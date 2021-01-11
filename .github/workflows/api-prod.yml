@@ -1,0 +1,81 @@
+env:
+  SUBFOLDER_NAME: api
+  APP_NAME: snu-api
+  ENVIRONMENT_NAME: snu-api-production
+
+  SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+  SLACK_COLOR: "#3278BD"
+  SLACK_ICON_EMOJI: ":package:"
+  SLACK_USERNAME: Github
+  MSG_MINIMAL: true
+  SLACK_FOOTER: ""
+
+
+name: Deploy api
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - api/**
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [12.x]
+
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Node ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Create SSH key
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          sudo chmod 600 ~/.ssh/id_ed25519
+          echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
+        shell: bash
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+
+      - name: Change ssh key file permissions
+        run: |
+          chmod go-rwx ~/.ssh/id_ed25519
+
+      - name: Remove git folder
+        run: |
+          rm -rf .git
+
+      - name: Push
+        working-directory: ${{ env.SUBFOLDER_NAME }}
+        run: |
+          git init
+          git config user.email "github.deployer@gmail.com"
+          git config user.name "Github Deployer"
+          git remote add cloud "$CLEVER_CLOUD_GIT_REMOTE"
+          git add .
+          git commit -m "For deploy"
+          git push -f -u cloud master
+        env:
+          CLEVER_CLOUD_GIT_REMOTE: ${{ secrets.CLEVER_CLOUD_GIT_REMOTE_API_PROD }}
+
+      - name: Notification on failure
+        if: ${{ failure() }}
+        uses: rtCamp/action-slack-notify@master
+        env:
+          SLACK_TITLE: Failed to deploy api
+
+      - name: Notification on success
+        if: ${{ success() }}
+        uses: rtCamp/action-slack-notify@master
+        env:
+          SLACK_TITLE: api deployed
+
