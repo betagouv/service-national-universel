@@ -8,7 +8,7 @@ const BabelPlugin = require("babel-webpack-plugin");
 const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 //
-module.exports = env => {
+module.exports = (env) => {
   const mode = env["production"] ? "production" : "development";
   console.log("mode", mode);
   const plugins = [
@@ -18,7 +18,7 @@ module.exports = env => {
     // }),
     new CopyWebpackPlugin([
       { from: "./public/robots.txt", to: "./robots.txt" },
-      { from: "./public/logo.png", to: "./logo.png" }
+      { from: "./public/logo.png", to: "./logo.png" },
     ]),
     new HtmlWebpackPlugin({
       template: "./public/index.html",
@@ -31,8 +31,8 @@ module.exports = env => {
         html5: true,
         minifyCSS: true,
         removeComments: true,
-        removeEmptyAttributes: true
-      }
+        removeEmptyAttributes: true,
+      },
     }),
     new webpack.DefinePlugin({ "process.env": JSON.stringify(mode) }),
     new BabelPlugin({
@@ -44,19 +44,19 @@ module.exports = env => {
             loose: true,
             modules: false,
             targets: { browsers: [">1%"] },
-            useBuiltIns: true
-          }
-        ]
+            useBuiltIns: true,
+          },
+        ],
       ],
       sourceMaps: false,
-      compact: false
+      compact: false,
     }),
     new UglifyJsPlugin({
       test: /\.js($|\?)/i,
       exclude: /node_modules/,
       cache: false,
-      parallel: 2
-    })
+      parallel: 2,
+    }),
     // new BundleAnalyzerPlugin()
   ];
 
@@ -67,33 +67,33 @@ module.exports = env => {
     output: {
       path: path.resolve("build"),
       filename: "[hash].index.js",
-      publicPath: "/"
+      publicPath: "/",
     },
     node: { fs: "empty" },
     module: {
       rules: [
         {
           test: /\.less$/,
-          loader: "style-loader!css-loader!less-loader"
+          use: ["style-loader", "css-loader", "less-loader"],
         },
         {
           test: /\.css$/,
-          loader: "style-loader!css-loader"
+          loader: "style-loader!css-loader",
         },
         {
           test: /\.js$/,
           loader: "babel-loader",
           include: path.resolve("src"),
           exclude: /node_modules/,
-          query: { babelrc: true }
+          query: { babelrc: true },
         },
         {
           test: /\.(gif|png|jpe?g|svg|woff|woff2)$/i,
           exclude: /node_modules/,
-          use: ["file-loader", { loader: "image-webpack-loader", options: { bypassOnDebug: true } }]
-        }
-      ]
+          use: ["file-loader", { loader: "image-webpack-loader", options: { bypassOnDebug: true } }],
+        },
+      ],
     },
-    plugins: plugins
+    plugins: plugins,
   };
 };

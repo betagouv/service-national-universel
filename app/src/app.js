@@ -24,7 +24,7 @@ import Footer from "./components/footer";
 import api from "./services/api";
 import { SENTRY_URL, environment } from "./config";
 
-import "./index.less";
+import "./index.css";
 import { YOUNG_STATUS } from "./utils";
 
 if (environment === "production") Sentry.init({ dsn: SENTRY_URL, environment: "app" });
