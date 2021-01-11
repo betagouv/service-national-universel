@@ -1,0 +1,70 @@
+@import url("https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap");
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-weight: 400;
+  background-color: #f4f5f7;
+  font-family: "Ubuntu", sans-serif;
+}
+
+ul {
+  list-style: none;
+  position: 0;
+  margin: 0;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
+}
+
+.main {
+  min-height: 100vh;
+  flex-direction: column;
+  display: flex;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+}
+
+table tr {
+  cursor: pointer;
+}
+a:hover {
+  text-decoration: none;
+}
+
+.image-input {
+  height: 100px;
+  min-width: 150px;
+  background: #f3f3f3 url("./assets/image.svg") center no-repeat;
+  background-size: 50%;
+  border: 2px solid #eee;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+.container {
+  max-width: 1270px;
+}
+
+.form-control {
+  font-size: 16px;
+  &::placeholder {
+    color: #9fa6b2;
+    font-size: 16px;
+  }
+
+  &:focus {
+    box-shadow: none;
+    border-color: #aaa;
+  }
+}

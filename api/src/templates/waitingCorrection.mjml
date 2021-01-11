@@ -1,0 +1,26 @@
+<mjml>
+  <mj-body>
+    <mj-section>
+      <mj-column>
+        <mj-text>
+          <h1 font-size="20px">Demande de correction</h1>
+        </mj-text>
+        <mj-text font-size="18px" color="#3D4852">
+          Vous recevez cet email car vos informations renseignées durant votre inscription au SNU sont incomplètes. Un référent vous a laissé une
+          demande détaillée :
+        </mj-text>
+        <mj-text line-height="1.5" font-size="16px" color="#000">{{message}}</mj-text>
+
+        <mj-button font-size="20px" background-color="#3490DC" href="{{cta}}"> Modifier mes informations </mj-button>
+
+        <mj-text font-size="18px" color="#3D4852"> Bien cordialement,</mj-text>
+        <mj-text font-size="18px" color="#3D4852"> L’équipe SNU</mj-text>
+
+        <mj-divider border-color="#F6F7F8"></mj-divider>
+        <mj-text>
+          Si vous ne parvenez pas à cliquer sur le bouton "Modifier mes informations", copiez-collez l'URL ci-dessous dans votre navigateur: {{cta}}
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

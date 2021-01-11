@@ -1,0 +1,398 @@
+import React, { useEffect, useState } from "react";
+import styled from "styled-components";
+import { Row, Col, Input } from "reactstrap";
+import { Field, Formik } from "formik";
+import { useSelector, useDispatch } from "react-redux";
+import { toastr } from "react-redux-toastr";
+import validator from "validator";
+
+import AddressInput from "../components/addressInput";
+import api from "../../../services/api";
+import { setYoung } from "../../../redux/auth/actions";
+import ErrorMessage, { requiredMessage } from "../components/errorMessage";
+
+import { STEPS, saveYoung } from "../utils";
+
+const Parent = ({ id = 1, values, errors, touched, handleChange }) => {
+  return (
+    <>
+      <FormLegend>Représentant légal n°{id}</FormLegend>
+      <FormRow>
+        <Col md={4}>
+          <Label>Je suis</Label>
+        </Col>
+        <Col>
+          <RadioLabel>
+            <Field
+              validate={(v) => !v && requiredMessage}
+              type="radio"
+              name={`parent${id}Status`}
+              onChange={handleChange}
+              value="mother"
+              checked={values[`parent${id}Status`] === "mother"}
+            />
+            La mère
+          </RadioLabel>
+          <RadioLabel>
+            <Field
+              validate={(v) => !v && requiredMessage}
+              type="radio"
+              name={`parent${id}Status`}
+              onChange={handleChange}
+              value="father"
+              checked={values[`parent${id}Status`] === "father"}
+            />
+            Le père
+          </RadioLabel>
+          <RadioLabel>
+            <Field
+              validate={(v) => !v && requiredMessage}
+              type="radio"
+              name={`parent${id}Status`}
+              onChange={handleChange}
+              value="representant"
+              checked={values[`parent${id}Status`] === "representant"}
+            />
+            Le représentant légal
+          </RadioLabel>
+          <ErrorMessage errors={errors} touched={touched} name={`parent${id}Status`} />
+        </Col>
+      </FormRow>
+      <FormRow align="center">
+        <Col md={4}>
+          <Label>Prénom</Label>
+        </Col>
+        <Col>
+          <Field
+            validate={(v) => !v && requiredMessage}
+            placeholder={`Prénom du parent ${id}`}
+            name={`parent${id}FirstName`}
+            value={values[`parent${id}FirstName`]}
+            onChange={handleChange}
+            className="form-control"
+          />
+          <ErrorMessage errors={errors} touched={touched} name={`parent${id}FirstName`} />
+        </Col>
+      </FormRow>
+      <FormRow align="center">
+        <Col md={4}>
+          <Label>Nom</Label>
+        </Col>
+        <Col>
+          <Field
+            validate={(v) => !v && requiredMessage}
+            placeholder={`Nom du parent ${id}`}
+            name={`parent${id}LastName`}
+            value={values[`parent${id}LastName`]}
+            onChange={handleChange}
+            className="form-control"
+          />
+          <ErrorMessage errors={errors} touched={touched} name={`parent${id}LastName`} />
+        </Col>
+      </FormRow>
+      <FormRow align="center">
+        <Col md={4}>
+          <Label>E-mail</Label>
+        </Col>
+        <Col>
+          <Field
+            validate={(v) => (!v && requiredMessage) || (!validator.isEmail(v) && "Ce champs est au mauvais format")}
+            placeholder={`Email du parent ${id}`}
+            type="email"
+            name={`parent${id}Email`}
+            value={values[`parent${id}Email`]}
+            onChange={handleChange}
+            className="form-control"
+          />
+          <ErrorMessage errors={errors} touched={touched} name={`parent${id}Email`} />
+        </Col>
+      </FormRow>
+      <FormRow align="center">
+        <Col md={4}>
+          <Label>Téléphone</Label>
+        </Col>
+        <Col>
+          <Field
+            validate={(v) => (!v && requiredMessage) || (!validator.isMobilePhone(v) && "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX")}
+            placeholder={`Téléphone du parent ${id}`}
+            type="tel"
+            name={`parent${id}Phone`}
+            value={values[`parent${id}Phone`]}
+            onChange={handleChange}
+            className="form-control"
+          />
+          <ErrorMessage errors={errors} touched={touched} name={`parent${id}Phone`} />
+        </Col>
+      </FormRow>
+      <FormRow>
+        <Col md={4}>
+          <Label>Lieu de résidence</Label>
+        </Col>
+        <Col>
+          <RadioLabel>
+            <Field
+              validate={(v) => !v && requiredMessage}
+              className="form-control"
+              type="radio"
+              name={`parent${id}OwnAddress`}
+              value="false"
+              checked={values[`parent${id}OwnAddress`] === "false"}
+              onChange={handleChange}
+            />
+            Identique à celle du volontaire
+          </RadioLabel>
+          <RadioLabel>
+            <Field
+              validate={(v) => !v && requiredMessage}
+              className="form-control"
+              type="radio"
+              name={`parent${id}OwnAddress`}
+              value="true"
+              checked={values[`parent${id}OwnAddress`] === "true"}
+              onChange={handleChange}
+            />
+            Différente de celle du volontaire
+          </RadioLabel>
+          <ErrorMessage errors={errors} touched={touched} name={`parent${id}OwnAddress`} />
+          {values[`parent${id}OwnAddress`] === "true" && (
+            <FormRow>
+              <Col>
+                <Row>
+                  <Col md={12} style={{ marginTop: 15 }}>
+                    <Label>Rechercher</Label>
+                    <AddressInput
+                      keys={{
+                        city: `parent${id}City`,
+                        zip: `parent${id}Zip`,
+                        address: `parent${id}Address`,
+                        location: `parent${id}Location`,
+                        department: `parent${id}Department`,
+                        region: `parent${id}Region`,
+                      }}
+                      values={values}
+                      handleChange={handleChange}
+                      errors={errors}
+                      touched={touched}
+                    />
+                  </Col>
+                </Row>
+              </Col>
+            </FormRow>
+          )}
+        </Col>
+      </FormRow>
+    </>
+  );
+};
+
+export default ({ setStep }) => {
+  const [parent2, setParent2] = useState(false);
+  const young = useSelector((state) => state.Auth.young);
+  const dispatch = useDispatch();
+
+  if (!young) {
+    setStep(STEPS.PROFIL);
+    return <div />;
+  }
+
+  useEffect(() => {
+    setParent2(young && young.parent2Status);
+  }, [young]);
+
+  const handleSave = async (values) => {
+    const young = await saveYoung(values);
+    if (young) dispatch(setYoung(young));
+  };
+
+  return (
+    <Wrapper>
+      <Heading>
+        <h2>Coordonnées du ou des représentants légaux</h2>
+        <p>Faites compléter les informations ci-dessous par votre ou vos représentants légaux</p>
+      </Heading>
+      <Formik
+        initialValues={young}
+        validateOnChange={false}
+        validateOnBlur={false}
+        onSubmit={async (values) => {
+          try {
+            console.log(values);
+            const { ok, code, data: young } = await api.put("/young", values);
+            if (!ok) return toastr.error("Une erreur s'est produite :", code);
+            dispatch(setYoung(young));
+            setStep(STEPS.CONSENTEMENTS);
+          } catch (e) {
+            console.log(e);
+            toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", e.code);
+          }
+        }}
+      >
+        {({ values, handleChange, handleSubmit, isSubmitting, submitForm, errors, touched }) => (
+          <>
+            <Parent id={1} values={values} handleChange={handleChange} errors={errors} touched={touched} />
+            <FormRow>
+              <Col md={{ offset: 4 }} style={{ padding: "45px 20px" }}>
+                <BorderButton
+                  onClick={() => {
+                    setParent2(!parent2);
+                    delete values.parent2Status;
+                    delete values.parent2FirstName;
+                    delete values.parent2LastName;
+                    delete values.parent2Email;
+                    delete values.parent2Phone;
+                    delete values.parent2OwnAddress;
+                    delete values.parent2Address;
+                    delete values.parent2ComplementAddress;
+                    delete values.parent2Zip;
+                    delete values.parent2City;
+                    delete values.parent2Department;
+                    delete values.parent2Location;
+                  }}
+                >
+                  {!parent2 ? "Ajouter" : "Retirer"} un représentant légal
+                </BorderButton>
+              </Col>
+            </FormRow>
+            {parent2 ? <Parent id={2} values={values} handleChange={handleChange} errors={errors} touched={touched} /> : null}
+            <Footer>
+              <ButtonContainer>
+                <SaveButton onClick={() => handleSave(values)}>Enregistrer</SaveButton>
+                <ContinueButton onClick={handleSubmit}>Continuer</ContinueButton>
+              </ButtonContainer>
+              {Object.keys(errors).length ? <h3>Vous ne pouvez passer à l'étape suivante car tous les champs ne sont pas correctement renseignés.</h3> : null}
+            </Footer>
+          </>
+        )}
+      </Formik>
+    </Wrapper>
+  );
+};
+
+const Wrapper = styled.div`
+  padding: 40px;
+  @media (max-width: 768px) {
+    padding: 22px;
+  }
+`;
+const Heading = styled.div`
+  margin-bottom: 30px;
+  h2 {
+    color: #161e2e;
+    font-size: 1.8rem;
+    font-weight: 700;
+  }
+  p {
+    color: #161e2e;
+    font-size: 1rem;
+  }
+`;
+
+const FormLegend = styled.div`
+  color: #161e2e;
+  font-size: 20px;
+  font-weight: 700;
+  border-top: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
+  padding: 20px 0;
+`;
+
+const FormRow = styled(Row)`
+  border-bottom: 1px solid #e5e7eb;
+  padding-top: 20px;
+  padding-bottom: 20px;
+  align-items: ${({ align }) => align};
+  text-align: left;
+  input[type="text"] {
+    max-width: 500px;
+  }
+`;
+
+const Label = styled.div`
+  color: #374151;
+  margin-bottom: 10px;
+`;
+
+const RadioLabel = styled.label`
+  display: flex;
+  align-items: center;
+  color: #374151;
+  font-size: 14px;
+  margin-bottom: 15px;
+  :last-child {
+    margin-bottom: 0;
+  }
+  input {
+    cursor: pointer;
+    margin-right: 12px;
+    width: 15px;
+    height: 15px;
+    min-width: 15px;
+    min-height: 15px;
+  }
+`;
+
+const BorderButton = styled.button`
+  color: #5145cd;
+  border: 1px solid #5145cd;
+  padding: 12px 25px;
+  background-color: transparent;
+  outline: 0;
+  border-radius: 6px;
+  font-weight: 500;
+  :hover {
+    background-color: #f9fafb;
+  }
+`;
+
+const Footer = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  h3 {
+    border: 1px solid #fc8181;
+    border-radius: 0.25em;
+    margin-top: 1em;
+    background-color: #fff5f5;
+    color: #c53030;
+    font-weight: 400;
+    font-size: 12px;
+    padding: 1em;
+  }
+`;
+
+const ButtonContainer = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+`;
+
+const ContinueButton = styled.button`
+  color: #fff;
+  background-color: #5145cd;
+  padding: 9px 20px;
+  border: 0;
+  outline: 0;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 20px;
+  margin-right: 10px;
+  margin-top: 40px;
+  @media (max-width: 768px) {
+    margin-top: 10px;
+  }
+  display: block;
+  width: 140px;
+  outline: 0;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  :hover {
+    opacity: 0.9;
+  }
+`;
+
+const SaveButton = styled(ContinueButton)`
+  color: #374151;
+  background-color: #f9fafb;
+  border-width: 1px;
+  border-color: transparent;
+`;

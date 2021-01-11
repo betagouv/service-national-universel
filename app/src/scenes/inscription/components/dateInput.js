@@ -1,0 +1,94 @@
+import React, { useEffect, useState } from "react";
+import { Field } from "formik";
+import styled from "styled-components";
+import { CustomInput } from "reactstrap";
+
+const MONTH = {
+  0: "jan.",
+  1: "fev.",
+  2: "mars",
+  3: "avril",
+  4: "mai",
+  5: "juin",
+  6: "juill.",
+  7: "août",
+  8: "sept.",
+  9: "oct.",
+  10: "nov.",
+  11: "dec.",
+};
+
+export default ({ value, onChange, placeholder, onSelect }) => {
+  const [y, m, d] = value ? value.substring(0, 10).split("-") : ["", "", ""];
+  const [day, setDay] = useState(parseInt(d));
+  const [month, setMonth] = useState(parseInt(m - 1));
+  const [year, setYear] = useState(parseInt(y));
+
+  const handleDay = (e) => {
+    setDay(e.target.value);
+  };
+  const handleMonth = (e) => {
+    setMonth(e.target.value);
+  };
+  const handleYear = (e) => {
+    setYear(e.target.value);
+  };
+
+  useEffect(() => {
+    if (!day || !month || !year) return onChange(null);
+    const date = new Date(Date.UTC(parseInt(year), parseInt(month), parseInt(day)));
+    const dateFormat = date.toISOString();
+    onChange(dateFormat);
+  }, [day, month, year]);
+
+  const range = (start, end) => {
+    return Array(end - start + 1)
+      .fill()
+      .map((_, idx) => start + idx);
+  };
+  return (
+    <Wrapper>
+      <Input id="day" name="day" value={day} onChange={handleDay} type="select">
+        <option value="" label="jour" />
+        {range(1, 31).map((d) => (
+          <option value={d} label={d} />
+        ))}
+      </Input>
+      <Separator>/</Separator>
+      <Input id="month" name="month" value={month} onChange={handleMonth} type="select">
+        <option value="" label="mois" />
+        {range(0, 11).map((m) => (
+          <option value={m} label={MONTH[m]} />
+        ))}
+      </Input>
+      <Separator>/</Separator>
+      <Input id="year" name="year" value={year} onChange={handleYear} type="select">
+        <option value="" label="année" />
+        {range(1990, 2020).map((y) => (
+          <option value={y} label={y} />
+        ))}
+      </Input>
+    </Wrapper>
+  );
+};
+
+const Wrapper = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
+const Input = styled(CustomInput)`
+  max-width: ${({ name }) => {
+    if (name === "day") return "5rem";
+    if (name === "month") return "6rem";
+    if (name === "year") return "6rem";
+  }};
+  height: 2.25rem;
+  display: flex;
+  align-items: center;
+  padding: 0 1.75rem 0 0.75rem;
+`;
+
+const Separator = styled.div`
+  margin: 0 1rem;
+`;
