@@ -73,12 +73,8 @@ module.exports = (env) => {
     module: {
       rules: [
         {
-          test: /\.less$/,
-          use: ["style-loader", "css-loader", "less-loader"],
-        },
-        {
           test: /\.css$/,
-          loader: "style-loader!css-loader",
+          use: ["style-loader", "css-loader"],
         },
         {
           test: /\.js$/,
@@ -90,7 +86,20 @@ module.exports = (env) => {
         {
           test: /\.(gif|png|jpe?g|svg|woff|woff2)$/i,
           exclude: /node_modules/,
-          use: ["file-loader", { loader: "image-webpack-loader", options: { bypassOnDebug: true } }],
+          use: [
+            {
+              loader: 'file-loader',
+              options: {
+                esModule: false,
+              },
+            },
+            {
+              loader: 'image-webpack-loader',
+              options: {
+                disable: true,
+              },
+            },
+          ],
         },
       ],
     },
