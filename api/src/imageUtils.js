@@ -51,8 +51,9 @@ const watermarkImage = async (data) => {
 const getImageSize = (data) => {
   return new Promise((resolve, reject) => {
     gm(data).size((err, size) => {
+      console.log("Err", err);
+      console.log("size", size);
       if (err) return reject(err);
-
       resolve(size);
     });
   });
