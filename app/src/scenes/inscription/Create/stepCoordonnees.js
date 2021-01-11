@@ -86,7 +86,7 @@ export default ({ setStep }) => {
                     handleChange({ target: { value: res.data, name: "cniFiles" } });
                   }}
                 />
-                <div style={{ fontSize: "0.8rem", color: "#555", fontStyle: "italic" }}>* Carte National d'identité ou passeport</div>
+                <div style={{ fontSize: "0.8rem", color: "#555", fontStyle: "italic" }}>* Carte nationale d'identité ou passeport</div>
                 <ErrorMessage errors={errors} touched={touched} name="cniFiles" />
               </Col>
             </FormRow>
