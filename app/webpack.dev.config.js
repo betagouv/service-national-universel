@@ -53,6 +53,7 @@ module.exports = (env) => {
         },
         {
           test: /\.(gif|png|jpe?g|svg|woff|woff2)$/i,
+          exclude: /node_modules/,
           use: [
             {
               loader: 'file-loader',
