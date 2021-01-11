@@ -74,7 +74,7 @@ export default ({ setStep }) => {
               </Col>
               <Col>
                 <DndFileInput
-                  placeholder="votre pièce d'identité (recto-verso)"
+                  placeholder="votre pièce d'identité* (recto-verso)"
                   errorMessage="Vous devez téléverser votre pièce d'identité"
                   value={values.cniFiles}
                   name="cniFiles"
@@ -86,6 +86,7 @@ export default ({ setStep }) => {
                     handleChange({ target: { value: res.data, name: "cniFiles" } });
                   }}
                 />
+                <div style={{ fontSize: "0.8rem", color: "#555", fontStyle: "italic" }}>* Carte National d'identité ou passeport</div>
                 <ErrorMessage errors={errors} touched={touched} name="cniFiles" />
               </Col>
             </FormRow>
