@@ -131,6 +131,7 @@ const Schema = new mongoose.Schema({
   parentConsentmentFiles: { type: [String], default: [] },
   consentment: { type: String, enum: ["true", "false"] },
   imageRight: { type: String, enum: ["true", "false"] },
+  imageRightFiles: { type: [String], default: [] },
 
   // * Motivations
   motivations: { type: String },

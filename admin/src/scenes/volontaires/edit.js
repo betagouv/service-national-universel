@@ -415,6 +415,40 @@ export default (props) => {
                 </Box>
               </Col>
             </Row>
+            <Row>
+              <Col md={6} style={{ marginBottom: "20px" }}>
+                <Box>
+                  <BoxTitle>Consentement de droit à l'image</BoxTitle>
+                  <BoxContent direction="column">
+                    <Select
+                      name="imageRight"
+                      values={values}
+                      handleChange={handleChange}
+                      title="Autorisation"
+                      options={[
+                        { value: "true", label: "Oui" },
+                        { value: "false", label: "Non" },
+                      ]}
+                    />
+                    {values.imageRightFiles.map((e, i) => {
+                      return (
+                        <InfoBtn
+                          key={i}
+                          color="white"
+                          loading={buttonsLoading[`imageRightFiles${i}`]}
+                          onClick={async () => {
+                            setButtonsLoading({ ...buttonsLoading, [`imageRightFiles${i}`]: true });
+                            const { data, ok } = await api.get(`/referent/youngFile/${values._id}/imageRightFiles/${e}`);
+                            setButtonsLoading({ ...buttonsLoading, [`imageRightFiles${i}`]: false });
+                            setCurrentFile(data);
+                          }}
+                        >{`Visualiser le formulaire de consentement de droit à l'image (${i + 1}/${values.imageRightFiles.length})`}</InfoBtn>
+                      );
+                    })}
+                  </BoxContent>
+                </Box>
+              </Col>
+            </Row>
           </>
         )}
       </Formik>
