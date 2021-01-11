@@ -1,7 +1,9 @@
 import React, { useState } from "react";
-import {  DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
+import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import { ReactiveBase, ReactiveList, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
+import { toastr } from "react-redux-toastr";
+import { useSelector } from "react-redux";
 
 import ExportComponent from "../../components/Export";
 import ReactiveFilter from "../../components/ReactiveFilter";
@@ -10,16 +12,15 @@ import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
 
-import { translate } from "../../utils";
+import { translate, YOUNG_STATUS_COLORS } from "../../utils";
 import { Link } from "react-router-dom";
 
-const FILTERS = ["SEARCH", "STATUT", "FORMAT", "PHASE"];
+const FILTERS = ["SEARCH", "STATUS", "FORMAT", "PHASE", "COHORT"];
 
 export default ({ setYoung }) => {
   const [volontaire, setVolontaire] = useState(null);
 
-  return <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "200px" }}>En cours</div>;
-
+  // return <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "200px" }}>En cours</div>;
 
   return (
     <div>
@@ -46,7 +47,7 @@ export default ({ setYoung }) => {
                 showIcon={false}
                 placeholder="Rechercher par mots clés, mission ou structure..."
                 componentId="SEARCH"
-                dataField={["email", "name"]}
+                dataField={["email", "firstName", "lastName"]}
                 react={{ and: FILTERS }}
                 // fuzziness={2}
                 style={{ flex: 2 }}
@@ -59,17 +60,36 @@ export default ({ setYoung }) => {
                   placeholder="STATUT"
                   componentId="STATUS"
                   dataField="status.keyword"
-                  renderItem={(e) => translate(e)}
+                  react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
                   title=""
                   URLParams={true}
                   showSearch={false}
                 />
                 <MultiDropdownList
                   className="dropdown-filter"
-                  placeholder="FORMAT"
-                  componentId="FORMAT"
-                  dataField="missionFormat.keyword"
-                  renderItem={(e) => translate(e)}
+                  placeholder="PHASE"
+                  componentId="PHASE"
+                  dataField="phase.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "PHASE") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                />
+                <MultiDropdownList
+                  className="dropdown-filter"
+                  placeholder="COHORT"
+                  componentId="COHORT"
+                  dataField="cohort.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
                   title=""
                   URLParams={true}
                   showSearch={false}
@@ -138,9 +158,12 @@ export default ({ setYoung }) => {
 const Hit = ({ hit, onClick }) => {
   return (
     <tr onClick={onClick}>
-      <td>{hit.email}</td>
       <td>
-        <Tag>{translate(hit.status)}</Tag>
+        <div className="name">{`${hit.firstName} ${hit.lastName}`}</div>
+        <div className="email">{hit.email}</div>
+      </td>
+      <td>
+        <Badge color={YOUNG_STATUS_COLORS[hit.status]}>{translate(hit.status)}</Badge>
       </td>
       <td onClick={(e) => e.stopPropagation()}>
         <Action hit={hit} />
@@ -148,12 +171,23 @@ const Hit = ({ hit, onClick }) => {
     </tr>
   );
 };
+
 const Action = ({ hit, color }) => {
+  const user = useSelector((state) => state.Auth.user);
+
+  const handleImpersonate = async () => {
+    try {
+      await api.post(`/young/signin_as/${hit._id}`);
+    } catch (e) {
+      console.log(e);
+      toastr.error("Oops, une erreur est survenu lors de la masquarade !", e.code);
+    }
+  };
   return (
-    <ActionBox color={color}>
+    <ActionBox color={"#444"}>
       <UncontrolledDropdown setActiveFromChild>
         <DropdownToggle tag="button">
-          En attente de validation
+          Choisissez une action
           <div className="down-icon">
             <svg viewBox="0 0 407.437 407.437">
               <polygon points="386.258,91.567 203.718,273.512 21.179,91.567 0,112.815 203.718,315.87 407.437,112.815 " />
@@ -161,10 +195,18 @@ const Action = ({ hit, color }) => {
           </div>
         </DropdownToggle>
         <DropdownMenu>
-          <DropdownItem tag={Link} to={"#"}>
-            View
-          </DropdownItem>
-          <DropdownItem tag="div">Dupliquer</DropdownItem>
+          <Link to={`/volontaire/${hit._id}`}>
+            <DropdownItem className="dropdown-item" onClick={() => handleClickStatus(1)}>
+              Voir ou Modifier le profil
+            </DropdownItem>
+          </Link>
+          {user.role === "admin" ? (
+            <DropdownItem className="dropdown-item" onClick={handleImpersonate}>
+              <a target="blank" href={`http://localhost:8081/auth/connect?token=${api.getToken()}&young_id=${hit._id}`}>
+                Prendre sa place
+              </a>
+            </DropdownItem>
+          ) : null}
         </DropdownMenu>
       </UncontrolledDropdown>
     </ActionBox>
@@ -177,13 +219,6 @@ const Header = styled.div`
   align-items: flex-start;
   margin-top: 20px;
   justify-content: space-between;
-`;
-
-const Subtitle = styled.div`
-  color: rgb(113, 128, 150);
-  font-weight: 400;
-  text-transform: uppercase;
-  font-size: 18px;
 `;
 
 const Title = styled.div`
@@ -330,6 +365,12 @@ const Table = styled.table`
     :hover {
       background-color: #e6ebfa;
     }
+    .name {
+      color: black;
+    }
+    .email {
+      font-size: 0.8rem;
+    }
   }
 `;
 
@@ -349,28 +390,29 @@ const Export = styled.div`
   }
 `;
 
-const Tag = styled.span`
-  background-color: rgb(253, 246, 236);
-  border: 1px solid rgb(250, 236, 216);
-  color: rgb(230, 162, 60);
-  align-self: flex-start;
-  border-radius: 4px;
-  padding: 8px 15px;
-  font-size: 13px;
-  white-space: nowrap;
-  font-weight: 400;
-  cursor: pointer;
-  margin-right: 5px;
+const Badge = styled.span`
+  display: inline-block;
+  padding: 0.25rem 1rem;
+  margin: 0 0.25rem;
+  border-radius: 99999px;
+  font-size: 0.8rem;
+  margin-bottom: 5px;
+  margin-top: 15px;
+  ${({ color }) => `
+    color: ${color};
+    background-color: ${color}33;
+  `}
 `;
 
 const ActionBox = styled.div`
   .dropdown-menu {
     min-width: 0;
+    width: 200px;
     a,
     div {
       white-space: nowrap;
       font-size: 14px;
-      padding: 5px 15px;
+      /* padding: 5px 15px; */
     }
   }
   button {
@@ -383,7 +425,7 @@ const ActionBox = styled.div`
     padding: 0 0 0 12px;
     font-size: 12px;
     min-width: 130px;
-    font-weight: 700;
+    font-weight: 400;
     color: #fff;
     cursor: pointer;
     outline: 0;
@@ -407,42 +449,38 @@ const ActionBox = styled.div`
       }
     }
   }
-  ${({ color }) =>
-    color === "green" &&
-    `
+  .dropdown-item {
+    background-color: transparent;
+    border: none;
+    color: #767676;
+    white-space: nowrap;
+    font-size: 14px;
+    padding: 5px 15px;
+    font-weight: 400;
+    :hover {
+      background-color: #eaf3fa;
+      color: #3182ce;
+    }
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+  }
+
+  ${({ color }) => `
     button {
       background-color: transparent;
-      border: 1px solid #6BC763;
-      color: #6BC763;
+      border: 1px solid ${color};
+      color: ${color};
       .edit-icon {
         path {
-          fill: #6BC763;
+          fill: ${color};
         }
       }
       .down-icon {
-        border-left: 1px solid #6BC763;
+        border-left: 1px solid ${color};
         svg polygon {
-          fill: #6BC763;
-        }
-      }
-    }  
-  `}
-  ${({ color }) =>
-    color === "red" &&
-    `
-    button {
-      background-color: transparent;
-      border: 1px solid #F1545B;
-      color: #F1545B;
-      .edit-icon {
-        path {
-          fill: #F1545B;
-        }
-      }
-      .down-icon {
-        border-left: 1px solid #F1545B;
-        svg polygon {
-          fill: #F1545B;
+          fill: ${color};
         }
       }
     }  

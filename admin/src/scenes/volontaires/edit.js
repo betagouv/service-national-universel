@@ -6,7 +6,7 @@ import { Modal } from "reactstrap";
 import LoadingButton from "../../components/loadingButton";
 
 import DateInput from "../../components/dateInput";
-import { departmentList, regionList, YOUNG_STATUS, translate } from "../../utils";
+import { departmentList, regionList, YOUNG_STATUS, translate, YOUNG_STATUS_COLORS } from "../../utils";
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 
@@ -462,15 +462,9 @@ const HistoricItem = ({ item }) => {
     return date.toLocaleDateString();
   };
 
-  let color = "#6CC763";
-  if (item.status === YOUNG_STATUS.WAITING_CORRECTION) color = "#FEB951";
-  if (item.status === YOUNG_STATUS.WAITING_VALIDATION) color = "#FE7B52";
-  if (item.status === YOUNG_STATUS.REFUSED) color = "#F8A9AD";
-  if (item.status === YOUNG_STATUS.IN_PROGRESS) color = "#382F79";
-
   return (
     <>
-      <Badge color={color}>{translate(item.status)}</Badge>
+      <Badge color={YOUNG_STATUS_COLORS[item.status]}>{translate(item.status)}</Badge>
       <div className="history-detail">
         {item.note ? <div>{item.note}</div> : null}
         <div className="muted">

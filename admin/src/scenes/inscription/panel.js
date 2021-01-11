@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Modal } from "reactstrap";
 import { translate as t } from "./utils";
-import { departmentList, regionList, YOUNG_SITUATIONS, YOUNG_STATUS, translate } from "../../utils";
+import { departmentList, regionList, YOUNG_SITUATIONS, YOUNG_STATUS, translate, YOUNG_STATUS_COLORS } from "../../utils";
 import { Link } from "react-router-dom";
 import LoadingButton from "../../components/loadingButton";
 
@@ -181,15 +181,9 @@ const HistoricItem = ({ item }) => {
     return d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" });
   };
 
-  let color = "#6CC763";
-  if (item.status === YOUNG_STATUS.WAITING_CORRECTION) color = "#FEB951";
-  if (item.status === YOUNG_STATUS.WAITING_VALIDATION) color = "#FE7B52";
-  if (item.status === YOUNG_STATUS.REFUSED) color = "#F8A9AD";
-  if (item.status === YOUNG_STATUS.IN_PROGRESS) color = "#382F79";
-
   return (
     <>
-      <Badge color={color}>{translate(item.status)}</Badge>
+      <Badge color={YOUNG_STATUS_COLORS[item.status]}>{translate(item.status)}</Badge>
       <div className="history-detail">
         {item.note ? <div>{item.note}</div> : null}
         <div className="muted">

@@ -399,3 +399,11 @@ export const YOUNG_SITUATIONS = {
   CAP_EMPLOI: "CAP_EMPLOI",
   NOTHING: "NOTHING", // @todo find a better key --'
 };
+
+export const YOUNG_STATUS_COLORS = {
+  WAITING_VALIDATION: "#FE7B52",
+  WAITING_CORRECTION: "#FEB951",
+  VALIDATED: "#6CC763",
+  REFUSED: "#F8A9AD",
+  IN_PROGRESS: "#382F79",
+};
