@@ -20,8 +20,8 @@ const PASSWORD_NOT_VALIDATED = "PASSWORD_NOT_VALIDATED";
 const ACOUNT_NOT_ACTIVATED = "ACOUNT_NOT_ACTIVATED";
 const USER_NOT_EXISTS = "USER_NOT_EXISTS";
 
-const COOKIE_MAX_AGE = 60*60*2*1000; // 2h
-const JWT_MAX_AGE = 60*60*2; // 2h
+const COOKIE_MAX_AGE = 60 * 60 * 2 * 1000; // 2h
+const JWT_MAX_AGE = 60 * 60 * 2; // 2h
 
 class Auth {
   constructor(model) {
@@ -128,9 +128,9 @@ class Auth {
     try {
       const obj = await this.model.findOne({ email: req.body.email.toLowerCase() });
       console.log("NOT FOUND", req.body.email.toLowerCase());
-      if (!obj) return res.status(200).send({ ok: true });
+      if (!obj) return res.status(404).send({ ok: false, code: USER_NOT_EXISTS });
       const token = await crypto.randomBytes(20).toString("hex");
-      obj.set({ forgotPasswordResetToken: token, forgotPasswordResetExpires: Date.now() + JWT_MAX_AGE });
+      obj.set({ forgotPasswordResetToken: token, forgotPasswordResetExpires: Date.now() + COOKIE_MAX_AGE });
       await obj.save();
       let htmlContent = fs.readFileSync(path.resolve(__dirname, "./templates/forgetpassword.html")).toString();
       htmlContent = htmlContent.replace(/{{cta}}/g, `${cta}?token=${token}`);
