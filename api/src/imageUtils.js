@@ -34,7 +34,6 @@ const watermarkImage = async (data) => {
   const { width, height } = await getImageSize(data);
   const watermarkXPos = (width - watermarkWidth) / 2;
   const watermarkYPos = (height - watermarkHeight) / 2;
-
   return new Promise((resolve, reject) => {
     gm(data)
       .draw([`image over ${watermarkXPos},${watermarkYPos} ${watermarkWidth},${watermarkHeight} "${watermarkPath}"`])
@@ -53,6 +52,8 @@ const getImageSize = (data) => {
     gm(data).size((err, size) => {
       console.log("Err", err);
       console.log("size", size);
+      //Sometimes, files are corrupted
+      if (!size || isNaN(size.width) || isNaN(size.height)) return reject();
       if (err) return reject(err);
       resolve(size);
     });
