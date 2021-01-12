@@ -9,6 +9,39 @@ import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../redux/auth/actions";
 
+const AuthorizationIntro = () => (
+  <div>
+    Cette autorisation emporte la possibilité pour l’Administration ainsi que ses ayants droit éventuels ou toute personne accréditée ou autorisée par elle à enregistrer, à
+    reproduire et à représenter l’image et la voix du volontaire représenté légalement, en partie ou en intégralité, ensemble ou séparément, sur les médias / supports détaillés
+    ci-dessous.
+  </div>
+);
+
+const AuthorizationDetails = () => (
+  <div>
+    <b>Cette autorisation est valable pour une utilisation :</b>
+    <ul>
+      <li>
+        <b>• Pour une durée de :</b> 5 ans à compter de la signature de la présente
+      </li>
+      <li>
+        <b>• Sur tous les territoires :</b> monde, tous pays
+      </li>
+      <li>
+        • Sur tous les supports matériels et immatériels, en tous formats connus ou inconnus à ce jour, et notamment, sans que cette liste ne soit exhaustive : support papier
+        (tirages des photographies), catalogues et éditions diverses, CDROM / DVDROM et autres supports numériques connus et inconnus à ce jour, tout support audiovisuel, notamment
+        cinéma, TV et par tous moyens inhérents à ce mode de communication, internet (incluant Intranet, Extranet, Blogs, réseaux sociaux), tous vecteurs de réception confondus
+        (smartphones, tablettes, etc.), médias presse (spots publicitaires télévisuels, spots publicitaires cinématographiques), supports de communication interne, supports
+        promotionnels (PLV, ILV, campagnes d’affichage en tous lieux, toutes dimensions et sur tous supports (urbain, aéroports, gares, transports en commun, etc.), supports
+        destinés à la vente (produits de merchandising : cartes postales, posters, tee-shirt, produits dérivés, etc.) • De l’image du volontaire représenté légalement en tant que
+        telle, modifiée ou non, et/ou intégrée dans une œuvre papier, numérique ou audiovisuelle, telle qu’une émission, un reportage, un documentaire, une bande annonce
+        promotionnelle, etc.
+      </li>
+    </ul>
+    <b>La présente autorisation est consentie à titre gratuit.</b>
+  </div>
+);
+
 export default () => {
   const young = useSelector((state) => state.Auth.young);
   const [expandInfo, setExpandInfo] = useState(false);
@@ -176,63 +209,13 @@ export default () => {
                   </Col>
                 </FormRow>
                 <Info className="noPrint">
-                  Cette autorisation emporte la possibilité pour l’Administration ainsi que ses ayants droit éventuels ou toute personne accréditée ou autorisée par elle à
-                  enregistrer, à reproduire et à représenter l’image et la voix du volontaire représenté légalement, en partie ou en intégralité, ensemble ou séparément, sur les
-                  médias / supports détaillés ci-dessous.
-                  {expandInfo ? (
-                    <div>
-                      <b>Cette autorisation est valable pour une utilisation :</b>
-                      <ul>
-                        <li>
-                          <b>• Pour une durée de :</b> 5 ans à compter de la signature de la présente
-                        </li>
-                        <li>
-                          <b>• Sur tous les territoires :</b> monde, tous pays
-                        </li>
-                        <li>
-                          • Sur tous les supports matériels et immatériels, en tous formats connus ou inconnus à ce jour, et notamment, sans que cette liste ne soit exhaustive :
-                          support papier (tirages des photographies), catalogues et éditions diverses, CDROM / DVDROM et autres supports numériques connus et inconnus à ce jour,
-                          tout support audiovisuel, notamment cinéma, TV et par tous moyens inhérents à ce mode de communication, internet (incluant Intranet, Extranet, Blogs,
-                          réseaux sociaux), tous vecteurs de réception confondus (smartphones, tablettes, etc.), médias presse (spots publicitaires télévisuels, spots publicitaires
-                          cinématographiques), supports de communication interne, supports promotionnels (PLV, ILV, campagnes d’affichage en tous lieux, toutes dimensions et sur
-                          tous supports (urbain, aéroports, gares, transports en commun, etc.), supports destinés à la vente (produits de merchandising : cartes postales, posters,
-                          tee-shirt, produits dérivés, etc.) • De l’image du volontaire représenté légalement en tant que telle, modifiée ou non, et/ou intégrée dans une œuvre
-                          papier, numérique ou audiovisuelle, telle qu’une émission, un reportage, un documentaire, une bande annonce promotionnelle, etc.
-                        </li>
-                      </ul>
-                      <b>La présente autorisation est consentie à titre gratuit.</b>
-                    </div>
-                  ) : (
-                    "..."
-                  )}
+                  <AuthorizationIntro />
+                  {expandInfo ? <AuthorizationDetails /> : "..."}
                   <span onClick={toggleInfo}>{expandInfo ? "  VOIR MOINS" : "  VOIR PLUS"}</span>
                 </Info>
                 <Info className="onlyPrint">
-                  Cette autorisation emporte la possibilité pour l’Administration ainsi que ses ayants droit éventuels ou toute personne accréditée ou autorisée par elle à
-                  enregistrer, à reproduire et à représenter l’image et la voix du volontaire représenté légalement, en partie ou en intégralité, ensemble ou séparément, sur les
-                  médias / supports détaillés ci-dessous.
-                  <div>
-                    <b>Cette autorisation est valable pour une utilisation :</b>
-                    <ul>
-                      <li>
-                        <b>• Pour une durée de :</b> 5 ans à compter de la signature de la présente
-                      </li>
-                      <li>
-                        <b>• Sur tous les territoires :</b> monde, tous pays
-                      </li>
-                      <li>
-                        • Sur tous les supports matériels et immatériels, en tous formats connus ou inconnus à ce jour, et notamment, sans que cette liste ne soit exhaustive :
-                        support papier (tirages des photographies), catalogues et éditions diverses, CDROM / DVDROM et autres supports numériques connus et inconnus à ce jour, tout
-                        support audiovisuel, notamment cinéma, TV et par tous moyens inhérents à ce mode de communication, internet (incluant Intranet, Extranet, Blogs, réseaux
-                        sociaux), tous vecteurs de réception confondus (smartphones, tablettes, etc.), médias presse (spots publicitaires télévisuels, spots publicitaires
-                        cinématographiques), supports de communication interne, supports promotionnels (PLV, ILV, campagnes d’affichage en tous lieux, toutes dimensions et sur tous
-                        supports (urbain, aéroports, gares, transports en commun, etc.), supports destinés à la vente (produits de merchandising : cartes postales, posters,
-                        tee-shirt, produits dérivés, etc.) • De l’image du volontaire représenté légalement en tant que telle, modifiée ou non, et/ou intégrée dans une œuvre
-                        papier, numérique ou audiovisuelle, telle qu’une émission, un reportage, un documentaire, une bande annonce promotionnelle, etc.
-                      </li>
-                    </ul>
-                    <b>La présente autorisation est consentie à titre gratuit.</b>
-                  </div>
+                  <AuthorizationIntro />
+                  <AuthorizationDetails />
                 </Info>
                 <div className="noPrint">
                   {/* @todo add with france connect */}
