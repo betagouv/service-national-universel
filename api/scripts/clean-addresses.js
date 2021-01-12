@@ -2,7 +2,7 @@ require("dotenv").config({ path: "../.env-prod" });
 
 require("../src/mongo");
 const YoungModel = require("../src/models/young");
-
+// @TODO script to be validated
 (async function run() {
   const cursor = YoungModel.find({}).cursor();
   await cursor.eachAsync(async function (doc) {
