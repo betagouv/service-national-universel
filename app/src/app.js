@@ -26,6 +26,7 @@ import { SENTRY_URL, environment } from "./config";
 
 import "./index.less";
 import { YOUNG_STATUS } from "./utils";
+import styled from "styled-components";
 
 if (environment === "production") Sentry.init({ dsn: SENTRY_URL, environment: "app" });
 
@@ -73,7 +74,7 @@ const Espace = () => {
       <Header />
       <div style={{ display: "flex" }}>
         <Drawer />
-        <div style={{ width: "100%", padding: 32 }}>
+        <Content>
           <Switch>
             <Route path="/account" component={Account} />
             <Route path="/phase1" component={Phase1} />
@@ -83,7 +84,7 @@ const Espace = () => {
             <Route path="/preferences" component={Preferences} />
             <Route path="/" component={Home} />
           </Switch>
-        </div>
+        </Content>
       </div>
     </>
   );
@@ -101,3 +102,11 @@ function ScrollToTop() {
 
   return null;
 }
+
+const Content = styled.div`
+  width: 100%;
+  padding: 2rem;
+  @media (max-width: 768px) {
+    padding: 0;
+  }
+`;

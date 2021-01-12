@@ -79,7 +79,7 @@ export default () => {
             Note relative aux informations d'ordre sanitaire{" >"}
           </a>
         </div>
-        <div style={{ minWidth: "30%", display: "flex", justifyContent: "flex-end", alignItems: "center" }}>
+        <div style={{ minWidth: "30%", display: "flex", justifyContent: "flex-end", alignItems: "center", marginLeft: "1.5rem" }}>
           <a target="blank" href="https://apicivique.s3.eu-west-3.amazonaws.com/Fiche_sanitaire.pdf">
             <ContinueButton>Télécharger la fiche sanitaire</ContinueButton>
           </a>
@@ -88,11 +88,11 @@ export default () => {
       <Content style={{ width: "100%" }} id="imageRight">
         <div style={{ display: "flex" }}>
           <div className="icon">
-            <svg class="h-6 w-6 text-indigo-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <svg className="h-6 w-6 text-indigo-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
               <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
                 d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"
               ></path>
             </svg>
@@ -186,18 +186,34 @@ export default () => {
                 <FormRow>
                   <Col>
                     <RadioLabel>
-                      <Field validate={(v) => !v && requiredMessage} type="radio" name="imageRight" value="true" checked={values.imageRight === "true"} onChange={handleChange} />
-                      <div>
+                      <Field
+                        id="true"
+                        validate={(v) => !v && requiredMessage}
+                        type="radio"
+                        name="imageRight"
+                        value="true"
+                        checked={values.imageRight === "true"}
+                        onChange={handleChange}
+                      />
+                      <label htmlFor="true">
                         Nous autorisons l'Administration à reproduire et exploiter l'image et la voix de{" "}
                         <b>
                           {young.firstName} {young.lastName}
                         </b>{" "}
                         que nous représentons légalement, sur les supports visés ci-après à des fins de promotion du Service Nationnel Universel
-                      </div>
+                      </label>
                     </RadioLabel>
                     <RadioLabel>
-                      <Field validate={(v) => !v && requiredMessage} type="radio" name="imageRight" value="false" checked={values.imageRight === "false"} onChange={handleChange} />
-                      <label>
+                      <Field
+                        id="false"
+                        validate={(v) => !v && requiredMessage}
+                        type="radio"
+                        name="imageRight"
+                        value="false"
+                        checked={values.imageRight === "false"}
+                        onChange={handleChange}
+                      />
+                      <label htmlFor="false">
                         Nous n'autorisons pas l'Administration à reproduire et exploiter l'image et la voix de{" "}
                         <b>
                           {young.firstName} {young.lastName}
@@ -293,10 +309,17 @@ const Tag = styled.span`
   border-radius: 99999px;
   background-color: #e5edff;
   font-size: 1rem;
+  @media (max-width: 768px) {
+    font-size: 0.7rem;
+    padding: 0.1rem 0.5rem;
+  }
 `;
 
 const Hero = styled.div`
   border-radius: 0.5rem;
+  @media (max-width: 768px) {
+    border-radius: 0;
+  }
   max-width: 80rem;
   margin: 1rem auto;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
@@ -306,10 +329,11 @@ const Hero = styled.div`
   justify-content: space-between;
   .content {
     width: 65%;
+    padding: 60px 30px 60px 50px;
     @media (max-width: 768px) {
       width: 100%;
+      padding: 30px 10px 30px 20px;
     }
-    padding: 60px 30px 60px 50px;
     position: relative;
     background-color: #fff;
     > * {
@@ -352,9 +376,7 @@ const Hero = styled.div`
     }
     font-weight: 400;
     display: -webkit-box;
-    -webkit-line-clamp: 5;
     -webkit-box-orient: vertical;
-    overflow: hidden;
   }
   .thumb {
     min-height: 400px;
@@ -376,6 +398,9 @@ const BackButton = styled.a`
   border-radius: 6px;
   font-weight: 500;
   font-size: 1rem;
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+  }
   display: block;
   outline: 0;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
@@ -393,6 +418,10 @@ const Content = styled.div`
     width: 100%;
   }
   padding: 60px 30px 60px 50px;
+  @media (max-width: 768px) {
+    width: 100%;
+    padding: 30px 15px 30px 15px;
+  }
   position: relative;
   background-color: #f9fafb;
   > * {
@@ -411,13 +440,11 @@ const Content = styled.div`
     border-color: #d2d6dc;
     border-bottom-style: dashed;
   }
-`;
-
-const ContentHorizontal = styled(Content)`
-  display: flex;
-  width: 100%;
   h2 {
     font-size: 1.5rem;
+    @media (max-width: 768px) {
+      font-size: 1.2rem;
+    }
     color: #161e2e;
     margin-bottom: 20px;
     font-weight: 700;
@@ -427,8 +454,17 @@ const ContentHorizontal = styled(Content)`
     color: #6b7280;
     margin-top: 0.5rem;
     font-size: 1.125rem !important;
+    @media (max-width: 768px) {
+      font-size: 0.8rem !important;
+    }
     font-weight: 400 !important;
   }
+`;
+
+const ContentHorizontal = styled(Content)`
+  display: flex;
+  width: 100%;
+
   .link {
     color: #5145cd;
     font-size: 0.875rem;
@@ -447,6 +483,9 @@ const SignBox = styled.div`
 
 const Info = styled.div`
   margin: 2rem;
+  @media (max-width: 768px) {
+    margin: 0;
+  }
   margin-top: 0;
   font-style: italic;
   color: #4b5563;
@@ -476,7 +515,9 @@ const ContinueButton = styled.button`
   border-radius: 6px;
   font-weight: 500;
   font-size: 1rem;
-  margin-right: 10px;
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+  }
   margin-top: 40px;
   display: block;
   outline: 0;
@@ -504,6 +545,9 @@ const Title = styled.div`
     position: absolute;
     left: 0;
     top: 50%;
+    @media (max-width: 768px) {
+      top: 110%;
+    }
     transform: translateY(-50%);
     z-index: -1;
   }
@@ -524,6 +568,8 @@ const ConsentementBox = styled.div`
   @media (max-width: 768px) {
     border-radius: 0;
     margin: 0;
+    width: 100%;
+    padding: 1rem;
   }
   .noPrint {
     @media print {
@@ -552,6 +598,9 @@ const FormGroup = styled.div`
   margin-bottom: 25px;
   label {
     font-size: 1rem;
+    @media (max-width: 768px) {
+      font-size: 0.8rem;
+    }
     font-weight: 500;
     text-transform: uppercase;
     color: #6a6f85;
@@ -604,12 +653,16 @@ const RadioLabel = styled.label`
   input {
     cursor: pointer;
     margin-right: 1.25rem;
-    width: 1.5rem;
-    height: 1.5rem;
+    width: 16px;
+    height: 16px;
   }
   label {
     color: #4b5563;
     font-size: 1rem;
+    @media (max-width: 768px) {
+      font-size: 0.8rem;
+    }
+    width: 100%;
   }
 `;
 

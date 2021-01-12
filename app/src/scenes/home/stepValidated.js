@@ -99,10 +99,11 @@ const WrapperItem = styled.div`
 const Content = styled.div`
   margin-top: ${({ showAlert }) => (showAlert ? "2rem" : "")};
   width: 65%;
+  padding: 60px 30px 60px 50px;
   @media (max-width: 768px) {
     width: 100%;
+    padding: 30px 15px 30px 15px;
   }
-  padding: 60px 30px 60px 50px;
   position: relative;
   background-color: #fff;
   > * {
@@ -120,6 +121,9 @@ const Content = styled.div`
 
 const Hero = styled.div`
   border-radius: 0.5rem;
+  @media (max-width: 768px) {
+    border-radius: 0;
+  }
   max-width: 80rem;
   margin: 0 auto;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
