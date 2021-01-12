@@ -58,15 +58,16 @@ a:hover {
 
 .form-control {
   font-size: 16px;
-  &::placeholder {
-    color: #9fa6b2;
-    font-size: 16px;
-  }
+}
 
-  &:focus {
-    box-shadow: none;
-    border-color: #aaa;
-  }
+.form-control::placeholder {
+  color: #9fa6b2;
+  font-size: 16px;
+}
+
+.form-control:focus {
+  box-shadow: none;
+  border-color: #aaa;
 }
 
 @media print {

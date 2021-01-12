@@ -39,12 +39,8 @@ module.exports = (env) => {
     module: {
       rules: [
         {
-          test: /\.less$/,
-          loader: "style-loader!css-loader!less-loader"
-        },
-        {
           test: /\.css$/,
-          loader: "style-loader!css-loader"
+          use: ["style-loader", "css-loader"],
         },
         {
           test: /\.js$/,
@@ -59,15 +55,14 @@ module.exports = (env) => {
           test: /\.(gif|png|jpe?g|svg|woff|woff2)$/i,
           exclude: /node_modules/,
           use: [
-            'file-loader',
             {
-              loader: 'image-webpack-loader',
+              loader: 'file-loader',
               options: {
-                bypassOnDebug: true,
+                esModule: false,
               },
             },
           ],
-        }
+        },
       ]
     },
     plugins,
