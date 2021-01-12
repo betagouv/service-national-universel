@@ -48,8 +48,18 @@ export default () => {
         </Item> */}
         {/* <hr /> */}
 
+        {user.role === "admin" && (
+          <Item>
+            <InviteReferent role={"admin"} />
+          </Item>
+        )}
+        {(user.role === "admin" || user.role === "referent_region") && (
+          <Item>
+            <InviteReferent role={"referent_region"} />
+          </Item>
+        )}
         <Item>
-          <InviteReferent />
+          <InviteReferent role={"referent_department"} />
         </Item>
         <Item>
           <NavLink to="/profil">Profil</NavLink>
@@ -68,12 +78,15 @@ export default () => {
   );
 };
 
-const InviteReferent = () => {
+const InviteReferent = ({ role }) => {
   const [open, setOpen] = useState(false);
+  let label = "Inviter un administrateur";
+  if (role === "referent_region") label = "Inviter un référent régional";
+  if (role === "referent_department") label = "Inviter un référent départemental";
   return (
     <div onClick={() => setOpen(true)}>
-      <div style={{ padding: "10px 25px 8px", color: "#606266" }}>Inviter un référent départemental</div>
-      <Invite open={open} setOpen={() => setOpen(false)} />
+      <div style={{ padding: "10px 25px 8px" }}>{label}</div>
+      <Invite role={role} label={label} open={open} setOpen={() => setOpen(false)} />
     </div>
   );
 };
@@ -155,8 +168,12 @@ const Menu = styled.div`
 
 const Item = styled.div`
   font-size: 14px;
-  color: #888888;
+  color: #606266;
   cursor: pointer;
+  :hover {
+    background-color: #eaf3fa;
+    color: #3182ce;
+  }
   a {
     color: inherit;
     text-decoration: none;

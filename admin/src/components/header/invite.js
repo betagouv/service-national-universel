@@ -7,31 +7,32 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { toastr } from "react-redux-toastr";
 
-import { departmentList } from "../../utils";
+import { departmentList, regionList, region2department } from "../../utils";
 
 import LoadingButton from "../../components/loadingButton";
 import api from "../../services/api";
 
-export default ({ setOpen, open }) => {
+export default ({ setOpen, open, label = "Inviter un référent", role = "" }) => {
   const { user } = useSelector((state) => state.Auth);
 
   return (
     <Invitation style={{ marginBottom: 10, textAlign: "right" }}>
       <Modal isOpen={open} toggle={() => setOpen(false)} size="lg">
         <Invitation>
-          <ModalHeader toggle={() => setOpen(false)}>Inviter un référent</ModalHeader>
+          <ModalHeader toggle={() => setOpen(false)}>{label}</ModalHeader>
           <ModalBody>
             <Formik
               initialValues={{
                 firstName: "",
                 lastName: "",
-                role: "",
+                role,
                 email: "",
+                region: "",
                 department: "",
               }}
               onSubmit={async (values, { setSubmitting }) => {
                 try {
-                  await api.post("/referent/signup_invite/referent_department", values);
+                  await api.post(`/referent/signup_invite/${role}`, values);
                   toastr.success("Invitation envoyée");
                   setOpen();
                   setOpen(false);
@@ -63,12 +64,22 @@ export default ({ setOpen, open }) => {
                         <Field name="email" value={values.email} onChange={handleChange} />
                       </FormGroup>
                     </Col>
-                    <Col md={6}>
-                      <FormGroup>
-                        <div>Département</div>
-                        <ChooseDepartment value={values.department} onChange={handleChange} />
-                      </FormGroup>
-                    </Col>
+                    {role === "referent_department" ? (
+                      <Col md={6}>
+                        <FormGroup>
+                          <div>Département</div>
+                          <ChooseDepartment value={values.department} onChange={handleChange} />
+                        </FormGroup>
+                      </Col>
+                    ) : null}
+                    {role === "referent_region" ? (
+                      <Col md={6}>
+                        <FormGroup>
+                          <div>Région</div>
+                          <ChooseRegion value={values.region} onChange={handleChange} />
+                        </FormGroup>
+                      </Col>
+                    ) : null}
                   </Row>
                   <br />
                   <LoadingButton loading={isSubmitting} color="info" onClick={handleSubmit}>
@@ -86,17 +97,45 @@ export default ({ setOpen, open }) => {
 
 const ChooseDepartment = ({ value, onChange }) => {
   const { user } = useSelector((state) => state.Auth);
+  const [list, setList] = useState(departmentList);
 
   useEffect(() => {
+    //force the value if it is a referent_department
     if (user.role === "referent_department") {
       return onChange({ target: { value: user.department, name: "department" } });
     }
-    return onChange({ target: { value: departmentList[0], name: "department" } });
+    //filter the array if it is a referent_region
+    if (user.role === "referent_region") {
+      setList(region2department[user.region]);
+    }
+    return onChange({ target: { value: list[0], name: "department" } });
   }, []);
 
   return (
     <Input disabled={user.role === "referent_department"} type="select" name="department" value={value} onChange={onChange}>
-      {departmentList.map((e) => {
+      {list.map((e) => {
+        return (
+          <option value={e} key={e}>
+            {e}
+          </option>
+        );
+      })}
+    </Input>
+  );
+};
+const ChooseRegion = ({ value, onChange }) => {
+  const { user } = useSelector((state) => state.Auth);
+
+  useEffect(() => {
+    if (user.role === "referent_region") {
+      return onChange({ target: { value: user.region, name: "region" } });
+    }
+    return onChange({ target: { value: regionList[0], name: "region" } });
+  }, []);
+
+  return (
+    <Input disabled={user.role === "referent_region"} type="select" name="region" value={value} onChange={onChange}>
+      {regionList.map((e) => {
         return (
           <option value={e} key={e}>
             {e}
