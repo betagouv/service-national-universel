@@ -21,13 +21,18 @@
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",
+    "css-loader": "^5.0.1",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "express-fileupload": "^1.2.0",
     "faker": "^5.1.0",
+    "file-loader": "^6.2.0",
     "gm": "^1.23.1",
     "http-aws-es": "^6.0.0",
+    "image-webpack-loader": "^7.0.1",
     "jsonwebtoken": "^8.5.1",
+    "less": "^4.1.0",
+    "less-loader": "^7.2.1",
     "mongoose": "^5.11.11",
     "multer": "^1.4.2",
     "mysql2": "^2.2.5",
@@ -35,7 +40,9 @@
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
     "password-validator": "^5.1.0",
-    "sequelize": "^6.3.5"
+    "query-string": "^6.13.8",
+    "sequelize": "^6.3.5",
+    "style-loader": "^2.0.0"
   },
   "devDependencies": {
     "csv-parser": "^3.0.0"

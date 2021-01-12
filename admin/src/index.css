@@ -1,4 +1,4 @@
-@import (css) url("https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap");
 
 * {
   padding: 0;
@@ -47,9 +47,10 @@ table tr {
 a {
   text-decoration: none;
   color: inherit;
-  &:hover {
-    text-decoration: none;
-  }
+}
+
+a:hover {
+  text-decoration: none;
 }
 
 .screen-container {
