@@ -1,5 +1,8 @@
 const express = require("express");
 const passport = require("passport");
+const fetch = require("node-fetch");
+const queryString = require("querystring");
+const crypto = require("crypto");
 const router = express.Router();
 
 const config = require("../config");
@@ -87,6 +90,58 @@ router.put("/", passport.authenticate("young", { session: false }), async (req, 
     capture(error);
     res.status(500).send({ ok: false, code: SERVER_ERROR, error });
   }
+});
+
+router.get("/france-connect/authorization-url", async (req, res) => {
+  const query = {
+    scope: `openid given_name family_name email`,
+    redirect_uri: process.env.FRANCE_CONNECT_REDIRECT_URI,
+    response_type: "code",
+    client_id: process.env.FRANCE_CONNECT_CLIENT_ID,
+    state: "home",
+    nonce: crypto.randomBytes(20).toString("hex"),
+    acr_values: "eidas1",
+  };
+  const url = `${process.env.FRANCE_CONNECT_URL}/authorize?${queryString.stringify(query)}`;
+  res.status(200).send({ ok: true, data: { url } });
+});
+
+router.post("/france-connect/user-info", async (req, res) => {
+  console.log(req.body.code);
+  const body = {
+    grant_type: "authorization_code",
+    redirect_uri: process.env.FRANCE_CONNECT_REDIRECT_URI,
+    client_id: process.env.FRANCE_CONNECT_CLIENT_ID,
+    client_secret: process.env.FRANCE_CONNECT_CLIENT_SECRET,
+    code: req.body.code,
+  };
+  const obj = {
+    method: "POST",
+    headers: { "content-type": "application/x-www-form-urlencoded" },
+    body: queryString.stringify(body),
+  };
+  const res1 = await fetch(`${process.env.FRANCE_CONNECT_URL}/token`, obj);
+  const r1 = await res1.json();
+
+  console.log(r1);
+
+  if (!r1["access_token"] || !r1["id_token"]) {
+    return res.sendStatus(401, r1);
+  }
+
+  console.log({ headers: { Authorization: `Bearer ${r1["access_token"]}` } });
+
+  const res2 = await fetch(`https://fcp.integ01.dev-franceconnect.fr/api/v1/userinfo`, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${r1["access_token"]}` },
+  });
+  console.log("SEE BELOW");
+  console.log(res2);
+  const r2 = await res2.json();
+  console.log(r2);
+
+  res.status(200).send({ ok: true, data: r2 });
+  return r1;
 });
 
 module.exports = router;

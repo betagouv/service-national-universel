@@ -18,13 +18,22 @@ import Drawer from "./drawer";
 
 import { STEPS } from "../utils";
 
-export default () => {
+export default (props) => {
   const [step, setStep] = useState(STEPS.REPRESENTANTS);
+  const [initialData, setInitialData] = useState(null);
 
   const young = useSelector((state) => state.Auth.young);
 
   useEffect(() => {
-    if (young) setStep(STEPS.COORDONNEES);
+    // `props.location.state.step` and `props.location.state.data` are sent by
+    if (props.location && props.location.state && props.location.state.step) {
+      setStep(props.location.state.step);
+    } else if(young) {
+      setStep(STEPS.COORDONNEES);
+    }
+    if (props.location && props.location.state && props.location.state.data) {
+      setInitialData(props.location.state.data);
+    }
   }, []);
 
   useEffect(() => {
@@ -38,7 +47,7 @@ export default () => {
   function renderStep() {
     if (step === STEPS.COORDONNEES) return <Coordonnees setStep={setStep} />;
     if (step === STEPS.PARTICULIERES) return <Particulieres setStep={setStep} />;
-    if (step === STEPS.REPRESENTANTS) return <Representants setStep={setStep} />;
+    if (step === STEPS.REPRESENTANTS) return <Representants setStep={setStep} initialData={initialData} />;
     if (step === STEPS.CONSENTEMENTS) return <Consentements setStep={setStep} />;
     if (step === STEPS.MOTIVATIONS) return <Motivations setStep={setStep} />;
     if (step === STEPS.DONE) return <Done setStep={setStep} />;

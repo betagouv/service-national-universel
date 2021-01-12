@@ -10,6 +10,7 @@ import AddressInput from "../components/addressInput";
 import api from "../../../services/api";
 import { setYoung } from "../../../redux/auth/actions";
 import ErrorMessage, { requiredMessage } from "../components/errorMessage";
+import FranceConnectButton from "../../../components/FranceConnectButton";
 
 import { STEPS, saveYoung } from "../utils";
 
@@ -17,6 +18,12 @@ const Parent = ({ id = 1, values, errors, touched, handleChange }) => {
   return (
     <>
       <FormLegend>Représentant légal n°{id}</FormLegend>
+      <FormRow>
+        <Col>
+          <p>Vous pouvez utiliser ce bouton vous pour récupérer les données du représentant légal n°1 avec France Connect</p>
+          <FranceConnectButton />
+        </Col>
+      </FormRow>
       <FormRow>
         <Col md={4}>
           <Label>Je suis</Label>
@@ -185,7 +192,7 @@ const Parent = ({ id = 1, values, errors, touched, handleChange }) => {
   );
 };
 
-export default ({ setStep }) => {
+export default ({ setStep, initialData }) => {
   const [parent2, setParent2] = useState(false);
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
@@ -203,6 +210,12 @@ export default ({ setStep }) => {
     const young = await saveYoung(values);
     if (young) dispatch(setYoung(young));
   };
+
+  if (initialData) {
+    young.parent1FirstName = initialData.firstName;
+    young.parent1LastName = initialData.lastName;
+    young.parent1Email = initialData.email;
+  }
 
   return (
     <Wrapper>

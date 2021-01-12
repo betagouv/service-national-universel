@@ -18,8 +18,9 @@ import Preferences from "./scenes/preferences";
 
 import Header from "./components/header";
 import Drawer from "./components/drawer";
-
 import Footer from "./components/footer";
+
+import FranceConnectCallback from "./components/FranceConnectCallback";
 
 import api from "./services/api";
 import { SENTRY_URL, environment } from "./config";
@@ -54,6 +55,7 @@ export default () => {
       <ScrollToTop />
       <div className="main">
         <Switch>
+          <Route path="/data-callback" component={FranceConnectCallback} />
           <Route path="/inscription" component={Inscription} />
           <Route path="/auth" component={Auth} />
           <Route path="/" component={Espace} />
