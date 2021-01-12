@@ -2,6 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { REFERENT_ROLES } from "../../utils";
 
 import User from "./user";
 
@@ -11,9 +12,9 @@ export default () => {
   if (!user) return <div />;
 
   function getName() {
-    if (user.role === "admin") return "Espace modérateur";
-    if (user.role === "referent_department") return "ESPACE RÉFÉRENT DÉPARTEMENTAL";
-    if (user.role === "referent_region") return "ESPACE RÉFÉRENT REGIONAL";
+    if (user.role === REFERENT_ROLES.ADMIN) return "Espace modérateur";
+    if (user.role === REFERENT_ROLES.REFERENT_DEPARTMENT) return "ESPACE RÉFÉRENT DÉPARTEMENTAL";
+    if (user.role === REFERENT_ROLES.REFERENT_REGION) return "ESPACE RÉFÉRENT REGIONAL";
     return "";
   }
   return (

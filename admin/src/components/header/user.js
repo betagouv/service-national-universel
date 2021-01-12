@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import Invite from "./invite";
 import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
+import { REFERENT_ROLES } from "../../utils";
 
 import Avatar from "../Avatar";
 
@@ -48,18 +49,18 @@ export default () => {
         </Item> */}
         {/* <hr /> */}
 
-        {user.role === "admin" && (
+        {user.role === REFERENT_ROLES.ADMIN && (
           <Item>
-            <InviteReferent role={"admin"} />
+            <InviteReferent role={REFERENT_ROLES.ADMIN} />
           </Item>
         )}
-        {(user.role === "admin" || user.role === "referent_region") && (
+        {(user.role === REFERENT_ROLES.ADMIN || user.role === REFERENT_ROLES.REFERENT_REGION) && (
           <Item>
-            <InviteReferent role={"referent_region"} />
+            <InviteReferent role={REFERENT_ROLES.REFERENT_REGION} />
           </Item>
         )}
         <Item>
-          <InviteReferent role={"referent_department"} />
+          <InviteReferent role={REFERENT_ROLES.REFERENT_DEPARTMENT} />
         </Item>
         <Item>
           <NavLink to="/profil">Profil</NavLink>
@@ -81,8 +82,8 @@ export default () => {
 const InviteReferent = ({ role }) => {
   const [open, setOpen] = useState(false);
   let label = "Inviter un administrateur";
-  if (role === "referent_region") label = "Inviter un référent régional";
-  if (role === "referent_department") label = "Inviter un référent départemental";
+  if (role === REFERENT_ROLES.REFERENT_REGION) label = "Inviter un référent régional";
+  if (role === REFERENT_ROLES.REFERENT_DEPARTMENT) label = "Inviter un référent départemental";
   return (
     <div onClick={() => setOpen(true)}>
       <div style={{ padding: "10px 25px 8px" }}>{label}</div>

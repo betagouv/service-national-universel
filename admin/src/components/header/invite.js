@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { toastr } from "react-redux-toastr";
 
-import { departmentList, regionList, region2department } from "../../utils";
+import { departmentList, regionList, region2department, REFERENT_ROLES } from "../../utils";
 
 import LoadingButton from "../../components/loadingButton";
 import api from "../../services/api";
@@ -64,7 +64,7 @@ export default ({ setOpen, open, label = "Inviter un référent", role = "" }) =
                         <Field name="email" value={values.email} onChange={handleChange} />
                       </FormGroup>
                     </Col>
-                    {role === "referent_department" ? (
+                    {role === REFERENT_ROLES.REFERENT_DEPARTMENT ? (
                       <Col md={6}>
                         <FormGroup>
                           <div>Département</div>
@@ -72,7 +72,7 @@ export default ({ setOpen, open, label = "Inviter un référent", role = "" }) =
                         </FormGroup>
                       </Col>
                     ) : null}
-                    {role === "referent_region" ? (
+                    {role === REFERENT_ROLES.REFERENT_REGION ? (
                       <Col md={6}>
                         <FormGroup>
                           <div>Région</div>
@@ -101,18 +101,18 @@ const ChooseDepartment = ({ value, onChange }) => {
 
   useEffect(() => {
     //force the value if it is a referent_department
-    if (user.role === "referent_department") {
+    if (user.role === REFERENT_ROLES.REFERENT_DEPARTMENT) {
       return onChange({ target: { value: user.department, name: "department" } });
     }
     //filter the array if it is a referent_region
-    if (user.role === "referent_region") {
+    if (user.role === REFERENT_ROLES.REFERENT_REGION) {
       setList(region2department[user.region]);
     }
     return onChange({ target: { value: list[0], name: "department" } });
   }, []);
 
   return (
-    <Input disabled={user.role === "referent_department"} type="select" name="department" value={value} onChange={onChange}>
+    <Input disabled={user.role === REFERENT_ROLES.REFERENT_DEPARTMENT} type="select" name="department" value={value} onChange={onChange}>
       {list.map((e) => {
         return (
           <option value={e} key={e}>
@@ -127,14 +127,14 @@ const ChooseRegion = ({ value, onChange }) => {
   const { user } = useSelector((state) => state.Auth);
 
   useEffect(() => {
-    if (user.role === "referent_region") {
+    if (user.role === REFERENT_ROLES.REFERENT_REGION) {
       return onChange({ target: { value: user.region, name: "region" } });
     }
     return onChange({ target: { value: regionList[0], name: "region" } });
   }, []);
 
   return (
-    <Input disabled={user.role === "referent_region"} type="select" name="region" value={value} onChange={onChange}>
+    <Input disabled={user.role === REFERENT_ROLES.REFERENT_REGION} type="select" name="region" value={value} onChange={onChange}>
       {regionList.map((e) => {
         return (
           <option value={e} key={e}>

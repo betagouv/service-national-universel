@@ -15,7 +15,7 @@ import ScholarshopSituation from "./scolarshipSituation";
 import ParticularSituation from "./particularSituation";
 import PriorityArea from "./priorityArea";
 
-import { departmentList, regionList, YOUNG_STATUS, translate, region2department } from "../../../utils";
+import { departmentList, regionList, YOUNG_STATUS, translate, region2department, REFERENT_ROLES } from "../../../utils";
 
 export default () => {
   const [filter, setFilter] = useState({ status: Object.keys(YOUNG_STATUS), region: "", department: "", cohort: "2021" });
@@ -76,7 +76,7 @@ export default () => {
 
 const FilterRegion = ({ updateFilter, filter }) => {
   const user = useSelector((state) => state.Auth.user);
-  if (user.role === "referent_department") return <div />;
+  if (user.role === REFERENT_ROLES.REFERENT_DEPARTMENT) return <div />;
   return (
     <FilterWrapper>
       <Dropdown onChange={(region) => updateFilter({ region })} selectedOption={filter.region} options={regionList} prelabel="Régions" />
@@ -91,7 +91,7 @@ const FilterDepartment = ({ updateFilter, filter }) => {
     return region2department[filter.region];
   };
 
-  if (user.role === "referent_department") {
+  if (user.role === REFERENT_ROLES.REFERENT_DEPARTMENT) {
     return (
       <FilterWrapper>
         <Dropdown disabled onChange={() => {}} selectedOption={user.department} options={[]} prelabel="Départements" />
