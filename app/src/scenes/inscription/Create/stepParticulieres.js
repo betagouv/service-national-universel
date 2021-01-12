@@ -350,7 +350,15 @@ export default ({ setStep }) => {
                       value={values.highSkilledActivityProofFiles}
                       name="highSkilledActivityProofFiles"
                       onChange={async (e) => {
-                        let { ok, data } = await api.uploadFile("/young/file/highSkilledActivityProofFiles", e.target.files);
+                        let { ok, data, code } = await api.uploadFile("/young/file/highSkilledActivityProofFiles", e.target.files);
+                        if (code === "FILE_CORRUPTED") {
+                          return toastr.error(
+                            "Le fichier semble corrompu",
+                            "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
+                            { timeOut: 0 }
+                          );
+                        }
+
                         if (!ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
                         handleChange({ target: { value: data, name: "highSkilledActivityProofFiles" } });
                         toastr.success("Fichier téléversé");

@@ -15,6 +15,7 @@ const AuthObject = require("../auth");
 const YoungAuth = new AuthObject(YoungObject);
 
 const SERVER_ERROR = "SERVER_ERROR";
+const FILE_CORRUPTED = "FILE_CORRUPTED";
 const YOUNG_ALREADY_REGISTERED = "YOUNG_ALREADY_REGISTERED";
 
 router.post("/signin", (req, res) => YoungAuth.signin(req, res));
@@ -50,8 +51,8 @@ router.post("/file/:key", passport.authenticate("young", { session: false }), as
     await req.user.save();
     return res.status(200).send({ data: names, ok: true });
   } catch (error) {
-    console.log("ERRORR", error);
     capture(error);
+    if (error === "FILE_CORRUPTED") return res.status(500).send({ ok: false, code: FILE_CORRUPTED });
     return res.status(500).send({ ok: false, code: SERVER_ERROR });
   }
 });
