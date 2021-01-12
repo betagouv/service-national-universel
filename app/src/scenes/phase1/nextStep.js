@@ -72,7 +72,7 @@ export default () => {
         <div>
           <h2>Transmission de la fiche sanitaire</h2>
           <p>
-            En attente de votre affectation, vous pouvez dores-et-déjà télécharger la fiche sanitaire ici. Vous devrez la renvoyer complétée et signée par votre représentant légal{" "}
+            En attente de votre affectation, vous pouvez d’ores et déjà télécharger la fiche sanitaire ici. Vous devrez la renvoyer complétée et signée par votre représentant légal{" "}
             <b>au plus tard le 4 juin 2021</b>. L'adresse de destination vous sera communiqué sur cette page, une fois votre lieu d'affectation connue.
           </p>
           <a href="https://apicivique.s3.eu-west-3.amazonaws.com/Note_relative_aux_informations_d_ordre_sanitaire.pdf" target="blank" className="link">
@@ -191,7 +191,7 @@ export default () => {
                         Nous autorisons l'Administration à reproduire et exploiter l'image et la voix de{" "}
                         <b>
                           {young.firstName} {young.lastName}
-                        </b>
+                        </b>{" "}
                         que nous représentons légalement, sur les supports visés ci-après à des fins de promotion du Service Nationnel Universel
                       </div>
                     </RadioLabel>
