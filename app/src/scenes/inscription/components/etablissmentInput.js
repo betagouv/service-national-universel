@@ -83,7 +83,7 @@ const AutoComplete = ({ placeholder, onSelect }) => {
 
   const renderSuggestion = (suggestion) => (
     <div style={{ fontSize: 12 }}>
-      <strong>{suggestion.name2 || "AUTRE"}</strong>
+      <strong>{suggestion.name2 || "RENTREZ MANUELLEMENT L'ETABLISSEMENT"}</strong>
       <div>
         {suggestion.city} {suggestion.city && ","} {suggestion.postcode}
       </div>
