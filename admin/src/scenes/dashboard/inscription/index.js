@@ -19,6 +19,7 @@ import { departmentList, regionList, YOUNG_STATUS, translate, region2department,
 
 export default () => {
   const [filter, setFilter] = useState({ status: Object.keys(YOUNG_STATUS), region: "", department: "", cohort: "2021" });
+  const user = useSelector((state) => state.Auth.user);
 
   const onExportButtonClicked = () => {
     console.log("Export button clicked");
@@ -27,6 +28,15 @@ export default () => {
   function updateFilter(n) {
     setFilter({ ...filter, ...n });
   }
+
+  useEffect(() => {
+    if (user.role === REFERENT_ROLES.REFERENT_DEPARTMENT) {
+      updateFilter({ department: user.department });
+    }
+    if (user.role === REFERENT_ROLES.REFERENT_REGION) {
+      updateFilter({ region: user.region });
+    }
+  }, []);
 
   return (
     <>
@@ -77,6 +87,15 @@ export default () => {
 const FilterRegion = ({ updateFilter, filter }) => {
   const user = useSelector((state) => state.Auth.user);
   if (user.role === REFERENT_ROLES.REFERENT_DEPARTMENT) return <div />;
+
+  if (user.role === REFERENT_ROLES.REFERENT_REGION) {
+    return (
+      <FilterWrapper>
+        <Dropdown disabled onChange={() => {}} selectedOption={filter.region} options={[]} prelabel="Régions" />
+      </FilterWrapper>
+    );
+  }
+
   return (
     <FilterWrapper>
       <Dropdown onChange={(region) => updateFilter({ region })} selectedOption={filter.region} options={regionList} prelabel="Régions" />
@@ -94,7 +113,7 @@ const FilterDepartment = ({ updateFilter, filter }) => {
   if (user.role === REFERENT_ROLES.REFERENT_DEPARTMENT) {
     return (
       <FilterWrapper>
-        <Dropdown disabled onChange={() => {}} selectedOption={user.department} options={[]} prelabel="Départements" />
+        <Dropdown disabled onChange={() => {}} selectedOption={filter.department} options={[]} prelabel="Départements" />
       </FilterWrapper>
     );
   }
@@ -118,7 +137,7 @@ const FilterStatus = ({ value = [], onChange }) => {
   }
 
   let STATUS = Object.keys(YOUNG_STATUS);
-  if (user.role !== "admin") STATUS = STATUS.filter((e) => e !== "IN_PROGRESS");
+  if (user.role !== REFERENT_ROLES.ADMIN) STATUS = STATUS.filter((e) => e !== "IN_PROGRESS");
   return (
     <div style={{ display: "flex", flexWrap: "wrap" }}>
       {STATUS.map((e) => {
