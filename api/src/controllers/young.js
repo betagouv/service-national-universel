@@ -50,6 +50,7 @@ router.post("/file/:key", passport.authenticate("young", { session: false }), as
     await req.user.save();
     return res.status(200).send({ data: names, ok: true });
   } catch (error) {
+    console.log("ERRORR", error);
     capture(error);
     return res.status(500).send({ ok: false, code: SERVER_ERROR });
   }

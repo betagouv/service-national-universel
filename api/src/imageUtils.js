@@ -53,7 +53,7 @@ const getImageSize = (data) => {
       console.log("Err", err);
       console.log("size", size);
       //Sometimes, files are corrupted
-      if (!size || isNaN(size.width) || isNaN(size.height)) return reject();
+      if (!size || isNaN(size.width) || isNaN(size.height)) return reject("FILE_CORRUPTED");
       if (err) return reject(err);
       resolve(size);
     });
