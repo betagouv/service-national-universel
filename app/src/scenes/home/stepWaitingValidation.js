@@ -28,7 +28,7 @@ export default () => {
           e-mail de l'avancement de votre candidature.
         </p>
         <p>Vous pouvez cependant continuer à éditer les informations renseignées lors de votre inscription.</p>
-        <Link to="/inscription/create">
+        <Link to="/inscription/coordonnees">
           <BackButton>Editer mes informations d'inscription</BackButton>
         </Link>
         <Separator />

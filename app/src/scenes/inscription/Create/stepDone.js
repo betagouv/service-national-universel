@@ -1,13 +1,14 @@
 import React from "react";
 import styled from "styled-components";
 import { useSelector, useDispatch } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 
 export default () => {
+  const history = useHistory();
   const young = useSelector((state) => state.Auth.young) || {};
 
   if (!young) {
-    setStep(STEPS.PROFIL);
+    history.push("/inscription/create");
     return <div />;
   }
   return (
