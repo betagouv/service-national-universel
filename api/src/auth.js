@@ -130,7 +130,7 @@ class Auth {
       console.log("NOT FOUND", req.body.email.toLowerCase());
       if (!obj) return res.status(404).send({ ok: false, code: USER_NOT_EXISTS });
       const token = await crypto.randomBytes(20).toString("hex");
-      obj.set({ forgotPasswordResetToken: token, forgotPasswordResetExpires: Date.now() + JWT_MAX_AGE * 1000 });
+      obj.set({ forgotPasswordResetToken: token, forgotPasswordResetExpires: Date.now() + COOKIE_MAX_AGE });
       await obj.save();
       let htmlContent = fs.readFileSync(path.resolve(__dirname, "./templates/forgetpassword.html")).toString();
       htmlContent = htmlContent.replace(/{{cta}}/g, `${cta}?token=${token}`);
