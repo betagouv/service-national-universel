@@ -9,7 +9,7 @@ import ExportComponent from "../../components/Export";
 import ReactiveFilter from "../../components/ReactiveFilter";
 
 import api from "../../services/api";
-import { apiURL } from "../../config";
+import { apiURL, appURL } from "../../config";
 import Panel from "./panel";
 
 import { translate, YOUNG_STATUS_COLORS } from "../../utils";
@@ -19,8 +19,6 @@ const FILTERS = ["SEARCH", "STATUS", "FORMAT", "PHASE", "COHORT"];
 
 export default ({ setYoung }) => {
   const [volontaire, setVolontaire] = useState(null);
-
-  // return <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "200px" }}>En cours</div>;
 
   return (
     <div>
@@ -175,14 +173,6 @@ const Hit = ({ hit, onClick }) => {
 const Action = ({ hit, color }) => {
   const user = useSelector((state) => state.Auth.user);
 
-  const handleImpersonate = async () => {
-    try {
-      await api.post(`/young/signin_as/${hit._id}`);
-    } catch (e) {
-      console.log(e);
-      toastr.error("Oops, une erreur est survenu lors de la masquarade !", e.code);
-    }
-  };
   return (
     <ActionBox color={"#444"}>
       <UncontrolledDropdown setActiveFromChild>
@@ -201,8 +191,8 @@ const Action = ({ hit, color }) => {
             </DropdownItem>
           </Link>
           {user.role === "admin" ? (
-            <DropdownItem className="dropdown-item" onClick={handleImpersonate}>
-              <a target="blank" href={`http://localhost:8081/auth/connect?token=${api.getToken()}&young_id=${hit._id}`}>
+            <DropdownItem className="dropdown-item">
+              <a target="blank" href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${hit._id}`}>
                 Prendre sa place
               </a>
             </DropdownItem>
@@ -412,7 +402,6 @@ const ActionBox = styled.div`
     div {
       white-space: nowrap;
       font-size: 14px;
-      /* padding: 5px 15px; */
     }
   }
   button {

@@ -1,7 +1,6 @@
 const OPERATION_UNAUTHORIZED = "OPERATION_UNAUTHORIZED";
 
 const onlyAdmin = (req, res, next) => {
-  console.log("check if admin");
   if (req.user.role === "admin") {
     next();
   } else {

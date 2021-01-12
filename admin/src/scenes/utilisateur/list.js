@@ -3,16 +3,14 @@ import { Col, DropdownItem, DropdownMenu, DropdownToggle, Label, Pagination, Pag
 import { ReactiveBase, ReactiveList, SingleList, MultiDropdownList, MultiList, DataSearch } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
-import { useDispatch, useSelector } from "react-redux";
-import { setUser, setStructure } from "../../redux/auth/actions";
+import { useDispatch } from "react-redux";
+import { setUser } from "../../redux/auth/actions";
 
 import { translate } from "../../utils";
 import ExportComponent from "../../components/Export";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
-
-import { Link, Redirect } from "react-router-dom";
 
 const FILTERS = ["SEARCH", "ROLE", "REGION", "DEPARTMENT"];
 
