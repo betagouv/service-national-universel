@@ -29,7 +29,7 @@ export default () => {
             <span>Mon espace volontaire</span>
           </Title>
           <Formik
-            initialValues={{}}
+            initialValues={{ email: "", password: "" }}
             onSubmit={async (values, actions) => {
               try {
                 const { user: young, token } = await api.post(`/young/signin`, values);
