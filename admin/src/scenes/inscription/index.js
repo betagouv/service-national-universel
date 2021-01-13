@@ -58,7 +58,6 @@ export default () => {
               <FilterRow>
                 <MultiDropdownList
                   className="dropdown-filter"
-                  placeholder="Status"
                   componentId="STATUS"
                   dataField="status.keyword"
                   renderItem={(e, count) => {
@@ -68,6 +67,13 @@ export default () => {
                   react={{ and: FILTERS }}
                   URLParams={true}
                   showSearch={false}
+                  renderLabel={(items) =>
+                    Object.keys(items).length > 0
+                      ? Object.keys(items).map((item) => {
+                          return <div>{translate(item)}</div>;
+                        })
+                      : "Statut"
+                  }
                 />
                 <MultiDropdownList
                   className="dropdown-filter"
@@ -78,6 +84,7 @@ export default () => {
                   react={{ and: FILTERS }}
                   URLParams={true}
                   showSearch={false}
+                  sortBy="asc"
                 />
                 <MultiDropdownList
                   className="dropdown-filter"
@@ -88,6 +95,7 @@ export default () => {
                   react={{ and: FILTERS }}
                   URLParams={true}
                   showSearch={false}
+                  sortBy="asc"
                 />
               </FilterRow>
             </Filter>
