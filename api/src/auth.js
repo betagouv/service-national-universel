@@ -59,12 +59,13 @@ class Auth {
 
   async signup(req, res) {
     try {
-      const { password, email, firstName: reqFirstName, lastName: reqLastName } = req.body;
+      const { password, email: reqEmail, firstName: reqFirstName, lastName: reqLastName } = req.body;
 
       if (!validatePassword(password)) return res.status(200).send({ ok: false, user: null, code: PASSWORD_NOT_VALIDATED });
 
       const firstName = reqFirstName.charAt(0).toUpperCase() + (reqFirstName || "").toLowerCase().slice(1);
       const lastName = reqLastName.toUpperCase();
+      const email = reqEmail.trim().toLowerCase();
 
       const user = await this.model.create({ password, email, firstName, lastName });
       const token = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });
