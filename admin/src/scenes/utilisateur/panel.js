@@ -23,11 +23,11 @@ export default ({ onChange, value }) => {
         <Details title="Région" value={value.region} />
         <Details title="Département" value={value.department} />
       </Info>
-      <div>
+      {/* <div>
         {Object.keys(value).map((e) => {
           return <div>{`${e}:${value[e]}`}</div>;
         })}
-      </div>
+      </div> */}
     </Panel>
   );
 };
