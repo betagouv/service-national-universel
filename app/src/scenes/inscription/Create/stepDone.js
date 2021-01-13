@@ -5,7 +5,7 @@ import { Link, useHistory } from "react-router-dom";
 
 export default () => {
   const history = useHistory();
-  const young = useSelector((state) => state.Auth.young) || {};
+  const young = useSelector((state) => state.Auth.young);
 
   if (!young) {
     history.push("/inscription/create");
