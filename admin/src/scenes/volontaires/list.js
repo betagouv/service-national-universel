@@ -192,9 +192,7 @@ const Action = ({ hit, color }) => {
           </Link>
           {user.role === "admin" ? (
             <DropdownItem className="dropdown-item">
-              <a target="blank" href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${hit._id}`}>
-                Prendre sa place
-              </a>
+              <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${hit._id}`}>Prendre sa place</a>
             </DropdownItem>
           ) : null}
         </DropdownMenu>
