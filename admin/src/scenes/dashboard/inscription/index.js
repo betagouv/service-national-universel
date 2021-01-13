@@ -121,9 +121,9 @@ const FilterStatus = ({ value = [], onChange }) => {
   if (user.role !== "admin") STATUS = STATUS.filter((e) => e !== "IN_PROGRESS");
   return (
     <div style={{ display: "flex", flexWrap: "wrap" }}>
-      {STATUS.map((e) => {
+      {STATUS.map((e, i) => {
         return (
-          <FilterWrapper>
+          <FilterWrapper key={i}>
             <Checkbox isChecked={value.includes(YOUNG_STATUS[e])} onChange={(status) => updateStatus(status)} name={e} label={translate(YOUNG_STATUS[e])} />
           </FilterWrapper>
         );
