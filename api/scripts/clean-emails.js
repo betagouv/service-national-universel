@@ -2,9 +2,10 @@ require("dotenv").config({ path: "../.env-prod" });
 
 require("../src/mongo");
 const ReferentModel = require("../src/models/referent");
+const YoungModel = require("../src/models/young");
 
-(async function run() {
-  const cursor = ReferentModel.find({}).cursor();
+const clean = async (model) => {
+  const cursor = model.find({}).cursor();
   await cursor.eachAsync(async function (doc) {
     try {
       const firstName = doc.firstName.charAt(0).toUpperCase() + (doc.firstName || "").toLowerCase().slice(1);
@@ -18,4 +19,11 @@ const ReferentModel = require("../src/models/referent");
       console.log("e", e);
     }
   });
+};
+
+(async function run() {
+  console.log("CLEANING REFERENT EMAILS");
+  await clean(ReferentModel);
+  console.log("CLEANING YOUNG EMAILS");
+  await clean(YoungModel);
 })();
