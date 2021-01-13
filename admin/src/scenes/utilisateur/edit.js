@@ -16,7 +16,6 @@ export default (props) => {
       const id = props.match && props.match.params && props.match.params.id;
       if (!id) return setUser(null);
       const { data } = await api.get(`/referent/${id}`);
-      console.log("get", data);
       setUser(data);
     })();
   }, []);
