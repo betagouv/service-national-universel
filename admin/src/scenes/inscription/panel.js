@@ -5,6 +5,7 @@ import { translate as t } from "./utils";
 import { departmentList, regionList, YOUNG_SITUATIONS, YOUNG_STATUS, translate } from "../../utils";
 import { Link } from "react-router-dom";
 import LoadingButton from "../../components/loadingButton";
+import Historic from "../../components/historic";
 
 import api from "../../services/api";
 export default ({ onChange, value }) => {
@@ -51,13 +52,7 @@ export default ({ onChange, value }) => {
           <EditBtn color="white">Modifier</EditBtn>
         </Link>
       </div>
-      {young && young.historic && young.historic.length !== 0 && (
-        <div className="info">
-          {young.historic.map((historicItem, key) => (
-            <HistoricItem key={key} item={historicItem} />
-          ))}
-        </div>
-      )}
+      {young && young.historic && young.historic.length !== 0 && <Historic value={young.historic} />}
       <Info title="Pièce d’identité" id={value._id}>
         {(value.cniFiles || []).map((e, i) => {
           return (
@@ -175,31 +170,6 @@ export default ({ onChange, value }) => {
   );
 };
 
-const HistoricItem = ({ item }) => {
-  const formatLongDate = (date) => {
-    const d = new Date(date);
-    return d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" });
-  };
-
-  let color = "#6CC763";
-  if (item.status === YOUNG_STATUS.WAITING_CORRECTION) color = "#FEB951";
-  if (item.status === YOUNG_STATUS.WAITING_VALIDATION) color = "#FE7B52";
-  if (item.status === YOUNG_STATUS.REFUSED) color = "#F8A9AD";
-  if (item.status === YOUNG_STATUS.IN_PROGRESS) color = "#382F79";
-
-  return (
-    <>
-      <Badge color={color}>{translate(item.status)}</Badge>
-      <div className="history-detail">
-        {item.note ? <div>{item.note}</div> : null}
-        <div className="muted">
-          Par <b>{item.userName}</b> • le {formatLongDate(item.createdAt)}
-        </div>
-      </div>
-    </>
-  );
-};
-
 const Info = ({ children, title, id }) => {
   return (
     <div className="info">
@@ -252,20 +222,6 @@ const InfoBtn = styled(LoadingButton)`
 
 const EditBtn = styled(InfoBtn)`
   background: url(${require("../../assets/pencil.svg")}) left 15px center no-repeat;
-`;
-
-const Badge = styled.span`
-  display: inline-block;
-  padding: 0.25rem 1rem;
-  margin: 0 0.25rem;
-  border-radius: 99999px;
-  font-size: 0.8rem;
-  margin-bottom: 5px;
-  margin-top: 15px;
-  ${({ color }) => `
-    color: ${color};
-    background-color: ${color}33;
-  `}
 `;
 
 const Panel = styled.div`
@@ -337,13 +293,5 @@ const Panel = styled.div`
     font-size: 18px;
     font-weight: 400;
     font-style: italic;
-  }
-  .muted {
-    color: #666;
-  }
-  .history-detail {
-    font-size: 0.8rem;
-    margin-top: 5px;
-    margin-left: 10px;
   }
 `;
