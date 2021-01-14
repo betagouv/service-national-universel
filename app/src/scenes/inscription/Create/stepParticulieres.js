@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { Row, Col, Input } from "reactstrap";
 import { Field, Formik } from "formik";
 import { useSelector, useDispatch } from "react-redux";
+import { useHistory } from "react-router-dom";
 
 import { setYoung } from "../../../redux/auth/actions";
 import api from "../../../services/api";
@@ -13,13 +14,14 @@ import DndFileInput from "../../../components/dndFileInput";
 import { saveYoung, STEPS } from "../utils";
 import { toastr } from "react-redux-toastr";
 
-export default ({ setStep }) => {
+export default () => {
+  const history = useHistory();
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
   const [inputAddress, setInputAddress] = useState("");
 
   if (!young) {
-    setStep(STEPS.PROFIL);
+    history.push('/inscription/create');
     return <div />;
   }
 
@@ -47,7 +49,7 @@ export default ({ setStep }) => {
             const { ok, code, data: young } = await api.put("/young", values);
             if (!ok) return toastr.error("Une erreur s'est produite :", code);
             dispatch(setYoung(young));
-            setStep(STEPS.REPRESENTANTS);
+            history.push("/inscription/representants");
           } catch (e) {
             console.log(e);
             toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", e.code);
