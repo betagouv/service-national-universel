@@ -1,4 +1,4 @@
-require("dotenv").config({ path: "./.env-staging" });
+require("dotenv").config({ path: "./.env-prod" });
 
 const bodyParser = require("body-parser");
 const cors = require("cors");
