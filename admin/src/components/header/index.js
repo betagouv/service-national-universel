@@ -8,23 +8,10 @@ import User from "./user";
 
 export default () => {
   const { user } = useSelector((state) => state.Auth);
-
   if (!user) return <div />;
 
-  function getName() {
-    if (user.role === REFERENT_ROLES.ADMIN) return "Espace modérateur";
-    if (user.role === REFERENT_ROLES.REFERENT_DEPARTMENT) return "ESPACE RÉFÉRENT DÉPARTEMENTAL";
-    if (user.role === REFERENT_ROLES.REFERENT_REGION) return "ESPACE RÉFÉRENT REGIONAL";
-    return "";
-  }
   return (
     <Header>
-      <Logo>
-        <Link to="/">
-          <img src={require("../../assets/logo-snu.png")} height={38} />
-          {getName()}
-        </Link>
-      </Logo>
       <div style={{ display: "flex", alignItems: "center" }}>
         {/* <IconLink to="#" icon={require("../../assets/messages.svg")} /> */}
         {/* <IconLink to="#" icon={require("../../assets/notification.svg")} /> */}
@@ -38,9 +25,10 @@ const Header = styled.div`
   background-color: #fff;
   padding-right: 20px;
   width: 100%;
+  height: 68px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.05);
   position: sticky;
   left: 0;
