@@ -1,5 +1,8 @@
 const express = require("express");
 const passport = require("passport");
+const fetch = require("node-fetch");
+const queryString = require("querystring");
+const crypto = require("crypto");
 const router = express.Router();
 
 const config = require("../config");
@@ -87,6 +90,51 @@ router.put("/", passport.authenticate("young", { session: false }), async (req, 
     capture(error);
     res.status(500).send({ ok: false, code: SERVER_ERROR, error });
   }
+});
+
+// Get authorization from France Connect.
+router.post("/france-connect/authorization-url", async (req, res) => {
+  const query = {
+    scope: `openid given_name family_name email`,
+    redirect_uri: `${config.APP_URL}/${req.body.callback}`,
+    response_type: "code",
+    client_id: process.env.FRANCE_CONNECT_CLIENT_ID,
+    state: "home",
+    nonce: crypto.randomBytes(20).toString("hex"),
+    acr_values: "eidas1",
+  };
+  const url = `${process.env.FRANCE_CONNECT_URL}/authorize?${queryString.stringify(query)}`;
+  res.status(200).send({ ok: true, data: { url } });
+});
+
+// Get user information for authorized user on France Connect.
+router.post("/france-connect/user-info", async (req, res) => {
+  // Get token…
+  const body = {
+    grant_type: "authorization_code",
+    redirect_uri: `${config.APP_URL}/${req.body.callback}`,
+    client_id: process.env.FRANCE_CONNECT_CLIENT_ID,
+    client_secret: process.env.FRANCE_CONNECT_CLIENT_SECRET,
+    code: req.body.code,
+  };
+  const tokenResponse = await fetch(`${process.env.FRANCE_CONNECT_URL}/token`, {
+    method: "POST",
+    headers: { "content-type": "application/x-www-form-urlencoded" },
+    body: queryString.stringify(body),
+  });
+  const token = await tokenResponse.json();
+
+  if (!token["access_token"] || !token["id_token"]) {
+    return res.sendStatus(401, token);
+  }
+
+  // … then get user info.
+  const userInfoResponse = await fetch(`${process.env.FRANCE_CONNECT_URL}/userinfo`, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${token["access_token"]}` },
+  });
+  const userInfo = await userInfoResponse.json();
+  res.status(200).send({ ok: true, data: userInfo });
 });
 
 module.exports = router;

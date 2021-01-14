@@ -11,13 +11,34 @@ import AddressInput from "../components/addressInput";
 import api from "../../../services/api";
 import { setYoung } from "../../../redux/auth/actions";
 import ErrorMessage, { requiredMessage } from "../components/errorMessage";
+import FranceConnectButton from "../../../components/FranceConnectButton";
+import { environment } from "../../../config";
 
-import { STEPS, saveYoung } from "../utils";
+import { saveYoung } from "../utils";
+
+function getFranceConnectCallback(idRepresentant) {
+  return `inscription/representants?action=updateFromFranceConnect&representant=${idRepresentant}`;
+}
 
 const Parent = ({ id = 1, values, errors, touched, handleChange }) => {
+  async function handleSave() {
+    await saveYoung(values);
+  }
   return (
     <>
       <FormLegend>Représentant légal n°{id}</FormLegend>
+      {environment !== "production" ? (
+        <FormRow>
+          <Col>
+            <p>
+              Vous pouvez utiliser ce bouton vous pour identifier et récupérer les données (nom, prénom et email) du représentant légal n°{id} avec FranceConnect, ou remplir les
+              informations manuellement ci-dessous.
+            </p>
+            <FranceConnectButton callback={getFranceConnectCallback(id)} beforeRedirect={() => handleSave()} />
+          </Col>
+        </FormRow>
+      ) : null}
+
       <FormRow>
         <Col md={4}>
           <Label>Je suis</Label>
@@ -188,18 +209,44 @@ const Parent = ({ id = 1, values, errors, touched, handleChange }) => {
 
 export default () => {
   const history = useHistory();
-  const [parent2, setParent2] = useState(false);
-  const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
+  const young = useSelector((state) => state.Auth.young);
+  const [isParent2Visible, setIsParent2Visible] = useState(false);
+  const [initialValues, setInitialValues] = useState(young);
 
   if (!young) {
     history.push("/inscription/create");
     return <div />;
   }
-
+const hasParent2Infos = () => {
+    return young && (young.parent2Status || young.parent2FirstName || young.parent2LastName || young.parent2Email || young.parent2Phone);
+  };
   useEffect(() => {
-    setParent2(young && young.parent2Status);
+    setIsParent2Visible(hasParent2Infos());
   }, [young]);
+
+  // Update from France Connect.
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const action = urlParams.get("action");
+    const id = urlParams.get("representant");
+    const code = urlParams.get("code");
+    if (action === "updateFromFranceConnect" && id && code) {
+      async function fetchData() {
+        const { data } = await api.post("/young/france-connect/user-info", { code, callback: getFranceConnectCallback(id) });
+        if (data && data["email"]) {
+          if (id === '2') setIsParent2Visible(true);
+          setInitialValues({
+            ...young,
+            [`parent${id}FirstName`]: data["given_name"],
+            [`parent${id}LastName`]: data["family_name"],
+            [`parent${id}Email`]: data["email"],
+          });
+        }
+      }
+      fetchData();
+    }
+  }, []);
 
   const handleSave = async (values) => {
     const young = await saveYoung(values);
@@ -213,7 +260,8 @@ export default () => {
         <p>Faites compléter les informations ci-dessous par votre ou vos représentants légaux</p>
       </Heading>
       <Formik
-        initialValues={young}
+        initialValues={initialValues}
+        enableReinitialize={true}
         validateOnChange={false}
         validateOnBlur={false}
         onSubmit={async (values) => {
@@ -236,7 +284,7 @@ export default () => {
               <Col md={{ offset: 4 }} style={{ padding: "45px 20px" }}>
                 <BorderButton
                   onClick={() => {
-                    setParent2(!parent2);
+                    setIsParent2Visible(!isParent2Visible);
                     delete values.parent2Status;
                     delete values.parent2FirstName;
                     delete values.parent2LastName;
@@ -251,11 +299,11 @@ export default () => {
                     delete values.parent2Location;
                   }}
                 >
-                  {!parent2 ? "Ajouter" : "Retirer"} un représentant légal
+                  {!isParent2Visible ? "Ajouter" : "Retirer"} un représentant légal
                 </BorderButton>
               </Col>
             </FormRow>
-            {parent2 ? <Parent id={2} values={values} handleChange={handleChange} errors={errors} touched={touched} /> : null}
+            {isParent2Visible ? <Parent id={2} values={values} handleChange={handleChange} errors={errors} touched={touched} /> : null}
             <Footer>
               <ButtonContainer>
                 <SaveButton onClick={() => handleSave(values)}>Enregistrer</SaveButton>
