@@ -203,8 +203,8 @@ const ImageHovered = () => (
   <svg width="230px" height="60px" viewBox="0 0 230 60" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink">
     <title>bouton-fc-standard-hover</title>
     <desc>Created with Sketch.</desc>
-    <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
-      <g id="bouton-fc-standard-hover" fill-rule="nonzero">
+    <g id="Page-1" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
+      <g id="bouton-fc-standard-hover" fillRule="nonzero">
         <path
           d="M2.23461677,0.5 C1.20930629,0.5 0.5,1.4072133 0.5,2.66666667 L0.5,57.5 C0.5,58.7138628 1.17181881,59.5 2.23461677,59.5 L227.68262,59.5 C228.768412,59.5 229.5,58.6878241 229.5,57.5 L229.5,2.66666667 C229.5,1.43444375 228.729912,0.5 227.68262,0.5 L2.23461677,0.5 Z"
           id="Fond"
