@@ -8,7 +8,7 @@ import { toastr } from "react-redux-toastr";
 import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
 
-import { departmentList, translate } from "../../utils";
+import { departmentList, translate, REFERENT_ROLES } from "../../utils";
 
 export default () => {
   const user = useSelector((state) => state.Auth.user);
@@ -53,7 +53,7 @@ export default () => {
               <FormGroup>
                 <label>Role</label>
                 <Input disabled type="select" name="role" value={values.role} onChange={handleChange}>
-                  {["admin", "referent_region", "referent_department"].map((e) => {
+                  {[REFERENT_ROLES.ADMIN, REFERENT_ROLES.REFERENT_REGION, REFERENT_ROLES.REFERENT_DEPARTMENT].map((e) => {
                     return <option value={e} label={translate(e)} />;
                   })}
                 </Input>

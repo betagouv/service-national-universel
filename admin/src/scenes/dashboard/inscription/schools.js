@@ -40,9 +40,9 @@ export default ({ filter }) => {
           </TableHeaderRow>
         </thead>
         <tbody>
-          {schools.map((e) => {
+          {schools.map((e, i) => {
             return (
-              <TableRow>
+              <TableRow key={i}>
                 <TableCell>{e.name}</TableCell>
                 <TableCell>
                   <TableCellContent>

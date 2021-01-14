@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { FormGroup, Row, Col } from "reactstrap";
 import { Formik, Field } from "formik";
 import validator from "validator";
@@ -15,6 +15,7 @@ import LoadingButton from "../../components/loadingButton";
 export default () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.Auth.user);
+  const [userIsValid, setUserIsValid] = useState(true);
 
   return (
     <Wrapper noGutters>
@@ -26,15 +27,18 @@ export default () => {
           <Title>Bienvenue !</Title>
           {user && <Redirect to="/" />}
           <Formik
-            initialValues={{}}
+            initialValues={{ email: "", password: "" }}
+            validateOnChange={false}
+            validateOnBlur={false}
             onSubmit={async (values, actions) => {
               try {
                 const { user, token } = await api.post(`/referent/signin`, values);
                 if (token) api.setToken(token);
                 if (user) dispatch(setUser(user));
               } catch (e) {
-                if (e && e.code === "EMAIL_OR_PASSWORD_INVALID") return toastr.error("Email ou mot de passe invalide");
-             
+                if (e && (e.code === "EMAIL_OR_PASSWORD_INVALID" || e.code === "USER_NOT_EXISTS")) {
+                  return setUserIsValid(false);
+                }
                 toastr.error("Erreur détecté");
               }
               actions.setSubmitting(false);
@@ -43,6 +47,11 @@ export default () => {
             {({ values, errors, isSubmitting, handleChange, handleSubmit }) => {
               return (
                 <form onSubmit={handleSubmit}>
+                  {!userIsValid && (
+                    <StyledFormGroup>
+                      <ErrorLogin>Identifiant incorrect </ErrorLogin>
+                    </StyledFormGroup>
+                  )}
                   <StyledFormGroup>
                     <label>ADRESSE EMAIL</label>
                     <InputField
@@ -52,7 +61,7 @@ export default () => {
                       value={values.email}
                       onChange={handleChange}
                       placeholder="EMAIL"
-                      hasError={errors.email}
+                      error={errors.email}
                     />
                     <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.email}</p>
                   </StyledFormGroup>
@@ -65,7 +74,7 @@ export default () => {
                       value={values.password}
                       onChange={handleChange}
                       placeholder="Entrez votre mot de passe"
-                      hasError={errors.password}
+                      error={errors.password}
                     />
                     <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.password}</p>
                   </StyledFormGroup>
@@ -136,7 +145,7 @@ const InputField = styled(Field)`
   padding: 9px 20px;
   border-radius: 4px;
   border: 1px solid;
-  border-color: ${({ hasError }) => (hasError ? "red" : "#dcdfe6")};
+  border-color: ${({ error }) => (error ? "red" : "#dcdfe6")};
   ::placeholder {
     color: #d6d6e1;
   }
@@ -190,4 +199,17 @@ const Thumb = styled.div`
   img {
     max-width: 280px;
   }
+`;
+
+const ErrorLogin = styled.div`
+  background-color: #fff5f5;
+  display: block;
+  width: 100%;
+  padding: 15px;
+  margin-top: 3px;
+  margin-bottom: 0;
+  border: 1px solid #fc8180;
+  color: #c73738;
+  line-height: 1.2;
+  border-radius: 5px;
 `;

@@ -5,6 +5,7 @@ import { Field, Formik } from "formik";
 import { useSelector, useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import validator from "validator";
+import { useHistory } from "react-router-dom";
 
 import DndFileInput from "../../../components/dndFileInput";
 
@@ -18,12 +19,13 @@ import { saveYoung, STEPS, YOUNG_SITUATIONS } from "../utils";
 import AddressInput from "../components/addressInput";
 import Etablissement from "../components/etablissmentInput";
 
-export default ({ setStep }) => {
+export default () => {
+  const history = useHistory();
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
 
   if (!young) {
-    setStep(STEPS.PROFIL);
+    history.push('/inscription/create');
     return <div />;
   }
 
@@ -59,7 +61,7 @@ export default ({ setStep }) => {
             const { ok, code, data: young } = await api.put("/young", values);
             if (!ok) return toastr.error("Une erreur s'est produite :", code);
             dispatch(setYoung(young));
-            setStep(STEPS.PARTICULIERES);
+            history.push("/inscription/situations-particulieres");
           } catch (e) {
             console.log(e);
             toastr.error("Erreur !");

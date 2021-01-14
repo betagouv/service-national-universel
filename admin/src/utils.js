@@ -399,3 +399,9 @@ export const YOUNG_SITUATIONS = {
   CAP_EMPLOI: "CAP_EMPLOI",
   NOTHING: "NOTHING", // @todo find a better key --'
 };
+
+export const REFERENT_ROLES = {
+  ADMIN: "admin",
+  REFERENT_DEPARTMENT: "referent_department",
+  REFERENT_REGION: "referent_region",
+};
