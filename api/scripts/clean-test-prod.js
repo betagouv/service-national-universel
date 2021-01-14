@@ -26,6 +26,8 @@ const YoungModel = require("../src/models/young");
   await YoungModel.deleteMany({ email: { $regex: /gabrielle\.bouxin@hotmail\.fr/, $options: "i" } });
   await YoungModel.deleteMany({ email: { $regex: /nicolas@canard\.fr/, $options: "i" } });
 
+  await YoungModel.deleteMany({ email: { $regex: /lisadossantos77240@gmail\.fr/, $options: "i" } });
+
   //delete the young account with email ending with @...gouv.fr. tests made by referents
   await YoungModel.deleteMany({ email: { $regex: /gouv\.fr$/, $options: "i" } });
 })();
