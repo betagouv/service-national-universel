@@ -10,16 +10,16 @@ export default ({ location }) => {
   const dispatch = useDispatch();
 
   const params = queryString.parse(location.search);
-  const token = params.token;
+  const { token, young_id } = params;
 
-  if (!token) {
-    return <div>Aucun token</div>;
+  if (!token || !young_id) {
+    return <Redirect to="/" />;
   }
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const { ok, data, token } = await api.post(`/referent/signin_as/young/${params.young_id}`);
+        const { ok, data, token } = await api.post(`/referent/signin_as/young/${young_id}`);
         if (!ok) return setLoading(false);
         await init({ data, token });
         setLoading(false);
