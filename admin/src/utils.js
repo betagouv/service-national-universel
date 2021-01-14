@@ -74,6 +74,10 @@ export const translate = (value) => {
       return "Référent départemental";
     case "referent_region":
       return "Référent régional";
+    case "COHESION_STAY":
+      return "Séjour de cohésion";
+    case "INSCRIPTION":
+      return "Inscription";
     default:
       return value;
   }

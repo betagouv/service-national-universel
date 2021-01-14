@@ -58,16 +58,16 @@ export default () => {
               <FilterRow>
                 <MultiDropdownList
                   className="dropdown-filter"
-                  placeholder="Status"
                   componentId="STATUS"
                   dataField="status.keyword"
                   renderItem={(e, count) => {
                     return `${translate(e)} (${count})`;
                   }}
                   title=""
-                  react={{ and: FILTERS }}
+                  react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
                   URLParams={true}
                   showSearch={false}
+                  // @TODO translate label
                 />
                 <MultiDropdownList
                   className="dropdown-filter"
@@ -75,7 +75,7 @@ export default () => {
                   componentId="REGION"
                   dataField="region.keyword"
                   title=""
-                  react={{ and: FILTERS }}
+                  react={{ and: FILTERS.filter((e) => e !== "REGION") }}
                   URLParams={true}
                   showSearch={false}
                 />
@@ -85,7 +85,7 @@ export default () => {
                   componentId="DEPARTMENT"
                   dataField="department.keyword"
                   title=""
-                  react={{ and: FILTERS }}
+                  react={{ and: FILTERS.filter((e) => e !== "DEPARTMENT") }}
                   URLParams={true}
                   showSearch={false}
                 />

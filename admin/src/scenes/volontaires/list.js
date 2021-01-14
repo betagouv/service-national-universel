@@ -55,7 +55,6 @@ export default ({ setYoung }) => {
               <FilterRow>
                 <MultiDropdownList
                   className="dropdown-filter"
-                  placeholder="STATUT"
                   componentId="STATUS"
                   dataField="status.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
@@ -65,10 +64,10 @@ export default ({ setYoung }) => {
                   title=""
                   URLParams={true}
                   showSearch={false}
+                  // @TODO translate label
                 />
                 <MultiDropdownList
                   className="dropdown-filter"
-                  placeholder="PHASE"
                   componentId="PHASE"
                   dataField="phase.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "PHASE") }}
@@ -78,10 +77,11 @@ export default ({ setYoung }) => {
                   title=""
                   URLParams={true}
                   showSearch={false}
+                  // @TODO translate label
                 />
                 <MultiDropdownList
                   className="dropdown-filter"
-                  placeholder="COHORT"
+                  placeholder="Cohort"
                   componentId="COHORT"
                   dataField="cohort.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "COHORT") }}

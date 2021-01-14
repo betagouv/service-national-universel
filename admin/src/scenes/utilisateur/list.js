@@ -58,6 +58,7 @@ export default () => {
                   renderItem={(e, count) => {
                     return `${translate(e)} (${count})`;
                   }}
+                  react={{ and: FILTERS.filter((e) => e !== "ROLE") }}
                   title=""
                   URLParams={true}
                   showSearch={false}
@@ -70,6 +71,7 @@ export default () => {
                   renderItem={(e, count) => {
                     return `${translate(e)} (${count})`;
                   }}
+                  react={{ and: FILTERS.filter((e) => e !== "REGION") }}
                   title=""
                   URLParams={true}
                   showSearch={false}
@@ -82,6 +84,7 @@ export default () => {
                   renderItem={(e, count) => {
                     return `${translate(e)} (${count})`;
                   }}
+                  react={{ and: FILTERS.filter((e) => e !== "DEPARTMENT") }}
                   title=""
                   URLParams={true}
                   showSearch={false}
