@@ -34,7 +34,11 @@ router.post("/file/:key", passport.authenticate("young", { session: false }), as
     const files = Object.keys(req.files || {}).map((e) => req.files[e]);
 
     for (let i = 0; i < files.length; i++) {
-      const currentFile = files[i];
+      let currentFile = files[i];
+      // If multiple file with same names are provided, currentFile is an array. We just take the latest.
+      if (Array.isArray(currentFile)) {
+        currentFile = currentFile[currentFile.length - 1];
+      }
       const { name, data, mimetype } = currentFile;
       let bufferWithWaterMark = null;
 
