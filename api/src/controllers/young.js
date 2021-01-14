@@ -96,7 +96,7 @@ router.put("/", passport.authenticate("young", { session: false }), async (req, 
 router.post("/france-connect/authorization-url", async (req, res) => {
   const query = {
     scope: `openid given_name family_name email`,
-    redirect_uri: `${APP_URL}/${req.body.callback}`,
+    redirect_uri: `${config.APP_URL}/${req.body.callback}`,
     response_type: "code",
     client_id: process.env.FRANCE_CONNECT_CLIENT_ID,
     state: "home",
@@ -115,7 +115,7 @@ router.post("/france-connect/user-info", async (req, res) => {
     headers: { "content-type": "application/x-www-form-urlencoded" },
     body: queryString.stringify({
       grant_type: "authorization_code",
-      redirect_uri: `${APP_URL}/${req.body.callback}`,
+      redirect_uri: `${config.APP_URL}/${req.body.callback}`,
       client_id: process.env.FRANCE_CONNECT_CLIENT_ID,
       client_secret: process.env.FRANCE_CONNECT_CLIENT_SECRET,
       code: req.body.code,
