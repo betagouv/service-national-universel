@@ -1,5 +1,5 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, Link } from "react-router-dom";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
@@ -8,8 +8,21 @@ export default () => {
 
   if (!user) return <div />;
 
+  function getName() {
+    if (user.role === "admin") return "Espace modérateur";
+    if (user.role === "referent_department") return "ESPACE RÉFÉRENT DÉPARTEMENTAL";
+    if (user.role === "referent_region") return "ESPACE RÉFÉRENT REGIONAL";
+    return "";
+  }
+
   return (
     <Sidebar onClick={() => {}} id="drawer">
+      <Logo>
+        <Link to="/">
+          <img src={require("../../assets/logo-snu.png")} height={38} />
+          {getName()}
+        </Link>
+      </Logo>
       <ul>
         <li>
           <NavLink to="/dashboard">Tableau de bord</NavLink>
@@ -47,11 +60,34 @@ export default () => {
   );
 };
 
+const Logo = styled.h1`
+  background: #372f78;
+  box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.1);
+  width: 250px;
+  margin-bottom: 0;
+  padding: 15px 20px 5px;
+  a {
+    display: inline-flex;
+    align-items: center;
+    color: #161e2e;
+    font-size: 13px;
+    font-weight: 500;
+    color: #fff;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    text-decoration: none;
+  }
+  img {
+    margin-right: 25px;
+    vertical-align: top;
+  }
+`;
+
 const Sidebar = styled.div`
   background-color: #372f78;
   width: 250px;
   position: fixed;
-  top: 68px;
+  top: 0;
   bottom: 0;
   left: 0;
   z-index: 1;

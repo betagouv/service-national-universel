@@ -61,7 +61,7 @@ router.post("/signup_invite/:role", passport.authenticate("referent", { session:
     if (req.body.hasOwnProperty(`email`)) obj.email = req.body.email;
     if (req.body.hasOwnProperty(`firstName`)) obj.firstName = req.body.firstName;
     if (req.body.hasOwnProperty(`lastName`)) obj.lastName = req.body.lastName;
-    if (req.body.hasOwnProperty(`role`)) obj.role = "referent_department";
+    if (req.body.hasOwnProperty(`role`)) obj.role = req.body.role;
     if (req.body.hasOwnProperty(`region`)) obj.region = req.body.region; //TODO
     if (req.body.hasOwnProperty(`department`)) obj.department = req.body.department;
 
@@ -70,13 +70,26 @@ router.post("/signup_invite/:role", passport.authenticate("referent", { session:
     obj.invitationExpires = Date.now() + 86400000 * 7; // 7 days
 
     const referent = await ReferentObject.create(obj);
-
-    let htmlContent = fs.readFileSync(path.resolve(__dirname, "../templates/inviteReferentDepartment.html")).toString();
+    let template = "";
+    let mailObject = "";
+    if (obj.role === "referent_department") {
+      template = "../templates/inviteReferentDepartment.html";
+      mailObject = "Activez votre compte référent départemental SNU";
+    } else if (obj.role === "referent_region") {
+      template = "../templates/inviteReferentRegion.html";
+      mailObject = "Activez votre compte référent régional SNU";
+    } else if (obj.role === "admin") {
+      template = "../templates/inviteAdmin.html";
+      mailObject = "Activez votre compte administrateur SNU";
+    }
+    let htmlContent = fs.readFileSync(path.resolve(__dirname, template)).toString();
     htmlContent = htmlContent.replace(/{{toName}}/g, `${obj.firstName} ${obj.lastName}`);
     htmlContent = htmlContent.replace(/{{fromName}}/g, `${req.user.firstName} ${req.user.lastName}`);
     htmlContent = htmlContent.replace(/{{department}}/g, `${obj.department}`);
+    htmlContent = htmlContent.replace(/{{region}}/g, `${obj.region}`);
     htmlContent = htmlContent.replace(/{{cta}}/g, `${config.ADMIN_URL}/auth/signup?token=${invitation_token}`);
-    await sendEmail({ name: `${obj.firstName} ${obj.lastName}`, email: obj.email }, "Activez votre compte référent départemental SNU", htmlContent);
+
+    await sendEmail({ name: `${obj.firstName} ${obj.lastName}`, email: obj.email }, mailObject, htmlContent);
 
     return res.status(200).send({ data: referent, ok: true });
   } catch (error) {

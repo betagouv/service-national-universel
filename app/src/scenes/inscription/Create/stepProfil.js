@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { Row, Col, Input } from "reactstrap";
 import { Field, Formik } from "formik";
 import { useSelector, useDispatch } from "react-redux";
+import { useHistory } from "react-router-dom";
 import validator from "validator";
 import { toastr } from "react-redux-toastr";
 import DateInput from "../components/dateInput";
@@ -16,14 +17,9 @@ import api from "../../../services/api";
 import { STEPS } from "../utils";
 import { YOUNG_STATUS, YOUNG_PHASE } from "../../../utils";
 
-export default ({ setStep }) => {
+export default () => {
   const dispatch = useDispatch();
-  const young = useSelector((state) => state.Auth.young) || {};
-
-  const trimDate = (date) => {
-    if (!date) return;
-    return date.substring(0, 10);
-  };
+  const young = useSelector((state) => state.Auth.young) || { frenchNationality: "", firstName: "", lastName: "", birthdateAt: "", email: "", password: "", repassword: "" };
 
   return (
     <Wrapper>
@@ -55,7 +51,7 @@ export default ({ setStep }) => {
             const { ok: okPut, code: codePut, data: young } = await api.put("/young", newValues);
             if (!okPut) return toastr.error("Une erreur s'est produite :", codePut);
             dispatch(setYoung(young));
-            setStep(STEPS.COORDONNEES);
+            history.push("/inscription/coordonnees");
           } catch (e) {
             console.log(e);
             if ((e.code = "USER_ALREADY_REGISTERED")) return toastr.error("Cet email est déjà utilisé.", "Merci de vous connecter pour continuer votre inscription.");

@@ -2,28 +2,16 @@ import React from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { REFERENT_ROLES } from "../../utils";
 
 import User from "./user";
 
 export default () => {
   const { user } = useSelector((state) => state.Auth);
-
   if (!user) return <div />;
 
-  function getName() {
-    if (user.role === "admin") return "Espace modérateur";
-    if (user.role === "referent_department") return "ESPACE RÉFÉRENT DÉPARTEMENTAL";
-    if (user.role === "referent_region") return "ESPACE RÉFÉRENT REGIONAL";
-    return "";
-  }
   return (
     <Header>
-      <Logo>
-        <Link to="/">
-          <img src={require("../../assets/logo-snu.png")} height={38} />
-          {getName()}
-        </Link>
-      </Logo>
       <div style={{ display: "flex", alignItems: "center" }}>
         {/* <IconLink to="#" icon={require("../../assets/messages.svg")} /> */}
         {/* <IconLink to="#" icon={require("../../assets/notification.svg")} /> */}
@@ -37,9 +25,10 @@ const Header = styled.div`
   background-color: #fff;
   padding-right: 20px;
   width: 100%;
+  height: 68px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.05);
   position: sticky;
   left: 0;
