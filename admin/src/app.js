@@ -38,12 +38,10 @@ export default () => {
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
   useEffect(() => {
-
-
     async function fetchData() {
       try {
         if (window.location.href.indexOf("/auth") !== -1) return setLoading(false);
-        
+
         const res = await api.get("/referent/signin_token");
         if (!res.ok || !res.user) return setLoading(false);
         if (res.token) api.setToken(res.token);
@@ -74,9 +72,9 @@ const Home = () => {
   // if (user && !user.structureId) return <Onboarding />;
   return (
     <div className="main">
-      <Header />
       <Drawer />
       <div className="screen-container" style={{ marginLeft: !user && 0 }}>
+        <Header />
         <Switch>
           <Route path="/auth" component={Auth} />
           <RestrictedRoute path="/structure" component={Structure} />

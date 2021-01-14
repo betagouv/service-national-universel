@@ -121,7 +121,6 @@ export default () => {
                   );
                 }}
                 render={({ data, resultStats }) => {
-                  console.log("data", data);
                   return (
                     <Table>
                       <thead>

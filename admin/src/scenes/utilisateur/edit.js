@@ -4,7 +4,7 @@ import { Col, Row } from "reactstrap";
 import { Field, Formik } from "formik";
 
 import DateInput from "../../components/dateInput";
-import { departmentList, regionList, translate } from "../../utils";
+import { departmentList, regionList, translate, REFERENT_ROLES } from "../../utils";
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 
@@ -16,7 +16,6 @@ export default (props) => {
       const id = props.match && props.match.params && props.match.params.id;
       if (!id) return setUser(null);
       const { data } = await api.get(`/referent/${id}`);
-      console.log("get", data);
       setUser(data);
     })();
   }, []);
@@ -86,11 +85,11 @@ export default (props) => {
                       values={values}
                       handleChange={handleChange}
                       title="Rôle"
-                      options={["referent_department", "referent_region", "admin"].map((key) => ({ value: key, label: translate(key) }))}
+                      options={[REFERENT_ROLES.REFERENT_DEPARTMENT, REFERENT_ROLES.REFERENT_REGION, REFERENT_ROLES.ADMIN].map((key) => ({ value: key, label: translate(key) }))}
                     />
                     <Select name="department" values={values} handleChange={handleChange} title="Département" options={departmentList.map((d) => ({ value: d, label: d }))} />
                     <Select
-                      disabled={values.role === "referent_department"}
+                      disabled={values.role === REFERENT_ROLES.REFERENT_DEPARTMENT}
                       name="region"
                       values={values}
                       handleChange={handleChange}

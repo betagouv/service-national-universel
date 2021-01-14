@@ -1,64 +1,14 @@
-import React, { useEffect, useState } from "react";
-import { Container } from "reactstrap";
+import React from "react";
 import styled from "styled-components";
-import { useSelector, useDispatch } from "react-redux";
-import { Link } from "react-router-dom";
-
-import Profil from "./stepProfil";
-import Coordonnees from "./stepCoordonnees";
-import Representants from "./stepRepresentants";
-import Particulieres from "./stepParticulieres";
-import Consentements from "./stepConsentements";
-import Motivations from "./stepMotivations";
-import Done from "./stepDone";
+import { useSelector } from "react-redux";
+import { Link, useHistory } from "react-router-dom";
 import api from "../../../services/api";
-import { setYoung } from "../../../redux/auth/actions";
-
-import Drawer from "./drawer";
 
 import { STEPS } from "../utils";
 
-export default () => {
-  const [step, setStep] = useState(STEPS.REPRESENTANTS);
-
+export default ({ step }) => {
+  const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
-
-  useEffect(() => {
-    if (young) setStep(STEPS.COORDONNEES);
-  }, []);
-
-  useEffect(() => {
-    if (document.getElementsByTagName) {
-      const inputElements = document.getElementsByTagName("input");
-      for (let i = 0; inputElements[i]; i++) inputElements[i].setAttribute("autocomplete", "novalue");
-    }
-    window.scrollTo(0, 0);
-  }, [step]);
-
-  function renderStep() {
-    if (step === STEPS.COORDONNEES) return <Coordonnees setStep={setStep} />;
-    if (step === STEPS.PARTICULIERES) return <Particulieres setStep={setStep} />;
-    if (step === STEPS.REPRESENTANTS) return <Representants setStep={setStep} />;
-    if (step === STEPS.CONSENTEMENTS) return <Consentements setStep={setStep} />;
-    if (step === STEPS.MOTIVATIONS) return <Motivations setStep={setStep} />;
-    if (step === STEPS.DONE) return <Done setStep={setStep} />;
-    return <Profil setStep={setStep} />;
-  }
-
-  return (
-    <div>
-      <Drawer setStep={setStep} step={step} />
-      <Content>
-        <Nav setStep={setStep} step={step} />
-        <Wrapper>{renderStep()}</Wrapper>
-      </Content>
-    </div>
-  );
-};
-
-const Nav = ({ setStep, step }) => {
-  const young = useSelector((state) => state.Auth.young);
-  const dispatch = useDispatch();
 
   const currentIndex = Object.keys(STEPS).indexOf(step);
 
@@ -91,22 +41,22 @@ const Nav = ({ setStep, step }) => {
         )}
       </HeaderNav>
       <Topbar>
-        <Element status={getStatus(STEPS.PROFIL)} onClick={() => setStep(STEPS.PROFIL)}>
+        <Element status={getStatus(STEPS.PROFIL)} onClick={() => history.push('/inscription/create')}>
           <a>Mon profil</a>
         </Element>
-        <Element status={getStatus(STEPS.COORDONNEES)} onClick={() => setStep(STEPS.COORDONNEES)}>
+        <Element status={getStatus(STEPS.COORDONNEES)} onClick={() => history.push('/inscription/coordonnees')}>
           <a>Coordonnées</a>
         </Element>
-        <Element status={getStatus(STEPS.PARTICULIERES)} onClick={() => setStep(STEPS.PARTICULIERES)}>
+        <Element status={getStatus(STEPS.PARTICULIERES)} onClick={() => history.push('/inscription/situations-particulieres')}>
           <a>Situations particulières</a>
         </Element>
-        <Element status={getStatus(STEPS.REPRESENTANTS)} onClick={() => setStep(STEPS.REPRESENTANTS)}>
+        <Element status={getStatus(STEPS.REPRESENTANTS)} onClick={() => history.push('/inscription/representants')}>
           <a>Représentants légaux</a>
         </Element>
-        <Element status={getStatus(STEPS.CONSENTEMENTS)} onClick={() => setStep(STEPS.CONSENTEMENTS)}>
+        <Element status={getStatus(STEPS.CONSENTEMENTS)} onClick={() => history.push('/inscription/consentements')}>
           <a>Consentements</a>
         </Element>
-        <Element status={getStatus(STEPS.MOTIVATIONS)} onClick={() => setStep(STEPS.MOTIVATIONS)}>
+        <Element status={getStatus(STEPS.MOTIVATIONS)} onClick={() => history.push('/inscription/motivations')}>
           <a>Motivations</a>
         </Element>
         <Element>{`${((currentIndex * 100) / (Object.keys(STEPS).length - 1)).toFixed(0)}%`}</Element>
@@ -153,22 +103,6 @@ const Button = styled.button`
   :hover {
     opacity: 0.9;
   }
-`;
-
-const Content = styled.div`
-  padding: 1rem;
-  margin-left: 320px;
-  @media (max-width: 768px) {
-    margin-left: 0;
-  }
-`;
-
-const Wrapper = styled.div`
-  margin: 20px auto;
-  background-color: #fff;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  border-radius: 6px;
-  max-width: 1270px;
 `;
 
 const Topbar = styled.ul`

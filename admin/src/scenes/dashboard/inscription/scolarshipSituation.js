@@ -35,9 +35,9 @@ export default ({ filter }) => {
 
     return (
       <Row style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-        {Object.keys(value).map((e) => {
+        {Object.keys(value).map((e, i) => {
           return (
-            <Col style={{ marginTop: "15px" }}>
+            <Col style={{ marginTop: "15px" }} key={i}>
               <CircularProgress circleProgressColor="#1B7BBF" percentage={((value[e] * 100) / total).toFixed(1)} title={value[e]} subtitle={translate(e)} />
             </Col>
           );

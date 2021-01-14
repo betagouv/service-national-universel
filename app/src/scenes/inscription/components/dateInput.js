@@ -20,9 +20,9 @@ const MONTH = {
 
 export default ({ value, onChange, placeholder, onSelect }) => {
   const [y, m, d] = value ? value.substring(0, 10).split("-") : ["", "", ""];
-  const [day, setDay] = useState(parseInt(d));
-  const [month, setMonth] = useState(parseInt(m - 1));
-  const [year, setYear] = useState(parseInt(y));
+  const [day, setDay] = useState(d ? parseInt(d) : "");
+  const [month, setMonth] = useState(m ? parseInt(m - 1) : "");
+  const [year, setYear] = useState(y ? parseInt(y) : "");
 
   const handleDay = (e) => {
     setDay(e.target.value);
@@ -51,21 +51,21 @@ export default ({ value, onChange, placeholder, onSelect }) => {
       <Input id="day" name="day" value={day} onChange={handleDay} type="select">
         <option value="" label="jour" />
         {range(1, 31).map((d) => (
-          <option value={d} label={d} />
+          <option key={d} value={d} label={d} />
         ))}
       </Input>
       <Separator>/</Separator>
       <Input id="month" name="month" value={month} onChange={handleMonth} type="select">
         <option value="" label="mois" />
         {range(0, 11).map((m) => (
-          <option value={m} label={MONTH[m]} />
+          <option key={m} value={m} label={MONTH[m]} />
         ))}
       </Input>
       <Separator>/</Separator>
       <Input id="year" name="year" value={year} onChange={handleYear} type="select">
         <option value="" label="année" />
         {range(1990, 2020).map((y) => (
-          <option value={y} label={y} />
+          <option key={y} value={y} label={y} />
         ))}
       </Input>
     </Wrapper>

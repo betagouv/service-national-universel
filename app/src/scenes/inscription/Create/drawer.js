@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { STEPS } from "../utils";
-import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 
-export default ({ setStep, step }) => {
+export default ({ step }) => {
+  const history = useHistory();
   const [open, setOpen] = useState(true);
 
   if (open) {
@@ -36,7 +36,7 @@ export default ({ setStep, step }) => {
               </a>
             </Logos>
           </Header>
-          <a onClick={() => setStep(STEPS.COORDONNEES)}>
+          <a onClick={() => history.push("/inscription/coordonnees")}>
             <div className="icon">
               <img src={require("../../../assets/logo-snu.png")} height={36} />
             </div>
@@ -47,22 +47,22 @@ export default ({ setStep, step }) => {
           </a>
           <ul className="stepNav">
             <Element status={getStatus(STEPS.PROFIL)}>
-              <a>Mon profil</a>
+              <a onClick={() => history.push("/inscription/create")}>Mon profil</a>
             </Element>
             <Element status={getStatus(STEPS.COORDONNEES)}>
-              <a>Coordonnées</a>
+              <a onClick={() => history.push("/inscription/coordonnees")}>Coordonnées</a>
             </Element>
             <Element status={getStatus(STEPS.PARTICULIERES)}>
-              <a>Situations particulières</a>
+              <a onClick={() => history.push("/inscription/situations-particulieres")}>Situations particulières</a>
             </Element>
             <Element status={getStatus(STEPS.REPRESENTANTS)}>
-              <a>Représentants légaux</a>
+              <a onClick={() => history.push("/inscription/representants")}>Représentants légaux</a>
             </Element>
             <Element status={getStatus(STEPS.CONSENTEMENTS)}>
-              <a>Consentements</a>
+              <a onClick={() => history.push("/inscription/consentements")}>Consentements</a>
             </Element>
             <Element status={getStatus(STEPS.MOTIVATIONS)}>
-              <a>Motivations</a>
+              <a onClick={() => history.push("/inscription/motivations")}>Motivations</a>
             </Element>
           </ul>
         </li>
