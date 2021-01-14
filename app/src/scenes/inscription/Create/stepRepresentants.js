@@ -24,7 +24,8 @@ const Parent = ({ id = 1, values, errors, touched, handleChange, handleSave }) =
   return (
     <>
       <FormLegend>Représentant légal n°{id}</FormLegend>
-      <FormRow>
+      {environment !== "production" ? (
+        <FormRow>
           <Col>
             <p>
               Vous pouvez utiliser ce bouton vous pour identifier et récupérer les données (nom, prénom et email) du représentant légal n°{id} avec FranceConnect, ou remplir les
@@ -33,6 +34,8 @@ const Parent = ({ id = 1, values, errors, touched, handleChange, handleSave }) =
             <FranceConnectButton callback={getFranceConnectCallback(id)} beforeRedirect={() => handleSave(values)} />
           </Col>
         </FormRow>
+      ) : null}
+
       <FormRow>
         <Col md={4}>
           <Label>Je suis</Label>
