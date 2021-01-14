@@ -58,7 +58,7 @@ async function migrate(model, cb) {
     const exists = await connection_es_staging.indices.exists({ index: model });
     if (exists) await connection_es_staging.indices.delete({ index: model });
   } catch (e) {
-    console.log("e");
+    console.log("e", e);
   }
   console.log(`End delete staging es ${model}`);
 
@@ -66,7 +66,6 @@ async function migrate(model, cb) {
 
   const mapping = getMapping(Schema);
   await connection_es_staging.indices.create({ index: model });
-  console.log("la");
   function time() {
     const total = Math.floor((Date.now() - start_at) / 1000);
     console.log(`Created ${count} in ${Math.floor(total / 60)} m ${Math.floor(total % 60)} s`);
