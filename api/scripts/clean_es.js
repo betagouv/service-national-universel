@@ -5,8 +5,7 @@ const YoungModel = require("../src/models/young");
 const ReferentModel = require("../src/models/referent");
 const StructureModel = require("../src/models/structure");
 
-const getElasticInstance = require("../src/es");
-const esclient = getElasticInstance();
+const esClient = require("../src/es");
 
 (async function fetch() {
   console.log("START");
@@ -14,20 +13,20 @@ const esclient = getElasticInstance();
   //   const obj = await YoungModel.findById(hit._id);
   //   if (obj) return;
   //   console.log("DELETE", hit.email);
-  //   await esclient.delete({ index: "young", type: "_doc", refresh: true, id: hit._id });
+  //   await esClient.delete({ index: "young", type: "_doc", refresh: true, id: hit._id });
   // });
 
   await run("referent", async (hit) => {
     const obj = await ReferentModel.findById(hit._id);
     if (obj) return;
-    await esclient.delete({ index: "referent", type: "_doc", refresh: true, id: hit._id });
+    await esClient.delete({ index: "referent", type: "_doc", refresh: true, id: hit._id });
     console.log("DELETED", hit._id);
   });
 
   // await run("structure", async (hit) => {
   //   const obj = await StructureModel.findById(hit._id);
   //   if (obj) return;
-  //   await esclient.delete({ index: "structure", type: "_doc", refresh: true, id: hit._id });
+  //   await esClient.delete({ index: "structure", type: "_doc", refresh: true, id: hit._id });
   //   console.log("DELETED", hit._id);
   // });
 
@@ -40,7 +39,7 @@ function run(index, cb) {
     const query = { index: index, type: "_doc", scroll: "10s", body: { query: { match_all: {} } } };
     // const query = { index: index, type: "_doc", scroll: "10s", body: { query: { ids: { values: ["5e42be1a2266541efd4b64f9"] } } } };
     // first we do a search, and specify a scroll timeout
-    esclient.search(query, function getMoreUntilDone(error, res) {
+    esClient.search(query, function getMoreUntilDone(error, res) {
       const response = res.body;
       if (!response.hits) console.log("response", response);
       response.hits.hits.forEach(async function (hit) {
@@ -50,7 +49,7 @@ function run(index, cb) {
       });
 
       if (response.hits.total !== count) {
-        esclient.scroll({ scrollId: response._scroll_id, scroll: "10s" }, getMoreUntilDone);
+        esClient.scroll({ scrollId: response._scroll_id, scroll: "10s" }, getMoreUntilDone);
       } else {
         resolve();
       }
