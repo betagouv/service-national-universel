@@ -6,7 +6,7 @@ import { toastr } from "react-redux-toastr";
 import { useDispatch } from "react-redux";
 import { setUser } from "../../redux/auth/actions";
 
-import { translate } from "../../utils";
+import { translate, getFilterLabel } from "../../utils";
 import ExportComponent from "../../components/Export";
 import api from "../../services/api";
 import { apiURL } from "../../config";
@@ -52,7 +52,6 @@ export default () => {
               <FilterRow>
                 <MultiDropdownList
                   className="dropdown-filter"
-                  placeholder="ROLE"
                   componentId="ROLE"
                   dataField="role.keyword"
                   renderItem={(e, count) => {
@@ -62,10 +61,11 @@ export default () => {
                   title=""
                   URLParams={true}
                   showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Rôle")}
                 />
                 <MultiDropdownList
                   className="dropdown-filter"
-                  placeholder="REGION"
+                  placeholder="Région"
                   componentId="REGION"
                   dataField="region.keyword"
                   renderItem={(e, count) => {
@@ -75,10 +75,11 @@ export default () => {
                   title=""
                   URLParams={true}
                   showSearch={false}
+                  sortBy="asc"
                 />
                 <MultiDropdownList
                   className="dropdown-filter"
-                  placeholder="DEPARTMENT"
+                  placeholder="Département"
                   componentId="DEPARTMENT"
                   dataField="department.keyword"
                   renderItem={(e, count) => {
@@ -88,6 +89,7 @@ export default () => {
                   title=""
                   URLParams={true}
                   showSearch={false}
+                  sortBy="asc"
                 />
               </FilterRow>
             </Filter>

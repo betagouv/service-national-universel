@@ -15,7 +15,7 @@ import { translate, YOUNG_STATUS, YOUNG_PHASE, getFilterLabel } from "../../util
 import { toastr } from "react-redux-toastr";
 import MailCorrection from "./MailCorrection";
 
-const FILTERS = ["SEARCH", "STATUS", "FORMAT", "REGION", "DEPARTMENT", "PHASE", "REMOVEINPROGRESS"];
+const FILTERS = ["SEARCH", "STATUS", "REGION", "DEPARTMENT", "PHASE", "REMOVEINPROGRESS"];
 
 export default () => {
   const [young, setYoung] = useState(null);

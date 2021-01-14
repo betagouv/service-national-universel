@@ -12,10 +12,10 @@ import api from "../../services/api";
 import { apiURL, appURL } from "../../config";
 import Panel from "./panel";
 
-import { translate, YOUNG_STATUS_COLORS } from "../../utils";
+import { translate, getFilterLabel, YOUNG_STATUS_COLORS } from "../../utils";
 import { Link } from "react-router-dom";
 
-const FILTERS = ["SEARCH", "STATUS", "FORMAT", "PHASE", "COHORT"];
+const FILTERS = ["SEARCH", "STATUS", "PHASE", "COHORT"];
 
 export default ({ setYoung }) => {
   const [volontaire, setVolontaire] = useState(null);
@@ -64,7 +64,7 @@ export default ({ setYoung }) => {
                   title=""
                   URLParams={true}
                   showSearch={false}
-                  // @TODO translate label
+                  renderLabel={(items) => getFilterLabel(items, "Statut")}
                 />
                 <MultiDropdownList
                   className="dropdown-filter"
@@ -77,7 +77,7 @@ export default ({ setYoung }) => {
                   title=""
                   URLParams={true}
                   showSearch={false}
-                  // @TODO translate label
+                  renderLabel={(items) => getFilterLabel(items, "Phase")}
                 />
                 <MultiDropdownList
                   className="dropdown-filter"
