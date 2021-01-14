@@ -20,7 +20,10 @@ function getFranceConnectCallback(idRepresentant) {
   return `inscription/representants?action=updateFromFranceConnect&representant=${idRepresentant}`;
 }
 
-const Parent = ({ id = 1, values, errors, touched, handleChange, handleSave }) => {
+const Parent = ({ id = 1, values, errors, touched, handleChange }) => {
+  async function handleSave() {
+    await saveYoung(values);
+  }
   return (
     <>
       <FormLegend>Représentant légal n°{id}</FormLegend>
@@ -31,7 +34,7 @@ const Parent = ({ id = 1, values, errors, touched, handleChange, handleSave }) =
               Vous pouvez utiliser ce bouton vous pour identifier et récupérer les données (nom, prénom et email) du représentant légal n°{id} avec FranceConnect, ou remplir les
               informations manuellement ci-dessous.
             </p>
-            <FranceConnectButton callback={getFranceConnectCallback(id)} beforeRedirect={() => handleSave(values)} />
+            <FranceConnectButton callback={getFranceConnectCallback(id)} beforeRedirect={() => handleSave()} />
           </Col>
         </FormRow>
       ) : null}
@@ -230,6 +233,7 @@ export default () => {
       async function fetchData() {
         const { data } = await api.post("/young/france-connect/user-info", { code, callback: getFranceConnectCallback(id) });
         if (data && data["email"]) {
+          if (id === '2') setIsParent2Visible(true);
           setInitialValues({
             ...young,
             [`parent${id}FirstName`]: data["given_name"],
@@ -273,7 +277,7 @@ export default () => {
       >
         {({ values, handleChange, handleSubmit, isSubmitting, submitForm, errors, touched }) => (
           <>
-            <Parent id={1} values={values} handleChange={handleChange} handleSave={handleSave} errors={errors} touched={touched} />
+            <Parent id={1} values={values} handleChange={handleChange} errors={errors} touched={touched} />
             <FormRow>
               <Col md={{ offset: 4 }} style={{ padding: "45px 20px" }}>
                 <BorderButton
@@ -297,7 +301,7 @@ export default () => {
                 </BorderButton>
               </Col>
             </FormRow>
-            {isParent2Visible ? <Parent id={2} values={values} handleChange={handleChange} handleSave={handleSave} errors={errors} touched={touched} /> : null}
+            {isParent2Visible ? <Parent id={2} values={values} handleChange={handleChange} errors={errors} touched={touched} /> : null}
             <Footer>
               <ButtonContainer>
                 <SaveButton onClick={() => handleSave(values)}>Enregistrer</SaveButton>
