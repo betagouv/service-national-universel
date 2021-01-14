@@ -218,7 +218,9 @@ export default () => {
     history.push("/inscription/create");
     return <div />;
   }
-
+const hasParent2Infos = () => {
+    return young && (young.parent2Status || young.parent2FirstName || young.parent2LastName || young.parent2Email || young.parent2Phone);
+  };
   useEffect(() => {
     setIsParent2Visible(young && young.parent2Status);
   }, [young]);
