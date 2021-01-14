@@ -35,10 +35,10 @@ export default ({ filter }) => {
     const total = dates.reduce((acc, v) => acc + v.value, 0);
     return (
       <Row style={{ display: "flex", justifyContent: "space-around" }}>
-        {dates.map((e) => {
+        {dates.map((e, i) => {
           const percent = ((e.value * 100) / total).toFixed(1);
           return (
-            <Col style={{ marginBottom: "15px" }}>
+            <Col style={{ marginBottom: "15px" }} key={i}>
               <CircularProgress circleProgressColor="#5245CC" percentage={percent} title={e.value} subtitle={`nées en ${e.name}`} />
             </Col>
           );

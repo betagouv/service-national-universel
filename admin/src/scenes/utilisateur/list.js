@@ -107,8 +107,8 @@ export default () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {data.map((hit) => (
-                        <Hit hit={hit} onClick={() => setResponsable(hit)} />
+                      {data.map((hit, i) => (
+                        <Hit key={i} hit={hit} onClick={() => setResponsable(hit)} />
                       ))}
                     </tbody>
                   </Table>

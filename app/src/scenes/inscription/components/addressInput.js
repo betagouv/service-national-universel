@@ -148,7 +148,9 @@ export default ({ keys, values, handleChange, errors, touched }) => {
           >
             <option label=""></option>
             {departmentListFiltered.map((d) => (
-              <option value={d}>{d}</option>
+              <option key={d} value={d}>
+                {d}
+              </option>
             ))}
           </Field>
           <ErrorMessage errors={errors} touched={touched} name={keys.department} />
@@ -172,7 +174,9 @@ export default ({ keys, values, handleChange, errors, touched }) => {
           >
             <option label=""></option>
             {regionListFiltered.map((r) => (
-              <option value={r}>{r}</option>
+              <option key={r} value={r}>
+                {r}
+              </option>
             ))}
           </Field>
           <ErrorMessage errors={errors} touched={touched} name={keys.region} />
