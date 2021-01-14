@@ -11,7 +11,7 @@ import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
 
-import { translate, YOUNG_STATUS, YOUNG_PHASE } from "../../utils";
+import { translate, YOUNG_STATUS, YOUNG_PHASE, getFilterLabel } from "../../utils";
 import { toastr } from "react-redux-toastr";
 import MailCorrection from "./MailCorrection";
 
@@ -67,13 +67,7 @@ export default () => {
                   react={{ and: FILTERS }}
                   URLParams={true}
                   showSearch={false}
-                  renderLabel={(items) =>
-                    Object.keys(items).length > 0
-                      ? Object.keys(items).map((item) => {
-                          return <div>{translate(item)}</div>;
-                        })
-                      : "Statut"
-                  }
+                  renderLabel={(items) => getFilterLabel(items, "Statut")}
                 />
                 <MultiDropdownList
                   className="dropdown-filter"
