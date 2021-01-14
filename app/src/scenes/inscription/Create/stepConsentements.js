@@ -1,22 +1,24 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { Row, Col, Input } from "reactstrap";
+import { Row, Col } from "reactstrap";
 import { Field, Formik } from "formik";
 import { useSelector, useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
+import { useHistory } from "react-router-dom";
 
 import { setYoung } from "../../../redux/auth/actions";
 import DndFileInput from "../../../components/dndFileInput";
 import ErrorMessage, { requiredMessage } from "../components/errorMessage";
-import { saveYoung, STEPS } from "../utils";
+import { saveYoung } from "../utils";
 import api from "../../../services/api";
 
-export default ({ setStep }) => {
+export default () => {
+  const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
   const [clickedRules, setClickedRules] = useState(false);
   const dispatch = useDispatch();
   if (!young) {
-    setStep(STEPS.PROFIL);
+    history.push('/inscription/create');
     return <div />;
   }
 
@@ -56,7 +58,7 @@ export default ({ setStep }) => {
             const { ok, code, data: young } = await api.put("/young", values);
             if (!ok) return toastr.error("Une erreur s'est produite :", code);
             dispatch(setYoung(young));
-            setStep(STEPS.MOTIVATIONS);
+            history.push("/inscription/motivations")
           } catch (e) {
             console.log(e);
             toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", e.code);
