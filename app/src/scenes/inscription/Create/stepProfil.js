@@ -20,6 +20,7 @@ import { YOUNG_STATUS, YOUNG_PHASE } from "../../../utils";
 export default () => {
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young) || { frenchNationality: "", firstName: "", lastName: "", birthdateAt: "", email: "", password: "", repassword: "" };
+  const history = useHistory();
 
   return (
     <Wrapper>
