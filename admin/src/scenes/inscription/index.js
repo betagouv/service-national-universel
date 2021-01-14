@@ -11,7 +11,7 @@ import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
 
-import { translate, YOUNG_STATUS, YOUNG_PHASE } from "../../utils";
+import { translate, YOUNG_STATUS, YOUNG_PHASE, getFilterLabel } from "../../utils";
 import { toastr } from "react-redux-toastr";
 import MailCorrection from "./MailCorrection";
 
@@ -67,7 +67,7 @@ export default () => {
                   react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
                   URLParams={true}
                   showSearch={false}
-                  // @TODO translate label
+                  renderLabel={(items) => getFilterLabel(items, "Statut")}
                 />
                 <MultiDropdownList
                   className="dropdown-filter"
@@ -78,6 +78,7 @@ export default () => {
                   react={{ and: FILTERS.filter((e) => e !== "REGION") }}
                   URLParams={true}
                   showSearch={false}
+                  sortBy="asc"
                 />
                 <MultiDropdownList
                   className="dropdown-filter"
@@ -88,6 +89,7 @@ export default () => {
                   react={{ and: FILTERS.filter((e) => e !== "DEPARTMENT") }}
                   URLParams={true}
                   showSearch={false}
+                  sortBy="asc"
                 />
               </FilterRow>
             </Filter>
