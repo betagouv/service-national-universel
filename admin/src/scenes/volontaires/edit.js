@@ -4,6 +4,7 @@ import { Col, Row } from "reactstrap";
 import { Field, Formik } from "formik";
 import { Modal } from "reactstrap";
 import LoadingButton from "../../components/loadingButton";
+import Historic from "../../components/historic";
 
 import DateInput from "../../components/dateInput";
 import { openDocumentInNewtab, departmentList, regionList, YOUNG_STATUS, translate } from "../../utils";
@@ -86,15 +87,7 @@ export default (props) => {
                   <div>
                     <BoxTitle>{` Status : ${translate(young.status)}`}</BoxTitle>
                   </div>
-                  <BoxContent direction="column">
-                    {young && young.historic && young.historic.length !== 0 && (
-                      <div className="info">
-                        {young.historic.map((historicItem, key) => (
-                          <HistoricItem key={key} item={historicItem} />
-                        ))}
-                      </div>
-                    )}
-                  </BoxContent>
+                  <BoxContent direction="column">{young && young.historic && young.historic.length !== 0 && <Historic value={young.historic} />}</BoxContent>
                 </Box>
               </Col>
               <Col md={6} style={{ marginBottom: "20px" }}>
@@ -436,31 +429,6 @@ export default (props) => {
   );
 };
 
-const HistoricItem = ({ item }) => {
-  const formatDate = (d) => {
-    const date = new Date(d);
-    return date.toLocaleDateString();
-  };
-
-  let color = "#6CC763";
-  if (item.status === YOUNG_STATUS.WAITING_CORRECTION) color = "#FEB951";
-  if (item.status === YOUNG_STATUS.WAITING_VALIDATION) color = "#FE7B52";
-  if (item.status === YOUNG_STATUS.REFUSED) color = "#F8A9AD";
-  if (item.status === YOUNG_STATUS.IN_PROGRESS) color = "#382F79";
-
-  return (
-    <>
-      <Badge color={color}>{translate(item.status)}</Badge>
-      <div className="history-detail">
-        {item.note ? <div>{item.note}</div> : null}
-        <div className="muted">
-          Par <b>{item.userName}</b> • le {formatDate(item.createdAt)}
-        </div>
-      </div>
-    </>
-  );
-};
-
 const Item = ({ title, values, name, handleChange, type = "text", disabled = false }) => {
   const renderInput = () => {
     if (type === "date") {
@@ -616,16 +584,6 @@ const BoxContent = styled.div`
       margin-right: 5px;
     }
   }
-
-  .muted {
-    color: #666;
-  }
-  .history-detail {
-    font-size: 0.8rem;
-    margin-top: 5px;
-    margin-left: 10px;
-  }
-
   .quote {
     font-size: 18px;
     font-weight: 400;
