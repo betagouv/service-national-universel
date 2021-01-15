@@ -3,7 +3,7 @@ const path = require("path");
 const hsts = require("hsts");
 
 const app = express();
-const port = 8082;
+const port = 8080;
 
 app.use(hsts({ maxAge: 31536000, includeSubDomains: true, preload: true }));
 app.use(express.static(path.join(__dirname, "../build")));
