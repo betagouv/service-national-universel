@@ -30,6 +30,14 @@ const OPERATION_UNAUTHORIZED = "OPERATION_UNAUTHORIZED";
 
 const COOKIE_MAX_AGE = 2592000000;
 
+function cookieOptions() {
+  if (process.env.NODE_ENV !== "production") {
+    return { maxAge: COOKIE_MAX_AGE, httpOnly: true, secure: false };
+  } else {
+    return { maxAge: COOKIE_MAX_AGE, httpOnly: true, secure: true, sameSite: "none" };
+  }
+}
+
 router.post("/signin", (req, res) => ReferentAuth.signin(req, res));
 router.post("/logout", (req, res) => ReferentAuth.logout(req, res));
 
@@ -144,8 +152,8 @@ router.post("/signup", passport.authenticate("referent", { session: false }), as
     referent.set({ invitationExpires: null });
 
     const token = jwt.sign({ _id: referent.id }, config.secret, { expiresIn: "30d" });
-    const opts = { maxAge: COOKIE_MAX_AGE, secure: process.env.NODE_ENV === "production" ? true : false, httpOnly: true };
-    res.cookie("jwt", token, opts);
+    res.cookie("jwt", token, cookieOptions());
+
     await referent.save();
 
     referent.password = undefined;
