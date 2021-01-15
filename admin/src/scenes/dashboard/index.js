@@ -1,9 +1,9 @@
+import { fdatasyncSync } from "fs";
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import Inscription from "./inscription";
 
 export default () => {
-
   const [currentTab, setCurrentTab] = useState("inscriptions");
 
   return (
@@ -13,7 +13,13 @@ export default () => {
           <TabItem onClick={() => setCurrentTab("inscriptions")} isActive={currentTab === "inscriptions"}>
             Inscriptions
           </TabItem>
-          <TabItem onClick={() => setCurrentTab("volontaires")} isActive={currentTab === "volontaires"}>
+          <TabItem
+            onClick={() => {
+              fdsfdsfsd();
+              setCurrentTab("volontaires");
+            }}
+            isActive={currentTab === "volontaires"}
+          >
             Volontaires
           </TabItem>
           <TabItem onClick={() => setCurrentTab("organisations")} isActive={currentTab === "organisations"}>

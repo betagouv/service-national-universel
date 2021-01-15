@@ -1,12 +1,11 @@
 const path = require("path");
 
 const webpack = require("webpack");
-const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const ManifestPlugin = require("webpack-manifest-plugin");
 const BabelPlugin = require("babel-webpack-plugin");
-const BundleAnalyzerPlugin = require("webpack-bundle-analyzer").BundleAnalyzerPlugin;
 const CopyWebpackPlugin = require("copy-webpack-plugin");
+const TerserPlugin = require("terser-webpack-plugin");
+
 //
 module.exports = (env) => {
   const mode = env["production"] ? "production" : "development";
@@ -51,23 +50,22 @@ module.exports = (env) => {
       sourceMaps: false,
       compact: false,
     }),
-    new UglifyJsPlugin({
-      test: /\.js($|\?)/i,
-      exclude: /node_modules/,
-      cache: false,
-      parallel: 2,
-    }),
     // new BundleAnalyzerPlugin()
   ];
 
   return {
     mode,
     entry: ["babel-polyfill", "./src/index.js"],
-    devtool: false,
+    devtool: "source-map",
     output: {
       path: path.resolve("build"),
       filename: "[hash].index.js",
       publicPath: "/",
+      // sourceMapFilename: "[hash].index.map.js",
+    },
+    optimization: {
+      minimize: true,
+      minimizer: [new TerserPlugin()],
     },
     node: { fs: "empty" },
     module: {
