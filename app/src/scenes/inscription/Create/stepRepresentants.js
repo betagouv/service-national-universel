@@ -14,7 +14,7 @@ import ErrorMessage, { requiredMessage } from "../components/errorMessage";
 import FranceConnectButton from "../../../components/FranceConnectButton";
 import { environment } from "../../../config";
 
-import { saveYoung } from "../utils";
+import { saveYoung, STEPS } from "../utils";
 
 function getFranceConnectCallback(idRepresentant) {
   return `inscription/representants?action=updateFromFranceConnect&representant=${idRepresentant}`;
@@ -215,10 +215,10 @@ export default () => {
   const [initialValues, setInitialValues] = useState(young);
 
   if (!young) {
-    history.push("/inscription/create");
+    history.push("/inscription/profil");
     return <div />;
   }
-const hasParent2Infos = () => {
+  const hasParent2Infos = () => {
     return young && (young.parent2Status || young.parent2FirstName || young.parent2LastName || young.parent2Email || young.parent2Phone);
   };
   useEffect(() => {
@@ -235,7 +235,7 @@ const hasParent2Infos = () => {
       async function fetchData() {
         const { data } = await api.post("/young/france-connect/user-info", { code, callback: getFranceConnectCallback(id) });
         if (data && data["email"]) {
-          if (id === '2') setIsParent2Visible(true);
+          if (id === "2") setIsParent2Visible(true);
           setInitialValues({
             ...young,
             [`parent${id}FirstName`]: data["given_name"],
@@ -266,7 +266,7 @@ const hasParent2Infos = () => {
         validateOnBlur={false}
         onSubmit={async (values) => {
           try {
-            console.log(values);
+            values.inscriptionStep = STEPS.CONSENTEMENTS;
             const { ok, code, data: young } = await api.put("/young", values);
             if (!ok) return toastr.error("Une erreur s'est produite :", code);
             dispatch(setYoung(young));
