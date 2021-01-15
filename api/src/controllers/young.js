@@ -10,7 +10,6 @@ const { capture } = require("../sentry");
 
 const { uploadFile } = require("../utils");
 const { encrypt } = require("../cryptoUtils");
-const { watermarkPdf, watermarkImage } = require("../imageUtils");
 
 const YoungObject = require("../models/young");
 const AuthObject = require("../auth");
@@ -39,14 +38,8 @@ router.post("/file/:key", passport.authenticate("young", { session: false }), as
     for (let i = 0; i < files.length; i++) {
       const currentFile = files[i];
       const { name, data, mimetype } = currentFile;
-      let bufferWithWaterMark = null;
 
-      if (mimetype.includes("image/")) {
-        bufferWithWaterMark = await watermarkImage(data);
-      } else if (mimetype === "application/pdf") {
-        bufferWithWaterMark = await watermarkPdf(data, 0);
-      }
-      const encryptedBuffer = encrypt(bufferWithWaterMark);
+      const encryptedBuffer = encrypt(data);
       const resultingFile = { mimetype: "image/png", encoding: "7bit", data: encryptedBuffer };
       await uploadFile(`app/young/${req.user._id}/${key}/${name}`, resultingFile);
     }

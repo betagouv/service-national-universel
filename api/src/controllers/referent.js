@@ -5,6 +5,7 @@ const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
 const jwt = require("jsonwebtoken");
+const mime = require('mime-types');
 
 const { getFile } = require("../utils");
 const config = require("../config");
@@ -197,7 +198,11 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
     const downloaded = await getFile(`app/young/${youngId}/${key}/${fileName}`);
     const decryptedBuffer = decrypt(downloaded.Body);
 
-    return res.status(200).send({ data: Buffer.from(decryptedBuffer, "base64"), ok: true });
+    return res.status(200).send({ 
+      data: Buffer.from(decryptedBuffer, "base64"), 
+      mimeType: mime.lookup(fileName),
+      ok: true 
+    });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: SERVER_ERROR });

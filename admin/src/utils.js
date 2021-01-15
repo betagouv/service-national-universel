@@ -413,3 +413,13 @@ export const REFERENT_ROLES = {
   REFERENT_DEPARTMENT: "referent_department",
   REFERENT_REGION: "referent_region",
 };
+
+// Open a document from an API response that contains `data` and `mimeType`.
+export async function openDocumentInNewtab(apiResponse) {
+  const { data, mimeType } = apiResponse;
+  const arrayBufferView = new Uint8Array(data.data);
+  const blob = new Blob([arrayBufferView], { type: mimeType });
+  const urlCreator = window.URL || window.webkitURL;
+  const fileURL = urlCreator.createObjectURL(blob);
+  window.open(fileURL);
+}
