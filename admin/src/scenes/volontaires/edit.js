@@ -6,14 +6,12 @@ import { Modal } from "reactstrap";
 import LoadingButton from "../../components/loadingButton";
 
 import DateInput from "../../components/dateInput";
-import { departmentList, regionList, YOUNG_STATUS, translate } from "../../utils";
+import { openDocumentInNewtab, departmentList, regionList, YOUNG_STATUS, translate } from "../../utils";
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 
 export default (props) => {
   const [young, setYoung] = useState();
-  const [currentFile, setCurrentFile] = useState(null);
-  const [buttonsLoading, setButtonsLoading] = useState({});
 
   useEffect(() => {
     (async () => {
@@ -39,7 +37,6 @@ export default (props) => {
   return (
     //@todo fix the depart and region
     <Wrapper>
-      <Image value={currentFile} onChange={() => setCurrentFile(null)} />
       <Formik
         initialValues={young}
         onSubmit={async (values) => {
@@ -75,12 +72,8 @@ export default (props) => {
                         <InfoBtn
                           key={i}
                           color="white"
-                          loading={buttonsLoading[`cniFiles${i}`]}
                           onClick={async () => {
-                            setButtonsLoading({ ...buttonsLoading, [`cniFiles${i}`]: true });
-                            const { data, ok } = await api.get(`/referent/youngFile/${values._id}/cniFiles/${e}`);
-                            setButtonsLoading({ ...buttonsLoading, [`cniFiles${i}`]: false });
-                            setCurrentFile(data);
+                            openDocumentInNewtab(await api.get(`/referent/youngFile/${values._id}/cniFiles/${e}`));
                           }}
                         >{`Visualiser la pièce d’identité (${i + 1}/${values.cniFiles.length})`}</InfoBtn>
                       );
@@ -262,12 +255,8 @@ export default (props) => {
                         <InfoBtn
                           key={i}
                           color="white"
-                          loading={buttonsLoading[`highSkilledActivityProofFiles${i}`]}
                           onClick={async () => {
-                            setButtonsLoading({ ...buttonsLoading, [`highSkilledActivityProofFiles${i}`]: true });
-                            const { data, ok } = await api.get(`/referent/youngFile/${values._id}/highSkilledActivityProofFiles/${e}`);
-                            setButtonsLoading({ ...buttonsLoading, [`highSkilledActivityProofFiles${i}`]: false });
-                            setCurrentFile(data);
+                            openDocumentInNewtab(await api.get(`/referent/youngFile/${values._id}/highSkilledActivityProofFiles/${e}`));
                           }}
                         >{`Visualiser le justificatif d'engagement (${i + 1}/${values.highSkilledActivityProofFiles.length})`}</InfoBtn>
                       );
@@ -338,12 +327,8 @@ export default (props) => {
                         <InfoBtn
                           key={i}
                           color="white"
-                          loading={buttonsLoading[`parentConsentmentFiles${i}`]}
                           onClick={async () => {
-                            setButtonsLoading({ ...buttonsLoading, [`parentConsentmentFiles${i}`]: true });
-                            const { data, ok } = await api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${values.parentConsentmentFiles[0]}`);
-                            setButtonsLoading({ ...buttonsLoading, [`parentConsentmentFiles${i}`]: false });
-                            setCurrentFile(data);
+                            openDocumentInNewtab(await api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${values.parentConsentmentFiles[0]}`));
                           }}
                         >
                           Visualiser le formulaire de consentement
@@ -401,11 +386,10 @@ export default (props) => {
                       title="Région"
                       options={regionList.map((r) => ({ value: r, label: r }))}
                     />
-                    {values.parentConsentmentFiles && values.parentConsentmentFiles.length ? (
+                    {values.parentConsentmentFiles && values.parentConsentmentFiles.length === 2 ? (
                       <InfoBtn
                         onClick={async () => {
-                          const { data, ok } = await api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${values.parentConsentmentFiles[0]}`);
-                          setCurrentFile(data);
+                          openDocumentInNewtab(await api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${values.parentConsentmentFiles[1]}`));
                         }}
                       >
                         Visualiser le formulaire de consentement
@@ -435,12 +419,8 @@ export default (props) => {
                         <InfoBtn
                           key={i}
                           color="white"
-                          loading={buttonsLoading[`imageRightFiles${i}`]}
                           onClick={async () => {
-                            setButtonsLoading({ ...buttonsLoading, [`imageRightFiles${i}`]: true });
-                            const { data, ok } = await api.get(`/referent/youngFile/${values._id}/imageRightFiles/${e}`);
-                            setButtonsLoading({ ...buttonsLoading, [`imageRightFiles${i}`]: false });
-                            setCurrentFile(data);
+                            openDocumentInNewtab(await api.get(`/referent/youngFile/${values._id}/imageRightFiles/${e}`));
                           }}
                         >{`Visualiser le formulaire de consentement de droit à l'image (${i + 1}/${values.imageRightFiles.length})`}</InfoBtn>
                       );
@@ -527,19 +507,6 @@ const Select = ({ title, name, values, handleChange, disabled, errors, touched, 
         </select>
       </Col>
     </Row>
-  );
-};
-
-const Image = ({ value, onChange }) => {
-  if (!value) return <div />;
-  const arrayBufferView = new Uint8Array(value.data);
-  const blob = new Blob([arrayBufferView], { type: "image/png" });
-  const urlCreator = window.URL || window.webkitURL;
-  const imageUrl = urlCreator.createObjectURL(blob);
-  return (
-    <Modal size="lg" isOpen={true} toggle={onChange}>
-      <img style={{ objectFit: "contain", height: "90vh" }} src={imageUrl} />
-    </Modal>
   );
 };
 

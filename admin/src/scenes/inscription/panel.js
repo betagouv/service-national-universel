@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Modal } from "reactstrap";
+
 import { translate as t } from "./utils";
-import { departmentList, regionList, YOUNG_SITUATIONS, YOUNG_STATUS, translate } from "../../utils";
+import { YOUNG_SITUATIONS, YOUNG_STATUS, translate, openDocumentInNewtab } from "../../utils";
 import { Link } from "react-router-dom";
 import LoadingButton from "../../components/loadingButton";
 
 import api from "../../services/api";
+
 export default ({ onChange, value }) => {
-  const [currentFile, setCurrentFile] = useState(null);
   const [young, setYoung] = useState(null);
-  const [buttonsLoading, setButtonsLoading] = useState({});
 
   useEffect(() => {
     (async () => {
@@ -37,7 +37,6 @@ export default ({ onChange, value }) => {
 
   return (
     <Panel>
-      <Image value={currentFile} onChange={() => setCurrentFile(null)} />
       <div className="close" onClick={onChange} />
       <div className="info">
         <div className="title">{`${value.firstName} ${value.lastName}`}</div>
@@ -64,12 +63,8 @@ export default ({ onChange, value }) => {
             <InfoBtn
               key={i}
               color="white"
-              loading={buttonsLoading[`cniFiles${i}`]}
               onClick={async () => {
-                setButtonsLoading({ ...buttonsLoading, [`cniFiles${i}`]: true });
-                const { data, ok } = await api.get(`/referent/youngFile/${value._id}/cniFiles/${e}`);
-                setButtonsLoading({ ...buttonsLoading, [`cniFiles${i}`]: false });
-                setCurrentFile(data);
+                openDocumentInNewtab(await api.get(`/referent/youngFile/${value._id}/cniFiles/${e}`));
               }}
             >{`Visualiser la pièce d’identité (${i + 1}/${value.cniFiles.length})`}</InfoBtn>
           );
@@ -81,12 +76,8 @@ export default ({ onChange, value }) => {
             <InfoBtn
               key={i}
               color="white"
-              loading={buttonsLoading[`parentConsentmentFiles${i}`]}
               onClick={async () => {
-                setButtonsLoading({ ...buttonsLoading, [`parentConsentmentFiles${i}`]: true });
-                const { data, ok } = await api.get(`/referent/youngFile/${value._id}/parentConsentmentFiles/${e}`);
-                setButtonsLoading({ ...buttonsLoading, [`parentConsentmentFiles${i}`]: false });
-                setCurrentFile(data);
+                openDocumentInNewtab(await api.get(`/referent/youngFile/${value._id}/parentConsentmentFiles/${e}`));
               }}
             >
               Visualiser le formulaire
@@ -219,19 +210,6 @@ const Details = ({ title, value }) => {
       <div className="detail-title">{`${title} :`}</div>
       <div className="detail-text">{value}</div>
     </div>
-  );
-};
-
-const Image = ({ value, onChange }) => {
-  if (!value) return <div />;
-  const arrayBufferView = new Uint8Array(value.data);
-  const blob = new Blob([arrayBufferView], { type: "image/png" });
-  const urlCreator = window.URL || window.webkitURL;
-  const imageUrl = urlCreator.createObjectURL(blob);
-  return (
-    <Modal size="lg" isOpen={true} toggle={onChange}>
-      <img style={{ objectFit: "contain", height: "90vh" }} src={imageUrl} />
-    </Modal>
   );
 };
 
