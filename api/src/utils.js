@@ -55,12 +55,16 @@ function fileExist(url) {
 function validatePassword(password) {
   const schema = new passwordValidator();
   schema
-  schema
-    .is().min(8)       // Minimum length 8
-    .has().uppercase()  // Must have uppercase letters
-    .has().lowercase()  // Must have lowercase letters
-    .has().digits()     // Must have digits
-    .has().symbols()    // Must have symbols
+    .is()
+    .min(8) // Minimum length 8
+    .has()
+    .uppercase() // Must have uppercase letters
+    .has()
+    .lowercase() // Must have lowercase letters
+    .has()
+    .digits() // Must have digits
+    .has()
+    .symbols(); // Must have symbols
 
   return schema.validate(password);
 }
