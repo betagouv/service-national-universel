@@ -213,19 +213,6 @@ const Details = ({ title, value }) => {
   );
 };
 
-const Image = ({ value, onChange }) => {
-  if (!value) return <div />;
-  const arrayBufferView = new Uint8Array(value.data);
-  const blob = new Blob([arrayBufferView], { type: "image/png" });
-  const urlCreator = window.URL || window.webkitURL;
-  const imageUrl = urlCreator.createObjectURL(blob);
-  return (
-    <Modal size="lg" isOpen={true} toggle={onChange}>
-      <img style={{ objectFit: "contain", height: "90vh" }} src={imageUrl} />
-    </Modal>
-  );
-};
-
 const InfoBtn = styled(LoadingButton)`
   color: #555;
   background: url(${require("../../assets/eye.svg")}) left 15px center no-repeat;

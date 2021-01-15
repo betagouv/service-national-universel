@@ -510,19 +510,6 @@ const Select = ({ title, name, values, handleChange, disabled, errors, touched, 
   );
 };
 
-const Image = ({ value, onChange }) => {
-  if (!value) return <div />;
-  const arrayBufferView = new Uint8Array(value.data);
-  const blob = new Blob([arrayBufferView], { type: "image/png" });
-  const urlCreator = window.URL || window.webkitURL;
-  const imageUrl = urlCreator.createObjectURL(blob);
-  return (
-    <Modal size="lg" isOpen={true} toggle={onChange}>
-      <img style={{ objectFit: "contain", height: "90vh" }} src={imageUrl} />
-    </Modal>
-  );
-};
-
 const Badge = styled.span`
   display: inline-block;
   padding: 0.25rem 1rem;
