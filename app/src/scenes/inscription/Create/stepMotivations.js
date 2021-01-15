@@ -36,6 +36,7 @@ export default () => {
             // if the young is not already in WAITING_VALIDATION, update the status and push it in the historic
             if (values.status !== YOUNG_STATUS.WAITING_VALIDATION) {
               values.status = YOUNG_STATUS.WAITING_VALIDATION;
+              values.lastStatusAt = Date.now();
               values.historic.push({
                 phase: YOUNG_PHASE.INSCRIPTION,
                 createdAt: Date.now(),

@@ -1,4 +1,4 @@
-require("dotenv").config({ path: "./.env-prod" });
+require("dotenv").config({ path: "./.env-staging" });
 
 const bodyParser = require("body-parser");
 const cors = require("cors");
@@ -13,6 +13,7 @@ console.log("MONGO_URL", MONGO_URL);
 console.log("APP_URL, ADMIN_URL", APP_URL, ADMIN_URL);
 
 const app = express();
+require("./crons");
 
 const origin = [APP_URL, ADMIN_URL];
 app.use(cors({ credentials: true, origin }));
