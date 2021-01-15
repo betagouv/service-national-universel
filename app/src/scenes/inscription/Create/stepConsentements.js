@@ -9,7 +9,7 @@ import { useHistory } from "react-router-dom";
 import { setYoung } from "../../../redux/auth/actions";
 import DndFileInput from "../../../components/dndFileInput";
 import ErrorMessage, { requiredMessage } from "../components/errorMessage";
-import { saveYoung } from "../utils";
+import { saveYoung, STEPS } from "../utils";
 import api from "../../../services/api";
 
 export default () => {
@@ -18,7 +18,7 @@ export default () => {
   const [clickedRules, setClickedRules] = useState(false);
   const dispatch = useDispatch();
   if (!young) {
-    history.push('/inscription/create');
+    history.push("/inscription/profil");
     return <div />;
   }
 
@@ -55,10 +55,11 @@ export default () => {
             console.log(values);
             values.parentConsentment = "true";
             values.consentment = "true";
+            values.inscriptionStep = STEPS.MOTIVATIONS;
             const { ok, code, data: young } = await api.put("/young", values);
             if (!ok) return toastr.error("Une erreur s'est produite :", code);
             dispatch(setYoung(young));
-            history.push("/inscription/motivations")
+            history.push("/inscription/motivations");
           } catch (e) {
             console.log(e);
             toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", e.code);

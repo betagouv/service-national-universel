@@ -11,13 +11,12 @@ import { setYoung } from "../../../redux/auth/actions";
 import { YOUNG_STATUS, YOUNG_PHASE } from "../../../utils";
 import { saveYoung, STEPS } from "../utils";
 
-
 export default () => {
   const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
   if (!young) {
-    history.push('/inscription/create');
+    history.push("/inscription/profil");
     return <div />;
   }
   const handleSave = async (values) => {
@@ -46,6 +45,7 @@ export default () => {
                 note: "",
               });
             }
+            values.inscriptionStep = STEPS.DONE;
             const { ok, code, data: young } = await api.put("/young", values);
             if (!ok) return toastr.error("Une erreur s'est produite :", code);
             dispatch(setYoung(young));

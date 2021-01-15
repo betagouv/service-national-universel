@@ -8,7 +8,7 @@ export default () => {
   const young = useSelector((state) => state.Auth.young);
 
   if (!young) {
-    history.push("/inscription/create");
+    history.push("/inscription/profil");
     return <div />;
   }
   return (

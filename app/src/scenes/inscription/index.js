@@ -39,9 +39,9 @@ const Step = ({ step }) => {
 export default () => {
   return (
     <Switch>
-      <Route path="/inscription/create" component={() => <Step step={STEPS.PROFIL} />} />
+      <Route path="/inscription/profil" component={() => <Step step={STEPS.PROFIL} />} />
       <Route path="/inscription/coordonnees" component={() => <Step step={STEPS.COORDONNEES} />} />
-      <Route path="/inscription/situations-particulieres" component={() => <Step step={STEPS.PARTICULIERES} />} />
+      <Route path="/inscription/particulieres" component={() => <Step step={STEPS.PARTICULIERES} />} />
       <Route path="/inscription/representants" component={() => <Step step={STEPS.REPRESENTANTS} />} />
       <Route path="/inscription/consentements" component={() => <Step step={STEPS.CONSENTEMENTS} />} />
       <Route path="/inscription/motivations" component={() => <Step step={STEPS.MOTIVATIONS} />} />
