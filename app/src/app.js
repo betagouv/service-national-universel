@@ -28,12 +28,16 @@ import "./index.css";
 import { YOUNG_STATUS } from "./utils";
 import styled from "styled-components";
 
+import matomo from "./services/matomo";
+
 if (environment === "production") Sentry.init({ dsn: SENTRY_URL, environment: "app" });
 
 export default () => {
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
   useEffect(() => {
+    matomo.logEvent("TEST", "testaction", "testName", "testvalue");
+
     async function fetchData() {
       try {
         const { ok, user, token } = await api.get("/young/signin_token");
