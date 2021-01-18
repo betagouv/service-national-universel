@@ -8,7 +8,7 @@ import { toastr } from "react-redux-toastr";
 import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
 
-import { departmentList, translate, REFERENT_ROLES } from "../../utils";
+import { departmentList, translate, REFERENT_ROLES, regionList } from "../../utils";
 
 export default () => {
   const user = useSelector((state) => state.Auth.user);
@@ -39,33 +39,27 @@ export default () => {
             <form onSubmit={handleSubmit}>
               <Title>
                 {`${user.firstName} ${user.lastName}`}
-                {(user.roles || []).map((e) => (
-                  <Tag>{e}</Tag>
-                ))}
+                <Tag>{translate(user.role)}</Tag>
               </Title>
               <Legend>Informations générales</Legend>
               <FormGroup>
                 <label>
                   <span>*</span>EMAIL
                 </label>
-                <Input placeholder="Email" disabled name="email" value={values.email} onChange={handleChange} />
+                <Input placeholder="Email" name="email" value={values.email} onChange={handleChange} />
               </FormGroup>
-              <FormGroup>
-                <label>Role</label>
-                <Input disabled type="select" name="role" value={values.role} onChange={handleChange}>
-                  {[REFERENT_ROLES.ADMIN, REFERENT_ROLES.REFERENT_REGION, REFERENT_ROLES.REFERENT_DEPARTMENT].map((e) => {
-                    return <option value={e} label={translate(e)} />;
-                  })}
-                </Input>
-              </FormGroup>
-              <FormGroup>
-                <label>Département</label>
-                <Input type="select" name="department" value={values.department} onChange={handleChange}>
-                  {Object.keys(departmentList).map((e) => {
-                    return <option disabled={user.role !== "admin"} value={departmentList[e]} label={departmentList[e]} />;
-                  })}
-                </Input>
-              </FormGroup>
+              {user.role === REFERENT_ROLES.REFERENT_DEPARTMENT ? (
+                <FormGroup>
+                  <label>Département</label>
+                  <Input disabled name="department" value={values.department} onChange={handleChange} />
+                </FormGroup>
+              ) : null}
+              {user.role === REFERENT_ROLES.REFERENT_REGION ? (
+                <FormGroup>
+                  <label>Région</label>
+                  <Input disabled name="region" value={values.region} onChange={handleChange} />
+                </FormGroup>
+              ) : null}
               <Row>
                 <Col>
                   <FormGroup>
