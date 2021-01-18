@@ -41,7 +41,7 @@ const updateDepartmentRegion = async ({ doc, departmentKey, regionKey, zipKey })
       const region = department2region[departmentLookUp[depart]];
       console.log(departmentKey, department);
       console.log(regionKey, region);
-      await doc.set({ departmentKey: department, regionKey: region });
+      await doc.set({ [departmentKey]: department, [regionKey]: region });
       await doc.save();
       await doc.index();
       return;
@@ -56,7 +56,7 @@ const updateDepartmentRegion = async ({ doc, departmentKey, regionKey, zipKey })
       console.log(departmentKey, doc[departmentKey]);
       const region = department2region[doc[departmentKey]];
       console.log(regionKey, region);
-      await doc.set({ regionKey: region });
+      await doc.set({ [regionKey]: region });
       await doc.save();
       await doc.index();
       return;
