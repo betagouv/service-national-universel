@@ -10,6 +10,9 @@ import SelectStatus from "../../components/selectStatus";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import "dayjs/locale/fr";
 
 import { translate, YOUNG_STATUS, YOUNG_PHASE, getFilterLabel } from "../../utils";
 import { toastr } from "react-redux-toastr";
@@ -209,12 +212,8 @@ export default () => {
 };
 
 const Hit = ({ hit, index, onClick }) => {
-  const createdAt = new Date(hit.createdAt);
-  createdAt.setHours(0, 0, 0, 0);
-  const now = new Date();
-  now.setHours(0, 0, 0, 0);
-  const diffTime = Math.abs(createdAt - now);
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  dayjs.extend(relativeTime).locale("fr");
+  const diff = dayjs(new Date(hit.createdAt)).fromNow();
 
   const formatLongDate = (date) => {
     const d = new Date(date);
@@ -228,7 +227,7 @@ const Hit = ({ hit, index, onClick }) => {
         <strong>
           {hit.firstName} {hit.lastName}
         </strong>
-        <div>{`Inscrit(e) il y a ${diffDays} jour(s) • ${formatLongDate(hit.createdAt)}`}</div>
+        <div>{`Inscrit(e) ${diff} • ${formatLongDate(hit.createdAt)}`}</div>
       </td>
       <td onClick={(e) => e.stopPropagation()}>
         <SelectStatus hit={hit} />
