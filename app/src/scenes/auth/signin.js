@@ -10,6 +10,7 @@ import styled from "styled-components";
 import { setYoung } from "../../redux/auth/actions";
 
 import api from "../../services/api";
+import matomo from "../../services/matomo";
 import LoadingButton from "../../components/loadingButton";
 import Header from "./components/header";
 
@@ -34,7 +35,10 @@ export default () => {
               try {
                 const { user: young, token } = await api.post(`/young/signin`, values);
                 if (token) api.setToken(token);
-                if (young) dispatch(setYoung(young));
+                if (young) {
+                  dispatch(setYoung(young));
+                  matomo.setUserId(young._id);
+                }
               } catch (e) {
                 console.log("e", e);
                 setUserIsValid(false);

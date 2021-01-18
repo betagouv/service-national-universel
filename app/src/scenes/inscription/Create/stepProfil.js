@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import styled from "styled-components";
-import { Row, Col, Input } from "reactstrap";
+import { Row, Col } from "reactstrap";
 import { Field, Formik } from "formik";
 import { useSelector, useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
@@ -13,11 +13,16 @@ import ErrorMessage, { requiredMessage } from "../components/errorMessage";
 
 import { setYoung } from "../../../redux/auth/actions";
 
+import matomo from "../../../services/matomo";
 import api from "../../../services/api";
-import { STEPS } from "../utils";
+
 import { YOUNG_STATUS, YOUNG_PHASE } from "../../../utils";
 
 export default () => {
+  useEffect(() => {
+    matomo.logEvent("inscription", "open_step", "step", "profil");
+  }, []);
+
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young) || { frenchNationality: "", firstName: "", lastName: "", birthdateAt: "", email: "", password: "", repassword: "" };
   const history = useHistory();

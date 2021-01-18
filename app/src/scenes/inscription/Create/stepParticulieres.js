@@ -1,12 +1,14 @@
-import React, { useState } from "react";
+import React, { useEffect } from "react";
 import styled from "styled-components";
-import { Row, Col, Input } from "reactstrap";
+import { Row, Col } from "reactstrap";
 import { Field, Formik } from "formik";
 import { useSelector, useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
 
 import { setYoung } from "../../../redux/auth/actions";
 import api from "../../../services/api";
+import matomo from "../../../services/matomo";
+
 import ErrorMessage, { requiredMessage } from "../components/errorMessage";
 import AddressInput from "../components/addressInput";
 import DndFileInput from "../../../components/dndFileInput";
@@ -15,10 +17,13 @@ import { saveYoung, STEPS } from "../utils";
 import { toastr } from "react-redux-toastr";
 
 export default () => {
+  useEffect(() => {
+    matomo.logEvent("inscription", "open_step", "step", "particulieres");
+  }, []);
+
   const history = useHistory();
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
-  const [inputAddress, setInputAddress] = useState("");
 
   if (!young) {
     history.push("/inscription/profil");

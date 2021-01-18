@@ -1,9 +1,16 @@
-import React from "react";
+import React, { useEffect } from "react";
 import styled from "styled-components";
 import { useSelector, useDispatch } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
 
+import matomo from "../../../services/matomo";
+
 export default () => {
+
+  useEffect(() => {
+    matomo.logEvent("inscription", "open_step", "step", "done");
+  }, []);
+
   const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
 
