@@ -46,7 +46,7 @@ export default () => {
                 values={values}
                 handleChange={handleChange}
                 title="E-mail"
-                validate={(v) => (!v && requiredMessage) || (!validator.isEmail(v) && "Ce champs est au mauvais format")}
+                validate={(v) => (!v && requiredMessage) || (!validator.isEmail(v) && "Ce champ est au mauvais format")}
                 errors={errors}
                 touched={touched}
               />
