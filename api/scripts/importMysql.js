@@ -4,7 +4,7 @@ const { QueryTypes } = require("sequelize");
 require("../src/mongo");
 
 const opts = { define: { freezeTableName: true, timestamps: false }, logging: false };
-const sequelize = new Sequelize("mysql://root:root@localhost:3306/snu", opts);
+const sequelize = new Sequelize(process.env.MYSQL_URL, opts);
 
 const Mission = require(`../src/models/mission`);
 const Structure = require(`../src/models/structure`);
