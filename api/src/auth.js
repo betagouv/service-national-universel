@@ -75,7 +75,6 @@ class Auth {
 
       const firstName = reqFirstName.charAt(0).toUpperCase() + (reqFirstName || "").toLowerCase().slice(1);
       const lastName = reqLastName.toUpperCase();
-      const email = reqEmail.trim().toLowerCase();
 
       const user = await this.model.create({ password, email, firstName, lastName });
       const token = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });
