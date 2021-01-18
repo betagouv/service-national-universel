@@ -7,7 +7,7 @@ var faker = require("faker/locale/fr");
 
 const opts = { define: { freezeTableName: true, timestamps: false }, logging: false };
 
-const connexionURL = "mysql://ulgibn9uaa040ayv:Jd1IlqlrHrBIeVnSzPGm@bk1mgoxu5fmusuvklzdu-mysql.services.clever-cloud.com:20452/bk1mgoxu5fmusuvklzdu";
+const connexionURL = process.env.MYSQL_URL;
 const sequelize = new Sequelize(connexionURL, opts);
 
 // const Mission = require(`../src/models/mission`);
