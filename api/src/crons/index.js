@@ -29,6 +29,7 @@ const autoValidate = async () => {
       if (gt2w(lastStatus.createdAt)) {
         count++;
         doc.historic.push({ phase: "INSCRIPTION", status: "VALIDATED" });
+        doc.set({ status: "VALIDATED", lastStatusAt: Date.now() });
         doc.save();
       }
     } catch (error) {

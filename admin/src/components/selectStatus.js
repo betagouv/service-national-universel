@@ -33,9 +33,8 @@ export default ({ hit }) => {
 
   const setStatus = async (status, note) => {
     try {
-      young.lastStatusAt = Date.now();
       young.historic.push({ phase: YOUNG_PHASE.INSCRIPTION, userName: `${user.firstName} ${user.lastName}`, userId: user._id, status, note });
-      const { ok, code, data: newYoung } = await api.put(`/referent/young/${young._id}`, { historic: young.historic, status });
+      const { ok, code, data: newYoung } = await api.put(`/referent/young/${young._id}`, { historic: young.historic, status, lastStatusAt: Date.now() });
 
       if (!ok) toastr.error("Une erreur s'est produite :", code);
       setYoung(newYoung);
