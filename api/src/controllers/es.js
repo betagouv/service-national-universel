@@ -3,11 +3,9 @@ const passport = require("passport");
 const express = require("express");
 const router = express.Router();
 
-const { ES_ENDPOINT } = require("../config");
 const { capture } = require("../sentry");
 
-const getElasticInstance = require("../es");
-const esclient = getElasticInstance();
+const esClient = require("../es");
 
 router.post("/_msearch", passport.authenticate(["young", "referent"], { session: false }), (req, res) => exec(req, res, ""));
 
@@ -23,13 +21,13 @@ async function exec(req, res, index = "") {
 
     //Dirty hack for young. They should access only to school. I think we need to do a separate route @raph
     if (user.constructor.modelName === "young") {
-      const d = await esclient.msearch({ index: "school", body: body });
+      const d = await esClient.msearch({ index: "school", body: body });
       return res.status(200).send(d.body);
     }
 
     const bodyFiltered = await filter(body, user, index);
     let i = index ? [index] : [];
-    const d = await esclient.msearch({ index: i, body: bodyFiltered });
+    const d = await esClient.msearch({ index: i, body: bodyFiltered });
     return res.status(200).send(d.body);
   } catch (error) {
     console.log("ERROR", JSON.stringify(error));
