@@ -51,10 +51,11 @@ router.post("/reset_password", passport.authenticate("referent", { session: fals
 router.post("/signup_invite/:role", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const obj = {};
-    if (req.body.hasOwnProperty(`email`)) obj.email = req.body.email;
+    if (req.body.hasOwnProperty(`email`)) obj.email = req.body.email.trim().toLowerCase();
     if (req.body.hasOwnProperty(`firstName`)) obj.firstName = req.body.firstName;
     if (req.body.hasOwnProperty(`lastName`)) obj.lastName = req.body.lastName;
     if (req.body.hasOwnProperty(`role`)) obj.role = req.body.role;
+
     if (req.body.hasOwnProperty(`region`)) obj.region = req.body.region; //TODO
     if (req.body.hasOwnProperty(`department`)) obj.department = req.body.department;
 
