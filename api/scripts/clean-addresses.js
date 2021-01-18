@@ -169,6 +169,7 @@ const departmentLookUp = {
   974: "La Réunion",
   975: "Saint-Pierre-et-Miquelon",
   976: "Mayotte",
+  978: "Saint-Martin",
   987: "Polynésie française",
   988: "Nouvelle-Calédonie",
 };
