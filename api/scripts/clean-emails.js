@@ -1,4 +1,4 @@
-require("dotenv").config({ path: "../.env-prod" });
+require("dotenv").config({ path: "../.env-staging" });
 
 require("../src/mongo");
 const ReferentModel = require("../src/models/referent");
@@ -8,13 +8,19 @@ const clean = async (model) => {
   const cursor = model.find({}).cursor();
   await cursor.eachAsync(async function (doc) {
     try {
-      const firstName = doc.firstName.charAt(0).toUpperCase() + (doc.firstName || "").toLowerCase().slice(1);
-      const lastName = doc.lastName.toUpperCase();
       const email = (doc.email || "").trim().toLowerCase();
-      doc.set({ firstName, lastName, email });
-      console.log(doc);
-      // doc.save();
-      // doc.index();
+      if (email !== doc.email) {
+        console.log("old email: ", doc.email);
+        const existingEmail = await model.findOne({ email });
+        if (existingEmail) {
+          console.log(`Email ${email} already exist, SKIPPED`);
+        } else {
+          doc.set({ email });
+          console.log("new email: ", doc.email);
+          await doc.save();
+          await doc.index();
+        }
+      }
     } catch (e) {
       console.log("e", e);
     }
@@ -26,4 +32,5 @@ const clean = async (model) => {
   await clean(ReferentModel);
   console.log("CLEANING YOUNG EMAILS");
   await clean(YoungModel);
+  process.exit(1);
 })();
