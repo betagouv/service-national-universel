@@ -25,7 +25,7 @@ export default () => {
   const young = useSelector((state) => state.Auth.young);
 
   if (!young) {
-    history.push('/inscription/create');
+    history.push("/inscription/profil");
     return <div />;
   }
 
@@ -58,10 +58,11 @@ export default () => {
         validateOnBlur={false}
         onSubmit={async (values) => {
           try {
+            values.inscriptionStep = STEPS.PARTICULIERES;
             const { ok, code, data: young } = await api.put("/young", values);
             if (!ok) return toastr.error("Une erreur s'est produite :", code);
             dispatch(setYoung(young));
-            history.push("/inscription/situations-particulieres");
+            history.push("/inscription/particulieres");
           } catch (e) {
             console.log(e);
             toastr.error("Erreur !");

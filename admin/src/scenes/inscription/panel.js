@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Modal } from "reactstrap";
+
 import { translate as t } from "./utils";
-import { departmentList, regionList, YOUNG_SITUATIONS, YOUNG_STATUS, translate, YOUNG_STATUS_COLORS } from "../../utils";
+import { YOUNG_SITUATIONS, YOUNG_STATUS, translate, openDocumentInNewtab } from "../../utils";
 import { Link } from "react-router-dom";
 import LoadingButton from "../../components/loadingButton";
+import Historic from "../../components/historic";
 
 import api from "../../services/api";
+
 export default ({ onChange, value }) => {
-  const [currentFile, setCurrentFile] = useState(null);
   const [young, setYoung] = useState(null);
-  const [buttonsLoading, setButtonsLoading] = useState({});
 
   useEffect(() => {
     (async () => {
@@ -37,7 +38,6 @@ export default ({ onChange, value }) => {
 
   return (
     <Panel>
-      <Image value={currentFile} onChange={() => setCurrentFile(null)} />
       <div className="close" onClick={onChange} />
       <div className="info">
         <div className="title">{`${value.firstName} ${value.lastName}`}</div>
@@ -51,25 +51,15 @@ export default ({ onChange, value }) => {
           <EditBtn color="white">Modifier</EditBtn>
         </Link>
       </div>
-      {young && young.historic && young.historic.length !== 0 && (
-        <div className="info">
-          {young.historic.map((historicItem, key) => (
-            <HistoricItem key={key} item={historicItem} />
-          ))}
-        </div>
-      )}
+      {young && young.historic && young.historic.length !== 0 && <Historic value={young.historic} />}
       <Info title="Pièce d’identité" id={value._id}>
         {(value.cniFiles || []).map((e, i) => {
           return (
             <InfoBtn
               key={i}
               color="white"
-              loading={buttonsLoading[`cniFiles${i}`]}
               onClick={async () => {
-                setButtonsLoading({ ...buttonsLoading, [`cniFiles${i}`]: true });
-                const { data, ok } = await api.get(`/referent/youngFile/${value._id}/cniFiles/${e}`);
-                setButtonsLoading({ ...buttonsLoading, [`cniFiles${i}`]: false });
-                setCurrentFile(data);
+                openDocumentInNewtab(await api.get(`/referent/youngFile/${value._id}/cniFiles/${e}`));
               }}
             >{`Visualiser la pièce d’identité (${i + 1}/${value.cniFiles.length})`}</InfoBtn>
           );
@@ -81,12 +71,8 @@ export default ({ onChange, value }) => {
             <InfoBtn
               key={i}
               color="white"
-              loading={buttonsLoading[`parentConsentmentFiles${i}`]}
               onClick={async () => {
-                setButtonsLoading({ ...buttonsLoading, [`parentConsentmentFiles${i}`]: true });
-                const { data, ok } = await api.get(`/referent/youngFile/${value._id}/parentConsentmentFiles/${e}`);
-                setButtonsLoading({ ...buttonsLoading, [`parentConsentmentFiles${i}`]: false });
-                setCurrentFile(data);
+                openDocumentInNewtab(await api.get(`/referent/youngFile/${value._id}/parentConsentmentFiles/${e}`));
               }}
             >
               Visualiser le formulaire
@@ -175,25 +161,6 @@ export default ({ onChange, value }) => {
   );
 };
 
-const HistoricItem = ({ item }) => {
-  const formatLongDate = (date) => {
-    const d = new Date(date);
-    return d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" });
-  };
-
-  return (
-    <>
-      <Badge color={YOUNG_STATUS_COLORS[item.status]}>{translate(item.status)}</Badge>
-      <div className="history-detail">
-        {item.note ? <div>{item.note}</div> : null}
-        <div className="muted">
-          Par <b>{item.userName}</b> • le {formatLongDate(item.createdAt)}
-        </div>
-      </div>
-    </>
-  );
-};
-
 const Info = ({ children, title, id }) => {
   return (
     <div className="info">
@@ -216,19 +183,6 @@ const Details = ({ title, value }) => {
   );
 };
 
-const Image = ({ value, onChange }) => {
-  if (!value) return <div />;
-  const arrayBufferView = new Uint8Array(value.data);
-  const blob = new Blob([arrayBufferView], { type: "image/png" });
-  const urlCreator = window.URL || window.webkitURL;
-  const imageUrl = urlCreator.createObjectURL(blob);
-  return (
-    <Modal size="lg" isOpen={true} toggle={onChange}>
-      <img style={{ objectFit: "contain", height: "90vh" }} src={imageUrl} />
-    </Modal>
-  );
-};
-
 const InfoBtn = styled(LoadingButton)`
   color: #555;
   background: url(${require("../../assets/eye.svg")}) left 15px center no-repeat;
@@ -246,20 +200,6 @@ const InfoBtn = styled(LoadingButton)`
 
 const EditBtn = styled(InfoBtn)`
   background: url(${require("../../assets/pencil.svg")}) left 15px center no-repeat;
-`;
-
-const Badge = styled.span`
-  display: inline-block;
-  padding: 0.25rem 1rem;
-  margin: 0 0.25rem;
-  border-radius: 99999px;
-  font-size: 0.8rem;
-  margin-bottom: 5px;
-  margin-top: 15px;
-  ${({ color }) => `
-    color: ${color};
-    background-color: ${color}33;
-  `}
 `;
 
 const Panel = styled.div`
@@ -331,13 +271,5 @@ const Panel = styled.div`
     font-size: 18px;
     font-weight: 400;
     font-style: italic;
-  }
-  .muted {
-    color: #666;
-  }
-  .history-detail {
-    font-size: 0.8rem;
-    margin-top: 5px;
-    margin-left: 10px;
   }
 `;

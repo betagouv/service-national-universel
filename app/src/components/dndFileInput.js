@@ -69,7 +69,7 @@ export default ({ value, onChange, name, errorMessage = requiredMessage, placeho
         </>
       </ImageInput>
       {filesList.map((e, i) => (
-        <File>
+        <File key={i}>
           {getFileName(e)} <span onClick={() => handleChange(filesList.filter((n, j) => i !== j))}>Retirer</span>
         </File>
       ))}

@@ -24,6 +24,16 @@ export default ({ step }) => {
     window.location = "/";
   };
 
+  const handleClick = (s) => {
+    if (s === step || !young) return; //click on same step or not connected
+
+    const stepIndex = Object.keys(STEPS).indexOf(s);
+    const limitIndex = Object.keys(STEPS).indexOf(young.inscriptionStep);
+    if (limitIndex < stepIndex) return;
+
+    return history.push(`/inscription/${s.toLowerCase()}`);
+  };
+
   return (
     <>
       <HeaderNav>
@@ -41,22 +51,28 @@ export default ({ step }) => {
         )}
       </HeaderNav>
       <Topbar>
-        <Element status={getStatus(STEPS.PROFIL)} onClick={() => history.push('/inscription/create')}>
+        <Element status={getStatus(STEPS.PROFIL)} onClick={() => handleClick(STEPS.PROFIL)}>
           <a>Mon profil</a>
         </Element>
-        <Element status={getStatus(STEPS.COORDONNEES)} onClick={() => history.push('/inscription/coordonnees')}>
+        <Element status={getStatus(STEPS.COORDONNEES)} onClick={() => handleClick(STEPS.COORDONNEES)}>
           <a>Coordonnées</a>
         </Element>
-        <Element status={getStatus(STEPS.PARTICULIERES)} onClick={() => history.push('/inscription/situations-particulieres')}>
-          <a>Situations particulières</a>
+        <Element status={getStatus(STEPS.PARTICULIERES)} onClick={() => handleClick(STEPS.PARTICULIERES)}>
+          <a>
+            Situations <br />
+            particulières
+          </a>
         </Element>
-        <Element status={getStatus(STEPS.REPRESENTANTS)} onClick={() => history.push('/inscription/representants')}>
-          <a>Représentants légaux</a>
+        <Element status={getStatus(STEPS.REPRESENTANTS)} onClick={() => handleClick(STEPS.REPRESENTANTS)}>
+          <a>
+            Représentants <br />
+            légaux
+          </a>
         </Element>
-        <Element status={getStatus(STEPS.CONSENTEMENTS)} onClick={() => history.push('/inscription/consentements')}>
+        <Element status={getStatus(STEPS.CONSENTEMENTS)} onClick={() => handleClick(STEPS.CONSENTEMENTS)}>
           <a>Consentements</a>
         </Element>
-        <Element status={getStatus(STEPS.MOTIVATIONS)} onClick={() => history.push('/inscription/motivations')}>
+        <Element status={getStatus(STEPS.MOTIVATIONS)} onClick={() => handleClick(STEPS.MOTIVATIONS)}>
           <a>Motivations</a>
         </Element>
         <Element>{`${((currentIndex * 100) / (Object.keys(STEPS).length - 1)).toFixed(0)}%`}</Element>

@@ -21,7 +21,7 @@ export default () => {
   const [inputAddress, setInputAddress] = useState("");
 
   if (!young) {
-    history.push('/inscription/create');
+    history.push("/inscription/profil");
     return <div />;
   }
 
@@ -45,7 +45,7 @@ export default () => {
         validateOnBlur={false}
         onSubmit={async (values) => {
           try {
-            console.log(values);
+            values.inscriptionStep = STEPS.REPRESENTANTS;
             const { ok, code, data: young } = await api.put("/young", values);
             if (!ok) return toastr.error("Une erreur s'est produite :", code);
             dispatch(setYoung(young));

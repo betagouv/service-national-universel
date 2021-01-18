@@ -27,6 +27,13 @@ const Schema = new mongoose.Schema({
   },
   lastStatusAt: { type: Date, default: Date.now },
 
+  //keep track of the current inscription step
+  inscriptionStep: {
+    type: String,
+    default: "COORDONNEES", // if the young is created, it passed the first step, so default is COORDONNEES
+    enum: ["PROFIL", "COORDONNEES", "PARTICULIERES", "REPRESENTANTS", "CONSENTEMENTS", "MOTIVATIONS", "DONE"],
+  },
+
   // userName and userId because it can be a young or a referent
   historic: {
     type: [
