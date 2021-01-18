@@ -136,8 +136,10 @@ class Auth {
   async forgotPassword(req, res, cta) {
     try {
       const obj = await this.model.findOne({ email: req.body.email.toLowerCase() });
-      console.log("NOT FOUND", req.body.email.toLowerCase());
-      if (!obj) return res.status(404).send({ ok: false, code: USER_NOT_EXISTS });
+      if (!obj) {
+        console.log("NOT FOUND", req.body.email.toLowerCase());
+        return res.status(404).send({ ok: false, code: USER_NOT_EXISTS });
+      }
       const token = await crypto.randomBytes(20).toString("hex");
       obj.set({ forgotPasswordResetToken: token, forgotPasswordResetExpires: Date.now() + COOKIE_MAX_AGE });
       await obj.save();
