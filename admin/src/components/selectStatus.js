@@ -2,15 +2,17 @@ import React, { useEffect, useState } from "react";
 import { Col, DropdownItem, DropdownMenu, DropdownToggle, Label, Pagination, PaginationItem, PaginationLink, Row, UncontrolledDropdown } from "reactstrap";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
+import { toastr } from "react-redux-toastr";
 
 import api from "../services/api";
 
 import { translate, YOUNG_STATUS, YOUNG_PHASE } from "../utils";
-import { toastr } from "react-redux-toastr";
+
 import MailCorrection from "../scenes/inscription/MailCorrection";
 
 export default ({ hit }) => {
   const STATUS = [YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.VALIDATED, YOUNG_STATUS.REFUSED];
+
   const [modal, setModal] = useState(false);
   const [young, setYoung] = useState(null);
   const user = useSelector((state) => state.Auth.user);
@@ -35,6 +37,14 @@ export default ({ hit }) => {
     try {
       young.historic.push({ phase: YOUNG_PHASE.INSCRIPTION, userName: `${user.firstName} ${user.lastName}`, userId: user._id, status, note });
       const { ok, code, data: newYoung } = await api.put(`/referent/young/${young._id}`, { historic: young.historic, status });
+
+      // if (status === YOUNG_STATUS.WAITING_CORRECTION) {
+      //   await api.post(`/referent/email/correction/${value._id}`, { message, subject: "Demande de correction" });
+      // }
+
+      // if (status === YOUNG_STATUS.WAITING_CORRECTION) {
+      //   await api.post(`/referent/email/correction/${value._id}`, { message, subject: "Demande de correction" });
+      // }
 
       if (!ok) toastr.error("Une erreur s'est produite :", code);
       setYoung(newYoung);

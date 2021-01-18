@@ -1,0 +1,26 @@
+<mjml>
+  <mj-body>
+    <mj-section>
+      <mj-column>
+        <mj-text>
+          <h1 font-size="20px">Candidature validée</h1>
+        </mj-text>
+        <mj-text font-size="18px" color="#000">
+Bonjour {{firstName}} {{lastName}},
+
+           </mj-text>
+          <mj-text line-height="1.5" font-size="18px" color="#000">
+Nous n'avons malheureusement pu donner suite à votre candidature au Service Nationale Universel édition 2021.
+           </mj-text>
+             <mj-text line-height="1.5" font-size="18px" color="#000">
+Bonne continuation,
+
+                     </mj-text>
+
+     
+        <mj-text font-size="18px" color="#000">Les équipes du Service National Universel</mj-text>
+
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>
