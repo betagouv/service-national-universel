@@ -55,7 +55,7 @@ export default () => {
             history.push("/inscription/coordonnees");
           } catch (e) {
             console.log(e);
-            if ((e.code = "USER_ALREADY_REGISTERED")) return toastr.error("Cet email est déjà utilisé.", "Merci de vous connecter pour continuer votre inscription.");
+            if (e.code === "USER_ALREADY_REGISTERED") return toastr.error("Cet email est déjà utilisé.", "Merci de vous connecter pour continuer votre inscription.");
             return toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", e.code);
           }
         }}

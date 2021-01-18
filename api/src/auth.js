@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
+const validator = require("validator");
 
 const { capture } = require("./sentry");
 
@@ -11,6 +12,7 @@ const { sendEmail } = require("./sendinblue");
 
 const EMAIL_OR_PASSWORD_INVALID = "EMAIL_OR_PASSWORD_INVALID";
 const PASSWORD_INVALID = "PASSWORD_INVALID";
+const EMAIL_INVALID = "EMAIL_INVALID";
 const EMAIL_AND_PASSWORD_REQUIRED = "EMAIL_AND_PASSWORD_REQUIRED";
 const PASSWORD_TOKEN_EXPIRED_OR_INVALID = "PASSWORD_TOKEN_EXPIRED_OR_INVALID";
 const PASSWORDS_NOT_MATCH = "PASSWORDS_NOT_MATCH";
@@ -64,9 +66,12 @@ class Auth {
 
   async signup(req, res) {
     try {
-      const { password, email, firstName: reqFirstName, lastName: reqLastName } = req.body;
+      const { password, email: reqEmail, firstName: reqFirstName, lastName: reqLastName } = req.body;
 
       if (!validatePassword(password)) return res.status(200).send({ ok: false, user: null, code: PASSWORD_NOT_VALIDATED });
+
+      const email = reqEmail.trim().toLowerCase();
+      if (!validator.isEmail(email)) return res.status(200).send({ ok: false, user: null, code: EMAIL_INVALID });
 
       const firstName = reqFirstName.charAt(0).toUpperCase() + (reqFirstName || "").toLowerCase().slice(1);
       const lastName = reqLastName.toUpperCase();
