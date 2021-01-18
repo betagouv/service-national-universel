@@ -2,16 +2,11 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { STEPS } from "../utils";
 import { useHistory } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 export default ({ step }) => {
   const history = useHistory();
-  const [open, setOpen] = useState(true);
-
-  if (open) {
-    document.body.classList.add("open-drawer");
-  } else {
-    document.body.classList.remove("open-drawer");
-  }
+  const young = useSelector((state) => state.Auth.young);
 
   const currentIndex = Object.keys(STEPS).indexOf(step);
 
@@ -21,9 +16,19 @@ export default ({ step }) => {
     if (stepIndex > currentIndex) return "todo";
     return "done";
   }
+
+  const handleClick = (s) => {
+    if (s === step || !young) return; //click on same step or not connected
+
+    const stepIndex = Object.keys(STEPS).indexOf(s);
+    const limitIndex = Object.keys(STEPS).indexOf(young.inscriptionStep);
+    if (limitIndex < stepIndex) return;
+
+    return history.push(`/inscription/${s.toLowerCase()}`);
+  };
+
   return (
-    <Sidebar open={open}>
-      {/* <MenuBtn onClick={() => setOpen(!open)} src={require("../assets/menu.svg")} /> */}
+    <Sidebar>
       <MainNav>
         <li>
           <Header>
@@ -47,22 +52,22 @@ export default ({ step }) => {
           </a>
           <ul className="stepNav">
             <Element status={getStatus(STEPS.PROFIL)}>
-              <a onClick={() => history.push("/inscription/create")}>Mon profil</a>
+              <a onClick={() => handleClick(STEPS.PROFIL)}>Mon profil</a>
             </Element>
             <Element status={getStatus(STEPS.COORDONNEES)}>
-              <a onClick={() => history.push("/inscription/coordonnees")}>Coordonnées</a>
+              <a onClick={() => handleClick(STEPS.COORDONNEES)}>Coordonnées</a>
             </Element>
             <Element status={getStatus(STEPS.PARTICULIERES)}>
-              <a onClick={() => history.push("/inscription/situations-particulieres")}>Situations particulières</a>
+              <a onClick={() => handleClick(STEPS.PARTICULIERES)}>Situations particulières</a>
             </Element>
             <Element status={getStatus(STEPS.REPRESENTANTS)}>
-              <a onClick={() => history.push("/inscription/representants")}>Représentants légaux</a>
+              <a onClick={() => handleClick(STEPS.REPRESENTANTS)}>Représentants légaux</a>
             </Element>
             <Element status={getStatus(STEPS.CONSENTEMENTS)}>
-              <a onClick={() => history.push("/inscription/consentements")}>Consentements</a>
+              <a onClick={() => handleClick(STEPS.CONSENTEMENTS)}>Consentements</a>
             </Element>
             <Element status={getStatus(STEPS.MOTIVATIONS)}>
-              <a onClick={() => history.push("/inscription/motivations")}>Motivations</a>
+              <a onClick={() => handleClick(STEPS.MOTIVATIONS)}>Motivations</a>
             </Element>
           </ul>
         </li>
@@ -101,7 +106,6 @@ const Sidebar = styled.div`
   z-index: 1;
   transition: 0.2s;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  transform: ${({ open }) => (open ? "translateX(0)" : "translateX(-100%)")};
   @media (max-width: 768px) {
     display: none;
   }

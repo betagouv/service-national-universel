@@ -45,7 +45,7 @@ export default ({}) => {
                 Je suis de <strong> nationalité française</strong>
               </div>
             </li>
-            <Link to="/inscription/create">
+            <Link to="/inscription/profil">
               <li className="button">Commencer l'inscription</li>
             </Link>
           </ul>

@@ -49,23 +49,29 @@ export default ({ value, onChange, placeholder, onSelect }) => {
   return (
     <Wrapper>
       <Input id="day" name="day" value={day} onChange={handleDay} type="select">
-        <option value="" label="jour" />
+        <option value="">jour</option>
         {range(1, 31).map((d) => (
-          <option key={d} value={d} label={d} />
+          <option key={d} value={d}>
+            {d}
+          </option>
         ))}
       </Input>
       <Separator>/</Separator>
       <Input id="month" name="month" value={month} onChange={handleMonth} type="select">
-        <option value="" label="mois" />
+        <option value="">mois</option>
         {range(0, 11).map((m) => (
-          <option key={m} value={m} label={MONTH[m]} />
+          <option key={m} value={m}>
+            {MONTH[m]}
+          </option>
         ))}
       </Input>
       <Separator>/</Separator>
       <Input id="year" name="year" value={year} onChange={handleYear} type="select">
-        <option value="" label="année" />
+        <option value="">année</option>
         {range(1990, 2020).map((y) => (
-          <option key={y} value={y} label={y} />
+          <option key={y} value={y}>
+            {y}
+          </option>
         ))}
       </Input>
     </Wrapper>

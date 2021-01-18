@@ -20,6 +20,7 @@ import { YOUNG_STATUS, YOUNG_PHASE } from "../../../utils";
 export default () => {
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young) || { frenchNationality: "", firstName: "", lastName: "", birthdateAt: "", email: "", password: "", repassword: "" };
+  const history = useHistory();
 
   return (
     <Wrapper>
@@ -54,7 +55,7 @@ export default () => {
             history.push("/inscription/coordonnees");
           } catch (e) {
             console.log(e);
-            if ((e.code = "USER_ALREADY_REGISTERED")) return toastr.error("Cet email est déjà utilisé.", "Merci de vous connecter pour continuer votre inscription.");
+            if (e.code === "USER_ALREADY_REGISTERED") return toastr.error("Cet email est déjà utilisé.", "Merci de vous connecter pour continuer votre inscription.");
             return toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", e.code);
           }
         }}

@@ -11,7 +11,7 @@ import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
 
-import { translate, YOUNG_STATUS, YOUNG_PHASE } from "../../utils";
+import { translate, YOUNG_STATUS, YOUNG_PHASE, getFilterLabel } from "../../utils";
 import { toastr } from "react-redux-toastr";
 import MailCorrection from "./MailCorrection";
 
@@ -58,7 +58,6 @@ export default () => {
               <FilterRow>
                 <MultiDropdownList
                   className="dropdown-filter"
-                  placeholder="Status"
                   componentId="STATUS"
                   dataField="status.keyword"
                   renderItem={(e, count) => {
@@ -68,6 +67,7 @@ export default () => {
                   react={{ and: FILTERS }}
                   URLParams={true}
                   showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Statut")}
                 />
                 <MultiDropdownList
                   className="dropdown-filter"
@@ -78,6 +78,7 @@ export default () => {
                   react={{ and: FILTERS }}
                   URLParams={true}
                   showSearch={false}
+                  sortBy="asc"
                 />
                 <MultiDropdownList
                   className="dropdown-filter"
@@ -88,6 +89,7 @@ export default () => {
                   react={{ and: FILTERS }}
                   URLParams={true}
                   showSearch={false}
+                  sortBy="asc"
                 />
               </FilterRow>
             </Filter>

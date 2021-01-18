@@ -2,8 +2,7 @@
 
 const { capture } = require("../sentry");
 
-const getElasticInstance = require("./index");
-const esClient = getElasticInstance();
+const esClient = require("./index");
 
 //https://www.elastic.co/guide/en/elasticsearch/client/javascript-api/current/bulk_examples.html
 
@@ -16,16 +15,13 @@ function Mongoosastic(schema, index) {
   const indexName = index;
   const typeName = "_doc";
 
-  //ElasticSearch Client
+  if (!esClient) return;
 
+  //ElasticSearch Client
   async function createMapping() {
     try {
       const exists = await esClient.indices.exists({ index: indexName });
       if (!exists) await esClient.indices.create({ index: indexName });
-
-      // const completeMapping = {};
-      // completeMapping[typeName] = getMapping(schema);
-      // await esClient.indices.putMapping({ index: indexName, type: typeName, include_type_name: true, body: completeMapping });
     } catch (e) {
       console.log("Error update mapping", e);
     }
@@ -206,8 +202,6 @@ function getMapping(schema) {
   return { properties };
 }
 
-module.exports = Mongoosastic;
-
 function serialize(model, mapping) {
   let name, outModel;
 
@@ -242,3 +236,5 @@ function serialize(model, mapping) {
 
   return outModel;
 }
+
+module.exports = Mongoosastic;

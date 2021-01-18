@@ -4,16 +4,15 @@ import { Col, Row } from "reactstrap";
 import { Field, Formik } from "formik";
 import { Modal } from "reactstrap";
 import LoadingButton from "../../components/loadingButton";
+import Historic from "../../components/historic";
 
 import DateInput from "../../components/dateInput";
-import { departmentList, regionList, YOUNG_STATUS, translate } from "../../utils";
+import { openDocumentInNewtab, departmentList, regionList, YOUNG_STATUS, translate } from "../../utils";
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 
 export default (props) => {
   const [young, setYoung] = useState();
-  const [currentFile, setCurrentFile] = useState(null);
-  const [buttonsLoading, setButtonsLoading] = useState({});
 
   useEffect(() => {
     (async () => {
@@ -39,7 +38,6 @@ export default (props) => {
   return (
     //@todo fix the depart and region
     <Wrapper>
-      <Image value={currentFile} onChange={() => setCurrentFile(null)} />
       <Formik
         initialValues={young}
         onSubmit={async (values) => {
@@ -75,12 +73,8 @@ export default (props) => {
                         <InfoBtn
                           key={i}
                           color="white"
-                          loading={buttonsLoading[`cniFiles${i}`]}
                           onClick={async () => {
-                            setButtonsLoading({ ...buttonsLoading, [`cniFiles${i}`]: true });
-                            const { data, ok } = await api.get(`/referent/youngFile/${values._id}/cniFiles/${e}`);
-                            setButtonsLoading({ ...buttonsLoading, [`cniFiles${i}`]: false });
-                            setCurrentFile(data);
+                            openDocumentInNewtab(await api.get(`/referent/youngFile/${values._id}/cniFiles/${e}`));
                           }}
                         >{`Visualiser la pièce d’identité (${i + 1}/${values.cniFiles.length})`}</InfoBtn>
                       );
@@ -93,15 +87,7 @@ export default (props) => {
                   <div>
                     <BoxTitle>{` Status : ${translate(young.status)}`}</BoxTitle>
                   </div>
-                  <BoxContent direction="column">
-                    {young && young.historic && young.historic.length !== 0 && (
-                      <div className="info">
-                        {young.historic.map((historicItem, key) => (
-                          <HistoricItem key={key} item={historicItem} />
-                        ))}
-                      </div>
-                    )}
-                  </BoxContent>
+                  <BoxContent direction="column">{young && young.historic && young.historic.length !== 0 && <Historic value={young.historic} />}</BoxContent>
                 </Box>
               </Col>
               <Col md={6} style={{ marginBottom: "20px" }}>
@@ -262,12 +248,8 @@ export default (props) => {
                         <InfoBtn
                           key={i}
                           color="white"
-                          loading={buttonsLoading[`highSkilledActivityProofFiles${i}`]}
                           onClick={async () => {
-                            setButtonsLoading({ ...buttonsLoading, [`highSkilledActivityProofFiles${i}`]: true });
-                            const { data, ok } = await api.get(`/referent/youngFile/${values._id}/highSkilledActivityProofFiles/${e}`);
-                            setButtonsLoading({ ...buttonsLoading, [`highSkilledActivityProofFiles${i}`]: false });
-                            setCurrentFile(data);
+                            openDocumentInNewtab(await api.get(`/referent/youngFile/${values._id}/highSkilledActivityProofFiles/${e}`));
                           }}
                         >{`Visualiser le justificatif d'engagement (${i + 1}/${values.highSkilledActivityProofFiles.length})`}</InfoBtn>
                       );
@@ -338,12 +320,8 @@ export default (props) => {
                         <InfoBtn
                           key={i}
                           color="white"
-                          loading={buttonsLoading[`parentConsentmentFiles${i}`]}
                           onClick={async () => {
-                            setButtonsLoading({ ...buttonsLoading, [`parentConsentmentFiles${i}`]: true });
-                            const { data, ok } = await api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${values.parentConsentmentFiles[0]}`);
-                            setButtonsLoading({ ...buttonsLoading, [`parentConsentmentFiles${i}`]: false });
-                            setCurrentFile(data);
+                            openDocumentInNewtab(await api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${values.parentConsentmentFiles[0]}`));
                           }}
                         >
                           Visualiser le formulaire de consentement
@@ -401,11 +379,10 @@ export default (props) => {
                       title="Région"
                       options={regionList.map((r) => ({ value: r, label: r }))}
                     />
-                    {values.parentConsentmentFiles && values.parentConsentmentFiles.length ? (
+                    {values.parentConsentmentFiles && values.parentConsentmentFiles.length === 2 ? (
                       <InfoBtn
                         onClick={async () => {
-                          const { data, ok } = await api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${values.parentConsentmentFiles[0]}`);
-                          setCurrentFile(data);
+                          openDocumentInNewtab(await api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${values.parentConsentmentFiles[1]}`));
                         }}
                       >
                         Visualiser le formulaire de consentement
@@ -435,12 +412,8 @@ export default (props) => {
                         <InfoBtn
                           key={i}
                           color="white"
-                          loading={buttonsLoading[`imageRightFiles${i}`]}
                           onClick={async () => {
-                            setButtonsLoading({ ...buttonsLoading, [`imageRightFiles${i}`]: true });
-                            const { data, ok } = await api.get(`/referent/youngFile/${values._id}/imageRightFiles/${e}`);
-                            setButtonsLoading({ ...buttonsLoading, [`imageRightFiles${i}`]: false });
-                            setCurrentFile(data);
+                            openDocumentInNewtab(await api.get(`/referent/youngFile/${values._id}/imageRightFiles/${e}`));
                           }}
                         >{`Visualiser le formulaire de consentement de droit à l'image (${i + 1}/${values.imageRightFiles.length})`}</InfoBtn>
                       );
@@ -456,31 +429,6 @@ export default (props) => {
   );
 };
 
-const HistoricItem = ({ item }) => {
-  const formatDate = (d) => {
-    const date = new Date(d);
-    return date.toLocaleDateString();
-  };
-
-  let color = "#6CC763";
-  if (item.status === YOUNG_STATUS.WAITING_CORRECTION) color = "#FEB951";
-  if (item.status === YOUNG_STATUS.WAITING_VALIDATION) color = "#FE7B52";
-  if (item.status === YOUNG_STATUS.REFUSED) color = "#F8A9AD";
-  if (item.status === YOUNG_STATUS.IN_PROGRESS) color = "#382F79";
-
-  return (
-    <>
-      <Badge color={color}>{translate(item.status)}</Badge>
-      <div className="history-detail">
-        {item.note ? <div>{item.note}</div> : null}
-        <div className="muted">
-          Par <b>{item.userName}</b> • le {formatDate(item.createdAt)}
-        </div>
-      </div>
-    </>
-  );
-};
-
 const Item = ({ title, values, name, handleChange, type = "text", disabled = false }) => {
   const renderInput = () => {
     if (type === "date") {
@@ -488,14 +436,6 @@ const Item = ({ title, values, name, handleChange, type = "text", disabled = fal
         <>
           <Field
             hidden
-            validate={(v) => {
-              if (!v) return requiredMessage;
-              var from = new Date(2003, 6, 2); // -1 because months are from 0 to 11
-              var to = new Date(2006, 3, 20);
-              const [y, m, d] = v.substring(0, 10).split("-");
-              var check = new Date(Date.UTC(parseInt(y), parseInt(m - 1), parseInt(d)));
-              return (check < from || check > to) && "Vous n'avez pas l'âge requis pour vous inscrire au SNU";
-            }}
             name="birthdateAt"
             value={values.birthdateAt}
           />
@@ -535,19 +475,6 @@ const Select = ({ title, name, values, handleChange, disabled, errors, touched, 
         </select>
       </Col>
     </Row>
-  );
-};
-
-const Image = ({ value, onChange }) => {
-  if (!value) return <div />;
-  const arrayBufferView = new Uint8Array(value.data);
-  const blob = new Blob([arrayBufferView], { type: "image/png" });
-  const urlCreator = window.URL || window.webkitURL;
-  const imageUrl = urlCreator.createObjectURL(blob);
-  return (
-    <Modal size="lg" isOpen={true} toggle={onChange}>
-      <img style={{ objectFit: "contain", height: "90vh" }} src={imageUrl} />
-    </Modal>
   );
 };
 
@@ -657,16 +584,6 @@ const BoxContent = styled.div`
       margin-right: 5px;
     }
   }
-
-  .muted {
-    color: #666;
-  }
-  .history-detail {
-    font-size: 0.8rem;
-    margin-top: 5px;
-    margin-left: 10px;
-  }
-
   .quote {
     font-size: 18px;
     font-weight: 400;

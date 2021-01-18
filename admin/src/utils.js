@@ -1,3 +1,5 @@
+import { toastr } from "react-redux-toastr";
+
 export const domains = ["Défense et mémoire", "Sécurité", "Solidarité", "Santé", "Éducation", "Culture", "Sport", "Environnement et développement durable", "Citoyenneté"];
 export const status = ["Brouillon", "En attente de validation", "En attente de correction", "Validée", "Refusée", "Annulée", "Archivée"];
 
@@ -77,6 +79,14 @@ export const translate = (value) => {
     default:
       return value;
   }
+};
+
+export const getFilterLabel = (selected, placeholder = "Choisissez un filtre") => {
+  if (Object.keys(selected).length === 0) return placeholder;
+  const translated = Object.keys(selected).map((item) => {
+    return translate(item);
+  });
+  return translated.join(", ");
 };
 
 export const departmentList = [
@@ -405,3 +415,17 @@ export const REFERENT_ROLES = {
   REFERENT_DEPARTMENT: "referent_department",
   REFERENT_REGION: "referent_region",
 };
+
+// Open a document from an API response that contains `data` and `mimeType`.
+export async function openDocumentInNewtab(apiResponse) {
+  const { data, mimeType, ok, code } = apiResponse;
+  if (!ok) {
+    toastr.error("Impossible d'afficher le document", code || '');
+    return;
+  }
+  const arrayBufferView = new Uint8Array(data.data);
+  const blob = new Blob([arrayBufferView], { type: mimeType });
+  const urlCreator = window.URL || window.webkitURL;
+  const fileURL = urlCreator.createObjectURL(blob);
+  window.open(fileURL);
+}

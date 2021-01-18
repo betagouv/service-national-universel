@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
+const validator = require("validator");
 
 const { capture } = require("./sentry");
 
@@ -11,6 +12,7 @@ const { sendEmail } = require("./sendinblue");
 
 const EMAIL_OR_PASSWORD_INVALID = "EMAIL_OR_PASSWORD_INVALID";
 const PASSWORD_INVALID = "PASSWORD_INVALID";
+const EMAIL_INVALID = "EMAIL_INVALID";
 const EMAIL_AND_PASSWORD_REQUIRED = "EMAIL_AND_PASSWORD_REQUIRED";
 const PASSWORD_TOKEN_EXPIRED_OR_INVALID = "PASSWORD_TOKEN_EXPIRED_OR_INVALID";
 const PASSWORDS_NOT_MATCH = "PASSWORDS_NOT_MATCH";
@@ -23,6 +25,13 @@ const USER_NOT_EXISTS = "USER_NOT_EXISTS";
 const COOKIE_MAX_AGE = 60 * 60 * 2 * 1000; // 2h
 const JWT_MAX_AGE = 60 * 60 * 2; // 2h
 
+function cookieOptions() {
+  if (config.ENVIRONMENT === "development") {
+    return { maxAge: COOKIE_MAX_AGE, httpOnly: true, secure: false };
+  } else {
+    return { maxAge: COOKIE_MAX_AGE, httpOnly: true, secure: true, sameSite: "none" };
+  }
+}
 class Auth {
   constructor(model) {
     this.model = model;
@@ -46,9 +55,7 @@ class Auth {
       await user.save();
 
       const token = jwt.sign({ _id: user.id }, config.secret, { expiresIn: JWT_MAX_AGE });
-      const opts = { maxAge: COOKIE_MAX_AGE, secure: config.ENVIRONMENT === "development" ? false : true, httpOnly: true };
-
-      res.cookie("jwt", token, opts);
+      res.cookie("jwt", token, cookieOptions());
 
       return res.status(200).send({ ok: true, token, user });
     } catch (error) {
@@ -63,14 +70,16 @@ class Auth {
 
       if (!validatePassword(password)) return res.status(200).send({ ok: false, user: null, code: PASSWORD_NOT_VALIDATED });
 
+      const email = reqEmail.trim().toLowerCase();
+      if (!validator.isEmail(email)) return res.status(200).send({ ok: false, user: null, code: EMAIL_INVALID });
+
       const firstName = reqFirstName.charAt(0).toUpperCase() + (reqFirstName || "").toLowerCase().slice(1);
       const lastName = reqLastName.toUpperCase();
       const email = reqEmail.trim().toLowerCase();
 
       const user = await this.model.create({ password, email, firstName, lastName });
       const token = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });
-      const opts = { maxAge: COOKIE_MAX_AGE, secure: config.ENVIRONMENT === "development" ? false : true, httpOnly: false };
-      res.cookie("jwt", token, opts);
+      res.cookie("jwt", token, cookieOptions());
 
       return res.status(200).send({ user, token, ok: true });
     } catch (error) {

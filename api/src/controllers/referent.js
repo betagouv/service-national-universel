@@ -5,6 +5,8 @@ const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
 const jwt = require("jsonwebtoken");
+const mime = require("mime-types");
+const FileType = require("file-type");
 
 const { getFile } = require("../utils");
 const config = require("../config");
@@ -29,6 +31,14 @@ const USER_NOT_FOUND = "USER_NOT_FOUND";
 const OPERATION_UNAUTHORIZED = "OPERATION_UNAUTHORIZED";
 
 const COOKIE_MAX_AGE = 2592000000;
+
+function cookieOptions() {
+  if (process.env.NODE_ENV !== "production") {
+    return { maxAge: COOKIE_MAX_AGE, httpOnly: true, secure: false };
+  } else {
+    return { maxAge: COOKIE_MAX_AGE, httpOnly: true, secure: true, sameSite: "none" };
+  }
+}
 
 router.post("/signin", (req, res) => ReferentAuth.signin(req, res));
 router.post("/logout", (req, res) => ReferentAuth.logout(req, res));
@@ -145,8 +155,8 @@ router.post("/signup", passport.authenticate("referent", { session: false }), as
     referent.set({ invitationExpires: null });
 
     const token = jwt.sign({ _id: referent.id }, config.secret, { expiresIn: "30d" });
-    const opts = { maxAge: COOKIE_MAX_AGE, secure: process.env.NODE_ENV === "production" ? true : false, httpOnly: true };
-    res.cookie("jwt", token, opts);
+    res.cookie("jwt", token, cookieOptions());
+
     await referent.save();
 
     referent.password = undefined;
@@ -197,8 +207,19 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
     const { youngId, key, fileName } = req.params;
     const downloaded = await getFile(`app/young/${youngId}/${key}/${fileName}`);
     const decryptedBuffer = decrypt(downloaded.Body);
+    let mimeFromFile = null;
+    try {
+      const { mime } = await FileType.fromBuffer(decryptedBuffer);
+      mimeFromFile = mime;
+    } catch (e) {
+      capture(e);
+    }
 
-    return res.status(200).send({ data: Buffer.from(decryptedBuffer, "base64"), ok: true });
+    return res.status(200).send({
+      data: Buffer.from(decryptedBuffer, "base64"),
+      mimeType: mimeFromFile ? mimeFromFile : mime.lookup(fileName),
+      ok: true,
+    });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: SERVER_ERROR });
