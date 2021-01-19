@@ -168,6 +168,9 @@ export default () => {
                 loader={<div style={{ padding: "0 20px" }}>Chargement...</div>}
                 innerClass={{ pagination: "pagination" }}
                 renderNoResults={() => <div />}
+                onError={() => {
+                  window.location.href = "/auth?unauthorized=1";
+                }}
                 renderResultStats={(e) => {
                   return (
                     <>
