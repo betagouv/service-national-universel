@@ -2,10 +2,10 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Col, Row } from "reactstrap";
 import { Field, Formik } from "formik";
-import { Modal } from "reactstrap";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/fr";
+import { useSelector } from "react-redux";
 
 import LoadingButton from "../../components/loadingButton";
 import Historic from "../../components/historic";
@@ -14,9 +14,12 @@ import DateInput from "../../components/dateInput";
 import { openDocumentInNewtab, departmentList, regionList, YOUNG_STATUS, translate } from "../../utils";
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
+import { useHistory } from "react-router-dom";
 
 export default (props) => {
   const [young, setYoung] = useState();
+  const user = useSelector((state) => state.Auth.user);
+  const history = useHistory();
 
   useEffect(() => {
     (async () => {
@@ -426,6 +429,18 @@ export default (props) => {
           </>
         )}
       </Formik>
+      {user.role === "admin" && (
+        <DeleteBtn
+          onClick={async () => {
+            if (!confirm("Êtes-vous sûr(e) de vouloir supprimer ce profil")) return;
+            await api.remove(`/young/${young._id}`);
+            toastr.success("Ce profil a été supprimé.");
+            return history.push(`/inscription`);
+          }}
+        >
+          Supprimer
+        </DeleteBtn>
+      )}
     </Wrapper>
   );
 };
@@ -503,6 +518,20 @@ const InfoBtn = styled(LoadingButton)`
   margin-top: 1rem;
   margin-left: 1rem;
   width: fit-content;
+`;
+
+const DeleteBtn = styled.button`
+  background-color: #bd2130;
+  border: none;
+  border-radius: 5px;
+  padding: 7px 30px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  :hover {
+    background: #dc3545;
+  }
 `;
 
 const Wrapper = styled.div`
