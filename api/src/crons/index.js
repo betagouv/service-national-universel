@@ -20,8 +20,6 @@ const autoValidate = async () => {
 
   await cursor.eachAsync(async (doc) => {
     try {
-      console.log("checking", doc.email);
-
       // check the last item in historic with status WAITING_VALIDATION
       const lastStatus = getLastStatus(doc, "WAITING_VALIDATION");
 
