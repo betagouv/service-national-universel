@@ -69,8 +69,8 @@ const AutoComplete = ({ placeholder, onSelect }) => {
   const [hits, setHits] = useState([]);
   const [value, setValue] = useState("");
 
-  const onSuggestionsFetchRequested = ({ value }) => {
-    setHits(getSuggestions(value));
+  const onSuggestionsFetchRequested = async ({ value }) => {
+    setHits(await getSuggestions(value));
   };
 
   const onSuggestionsClearRequested = () => {
@@ -101,7 +101,7 @@ const AutoComplete = ({ placeholder, onSelect }) => {
     const hits = responses[0]?.hits?.hits.map((e) => e._source);
     // if (hits.length) return setHits(hits);
     hits.push({ name2: "", city: "", postcode: "", type: "AUTRE" });
-    return setHits(hits);
+    return hits;
   };
 
   return (
