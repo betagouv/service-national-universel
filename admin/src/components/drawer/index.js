@@ -41,9 +41,9 @@ export default () => {
         {/*   <li>
           <NavLink to="/tuteur">Tuteurs</NavLink>
         </li> */}
-        {/* <li>
+        <li>
           <NavLink to="/volontaire">Volontaires</NavLink>
-        </li> */}
+        </li>
         <li>
           <NavLink to="/inscription">Candidature</NavLink>
         </li>
