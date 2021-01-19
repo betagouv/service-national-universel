@@ -5,7 +5,8 @@ const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
 const jwt = require("jsonwebtoken");
-const mime = require('mime-types');
+const mime = require("mime-types");
+const FileType = require("file-type");
 
 const { getFile } = require("../utils");
 const config = require("../config");
@@ -67,10 +68,11 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
 router.post("/signup_invite/:role", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const obj = {};
-    if (req.body.hasOwnProperty(`email`)) obj.email = req.body.email;
+    if (req.body.hasOwnProperty(`email`)) obj.email = req.body.email.trim().toLowerCase();
     if (req.body.hasOwnProperty(`firstName`)) obj.firstName = req.body.firstName;
     if (req.body.hasOwnProperty(`lastName`)) obj.lastName = req.body.lastName;
     if (req.body.hasOwnProperty(`role`)) obj.role = req.body.role;
+
     if (req.body.hasOwnProperty(`region`)) obj.region = req.body.region; //TODO
     if (req.body.hasOwnProperty(`department`)) obj.department = req.body.department;
 
@@ -222,11 +224,16 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
     const { youngId, key, fileName } = req.params;
     const downloaded = await getFile(`app/young/${youngId}/${key}/${fileName}`);
     const decryptedBuffer = decrypt(downloaded.Body);
+    let mimeFromFile = null;
+    try {
+      const { mime } = await FileType.fromBuffer(decryptedBuffer);
+      mimeFromFile = mime;
+    } catch (e) {}
 
-    return res.status(200).send({ 
-      data: Buffer.from(decryptedBuffer, "base64"), 
-      mimeType: mime.lookup(fileName),
-      ok: true 
+    return res.status(200).send({
+      data: Buffer.from(decryptedBuffer, "base64"),
+      mimeType: mimeFromFile ? mimeFromFile : mime.lookup(fileName),
+      ok: true,
     });
   } catch (error) {
     capture(error);

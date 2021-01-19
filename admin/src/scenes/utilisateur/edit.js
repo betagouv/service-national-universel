@@ -2,6 +2,9 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Col, Row } from "reactstrap";
 import { Field, Formik } from "formik";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import "dayjs/locale/fr";
 
 import DateInput from "../../components/dateInput";
 import { departmentList, regionList, translate, REFERENT_ROLES } from "../../utils";
@@ -24,12 +27,9 @@ export default (props) => {
 
   const getSubtitle = () => {
     const createdAt = new Date(user.createdAt);
-    createdAt.setHours(0, 0, 0, 0);
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-    const diffTime = Math.abs(createdAt - now);
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    return `Inscrit(e) il y a ${diffDays} jour(s) - ${createdAt.toLocaleDateString()}`;
+    dayjs.extend(relativeTime).locale("fr");
+    const diff = dayjs(createdAt).fromNow();
+    return `Inscrit(e) ${diff} - ${createdAt.toLocaleDateString()}`;
   };
 
   return (

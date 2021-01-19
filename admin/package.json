@@ -58,6 +58,7 @@
     "babel-preset-env": "^1.7.0",
     "babel-webpack-plugin": "^0.1.2",
     "bootstrap": "^4.5.2",
+    "dayjs": "^1.10.3",
     "express": "^4.17.1",
     "formik": "^2.1.5",
     "hsts": "^2.2.0",

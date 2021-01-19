@@ -1,9 +1,10 @@
-require("dotenv").config({ path: "../.env-prod" });
+require("dotenv").config({ path: "../.env-staging" });
 
 require("../src/mongo");
 const YoungModel = require("../src/models/young");
-
+// @TODO script to be validated
 (async function run() {
+  console.log("Script started.");
   const cursor = YoungModel.find({}).cursor();
   await cursor.eachAsync(async function (doc) {
     try {
@@ -21,6 +22,8 @@ const YoungModel = require("../src/models/young");
       console.log("e", e);
     }
   });
+  console.log("DONE.");
+  process.exit(1);
 })();
 
 const updateDepartmentRegion = async ({ doc, departmentKey, regionKey, zipKey }) => {
@@ -28,7 +31,7 @@ const updateDepartmentRegion = async ({ doc, departmentKey, regionKey, zipKey })
   // not a correct department name
   if (index === -1) {
     if (doc[zipKey]) {
-      console.log(`\nincorrect ${departmentKey} >`, doc[departmentKey]);
+      console.log(`\nincorrect ${departmentKey} (${doc[departmentKey]}) for young ${doc.email}`);
       console.log(zipKey, doc[zipKey]);
       let depart = doc[zipKey].substr(0, 2);
       if (["97", "98"].includes(depart)) {
@@ -38,9 +41,9 @@ const updateDepartmentRegion = async ({ doc, departmentKey, regionKey, zipKey })
       const region = department2region[departmentLookUp[depart]];
       console.log(departmentKey, department);
       console.log(regionKey, region);
-      await doc.set({ departmentKey: department, regionKey: region });
-      // await doc.save();
-      // await doc.index();
+      await doc.set({ [departmentKey]: department, [regionKey]: region });
+      await doc.save();
+      await doc.index();
       return;
     }
   }
@@ -49,13 +52,13 @@ const updateDepartmentRegion = async ({ doc, departmentKey, regionKey, zipKey })
   // not a correct region name
   if (index2 === -1) {
     if (doc[departmentKey]) {
-      console.log(`\nincorrect ${regionKey} >`, doc[regionKey]);
+      console.log(`\nincorrect ${regionKey} (${doc[regionKey]}) for young ${doc.email}`);
       console.log(departmentKey, doc[departmentKey]);
       const region = department2region[doc[departmentKey]];
       console.log(regionKey, region);
-      await doc.set({ regionKey: region });
-      // await doc.save();
-      // await doc.index();
+      await doc.set({ [regionKey]: region });
+      await doc.save();
+      await doc.index();
       return;
     }
   }
@@ -166,6 +169,7 @@ const departmentLookUp = {
   974: "La Réunion",
   975: "Saint-Pierre-et-Miquelon",
   976: "Mayotte",
+  978: "Saint-Martin",
   987: "Polynésie française",
   988: "Nouvelle-Calédonie",
 };

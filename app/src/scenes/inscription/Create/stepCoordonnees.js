@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import styled from "styled-components";
-import { Row, Col, Input } from "reactstrap";
+import { Row, Col } from "reactstrap";
 import { Field, Formik } from "formik";
 import { useSelector, useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
@@ -14,12 +14,18 @@ import ErrorMessage, { requiredMessage } from "../components/errorMessage";
 import { setYoung } from "../../../redux/auth/actions";
 
 import api from "../../../services/api";
+import matomo from "../../../services/matomo";
+
 import { saveYoung, STEPS, YOUNG_SITUATIONS } from "../utils";
 
 import AddressInput from "../components/addressInput";
 import Etablissement from "../components/etablissmentInput";
 
 export default () => {
+  useEffect(() => {
+    matomo.logEvent("inscription", "open_step", "step", "coordonnees");
+  }, []);
+
   const history = useHistory();
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);

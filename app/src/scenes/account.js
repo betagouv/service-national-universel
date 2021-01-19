@@ -9,6 +9,7 @@ import LoadingButton from "../components/loadingButton";
 import { setYoung } from "../redux/auth/actions";
 import ErrorMessage, { requiredMessage } from "../scenes/inscription/components/errorMessage";
 import { getPasswordErrorMessage } from "../utils";
+import validator from "validator";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
@@ -22,6 +23,8 @@ export default () => {
       </Heading>
       <Formik
         initialValues={young}
+        validateOnChange={false}
+        validateOnBlur={false}
         onSubmit={async (values) => {
           try {
             const { ok, code, data: young } = await api.put("/young", values);
@@ -34,14 +37,22 @@ export default () => {
           }
         }}
       >
-        {({ values, handleChange, handleSubmit, isSubmitting }) => (
+        {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
           <>
             <Title>Email</Title>
             <FormRow>
-              <Item name="email" values={values} handleChange={handleChange} title="E-mail" disabled />
-              {/* <ContinueButton style={{ marginLeft: 10 }} onClick={handleSubmit} disabled={isSubmitting}>
-                Modifier
-              </ContinueButton> */}
+              <Item
+                name="email"
+                values={values}
+                handleChange={handleChange}
+                title="E-mail"
+                validate={(v) => (!v && requiredMessage) || (!validator.isEmail(v) && "Ce champ est au mauvais format")}
+                errors={errors}
+                touched={touched}
+              />
+              <ContinueButton style={{ marginLeft: 10 }} onClick={handleSubmit} disabled={isSubmitting}>
+                Enregistrer
+              </ContinueButton>
             </FormRow>
           </>
         )}
@@ -104,7 +115,7 @@ export default () => {
                 touched={touched}
               />
             </div>
-            <ContinueButton onClick={handleSubmit} disabled={isSubmitting} style={{ width: "auto", margin: "40px 0" }}>
+            <ContinueButton onClick={handleSubmit} disabled={isSubmitting} style={{ margin: "2rem 0" }}>
               Valider mon nouveau mot de passe
             </ContinueButton>
           </>
@@ -180,7 +191,7 @@ export default () => {
                 <Item name="parent2Phone" values={values} handleChange={handleChange} title="Téléphone" />
               </FormRow>
             )}
-            <ContinueButton style={{ fontSize: 20, padding: "10px 20px" }} onClick={handleSubmit}>
+            <ContinueButton onClick={handleSubmit} disabled={isSubmitting}>
               Enregistrer
             </ContinueButton>
           </>
@@ -205,8 +216,10 @@ const Select = ({ title, name, values, handleChange, errors, touched, validate, 
     <Col md={4} style={{ marginTop: 20 }}>
       <Label>{title}</Label>
       <select className="form-control" name={name} value={values[name]} onChange={handleChange} validate={validate}>
-        {options.map((o) => (
-          <option value={o.value} label={o.label} />
+        {options.map((o, i) => (
+          <option key={i} value={o.value}>
+            {o.label}
+          </option>
         ))}
       </select>
       {errors && <ErrorMessage errors={errors} touched={touched} name={name} />}
@@ -224,21 +237,27 @@ const Heading = styled.div`
   margin-bottom: 30px;
   span {
     color: #42389d;
-    font-size: 16px;
+    font-size: 1rem;
     font-weight: 700;
     margin-bottom: 5px;
   }
   h1 {
     color: #161e2e;
     margin-bottom: 0;
-    font-size: 45px;
+    font-size: 3rem;
+    @media (max-width: 767px) {
+      font-size: 1.8rem;
+    }
     font-weight: 800;
   }
 `;
 
 const Title = styled.h2`
   color: #161e2e;
-  font-size: 32px;
+  font-size: 2rem;
+  @media (max-width: 767px) {
+    font-size: 1.5rem;
+  }
   font-weight: 700;
   margin-bottom: 25px;
 `;
@@ -263,6 +282,9 @@ const Label = styled.div`
 `;
 
 const ContinueButton = styled.button`
+  @media (max-width: 767px) {
+    margin: 1rem 0;
+  }
   color: #fff;
   background-color: #5145cd;
   padding: 10px 40px;
@@ -272,7 +294,7 @@ const ContinueButton = styled.button`
   font-weight: 600;
   font-size: 14px;
   display: block;
-  width: 140px;
+  width: auto;
   outline: 0;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   align-self: flex-end;
