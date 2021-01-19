@@ -30,7 +30,7 @@ export default (props) => {
   if (young === undefined) return <div>Chargement...</div>;
 
   const getSubtitle = () => {
-    const createdAt = new Date(user.createdAt);
+    const createdAt = new Date(young.createdAt);
     dayjs.extend(relativeTime).locale("fr");
     const diff = dayjs(createdAt).fromNow();
     return `Inscrit(e) ${diff} - ${createdAt.toLocaleDateString()}`;
