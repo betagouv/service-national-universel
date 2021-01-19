@@ -69,8 +69,8 @@ const AutoComplete = ({ placeholder, onSelect }) => {
   const [hits, setHits] = useState([]);
   const [value, setValue] = useState("");
 
-  const onSuggestionsFetchRequested = ({ value }) => {
-    setHits(getSuggestions(value));
+  const onSuggestionsFetchRequested = async ({ value }) => {
+    setHits(await getSuggestions(value));
   };
 
   const onSuggestionsClearRequested = () => {
@@ -98,10 +98,10 @@ const AutoComplete = ({ placeholder, onSelect }) => {
     queries.push({ query: { multi_match: { query: text, type: "most_fields", fields: ["name2", "city", "type", "postcode"] } } });
     const { responses } = await api.esQuery(queries);
     console.log("responses", responses);
-    const hits = responses[0]?.hits?.hits.map((e) => e._source);
+    const hits = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
     // if (hits.length) return setHits(hits);
     hits.push({ name2: "", city: "", postcode: "", type: "AUTRE" });
-    return setHits(hits);
+    return hits;
   };
 
   return (

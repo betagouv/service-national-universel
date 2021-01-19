@@ -10,12 +10,15 @@ import SelectStatus from "../../components/selectStatus";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import "dayjs/locale/fr";
 
 import { translate, YOUNG_STATUS, YOUNG_PHASE, getFilterLabel } from "../../utils";
 import { toastr } from "react-redux-toastr";
 import MailCorrection from "./MailCorrection";
 
-const FILTERS = ["SEARCH", "STATUS", "FORMAT", "REGION", "DEPARTMENT", "PHASE", "REMOVEINPROGRESS"];
+const FILTERS = ["SEARCH", "STATUS", "REGION", "DEPARTMENT", "PHASE", "REMOVEINPROGRESS"];
 
 export default () => {
   const [young, setYoung] = useState(null);
@@ -32,12 +35,68 @@ export default () => {
                   title="Exporter les inscriptions"
                   collection="candidature"
                   react={{ and: FILTERS }}
-                  transform={({ lastName, firstName, department, email }) => {
+                  transform={(data) => {
                     return {
-                      Département: department,
-                      Nom: lastName,
-                      Prénom: firstName,
-                      Email: email,
+                      _id: data._id,
+                      cohort: data.cohort,
+                      firstName: data.firstName,
+                      lastName: data.lastName,
+                      birthdateAt: data.birthdateAt,
+                      gender: data.gender,
+                      email: data.email,
+                      phone: data.phone,
+                      address: data.address,
+                      zip: data.zip,
+                      city: data.city,
+                      department: data.department,
+                      region: data.region,
+                      situation: data.situation,
+                      schoolType: data.schoolType,
+                      schoolName: data.schoolName,
+                      schoolZip: data.schoolZip,
+                      schoolCity: data.schoolCity,
+                      schoolDepartment: data.schoolDepartment,
+                      handicap: data.handicap,
+                      ppsBeneficiary: data.ppsBeneficiary,
+                      paiBeneficiary: data.paiBeneficiary,
+                      medicosocialStructure: data.medicosocialStructure,
+                      medicosocialStructureName: data.medicosocialStructureName,
+                      medicosocialStructureAddress: data.medicosocialStructureAddress,
+                      medicosocialStructureZip: data.medicosocialStructureZip,
+                      medicosocialStructureCity: data.medicosocialStructureCity,
+                      specificAmenagment: data.specificAmenagment,
+                      specificAmenagmentType: data.specificAmenagmentType,
+                      highSkilledActivity: data.highSkilledActivity,
+                      highSkilledActivityType: data.highSkilledActivityType,
+                      highSkilledActivityProofFiles: data.highSkilledActivityProofFiles,
+                      parentConsentment: data.parentConsentment,
+                      parent1Status: data.parent1Status,
+                      parent1FirstName: data.parent1FirstName,
+                      parent1LastName: data.parent1LastName,
+                      parent1Email: data.parent1Email,
+                      parent1Phone: data.parent1Phone,
+                      parent1Address: data.parent1Address,
+                      parent1Zip: data.parent1Zip,
+                      parent1City: data.parent1City,
+                      parent1Department: data.parent1Department,
+                      parent1Region: data.parent1Region,
+                      parent2Status: data.parent2Status,
+                      parent2FirstName: data.parent2FirstName,
+                      parent2LastName: data.parent2LastName,
+                      parent2Email: data.parent2Email,
+                      parent2Phone: data.parent2Phone,
+                      parent2Address: data.parent2Address,
+                      parent2Zip: data.parent2Zip,
+                      parent2City: data.parent2City,
+                      parent2Department: data.parent2Department,
+                      parent2Region: data.parent2Region,
+                      motivations: data.motivations,
+                      phase: data.phase,
+                      createdAt: data.createdAt,
+                      updatedAt: data.updatedAt,
+                      lastLoginAt: data.lastLoginAt,
+                      status: data.status,
+                      lastStatusAt: data.lastStatusAt,
                     };
                   }}
                 />
@@ -64,7 +123,7 @@ export default () => {
                     return `${translate(e)} (${count})`;
                   }}
                   title=""
-                  react={{ and: FILTERS }}
+                  react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
                   URLParams={true}
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Statut")}
@@ -75,7 +134,7 @@ export default () => {
                   componentId="REGION"
                   dataField="region.keyword"
                   title=""
-                  react={{ and: FILTERS }}
+                  react={{ and: FILTERS.filter((e) => e !== "REGION") }}
                   URLParams={true}
                   showSearch={false}
                   sortBy="asc"
@@ -86,7 +145,7 @@ export default () => {
                   componentId="DEPARTMENT"
                   dataField="department.keyword"
                   title=""
-                  react={{ and: FILTERS }}
+                  react={{ and: FILTERS.filter((e) => e !== "DEPARTMENT") }}
                   URLParams={true}
                   showSearch={false}
                   sortBy="asc"
@@ -104,12 +163,14 @@ export default () => {
                 // renderPagination={(e) => <ResultFooter {...e} />}
                 size={10}
                 showLoader={true}
-                // dataField="createdAt"
                 sortBy="desc"
                 dataField="createdAt"
                 loader={<div style={{ padding: "0 20px" }}>Chargement...</div>}
                 innerClass={{ pagination: "pagination" }}
                 renderNoResults={() => <div />}
+                onError={() => {
+                  window.location.href = "/auth?unauthorized=1";
+                }}
                 renderResultStats={(e) => {
                   return (
                     <>
@@ -153,12 +214,8 @@ export default () => {
 };
 
 const Hit = ({ hit, index, onClick }) => {
-  const createdAt = new Date(hit.createdAt);
-  createdAt.setHours(0, 0, 0, 0);
-  const now = new Date();
-  now.setHours(0, 0, 0, 0);
-  const diffTime = Math.abs(createdAt - now);
-  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  dayjs.extend(relativeTime).locale("fr");
+  const diff = dayjs(new Date(hit.createdAt)).fromNow();
 
   const formatLongDate = (date) => {
     const d = new Date(date);
@@ -172,7 +229,7 @@ const Hit = ({ hit, index, onClick }) => {
         <strong>
           {hit.firstName} {hit.lastName}
         </strong>
-        <div>{`Inscrit(e) il y a ${diffDays} jour(s) • ${formatLongDate(hit.createdAt)}`}</div>
+        <div>{`Inscrit(e) ${diff} • ${formatLongDate(hit.createdAt)}`}</div>
       </td>
       <td onClick={(e) => e.stopPropagation()}>
         <SelectStatus hit={hit} />

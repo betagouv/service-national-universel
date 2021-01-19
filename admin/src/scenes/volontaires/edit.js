@@ -3,6 +3,10 @@ import styled from "styled-components";
 import { Col, Row } from "reactstrap";
 import { Field, Formik } from "formik";
 import { Modal } from "reactstrap";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import "dayjs/locale/fr";
+
 import LoadingButton from "../../components/loadingButton";
 import Historic from "../../components/historic";
 
@@ -27,12 +31,10 @@ export default (props) => {
 
   const getSubtitle = () => {
     const createdAt = new Date(young.createdAt);
-    createdAt.setHours(0, 0, 0, 0);
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-    const diffTime = Math.abs(createdAt - now);
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    return `Inscrit(e) il y a ${diffDays} jour(s) - ${createdAt.toLocaleDateString()}`;
+
+    dayjs.extend(relativeTime).locale("fr");
+    const diff = dayjs(createdAt).fromNow();
+    return `Inscrit(e) ${diff} - ${createdAt.toLocaleDateString()}`;
   };
 
   return (
@@ -434,11 +436,7 @@ const Item = ({ title, values, name, handleChange, type = "text", disabled = fal
     if (type === "date") {
       return (
         <>
-          <Field
-            hidden
-            name="birthdateAt"
-            value={values.birthdateAt}
-          />
+          <Field hidden name="birthdateAt" value={values.birthdateAt} />
           <DateInput
             value={values.birthdateAt}
             onChange={(date) => {

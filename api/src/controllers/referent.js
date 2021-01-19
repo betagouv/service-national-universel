@@ -5,7 +5,8 @@ const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
 const jwt = require("jsonwebtoken");
-const mime = require('mime-types');
+const mime = require("mime-types");
+const FileType = require("file-type");
 
 const { getFile } = require("../utils");
 const config = require("../config");
@@ -18,7 +19,7 @@ const AuthObject = require("../auth");
 const { decrypt } = require("../cryptoUtils");
 const { sendEmail } = require("../sendinblue");
 const { validatePassword } = require("../utils");
-
+const { onlyAdmin } = require("../middleware/admin");
 const ReferentAuth = new AuthObject(ReferentObject);
 
 const SERVER_ERROR = "SERVER_ERROR";
@@ -28,8 +29,8 @@ const INVITATION_TOKEN_EXPIRED_OR_INVALID = "INVITATION_TOKEN_EXPIRED_OR_INVALID
 const NOT_FOUND = "NOT_FOUND";
 const USER_NOT_FOUND = "USER_NOT_FOUND";
 const OPERATION_UNAUTHORIZED = "OPERATION_UNAUTHORIZED";
-
-const COOKIE_MAX_AGE = 2592000000;
+const COOKIE_MAX_AGE = 60 * 60 * 2 * 1000; // 2h
+const JWT_MAX_AGE = 60 * 60 * 2; // 2h
 
 function cookieOptions() {
   if (process.env.NODE_ENV !== "production") {
@@ -47,13 +48,31 @@ router.post("/forgot_password", async (req, res) => ReferentAuth.forgotPassword(
 router.post("/forgot_password_reset", async (req, res) => ReferentAuth.forgotPasswordReset(req, res));
 router.post("/reset_password", passport.authenticate("referent", { session: false }), async (req, res) => ReferentAuth.resetPassword(req, res));
 
+router.post("/signin_as/:type/:id", passport.authenticate("referent", { session: false }), onlyAdmin, async (req, res) => {
+  try {
+    const { type, id } = req.params;
+    let user = null;
+    if (type === "referent") user = await ReferentObject.findById(id);
+    else if (type === "young") user = await YoungObject.findById(id);
+    if (!user) return res.status(404).send({ code: NOT_FOUND, ok: false });
+    const token = jwt.sign({ _id: user.id }, config.secret, { expiresIn: JWT_MAX_AGE });
+    const opts = { maxAge: COOKIE_MAX_AGE, secure: config.ENVIRONMENT === "development" ? false : true, httpOnly: true };
+    res.cookie("jwt", token, opts);
+    return res.status(200).send({ data: user, ok: true, token });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: SERVER_ERROR });
+  }
+});
+
 router.post("/signup_invite/:role", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const obj = {};
-    if (req.body.hasOwnProperty(`email`)) obj.email = req.body.email;
+    if (req.body.hasOwnProperty(`email`)) obj.email = req.body.email.trim().toLowerCase();
     if (req.body.hasOwnProperty(`firstName`)) obj.firstName = req.body.firstName;
     if (req.body.hasOwnProperty(`lastName`)) obj.lastName = req.body.lastName;
     if (req.body.hasOwnProperty(`role`)) obj.role = req.body.role;
+
     if (req.body.hasOwnProperty(`region`)) obj.region = req.body.region; //TODO
     if (req.body.hasOwnProperty(`department`)) obj.department = req.body.department;
 
@@ -205,11 +224,16 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
     const { youngId, key, fileName } = req.params;
     const downloaded = await getFile(`app/young/${youngId}/${key}/${fileName}`);
     const decryptedBuffer = decrypt(downloaded.Body);
+    let mimeFromFile = null;
+    try {
+      const { mime } = await FileType.fromBuffer(decryptedBuffer);
+      mimeFromFile = mime;
+    } catch (e) {}
 
-    return res.status(200).send({ 
-      data: Buffer.from(decryptedBuffer, "base64"), 
-      mimeType: mime.lookup(fileName),
-      ok: true 
+    return res.status(200).send({
+      data: Buffer.from(decryptedBuffer, "base64"),
+      mimeType: mimeFromFile ? mimeFromFile : mime.lookup(fileName),
+      ok: true,
     });
   } catch (error) {
     capture(error);
