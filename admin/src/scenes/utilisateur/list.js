@@ -84,6 +84,9 @@ export default () => {
                 sortBy="desc"
                 loader={<div style={{ padding: "0 20px" }}>Chargement...</div>}
                 renderNoResults={() => <div style={{ padding: "10px 25px" }}>No Results found.</div>}
+                onError={() => {
+                  window.location.href = "/auth?unauthorized=1";
+                }}
                 renderResultStats={(e) => {
                   return (
                     <>
