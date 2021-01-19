@@ -4,19 +4,17 @@ import styled from "styled-components";
 import { useSelector, useDispatch } from "react-redux";
 
 import { YOUNG_STATUS } from "../../utils";
-import WaitingValidation from "./waitingValidation";
-import WaitingCorrection from "./waitingCorrection";
-import Validated from "./validated";
-import Refused from "./refused";
+import StepWaitingValidation from "./stepWaitingValidation";
+import StepWaitingCorrection from "./stepWaitingCorrection";
+import StepValidated from "./stepValidated";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young) || {};
 
   const renderStep = () => {
-    if (young.status === YOUNG_STATUS.WAITING_CORRECTION) return <WaitingCorrection />;
-    if (young.status === YOUNG_STATUS.WAITING_VALIDATION) return <WaitingValidation />;
-    if (young.status === YOUNG_STATUS.VALIDATED) return <Validated />;
-    if (young.status === YOUNG_STATUS.REFUSED) return <Refused />;
+    if (young.status === YOUNG_STATUS.WAITING_CORRECTION) return <StepWaitingCorrection />;
+    if (young.status === YOUNG_STATUS.WAITING_VALIDATION) return <StepWaitingValidation />;
+    if (young.status === YOUNG_STATUS.VALIDATED) return <StepValidated />;
     return <div />;
   };
 

@@ -34,7 +34,6 @@ export default (props) => {
 
   const getSubtitle = () => {
     const createdAt = new Date(young.createdAt);
-
     dayjs.extend(relativeTime).locale("fr");
     const diff = dayjs(createdAt).fromNow();
     return `Inscrit(e) ${diff} - ${createdAt.toLocaleDateString()}`;

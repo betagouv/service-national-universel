@@ -2,17 +2,16 @@ import React, { useState } from "react";
 import { Col, DropdownItem, DropdownMenu, DropdownToggle, Label, Pagination, PaginationItem, PaginationLink, Row, UncontrolledDropdown } from "reactstrap";
 import { ReactiveBase, ReactiveList, SingleList, MultiDropdownList, MultiList, DataSearch } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
-import { toastr } from "react-redux-toastr";
-import { useDispatch } from "react-redux";
-import { setUser } from "../../redux/auth/actions";
 
-import { translate, getFilterLabel } from "../../utils";
+import { translate } from "../../utils";
 import ExportComponent from "../../components/Export";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
 
-const FILTERS = ["SEARCH", "ROLE", "REGION", "DEPARTMENT"];
+import { Link } from "react-router-dom";
+
+const FILTERS = ["SEARCH", "STATUT", "FORMAT"];
 
 export default () => {
   const [responsable, setResponsable] = useState(null);
@@ -50,47 +49,26 @@ export default () => {
                 autosuggest={false}
               />
               <FilterRow>
-                <MultiDropdownList
+                {/* <MultiDropdownList
                   className="dropdown-filter"
-                  componentId="ROLE"
-                  dataField="role.keyword"
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  react={{ and: FILTERS.filter((e) => e !== "ROLE") }}
-                  title=""
-                  URLParams={true}
-                  showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Rôle")}
-                />
-                <MultiDropdownList
+                    placeholder="STATUT"
+                    componentId="STATUS"
+                    dataField="status.keyword"
+                    renderItem={(e) => translate(e)}
+                    title=""
+                    URLParams={true}
+                    showSearch={false}
+                  />
+                  <MultiDropdownList
                   className="dropdown-filter"
-                  placeholder="Région"
-                  componentId="REGION"
-                  dataField="region.keyword"
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  react={{ and: FILTERS.filter((e) => e !== "REGION") }}
-                  title=""
-                  URLParams={true}
-                  showSearch={false}
-                  sortBy="asc"
-                />
-                <MultiDropdownList
-                  className="dropdown-filter"
-                  placeholder="Département"
-                  componentId="DEPARTMENT"
-                  dataField="department.keyword"
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  react={{ and: FILTERS.filter((e) => e !== "DEPARTMENT") }}
-                  title=""
-                  URLParams={true}
-                  showSearch={false}
-                  sortBy="asc"
-                />
+                    placeholder="FORMAT"
+                    componentId="FORMAT"
+                    dataField="missionFormat.keyword"
+                    renderItem={(e) => translate(e)}
+                    title=""
+                    URLParams={true}
+                    showSearch={false}
+                  />*/}
               </FilterRow>
             </Filter>
             <ResultTable>
@@ -106,9 +84,6 @@ export default () => {
                 sortBy="desc"
                 loader={<div style={{ padding: "0 20px" }}>Chargement...</div>}
                 renderNoResults={() => <div style={{ padding: "10px 25px" }}>No Results found.</div>}
-                onError={() => {
-                  window.location.href = "/auth?unauthorized=1";
-                }}
                 renderResultStats={(e) => {
                   return (
                     <>
@@ -129,7 +104,6 @@ export default () => {
                         <th>Rôle</th>
                         <th>Crée le</th>
                         <th>Dernière connexion le</th>
-                        <th>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -166,32 +140,16 @@ const Hit = ({ hit, onClick }) => {
       </td>
       <td>{formatLongDate(hit.createdAt)}</td>
       <td>{formatLongDate(hit.lastLoginAt)}</td>
-      <td onClick={(e) => e.stopPropagation()}>
-        <Action hit={hit} />
-      </td>
     </tr>
   );
 };
 
 const Action = ({ hit, color }) => {
-  const dispatch = useDispatch();
-
-  const handleImpersonate = async () => {
-    try {
-      const { ok, data, token } = await api.post(`/referent/signin_as/referent/${hit._id}`);
-      if (!ok) return toastr.error("Oops, une erreur est survenu lors de la masquarade !", e.code);
-      if (token) api.setToken(token);
-      if (data) dispatch(setUser(data));
-    } catch (e) {
-      console.log(e);
-      toastr.error("Oops, une erreur est survenu lors de la masquarade !", e.code);
-    }
-  };
   return (
-    <ActionBox color={"#444"}>
+    <ActionBox color={color}>
       <UncontrolledDropdown setActiveFromChild>
         <DropdownToggle tag="button">
-          Choisissez une action
+          En attente de validation
           <div className="down-icon">
             <svg viewBox="0 0 407.437 407.437">
               <polygon points="386.258,91.567 203.718,273.512 21.179,91.567 0,112.815 203.718,315.87 407.437,112.815 " />
@@ -199,9 +157,10 @@ const Action = ({ hit, color }) => {
           </div>
         </DropdownToggle>
         <DropdownMenu>
-          <DropdownItem className="dropdown-item" onClick={handleImpersonate}>
-            Prendre sa place
+          <DropdownItem tag={Link} to={"#"}>
+            View
           </DropdownItem>
+          <DropdownItem tag="div">Duplicator</DropdownItem>
         </DropdownMenu>
       </UncontrolledDropdown>
     </ActionBox>
@@ -411,11 +370,11 @@ const Export = styled.div`
 const ActionBox = styled.div`
   .dropdown-menu {
     min-width: 0;
-    width: 200px;
     a,
     div {
       white-space: nowrap;
       font-size: 14px;
+      padding: 5px 15px;
     }
   }
   button {
@@ -428,7 +387,7 @@ const ActionBox = styled.div`
     padding: 0 0 0 12px;
     font-size: 12px;
     min-width: 130px;
-    font-weight: 400;
+    font-weight: 700;
     color: #fff;
     cursor: pointer;
     outline: 0;
@@ -452,38 +411,42 @@ const ActionBox = styled.div`
       }
     }
   }
-  .dropdown-item {
-    background-color: transparent;
-    border: none;
-    color: #767676;
-    white-space: nowrap;
-    font-size: 14px;
-    padding: 5px 15px;
-    font-weight: 400;
-    :hover {
-      background-color: #eaf3fa;
-      color: #3182ce;
-    }
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
-  }
-
-  ${({ color }) => `
+  ${({ color }) =>
+    color === "green" &&
+    `
     button {
       background-color: transparent;
-      border: 1px solid ${color};
-      color: ${color};
+      border: 1px solid #6BC763;
+      color: #6BC763;
       .edit-icon {
         path {
-          fill: ${color};
+          fill: #6BC763;
         }
       }
       .down-icon {
-        border-left: 1px solid ${color};
+        border-left: 1px solid #6BC763;
         svg polygon {
-          fill: ${color};
+          fill: #6BC763;
+        }
+      }
+    }  
+  `}
+  ${({ color }) =>
+    color === "red" &&
+    `
+    button {
+      background-color: transparent;
+      border: 1px solid #F1545B;
+      color: #F1545B;
+      .edit-icon {
+        path {
+          fill: #F1545B;
+        }
+      }
+      .down-icon {
+        border-left: 1px solid #F1545B;
+        svg polygon {
+          fill: #F1545B;
         }
       }
     }  
