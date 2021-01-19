@@ -103,11 +103,10 @@ export default ({ setYoung }) => {
                 innerClass={{ pagination: "pagination" }}
                 size={10}
                 showLoader={true}
-                // dataField="createdAt"
-                // sortBy="desc"
+                dataField="createdAt"
+                sortBy="desc"
                 loader={<div style={{ padding: "0 20px" }}>Chargement...</div>}
                 innerClass={{ pagination: "pagination" }}
-                dataField="created_at"
                 renderNoResults={() => <div style={{ padding: "10px 25px" }}>No Results found.</div>}
                 renderResultStats={(e) => {
                   return (

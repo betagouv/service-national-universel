@@ -163,7 +163,6 @@ export default () => {
                 // renderPagination={(e) => <ResultFooter {...e} />}
                 size={10}
                 showLoader={true}
-                // dataField="createdAt"
                 sortBy="desc"
                 dataField="createdAt"
                 loader={<div style={{ padding: "0 20px" }}>Chargement...</div>}
