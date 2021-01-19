@@ -27,6 +27,7 @@ const autoValidate = async () => {
 
       // if its createdAt > 2w, then validated by cron
       if (gt2w(lastStatus.createdAt)) {
+        console.log("updating", doc.email);
         count++;
         doc.historic.push({ phase: "INSCRIPTION", status: "VALIDATED" });
         doc.set({ status: "VALIDATED", lastStatusAt: Date.now() });
