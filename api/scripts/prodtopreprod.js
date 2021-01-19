@@ -32,9 +32,7 @@ const ES_ENDPOINT_STAGING = envStagingConfig.ES_ENDPOINT;
     return doc;
   });
 
-  await migrate("school", (doc) => {
-    return doc;
-  });
+  await migrate("school");
   console.log("END");
 })();
 
