@@ -19,7 +19,7 @@ const AuthObject = require("../auth");
 const { decrypt } = require("../cryptoUtils");
 const { sendEmail } = require("../sendinblue");
 const { validatePassword } = require("../utils");
-
+const { onlyAdmin } = require("../middleware/admin");
 const ReferentAuth = new AuthObject(ReferentObject);
 
 const SERVER_ERROR = "SERVER_ERROR";
@@ -29,8 +29,8 @@ const INVITATION_TOKEN_EXPIRED_OR_INVALID = "INVITATION_TOKEN_EXPIRED_OR_INVALID
 const NOT_FOUND = "NOT_FOUND";
 const USER_NOT_FOUND = "USER_NOT_FOUND";
 const OPERATION_UNAUTHORIZED = "OPERATION_UNAUTHORIZED";
-
-const COOKIE_MAX_AGE = 2592000000;
+const COOKIE_MAX_AGE = 60 * 60 * 2 * 1000; // 2h
+const JWT_MAX_AGE = 60 * 60 * 2; // 2h
 
 function cookieOptions() {
   if (process.env.NODE_ENV !== "production") {
@@ -47,6 +47,23 @@ router.get("/signin_token", passport.authenticate("referent", { session: false }
 router.post("/forgot_password", async (req, res) => ReferentAuth.forgotPassword(req, res, `${config.ADMIN_URL}/auth/reset`));
 router.post("/forgot_password_reset", async (req, res) => ReferentAuth.forgotPasswordReset(req, res));
 router.post("/reset_password", passport.authenticate("referent", { session: false }), async (req, res) => ReferentAuth.resetPassword(req, res));
+
+router.post("/signin_as/:type/:id", passport.authenticate("referent", { session: false }), onlyAdmin, async (req, res) => {
+  try {
+    const { type, id } = req.params;
+    let user = null;
+    if (type === "referent") user = await ReferentObject.findById(id);
+    else if (type === "young") user = await YoungObject.findById(id);
+    if (!user) return res.status(404).send({ code: NOT_FOUND, ok: false });
+    const token = jwt.sign({ _id: user.id }, config.secret, { expiresIn: JWT_MAX_AGE });
+    const opts = { maxAge: COOKIE_MAX_AGE, secure: config.ENVIRONMENT === "development" ? false : true, httpOnly: true };
+    res.cookie("jwt", token, opts);
+    return res.status(200).send({ data: user, ok: true, token });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: SERVER_ERROR });
+  }
+});
 
 router.post("/signup_invite/:role", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
@@ -225,9 +242,7 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
     try {
       const { mime } = await FileType.fromBuffer(decryptedBuffer);
       mimeFromFile = mime;
-    } catch (e) {
-      capture(e);
-    }
+    } catch (e) {}
 
     return res.status(200).send({
       data: Buffer.from(decryptedBuffer, "base64"),

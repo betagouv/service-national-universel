@@ -3,12 +3,9 @@ import styled from "styled-components";
 import { Col, Row, Input } from "reactstrap";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { YOUNG_STATUS_COLORS } from "../../../utils";
 
 import api from "../../../services/api";
-
-const CARD_BOTTOM_YELLOW = "#FEB951";
-const CARD_BOTTOM_GREEN = "#6BC763";
-const CARD_BOTTOM_RED = "#FE7B51";
 
 export default ({ filter }) => {
   const [status, setStatus] = useState({});
@@ -39,7 +36,7 @@ export default ({ filter }) => {
       {user.role === "admin" && (
         <Col md={6} xl={2}>
           <Link to='/inscription?STATUS=%5B"IN_PROGRESS"%5D'>
-            <Card borderBottomColor={CARD_BOTTOM_GREEN}>
+            <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
               <CardTitle>En cours</CardTitle>
               <CardSubtitle>Inscriptions en cours</CardSubtitle>
               <CardValueWrapper>
@@ -52,7 +49,7 @@ export default ({ filter }) => {
       )}
       <Col md={6} xl={2}>
         <Link to='/inscription?STATUS=%5B"WAITING_VALIDATION"%5D'>
-          <Card borderBottomColor={CARD_BOTTOM_YELLOW}>
+          <Card borderBottomColor={YOUNG_STATUS_COLORS.WAITING_VALIDATION}>
             <CardTitle>En attente de validation</CardTitle>
             <CardValueWrapper>
               <CardValue>{status.WAITING_VALIDATION || 0}</CardValue>
@@ -73,7 +70,7 @@ export default ({ filter }) => {
       </Col> */}
       <Col md={6} xl={2}>
         <Link to='/inscription/?STATUS=%5B"WAITING_CORRECTION"%5D'>
-          <Card borderBottomColor={CARD_BOTTOM_RED}>
+          <Card borderBottomColor={YOUNG_STATUS_COLORS.WAITING_CORRECTION}>
             <CardTitle>En attente de correction</CardTitle>
             <CardValueWrapper>
               <CardValue>{status.WAITING_CORRECTION || 0}</CardValue>
@@ -84,7 +81,7 @@ export default ({ filter }) => {
       </Col>
       <Col md={6} xl={2}>
         <Link to='/inscription/?STATUS=%5B"VALIDATED"%5D'>
-          <Card borderBottomColor={CARD_BOTTOM_GREEN}>
+          <Card borderBottomColor={YOUNG_STATUS_COLORS.VALIDATED}>
             <CardTitle>Validées</CardTitle>
             <CardValueWrapper>
               <CardValue>{status.VALIDATED || 0}</CardValue>
@@ -95,7 +92,7 @@ export default ({ filter }) => {
       </Col>
       <Col md={6} xl={2}>
         <Link to='/inscription/?STATUS=%5B"REFUSED"%5D'>
-          <Card borderBottomColor={CARD_BOTTOM_RED}>
+          <Card borderBottomColor={YOUNG_STATUS_COLORS.REFUSED}>
             <CardTitle>Refusées</CardTitle>
             <CardValueWrapper>
               <CardValue>{status.REFUSED || 0}</CardValue>

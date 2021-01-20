@@ -2,6 +2,15 @@ import "isomorphic-fetch";
 
 import { apiURL } from "../config";
 
+function jsonOrRedirectToSignIn(response) {
+  if (response.ok === false && response.status === 401) {
+    if (window && window.location && window.location.href) {
+      window.location.href = "/auth?unauthorized=1";
+    }
+  }
+  return response.json();
+}
+
 class api {
   constructor() {
     this.token = "";
@@ -25,9 +34,9 @@ class api {
       headers: { "Content-Type": "application/x-ndjson", Authorization: `JWT ${this.token}` },
       body: query,
     })
-      .then((r) => r.json())
+      .then((r) => jsonOrRedirectToSignIn(r))
       .catch((e) => {
-        console.log(e);
+        console.error(e);
       });
   }
 

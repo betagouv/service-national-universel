@@ -31,6 +31,8 @@ const ES_ENDPOINT_STAGING = envStagingConfig.ES_ENDPOINT;
     doc.set({ lastName: faker.name.lastName() });
     return doc;
   });
+
+  await migrate("school");
   console.log("END");
 })();
 

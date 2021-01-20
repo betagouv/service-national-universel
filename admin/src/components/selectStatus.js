@@ -2,11 +2,11 @@ import React, { useEffect, useState } from "react";
 import { Col, DropdownItem, DropdownMenu, DropdownToggle, Label, Pagination, PaginationItem, PaginationLink, Row, UncontrolledDropdown } from "reactstrap";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
-import { toastr } from "react-redux-toastr";
 
 import api from "../services/api";
 
-import { translate, YOUNG_STATUS, YOUNG_PHASE } from "../utils";
+import { translate, YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_COLORS } from "../utils";
+import { toastr } from "react-redux-toastr";
 
 import MailCorrection from "../scenes/inscription/MailCorrection";
 
@@ -46,7 +46,7 @@ export default ({ hit }) => {
         await api.post(`/referent/email/refuse/${young._id}`, { subject: "Inscription refusée" });
       }
 
-      if (!ok) toastr.error("Une erreur s'est produite :", code);
+      if (!ok) return toastr.error("Une erreur s'est produite :", code);
       setYoung(newYoung);
       toastr.success("Mis à jour!");
     } catch (e) {
@@ -54,12 +54,6 @@ export default ({ hit }) => {
       toastr.error("Oups, une erreur est survenue :", e.code);
     }
   };
-
-  let color = "#6CC763";
-  if (young.status === YOUNG_STATUS.WAITING_CORRECTION) color = "#FEB951";
-  if (young.status === YOUNG_STATUS.WAITING_VALIDATION) color = "#FE7B52";
-  if (young.status === YOUNG_STATUS.REFUSED) color = "#F8A9AD";
-  if (young.status === YOUNG_STATUS.IN_PROGRESS) color = "#382F79";
 
   return (
     <>
@@ -73,7 +67,7 @@ export default ({ hit }) => {
           }}
         />
       )}
-      <ActionBox color={color}>
+      <ActionBox color={YOUNG_STATUS_COLORS[young.status]}>
         <UncontrolledDropdown setActiveFromChild>
           <DropdownToggle tag="button">
             {translate(young.status)}

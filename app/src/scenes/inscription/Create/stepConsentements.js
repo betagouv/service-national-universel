@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState ,useEffect} from "react";
 import styled from "styled-components";
 import { Row, Col } from "reactstrap";
 import { Field, Formik } from "formik";
@@ -10,9 +10,15 @@ import { setYoung } from "../../../redux/auth/actions";
 import DndFileInput from "../../../components/dndFileInput";
 import ErrorMessage, { requiredMessage } from "../components/errorMessage";
 import { saveYoung, STEPS } from "../utils";
+
 import api from "../../../services/api";
+import matomo from "../../../services/matomo";
 
 export default () => {
+  useEffect(() => {
+    matomo.logEvent("inscription", "open_step", "step", 4);
+  }, []);
+
   const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
   const [clickedRules, setClickedRules] = useState(false);

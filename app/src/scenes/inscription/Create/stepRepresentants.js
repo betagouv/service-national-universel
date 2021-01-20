@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { Row, Col, Input } from "reactstrap";
+import { Row, Col } from "reactstrap";
 import { Field, Formik } from "formik";
 import { useSelector, useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
@@ -9,6 +9,8 @@ import { useHistory } from "react-router-dom";
 
 import AddressInput from "../components/addressInput";
 import api from "../../../services/api";
+import matomo from "../../../services/matomo";
+
 import { setYoung } from "../../../redux/auth/actions";
 import ErrorMessage, { requiredMessage } from "../components/errorMessage";
 import FranceConnectButton from "../../../components/FranceConnectButton";
@@ -208,6 +210,10 @@ const Parent = ({ id = 1, values, errors, touched, handleChange }) => {
 };
 
 export default () => {
+  useEffect(() => {
+    matomo.logEvent("inscription", "open_step", "step", 3);
+  }, []);
+
   const history = useHistory();
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
