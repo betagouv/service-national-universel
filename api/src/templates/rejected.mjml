@@ -3,7 +3,7 @@
     <mj-section>
       <mj-column>
         <mj-text>
-          <h1 font-size="20px">Candidature validée</h1>
+          <h1 font-size="20px">Candidature refusée</h1>
         </mj-text>
         <mj-text font-size="18px" color="#000">
 Bonjour {{firstName}} {{lastName}},

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Col, DropdownItem, DropdownMenu, DropdownToggle, Label, Pagination, PaginationItem, PaginationLink, Row, UncontrolledDropdown } from "reactstrap";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
-import { toastr } from "react-redux-toastr";
 
 import api from "../services/api";
 
@@ -47,7 +46,7 @@ export default ({ hit }) => {
         await api.post(`/referent/email/refuse/${young._id}`, { subject: "Inscription refusée" });
       }
 
-      if (!ok) toastr.error("Une erreur s'est produite :", code);
+      if (!ok) return toastr.error("Une erreur s'est produite :", code);
       setYoung(newYoung);
       toastr.success("Mis à jour!");
     } catch (e) {
