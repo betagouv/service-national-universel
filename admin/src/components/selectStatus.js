@@ -6,7 +6,8 @@ import { toastr } from "react-redux-toastr";
 
 import api from "../services/api";
 
-import { translate, YOUNG_STATUS, YOUNG_PHASE } from "../utils";
+import { translate, YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_COLORS } from "../utils";
+import { toastr } from "react-redux-toastr";
 
 import MailCorrection from "../scenes/inscription/MailCorrection";
 
@@ -55,12 +56,6 @@ export default ({ hit }) => {
     }
   };
 
-  let color = "#6CC763";
-  if (young.status === YOUNG_STATUS.WAITING_CORRECTION) color = "#FEB951";
-  if (young.status === YOUNG_STATUS.WAITING_VALIDATION) color = "#FE7B52";
-  if (young.status === YOUNG_STATUS.REFUSED) color = "#F8A9AD";
-  if (young.status === YOUNG_STATUS.IN_PROGRESS) color = "#382F79";
-
   return (
     <>
       {modal && (
@@ -73,7 +68,7 @@ export default ({ hit }) => {
           }}
         />
       )}
-      <ActionBox color={color}>
+      <ActionBox color={YOUNG_STATUS_COLORS[young.status]}>
         <UncontrolledDropdown setActiveFromChild>
           <DropdownToggle tag="button">
             {translate(young.status)}

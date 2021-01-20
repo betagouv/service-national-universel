@@ -14,7 +14,7 @@ import Panel from "./panel";
 
 import { translate, getFilterLabel } from "../../utils";
 
-const FILTERS = ["SEARCH", "STATUS", "FORMAT", "REGION", "DEPARTMENT", "PHASE", "REMOVEINPROGRESS"];
+const FILTERS = ["SEARCH", "STATUS", "REGION", "DEPARTMENT", "PHASE", "REMOVEINPROGRESS"];
 
 export default () => {
   const [young, setYoung] = useState(null);
@@ -119,7 +119,7 @@ export default () => {
                     return `${translate(e)} (${count})`;
                   }}
                   title=""
-                  react={{ and: FILTERS }}
+                  react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
                   URLParams={true}
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Statut")}
@@ -130,7 +130,7 @@ export default () => {
                   componentId="REGION"
                   dataField="region.keyword"
                   title=""
-                  react={{ and: FILTERS }}
+                  react={{ and: FILTERS.filter((e) => e !== "REGION") }}
                   URLParams={true}
                   showSearch={false}
                   sortBy="asc"
@@ -141,7 +141,7 @@ export default () => {
                   componentId="DEPARTMENT"
                   dataField="department.keyword"
                   title=""
-                  react={{ and: FILTERS }}
+                  react={{ and: FILTERS.filter((e) => e !== "DEPARTMENT") }}
                   URLParams={true}
                   showSearch={false}
                   sortBy="asc"
@@ -159,12 +159,14 @@ export default () => {
                 // renderPagination={(e) => <ResultFooter {...e} />}
                 size={10}
                 showLoader={true}
-                // dataField="createdAt"
                 sortBy="desc"
                 dataField="createdAt"
                 loader={<div style={{ padding: "0 20px" }}>Chargement...</div>}
                 innerClass={{ pagination: "pagination" }}
                 renderNoResults={() => <div />}
+                onError={() => {
+                  window.location.href = "/auth?unauthorized=1";
+                }}
                 renderResultStats={(e) => {
                   return (
                     <>

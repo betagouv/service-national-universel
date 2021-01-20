@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FormGroup, Row, Col } from "reactstrap";
 import { Formik, Field } from "formik";
 import validator from "validator";
@@ -6,6 +6,7 @@ import { Link, Redirect } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
+import queryString from "query-string";
 
 import { setUser, setStructure } from "../../redux/auth/actions";
 
@@ -16,6 +17,13 @@ export default () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.Auth.user);
   const [userIsValid, setUserIsValid] = useState(true);
+
+  useEffect(() => {
+    const { unauthorized } = queryString.parse(location.search);
+    if (unauthorized === "1") {
+      toastr.error("Votre session a expiré", "Vous devez entrer à nouveau vos identifiants pour continuer.");
+    }
+  }, []);
 
   return (
     <Wrapper noGutters>
@@ -39,7 +47,7 @@ export default () => {
                 if (e && (e.code === "EMAIL_OR_PASSWORD_INVALID" || e.code === "USER_NOT_EXISTS")) {
                   return setUserIsValid(false);
                 }
-                toastr.error("Erreur détecté");
+                toastr.error("Erreur détectée");
               }
               actions.setSubmitting(false);
             }}

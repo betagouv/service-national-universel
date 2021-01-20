@@ -4,6 +4,8 @@ import { BrowserRouter as Router, Route, Switch, Redirect, useLocation } from "r
 import "bootstrap/dist/css/bootstrap.min.css";
 import * as Sentry from "@sentry/browser";
 
+import styled from "styled-components";
+
 import { setYoung } from "./redux/auth/actions";
 
 import Account from "./scenes/account";
@@ -26,7 +28,6 @@ import { SENTRY_URL, environment } from "./config";
 
 import "./index.css";
 import { YOUNG_STATUS } from "./utils";
-import styled from "styled-components";
 
 import matomo from "./services/matomo";
 
@@ -36,13 +37,15 @@ export default () => {
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
   useEffect(() => {
-    matomo.logEvent("TEST", "testaction", "testName", "testvalue");
-
+    matomo.logEvent("start", "open_app");
     async function fetchData() {
       try {
         const { ok, user, token } = await api.get("/young/signin_token");
         if (token) api.setToken(token);
-        if (ok && user) dispatch(setYoung(user));
+        if (ok && user) {
+          dispatch(setYoung(user));
+          matomo.setUserId(user._id);
+        }
       } catch (e) {
         console.log(e);
       }

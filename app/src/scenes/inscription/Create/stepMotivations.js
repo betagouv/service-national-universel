@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import styled from "styled-components";
 import { Input } from "reactstrap";
 import { Formik } from "formik";
@@ -7,11 +7,17 @@ import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 
 import api from "../../../services/api";
+import matomo from "../../../services/matomo";
+
 import { setYoung } from "../../../redux/auth/actions";
 import { YOUNG_STATUS, YOUNG_PHASE } from "../../../utils";
 import { saveYoung, STEPS } from "../utils";
 
 export default () => {
+  useEffect(() => {
+    matomo.logEvent("inscription", "open_step", "step", 5);
+  }, []);
+
   const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
