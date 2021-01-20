@@ -211,7 +211,7 @@ const Parent = ({ id = 1, values, errors, touched, handleChange }) => {
 
 export default () => {
   useEffect(() => {
-    matomo.logEvent("inscription", "open_step", "step", "representant");
+    matomo.logEvent("inscription", "open_step", "step", 3);
   }, []);
 
   const history = useHistory();

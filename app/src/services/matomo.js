@@ -15,7 +15,7 @@ class Api {
     Name (Optional – Recommended) – This is usually the title of the element that is being interacted with, to aid with analysis. For example, it could be the name of a Video that was played or the specific form that is being submitted.
     Value (Optional) – This is a numeric value and is often added dynamically. It could be the cost of a product that is added to a cart, or the completion percentage of a video.
   */
-  logEvent(categorie, action, name, value) {
+  logEvent(categorie, action, name = '', value = '') {
     if (!window._paq) return;
     window._paq.push(["trackEvent", categorie, action, name, value]);
   }

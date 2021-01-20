@@ -18,7 +18,7 @@ import { toastr } from "react-redux-toastr";
 
 export default () => {
   useEffect(() => {
-    matomo.logEvent("inscription", "open_step", "step", "particulieres");
+    matomo.logEvent("inscription", "open_step", "step", 2);
   }, []);
 
   const history = useHistory();

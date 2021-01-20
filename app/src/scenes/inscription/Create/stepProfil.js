@@ -20,7 +20,7 @@ import { YOUNG_STATUS, YOUNG_PHASE } from "../../../utils";
 
 export default () => {
   useEffect(() => {
-    matomo.logEvent("inscription", "open_step", "step", "profil");
+    matomo.logEvent("inscription", "open_step", "step", 0);
   }, []);
 
   const dispatch = useDispatch();

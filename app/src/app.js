@@ -37,7 +37,7 @@ export default () => {
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
   useEffect(() => {
-    matomo.logEvent("start", "open_app", "", "");
+    matomo.logEvent("start", "open_app");
     async function fetchData() {
       try {
         const { ok, user, token } = await api.get("/young/signin_token");

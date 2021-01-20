@@ -16,7 +16,7 @@ import matomo from "../../../services/matomo";
 
 export default () => {
   useEffect(() => {
-    matomo.logEvent("inscription", "open_step", "step", "consentements");
+    matomo.logEvent("inscription", "open_step", "step", 4);
   }, []);
 
   const history = useHistory();
