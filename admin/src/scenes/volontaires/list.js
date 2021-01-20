@@ -130,8 +130,8 @@ export default ({ setYoung }) => {
                       </tr>
                     </thead>
                     <tbody>
-                      {data.map((hit) => (
-                        <Hit hit={hit} onClick={() => setVolontaire(hit)} />
+                      {data.map((hit, i) => (
+                        <Hit key={i} hit={hit} onClick={() => setVolontaire(hit)} />
                       ))}
                     </tbody>
                   </Table>
@@ -185,9 +185,7 @@ const Action = ({ hit, color }) => {
         </DropdownToggle>
         <DropdownMenu>
           <Link to={`/volontaire/${hit._id}`}>
-            <DropdownItem className="dropdown-item" onClick={() => handleClickStatus(1)}>
-              Voir ou Modifier le profil
-            </DropdownItem>
+            <DropdownItem className="dropdown-item">Voir ou Modifier le profil</DropdownItem>
           </Link>
           {user.role === "admin" ? (
             <DropdownItem className="dropdown-item">
