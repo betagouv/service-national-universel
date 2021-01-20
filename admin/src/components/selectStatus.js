@@ -38,13 +38,13 @@ export default ({ hit }) => {
       young.historic.push({ phase: YOUNG_PHASE.INSCRIPTION, userName: `${user.firstName} ${user.lastName}`, userId: user._id, status, note });
       const { ok, code, data: newYoung } = await api.put(`/referent/young/${young._id}`, { historic: young.historic, status });
 
-      // if (status === YOUNG_STATUS.WAITING_CORRECTION) {
-      //   await api.post(`/referent/email/correction/${value._id}`, { message, subject: "Demande de correction" });
-      // }
+      if (status === YOUNG_STATUS.VALIDATED) {
+        await api.post(`/referent/email/validate/${young._id}`, { subject: "Inscription validée" });
+      }
 
-      // if (status === YOUNG_STATUS.WAITING_CORRECTION) {
-      //   await api.post(`/referent/email/correction/${value._id}`, { message, subject: "Demande de correction" });
-      // }
+      if (status === YOUNG_STATUS.REFUSED) {
+        await api.post(`/referent/email/refuse/${young._id}`, { subject: "Inscription refusée" });
+      }
 
       if (!ok) toastr.error("Une erreur s'est produite :", code);
       setYoung(newYoung);
