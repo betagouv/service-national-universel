@@ -15,7 +15,7 @@ import { saveYoung, STEPS } from "../utils";
 
 export default () => {
   useEffect(() => {
-    matomo.logEvent("inscription", "open_step", "step", "motivation");
+    matomo.logEvent("inscription", "open_step", "step", 5);
   }, []);
 
   const history = useHistory();

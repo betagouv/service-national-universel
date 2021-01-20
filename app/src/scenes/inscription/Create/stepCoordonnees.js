@@ -23,7 +23,7 @@ import Etablissement from "../components/etablissmentInput";
 
 export default () => {
   useEffect(() => {
-    matomo.logEvent("inscription", "open_step", "step", "coordonnees");
+    matomo.logEvent("inscription", "open_step", "step", 1);
   }, []);
 
   const history = useHistory();
