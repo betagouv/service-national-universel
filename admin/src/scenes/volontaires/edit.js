@@ -429,7 +429,6 @@ export default (props) => {
           </>
         )}
       </Formik>
-      {user.role === "admin" && (
         <DeleteBtn
           onClick={async () => {
             if (!confirm("Êtes-vous sûr(e) de vouloir supprimer ce profil")) return;
@@ -447,7 +446,6 @@ export default (props) => {
         >
           Supprimer
         </DeleteBtn>
-      )}
     </Wrapper>
   );
 };
