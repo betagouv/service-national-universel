@@ -433,9 +433,16 @@ export default (props) => {
         <DeleteBtn
           onClick={async () => {
             if (!confirm("Êtes-vous sûr(e) de vouloir supprimer ce profil")) return;
-            await api.remove(`/young/${young._id}`);
+          try {
+            const { ok, code } = await api.remove(`/young/${young._id}`);
+            if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
+            if (!ok) return toastr.error("Une erreur s'est produite :", code);
             toastr.success("Ce profil a été supprimé.");
             return history.push(`/inscription`);
+          } catch (e) {
+            console.log(e);
+            return toastr.error("Oups, une erreur est survenue pendant la supression du profil :", e.code);
+          }
           }}
         >
           Supprimer
