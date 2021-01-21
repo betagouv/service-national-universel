@@ -1,22 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { Col, DropdownItem, DropdownMenu, DropdownToggle, Label, Pagination, PaginationItem, PaginationLink, Row, UncontrolledDropdown } from "reactstrap";
-import { ReactiveBase, ReactiveList, SingleList, MultiDropdownList, MultiList, DataSearch } from "@appbaseio/reactivesearch";
+import { ReactiveBase, ReactiveList, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
-import { useSelector } from "react-redux";
+import relativeTime from "dayjs/plugin/relativeTime";
+import dayjs from "dayjs";
+import "dayjs/locale/fr";
 
-import ExportComponent from "../../components/Export";
+import ExportComponent from "../../components/ExportXlsx";
 import ReactiveFilter from "../../components/ReactiveFilter";
 import SelectStatus from "../../components/selectStatus";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
-import "dayjs/locale/fr";
 
-import { translate, YOUNG_STATUS, YOUNG_PHASE, getFilterLabel } from "../../utils";
-import { toastr } from "react-redux-toastr";
-import MailCorrection from "./MailCorrection";
+import { translate, getFilterLabel } from "../../utils";
 
 const FILTERS = ["SEARCH", "STATUS", "REGION", "DEPARTMENT", "PHASE", "REMOVEINPROGRESS"];
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ReactiveComponent } from "@appbaseio/reactivesearch";
-import XLSX from "../../node_modules/xlsx/dist/xlsx.mini.min.js";
+import * as FileSaver from "file-saver";
+import * as XLSX from "xlsx";
 
 export default function ExportComponent({ title, collection, react, transform }) {
   const [exporting, setExporting] = useState(false);
@@ -74,11 +75,19 @@ async function exportData(fileName, entities, transform) {
     csv.push(arr);
   }
 
-  console.log(csv);
-  const result = XLSX.utils.aoa_to_sheet(csv);
-  const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, result, "test");
-  XLSX.writeFile(wb, fileName);
+  // console.log(csv);
+  // const result = XLSX.utils.aoa_to_sheet(csv);
+  // const wb = XLSX.utils.book_new();
+  // XLSX.utils.book_append_sheet(wb, result, "test");
+  // XLSX.writeFile(wb, fileName);
+
+  const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+  const fileExtension = ".xlsx";
+  const ws = XLSX.utils.json_to_sheet(csv);
+  const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
+  const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
+  const data = new Blob([excelBuffer], { type: fileType });
+  FileSaver.saveAs(data, fileName + fileExtension);
 }
 
 function objectWithMostFields(objArr) {
