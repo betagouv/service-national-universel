@@ -7,7 +7,7 @@ import { useDispatch } from "react-redux";
 import { setUser } from "../../redux/auth/actions";
 
 import { translate, getFilterLabel } from "../../utils";
-import ExportComponent from "../../components/Export";
+import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";

@@ -59,6 +59,7 @@
     "babel-webpack-plugin": "^0.1.2",
     "bootstrap": "^4.5.2",
     "dayjs": "^1.10.3",
+    "exceljs": "^4.2.0",
     "express": "^4.17.1",
     "formik": "^2.1.5",
     "hsts": "^2.2.0",

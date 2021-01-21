@@ -5,7 +5,7 @@ import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
-import ExportComponent from "../../components/Export";
+import ExportComponent from "../../components/ExportXlsx";
 import ReactiveFilter from "../../components/ReactiveFilter";
 
 import api from "../../services/api";

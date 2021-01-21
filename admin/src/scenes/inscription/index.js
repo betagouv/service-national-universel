@@ -4,7 +4,7 @@ import { ReactiveBase, ReactiveList, SingleList, MultiDropdownList, MultiList, D
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
-import ExportComponent from "../../components/Export";
+import ExportComponent from "../../components/ExportXlsx";
 import ReactiveFilter from "../../components/ReactiveFilter";
 import SelectStatus from "../../components/selectStatus";
 import api from "../../services/api";
