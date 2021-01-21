@@ -414,14 +414,13 @@ export const YOUNG_SITUATIONS = {
   NOTHING: "NOTHING", // @todo find a better key --'
 };
 
-
 export const YOUNG_STATUS_COLORS = {
   WAITING_VALIDATION: "#FE7B52",
   WAITING_CORRECTION: "#FEB951",
   VALIDATED: "#6CC763",
   REFUSED: "#F8A9AD",
   IN_PROGRESS: "#382F79",
-}
+};
 
 export const REFERENT_ROLES = {
   ADMIN: "admin",
@@ -433,7 +432,7 @@ export const REFERENT_ROLES = {
 export async function openDocumentInNewtab(apiResponse) {
   const { data, mimeType, ok, code } = apiResponse;
   if (!ok) {
-    toastr.error("Impossible d'afficher le document", code || '');
+    toastr.error("Impossible d'afficher le document", code || "");
     return;
   }
   const arrayBufferView = new Uint8Array(data.data);
@@ -441,4 +440,28 @@ export async function openDocumentInNewtab(apiResponse) {
   const urlCreator = window.URL || window.webkitURL;
   const fileURL = urlCreator.createObjectURL(blob);
   window.open(fileURL);
+}
+
+// Downmload a document from an API response that contains `data` and `mimeType`.
+export async function downloadDocument(apiResponse) {
+  const { data, mimeType, ok, code, originalFileName } = apiResponse;
+  if (!ok) {
+    toastr.error("Impossible d'afficher le document", code || "");
+    return;
+  }
+  const arrayBufferView = new Uint8Array(data.data);
+  const blob = new Blob([arrayBufferView], { type: mimeType });
+  if (window.navigator.msSaveOrOpenBlob)
+    // IE hack; see http://msdn.microsoft.com/en-us/library/ie/hh779016.aspx
+    window.navigator.msSaveBlob(blob, originalFileName);
+  else {
+    let a = window.document.createElement("a");
+    a.href = window.URL.createObjectURL(blob, {
+      type: mimeType,
+    });
+    a.download = originalFileName;
+    document.body.appendChild(a);
+    a.click(); // IE: "Access is denied"; see: https://connect.microsoft.com/IE/feedback/details/797361/ie-10-treats-blob-url-as-cross-origin-and-denies-access
+    document.body.removeChild(a);
+  }
 }

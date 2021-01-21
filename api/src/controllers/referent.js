@@ -233,6 +233,7 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
     return res.status(200).send({
       data: Buffer.from(decryptedBuffer, "base64"),
       mimeType: mimeFromFile ? mimeFromFile : mime.lookup(fileName),
+      originalFileName: fileName,
       ok: true,
     });
   } catch (error) {

@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { Modal } from "reactstrap";
 
 import { translate as t } from "./utils";
-import { YOUNG_SITUATIONS, YOUNG_STATUS, translate, openDocumentInNewtab } from "../../utils";
+import { YOUNG_SITUATIONS, YOUNG_STATUS, translate, downloadDocument } from "../../utils";
 import { Link } from "react-router-dom";
 import LoadingButton from "../../components/loadingButton";
 import Historic from "../../components/historic";
@@ -59,9 +59,9 @@ export default ({ onChange, value }) => {
               key={i}
               color="white"
               onClick={async () => {
-                openDocumentInNewtab(await api.get(`/referent/youngFile/${value._id}/cniFiles/${e}`));
+                downloadDocument(await api.get(`/referent/youngFile/${value._id}/cniFiles/${e}`));
               }}
-            >{`Visualiser la pièce d’identité (${i + 1}/${value.cniFiles.length})`}</InfoBtn>
+            >{`Télécharger la pièce d’identité (${i + 1}/${value.cniFiles.length})`}</InfoBtn>
           );
         })}
       </Info>
@@ -72,10 +72,10 @@ export default ({ onChange, value }) => {
               key={i}
               color="white"
               onClick={async () => {
-                openDocumentInNewtab(await api.get(`/referent/youngFile/${value._id}/parentConsentmentFiles/${e}`));
+                downloadDocument(await api.get(`/referent/youngFile/${value._id}/parentConsentmentFiles/${e}`));
               }}
             >
-              Visualiser le formulaire
+              Télécharger le formulaire
             </InfoBtn>
           );
         })}

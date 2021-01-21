@@ -11,7 +11,7 @@ import LoadingButton from "../../components/loadingButton";
 import Historic from "../../components/historic";
 
 import DateInput from "../../components/dateInput";
-import { openDocumentInNewtab, departmentList, regionList, YOUNG_STATUS, translate } from "../../utils";
+import { downloadDocument, departmentList, regionList, YOUNG_STATUS, translate } from "../../utils";
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
@@ -79,9 +79,9 @@ export default (props) => {
                           key={i}
                           color="white"
                           onClick={async () => {
-                            openDocumentInNewtab(await api.get(`/referent/youngFile/${values._id}/cniFiles/${e}`));
+                            downloadDocument(await api.get(`/referent/youngFile/${values._id}/cniFiles/${e}`));
                           }}
-                        >{`Visualiser la pièce d’identité (${i + 1}/${values.cniFiles.length})`}</InfoBtn>
+                        >{`Télécharger la pièce d’identité (${i + 1}/${values.cniFiles.length})`}</InfoBtn>
                       );
                     })}
                   </BoxContent>
@@ -254,9 +254,9 @@ export default (props) => {
                           key={i}
                           color="white"
                           onClick={async () => {
-                            openDocumentInNewtab(await api.get(`/referent/youngFile/${values._id}/highSkilledActivityProofFiles/${e}`));
+                            downloadDocument(await api.get(`/referent/youngFile/${values._id}/highSkilledActivityProofFiles/${e}`));
                           }}
-                        >{`Visualiser le justificatif d'engagement (${i + 1}/${values.highSkilledActivityProofFiles.length})`}</InfoBtn>
+                        >{`Télécharger le justificatif d'engagement (${i + 1}/${values.highSkilledActivityProofFiles.length})`}</InfoBtn>
                       );
                     })}
                   </BoxContent>
@@ -326,10 +326,10 @@ export default (props) => {
                           key={i}
                           color="white"
                           onClick={async () => {
-                            openDocumentInNewtab(await api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${values.parentConsentmentFiles[0]}`));
+                            downloadDocument(await api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${values.parentConsentmentFiles[0]}`));
                           }}
                         >
-                          Visualiser le formulaire de consentement
+                          Télécharger le formulaire de consentement
                         </InfoBtn>
                       );
                     })}
@@ -387,10 +387,10 @@ export default (props) => {
                     {values.parentConsentmentFiles && values.parentConsentmentFiles.length === 2 ? (
                       <InfoBtn
                         onClick={async () => {
-                          openDocumentInNewtab(await api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${values.parentConsentmentFiles[1]}`));
+                          downloadDocument(await api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${values.parentConsentmentFiles[1]}`));
                         }}
                       >
-                        Visualiser le formulaire de consentement
+                        Télécharger le formulaire de consentement
                       </InfoBtn>
                     ) : null}
                   </BoxContent>
@@ -418,9 +418,9 @@ export default (props) => {
                           key={i}
                           color="white"
                           onClick={async () => {
-                            openDocumentInNewtab(await api.get(`/referent/youngFile/${values._id}/imageRightFiles/${e}`));
+                            downloadDocument(await api.get(`/referent/youngFile/${values._id}/imageRightFiles/${e}`));
                           }}
-                        >{`Visualiser le formulaire de consentement de droit à l'image (${i + 1}/${values.imageRightFiles.length})`}</InfoBtn>
+                        >{`Télécharger le formulaire de consentement de droit à l'image (${i + 1}/${values.imageRightFiles.length})`}</InfoBtn>
                       );
                     })}
                   </BoxContent>
@@ -430,9 +430,9 @@ export default (props) => {
           </>
         )}
       </Formik>
-        <DeleteBtn
-          onClick={async () => {
-            if (!confirm("Êtes-vous sûr(e) de vouloir supprimer ce profil")) return;
+      <DeleteBtn
+        onClick={async () => {
+          if (!confirm("Êtes-vous sûr(e) de vouloir supprimer ce profil")) return;
           try {
             const { ok, code } = await api.remove(`/young/${young._id}`);
             if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
@@ -443,10 +443,10 @@ export default (props) => {
             console.log(e);
             return toastr.error("Oups, une erreur est survenue pendant la supression du profil :", e.code);
           }
-          }}
-        >
-          Supprimer
-        </DeleteBtn>
+        }}
+      >
+        Supprimer
+      </DeleteBtn>
     </Wrapper>
   );
 };
