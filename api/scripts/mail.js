@@ -13,7 +13,7 @@ const YoungModel = require("../src/models/young");
 
 let count = 0;
 async function run(MyModel) {
-  const cursor = MyModel.find({ cohort: 2021, status: "VALIDATED" }).cursor();
+  const cursor = MyModel.find({ cohort: 2021, status: "REFUSED" }).cursor();
   await cursor.eachAsync(async function (young) {
     count++;
     if (count % 10 === 0) console.log(count);
@@ -21,20 +21,20 @@ async function run(MyModel) {
       let htmlContent = "";
       let subject = "";
 
-      const template = "validate";
+      // const template = "refuse";
 
-      if (template === "validate") {
-        htmlContent = fs.readFileSync(path.resolve(__dirname, "../src/templates/validated.html")).toString();
-        htmlContent = htmlContent.replace(/{{cta}}/g, "https://inscription.snu.gouv.fr");
-        htmlContent = htmlContent.replace(/{{firstName}}/g, young.firstName);
-        htmlContent = htmlContent.replace(/{{lastName}}/g, young.lastName);
-        subject = "Votre candidature au SNU a été validée";
-      } else if (template === "refuse") {
-        htmlContent = fs.readFileSync(path.resolve(__dirname, "../src/templates/rejected.html")).toString();
-        htmlContent = htmlContent.replace(/{{firstName}}/g, young.firstName);
-        htmlContent = htmlContent.replace(/{{lastName}}/g, young.lastName);
-        subject = "Votre candidature au SNU a été refusée";
-      }
+      // if (template === "validate") {
+      //   htmlContent = fs.readFileSync(path.resolve(__dirname, "../src/templates/validated.html")).toString();
+      //   htmlContent = htmlContent.replace(/{{cta}}/g, "https://inscription.snu.gouv.fr");
+      //   htmlContent = htmlContent.replace(/{{firstName}}/g, young.firstName);
+      //   htmlContent = htmlContent.replace(/{{lastName}}/g, young.lastName);
+      //   subject = "Votre candidature au SNU a été validée";
+      // } else if (template === "refuse") {
+      //   htmlContent = fs.readFileSync(path.resolve(__dirname, "../src/templates/rejected.html")).toString();
+      //   htmlContent = htmlContent.replace(/{{firstName}}/g, young.firstName);
+      //   htmlContent = htmlContent.replace(/{{lastName}}/g, young.lastName);
+      //   subject = "Votre candidature au SNU a été refusée";
+      // }
 
       await sendEmail({ name: `${young.firstName} ${young.lastName}`, email: "se.legoff@gmail.com" }, subject, htmlContent);
     } catch (e) {
