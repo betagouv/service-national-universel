@@ -72,6 +72,7 @@
     "react-autosuggest": "^10.0.4",
     "react-dom": "^16.13.1",
     "react-multi-select-component": "^3.0.7",
+    "react-pdf": "^5.1.0",
     "react-redux": "^7.2.1",
     "react-redux-toastr": "^7.6.5",
     "react-router-dom": "^5.2.0",
