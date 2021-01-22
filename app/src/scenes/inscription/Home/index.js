@@ -19,7 +19,7 @@ export default ({}) => {
           </Element>
           <Element>
             <h4>La mission d'intérêt général</h4>
-            <p>12 jours ou 84 heures dans l'année</p>
+            <p>84 heures dans l'année</p>
           </Element>
           <Element>
             <h4>L'engagement</h4>

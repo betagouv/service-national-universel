@@ -13,11 +13,11 @@ export default ({ onChange, value, setYoung }) => {
       <Info title="Coordonnées" setYoung={setYoung}>
         <Details title="E-mail" value={value.email} />
       </Info>
-      <div>
+      {/* <div>
         {Object.keys(value).map((e) => {
           return <div>{`${e}:${value[e]}`}</div>;
         })}
-      </div>
+      </div> */}
     </Panel>
   );
 };

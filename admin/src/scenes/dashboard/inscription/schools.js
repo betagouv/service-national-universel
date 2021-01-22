@@ -31,13 +31,12 @@ export default ({ filter }) => {
       if (filter.department) queries[1].query.bool.filter.push({ term: { "department.keyword": filter.department } });
 
       const { responses } = await api.esQuery(queries);
-      console.log(responses);
 
       const totalHits = responses[0].hits.total.value;
       const arr = responses[0].aggregations.names.buckets.map((e) => {
-        const schoolInfo = e.firstUser.hits.hits[0]._source;
+        const schoolInfo = e.firstUser?.hits?.hits[0]?._source;
         const total = e.doc_count;
-        const inDepartment = e.departments.buckets.find((f) => f.key === schoolInfo.schoolDepartment).doc_count;
+        const inDepartment = (e.departments?.buckets?.find((f) => f.key === schoolInfo.schoolDepartment) || {}).doc_count || 0;
 
         return {
           id: e.key,

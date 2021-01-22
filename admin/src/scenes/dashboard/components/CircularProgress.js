@@ -9,7 +9,7 @@ export default ({ sqSize = 70, strokeWidth = 3, percentage = 25, circleStrokeCol
   // Arc length at 100% coverage is the circle circumference
   const dashArray = radius * Math.PI * 2;
   // Scale 100% coverage overlay with the actual percent
-  const dashOffset = dashArray - (dashArray * percentage) / 100;
+  const dashOffset = dashArray - (dashArray * (isNaN(percentage) ? 0 : percentage)) / 100;
 
   return (
     <CircularProgressWrapper>
