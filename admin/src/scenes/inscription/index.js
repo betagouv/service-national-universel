@@ -1,16 +1,16 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ReactiveBase, ReactiveList, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
+import relativeTime from "dayjs/plugin/relativeTime";
+import dayjs from "dayjs";
+import "dayjs/locale/fr";
 
-import ExportComponent from "../../components/Export";
+import ExportComponent from "../../components/ExportXlsx";
 import ReactiveFilter from "../../components/ReactiveFilter";
 import SelectStatus from "../../components/selectStatus";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
-import "dayjs/locale/fr";
 
 import { translate, getFilterLabel } from "../../utils";
 
