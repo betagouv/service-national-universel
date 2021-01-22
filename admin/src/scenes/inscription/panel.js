@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Modal } from "reactstrap";
+import { Link } from "react-router-dom";
+import { Page } from "react-pdf";
+import { Document } from "react-pdf/dist/esm/entry.webpack";
 
 import { translate as t } from "./utils";
 import { YOUNG_SITUATIONS, YOUNG_STATUS, translate, openDocumentInNewtab } from "../../utils";
-import { Link } from "react-router-dom";
+
 import LoadingButton from "../../components/loadingButton";
 import Historic from "../../components/historic";
 
@@ -12,6 +15,7 @@ import api from "../../services/api";
 
 export default ({ onChange, value }) => {
   const [young, setYoung] = useState(null);
+  const [file, setFile] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -38,6 +42,7 @@ export default ({ onChange, value }) => {
 
   return (
     <Panel>
+      {file && <Image value={file} onChange={() => setFile(null)} />}
       <div className="close" onClick={onChange} />
       <div className="info">
         <div className="title">{`${value.firstName} ${value.lastName}`}</div>
@@ -59,7 +64,8 @@ export default ({ onChange, value }) => {
               key={i}
               color="white"
               onClick={async () => {
-                openDocumentInNewtab(await api.get(`/referent/youngFile/${value._id}/cniFiles/${e}`));
+                const f = await api.get(`/referent/youngFile/${value._id}/cniFiles/${e}`);
+                setFile(f);
               }}
             >{`Visualiser la pièce d’identité (${i + 1}/${value.cniFiles.length})`}</InfoBtn>
           );
@@ -72,7 +78,8 @@ export default ({ onChange, value }) => {
               key={i}
               color="white"
               onClick={async () => {
-                openDocumentInNewtab(await api.get(`/referent/youngFile/${value._id}/parentConsentmentFiles/${e}`));
+                const f = await api.get(`/referent/youngFile/${value._id}/parentConsentmentFiles/${e}`);
+                setFile(f);
               }}
             >
               Visualiser le formulaire
@@ -180,6 +187,31 @@ const Details = ({ title, value }) => {
       <div className="detail-title">{`${title} :`}</div>
       <div className="detail-text">{value}</div>
     </div>
+  );
+};
+
+const Image = ({ value, onChange }) => {
+  if (!value) return <div />;
+  const arrayBufferView = new Uint8Array(value.data.data);
+  const blob = new Blob([arrayBufferView], { type: value.mimeType });
+  const urlCreator = window.URL || window.webkitURL;
+  const imageUrl = urlCreator.createObjectURL(blob);
+
+  function renderFile() {
+    if (value.mimeType === "application/pdf") {
+      return (
+        <Document file={imageUrl} onLoadSuccess={() => {}}>
+          <Page pageNumber={1} />
+        </Document>
+      );
+    } else {
+      return <img style={{ objectFit: "contain", height: "90vh" }} src={imageUrl} />;
+    }
+  }
+  return (
+    <Modal size="lg" isOpen={true} toggle={onChange}>
+      {renderFile()}
+    </Modal>
   );
 };
 
