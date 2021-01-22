@@ -13,6 +13,7 @@ import RankingPeriod from "./rankingPeriod";
 import MobilityCard from "./mobilityCard";
 import TransportCard from "./transportCard";
 import { MISSION_DOMAINS, PERIOD, PROFESSIONNAL_PROJECT, PROFESSIONNAL_PROJECT_PRECISION } from "./utils";
+import ErrorMessage, { requiredMessage } from "./errorMessage";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
@@ -36,7 +37,7 @@ export default () => {
         validateOnBlur={false}
         onSubmit={async (values) => {
           try {
-            return console.log(values.periodRanking);
+            console.log(values);
             const { ok, code, data: young } = await api.put("/young", values);
             if (!ok) return toastr.error("Une erreur s'est produite", code);
             dispatch(setYoung(young));
@@ -50,6 +51,14 @@ export default () => {
         {({ values, handleChange, handleSubmit, errors, touched, isSubmitting, submitForm }) => (
           <>
             <PreferenceItem title="Sélectionnez 3 thématiques qui vous intéressent le plus parmi les domaines d'action disponibles">
+              <Field
+                hidden
+                validate={(v) => {
+                  if (!v) return requiredMessage;
+                  if (v.length < 3) return "Veuillez selectionner 3 domaines";
+                }}
+                name="domains"
+              />
               <DomainItem
                 name="domains"
                 handleChange={handleChange}
@@ -122,10 +131,20 @@ export default () => {
                 title="Sport"
                 subtitle="Animation d’un club ou d’une association sportive..."
               />
+              <ErrorMessage errors={errors} touched={touched} name="domains" />
             </PreferenceItem>
             <PreferenceItem title="Quel est votre projet professionnel ?">
               <div style={{ display: "flex" }}>
-                <Button name="professionnalProject" handleChange={handleChange} values={values} value={PROFESSIONNAL_PROJECT.UNIFORM} title="Corps en uniforme" />
+                <Button
+                  name="professionnalProject"
+                  handleChange={handleChange}
+                  values={values}
+                  value={PROFESSIONNAL_PROJECT.UNIFORM}
+                  title="Corps en uniforme"
+                  onClick={() => {
+                    handleChange({ target: { name: "professionnalProjectPrecision", value: "" } });
+                  }}
+                />
                 <Button
                   name="professionnalProject"
                   handleChange={handleChange}
@@ -133,12 +152,12 @@ export default () => {
                   value={PROFESSIONNAL_PROJECT.OTHER}
                   title="Autre"
                   onClick={() => {
-                    console.log("yo");
                     handleChange({ target: { name: "professionnalProjectPrecision", value: "" } });
                   }}
                 />
                 <Button name="professionnalProject" handleChange={handleChange} values={values} value={PROFESSIONNAL_PROJECT.UNKNOWN} title="Non connu pour le moment" />
               </div>
+              <ErrorMessage errors={errors} touched={touched} name="professionnalProject" />
               {values.professionnalProject && values.professionnalProject !== PROFESSIONNAL_PROJECT.UNKNOWN ? (
                 <>
                   <span style={{ textTransform: "uppercase", letterSpacing: "0.05rem", margin: "0.75rem 0", fontSize: "0,875rem", fontWeight: "500", color: "#6b7280" }}>
@@ -157,14 +176,21 @@ export default () => {
                       <Button name="professionnalProjectPrecision" handleChange={handleChange} values={values} value={PROFESSIONNAL_PROJECT_PRECISION.ARMY} title="Militaire" />
                     </div>
                   ) : (
-                    <Field
-                      placeholder="Précisez à l'administration votre projet professionnel"
-                      className="form-control"
-                      name="professionnalProjectPrecision"
-                      value={values.professionnalProjectPrecision}
-                      onChange={handleChange}
-                    />
+                    <>
+                      <Field
+                        validate={(v) => {
+                          if (!v) return requiredMessage;
+                        }}
+                        placeholder="Précisez à l'administration votre projet professionnel"
+                        className="form-control"
+                        name="professionnalProjectPrecision"
+                        value={values.professionnalProjectPrecision}
+                        onChange={handleChange}
+                      />
+                      <ErrorMessage errors={errors} touched={touched} name="professionnalProjectPrecision" />
+                    </>
                   )}
+                  <ErrorMessage errors={errors} touched={touched} name="professionnalProjectPrecision" />
                 </>
               ) : null}
             </PreferenceItem>
@@ -174,6 +200,7 @@ export default () => {
                 OU
                 <Button name="period" handleChange={handleChange} values={values} value={PERIOD.SCHOOL} title="Sur le temps scolaire" />
               </div>
+              <ErrorMessage errors={errors} touched={touched} name="period" />
               {values.period ? (
                 <RankingPeriod
                   handleChange={handleChange}
@@ -187,10 +214,10 @@ export default () => {
             <PreferenceItem title="Quelle est votre mobilité géographique ?">
               <Row style={{ width: "100%" }}>
                 <Col md={6}>
-                  <MobilityCard title="MISSION À PROXIMITÉ DE" handleChange={handleChange} values={values} />
+                  <MobilityCard title="MISSION À PROXIMITÉ DE" handleChange={handleChange} values={values} errors={errors} touched={touched} />
                 </Col>
                 <Col md={6}>
-                  <TransportCard title="MOYEN(S) DE TRANSPORT PRIVILÉGIÉ" handleChange={handleChange} values={values} />
+                  <TransportCard title="MOYEN(S) DE TRANSPORT PRIVILÉGIÉ" handleChange={handleChange} values={values} errors={errors} touched={touched} />
                 </Col>
               </Row>
             </PreferenceItem>
@@ -200,6 +227,7 @@ export default () => {
                 OU
                 <Button name="missionFormat" handleChange={handleChange} values={values} value="DISCONTINUOUS" title="Mission perlée (84 heures réparties sur l'année)" />
               </div>
+              <ErrorMessage errors={errors} touched={touched} name="missionFormat" />
             </PreferenceItem>
             <PreferenceItem title="Etes-vous engagés comme bénévole en parallèle de votre inscription au SNU ?">
               <div style={{ display: "flex", alignItems: "center", marginBottom: "0.5rem" }}>
@@ -207,30 +235,38 @@ export default () => {
                 OU
                 <Button name="engaged" handleChange={handleChange} values={values} value="false" title="NON" />
               </div>
+              <ErrorMessage errors={errors} touched={touched} name="engaged" />
               {values.engaged === "true" ? (
-                <Input
-                  type="textarea"
-                  rows={5}
-                  placeholder="Expliquez cette mission en quelques mots..."
-                  name="engagedDescription"
-                  value={values.engagedDescription}
-                  onChange={handleChange}
-                />
+                <>
+                  <Field
+                    validate={(v) => {
+                      if (!v) return requiredMessage;
+                    }}
+                    type="textarea"
+                    rows={5}
+                    placeholder="Expliquez cette mission en quelques mots..."
+                    name="engagedDescription"
+                    value={values.engagedDescription}
+                    onChange={handleChange}
+                  />
+                  <ErrorMessage errors={errors} touched={touched} name="engagedDescription" />
+                </>
               ) : null}
             </PreferenceItem>
             <PreferenceItem title="Avez-vous déjà une idée de là où vous voudriez réaliser votre mission d'intérêt général ?">
               <Input
                 type="textarea"
                 rows={5}
-                placeholder="Précisez à l'administration le lieu où vous souhaiteriez effectuer votre mission..."
+                placeholder="(Optionel) Précisez à l'administration le lieu où vous souhaiteriez effectuer votre mission..."
                 name="desiredLocation"
                 value={values.desiredLocation}
                 onChange={handleChange}
               />
             </PreferenceItem>
-            <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+            <Footer>
               <ContinueButton onClick={handleSubmit}>Enregistrer mes préférences</ContinueButton>
-            </div>
+              {Object.keys(errors).length ? <h3>Vous ne pouvez pas enregistrer votre avancée car tous les champs ne sont pas correctement renseignés.</h3> : null}
+            </Footer>
           </>
         )}
       </Formik>
@@ -250,6 +286,23 @@ const PreferenceItem = ({ title, children }) => {
     </Hero>
   );
 };
+
+const Footer = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  h3 {
+    border: 1px solid #fc8181;
+    border-radius: 0.25em;
+    margin-top: 1em;
+    background-color: #fff5f5;
+    color: #c53030;
+    font-weight: 400;
+    font-size: 12px;
+    padding: 1em;
+  }
+`;
 
 const Item = ({ title, subtitle, name, values, handleChange }) => {
   return (

@@ -3,26 +3,47 @@ import styled from "styled-components";
 import { translate } from "./utils";
 import Button from "./button";
 import { Field } from "formik";
+import ErrorMessage, { requiredMessage } from "./errorMessage";
 
-export default ({ title, handleChange, values }) => {
+export default ({ title, handleChange, values, errors, touched }) => {
   return (
     <Container>
       <Title>{title}</Title>
-      <Item values={values} handleChange={handleChange} name="mobilityNearSchool" label="Votre établissement" />
-      <Item values={values} handleChange={handleChange} name="mobilityNearHome" label="Votre domicile" />
-      <Item values={values} handleChange={handleChange} name="mobilityNearRelative" label="Hébergement chez un proche" />
+      <Item values={values} handleChange={handleChange} name="mobilityNearSchool" label="Votre établissement" errors={errors} touched={touched} />
+      <Item values={values} handleChange={handleChange} name="mobilityNearHome" label="Votre domicile" errors={errors} touched={touched} />
+      <Item values={values} handleChange={handleChange} name="mobilityNearRelative" label="Hébergement chez un proche" errors={errors} touched={touched} />
       {values.mobilityNearRelative === "true" ? (
         <>
           <span style={{ textTransform: "uppercase", letterSpacing: "0.05rem", margin: "0.75rem 0", fontSize: "0,875rem", fontWeight: "500", color: "#6b7280" }}>Précisez</span>
-          <Field placeholder="Chez qui ?" className="form-control" name="mobilityNearRelativeName" value={values.mobilityNearRelativeName} onChange={handleChange} />
-          <Field placeholder="Code postal" className="form-control" name="mobilityNearRelativeZip" value={values.mobilityNearRelativeZip} onChange={handleChange} />
+          <Field
+            validate={(v) => {
+              if (!v) return requiredMessage;
+            }}
+            placeholder="Chez qui ?"
+            className="form-control"
+            name="mobilityNearRelativeName"
+            value={values.mobilityNearRelativeName}
+            onChange={handleChange}
+          />
+          <ErrorMessage errors={errors} touched={touched} name="mobilityNearRelativeName" />
+          <Field
+            validate={(v) => {
+              if (!v) return requiredMessage;
+            }}
+            placeholder="Code postal"
+            className="form-control"
+            name="mobilityNearRelativeZip"
+            value={values.mobilityNearRelativeZip}
+            onChange={handleChange}
+          />
+          <ErrorMessage errors={errors} touched={touched} name="mobilityNearRelativeZip" />
         </>
       ) : null}
     </Container>
   );
 };
 
-const Item = ({ values, handleChange, name, label }) => {
+const Item = ({ values, handleChange, name, label, errors, touched }) => {
   return (
     <>
       <ItemContainer>
@@ -34,6 +55,7 @@ const Item = ({ values, handleChange, name, label }) => {
           <Button name={name} handleChange={handleChange} values={values} value="false" title="Non" />
         </div>
       </ItemContainer>
+      <ErrorMessage errors={errors} touched={touched} name={name} />
     </>
   );
 };
@@ -55,7 +77,7 @@ const Container = styled.div`
   width: 100%;
   input {
     max-width: 20rem;
-    margin-bottom: 0.5rem;
+    margin-top: 0.5rem;
   }
 `;
 

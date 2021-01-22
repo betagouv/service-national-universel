@@ -4,8 +4,9 @@ import { translate } from "./utils";
 import Button from "./button";
 import { Field } from "formik";
 import { Row, Col } from "reactstrap";
+import ErrorMessage, { requiredMessage } from "./errorMessage";
 
-export default ({ title, handleChange, values }) => {
+export default ({ title, handleChange, values, errors, touched }) => {
   return (
     <Container>
       <Title>{title}</Title>
@@ -18,17 +19,21 @@ export default ({ title, handleChange, values }) => {
         <Button name="mobilityTransport" handleChange={handleChange} values={values} value="CARPOOLING" title="Covoiturage" />
         <Button name="mobilityTransport" handleChange={handleChange} values={values} value="OTHER" title="Autre" />
       </Row>
-
+      <ErrorMessage errors={errors} touched={touched} name="mobilityTransport" />
       {values.mobilityTransport === "OTHER" ? (
         <>
           <span style={{ textTransform: "uppercase", letterSpacing: "0.05rem", margin: "0.75rem 0", fontSize: "0,875rem", fontWeight: "500", color: "#6b7280" }}>Précisez</span>
           <Field
+            validate={(v) => {
+              if (!v) return requiredMessage;
+            }}
             placeholder="Quel moyen de transport utilisez-vous ?"
             className="form-control"
             name="mobilityTransportOther"
             value={values.mobilityTransportOther}
             onChange={handleChange}
           />
+          <ErrorMessage errors={errors} touched={touched} name="mobilityTransportOther" />
         </>
       ) : null}
     </Container>

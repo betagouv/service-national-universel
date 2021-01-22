@@ -25,7 +25,7 @@ export default () => {
 
   const getDisabled = (tab) => {
     if (tab === TABS_USER.PREFERENCES) {
-      return [YOUNG_STATUS.WAITING_VALIDATION].includes(young.status);
+      return [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.REFUSED, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status);
     }
   };
 

@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
+import { requiredMessage } from "./errorMessage";
 import styled from "styled-components";
+import { Field } from "formik";
 
 export default ({ title, handleChange, name, value, values, onClick }) => {
   const handleClick = () => {
@@ -10,6 +12,13 @@ export default ({ title, handleChange, name, value, values, onClick }) => {
 
   return (
     <Container selected={values[name] && values[name] === value} onClick={handleClick}>
+      <Field
+        hidden
+        validate={(v) => {
+          if (!v) return requiredMessage;
+        }}
+        name={name}
+      />
       {title}
     </Container>
   );
