@@ -1,4 +1,4 @@
-export const PERIOD_HOLIDAYS = {
+export const PERIOD_DURING_HOLIDAYS = {
   SUMMER: "SUMMER",
   AUTUMN: "AUTUMN",
   DECEMBER: "DECEMBER",
@@ -6,7 +6,7 @@ export const PERIOD_HOLIDAYS = {
   SPRING: "SPRING",
 };
 
-export const PERIOD_SCHOOL = {
+export const PERIOD_DURING_SCHOOL = {
   EVENING: "EVENING",
   END_DAY: "END_DAY",
   WEEKEND: "WEEKEND",
@@ -37,8 +37,8 @@ export const PROFESSIONNAL_PROJECT_PRECISION = {
 };
 
 export const PERIOD = {
-  HOLIDAYS: "HOLIDAYS",
-  SCHOOL: "SCHOOL",
+  DURING_HOLIDAYS: "DURING_HOLIDAYS",
+  DURING_SCHOOL: "DURING_SCHOOL",
 };
 
 export const translate = (value) => {

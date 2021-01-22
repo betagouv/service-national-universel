@@ -155,7 +155,16 @@ export default () => {
                     handleChange({ target: { name: "professionnalProjectPrecision", value: "" } });
                   }}
                 />
-                <Button name="professionnalProject" handleChange={handleChange} values={values} value={PROFESSIONNAL_PROJECT.UNKNOWN} title="Non connu pour le moment" />
+                <Button
+                  name="professionnalProject"
+                  handleChange={handleChange}
+                  values={values}
+                  value={PROFESSIONNAL_PROJECT.UNKNOWN}
+                  title="Non connu pour le moment"
+                  onClick={() => {
+                    handleChange({ target: { name: "professionnalProjectPrecision", value: "" } });
+                  }}
+                />
               </div>
               <ErrorMessage errors={errors} touched={touched} name="professionnalProject" />
               {values.professionnalProject && values.professionnalProject !== PROFESSIONNAL_PROJECT.UNKNOWN ? (
@@ -196,15 +205,15 @@ export default () => {
             </PreferenceItem>
             <PreferenceItem title="Quelle période privilégiez-vous pour réaliser la mission d'intérêt général ?">
               <div style={{ display: "flex", alignItems: "center", marginBottom: "0.5rem" }}>
-                <Button name="period" handleChange={handleChange} values={values} value={PERIOD.HOLIDAYS} title="Sur les vacances scolaires" />
+                <Button name="period" handleChange={handleChange} values={values} value={PERIOD.DURING_HOLIDAYS} title="Sur les vacances scolaires" />
                 OU
-                <Button name="period" handleChange={handleChange} values={values} value={PERIOD.SCHOOL} title="Sur le temps scolaire" />
+                <Button name="period" handleChange={handleChange} values={values} value={PERIOD.DURING_SCHOOL} title="Sur le temps scolaire" />
               </div>
               <ErrorMessage errors={errors} touched={touched} name="period" />
               {values.period ? (
                 <RankingPeriod
                   handleChange={handleChange}
-                  title={values.period === PERIOD.HOLIDAYS ? "SUR LES VACANCES SCOLAIRES" : "SUR LE TEMPS SCOLAIRE"}
+                  title={values.period === PERIOD.DURING_HOLIDAYS ? "SUR LES VACANCES SCOLAIRES" : "SUR LE TEMPS SCOLAIRE"}
                   period={values.period}
                   values={values}
                   name="periodRanking"

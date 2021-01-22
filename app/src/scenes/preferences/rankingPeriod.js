@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { PERIOD_HOLIDAYS, PERIOD_SCHOOL, PERIOD, translate } from "./utils";
+import { PERIOD_DURING_HOLIDAYS, PERIOD_DURING_SCHOOL, PERIOD, translate } from "./utils";
 
 export default ({ title, period, handleChange, name, values }) => {
   const [items, setItems] = useState(values[name]);
 
   useEffect(() => {
     let defaultRanking = [];
-    if (period === PERIOD.HOLIDAYS) defaultRanking = Object.keys(PERIOD_HOLIDAYS);
-    if (period === PERIOD.SCHOOL) defaultRanking = Object.keys(PERIOD_SCHOOL);
+    if (period === PERIOD.DURING_HOLIDAYS) defaultRanking = Object.keys(PERIOD_DURING_HOLIDAYS);
+    if (period === PERIOD.DURING_SCHOOL) defaultRanking = Object.keys(PERIOD_DURING_SCHOOL);
     handleChange({ target: { name, value: defaultRanking } });
     setItems(defaultRanking);
   }, [period]);

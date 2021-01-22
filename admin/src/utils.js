@@ -80,6 +80,60 @@ export const translate = (value) => {
       return "Séjour de cohésion";
     case "INSCRIPTION":
       return "Inscription";
+    case "SUMMER":
+      return "Vacances d'été (juillet ou août)";
+    case "AUTUMN":
+      return "Vacances d'automne";
+    case "DECEMBER":
+      return "Vacances de fin d'année (décembre)";
+    case "WINTER":
+      return "Vacances d'hiver";
+    case "SPRING":
+      return "Vacances de printemps";
+    case "EVENING":
+      return "En soirée";
+    case "END_DAY":
+      return "En fin de journée";
+    case "WEEKEND":
+      return "Durant le week-end";
+    case "CITIZENSHIP":
+      return "Citoyenneté";
+    case "CULTURE":
+      return "Culture";
+    case "DEFENSE":
+      return "Défense et mémoire";
+    case "EDUCATION":
+      return "Éducation";
+    case "ENVIRONMENT":
+      return "Environnement";
+    case "HEALTH":
+      return "Santé";
+    case "SECURITY":
+      return "Sécurité";
+    case "SOLIDARITY":
+      return "Solidarité";
+    case "SPORT":
+      return "Sport";
+    case "UNIFORM":
+      return "Corps en uniforme";
+    case "OTHER":
+      return "Autre";
+    case "UNKNOWN":
+      return "Non connu pour le moment";
+    case "FIREFIGHTER":
+      return "Pompiers";
+    case "POLICE":
+      return "Police";
+    case "ARMY":
+      return "Militaire";
+    case "DURING_HOLIDAYS":
+      return "Sur les vacances scolaires";
+    case "DURING_SCHOOL":
+      return "Sur le temps scolaire";
+    case "true":
+      return "Oui";
+    case "false":
+      return "Non";
     default:
       return value;
   }
@@ -414,14 +468,13 @@ export const YOUNG_SITUATIONS = {
   NOTHING: "NOTHING", // @todo find a better key --'
 };
 
-
 export const YOUNG_STATUS_COLORS = {
   WAITING_VALIDATION: "#FE7B52",
   WAITING_CORRECTION: "#FEB951",
   VALIDATED: "#6CC763",
   REFUSED: "#F8A9AD",
   IN_PROGRESS: "#382F79",
-}
+};
 
 export const REFERENT_ROLES = {
   ADMIN: "admin",
@@ -433,7 +486,7 @@ export const REFERENT_ROLES = {
 export async function openDocumentInNewtab(apiResponse) {
   const { data, mimeType, ok, code } = apiResponse;
   if (!ok) {
-    toastr.error("Impossible d'afficher le document", code || '');
+    toastr.error("Impossible d'afficher le document", code || "");
     return;
   }
   const arrayBufferView = new Uint8Array(data.data);
