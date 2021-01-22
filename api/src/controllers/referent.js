@@ -196,21 +196,35 @@ router.put("/young/:id", passport.authenticate("referent", { session: false }), 
   }
 });
 
-router.post("/email/:youngId", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.post("/email/:template/:youngId", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const { youngId } = req.params;
+    const { youngId, template } = req.params;
     const young = await YoungObject.findById(youngId);
     if (!young) return res.status(200).send({ ok: true });
-    let htmlContent = fs.readFileSync(path.resolve(__dirname, "../templates/waitingCorrection.html")).toString();
-    htmlContent = htmlContent.replace(/{{message}}/g, `${req.body.message}`);
-    htmlContent = htmlContent.replace(/{{cta}}/g, "https://inscription.snu.gouv.fr");
-    htmlContent = htmlContent.replace(/\n/g, "<br/>");
-    console.log(htmlContent);
-    await sendEmail(
-      { name: `${young.firstName} ${young.lastName}`, email: young.email },
-      "Votre candidature au SNU est en attente de correction",
-      htmlContent
-    );
+
+    let htmlContent = "";
+    let subject = "";
+
+    if (template === "correction") {
+      htmlContent = fs.readFileSync(path.resolve(__dirname, "../templates/waitingCorrection.html")).toString();
+      htmlContent = htmlContent.replace(/{{message}}/g, `${req.body.message}`);
+      htmlContent = htmlContent.replace(/{{cta}}/g, "https://inscription.snu.gouv.fr");
+      htmlContent = htmlContent.replace(/\n/g, "<br/>");
+      subject = "Votre candidature au SNU est en attente de correction";
+    } else if (template === "validate") {
+      htmlContent = fs.readFileSync(path.resolve(__dirname, "../templates/validated.html")).toString();
+      htmlContent = htmlContent.replace(/{{cta}}/g, "https://inscription.snu.gouv.fr");
+      htmlContent = htmlContent.replace(/{{firstName}}/g, young.firstName);
+      htmlContent = htmlContent.replace(/{{lastName}}/g, young.lastName);
+      subject = "Votre candidature au SNU a été validée";
+    } else if (template === "refuse") {
+      htmlContent = fs.readFileSync(path.resolve(__dirname, "../templates/rejected.html")).toString();
+      htmlContent = htmlContent.replace(/{{firstName}}/g, young.firstName);
+      htmlContent = htmlContent.replace(/{{lastName}}/g, young.lastName);
+      subject = "Votre candidature au SNU a été refusée";
+    }
+
+    await sendEmail({ name: `${young.firstName} ${young.lastName}`, email: young.email }, subject, htmlContent);
     return res.status(200).send({ ok: true }); //todo
   } catch (error) {
     console.log(error);

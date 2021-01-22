@@ -7,10 +7,12 @@ import api from "../services/api";
 
 import { translate, YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_COLORS } from "../utils";
 import { toastr } from "react-redux-toastr";
+
 import MailCorrection from "../scenes/inscription/MailCorrection";
 
 export default ({ hit }) => {
   const STATUS = [YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.VALIDATED, YOUNG_STATUS.REFUSED];
+
   const [modal, setModal] = useState(false);
   const [young, setYoung] = useState(null);
   const user = useSelector((state) => state.Auth.user);
@@ -37,7 +39,15 @@ export default ({ hit }) => {
       young.historic.push({ phase: YOUNG_PHASE.INSCRIPTION, userName: `${user.firstName} ${user.lastName}`, userId: user._id, status, note });
       const { ok, code, data: newYoung } = await api.put(`/referent/young/${young._id}`, { historic: young.historic, status });
 
-      if (!ok) toastr.error("Une erreur s'est produite :", code);
+      if (status === YOUNG_STATUS.VALIDATED) {
+        await api.post(`/referent/email/validate/${young._id}`, { subject: "Inscription validée" });
+      }
+
+      if (status === YOUNG_STATUS.REFUSED) {
+        await api.post(`/referent/email/refuse/${young._id}`, { subject: "Inscription refusée" });
+      }
+
+      if (!ok) return toastr.error("Une erreur s'est produite :", code);
       setYoung(newYoung);
       toastr.success("Mis à jour!");
     } catch (e) {

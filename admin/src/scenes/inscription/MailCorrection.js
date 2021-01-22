@@ -26,7 +26,7 @@ Merci de vous reconnecter à votre compte pour apporter les modifications demand
 
   const send = async () => {
     setSending(true);
-    await api.post(`/referent/email/${value._id}`, { message, subject: "Demande de correction" });
+    await api.post(`/referent/email/correction/${value._id}`, { message, subject: "Demande de correction" });
     toastr.success("Email envoyé !");
     onSend(message);
   };
