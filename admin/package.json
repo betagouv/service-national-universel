@@ -4,7 +4,7 @@
   "scripts": {
     "dev": "webpack-dev-server --port 8082 --mode development --config webpack.dev.config.js --open --hot --inline",
     "start": "npm run build && node server/index.js",
-    "build": "webpack --env.production --env.NODE_ENV=production",
+    "build": "node --max-old-space-size=2048 node_modules/webpack/bin/webpack.js --env.production --env.NODE_ENV=production",
     "deploy": "npm run build && eb deploy maakyo-admin-production --profile postajob"
   },
   "prettier": {
