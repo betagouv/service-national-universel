@@ -27,6 +27,7 @@ export default ({ hit }) => {
   if (!young) return <div />;
 
   const handleClickStatus = (status) => {
+    if (!confirm("Êtes-vous sûr(e) de vouloir modifier le statut de ce profil?\nUn email sera automatiquement envoyé à l'utlisateur.")) return;
     if (status === YOUNG_STATUS.WAITING_CORRECTION) return setModal(true);
     setStatus(status);
   };
