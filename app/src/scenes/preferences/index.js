@@ -190,7 +190,7 @@ export default () => {
                         validate={(v) => {
                           if (!v) return requiredMessage;
                         }}
-                        placeholder="Précisez à l'administration votre projet professionnel"
+                        placeholder="Exemple : Je rêve de devenir danseuse étoile..."
                         className="form-control"
                         name="professionnalProjectPrecision"
                         value={values.professionnalProjectPrecision}
@@ -226,7 +226,7 @@ export default () => {
                   <MobilityCard title="MISSION À PROXIMITÉ DE" handleChange={handleChange} values={values} errors={errors} touched={touched} />
                 </Col>
                 <Col md={6}>
-                  <TransportCard title="MOYEN(S) DE TRANSPORT PRIVILÉGIÉ" handleChange={handleChange} values={values} errors={errors} touched={touched} />
+                  <TransportCard title="MOYEN(S) DE TRANSPORT PRIVILÉGIÉ(S)" handleChange={handleChange} values={values} errors={errors} touched={touched} />
                 </Col>
               </Row>
             </PreferenceItem>
@@ -248,11 +248,15 @@ export default () => {
               {values.engaged === "true" ? (
                 <>
                   <Field
+                    hidden
                     validate={(v) => {
                       if (!v) return requiredMessage;
                     }}
+                    name="engagedDescription"
+                  />
+                  <Input
                     type="textarea"
-                    rows={5}
+                    rows={3}
                     placeholder="Expliquez cette mission en quelques mots..."
                     name="engagedDescription"
                     value={values.engagedDescription}
@@ -262,11 +266,11 @@ export default () => {
                 </>
               ) : null}
             </PreferenceItem>
-            <PreferenceItem title="Avez-vous déjà une idée de là où vous voudriez réaliser votre mission d'intérêt général ?">
+            <PreferenceItem title="Avez-vous déjà une idée de là où vous voudriez réaliser votre mission d'intérêt général ? (Optionel)">
               <Input
                 type="textarea"
-                rows={5}
-                placeholder="(Optionel) Précisez à l'administration le lieu où vous souhaiteriez effectuer votre mission..."
+                rows={3}
+                placeholder="Précisez à l'administration le lieu où vous souhaiteriez effectuer votre mission..."
                 name="desiredLocation"
                 value={values.desiredLocation}
                 onChange={handleChange}

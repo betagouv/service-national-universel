@@ -7,15 +7,16 @@ export default ({ title, handleChange, name, value, values, onClick }) => {
   const handleClick = () => {
     if (values[name] === value) value = "";
     if (onClick) onClick();
-    handleChange({ target: { name, value } });
+    if (handleChange) handleChange({ target: { name, value } });
   };
 
   return (
-    <Container selected={values[name] && values[name] === value} onClick={handleClick}>
+    <Container selected={(values[name] && values[name] === value) || (Array.isArray(values[name]) && values[name].indexOf(value) !== -1)} onClick={handleClick}>
       <Field
         hidden
         validate={(v) => {
           if (!v) return requiredMessage;
+          if (Array.isArray(v) && v.length === 0) return requiredMessage;
         }}
         name={name}
       />
