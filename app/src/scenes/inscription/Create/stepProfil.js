@@ -57,6 +57,7 @@ export default () => {
             const { ok: okPut, code: codePut, data: young } = await api.put("/young", newValues);
             if (!okPut) return toastr.error("Une erreur s'est produite :", codePut);
             dispatch(setYoung(young));
+            matomo.setUserId(young._id);
             history.push("/inscription/coordonnees");
           } catch (e) {
             console.log(e);
