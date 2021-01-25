@@ -12,6 +12,8 @@ import { setUser, setStructure } from "../../redux/auth/actions";
 import api from "../../services/api";
 import LoadingButton from "../../components/loadingButton";
 
+import matomo from "../../services/matomo";
+
 export default () => {
   const [invitation, setInvitation] = useState("");
   const [newuser, setNewUser] = useState(null);
@@ -62,7 +64,10 @@ export default () => {
                   return toastr.error("Problème", code);
                 }
                 if (token) api.setToken(token);
-                if (user) dispatch(setUser(user));
+                if (user) {
+                  dispatch(setUser(user));
+                  matomo.setUserId(user._id);
+                }
               } catch (e) {
                 if (e && e.code === "USER_ALREADY_REGISTERED") return toastr.error("Le compte existe déja. Veuillez vous connecter");
                 actions.setSubmitting(false);
