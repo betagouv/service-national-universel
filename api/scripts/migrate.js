@@ -1,4 +1,5 @@
-require("dotenv").config({ path: "./../.env-prod" });
+require("dotenv").config({ path: "./../.env-staging" });
+const esClient = require("../src/es");
 
 const Sequelize = require("sequelize");
 const { QueryTypes } = require("sequelize");
@@ -10,9 +11,9 @@ const opts = { define: { freezeTableName: true, timestamps: false }, logging: fa
 const connexionURL = process.env.MYSQL_URL;
 const sequelize = new Sequelize(connexionURL, opts);
 
-// const Mission = require(`../src/models/mission`);
+const Mission = require(`../src/models/mission`);
 // const Structure = require(`../src/models/structure`);
-const Young = require("../src/models/young");
+// const Young = require("../src/models/young");
 // const Referent = require("../src/models/referent");
 // const Application = require("../src/models/application");
 
@@ -32,24 +33,24 @@ sequelize.authenticate().then(async (e) => {
   // await Structure.deleteMany({});
   // await migrate("Structure", migrateStructure);
 
-  // await esclient.indices.delete({ index: "mission" });
-  // await Mission.deleteMany({});
-  // await migrate("Mission", migrateMission);
+  // await esClient.indices.delete({ index: "mission" });
+  await Mission.deleteMany({});
+  await migrate("Mission", migrateMission);
 
-  try {
-    // Migrate people in the cohesion stay
-    console.log(`### START MONGO DELETE Young`);
-    await Young.deleteMany({ phase: "COHESION_STAY" });
-    console.log(`### END DELETE young`);
-    await migrate("Young", migrateYoung);
-    console.log(`### END MONGO DELETE young`);
-    await Young.unsynchronize();
-    console.log(`### END DELETED ES Indice for young`);
-    await Young.synchronize();
-    console.log(`### END SYNC ES Indice for young`);
-  } catch (e) {
-    console.log(e);
-  }
+  // try {
+  //   // Migrate people in the cohesion stay
+  //   console.log(`### START MONGO DELETE Young`);
+  //   await Young.deleteMany({ phase: "COHESION_STAY" });
+  //   console.log(`### END DELETE young`);
+  //   await migrate("Young", migrateYoung);
+  //   console.log(`### END MONGO DELETE young`);
+  //   await Young.unsynchronize();
+  //   console.log(`### END DELETED ES Indice for young`);
+  //   await Young.synchronize();
+  //   console.log(`### END SYNC ES Indice for young`);
+  // } catch (e) {
+  //   console.log(e);
+  // }
 
   // await esclient.indices.delete({ index: "referent" });
   // await Referent.deleteMany({});
@@ -58,6 +59,7 @@ sequelize.authenticate().then(async (e) => {
   // await esclient.indices.delete({ index: "application" });
   // await Application.deleteMany({});
   // await migrate("Application", migrateApplication);
+  process.exit(1);
 });
 
 async function migrateStructure() {
@@ -113,6 +115,9 @@ async function migrateMission() {
     try {
       const mission = { ...m };
       mission.sqlId = m.id;
+      mission.sqlStructureId = m.structure_id;
+      mission.sqlTutorId = m.tuteur_id;
+
       mission.placesTotal = m.participations_max;
       mission.placesLeft = m.participations_max;
       if (m.longitude && m.latitude) {
@@ -122,8 +127,18 @@ async function migrateMission() {
         };
       }
       mission.remote = m.is_everywhere ? "true" : "false";
+
+      //todo translates domains
       mission.domains = JSON.parse(m.domaines);
-      mission.format = m.format === "Perlée" ? "DISCONTINUOUS" : "CONTINUOUS";
+      if (m.format === "Perlée") {
+        mission.format = "DISCONTINUOUS";
+      } else if (m.format === "Continue") {
+        mission.format = "CONTINUOUS";
+      } else if (m.format === "Autonome") {
+        mission.format = "AUTONOMOUS";
+      } else {
+        console.log("ERRR", m.format);
+      }
       mission.status = (() => {
         if (m.state === "Brouillon") return "DRAFT";
         if (m.state === "En attente de validation") return "WAITING_VALIDATION";
@@ -133,9 +148,12 @@ async function migrateMission() {
         if (m.state === "Annulée") return "CANCEL";
         if (m.state === "Archivée") return "ARCHIVED";
       })();
-
-      mission.dateEnd = m.end_date;
-      mission.dateStart = m.start_date;
+      if (JSON.parse(m.periodes).length) mission.period = JSON.parse(m.periodes);
+      mission.frequence = m.frequence;
+      mission.department = departmentList[m.department];
+      mission.region = department2region[mission.department];
+      mission.endAt = m.end_date;
+      mission.startAt = m.start_date;
 
       a.push(mission);
     } catch (error) {
@@ -449,112 +467,112 @@ const regionList = {
 };
 
 const department2region = {
-  "01": "84",
-  "02": "32",
-  "03": "84",
-  "04": "93",
-  "05": "93",
-  "06": "93",
-  "07": "84",
-  "08": "44",
-  "09": "76",
-  10: "44",
-  11: "76",
-  12: "76",
-  13: "93",
-  14: "28",
-  15: "84",
-  16: "75",
-  17: "75",
-  18: "24",
-  19: "75",
-  21: "27",
-  22: "53",
-  23: "75",
-  24: "75",
-  25: "27",
-  26: "84",
-  27: "28",
-  28: "24",
-  29: "53",
-  "2A": "94",
-  "2B": "94",
-  30: "76",
-  31: "76",
-  32: "76",
-  33: "75",
-  34: "76",
-  35: "53",
-  36: "24",
-  37: "24",
-  38: "84",
-  39: "27",
-  40: "75",
-  41: "24",
-  42: "84",
-  43: "84",
-  44: "52",
-  45: "24",
-  46: "76",
-  47: "75",
-  48: "76",
-  49: "52",
-  50: "28",
-  51: "44",
-  52: "44",
-  53: "52",
-  54: "44",
-  55: "44",
-  56: "53",
-  57: "44",
-  58: "27",
-  59: "32",
-  60: "32",
-  61: "28",
-  62: "32",
-  63: "84",
-  64: "75",
-  65: "76",
-  66: "76",
-  67: "44",
-  68: "44",
-  69: "84",
-  70: "27",
-  71: "27",
-  72: "52",
-  73: "84",
-  74: "84",
-  75: "11",
-  76: "28",
-  77: "11",
-  78: "11",
-  79: "75",
-  80: "32",
-  81: "76",
-  82: "76",
-  83: "93",
-  84: "93",
-  85: "52",
-  86: "75",
-  87: "75",
-  88: "44",
-  89: "27",
-  90: "27",
-  91: "11",
-  92: "11",
-  93: "11",
-  94: "11",
-  95: "11",
-  971: "971",
-  972: "972",
-  973: "973",
-  974: "974",
-  975: "975",
-  976: "976",
-  977: "977",
-  978: "978",
-  984: "984",
-  986: "986",
-  987: "987",
-  988: "988",
+  Ain: "Auvergne-Rhône-Alpes",
+  Aisne: "Hauts-de-France",
+  Allier: "Auvergne-Rhône-Alpes",
+  "Alpes-de-Haute-Provence": "Provence-Alpes-Côte d'Azur",
+  "Hautes-Alpes": "Provence-Alpes-Côte d'Azur",
+  "Alpes-Maritimes": "Provence-Alpes-Côte d'Azur",
+  Ardèche: "Auvergne-Rhône-Alpes",
+  Ardennes: "Grand Est",
+  Ariège: "Occitanie",
+  Aube: "Grand Est",
+  Aude: "Occitanie",
+  Aveyron: "Occitanie",
+  "Bouches-du-Rhône": "Provence-Alpes-Côte d'Azur",
+  Calvados: "Normandie",
+  Cantal: "Auvergne-Rhône-Alpes",
+  Charente: "Nouvelle-Aquitaine",
+  "Charente-Maritime": "Nouvelle-Aquitaine",
+  Cher: "Centre-Val de Loire",
+  Corrèze: "Nouvelle-Aquitaine",
+  "Côte-d'Or": "Bourgogne-Franche-Comté",
+  "Côtes-d'Armor": "Bretagne",
+  Creuse: "Nouvelle-Aquitaine",
+  Dordogne: "Nouvelle-Aquitaine",
+  Doubs: "Bourgogne-Franche-Comté",
+  Drôme: "Auvergne-Rhône-Alpes",
+  Eure: "Normandie",
+  "Eure-et-Loire": "Centre-Val de Loire",
+  Finistère: "Bretagne",
+  "Corse-du-Sud": "Corse",
+  "Haute-Corse": "Corse",
+  Gard: "Occitanie",
+  "Haute-Garonne": "Occitanie",
+  Gers: "Occitanie",
+  Gironde: "Nouvelle-Aquitaine",
+  Hérault: "Occitanie",
+  "Ille-et-Vilaine": "Bretagne",
+  Indre: "Centre-Val de Loire",
+  "Indre-et-Loire": "Centre-Val de Loire",
+  Isère: "Auvergne-Rhône-Alpes",
+  Jura: "Bourgogne-Franche-Comté",
+  Landes: "Nouvelle-Aquitaine",
+  "Loir-et-Cher": "Centre-Val de Loire",
+  Loire: "Auvergne-Rhône-Alpes",
+  "Haute-Loire": "Auvergne-Rhône-Alpes",
+  "Loire-Atlantique": "Pays de la Loire",
+  Loiret: "Centre-Val de Loire",
+  Lot: "Occitanie",
+  "Lot-et-Garonne": "Nouvelle-Aquitaine",
+  Lozère: "Occitanie",
+  "Maine-et-Loire": "Pays de la Loire",
+  Manche: "Normandie",
+  Marne: "Grand Est",
+  "Haute-Marne": "Grand Est",
+  Mayenne: "Pays de la Loire",
+  "Meurthe-et-Moselle": "Grand Est",
+  Meuse: "Grand Est",
+  Morbihan: "Bretagne",
+  Moselle: "Grand Est",
+  Nièvre: "Bourgogne-Franche-Comté",
+  Nord: "Hauts-de-France",
+  Oise: "Hauts-de-France",
+  Orne: "Normandie",
+  "Pas-de-Calais": "Hauts-de-France",
+  "Puy-de-Dôme": "Auvergne-Rhône-Alpes",
+  "Pyrénées-Atlantiques": "Nouvelle-Aquitaine",
+  "Hautes-Pyrénées": "Occitanie",
+  "Pyrénées-Orientales": "Occitanie",
+  "Bas-Rhin": "Grand Est",
+  "Haut-Rhin": "Grand Est",
+  Rhône: "Auvergne-Rhône-Alpes",
+  "Haute-Saône": "Bourgogne-Franche-Comté",
+  "Saône-et-Loire": "Bourgogne-Franche-Comté",
+  Sarthe: "Pays de la Loire",
+  Savoie: "Auvergne-Rhône-Alpes",
+  "Haute-Savoie": "Auvergne-Rhône-Alpes",
+  Paris: "Île-de-France",
+  "Seine-Maritime": "Normandie",
+  "Seine-et-Marne": "Île-de-France",
+  Yvelines: "Île-de-France",
+  "Deux-Sèvres": "Nouvelle-Aquitaine",
+  Somme: "Hauts-de-France",
+  Tarn: "Occitanie",
+  "Tarn-et-Garonne": "Occitanie",
+  Var: "Provence-Alpes-Côte d'Azur",
+  Vaucluse: "Provence-Alpes-Côte d'Azur",
+  Vendée: "Pays de la Loire",
+  Vienne: "Nouvelle-Aquitaine",
+  "Haute-Vienne": "Nouvelle-Aquitaine",
+  Vosges: "Grand Est",
+  Yonne: "Bourgogne-Franche-Comté",
+  "Territoire de Belfort": "Bourgogne-Franche-Comté",
+  Essonne: "Île-de-France",
+  "Hauts-de-Seine": "Île-de-France",
+  "Seine-Saint-Denis": "Île-de-France",
+  "Val-de-Marne": "Île-de-France",
+  "Val-d'Oise": "Île-de-France",
+  Guadeloupe: "Guadeloupe",
+  Martinique: "Martinique",
+  Guyane: "Guyane",
+  "La Réunion": "La Réunion",
+  "Saint-Pierre-et-Miquelon": "Saint-Pierre-et-Miquelon",
+  Mayotte: "Mayotte",
+  "Saint-Barthélemy": "Saint-Barthélemy",
+  "Saint-Martin": "Saint-Martin",
+  "Terres australes et antarctiques françaises": "Terres australes et antarctiques françaises",
+  "Wallis-et-Futuna": "Wallis-et-Futuna",
+  "Polynésie française": "Polynésie française",
+  "Nouvelle-Calédonie": "Nouvelle-Calédonie",
 };

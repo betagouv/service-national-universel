@@ -3,7 +3,6 @@ import styled from "styled-components";
 import Inscription from "./inscription";
 
 export default () => {
-
   const [currentTab, setCurrentTab] = useState("inscriptions");
 
   return (
@@ -49,6 +48,7 @@ const TabItem = styled.li`
   position: relative;
   font-size: 16px;
   color: #979797;
+  cursor: pointer;
 
   ${(props) =>
     props.isActive &&
