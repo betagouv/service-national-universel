@@ -40,10 +40,12 @@ export default ({ hit }) => {
       const { ok, code, data: newYoung } = await api.put(`/referent/young/${young._id}`, { historic: young.historic, status });
 
       if (status === YOUNG_STATUS.VALIDATED) {
+        matomo.logEvent("status_update", YOUNG_STATUS.VALIDATED);
         await api.post(`/referent/email/validate/${young._id}`, { subject: "Inscription validée" });
       }
 
       if (status === YOUNG_STATUS.REFUSED) {
+        matomo.logEvent("status_update", YOUNG_STATUS.REFUSED);
         await api.post(`/referent/email/refuse/${young._id}`, { subject: "Inscription refusée" });
       }
 
