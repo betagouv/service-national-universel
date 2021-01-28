@@ -11,15 +11,17 @@ import { Document, Page } from "react-pdf/dist/esm/entry.webpack";
 
 import LoadingButton from "../../components/loadingButton";
 import Historic from "../../components/historic";
+import DocumentInModal from "../../components/DocumentInModal";
 
 import DateInput from "../../components/dateInput";
-import { openDocumentInNewtab, departmentList, regionList, YOUNG_STATUS, translate } from "../../utils";
+import { departmentList, regionList, YOUNG_STATUS, translate } from "../../utils";
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 
 export default (props) => {
   const [young, setYoung] = useState();
+  const [file, setFile] = useState(null);
   const user = useSelector((state) => state.Auth.user);
   const history = useHistory();
   const [buttonsLoading, setButtonsLoading] = useState({});
@@ -51,6 +53,7 @@ export default (props) => {
   return (
     //@todo fix the depart and region
     <Wrapper>
+      {file && <DocumentInModal value={file} onChange={() => setFile(null)} />}
       <Formik
         initialValues={young}
         onSubmit={async (values) => {
@@ -440,7 +443,8 @@ export default (props) => {
                           key={i}
                           color="white"
                           onClick={async () => {
-                            openDocumentInNewtab(await api.get(`/referent/youngFile/${values._id}/imageRightFiles/${e}`));
+                            const f = await api.get(`/referent/youngFile/${values._id}/imageRightFiles/${e}`);
+                            setFile(f);
                           }}
                         >{`Visualiser le formulaire de consentement de droit à l'image (${i + 1}/${values.imageRightFiles.length})`}</InfoBtn>
                       );
