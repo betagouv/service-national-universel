@@ -112,22 +112,24 @@ export default () => {
                     </>
                   );
                 }}
-                render={({ data }) => (
-                  <Table>
-                    <thead>
-                      <tr>
-                        <th width="50%">Structures</th>
-                        <th width="20%">Missions</th>
-                        <th>Contexte</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {data.map((hit, k) => (
-                        <Hit hit={hit} key={k} onClick={() => setStructure(hit)} />
-                      ))}
-                    </tbody>
-                  </Table>
-                )}
+                render={({ data }) => {
+                  return (
+                    <Table>
+                      <thead>
+                        <tr>
+                          <th width="50%">Structures</th>
+                          <th width="20%">Missions</th>
+                          <th>Contexte</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {data.map((hit, k) => (
+                          <Hit hit={hit} key={k} onClick={() => setStructure(hit)} />
+                        ))}
+                      </tbody>
+                    </Table>
+                  );
+                }}
               />
             </ResultTable>
           </div>
@@ -145,7 +147,7 @@ const Hit = ({ hit, onClick }) => {
       const queries = [];
       queries.push({ index: "mission", type: "_doc" });
       queries.push({
-        query: { bool: { must: { match_all: {} }, filter: [{ term: { "sqlStructureId.keyword": hit.sqlId } }] } },
+        query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": hit._id } }] } },
       });
 
       const { responses } = await api.esQuery(queries);
