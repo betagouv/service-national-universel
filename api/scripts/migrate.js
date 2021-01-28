@@ -1,5 +1,7 @@
 require("dotenv").config({ path: "./../.env-staging" });
-const esClient = require("../src/es");
+
+const esclient = require("../src/es");
+
 
 const Sequelize = require("sequelize");
 const { QueryTypes } = require("sequelize");
@@ -29,9 +31,9 @@ const migrate = async (model, migration) => {
 };
 
 sequelize.authenticate().then(async (e) => {
-  // await esclient.indices.delete({ index: "structure" });
-  // await Structure.deleteMany({});
-  // await migrate("Structure", migrateStructure);
+  await esclient.indices.delete({ index: "structure" });
+  await Structure.deleteMany({});
+  await migrate("Structure", migrateStructure);
 
   // await esclient.indices.delete({ index: "referent" });
   await Referent.deleteMany({ sqlId: { $ne: null } });
