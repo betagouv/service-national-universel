@@ -8,8 +8,9 @@ import { Link, Redirect } from "react-router-dom";
 
 import MultiSelect from "../../components/Multiselect";
 import AddressInput from "../../components/addressInput";
+import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
 
-import { domains, translate, departmentList } from "../../utils";
+import { domains, translate, departmentList, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL } from "../../utils";
 import api from "../../services/api";
 
 export default (props) => {
@@ -27,12 +28,19 @@ export default (props) => {
     })();
   }, []);
 
-  if (defaultValue === undefined) return <div>Chargement...</div>;
+  const handleSave = async (values) => {
+    const { ok, code, data: mission } = await api.put("/mission", values);
+    if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de votre progression", code);
+    if (ok) toastr.success("Progression enregistrée");
+  };
 
+  if (defaultValue === undefined) return <div>Chargement...</div>;
   if (redirect) return <Redirect to="/mission" />;
 
   return (
     <Formik
+      validateOnChange={false}
+      validateOnBlur={false}
       initialValues={
         defaultValue || {
           placesTotal: 1,
@@ -46,6 +54,14 @@ export default (props) => {
           contraintes: "",
           departement: "",
           tuteur: "",
+          startAt: "",
+          endAt: "",
+          city: "",
+          zip: "",
+          address: "",
+          location: "",
+          department: "",
+          region: "",
         }
       }
       onSubmit={async (values) => {
@@ -69,7 +85,8 @@ export default (props) => {
       {({ values, handleChange, handleSubmit, isValid, errors, touched }) => (
         <Wrapper>
           <Header>
-            <Title>{values._id ? values.name : "Création d'une mission"}</Title>
+            <Title>{values.name ? values.name : "Création d'une mission"}</Title>
+            {Object.keys(errors).length ? <h3>Vous ne pouvez pas porposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
             <ButtonContainer>
               <button
                 className="white-button"
@@ -77,7 +94,7 @@ export default (props) => {
                 onClick={() => {
                   console.log("SAVE");
                   handleChange({ target: { value: "DRAFT", name: "status" } });
-                  handleSubmit();
+                  handleSave(values);
                 }}
               >
                 Enregistrer
@@ -107,13 +124,8 @@ export default (props) => {
                       <br />
                       Exemple: "Je fais les courses de produits pour mes voisons les plus fragiles
                     </p>
-                    <Field
-                      // validate={(v) => !v.length}
-                      value={values.name}
-                      onChange={handleChange}
-                      name="name"
-                      placeholder="Nom de votre mission"
-                    />
+                    <Field validate={(v) => !v && requiredMessage} value={values.name} onChange={handleChange} name="name" placeholder="Nom de votre mission" />
+                    <ErrorMessage errors={errors} touched={touched} name="name" />
                   </FormGroup>
                   <FormGroup>
                     <label>STRUCTURE RATTACHÉE</label>
@@ -127,7 +139,7 @@ export default (props) => {
                     <label>
                       <span>*</span>TYPE DE MISSION
                     </label>
-                    <Field component="select" name="format" value={values.format} onChange={handleChange}>
+                    <Field validate={(v) => !v && requiredMessage} component="select" name="format" value={values.format} onChange={handleChange}>
                       <option key="CONTINUOUS" value="CONTINUOUS">
                         {translate("CONTINUOUS")}
                       </option>
@@ -135,13 +147,14 @@ export default (props) => {
                         {translate("DISCONTINUOUS")}
                       </option>
                     </Field>
+                    <ErrorMessage errors={errors} touched={touched} name="format" />
                   </FormGroup>
                   <FormGroup>
                     <label>
                       <span>*</span>OBJECTIFS DE LA MISSION
                     </label>
                     <Field
-                      // validate={(v) => !v.length}
+                      validate={(v) => !v && requiredMessage}
                       name="description"
                       component="textarea"
                       rows={2}
@@ -149,13 +162,14 @@ export default (props) => {
                       onChange={handleChange}
                       placeholder="Décrivez en quelques mots votre mission"
                     />
+                    <ErrorMessage errors={errors} touched={touched} name="description" />
                   </FormGroup>
                   <FormGroup>
                     <label>
                       <span>*</span>ACTIONS CONCRÈTES CONFIÉES AU(X) VOLONTAIRE(S)
                     </label>
                     <Field
-                      // validate={(v) => !v.length}
+                      validate={(v) => !v && requiredMessage}
                       name="actions"
                       component="textarea"
                       rows={2}
@@ -163,6 +177,7 @@ export default (props) => {
                       onChange={handleChange}
                       placeholder="Listez briévement les actions confiées au(x) volontaire(s)"
                     />
+                    <ErrorMessage errors={errors} touched={touched} name="actions" />
                   </FormGroup>
                   <FormGroup>
                     <label>CONTRAINTES SPÉCIFIQUES POUR CETTE MISSION ?</label>
@@ -172,7 +187,6 @@ export default (props) => {
                       Exemple : Conditons physiques / Période de formation / Mission en soirée / etc
                     </p>
                     <Field
-                      // validate={(v) => !v.length}
                       name="contraintes"
                       component="textarea"
                       rows={2}
@@ -193,10 +207,35 @@ export default (props) => {
                       </label>
                       <Row>
                         <Col>
-                          <Input type="date" name="startAt" value={values.startAt} onChange={handleChange} placeholder="Date de début" />
+                          <Field
+                            validate={(v) => {
+                              if (!v) return requiredMessage;
+                              const start = new Date(v);
+                              if (start.getTime() < Date.now()) return "La date de début ne peut pas être dans le passé.";
+                            }}
+                            type="date"
+                            name="startAt"
+                            value={values.startAt}
+                            onChange={handleChange}
+                            placeholder="Date de début"
+                          />
+                          <ErrorMessage errors={errors} touched={touched} name="startAt" />
                         </Col>
                         <Col>
-                          <Input type="date" name="endAt" value={values.endAt} onChange={handleChange} placeholder="Date de fin" />
+                          <Field
+                            validate={(v) => {
+                              if (!v) return requiredMessage;
+                              const end = new Date(v);
+                              const start = new Date(values.startAt);
+                              if (end.getTime() < start.getTime()) return "La date de fin doit être après la date de début.";
+                            }}
+                            type="date"
+                            name="endAt"
+                            value={values.endAt}
+                            onChange={handleChange}
+                            placeholder="Date de fin"
+                          />
+                          <ErrorMessage errors={errors} touched={touched} name="endAt" />
                         </Col>
                       </Row>
                     </FormGroup>
@@ -215,8 +254,15 @@ export default (props) => {
                     </FormGroup>
                     <FormGroup>
                       <label>PÉRIODES POSSIBLES POUR RÉALISER LA MISSION</label>
-                      {/* TODO specs les periodes ? */}
-                      <input placeholder="Sélectionner les périodes" />
+                      <MultiSelect
+                        value={values.period}
+                        onChange={handleChange}
+                        name="period"
+                        options={Object.keys(MISSION_PERIOD_DURING_SCHOOL)
+                          .concat(Object.keys(MISSION_PERIOD_DURING_HOLIDAYS))
+                          .map((p) => translate(p))}
+                        placeholder="Sélectionnez une ou plusieurs périodes"
+                      />
                     </FormGroup>
                     <FormGroup>
                       <label>NOMBRE DE VOLONTAIRES RECHERCHÉS POUR CETTE MISSION</label>
@@ -235,11 +281,12 @@ export default (props) => {
                     </label>
                     <p style={{ color: "#a0aec1", fontSize: 12 }}>
                       Sélectionner le tuteur qui va s'occuper de la mission. <br />
-                      Vous pouvez également{" "}
+                      {/* todo invite tuteur */}
+                      {/* Vous pouvez également{" "}
                       <u>
                         <Link to="/team/invite">ajouter un nouveau tuteur</Link>
                       </u>{" "}
-                      à votre équipe.
+                      à votre équipe. */}
                     </p>
                     <Field component="select" name="tuteur_id" value={values.tuteur_id} onChange={handleChange}>
                       <option value="">Sélectionner un tuteur</option>
@@ -291,6 +338,31 @@ export default (props) => {
               />
             </FormGroup> */}
           </Box>
+          <Header style={{ justifyContent: "flex-end" }}>
+            {Object.keys(errors).length ? <h3>Vous ne pouvez pas porposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
+            <ButtonContainer>
+              <button
+                className="white-button"
+                disabled={!isValid}
+                onClick={() => {
+                  console.log("SAVE");
+                  handleChange({ target: { value: "DRAFT", name: "status" } });
+                  handleSubmit();
+                }}
+              >
+                Enregistrer
+              </button>
+              <button
+                disabled={!isValid}
+                onClick={() => {
+                  handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
+                  handleSubmit();
+                }}
+              >
+                Enregistrer et proposer la mission
+              </button>
+            </ButtonContainer>
+          </Header>
         </Wrapper>
       )}
     </Formik>
@@ -305,7 +377,16 @@ const Header = styled.div`
   padding: 0 25px 0;
   display: flex;
   margin-top: 25px;
-  align-items: flex-start;
+  align-items: center;
+  h3 {
+    border: 1px solid #fc8181;
+    border-radius: 0.25em;
+    background-color: #fff5f5;
+    color: #c53030;
+    font-weight: 400;
+    font-size: 12px;
+    padding: 1em;
+  }
 `;
 
 const FormGroup = styled.div`
