@@ -6,6 +6,8 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/fr";
 import { useSelector } from "react-redux";
+import { Modal } from "reactstrap";
+import { Document, Page } from "react-pdf/dist/esm/entry.webpack";
 
 import LoadingButton from "../../components/loadingButton";
 import Historic from "../../components/historic";
@@ -20,6 +22,8 @@ export default (props) => {
   const [young, setYoung] = useState();
   const user = useSelector((state) => state.Auth.user);
   const history = useHistory();
+  const [buttonsLoading, setButtonsLoading] = useState({});
+  const [file, setFile] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -31,6 +35,10 @@ export default (props) => {
   }, []);
 
   if (young === undefined) return <div>Chargement...</div>;
+
+  const setButtonLoading = (btn, v) => {
+    setButtonsLoading({ ...buttonsLoading, [btn]: v });
+  };
 
   const getSubtitle = () => {
     const createdAt = new Date(young.createdAt);
@@ -58,6 +66,7 @@ export default (props) => {
       >
         {({ values, handleChange, handleSubmit, isSubmitting, submitForm }) => (
           <>
+            {file && <Image value={file} onChange={() => setFile(null)} />}
             <TitleWrapper>
               <div>
                 <Title>{`Profil de ${values.firstName} ${values.lastName}`}</Title>
@@ -78,8 +87,12 @@ export default (props) => {
                         <InfoBtn
                           key={i}
                           color="white"
+                          loading={buttonsLoading[`cniFiles${i}`]}
                           onClick={async () => {
-                            openDocumentInNewtab(await api.get(`/referent/youngFile/${values._id}/cniFiles/${e}`));
+                            setButtonLoading(`cniFiles${i}`, true);
+                            const f = await api.get(`/referent/youngFile/${values._id}/cniFiles/${e}`);
+                            setButtonLoading(`cniFiles${i}`, false);
+                            setFile(f);
                           }}
                         >{`Visualiser la pièce d’identité (${i + 1}/${values.cniFiles.length})`}</InfoBtn>
                       );
@@ -253,8 +266,12 @@ export default (props) => {
                         <InfoBtn
                           key={i}
                           color="white"
+                          loading={buttonsLoading[`highSkilledActivityProofFiles${i}`]}
                           onClick={async () => {
-                            openDocumentInNewtab(await api.get(`/referent/youngFile/${values._id}/highSkilledActivityProofFiles/${e}`));
+                            setButtonLoading(`highSkilledActivityProofFiles${i}`, true);
+                            const f = await api.get(`/referent/youngFile/${values._id}/highSkilledActivityProofFiles/${e}`);
+                            setButtonLoading(`highSkilledActivityProofFiles${i}`, false);
+                            setFile(f);
                           }}
                         >{`Visualiser le justificatif d'engagement (${i + 1}/${values.highSkilledActivityProofFiles.length})`}</InfoBtn>
                       );
@@ -320,19 +337,20 @@ export default (props) => {
                       title="Région"
                       options={regionList.map((r) => ({ value: r, label: r }))}
                     />
-                    {values.parentConsentmentFiles.map((e, i) => {
-                      return (
-                        <InfoBtn
-                          key={i}
-                          color="white"
-                          onClick={async () => {
-                            openDocumentInNewtab(await api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${values.parentConsentmentFiles[0]}`));
-                          }}
-                        >
-                          Visualiser le formulaire de consentement
-                        </InfoBtn>
-                      );
-                    })}
+                    {values.parentConsentmentFiles.length ? (
+                      <InfoBtn
+                        color="white"
+                        loading={buttonsLoading[`parentConsentmentFiles0`]}
+                        onClick={async () => {
+                          setButtonLoading(`parentConsentmentFiles0`, true);
+                          const f = await api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${values.parentConsentmentFiles[0]}`);
+                          setButtonLoading(`parentConsentmentFiles0`, false);
+                          setFile(f);
+                        }}
+                      >
+                        Visualiser le formulaire de consentement
+                      </InfoBtn>
+                    ) : null}
                   </BoxContent>
                 </Box>
               </Col>
@@ -386,8 +404,12 @@ export default (props) => {
                     />
                     {values.parentConsentmentFiles && values.parentConsentmentFiles.length === 2 ? (
                       <InfoBtn
+                        loading={buttonsLoading[`parentConsentmentFiles1`]}
                         onClick={async () => {
-                          openDocumentInNewtab(await api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${values.parentConsentmentFiles[1]}`));
+                          setButtonLoading(`parentConsentmentFiles1`, true);
+                          const f = await api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${values.parentConsentmentFiles[1]}`);
+                          setButtonLoading(`parentConsentmentFiles1`, false);
+                          setFile(f);
                         }}
                       >
                         Visualiser le formulaire de consentement
@@ -430,9 +452,9 @@ export default (props) => {
           </>
         )}
       </Formik>
-        <DeleteBtn
-          onClick={async () => {
-            if (!confirm("Êtes-vous sûr(e) de vouloir supprimer ce profil")) return;
+      <DeleteBtn
+        onClick={async () => {
+          if (!confirm("Êtes-vous sûr(e) de vouloir supprimer ce profil")) return;
           try {
             const { ok, code } = await api.remove(`/young/${young._id}`);
             if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
@@ -443,10 +465,10 @@ export default (props) => {
             console.log(e);
             return toastr.error("Oups, une erreur est survenue pendant la supression du profil :", e.code);
           }
-          }}
-        >
-          Supprimer
-        </DeleteBtn>
+        }}
+      >
+        Supprimer
+      </DeleteBtn>
     </Wrapper>
   );
 };
@@ -493,6 +515,31 @@ const Select = ({ title, name, values, handleChange, disabled, errors, touched, 
         </select>
       </Col>
     </Row>
+  );
+};
+
+const Image = ({ value, onChange }) => {
+  if (!value) return <div />;
+  const arrayBufferView = new Uint8Array(value.data.data);
+  const blob = new Blob([arrayBufferView], { type: value.mimeType });
+  const urlCreator = window.URL || window.webkitURL;
+  const imageUrl = urlCreator.createObjectURL(blob);
+
+  function renderFile() {
+    if (value.mimeType === "application/pdf") {
+      return (
+        <Document file={imageUrl} onLoadSuccess={() => {}}>
+          <Page pageNumber={1} />
+        </Document>
+      );
+    } else {
+      return <img style={{ objectFit: "contain", height: "90vh" }} src={imageUrl} />;
+    }
+  }
+  return (
+    <Modal size="lg" isOpen={true} toggle={onChange}>
+      {renderFile()}
+    </Modal>
   );
 };
 
