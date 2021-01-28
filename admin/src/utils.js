@@ -92,6 +92,60 @@ export const translate = (value) => {
       return "Séjour de cohésion";
     case "INSCRIPTION":
       return "Inscription";
+    case "SUMMER":
+      return "Vacances d'été (juillet ou août)";
+    case "AUTUMN":
+      return "Vacances d'automne";
+    case "DECEMBER":
+      return "Vacances de fin d'année (décembre)";
+    case "WINTER":
+      return "Vacances d'hiver";
+    case "SPRING":
+      return "Vacances de printemps";
+    case "EVENING":
+      return "En soirée";
+    case "END_DAY":
+      return "En fin de journée";
+    case "WEEKEND":
+      return "Durant le week-end";
+    case "CITIZENSHIP":
+      return "Citoyenneté";
+    case "CULTURE":
+      return "Culture";
+    case "DEFENSE":
+      return "Défense et mémoire";
+    case "EDUCATION":
+      return "Éducation";
+    case "ENVIRONMENT":
+      return "Environnement";
+    case "HEALTH":
+      return "Santé";
+    case "SECURITY":
+      return "Sécurité";
+    case "SOLIDARITY":
+      return "Solidarité";
+    case "SPORT":
+      return "Sport";
+    case "UNIFORM":
+      return "Corps en uniforme";
+    case "OTHER":
+      return "Autre";
+    case "UNKNOWN":
+      return "Non connu pour le moment";
+    case "FIREFIGHTER":
+      return "Pompiers";
+    case "POLICE":
+      return "Police";
+    case "ARMY":
+      return "Militaire";
+    case "DURING_HOLIDAYS":
+      return "Sur les vacances scolaires";
+    case "DURING_SCHOOL":
+      return "Sur le temps scolaire";
+    case "true":
+      return "Oui";
+    case "false":
+      return "Non";
     default:
       return value;
   }
@@ -566,6 +620,32 @@ export const MISSION_STATUS_COLORS = {
   REFUSED: "#F8A9AD",
   CANCEL: "#ffa987",
   ARCHIVED: "#ffb3fb",
+};
+
+export const MISSION_PERIOD_DURING_HOLIDAYS = {
+  SUMMER: "SUMMER",
+  AUTUMN: "AUTUMN",
+  DECEMBER: "DECEMBER",
+  WINTER: "WINTER",
+  SPRING: "SPRING",
+};
+
+export const MISSION_PERIOD_DURING_SCHOOL = {
+  EVENING: "EVENING",
+  END_DAY: "END_DAY",
+  WEEKEND: "WEEKEND",
+};
+
+export const MISSION_DOMAINS = {
+  CITIZENSHIP: "CITIZENSHIP",
+  CULTURE: "CULTURE",
+  DEFENSE: "DEFENSE",
+  EDUCATION: "EDUCATION",
+  ENVIRONMENT: "ENVIRONMENT",
+  HEALTH: "HEALTH",
+  SECURITY: "SECURITY",
+  SOLIDARITY: "SOLIDARITY",
+  SPORT: "SPORT",
 };
 
 // Open a document from an API response that contains `data` and `mimeType`.
