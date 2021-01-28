@@ -27,9 +27,11 @@ export default () => {
         <li>
           <NavLink to="/dashboard">Tableau de bord</NavLink>
         </li>
+        {/*
         <li>
           <NavLink to="/structure">Structures</NavLink>
         </li>
+        */}
         {/*
         <li>
           <NavLink to="/mission">Missions</NavLink>
