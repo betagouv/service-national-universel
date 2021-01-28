@@ -85,20 +85,22 @@ export default (props) => {
       {({ values, handleChange, handleSubmit, isValid, errors, touched }) => (
         <Wrapper>
           <Header>
-            <Title>{values.name ? values.name : "Création d'une mission"}</Title>
+            <Title>{defaultValue ? values.name : "Création d'une mission"}</Title>
             {Object.keys(errors).length ? <h3>Vous ne pouvez pas porposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
             <ButtonContainer>
-              <button
-                className="white-button"
-                disabled={!isValid}
-                onClick={() => {
-                  console.log("SAVE");
-                  handleChange({ target: { value: "DRAFT", name: "status" } });
-                  handleSave(values);
-                }}
-              >
-                Enregistrer
-              </button>
+              {!defaultValue ? (
+                <button
+                  className="white-button"
+                  disabled={!isValid}
+                  onClick={() => {
+                    console.log("SAVE");
+                    handleChange({ target: { value: "DRAFT", name: "status" } });
+                    handleSave(values);
+                  }}
+                >
+                  Enregistrer
+                </button>
+              ) : null}
               <button
                 disabled={!isValid}
                 onClick={() => {
@@ -106,7 +108,7 @@ export default (props) => {
                   handleSubmit();
                 }}
               >
-                Enregistrer et proposer la mission
+                {defaultValue ? "Enregistrer les modifications" : "Enregistrer et proposer la mission"}
               </button>
             </ButtonContainer>
           </Header>
