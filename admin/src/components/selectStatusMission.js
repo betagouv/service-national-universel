@@ -5,52 +5,49 @@ import { useSelector } from "react-redux";
 
 import api from "../services/api";
 
-import { translate, YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_COLORS } from "../utils";
+import { translate, MISSION_STATUS_COLORS, MISSION_STATUS } from "../utils";
 import { toastr } from "react-redux-toastr";
 
 import MailCorrection from "../scenes/inscription/MailCorrection";
 
 export default ({ hit }) => {
-  const STATUS = [YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.VALIDATED, YOUNG_STATUS.REFUSED];
+  // const STATUS = [YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.VALIDATED, YOUNG_STATUS.REFUSED];
 
   const [modal, setModal] = useState(false);
-  const [young, setYoung] = useState(null);
+  const [mission, setMission] = useState(null);
   const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
     (async () => {
       const id = hit && hit._id;
-      if (!id) return setYoung(null);
-      const { data } = await api.get(`/referent/young/${id}`);
-      setYoung(data);
+      if (!id) return setMission(null);
+      const { data } = await api.get(`/mission/${id}`);
+      setMission(data);
     })();
   }, [hit]);
 
-  if (!young) return <div />;
+  if (!mission) return <div />;
 
   const handleClickStatus = (status) => {
-    if (!confirm("Êtes-vous sûr(e) de vouloir modifier le statut de ce profil?\nUn email sera automatiquement envoyé à l'utlisateur.")) return;
-    if (status === YOUNG_STATUS.WAITING_CORRECTION) return setModal(true);
+    if (!confirm("Êtes-vous sûr(e) de vouloir modifier le statut de cette mission?\nUn email sera automatiquement envoyé.")) return;
+    if (status === MISSION_STATUS.WAITING_CORRECTION) return setModal(true);
     setStatus(status);
   };
 
-  const setStatus = async (status, note) => {
+  const setStatus = async (status) => {
     try {
-      young.historic.push({ phase: YOUNG_PHASE.INSCRIPTION, userName: `${user.firstName} ${user.lastName}`, userId: user._id, status, note });
-      const { ok, code, data: newYoung } = await api.put(`/referent/young/${young._id}`, { historic: young.historic, status });
+      const { ok, code, data: newMission } = await api.put(`/mission/${mission._id}`, { status });
 
-      if (status === YOUNG_STATUS.VALIDATED) {
-        matomo.logEvent("status_update", YOUNG_STATUS.VALIDATED);
-        await api.post(`/referent/email/validate/${young._id}`, { subject: "Inscription validée" });
-      }
+      // if (status === MISSION_STATUS.VALIDATED) {
+      //   await api.post(`/referent/email/validate/${young._id}`, { subject: "Inscription validée" });
+      // }
 
-      if (status === YOUNG_STATUS.REFUSED) {
-        matomo.logEvent("status_update", YOUNG_STATUS.REFUSED);
-        await api.post(`/referent/email/refuse/${young._id}`, { subject: "Inscription refusée" });
-      }
+      // if (status === MISSION_STATUS.REFUSED) {
+      //   await api.post(`/referent/email/refuse/${young._id}`, { subject: "Inscription refusée" });
+      // }
 
       if (!ok) return toastr.error("Une erreur s'est produite :", code);
-      setYoung(newYoung);
+      setMission(newMission);
       toastr.success("Mis à jour!");
     } catch (e) {
       console.log(e);
@@ -60,7 +57,7 @@ export default ({ hit }) => {
 
   return (
     <>
-      {modal && (
+      {/* {modal && (
         <MailCorrection
           value={young}
           onChange={() => setModal(false)}
@@ -69,11 +66,11 @@ export default ({ hit }) => {
             setModal(false);
           }}
         />
-      )}
-      <ActionBox color={YOUNG_STATUS_COLORS[young.status]}>
+      )} */}
+      <ActionBox color={MISSION_STATUS_COLORS[mission.status]}>
         <UncontrolledDropdown setActiveFromChild>
           <DropdownToggle tag="button">
-            {translate(young.status)}
+            {translate(mission.status)}
             <div className="down-icon">
               <svg viewBox="0 0 407.437 407.437">
                 <polygon points="386.258,91.567 203.718,273.512 21.179,91.567 0,112.815 203.718,315.87 407.437,112.815 " />
@@ -81,7 +78,7 @@ export default ({ hit }) => {
             </div>
           </DropdownToggle>
           <DropdownMenu>
-            {STATUS.map((status) => {
+            {Object.keys(MISSION_STATUS).map((status) => {
               return (
                 <DropdownItem key={status} className="dropdown-item" onClick={() => handleClickStatus(status)}>
                   {translate(status)}
@@ -99,7 +96,7 @@ export default ({ hit }) => {
 const ActionBox = styled.div`
   .dropdown-menu {
     min-width: 0;
-    width: 200px;
+    width: 500px;
     a,
     div {
       white-space: nowrap;
@@ -111,12 +108,12 @@ const ActionBox = styled.div`
     background-color: #feb951;
     border: 1px solid #feb951;
     display: inline-flex;
+    flex: 1;
     align-items: center;
     text-align: left;
     border-radius: 4px;
     padding: 0 0 0 12px;
     font-size: 12px;
-    min-width: 130px;
     font-weight: 700;
     color: #fff;
     cursor: pointer;

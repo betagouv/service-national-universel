@@ -12,7 +12,7 @@ import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
 
-import { translate, getFilterLabel } from "../../utils";
+import { translate, getFilterLabel, formatStringLongDate } from "../../utils";
 
 const FILTERS = ["SEARCH", "STATUS", "REGION", "DEPARTMENT", "PHASE", "REMOVEINPROGRESS"];
 
@@ -213,11 +213,6 @@ const Hit = ({ hit, index, onClick }) => {
   dayjs.extend(relativeTime).locale("fr");
   const diff = dayjs(new Date(hit.createdAt)).fromNow();
 
-  const formatLongDate = (date) => {
-    const d = new Date(date);
-    return d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" });
-  };
-
   return (
     <tr onClick={onClick} key={hit._id}>
       <td>{index + 1}</td>
@@ -225,7 +220,7 @@ const Hit = ({ hit, index, onClick }) => {
         <strong>
           {hit.firstName} {hit.lastName}
         </strong>
-        <div>{`Inscrit(e) ${diff} • ${formatLongDate(hit.createdAt)}`}</div>
+        <div>{`Inscrit(e) ${diff} • ${formatStringLongDate(hit.createdAt)}`}</div>
       </td>
       <td onClick={(e) => e.stopPropagation()}>
         <SelectStatus hit={hit} />
