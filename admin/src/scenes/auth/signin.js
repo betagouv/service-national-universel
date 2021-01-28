@@ -13,6 +13,8 @@ import { setUser, setStructure } from "../../redux/auth/actions";
 import api from "../../services/api";
 import LoadingButton from "../../components/loadingButton";
 
+import matomo from "../../services/matomo";
+
 export default () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.Auth.user);
@@ -42,7 +44,10 @@ export default () => {
               try {
                 const { user, token } = await api.post(`/referent/signin`, values);
                 if (token) api.setToken(token);
-                if (user) dispatch(setUser(user));
+                if (user) {
+                  dispatch(setUser(user));
+                  matomo.setUserId(user._id);
+                }
               } catch (e) {
                 if (e && (e.code === "EMAIL_OR_PASSWORD_INVALID" || e.code === "USER_NOT_EXISTS")) {
                   return setUserIsValid(false);
