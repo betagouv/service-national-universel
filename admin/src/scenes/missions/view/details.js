@@ -3,20 +3,27 @@ import { Link } from "react-router-dom";
 import { Col, Row, Input } from "reactstrap";
 import styled from "styled-components";
 import { formatDay, translate, formatStringDate } from "../../../utils";
+import api from "../../../services/api";
+import { toastr } from "react-redux-toastr";
 
 export default ({ mission }) => {
-  const [tutor, setTutor] = useState({});
+  const [tutor, setTutor] = useState();
   //todo ajouter tout le tutor et structure dans le modele mission ?
-  const [structure, setStructure] = useState({});
+  const [structure, setStructure] = useState();
 
   useEffect(() => {
     (async () => {
-      const id = mission && mission.tutorId;
-      if (!id) return;
-      const { data } = await api.get(`/referent/${id}`);
-      setTutor(data);
+      if (!mission) return;
+      const { ok: ok1, data: dataTutor, code: code1 } = await api.get(`/referent/${mission.tutorId}`);
+      const { ok: ok2, data: dataStructure, code: code2 } = await api.get(`/structure/${mission.structureId}`);
+      if (!ok1) toastr.error("ERROR", code1);
+      else setTutor(dataTutor);
+      if (!ok2) toastr.error("ERROR", code2);
+      else setStructure(dataStructure);
+      return;
     })();
   }, []);
+
   return (
     <Box>
       <Row>
@@ -70,31 +77,64 @@ export default ({ mission }) => {
         </Col>
         <Col md={6}>
           <Row style={{ borderBottom: "2px solid #f4f5f7" }}>
-            <Wrapper>
-              <Legend>
-                Le tuteur
-                <Link to={`/user/${tutor._id}`}>
-                  <SubtitleLink>{`${tutor.firstName} ${tutor.lastName} >`}</SubtitleLink>
-                </Link>
-              </Legend>
-              <div className="detail">
-                <div className="detail-title">E-mail</div>
-                <div className="detail-text">{tutor.email}</div>
-              </div>
-              <div className="detail">
-                <div className="detail-title">Tel. fixe</div>
-                <div className="detail-text">{tutor.phone}</div>
-              </div>
-              <div className="detail">
-                <div className="detail-title">Tel. mobile</div>
-                <div className="detail-text">{mission.mobile}</div>
-              </div>
-            </Wrapper>
+            {tutor ? (
+              <Wrapper>
+                <Legend>
+                  Le tuteur
+                  <Link to={`/user/${tutor._id}`}>
+                    <SubtitleLink>{`${tutor.firstName} ${tutor.lastName} >`}</SubtitleLink>
+                  </Link>
+                </Legend>
+                <div className="detail">
+                  <div className="detail-title">E-mail</div>
+                  <div className="detail-text">{tutor.email}</div>
+                </div>
+                <div className="detail">
+                  <div className="detail-title">Tel. fixe</div>
+                  <div className="detail-text">{tutor.phone}</div>
+                </div>
+                <div className="detail">
+                  <div className="detail-title">Tel. mobile</div>
+                  <div className="detail-text">{mission.mobile}</div>
+                </div>
+              </Wrapper>
+            ) : null}
           </Row>
           <Row>
-            <Wrapper>
-              <Legend>Le structure</Legend>
-            </Wrapper>
+            {structure ? (
+              <Wrapper>
+                <Legend>
+                  Le structure
+                  <Link to={`/structure/${structure._id}`}>
+                    <SubtitleLink>{`${structure.name} >`}</SubtitleLink>
+                  </Link>
+                </Legend>
+                <div className="detail">
+                  <div className="detail-title">Statut</div>
+                  <div className="detail-text">{translate(structure.status)}</div>
+                </div>
+                <div className="detail">
+                  <div className="detail-title">Région</div>
+                  <div className="detail-text">{structure.region}</div>
+                </div>
+                <div className="detail">
+                  <div className="detail-title">Dép.</div>
+                  <div className="detail-text">{structure.department}</div>
+                </div>
+                <div className="detail">
+                  <div className="detail-title">Ville</div>
+                  <div className="detail-text">{structure.city}</div>
+                </div>
+                <div className="detail">
+                  <div className="detail-title">Adresse</div>
+                  <div className="detail-text">{structure.address}</div>
+                </div>
+                <div className="detail">
+                  <div className="detail-title">Présentation</div>
+                  <div className="detail-text">{structure.description}</div>
+                </div>
+              </Wrapper>
+            ) : null}
           </Row>
         </Col>
       </Row>

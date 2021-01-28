@@ -64,6 +64,7 @@ export default () => {
                     componentId="LOCATION"
                     dataField={["city", "zip"]}
                     react={{ and: FILTERS }}
+                    fuzziness={1}
                     style={{ flex: 2 }}
                     innerClass={{ input: "searchbox" }}
                     autosuggest={false}
@@ -113,7 +114,7 @@ export default () => {
                 <Col md={2}>
                   <MultiDropdownList
                     className="dropdown-filter"
-                    placeholder="choisir"
+                    placeholder="Domaine"
                     componentId="DOMAIN"
                     dataField="domains.keyword"
                     title=""
@@ -123,7 +124,15 @@ export default () => {
                 </Col>
                 <Col md={2}>
                   <div className="dropdown-filter">
-                    <CustomFilter title="Places restantes" componentId="PLACES" field="placesLeft" />
+                    <MultiDropdownList
+                      className="dropdown-filter"
+                      placeholder="Places restantes"
+                      componentId="PLACES"
+                      dataField="placesLeft"
+                      title=""
+                      URLParams={true}
+                      showSearch={false}
+                    />
                   </div>
                 </Col>
               </Row>
@@ -164,8 +173,8 @@ export default () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {data.map((hit) => (
-                        <Hit hit={hit} onClick={() => setMission(hit)} />
+                      {data.map((hit, i) => (
+                        <Hit key={i} hit={hit} onClick={() => setMission(hit)} />
                       ))}
                     </tbody>
                   </Table>
@@ -181,7 +190,7 @@ export default () => {
 };
 
 const Hit = ({ hit, onClick }) => {
-  console.log("h", hit);
+  // console.log("h", hit);
   return (
     <tr onClick={onClick}>
       <td>

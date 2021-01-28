@@ -12,10 +12,10 @@ const connexionURL = process.env.MYSQL_URL;
 const sequelize = new Sequelize(connexionURL, opts);
 
 const Mission = require(`../src/models/mission`);
-// const Structure = require(`../src/models/structure`);
-// const Young = require("../src/models/young");
-// const Referent = require("../src/models/referent");
-// const Application = require("../src/models/application");
+const Structure = require(`../src/models/structure`);
+const Young = require("../src/models/young");
+const Referent = require("../src/models/referent");
+const Application = require("../src/models/application");
 
 const migrate = async (model, migration) => {
   console.log(`>>> START ${model}`);
@@ -33,8 +33,12 @@ sequelize.authenticate().then(async (e) => {
   // await Structure.deleteMany({});
   // await migrate("Structure", migrateStructure);
 
+  // await esclient.indices.delete({ index: "referent" });
+  await Referent.deleteMany({ sqlId: { $ne: null } });
+  await migrate("Referent", migrateReferent);
+
   // await esClient.indices.delete({ index: "mission" });
-  await Mission.deleteMany({});
+  // await Mission.deleteMany({});
   await migrate("Mission", migrateMission);
 
   // try {
@@ -51,10 +55,6 @@ sequelize.authenticate().then(async (e) => {
   // } catch (e) {
   //   console.log(e);
   // }
-
-  // await esclient.indices.delete({ index: "referent" });
-  // await Referent.deleteMany({});
-  // await migrate("Referent", migrateReferent);
 
   // await esclient.indices.delete({ index: "application" });
   // await Application.deleteMany({});
@@ -111,12 +111,22 @@ async function migrateMission() {
   const missionsSQL = await sequelize.query("SELECT * FROM `missions`", { type: QueryTypes.SELECT });
   let a = [];
   console.log(`${missionsSQL.length} missions detected`);
-  missionsSQL.forEach(async (m) => {
+
+  for (let i = 0; i < missionsSQL.length; i++) {
+    const m = missionsSQL[i];
     try {
       const mission = { ...m };
       mission.sqlId = m.id;
+
+      // todo get structure info
       mission.sqlStructureId = m.structure_id;
+      const structure = await Structure.findOne({ sqlId: m.structure_id });
+      if (mission) mission.structureId = structure._id;
+
+      // todo get tutor info
       mission.sqlTutorId = m.tuteur_id;
+      const tutor = await Referent.findOne({ sqlId: m.tuteur_id });
+      if (tutor) mission.tutorId = tutor._id;
 
       mission.placesTotal = m.participations_max;
       mission.placesLeft = m.participations_max;
@@ -159,7 +169,7 @@ async function migrateMission() {
     } catch (error) {
       console.log(error);
     }
-  });
+  }
   await Mission.insertMany(a);
   console.log(`${a.length} added`);
 }
@@ -260,10 +270,7 @@ async function migrateReferent() {
     try {
       if (!u.referent_department && !u.referent_region) return;
       const referent = { ...u };
-      // referent.firstName = u.first_name;
-      // referent.lastName = u.last_name;
-
-      // referent.email = (referent.email || "").toLowerCase();
+      referent.sqlId = u.id;
 
       //start anonymisation
       const fn = faker.name.firstName();
@@ -273,14 +280,23 @@ async function migrateReferent() {
       referent.email = `${referent.firstName}.${referent.lastName}@mail.com`;
       //end anonymisation
 
-      referent.role = "responsable"; // @todo update role
-      // @todo which depart or region ?
+      if (u.referent_region) {
+        referent.role = "referent_region";
+        referent.region = regionList[u.referent_region];
+      } else if (u.referent_department) {
+        referent.role = "referent_department";
+        referent.department = departmentList[u.referent_department];
+      }
       a.push(referent);
     } catch (error) {
       console.log(error);
     }
   });
-  await Referent.insertMany(a);
+  try {
+    await Referent.insertMany(a);
+  } catch (error) {
+    console.log("error while inserting referents");
+  }
   console.log(`${a.length} added`);
 }
 

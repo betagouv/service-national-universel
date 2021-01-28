@@ -10,20 +10,21 @@ import api from "../../services/api";
 import SelectStatusMission from "../../components/selectStatusMission";
 
 export default ({ onChange, mission }) => {
-  const [tutor, setTutor] = useState({});
-  const [structure, setStructure] = useState({});
+  const [tutor, setTutor] = useState();
+  const [structure, setStructure] = useState();
 
   useEffect(() => {
     (async () => {
-      const { ok: ok1, data: dataTutor, code: code1 } = await api.get(`/referent/${tuteur_id}`);
+      if (!mission) return;
+      const { ok: ok1, data: dataTutor, code: code1 } = await api.get(`/referent/${mission.tutorId}`);
       const { ok: ok2, data: dataStructure, code: code2 } = await api.get(`/structure/${mission.structureId}`);
-      if (!ok1) return toastr.error("ERROR", code1);
-      setTutor(dataTutor);
-      if (!ok2) return toastr.error("ERROR", code2);
-      setStructure(dataStructure);
+      if (!ok1) toastr.error("ERROR", code1);
+      else setTutor(dataTutor);
+      if (!ok2) toastr.error("ERROR", code2);
+      else setStructure(dataStructure);
       return;
     })();
-  }, []);
+  }, [mission]);
 
   if (!mission) return <div />;
   return (
@@ -61,23 +62,23 @@ export default ({ onChange, mission }) => {
       <div className="title">La structure</div>
       <div className="detail">
         <div className="detail-title">Statut</div>
-        <div className="detail-text">{structure.status}</div>
+        <div className="detail-text">{structure && translate(structure.status)}</div>
       </div>
       <div className="detail">
         <div className="detail-title">Dép.</div>
-        <div className="detail-text">{structure.department}</div>
+        <div className="detail-text">{structure && structure.department}</div>
       </div>
       <div className="detail">
         <div className="detail-title">Tuteur</div>
-        <div className="detail-text">{`${tutor?.firstName} ${tutor?.lastName}`}</div>
+        <div className="detail-text">{tutor ? `${tutor.firstName} ${tutor.lastName}` : ""}</div>
       </div>
       <div className="detail">
         <div className="detail-title">E-mail</div>
-        <div className="detail-text">{tutor.email}</div>
+        <div className="detail-text">{tutor && tutor.email}</div>
       </div>
       <div className="detail">
         <div className="detail-title">tel.</div>
-        <div className="detail-text">{tutor.phone}</div>
+        <div className="detail-text">{tutor && tutor.phone}</div>
       </div>
       <hr />
       <div className="title">La mission</div>
