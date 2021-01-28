@@ -6,8 +6,6 @@ import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/fr";
 import { useSelector } from "react-redux";
-import { Modal } from "reactstrap";
-import { Document, Page } from "react-pdf/dist/esm/entry.webpack";
 
 import LoadingButton from "../../components/loadingButton";
 import Historic from "../../components/historic";
@@ -25,7 +23,6 @@ export default (props) => {
   const user = useSelector((state) => state.Auth.user);
   const history = useHistory();
   const [buttonsLoading, setButtonsLoading] = useState({});
-  const [file, setFile] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -69,7 +66,6 @@ export default (props) => {
       >
         {({ values, handleChange, handleSubmit, isSubmitting, submitForm }) => (
           <>
-            {file && <Image value={file} onChange={() => setFile(null)} />}
             <TitleWrapper>
               <div>
                 <Title>{`Profil de ${values.firstName} ${values.lastName}`}</Title>
@@ -521,45 +517,6 @@ const Select = ({ title, name, values, handleChange, disabled, errors, touched, 
     </Row>
   );
 };
-
-const Image = ({ value, onChange }) => {
-  if (!value) return <div />;
-  const arrayBufferView = new Uint8Array(value.data.data);
-  const blob = new Blob([arrayBufferView], { type: value.mimeType });
-  const urlCreator = window.URL || window.webkitURL;
-  const imageUrl = urlCreator.createObjectURL(blob);
-
-  function renderFile() {
-    if (value.mimeType === "application/pdf") {
-      return (
-        <Document file={imageUrl} onLoadSuccess={() => {}}>
-          <Page pageNumber={1} />
-        </Document>
-      );
-    } else {
-      return <img style={{ objectFit: "contain", height: "90vh" }} src={imageUrl} />;
-    }
-  }
-  return (
-    <Modal size="lg" isOpen={true} toggle={onChange}>
-      {renderFile()}
-    </Modal>
-  );
-};
-
-const Badge = styled.span`
-  display: inline-block;
-  padding: 0.25rem 1rem;
-  margin: 0 0.25rem;
-  border-radius: 99999px;
-  font-size: 0.8rem;
-  margin-bottom: 5px;
-  margin-top: 15px;
-  ${({ color }) => `
-    color: ${color};
-    background-color: ${color}33;
-  `}
-`;
 
 const InfoBtn = styled(LoadingButton)`
   color: #555;
