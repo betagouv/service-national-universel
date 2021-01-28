@@ -2,9 +2,7 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Modal } from "reactstrap";
 import { Link } from "react-router-dom";
-import { Page } from "react-pdf";
-import { Document } from "react-pdf/dist/esm/entry.webpack";
-// import { Document, Page } from "react-pdf/dist/esm/entry.webpack";
+import { Page, Document } from "react-pdf";
 
 import { translate as t } from "./utils";
 import { YOUNG_SITUATIONS, YOUNG_STATUS, translate, openDocumentInNewtab } from "../../utils";
