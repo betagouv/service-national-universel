@@ -49,6 +49,7 @@ const Schema = new mongoose.Schema({
   zip: { type: String },
   city: { type: String },
   department: { type: String },
+  region: { type: String },
   country: { type: String },
   location: {
     lon: { type: Number },

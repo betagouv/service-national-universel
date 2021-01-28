@@ -1,4 +1,6 @@
-require("dotenv").config({ path: "./../.env-prod" });
+require("dotenv").config({ path: "./../.env-staging" });
+
+const esclient = require("../src/es");
 
 const Sequelize = require("sequelize");
 const { QueryTypes } = require("sequelize");
@@ -11,8 +13,8 @@ const connexionURL = process.env.MYSQL_URL;
 const sequelize = new Sequelize(connexionURL, opts);
 
 // const Mission = require(`../src/models/mission`);
-// const Structure = require(`../src/models/structure`);
-const Young = require("../src/models/young");
+const Structure = require(`../src/models/structure`);
+// const Young = require("../src/models/young");
 // const Referent = require("../src/models/referent");
 // const Application = require("../src/models/application");
 
@@ -28,9 +30,9 @@ const migrate = async (model, migration) => {
 };
 
 sequelize.authenticate().then(async (e) => {
-  // await esclient.indices.delete({ index: "structure" });
-  // await Structure.deleteMany({});
-  // await migrate("Structure", migrateStructure);
+  await esclient.indices.delete({ index: "structure" });
+  await Structure.deleteMany({});
+  await migrate("Structure", migrateStructure);
 
   // await esclient.indices.delete({ index: "mission" });
   // await Mission.deleteMany({});
@@ -38,15 +40,15 @@ sequelize.authenticate().then(async (e) => {
 
   try {
     // Migrate people in the cohesion stay
-    console.log(`### START MONGO DELETE Young`);
-    await Young.deleteMany({ phase: "COHESION_STAY" });
-    console.log(`### END DELETE young`);
-    await migrate("Young", migrateYoung);
-    console.log(`### END MONGO DELETE young`);
-    await Young.unsynchronize();
-    console.log(`### END DELETED ES Indice for young`);
-    await Young.synchronize();
-    console.log(`### END SYNC ES Indice for young`);
+    //console.log(`### START MONGO DELETE Young`);
+    //await Young.deleteMany({ phase: "COHESION_STAY" });
+    //console.log(`### END DELETE young`);
+    //await migrate("Young", migrateYoung);
+    //console.log(`### END MONGO DELETE young`);
+    //await Young.unsynchronize();
+    //console.log(`### END DELETED ES Indice for young`);
+    //await Young.synchronize();
+    //console.log(`### END SYNC ES Indice for young`);
   } catch (e) {
     console.log(e);
   }

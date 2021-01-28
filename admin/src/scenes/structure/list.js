@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Col, DropdownItem, DropdownMenu, DropdownToggle, Label, Pagination, PaginationItem, PaginationLink, Row, UncontrolledDropdown } from "reactstrap";
 import { ReactiveBase, ReactiveList, SingleList, MultiDropdownList, MultiList, DataSearch } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
@@ -11,7 +11,12 @@ import Panel from "./panel";
 import { translate } from "../../utils";
 import { Link } from "react-router-dom";
 
-const FILTERS = ["SEARCH", "STATUT", "FORMAT"];
+const FILTERS = ["SEARCH", "STATUT", "DEPARTMENT", "REGION"];
+const formatLongDate = (date) => {
+  if (!date) return "-";
+  const d = new Date(date);
+  return d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" });
+};
 
 export default () => {
   const [structure, setStructure] = useState(null);
@@ -49,9 +54,9 @@ export default () => {
               <FilterRow>
                 <MultiDropdownList
                   className="dropdown-filter"
-                  placeholder="STATUT"
-                  componentId="STATUS"
-                  dataField="status.keyword"
+                  placeholder="Statut justridique"
+                  componentId="STATUT"
+                  dataField="statutJuridique.keyword"
                   renderItem={(e) => translate(e)}
                   title=""
                   URLParams={true}
@@ -59,13 +64,25 @@ export default () => {
                 />
                 <MultiDropdownList
                   className="dropdown-filter"
-                  placeholder="FORMAT"
-                  componentId="FORMAT"
-                  dataField="missionFormat.keyword"
-                  renderItem={(e) => translate(e)}
+                  placeholder="Départements"
+                  componentId="DEPARTMENT"
+                  dataField="department.keyword"
                   title=""
+                  react={{ and: FILTERS.filter((e) => e !== "DEPARTMENT") }}
                   URLParams={true}
                   showSearch={false}
+                  sortBy="asc"
+                />
+                <MultiDropdownList
+                  className="dropdown-filter"
+                  placeholder="Régions"
+                  componentId="REGION"
+                  dataField="region.keyword"
+                  title=""
+                  react={{ and: FILTERS.filter((e) => e !== "REGION") }}
+                  URLParams={true}
+                  showSearch={false}
+                  sortBy="asc"
                 />
               </FilterRow>
             </Filter>
@@ -99,14 +116,14 @@ export default () => {
                   <Table>
                     <thead>
                       <tr>
-                        <th width="40%">Nom</th>
-                        <th width="40%">Contexte</th>
-                        <th>Actions</th>
+                        <th width="50%">Structures</th>
+                        <th width="20%">Missions</th>
+                        <th>Contexte</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {data.map((hit) => (
-                        <Hit hit={hit} onClick={() => setStructure(hit)} />
+                      {data.map((hit, k) => (
+                        <Hit hit={hit} key={k} onClick={() => setStructure(hit)} />
                       ))}
                     </tbody>
                   </Table>
@@ -122,16 +139,37 @@ export default () => {
 };
 
 const Hit = ({ hit, onClick }) => {
+  const [missionsInfo, setMissionsInfo] = useState({ count: "-", placesTotal: "-" });
+  useEffect(() => {
+    (async () => {
+      const queries = [];
+      queries.push({ index: "mission", type: "_doc" });
+      queries.push({
+        query: { bool: { must: { match_all: {} }, filter: [{ term: { "sqlStructureId.keyword": hit.sqlId } }] } },
+      });
+
+      const { responses } = await api.esQuery(queries);
+      setMissionsInfo({
+        count: responses[0].hits.hits.length,
+        placesTotal: responses[0].hits.hits.reduce((acc, e) => acc + e._source.placesTotal, 0),
+      });
+    })();
+  }, [hit]);
   return (
     <tr onClick={onClick}>
       <td>
-        <div>{hit.name}</div>
-        <div style={{ color: "#718096" }}>{hit.statutJuridique}</div>
+        <div style={{ fontWeight: "bold" }}>{hit.name}</div>
+        <div style={{ color: "#718096" }}>
+          {hit.statutJuridique} • Créée le {formatLongDate(hit.createdAt)}
+        </div>
       </td>
       <td>
-        <Tag>{translate(hit.status)}</Tag>
+        <div style={{ fontWeight: "bold" }}>{missionsInfo.count} missions</div>
+        <div>{missionsInfo.placesTotal} places</div>
       </td>
-      <td onClick={(e) => e.stopPropagation()}>{/* <Action hit={hit} /> */}</td>
+      <td>
+        <Tag>{translate(hit.department)}</Tag>
+      </td>
     </tr>
   );
 };
