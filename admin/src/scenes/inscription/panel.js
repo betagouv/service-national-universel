@@ -12,6 +12,7 @@ import api from "../../services/api";
 export default ({ onChange, value }) => {
   const [young, setYoung] = useState(null);
   const [file, setFile] = useState(null);
+  const [buttonsLoading, setButtonsLoading] = useState({});
 
   useEffect(() => {
     (async () => {
@@ -34,6 +35,10 @@ export default ({ onChange, value }) => {
     const date = new Date(d);
     const diffTime = Math.abs(date - now);
     return Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
+  };
+
+  const setButtonLoading = (btn, v) => {
+    setButtonsLoading({ ...buttonsLoading, [btn]: v });
   };
 
   return (
@@ -59,8 +64,11 @@ export default ({ onChange, value }) => {
             <InfoBtn
               key={i}
               color="white"
+              loading={buttonsLoading[`cniFiles${i}`]}
               onClick={async () => {
+                setButtonLoading(`cniFiles${i}`, true);
                 const f = await api.get(`/referent/youngFile/${value._id}/cniFiles/${e}`);
+                setButtonLoading(`cniFiles${i}`, false);
                 setFile(f);
               }}
             >{`Visualiser la pièce d’identité (${i + 1}/${value.cniFiles.length})`}</InfoBtn>
@@ -73,8 +81,11 @@ export default ({ onChange, value }) => {
             <InfoBtn
               key={i}
               color="white"
+              loading={buttonsLoading[`parentConsentmentFiles${i}`]}
               onClick={async () => {
+                setButtonLoading(`parentConsentmentFiles${i}`, true);
                 const f = await api.get(`/referent/youngFile/${value._id}/parentConsentmentFiles/${e}`);
+                setButtonLoading(`parentConsentmentFiles${i}`, false);
                 setFile(f);
               }}
             >

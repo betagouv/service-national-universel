@@ -22,6 +22,7 @@ export default (props) => {
   const [file, setFile] = useState(null);
   const user = useSelector((state) => state.Auth.user);
   const history = useHistory();
+  const [buttonsLoading, setButtonsLoading] = useState({});
 
   useEffect(() => {
     (async () => {
@@ -33,6 +34,10 @@ export default (props) => {
   }, []);
 
   if (young === undefined) return <div>Chargement...</div>;
+
+  const setButtonLoading = (btn, v) => {
+    setButtonsLoading({ ...buttonsLoading, [btn]: v });
+  };
 
   const getSubtitle = () => {
     const createdAt = new Date(young.createdAt);
@@ -81,8 +86,11 @@ export default (props) => {
                         <InfoBtn
                           key={i}
                           color="white"
+                          loading={buttonsLoading[`cniFiles${i}`]}
                           onClick={async () => {
+                            setButtonLoading(`cniFiles${i}`, true);
                             const f = await api.get(`/referent/youngFile/${values._id}/cniFiles/${e}`);
+                            setButtonLoading(`cniFiles${i}`, false);
                             setFile(f);
                           }}
                         >{`Visualiser la pièce d’identité (${i + 1}/${values.cniFiles.length})`}</InfoBtn>
@@ -257,8 +265,11 @@ export default (props) => {
                         <InfoBtn
                           key={i}
                           color="white"
+                          loading={buttonsLoading[`highSkilledActivityProofFiles${i}`]}
                           onClick={async () => {
+                            setButtonLoading(`highSkilledActivityProofFiles${i}`, true);
                             const f = await api.get(`/referent/youngFile/${values._id}/highSkilledActivityProofFiles/${e}`);
+                            setButtonLoading(`highSkilledActivityProofFiles${i}`, false);
                             setFile(f);
                           }}
                         >{`Visualiser le justificatif d'engagement (${i + 1}/${values.highSkilledActivityProofFiles.length})`}</InfoBtn>
@@ -325,20 +336,20 @@ export default (props) => {
                       title="Région"
                       options={regionList.map((r) => ({ value: r, label: r }))}
                     />
-                    {values.parentConsentmentFiles.map((e, i) => {
-                      return (
-                        <InfoBtn
-                          key={i}
-                          color="white"
-                          onClick={async () => {
-                            const f = await api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${values.parentConsentmentFiles[0]}`);
-                            setFile(f);
-                          }}
-                        >
-                          Visualiser le formulaire de consentement
-                        </InfoBtn>
-                      );
-                    })}
+                    {values.parentConsentmentFiles.length ? (
+                      <InfoBtn
+                        color="white"
+                        loading={buttonsLoading[`parentConsentmentFiles0`]}
+                        onClick={async () => {
+                          setButtonLoading(`parentConsentmentFiles0`, true);
+                          const f = await api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${values.parentConsentmentFiles[0]}`);
+                          setButtonLoading(`parentConsentmentFiles0`, false);
+                          setFile(f);
+                        }}
+                      >
+                        Visualiser le formulaire de consentement
+                      </InfoBtn>
+                    ) : null}
                   </BoxContent>
                 </Box>
               </Col>
@@ -392,8 +403,11 @@ export default (props) => {
                     />
                     {values.parentConsentmentFiles && values.parentConsentmentFiles.length === 2 ? (
                       <InfoBtn
+                        loading={buttonsLoading[`parentConsentmentFiles1`]}
                         onClick={async () => {
+                          setButtonLoading(`parentConsentmentFiles1`, true);
                           const f = await api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${values.parentConsentmentFiles[1]}`);
+                          setButtonLoading(`parentConsentmentFiles1`, false);
                           setFile(f);
                         }}
                       >
@@ -503,20 +517,6 @@ const Select = ({ title, name, values, handleChange, disabled, errors, touched, 
     </Row>
   );
 };
-
-const Badge = styled.span`
-  display: inline-block;
-  padding: 0.25rem 1rem;
-  margin: 0 0.25rem;
-  border-radius: 99999px;
-  font-size: 0.8rem;
-  margin-bottom: 5px;
-  margin-top: 15px;
-  ${({ color }) => `
-    color: ${color};
-    background-color: ${color}33;
-  `}
-`;
 
 const InfoBtn = styled(LoadingButton)`
   color: #555;
