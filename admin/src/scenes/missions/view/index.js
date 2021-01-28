@@ -6,6 +6,8 @@ import { useSelector } from "react-redux";
 import api from "../../../services/api";
 import { Formik, Field } from "formik";
 import SelectStatusMission from "../../../components/selectStatusMission";
+import { useHistory } from "react-router-dom";
+import { toastr } from "react-redux-toastr";
 
 import Details from "./details";
 
@@ -15,6 +17,7 @@ export default (props) => {
   const [mission, setMission] = useState();
   const user = useSelector((state) => state.Auth.user);
   const [tab, setTab] = useState("DETAILS");
+  const history = useHistory();
 
   function getName() {
     if (user.role === "admin") return "Espace modérateur";
@@ -47,6 +50,20 @@ export default (props) => {
     })();
   }, []);
 
+  const handleDelete = async () => {
+    if (!confirm("Êtes-vous sûr(e) de vouloir supprimer cette mission ?")) return;
+    try {
+      const { ok, code } = await api.remove(`/mission/${mission._id}`);
+      if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
+      if (!ok) return toastr.error("Une erreur s'est produite :", code);
+      toastr.success("Cette mission a été supprimée.");
+      return history.push(`/mission`);
+    } catch (e) {
+      console.log(e);
+      return toastr.error("Oups, une erreur est survenue pendant la supression de la mission :", e.code);
+    }
+  };
+
   if (!mission) return <div />;
   return (
     <Wrapper>
@@ -56,13 +73,13 @@ export default (props) => {
 
           <TabNavigationList>
             <TabItem isActive={tab === TABS.DETAILS} onClick={() => setTab(TABS.DETAILS)}>
-              DETAILS
+              Détails
             </TabItem>
             <TabItem isActive={tab === TABS.VOLUNTEERS} onClick={() => setTab(TABS.VOLUNTEERS)}>
-              VOLONTAIRES
+              Volontaires
             </TabItem>
             <TabItem isActive={tab === TABS.HISTORIC} onClick={() => setTab(TABS.HISTORIC)}>
-              HISTORIQUE
+              Historique
             </TabItem>
           </TabNavigationList>
         </div>
@@ -89,9 +106,9 @@ export default (props) => {
                 </Link>
               </Col>
               <Col md={6}>
-                <Link to={``}>
-                  <Button className="btn-blue">Supprimer</Button>
-                </Link>
+                <Button onClick={handleDelete} className="btn-red">
+                  Supprimer
+                </Button>
               </Col>
             </Row>
           </Col>
@@ -149,17 +166,21 @@ const TabNavigationList = styled.ul`
 `;
 
 const TabItem = styled.li`
-  padding: 16px;
+  padding: 0.5rem 1rem;
   position: relative;
-  font-size: 16px;
+  font-size: 1rem;
   color: #979797;
   cursor: pointer;
+  font-weight: 300;
+  border-radius: 0.5rem;
+  overflow: hidden;
 
   ${(props) =>
     props.isActive &&
     `
-    color: #5245CC;
-    font-weight: bold;
+    color: #222;
+    font-weight: 500;
+    background-color:#fff;
 
     &:after {
       content: "";

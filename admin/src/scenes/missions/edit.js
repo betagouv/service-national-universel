@@ -28,8 +28,13 @@ export default (props) => {
     })();
   }, []);
 
-  if (defaultValue === undefined) return <div>Chargement...</div>;
+  const handleSave = async (values) => {
+    const { ok, code, data: mission } = await api.put("/mission", values);
+    if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de votre progression", code);
+    if (ok) toastr.success("Progression enregistrée");
+  };
 
+  if (defaultValue === undefined) return <div>Chargement...</div>;
   if (redirect) return <Redirect to="/mission" />;
 
   return (
@@ -80,7 +85,8 @@ export default (props) => {
       {({ values, handleChange, handleSubmit, isValid, errors, touched }) => (
         <Wrapper>
           <Header>
-            <Title>{values._id ? values.name : "Création d'une mission"}</Title>
+            <Title>{values.name ? values.name : "Création d'une mission"}</Title>
+            {Object.keys(errors).length ? <h3>Vous ne pouvez pas porposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
             <ButtonContainer>
               <button
                 className="white-button"
@@ -88,7 +94,7 @@ export default (props) => {
                 onClick={() => {
                   console.log("SAVE");
                   handleChange({ target: { value: "DRAFT", name: "status" } });
-                  handleSubmit();
+                  handleSave(values);
                 }}
               >
                 Enregistrer
@@ -332,8 +338,8 @@ export default (props) => {
               />
             </FormGroup> */}
           </Box>
-          <Header>
-            <Title>{values._id ? values.name : "Création d'une mission"}</Title>
+          <Header style={{ justifyContent: "flex-end" }}>
+            {Object.keys(errors).length ? <h3>Vous ne pouvez pas porposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
             <ButtonContainer>
               <button
                 className="white-button"
@@ -371,7 +377,16 @@ const Header = styled.div`
   padding: 0 25px 0;
   display: flex;
   margin-top: 25px;
-  align-items: flex-start;
+  align-items: center;
+  h3 {
+    border: 1px solid #fc8181;
+    border-radius: 0.25em;
+    background-color: #fff5f5;
+    color: #c53030;
+    font-weight: 400;
+    font-size: 12px;
+    padding: 1em;
+  }
 `;
 
 const FormGroup = styled.div`

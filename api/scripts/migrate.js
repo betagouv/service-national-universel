@@ -1,5 +1,5 @@
 require("dotenv").config({ path: "./../.env-staging" });
-const esClient = require("../src/es");
+const esclient = require("../src/es");
 
 const Sequelize = require("sequelize");
 const { QueryTypes } = require("sequelize");
@@ -34,12 +34,12 @@ sequelize.authenticate().then(async (e) => {
   // await migrate("Structure", migrateStructure);
 
   // await esclient.indices.delete({ index: "referent" });
-  await Referent.deleteMany({ sqlId: { $ne: null } });
-  await migrate("Referent", migrateReferent);
+  // await Referent.deleteMany({ sqlId: { $ne: null } });
+  // await migrate("Referent", migrateReferent);
 
-  // await esClient.indices.delete({ index: "mission" });
+  // await esclient.indices.delete({ index: "mission" });
   // await Mission.deleteMany({});
-  await migrate("Mission", migrateMission);
+  // await migrate("Mission", migrateMission);
 
   // try {
   //   // Migrate people in the cohesion stay
@@ -56,9 +56,13 @@ sequelize.authenticate().then(async (e) => {
   //   console.log(e);
   // }
 
-  // await esclient.indices.delete({ index: "application" });
-  // await Application.deleteMany({});
-  // await migrate("Application", migrateApplication);
+  try {
+    await esclient.indices.delete({ index: "application" });
+  } catch (error) {
+    console.log("ERROR ES", error);
+  }
+  await Application.deleteMany({});
+  await migrate("Application", migrateApplication);
   process.exit(1);
 });
 
@@ -312,27 +316,35 @@ async function migrateApplication() {
       const app = { ...my };
 
       const mission = await Mission.findOne({ sqlId: my.mission_id });
-      app.missionId = (mission && mission._id) || "N/A";
-      app.missionName = mission.name;
-      app.missionDepartment = mission.department;
-      app.missionRegion = mission.region;
+      if (mission) {
+        app.missionId = mission._id;
+        app.missionName = mission.name;
+        app.missionDepartment = mission.department;
+        app.missionRegion = mission.region;
+      } else {
+        app.missionId = "N/A";
+      }
 
       const young = await Young.findOne({ sqlId: my.young_id });
-      app.youngId = (young && young._id) || "N/A";
-      app.youngFirstName = young.firstName;
-      app.youngLastName = young.lastName;
-      app.youngEmail = young.email;
+      if (young) {
+        app.youngId = young._id;
+        app.youngFirstName = young.firstName;
+        app.youngLastName = young.lastName;
+        app.youngEmail = young.email;
+      } else {
+        app.youngId = "N/A";
+      }
 
       app.status = (() => {
         if (my.status === "CANDIDATURE_CREEE") return "WAITING_VALIDATION";
         if (my.status === "CANDIDATURE_VALIDEE") return "VALIDATED";
         if (my.status === "CANDIDATURE_REFUSEE") return "REFUSED";
-        if (my.status === "CANDIDATURE_ANNULEE") return "CANCEL";
-        if (my.status === "CANDIDATURE_PRESELECTIONNEE") return;
-        if (my.status === "CANDIDATURE_CONTRAT_SIGNE") return;
-        if (my.status === "MISSION_EN_COURS") return;
-        if (my.status === "MISSION_EFFECTUEE") return "ARCHIVED";
-        if (my.status === "MISSION_NON_ACHEVEE") return;
+        if (my.status === "CANDIDATURE_ANNULEE") return "CANCELED";
+        if (my.status === "CANDIDATURE_PRESELECTIONNEE") return "PRESELECTED";
+        if (my.status === "CANDIDATURE_CONTRAT_SIGNE") return "SIGNED_CONTRACT";
+        if (my.status === "MISSION_EN_COURS") return "IN_PROGRESS";
+        if (my.status === "MISSION_EFFECTUEE") return "DONE";
+        if (my.status === "MISSION_NON_ACHEVEE") return "NOT_COMPLETED";
       })();
 
       app.createdAt = my.created_at;
@@ -342,7 +354,11 @@ async function migrateApplication() {
       console.log(error);
     }
   }
-  await Application.insertMany(a);
+  try {
+    await Application.insertMany(a);
+  } catch (error) {
+    console.log("error while inserting applications", error);
+  }
   console.log(`${a.length} added`);
 }
 
