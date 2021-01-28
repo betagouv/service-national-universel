@@ -41,6 +41,14 @@ export default ({ value, onChange, name, errorMessage = requiredMessage, placeho
   });
 
   function onAdd(files) {
+    Object.keys(files).forEach((i) => {
+      const fileName = files[i].name.match(/(.*)(\..*)/);
+      const newName = `${fileName[1]}-${filesList.length}${fileName[2]}`;
+      Object.defineProperty(files[i], "name", {
+        writable: true,
+        value: newName,
+      });
+    });
     handleChange([...filesList, ...files]);
   }
 
