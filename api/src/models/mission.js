@@ -6,12 +6,17 @@ const MODELNAME = "mission";
 
 const Schema = new mongoose.Schema({
   sqlId: { type: String, index: true }, // ID of the previous database
+  sqlStructureId: { type: String, index: true }, // ID of the previous database
+  sqlTutorId: { type: String, index: true }, // ID of the previous database
+
   name: { type: String, required: true }, // OK
   domains: { type: [String] }, // OK
 
-  dateStart: { type: Date }, // OK
-  dateEnd: { type: Date }, // OK
-  format: { type: String, default: "CONTINUOUS", enum: ["CONTINUOUS", "DISCONTINUOUS"] },
+  startAt: { type: Date }, // OK
+  endAt: { type: Date }, // OK
+  format: { type: String, default: "CONTINUOUS", enum: ["CONTINUOUS", "DISCONTINUOUS", "AUTONOMOUS"] },
+  frequence: { type: String },
+  period: { type: [String] },
 
   placesTotal: { type: Number, default: 1 }, // OK
   placesLeft: { type: Number, default: 1 }, // OK
@@ -33,7 +38,7 @@ const Schema = new mongoose.Schema({
 
   // structure_id: { type: String, required: true },
   // referent_id: { type: String, required: true },
-  tuteur_id: { type: String },
+  tutorId: { type: String },
 
   //
 
@@ -46,6 +51,7 @@ const Schema = new mongoose.Schema({
   zip: { type: String },
   city: { type: String },
   department: { type: String },
+  region: { type: String },
   country: { type: String },
   location: {
     lat: { type: Number },

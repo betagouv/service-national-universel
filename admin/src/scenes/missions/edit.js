@@ -7,15 +7,16 @@ import { Formik, Field } from "formik";
 import { Link, Redirect } from "react-router-dom";
 
 import MultiSelect from "../../components/Multiselect";
+import AddressInput from "../../components/addressInput";
 
-import { domains, translate } from "../../utils";
+import { domains, translate, departmentList } from "../../utils";
 import api from "../../services/api";
 
 export default (props) => {
   const [defaultValue, setDefaultValue] = useState();
   const [redirect, setRedirect] = useState(false);
 
-  const structure = useSelector((state) => state.Auth.structure);
+  const structure = useSelector((state) => state.Auth.structure) || {}; // empty object if no stucture
 
   useEffect(() => {
     (async () => {
@@ -32,7 +33,6 @@ export default (props) => {
 
   return (
     <Formik
-      isInitialValid={false}
       initialValues={
         defaultValue || {
           placesTotal: 1,
@@ -66,181 +66,231 @@ export default (props) => {
         }
       }}
     >
-      {({ values, handleChange, handleSubmit, isValid }) => (
+      {({ values, handleChange, handleSubmit, isValid, errors, touched }) => (
         <Wrapper>
-          <Subtitle>MISSION</Subtitle>
-          <Title>{values._id ? "Édition" : "Création"}</Title>
-          <Legend>Informations générales</Legend>
-          <FormGroup>
-            <label>
-              <span>*</span>NOM DE VOTRE MISSION
-            </label>
-            <Field
-              // validate={(v) => !v.length}
-              value={values.name}
-              onChange={handleChange}
-              name="name"
-              placeholder="Nom de votre mission"
-            />
-          </FormGroup>
-          <FormGroup>
-            <label>STRUCTURE RATTACHÉE</label>
-            <Input disabled value={values.structureName} placeholder="Structure de la mission" />
-          </FormGroup>
-          <FormGroup>
-            <label>DOMAINES</label>
-            <MultiSelect value={values.domains} onChange={handleChange} name="domains" options={domains} placeholder="Sélectionner un ou plusieurs domains" />
-          </FormGroup>
-          <FormGroup>
-            <label>NOMBRE DE VOLONTAIRES SUSCEPTIBLES D’ÊTRE ACCUEILLIS DE FAÇON CONCOMITANTE SUR CETTE MISSION</label>
-            <p style={{ color: "#a0aec1", fontSize: 12 }}>Précisez ce nombre en fonction de vos contraintes logistiques et votre capacité à accompagner les volontaires.</p>
-            <Input name="placesTotal" onChange={handleChange} value={values.placesTotal} type="number" min={0} max={999} />
-          </FormGroup>
-          <FormGroup>
-            <label>
-              <span>*</span>FORMAT DE MISSION
-            </label>
-            <Field component="select" name="format" value={values.format} onChange={handleChange}>
-              <option key="CONTINUOUS" value="CONTINUOUS">
-                {translate("CONTINUOUS")}
-              </option>
-              <option key="DISCONTINUOUS" value="DISCONTINUOUS">
-                {translate("DISCONTINUOUS")}
-              </option>
-            </Field>
-          </FormGroup>
-          <Legend>Dates de la mission {values.format === "CONTINUOUS" ? `continue` : `perlée`}</Legend>
-          <Row>
-            <Col>
-              <FormGroup>
-                <label>DATE DE DÉBUT</label>
-                <Input type="date" name="date_start" value={values.start_date} onChange={handleChange} placeholder="Date de fin" />
-              </FormGroup>
-            </Col>
-            <Col>
-              <FormGroup>
-                <label>DATE DE FIN</label>
-                <Input type="date" name="date_end" value={values.start_date} onChange={handleChange} placeholder="Date de fin" />
-              </FormGroup>
-            </Col>
-          </Row>
-          <FormGroup>
-            <label>FRÉQUENCE ESTIMÉE DE LA MISSION</label>
-            <p style={{ color: "#a0aec1", fontSize: 12 }}>
-              Par exemple, tous les mardis soirs, le samedi, tous les mercredis après-midi pendant un trimestre, possibilité de moduler les horaires en fonction de l'emploi du
-              temps du volontaire...
-            </p>
-            <textarea rows={2} placeholder="Fréquence estimée de la mission" />
-          </FormGroup>
-          <FormGroup>
-            <label>PÉRIODES POSSIBLES POUR RÉALISER LA MISSION</label>
-            <input placeholder="Sélectionner les périodes" />
-          </FormGroup>
-          <Legend>Détail de la mission</Legend>
-          <FormGroup>
-            <label>
-              <span>*</span>DESCRIPTIF DE LA MISSION
-            </label>
-            <Field
-              // validate={(v) => !v.length}
-              name="description"
-              component="textarea"
-              rows={2}
-              value={values.description}
-              onChange={handleChange}
-              placeholder="Décrivez votre mission, en quelques mots"
-            />
-          </FormGroup>
-          <FormGroup>
-            <label>
-              <span>*</span>ACTIONS CONCRÈTES CONFIÉES AU(X) VOLONTAIRE(S)
-            </label>
-            <Field
-              // validate={(v) => !v.length}
-              name="actions"
-              component="textarea"
-              rows={2}
-              value={values.actions}
-              onChange={handleChange}
-              placeholder="Actions concrètes confiées au(x) volontaire(s)"
-            />
-          </FormGroup>
-          <FormGroup>
-            <label>
-              <span>*</span>EN QUOI LA MISSION PROPOSÉE PERMETTRA-T-ELLE AU VOLONTAIRE D’AGIR EN FAVEUR DE L’INTÉRÊT GÉNÉRAL ?
-            </label>
-            <p style={{ color: "#a0aec1", fontSize: 12 }}>
-              Les réponses à cette question ne seront pas publiées. Elles permettront aux services référents de valider les missions.
-            </p>
-            <Field
-              // validate={(v) => !v.length}
-              name="justifications"
-              component="textarea"
-              rows={2}
-              value={values.justifications}
-              onChange={handleChange}
-              placeholder="Décrivez votre mission, en quelques mots"
-            />
-          </FormGroup>
-          <FormGroup>
-            <label>
-              <span>*</span>Y A-T-IL DES CONTRAINTES SPÉCIFIQUES POUR CETTE MISSION ?
-            </label>
-            <p style={{ color: "#a0aec1", fontSize: 12 }}>
-              Par exemple, nécessité d’une bonne condition physique, mission en soirée, cette mission intègre une période de formation…
-            </p>
-            <Field
-              // validate={(v) => !v.length}
-              name="contraintes"
-              component="textarea"
-              rows={2}
-              value={values.contraintes}
-              onChange={handleChange}
-              placeholder="Décrivez votre mission, en quelques mots"
-            />
-          </FormGroup>
-          <Legend>Lieu de la mission</Legend>
-          <FormGroup>
-            <label>
-              <span>*</span>DÉPARTEMENT
-            </label>
-            <Field
-              // validate={(v) => !v.length}
-              name="departement"
-              onChange={handleChange}
-              value={values.departement}
-              placeholder="Département"
-            />
-          </FormGroup>
-          <Legend>Tuteur de la mission</Legend>
-          <p style={{ color: "#a0aec1", fontSize: 12 }}>
-            Sélectionner le tuteur qui va s'occuper de la mission. Vous pouvez également <Link to="/team/invite">ajouter un nouveau tuteur</Link> à votre équipe.
-          </p>
-          <FormGroup>
-            <label>
-              <span>*</span>TUTEUR
-            </label>
-            <Field
-              // validate={(v) => !v.length}
-              name="tuteur"
-              value={values.tuteur}
-              onChange={handleChange}
-              placeholder="Sélectionner un tuteur"
-            />
-          </FormGroup>
-          <ButtonLight type="button" onClick={handleSubmit}>
-            Enregistrer
-          </ButtonLight>
-          <Button
-            type="button"
-            disabled={!isValid}
-            onClick={() => {
-              handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
-              handleSubmit();
-            }}
-          >
-            Enregistrer et proposer la mission
-          </Button>
+          <Header>
+            <Title>{values._id ? values.name : "Création d'une mission"}</Title>
+            <ButtonContainer>
+              <button
+                className="white-button"
+                disabled={!isValid}
+                onClick={() => {
+                  console.log("SAVE");
+                  handleChange({ target: { value: "DRAFT", name: "status" } });
+                  handleSubmit();
+                }}
+              >
+                Enregistrer
+              </button>
+              <button
+                disabled={!isValid}
+                onClick={() => {
+                  handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
+                  handleSubmit();
+                }}
+              >
+                Enregistrer et proposer la mission
+              </button>
+            </ButtonContainer>
+          </Header>
+          <Box>
+            <Row style={{ borderBottom: "2px solid #f4f5f7" }}>
+              <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
+                <Wrapper>
+                  <Legend>Détails de la mission</Legend>
+                  <FormGroup>
+                    <label>
+                      <span>*</span>NOM DE LA MISSION
+                    </label>
+                    <p style={{ color: "#a0aec1", fontSize: 12 }}>
+                      Privilégiez une phrase précisant l'action du volontaire.
+                      <br />
+                      Exemple: "Je fais les courses de produits pour mes voisons les plus fragiles
+                    </p>
+                    <Field
+                      // validate={(v) => !v.length}
+                      value={values.name}
+                      onChange={handleChange}
+                      name="name"
+                      placeholder="Nom de votre mission"
+                    />
+                  </FormGroup>
+                  <FormGroup>
+                    <label>STRUCTURE RATTACHÉE</label>
+                    <Input disabled value={values.structureName} placeholder="Structure de la mission" />
+                  </FormGroup>
+                  <FormGroup>
+                    <label>DOMAINES D'ACTION</label>
+                    <MultiSelect value={values.domains} onChange={handleChange} name="domains" options={domains} placeholder="Sélectionnez un ou plusieurs domains" />
+                  </FormGroup>
+                  <FormGroup>
+                    <label>
+                      <span>*</span>TYPE DE MISSION
+                    </label>
+                    <Field component="select" name="format" value={values.format} onChange={handleChange}>
+                      <option key="CONTINUOUS" value="CONTINUOUS">
+                        {translate("CONTINUOUS")}
+                      </option>
+                      <option key="DISCONTINUOUS" value="DISCONTINUOUS">
+                        {translate("DISCONTINUOUS")}
+                      </option>
+                    </Field>
+                  </FormGroup>
+                  <FormGroup>
+                    <label>
+                      <span>*</span>OBJECTIFS DE LA MISSION
+                    </label>
+                    <Field
+                      // validate={(v) => !v.length}
+                      name="description"
+                      component="textarea"
+                      rows={2}
+                      value={values.description}
+                      onChange={handleChange}
+                      placeholder="Décrivez en quelques mots votre mission"
+                    />
+                  </FormGroup>
+                  <FormGroup>
+                    <label>
+                      <span>*</span>ACTIONS CONCRÈTES CONFIÉES AU(X) VOLONTAIRE(S)
+                    </label>
+                    <Field
+                      // validate={(v) => !v.length}
+                      name="actions"
+                      component="textarea"
+                      rows={2}
+                      value={values.actions}
+                      onChange={handleChange}
+                      placeholder="Listez briévement les actions confiées au(x) volontaire(s)"
+                    />
+                  </FormGroup>
+                  <FormGroup>
+                    <label>CONTRAINTES SPÉCIFIQUES POUR CETTE MISSION ?</label>
+                    <p style={{ color: "#a0aec1", fontSize: 12 }}>
+                      Précisez les informations complémentaires à préciser au volontaire.
+                      <br />
+                      Exemple : Conditons physiques / Période de formation / Mission en soirée / etc
+                    </p>
+                    <Field
+                      // validate={(v) => !v.length}
+                      name="contraintes"
+                      component="textarea"
+                      rows={2}
+                      value={values.contraintes}
+                      onChange={handleChange}
+                      placeholder="Spécifiez les contraintes liées à la mission"
+                    />
+                  </FormGroup>
+                </Wrapper>
+              </Col>
+              <Col md={6}>
+                <Row style={{ borderBottom: "2px solid #f4f5f7" }}>
+                  <Wrapper>
+                    <Legend>Date et places disponibles</Legend>
+                    <FormGroup>
+                      <label>
+                        <span>*</span>DATES DE LA MISSION
+                      </label>
+                      <Row>
+                        <Col>
+                          <Input type="date" name="startAt" value={values.startAt} onChange={handleChange} placeholder="Date de début" />
+                        </Col>
+                        <Col>
+                          <Input type="date" name="endAt" value={values.endAt} onChange={handleChange} placeholder="Date de fin" />
+                        </Col>
+                      </Row>
+                    </FormGroup>
+                    <FormGroup>
+                      <label>FRÉQUENCE ESTIMÉE DE LA MISSION</label>
+                      <p style={{ color: "#a0aec1", fontSize: 12 }}>Par exemple, tous les mardis soirs, le samedi, tous les mercredis après-midi pendant un trimestre, etc.</p>
+                      <Field
+                        // validate={(v) => !v.length}
+                        name="frequence"
+                        component="textarea"
+                        rows={2}
+                        value={values.frequence}
+                        onChange={handleChange}
+                        placeholder="Fréquence estimée de la mission"
+                      />
+                    </FormGroup>
+                    <FormGroup>
+                      <label>PÉRIODES POSSIBLES POUR RÉALISER LA MISSION</label>
+                      {/* TODO specs les periodes ? */}
+                      <input placeholder="Sélectionner les périodes" />
+                    </FormGroup>
+                    <FormGroup>
+                      <label>NOMBRE DE VOLONTAIRES RECHERCHÉS POUR CETTE MISSION</label>
+                      <p style={{ color: "#a0aec1", fontSize: 12 }}>
+                        Précisez ce nombre en fonction de vos contraintes logistiques et votre capacité à accompagner les volontaires.
+                      </p>
+                      <Input name="placesTotal" onChange={handleChange} value={values.placesTotal} type="number" min={1} max={999} />
+                    </FormGroup>
+                  </Wrapper>
+                </Row>
+                <Wrapper>
+                  <Legend>Tuteur de la mission</Legend>
+                  <FormGroup>
+                    <label>
+                      <span>*</span>TUTEUR
+                    </label>
+                    <p style={{ color: "#a0aec1", fontSize: 12 }}>
+                      Sélectionner le tuteur qui va s'occuper de la mission. <br />
+                      Vous pouvez également{" "}
+                      <u>
+                        <Link to="/team/invite">ajouter un nouveau tuteur</Link>
+                      </u>{" "}
+                      à votre équipe.
+                    </p>
+                    <Field component="select" name="tuteur_id" value={values.tuteur_id} onChange={handleChange}>
+                      <option value="">Sélectionner un tuteur</option>
+                      {/* todo map sur les tuteurs de la structure */}
+                      <option value="CONTINUOUS">{translate("CONTINUOUS")}</option>
+                      <option value="DISCONTINUOUS">{translate("DISCONTINUOUS")}</option>
+                    </Field>
+                  </FormGroup>
+                </Wrapper>
+              </Col>
+            </Row>
+            <Row>
+              <Col md={12}>
+                <Wrapper>
+                  <Legend>Lieu où se déroule la mission</Legend>
+                  <FormGroup>
+                    <label>
+                      <span>*</span>LIEU
+                    </label>
+                    <AddressInput
+                      keys={{ city: "city", zip: "zip", address: "address", location: "location", department: "department", region: "region" }}
+                      values={values}
+                      handleChange={handleChange}
+                      errors={errors}
+                      touched={touched}
+                    />
+                    <p style={{ color: "#a0aec1", fontSize: 12 }}>Si l'adresse n'est pas reconnue, veuillez saisir le nom de la ville.</p>
+                  </FormGroup>
+                </Wrapper>
+              </Col>
+            </Row>
+
+            {/* <Legend>Détail de la mission</Legend>
+            <FormGroup>
+              <label>
+                <span>*</span>EN QUOI LA MISSION PROPOSÉE PERMETTRA-T-ELLE AU VOLONTAIRE D’AGIR EN FAVEUR DE L’INTÉRÊT GÉNÉRAL ?
+              </label>
+              <p style={{ color: "#a0aec1", fontSize: 12 }}>
+                Les réponses à cette question ne seront pas publiées. Elles permettront aux services référents de valider les missions.
+              </p>
+              <Field
+                // validate={(v) => !v.length}
+                name="justifications"
+                component="textarea"
+                rows={2}
+                value={values.justifications}
+                onChange={handleChange}
+                placeholder="Décrivez votre mission, en quelques mots"
+              />
+            </FormGroup> */}
+          </Box>
         </Wrapper>
       )}
     </Formik>
@@ -248,10 +298,14 @@ export default (props) => {
 };
 
 const Wrapper = styled.div`
-  padding: 40px;
-  ${FormGroup} {
-    max-width: 750px;
-  }
+  padding: 3rem;
+`;
+
+const Header = styled.div`
+  padding: 0 25px 0;
+  display: flex;
+  margin-top: 25px;
+  align-items: flex-start;
 `;
 
 const FormGroup = styled.div`
@@ -302,11 +356,11 @@ const Title = styled.div`
   font-weight: 700;
   font-size: 24px;
   margin-bottom: 10px;
+  flex: 1;
 `;
 
 const Legend = styled.div`
   color: rgb(38, 42, 62);
-  margin-top: 30px;
   margin-bottom: 20px;
   font-size: 20px;
 `;
@@ -345,4 +399,38 @@ const Button = styled.button`
     opacity: 0.5;
     cursor: not-allowed;
   }
+`;
+
+const ButtonContainer = styled.div`
+  button {
+    background-color: #5245cc;
+    color: #fff;
+    &.white-button {
+      color: #000;
+      background-color: #fff;
+      :hover {
+        background: #ddd;
+      }
+    }
+    margin-left: 1rem;
+    border: none;
+    border-radius: 5px;
+    padding: 7px 30px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    :hover {
+      background: #372f78;
+    }
+  }
+`;
+
+const Box = styled.div`
+  width: ${(props) => props.width || 100}%;
+  min-height: 400px;
+  height: 100%;
+  background-color: #fff;
+  filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.05));
+  margin-bottom: 33px;
+  border-radius: 8px;
 `;

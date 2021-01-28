@@ -32,7 +32,7 @@ export default () => {
         </li>
         <li>
           <NavLink to="/mission">Missions</NavLink>
-        </li> */}
+        </li>*/}
         {user.role === "admin" && (
           <li>
             <NavLink to="/user">Utilisateurs</NavLink>

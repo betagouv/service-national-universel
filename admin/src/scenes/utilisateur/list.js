@@ -6,7 +6,7 @@ import { toastr } from "react-redux-toastr";
 import { useDispatch } from "react-redux";
 import { setUser } from "../../redux/auth/actions";
 
-import { translate, getFilterLabel } from "../../utils";
+import { translate, getFilterLabel, formatStringLongDate } from "../../utils";
 import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
 import { apiURL } from "../../config";
@@ -150,11 +150,6 @@ export default () => {
 };
 
 const Hit = ({ hit, onClick }) => {
-  const formatLongDate = (date) => {
-    if (!date) return "-";
-    const d = new Date(date);
-    return d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" });
-  };
   return (
     <tr onClick={onClick}>
       <td>
@@ -164,8 +159,8 @@ const Hit = ({ hit, onClick }) => {
       <td>
         <Tag>{translate(hit.role)}</Tag>
       </td>
-      <td>{formatLongDate(hit.createdAt)}</td>
-      <td>{formatLongDate(hit.lastLoginAt)}</td>
+      <td>{formatStringLongDate(hit.createdAt)}</td>
+      <td>{formatStringLongDate(hit.lastLoginAt)}</td>
       <td onClick={(e) => e.stopPropagation()}>
         <Action hit={hit} />
       </td>
