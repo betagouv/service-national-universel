@@ -7,6 +7,7 @@ const { capture } = require("../sentry");
 const ApplicationObject = require("../models/application");
 
 const SERVER_ERROR = "SERVER_ERROR";
+const NOT_FOUND = "NOT_FOUND";
 
 router.post("/", async (req, res) => {
   try {
@@ -54,7 +55,7 @@ router.get("/young/:id", passport.authenticate("referent", { session: false }), 
 
 router.get("/mission/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const data = await ApplicationObject.findOne({ missionId: req.params.id });
+    const data = await ApplicationObject.find({ missionId: req.params.id });
     if (!data) return res.status(404).send({ ok: false, code: NOT_FOUND });
     return res.status(200).send({ ok: true, data });
   } catch (error) {

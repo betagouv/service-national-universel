@@ -34,9 +34,9 @@ sequelize.authenticate().then(async (e) => {
   // await migrate("Structure", migrateStructure);
 
   // await esclient.indices.delete({ index: "referent" });
-  await Referent.deleteMany({ sqlId: { $ne: null } });
-  await migrate("Referent", migrateReferent);
-  await migrate("Referent / Members", migrateStructureMembers);
+  // await Referent.deleteMany({ sqlId: { $ne: null } });
+  // await migrate("Referent", migrateReferent);
+  // await migrate("Referent / Members", migrateStructureMembers);
 
   // await esclient.indices.delete({ index: "mission" });
   // await Mission.deleteMany({});
@@ -57,13 +57,13 @@ sequelize.authenticate().then(async (e) => {
   //   console.log(e);
   // }
 
-  // try {
-  //   await esclient.indices.delete({ index: "application" });
-  // } catch (error) {
-  //   console.log("ERROR ES", error);
-  // }
-  // await Application.deleteMany({});
-  // await migrate("Application", migrateApplication);
+  try {
+    await esclient.indices.delete({ index: "application" });
+  } catch (error) {
+    console.log("ERROR ES", error);
+  }
+  await Application.deleteMany({});
+  await migrate("Application", migrateApplication);
   process.exit(1);
 });
 
@@ -126,7 +126,7 @@ async function migrateMission() {
       // todo get structure info
       mission.sqlStructureId = m.structure_id;
       const structure = await Structure.findOne({ sqlId: m.structure_id });
-      if (mission) mission.structureId = structure._id;
+      if (structure) mission.structureId = structure._id;
 
       // todo get tutor info
       mission.sqlTutorId = m.tuteur_id;
@@ -360,7 +360,10 @@ async function migrateApplication() {
         app.youngId = young._id;
         app.youngFirstName = young.firstName;
         app.youngLastName = young.lastName;
+        app.youngBirthdateAt = young.birthdateAt;
         app.youngEmail = young.email;
+        app.youngCity = young.city;
+        app.youngDepartment = young.department;
       } else {
         app.youngId = "N/A";
       }

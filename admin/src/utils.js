@@ -146,6 +146,16 @@ export const translate = (value) => {
       return "Oui";
     case "false":
       return "Non";
+    case "male":
+      return "Homme";
+    case "female":
+      return "Femme";
+    case "father":
+      return "Père";
+    case "mother":
+      return "Mère";
+    case "representant":
+      return "Représentant légal";
     default:
       return value;
   }

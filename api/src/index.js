@@ -34,6 +34,7 @@ app.use("/mission", require("./controllers/mission"));
 app.use("/structure", require("./controllers/structure"));
 app.use("/young", require("./controllers/young"));
 app.use("/referent", require("./controllers/referent"));
+app.use("/application", require("./controllers/application"));
 
 app.get("/", async (req, res) => {
   const d = new Date();
