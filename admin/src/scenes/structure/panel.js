@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import SocialIcons from "../../components/SocialIcons";
+import { Link } from "react-router-dom";
 
 import api from "../../services/api";
 
@@ -27,9 +28,21 @@ export default ({ onChange, value }) => {
   if (!value) return <div />;
   return (
     <Panel>
-      <div className="close" onClick={onChange} />
+      <div style={{ display: "flex" }}>
+        <Subtitle>structure</Subtitle>
+        <div className="close" onClick={onChange} />
+      </div>
       <div className="info">
         <div className="title">{value.name}</div>
+        <Link to={`/structure/${value._id}`}>
+          <Button className="btn-blue">Consulter</Button>
+        </Link>
+        <Link to={`/structure/${value._id}/edit`}>
+          <Button className="btn-blue">Modifier</Button>
+        </Link>
+        <Link to={`/structure/${value._id}`}>
+          <Button className="btn-red">Supprimer</Button>
+        </Link>
       </div>
       <Info title="La structure">
         <div className="">{value.description}</div>
@@ -88,6 +101,13 @@ const Details = ({ title, value }) => {
   );
 };
 
+const Subtitle = styled.div`
+  color: rgb(113, 128, 150);
+  font-weight: 400;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+`;
+
 const Panel = styled.div`
   background: #ffffff;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
@@ -102,6 +122,7 @@ const Panel = styled.div`
   position: sticky;
   top: 68px;
   right: 0;
+  padding: 20px;
   .close {
     color: #000;
     font-weight: 400;
@@ -121,7 +142,7 @@ const Panel = styled.div`
     margin-bottom: 2px;
   }
   .info {
-    padding: 30px 25px;
+    padding: 2rem 0;
     border-bottom: 1px solid #f2f1f1;
     &-title {
       font-weight: 500;
@@ -151,5 +172,34 @@ const Panel = styled.div`
     padding: 5px 7px 7px 7px;
     margin: 5px;
     border-radius: 5px;
+  }
+`;
+
+const Button = styled.button`
+  margin: 0 0.5rem;
+  align-self: flex-start;
+  border-radius: 4px;
+  padding: 5px;
+  font-size: 12px;
+  min-width: 100px;
+  font-weight: 400;
+  cursor: pointer;
+  background-color: #fff;
+  &.btn-blue {
+    color: #646b7d;
+    border: 1px solid #dcdfe6;
+    :hover {
+      color: rgb(49, 130, 206);
+      border-color: rgb(193, 218, 240);
+      background-color: rgb(234, 243, 250);
+    }
+  }
+  &.btn-red {
+    border: 1px solid #f6cccf;
+    color: rgb(206, 90, 90);
+    :hover {
+      border-color: rgb(240, 218, 218);
+      background-color: rgb(250, 230, 230);
+    }
   }
 `;
