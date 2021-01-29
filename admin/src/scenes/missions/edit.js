@@ -16,8 +16,9 @@ import api from "../../services/api";
 export default (props) => {
   const [defaultValue, setDefaultValue] = useState();
   const [redirect, setRedirect] = useState(false);
+  const [structure, setStructure] = useState();
 
-  const structure = useSelector((state) => state.Auth.structure) || {}; // empty object if no stucture
+  const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
     (async () => {
@@ -25,6 +26,11 @@ export default (props) => {
       if (!id) return setDefaultValue(null);
       const { data } = await api.get(`/mission/${id}`);
       setDefaultValue(data);
+    })();
+    (async () => {
+      if (!user.structureId) return setStructure({});
+      const { data } = await api.get(`/structure/${user.structureId}`);
+      setStructure(data);
     })();
   }, []);
 
@@ -34,7 +40,7 @@ export default (props) => {
     if (ok) toastr.success("Progression enregistrée");
   };
 
-  if (defaultValue === undefined) return <div>Chargement...</div>;
+  if (defaultValue === undefined || structure === undefined) return <div>Chargement...</div>;
   if (redirect) return <Redirect to="/mission" />;
 
   return (

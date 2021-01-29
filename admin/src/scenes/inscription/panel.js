@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
-import { translate as t } from "./utils";
 
-import { YOUNG_SITUATIONS } from "../../utils";
+import { YOUNG_SITUATIONS, translate as t } from "../../utils";
 import LoadingButton from "../../components/loadingButton";
 import Historic from "../../components/historic";
 import DocumentInModal from "../../components/DocumentInModal";

@@ -22,9 +22,13 @@ export default ({ step }) => {
   };
 
   const logout = async () => {
-    await api.post(`/young/logout`);
+    try {
+      await api.post(`/young/logout`);
+    } catch (error) {
+      console.log({ error });
+    }
     dispatch(setYoung(null));
-    window.location.href = "/";
+    // window.location.href = "/";
   };
 
   const handleClick = (s) => {

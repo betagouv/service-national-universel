@@ -8,13 +8,16 @@ import { Formik, Field } from "formik";
 import SelectStatusMission from "../../../components/selectStatusMission";
 import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
+import Panel from "../../volontaires/panel";
 
 import Details from "./details";
+import Youngs from "./youngs";
 
 const TABS = { DETAILS: "DETAILS", VOLUNTEERS: "VOLUNTEERS", HISTORIC: "HISTORIC" };
 
 export default (props) => {
   const [mission, setMission] = useState();
+  const [young, setYoung] = useState();
   const user = useSelector((state) => state.Auth.user);
   const [tab, setTab] = useState("DETAILS");
   const history = useHistory();
@@ -31,8 +34,7 @@ export default (props) => {
       case TABS.DETAILS:
         return <Details mission={mission} />;
       case TABS.VOLUNTEERS:
-        console.log("VOL");
-        return <div />;
+        return <Youngs mission={mission} setYoung={setYoung} />;
       case TABS.HISTORIC:
         console.log("HIST");
         return <div />;
@@ -66,56 +68,75 @@ export default (props) => {
 
   if (!mission) return <div />;
   return (
-    <Wrapper>
-      <Header>
-        <div style={{ flex: 1 }}>
-          <Title>{mission.name}</Title>
+    <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
+      <div style={{ flex: 2, position: "relative", padding: "3rem" }}>
+        <Header>
+          <div style={{ flex: 1 }}>
+            <Title>{mission.name}</Title>
 
-          <TabNavigationList>
-            <TabItem isActive={tab === TABS.DETAILS} onClick={() => setTab(TABS.DETAILS)}>
-              Détails
-            </TabItem>
-            <TabItem isActive={tab === TABS.VOLUNTEERS} onClick={() => setTab(TABS.VOLUNTEERS)}>
-              Volontaires
-            </TabItem>
-            <TabItem isActive={tab === TABS.HISTORIC} onClick={() => setTab(TABS.HISTORIC)}>
-              Historique
-            </TabItem>
-          </TabNavigationList>
-        </div>
-        <Row style={{ minWidth: "40%" }}>
-          <Col md={6}>
-            <BoxPlaces>
-              <h1>{mission.placesLeft}</h1>
-              <div>
-                <p className="text">PLACES RESTANTES</p>
-                <p className="text places">{`${mission.placesTaken}/${mission.placesTotal}`}</p>
-              </div>
-            </BoxPlaces>
-          </Col>
-          <Col md={6}>
-            <Row>
-              <Col md={12}>
-                <SelectStatusMission hit={mission} />
-              </Col>
-            </Row>
-            <Row>
-              <Col md={6}>
-                <Link to={`/mission/${mission._id}/edit`}>
-                  <Button className="btn-blue">Modifier</Button>
-                </Link>
-              </Col>
-              <Col md={6}>
-                <Button onClick={handleDelete} className="btn-red">
-                  Supprimer
-                </Button>
-              </Col>
-            </Row>
-          </Col>
-        </Row>
-      </Header>
-      {renderTab()}
-    </Wrapper>
+            <TabNavigationList>
+              <TabItem isActive={tab === TABS.DETAILS} onClick={() => setTab(TABS.DETAILS)}>
+                Détails
+              </TabItem>
+              <TabItem isActive={tab === TABS.VOLUNTEERS} onClick={() => setTab(TABS.VOLUNTEERS)}>
+                Volontaires
+              </TabItem>
+              <TabItem isActive={tab === TABS.HISTORIC} onClick={() => setTab(TABS.HISTORIC)}>
+                Historique
+              </TabItem>
+            </TabNavigationList>
+          </div>
+          <Row style={{ minWidth: "30%" }}>
+            <Col md={6}>
+              <BoxPlaces>
+                <table>
+                  <tbody>
+                    <tr>
+                      <td style={{ fontSize: "2.5rem", paddingRight: "10px" }}>{mission.placesLeft}</td>
+                      <td>
+                        <b>Places restantes</b>
+                        <br />
+                        <span style={{ color: "#999" }}>
+                          {" "}
+                          {mission.placesTotal - mission.placesLeft} / {mission.placesTotal}
+                        </span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </BoxPlaces>
+            </Col>
+            <Col md={6}>
+              <Row>
+                <Col md={12}>
+                  <SelectStatusMission hit={mission} />
+                </Col>
+              </Row>
+              <Row>
+                <Col md={6}>
+                  <Link to={`/mission/${mission._id}/edit`}>
+                    <Button className="btn-blue">Modifier</Button>
+                  </Link>
+                </Col>
+                <Col md={6}>
+                  <Button onClick={handleDelete} className="btn-red">
+                    Supprimer
+                  </Button>
+                </Col>
+              </Row>
+            </Col>
+          </Row>
+        </Header>
+        {renderTab()}
+      </div>
+      <Panel
+        value={young}
+        onChange={() => {
+          setYoung(null);
+        }}
+        setYoung={setYoung}
+      />
+    </div>
     // <Sidebar onClick={() => {}} id="drawer">
     //   <Logo>
     //     <Link to="/">
@@ -297,7 +318,7 @@ const Box = styled.div`
 `;
 
 const BoxPlaces = styled(Box)`
-  padding: 1rem;
+  padding: 0 1rem;
   display: flex;
   align-items: center;
   h1 {

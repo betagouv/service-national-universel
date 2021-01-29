@@ -11,7 +11,7 @@ import SelectStatusMission from "../../components/selectStatusMission";
 
 export default ({ onChange, mission }) => {
   const [tutor, setTutor] = useState();
-  const [structure, setStructure] = useState();
+  const [structure, setStructure] = useState({});
 
   useEffect(() => {
     (async () => {
@@ -59,15 +59,22 @@ export default ({ onChange, mission }) => {
         <button>Consulter tous les volontaires</button>
       </Link> */}
       <hr />
-      <div className="title">La structure</div>
+      <div className="title">
+        La structure
+        <Link to={`/structure/${structure._id}`}>
+          <SubtitleLink>{`${structure.name} >`}</SubtitleLink>
+        </Link>
+      </div>
+
       <div className="detail">
         <div className="detail-title">Statut</div>
-        <div className="detail-text">{structure && translate(structure.status)}</div>
+        <div className="detail-text">{translate(structure.status)}</div>
       </div>
       <div className="detail">
         <div className="detail-title">Dép.</div>
-        <div className="detail-text">{structure && structure.department}</div>
+        <div className="detail-text">{structure.department}</div>
       </div>
+
       <div className="detail">
         <div className="detail-title">Tuteur</div>
         <div className="detail-text">{tutor ? `${tutor.firstName} ${tutor.lastName}` : ""}</div>
@@ -174,6 +181,10 @@ const Subtitle = styled.div`
   font-weight: 400;
   text-transform: uppercase;
   font-size: 0.9rem;
+`;
+
+const SubtitleLink = styled(Subtitle)`
+  color: #5245cc;
 `;
 
 const Tag = styled.span`

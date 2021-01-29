@@ -58,17 +58,19 @@ export default ({ onChange, value }) => {
       <Info title={`Missions (${missionsInfo.count})`}>
         <p style={{ color: "#999" }}>Cette structure a {missionsInfo.count} missions disponibles</p>
         <table>
-          <tr>
-            <td style={{ fontSize: "2.5rem", paddingRight: "10px" }}>{missionsInfo.placesLeft}</td>
-            <td>
-              <b>Places restantes</b>
-              <br />
-              <span style={{ color: "#999" }}>
-                {" "}
-                {missionsInfo.placesTotal - missionsInfo.placesLeft} / {missionsInfo.placesTotal}
-              </span>
-            </td>
-          </tr>
+          <tbody>
+            <tr>
+              <td style={{ fontSize: "2.5rem", paddingRight: "10px" }}>{missionsInfo.placesLeft}</td>
+              <td>
+                <b>Places restantes</b>
+                <br />
+                <span style={{ color: "#999" }}>
+                  {" "}
+                  {missionsInfo.placesTotal - missionsInfo.placesLeft} / {missionsInfo.placesTotal}
+                </span>
+              </td>
+            </tr>
+          </tbody>
         </table>
       </Info>
       <div>

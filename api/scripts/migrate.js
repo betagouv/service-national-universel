@@ -36,6 +36,7 @@ sequelize.authenticate().then(async (e) => {
   // await esclient.indices.delete({ index: "referent" });
   // await Referent.deleteMany({ sqlId: { $ne: null } });
   // await migrate("Referent", migrateReferent);
+  // await migrate("Referent / Members", migrateStructureMembers);
 
   // await esclient.indices.delete({ index: "mission" });
   // await Mission.deleteMany({});
@@ -125,7 +126,7 @@ async function migrateMission() {
       // todo get structure info
       mission.sqlStructureId = m.structure_id;
       const structure = await Structure.findOne({ sqlId: m.structure_id });
-      if (mission) mission.structureId = structure._id;
+      if (structure) mission.structureId = structure._id;
 
       // todo get tutor info
       mission.sqlTutorId = m.tuteur_id;
@@ -267,31 +268,42 @@ async function migrateYoung() {
 }
 
 async function migrateReferent() {
-  const profilesSql = await sequelize.query("SELECT * FROM `profiles`", { type: QueryTypes.SELECT });
+  const profilesSql = await sequelize.query(
+    //take everyone except the youngs
+    "SELECT profiles.*, users.context_role FROM `profiles` LEFT JOIN `users` on profiles.user_id = users.id WHERE users.context_role <> 'volontaire' OR users.context_role is null",
+    {
+      type: QueryTypes.SELECT,
+    }
+  );
   let a = [];
   console.log(`${profilesSql.length} profiles detected`);
   profilesSql.forEach(async (u) => {
     try {
-      if (!u.referent_department && !u.referent_region) return;
       const referent = { ...u };
-      referent.sqlId = u.id;
+      if (u.id) {
+        referent.sqlId = u.id;
 
-      //start anonymisation
-      const fn = faker.name.firstName();
-      referent.firstName = fn.charAt(0).toUpperCase() + fn.slice(1);
-      const ln = faker.name.lastName();
-      referent.lastName = ln.toUpperCase();
-      referent.email = `${referent.firstName}.${referent.lastName}@mail.com`;
-      //end anonymisation
+        //start anonymisation
+        const fn = faker.name.firstName();
+        referent.firstName = fn.charAt(0).toUpperCase() + fn.slice(1);
+        const ln = faker.name.lastName();
+        referent.lastName = ln.toUpperCase();
+        referent.email = `${u.id}@mail.com`;
+        //end anonymisation
 
-      if (u.referent_region) {
-        referent.role = "referent_region";
-        referent.region = regionList[u.referent_region];
-      } else if (u.referent_department) {
-        referent.role = "referent_department";
-        referent.department = departmentList[u.referent_department];
+        if (u.referent_region) {
+          referent.role = "referent_region";
+          referent.region = regionList[u.referent_region];
+        } else if (u.referent_department) {
+          referent.role = "referent_department";
+          referent.department = departmentList[u.referent_department];
+        } else if (u.context_role === "superviseur") {
+          referent.role = "structure_responsible";
+        } else {
+          referent.role = "structure_member";
+        }
+        a.push(referent);
       }
-      a.push(referent);
     } catch (error) {
       console.log(error);
     }
@@ -299,9 +311,27 @@ async function migrateReferent() {
   try {
     await Referent.insertMany(a);
   } catch (error) {
-    console.log("error while inserting referents");
+    console.log("error while inserting referents", error);
   }
   console.log(`${a.length} added`);
+}
+
+async function migrateStructureMembers() {
+  const members = await sequelize.query("SELECT * FROM `members`", {
+    type: QueryTypes.SELECT,
+  });
+  let a = [];
+  console.log(`${members.length} members detected`);
+  for (let i = 0; i < members.length; i++) {
+    const m = members[i];
+
+    try {
+      const structure = await Structure.findOne({ sqlId: m.structure_id });
+      await Referent.findOneAndUpdate({ sqlId: m.profile_id }, { structureId: structure._id });
+    } catch (error) {
+      console.log("error while linking ref/structure", error);
+    }
+  }
 }
 
 async function migrateApplication() {
@@ -330,7 +360,10 @@ async function migrateApplication() {
         app.youngId = young._id;
         app.youngFirstName = young.firstName;
         app.youngLastName = young.lastName;
+        app.youngBirthdateAt = young.birthdateAt;
         app.youngEmail = young.email;
+        app.youngCity = young.city;
+        app.youngDepartment = young.department;
       } else {
         app.youngId = "N/A";
       }

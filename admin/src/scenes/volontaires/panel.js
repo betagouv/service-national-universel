@@ -1,33 +1,109 @@
-import React from "react";
-import { Redirect } from "react-router-dom";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
+import { Link } from "react-router-dom";
 
-export default ({ onChange, value, setYoung }) => {
+import { YOUNG_SITUATIONS, translate as t } from "../../utils";
+import LoadingButton from "../../components/loadingButton";
+import Historic from "../../components/historic";
+import DocumentInModal from "../../components/DocumentInModal";
+import api from "../../services/api";
+
+export default ({ onChange, value }) => {
+  const [file, setFile] = useState(null);
+  const [buttonsLoading, setButtonsLoading] = useState({});
+
+  console.log(value);
   if (!value) return <div />;
+
+  const formatDate = (d) => {
+    const date = new Date(d);
+    return date.toLocaleDateString();
+  };
+
+  const getAge = (d) => {
+    const now = new Date();
+    const date = new Date(d);
+    const diffTime = Math.abs(date - now);
+    return Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
+  };
+
+  const setButtonLoading = (btn, v) => {
+    setButtonsLoading({ ...buttonsLoading, [btn]: v });
+  };
+
   return (
     <Panel>
+      {file && <DocumentInModal value={file} onChange={() => setFile(null)} />}
       <div className="close" onClick={onChange} />
       <div className="info">
         <div className="title">{`${value.firstName} ${value.lastName}`}</div>
+        <div>{t(value.gender)}</div>
+        {value.birthdateAt && (
+          <div>
+            Né(e) le {formatDate(value.birthdateAt)} - {getAge(value.birthdateAt)} ans
+          </div>
+        )}
+        <Link to={`/volontaire/${value._id}`}>
+          <EditBtn color="white">Modifier</EditBtn>
+        </Link>
       </div>
-      <Info title="Coordonnées" setYoung={setYoung}>
+      <Info title="Coordonnées" id={value._id}>
         <Details title="E-mail" value={value.email} />
+        <Details title="Tel" value={value.phone} />
+        <Details title="Région" value={value.region} />
+        <Details title="Dép" value={value.department} />
+        <Details title="Ville" value={value.city && value.zip && `${value.city} (${value.zip})`} />
+        <Details title="Adresse" value={value.address} />
       </Info>
-      {/* <div>
-        {Object.keys(value).map((e) => {
-          return <div>{`${e}:${value[e]}`}</div>;
-        })}
-      </div> */}
+      <Info title="Situation" id={value._id}>
+        <Details
+          title="Statut"
+          value={() => {
+            if (value.situation === YOUNG_SITUATIONS.GENERAL_SCHOOL) return "En enseignement général ou technologique";
+            if (value.situation === YOUNG_SITUATIONS.PROFESSIONAL_SCHOOL) return "En enseignement professionnel";
+            if (value.situation === YOUNG_SITUATIONS.AGRICULTURAL_SCHOOL) return "En lycée agricole";
+            if (value.situation === YOUNG_SITUATIONS.SPECIALIZED_SCHOOL) return "En établissement spécialisé";
+            if (value.situation === YOUNG_SITUATIONS.APPRENTICESHIP) return "En apprentissage";
+            if (value.situation === YOUNG_SITUATIONS.EMPLOYEE) return "Salarié(e)";
+            if (value.situation === YOUNG_SITUATIONS.INDEPENDANT) return "Indépendant(e)";
+            if (value.situation === YOUNG_SITUATIONS.SELF_EMPLOYED) return "Auto-entrepreneur";
+            if (value.situation === YOUNG_SITUATIONS.ADAPTED_COMPANY) return "En ESAT, CAT ou en entreprise adaptée";
+            if (value.situation === YOUNG_SITUATIONS.POLE_EMPLOI) return "Inscrit(e) à Pôle emploi";
+            if (value.situation === YOUNG_SITUATIONS.MISSION_LOCALE) return "Inscrit(e) à la Mission locale";
+            if (value.situation === YOUNG_SITUATIONS.CAP_EMPLOI) return "Inscrit(e) à Cap emploi";
+            if (value.situation === YOUNG_SITUATIONS.NOTHING) return "Inscrit(e) nulle part";
+          }}
+        />
+        <Details title="Type" value={value.schoolType} />
+        <Details title="Nom" value={value.schoolName} />
+        <Details title="Région" value={value.schoolRegion} />
+        <Details title="Dép" value={value.schoolDepartment} />
+        <Details title="Ville" value={value.schoolCity && value.schoolZip && `${value.schoolCity} (${value.schoolZip})`} />
+        <Details title="Adresse" value={value.schoolAdress} />
+      </Info>
+      <Info title="Situations particulières" id={value._id}>
+        <Details title="Handicap" value={t(value.handicap)} />
+        <Details title="PPS" value={t(value.ppsBeneficiary)} />
+        <Details title="PAI" value={t(value.paiBeneficiary)} />
+        <Details title="Suivi médicosociale" value={t(value.medicosocialStructure)} />
+        <Details title="Aménagement spécifique" value={t(value.medicosocialStructure)} />
+        <Details title="Activités de haut niveau" value={t(value.highSkilledActivity)} />
+      </Info>
+      {value.motivations && (
+        <div className="info">
+          <div className="info-title">Motivations</div>
+          <div className="quote">{`« ${value.motivations} »`}</div>
+        </div>
+      )}
     </Panel>
   );
 };
 
-const Info = ({ children, title, setYoung }) => {
+const Info = ({ children, title, id }) => {
   return (
     <div className="info">
       <div style={{ position: "relative" }}>
         <div className="info-title">{title}</div>
-        <div className="info-edit" onClick={() => <Redirect to="volontaire/edit/baba" />}></div>
       </div>
       {children}
     </div>
@@ -36,6 +112,7 @@ const Info = ({ children, title, setYoung }) => {
 
 const Details = ({ title, value }) => {
   if (!value) return <div />;
+  if (typeof value === "function") value = value();
   return (
     <div className="detail">
       <div className="detail-title">{`${title} :`}</div>
@@ -43,6 +120,25 @@ const Details = ({ title, value }) => {
     </div>
   );
 };
+
+const InfoBtn = styled(LoadingButton)`
+  color: #555;
+  background: url(${require("../../assets/eye.svg")}) left 15px center no-repeat;
+  box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.16);
+  border: 0;
+  outline: 0;
+  border-radius: 5px;
+  padding: 8px 25px 8px 40px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-right: 5px;
+  margin-top: 1rem;
+`;
+
+const EditBtn = styled(InfoBtn)`
+  background: url(${require("../../assets/pencil.svg")}) left 15px center no-repeat;
+`;
 
 const Panel = styled.div`
   background: #ffffff;
