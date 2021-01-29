@@ -36,6 +36,7 @@ sequelize.authenticate().then(async (e) => {
   // await esclient.indices.delete({ index: "referent" });
   await Referent.deleteMany({ sqlId: { $ne: null } });
   await migrate("Referent", migrateReferent);
+  await migrate("Referent / Members", migrateStructureMembers);
 
   // await esclient.indices.delete({ index: "mission" });
   // await Mission.deleteMany({});
@@ -268,7 +269,8 @@ async function migrateYoung() {
 
 async function migrateReferent() {
   const profilesSql = await sequelize.query(
-    "SELECT * FROM `profiles` LEFT JOIN `users` on profiles.user_id = users.id WHERE users.context_role <> 'volontaire' OR users.context_role is null",
+    //take everyone except the youngs
+    "SELECT profiles.*, users.context_role FROM `profiles` LEFT JOIN `users` on profiles.user_id = users.id WHERE users.context_role <> 'volontaire' OR users.context_role is null",
     {
       type: QueryTypes.SELECT,
     }
@@ -277,9 +279,8 @@ async function migrateReferent() {
   console.log(`${profilesSql.length} profiles detected`);
   profilesSql.forEach(async (u) => {
     try {
-      // if (!u.referent_department && !u.referent_region) return;
       const referent = { ...u };
-      if (!u.id) {
+      if (u.id) {
         referent.sqlId = u.id;
 
         //start anonymisation
@@ -296,8 +297,10 @@ async function migrateReferent() {
         } else if (u.referent_department) {
           referent.role = "referent_department";
           referent.department = departmentList[u.referent_department];
+        } else if (u.context_role === "superviseur") {
+          referent.role = "structure_responsible";
         } else {
-          referent.role = "tutor";
+          referent.role = "structure_member";
         }
         a.push(referent);
       }
@@ -311,6 +314,24 @@ async function migrateReferent() {
     console.log("error while inserting referents", error);
   }
   console.log(`${a.length} added`);
+}
+
+async function migrateStructureMembers() {
+  const members = await sequelize.query("SELECT * FROM `members`", {
+    type: QueryTypes.SELECT,
+  });
+  let a = [];
+  console.log(`${members.length} members detected`);
+  for (let i = 0; i < members.length; i++) {
+    const m = members[i];
+
+    try {
+      const structure = await Structure.findOne({ sqlId: m.structure_id });
+      await Referent.findOneAndUpdate({ sqlId: m.profile_id }, { structureId: structure._id });
+    } catch (error) {
+      console.log("error while linking ref/structure", error);
+    }
+  }
 }
 
 async function migrateApplication() {

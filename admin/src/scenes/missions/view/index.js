@@ -83,14 +83,24 @@ export default (props) => {
             </TabItem>
           </TabNavigationList>
         </div>
-        <Row style={{ minWidth: "40%" }}>
+        <Row style={{ minWidth: "30%" }}>
           <Col md={6}>
             <BoxPlaces>
-              <h1>{mission.placesLeft}</h1>
-              <div>
-                <p className="text">PLACES RESTANTES</p>
-                <p className="text places">{`${mission.placesTaken}/${mission.placesTotal}`}</p>
-              </div>
+              <table>
+                <tbody>
+                  <tr>
+                    <td style={{ fontSize: "2.5rem", paddingRight: "10px" }}>{mission.placesLeft}</td>
+                    <td>
+                      <b>Places restantes</b>
+                      <br />
+                      <span style={{ color: "#999" }}>
+                        {" "}
+                        {mission.placesTotal - mission.placesLeft} / {mission.placesTotal}
+                      </span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </BoxPlaces>
           </Col>
           <Col md={6}>
@@ -297,7 +307,7 @@ const Box = styled.div`
 `;
 
 const BoxPlaces = styled(Box)`
-  padding: 1rem;
+  padding: 0 1rem;
   display: flex;
   align-items: center;
   h1 {
