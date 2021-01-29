@@ -34,8 +34,8 @@ sequelize.authenticate().then(async (e) => {
   // await migrate("Structure", migrateStructure);
 
   // await esclient.indices.delete({ index: "referent" });
-  // await Referent.deleteMany({ sqlId: { $ne: null } });
-  // await migrate("Referent", migrateReferent);
+  await Referent.deleteMany({ sqlId: { $ne: null } });
+  await migrate("Referent", migrateReferent);
 
   // await esclient.indices.delete({ index: "mission" });
   // await Mission.deleteMany({});
@@ -56,13 +56,13 @@ sequelize.authenticate().then(async (e) => {
   //   console.log(e);
   // }
 
-  try {
-    await esclient.indices.delete({ index: "application" });
-  } catch (error) {
-    console.log("ERROR ES", error);
-  }
-  await Application.deleteMany({});
-  await migrate("Application", migrateApplication);
+  // try {
+  //   await esclient.indices.delete({ index: "application" });
+  // } catch (error) {
+  //   console.log("ERROR ES", error);
+  // }
+  // await Application.deleteMany({});
+  // await migrate("Application", migrateApplication);
   process.exit(1);
 });
 
@@ -267,31 +267,40 @@ async function migrateYoung() {
 }
 
 async function migrateReferent() {
-  const profilesSql = await sequelize.query("SELECT * FROM `profiles`", { type: QueryTypes.SELECT });
+  const profilesSql = await sequelize.query(
+    "SELECT * FROM `profiles` LEFT JOIN `users` on profiles.user_id = users.id WHERE users.context_role <> 'volontaire' OR users.context_role is null",
+    {
+      type: QueryTypes.SELECT,
+    }
+  );
   let a = [];
   console.log(`${profilesSql.length} profiles detected`);
   profilesSql.forEach(async (u) => {
     try {
-      if (!u.referent_department && !u.referent_region) return;
+      // if (!u.referent_department && !u.referent_region) return;
       const referent = { ...u };
-      referent.sqlId = u.id;
+      if (!u.id) {
+        referent.sqlId = u.id;
 
-      //start anonymisation
-      const fn = faker.name.firstName();
-      referent.firstName = fn.charAt(0).toUpperCase() + fn.slice(1);
-      const ln = faker.name.lastName();
-      referent.lastName = ln.toUpperCase();
-      referent.email = `${referent.firstName}.${referent.lastName}@mail.com`;
-      //end anonymisation
+        //start anonymisation
+        const fn = faker.name.firstName();
+        referent.firstName = fn.charAt(0).toUpperCase() + fn.slice(1);
+        const ln = faker.name.lastName();
+        referent.lastName = ln.toUpperCase();
+        referent.email = `${u.id}@mail.com`;
+        //end anonymisation
 
-      if (u.referent_region) {
-        referent.role = "referent_region";
-        referent.region = regionList[u.referent_region];
-      } else if (u.referent_department) {
-        referent.role = "referent_department";
-        referent.department = departmentList[u.referent_department];
+        if (u.referent_region) {
+          referent.role = "referent_region";
+          referent.region = regionList[u.referent_region];
+        } else if (u.referent_department) {
+          referent.role = "referent_department";
+          referent.department = departmentList[u.referent_department];
+        } else {
+          referent.role = "tutor";
+        }
+        a.push(referent);
       }
-      a.push(referent);
     } catch (error) {
       console.log(error);
     }
@@ -299,7 +308,7 @@ async function migrateReferent() {
   try {
     await Referent.insertMany(a);
   } catch (error) {
-    console.log("error while inserting referents");
+    console.log("error while inserting referents", error);
   }
   console.log(`${a.length} added`);
 }

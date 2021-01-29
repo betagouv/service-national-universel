@@ -22,7 +22,7 @@ const Schema = new mongoose.Schema({
   invitationToken: { type: String, default: "" },
   invitationExpires: { type: Date },
 
-  role: { type: String, enum: ["admin", "referent_region", "referent_department"] },
+  role: { type: String, enum: ["admin", "referent_region", "referent_department", "tutor"] },
   region: { type: String, default: "" },
   department: { type: String, default: "" },
 
