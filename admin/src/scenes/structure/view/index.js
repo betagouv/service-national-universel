@@ -185,7 +185,7 @@ const Wrapper = styled.div`
 const Header = styled.div`
   padding: 0 25px 0;
   display: flex;
-  margin: 2rem 0 1rem 0;
+  margin-bottom: 1rem;
   align-items: flex-start;
 `;
 
