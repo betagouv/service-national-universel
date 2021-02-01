@@ -17,7 +17,7 @@ const Schema = new mongoose.Schema({
 
   status: { type: String, default: "WAITING_VALIDATION", enum: ["WAITING_VALIDATION", "WAITING_CORRECTION", "VALIDATED"] },
 
-  userId: { type: String },
+  sqlUserId: { type: String },
   isNetwork: { type: String, enum: ["true", "false"] },
   networkId: { type: String },
   sqlNetworkId: { type: String },

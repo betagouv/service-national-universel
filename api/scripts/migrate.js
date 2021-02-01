@@ -90,6 +90,7 @@ async function migrateStructure() {
       structure.sqlId = s.id;
       structure.isNetwork = structure.is_reseau ? "true" : "false";
       structure.sqlNetworkId = s.reseau_id;
+      structure.sqlUserId = s.user_id;
       if (s.longitude && s.latitude) structure.location = { lon: parseFloat(s.longitude), lat: parseFloat(s.latitude) };
 
       structure.legalStatus = (() => {
