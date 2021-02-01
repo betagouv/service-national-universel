@@ -49,7 +49,7 @@ export default ({ onChange, value }) => {
       <Info title="La structure">
         <div className="">{value.description}</div>
         <Details title="Agréments" value={value.associationTypes || "--"} />
-        <Details title="Statut" value={translate(value.statutJuridique) || "--"} />
+        <Details title="Statut" value={translate(value.legalStatus) || "--"} />
         <Details title="Région" value={value.region || "--"} />
         <Details title="Dép." value={value.department || "--"} />
         <Details title="Ville" value={value.city || "--"} />

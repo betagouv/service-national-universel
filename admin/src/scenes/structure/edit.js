@@ -107,8 +107,8 @@ export default (props) => {
                     <label>
                       <span>*</span>STATUT JURIDIQUE
                     </label>
-                    <Field validate={(v) => !v && requiredMessage} component="select" name="statutJuridique" value={values.statutJuridique} onChange={handleChange}></Field>
-                    <ErrorMessage errors={errors} touched={touched} name="statutJuridique" />
+                    <Field validate={(v) => !v && requiredMessage} component="select" name="legalStatus" value={values.legalStatus} onChange={handleChange}></Field>
+                    <ErrorMessage errors={errors} touched={touched} name="legalStatus" />
                   </FormGroup>
                   <FormGroup>
                     <label>DISPOSEZ-VOUS D'UN AGRÉMENT ?</label>
