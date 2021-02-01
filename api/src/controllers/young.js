@@ -10,6 +10,7 @@ const { capture } = require("../sentry");
 
 const { uploadFile } = require("../utils");
 const { encrypt } = require("../cryptoUtils");
+const { getQPV } = require("../qpv");
 
 const YoungObject = require("../models/young");
 const AuthObject = require("../auth");
@@ -60,6 +61,10 @@ router.post("/file/:key", passport.authenticate("young", { session: false }), as
 router.post("/", async (req, res) => {
   try {
     const young = await YoungObject.create(req.body);
+
+    // const qpv = await getQPV(young.zip, young.city, young.address);
+    // young.qpv;
+
     return res.status(200).send({ young, ok: true });
   } catch (error) {
     if (error.code === 11000) return res.status(409).send({ ok: false, code: YOUNG_ALREADY_REGISTERED });

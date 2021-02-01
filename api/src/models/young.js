@@ -64,6 +64,7 @@ const Schema = new mongoose.Schema({
   department: { type: String },
   region: { type: String },
   location: { lat: Number, lon: Number },
+  qpv: { type: String, enum: ["true", "false"] },
 
   // * School informations
   situation: { type: String },
