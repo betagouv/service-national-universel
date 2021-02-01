@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 
 import { YOUNG_SITUATIONS, translate as t } from "../../utils";
 import LoadingButton from "../../components/loadingButton";
+import DownloadButton from "../../components/DownloadButton";
 import Historic from "../../components/historic";
 import DocumentInModal from "../../components/DocumentInModal";
 import api from "../../services/api";
@@ -60,36 +61,46 @@ export default ({ onChange, value }) => {
       <Info title="Pièce d’identité" id={value._id}>
         {(value.cniFiles || []).map((e, i) => {
           return (
-            <InfoBtn
-              key={i}
-              color="white"
-              loading={buttonsLoading[`cniFiles${i}`]}
-              onClick={async () => {
-                setButtonLoading(`cniFiles${i}`, true);
-                const f = await api.get(`/referent/youngFile/${value._id}/cniFiles/${e}`);
-                setButtonLoading(`cniFiles${i}`, false);
-                setFile(f);
-              }}
-            >{`Visualiser la pièce d’identité (${i + 1}/${value.cniFiles.length})`}</InfoBtn>
+            <div key={i}>
+              <InfoBtn
+                color="white"
+                loading={buttonsLoading[`cniFiles${i}`]}
+                onClick={async () => {
+                  setButtonLoading(`cniFiles${i}`, true);
+                  const f = await api.get(`/referent/youngFile/${value._id}/cniFiles/${e}`);
+                  setButtonLoading(`cniFiles${i}`, false);
+                  setFile(f);
+                }}
+              >{`Visualiser la pièce d’identité (${i + 1}/${value.cniFiles.length})`}</InfoBtn>
+              <DownloadButton
+                source={() => api.get(`/referent/youngFile/${value._id}/cniFiles/${e}`)}
+                title={`Télécharger la pièce d’identité (${i + 1}/${value.cniFiles.length})`}
+              />
+            </div>
           );
         })}
       </Info>
       <Info title="Consentements du ou des représentants légaux" id={value._id}>
         {(value.parentConsentmentFiles || []).map((e, i) => {
           return (
-            <InfoBtn
-              key={i}
-              color="white"
-              loading={buttonsLoading[`parentConsentmentFiles${i}`]}
-              onClick={async () => {
-                setButtonLoading(`parentConsentmentFiles${i}`, true);
-                const f = await api.get(`/referent/youngFile/${value._id}/parentConsentmentFiles/${e}`);
-                setButtonLoading(`parentConsentmentFiles${i}`, false);
-                setFile(f);
-              }}
-            >
-              Visualiser le formulaire
-            </InfoBtn>
+            <div key={i}>
+              <InfoBtn
+                color="white"
+                loading={buttonsLoading[`parentConsentmentFiles${i}`]}
+                onClick={async () => {
+                  setButtonLoading(`parentConsentmentFiles${i}`, true);
+                  const f = await api.get(`/referent/youngFile/${value._id}/parentConsentmentFiles/${e}`);
+                  setButtonLoading(`parentConsentmentFiles${i}`, false);
+                  setFile(f);
+                }}
+              >
+                Visualiser le formulaire
+              </InfoBtn>
+              <DownloadButton
+                source={() => api.get(`/referent/youngFile/${value._id}/parentConsentmentFiles/${e}`)}
+                title={`Télécharger le formulaire (${i + 1}/${value.cniFiles.length})`}
+              />
+            </div>
           );
         })}
       </Info>

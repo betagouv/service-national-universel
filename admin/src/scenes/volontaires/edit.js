@@ -8,6 +8,7 @@ import "dayjs/locale/fr";
 import { useSelector } from "react-redux";
 
 import LoadingButton from "../../components/loadingButton";
+import DownloadButton from "../../components/DownloadButton";
 import Historic from "../../components/historic";
 import DocumentInModal from "../../components/DocumentInModal";
 
@@ -83,17 +84,22 @@ export default (props) => {
                     <Item title="Date de naissance" type="date" values={values} name="birthdateAt" handleChange={handleChange} />
                     {values.cniFiles.map((e, i) => {
                       return (
-                        <InfoBtn
-                          key={i}
-                          color="white"
-                          loading={buttonsLoading[`cniFiles${i}`]}
-                          onClick={async () => {
-                            setButtonLoading(`cniFiles${i}`, true);
-                            const f = await api.get(`/referent/youngFile/${values._id}/cniFiles/${e}`);
-                            setButtonLoading(`cniFiles${i}`, false);
-                            setFile(f);
-                          }}
-                        >{`Visualiser la pièce d’identité (${i + 1}/${values.cniFiles.length})`}</InfoBtn>
+                        <div key={i}>
+                          <InfoBtn
+                            color="white"
+                            loading={buttonsLoading[`cniFiles${i}`]}
+                            onClick={async () => {
+                              setButtonLoading(`cniFiles${i}`, true);
+                              const f = await api.get(`/referent/youngFile/${values._id}/cniFiles/${e}`);
+                              setButtonLoading(`cniFiles${i}`, false);
+                              setFile(f);
+                            }}
+                          >{`Visualiser la pièce d’identité (${i + 1}/${values.cniFiles.length})`}</InfoBtn>
+                          <DownloadButtonWithMargin
+                            source={() => api.get(`/referent/youngFile/${values._id}/cniFiles/${e}`)}
+                            title={`Télécharger la pièce d’identité (${i + 1}/${values.cniFiles.length})`}
+                          />
+                        </div>
                       );
                     })}
                   </BoxContent>
@@ -262,17 +268,22 @@ export default (props) => {
                     />
                     {values.highSkilledActivityProofFiles.map((e, i) => {
                       return (
-                        <InfoBtn
-                          key={i}
-                          color="white"
-                          loading={buttonsLoading[`highSkilledActivityProofFiles${i}`]}
-                          onClick={async () => {
-                            setButtonLoading(`highSkilledActivityProofFiles${i}`, true);
-                            const f = await api.get(`/referent/youngFile/${values._id}/highSkilledActivityProofFiles/${e}`);
-                            setButtonLoading(`highSkilledActivityProofFiles${i}`, false);
-                            setFile(f);
-                          }}
-                        >{`Visualiser le justificatif d'engagement (${i + 1}/${values.highSkilledActivityProofFiles.length})`}</InfoBtn>
+                        <div key={i}>
+                          <InfoBtn
+                            color="white"
+                            loading={buttonsLoading[`highSkilledActivityProofFiles${i}`]}
+                            onClick={async () => {
+                              setButtonLoading(`highSkilledActivityProofFiles${i}`, true);
+                              const f = await api.get(`/referent/youngFile/${values._id}/highSkilledActivityProofFiles/${e}`);
+                              setButtonLoading(`highSkilledActivityProofFiles${i}`, false);
+                              setFile(f);
+                            }}
+                          >{`Visualiser le justificatif d'engagement (${i + 1}/${values.highSkilledActivityProoefFiles.length})`}</InfoBtn>
+                          <DownloadButtonWithMargin
+                            source={() => api.get(`/referent/youngFile/${values._id}/highSkilledActivityProofFiles/${e}`)}
+                            title={`Télécharger le justificatif d'engagement (${i + 1}/${values.highSkilledActivityProoefFiles.length})`}
+                          />
+                        </div>
                       );
                     })}
                   </BoxContent>
@@ -337,18 +348,24 @@ export default (props) => {
                       options={regionList.map((r) => ({ value: r, label: r }))}
                     />
                     {values.parentConsentmentFiles.length ? (
-                      <InfoBtn
-                        color="white"
-                        loading={buttonsLoading[`parentConsentmentFiles0`]}
-                        onClick={async () => {
-                          setButtonLoading(`parentConsentmentFiles0`, true);
-                          const f = await api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${values.parentConsentmentFiles[0]}`);
-                          setButtonLoading(`parentConsentmentFiles0`, false);
-                          setFile(f);
-                        }}
-                      >
-                        Visualiser le formulaire de consentement
-                      </InfoBtn>
+                      <div>
+                        <InfoBtn
+                          color="white"
+                          loading={buttonsLoading[`parentConsentmentFiles0`]}
+                          onClick={async () => {
+                            setButtonLoading(`parentConsentmentFiles0`, true);
+                            const f = await api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${values.parentConsentmentFiles[0]}`);
+                            setButtonLoading(`parentConsentmentFiles0`, false);
+                            setFile(f);
+                          }}
+                        >
+                          Visualiser le formulaire de consentement
+                        </InfoBtn>
+                        <DownloadButtonWithMargin
+                          source={() => api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${values.parentConsentmentFiles[0]}`)}
+                          title={"Télécharger le formulaire de consentement"}
+                        />
+                      </div>
                     ) : null}
                   </BoxContent>
                 </Box>
@@ -402,17 +419,23 @@ export default (props) => {
                       options={regionList.map((r) => ({ value: r, label: r }))}
                     />
                     {values.parentConsentmentFiles && values.parentConsentmentFiles.length === 2 ? (
-                      <InfoBtn
-                        loading={buttonsLoading[`parentConsentmentFiles1`]}
-                        onClick={async () => {
-                          setButtonLoading(`parentConsentmentFiles1`, true);
-                          const f = await api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${values.parentConsentmentFiles[1]}`);
-                          setButtonLoading(`parentConsentmentFiles1`, false);
-                          setFile(f);
-                        }}
-                      >
-                        Visualiser le formulaire de consentement
-                      </InfoBtn>
+                      <div>
+                        <InfoBtn
+                          loading={buttonsLoading[`parentConsentmentFiles1`]}
+                          onClick={async () => {
+                            setButtonLoading(`parentConsentmentFiles1`, true);
+                            const f = await api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${values.parentConsentmentFiles[1]}`);
+                            setButtonLoading(`parentConsentmentFiles1`, false);
+                            setFile(f);
+                          }}
+                        >
+                          Visualiser le formulaire de consentement
+                        </InfoBtn>
+                        <DownloadButtonWithMargin
+                          source={() => api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${values.parentConsentmentFiles[1]}`)}
+                          title={"Télécharger le formulaire de consentement"}
+                        />
+                      </div>
                     ) : null}
                   </BoxContent>
                 </Box>
@@ -435,14 +458,19 @@ export default (props) => {
                     />
                     {values.imageRightFiles.map((e, i) => {
                       return (
-                        <InfoBtn
-                          key={i}
-                          color="white"
-                          onClick={async () => {
-                            const f = await api.get(`/referent/youngFile/${values._id}/imageRightFiles/${e}`);
-                            setFile(f);
-                          }}
-                        >{`Visualiser le formulaire de consentement de droit à l'image (${i + 1}/${values.imageRightFiles.length})`}</InfoBtn>
+                        <div key={i}>
+                          <InfoBtn
+                            color="white"
+                            onClick={async () => {
+                              const f = await api.get(`/referent/youngFile/${values._id}/imageRightFiles/${e}`);
+                              setFile(f);
+                            }}
+                          >{`Visualiser le formulaire de consentement de droit à l'image (${i + 1}/${values.imageRightFiles.length})`}</InfoBtn>
+                          <DownloadButtonWithMargin
+                            source={() => api.get(`/referent/youngFile/${values._id}/imageRightFiles/${e}`)}
+                            title={`Télécharger le formulaire de consentement de droit à l'image (${i + 1}/${values.imageRightFiles.length})`}
+                          />
+                        </div>
                       );
                     })}
                   </BoxContent>
@@ -532,6 +560,10 @@ const InfoBtn = styled(LoadingButton)`
   margin-top: 1rem;
   margin-left: 1rem;
   width: fit-content;
+`;
+
+const DownloadButtonWithMargin = styled(DownloadButton)`
+  margin-left: 1rem;
 `;
 
 const DeleteBtn = styled.button`
