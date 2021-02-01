@@ -36,7 +36,7 @@ export default (props) => {
 
   const handleSave = async (values) => {
     const { ok, code, data: mission } = await api.put("/mission", values);
-    if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de votre progression", code);
+    if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de votre progression", translate(code));
     if (ok) toastr.success("Progression enregistrée");
   };
 

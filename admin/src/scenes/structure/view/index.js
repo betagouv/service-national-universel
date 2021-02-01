@@ -10,6 +10,7 @@ import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 
 import Details from "./details";
+import { translate } from "../../../utils";
 
 const TABS = { DETAILS: "DETAILS", MISSIONS: "MISSIONS", HISTORIC: "HISTORIC" };
 
@@ -48,12 +49,12 @@ export default (props) => {
     try {
       const { ok, code } = await api.remove(`/structure/${structure._id}`);
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
-      if (!ok) return toastr.error("Une erreur s'est produite :", code);
+      if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       toastr.success("Cette structure a été supprimée.");
       return history.push(`/structure`);
     } catch (e) {
       console.log(e);
-      return toastr.error("Oups, une erreur est survenue pendant la supression de la structure :", e.code);
+      return toastr.error("Oups, une erreur est survenue pendant la supression de la structure :", translate(e.code));
     }
   };
 

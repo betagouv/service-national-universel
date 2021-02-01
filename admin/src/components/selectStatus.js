@@ -49,12 +49,12 @@ export default ({ hit }) => {
         await api.post(`/referent/email/refuse/${young._id}`, { subject: "Inscription refusée" });
       }
 
-      if (!ok) return toastr.error("Une erreur s'est produite :", code);
+      if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       setYoung(newYoung);
       toastr.success("Mis à jour!");
     } catch (e) {
       console.log(e);
-      toastr.error("Oups, une erreur est survenue :", e.code);
+      toastr.error("Oups, une erreur est survenue :", translate(e.code));
     }
   };
 

@@ -49,7 +49,7 @@ export default ({ onChange }) => {
                     //   await api.put(`/user?user_id=${user._id}`, { avatar: url });
                     //   toastr.success("success");
                     // }}
-                    onError={(error) => toastr.error(error)}
+                    onError={(error) => toastr.error(Erreur !)}
                     // url={values.avatar}
                     // route={`/structure/image?user_id=${user._id}`}
                   />

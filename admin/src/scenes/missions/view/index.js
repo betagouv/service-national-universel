@@ -12,6 +12,7 @@ import Panel from "../../volontaires/panel";
 
 import Details from "./details";
 import Youngs from "./youngs";
+import { translate } from "../../../utils";
 
 const TABS = { DETAILS: "DETAILS", VOLUNTEERS: "VOLUNTEERS", HISTORIC: "HISTORIC" };
 
@@ -57,12 +58,12 @@ export default (props) => {
     try {
       const { ok, code } = await api.remove(`/mission/${mission._id}`);
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
-      if (!ok) return toastr.error("Une erreur s'est produite :", code);
+      if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       toastr.success("Cette mission a été supprimée.");
       return history.push(`/mission`);
     } catch (e) {
       console.log(e);
-      return toastr.error("Oups, une erreur est survenue pendant la supression de la mission :", e.code);
+      return toastr.error("Oups, une erreur est survenue pendant la supression de la mission :", translate(e.code));
     }
   };
 

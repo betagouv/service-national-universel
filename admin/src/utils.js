@@ -156,6 +156,26 @@ export const translate = (value) => {
       return "Mère";
     case "representant":
       return "Représentant légal";
+    case "SERVER_ERROR":
+      return "Erreur serveur";
+    case "NOT_FOUND":
+      return "Existe pas";
+    case "PASSWORD_TOKEN_EXPIRED_OR_INVALID":
+      return "Lien expiré ou token invalide";
+    case "USER_ALREADY_REGISTERED":
+      return "Utilisateur déjà inscrit";
+    case "PASSWORD_NOT_VALIDATED":
+      return "Mot de passe invalide";
+    case "INVITATION_TOKEN_EXPIRED_OR_INVALID":
+      return "Invitation invalide";
+    case "USER_NOT_FOUND":
+      return "Utilisateur n'existe pas";
+    case "OPERATION_UNAUTHORIZED":
+      return "Opération non autorisée";
+    case "FILE_CORRUPTED":
+      return "Ce fichier est corrompu";
+    case "YOUNG_ALREADY_REGISTERED":
+      return "Utilisateur déjà inscrit";
     default:
       return value;
   }
