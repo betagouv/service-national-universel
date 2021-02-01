@@ -137,7 +137,6 @@ const Parent = ({ id = 1, values, errors, touched, handleChange }) => {
             value={values[`parent${id}Email`]}
             onChange={handleChange}
             className="form-control"
-            disabled={isParentFromFranceConnect}
           />
           <ErrorMessage errors={errors} touched={touched} name={`parent${id}Email`} />
         </Col>
