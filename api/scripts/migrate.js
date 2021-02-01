@@ -157,7 +157,10 @@ async function migrateMission() {
 
       mission.sqlStructureId = m.structure_id;
       const structure = await Structure.findOne({ sqlId: m.structure_id });
-      if (structure) mission.structureId = structure._id;
+      if (structure) {
+        mission.structureId = structure._id;
+        mission.structureName = structure.name;
+      }
 
       mission.sqlTutorId = m.tuteur_id;
       const tutor = await Referent.findOne({ sqlId: m.tuteur_id });

@@ -165,7 +165,7 @@ const Hit = ({ hit, onClick }) => {
       <td>
         <div style={{ fontWeight: "bold" }}>{hit.name}</div>
         <div style={{ color: "#718096" }}>
-          {hit.statutJuridique} • Créée le {formatLongDate(hit.createdAt)}
+          {translate(hit.statutJuridique)} • Créée le {formatLongDate(hit.createdAt)}
         </div>
       </td>
       <td>
