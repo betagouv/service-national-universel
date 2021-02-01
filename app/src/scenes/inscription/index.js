@@ -7,6 +7,7 @@ import Particulieres from "./Create/stepParticulieres";
 import Consentements from "./Create/stepConsentements";
 import Motivations from "./Create/stepMotivations";
 import Nav from "./components/Nav";
+import FranceConnectCallback from "./components/FranceConnectCallback";
 import Done from "./Create/stepDone";
 import styled from "styled-components";
 
@@ -46,6 +47,7 @@ export default () => {
       <Route path="/inscription/consentements" component={() => <Step step={STEPS.CONSENTEMENTS} />} />
       <Route path="/inscription/motivations" component={() => <Step step={STEPS.MOTIVATIONS} />} />
       <Route path="/inscription/done" component={() => <Step step={STEPS.DONE} />} />
+      <Route path="/inscription/france-connect-callback" component={() => <FranceConnectCallback />} />
       <Route path="/inscription" component={Home} />
     </Switch>
   );
