@@ -8,6 +8,7 @@ import ErrorMessage, { requiredMessage } from "../inscription/components/errorMe
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../redux/auth/actions";
+import { translate } from "../../utils";
 
 const AuthorizationIntro = () => (
   <div>
@@ -110,7 +111,7 @@ export default () => {
             onSubmit={async (values) => {
               try {
                 const { ok, code, data: young } = await api.put("/young", values);
-                if (!ok) return toastr.error("Une erreur s'est produite", code);
+                if (!ok) return toastr.error("Une erreur s'est produite", translate(code));
                 dispatch(setYoung(young));
                 toastr.success("Mis à jour !");
               } catch (e) {
