@@ -5,6 +5,8 @@ import { Link } from "react-router-dom";
 
 import api from "../../services/api";
 
+import { translate } from "../../utils";
+
 export default ({ onChange, value }) => {
   const [missionsInfo, setMissionsInfo] = useState({ count: "-", placesTotal: "-" });
   useEffect(() => {
@@ -47,7 +49,7 @@ export default ({ onChange, value }) => {
       <Info title="La structure">
         <div className="">{value.description}</div>
         <Details title="Agréments" value={value.associationTypes || "--"} />
-        <Details title="Statut" value={value.statutJuridique || "--"} />
+        <Details title="Statut" value={translate(value.statutJuridique) || "--"} />
         <Details title="Région" value={value.region || "--"} />
         <Details title="Dép." value={value.department || "--"} />
         <Details title="Ville" value={value.city || "--"} />

@@ -37,9 +37,9 @@ export const translate = (value) => {
     case "VALIDATED":
       return "Validée";
     case "CONTINUOUS":
-      return "Mission perlée (84 heures tout au long de l'année)";
-    case "DISCONTINUOUS":
       return "Mission continue (12 jours d'affilée sauf exception)";
+    case "DISCONTINUOUS":
+      return "Mission perlée (84 heures tout au long de l'année)";
     case "DRAFT":
       return "Brouillon";
     case "REFUSED":
@@ -48,6 +48,14 @@ export const translate = (value) => {
       return "Annulée";
     case "ARCHIVED":
       return "Archivée";
+    case "DONE":
+      return "Effectuée";
+    case "NOT_COMPLETED":
+      return "Non achevée";
+    case "PRESELECTED":
+      return "Présélectionnée";
+    case "SIGNED_CONTRACT":
+      return "Contrat signé";
     case "ASSOCIATION":
       return "Association";
     case "PUBLIC":
@@ -630,6 +638,33 @@ export const MISSION_STATUS_COLORS = {
   REFUSED: "#F8A9AD",
   CANCEL: "#ffa987",
   ARCHIVED: "#ffb3fb",
+};
+
+export const APPLICATION_STATUS = {
+  WAITING_VALIDATION: "WAITING_VALIDATION",
+  VALIDATED: "VALIDATED",
+  REFUSED: "REFUSED",
+  CANCEL: "CANCELED",
+  ARCHIVED: "ARCHIVED",
+  IN_PROGRESS: "IN_PROGRESS",
+  DONE: "DONE",
+  NOT_COMPLETED: "NOT_COMPLETED",
+  PRESELECTED: "PRESELECTED",
+  SIGNED_CONTRACT: "SIGNED_CONTRACT",
+};
+
+export const APPLICATION_STATUS_COLORS = {
+  WAITING_VALIDATION: "#FE7B52",
+  WAITING_CORRECTION: "#FEB951",
+  VALIDATED: "#6CC763",
+  DONE: "#1C7713",
+  PRESELECTED: "#d9bb71",
+  NOT_COMPLETED: "#d9bb71",
+  SIGNED_CONTRACT: "#d9bb71",
+  REFUSED: "#F8A9AD",
+  CANCEL: "#ffa987",
+  ARCHIVED: "#ffb3fb",
+  IN_PROGRESS: "#382F79",
 };
 
 export const MISSION_PERIOD_DURING_HOLIDAYS = {

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Col, DropdownItem, DropdownMenu, DropdownToggle, Label, Pagination, PaginationItem, PaginationLink, Row, UncontrolledDropdown } from "reactstrap";
 import { ReactiveBase, ReactiveList, SingleList, MultiDropdownList, MultiList, DataSearch } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
-
+import SelectStatusApplication from "../../../components/selectStatusApplication";
 import api from "../../../services/api";
 import { apiURL } from "../../../config";
 
@@ -68,7 +68,7 @@ const Hit = ({ hit, onClick }) => {
           <div>
             <h2>{`${hit.youngFirstName} ${hit.youngLastName}`}</h2>
             <p>
-              {getAge(hit.youngBirthdateAt)} ans {`• ${hit.youngCity} (${hit.youngDepartment})`}
+              {hit.youngBirthdateAt ? `${getAge(hit.youngBirthdateAt)} ans` : null} {`• ${hit.youngCity || ""} (${hit.youngDepartment || ""})`}
             </p>
           </div>
         </TeamMember>
@@ -76,7 +76,9 @@ const Hit = ({ hit, onClick }) => {
       <td>
         <div>{formatStringLongDate(hit.createdAt)}</div>
       </td>
-      <td onClick={(e) => e.stopPropagation()}>{hit.status}</td>
+      <td onClick={(e) => e.stopPropagation()}>
+        <SelectStatusApplication hit={hit} />
+      </td>
     </tr>
   );
 };
@@ -196,6 +198,7 @@ const Table = styled.table`
   width: 100%;
   color: #242526;
   margin-top: 10px;
+  background-color: #fff;
   th {
     border-top: 1px solid #f4f5f7;
     border-bottom: 1px solid #f4f5f7;

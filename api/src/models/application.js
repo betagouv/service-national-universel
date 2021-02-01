@@ -9,6 +9,9 @@ const Schema = new mongoose.Schema({
   youngFirstName: { type: String },
   youngLastName: { type: String },
   youngEmail: { type: String },
+  youngBirthdateAt: { type: String },
+  youngCity: { type: String },
+  youngDepartment: { type: String },
 
   missionId: { type: String },
   missionName: { type: String },
@@ -23,7 +26,7 @@ const Schema = new mongoose.Schema({
   // CANDIDATURE_CREEE : WAITING_VALIDATION
   // CANDIDATURE_REFUSEE : REFUSED
   // CANDIDATURE_VALIDEE : VALIDATED
-  // CANDIDATURE_ANNULEE : CANCELED
+  // CANDIDATURE_ANNULEE : CANCEL
   // CANDIDATURE_PRESELECTIONNEE : PRESELECTED
   // CANDIDATURE_CONTRAT_SIGNE : SIGNED_CONTRACT
 
@@ -33,7 +36,7 @@ const Schema = new mongoose.Schema({
       "WAITING_VALIDATION",
       "VALIDATED",
       "REFUSED",
-      "CANCELED",
+      "CANCEL",
       "ARCHIVED",
       "IN_PROGRESS",
       "DONE",
