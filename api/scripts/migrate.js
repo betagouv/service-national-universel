@@ -1,4 +1,4 @@
-require("dotenv").config({ path: "./../.env-staging" });
+require("dotenv").config({ path: "./../.env-prod" });
 const esclient = require("../src/es");
 
 const Sequelize = require("sequelize");
@@ -32,27 +32,27 @@ const migrate = async (model, migration) => {
 };
 
 sequelize.authenticate().then(async (e) => {
-  // try {
-  //   await esclient.indices.delete({ index: "structure" });
-  // } catch (error) {
-  //   console.log("ERROR ES", error);
-  // }
-  // await Structure.deleteMany({});
-  // await migrate("Structure", migrateStructure);
-  // await migrate("Network", migrateNetwork);
+  try {
+    await esclient.indices.delete({ index: "structure" });
+  } catch (error) {
+    console.log("ERROR ES", error);
+  }
+  await Structure.deleteMany({});
+  await migrate("Structure", migrateStructure);
+  await migrate("Network", migrateNetwork);
 
-  // // await esclient.indices.delete({ index: "referent" });
-  // await Referent.deleteMany({ sqlId: { $ne: null } });
-  // await migrate("Referent", migrateReferent);
-  // await migrate("Referent / Members", migrateStructureMembers);
+  // await esclient.indices.delete({ index: "referent" });
+  await Referent.deleteMany({ sqlId: { $ne: null } });
+  await migrate("Referent", migrateReferent);
+  await migrate("Referent / Members", migrateStructureMembers);
 
-  // try {
-  //   await esclient.indices.delete({ index: "mission" });
-  // } catch (error) {
-  //   console.log("ERROR ES", error);
-  // }
-  // await Mission.deleteMany({});
-  // await migrate("Mission", migrateMission);
+  try {
+    await esclient.indices.delete({ index: "mission" });
+  } catch (error) {
+    console.log("ERROR ES", error);
+  }
+  await Mission.deleteMany({});
+  await migrate("Mission", migrateMission);
 
   // try {
   //   // Migrate people in the cohesion stay
@@ -310,21 +310,25 @@ async function migrateReferent() {
       type: QueryTypes.SELECT,
     }
   );
-  let a = [];
+  let count = 0;
   console.log(`${profilesSql.length} profiles detected`);
-  profilesSql.forEach(async (u) => {
+  for (let i = 0; i < profilesSql.length; i++) {
+    const u = profilesSql[i];
     try {
       const referent = { ...u };
       if (u.id) {
         referent.sqlId = u.id;
 
-        //start anonymisation
-        const fn = faker.name.firstName();
-        referent.firstName = fn.charAt(0).toUpperCase() + fn.slice(1);
-        const ln = faker.name.lastName();
-        referent.lastName = ln.toUpperCase();
-        referent.email = `${u.id}@mail.com`;
-        //end anonymisation
+        // //start anonymisation
+        // const fn = faker.name.firstName();
+        // referent.firstName = fn.charAt(0).toUpperCase() + fn.slice(1);
+        // const ln = faker.name.lastName();
+        // referent.lastName = ln.toUpperCase();
+        // referent.email = `${u.id}@mail.com`;
+        // //end anonymisation
+
+        referent.firstName = u.first_name;
+        referent.lastName = u.last_name.toUpperCase();
 
         if (u.referent_region) {
           referent.role = "referent_region";
@@ -337,18 +341,14 @@ async function migrateReferent() {
         } else {
           referent.role = "structure_member";
         }
-        a.push(referent);
+        await Referent.create(referent);
+        count++;
+        if (count % 100 === 0) logPrecentage(count, profilesSql.length);
       }
     } catch (error) {
       console.log(error);
     }
-  });
-  try {
-    await Referent.insertMany(a);
-  } catch (error) {
-    console.log("error while inserting referents", error);
   }
-  console.log(`${a.length} added`);
 }
 
 async function migrateStructureMembers() {
@@ -362,7 +362,7 @@ async function migrateStructureMembers() {
 
     try {
       const structure = await Structure.findOne({ sqlId: m.structure_id });
-      if (structure) await Referent.findOneAndUpdate({ sqlId: m.profile_id }, { structureId: structure._id });
+      if (structure) await Referent.findOneAndUpdate({ sqlId: m.profile_id }, { structureId: structure._id }, { useFindAndModify: false });
     } catch (error) {
       console.log("error while linking ref/structure", error);
     }
@@ -409,7 +409,7 @@ async function migrateApplication() {
         if (my.status === "CANDIDATURE_CREEE") return "WAITING_VALIDATION";
         if (my.status === "CANDIDATURE_VALIDEE") return "VALIDATED";
         if (my.status === "CANDIDATURE_REFUSEE") return "REFUSED";
-        if (my.status === "CANDIDATURE_ANNULEE") return "CANCELED";
+        if (my.status === "CANDIDATURE_ANNULEE") return "CANCEL";
         if (my.status === "CANDIDATURE_PRESELECTIONNEE") return "PRESELECTED";
         if (my.status === "CANDIDATURE_CONTRAT_SIGNE") return "SIGNED_CONTRACT";
         if (my.status === "MISSION_EN_COURS") return "IN_PROGRESS";
