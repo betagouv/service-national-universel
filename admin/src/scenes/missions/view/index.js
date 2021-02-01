@@ -97,7 +97,6 @@ export default (props) => {
                         <b>Places restantes</b>
                         <br />
                         <span style={{ color: "#999" }}>
-                          {" "}
                           {mission.placesTotal - mission.placesLeft} / {mission.placesTotal}
                         </span>
                       </td>
@@ -112,7 +111,7 @@ export default (props) => {
                   <SelectStatusMission hit={mission} />
                 </Col>
               </Row>
-              <Row>
+              <Row style={{ marginTop: "0.5rem" }}>
                 <Col md={6}>
                   <Link to={`/mission/${mission._id}/edit`}>
                     <Button className="btn-blue">Modifier</Button>
