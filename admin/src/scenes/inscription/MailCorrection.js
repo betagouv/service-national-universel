@@ -8,6 +8,8 @@ import { toastr } from "react-redux-toastr";
 
 export default ({ value, onChange, onSend }) => {
   const [message, setMessage] = useState();
+  const [sending, setSending] = useState(false);
+
   useEffect(() => {
     setMessage(`Bonjour ${value.firstName} ${value.lastName},
 Votre candidature au SNU a bien été étudiée par l'équipe de votre département.
@@ -23,6 +25,7 @@ Merci de vous reconnecter à votre compte pour apporter les modifications demand
   if (!value) return <div />;
 
   const send = async () => {
+    setSending(true);
     await api.post(`/referent/email/correction/${value._id}`, { message, subject: "Demande de correction" });
     toastr.success("Email envoyé !");
     onSend(message);
@@ -35,7 +38,9 @@ Merci de vous reconnecter à votre compte pour apporter les modifications demand
         <h1>Veuillez éditer le message ci-dessous pour préciser les corrections à apporter avant de l'envoyer</h1>
         <h3>votre message</h3>
         <textarea rows="15" value={message} onChange={(e) => setMessage(e.target.value)} />
-        <button onClick={send}>Envoyer la demande de correction</button>
+        <button disabled={sending} onClick={send}>
+          Envoyer la demande de correction
+        </button>
       </ModalContainer>
     </Modal>
   );
