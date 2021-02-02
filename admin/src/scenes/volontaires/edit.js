@@ -278,10 +278,10 @@ export default (props) => {
                               setButtonLoading(`highSkilledActivityProofFiles${i}`, false);
                               setFile(f);
                             }}
-                          >{`Visualiser le justificatif d'engagement (${i + 1}/${values.highSkilledActivityProoefFiles.length})`}</InfoBtn>
+                          >{`Visualiser le justificatif d'engagement (${i + 1}/${values.highSkilledActivityProofFiles.length})`}</InfoBtn>
                           <DownloadButtonWithMargin
                             source={() => api.get(`/referent/youngFile/${values._id}/highSkilledActivityProofFiles/${e}`)}
-                            title={`Télécharger le justificatif d'engagement (${i + 1}/${values.highSkilledActivityProoefFiles.length})`}
+                            title={`Télécharger le justificatif d'engagement (${i + 1}/${values.highSkilledActivityProofFiles.length})`}
                           />
                         </div>
                       );
