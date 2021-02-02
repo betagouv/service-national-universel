@@ -8,7 +8,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
 import { translate, departmentList, regionList, region2department, REFERENT_ROLES } from "../../utils";
-
 import LoadingButton from "../../components/loadingButton";
 import api from "../../services/api";
 
@@ -22,10 +21,12 @@ export default ({ setOpen, open, label = "Inviter un référent", role = "" }) =
           <ModalHeader toggle={() => setOpen(false)}>{label}</ModalHeader>
           <ModalBody>
             <Formik
+              validateOnChange={false}
+              validateOnBlur={false}
               initialValues={{
                 firstName: "",
                 lastName: "",
-                role,
+                role: "",
                 email: "",
                 region: "",
                 department: "",
@@ -43,48 +44,57 @@ export default ({ setOpen, open, label = "Inviter un référent", role = "" }) =
                 setSubmitting(false);
               }}
             >
-              {({ values, handleChange, handleSubmit, isSubmitting }) => (
+              {({ values, handleChange, handleSubmit, isSubmitting, errors }) => (
                 <React.Fragment>
                   <Row>
                     <Col md={6}>
                       <FormGroup>
                         <div>Prénom</div>
-                        <Field name="firstName" value={values.firstName} onChange={handleChange} />
+                        <Field validate={(v) => !v} name="firstName" value={values.firstName} onChange={handleChange} />
                       </FormGroup>
                     </Col>
                     <Col md={6}>
                       <FormGroup>
                         <div>Nom</div>
-                        <Field name="lastName" value={values.lastName} onChange={handleChange} />
+                        <Field validate={(v) => !v} name="lastName" value={values.lastName} onChange={handleChange} />
                       </FormGroup>
                     </Col>
                     <Col md={6}>
                       <FormGroup>
                         <div>Email</div>
-                        <Field name="email" value={values.email} onChange={handleChange} />
+                        <Field validate={(v) => !v} name="email" value={values.email} onChange={handleChange} />
                       </FormGroup>
                     </Col>
-                    {role === REFERENT_ROLES.REFERENT_DEPARTMENT ? (
-                      <Col md={6}>
-                        <FormGroup>
-                          <div>Département</div>
-                          <ChooseDepartment value={values.department} onChange={handleChange} />
-                        </FormGroup>
-                      </Col>
-                    ) : null}
-                    {role === REFERENT_ROLES.REFERENT_REGION ? (
-                      <Col md={6}>
-                        <FormGroup>
-                          <div>Région</div>
-                          <ChooseRegion value={values.region} onChange={handleChange} />
-                        </FormGroup>
-                      </Col>
-                    ) : null}
+                  </Row>
+                  <Row>
+                    <Col md={6}>
+                      <FormGroup>
+                        <div>Rôle</div>
+                        <ChooseRole validate={(v) => !v} value={values.role} onChange={handleChange} />
+                      </FormGroup>
+                    </Col>
+                    <Col md={6}>
+                      <FormGroup>
+                        {values.role === REFERENT_ROLES.REFERENT_DEPARTMENT ? (
+                          <>
+                            <div>Département</div>
+                            <ChooseDepartment validate={(v) => !v} value={values.department} onChange={handleChange} />
+                          </>
+                        ) : null}
+                        {values.role === REFERENT_ROLES.REFERENT_REGION ? (
+                          <>
+                            <div>Région</div>
+                            <ChooseRegion validate={(v) => !v} value={values.region} onChange={handleChange} />
+                          </>
+                        ) : null}
+                      </FormGroup>
+                    </Col>
                   </Row>
                   <br />
                   <LoadingButton loading={isSubmitting} color="info" onClick={handleSubmit}>
                     Envoyer l'invitation
                   </LoadingButton>
+                  {Object.keys(errors).length ? <h3>Merci de remplir tous les champs avant d'envoyer une invitation.</h3> : null}
                 </React.Fragment>
               )}
             </Formik>
@@ -123,6 +133,7 @@ const ChooseDepartment = ({ value, onChange }) => {
     </Input>
   );
 };
+
 const ChooseRegion = ({ value, onChange }) => {
   const { user } = useSelector((state) => state.Auth);
 
@@ -146,6 +157,21 @@ const ChooseRegion = ({ value, onChange }) => {
   );
 };
 
+const ChooseRole = ({ value, onChange }) => {
+  const { user } = useSelector((state) => state.Auth);
+
+  return (
+    <Input type="select" name="role" value={value} onChange={onChange}>
+      <option value=""></option>
+      <option value={REFERENT_ROLES.REFERENT_DEPARTMENT}>{translate(REFERENT_ROLES.REFERENT_DEPARTMENT)}</option>
+      {user.role === REFERENT_ROLES.ADMIN || user.role === REFERENT_ROLES.REFERENT_REGION ? (
+        <option value={REFERENT_ROLES.REFERENT_REGION}>{translate(REFERENT_ROLES.REFERENT_REGION)}</option>
+      ) : null}{" "}
+      {user.role === REFERENT_ROLES.ADMIN ? <option value={REFERENT_ROLES.ADMIN}>{translate(REFERENT_ROLES.ADMIN)}</option> : null}
+    </Input>
+  );
+};
+
 const Invitation = styled.div`
   input {
     display: block;
@@ -161,5 +187,16 @@ const Invitation = styled.div`
     border: 1px solid #ced4da;
     border-radius: 0.25rem;
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  }
+  h3 {
+    border: 1px solid #fc8181;
+    border-radius: 0.25em;
+    margin-top: 1em;
+    background-color: #fff5f5;
+    color: #c53030;
+    font-weight: 400;
+    font-size: 12px;
+    padding: 1em;
+    text-align: center;
   }
 `;
