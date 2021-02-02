@@ -14,10 +14,12 @@ if (environment === "production") {
 const S3PREFIX = "";
 const SENTRY_URL = "https://415a2c2d9246422fa05cd5e96dd39c23@o348403.ingest.sentry.io/5557988";
 
+const franceConnectUrl = "https://fcp.integ01.dev-franceconnect.fr/api/v1";
+
 function getEnvironment() {
   if (window.location.href.indexOf("localhost") !== -1 || window.location.href.indexOf("127.0.0.1") !== -1) return "development";
   if (window.location.href.indexOf("app-66aba4d6-e5fc-4c74-b252-f55fb0e9d37f.cleverapps.io") !== -1) return "staging";
   return "production";
 }
 
-export { apiURL, S3PREFIX, SENTRY_URL, environment };
+export { apiURL, S3PREFIX, SENTRY_URL, environment, franceConnectUrl };

@@ -94,6 +94,7 @@ const Schema = new mongoose.Schema({
   parent1Department: { type: String },
   parent1Region: { type: String },
   parent1Location: { lat: Number, lon: Number },
+  parent1FromFranceConnect: { type: String, enum: ["true", "false"], default: "false" },
 
   parent2Status: { type: String },
   parent2FirstName: { type: String },
@@ -108,6 +109,7 @@ const Schema = new mongoose.Schema({
   parent2Department: { type: String },
   parent2Region: { type: String },
   parent2Location: { lat: Number, lon: Number },
+  parent2FromFranceConnect: { type: String, enum: ["true", "false"], default: "false" },
 
   // * Situations particulières
   handicap: { type: String, enum: ["true", "false"] },
