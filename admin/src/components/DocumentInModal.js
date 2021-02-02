@@ -1,6 +1,7 @@
 import React from "react";
 import { Modal } from "reactstrap";
-import { Page, Document } from "react-pdf";
+import { Page, Document, pdfjs } from "react-pdf";
+pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
 export default function DocumentInModal({ value, onChange }) {
   if (!value || !value.data || !value.data.data) return <div />;
@@ -12,7 +13,7 @@ export default function DocumentInModal({ value, onChange }) {
   function renderFile() {
     if (value.mimeType === "application/pdf") {
       return (
-        <Document file={imageUrl} onLoadSuccess={() => {}}>
+        <Document file={imageUrl} onLoadSuccess={() => {}} onLoadError={console.error}>
           <Page pageNumber={1} />
         </Document>
       );
