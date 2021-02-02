@@ -7,8 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 
 import { toastr } from "react-redux-toastr";
 
-import { departmentList, regionList, region2department, REFERENT_ROLES, translate } from "../../utils";
-
+import { translate, departmentList, regionList, region2department, REFERENT_ROLES } from "../../utils";
 import LoadingButton from "../../components/loadingButton";
 import api from "../../services/api";
 
@@ -40,7 +39,7 @@ export default ({ setOpen, open, label = "Inviter un référent", role = "" }) =
                   setOpen(false);
                 } catch (e) {
                   console.log(e);
-                  toastr.error("Erreur !", e.code);
+                  toastr.error("Erreur !", translate(e.code));
                 }
                 setSubmitting(false);
               }}

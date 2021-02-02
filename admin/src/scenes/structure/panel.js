@@ -5,6 +5,8 @@ import { Link } from "react-router-dom";
 
 import api from "../../services/api";
 
+import { translate } from "../../utils";
+
 export default ({ onChange, value }) => {
   const [missionsInfo, setMissionsInfo] = useState({ count: "-", placesTotal: "-" });
   useEffect(() => {
@@ -47,7 +49,7 @@ export default ({ onChange, value }) => {
       <Info title="La structure">
         <div className="">{value.description}</div>
         <Details title="Agréments" value={value.associationTypes || "--"} />
-        <Details title="Statut" value={value.statutJuridique || "--"} />
+        <Details title="Statut" value={translate(value.legalStatus) || "--"} />
         <Details title="Région" value={value.region || "--"} />
         <Details title="Dép." value={value.department || "--"} />
         <Details title="Ville" value={value.city || "--"} />
@@ -58,17 +60,19 @@ export default ({ onChange, value }) => {
       <Info title={`Missions (${missionsInfo.count})`}>
         <p style={{ color: "#999" }}>Cette structure a {missionsInfo.count} missions disponibles</p>
         <table>
-          <tr>
-            <td style={{ fontSize: "2.5rem", paddingRight: "10px" }}>{missionsInfo.placesLeft}</td>
-            <td>
-              <b>Places restantes</b>
-              <br />
-              <span style={{ color: "#999" }}>
-                {" "}
-                {missionsInfo.placesTotal - missionsInfo.placesLeft} / {missionsInfo.placesTotal}
-              </span>
-            </td>
-          </tr>
+          <tbody>
+            <tr>
+              <td style={{ fontSize: "2.5rem", paddingRight: "10px" }}>{missionsInfo.placesLeft}</td>
+              <td>
+                <b>Places restantes</b>
+                <br />
+                <span style={{ color: "#999" }}>
+                  {" "}
+                  {missionsInfo.placesTotal - missionsInfo.placesLeft} / {missionsInfo.placesTotal}
+                </span>
+              </td>
+            </tr>
+          </tbody>
         </table>
       </Info>
       <div>

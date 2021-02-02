@@ -7,6 +7,7 @@ import api from "../services/api";
 
 import { translate, YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_COLORS } from "../utils";
 import { toastr } from "react-redux-toastr";
+import matomo from "../services/matomo";
 
 import MailCorrection from "../scenes/inscription/MailCorrection";
 
@@ -49,12 +50,12 @@ export default ({ hit }) => {
         await api.post(`/referent/email/refuse/${young._id}`, { subject: "Inscription refusée" });
       }
 
-      if (!ok) return toastr.error("Une erreur s'est produite :", code);
+      if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       setYoung(newYoung);
       toastr.success("Mis à jour!");
     } catch (e) {
       console.log(e);
-      toastr.error("Oups, une erreur est survenue :", e.code);
+      toastr.error("Oups, une erreur est survenue :", translate(e.code));
     }
   };
 
@@ -108,36 +109,41 @@ const ActionBox = styled.div`
     }
   }
   button {
-    background-color: #feb951;
-    border: 1px solid #feb951;
+    ${({ color }) => `
+      background-color: ${color}15;
+      border: 1px solid ${color};
+      color: ${color};
+    `}
     display: inline-flex;
+    flex: 1;
+    justify-content: space-between;
     align-items: center;
     text-align: left;
-    border-radius: 4px;
+    border-radius: 0.5rem;
     padding: 0 0 0 12px;
     font-size: 12px;
-    min-width: 130px;
     font-weight: 700;
-    color: #fff;
     cursor: pointer;
     outline: 0;
+    width: 100%;
+    max-width: 250px;
     .edit-icon {
       height: 17px;
       margin-right: 10px;
       path {
-        fill: #fff;
+        fill: ${({ color }) => `${color}`};
       }
     }
     .down-icon {
       margin-left: auto;
       padding: 7px 15px;
-      border-left: 2px solid #fbd392;
+      /* border-left: 1px solid ${({ color }) => `${color}`}; */
       margin-left: 15px;
       svg {
         height: 10px;
       }
       svg polygon {
-        fill: #fff;
+        fill: ${({ color }) => `${color}`};
       }
     }
   }
@@ -153,23 +159,4 @@ const ActionBox = styled.div`
       background-color: #f3f3f3;
     }
   }
-
-  ${({ color }) => `
-    button {
-      background-color: ${color}15;
-      border: 1px solid ${color};
-      color: ${color};
-      .edit-icon {
-        path {
-          fill: ${color};
-        }
-      }
-      .down-icon {
-        border-left: 1px solid ${color};
-        svg polygon {
-          fill: ${color};
-        }
-      }
-    }  
-  `}
 `;

@@ -9,18 +9,18 @@ import { formatDay, translate, formatStringDate } from "../../utils";
 import api from "../../services/api";
 import SelectStatusMission from "../../components/selectStatusMission";
 
-export default ({ onChange, mission }) => {
+export default ({ onClose, mission }) => {
   const [tutor, setTutor] = useState();
-  const [structure, setStructure] = useState();
+  const [structure, setStructure] = useState({});
 
   useEffect(() => {
     (async () => {
       if (!mission) return;
       const { ok: ok1, data: dataTutor, code: code1 } = await api.get(`/referent/${mission.tutorId}`);
       const { ok: ok2, data: dataStructure, code: code2 } = await api.get(`/structure/${mission.structureId}`);
-      if (!ok1) toastr.error("Oups, une erreur est survnue lors de la récuperation du tuteur", code1);
+      if (!ok1) toastr.error("Oups, une erreur est survnue lors de la récuperation du tuteur", translate(code1));
       else setTutor(dataTutor);
-      if (!ok2) toastr.error("Oups, une erreur est survnue lors de la récuperation de la structure", code2);
+      if (!ok2) toastr.error("Oups, une erreur est survnue lors de la récuperation de la structure", translate(code2));
       else setStructure(dataStructure);
       return;
     })();
@@ -31,7 +31,7 @@ export default ({ onChange, mission }) => {
     <Panel>
       <div style={{ display: "flex" }}>
         <Subtitle>MISSION</Subtitle>
-        <div className="close" onClick={onChange} />
+        <div className="close" onClick={onClose} />
       </div>
       <div className="name">{mission.structureName}</div>
       <div className="title">{mission.name}</div>
@@ -59,15 +59,22 @@ export default ({ onChange, mission }) => {
         <button>Consulter tous les volontaires</button>
       </Link> */}
       <hr />
-      <div className="title">La structure</div>
+      <div className="title">
+        La structure
+        <Link to={`/structure/${structure._id}`}>
+          <SubtitleLink>{`${structure.name} >`}</SubtitleLink>
+        </Link>
+      </div>
+
       <div className="detail">
         <div className="detail-title">Statut</div>
-        <div className="detail-text">{structure && translate(structure.status)}</div>
+        <div className="detail-text">{translate(structure.status)}</div>
       </div>
       <div className="detail">
         <div className="detail-title">Dép.</div>
-        <div className="detail-text">{structure && structure.department}</div>
+        <div className="detail-text">{structure.department}</div>
       </div>
+
       <div className="detail">
         <div className="detail-title">Tuteur</div>
         <div className="detail-text">{tutor ? `${tutor.firstName} ${tutor.lastName}` : ""}</div>
@@ -144,7 +151,7 @@ const Status = ({ mission }) => {
             await api.put(`/mission/${mission._id}`, values);
             toastr.success("Success");
           } catch (e) {
-            toastr.error("Error");
+            toastr.error("Erreur !");
           }
         }}
       >
@@ -174,6 +181,10 @@ const Subtitle = styled.div`
   font-weight: 400;
   text-transform: uppercase;
   font-size: 0.9rem;
+`;
+
+const SubtitleLink = styled(Subtitle)`
+  color: #5245cc;
 `;
 
 const Tag = styled.span`

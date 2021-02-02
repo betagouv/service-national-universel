@@ -4,16 +4,16 @@ const passport = require("passport");
 
 const { capture } = require("../sentry");
 
-const MissionObject = require("../models/mission");
+const ApplicationObject = require("../models/application");
 
 const SERVER_ERROR = "SERVER_ERROR";
-const NOT_FOUND = "PASSWORD_TOKEN_EXPIRED_OR_INVALID";
+const NOT_FOUND = "NOT_FOUND";
 
 router.post("/", async (req, res) => {
   try {
     const obj = {};
     // if (req.body.hasOwnProperty(`jobboard_indeed_status`)) obj.jobboard_indeed_status = req.body.jobboard_indeed_status;
-    const data = await MissionObject.create(req.body);
+    const data = await ApplicationObject.create(req.body);
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
@@ -23,8 +23,8 @@ router.post("/", async (req, res) => {
 
 router.put("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const mission = await MissionObject.findByIdAndUpdate(req.body._id, req.body, { new: true });
-    res.status(200).send({ ok: true, data: mission });
+    const application = await ApplicationObject.findByIdAndUpdate(req.body._id, req.body, { new: true });
+    res.status(200).send({ ok: true, data: application });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: SERVER_ERROR, error });
@@ -33,7 +33,7 @@ router.put("/", passport.authenticate("referent", { session: false }), async (re
 
 router.get("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const data = await MissionObject.findOne({ _id: req.params.id });
+    const data = await ApplicationObject.findOne({ _id: req.params.id });
     if (!data) return res.status(404).send({ ok: false, code: NOT_FOUND });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
@@ -42,9 +42,9 @@ router.get("/:id", passport.authenticate("referent", { session: false }), async 
   }
 });
 
-router.get("/structure/:structureId", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.get("/young/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const data = await MissionObject.find({ structureId: req.params.structureId });
+    const data = await ApplicationObject.findOne({ youngId: req.params.id });
     if (!data) return res.status(404).send({ ok: false, code: NOT_FOUND });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
@@ -53,15 +53,16 @@ router.get("/structure/:structureId", passport.authenticate("referent", { sessio
   }
 });
 
-// router.get("/", async (req, res) => {
-//   try {
-//     const data = ""; //await MissionObject.find(req.query);
-//     return res.status(200).send({ ok: true, data });
-//   } catch (error) {
-//     capture(error);
-//     res.status(500).send({ ok: false, code: SERVER_ERROR, error });
-//   }
-// });
+router.get("/mission/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
+  try {
+    const data = await ApplicationObject.find({ missionId: req.params.id });
+    if (!data) return res.status(404).send({ ok: false, code: NOT_FOUND });
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: SERVER_ERROR, error });
+  }
+});
 
 //@check
 router.delete("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {

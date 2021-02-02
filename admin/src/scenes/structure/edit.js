@@ -28,7 +28,7 @@ export default (props) => {
 
   const handleSave = async (values) => {
     const { ok, code } = await api.put("/structure", values);
-    if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de votre progression", code);
+    if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de votre progression", translate(code));
     if (ok) toastr.success("Progression enregistrée");
   };
 
@@ -107,8 +107,8 @@ export default (props) => {
                     <label>
                       <span>*</span>STATUT JURIDIQUE
                     </label>
-                    <Field validate={(v) => !v && requiredMessage} component="select" name="statutJuridique" value={values.statutJuridique} onChange={handleChange}></Field>
-                    <ErrorMessage errors={errors} touched={touched} name="statutJuridique" />
+                    <Field validate={(v) => !v && requiredMessage} component="select" name="legalStatus" value={values.legalStatus} onChange={handleChange}></Field>
+                    <ErrorMessage errors={errors} touched={touched} name="legalStatus" />
                   </FormGroup>
                   <FormGroup>
                     <label>DISPOSEZ-VOUS D'UN AGRÉMENT ?</label>

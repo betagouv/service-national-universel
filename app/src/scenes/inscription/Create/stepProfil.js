@@ -7,7 +7,7 @@ import { useHistory } from "react-router-dom";
 import validator from "validator";
 import { toastr } from "react-redux-toastr";
 import DateInput from "../components/dateInput";
-import { getPasswordErrorMessage } from "../../../utils";
+import { getPasswordErrorMessage, translate } from "../../../utils";
 
 import ErrorMessage, { requiredMessage } from "../components/errorMessage";
 
@@ -40,7 +40,7 @@ export default () => {
         onSubmit={async (values) => {
           try {
             const { user, token, code, ok } = await api.post(`/young/signup`, values);
-            if (!ok) return toastr.error("Une erreur s'est produite :", code);
+            if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             if (token) api.setToken(token);
 
             const newValues = { ...values, ...user };
@@ -62,7 +62,7 @@ export default () => {
           } catch (e) {
             console.log(e);
             if (e.code === "USER_ALREADY_REGISTERED") return toastr.error("Cet email est déjà utilisé.", "Merci de vous connecter pour continuer votre inscription.");
-            return toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", e.code);
+            return toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code));
           }
         }}
       >

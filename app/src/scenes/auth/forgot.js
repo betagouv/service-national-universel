@@ -9,6 +9,7 @@ import { Link, Redirect } from "react-router-dom";
 
 import LoadingButton from "../../components/loadingButton";
 import api from "../../services/api";
+import { translate } from "../../utils";
 
 export default () => {
   const [done, setDone] = useState(false);
@@ -50,11 +51,11 @@ export default () => {
               onSubmit={async (values, actions) => {
                 try {
                   await api.post("/young/forgot_password", values);
-                  toastr.success("Sent");
+                  toastr.success("E-mail envoyé !");
                   setMail(values.email);
                   setDone(true);
                 } catch (e) {
-                  toastr.error("Error", e.code);
+                  toastr.error("Erreur !", translate(e.code));
                 }
                 actions.setSubmitting(false);
               }}

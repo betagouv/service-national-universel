@@ -1,4 +1,4 @@
-require("dotenv").config({ path: "./../.env-staging" });
+require("dotenv").config({ path: "./../.env-prod" });
 const esclient = require("../src/es");
 
 const Sequelize = require("sequelize");
@@ -17,10 +17,13 @@ const Young = require("../src/models/young");
 const Referent = require("../src/models/referent");
 const Application = require("../src/models/application");
 
+const logPrecentage = (value, total) => {
+  console.log(`${parseInt((value * 100) / total)} %`);
+};
+
 const migrate = async (model, migration) => {
   console.log(`>>> START ${model}`);
   try {
-    console.log(`${model} deleted`);
     console.log(`MIGRATION ${model} START`);
     await migration();
   } catch (error) {
@@ -29,17 +32,27 @@ const migrate = async (model, migration) => {
 };
 
 sequelize.authenticate().then(async (e) => {
-  // await esclient.indices.delete({ index: "structure" });
-  // await Structure.deleteMany({});
-  // await migrate("Structure", migrateStructure);
+  try {
+    await esclient.indices.delete({ index: "structure" });
+  } catch (error) {
+    console.log("ERROR ES", error);
+  }
+  await Structure.deleteMany({});
+  await migrate("Structure", migrateStructure);
+  await migrate("Network", migrateNetwork);
 
   // await esclient.indices.delete({ index: "referent" });
-  // await Referent.deleteMany({ sqlId: { $ne: null } });
-  // await migrate("Referent", migrateReferent);
+  await Referent.deleteMany({ sqlId: { $ne: null } });
+  await migrate("Referent", migrateReferent);
+  await migrate("Referent / Members", migrateStructureMembers);
 
-  // await esclient.indices.delete({ index: "mission" });
-  // await Mission.deleteMany({});
-  // await migrate("Mission", migrateMission);
+  try {
+    await esclient.indices.delete({ index: "mission" });
+  } catch (error) {
+    console.log("ERROR ES", error);
+  }
+  await Mission.deleteMany({});
+  await migrate("Mission", migrateMission);
 
   // try {
   //   // Migrate people in the cohesion stay
@@ -75,13 +88,15 @@ async function migrateStructure() {
       // @todo quid deleted structures ? (structure.deleted_at !== null)
       const structure = { ...s };
       structure.sqlId = s.id;
-      structure.is_reseau = !!structure.is_reseau;
+      structure.isNetwork = structure.is_reseau ? "true" : "false";
+      structure.sqlNetworkId = s.reseau_id;
+      structure.sqlUserId = s.user_id;
       if (s.longitude && s.latitude) structure.location = { lon: parseFloat(s.longitude), lat: parseFloat(s.latitude) };
 
-      structure.statutJuridique = (() => {
-        if (s.status_juridique === "Structure publique") return "PUBLIC";
-        if (s.status_juridique === "Structure privée") return "PRIVATE";
-        if (s.status_juridique === "Association") return "ASSOCIATION";
+      structure.legalStatus = (() => {
+        if (s.statut_juridique === "Structure publique") return "PUBLIC";
+        if (s.statut_juridique === "Structure privée") return "PRIVATE";
+        if (s.statut_juridique === "Association") return "ASSOCIATION";
         return "OTHER";
       })();
 
@@ -91,7 +106,7 @@ async function migrateStructure() {
       structure.structurePriveeType = s.structure_privee_type;
 
       structure.department = departmentList[s.department];
-      structure.region = regionList[department2region[s.department]];
+      structure.region = department2region[structure.department];
 
       structure.status = (() => {
         if (s.state === "En attente de validation") return "WAITING_VALIDATION";
@@ -111,9 +126,28 @@ async function migrateStructure() {
   console.log(`${a.length} added`);
 }
 
+async function migrateNetwork() {
+  const structuresSQL = await sequelize.query("SELECT * FROM `structures` where reseau_id is not null", { type: QueryTypes.SELECT });
+  let count = 0;
+  console.log(`${structuresSQL.length} structures network detected`);
+  for (let i = 0; i < structuresSQL.length; i++) {
+    const s = structuresSQL[i];
+
+    try {
+      const structure = await Structure.findOne({ sqlId: s.sqlNetworkId });
+      if (structure) await Structure.findByIdAndUpdate(s._id, { networkId: structure._id });
+    } catch (error) {
+      console.log("error while linking structure", error);
+    }
+    count++;
+    if (count % 100 === 0) logPrecentage(count, structuresSQL.length);
+  }
+}
+
 async function migrateMission() {
   const missionsSQL = await sequelize.query("SELECT * FROM `missions`", { type: QueryTypes.SELECT });
   let a = [];
+  let count = 0;
   console.log(`${missionsSQL.length} missions detected`);
 
   for (let i = 0; i < missionsSQL.length; i++) {
@@ -122,12 +156,13 @@ async function migrateMission() {
       const mission = { ...m };
       mission.sqlId = m.id;
 
-      // todo get structure info
       mission.sqlStructureId = m.structure_id;
       const structure = await Structure.findOne({ sqlId: m.structure_id });
-      if (mission) mission.structureId = structure._id;
+      if (structure) {
+        mission.structureId = structure._id;
+        mission.structureName = structure.name;
+      }
 
-      // todo get tutor info
       mission.sqlTutorId = m.tuteur_id;
       const tutor = await Referent.findOne({ sqlId: m.tuteur_id });
       if (tutor) mission.tutorId = tutor._id;
@@ -151,7 +186,7 @@ async function migrateMission() {
       } else if (m.format === "Autonome") {
         mission.format = "AUTONOMOUS";
       } else {
-        console.log("ERRR", m.format);
+        console.log("ERROR FORMAT", m.format);
       }
       mission.status = (() => {
         if (m.state === "Brouillon") return "DRAFT";
@@ -168,7 +203,8 @@ async function migrateMission() {
       mission.region = department2region[mission.department];
       mission.endAt = m.end_date;
       mission.startAt = m.start_date;
-
+      count++;
+      if (count % 100 === 0) logPrecentage(count, missionsSQL.length);
       a.push(mission);
     } catch (error) {
       console.log(error);
@@ -267,48 +303,79 @@ async function migrateYoung() {
 }
 
 async function migrateReferent() {
-  const profilesSql = await sequelize.query("SELECT * FROM `profiles`", { type: QueryTypes.SELECT });
-  let a = [];
+  const profilesSql = await sequelize.query(
+    //take everyone except the youngs
+    "SELECT profiles.*, users.context_role FROM `profiles` LEFT JOIN `users` on profiles.user_id = users.id WHERE users.context_role <> 'volontaire' OR users.context_role is null",
+    {
+      type: QueryTypes.SELECT,
+    }
+  );
+  let count = 0;
   console.log(`${profilesSql.length} profiles detected`);
-  profilesSql.forEach(async (u) => {
+  for (let i = 0; i < profilesSql.length; i++) {
+    const u = profilesSql[i];
     try {
-      if (!u.referent_department && !u.referent_region) return;
       const referent = { ...u };
-      referent.sqlId = u.id;
+      if (u.id) {
+        referent.sqlId = u.id;
 
-      //start anonymisation
-      const fn = faker.name.firstName();
-      referent.firstName = fn.charAt(0).toUpperCase() + fn.slice(1);
-      const ln = faker.name.lastName();
-      referent.lastName = ln.toUpperCase();
-      referent.email = `${referent.firstName}.${referent.lastName}@mail.com`;
-      //end anonymisation
+        // //start anonymisation
+        // const fn = faker.name.firstName();
+        // referent.firstName = fn.charAt(0).toUpperCase() + fn.slice(1);
+        // const ln = faker.name.lastName();
+        // referent.lastName = ln.toUpperCase();
+        // referent.email = `${u.id}@mail.com`;
+        // //end anonymisation
 
-      if (u.referent_region) {
-        referent.role = "referent_region";
-        referent.region = regionList[u.referent_region];
-      } else if (u.referent_department) {
-        referent.role = "referent_department";
-        referent.department = departmentList[u.referent_department];
+        referent.firstName = u.first_name;
+        referent.lastName = u.last_name.toUpperCase();
+
+        if (u.referent_region) {
+          referent.role = "referent_region";
+          referent.region = regionList[u.referent_region];
+        } else if (u.referent_department) {
+          referent.role = "referent_department";
+          referent.department = departmentList[u.referent_department];
+        } else if (u.context_role === "superviseur") {
+          referent.role = "structure_responsible";
+        } else {
+          referent.role = "structure_member";
+        }
+        await Referent.create(referent);
+        count++;
+        if (count % 100 === 0) logPrecentage(count, profilesSql.length);
       }
-      a.push(referent);
     } catch (error) {
       console.log(error);
     }
-  });
-  try {
-    await Referent.insertMany(a);
-  } catch (error) {
-    console.log("error while inserting referents");
   }
-  console.log(`${a.length} added`);
+}
+
+async function migrateStructureMembers() {
+  const members = await sequelize.query("SELECT * FROM `members`", {
+    type: QueryTypes.SELECT,
+  });
+  console.log(`${members.length} members detected`);
+  let count = 0;
+  for (let i = 0; i < members.length; i++) {
+    const m = members[i];
+
+    try {
+      const structure = await Structure.findOne({ sqlId: m.structure_id });
+      if (structure) await Referent.findOneAndUpdate({ sqlId: m.profile_id }, { structureId: structure._id }, { useFindAndModify: false });
+    } catch (error) {
+      console.log("error while linking ref/structure", error);
+    }
+    count++;
+    if (count % 100 === 0) logPrecentage(count, members.length);
+  }
 }
 
 async function migrateApplication() {
   const missionYoungSQL = await sequelize.query("SELECT * FROM `mission_young`", { type: QueryTypes.SELECT });
   let a = [];
   console.log(`${missionYoungSQL.length} mission_youngs detected`);
-
+  let count = 0;
   // good old for(;;) because of the inner promises in the loop.
   for (let i = 0; i < missionYoungSQL.length; i++) {
     const my = missionYoungSQL[i];
@@ -330,7 +397,10 @@ async function migrateApplication() {
         app.youngId = young._id;
         app.youngFirstName = young.firstName;
         app.youngLastName = young.lastName;
+        app.youngBirthdateAt = young.birthdateAt;
         app.youngEmail = young.email;
+        app.youngCity = young.city;
+        app.youngDepartment = young.department;
       } else {
         app.youngId = "N/A";
       }
@@ -339,7 +409,7 @@ async function migrateApplication() {
         if (my.status === "CANDIDATURE_CREEE") return "WAITING_VALIDATION";
         if (my.status === "CANDIDATURE_VALIDEE") return "VALIDATED";
         if (my.status === "CANDIDATURE_REFUSEE") return "REFUSED";
-        if (my.status === "CANDIDATURE_ANNULEE") return "CANCELED";
+        if (my.status === "CANDIDATURE_ANNULEE") return "CANCEL";
         if (my.status === "CANDIDATURE_PRESELECTIONNEE") return "PRESELECTED";
         if (my.status === "CANDIDATURE_CONTRAT_SIGNE") return "SIGNED_CONTRACT";
         if (my.status === "MISSION_EN_COURS") return "IN_PROGRESS";
@@ -349,6 +419,8 @@ async function migrateApplication() {
 
       app.createdAt = my.created_at;
       app.updatedAt = my.updated_at;
+      count++;
+      if (count % 100 === 0) logPrecentage(count, missionYoungSQL.length);
       a.push(app);
     } catch (error) {
       console.log(error);

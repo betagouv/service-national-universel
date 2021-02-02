@@ -8,6 +8,7 @@ import styled from "styled-components";
 import LoadingButton from "../../components/loadingButton";
 import api from "../../services/api";
 import { Link } from "react-router-dom";
+import { translate } from "../../utils";
 
 export default () => {
   const [done, setDone] = useState(false);
@@ -38,7 +39,7 @@ export default () => {
                   await api.post("/referent/forgot_password", values);
                   setDone(true);
                 } catch (e) {
-                  toastr.error("Error", e.code);
+                  toastr.error("Erreur !", translate(e.code));
                 }
                 actions.setSubmitting(false);
               }}

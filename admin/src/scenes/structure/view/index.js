@@ -8,8 +8,11 @@ import { Formik, Field } from "formik";
 import SelectStatusMission from "../../../components/selectStatusMission";
 import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
+import Panel from "../../missions/panel";
 
 import Details from "./details";
+import { translate } from "../../../utils";
+import Missions from "./missions";
 
 const TABS = { DETAILS: "DETAILS", MISSIONS: "MISSIONS", HISTORIC: "HISTORIC" };
 
@@ -18,13 +21,14 @@ export default (props) => {
   const user = useSelector((state) => state.Auth.user);
   const [tab, setTab] = useState("DETAILS");
   const history = useHistory();
+  const [mission, setMission] = useState();
 
   const renderTab = () => {
     switch (tab) {
       case TABS.DETAILS:
         return <Details structure={structure} />;
       case TABS.MISSIONS:
-        console.log("VOL");
+        return <Missions structure={structure} setMission={setMission} />;
         return <div />;
       case TABS.HISTORIC:
         console.log("HIST");
@@ -48,90 +52,57 @@ export default (props) => {
     try {
       const { ok, code } = await api.remove(`/structure/${structure._id}`);
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
-      if (!ok) return toastr.error("Une erreur s'est produite :", code);
+      if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       toastr.success("Cette structure a été supprimée.");
       return history.push(`/structure`);
     } catch (e) {
       console.log(e);
-      return toastr.error("Oups, une erreur est survenue pendant la supression de la structure :", e.code);
+      return toastr.error("Oups, une erreur est survenue pendant la supression de la structure :", translate(e.code));
     }
   };
 
   if (!structure) return <div />;
   return (
-    <Wrapper>
-      <Header>
-        <div style={{ flex: 1 }}>
-          <Title>{structure.name}</Title>
+    <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
+      <div style={{ flex: 2, position: "relative", padding: "3rem" }}>
+        <Header>
+          <div style={{ flex: 1 }}>
+            <Title>{structure.name}</Title>
 
-          <TabNavigationList>
-            <TabItem isActive={tab === TABS.DETAILS} onClick={() => setTab(TABS.DETAILS)}>
-              Détails
-            </TabItem>
-            <TabItem isActive={tab === TABS.MISSIONS} onClick={() => setTab(TABS.MISSIONS)}>
-              Missions
-            </TabItem>
-            <TabItem isActive={tab === TABS.HISTORIC} onClick={() => setTab(TABS.HISTORIC)}>
-              Historique
-            </TabItem>
-          </TabNavigationList>
-        </div>
-        <Row style={{ minWidth: "20%" }}>
-          <Col md={6}>
-            <Link to={`/structure/${structure._id}/edit`}>
-              <Button className="btn-blue">Modifier</Button>
-            </Link>
-          </Col>
-          <Col md={6}>
-            <Button onClick={handleDelete} className="btn-red">
-              Supprimer
-            </Button>
-          </Col>
-        </Row>
-      </Header>
-      {renderTab()}
-    </Wrapper>
-    // <Sidebar onClick={() => {}} id="drawer">
-    //   <Logo>
-    //     <Link to="/">
-    //       <img src={require("../../assets/logo-snu.png")} height={38} />
-    //       {getName()}
-    //     </Link>
-    //   </Logo>
-    //   <ul>
-    //     <li>
-    //       <NavLink to="/dashboard">Tableau de bord</NavLink>
-    //     </li>
-    //     {/* <li>
-    //       <NavLink to="/structure">Structures</NavLink>
-    //     </li>*/}
-    //     <li>
-    //       <NavLink to="/mission">Missions</NavLink>
-    //     </li>
-    //     {user.role === "admin" && (
-    //       <li>
-    //         <NavLink to="/user">Utilisateurs</NavLink>
-    //       </li>
-    //     )}
-    //     {/*   <li>
-    //       <NavLink to="/tuteur">Tuteurs</NavLink>
-    //     </li> */}
-    //     <li>
-    //       <NavLink to="/volontaire">Volontaires</NavLink>
-    //     </li>
-    //     <li>
-    //       <NavLink to="/inscription">Inscriptions</NavLink>
-    //     </li>
-    //   </ul>
-    //   {/* <Version>
-    //     <a href="#" className="info help">
-    //       Centre d’aide
-    //     </a>
-    //     <a href="#" className="info new">
-    //       Nouveautés
-    //     </a>
-    //   </Version> */}
-    // </Sidebar>
+            <TabNavigationList>
+              <TabItem isActive={tab === TABS.DETAILS} onClick={() => setTab(TABS.DETAILS)}>
+                Détails
+              </TabItem>
+              <TabItem isActive={tab === TABS.MISSIONS} onClick={() => setTab(TABS.MISSIONS)}>
+                Missions
+              </TabItem>
+              <TabItem isActive={tab === TABS.HISTORIC} onClick={() => setTab(TABS.HISTORIC)}>
+                Historique
+              </TabItem>
+            </TabNavigationList>
+          </div>
+          <Row style={{ minWidth: "20%" }}>
+            <Col md={6}>
+              <Link to={`/structure/${structure._id}/edit`}>
+                <Button className="btn-blue">Modifier</Button>
+              </Link>
+            </Col>
+            <Col md={6}>
+              <Button onClick={handleDelete} className="btn-red">
+                Supprimer
+              </Button>
+            </Col>
+          </Row>
+        </Header>
+        {renderTab()}
+      </div>
+      <Panel
+        mission={mission}
+        onClose={() => {
+          setMission(null);
+        }}
+      />
+    </div>
   );
 };
 

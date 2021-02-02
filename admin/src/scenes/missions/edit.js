@@ -16,8 +16,9 @@ import api from "../../services/api";
 export default (props) => {
   const [defaultValue, setDefaultValue] = useState();
   const [redirect, setRedirect] = useState(false);
+  const [structure, setStructure] = useState();
 
-  const structure = useSelector((state) => state.Auth.structure) || {}; // empty object if no stucture
+  const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
     (async () => {
@@ -26,15 +27,20 @@ export default (props) => {
       const { data } = await api.get(`/mission/${id}`);
       setDefaultValue(data);
     })();
+    (async () => {
+      if (!user.structureId) return setStructure({});
+      const { data } = await api.get(`/structure/${user.structureId}`);
+      setStructure(data);
+    })();
   }, []);
 
   const handleSave = async (values) => {
     const { ok, code, data: mission } = await api.put("/mission", values);
-    if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de votre progression", code);
+    if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de votre progression", translate(code));
     if (ok) toastr.success("Progression enregistrée");
   };
 
-  if (defaultValue === undefined) return <div>Chargement...</div>;
+  if (defaultValue === undefined || structure === undefined) return <div>Chargement...</div>;
   if (redirect) return <Redirect to="/mission" />;
 
   return (

@@ -63,7 +63,7 @@ export default () => {
                     placeholder="Ville ou code postal"
                     componentId="LOCATION"
                     dataField={["city", "zip"]}
-                    react={{ and: FILTERS }}
+                    react={{ and: FILTERS.filter((e) => e !== "LOCATION") }}
                     fuzziness={1}
                     style={{ flex: 2 }}
                     innerClass={{ input: "searchbox" }}
@@ -117,6 +117,7 @@ export default () => {
                     placeholder="Domaine"
                     componentId="DOMAIN"
                     dataField="domains.keyword"
+                    react={{ and: FILTERS.filter((e) => e !== "DOMAIN") }}
                     title=""
                     URLParams={true}
                     showSearch={false}
@@ -129,6 +130,7 @@ export default () => {
                       placeholder="Places restantes"
                       componentId="PLACES"
                       dataField="placesLeft"
+                      react={{ and: FILTERS.filter((e) => e !== "PLACES") }}
                       title=""
                       URLParams={true}
                       showSearch={false}
