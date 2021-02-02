@@ -133,7 +133,7 @@ export const translate = (value) => {
     case "SERVER_ERROR":
       return "Erreur serveur";
     case "NOT_FOUND":
-      return "Existe pas";
+      return "Ressource introuvable";
     case "PASSWORD_TOKEN_EXPIRED_OR_INVALID":
       return "Lien expiré ou token invalide";
     case "USER_ALREADY_REGISTERED":
