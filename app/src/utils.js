@@ -143,7 +143,8 @@ export const translate = (value) => {
     case "INVITATION_TOKEN_EXPIRED_OR_INVALID":
       return "Invitation invalide";
     case "USER_NOT_FOUND":
-      return "Utilisateur n'existe pas";
+    case "USER_NOT_EXISTS":
+      return "L'utilisateur n'existe pas";
     case "OPERATION_UNAUTHORIZED":
       return "Opération non autorisée";
     case "FILE_CORRUPTED":
