@@ -14,6 +14,7 @@ import MobilityCard from "./mobilityCard";
 import TransportCard from "./transportCard";
 import { MISSION_DOMAINS, PERIOD, PROFESSIONNAL_PROJECT, PROFESSIONNAL_PROJECT_PRECISION } from "./utils";
 import ErrorMessage, { requiredMessage } from "./errorMessage";
+import { translate } from "../../utils";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
@@ -39,9 +40,11 @@ export default () => {
           try {
             console.log(values);
             const { ok, code, data: young } = await api.put("/young", values);
-            if (!ok) return toastr.error("Une erreur s'est produite", code);
-            dispatch(setYoung(young));
-            toastr.success("Mis à jour !");
+            if (!ok) return toastr.error("Une erreur s'est produite", translate(code));
+            if (young) {
+              dispatch(setYoung(young));
+            }
+            return toastr.success("Mis à jour !");
           } catch (e) {
             console.log(e);
             toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", e.code);

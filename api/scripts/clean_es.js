@@ -9,12 +9,12 @@ const esClient = require("../src/es");
 
 (async function fetch() {
   console.log("START");
-  // await run("young", async (hit) => {
-  //   const obj = await YoungModel.findById(hit._id);
-  //   if (obj) return;
-  //   console.log("DELETE", hit.email);
-  //   await esClient.delete({ index: "young", type: "_doc", refresh: true, id: hit._id });
-  // });
+  await run("young", async (hit) => {
+    const obj = await YoungModel.findById(hit._id);
+    if (obj) return;
+    console.log("DELETE", hit.email);
+    await esClient.delete({ index: "young", type: "_doc", refresh: true, id: hit._id });
+  });
 
   await run("referent", async (hit) => {
     const obj = await ReferentModel.findById(hit._id);

@@ -5,17 +5,25 @@ import { Field, Formik } from "formik";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/fr";
+import { useSelector } from "react-redux";
 
 import LoadingButton from "../../components/loadingButton";
+import DownloadButton from "../../components/DownloadButton";
 import Historic from "../../components/historic";
+import DocumentInModal from "../../components/DocumentInModal";
 
 import DateInput from "../../components/dateInput";
-import { openDocumentInNewtab, departmentList, regionList, YOUNG_STATUS, translate } from "../../utils";
+import { departmentList, regionList, YOUNG_STATUS, translate } from "../../utils";
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
+import { useHistory } from "react-router-dom";
 
 export default (props) => {
   const [young, setYoung] = useState();
+  const [file, setFile] = useState(null);
+  const user = useSelector((state) => state.Auth.user);
+  const history = useHistory();
+  const [buttonsLoading, setButtonsLoading] = useState({});
 
   useEffect(() => {
     (async () => {
@@ -28,6 +36,10 @@ export default (props) => {
 
   if (young === undefined) return <div>Chargement...</div>;
 
+  const setButtonLoading = (btn, v) => {
+    setButtonsLoading({ ...buttonsLoading, [btn]: v });
+  };
+
   const getSubtitle = () => {
     const createdAt = new Date(young.createdAt);
 
@@ -39,16 +51,17 @@ export default (props) => {
   return (
     //@todo fix the depart and region
     <Wrapper>
+      {file && <DocumentInModal value={file} onChange={() => setFile(null)} />}
       <Formik
         initialValues={young}
         onSubmit={async (values) => {
           try {
             const { ok, code, data: young } = await api.put(`/referent/young/${values._id}`, values);
-            if (!ok) toastr.error("Une erreur s'est produite :", code);
+            if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
             toastr.success("Mis à jour!");
           } catch (e) {
             console.log(e);
-            toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", e.code);
+            toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
           }
         }}
       >
@@ -71,13 +84,22 @@ export default (props) => {
                     <Item title="Date de naissance" type="date" values={values} name="birthdateAt" handleChange={handleChange} />
                     {values.cniFiles.map((e, i) => {
                       return (
-                        <InfoBtn
-                          key={i}
-                          color="white"
-                          onClick={async () => {
-                            openDocumentInNewtab(await api.get(`/referent/youngFile/${values._id}/cniFiles/${e}`));
-                          }}
-                        >{`Visualiser la pièce d’identité (${i + 1}/${values.cniFiles.length})`}</InfoBtn>
+                        <div key={i}>
+                          <InfoBtn
+                            color="white"
+                            loading={buttonsLoading[`cniFiles${i}`]}
+                            onClick={async () => {
+                              setButtonLoading(`cniFiles${i}`, true);
+                              const f = await api.get(`/referent/youngFile/${values._id}/cniFiles/${e}`);
+                              setButtonLoading(`cniFiles${i}`, false);
+                              setFile(f);
+                            }}
+                          >{`Visualiser la pièce d’identité (${i + 1}/${values.cniFiles.length})`}</InfoBtn>
+                          <DownloadButtonWithMargin
+                            source={() => api.get(`/referent/youngFile/${values._id}/cniFiles/${e}`)}
+                            title={`Télécharger la pièce d’identité (${i + 1}/${values.cniFiles.length})`}
+                          />
+                        </div>
                       );
                     })}
                   </BoxContent>
@@ -246,13 +268,22 @@ export default (props) => {
                     />
                     {values.highSkilledActivityProofFiles.map((e, i) => {
                       return (
-                        <InfoBtn
-                          key={i}
-                          color="white"
-                          onClick={async () => {
-                            openDocumentInNewtab(await api.get(`/referent/youngFile/${values._id}/highSkilledActivityProofFiles/${e}`));
-                          }}
-                        >{`Visualiser le justificatif d'engagement (${i + 1}/${values.highSkilledActivityProofFiles.length})`}</InfoBtn>
+                        <div key={i}>
+                          <InfoBtn
+                            color="white"
+                            loading={buttonsLoading[`highSkilledActivityProofFiles${i}`]}
+                            onClick={async () => {
+                              setButtonLoading(`highSkilledActivityProofFiles${i}`, true);
+                              const f = await api.get(`/referent/youngFile/${values._id}/highSkilledActivityProofFiles/${e}`);
+                              setButtonLoading(`highSkilledActivityProofFiles${i}`, false);
+                              setFile(f);
+                            }}
+                          >{`Visualiser le justificatif d'engagement (${i + 1}/${values.highSkilledActivityProoefFiles.length})`}</InfoBtn>
+                          <DownloadButtonWithMargin
+                            source={() => api.get(`/referent/youngFile/${values._id}/highSkilledActivityProofFiles/${e}`)}
+                            title={`Télécharger le justificatif d'engagement (${i + 1}/${values.highSkilledActivityProoefFiles.length})`}
+                          />
+                        </div>
                       );
                     })}
                   </BoxContent>
@@ -316,19 +347,26 @@ export default (props) => {
                       title="Région"
                       options={regionList.map((r) => ({ value: r, label: r }))}
                     />
-                    {values.parentConsentmentFiles.map((e, i) => {
-                      return (
+                    {values.parentConsentmentFiles.length ? (
+                      <div>
                         <InfoBtn
-                          key={i}
                           color="white"
+                          loading={buttonsLoading[`parentConsentmentFiles0`]}
                           onClick={async () => {
-                            openDocumentInNewtab(await api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${values.parentConsentmentFiles[0]}`));
+                            setButtonLoading(`parentConsentmentFiles0`, true);
+                            const f = await api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${values.parentConsentmentFiles[0]}`);
+                            setButtonLoading(`parentConsentmentFiles0`, false);
+                            setFile(f);
                           }}
                         >
                           Visualiser le formulaire de consentement
                         </InfoBtn>
-                      );
-                    })}
+                        <DownloadButtonWithMargin
+                          source={() => api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${values.parentConsentmentFiles[0]}`)}
+                          title={"Télécharger le formulaire de consentement"}
+                        />
+                      </div>
+                    ) : null}
                   </BoxContent>
                 </Box>
               </Col>
@@ -381,13 +419,23 @@ export default (props) => {
                       options={regionList.map((r) => ({ value: r, label: r }))}
                     />
                     {values.parentConsentmentFiles && values.parentConsentmentFiles.length === 2 ? (
-                      <InfoBtn
-                        onClick={async () => {
-                          openDocumentInNewtab(await api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${values.parentConsentmentFiles[1]}`));
-                        }}
-                      >
-                        Visualiser le formulaire de consentement
-                      </InfoBtn>
+                      <div>
+                        <InfoBtn
+                          loading={buttonsLoading[`parentConsentmentFiles1`]}
+                          onClick={async () => {
+                            setButtonLoading(`parentConsentmentFiles1`, true);
+                            const f = await api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${values.parentConsentmentFiles[1]}`);
+                            setButtonLoading(`parentConsentmentFiles1`, false);
+                            setFile(f);
+                          }}
+                        >
+                          Visualiser le formulaire de consentement
+                        </InfoBtn>
+                        <DownloadButtonWithMargin
+                          source={() => api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${values.parentConsentmentFiles[1]}`)}
+                          title={"Télécharger le formulaire de consentement"}
+                        />
+                      </div>
                     ) : null}
                   </BoxContent>
                 </Box>
@@ -410,13 +458,19 @@ export default (props) => {
                     />
                     {values.imageRightFiles.map((e, i) => {
                       return (
-                        <InfoBtn
-                          key={i}
-                          color="white"
-                          onClick={async () => {
-                            openDocumentInNewtab(await api.get(`/referent/youngFile/${values._id}/imageRightFiles/${e}`));
-                          }}
-                        >{`Visualiser le formulaire de consentement de droit à l'image (${i + 1}/${values.imageRightFiles.length})`}</InfoBtn>
+                        <div key={i}>
+                          <InfoBtn
+                            color="white"
+                            onClick={async () => {
+                              const f = await api.get(`/referent/youngFile/${values._id}/imageRightFiles/${e}`);
+                              setFile(f);
+                            }}
+                          >{`Visualiser le formulaire de consentement de droit à l'image (${i + 1}/${values.imageRightFiles.length})`}</InfoBtn>
+                          <DownloadButtonWithMargin
+                            source={() => api.get(`/referent/youngFile/${values._id}/imageRightFiles/${e}`)}
+                            title={`Télécharger le formulaire de consentement de droit à l'image (${i + 1}/${values.imageRightFiles.length})`}
+                          />
+                        </div>
                       );
                     })}
                   </BoxContent>
@@ -470,6 +524,23 @@ export default (props) => {
           </>
         )}
       </Formik>
+      <DeleteBtn
+        onClick={async () => {
+          if (!confirm("Êtes-vous sûr(e) de vouloir supprimer ce profil")) return;
+          try {
+            const { ok, code } = await api.remove(`/young/${young._id}`);
+            if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
+            if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+            toastr.success("Ce profil a été supprimé.");
+            return history.push(`/inscription`);
+          } catch (e) {
+            console.log(e);
+            return toastr.error("Oups, une erreur est survenue pendant la supression du profil :", translate(e.code));
+          }
+        }}
+      >
+        Supprimer
+      </DeleteBtn>
     </Wrapper>
   );
 };
@@ -548,7 +619,7 @@ const BadgeStyle = styled.span`
   `}
 `;
 
-const InfoBtn = styled(LoadingButton)`
+  const InfoBtn = styled(LoadingButton)`
   color: #555;
   background: url(${require("../../assets/eye.svg")}) left 15px center no-repeat;
   box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.16);
@@ -562,6 +633,24 @@ const InfoBtn = styled(LoadingButton)`
   margin-top: 1rem;
   margin-left: 1rem;
   width: fit-content;
+`;
+
+const DownloadButtonWithMargin = styled(DownloadButton)`
+  margin-left: 1rem;
+`;
+
+const DeleteBtn = styled.button`
+  background-color: #bd2130;
+  border: none;
+  border-radius: 5px;
+  padding: 7px 30px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  :hover {
+    background: #dc3545;
+  }
 `;
 
 const Wrapper = styled.div`

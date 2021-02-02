@@ -6,6 +6,7 @@ import { toastr } from "react-redux-toastr";
 
 import LoadingButton from "../../components/loadingButton";
 import api from "../../services/api";
+import { translate } from "../../utils";
 
 export default () => {
   const [users, setUsers] = useState(null);
@@ -74,7 +75,7 @@ const Create = ({ onChange }) => {
                 setOpen(false);
               } catch (e) {
                 console.log(e);
-                toastr.error("Erreur !", e.code);
+                toastr.error("Erreur !", translate(e.code));
               }
               setSubmitting(false);
             }}

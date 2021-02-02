@@ -1,11 +1,21 @@
-import { toastr } from "react-redux-toastr";
-
 export const domains = ["Défense et mémoire", "Sécurité", "Solidarité", "Santé", "Éducation", "Culture", "Sport", "Environnement et développement durable", "Citoyenneté"];
 export const status = ["Brouillon", "En attente de validation", "En attente de correction", "Validée", "Refusée", "Annulée", "Archivée"];
 
 export const formatDay = (date) => {
   if (!date) return "-";
   return new Date(date).toISOString().split("T")[0];
+};
+
+export const formatStringLongDate = (date) => {
+  if (!date) return "-";
+  const d = new Date(date);
+  return d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" });
+};
+
+export const formatStringDate = (date) => {
+  if (!date) return "-";
+  const d = new Date(date);
+  return d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" });
 };
 
 function sliceDate(value) {
@@ -25,9 +35,9 @@ export const translate = (value) => {
     case "VALIDATED":
       return "Validée";
     case "CONTINUOUS":
-      return "Mission perlée (84 heures tout au long de l'année)";
-    case "DISCONTINUOUS":
       return "Mission continue (12 jours d'affilée sauf exception)";
+    case "DISCONTINUOUS":
+      return "Mission perlée (84 heures tout au long de l'année)";
     case "DRAFT":
       return "Brouillon";
     case "REFUSED":
@@ -36,6 +46,14 @@ export const translate = (value) => {
       return "Annulée";
     case "ARCHIVED":
       return "Archivée";
+    case "DONE":
+      return "Effectuée";
+    case "NOT_COMPLETED":
+      return "Non achevée";
+    case "PRESELECTED":
+      return "Présélectionnée";
+    case "SIGNED_CONTRACT":
+      return "Contrat signé";
     case "ASSOCIATION":
       return "Association";
     case "PUBLIC":
@@ -134,6 +152,37 @@ export const translate = (value) => {
       return "Oui";
     case "false":
       return "Non";
+    case "male":
+      return "Homme";
+    case "female":
+      return "Femme";
+    case "father":
+      return "Père";
+    case "mother":
+      return "Mère";
+    case "representant":
+      return "Représentant légal";
+    case "SERVER_ERROR":
+      return "Erreur serveur";
+    case "NOT_FOUND":
+      return "Ressource introuvable";
+    case "PASSWORD_TOKEN_EXPIRED_OR_INVALID":
+      return "Lien expiré ou token invalide";
+    case "USER_ALREADY_REGISTERED":
+      return "Utilisateur déjà inscrit";
+    case "PASSWORD_NOT_VALIDATED":
+      return "Mot de passe invalide";
+    case "INVITATION_TOKEN_EXPIRED_OR_INVALID":
+      return "Invitation invalide";
+    case "USER_NOT_FOUND":
+    case "USER_NOT_EXISTS":
+      return "L'utilisateur n'existe pas";
+    case "OPERATION_UNAUTHORIZED":
+      return "Opération non autorisée";
+    case "FILE_CORRUPTED":
+      return "Ce fichier est corrompu";
+    case "YOUNG_ALREADY_REGISTERED":
+      return "Utilisateur déjà inscrit";
     default:
       return value;
   }
@@ -439,6 +488,114 @@ export const department2region = {
   "Nouvelle-Calédonie": "Nouvelle-Calédonie",
 };
 
+export const departmentLookUp = {
+  "01": "Ain",
+  "02": "Aisne",
+  "03": "Allier",
+  "04": "Alpes-de-Haute-Provence",
+  "05": "Hautes-Alpes",
+  "06": "Alpes-Maritimes",
+  "07": "Ardèche",
+  "08": "Ardennes",
+  "09": "Ariège",
+  10: "Aube",
+  11: "Aude",
+  12: "Aveyron",
+  13: "Bouches-du-Rhône",
+  14: "Calvados",
+  15: "Cantal",
+  16: "Charente",
+  17: "Charente-Maritime",
+  18: "Cher",
+  19: "Corrèze",
+  20: "Corse",
+  21: "Côte-d'Or",
+  22: "Côtes-d'Armor",
+  23: "Creuse",
+  24: "Dordogne",
+  25: "Doubs",
+  26: "Drôme",
+  27: "Eure",
+  28: "Eure-et-Loire",
+  29: "Finistère",
+  "2A": "Corse-du-Sud",
+  "2B": "Haute-Corse",
+  30: "Gard",
+  31: "Haute-Garonne",
+  32: "Gers",
+  33: "Gironde",
+  34: "Hérault",
+  35: "Ille-et-Vilaine",
+  36: "Indre",
+  37: "Indre-et-Loire",
+  38: "Isère",
+  39: "Jura",
+  40: "Landes",
+  41: "Loir-et-Cher",
+  42: "Loire",
+  43: "Haute-Loire",
+  44: "Loire-Atlantique",
+  45: "Loiret",
+  46: "Lot",
+  47: "Lot-et-Garonne",
+  48: "Lozère",
+  49: "Maine-et-Loire",
+  50: "Manche",
+  51: "Marne",
+  52: "Haute-Marne",
+  53: "Mayenne",
+  54: "Meurthe-et-Moselle",
+  55: "Meuse",
+  56: "Morbihan",
+  57: "Moselle",
+  58: "Nièvre",
+  59: "Nord",
+  60: "Oise",
+  61: "Orne",
+  62: "Pas-de-Calais",
+  63: "Puy-de-Dôme",
+  64: "Pyrénées-Atlantiques",
+  65: "Hautes-Pyrénées",
+  66: "Pyrénées-Orientales",
+  67: "Bas-Rhin",
+  68: "Haut-Rhin",
+  69: "Rhône",
+  70: "Haute-Saône",
+  71: "Saône-et-Loire",
+  72: "Sarthe",
+  73: "Savoie",
+  74: "Haute-Savoie",
+  75: "Paris",
+  76: "Seine-Maritime",
+  77: "Seine-et-Marne",
+  78: "Yvelines",
+  79: "Deux-Sèvres",
+  80: "Somme",
+  81: "Tarn",
+  82: "Tarn-et-Garonne",
+  83: "Var",
+  84: "Vaucluse",
+  85: "Vendée",
+  86: "Vienne",
+  87: "Haute-Vienne",
+  88: "Vosges",
+  89: "Yonne",
+  90: "Territoire de Belfort",
+  91: "Essonne",
+  92: "Hauts-de-Seine",
+  93: "Seine-Saint-Denis",
+  94: "Val-de-Marne",
+  95: "Val-d'Oise",
+  971: "Guadeloupe",
+  972: "Martinique",
+  973: "Guyane",
+  974: "La Réunion",
+  975: "Saint-Pierre-et-Miquelon",
+  976: "Mayotte",
+  987: "Polynésie française",
+  988: "Nouvelle-Calédonie",
+};
+
 export const YOUNG_STATUS = {
   WAITING_VALIDATION: "WAITING_VALIDATION",
   WAITING_CORRECTION: "WAITING_CORRECTION",
@@ -482,16 +639,75 @@ export const REFERENT_ROLES = {
   REFERENT_REGION: "referent_region",
 };
 
-// Open a document from an API response that contains `data` and `mimeType`.
-export async function openDocumentInNewtab(apiResponse) {
-  const { data, mimeType, ok, code } = apiResponse;
-  if (!ok) {
-    toastr.error("Impossible d'afficher le document", code || "");
-    return;
-  }
-  const arrayBufferView = new Uint8Array(data.data);
-  const blob = new Blob([arrayBufferView], { type: mimeType });
-  const urlCreator = window.URL || window.webkitURL;
-  const fileURL = urlCreator.createObjectURL(blob);
-  window.open(fileURL);
-}
+export const MISSION_STATUS = {
+  WAITING_VALIDATION: "WAITING_VALIDATION",
+  WAITING_CORRECTION: "WAITING_CORRECTION",
+  VALIDATED: "VALIDATED",
+  DRAFT: "DRAFT",
+  REFUSED: "REFUSED",
+  CANCEL: "CANCEL",
+  ARCHIVED: "ARCHIVED",
+};
+
+export const MISSION_STATUS_COLORS = {
+  WAITING_VALIDATION: "#FE7B52",
+  WAITING_CORRECTION: "#FEB951",
+  VALIDATED: "#6CC763",
+  DRAFT: "#d9bb71",
+  REFUSED: "#F8A9AD",
+  CANCEL: "#ffa987",
+  ARCHIVED: "#ffb3fb",
+};
+
+export const APPLICATION_STATUS = {
+  WAITING_VALIDATION: "WAITING_VALIDATION",
+  VALIDATED: "VALIDATED",
+  REFUSED: "REFUSED",
+  CANCEL: "CANCELED",
+  ARCHIVED: "ARCHIVED",
+  IN_PROGRESS: "IN_PROGRESS",
+  DONE: "DONE",
+  NOT_COMPLETED: "NOT_COMPLETED",
+  PRESELECTED: "PRESELECTED",
+  SIGNED_CONTRACT: "SIGNED_CONTRACT",
+};
+
+export const APPLICATION_STATUS_COLORS = {
+  WAITING_VALIDATION: "#FE7B52",
+  WAITING_CORRECTION: "#FEB951",
+  VALIDATED: "#6CC763",
+  DONE: "#1C7713",
+  PRESELECTED: "#d9bb71",
+  NOT_COMPLETED: "#d9bb71",
+  SIGNED_CONTRACT: "#d9bb71",
+  REFUSED: "#F8A9AD",
+  CANCEL: "#ffa987",
+  ARCHIVED: "#ffb3fb",
+  IN_PROGRESS: "#382F79",
+};
+
+export const MISSION_PERIOD_DURING_HOLIDAYS = {
+  SUMMER: "SUMMER",
+  AUTUMN: "AUTUMN",
+  DECEMBER: "DECEMBER",
+  WINTER: "WINTER",
+  SPRING: "SPRING",
+};
+
+export const MISSION_PERIOD_DURING_SCHOOL = {
+  EVENING: "EVENING",
+  END_DAY: "END_DAY",
+  WEEKEND: "WEEKEND",
+};
+
+export const MISSION_DOMAINS = {
+  CITIZENSHIP: "CITIZENSHIP",
+  CULTURE: "CULTURE",
+  DEFENSE: "DEFENSE",
+  EDUCATION: "EDUCATION",
+  ENVIRONMENT: "ENVIRONMENT",
+  HEALTH: "HEALTH",
+  SECURITY: "SECURITY",
+  SOLIDARITY: "SOLIDARITY",
+  SPORT: "SPORT",
+};

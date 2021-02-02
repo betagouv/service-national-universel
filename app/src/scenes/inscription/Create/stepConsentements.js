@@ -1,4 +1,4 @@
-import React, { useState ,useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { Row, Col } from "reactstrap";
 import { Field, Formik } from "formik";
@@ -13,6 +13,7 @@ import { saveYoung, STEPS } from "../utils";
 
 import api from "../../../services/api";
 import matomo from "../../../services/matomo";
+import { translate } from "../../../utils";
 
 export default () => {
   useEffect(() => {
@@ -63,12 +64,12 @@ export default () => {
             values.consentment = "true";
             values.inscriptionStep = STEPS.MOTIVATIONS;
             const { ok, code, data: young } = await api.put("/young", values);
-            if (!ok) return toastr.error("Une erreur s'est produite :", code);
+            if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             dispatch(setYoung(young));
             history.push("/inscription/motivations");
           } catch (e) {
             console.log(e);
-            toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", e.code);
+            toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code));
           }
         }}
       >

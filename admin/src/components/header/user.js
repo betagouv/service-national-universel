@@ -48,19 +48,8 @@ export default () => {
           <NavLink to="/team">Gérer votre équipe</NavLink>
         </Item> */}
         {/* <hr /> */}
-
-        {user.role === REFERENT_ROLES.ADMIN && (
-          <Item>
-            <InviteReferent role={REFERENT_ROLES.ADMIN} />
-          </Item>
-        )}
-        {(user.role === REFERENT_ROLES.ADMIN || user.role === REFERENT_ROLES.REFERENT_REGION) && (
-          <Item>
-            <InviteReferent role={REFERENT_ROLES.REFERENT_REGION} />
-          </Item>
-        )}
         <Item>
-          <InviteReferent role={REFERENT_ROLES.REFERENT_DEPARTMENT} />
+          <InviteReferent role={user.role} />
         </Item>
         <Item>
           <NavLink to="/profil">Profil</NavLink>
@@ -81,13 +70,10 @@ export default () => {
 
 const InviteReferent = ({ role }) => {
   const [open, setOpen] = useState(false);
-  let label = "Inviter un administrateur";
-  if (role === REFERENT_ROLES.REFERENT_REGION) label = "Inviter un référent régional";
-  if (role === REFERENT_ROLES.REFERENT_DEPARTMENT) label = "Inviter un référent départemental";
   return (
     <div onClick={() => setOpen(true)}>
-      <div style={{ padding: "10px 25px 8px" }}>{label}</div>
-      <Invite role={role} label={label} open={open} setOpen={() => setOpen(false)} />
+      <div style={{ padding: "10px 25px 8px" }}>Inviter un nouvel utilisateur</div>
+      <Invite role={role} label="Inviter un nouvel utilisateur" open={open} setOpen={() => setOpen(false)} />
     </div>
   );
 };

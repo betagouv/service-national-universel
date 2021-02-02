@@ -4,7 +4,7 @@
   "scripts": {
     "dev": "webpack-dev-server --port 8082 --mode development --config webpack.dev.config.js --open --hot --inline",
     "start": "npm run build && node server/index.js",
-    "build": "webpack --env.production --env.NODE_ENV=production",
+    "build": "node --max-old-space-size=2048 node_modules/webpack/bin/webpack.js --env.production --env.NODE_ENV=production",
     "deploy": "npm run build && eb deploy maakyo-admin-production --profile postajob"
   },
   "prettier": {
@@ -60,6 +60,7 @@
     "bootstrap": "^4.5.2",
     "dayjs": "^1.10.3",
     "express": "^4.17.1",
+    "file-saver": "^2.0.5",
     "formik": "^2.1.5",
     "hsts": "^2.2.0",
     "isomorphic-fetch": "^3.0.0",
@@ -71,13 +72,15 @@
     "react-autosuggest": "^10.0.4",
     "react-dom": "^16.13.1",
     "react-multi-select-component": "^3.0.7",
+    "react-pdf": "^5.1.0",
     "react-redux": "^7.2.1",
     "react-redux-toastr": "^7.6.5",
     "react-router-dom": "^5.2.0",
     "reactstrap": "^8.5.1",
     "redux": "^4.0.5",
     "styled-components": "^5.1.1",
-    "validator": "^13.1.1"
+    "validator": "^13.1.1",
+    "xlsx": "^0.16.9"
   },
   "engines": {
     "node": "^12"

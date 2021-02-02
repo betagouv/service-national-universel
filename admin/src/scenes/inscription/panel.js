@@ -1,17 +1,18 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { Modal } from "reactstrap";
-
-import { translate as t } from "./utils";
-import { YOUNG_SITUATIONS, YOUNG_STATUS, translate, openDocumentInNewtab } from "../../utils";
 import { Link } from "react-router-dom";
-import LoadingButton from "../../components/loadingButton";
-import Historic from "../../components/historic";
 
+import { YOUNG_SITUATIONS, translate as t } from "../../utils";
+import LoadingButton from "../../components/loadingButton";
+import DownloadButton from "../../components/DownloadButton";
+import Historic from "../../components/historic";
+import DocumentInModal from "../../components/DocumentInModal";
 import api from "../../services/api";
 
 export default ({ onChange, value }) => {
   const [young, setYoung] = useState(null);
+  const [file, setFile] = useState(null);
+  const [buttonsLoading, setButtonsLoading] = useState({});
 
   useEffect(() => {
     (async () => {
@@ -36,8 +37,13 @@ export default ({ onChange, value }) => {
     return Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
   };
 
+  const setButtonLoading = (btn, v) => {
+    setButtonsLoading({ ...buttonsLoading, [btn]: v });
+  };
+
   return (
     <Panel>
+      {file && <DocumentInModal value={file} onChange={() => setFile(null)} />}
       <div className="close" onClick={onChange} />
       <div className="info">
         <div className="title">{`${value.firstName} ${value.lastName}`}</div>
@@ -55,28 +61,46 @@ export default ({ onChange, value }) => {
       <Info title="Pièce d’identité" id={value._id}>
         {(value.cniFiles || []).map((e, i) => {
           return (
-            <InfoBtn
-              key={i}
-              color="white"
-              onClick={async () => {
-                openDocumentInNewtab(await api.get(`/referent/youngFile/${value._id}/cniFiles/${e}`));
-              }}
-            >{`Visualiser la pièce d’identité (${i + 1}/${value.cniFiles.length})`}</InfoBtn>
+            <div key={i}>
+              <InfoBtn
+                color="white"
+                loading={buttonsLoading[`cniFiles${i}`]}
+                onClick={async () => {
+                  setButtonLoading(`cniFiles${i}`, true);
+                  const f = await api.get(`/referent/youngFile/${value._id}/cniFiles/${e}`);
+                  setButtonLoading(`cniFiles${i}`, false);
+                  setFile(f);
+                }}
+              >{`Visualiser la pièce d’identité (${i + 1}/${value.cniFiles.length})`}</InfoBtn>
+              <DownloadButton
+                source={() => api.get(`/referent/youngFile/${value._id}/cniFiles/${e}`)}
+                title={`Télécharger la pièce d’identité (${i + 1}/${value.cniFiles.length})`}
+              />
+            </div>
           );
         })}
       </Info>
       <Info title="Consentements du ou des représentants légaux" id={value._id}>
         {(value.parentConsentmentFiles || []).map((e, i) => {
           return (
-            <InfoBtn
-              key={i}
-              color="white"
-              onClick={async () => {
-                openDocumentInNewtab(await api.get(`/referent/youngFile/${value._id}/parentConsentmentFiles/${e}`));
-              }}
-            >
-              Visualiser le formulaire
-            </InfoBtn>
+            <div key={i}>
+              <InfoBtn
+                color="white"
+                loading={buttonsLoading[`parentConsentmentFiles${i}`]}
+                onClick={async () => {
+                  setButtonLoading(`parentConsentmentFiles${i}`, true);
+                  const f = await api.get(`/referent/youngFile/${value._id}/parentConsentmentFiles/${e}`);
+                  setButtonLoading(`parentConsentmentFiles${i}`, false);
+                  setFile(f);
+                }}
+              >
+                Visualiser le formulaire
+              </InfoBtn>
+              <DownloadButton
+                source={() => api.get(`/referent/youngFile/${value._id}/parentConsentmentFiles/${e}`)}
+                title={`Télécharger le formulaire (${i + 1}/${value.cniFiles.length})`}
+              />
+            </div>
           );
         })}
       </Info>

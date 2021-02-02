@@ -17,6 +17,7 @@ import FranceConnectButton from "../../../components/FranceConnectButton";
 import { environment } from "../../../config";
 
 import { saveYoung, STEPS } from "../utils";
+import { translate } from "../../../utils";
 
 function getFranceConnectCallback(idRepresentant) {
   return `inscription/representants?action=updateFromFranceConnect&representant=${idRepresentant}`;
@@ -274,12 +275,12 @@ export default () => {
           try {
             values.inscriptionStep = STEPS.CONSENTEMENTS;
             const { ok, code, data: young } = await api.put("/young", values);
-            if (!ok) return toastr.error("Une erreur s'est produite :", code);
+            if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             dispatch(setYoung(young));
             history.push("/inscription/consentements");
           } catch (e) {
             console.log(e);
-            toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", e.code);
+            toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code));
           }
         }}
       >

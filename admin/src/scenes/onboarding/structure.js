@@ -11,7 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { translate } from "../../utils";
 import api from "../../services/api";
 
-const juridiqueStatusTypes = ["ASSOCIATION", "PUBLIC", "PRIVATE", "OTHER"];
+const legalStatusTypes = ["ASSOCIATION", "PUBLIC", "PRIVATE", "OTHER"];
 const CustomSelect = ({ field, form, children, ...props }) => (
   <Input type="select" {...field} {...props}>
     {children}
@@ -25,7 +25,7 @@ export default ({ onChange }) => {
       <Formik
         initialValues={{
           name: "",
-          statutJuridique: juridiqueStatusTypes[0],
+          legalStatus: legalStatusTypes[0],
           description: "",
           siret: "",
           website: "",
@@ -49,7 +49,7 @@ export default ({ onChange }) => {
                     //   await api.put(`/user?user_id=${user._id}`, { avatar: url });
                     //   toastr.success("success");
                     // }}
-                    onError={(error) => toastr.error(error)}
+                    onError={(error) => toastr.error(Erreur !)}
                     // url={values.avatar}
                     // route={`/structure/image?user_id=${user._id}`}
                   />
@@ -75,14 +75,14 @@ export default ({ onChange }) => {
                 <label>
                   <span>*</span>STATUT JURIDIQUE
                 </label>
-                <Field name="statutJuridique" component={CustomSelect} value={values.statutJuridique} onChange={handleChange} hasError={errors.statutJuridique}>
-                  {juridiqueStatusTypes.map((e) => (
+                <Field name="legalStatus" component={CustomSelect} value={values.legalStatus} onChange={handleChange} hasError={errors.legalStatus}>
+                  {legalStatusTypes.map((e) => (
                     <option key={e} value={e}>
                       {translate(e)}
                     </option>
                   ))}
                 </Field>
-                <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.statutJuridique}</p>
+                <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.legalStatus}</p>
               </FormGroup>
               <FormGroup>
                 <label>PRÉSENTATION SYNTHÉTIQUE DE LA STRUCTURE</label>
