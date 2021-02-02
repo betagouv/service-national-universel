@@ -18,8 +18,7 @@ export default function DownloadButton({ source, title, ...rest }) {
           setButtonsLoading(true);
           try {
             const f = await source();
-            const data = new Blob([new Uint8Array(f.data.data)], { type: f.mimeType });
-            FileSaver.saveAs(data, f.fileName.replace(/[^a-z0-9]/i, "-"));
+            FileSaver.saveAs(new Blob([new Uint8Array(f.data.data)], { type: f.mimeType }), f.fileName.replace(/[^a-z0-9]/i, "-"));
           } catch (e) {
             toastr.error("Oups, une erreur est survenue pendant le téléchagement", e.toString());
           }
