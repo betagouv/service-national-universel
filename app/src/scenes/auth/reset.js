@@ -7,7 +7,7 @@ import styled from "styled-components";
 import { Link, Redirect } from "react-router-dom";
 import queryString from "query-string";
 
-import { getPasswordErrorMessage } from "../../utils";
+import { getPasswordErrorMessage, translate } from "../../utils";
 import LoadingButton from "../../components/loadingButton";
 import api from "../../services/api";
 import { requiredMessage } from "../inscription/components/errorMessage";
@@ -44,10 +44,7 @@ export default () => {
               toastr.success("Mot de passe changé avec succès");
               setRedirect(true);
             } catch (e) {
-              if (e && e.code) {
-                if (e.code === "PASSWORD_TOKEN_EXPIRED_OR_INVALID") return toastr.error("Lien invalide. Veuillez ré-éffectuer la procédure");
-              }
-              toastr.error("Une erreur s'est produite :", e && e.code);
+              return toastr.error("Une erreur s'est produite :", translate(e && e.code));
             }
             actions.setSubmitting(false);
           }}

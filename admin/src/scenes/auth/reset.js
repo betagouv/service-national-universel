@@ -9,6 +9,7 @@ import validator from "validator";
 
 import api from "../../services/api";
 import LoadingButton from "../../components/loadingButton";
+import { translate } from "../../utils";
 
 export default ({ location }) => {
   const [redirect, setRedirect] = useState(false);
@@ -32,10 +33,7 @@ export default ({ location }) => {
                 toastr.success("Mot de passe créé");
                 setRedirect(true);
               } catch (e) {
-                if (e && e.code === "PASSWORD_TOKEN_EXPIRED_OR_INVALID") {
-                  return toastr.error("Lien expiré ou token invalide");
-                }
-                toastr.error(e && e.code);
+                return toastr.error(translate(e && e.code));
               }
               actions.setSubmitting(false);
             }}

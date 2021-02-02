@@ -8,7 +8,7 @@ import matomo from "../../../services/matomo";
 export default () => {
 
   useEffect(() => {
-    matomo.logEvent("inscription", "open_step", "step", "done");
+    matomo.logEvent("inscription", "open_step", "step", 6);
   }, []);
 
   const history = useHistory();

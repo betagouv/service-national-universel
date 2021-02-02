@@ -1,57 +1,124 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import { Field, Formik } from "formik";
 
-import { formatDay, translate } from "../../utils";
+import { formatDay, translate, formatStringDate } from "../../utils";
 
 import api from "../../services/api";
+import SelectStatusMission from "../../components/selectStatusMission";
 
-export default ({ onChange, mission }) => {
+export default ({ onClose, mission }) => {
+  const [tutor, setTutor] = useState();
+  const [structure, setStructure] = useState({});
+
+  useEffect(() => {
+    (async () => {
+      if (!mission) return;
+      const { ok: ok1, data: dataTutor, code: code1 } = await api.get(`/referent/${mission.tutorId}`);
+      const { ok: ok2, data: dataStructure, code: code2 } = await api.get(`/structure/${mission.structureId}`);
+      if (!ok1) toastr.error("Oups, une erreur est survnue lors de la récuperation du tuteur", translate(code1));
+      else setTutor(dataTutor);
+      if (!ok2) toastr.error("Oups, une erreur est survnue lors de la récuperation de la structure", translate(code2));
+      else setStructure(dataStructure);
+      return;
+    })();
+  }, [mission]);
+
   if (!mission) return <div />;
   return (
     <Panel>
-      <div className="close" onClick={onChange} />
+      <div style={{ display: "flex" }}>
+        <Subtitle>MISSION</Subtitle>
+        <div className="close" onClick={onClose} />
+      </div>
       <div className="name">{mission.structureName}</div>
       <div className="title">{mission.name}</div>
       <Link to={`/mission/${mission._id}`}>
-        <button>Modifier</button>
+        <Button className="btn-blue">Consulter</Button>
+      </Link>
+      <Link to={`/mission/${mission._id}/edit`}>
+        <Button className="btn-blue">Modifier</Button>
+      </Link>
+      <Link to={`/mission/${mission._id}`}>
+        <Button className="btn-red">Supprimer</Button>
       </Link>
       <hr />
-      <div style={{ marginBottom: 20 }}>
-        <Tag>{`${mission.department} - departmentNametodo`}</Tag>
+      <div>
+        <div className="title">Statut</div>
+        <SelectStatusMission hit={mission} />
+        <div className="description">A noter que des notifications emails seront envoyées</div>
       </div>
+      <hr />
+      <div className="title">{`Volontaire(s) (${mission.placesTaken})`}</div>
+      <div className="detail">
+        <div className="description">{`Cette mission a reçu ${mission.placesTaken} candidature(s)`}</div>
+      </div>
+      {/* <Link to={``}>
+        <button>Consulter tous les volontaires</button>
+      </Link> */}
+      <hr />
+      <div className="title">
+        La structure
+        <Link to={`/structure/${structure._id}`}>
+          <SubtitleLink>{`${structure.name} >`}</SubtitleLink>
+        </Link>
+      </div>
+
       <div className="detail">
         <div className="detail-title">Statut</div>
-        <div className="detail-text">{translate(mission.status)}</div>
+        <div className="detail-text">{translate(structure.status)}</div>
       </div>
       <div className="detail">
-        <div className="detail-title">Format</div>
-        <div className="detail-text">{translate(mission.format)}</div>
+        <div className="detail-title">Dép.</div>
+        <div className="detail-text">{structure.department}</div>
+      </div>
+
+      <div className="detail">
+        <div className="detail-title">Tuteur</div>
+        <div className="detail-text">{tutor ? `${tutor.firstName} ${tutor.lastName}` : ""}</div>
+      </div>
+      <div className="detail">
+        <div className="detail-title">E-mail</div>
+        <div className="detail-text">{tutor && tutor.email}</div>
+      </div>
+      <div className="detail">
+        <div className="detail-title">tel.</div>
+        <div className="detail-text">{tutor && tutor.phone}</div>
+      </div>
+      <hr />
+      <div className="title">La mission</div>
+      <div className="detail">
+        <div className="detail-title">Domaines</div>
+        <div className="detail-text">{mission.domains.join(", ")}</div>
       </div>
       <div className="detail">
         <div className="detail-title">Début</div>
-        <div className="detail-text">{formatDay(mission.date_start)}</div>
+        <div className="detail-text">{formatStringDate(mission.startAt)}</div>
       </div>
       <div className="detail">
         <div className="detail-title">Fin</div>
-        <div className="detail-text">{formatDay(mission.date_end)}</div>
+        <div className="detail-text">{formatStringDate(mission.endAt)}</div>
       </div>
       <div className="detail">
         <div className="detail-title">Adresse</div>
-        <div className="detail-text">{mission.city}</div>
+        <div className="detail-text">{mission.address}</div>
       </div>
       <div className="detail">
-        <div className="detail-title">Domaines</div>
-        <div className="detail-text">{mission.domains && mission.domains.join(", ")}</div>
+        <div className="detail-title">Dép.</div>
+        <div className="detail-text">{mission.department}</div>
       </div>
       <div className="detail">
-        <div className="detail-title">Max.</div>
-        <div className="detail-text">{mission.placesTotal}</div>
+        <div className="detail-title">Fréquence</div>
+        <div className="detail-text">{mission.frequence}</div>
       </div>
       <div className="detail">
-        <div className="detail-title">Détails</div>
+        <div className="detail-title">Périodes</div>
+        <div className="detail-text">{mission.period}</div>
+      </div>
+      <div className="detail">
+        <div className="detail-title">Objectifs</div>
         <div className="detail-text">{mission.description}</div>
       </div>
       <div className="detail">
@@ -59,11 +126,8 @@ export default ({ onChange, mission }) => {
         <div className="detail-text">{mission.actions}</div>
       </div>
       <div className="detail">
-        <div className="detail-title">MIG</div>
-        <div className="detail-text">{mission.justifications}</div>
-      </div>
-      <div>
-        <Status mission={mission} />
+        <div className="detail-title">Contraintes</div>
+        <div className="detail-text">{mission.contraintes}</div>
       </div>
       {/* <div>
         {Object.keys(mission).map((e) => {
@@ -79,11 +143,7 @@ export default ({ onChange, mission }) => {
 const Status = ({ mission }) => {
   return (
     <StatusBox>
-      <div className="title">Statut de la mission</div>
-      <div className="subtitle">
-        <img src={require("../../assets/information.svg")} height={14} />
-        <span>Vous pourez selectionner le statut de la mission. A noter que des notifications emails seront envoyees.</span>
-      </div>
+      <div className="title">Statut</div>
       <Formik
         initialValues={{ status: mission.status }}
         onSubmit={async (values) => {
@@ -91,14 +151,13 @@ const Status = ({ mission }) => {
             await api.put(`/mission/${mission._id}`, values);
             toastr.success("Success");
           } catch (e) {
-            toastr.error("Error");
+            toastr.error("Erreur !");
           }
         }}
       >
         {({ values, handleChange, handleSubmit, isSubmitting }) => (
           <div>
             <FormGroup>
-              <label>statut</label>
               <Field name="status" component="select" rows={2} value={values.status} onChange={handleChange}>
                 <option value="WAITING_VALIDATION">En attente de validation</option>
                 <option value="WAITING_CORRECTION">En attente de correction</option>
@@ -109,15 +168,24 @@ const Status = ({ mission }) => {
                 <option value="ARCHIVED">Archivée</option>
               </Field>
             </FormGroup>
-            <Button onClick={handleSubmit} disabled={isSubmitting}>
-              Enregistrer
-            </Button>
+            <div className="description">A noter que des notifications emails seront envoyées</div>
           </div>
         )}
       </Formik>
     </StatusBox>
   );
 };
+
+const Subtitle = styled.div`
+  color: rgb(113, 128, 150);
+  font-weight: 400;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+`;
+
+const SubtitleLink = styled(Subtitle)`
+  color: #5245cc;
+`;
 
 const Tag = styled.span`
   background-color: rgb(253, 246, 236);
@@ -148,7 +216,6 @@ const Panel = styled.div`
   border: 1px solid rgb(235, 238, 245);
   background-color: #fff;
   position: relative;
-  text-align: center;
   border-radius: 4px;
   padding-bottom: 20px;
   margin-bottom: 40px;
@@ -192,31 +259,20 @@ const Panel = styled.div`
     color: #000;
     font-size: 18px;
   }
-  button {
-    background-color: #fff;
-    border: 1px solid #dcdfe6;
-    align-self: flex-start;
-    border-radius: 4px;
-    padding: 5px;
-    font-size: 12px;
-    width: 100px;
+  .description {
     font-weight: 400;
-    color: #646b7d;
-    cursor: pointer;
-    :hover {
-      color: rgb(49, 130, 206);
-      border-color: rgb(193, 218, 240);
-      background-color: rgb(234, 243, 250);
-    }
+    color: #aaa;
+    font-size: 0.8rem;
   }
   hr {
     margin: 20px 0 30px;
   }
   .detail {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     font-size: 12px;
     text-align: left;
+    margin-top: 1rem;
     &-title {
       min-width: 90px;
       width: 90px;
@@ -287,19 +343,30 @@ const FormGroup = styled.div`
 `;
 
 const Button = styled.button`
-  background-color: #3182ce;
-  outline: 0;
-  border: 0;
-  color: #fff;
+  margin: 0 0.5rem;
+  align-self: flex-start;
   border-radius: 4px;
-  padding: 10px 20px;
-  font-size: 14px;
+  padding: 5px;
+  font-size: 12px;
+  min-width: 100px;
+  font-weight: 400;
   cursor: pointer;
-  :hover {
-    background-color: #5a9bd8;
+  background-color: #fff;
+  &.btn-blue {
+    color: #646b7d;
+    border: 1px solid #dcdfe6;
+    :hover {
+      color: rgb(49, 130, 206);
+      border-color: rgb(193, 218, 240);
+      background-color: rgb(234, 243, 250);
+    }
   }
-  :disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+  &.btn-red {
+    border: 1px solid #f6cccf;
+    color: rgb(206, 90, 90);
+    :hover {
+      border-color: rgb(240, 218, 218);
+      background-color: rgb(250, 230, 230);
+    }
   }
 `;

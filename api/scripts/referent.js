@@ -9,9 +9,10 @@ const { sendEmail } = require("../src/sendinblue");
 const ReferentModel = require("../src/models/referent");
 
 (async () => {
-  const arr = await parse("./referents.csv");
+  const arr = await parse("./Liste_référent_régional.csv");
   let count = 0;
   for (let i = 0; i < arr.length; i++) {
+    console.log({ body: arr[i] });
     await send({ body: arr[i] });
     // try {
     //   const school = await SchoolModel.findOneAndUpdate({ postcode: arr[i].postcode, name2: arr[i].name2 }, arr[i], { upsert: true, new: true });
@@ -19,11 +20,11 @@ const ReferentModel = require("../src/models/referent");
     // } catch (e) {
     //   console.log("e", e);
     // }
-
     console.log(count++);
   }
 
   console.log("aa", arr.length);
+  process.exit(1);
 })();
 
 function parse(file) {
@@ -32,13 +33,21 @@ function parse(file) {
     fs.createReadStream(file)
       .pipe(csv())
       .on("data", async (row) => {
+        let newRow = {};
         try {
           const obj = {};
-          obj.firstName = row["PRENOM"].trim().toLowerCase();
-          obj.lastName = row["NOM"].trim().toUpperCase();
-          obj.email = row["MAIL"].trim().toLowerCase();
-          obj.department = departmentList[row["N° de DPT"]];
-          obj.role = "referent_department";
+
+          Object.keys(row).map((key) => {
+            newRow[key.trim()] = row[key]; // fix weird bug with the key REGION
+          });
+
+          const fn = newRow["PRENOM"].trim();
+          obj.firstName = fn.charAt(0).toUpperCase() + fn.slice(1);
+          obj.lastName = newRow["NOM"].trim().toUpperCase();
+          obj.email = newRow["MAIL"].trim().toLowerCase();
+          obj.region = newRow["REGION"];
+          obj.role = "referent_region";
+
           arr.push(obj);
         } catch (e) {
           console.log("e", e);
@@ -57,8 +66,7 @@ async function send(req) {
     if (req.body.hasOwnProperty(`firstName`)) obj.firstName = req.body.firstName;
     if (req.body.hasOwnProperty(`lastName`)) obj.lastName = req.body.lastName;
     if (req.body.hasOwnProperty(`role`)) obj.role = req.body.role;
-    // if (req.body.hasOwnProperty(`region`)) obj.region = req.body.region; //TODO
-    if (req.body.hasOwnProperty(`department`)) obj.department = req.body.department;
+    if (req.body.hasOwnProperty(`region`)) obj.region = req.body.region;
 
     const invitation_token = crypto.randomBytes(20).toString("hex");
     obj.invitationToken = invitation_token;
@@ -66,13 +74,13 @@ async function send(req) {
 
     const referent = await ReferentModel.create(obj);
 
-    let htmlContent = fs.readFileSync("../src/templates/inviteReferentDepartment.html").toString();
+    let htmlContent = fs.readFileSync("../src/templates/inviteReferentRegion.html").toString();
     htmlContent = htmlContent.replace(/{{toName}}/g, `${obj.firstName} ${obj.lastName}`);
     htmlContent = htmlContent.replace(/{{fromName}}/g, `Gabrielle Bouxin`);
-    htmlContent = htmlContent.replace(/{{department}}/g, `${obj.department}`);
+    htmlContent = htmlContent.replace(/{{region}}/g, `${obj.region}`);
     htmlContent = htmlContent.replace(/{{cta}}/g, `https://candidature.snu.gouv.fr/auth/signup?token=${invitation_token}`);
 
-    // await sendEmail({ name: `${obj.firstName} ${obj.lastName}`, email: obj.email }, "Activez votre compte référent départemental SNU", htmlContent);
+    await sendEmail({ name: `${obj.firstName} ${obj.lastName}`, email: obj.email }, "Activez votre compte référent régional SNU", htmlContent);
 
     return;
   } catch (error) {

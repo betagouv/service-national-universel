@@ -134,4 +134,17 @@ router.post("/france-connect/user-info", async (req, res) => {
   res.status(200).send({ ok: true, data: userInfo });
 });
 
+// Delete one user (only admin can delete user)
+router.delete("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
+  try {
+    const young = await YoungObject.findOne({ _id: req.params.id });
+    await young.remove();
+    console.log(`Young ${req.params.id} has been deleted`);
+    res.status(200).send({ ok: true });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, error, code: SERVER_ERROR });
+  }
+});
+
 module.exports = router;

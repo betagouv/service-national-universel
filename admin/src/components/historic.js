@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { translate, YOUNG_STATUS } from "../utils";
+import { translate, YOUNG_STATUS, formatStringLongDate } from "../utils";
 
 export default ({ value }) => {
   if (!value) return <div />;
@@ -15,11 +15,6 @@ export default ({ value }) => {
 };
 
 const HistoricItem = ({ item }) => {
-  const formatLongDate = (date) => {
-    const d = new Date(date);
-    return d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" });
-  };
-
   let color = "#6CC763";
   if (item.status === YOUNG_STATUS.WAITING_CORRECTION) color = "#FEB951";
   if (item.status === YOUNG_STATUS.WAITING_VALIDATION) color = "#FE7B52";
@@ -41,7 +36,7 @@ const HistoricItem = ({ item }) => {
       <div className="history-detail">
         {item.note ? <Note value={item.note} /> : null}
         <div>
-          {getLabel()} • le {formatLongDate(item.createdAt)}
+          {getLabel()} • le {formatStringLongDate(item.createdAt)}
         </div>
       </div>
     </Item>

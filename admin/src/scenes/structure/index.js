@@ -8,8 +8,9 @@ import List from "./list";
 export default () => {
   return (
     <Switch>
-      <Route path="/structure/edit" component={Edit} />
-      <Route path="/structure/view" component={View} />
+      <Route path="/structure/create" component={Edit} />
+      <Route path="/structure/:id/edit" component={Edit} />
+      <Route path="/structure/:id" component={View} />
       <Route path="/structure" component={List} />
     </Switch>
   );

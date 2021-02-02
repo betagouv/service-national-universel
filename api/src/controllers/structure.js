@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
-
 const { capture } = require("../sentry");
 
 const StructureObject = require("../models/structure");

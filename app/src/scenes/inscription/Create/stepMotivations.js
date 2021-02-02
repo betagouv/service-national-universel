@@ -10,12 +10,12 @@ import api from "../../../services/api";
 import matomo from "../../../services/matomo";
 
 import { setYoung } from "../../../redux/auth/actions";
-import { YOUNG_STATUS, YOUNG_PHASE } from "../../../utils";
+import { YOUNG_STATUS, YOUNG_PHASE, translate } from "../../../utils";
 import { saveYoung, STEPS } from "../utils";
 
 export default () => {
   useEffect(() => {
-    matomo.logEvent("inscription", "open_step", "step", "motivation");
+    matomo.logEvent("inscription", "open_step", "step", 5);
   }, []);
 
   const history = useHistory();
@@ -54,12 +54,12 @@ export default () => {
             }
             values.inscriptionStep = STEPS.DONE;
             const { ok, code, data: young } = await api.put("/young", values);
-            if (!ok) return toastr.error("Une erreur s'est produite :", code);
+            if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             dispatch(setYoung(young));
             history.push("/inscription/done");
           } catch (e) {
             console.log(e);
-            toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", e.code);
+            toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code));
           }
         }}
       >

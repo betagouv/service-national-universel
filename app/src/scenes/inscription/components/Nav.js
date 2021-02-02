@@ -1,13 +1,15 @@
 import React from "react";
 import styled from "styled-components";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
-import api from "../../../services/api";
 
+import api from "../../../services/api";
+import { setYoung } from "../../../redux/auth/actions";
 import { STEPS } from "../utils";
 
 export default ({ step }) => {
   const history = useHistory();
+  const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
 
   const currentIndex = Object.keys(STEPS).indexOf(step);
@@ -20,8 +22,13 @@ export default ({ step }) => {
   };
 
   const logout = async () => {
-    await api.post(`/young/logout`);
-    window.location = "/";
+    try {
+      await api.post(`/young/logout`);
+    } catch (error) {
+      console.log({ error });
+    }
+    dispatch(setYoung(null));
+    // window.location.href = "/";
   };
 
   const handleClick = (s) => {
@@ -42,7 +49,7 @@ export default ({ step }) => {
         </h1>
         {young ? (
           <div onClick={logout}>
-            <Button>SE DECONNECTER</Button>
+            <Button>SE DÉCONNECTER</Button>
           </div>
         ) : (
           <Link to="/auth">

@@ -20,10 +20,11 @@ import { saveYoung, STEPS, YOUNG_SITUATIONS } from "../utils";
 
 import AddressInput from "../components/addressInput";
 import Etablissement from "../components/etablissmentInput";
+import { translate } from "../../../utils";
 
 export default () => {
   useEffect(() => {
-    matomo.logEvent("inscription", "open_step", "step", "coordonnees");
+    matomo.logEvent("inscription", "open_step", "step", 1);
   }, []);
 
   const history = useHistory();
@@ -66,7 +67,7 @@ export default () => {
           try {
             values.inscriptionStep = STEPS.PARTICULIERES;
             const { ok, code, data: young } = await api.put("/young", values);
-            if (!ok) return toastr.error("Une erreur s'est produite :", code);
+            if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             dispatch(setYoung(young));
             history.push("/inscription/particulieres");
           } catch (e) {

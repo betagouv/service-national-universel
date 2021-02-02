@@ -21,13 +21,10 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.put("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.put("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    let obj = {};
-    obj = req.body;
-    const data = await MissionObject.findByIdAndUpdate(req.params.id, obj, { new: true });
-    if (!data) return res.status(404).send({ ok: false, code: NOT_FOUND });
-    return res.status(200).send({ ok: true, data });
+    const mission = await MissionObject.findByIdAndUpdate(req.body._id, req.body, { new: true });
+    res.status(200).send({ ok: true, data: mission });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: SERVER_ERROR, error });
@@ -37,6 +34,17 @@ router.put("/:id", passport.authenticate("referent", { session: false }), async 
 router.get("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const data = await MissionObject.findOne({ _id: req.params.id });
+    if (!data) return res.status(404).send({ ok: false, code: NOT_FOUND });
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: SERVER_ERROR, error });
+  }
+});
+
+router.get("/structure/:structureId", passport.authenticate("referent", { session: false }), async (req, res) => {
+  try {
+    const data = await MissionObject.find({ structureId: req.params.structureId });
     if (!data) return res.status(404).send({ ok: false, code: NOT_FOUND });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
@@ -56,7 +64,7 @@ router.get("/:id", passport.authenticate("referent", { session: false }), async 
 // });
 
 //@check
-router.delete("/:id", passport.authenticate("user", { session: false }), async (req, res) => {
+router.delete("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     await MissionObject.findOneAndUpdate({ _id: req.params.id }, { deleted: "yes" });
     res.status(200).send({ ok: true });

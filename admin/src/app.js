@@ -30,6 +30,8 @@ import api from "./services/api";
 
 import { SENTRY_URL, environment } from "./config";
 
+import matomo from "./services/matomo";
+
 import "./index.css";
 
 if (environment === "production") Sentry.init({ dsn: SENTRY_URL, environment: "admin" });
@@ -38,6 +40,7 @@ export default () => {
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
   useEffect(() => {
+    matomo.logEvent("start", "open_app");
     async function fetchData() {
       try {
         if (window.location.href.indexOf("/auth") !== -1) return setLoading(false);
@@ -47,6 +50,7 @@ export default () => {
         if (res.token) api.setToken(res.token);
         // const { data: structure, ok } = await api.get(`/structure`);
         if (res.user) dispatch(setUser(res.user));
+        matomo.setUserId(res.user._id);
         // if (structure) dispatch(setStructure(structure));
       } catch (e) {
         console.log(e);
