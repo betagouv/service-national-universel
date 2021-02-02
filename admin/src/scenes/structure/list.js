@@ -11,7 +11,7 @@ import Panel from "./panel";
 import { translate } from "../../utils";
 import { Link } from "react-router-dom";
 
-const FILTERS = ["SEARCH", "STATUT", "DEPARTMENT", "REGION"];
+const FILTERS = ["SEARCH", "LEGAL_STATUS", "DEPARTMENT", "REGION"];
 const formatLongDate = (date) => {
   if (!date) return "-";
   const d = new Date(date);
@@ -54,10 +54,13 @@ export default () => {
               <FilterRow>
                 <MultiDropdownList
                   className="dropdown-filter"
-                  placeholder="Statut justridique"
-                  componentId="STATUT"
-                  dataField="statutJuridique.keyword"
-                  renderItem={(e) => translate(e)}
+                  placeholder="Statut juridique"
+                  componentId="LEGAL_STATUS"
+                  dataField="legalStatus.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "LEGAL_STATUS") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
                   title=""
                   URLParams={true}
                   showSearch={false}
@@ -162,7 +165,7 @@ const Hit = ({ hit, onClick }) => {
       <td>
         <div style={{ fontWeight: "bold" }}>{hit.name}</div>
         <div style={{ color: "#718096" }}>
-          {hit.statutJuridique} • Créée le {formatLongDate(hit.createdAt)}
+          {translate(hit.legalStatus)} • Créée le {formatLongDate(hit.createdAt)}
         </div>
       </td>
       <td>

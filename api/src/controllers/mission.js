@@ -42,6 +42,17 @@ router.get("/:id", passport.authenticate("referent", { session: false }), async 
   }
 });
 
+router.get("/structure/:structureId", passport.authenticate("referent", { session: false }), async (req, res) => {
+  try {
+    const data = await MissionObject.find({ structureId: req.params.structureId });
+    if (!data) return res.status(404).send({ ok: false, code: NOT_FOUND });
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: SERVER_ERROR, error });
+  }
+});
+
 // router.get("/", async (req, res) => {
 //   try {
 //     const data = ""; //await MissionObject.find(req.query);

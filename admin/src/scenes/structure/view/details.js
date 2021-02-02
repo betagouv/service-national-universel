@@ -20,7 +20,7 @@ export default ({ structure }) => {
             </div>
             <div className="detail">
               <div className="detail-title">Status</div>
-              <div className="detail-text">{translate(structure.statutJuridique)}</div>
+              <div className="detail-text">{translate(structure.legalStatus)}</div>
             </div>
             <div className="detail">
               <div className="detail-title">Région</div>

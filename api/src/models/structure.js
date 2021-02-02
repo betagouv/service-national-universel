@@ -17,11 +17,12 @@ const Schema = new mongoose.Schema({
 
   status: { type: String, default: "WAITING_VALIDATION", enum: ["WAITING_VALIDATION", "WAITING_CORRECTION", "VALIDATED"] },
 
-  user_id: { type: String },
-  is_reseau: { type: Boolean },
-  reseau_id: { type: String },
+  sqlUserId: { type: String },
+  isNetwork: { type: String, enum: ["true", "false"] },
+  networkId: { type: String },
+  sqlNetworkId: { type: String },
 
-  statutJuridique: { type: String, default: "ASSOCIATION", enum: ["ASSOCIATION", "PUBLIC", "PRIVATE", "OTHER"] },
+  legalStatus: { type: String, default: "ASSOCIATION", enum: ["ASSOCIATION", "PUBLIC", "PRIVATE", "OTHER"] },
 
   associationTypes: { type: [String] },
 

@@ -7,77 +7,82 @@ import SelectStatusApplication from "../../../components/selectStatusApplication
 import api from "../../../services/api";
 import { apiURL } from "../../../config";
 
-import { formatStringLongDate } from "../../../utils";
+import { formatStringDate, formatStringLongDate } from "../../../utils";
+import SelectStatusMission from "../../../components/selectStatusMission";
 
 const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "REGION", "DEPARTMENT"];
 
-export default ({ mission, setYoung }) => {
+export default ({ structure, setMission }) => {
   const [data, setData] = useState();
 
   useEffect(() => {
     (async () => {
-      const { ok, data } = await api.get(`/application/mission/${mission._id}`);
+      const { ok, data } = await api.get(`/mission/structure/${structure._id}`);
       if (ok) setData(data);
     })();
   }, []);
 
-  const handleClick = async (application) => {
-    const { ok, data } = await api.get(`/referent/young/${application.youngId}`);
-    if (ok) setYoung(data);
+  const handleClick = async (mission) => {
+    const { ok, data } = await api.get(`/mission/${mission._id}`);
+    if (ok) setMission(data);
   };
 
   if (!data) return <div />;
 
   return (
     <div>
-      <ReactiveBase url={`${apiURL}/es`} app="mission" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-        <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-          <div style={{ flex: 2, position: "relative" }}>
-            <Table>
-              <thead>
-                <tr>
-                  <th width="40%">Volontaire</th>
-                  <th>Date</th>
-                  <th width="20%">Statut pour la mission</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.map((hit, i) => (
-                  <Hit key={i} hit={hit} onClick={() => handleClick(hit)} />
-                ))}
-              </tbody>
-            </Table>
-          </div>
+      <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
+        <div style={{ flex: 2, position: "relative" }}>
+          <Table>
+            <thead>
+              <tr>
+                <th width="40%">Volontaire</th>
+                <th>Dates</th>
+                <th>Places</th>
+                <th width="20%">Statut pour la mission</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.map((hit, i) => (
+                <Hit key={i} hit={hit} onClick={() => handleClick(hit)} />
+              ))}
+            </tbody>
+          </Table>
         </div>
-      </ReactiveBase>
+      </div>
     </div>
   );
 };
 
 const Hit = ({ hit, onClick }) => {
-  const getAge = (d) => {
-    const now = new Date();
-    const date = new Date(d);
-    const diffTime = Math.abs(date - now);
-    return Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
-  };
   return (
     <tr onClick={onClick}>
       <td>
         <TeamMember>
           <div>
-            <h2>{`${hit.youngFirstName} ${hit.youngLastName}`}</h2>
+            <h2>{`${hit.name}`}</h2>
             <p>
-              {hit.youngBirthdateAt ? `${getAge(hit.youngBirthdateAt)} ans` : null} {`• ${hit.youngCity || ""} (${hit.youngDepartment || ""})`}
+              {hit.structureName} {`• ${hit.city || ""} (${hit.department || ""})`}
             </p>
           </div>
         </TeamMember>
       </td>
       <td>
-        <div>{formatStringLongDate(hit.createdAt)}</div>
+        <div>
+          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Du</span> {formatStringDate(hit.startAt)}
+        </div>
+        <div>
+          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Au</span> {formatStringDate(hit.endAt)}
+        </div>
+      </td>
+      <td>
+        {hit.placesTotal <= 1 ? `${hit.placesTotal} place` : `${hit.placesTotal} places`}
+        <div style={{ fontSize: 12, color: "rgb(113,128,150)" }}>
+          {hit.placesTaken} / {hit.placesTotal}
+        </div>
       </td>
       <td onClick={(e) => e.stopPropagation()}>
-        <SelectStatusApplication hit={hit} />
+        <SelectStatusMission hit={hit} />
       </td>
     </tr>
   );
