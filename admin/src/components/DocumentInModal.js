@@ -1,7 +1,9 @@
 import React from "react";
 import { Modal } from "reactstrap";
 import { Page, Document, pdfjs } from "react-pdf";
-pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
+import { pdfjsworker } from "pdfjs-dist/es5/build/pdf.worker.entry";
+pdfjs.GlobalWorkerOptions.workerSrc = pdfjsworker;
+// pdfjs.GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${pdfjs.version}/es5/build/pdf.worker.min.js`;
 
 export default function DocumentInModal({ value, onChange }) {
   if (!value || !value.data || !value.data.data) return <div />;
