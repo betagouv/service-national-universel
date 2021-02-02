@@ -7,6 +7,7 @@ import { Formik } from "formik";
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../redux/auth/actions";
+import { translate } from "../../utils";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
@@ -27,7 +28,7 @@ export default () => {
         onSubmit={async (values) => {
           try {
             const { ok, code, data: young } = await api.put(`/young`, values);
-            if (!ok) return toastr.error("Erreur", code);
+            if (!ok) return toastr.error("Erreur", translate(code));
             if (young) {
               dispatch(setYoung(young));
             }

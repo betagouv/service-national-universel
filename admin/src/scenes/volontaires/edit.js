@@ -56,11 +56,11 @@ export default (props) => {
         onSubmit={async (values) => {
           try {
             const { ok, code, data: young } = await api.put(`/referent/young/${values._id}`, values);
-            if (!ok) toastr.error("Une erreur s'est produite :", code);
+            if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
             toastr.success("Mis à jour!");
           } catch (e) {
             console.log(e);
-            toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", e.code);
+            toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
           }
         }}
       >
@@ -458,12 +458,12 @@ export default (props) => {
           try {
             const { ok, code } = await api.remove(`/young/${young._id}`);
             if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
-            if (!ok) return toastr.error("Une erreur s'est produite :", code);
+            if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             toastr.success("Ce profil a été supprimé.");
             return history.push(`/inscription`);
           } catch (e) {
             console.log(e);
-            return toastr.error("Oups, une erreur est survenue pendant la supression du profil :", e.code);
+            return toastr.error("Oups, une erreur est survenue pendant la supression du profil :", translate(e.code));
           }
         }}
       >

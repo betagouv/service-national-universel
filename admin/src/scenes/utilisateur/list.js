@@ -174,12 +174,12 @@ const Action = ({ hit, color }) => {
   const handleImpersonate = async () => {
     try {
       const { ok, data, token } = await api.post(`/referent/signin_as/referent/${hit._id}`);
-      if (!ok) return toastr.error("Oops, une erreur est survenu lors de la masquarade !", e.code);
+      if (!ok) return toastr.error("Oops, une erreur est survenu lors de la masquarade !", translate(e.code));
       if (token) api.setToken(token);
       if (data) dispatch(setUser(data));
     } catch (e) {
       console.log(e);
-      toastr.error("Oops, une erreur est survenu lors de la masquarade !", e.code);
+      toastr.error("Oops, une erreur est survenu lors de la masquarade !", translate(e.code));
     }
   };
   return (

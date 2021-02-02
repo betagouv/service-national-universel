@@ -40,12 +40,12 @@ export default (props) => {
         onSubmit={async (values) => {
           try {
             const { ok, code, data: user } = await api.put(`/referent/${values._id}`, values);
-            if (!ok) toastr.error("Une erreur s'est produite :", code);
+            if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
             setUser(user);
             toastr.success("Mis à jour !");
           } catch (e) {
             console.log(e);
-            toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", e.code);
+            toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
           }
         }}
       >
