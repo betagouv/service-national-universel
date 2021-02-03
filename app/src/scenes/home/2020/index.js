@@ -27,7 +27,9 @@ export default () => {
           <p style={{ color: "#161e2e", fontSize: "1.5rem", fontWeight: 700 }}>Votre parcours</p>
           <WrapperItem>
             {/* todo add tag CANCEL */}
-            <div className="title">1. Un séjour de cohésion</div>
+            <div className="title">
+              1. Un séjour de cohésion <Tag color="#c81e1e">Phase annulée</Tag>
+            </div>
             <div className="info">
               <div className="subtitle">Séjour annulé suite à la crise sanitaire.</div>
               <div className="subtitle">Vous pouvez cependant demander à participer à la session 2021.</div>
@@ -35,7 +37,9 @@ export default () => {
           </WrapperItem>
           <WrapperItem>
             {/* todo add tag IN_PROGRESS */}
-            <div className="title">2. Une première mission d'intérêt général</div>
+            <div className="title">
+              2. Une première mission d'intérêt général <Tag color="#5145cd">En cours</Tag>
+            </div>
             <div className="info">
               <div className="subtitle">À réaliser dans l’année, jusqu’au 31 juin 2021.</div>
             </div>
@@ -53,6 +57,19 @@ export default () => {
     </>
   );
 };
+
+const Tag = styled.span`
+  color: ${({ color }) => color || "#42389d"};
+  background-color: ${({ color }) => `${color}11` || "#42389d22"};
+  padding: 0.25rem 0.75rem;
+  margin: 0 0.25rem;
+  border-radius: 99999px;
+  font-size: 0.85rem;
+  @media (max-width: 768px) {
+    font-size: 0.7rem;
+    padding: 0.1rem 0.5rem;
+  }
+`;
 
 const WrapperItem = styled.div`
   margin-bottom: 1rem;

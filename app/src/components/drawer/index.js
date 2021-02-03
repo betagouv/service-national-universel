@@ -43,11 +43,12 @@ export default ({ inscription }) => {
     if (tab === DRAWER_TABS.HOME) return false;
     if (young.status === YOUNG_STATUS.REFUSED) return true;
     if (tab === DRAWER_TABS.PHASE1) {
+      if (young.cohort && young.cohort !== "2021") return true;
       return [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status);
     }
     if (tab === DRAWER_TABS.PHASE2) {
-      if (young.cohort && young.cohort !== 2021) return false;
-      return [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status);
+      if (young.cohort && young.cohort !== "2021") return false;
+      return [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.VALIDATED].includes(young.status);
     }
     if (tab === DRAWER_TABS.PHASE3) {
       //todo handle tab phase 3
@@ -64,8 +65,7 @@ export default ({ inscription }) => {
     <Sidebar open={open}>
       <MenuBtn onClick={() => setOpen(!open)} src={require("../../assets/menu.svg")} />
       <HomeLink exact to="/" onClick={(e) => handleClick(e, DRAWER_TABS.HOME)}>
-        <Icon src={require("../../assets/icon-sejour-cohesion.svg")} />
-        {/* <div className="icon">
+        <div className="icon">
           <svg fill="none" viewBox="0 0 24 24">
             <path
               strokeLinecap="round"
@@ -74,7 +74,7 @@ export default ({ inscription }) => {
               d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a1 1 0 001-1V10M9 21h6"
             ></path>
           </svg>
-        </div> */}
+        </div>
         Accueil
       </HomeLink>
       <MainNav>
@@ -85,13 +85,15 @@ export default ({ inscription }) => {
           to="/phase1"
           disabled={getDisabled(DRAWER_TABS.PHASE1)}
           handleClick={(event) => handleClick(event, DRAWER_TABS.PHASE1)}
-          open={activeTab === DRAWER_TABS.PHASE1}
+          open={activeTab === DRAWER_TABS.PHASE1 || young.cohort === "2020"}
         >
-          <ul className="subNav">
-            <li>
-              <Link to="/">Candidater à la session 2021</Link>
-            </li>
-          </ul>
+          {young.cohort === "2020" ? (
+            <ul className="subNav">
+              <li>
+                <Link to="/">Candidater à la session 2021</Link>
+              </li>
+            </ul>
+          ) : null}
         </Item>
         <Item
           title="mission d'intérêt général"
@@ -228,7 +230,7 @@ const Sidebar = styled.div`
 `;
 
 const HomeLink = styled(NavLink)`
-  padding-left: 35px;
+  padding-left: 40px;
   height: 70px;
 `;
 
