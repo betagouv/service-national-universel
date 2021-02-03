@@ -1,24 +1,25 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
+import NextStep from "./nextStep";
 
 export default () => {
   return (
-    <Hero>
-      <div className="content">
-        <h1>
-          <strong>Phase 2</strong>
-        </h1>
-        <p>
-          Culpa voluptate deserunt proident anim ex sunt ad adipisicing enim et pariatur anim. Lorem sint ipsum cupidatat sit laborum Lorem dolor id laborum adipisicing non et.
-          Aliquip aute voluptate amet irure cillum esse mollit veniam reprehenderit.
-        </p>
-        <Link to="/phase3/une-mission">
-          <BackButton>Trouver une mission</BackButton>
-        </Link>
-      </div>
-      <div className="thumb" />
-    </Hero>
+    <>
+      <Hero>
+        <div className="content">
+          <h1>
+            Réalisez votre <strong>mission d'intérêt général</strong>
+          </h1>
+          <p>
+            Culpa voluptate deserunt proident anim ex sunt ad adipisicing enim et pariatur anim. Lorem sint ipsum cupidatat sit laborum Lorem dolor id laborum adipisicing non et.
+            Aliquip aute voluptate amet irure cillum esse mollit veniam reprehenderit.
+          </p>
+        </div>
+        <div className="thumb" />
+      </Hero>
+      <NextStep />
+    </>
   );
 };
 
