@@ -44,4 +44,5 @@ const DownloadBtn = styled(LoadingButton)`
   cursor: pointer;
   margin-right: 5px;
   margin-top: 1rem;
+  width: fit-content;
 `;
