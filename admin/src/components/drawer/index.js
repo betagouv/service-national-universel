@@ -42,14 +42,14 @@ export default () => {
             <li>
               <NavLink to="/user">Utilisateurs</NavLink>
             </li>
+            <li>
+              <NavLink to="/volontaire">Volontaires</NavLink>
+            </li>
           </>
         )}
         {/*   <li>
           <NavLink to="/tuteur">Tuteurs</NavLink>
         </li> */}
-        <li>
-          <NavLink to="/volontaire">Volontaires</NavLink>
-        </li>
         <li>
           <NavLink to="/inscription">Inscriptions</NavLink>
         </li>
