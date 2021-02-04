@@ -40,7 +40,6 @@ export default ({ setYoung }) => {
               </Export>
             </Header>
             <Filter>
-              <ReactiveFilter componentId="PHASE" query={{ query: { bool: { filter: { term: { "phase.keyword": "COHESION_STAY" } } } }, value: "" }} />
               <ReactiveFilter componentId="STATUS" query={{ query: { bool: { filter: { term: { "status.keyword": "VALIDATED" } } } }, value: "" }} />
               <DataSearch
                 showIcon={false}
@@ -71,7 +70,7 @@ export default ({ setYoung }) => {
                   className="dropdown-filter"
                   componentId="PHASE"
                   dataField="phase.keyword"
-                  react={{ and: FILTERS }}
+                  react={{ and: FILTERS.filter((e) => e !== "PHASE") }}
                   renderItem={(e, count) => {
                     return `${translate(e)} (${count})`;
                   }}
