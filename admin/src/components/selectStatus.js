@@ -105,7 +105,9 @@ const ActionBox = styled.div`
     div {
       white-space: nowrap;
       font-size: 14px;
-      padding: 5px 15px;
+      :hover {
+        color: inherit;
+      }
     }
   }
   button {
@@ -148,6 +150,7 @@ const ActionBox = styled.div`
     }
   }
   .dropdown-item {
+    border-radius: 0;
     background-color: transparent;
     border: none;
     color: #767676;
