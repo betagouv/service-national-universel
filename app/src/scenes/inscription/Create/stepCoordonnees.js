@@ -81,7 +81,9 @@ export default () => {
           <>
             <FormRow>
               <Col md={4}>
-                <Label>Pièce d'identité</Label>
+                <Label>
+                  Pièce d'identité<p>Carte nationale d'identité RECTO-VERSO ou passeport</p>
+                </Label>
               </Col>
               <Col>
                 <DndFileInput
@@ -105,7 +107,7 @@ export default () => {
                     handleChange({ target: { value: res.data, name: "cniFiles" } });
                   }}
                 />
-                <div style={{ fontSize: "0.8rem", color: "#555", fontStyle: "italic" }}>* Carte nationale d'identité ou passeport</div>
+                <div style={{ fontSize: "0.8rem", color: "#555", fontStyle: "italic" }}>* Carte nationale d'identité RECTO-VERSO ou passeport</div>
                 <ErrorMessage errors={errors} touched={touched} name="cniFiles" />
               </Col>
             </FormRow>
@@ -419,6 +421,10 @@ const FormRow = styled(Row)`
 const Label = styled.div`
   color: #374151;
   margin-bottom: 10px;
+  p {
+    font-size: 0.9rem;
+    color: #6b7280;
+  }
 `;
 
 const RadioLabel = styled.label`
