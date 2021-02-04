@@ -82,7 +82,13 @@ export default () => {
             <FormRow>
               <Col md={4}>
                 <Label>
-                  Pièce d'identité<p>Carte nationale d'identité RECTO-VERSO ou passeport</p>
+                  Pièce d'identité
+                  <p>
+                    Carte nationale d'identité <b>RECTO-VERSO</b> ou passeport
+                  </p>
+                  <p>
+                    Dans un format <b>lisible</b>
+                  </p>
                 </Label>
               </Col>
               <Col>
@@ -424,6 +430,7 @@ const Label = styled.div`
   p {
     font-size: 0.9rem;
     color: #6b7280;
+    margin: 0;
   }
 `;
 
