@@ -1,6 +1,9 @@
 const cron = require("node-cron");
 const YoungModel = require("../models/young");
 const { capture } = require("../sentry");
+const { sendEmail } = require("../sendinblue");
+const fs = require("fs");
+const path = require("path");
 
 // dev : */5 * * * * * (every 5 secs)
 
@@ -29,13 +32,15 @@ const autoValidate = async () => {
         count++;
         doc.historic.push({ phase: "INSCRIPTION", status: "VALIDATED" });
         doc.set({ status: "VALIDATED", lastStatusAt: Date.now() });
-        doc.save();
+        await doc.save();
+        //send mail
+        await notify(doc);
       }
     } catch (error) {
-      capture("e", e);
+      capture("error", error);
     }
   });
-  capture(`CRON : ${count} validation (2 weeks)`);
+  capture(`CRON (auto validation): ${count} (2 weeks limit reached)`);
 };
 
 const getLastStatus = (doc, status) => doc.historic.filter((e) => e.status === status).reverse()[0];
@@ -46,4 +51,13 @@ const gt2w = (date) => {
   const diffTime = Math.abs(date2 - date1);
   const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
   return diffDays >= 14;
+};
+
+const notify = async (young) => {
+  let htmlContent = fs.readFileSync(path.resolve(__dirname, "../templates/validated.html")).toString();
+  htmlContent = htmlContent.replace(/{{cta}}/g, "https://inscription.snu.gouv.fr");
+  htmlContent = htmlContent.replace(/{{firstName}}/g, young.firstName);
+  htmlContent = htmlContent.replace(/{{lastName}}/g, young.lastName);
+  let subject = "Votre candidature au SNU a été validée";
+  await sendEmail({ name: `${young.firstName} ${young.lastName}`, email: young.email }, subject, htmlContent);
 };
