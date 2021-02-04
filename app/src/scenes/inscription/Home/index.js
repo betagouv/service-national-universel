@@ -45,6 +45,14 @@ export default ({}) => {
                 Je suis de <strong> nationalité française</strong>
               </div>
             </li>
+            <li>
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="rgb(49,196,141)" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+              <div>
+                Je suis disponible du <strong>21 juin</strong> au <strong>2 juillet 2021</strong>
+              </div>
+            </li>
             <Link to="/inscription/profil">
               <li className="button">Commencer l'inscription</li>
             </Link>
