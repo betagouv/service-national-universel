@@ -65,6 +65,7 @@ export default () => {
         validateOnBlur={false}
         onSubmit={async (values) => {
           try {
+            if (!confirm("Avez-vous bien pensé à téléverser le RECTO et le VERSO de votre pièce d'identité ?")) return;
             values.inscriptionStep = STEPS.PARTICULIERES;
             const { ok, code, data: young } = await api.put("/young", values);
             if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
