@@ -48,10 +48,11 @@ router.post("/forgot_password", async (req, res) => ReferentAuth.forgotPassword(
 router.post("/forgot_password_reset", async (req, res) => ReferentAuth.forgotPasswordReset(req, res));
 router.post("/reset_password", passport.authenticate("referent", { session: false }), async (req, res) => ReferentAuth.resetPassword(req, res));
 
-router.post("/signin_as/:type/:id", passport.authenticate("referent", { session: false }), onlyAdmin, async (req, res) => {
+router.post("/signin_as/:type/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const { type, id } = req.params;
     let user = null;
+    if (type === "referent" && req.user.role !== "admin") return res.status(401).send({ ok: false, code: OPERATION_UNAUTHORIZED });
     if (type === "referent") user = await ReferentObject.findById(id);
     else if (type === "young") user = await YoungObject.findById(id);
     if (!user) return res.status(404).send({ code: NOT_FOUND, ok: false });
