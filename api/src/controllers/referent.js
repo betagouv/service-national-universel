@@ -20,6 +20,8 @@ const { decrypt } = require("../cryptoUtils");
 const { sendEmail } = require("../sendinblue");
 const { validatePassword } = require("../utils");
 const { onlyAdmin } = require("../middleware/admin");
+const { uploadFile } = require("../utils");
+const { encrypt } = require("../cryptoUtils");
 const ReferentAuth = new AuthObject(ReferentObject);
 
 const SERVER_ERROR = "SERVER_ERROR";
@@ -255,6 +257,37 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
     });
   } catch (error) {
     capture(error);
+    return res.status(500).send({ ok: false, code: SERVER_ERROR });
+  }
+});
+
+router.post("/file/:key", passport.authenticate("referent", { session: false }), async (req, res) => {
+  try {
+    const key = req.params.key;
+    const { names, youngId } = JSON.parse(req.body.body);
+    const files = Object.keys(req.files || {}).map((e) => req.files[e]);
+
+    const young = await YoungObject.findById(youngId);
+    if (!young) return res.status(404).send({ ok: false });
+
+    for (let i = 0; i < files.length; i++) {
+      let currentFile = files[i];
+      // If multiple file with same names are provided, currentFile is an array. We just take the latest.
+      if (Array.isArray(currentFile)) {
+        currentFile = currentFile[currentFile.length - 1];
+      }
+      const { name, data, mimetype } = currentFile;
+
+      const encryptedBuffer = encrypt(data);
+      const resultingFile = { mimetype: "image/png", encoding: "7bit", data: encryptedBuffer };
+      await uploadFile(`app/young/${young._id}/${key}/${name}`, resultingFile);
+    }
+    young.set({ [key]: names });
+    await young.save();
+    return res.status(200).send({ data: names, ok: true });
+  } catch (error) {
+    capture(error);
+    if (error === "FILE_CORRUPTED") return res.status(500).send({ ok: false, code: FILE_CORRUPTED });
     return res.status(500).send({ ok: false, code: SERVER_ERROR });
   }
 });

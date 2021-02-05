@@ -15,6 +15,7 @@ import { departmentList, regionList, YOUNG_STATUS, translate } from "../../utils
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
+import DndFileInput from "../../components/dndFileInput";
 
 export default (props) => {
   const [young, setYoung] = useState();
@@ -73,13 +74,30 @@ export default (props) => {
                     <Item title="Nom" values={values} name={"lastName"} handleChange={handleChange} />
                     <Item title="Prénom" values={values} name="firstName" handleChange={handleChange} />
                     <Item title="Date de naissance" type="date" values={values} name="birthdateAt" handleChange={handleChange} />
-                    {values.cniFiles.map((e, i) => (
-                      <DownloadButtonWithMargin
-                        key={i}
-                        source={() => api.get(`/referent/youngFile/${values._id}/cniFiles/${e}`)}
-                        title={`Télécharger la pièce d’identité (${i + 1}/${values.cniFiles.length})`}
+                    <Documents>
+                      <h4>Pièces d'identité</h4>
+                      <DndFileInput
+                        placeholder="une pièce d'identité"
+                        errorMessage="Vous devez téléverser une pièce d'identité"
+                        value={values.cniFiles}
+                        source={(e) => api.get(`/referent/youngFile/${values._id}/cniFiles/${e}`)}
+                        name="cniFiles"
+                        onChange={async (e) => {
+                          const res = await api.uploadFile("/referent/file/cniFiles", e.target.files, { youngId: values._id });
+                          if (res.code === "FILE_CORRUPTED") {
+                            return toastr.error(
+                              "Le fichier semble corrompu",
+                              "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
+                              { timeOut: 0 }
+                            );
+                          }
+                          if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
+                          // We update and save it instant.
+                          handleChange({ target: { value: res.data, name: "cniFiles" } });
+                          handleSubmit();
+                        }}
                       />
-                    ))}
+                    </Documents>
                   </BoxContent>
                 </Box>
               </Col>
@@ -244,13 +262,30 @@ export default (props) => {
                       name="highSkilledActivityType"
                       handleChange={handleChange}
                     />
-                    {values.highSkilledActivityProofFiles.map((e, i) => (
-                      <DownloadButtonWithMargin
-                        key={i}
-                        source={() => api.get(`/referent/youngFile/${values._id}/highSkilledActivityProofFiles/${e}`)}
-                        title={`Télécharger le justificatif d'engagement (${i + 1}/${values.highSkilledActivityProofFiles.length})`}
+                    <Documents>
+                      <h4>Documents justificatifs</h4>
+                      <DndFileInput
+                        placeholder="un document justificatif"
+                        errorMessage="Vous devez téléverser un document justificatif"
+                        value={values.highSkilledActivityProofFiles}
+                        source={(e) => api.get(`/referent/youngFile/${values._id}/highSkilledActivityProofFiles/${e}`)}
+                        name="cniFiles"
+                        onChange={async (e) => {
+                          const res = await api.uploadFile("/referent/file/highSkilledActivityProofFiles", e.target.files, { youngId: values._id });
+                          if (res.code === "FILE_CORRUPTED") {
+                            return toastr.error(
+                              "Le fichier semble corrompu",
+                              "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
+                              { timeOut: 0 }
+                            );
+                          }
+                          if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
+                          // We update and save it instant.
+                          handleChange({ target: { value: res.data, name: "highSkilledActivityProofFiles" } });
+                          handleSubmit();
+                        }}
                       />
-                    ))}
+                    </Documents>
                   </BoxContent>
                 </Box>
               </Col>
@@ -312,12 +347,30 @@ export default (props) => {
                       title="Région"
                       options={regionList.map((r) => ({ value: r, label: r }))}
                     />
-                    {values.parentConsentmentFiles.length ? (
-                      <DownloadButtonWithMargin
-                        source={() => api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${values.parentConsentmentFiles[0]}`)}
-                        title={"Télécharger le formulaire de consentement"}
+                    <Documents>
+                      <h4>Attestations des représentants légaux</h4>
+                      <DndFileInput
+                        placeholder="un document justificatif"
+                        errorMessage="Vous devez téléverser un document justificatif"
+                        value={values.parentConsentmentFiles}
+                        source={(e) => api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${e}`)}
+                        name="cniFiles"
+                        onChange={async (e) => {
+                          const res = await api.uploadFile("/referent/file/parentConsentmentFiles", e.target.files, { youngId: values._id });
+                          if (res.code === "FILE_CORRUPTED") {
+                            return toastr.error(
+                              "Le fichier semble corrompu",
+                              "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
+                              { timeOut: 0 }
+                            );
+                          }
+                          if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
+                          // We update and save it instant.
+                          handleChange({ target: { value: res.data, name: "parentConsentmentFiles" } });
+                          handleSubmit();
+                        }}
                       />
-                    ) : null}
+                    </Documents>
                   </BoxContent>
                 </Box>
               </Col>
@@ -369,12 +422,6 @@ export default (props) => {
                       title="Région"
                       options={regionList.map((r) => ({ value: r, label: r }))}
                     />
-                    {values.parentConsentmentFiles && values.parentConsentmentFiles.length === 2 ? (
-                      <DownloadButtonWithMargin
-                        source={() => api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${values.parentConsentmentFiles[1]}`)}
-                        title={"Télécharger le formulaire de consentement"}
-                      />
-                    ) : null}
                   </BoxContent>
                 </Box>
               </Col>
@@ -394,13 +441,30 @@ export default (props) => {
                         { value: "false", label: "Non" },
                       ]}
                     />
-                    {values.imageRightFiles.map((e, i) => (
-                      <DownloadButtonWithMargin
-                        key={i}
-                        source={() => api.get(`/referent/youngFile/${values._id}/imageRightFiles/${e}`)}
-                        title={`Télécharger le formulaire de consentement de droit à l'image (${i + 1}/${values.imageRightFiles.length})`}
+                    <Documents>
+                      <h4>Formulaire de consentement de droit à l'image</h4>
+                      <DndFileInput
+                        placeholder="un document justificatif"
+                        errorMessage="Vous devez téléverser un document justificatif"
+                        value={values.imageRightFiles}
+                        source={(e) => api.get(`/referent/youngFile/${values._id}/imageRightFiles/${e}`)}
+                        name="cniFiles"
+                        onChange={async (e) => {
+                          const res = await api.uploadFile("/referent/file/imageRightFiles", e.target.files, { youngId: values._id });
+                          if (res.code === "FILE_CORRUPTED") {
+                            return toastr.error(
+                              "Le fichier semble corrompu",
+                              "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
+                              { timeOut: 0 }
+                            );
+                          }
+                          if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
+                          // We update and save it instant.
+                          handleChange({ target: { value: res.data, name: "imageRightFiles" } });
+                          handleSubmit();
+                        }}
                       />
-                    ))}
+                    </Documents>
                   </BoxContent>
                 </Box>
               </Col>
@@ -473,6 +537,17 @@ const Select = ({ title, name, values, handleChange, disabled, errors, touched, 
     </Row>
   );
 };
+
+const Documents = styled.div`
+  margin-left: 1rem;
+  margin-right: 1rem;
+  margin-top: 3rem;
+  h4 {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #6a6f85;
+  }
+`;
 
 const DownloadButtonWithMargin = styled(DownloadButton)`
   margin-left: 1rem;
