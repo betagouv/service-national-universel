@@ -312,6 +312,35 @@ export default (props) => {
                       title="Région"
                       options={regionList.map((r) => ({ value: r, label: r }))}
                     />
+                    <Select
+                      disabled={!values.parentConsentmentFilesCompliant}
+                      name="parentConsentmentFilesCompliant"
+                      values={values}
+                      handleChange={handleChange}
+                      title="Consentement"
+                      options={[
+                        { value: "true", label: "Conforme" },
+                        { value: "false", label: "Non conforme" },
+                      ]}
+                    />
+                    {values.parentConsentmentFilesCompliant === "false" ? (
+                      <>
+                        <Checkbox
+                          name="parentConsentmentFilesCompliantInfo"
+                          value="signature"
+                          values={values}
+                          handleChange={handleChange}
+                          description="Manque de la signature d'un des représentants"
+                        />
+                        <Checkbox
+                          name="parentConsentmentFilesCompliantInfo"
+                          value="proof"
+                          values={values}
+                          handleChange={handleChange}
+                          description="Manque d'un justificatif d'autorité parentale non partagée"
+                        />
+                      </>
+                    ) : null}
                     {values.parentConsentmentFiles.length ? (
                       <DownloadButtonWithMargin
                         source={() => api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${values.parentConsentmentFiles[0]}`)}
@@ -463,12 +492,28 @@ const Select = ({ title, name, values, handleChange, disabled, errors, touched, 
         <label>{title}</label>
       </Col>
       <Col md={8}>
-        <select disabled={disabled} className="form-control" className="form-control" name={name} value={values[name]} onChange={handleChange}>
+        <select disabled={disabled} className="form-control" name={name} value={values[name]} onChange={handleChange}>
           <option key={-1} value="" label="" />
           {options.map((o, i) => (
             <option key={i} value={o.value} label={o.label} />
           ))}
         </select>
+      </Col>
+    </Row>
+  );
+};
+
+const Checkbox = ({ title, name, value, values, handleChange, disabled, description }) => {
+  return (
+    <Row className="detail">
+      <Col md={4}>
+        <label>{title}</label>
+      </Col>
+      <Col md={8}>
+        <RadioLabel>
+          <Field disabled={disabled} className="form-control" type="radio" name={name} value={value} checked={values[name] === value} onChange={handleChange} />
+          {description}
+        </RadioLabel>
       </Col>
     </Row>
   );
@@ -551,7 +596,7 @@ const BoxContent = styled.div`
   label {
     font-weight: 500;
     color: #6a6f85;
-    display: block;
+    display: flex;
     margin-bottom: 0;
   }
 
@@ -583,5 +628,25 @@ const BoxContent = styled.div`
       props.direction === "column" &&
       `
     `}
+  }
+`;
+
+const RadioLabel = styled.label`
+  display: flex;
+  align-items: center;
+  color: #374151;
+  font-size: 14px;
+  margin-bottom: 0px;
+  text-align: left;
+  :last-child {
+    margin-bottom: 0;
+  }
+  input {
+    cursor: pointer;
+    margin-right: 12px;
+    width: 15px;
+    height: 15px;
+    min-width: 15px;
+    min-height: 15px;
   }
 `;
