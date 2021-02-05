@@ -56,6 +56,15 @@ export default ({}) => {
             <Link to="/inscription/profil">
               <li className="button">Commencer l'inscription</li>
             </Link>
+            <li>
+              <Infos>
+                Pour compléter l'inscription en quelques minutes, il vous faudra :
+                <div>
+                  • Une <b>pièce d'identité</b> (Carte Nationale d'Identité ou Passeport)
+                  <br />• La présence de vos <b>représentants légaux</b> pour obtenir leurs signatures
+                </div>
+              </Infos>
+            </li>
           </ul>
         </Points>
         <a style={{ fontSize: 12, color: "#000" }} href="https://www.snu.gouv.fr/foire-aux-questions-11" target="blank">
@@ -65,6 +74,11 @@ export default ({}) => {
     </div>
   );
 };
+
+const Infos = styled.div`
+  font-size: 0.8rem;
+  color: #6a7181;
+`;
 
 const Wrapper = styled.div`
   padding: 0 2rem 1rem;
@@ -244,13 +258,15 @@ const Points = styled.div`
     color: rgb(37, 47, 63);
     font-size: 20px;
     padding: 30px 2rem;
-    border-bottom: 1px solid #e5e7eb;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     svg {
       height: 26px;
       margin-right: 10px;
+    }
+    :not(:last-child) {
+      border-bottom: 1px solid #e5e7eb;
     }
   }
   .button {
@@ -260,7 +276,6 @@ const Points = styled.div`
     font-weight: 500;
     font-size: 1rem;
     cursor: pointer;
-    border-radius: 0 0 8px 8px;
     padding: 22px 10px;
     margin: -2px;
     letter-spacing: 0.03em;
