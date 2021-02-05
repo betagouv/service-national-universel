@@ -7,7 +7,6 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/fr";
 import { useSelector } from "react-redux";
 
-import DownloadButton from "../../components/DownloadButton";
 import Historic from "../../components/historic";
 
 import DateInput from "../../components/dateInput";
@@ -547,10 +546,6 @@ const Documents = styled.div`
     font-weight: 500;
     color: #6a6f85;
   }
-`;
-
-const DownloadButtonWithMargin = styled(DownloadButton)`
-  margin-left: 1rem;
 `;
 
 const DeleteBtn = styled.button`
