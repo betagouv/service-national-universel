@@ -219,8 +219,10 @@ router.post("/email/:template/:youngId", passport.authenticate("referent", { ses
       subject = "Votre candidature au SNU a été validée";
     } else if (template === "refuse") {
       htmlContent = fs.readFileSync(path.resolve(__dirname, "../templates/rejected.html")).toString();
+      htmlContent = htmlContent.replace(/{{message}}/g, `${req.body.message}`);
       htmlContent = htmlContent.replace(/{{firstName}}/g, young.firstName);
       htmlContent = htmlContent.replace(/{{lastName}}/g, young.lastName);
+      htmlContent = htmlContent.replace(/\n/g, "<br/>");
       subject = "Votre candidature au SNU a été refusée";
     }
 
