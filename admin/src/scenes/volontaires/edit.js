@@ -373,7 +373,7 @@ export default (props) => {
                   <BoxTitle>Consentement des représentants légaux</BoxTitle>
                   <BoxContent direction="column">
                     <Select
-                      disabled={!values.parentConsentmentFilesCompliant}
+                      disabled={!values.parentConsentmentFiles.length}
                       name="parentConsentmentFilesCompliant"
                       values={values}
                       handleChange={handleChange}
