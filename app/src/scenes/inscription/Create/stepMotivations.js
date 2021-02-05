@@ -32,6 +32,7 @@ export default () => {
   return (
     <Wrapper>
       <Heading>
+        <Optional>Optionnel</Optional>
         <h2>Vos motivations pour le SNU</h2>
         <p>Exprimez en quelques mots pourquoi vous souhaitez participer au Service National Universel</p>
       </Heading>
@@ -66,7 +67,6 @@ export default () => {
         {({ values, handleChange, handleSubmit }) => (
           <>
             <Input type="textarea" rows={10} placeholder="Vos motivations en quelques mots ..." name="motivations" value={values.motivations} onChange={handleChange} />
-            <Optional>Optionnel</Optional>
             <Footer>
               <ButtonContainer>
                 <SaveButton onClick={() => handleSave(values)}>Enregistrer</SaveButton>
@@ -109,8 +109,8 @@ const Heading = styled.div`
 const Optional = styled.div`
   font-weight: 400;
   color: #6b7280;
-  text-align: center;
   padding-top: 5px;
+  font-size: 2rem;
 `;
 
 const Footer = styled.div`
