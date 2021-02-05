@@ -29,11 +29,10 @@ export default ({ onClose, mission }) => {
   if (!mission) return <div />;
   return (
     <Panel>
-      <div style={{ display: "flex" }}>
+      <div style={{ display: "flex", marginBottom: "15px" }}>
         <Subtitle>MISSION</Subtitle>
         <div className="close" onClick={onClose} />
       </div>
-      <div className="name">{mission.structureName}</div>
       <div className="title">{mission.name}</div>
       <Link to={`/mission/${mission._id}`}>
         <Button className="btn-blue">Consulter</Button>
@@ -68,7 +67,7 @@ export default ({ onClose, mission }) => {
 
       <div className="detail">
         <div className="detail-title">Statut</div>
-        <div className="detail-text">{translate(structure.status)}</div>
+        <div className="detail-text">{translate(structure.legalStatus)}</div>
       </div>
       <div className="detail">
         <div className="detail-title">Dép.</div>

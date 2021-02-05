@@ -111,7 +111,7 @@ export default ({ mission }) => {
                 </Legend>
                 <div className="detail">
                   <div className="detail-title">Statut</div>
-                  <div className="detail-text">{translate(structure.status)}</div>
+                  <div className="detail-text">{translate(structure.legalStatus)}</div>
                 </div>
                 <div className="detail">
                   <div className="detail-title">Région</div>

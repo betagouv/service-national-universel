@@ -138,6 +138,8 @@ const Schema = new mongoose.Schema({
   // * Consentements
   parentConsentment: { type: String, enum: ["true", "false"] },
   parentConsentmentFiles: { type: [String], default: [] },
+  parentConsentmentFilesCompliant: { type: String, enum: ["true", "false"] },
+  parentConsentmentFilesCompliantInfo: { type: String },
   consentment: { type: String, enum: ["true", "false"] },
   imageRight: { type: String, enum: ["true", "false"] },
   imageRightFiles: { type: [String], default: [] },
