@@ -90,7 +90,7 @@ class Auth {
 
   async logout(req, res) {
     try {
-      res.clearCookie("jwt");
+      res.clearCookie("jwt", cookieOptions());
       return res.status(200).send({ ok: true });
     } catch (error) {
       capture(error);
