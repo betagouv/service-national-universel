@@ -13,11 +13,12 @@ import MailCorrection from "../scenes/inscription/MailCorrection";
 import MailRefused from "../scenes/inscription/MailRefused";
 
 export default ({ hit }) => {
-  const STATUS = [YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.VALIDATED, YOUNG_STATUS.REFUSED];
-
   const [modal, setModal] = useState(null);
   const [young, setYoung] = useState(null);
   const user = useSelector((state) => state.Auth.user);
+
+  let STATUS = [YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.VALIDATED, YOUNG_STATUS.REFUSED];
+  if (user.role === "admin") STATUS.push(YOUNG_STATUS.WAITING_VALIDATION);
 
   useEffect(() => {
     (async () => {
