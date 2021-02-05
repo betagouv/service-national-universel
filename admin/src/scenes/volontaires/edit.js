@@ -312,41 +312,6 @@ export default (props) => {
                       title="Région"
                       options={regionList.map((r) => ({ value: r, label: r }))}
                     />
-                    <Select
-                      disabled={!values.parentConsentmentFilesCompliant}
-                      name="parentConsentmentFilesCompliant"
-                      values={values}
-                      handleChange={handleChange}
-                      title="Consentement"
-                      options={[
-                        { value: "true", label: "Conforme" },
-                        { value: "false", label: "Non conforme" },
-                      ]}
-                    />
-                    {values.parentConsentmentFilesCompliant === "false" ? (
-                      <>
-                        <Checkbox
-                          name="parentConsentmentFilesCompliantInfo"
-                          value="signature"
-                          values={values}
-                          handleChange={handleChange}
-                          description="Manque de la signature d'un des représentants"
-                        />
-                        <Checkbox
-                          name="parentConsentmentFilesCompliantInfo"
-                          value="proof"
-                          values={values}
-                          handleChange={handleChange}
-                          description="Manque d'un justificatif d'autorité parentale non partagée"
-                        />
-                      </>
-                    ) : null}
-                    {values.parentConsentmentFiles.length ? (
-                      <DownloadButtonWithMargin
-                        source={() => api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${values.parentConsentmentFiles[0]}`)}
-                        title={"Télécharger le formulaire de consentement"}
-                      />
-                    ) : null}
                   </BoxContent>
                 </Box>
               </Col>
@@ -398,17 +363,55 @@ export default (props) => {
                       title="Région"
                       options={regionList.map((r) => ({ value: r, label: r }))}
                     />
-                    {values.parentConsentmentFiles && values.parentConsentmentFiles.length === 2 ? (
-                      <DownloadButtonWithMargin
-                        source={() => api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${values.parentConsentmentFiles[1]}`)}
-                        title={"Télécharger le formulaire de consentement"}
-                      />
-                    ) : null}
                   </BoxContent>
                 </Box>
               </Col>
             </Row>
             <Row>
+              <Col md={6} style={{ marginBottom: "20px" }}>
+                <Box>
+                  <BoxTitle>Consentement des représentants légaux</BoxTitle>
+                  <BoxContent direction="column">
+                    <Select
+                      disabled={!values.parentConsentmentFilesCompliant}
+                      name="parentConsentmentFilesCompliant"
+                      values={values}
+                      handleChange={handleChange}
+                      title="Consentement"
+                      options={[
+                        { value: "true", label: "Conforme" },
+                        { value: "false", label: "Non conforme" },
+                      ]}
+                    />
+                    {values.parentConsentmentFilesCompliant === "false" ? (
+                      <>
+                        <Checkbox
+                          name="parentConsentmentFilesCompliantInfo"
+                          value="signature"
+                          values={values}
+                          handleChange={handleChange}
+                          description="Manque de la signature d'un des représentants"
+                        />
+                        <Checkbox
+                          name="parentConsentmentFilesCompliantInfo"
+                          value="proof"
+                          values={values}
+                          handleChange={handleChange}
+                          description="Manque d'un justificatif d'autorité parentale non partagée"
+                        />
+                        <Checkbox name="parentConsentmentFilesCompliantInfo" value="other" values={values} handleChange={handleChange} description="Autre" />
+                      </>
+                    ) : null}
+                    {values.parentConsentmentFiles.map((e, i) => (
+                      <DownloadButtonWithMargin
+                        key={i}
+                        source={() => api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${e}`)}
+                        title={`Télécharger le formulaire de consentement (${i + 1}/${values.parentConsentmentFiles.length})`}
+                      />
+                    ))}
+                  </BoxContent>
+                </Box>
+              </Col>
               <Col md={6} style={{ marginBottom: "20px" }}>
                 <Box>
                   <BoxTitle>Consentement de droit à l'image</BoxTitle>
