@@ -110,7 +110,7 @@ const Parent = ({ id = 1, values, errors, touched, handleChange }) => {
       </FormRow>
       <FormRow align="center">
         <Col md={4}>
-          <Label>Nom</Label>
+          <Label>{isParentFromFranceConnect ? "Nom de naissance" : "Nom"}</Label>
         </Col>
         <Col>
           <Field
