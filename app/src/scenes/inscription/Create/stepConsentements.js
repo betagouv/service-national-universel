@@ -109,7 +109,6 @@ export default () => {
 
                     if (!ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
                     handleChange({ target: { value: files, name: "parentConsentmentFiles" } });
-                    handleChange({ target: { value: "true", name: "parentConsentmentFilesCompliant" } });
                     toastr.success("Fichier téléversé");
                   }}
                 />
