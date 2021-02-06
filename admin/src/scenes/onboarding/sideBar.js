@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { useDispatch, useSelector } from "react-redux";
 import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
+
 export default ({ step }) => {
   const dispatch = useDispatch();
 
@@ -27,7 +28,7 @@ export default ({ step }) => {
 };
 
 const Message = ({ step }) => {
-  const user = useSelector((state) => state.Auth.user);
+  const user = { firstName: "Sebastien", lastName: "Le Goff" }; //useSelector((state) => state.Auth.user);
 
   if (step === "profil") {
     return (
