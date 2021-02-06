@@ -417,7 +417,6 @@ export default (props) => {
                         { value: "false", label: "Non conforme" },
                       ]}
                     />
-
                     {values.parentConsentmentFilesCompliant === "false" ? (
                       <>
                         <Checkbox
