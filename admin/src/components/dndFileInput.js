@@ -12,34 +12,34 @@ function getFileName(file) {
 export default ({ value, onChange, name, errorMessage = requiredMessage, placeholder = "votre fichier", source }) => {
   const [filesList, setFilesList] = useState(value || []);
 
-  useEffect(() => {
-    const dropArea = document.getElementById("file-drop");
-    dropArea.addEventListener("dragleave", (e) => e.preventDefault(), false);
-    dropArea.addEventListener("dragover", (e) => e.preventDefault(), false);
-    dropArea.addEventListener(
-      "dragenter",
-      (e) => {
-        e.preventDefault();
-        dropArea.style.background = "#eee";
-      },
-      false
-    );
-    dropArea.addEventListener(
-      "drop",
-      (e) => {
-        e.preventDefault();
-        let dt = e.dataTransfer;
-        let files = dt.files;
-        dropArea.style.background = "#fff";
-        for (let i = 0; i < files.length; i++) {
-          if (!isFileSupported(files[i].name)) return toastr.error(`Le type du fichier ${files[i].name} n'est pas supporté.`);
-          if (files[i].size > 5000000) return toastr.error(`Ce fichier ${files[i].name} est trop volumineux.`);
-        }
-        handleChange(files);
-      },
-      false
-    );
-  });
+  // useEffect(() => {
+  //   const dropArea = document.getElementById("file-drop");
+  //   dropArea.addEventListener("dragleave", (e) => e.preventDefault(), false);
+  //   dropArea.addEventListener("dragover", (e) => e.preventDefault(), false);
+  //   dropArea.addEventListener(
+  //     "dragenter",
+  //     (e) => {
+  //       e.preventDefault();
+  //       dropArea.style.background = "#eee";
+  //     },
+  //     false
+  //   );
+  //   dropArea.addEventListener(
+  //     "drop",
+  //     (e) => {
+  //       e.preventDefault();
+  //       let dt = e.dataTransfer;
+  //       let files = dt.files;
+  //       dropArea.style.background = "#fff";
+  //       for (let i = 0; i < files.length; i++) {
+  //         if (!isFileSupported(files[i].name)) return toastr.error(`Le type du fichier ${files[i].name} n'est pas supporté.`);
+  //         if (files[i].size > 5000000) return toastr.error(`Ce fichier ${files[i].name} est trop volumineux.`);
+  //       }
+  //       handleChange(files);
+  //     },
+  //     false
+  //   );
+  // });
 
   function onAdd(files) {
     Object.keys(files).forEach((i) => {
@@ -95,7 +95,7 @@ export default ({ value, onChange, name, errorMessage = requiredMessage, placeho
           onChange={(e) => onAdd(e.target.files)}
         />
         <>
-          <span style={{ color: "#5850ec" }}>Téléversez {placeholder}</span> ou glissez-déposez
+          <span style={{ color: "#5850ec" }}>Téléversez {placeholder}</span>
           <span style={{ display: "block", fontSize: 13 }}>PDF, PNG ou JPG jusqu'à 5 Mo</span>
         </>
       </ImageInput>
@@ -126,7 +126,6 @@ const ImageInput = styled.label`
   border-radius: 6px;
   cursor: pointer;
   color: #4b5563;
-  max-width: 500px;
   font-size: 14px;
   line-height: 1.7;
   cursor: pointer;

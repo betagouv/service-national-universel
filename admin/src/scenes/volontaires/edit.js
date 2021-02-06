@@ -26,7 +26,7 @@ export default (props) => {
       const id = props.match && props.match.params && props.match.params.id;
       if (!id) return setYoung(null);
       const { data } = await api.get(`/referent/young/${id}`);
-      setYoung(data);
+      return setYoung(data);
     })();
   }, []);
 
@@ -346,30 +346,6 @@ export default (props) => {
                       title="Région"
                       options={regionList.map((r) => ({ value: r, label: r }))}
                     />
-                    <Documents>
-                      <h4>Attestations des représentants légaux</h4>
-                      <DndFileInput
-                        placeholder="un document justificatif"
-                        errorMessage="Vous devez téléverser un document justificatif"
-                        value={values.parentConsentmentFiles}
-                        source={(e) => api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${e}`)}
-                        name="cniFiles"
-                        onChange={async (e) => {
-                          const res = await api.uploadFile("/referent/file/parentConsentmentFiles", e.target.files, { youngId: values._id });
-                          if (res.code === "FILE_CORRUPTED") {
-                            return toastr.error(
-                              "Le fichier semble corrompu",
-                              "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
-                              { timeOut: 0 }
-                            );
-                          }
-                          if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
-                          // We update and save it instant.
-                          handleChange({ target: { value: res.data, name: "parentConsentmentFiles" } });
-                          handleSubmit();
-                        }}
-                      />
-                    </Documents>
                   </BoxContent>
                 </Box>
               </Col>
@@ -426,6 +402,68 @@ export default (props) => {
               </Col>
             </Row>
             <Row>
+              <Col md={6} style={{ marginBottom: "20px" }}>
+                <Box>
+                  <BoxTitle>Consentement des représentants légaux</BoxTitle>
+                  <BoxContent direction="column">
+                    <Select
+                      disabled={!values.parentConsentmentFiles.length}
+                      name="parentConsentmentFilesCompliant"
+                      values={values}
+                      handleChange={handleChange}
+                      title="Consentement"
+                      options={[
+                        { value: "true", label: "Conforme" },
+                        { value: "false", label: "Non conforme" },
+                      ]}
+                    />
+
+                    {values.parentConsentmentFilesCompliant === "false" ? (
+                      <>
+                        <Checkbox
+                          name="parentConsentmentFilesCompliantInfo"
+                          value="signature"
+                          values={values}
+                          handleChange={handleChange}
+                          description="Manque de la signature d'un des représentants"
+                        />
+                        <Checkbox
+                          name="parentConsentmentFilesCompliantInfo"
+                          value="proof"
+                          values={values}
+                          handleChange={handleChange}
+                          description="Manque d'un justificatif d'autorité parentale non partagée"
+                        />
+                        <Checkbox name="parentConsentmentFilesCompliantInfo" value="other" values={values} handleChange={handleChange} description="Autre" />
+                      </>
+                    ) : null}
+                    <Documents>
+                      <h4>Attestations des représentants légaux</h4>
+                      <DndFileInput
+                        placeholder="un document justificatif"
+                        errorMessage="Vous devez téléverser un document justificatif"
+                        value={values.parentConsentmentFiles}
+                        source={(e) => api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${e}`)}
+                        name="cniFiles"
+                        onChange={async (e) => {
+                          const res = await api.uploadFile("/referent/file/parentConsentmentFiles", e.target.files, { youngId: values._id });
+                          if (res.code === "FILE_CORRUPTED") {
+                            return toastr.error(
+                              "Le fichier semble corrompu",
+                              "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
+                              { timeOut: 0 }
+                            );
+                          }
+                          if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
+                          // We update and save it instant.
+                          handleChange({ target: { value: res.data, name: "parentConsentmentFiles" } });
+                          handleSubmit();
+                        }}
+                      />
+                    </Documents>
+                  </BoxContent>
+                </Box>
+              </Col>
               <Col md={6} style={{ marginBottom: "20px" }}>
                 <Box>
                   <BoxTitle>Consentement de droit à l'image</BoxTitle>
@@ -526,12 +564,28 @@ const Select = ({ title, name, values, handleChange, disabled, errors, touched, 
         <label>{title}</label>
       </Col>
       <Col md={8}>
-        <select disabled={disabled} className="form-control" className="form-control" name={name} value={values[name]} onChange={handleChange}>
+        <select disabled={disabled} className="form-control" name={name} value={values[name]} onChange={handleChange}>
           <option key={-1} value="" label="" />
           {options.map((o, i) => (
             <option key={i} value={o.value} label={o.label} />
           ))}
         </select>
+      </Col>
+    </Row>
+  );
+};
+
+const Checkbox = ({ title, name, value, values, handleChange, disabled, description }) => {
+  return (
+    <Row className="detail">
+      <Col md={4}>
+        <label>{title}</label>
+      </Col>
+      <Col md={8}>
+        <RadioLabel>
+          <Field disabled={disabled} className="form-control" type="radio" name={name} value={value} checked={values[name] === value} onChange={handleChange} />
+          {description}
+        </RadioLabel>
       </Col>
     </Row>
   );
@@ -545,6 +599,10 @@ const Documents = styled.div`
     font-size: 1rem;
     font-weight: 500;
     color: #6a6f85;
+  }
+  label {
+    display: block !important;
+    width: 100%;
   }
 `;
 
@@ -621,7 +679,7 @@ const BoxContent = styled.div`
   label {
     font-weight: 500;
     color: #6a6f85;
-    display: block;
+    display: flex;
     margin-bottom: 0;
   }
 
@@ -653,5 +711,25 @@ const BoxContent = styled.div`
       props.direction === "column" &&
       `
     `}
+  }
+`;
+
+const RadioLabel = styled.label`
+  display: flex;
+  align-items: center;
+  color: #374151;
+  font-size: 14px;
+  margin-bottom: 0px;
+  text-align: left;
+  :last-child {
+    margin-bottom: 0;
+  }
+  input {
+    cursor: pointer;
+    margin-right: 12px;
+    width: 15px;
+    height: 15px;
+    min-width: 15px;
+    min-height: 15px;
   }
 `;
