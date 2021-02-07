@@ -33,12 +33,18 @@ export default ({ value, onChange, name, errorMessage = requiredMessage, placeho
         for (let i = 0; i < files.length; i++) {
           if (!isFileSupported(files[i].name)) return toastr.error(`Le type du fichier ${files[i].name} n'est pas supporté.`);
           if (files[i].size > 5000000) return toastr.error(`Ce fichier ${files[i].name} est trop volumineux.`);
+          const fileName = files[i].name.match(/(.*)(\..*)/);
+          const newName = `${fileName[1]}-${filesList.length}${fileName[2]}`;
+          Object.defineProperty(files[i], "name", {
+            writable: true,
+            value: newName,
+          });
         }
-        handleChange(files);
+        handleChange([...filesList, ...files]);
       },
       false
     );
-  });
+  }, []);
 
   function onAdd(files) {
     Object.keys(files).forEach((i) => {
