@@ -11,7 +11,6 @@ const { capture } = require("../sentry");
 const { uploadFile } = require("../utils");
 const { encrypt } = require("../cryptoUtils");
 const { getQPV } = require("../qpv");
-
 const YoungObject = require("../models/young");
 const AuthObject = require("../auth");
 
@@ -61,10 +60,6 @@ router.post("/file/:key", passport.authenticate("young", { session: false }), as
 router.post("/", async (req, res) => {
   try {
     const young = await YoungObject.create(req.body);
-
-    // const qpv = await getQPV(young.zip, young.city, young.address);
-    // young.qpv;
-
     return res.status(200).send({ young, ok: true });
   } catch (error) {
     if (error.code === 11000) return res.status(409).send({ ok: false, code: YOUNG_ALREADY_REGISTERED });
@@ -86,7 +81,16 @@ router.get("/", passport.authenticate("young", { session: false }), async (req, 
 //@check
 router.put("/", passport.authenticate("young", { session: false }), async (req, res) => {
   try {
-    const young = await YoungObject.findByIdAndUpdate(req.user._id, req.body, { new: true });
+    const obj = req.body;
+
+    //Check quartier prioritaires
+    if (obj.zip && obj.city && obj.address && !obj.qpv) {
+      const qpv = await getQPV(obj.zip, obj.city, obj.address);
+      if (qpv === true) obj.qpv = "true";
+      if (qpv === false) obj.qpv = "false";
+    }
+
+    const young = await YoungObject.findByIdAndUpdate(req.user._id, obj, { new: true });
     res.status(200).send({ ok: true, data: young });
   } catch (error) {
     capture(error);
