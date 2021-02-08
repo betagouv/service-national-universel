@@ -24,11 +24,22 @@ export default () => {
             <strong>{young.firstName},</strong> ravis de vous retrouver !
           </h1>
           <p>Votre espace volontaire vous accompagne à chaque étape de votre SNU.</p>
+          <Separator />
           <p style={{ color: "#161e2e", fontSize: "1.5rem", fontWeight: 700 }}>Votre parcours</p>
           <WrapperItem>
             {/* todo add tag CANCEL */}
             <div className="title">
-              1. Un séjour de cohésion <Tag color="#046c4e">Phase validée</Tag>
+              1. Un séjour de cohésion{" "}
+              <Tag color="#046c4e">
+                <svg class="ml-1 mr-0.5 h-5 w-5 text-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path
+                    fill-rule="evenodd"
+                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                    clip-rule="evenodd"
+                  ></path>
+                </svg>
+                Phase validée
+              </Tag>
             </div>
             <div className="info">
               <div className="subtitle">Réalisé du 21 juin au 2 juillet 2019.</div>
@@ -57,16 +68,29 @@ export default () => {
   );
 };
 
+const Separator = styled.hr`
+  margin: 2.5rem 0;
+  height: 1px;
+  border-style: none;
+  background-color: #e5e7eb;
+`;
+
 const Tag = styled.span`
   color: ${({ color }) => color || "#42389d"};
   background-color: ${({ color }) => `${color}11` || "#42389d22"};
-  padding: 0.25rem 0.75rem;
+  padding: 0.25rem 0.75rem 0.25rem 0;
   margin: 0 0.25rem;
   border-radius: 99999px;
   font-size: 0.85rem;
   @media (max-width: 768px) {
     font-size: 0.7rem;
     padding: 0.1rem 0.5rem;
+  }
+  svg {
+    height: 1rem;
+    margin: 0;
+    margin-right: 0.2rem;
+    padding: 0;
   }
 `;
 

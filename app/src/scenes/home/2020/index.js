@@ -24,6 +24,7 @@ export default () => {
             <strong>{young.firstName},</strong> ravis de vous retrouver !
           </h1>
           <p>Votre espace volontaire vous accompagne à chaque étape de votre SNU.</p>
+          <Separator />
           <p style={{ color: "#161e2e", fontSize: "1.5rem", fontWeight: 700 }}>Votre parcours</p>
           <WrapperItem>
             {/* todo add tag CANCEL */}
@@ -32,7 +33,12 @@ export default () => {
             </div>
             <div className="info">
               <div className="subtitle">Séjour annulé suite à la crise sanitaire.</div>
-              <div className="subtitle">Vous pouvez cependant demander à participer à la session 2021.</div>
+              <div className="subtitle">
+                Vous pouvez cependant demander à{" "}
+                <a style={{ color: "inherit", textDecoration: "underline" }} href="/inscription/profil" target="blank">
+                  participer à la session 2021.
+                </a>
+              </div>
             </div>
           </WrapperItem>
           <WrapperItem>
@@ -95,6 +101,13 @@ const WrapperItem = styled.div`
     font-size: 1.25rem !important;
     font-weight: 500;
   }
+`;
+
+const Separator = styled.hr`
+  margin: 2.5rem 0;
+  height: 1px;
+  border-style: none;
+  background-color: #e5e7eb;
 `;
 
 const Content = styled.div`
