@@ -19,6 +19,7 @@ const YoungAuth = new AuthObject(YoungObject);
 const SERVER_ERROR = "SERVER_ERROR";
 const FILE_CORRUPTED = "FILE_CORRUPTED";
 const YOUNG_ALREADY_REGISTERED = "YOUNG_ALREADY_REGISTERED";
+const UNSUPPORTED_TYPE = "UNSUPPORTED_TYPE";
 
 router.post("/signin", (req, res) => YoungAuth.signin(req, res));
 router.post("/logout", (req, res) => YoungAuth.logout(req, res));
@@ -42,6 +43,7 @@ router.post("/file/:key", passport.authenticate("young", { session: false }), as
         currentFile = currentFile[currentFile.length - 1];
       }
       const { name, data, mimetype } = currentFile;
+      if (!["image/jpeg", "image/png", "application/pdf"].includes(mimetype)) return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
 
       const encryptedBuffer = encrypt(data);
       const resultingFile = { mimetype: "image/png", encoding: "7bit", data: encryptedBuffer };
