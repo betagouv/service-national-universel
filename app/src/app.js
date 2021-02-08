@@ -17,6 +17,7 @@ import Phase2 from "./scenes/phase2";
 import Phase3 from "./scenes/phase3";
 import Documents from "./scenes/documents";
 import Preferences from "./scenes/preferences";
+import Missions from "./scenes/missions";
 
 import Header from "./components/header";
 import Drawer from "./components/drawer";
@@ -89,6 +90,7 @@ const Espace = () => {
             <Route path="/phase3" component={Phase3} />
             <Route path="/documents" component={Documents} />
             <Route path="/preferences" component={Preferences} />
+            <Route path="/mission" component={Missions} />
             <Route path="/" component={Home} />
           </Switch>
         </Content>

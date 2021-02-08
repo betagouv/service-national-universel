@@ -109,7 +109,7 @@ export default ({ inscription }) => {
               <NavLink to="/preferences">Renseigner mes préférences</NavLink>
             </li>
             <li>
-              <NavLink to="/une-mission">Trouver une mission</NavLink>
+              <NavLink to="/mission">Trouver une mission</NavLink>
             </li>
             <li>
               <NavLink to="/phase2/candidatures">Suivre mes candidatures</NavLink>
