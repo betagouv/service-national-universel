@@ -12,6 +12,7 @@ import Team from "./components/Team";
 export default ({ onChange, value }) => {
   const [missionsInfo, setMissionsInfo] = useState({ count: "-", placesTotal: "-" });
   const [referents, setReferents] = useState([]);
+  const [parentStructure, setParentStructure] = useState(null);
   const history = useHistory();
   useEffect(() => {
     if (!value) return;
@@ -25,8 +26,21 @@ export default ({ onChange, value }) => {
       queries.push({
         query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": value._id } }] } },
       });
+      if (value.networkId) {
+        queries.push({ index: "structure", type: "_doc" });
+        queries.push({
+          query: { bool: { must: { match_all: {} }, filter: [{ term: { _id: value.networkId } }] } },
+        });
+      }
 
       const { responses } = await api.esQuery(queries);
+
+      if (value.networkId) {
+        const structures = responses[2]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+        setParentStructure(structures.length ? structures[0] : null);
+      } else {
+        setParentStructure(null);
+      }
       setMissionsInfo({
         count: responses[0].hits.hits.length,
         placesTotal: responses[0].hits.hits.reduce((acc, e) => acc + e._source.placesTotal, 0),
@@ -70,7 +84,7 @@ export default ({ onChange, value }) => {
         </Button>
       </div>
       <Info title="La structure">
-        <div className="">{value.description}</div>
+        <div>{value.description}</div>
         <Details title="Agréments" value={value.associationTypes || "--"} />
         <Details title="Statut" value={translate(value.legalStatus) || "--"} />
         <Details title="Région" value={value.region || "--"} />
@@ -99,11 +113,14 @@ export default ({ onChange, value }) => {
         </table>
       </Info>
       <Team referents={referents} />
-      <div>
-        {Object.keys(value).map((e, k) => {
+      {parentStructure ? (
+        <Info title={`Réseau national`}>
+          <div style={{ marginTop: "1rem" }}>{parentStructure.name}</div>
+        </Info>
+      ) : null}
+      <div>{/*Object.keys(value).map((e, k) => {
           return <div key={k}>{`${e}:${value[e]}`}</div>;
-        })}
-      </div>
+        }) */}</div>
     </Panel>
   );
 };
