@@ -8,7 +8,7 @@ function getFileName(file) {
   return (file && file.name) || file;
 }
 
-export default ({ value, onChange, name, errorMessage = requiredMessage, placeholder = "votre fichier" }) => {
+export default ({ optional, value, onChange, name, errorMessage = requiredMessage, placeholder = "votre fichier" }) => {
   const [filesList, setFilesList] = useState(value || []);
 
   useEffect(() => {
@@ -73,7 +73,7 @@ export default ({ value, onChange, name, errorMessage = requiredMessage, placeho
           multiple
           name={name}
           value={[]}
-          validate={(v) => ((!v || !v.length) && errorMessage) || (v && v.size > 5000000 && "Ce fichier est trop volumineux.")}
+          validate={(v) => (!optional && (!v || !v.length) && errorMessage) || (v && v.size > 5000000 && "Ce fichier est trop volumineux.")}
           onChange={(e) => onAdd(e.target.files)}
         />
         <img src={require("../assets/image.svg")} />
