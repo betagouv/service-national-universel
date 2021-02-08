@@ -26,7 +26,13 @@ export default () => {
         <Filters>
           <Row>
             <SearchBox>
-              <DataSearch innerClass={{ input: "form-control" }} placeholder="Recherche..." autosuggest={false} componentId="SEARCH" dataField={["title", "organisation"]} />
+              <DataSearch
+                innerClass={{ input: "form-control" }}
+                placeholder="Recherche..."
+                autosuggest={false}
+                componentId="SEARCH"
+                dataField={["name", "structureName", "description", "actions"]}
+              />
             </SearchBox>
             <Col>
               <CustomInput id="DISTANCE" type="select" defaultValue="null">
