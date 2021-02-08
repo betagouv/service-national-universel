@@ -24,8 +24,7 @@ export default ({ children, structure, tab }) => {
       return toastr.error("Oups, une erreur est survenue pendant la supression de la structure :", translate(e.code));
     }
   };
-
-  if (!structure) return <div />;
+  if (!structure) return null;
   return (
     <div style={{ flex: 2, position: "relative", padding: "3rem" }}>
       <Header>
@@ -44,18 +43,14 @@ export default ({ children, structure, tab }) => {
             </TabItem>
           </TabNavigationList>
         </div>
-        <Row style={{ minWidth: "20%" }}>
-          <Col md={6}>
-            <Link to={`/structure/${structure._id}/edit`}>
-              <Button className="btn-blue">Modifier</Button>
-            </Link>
-          </Col>
-          <Col md={6}>
-            <Button onClick={handleDelete} className="btn-red">
-              Supprimer
-            </Button>
-          </Col>
-        </Row>
+        <div style={{ display: "flex" }}>
+          <Link to={`/structure/${structure._id}/edit`}>
+            <Button className="btn-blue">Modifier</Button>
+          </Link>
+          <Button style={{ marginLeft: "0.5rem" }} onClick={handleDelete} className="btn-red">
+            Supprimer
+          </Button>
+        </div>
       </Header>
       {children}
     </div>

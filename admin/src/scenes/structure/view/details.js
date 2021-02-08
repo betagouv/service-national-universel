@@ -11,6 +11,7 @@ import Avatar from "../../../components/Avatar";
 export default ({ ...props }) => {
   const [structure, setStructure] = useState();
   const [referents, setReferents] = useState([]);
+  const [parentStructure, setParentStructure] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -29,12 +30,26 @@ export default ({ ...props }) => {
       queries.push({
         query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": structure._id } }] } },
       });
+      if (structure.networkId) {
+        queries.push({ index: "structure", type: "_doc" });
+        queries.push({
+          query: { bool: { must: { match_all: {} }, filter: [{ term: { _id: structure.networkId } }] } },
+        });
+      }
 
       const { responses } = await api.esQuery(queries);
+      if (structure.networkId) {
+        const structures = responses[1]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+        setParentStructure(structures.length ? structures[0] : null);
+      } else {
+        setParentStructure(null);
+      }
       setReferents(responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
     })();
   }, [structure]);
+
   if (!structure) return <div />;
+
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <StructureView structure={structure} tab="details">
@@ -72,7 +87,18 @@ export default ({ ...props }) => {
                   <div className="detail-title">Siret</div>
                   <div className="detail-text">{structure.siret}</div>
                 </div>
-                {/* todo tete de reseau */}
+                {parentStructure ? (
+                  <div className="detail">
+                    <div className="detail-title">Réseau national</div>
+                    <div className="detail-text">
+                      <TagParent>{parentStructure.name}</TagParent>
+                    </div>
+                  </div>
+                ) : null}
+                <div className="detail">
+                  <div className="detail-title">Tête de réseau</div>
+                  <div className="detail-text">{structure.isNetwork === "true" ? "Cette structure est une tête de réseau" : "Cette structure n'est pas une tête de réseau"}</div>
+                </div>
               </Wrapper>
             </Col>
             <Col md={6}>
@@ -130,4 +156,21 @@ const Box = styled.div`
   filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.05));
   margin-bottom: 33px;
   border-radius: 8px;
+`;
+
+const Tag = styled.span`
+  align-self: flex-start;
+  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+  font-size: 13px;
+  white-space: nowrap;
+  font-weight: 400;
+  cursor: pointer;
+  margin-right: 5px;
+`;
+
+const TagParent = styled(Tag)`
+  color: #5245cc;
+  background: rgba(82, 69, 204, 0.1);
+  border: 0.5px solid #5245cc;
 `;
