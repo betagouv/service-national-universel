@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
-import { YOUNG_STATUS } from "../utils";
-
-import { DRAWER_TABS } from "./utils";
+import { YOUNG_STATUS } from "../../utils";
+import Item from "./item";
+import { DRAWER_TABS } from "../utils";
 
 export default ({ inscription }) => {
   const [open, setOpen] = useState(true);
@@ -17,6 +17,17 @@ export default ({ inscription }) => {
   const [activeTab, setActiveTab] = useState(DRAWER_TABS.HOME);
 
   useEffect(() => {
+    if (young.cohort === "2019") {
+      setStatus1("Validée");
+      setStatus2("En cours");
+      return;
+    }
+    if (young.cohort === "2020") {
+      setStatus1("Annulée");
+      setStatus2("En cours");
+      return;
+    }
+
     if (young.status === YOUNG_STATUS.VALIDATED) {
       setStatus1("En attente d'affectation");
     }
@@ -32,14 +43,17 @@ export default ({ inscription }) => {
     if (tab === DRAWER_TABS.HOME) return false;
     if (young.status === YOUNG_STATUS.REFUSED) return true;
     if (tab === DRAWER_TABS.PHASE1) {
+      if (young.cohort && young.cohort !== "2021") return true;
       return [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status);
     }
     if (tab === DRAWER_TABS.PHASE2) {
+      if (young.cohort && young.cohort !== "2021") return false;
       return [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.VALIDATED].includes(young.status);
     }
     if (tab === DRAWER_TABS.PHASE3) {
-      return [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.VALIDATED].includes(young.status);
+      //todo handle tab phase 3
     }
+    return true;
   };
 
   const handleClick = (e, tab) => {
@@ -49,7 +63,7 @@ export default ({ inscription }) => {
 
   return (
     <Sidebar open={open}>
-      <MenuBtn onClick={() => setOpen(!open)} src={require("../assets/menu.svg")} />
+      <MenuBtn onClick={() => setOpen(!open)} src={require("../../assets/menu.svg")} />
       <HomeLink exact to="/" onClick={(e) => handleClick(e, DRAWER_TABS.HOME)}>
         <div className="icon">
           <svg fill="none" viewBox="0 0 24 24">
@@ -64,68 +78,65 @@ export default ({ inscription }) => {
         Accueil
       </HomeLink>
       <MainNav>
-        <li>
-          <NavLink to="/phase1" onClick={(event) => handleClick(event, DRAWER_TABS.PHASE1)} className={getDisabled(DRAWER_TABS.PHASE1) ? "disabled" : undefined}>
-            <div className="icon">
-              <svg fill="none" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                ></path>
-              </svg>
-            </div>
-            <div>
-              séjour de cohésion
-              <span>Phase 1 • {status1}</span>
-            </div>
-          </NavLink>
-        </li>
-        <li>
-          <NavLink to="/phase2" onClick={(event) => handleClick(event, DRAWER_TABS.PHASE2)} className={getDisabled(DRAWER_TABS.PHASE2) ? "disabled" : undefined}>
-            <div className="icon">
-              <svg fill="none" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                ></path>
-              </svg>
-            </div>
-            <div>
-              mission d'intérêt général
-              <span>Phase 2 • {status2}</span>
-            </div>
-          </NavLink>
-        </li>
-        <li>
-          <NavLink exact to="/phase3" onClick={(event) => handleClick(event, DRAWER_TABS.PHASE3)} className={getDisabled(DRAWER_TABS.PHASE3) ? "disabled" : undefined}>
-            <div className="icon">
-              <svg fill="none" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 4v12l-4-2-4 2V4M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-              </svg>
-            </div>
-            <div>
-              poursuivre mon snu
-              <span>Phase 3 • {status3}</span>
-            </div>
-          </NavLink>
-          {activeTab === DRAWER_TABS.PHASE3 && (
+        <Item
+          title="séjour de cohésion"
+          subtitle="Phase 1"
+          status={status1}
+          to="/phase1"
+          disabled={getDisabled(DRAWER_TABS.PHASE1)}
+          handleClick={(event) => handleClick(event, DRAWER_TABS.PHASE1)}
+          open={activeTab === DRAWER_TABS.PHASE1 || young.cohort === "2020"}
+        >
+          {young.cohort === "2020" ? (
             <ul className="subNav">
               <li>
-                <NavLink to="/phase3/les-programmes">Les programmes d'engagement</NavLink>
-              </li>
-              <li>
-                <NavLink to="/phase3/une-mission">Trouver une mission</NavLink>
-              </li>
-              <li>
-                <NavLink to="/phase3/valider">Valider ma phase 3</NavLink>
+                <Link to="/inscription/profil">Candidater à la session 2021</Link>
               </li>
             </ul>
-          )}
-        </li>
+          ) : null}
+        </Item>
+        <Item
+          title="mission d'intérêt général"
+          subtitle="Phase 2"
+          status={status2}
+          to="/phase2"
+          disabled={getDisabled(DRAWER_TABS.PHASE2)}
+          handleClick={(event) => handleClick(event, DRAWER_TABS.PHASE2)}
+          open={activeTab === DRAWER_TABS.PHASE2}
+        >
+          <ul className="subNav">
+            <li>
+              <NavLink to="/preferences">Renseigner mes préférences</NavLink>
+            </li>
+            <li>
+              <NavLink to="/une-mission">Trouver une mission</NavLink>
+            </li>
+            <li>
+              <NavLink to="/phase2/candidatures">Suivre mes candidatures</NavLink>
+            </li>
+          </ul>
+        </Item>
+        <Item
+          title="poursuivre mon snu"
+          subtitle="Phase 3"
+          status={status3}
+          to="/phase3"
+          disabled={getDisabled(DRAWER_TABS.PHASE3)}
+          handleClick={(event) => handleClick(event, DRAWER_TABS.PHASE3)}
+          open={activeTab === DRAWER_TABS.PHASE3}
+        >
+          <ul className="subNav">
+            <li>
+              <NavLink to="/phase3/les-programmes">Les programmes d'engagement</NavLink>
+            </li>
+            <li>
+              <NavLink to="/une-mission">Trouver une mission</NavLink>
+            </li>
+            <li>
+              <NavLink to="/phase3/valider">Valider ma phase 3</NavLink>
+            </li>
+          </ul>
+        </Item>
       </MainNav>
       <MyNav>
         {/* <li>
@@ -151,21 +162,6 @@ export default ({ inscription }) => {
               </svg>
             </div>
             Mes documents
-          </NavLink>
-        </li> */}
-        {/* <li>
-          <NavLink to="/preferences">
-            <div className="icon">
-              <svg fill="none" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"
-                ></path>
-              </svg>
-            </div>
-            Mes préférences
           </NavLink>
         </li> */}
         <li>
@@ -210,7 +206,6 @@ const Sidebar = styled.div`
     display: flex;
     align-items: center;
     font-weight: 700;
-    text-transform: uppercase;
     &.active,
     :hover {
       background-color: #5145cd;
@@ -246,6 +241,7 @@ const MainNav = styled.ul`
     padding-left: 0;
     margin-bottom: 15px;
     .icon {
+      z-index: 999;
       height: 32px;
       width: 32px;
       border-radius: 50%;
@@ -289,7 +285,7 @@ const MainNav = styled.ul`
         position: absolute;
         left: 50px;
         top: 40px;
-        z-index: -1;
+        z-index: 50;
       }
     }
   }
@@ -328,6 +324,20 @@ const MyNav = styled.ul`
     padding: 12px 15px;
     border-radius: 6px;
   }
+`;
+
+const Icon = styled.img`
+  z-index: 999;
+  height: 32px;
+  width: 32px;
+  border-radius: 50%;
+  background-color: #8da2fb;
+  border-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 20px;
+  color: #42389d;
 `;
 
 const MenuBtn = styled.img`
