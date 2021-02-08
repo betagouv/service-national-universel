@@ -64,7 +64,7 @@ export default ({ onChange, value }) => {
           <DownloadButton
             key={i}
             source={() => api.get(`/referent/youngFile/${value._id}/parentConsentmentFiles/${e}`)}
-            title={`Télécharger le formulaire (${i + 1}/${value.cniFiles.length})`}
+            title={`Télécharger le formulaire (${i + 1}/${value.parentConsentmentFiles.length})`}
           />
         ))}
       </Info>
