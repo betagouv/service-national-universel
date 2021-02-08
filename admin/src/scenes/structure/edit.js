@@ -228,6 +228,7 @@ const Header = styled.div`
   padding: 0 25px 0;
   display: flex;
   margin-top: 25px;
+  margin-bottom: 2rem;
   align-items: center;
   h3 {
     border: 1px solid #fc8181;

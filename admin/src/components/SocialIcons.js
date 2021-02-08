@@ -1,4 +1,5 @@
 import React from "react";
+import styled from "styled-components";
 
 export default function SocialIcons({ value }) {
   function websiteUrl(website) {
@@ -62,5 +63,14 @@ export default function SocialIcons({ value }) {
       </a>
     ) : null,
   ].filter((b) => b);
-  return <div>{a}</div>;
+  return <SocialWrapper>{a}</SocialWrapper>;
 }
+
+const SocialWrapper = styled.div`
+  .social-link {
+    border: solid 1px #aaa;
+    padding: 5px 7px 7px 7px;
+    margin: 5px;
+    border-radius: 5px;
+  }
+`;

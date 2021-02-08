@@ -212,12 +212,6 @@ const Panel = styled.div`
     font-weight: 400;
     font-style: italic;
   }
-  .social-link {
-    border: solid 1px #aaa;
-    padding: 5px 7px 7px 7px;
-    margin: 5px;
-    border-radius: 5px;
-  }
 `;
 
 const Button = styled.button`

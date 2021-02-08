@@ -7,6 +7,7 @@ import { translate } from "../../../utils";
 import StructureView from "./wrapper";
 import api from "../../../services/api";
 import Avatar from "../../../components/Avatar";
+import SocialIcons from "../../../components/SocialIcons";
 
 export default ({ ...props }) => {
   const [structure, setStructure] = useState();
@@ -57,7 +58,12 @@ export default ({ ...props }) => {
           <Row>
             <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
               <Wrapper>
-                <Legend>La structure</Legend>
+                <div style={{ display: "flex" }}>
+                  <Legend>La structure</Legend>
+                  <div style={{ marginLeft: "auto" }}>
+                    <SocialIcons value={structure} />
+                  </div>
+                </div>
 
                 <div className="detail">
                   <div className="detail-title">Présentation</div>
@@ -127,7 +133,7 @@ const Wrapper = styled.div`
   .detail {
     display: flex;
     align-items: flex-start;
-    font-size: 1rem;
+    font-size: 14px;
     text-align: left;
     margin-top: 1rem;
     &-title {
