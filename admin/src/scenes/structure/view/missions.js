@@ -6,21 +6,35 @@ import styled from "styled-components";
 import SelectStatusApplication from "../../../components/selectStatusApplication";
 import api from "../../../services/api";
 import { apiURL } from "../../../config";
+import StructureView from "./wrapper";
+import Panel from "../../missions/panel";
 
 import { formatStringDate, formatStringLongDate } from "../../../utils";
 import SelectStatusMission from "../../../components/selectStatusMission";
 
 const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "REGION", "DEPARTMENT"];
 
-export default ({ structure, setMission }) => {
+export default ({ ...props }) => {
   const [data, setData] = useState();
+  const [structure, setStructure] = useState();
+  const [mission, setMission] = useState();
 
   useEffect(() => {
     (async () => {
+      const id = props.match && props.match.params && props.match.params.id;
+      if (!id) return <div />;
+      const { data } = await api.get(`/structure/${id}`);
+      setStructure(data);
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      if (!structure) return;
       const { ok, data } = await api.get(`/mission/structure/${structure._id}`);
       if (ok) setData(data);
     })();
-  }, []);
+  }, [structure]);
 
   const handleClick = async (mission) => {
     const { ok, data } = await api.get(`/mission/${mission._id}`);
@@ -28,28 +42,37 @@ export default ({ structure, setMission }) => {
   };
 
   if (!data) return <div />;
+  if (!structure) return <div />;
 
   return (
-    <div>
-      <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-        <div style={{ flex: 2, position: "relative" }}>
-          <Table>
-            <thead>
-              <tr>
-                <th width="40%">Volontaire</th>
-                <th>Dates</th>
-                <th>Places</th>
-                <th width="20%">Statut pour la mission</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.map((hit, i) => (
-                <Hit key={i} hit={hit} onClick={() => handleClick(hit)} />
-              ))}
-            </tbody>
-          </Table>
+    <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
+      <StructureView structure={structure} tab="missions">
+        <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
+          <div style={{ flex: 2, position: "relative" }}>
+            <Table>
+              <thead>
+                <tr>
+                  <th width="40%">Volontaire</th>
+                  <th>Dates</th>
+                  <th>Places</th>
+                  <th width="20%">Statut pour la mission</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.map((hit, i) => (
+                  <Hit key={i} hit={hit} onClick={() => handleClick(hit)} />
+                ))}
+              </tbody>
+            </Table>
+          </div>
         </div>
-      </div>
+      </StructureView>
+      <Panel
+        mission={mission}
+        onClose={() => {
+          setMission(null);
+        }}
+      />
     </div>
   );
 };
