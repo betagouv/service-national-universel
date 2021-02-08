@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import SocialIcons from "../../components/SocialIcons";
+import { toastr } from "react-redux-toastr";
 import { Link } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 
 import api from "../../services/api";
 
@@ -9,6 +11,7 @@ import { translate } from "../../utils";
 
 export default ({ onChange, value }) => {
   const [missionsInfo, setMissionsInfo] = useState({ count: "-", placesTotal: "-" });
+  const history = useHistory();
   useEffect(() => {
     if (!value) return;
     (async () => {
@@ -27,6 +30,20 @@ export default ({ onChange, value }) => {
     })();
   }, [value]);
 
+  const handleDelete = async (structure) => {
+    if (!confirm("Êtes-vous sûr(e) de vouloir supprimer cette structure ?")) return;
+    try {
+      const { ok, code } = await api.remove(`/structure/${structure._id}`);
+      if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
+      if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+      toastr.success("Cette structure a été supprimée.");
+      return history.go(0);
+    } catch (e) {
+      console.log(e);
+      return toastr.error("Oups, une erreur est survenue pendant la supression de la structure :", translate(e.code));
+    }
+  };
+
   if (!value) return <div />;
   return (
     <Panel>
@@ -42,9 +59,9 @@ export default ({ onChange, value }) => {
         <Link to={`/structure/${value._id}/edit`}>
           <Button className="btn-blue">Modifier</Button>
         </Link>
-        <Link to={`/structure/${value._id}`}>
-          <Button className="btn-red">Supprimer</Button>
-        </Link>
+        <Button onClick={() => handleDelete(value)} className="btn-red">
+          Supprimer
+        </Button>
       </div>
       <Info title="La structure">
         <div className="">{value.description}</div>
@@ -143,7 +160,7 @@ const Panel = styled.div`
   .title {
     font-size: 24px;
     font-weight: 800;
-    margin-bottom: 2px;
+    margin-bottom: 12px;
   }
   .info {
     padding: 2rem 0;
