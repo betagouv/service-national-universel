@@ -7,15 +7,18 @@ import api from "../services/api";
 
 import { translate, YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_COLORS } from "../utils";
 import { toastr } from "react-redux-toastr";
+import matomo from "../services/matomo";
 
 import MailCorrection from "../scenes/inscription/MailCorrection";
+import MailRefused from "../scenes/inscription/MailRefused";
 
 export default ({ hit }) => {
-  const STATUS = [YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.VALIDATED, YOUNG_STATUS.REFUSED];
-
-  const [modal, setModal] = useState(false);
+  const [modal, setModal] = useState(null);
   const [young, setYoung] = useState(null);
   const user = useSelector((state) => state.Auth.user);
+
+  let STATUS = [YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.VALIDATED, YOUNG_STATUS.REFUSED];
+  if (user.role === "admin") STATUS.push(YOUNG_STATUS.WAITING_VALIDATION);
 
   useEffect(() => {
     (async () => {
@@ -30,40 +33,52 @@ export default ({ hit }) => {
 
   const handleClickStatus = (status) => {
     if (!confirm("Êtes-vous sûr(e) de vouloir modifier le statut de ce profil?\nUn email sera automatiquement envoyé à l'utlisateur.")) return;
-    if (status === YOUNG_STATUS.WAITING_CORRECTION) return setModal(true);
+    if (status === YOUNG_STATUS.WAITING_CORRECTION) return setModal(YOUNG_STATUS.WAITING_CORRECTION);
+    if (status === YOUNG_STATUS.REFUSED) return setModal(YOUNG_STATUS.REFUSED);
     setStatus(status);
   };
 
   const setStatus = async (status, note) => {
     try {
       young.historic.push({ phase: YOUNG_PHASE.INSCRIPTION, userName: `${user.firstName} ${user.lastName}`, userId: user._id, status, note });
-      const { ok, code, data: newYoung } = await api.put(`/referent/young/${young._id}`, { historic: young.historic, status });
+      const { ok, code, data: newYoung } = await api.put(`/referent/young/${young._id}`, { historic: young.historic, status, lastStatusAt: Date.now() });
 
       if (status === YOUNG_STATUS.VALIDATED) {
+        matomo.logEvent("status_update", YOUNG_STATUS.VALIDATED);
         await api.post(`/referent/email/validate/${young._id}`, { subject: "Inscription validée" });
       }
 
       if (status === YOUNG_STATUS.REFUSED) {
-        await api.post(`/referent/email/refuse/${young._id}`, { subject: "Inscription refusée" });
+        matomo.logEvent("status_update", YOUNG_STATUS.REFUSED);
       }
 
-      if (!ok) return toastr.error("Une erreur s'est produite :", code);
+      if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       setYoung(newYoung);
       toastr.success("Mis à jour!");
     } catch (e) {
       console.log(e);
-      toastr.error("Oups, une erreur est survenue :", e.code);
+      toastr.error("Oups, une erreur est survenue :", translate(e.code));
     }
   };
 
   return (
     <>
-      {modal && (
+      {modal === YOUNG_STATUS.WAITING_CORRECTION && (
         <MailCorrection
           value={young}
           onChange={() => setModal(false)}
-          onSend={(note) => {
-            setStatus(YOUNG_STATUS.WAITING_CORRECTION, note);
+          onSend={(msg) => {
+            setStatus(YOUNG_STATUS.WAITING_CORRECTION, msg);
+            setModal(false);
+          }}
+        />
+      )}
+      {modal === YOUNG_STATUS.REFUSED && (
+        <MailRefused
+          value={young}
+          onChange={() => setModal(false)}
+          onSend={(msg) => {
+            setStatus(YOUNG_STATUS.REFUSED, msg);
             setModal(false);
           }}
         />
@@ -102,44 +117,52 @@ const ActionBox = styled.div`
     div {
       white-space: nowrap;
       font-size: 14px;
-      padding: 5px 15px;
+      :hover {
+        color: inherit;
+      }
     }
   }
   button {
-    background-color: #feb951;
-    border: 1px solid #feb951;
+    ${({ color }) => `
+      background-color: ${color}15;
+      border: 1px solid ${color};
+      color: ${color};
+    `}
     display: inline-flex;
+    flex: 1;
+    justify-content: space-between;
     align-items: center;
     text-align: left;
-    border-radius: 4px;
+    border-radius: 0.5rem;
     padding: 0 0 0 12px;
     font-size: 12px;
-    min-width: 130px;
     font-weight: 700;
-    color: #fff;
     cursor: pointer;
     outline: 0;
+    width: 100%;
+    max-width: 250px;
     .edit-icon {
       height: 17px;
       margin-right: 10px;
       path {
-        fill: #fff;
+        fill: ${({ color }) => `${color}`};
       }
     }
     .down-icon {
       margin-left: auto;
       padding: 7px 15px;
-      border-left: 2px solid #fbd392;
+      /* border-left: 1px solid ${({ color }) => `${color}`}; */
       margin-left: 15px;
       svg {
         height: 10px;
       }
       svg polygon {
-        fill: #fff;
+        fill: ${({ color }) => `${color}`};
       }
     }
   }
   .dropdown-item {
+    border-radius: 0;
     background-color: transparent;
     border: none;
     color: #767676;
@@ -151,23 +174,4 @@ const ActionBox = styled.div`
       background-color: #f3f3f3;
     }
   }
-
-  ${({ color }) => `
-    button {
-      background-color: transparent;
-      border: 1px solid ${color};
-      color: ${color};
-      .edit-icon {
-        path {
-          fill: ${color};
-        }
-      }
-      .down-icon {
-        border-left: 1px solid ${color};
-        svg polygon {
-          fill: ${color};
-        }
-      }
-    }  
-  `}
 `;

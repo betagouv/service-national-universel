@@ -1,5 +1,6 @@
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
+import { translate } from "../../utils";
 
 export const STEPS = {
   PROFIL: "PROFIL",
@@ -13,7 +14,7 @@ export const STEPS = {
 
 export const saveYoung = async (values) => {
   const { ok, code, data: young } = await api.put("/young", values);
-  if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de votre progression", code);
+  if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de votre progression", translate(code));
   if (ok) toastr.success("Progression enregistrée");
   return young;
 };

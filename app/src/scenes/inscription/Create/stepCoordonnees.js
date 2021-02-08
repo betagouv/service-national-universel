@@ -20,6 +20,7 @@ import { saveYoung, STEPS, YOUNG_SITUATIONS } from "../utils";
 
 import AddressInput from "../components/addressInput";
 import Etablissement from "../components/etablissmentInput";
+import { translate } from "../../../utils";
 
 export default () => {
   useEffect(() => {
@@ -64,9 +65,10 @@ export default () => {
         validateOnBlur={false}
         onSubmit={async (values) => {
           try {
+            if (!confirm("Avez-vous bien pensé à téléverser le RECTO et le VERSO de votre pièce d'identité ?")) return;
             values.inscriptionStep = STEPS.PARTICULIERES;
             const { ok, code, data: young } = await api.put("/young", values);
-            if (!ok) return toastr.error("Une erreur s'est produite :", code);
+            if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             dispatch(setYoung(young));
             history.push("/inscription/particulieres");
           } catch (e) {
@@ -79,7 +81,15 @@ export default () => {
           <>
             <FormRow>
               <Col md={4}>
-                <Label>Pièce d'identité</Label>
+                <Label>
+                  Pièce d'identité
+                  <p>
+                    Carte nationale d'identité <b>RECTO-VERSO</b> ou passeport
+                  </p>
+                  <p>
+                    Dans un format <b>lisible</b>
+                  </p>
+                </Label>
               </Col>
               <Col>
                 <DndFileInput
@@ -103,7 +113,7 @@ export default () => {
                     handleChange({ target: { value: res.data, name: "cniFiles" } });
                   }}
                 />
-                <div style={{ fontSize: "0.8rem", color: "#555", fontStyle: "italic" }}>* Carte nationale d'identité ou passeport</div>
+                <div style={{ fontSize: "0.8rem", color: "#555", fontStyle: "italic" }}>* Carte nationale d'identité RECTO-VERSO ou passeport</div>
                 <ErrorMessage errors={errors} touched={touched} name="cniFiles" />
               </Col>
             </FormRow>
@@ -417,6 +427,11 @@ const FormRow = styled(Row)`
 const Label = styled.div`
   color: #374151;
   margin-bottom: 10px;
+  p {
+    font-size: 0.9rem;
+    color: #6b7280;
+    margin: 0;
+  }
 `;
 
 const RadioLabel = styled.label`

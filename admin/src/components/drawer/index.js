@@ -27,23 +27,29 @@ export default () => {
         <li>
           <NavLink to="/dashboard">Tableau de bord</NavLink>
         </li>
-        {/* <li>
-          <NavLink to="/structure">Structures</NavLink>
-        </li>
-        <li>
-          <NavLink to="/mission">Missions</NavLink>
-        </li> */}
         {user.role === "admin" && (
-          <li>
-            <NavLink to="/user">Utilisateurs</NavLink>
-          </li>
+          <>
+            <li>
+              <NavLink to="/structure">
+                Structures <i>(BÊTA)</i>
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/mission">
+                Missions <i>(BÊTA)</i>
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/user">Utilisateurs</NavLink>
+            </li>
+            <li>
+              <NavLink to="/volontaire">Volontaires</NavLink>
+            </li>
+          </>
         )}
         {/*   <li>
           <NavLink to="/tuteur">Tuteurs</NavLink>
         </li> */}
-        <li>
-          <NavLink to="/volontaire">Volontaires</NavLink>
-        </li>
         <li>
           <NavLink to="/inscription">Inscriptions</NavLink>
         </li>
@@ -102,6 +108,9 @@ const Sidebar = styled.div`
       font-size: 16px;
       border-bottom: 1px solid rgba(82, 69, 204, 0.5);
       transition: 0.2s;
+      i {
+        font-size: 0.7rem;
+      }
     }
     a.active {
       font-weight: 700;

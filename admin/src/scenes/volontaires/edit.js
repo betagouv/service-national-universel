@@ -7,14 +7,14 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/fr";
 import { useSelector } from "react-redux";
 
-import LoadingButton from "../../components/loadingButton";
 import Historic from "../../components/historic";
 
 import DateInput from "../../components/dateInput";
-import { openDocumentInNewtab, departmentList, regionList, YOUNG_STATUS, translate } from "../../utils";
+import { departmentList, regionList, YOUNG_STATUS, translate } from "../../utils";
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
+import DndFileInput from "../../components/dndFileInput";
 
 export default (props) => {
   const [young, setYoung] = useState();
@@ -26,7 +26,7 @@ export default (props) => {
       const id = props.match && props.match.params && props.match.params.id;
       if (!id) return setYoung(null);
       const { data } = await api.get(`/referent/young/${id}`);
-      setYoung(data);
+      return setYoung(data);
     })();
   }, []);
 
@@ -48,11 +48,11 @@ export default (props) => {
         onSubmit={async (values) => {
           try {
             const { ok, code, data: young } = await api.put(`/referent/young/${values._id}`, values);
-            if (!ok) toastr.error("Une erreur s'est produite :", code);
+            if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
             toastr.success("Mis à jour!");
           } catch (e) {
             console.log(e);
-            toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", e.code);
+            toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
           }
         }}
       >
@@ -73,17 +73,30 @@ export default (props) => {
                     <Item title="Nom" values={values} name={"lastName"} handleChange={handleChange} />
                     <Item title="Prénom" values={values} name="firstName" handleChange={handleChange} />
                     <Item title="Date de naissance" type="date" values={values} name="birthdateAt" handleChange={handleChange} />
-                    {values.cniFiles.map((e, i) => {
-                      return (
-                        <InfoBtn
-                          key={i}
-                          color="white"
-                          onClick={async () => {
-                            openDocumentInNewtab(await api.get(`/referent/youngFile/${values._id}/cniFiles/${e}`));
-                          }}
-                        >{`Visualiser la pièce d’identité (${i + 1}/${values.cniFiles.length})`}</InfoBtn>
-                      );
-                    })}
+                    <Documents>
+                      <h4>Pièces d'identité</h4>
+                      <DndFileInput
+                        placeholder="une pièce d'identité"
+                        errorMessage="Vous devez téléverser une pièce d'identité"
+                        value={values.cniFiles}
+                        source={(e) => api.get(`/referent/youngFile/${values._id}/cniFiles/${e}`)}
+                        name="cniFiles"
+                        onChange={async (e) => {
+                          const res = await api.uploadFile("/referent/file/cniFiles", e.target.files, { youngId: values._id });
+                          if (res.code === "FILE_CORRUPTED") {
+                            return toastr.error(
+                              "Le fichier semble corrompu",
+                              "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
+                              { timeOut: 0 }
+                            );
+                          }
+                          if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
+                          // We update and save it instant.
+                          handleChange({ target: { value: res.data, name: "cniFiles" } });
+                          handleSubmit();
+                        }}
+                      />
+                    </Documents>
                   </BoxContent>
                 </Box>
               </Col>
@@ -248,17 +261,30 @@ export default (props) => {
                       name="highSkilledActivityType"
                       handleChange={handleChange}
                     />
-                    {values.highSkilledActivityProofFiles.map((e, i) => {
-                      return (
-                        <InfoBtn
-                          key={i}
-                          color="white"
-                          onClick={async () => {
-                            openDocumentInNewtab(await api.get(`/referent/youngFile/${values._id}/highSkilledActivityProofFiles/${e}`));
-                          }}
-                        >{`Visualiser le justificatif d'engagement (${i + 1}/${values.highSkilledActivityProofFiles.length})`}</InfoBtn>
-                      );
-                    })}
+                    <Documents>
+                      <h4>Documents justificatifs</h4>
+                      <DndFileInput
+                        placeholder="un document justificatif"
+                        errorMessage="Vous devez téléverser un document justificatif"
+                        value={values.highSkilledActivityProofFiles}
+                        source={(e) => api.get(`/referent/youngFile/${values._id}/highSkilledActivityProofFiles/${e}`)}
+                        name="cniFiles"
+                        onChange={async (e) => {
+                          const res = await api.uploadFile("/referent/file/highSkilledActivityProofFiles", e.target.files, { youngId: values._id });
+                          if (res.code === "FILE_CORRUPTED") {
+                            return toastr.error(
+                              "Le fichier semble corrompu",
+                              "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
+                              { timeOut: 0 }
+                            );
+                          }
+                          if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
+                          // We update and save it instant.
+                          handleChange({ target: { value: res.data, name: "highSkilledActivityProofFiles" } });
+                          handleSubmit();
+                        }}
+                      />
+                    </Documents>
                   </BoxContent>
                 </Box>
               </Col>
@@ -320,19 +346,6 @@ export default (props) => {
                       title="Région"
                       options={regionList.map((r) => ({ value: r, label: r }))}
                     />
-                    {values.parentConsentmentFiles.map((e, i) => {
-                      return (
-                        <InfoBtn
-                          key={i}
-                          color="white"
-                          onClick={async () => {
-                            openDocumentInNewtab(await api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${values.parentConsentmentFiles[0]}`));
-                          }}
-                        >
-                          Visualiser le formulaire de consentement
-                        </InfoBtn>
-                      );
-                    })}
                   </BoxContent>
                 </Box>
               </Col>
@@ -384,20 +397,72 @@ export default (props) => {
                       title="Région"
                       options={regionList.map((r) => ({ value: r, label: r }))}
                     />
-                    {values.parentConsentmentFiles && values.parentConsentmentFiles.length === 2 ? (
-                      <InfoBtn
-                        onClick={async () => {
-                          openDocumentInNewtab(await api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${values.parentConsentmentFiles[1]}`));
-                        }}
-                      >
-                        Visualiser le formulaire de consentement
-                      </InfoBtn>
-                    ) : null}
                   </BoxContent>
                 </Box>
               </Col>
             </Row>
             <Row>
+              <Col md={6} style={{ marginBottom: "20px" }}>
+                <Box>
+                  <BoxTitle>Consentement des représentants légaux</BoxTitle>
+                  <BoxContent direction="column">
+                    <Select
+                      disabled={!values.parentConsentmentFiles.length}
+                      name="parentConsentmentFilesCompliant"
+                      values={values}
+                      handleChange={handleChange}
+                      title="Consentement"
+                      options={[
+                        { value: "true", label: "Conforme" },
+                        { value: "false", label: "Non conforme" },
+                      ]}
+                    />
+                    {values.parentConsentmentFilesCompliant === "false" ? (
+                      <>
+                        <Checkbox
+                          name="parentConsentmentFilesCompliantInfo"
+                          value="signature"
+                          values={values}
+                          handleChange={handleChange}
+                          description="Manque de la signature d'un des représentants"
+                        />
+                        <Checkbox
+                          name="parentConsentmentFilesCompliantInfo"
+                          value="proof"
+                          values={values}
+                          handleChange={handleChange}
+                          description="Manque d'un justificatif d'autorité parentale non partagée"
+                        />
+                        <Checkbox name="parentConsentmentFilesCompliantInfo" value="other" values={values} handleChange={handleChange} description="Autre" />
+                      </>
+                    ) : null}
+                    <Documents>
+                      <h4>Attestations des représentants légaux</h4>
+                      <DndFileInput
+                        placeholder="un document justificatif"
+                        errorMessage="Vous devez téléverser un document justificatif"
+                        value={values.parentConsentmentFiles}
+                        source={(e) => api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${e}`)}
+                        name="cniFiles"
+                        onChange={async (e) => {
+                          const res = await api.uploadFile("/referent/file/parentConsentmentFiles", e.target.files, { youngId: values._id });
+                          if (res.code === "FILE_CORRUPTED") {
+                            return toastr.error(
+                              "Le fichier semble corrompu",
+                              "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
+                              { timeOut: 0 }
+                            );
+                          }
+                          if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
+                          // We update and save it instant.
+                          handleChange({ target: { value: res.data, name: "parentConsentmentFiles" } });
+                          handleSubmit();
+                        }}
+                      />
+                    </Documents>
+                  </BoxContent>
+                </Box>
+              </Col>
               <Col md={6} style={{ marginBottom: "20px" }}>
                 <Box>
                   <BoxTitle>Consentement de droit à l'image</BoxTitle>
@@ -412,17 +477,30 @@ export default (props) => {
                         { value: "false", label: "Non" },
                       ]}
                     />
-                    {values.imageRightFiles.map((e, i) => {
-                      return (
-                        <InfoBtn
-                          key={i}
-                          color="white"
-                          onClick={async () => {
-                            openDocumentInNewtab(await api.get(`/referent/youngFile/${values._id}/imageRightFiles/${e}`));
-                          }}
-                        >{`Visualiser le formulaire de consentement de droit à l'image (${i + 1}/${values.imageRightFiles.length})`}</InfoBtn>
-                      );
-                    })}
+                    <Documents>
+                      <h4>Formulaire de consentement de droit à l'image</h4>
+                      <DndFileInput
+                        placeholder="un document justificatif"
+                        errorMessage="Vous devez téléverser un document justificatif"
+                        value={values.imageRightFiles}
+                        source={(e) => api.get(`/referent/youngFile/${values._id}/imageRightFiles/${e}`)}
+                        name="cniFiles"
+                        onChange={async (e) => {
+                          const res = await api.uploadFile("/referent/file/imageRightFiles", e.target.files, { youngId: values._id });
+                          if (res.code === "FILE_CORRUPTED") {
+                            return toastr.error(
+                              "Le fichier semble corrompu",
+                              "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
+                              { timeOut: 0 }
+                            );
+                          }
+                          if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
+                          // We update and save it instant.
+                          handleChange({ target: { value: res.data, name: "imageRightFiles" } });
+                          handleSubmit();
+                        }}
+                      />
+                    </Documents>
                   </BoxContent>
                 </Box>
               </Col>
@@ -430,23 +508,23 @@ export default (props) => {
           </>
         )}
       </Formik>
-        <DeleteBtn
-          onClick={async () => {
-            if (!confirm("Êtes-vous sûr(e) de vouloir supprimer ce profil")) return;
+      <DeleteBtn
+        onClick={async () => {
+          if (!confirm("Êtes-vous sûr(e) de vouloir supprimer ce profil")) return;
           try {
             const { ok, code } = await api.remove(`/young/${young._id}`);
             if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
-            if (!ok) return toastr.error("Une erreur s'est produite :", code);
+            if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             toastr.success("Ce profil a été supprimé.");
             return history.push(`/inscription`);
           } catch (e) {
             console.log(e);
-            return toastr.error("Oups, une erreur est survenue pendant la supression du profil :", e.code);
+            return toastr.error("Oups, une erreur est survenue pendant la supression du profil :", translate(e.code));
           }
-          }}
-        >
-          Supprimer
-        </DeleteBtn>
+        }}
+      >
+        Supprimer
+      </DeleteBtn>
     </Wrapper>
   );
 };
@@ -485,7 +563,7 @@ const Select = ({ title, name, values, handleChange, disabled, errors, touched, 
         <label>{title}</label>
       </Col>
       <Col md={8}>
-        <select disabled={disabled} className="form-control" className="form-control" name={name} value={values[name]} onChange={handleChange}>
+        <select disabled={disabled} className="form-control" name={name} value={values[name]} onChange={handleChange}>
           <option key={-1} value="" label="" />
           {options.map((o, i) => (
             <option key={i} value={o.value} label={o.label} />
@@ -496,34 +574,35 @@ const Select = ({ title, name, values, handleChange, disabled, errors, touched, 
   );
 };
 
-const Badge = styled.span`
-  display: inline-block;
-  padding: 0.25rem 1rem;
-  margin: 0 0.25rem;
-  border-radius: 99999px;
-  font-size: 0.8rem;
-  margin-bottom: 5px;
-  margin-top: 15px;
-  ${({ color }) => `
-    color: ${color};
-    background-color: ${color}33;
-  `}
-`;
+const Checkbox = ({ title, name, value, values, handleChange, disabled, description }) => {
+  return (
+    <Row className="detail">
+      <Col md={4}>
+        <label>{title}</label>
+      </Col>
+      <Col md={8}>
+        <RadioLabel>
+          <Field disabled={disabled} className="form-control" type="radio" name={name} value={value} checked={values[name] === value} onChange={handleChange} />
+          {description}
+        </RadioLabel>
+      </Col>
+    </Row>
+  );
+};
 
-const InfoBtn = styled(LoadingButton)`
-  color: #555;
-  background: url(${require("../../assets/eye.svg")}) left 15px center no-repeat;
-  box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.16);
-  border: 0;
-  outline: 0;
-  border-radius: 5px;
-  padding: 8px 25px 8px 40px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  margin-top: 1rem;
+const Documents = styled.div`
   margin-left: 1rem;
-  width: fit-content;
+  margin-right: 1rem;
+  margin-top: 3rem;
+  h4 {
+    font-size: 1rem;
+    font-weight: 500;
+    color: #6a6f85;
+  }
+  label {
+    display: block !important;
+    width: 100%;
+  }
 `;
 
 const DeleteBtn = styled.button`
@@ -599,7 +678,7 @@ const BoxContent = styled.div`
   label {
     font-weight: 500;
     color: #6a6f85;
-    display: block;
+    display: flex;
     margin-bottom: 0;
   }
 
@@ -631,5 +710,25 @@ const BoxContent = styled.div`
       props.direction === "column" &&
       `
     `}
+  }
+`;
+
+const RadioLabel = styled.label`
+  display: flex;
+  align-items: center;
+  color: #374151;
+  font-size: 14px;
+  margin-bottom: 0px;
+  text-align: left;
+  :last-child {
+    margin-bottom: 0;
+  }
+  input {
+    cursor: pointer;
+    margin-right: 12px;
+    width: 15px;
+    height: 15px;
+    min-width: 15px;
+    min-height: 15px;
   }
 `;

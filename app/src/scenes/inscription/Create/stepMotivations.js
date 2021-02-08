@@ -10,7 +10,7 @@ import api from "../../../services/api";
 import matomo from "../../../services/matomo";
 
 import { setYoung } from "../../../redux/auth/actions";
-import { YOUNG_STATUS, YOUNG_PHASE } from "../../../utils";
+import { YOUNG_STATUS, YOUNG_PHASE, translate } from "../../../utils";
 import { saveYoung, STEPS } from "../utils";
 
 export default () => {
@@ -32,6 +32,7 @@ export default () => {
   return (
     <Wrapper>
       <Heading>
+        <Optional>Optionnel</Optional>
         <h2>Vos motivations pour le SNU</h2>
         <p>Exprimez en quelques mots pourquoi vous souhaitez participer au Service National Universel</p>
       </Heading>
@@ -42,6 +43,7 @@ export default () => {
             // if the young is not already in WAITING_VALIDATION, update the status and push it in the historic
             if (values.status !== YOUNG_STATUS.WAITING_VALIDATION) {
               values.status = YOUNG_STATUS.WAITING_VALIDATION;
+              values.lastStatusAt = Date.now();
               values.historic.push({
                 phase: YOUNG_PHASE.INSCRIPTION,
                 createdAt: Date.now(),
@@ -53,19 +55,18 @@ export default () => {
             }
             values.inscriptionStep = STEPS.DONE;
             const { ok, code, data: young } = await api.put("/young", values);
-            if (!ok) return toastr.error("Une erreur s'est produite :", code);
+            if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             dispatch(setYoung(young));
             history.push("/inscription/done");
           } catch (e) {
             console.log(e);
-            toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", e.code);
+            toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code));
           }
         }}
       >
         {({ values, handleChange, handleSubmit }) => (
           <>
             <Input type="textarea" rows={10} placeholder="Vos motivations en quelques mots ..." name="motivations" value={values.motivations} onChange={handleChange} />
-            <Optional>Optionnel</Optional>
             <Footer>
               <ButtonContainer>
                 <SaveButton onClick={() => handleSave(values)}>Enregistrer</SaveButton>
@@ -108,8 +109,8 @@ const Heading = styled.div`
 const Optional = styled.div`
   font-weight: 400;
   color: #6b7280;
-  text-align: center;
   padding-top: 5px;
+  font-size: 2rem;
 `;
 
 const Footer = styled.div`

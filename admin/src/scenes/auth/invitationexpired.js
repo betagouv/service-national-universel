@@ -10,6 +10,7 @@ import { setUser, setStructure } from "../../redux/auth/actions";
 
 import api from "../../services/api";
 import LoadingButton from "../../components/loadingButton";
+import { translate } from "../../utils";
 
 export default () => {
   const urlParams = new URLSearchParams(window.location.search);
@@ -27,10 +28,10 @@ export default () => {
             onSubmit={async (values, actions) => {
               try {
                 const { ok, code } = await api.post(`/referent/signup_retry`, values);
-                if (!ok) return toastr.error("Error", code);
+                if (!ok) return toastr.error("Erreur !", translate(code));
                 toastr.success("Email envoyé");
               } catch (e) {
-                toastr.error("Error", e.code);
+                toastr.error("Erreur !", translate(e.code));
               }
               actions.setSubmitting(false);
             }}

@@ -32,6 +32,14 @@ function cookieOptions() {
     return { maxAge: COOKIE_MAX_AGE, httpOnly: true, secure: true, sameSite: "none" };
   }
 }
+
+function logoutCookieOptions() {
+  if (config.ENVIRONMENT === "development") {
+    return { httpOnly: true, secure: false };
+  } else {
+    return { httpOnly: true, secure: true, sameSite: "none" };
+  }
+}
 class Auth {
   constructor(model) {
     this.model = model;
@@ -90,7 +98,7 @@ class Auth {
 
   async logout(req, res) {
     try {
-      res.clearCookie("jwt");
+      res.clearCookie("jwt", logoutCookieOptions());
       return res.status(200).send({ ok: true });
     } catch (error) {
       capture(error);

@@ -40,6 +40,7 @@ export default () => {
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
   useEffect(() => {
+    matomo.logEvent("start", "open_app");
     async function fetchData() {
       try {
         if (window.location.href.indexOf("/auth") !== -1) return setLoading(false);
@@ -80,6 +81,7 @@ const Home = () => {
         <Header />
         <Switch>
           <Route path="/auth" component={Auth} />
+          <Route path="/onboarding" component={Onboarding} />
           <RestrictedRoute path="/structure" component={Structure} />
           <RestrictedRoute path="/settings" component={Settings} />
           <RestrictedRoute path="/profil" component={Profil} />

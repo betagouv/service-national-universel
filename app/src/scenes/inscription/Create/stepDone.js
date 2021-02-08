@@ -6,7 +6,6 @@ import { Link, useHistory } from "react-router-dom";
 import matomo from "../../../services/matomo";
 
 export default () => {
-
   useEffect(() => {
     matomo.logEvent("inscription", "open_step", "step", 6);
   }, []);
@@ -27,7 +26,7 @@ export default () => {
       </Logo>
       <h2>Merci {young.firstName}</h2>
       <p>Bravo, votre inscription a bien été enregistrée. Votre candidature est en cours de traitement.</p>
-      <p>Vous serez prochainement contacter par e-mail.</p>
+      <p>Vous serez prochainement contacté(e) par e-mail.</p>
       <p>Vous pouvez continuer à éditer vos informations personnelles jusqu'à la validation de votre inscription.</p>
       <Footer>
         <ButtonContainer>

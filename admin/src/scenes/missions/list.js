@@ -9,10 +9,11 @@ import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
 
-import { formatDay, translate } from "../../utils";
+import { formatStringDate, translate, getFilterLabel } from "../../utils";
 import CustomFilter from "./customFilter";
+import SelectStatusMission from "../../components/selectStatusMission";
 
-const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION"];
+const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "REGION", "DEPARTMENT"];
 
 export default () => {
   const [mission, setMission] = useState(null);
@@ -23,13 +24,21 @@ export default () => {
         <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
           <div style={{ flex: 2, position: "relative" }}>
             <Header>
-              <div>
-                {/* <Subtitle>RESPONSABLE</Subtitle> */}
+              <div style={{ flex: 1 }}>
                 <Title>Missions</Title>
               </div>
-              <Link to="/mission/create">
-                <Button>Nouvelle mission</Button>
-              </Link>
+              <ButtonContainer>
+                <Link to="/mission/create">
+                  <button>Nouvelle mission</button>
+                </Link>
+                <ExportComponent
+                  title="Exporter les missions"
+                  collection="mission"
+                  transform={(e) => {
+                    return e;
+                  }}
+                />
+              </ButtonContainer>
             </Header>
             <Filter>
               <Row>
@@ -48,13 +57,14 @@ export default () => {
                 </Col>
               </Row>
               <Row style={{ marginTop: "10px" }}>
-                <Col md={3}>
+                <Col md={2}>
                   <DataSearch
                     showIcon={false}
                     placeholder="Ville ou code postal"
                     componentId="LOCATION"
                     dataField={["city", "zip"]}
-                    react={{ and: FILTERS }}
+                    react={{ and: FILTERS.filter((e) => e !== "LOCATION") }}
+                    fuzziness={1}
                     style={{ flex: 2 }}
                     innerClass={{ input: "searchbox" }}
                     autosuggest={false}
@@ -62,21 +72,52 @@ export default () => {
                 </Col>
                 <Col md={2}>
                   <MultiDropdownList
-                    placeholder="Status"
-                    renderItem={(e) => translate(e)}
+                    className="dropdown-filter"
                     componentId="STATUS"
                     dataField="status.keyword"
-                    className="dropdown-filter"
+                    react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
+                    renderItem={(e, count) => {
+                      return `${translate(e)} (${count})`;
+                    }}
+                    title=""
                     URLParams={true}
                     showSearch={false}
+                    renderLabel={(items) => getFilterLabel(items, "Statut")}
                   />
                 </Col>
                 <Col md={2}>
                   <MultiDropdownList
                     className="dropdown-filter"
-                    placeholder="choisir"
+                    placeholder="Régions"
+                    componentId="REGION"
+                    dataField="region.keyword"
+                    title=""
+                    react={{ and: FILTERS.filter((e) => e !== "REGION") }}
+                    URLParams={true}
+                    showSearch={false}
+                    sortBy="asc"
+                  />
+                </Col>
+                <Col md={2}>
+                  <MultiDropdownList
+                    className="dropdown-filter"
+                    placeholder="Départements"
+                    componentId="DEPARTMENT"
+                    dataField="department.keyword"
+                    title=""
+                    react={{ and: FILTERS.filter((e) => e !== "DEPARTMENT") }}
+                    URLParams={true}
+                    showSearch={false}
+                    sortBy="asc"
+                  />
+                </Col>
+                <Col md={2}>
+                  <MultiDropdownList
+                    className="dropdown-filter"
+                    placeholder="Domaine"
                     componentId="DOMAIN"
                     dataField="domains.keyword"
+                    react={{ and: FILTERS.filter((e) => e !== "DOMAIN") }}
                     title=""
                     URLParams={true}
                     showSearch={false}
@@ -84,19 +125,17 @@ export default () => {
                 </Col>
                 <Col md={2}>
                   <div className="dropdown-filter">
-                    <CustomFilter title="Places restantes" componentId="PLACES" field="placesLeft" />
-                  </div>
-                </Col>
-                <Col md={3}>
-                  <Export>
-                    <ExportComponent
-                      title="Exporter les missions"
-                      collection="mission"
-                      transform={(e) => {
-                        return e;
-                      }}
+                    <MultiDropdownList
+                      className="dropdown-filter"
+                      placeholder="Places restantes"
+                      componentId="PLACES"
+                      dataField="placesLeft"
+                      react={{ and: FILTERS.filter((e) => e !== "PLACES") }}
+                      title=""
+                      URLParams={true}
+                      showSearch={false}
                     />
-                  </Export>
+                  </div>
                 </Col>
               </Row>
             </Filter>
@@ -109,11 +148,10 @@ export default () => {
                 innerClass={{ pagination: "pagination" }}
                 size={10}
                 showLoader={true}
-                // dataField="createdAt"
-                // sortBy="desc"
+                dataField="createdAt"
+                sortBy="desc"
                 loader={<div style={{ padding: "0 20px" }}>Chargement...</div>}
-                dataField="created_at"
-                renderNoResults={() => <div style={{ padding: "10px 25px" }}>No Results found.</div>}
+                renderNoResults={() => <div style={{ padding: "10px 25px" }}>Aucun Résultat.</div>}
                 renderResultStats={(e) => {
                   return (
                     <div>
@@ -132,15 +170,13 @@ export default () => {
                       <tr>
                         <th width="40%">Mission</th>
                         <th>Dates</th>
-                        <th>Ville</th>
                         <th>Places</th>
                         <th width="20%">Statut</th>
-                        <th>Actions</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {data.map((hit) => (
-                        <Hit hit={hit} onClick={() => setMission(hit)} />
+                      {data.map((hit, i) => (
+                        <Hit key={i} hit={hit} onClick={() => setMission(hit)} />
                       ))}
                     </tbody>
                   </Table>
@@ -156,37 +192,35 @@ export default () => {
 };
 
 const Hit = ({ hit, onClick }) => {
-  console.log("h", hit);
+  // console.log("h", hit);
   return (
     <tr onClick={onClick}>
       <td>
         <TeamMember>
           <div>
             <h2>{hit.name}</h2>
-            <p>{hit.structureName}</p>
+            <p>
+              {hit.structureName} {`• ${hit.city} (${hit.department})`}
+            </p>
           </div>
         </TeamMember>
       </td>
       <td>
         <div>
-          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Du</span> {formatDay(hit.dateStart)}
+          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Du</span> {formatStringDate(hit.startAt)}
         </div>
         <div>
-          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Au</span> {formatDay(hit.dateEnd)}
+          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Au</span> {formatStringDate(hit.endAt)}
         </div>
       </td>
-      <td>{hit.city}</td>
       <td>
         {hit.placesTotal <= 1 ? `${hit.placesTotal} place` : `${hit.placesTotal} places`}
         <div style={{ fontSize: 12, color: "rgb(113,128,150)" }}>
           {hit.placesTaken} / {hit.placesTotal}
         </div>
       </td>
-      <td>
-        <Tag>{translate(hit.status)}</Tag>
-      </td>
       <td onClick={(e) => e.stopPropagation()}>
-        <Action hit={hit} />
+        <SelectStatusMission hit={hit} />
       </td>
     </tr>
   );
@@ -220,7 +254,7 @@ const Header = styled.div`
   display: flex;
   margin-top: 25px;
   align-items: flex-start;
-  justify-content: space-between;
+  /* justify-content: space-between; */
 `;
 
 const Title = styled.div`
@@ -403,9 +437,10 @@ const Tag = styled.span`
   margin-right: 5px;
 `;
 
-const Export = styled.div`
+const ButtonContainer = styled.div`
   button {
     background-color: #5245cc;
+    margin-left: 1rem;
     border: none;
     border-radius: 5px;
     padding: 7px 30px;

@@ -15,6 +15,7 @@ import DndFileInput from "../../../components/dndFileInput";
 
 import { saveYoung, STEPS } from "../utils";
 import { toastr } from "react-redux-toastr";
+import { translate } from "../../../utils";
 
 export default () => {
   useEffect(() => {
@@ -52,12 +53,12 @@ export default () => {
           try {
             values.inscriptionStep = STEPS.REPRESENTANTS;
             const { ok, code, data: young } = await api.put("/young", values);
-            if (!ok) return toastr.error("Une erreur s'est produite :", code);
+            if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             dispatch(setYoung(young));
             history.push("/inscription/representants");
           } catch (e) {
             console.log(e);
-            toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", e.code);
+            toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code));
           }
         }}
       >
@@ -354,6 +355,7 @@ export default () => {
                   </Col>
                   <Col>
                     <DndFileInput
+                      optional
                       value={values.highSkilledActivityProofFiles}
                       name="highSkilledActivityProofFiles"
                       onChange={async (e) => {

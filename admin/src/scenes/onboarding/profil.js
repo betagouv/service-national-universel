@@ -10,17 +10,20 @@ import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
 
 export default ({ onChange }) => {
+
   const user = useSelector((state) => state.Auth.user);
+
   const dispatch = useDispatch();
   return (
     <Wrapper>
       <Title>Mon profil</Title>
       <Formik
-        initialValues={{ mobile: user.mobile, phone: user.phone }}
+        initialValues={{ mobile: "", phone: "" }}
         onSubmit={async (values, actions) => {
           try {
-            const { data, ok } = await api.put("/referent", values);
-            if (ok) dispatch(setUser(data));
+            console.log("NEXT")
+            // const { data, ok } = await api.put("/referent", values);
+            // if (ok) dispatch(setUser(data));
             return onChange("structure");
           } catch (e) {
             toastr.error("Erreur");
@@ -36,7 +39,7 @@ export default ({ onChange }) => {
                   <span>*</span>TÉLÉPHONE MOBILE
                 </label>
                 <Field
-                  validate={(v) => !validator.isMobilePhone(v) && "Ce champ est requis"}
+                  validate={(v) => !validator.isMobilePhone(v) && "Le numéro n'est pas valide"}
                   name="mobile"
                   type="tel"
                   value={values.mobile}

@@ -136,7 +136,7 @@ router.post("/france-connect/user-info", async (req, res) => {
     headers: { Authorization: `Bearer ${token["access_token"]}` },
   });
   const userInfo = await userInfoResponse.json();
-  res.status(200).send({ ok: true, data: userInfo });
+  res.status(200).send({ ok: true, data: userInfo, tokenId: token["id_token"] });
 });
 
 // Delete one user (only admin can delete user)

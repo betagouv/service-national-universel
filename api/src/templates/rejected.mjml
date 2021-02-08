@@ -1,26 +1,112 @@
 <mjml>
   <mj-body>
+    <mj-hero>
+      <mj-text>
+        <h1 font-size="20px">Candidature refusée</h1>
+      </mj-text>
+      <mj-text line-height="1.5" font-size="16px" color="#000">{{message}}</mj-text>
+
+      <mj-text font-size="18px" color="#3D4852"> Bien cordialement,</mj-text>
+      <mj-text font-size="18px" color="#3D4852"> L’équipe SNU</mj-text>
+
+      <mj-divider border-color="#F6F7F8"></mj-divider>
+      <mj-text>
+        <h1 font-size="20px">Voici d'autres grands programmes d'engagement</h1>
+      </mj-text>
+    </mj-hero>
     <mj-section>
-      <mj-column>
-        <mj-text>
-          <h1 font-size="20px">Candidature refusée</h1>
-        </mj-text>
-        <mj-text font-size="18px" color="#000">
-Bonjour {{firstName}} {{lastName}},
-
-           </mj-text>
-          <mj-text line-height="1.5" font-size="18px" color="#000">
-Nous n'avons malheureusement pu donner suite à votre candidature au Service Nationale Universel édition 2021.
-           </mj-text>
-             <mj-text line-height="1.5" font-size="18px" color="#000">
-Bonne continuation,
-
-                     </mj-text>
-
-     
-        <mj-text font-size="18px" color="#000">Les équipes du Service National Universel</mj-text>
-
-      </mj-column>
+      <mj-group>
+        <mj-column>
+          <mj-image
+            padding="20px"
+            height="160px"
+            border-radius="10px"
+            src="https://cdn.paris.fr/paris/2019/11/20/huge-0fbd313d8b04ac84f5f576bdacbcaee9.jpg"
+            target="https://www.service-civique.gouv.fr/"
+          />
+          <mj-text align="center">
+            <h2>Le Service Civique</h2>
+            <p>
+              Un engagement volontaire au service de l’intérêt général, en France ou à l’étranger, auprès d’organisations à but non lucratif ou
+              publiques.
+            </p>
+          </mj-text>
+          <mj-button href="https://www.service-civique.gouv.fr/" font-family="Helvetica" font-weight="700" background-color="white" color="#5145cd">
+            DÉCOUVRIR
+          </mj-button>
+        </mj-column>
+      </mj-group>
+      <mj-group>
+        <mj-column>
+          <mj-image
+            padding="20px"
+            height="160px"
+            border-radius="10px"
+            src="https://www.loire.fr/upload/docs/image/jpeg/2017-06/diapo-jsp0.jpg"
+            target="https://www.pompiers.fr/grand-public/devenir-sapeur-pompier"
+          />
+          <mj-text align="center">
+            <h2>Les Sapeurs-Pompiers de France</h2>
+            <p>
+              Si vous souhaitez vous engager pour aider votre prochain tout en ayant une autre activité professionnelle, le statut de sapeur-pompier
+              volontaire peut vous permettre d’y parvenir.
+            </p>
+          </mj-text>
+          <mj-button
+            href="https://www.pompiers.fr/grand-public/devenir-sapeur-pompier"
+            font-family="Helvetica"
+            font-weight="700"
+            background-color="white"
+            color="#5145cd"
+          >
+            DÉCOUVRIR
+          </mj-button>
+        </mj-column>
+      </mj-group>
+    </mj-section>
+    <mj-section>
+      <mj-group>
+        <mj-column>
+          <mj-image
+            padding="20px"
+            height="160px"
+            border-radius="10px"
+            src="http://planmercredi.education.gouv.fr/sites/default/files/styles/home_intro/public/bloc_image/072_duw0436934_0.png?itok=HmL6_lQ4"
+            target="http://planmercredi.education.gouv.fr/"
+          />
+          <mj-text align="center">
+            <h2>Plan Mercredi</h2>
+            <p>
+              Le Plan mercredi met en place un cadre de confiance pour les communes et les parents afin d’offrir au plus grand nombre d’enfants un
+              accueil de loisirs éducatifs de grande qualité le mercredi.
+            </p>
+          </mj-text>
+          <mj-button href="http://planmercredi.education.gouv.fr/" font-family="Helvetica" font-weight="700" background-color="white" color="#5145cd">
+            DÉCOUVRIR
+          </mj-button>
+        </mj-column>
+      </mj-group>
+      <mj-group>
+        <mj-column>
+          <mj-image
+            padding="20px"
+            height="160px"
+            border-radius="10px"
+            src="https://reserve-civique-wp.s3.amazonaws.com/uploads/2020/12/Capture-d%E2%80%99e%CC%81cran-2020-12-09-a%CC%80-09.55.45.png"
+            target="https://jeveuxaider.gouv.fr/"
+          />
+          <mj-text align="center">
+            <h2>JeVeuxAider</h2>
+            <p>
+              Devenez bénévole et trouvez des missions en quelques clics près de chez vous ou à distance. Plus de 330 000 bénévoles soutiennent des
+              milliers d'associations et d'organisations publiques.
+            </p>
+          </mj-text>
+          <mj-button href="https://jeveuxaider.gouv.fr/" font-family="Helvetica" font-weight="700" background-color="white" color="#5145cd">
+            DÉCOUVRIR
+          </mj-button>
+        </mj-column>
+      </mj-group>
     </mj-section>
   </mj-body>
 </mjml>

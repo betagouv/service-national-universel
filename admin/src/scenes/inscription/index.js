@@ -4,15 +4,16 @@ import styled from "styled-components";
 import relativeTime from "dayjs/plugin/relativeTime";
 import dayjs from "dayjs";
 import "dayjs/locale/fr";
+import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
+import { Link } from "react-router-dom";
 
 import ExportComponent from "../../components/ExportXlsx";
 import ReactiveFilter from "../../components/ReactiveFilter";
 import SelectStatus from "../../components/selectStatus";
 import api from "../../services/api";
-import { apiURL } from "../../config";
+import { apiURL, appURL } from "../../config";
 import Panel from "./panel";
-
-import { translate, getFilterLabel } from "../../utils";
+import { translate, getFilterLabel, formatStringLongDate } from "../../utils";
 
 const FILTERS = ["SEARCH", "STATUS", "REGION", "DEPARTMENT", "PHASE", "REMOVEINPROGRESS"];
 
@@ -187,8 +188,9 @@ export default () => {
                           <th width="10%" style={{ fontSize: 18 }}>
                             #
                           </th>
-                          <th width="60%">Volontaire</th>
-                          <th>Statut</th>
+                          <th width="50%">Volontaire</th>
+                          <th style={{ textAlign: "center" }}>Statut</th>
+                          <th style={{ textAlign: "center" }}>Actions</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -213,11 +215,6 @@ const Hit = ({ hit, index, onClick }) => {
   dayjs.extend(relativeTime).locale("fr");
   const diff = dayjs(new Date(hit.createdAt)).fromNow();
 
-  const formatLongDate = (date) => {
-    const d = new Date(date);
-    return d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" });
-  };
-
   return (
     <tr onClick={onClick} key={hit._id}>
       <td>{index + 1}</td>
@@ -225,12 +222,41 @@ const Hit = ({ hit, index, onClick }) => {
         <strong>
           {hit.firstName} {hit.lastName}
         </strong>
-        <div>{`Inscrit(e) ${diff} • ${formatLongDate(hit.createdAt)}`}</div>
+        <div>{`Inscrit(e) ${diff} • ${formatStringLongDate(hit.createdAt)}`}</div>
       </td>
-      <td onClick={(e) => e.stopPropagation()}>
+      <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
         <SelectStatus hit={hit} />
       </td>
+      <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
+        <Action hit={hit} />
+      </td>
     </tr>
+  );
+};
+
+const Action = ({ hit, color }) => {
+  return (
+    <ActionBox color={"#444"}>
+      <UncontrolledDropdown setActiveFromChild>
+        <DropdownToggle tag="button">
+          Choisissez une action
+          <div className="down-icon">
+            <svg viewBox="0 0 407.437 407.437">
+              <polygon points="386.258,91.567 203.718,273.512 21.179,91.567 0,112.815 203.718,315.87 407.437,112.815 " />
+            </svg>
+          </div>
+        </DropdownToggle>
+        <DropdownMenu>
+          <DropdownItem className="dropdown-item">
+            <Link to={`/volontaire/${hit._id}`}>Voir ou Modifier le profil</Link>
+          </DropdownItem>
+
+          <DropdownItem className="dropdown-item">
+            <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${hit._id}`}>Prendre sa place</a>
+          </DropdownItem>
+        </DropdownMenu>
+      </UncontrolledDropdown>
+    </ActionBox>
   );
 };
 
@@ -400,6 +426,73 @@ const Export = styled.div`
     cursor: pointer;
     :hover {
       background: #372f78;
+    }
+  }
+`;
+
+const ActionBox = styled.div`
+  .dropdown-menu {
+    min-width: 0;
+    width: 200px;
+    a,
+    div {
+      white-space: nowrap;
+      font-size: 14px;
+      :hover {
+        color: inherit;
+      }
+    }
+  }
+  button {
+    ${({ color }) => `
+      background-color: ${color}15;
+      border: 1px solid ${color};
+      color: ${color};
+    `}
+    display: inline-flex;
+    flex: 1;
+    justify-content: space-between;
+    align-items: center;
+    text-align: left;
+    border-radius: 0.5rem;
+    padding: 0 0 0 12px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    outline: 0;
+    width: 100%;
+    max-width: 250px;
+    .edit-icon {
+      height: 17px;
+      margin-right: 10px;
+      path {
+        fill: ${({ color }) => `${color}`};
+      }
+    }
+    .down-icon {
+      margin-left: auto;
+      padding: 7px 15px;
+      /* border-left: 1px solid ${({ color }) => `${color}`}; */
+      margin-left: 15px;
+      svg {
+        height: 10px;
+      }
+      svg polygon {
+        fill: ${({ color }) => `${color}`};
+      }
+    }
+  }
+  .dropdown-item {
+    border-radius: 0;
+    background-color: transparent;
+    border: none;
+    color: #767676;
+    white-space: nowrap;
+    font-size: 14px;
+    padding: 5px 15px;
+    font-weight: 400;
+    :hover {
+      background-color: #f3f3f3;
     }
   }
 `;

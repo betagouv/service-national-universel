@@ -1,4 +1,5 @@
-require("dotenv").config({ path: "./../.env-prod" });
+require("dotenv").config({ path: "./../.env-staging" });
+const esclient = require("../src/es");
 
 const Sequelize = require("sequelize");
 const { QueryTypes } = require("sequelize");
@@ -10,16 +11,19 @@ const opts = { define: { freezeTableName: true, timestamps: false }, logging: fa
 const connexionURL = process.env.MYSQL_URL;
 const sequelize = new Sequelize(connexionURL, opts);
 
-// const Mission = require(`../src/models/mission`);
-// const Structure = require(`../src/models/structure`);
+const Mission = require(`../src/models/mission`);
+const Structure = require(`../src/models/structure`);
 const Young = require("../src/models/young");
-// const Referent = require("../src/models/referent");
-// const Application = require("../src/models/application");
+const Referent = require("../src/models/referent");
+const Application = require("../src/models/application");
+
+const logPrecentage = (value, total) => {
+  console.log(`${parseInt((value * 100) / total)} %`);
+};
 
 const migrate = async (model, migration) => {
   console.log(`>>> START ${model}`);
   try {
-    console.log(`${model} deleted`);
     console.log(`MIGRATION ${model} START`);
     await migration();
   } catch (error) {
@@ -28,36 +32,51 @@ const migrate = async (model, migration) => {
 };
 
 sequelize.authenticate().then(async (e) => {
-  // await esclient.indices.delete({ index: "structure" });
-  // await Structure.deleteMany({});
-  // await migrate("Structure", migrateStructure);
-
-  // await esclient.indices.delete({ index: "mission" });
-  // await Mission.deleteMany({});
-  // await migrate("Mission", migrateMission);
-
   try {
-    // Migrate people in the cohesion stay
-    console.log(`### START MONGO DELETE Young`);
-    await Young.deleteMany({ phase: "COHESION_STAY" });
-    console.log(`### END DELETE young`);
-    await migrate("Young", migrateYoung);
-    console.log(`### END MONGO DELETE young`);
-    await Young.unsynchronize();
-    console.log(`### END DELETED ES Indice for young`);
-    await Young.synchronize();
-    console.log(`### END SYNC ES Indice for young`);
-  } catch (e) {
-    console.log(e);
+    await esclient.indices.delete({ index: "structure" });
+  } catch (error) {
+    console.log("ERROR ES", error);
   }
+  await Structure.deleteMany({});
+  await migrate("Structure", migrateStructure);
+  await migrate("Network", migrateNetwork);
 
   // await esclient.indices.delete({ index: "referent" });
-  // await Referent.deleteMany({});
-  // await migrate("Referent", migrateReferent);
+  await Referent.deleteMany({ sqlId: { $ne: null } });
+  await migrate("Referent", migrateReferent);
+  await migrate("Referent / Members", migrateStructureMembers);
 
-  // await esclient.indices.delete({ index: "application" });
-  // await Application.deleteMany({});
-  // await migrate("Application", migrateApplication);
+  try {
+    await esclient.indices.delete({ index: "mission" });
+  } catch (error) {
+    console.log("ERROR ES", error);
+  }
+  await Mission.deleteMany({});
+  await migrate("Mission", migrateMission);
+
+  // try {
+  //   // Migrate people in the cohesion stay
+  //   console.log(`### START MONGO DELETE Young`);
+  //   await Young.deleteMany({ phase: "COHESION_STAY" });
+  //   console.log(`### END DELETE young`);
+  //   await migrate("Young", migrateYoung);
+  //   console.log(`### END MONGO DELETE young`);
+  //   await Young.unsynchronize();
+  //   console.log(`### END DELETED ES Indice for young`);
+  //   await Young.synchronize();
+  //   console.log(`### END SYNC ES Indice for young`);
+  // } catch (e) {
+  //   console.log(e);
+  // }
+
+  try {
+    await esclient.indices.delete({ index: "application" });
+  } catch (error) {
+    console.log("ERROR ES", error);
+  }
+  await Application.deleteMany({});
+  await migrate("Application", migrateApplication);
+  process.exit(1);
 });
 
 async function migrateStructure() {
@@ -69,13 +88,15 @@ async function migrateStructure() {
       // @todo quid deleted structures ? (structure.deleted_at !== null)
       const structure = { ...s };
       structure.sqlId = s.id;
-      structure.is_reseau = !!structure.is_reseau;
+      structure.isNetwork = structure.is_reseau ? "true" : "false";
+      structure.sqlNetworkId = s.reseau_id;
+      structure.sqlUserId = s.user_id;
       if (s.longitude && s.latitude) structure.location = { lon: parseFloat(s.longitude), lat: parseFloat(s.latitude) };
 
-      structure.statutJuridique = (() => {
-        if (s.status_juridique === "Structure publique") return "PUBLIC";
-        if (s.status_juridique === "Structure privée") return "PRIVATE";
-        if (s.status_juridique === "Association") return "ASSOCIATION";
+      structure.legalStatus = (() => {
+        if (s.statut_juridique === "Structure publique") return "PUBLIC";
+        if (s.statut_juridique === "Structure privée") return "PRIVATE";
+        if (s.statut_juridique === "Association") return "ASSOCIATION";
         return "OTHER";
       })();
 
@@ -85,7 +106,7 @@ async function migrateStructure() {
       structure.structurePriveeType = s.structure_privee_type;
 
       structure.department = departmentList[s.department];
-      structure.region = regionList[department2region[s.department]];
+      structure.region = department2region[structure.department];
 
       structure.status = (() => {
         if (s.state === "En attente de validation") return "WAITING_VALIDATION";
@@ -105,14 +126,50 @@ async function migrateStructure() {
   console.log(`${a.length} added`);
 }
 
+async function migrateNetwork() {
+  const structuresSQL = await sequelize.query("SELECT * FROM `structures` where reseau_id is not null", { type: QueryTypes.SELECT });
+  let count = 0;
+  console.log(`${structuresSQL.length} structures network detected`);
+  for (let i = 0; i < structuresSQL.length; i++) {
+    const s = structuresSQL[i];
+
+    try {
+      const structure = await Structure.findOne({ sqlId: s.reseau_id });
+      if (structure) {
+        console.log(`structure ${s.id} - ${s.name}: networkId ${structure._id} - ${structure.name} (${s.reseau_id})`);
+        await Structure.findOneAndUpdate({ sqlId: s.id }, { networkId: structure._id }, { useFindAndModify: false });
+      }
+    } catch (error) {
+      console.log("error while linking structure", error);
+    }
+    count++;
+    if (count % 100 === 0) logPrecentage(count, structuresSQL.length);
+  }
+}
+
 async function migrateMission() {
   const missionsSQL = await sequelize.query("SELECT * FROM `missions`", { type: QueryTypes.SELECT });
   let a = [];
+  let count = 0;
   console.log(`${missionsSQL.length} missions detected`);
-  missionsSQL.forEach(async (m) => {
+
+  for (let i = 0; i < missionsSQL.length; i++) {
+    const m = missionsSQL[i];
     try {
       const mission = { ...m };
       mission.sqlId = m.id;
+
+      mission.sqlStructureId = m.structure_id;
+      const structure = await Structure.findOne({ sqlId: m.structure_id });
+      if (structure) {
+        mission.structureId = structure._id;
+        mission.structureName = structure.name;
+      }
+
+      mission.sqlTutorId = m.tuteur_id;
+      const tutor = await Referent.findOne({ sqlId: m.tuteur_id });
+      if (tutor) mission.tutorId = tutor._id;
+
       mission.placesTotal = m.participations_max;
       mission.placesLeft = m.participations_max;
       if (m.longitude && m.latitude) {
@@ -122,8 +179,18 @@ async function migrateMission() {
         };
       }
       mission.remote = m.is_everywhere ? "true" : "false";
+
+      //todo translates domains
       mission.domains = JSON.parse(m.domaines);
-      mission.format = m.format === "Perlée" ? "DISCONTINUOUS" : "CONTINUOUS";
+      if (m.format === "Perlée") {
+        mission.format = "DISCONTINUOUS";
+      } else if (m.format === "Continue") {
+        mission.format = "CONTINUOUS";
+      } else if (m.format === "Autonome") {
+        mission.format = "AUTONOMOUS";
+      } else {
+        console.log("ERROR FORMAT", m.format);
+      }
       mission.status = (() => {
         if (m.state === "Brouillon") return "DRAFT";
         if (m.state === "En attente de validation") return "WAITING_VALIDATION";
@@ -133,15 +200,19 @@ async function migrateMission() {
         if (m.state === "Annulée") return "CANCEL";
         if (m.state === "Archivée") return "ARCHIVED";
       })();
-
-      mission.dateEnd = m.end_date;
-      mission.dateStart = m.start_date;
-
+      if (JSON.parse(m.periodes).length) mission.period = JSON.parse(m.periodes);
+      mission.frequence = m.frequence;
+      mission.department = departmentList[m.department];
+      mission.region = department2region[mission.department];
+      mission.endAt = m.end_date;
+      mission.startAt = m.start_date;
+      count++;
+      if (count % 100 === 0) logPrecentage(count, missionsSQL.length);
       a.push(mission);
     } catch (error) {
       console.log(error);
     }
-  });
+  }
   await Mission.insertMany(a);
   console.log(`${a.length} added`);
 }
@@ -235,42 +306,79 @@ async function migrateYoung() {
 }
 
 async function migrateReferent() {
-  const profilesSql = await sequelize.query("SELECT * FROM `profiles`", { type: QueryTypes.SELECT });
-  let a = [];
+  const profilesSql = await sequelize.query(
+    //take everyone except the youngs
+    "SELECT profiles.*, users.context_role FROM `profiles` LEFT JOIN `users` on profiles.user_id = users.id WHERE users.context_role <> 'volontaire' OR users.context_role is null",
+    {
+      type: QueryTypes.SELECT,
+    }
+  );
+  let count = 0;
   console.log(`${profilesSql.length} profiles detected`);
-  profilesSql.forEach(async (u) => {
+  for (let i = 0; i < profilesSql.length; i++) {
+    const u = profilesSql[i];
     try {
-      if (!u.referent_department && !u.referent_region) return;
       const referent = { ...u };
-      // referent.firstName = u.first_name;
-      // referent.lastName = u.last_name;
+      if (u.id) {
+        referent.sqlId = u.id;
 
-      // referent.email = (referent.email || "").toLowerCase();
+        // //start anonymisation
+        // const fn = faker.name.firstName();
+        // referent.firstName = fn.charAt(0).toUpperCase() + fn.slice(1);
+        // const ln = faker.name.lastName();
+        // referent.lastName = ln.toUpperCase();
+        // referent.email = `${u.id}@mail.com`;
+        // //end anonymisation
 
-      //start anonymisation
-      const fn = faker.name.firstName();
-      referent.firstName = fn.charAt(0).toUpperCase() + fn.slice(1);
-      const ln = faker.name.lastName();
-      referent.lastName = ln.toUpperCase();
-      referent.email = `${referent.firstName}.${referent.lastName}@mail.com`;
-      //end anonymisation
+        referent.firstName = u.first_name;
+        referent.lastName = u.last_name.toUpperCase();
 
-      referent.role = "responsable"; // @todo update role
-      // @todo which depart or region ?
-      a.push(referent);
+        if (u.referent_region) {
+          referent.role = "referent_region";
+          referent.region = regionList[u.referent_region];
+        } else if (u.referent_department) {
+          referent.role = "referent_department";
+          referent.department = departmentList[u.referent_department];
+        } else if (u.context_role === "superviseur") {
+          referent.role = "structure_responsible";
+        } else {
+          referent.role = "structure_member";
+        }
+        await Referent.create(referent);
+        count++;
+        if (count % 100 === 0) logPrecentage(count, profilesSql.length);
+      }
     } catch (error) {
       console.log(error);
     }
+  }
+}
+
+async function migrateStructureMembers() {
+  const members = await sequelize.query("SELECT * FROM `members`", {
+    type: QueryTypes.SELECT,
   });
-  await Referent.insertMany(a);
-  console.log(`${a.length} added`);
+  console.log(`${members.length} members detected`);
+  let count = 0;
+  for (let i = 0; i < members.length; i++) {
+    const m = members[i];
+
+    try {
+      const structure = await Structure.findOne({ sqlId: m.structure_id });
+      if (structure) await Referent.findOneAndUpdate({ sqlId: m.profile_id }, { structureId: structure._id }, { useFindAndModify: false });
+    } catch (error) {
+      console.log("error while linking ref/structure", error);
+    }
+    count++;
+    if (count % 100 === 0) logPrecentage(count, members.length);
+  }
 }
 
 async function migrateApplication() {
   const missionYoungSQL = await sequelize.query("SELECT * FROM `mission_young`", { type: QueryTypes.SELECT });
   let a = [];
   console.log(`${missionYoungSQL.length} mission_youngs detected`);
-
+  let count = 0;
   // good old for(;;) because of the inner promises in the loop.
   for (let i = 0; i < missionYoungSQL.length; i++) {
     const my = missionYoungSQL[i];
@@ -278,37 +386,54 @@ async function migrateApplication() {
       const app = { ...my };
 
       const mission = await Mission.findOne({ sqlId: my.mission_id });
-      app.missionId = (mission && mission._id) || "N/A";
-      app.missionName = mission.name;
-      app.missionDepartment = mission.department;
-      app.missionRegion = mission.region;
+      if (mission) {
+        app.missionId = mission._id;
+        app.missionName = mission.name;
+        app.missionDepartment = mission.department;
+        app.missionRegion = mission.region;
+      } else {
+        app.missionId = "N/A";
+      }
 
       const young = await Young.findOne({ sqlId: my.young_id });
-      app.youngId = (young && young._id) || "N/A";
-      app.youngFirstName = young.firstName;
-      app.youngLastName = young.lastName;
-      app.youngEmail = young.email;
+      if (young) {
+        app.youngId = young._id;
+        app.youngFirstName = young.firstName;
+        app.youngLastName = young.lastName;
+        app.youngBirthdateAt = young.birthdateAt;
+        app.youngEmail = young.email;
+        app.youngCity = young.city;
+        app.youngDepartment = young.department;
+      } else {
+        app.youngId = "N/A";
+      }
 
       app.status = (() => {
         if (my.status === "CANDIDATURE_CREEE") return "WAITING_VALIDATION";
         if (my.status === "CANDIDATURE_VALIDEE") return "VALIDATED";
         if (my.status === "CANDIDATURE_REFUSEE") return "REFUSED";
         if (my.status === "CANDIDATURE_ANNULEE") return "CANCEL";
-        if (my.status === "CANDIDATURE_PRESELECTIONNEE") return;
-        if (my.status === "CANDIDATURE_CONTRAT_SIGNE") return;
-        if (my.status === "MISSION_EN_COURS") return;
-        if (my.status === "MISSION_EFFECTUEE") return "ARCHIVED";
-        if (my.status === "MISSION_NON_ACHEVEE") return;
+        if (my.status === "CANDIDATURE_PRESELECTIONNEE") return "PRESELECTED";
+        if (my.status === "CANDIDATURE_CONTRAT_SIGNE") return "SIGNED_CONTRACT";
+        if (my.status === "MISSION_EN_COURS") return "IN_PROGRESS";
+        if (my.status === "MISSION_EFFECTUEE") return "DONE";
+        if (my.status === "MISSION_NON_ACHEVEE") return "NOT_COMPLETED";
       })();
 
       app.createdAt = my.created_at;
       app.updatedAt = my.updated_at;
+      count++;
+      if (count % 100 === 0) logPrecentage(count, missionYoungSQL.length);
       a.push(app);
     } catch (error) {
       console.log(error);
     }
   }
-  await Application.insertMany(a);
+  try {
+    await Application.insertMany(a);
+  } catch (error) {
+    console.log("error while inserting applications", error);
+  }
   console.log(`${a.length} added`);
 }
 
@@ -449,112 +574,112 @@ const regionList = {
 };
 
 const department2region = {
-  "01": "84",
-  "02": "32",
-  "03": "84",
-  "04": "93",
-  "05": "93",
-  "06": "93",
-  "07": "84",
-  "08": "44",
-  "09": "76",
-  10: "44",
-  11: "76",
-  12: "76",
-  13: "93",
-  14: "28",
-  15: "84",
-  16: "75",
-  17: "75",
-  18: "24",
-  19: "75",
-  21: "27",
-  22: "53",
-  23: "75",
-  24: "75",
-  25: "27",
-  26: "84",
-  27: "28",
-  28: "24",
-  29: "53",
-  "2A": "94",
-  "2B": "94",
-  30: "76",
-  31: "76",
-  32: "76",
-  33: "75",
-  34: "76",
-  35: "53",
-  36: "24",
-  37: "24",
-  38: "84",
-  39: "27",
-  40: "75",
-  41: "24",
-  42: "84",
-  43: "84",
-  44: "52",
-  45: "24",
-  46: "76",
-  47: "75",
-  48: "76",
-  49: "52",
-  50: "28",
-  51: "44",
-  52: "44",
-  53: "52",
-  54: "44",
-  55: "44",
-  56: "53",
-  57: "44",
-  58: "27",
-  59: "32",
-  60: "32",
-  61: "28",
-  62: "32",
-  63: "84",
-  64: "75",
-  65: "76",
-  66: "76",
-  67: "44",
-  68: "44",
-  69: "84",
-  70: "27",
-  71: "27",
-  72: "52",
-  73: "84",
-  74: "84",
-  75: "11",
-  76: "28",
-  77: "11",
-  78: "11",
-  79: "75",
-  80: "32",
-  81: "76",
-  82: "76",
-  83: "93",
-  84: "93",
-  85: "52",
-  86: "75",
-  87: "75",
-  88: "44",
-  89: "27",
-  90: "27",
-  91: "11",
-  92: "11",
-  93: "11",
-  94: "11",
-  95: "11",
-  971: "971",
-  972: "972",
-  973: "973",
-  974: "974",
-  975: "975",
-  976: "976",
-  977: "977",
-  978: "978",
-  984: "984",
-  986: "986",
-  987: "987",
-  988: "988",
+  Ain: "Auvergne-Rhône-Alpes",
+  Aisne: "Hauts-de-France",
+  Allier: "Auvergne-Rhône-Alpes",
+  "Alpes-de-Haute-Provence": "Provence-Alpes-Côte d'Azur",
+  "Hautes-Alpes": "Provence-Alpes-Côte d'Azur",
+  "Alpes-Maritimes": "Provence-Alpes-Côte d'Azur",
+  Ardèche: "Auvergne-Rhône-Alpes",
+  Ardennes: "Grand Est",
+  Ariège: "Occitanie",
+  Aube: "Grand Est",
+  Aude: "Occitanie",
+  Aveyron: "Occitanie",
+  "Bouches-du-Rhône": "Provence-Alpes-Côte d'Azur",
+  Calvados: "Normandie",
+  Cantal: "Auvergne-Rhône-Alpes",
+  Charente: "Nouvelle-Aquitaine",
+  "Charente-Maritime": "Nouvelle-Aquitaine",
+  Cher: "Centre-Val de Loire",
+  Corrèze: "Nouvelle-Aquitaine",
+  "Côte-d'Or": "Bourgogne-Franche-Comté",
+  "Côtes-d'Armor": "Bretagne",
+  Creuse: "Nouvelle-Aquitaine",
+  Dordogne: "Nouvelle-Aquitaine",
+  Doubs: "Bourgogne-Franche-Comté",
+  Drôme: "Auvergne-Rhône-Alpes",
+  Eure: "Normandie",
+  "Eure-et-Loire": "Centre-Val de Loire",
+  Finistère: "Bretagne",
+  "Corse-du-Sud": "Corse",
+  "Haute-Corse": "Corse",
+  Gard: "Occitanie",
+  "Haute-Garonne": "Occitanie",
+  Gers: "Occitanie",
+  Gironde: "Nouvelle-Aquitaine",
+  Hérault: "Occitanie",
+  "Ille-et-Vilaine": "Bretagne",
+  Indre: "Centre-Val de Loire",
+  "Indre-et-Loire": "Centre-Val de Loire",
+  Isère: "Auvergne-Rhône-Alpes",
+  Jura: "Bourgogne-Franche-Comté",
+  Landes: "Nouvelle-Aquitaine",
+  "Loir-et-Cher": "Centre-Val de Loire",
+  Loire: "Auvergne-Rhône-Alpes",
+  "Haute-Loire": "Auvergne-Rhône-Alpes",
+  "Loire-Atlantique": "Pays de la Loire",
+  Loiret: "Centre-Val de Loire",
+  Lot: "Occitanie",
+  "Lot-et-Garonne": "Nouvelle-Aquitaine",
+  Lozère: "Occitanie",
+  "Maine-et-Loire": "Pays de la Loire",
+  Manche: "Normandie",
+  Marne: "Grand Est",
+  "Haute-Marne": "Grand Est",
+  Mayenne: "Pays de la Loire",
+  "Meurthe-et-Moselle": "Grand Est",
+  Meuse: "Grand Est",
+  Morbihan: "Bretagne",
+  Moselle: "Grand Est",
+  Nièvre: "Bourgogne-Franche-Comté",
+  Nord: "Hauts-de-France",
+  Oise: "Hauts-de-France",
+  Orne: "Normandie",
+  "Pas-de-Calais": "Hauts-de-France",
+  "Puy-de-Dôme": "Auvergne-Rhône-Alpes",
+  "Pyrénées-Atlantiques": "Nouvelle-Aquitaine",
+  "Hautes-Pyrénées": "Occitanie",
+  "Pyrénées-Orientales": "Occitanie",
+  "Bas-Rhin": "Grand Est",
+  "Haut-Rhin": "Grand Est",
+  Rhône: "Auvergne-Rhône-Alpes",
+  "Haute-Saône": "Bourgogne-Franche-Comté",
+  "Saône-et-Loire": "Bourgogne-Franche-Comté",
+  Sarthe: "Pays de la Loire",
+  Savoie: "Auvergne-Rhône-Alpes",
+  "Haute-Savoie": "Auvergne-Rhône-Alpes",
+  Paris: "Île-de-France",
+  "Seine-Maritime": "Normandie",
+  "Seine-et-Marne": "Île-de-France",
+  Yvelines: "Île-de-France",
+  "Deux-Sèvres": "Nouvelle-Aquitaine",
+  Somme: "Hauts-de-France",
+  Tarn: "Occitanie",
+  "Tarn-et-Garonne": "Occitanie",
+  Var: "Provence-Alpes-Côte d'Azur",
+  Vaucluse: "Provence-Alpes-Côte d'Azur",
+  Vendée: "Pays de la Loire",
+  Vienne: "Nouvelle-Aquitaine",
+  "Haute-Vienne": "Nouvelle-Aquitaine",
+  Vosges: "Grand Est",
+  Yonne: "Bourgogne-Franche-Comté",
+  "Territoire de Belfort": "Bourgogne-Franche-Comté",
+  Essonne: "Île-de-France",
+  "Hauts-de-Seine": "Île-de-France",
+  "Seine-Saint-Denis": "Île-de-France",
+  "Val-de-Marne": "Île-de-France",
+  "Val-d'Oise": "Île-de-France",
+  Guadeloupe: "Guadeloupe",
+  Martinique: "Martinique",
+  Guyane: "Guyane",
+  "La Réunion": "La Réunion",
+  "Saint-Pierre-et-Miquelon": "Saint-Pierre-et-Miquelon",
+  Mayotte: "Mayotte",
+  "Saint-Barthélemy": "Saint-Barthélemy",
+  "Saint-Martin": "Saint-Martin",
+  "Terres australes et antarctiques françaises": "Terres australes et antarctiques françaises",
+  "Wallis-et-Futuna": "Wallis-et-Futuna",
+  "Polynésie française": "Polynésie française",
+  "Nouvelle-Calédonie": "Nouvelle-Calédonie",
 };

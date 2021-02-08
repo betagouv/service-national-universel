@@ -51,15 +51,16 @@ router.get("/", passport.authenticate("referent", { session: false }), async (re
   }
 });
 
-//@check
 router.delete("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
-  // try {
-  //   await StructureObject.findOneAndUpdate({ _id: req.params.id }, { deleted: "yes" });
-  //   res.status(200).send({ ok: true });
-  // } catch (error) {
-  //   capture(error);
-  //   res.status(500).send({ ok: false, error, code: SERVER_ERROR });
-  // }
+  try {
+    const structure = await StructureObject.findOne({ _id: req.params.id });
+    await structure.remove();
+    console.log(`Structure ${req.params.id} has been deleted`);
+    res.status(200).send({ ok: true });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, error, code: SERVER_ERROR });
+  }
 });
 
 module.exports = router;

@@ -8,7 +8,7 @@ import api from "../services/api";
 import LoadingButton from "../components/loadingButton";
 import { setYoung } from "../redux/auth/actions";
 import ErrorMessage, { requiredMessage } from "../scenes/inscription/components/errorMessage";
-import { getPasswordErrorMessage } from "../utils";
+import { getPasswordErrorMessage, translate } from "../utils";
 import validator from "validator";
 
 export default () => {
@@ -28,12 +28,12 @@ export default () => {
         onSubmit={async (values) => {
           try {
             const { ok, code, data: young } = await api.put("/young", values);
-            if (!ok) toastr.error("Une erreur s'est produite :", code);
+            if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
             dispatch(setYoung(young));
             toastr.success("Mis à jour!");
           } catch (e) {
             console.log(e);
-            toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", e.code);
+            toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
           }
         }}
       >
@@ -65,12 +65,12 @@ export default () => {
         onSubmit={async (values) => {
           try {
             const { ok, code, data: young } = await api.post("/young/reset_password", values);
-            if (!ok) toastr.error("Une erreur s'est produite :", code);
+            if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
             dispatch(setYoung(young));
             toastr.success("Mis à jour!");
           } catch (e) {
             console.log(e);
-            toastr.error("Oups, une erreur est survenue pendant la mise à jour du mot de passe :", e.code);
+            toastr.error("Oups, une erreur est survenue pendant la mise à jour du mot de passe :", translate(e.code));
           }
         }}
       >
@@ -127,12 +127,12 @@ export default () => {
         onSubmit={async (values) => {
           try {
             const { ok, code, data: young } = await api.put("/young", values);
-            if (!ok) toastr.error("Une erreur s'est produite :", code);
+            if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
             dispatch(setYoung(young));
             toastr.success("Mis à jour!");
           } catch (e) {
             console.log(e);
-            toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", e.code);
+            toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
           }
         }}
       >

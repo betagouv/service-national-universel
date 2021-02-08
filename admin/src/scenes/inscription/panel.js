@@ -1,22 +1,15 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { Modal } from "reactstrap";
 import { Link } from "react-router-dom";
-// import { Page } from "react-pdf";
-// import { Document } from "react-pdf/dist/esm/entry.webpack";
-import { Document, Page } from "react-pdf/dist/esm/entry.webpack";
 
-import { translate as t } from "./utils";
-import { YOUNG_SITUATIONS, YOUNG_STATUS, translate, openDocumentInNewtab } from "../../utils";
-
+import { YOUNG_SITUATIONS, translate as t } from "../../utils";
 import LoadingButton from "../../components/loadingButton";
+import DownloadButton from "../../components/DownloadButton";
 import Historic from "../../components/historic";
-
 import api from "../../services/api";
 
 export default ({ onChange, value }) => {
   const [young, setYoung] = useState(null);
-  const [file, setFile] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -43,7 +36,6 @@ export default ({ onChange, value }) => {
 
   return (
     <Panel>
-      {file && <Image value={file} onChange={() => setFile(null)} />}
       <div className="close" onClick={onChange} />
       <div className="info">
         <div className="title">{`${value.firstName} ${value.lastName}`}</div>
@@ -59,34 +51,22 @@ export default ({ onChange, value }) => {
       </div>
       {young && young.historic && young.historic.length !== 0 && <Historic value={young.historic} />}
       <Info title="Pièce d’identité" id={value._id}>
-        {(value.cniFiles || []).map((e, i) => {
-          return (
-            <InfoBtn
-              key={i}
-              color="white"
-              onClick={async () => {
-                const f = await api.get(`/referent/youngFile/${value._id}/cniFiles/${e}`);
-                setFile(f);
-              }}
-            >{`Visualiser la pièce d’identité (${i + 1}/${value.cniFiles.length})`}</InfoBtn>
-          );
-        })}
+        {(value.cniFiles || []).map((e, i) => (
+          <DownloadButton
+            key={i}
+            source={() => api.get(`/referent/youngFile/${value._id}/cniFiles/${e}`)}
+            title={`Télécharger la pièce d’identité (${i + 1}/${value.cniFiles.length})`}
+          />
+        ))}
       </Info>
       <Info title="Consentements du ou des représentants légaux" id={value._id}>
-        {(value.parentConsentmentFiles || []).map((e, i) => {
-          return (
-            <InfoBtn
-              key={i}
-              color="white"
-              onClick={async () => {
-                const f = await api.get(`/referent/youngFile/${value._id}/parentConsentmentFiles/${e}`);
-                setFile(f);
-              }}
-            >
-              Visualiser le formulaire
-            </InfoBtn>
-          );
-        })}
+        {(value.parentConsentmentFiles || []).map((e, i) => (
+          <DownloadButton
+            key={i}
+            source={() => api.get(`/referent/youngFile/${value._id}/parentConsentmentFiles/${e}`)}
+            title={`Télécharger le formulaire (${i + 1}/${value.parentConsentmentFiles.length})`}
+          />
+        ))}
       </Info>
       <Info title="Coordonnées" id={value._id}>
         <Details title="E-mail" value={value.email} />
@@ -191,34 +171,9 @@ const Details = ({ title, value }) => {
   );
 };
 
-const Image = ({ value, onChange }) => {
-  if (!value) return <div />;
-  const arrayBufferView = new Uint8Array(value.data.data);
-  const blob = new Blob([arrayBufferView], { type: value.mimeType });
-  const urlCreator = window.URL || window.webkitURL;
-  const imageUrl = urlCreator.createObjectURL(blob);
-
-  function renderFile() {
-    if (value.mimeType === "application/pdf") {
-      return (
-        <Document file={imageUrl} onLoadSuccess={() => {}}>
-          <Page pageNumber={1} />
-        </Document>
-      );
-    } else {
-      return <img style={{ objectFit: "contain", height: "90vh" }} src={imageUrl} />;
-    }
-  }
-  return (
-    <Modal size="lg" isOpen={true} toggle={onChange}>
-      {renderFile()}
-    </Modal>
-  );
-};
-
-const InfoBtn = styled(LoadingButton)`
+const EditBtn = styled(LoadingButton)`
   color: #555;
-  background: url(${require("../../assets/eye.svg")}) left 15px center no-repeat;
+  background: url(${require("../../assets/pencil.svg")}) left 15px center no-repeat;
   box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.16);
   border: 0;
   outline: 0;
@@ -229,10 +184,6 @@ const InfoBtn = styled(LoadingButton)`
   cursor: pointer;
   margin-right: 5px;
   margin-top: 1rem;
-`;
-
-const EditBtn = styled(InfoBtn)`
-  background: url(${require("../../assets/pencil.svg")}) left 15px center no-repeat;
 `;
 
 const Panel = styled.div`

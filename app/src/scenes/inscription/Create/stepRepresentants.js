@@ -13,33 +13,42 @@ import matomo from "../../../services/matomo";
 
 import { setYoung } from "../../../redux/auth/actions";
 import ErrorMessage, { requiredMessage } from "../components/errorMessage";
-import FranceConnectButton from "../../../components/FranceConnectButton";
+import FranceConnectButton from "../components/FranceConnectButton";
 import { environment } from "../../../config";
 
 import { saveYoung, STEPS } from "../utils";
-
-function getFranceConnectCallback(idRepresentant) {
-  return `inscription/representants?action=updateFromFranceConnect&representant=${idRepresentant}`;
-}
+import { translate } from "../../../utils";
 
 const Parent = ({ id = 1, values, errors, touched, handleChange }) => {
+  const isParentFromFranceConnect = values[`parent${id}FromFranceConnect`] === "true";
+
+  function FranceConnectZone({ id, handleSave }) {
+    function getFranceConnectCallback(idRepresentant) {
+      return `inscription/france-connect-callback?representant=${idRepresentant}`;
+    }
+    if (environment === "production") return null;
+    if (isParentFromFranceConnect) {
+      return <i>Les information en provenance de FranceConnect du représentant légal n°{id} ont bien été enregistrées.</i>;
+    }
+    return (
+      <FormRow>
+        <Col>
+          <p>
+            Vous pouvez utiliser ce bouton vous pour identifier et récupérer les données (nom, prénom et email) du représentant légal n°{id} avec FranceConnect, ou remplir les
+            informations manuellement ci-dessous.
+          </p>
+          <FranceConnectButton callback={getFranceConnectCallback(id)} beforeRedirect={() => handleSave()} />
+        </Col>
+      </FormRow>
+    );
+  }
   async function handleSave() {
     await saveYoung(values);
   }
   return (
     <>
       <FormLegend>Représentant légal n°{id}</FormLegend>
-      {environment !== "production" ? (
-        <FormRow>
-          <Col>
-            <p>
-              Vous pouvez utiliser ce bouton vous pour identifier et récupérer les données (nom, prénom et email) du représentant légal n°{id} avec FranceConnect, ou remplir les
-              informations manuellement ci-dessous.
-            </p>
-            <FranceConnectButton callback={getFranceConnectCallback(id)} beforeRedirect={() => handleSave()} />
-          </Col>
-        </FormRow>
-      ) : null}
+      <FranceConnectZone handleSave={() => handleSave()} id={id} />
 
       <FormRow>
         <Col md={4}>
@@ -94,13 +103,14 @@ const Parent = ({ id = 1, values, errors, touched, handleChange }) => {
             value={values[`parent${id}FirstName`]}
             onChange={handleChange}
             className="form-control"
+            disabled={isParentFromFranceConnect}
           />
           <ErrorMessage errors={errors} touched={touched} name={`parent${id}FirstName`} />
         </Col>
       </FormRow>
       <FormRow align="center">
         <Col md={4}>
-          <Label>Nom</Label>
+          <Label>{isParentFromFranceConnect ? "Nom de naissance" : "Nom"}</Label>
         </Col>
         <Col>
           <Field
@@ -110,6 +120,7 @@ const Parent = ({ id = 1, values, errors, touched, handleChange }) => {
             value={values[`parent${id}LastName`]}
             onChange={handleChange}
             className="form-control"
+            disabled={isParentFromFranceConnect}
           />
           <ErrorMessage errors={errors} touched={touched} name={`parent${id}LastName`} />
         </Col>
@@ -220,10 +231,6 @@ export default () => {
   const [isParent2Visible, setIsParent2Visible] = useState(false);
   const [initialValues, setInitialValues] = useState(young);
 
-  if (!young) {
-    history.push("/inscription/profil");
-    return <div />;
-  }
   const hasParent2Infos = () => {
     return young && (young.parent2Status || young.parent2FirstName || young.parent2LastName || young.parent2Email || young.parent2Phone);
   };
@@ -231,28 +238,10 @@ export default () => {
     setIsParent2Visible(hasParent2Infos());
   }, [young]);
 
-  // Update from France Connect.
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const action = urlParams.get("action");
-    const id = urlParams.get("representant");
-    const code = urlParams.get("code");
-    if (action === "updateFromFranceConnect" && id && code) {
-      async function fetchData() {
-        const { data } = await api.post("/young/france-connect/user-info", { code, callback: getFranceConnectCallback(id) });
-        if (data && data["email"]) {
-          if (id === "2") setIsParent2Visible(true);
-          setInitialValues({
-            ...young,
-            [`parent${id}FirstName`]: data["given_name"],
-            [`parent${id}LastName`]: data["family_name"],
-            [`parent${id}Email`]: data["email"],
-          });
-        }
-      }
-      fetchData();
-    }
-  }, []);
+  if (!young) {
+    history.push("/inscription/profil");
+    return <div />;
+  }
 
   const handleSave = async (values) => {
     const young = await saveYoung(values);
@@ -274,12 +263,12 @@ export default () => {
           try {
             values.inscriptionStep = STEPS.CONSENTEMENTS;
             const { ok, code, data: young } = await api.put("/young", values);
-            if (!ok) return toastr.error("Une erreur s'est produite :", code);
+            if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             dispatch(setYoung(young));
             history.push("/inscription/consentements");
           } catch (e) {
             console.log(e);
-            toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", e.code);
+            toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code));
           }
         }}
       >
