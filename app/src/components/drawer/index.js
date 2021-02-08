@@ -90,7 +90,7 @@ export default ({ inscription }) => {
           {young.cohort === "2020" ? (
             <ul className="subNav">
               <li>
-                <Link to="/">Candidater à la session 2021</Link>
+                <Link to="/inscription/profil">Candidater à la session 2021</Link>
               </li>
             </ul>
           ) : null}
