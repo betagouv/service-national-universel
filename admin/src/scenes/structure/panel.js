@@ -6,17 +6,22 @@ import { Link } from "react-router-dom";
 import { useHistory } from "react-router-dom";
 
 import api from "../../services/api";
-
 import { translate } from "../../utils";
+import Team from "./components/Team";
 
 export default ({ onChange, value }) => {
   const [missionsInfo, setMissionsInfo] = useState({ count: "-", placesTotal: "-" });
+  const [referents, setReferents] = useState([]);
   const history = useHistory();
   useEffect(() => {
     if (!value) return;
     (async () => {
       const queries = [];
       queries.push({ index: "mission", type: "_doc" });
+      queries.push({
+        query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": value._id } }] } },
+      });
+      queries.push({ index: "referent", type: "_doc" });
       queries.push({
         query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": value._id } }] } },
       });
@@ -27,6 +32,7 @@ export default ({ onChange, value }) => {
         placesTotal: responses[0].hits.hits.reduce((acc, e) => acc + e._source.placesTotal, 0),
         placesLeft: responses[0].hits.hits.reduce((acc, e) => acc + e._source.placesLeft, 0),
       });
+      setReferents(responses[1]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
     })();
   }, [value]);
 
@@ -92,6 +98,7 @@ export default ({ onChange, value }) => {
           </tbody>
         </table>
       </Info>
+      <Team referents={referents} />
       <div>
         {Object.keys(value).map((e, k) => {
           return <div key={k}>{`${e}:${value[e]}`}</div>;

@@ -1,12 +1,28 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { Col, Row, Input } from "reactstrap";
+import { Col, Row } from "reactstrap";
 import styled from "styled-components";
-import { formatDay, translate, formatStringDate } from "../../../utils";
-import api from "../../../services/api";
+import { Link } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 
+import { formatDay, translate, formatStringDate } from "../../../utils";
+import api from "../../../services/api";
+import Avatar from "../../../components/Avatar";
+
 export default ({ structure }) => {
+  const [referents, setReferents] = useState([]);
+  useEffect(() => {
+    if (!structure) return;
+    (async () => {
+      const queries = [];
+      queries.push({ index: "referent", type: "_doc" });
+      queries.push({
+        query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": structure._id } }] } },
+      });
+
+      const { responses } = await api.esQuery(queries);
+      setReferents(responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
+    })();
+  }, [structure]);
   return (
     <Box>
       <Row>
@@ -45,8 +61,20 @@ export default ({ structure }) => {
             {/* todo tete de reseau */}
           </Wrapper>
         </Col>
-        <Col md={6}>{/* <Row style={{ borderBottom: "2px solid #f4f5f7" }}></Row>
-          <Row></Row> */}</Col>
+        <Col md={6}>
+          <Wrapper>
+            <Legend>{`Équipe (${referents.length})`}</Legend>
+            {referents.length ? null : <i>Aucun compte n'est associé à cette structure.</i>}
+            {referents.map((referent, k) => (
+              <Link to={`/user/${referent._id}`}>
+                <div style={{ display: "flex", alignItems: "center", marginTop: "1rem" }} key={k}>
+                  <Avatar name={`${referent.firstName} ${referent.lastName}`} />
+                  <div>{`${referent.firstName} ${referent.lastName}`}</div>
+                </div>
+              </Link>
+            ))}
+          </Wrapper>
+        </Col>
       </Row>
     </Box>
   );
