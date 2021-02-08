@@ -24,7 +24,7 @@ export default () => {
           <strong>{young.firstName},</strong> bienvenue dans votre espace personnel.
         </h1>
         <p>
-          Votre inscription a bien été enregistrée et est <b style={{ color: "#5145cd" }}>en cours de validation</b> par l'administration. Vous serez prochainement informé par
+          Votre inscription a bien été enregistrée et est <b style={{ color: "#5145cd" }}>en cours de validation</b> par l'administration. Vous serez prochainement informé(e) par
           e-mail de l'avancement de votre candidature.
         </p>
         <p>Vous pouvez cependant continuer à éditer les informations renseignées lors de votre inscription.</p>
