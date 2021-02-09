@@ -85,8 +85,15 @@ export default ({ onChange, value }) => {
       </div>
       <Info title="La structure">
         <div>{value.description}</div>
-        <Details title="Agréments" value={value.associationTypes || "--"} />
         <Details title="Statut" value={translate(value.legalStatus) || "--"} />
+        {value.legalStatus === "ASSOCIATION" ? <Details title="Agréments" value={value.associationTypes ? value.associationTypes.join(",") : "--"} /> : null}
+        {value.legalStatus === "PUBLIC" ? (
+          <div>
+            <Details title="Type" value={value.structurePubliqueType || "--"} />
+            {value.structurePubliqueType === "Service de l'Etat" ? <Details title="Service" value={value.structurePubliqueEtatType || "--"} /> : null}
+          </div>
+        ) : null}
+        {value.legalStatus === "PRIVATE" ? <Details title="Type" value={value.structurePriveeType || "--"} /> : null}
         <Details title="Région" value={value.region || "--"} />
         <Details title="Dép." value={value.department || "--"} />
         <Details title="Ville" value={value.city || "--"} />

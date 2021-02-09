@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Col, Row, Input } from "reactstrap";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
-import { useDispatch, useSelector } from "react-redux";
 import { Formik, Field } from "formik";
 import { Link, Redirect } from "react-router-dom";
 
@@ -10,11 +9,12 @@ import MultiSelect from "../../components/Multiselect";
 import AddressInput from "../../components/addressInput";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
 
-import { domains, translate, departmentList, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL } from "../../utils";
+import { associationTypes, privateTypes, publicTypes, publicEtatTypes, translate } from "../../utils";
 import api from "../../services/api";
 
 export default (props) => {
   const [defaultValue, setDefaultValue] = useState();
+  const [networks, setNetworks] = useState([]);
   const [redirect, setRedirect] = useState(false);
 
   useEffect(() => {
@@ -22,6 +22,8 @@ export default (props) => {
       const id = props.match && props.match.params && props.match.params.id;
       if (!id) return setDefaultValue(null);
       const { data } = await api.get(`/structure/${id}`);
+      const { data: networkData } = await api.get(`/structure/networks`);
+      setNetworks(networkData);
       setDefaultValue(data);
     })();
   }, []);
@@ -34,6 +36,8 @@ export default (props) => {
 
   if (defaultValue === undefined) return <div>Chargement...</div>;
   if (redirect) return <Redirect to="/structure" />;
+
+  console.log(networks);
 
   return (
     <Formik
@@ -60,6 +64,10 @@ export default (props) => {
           location: "",
           department: "",
           region: "",
+          website: "",
+          facebook: "",
+          twitter: "",
+          instagram: "",
         }
       }
       onSubmit={async (values) => {
@@ -95,6 +103,7 @@ export default (props) => {
             <Row style={{ borderBottom: "2px solid #f4f5f7" }}>
               <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
                 <Wrapper>
+                  {/*<pre>{JSON.stringify(values, null, 2)}</pre>*/}
                   <Legend>Informations sur structure d'accueil</Legend>
                   <FormGroup>
                     <label>
@@ -107,14 +116,87 @@ export default (props) => {
                     <label>
                       <span>*</span>STATUT JURIDIQUE
                     </label>
-                    <Field validate={(v) => !v && requiredMessage} component="select" name="legalStatus" value={values.legalStatus} onChange={handleChange}></Field>
+                    <Field validate={(v) => !v && requiredMessage} component="select" name="legalStatus" value={values.legalStatus} onChange={handleChange}>
+                      <option key="PUBLIC" value="PUBLIC">
+                        {translate("PUBLIC")}
+                      </option>
+                      <option key="PRIVATE" value="PRIVATE">
+                        {translate("PRIVATE")}
+                      </option>
+                      <option key="ASSOCIATION" value="ASSOCIATION">
+                        {translate("ASSOCIATION")}
+                      </option>
+                      <option key="OTHER" value="OTHER">
+                        {translate("OTHER")}
+                      </option>
+                    </Field>
                     <ErrorMessage errors={errors} touched={touched} name="legalStatus" />
                   </FormGroup>
-                  <FormGroup>
-                    <label>DISPOSEZ-VOUS D'UN AGRÉMENT ?</label>
-                    {/* TODO */}
-                    <Field component="select" name="" value={""} onChange={handleChange}></Field>
-                  </FormGroup>
+                  {values.legalStatus === "ASSOCIATION" && (
+                    <FormGroup>
+                      <label>DISPOSEZ-VOUS D'UN AGRÉMENT ?</label>
+                      <MultiSelect
+                        value={values.associationTypes}
+                        onChange={handleChange}
+                        name="associationTypes"
+                        options={associationTypes}
+                        placeholder="Sélectionnez un ou plusieurs agréments"
+                      />
+                    </FormGroup>
+                  )}
+                  {values.legalStatus === "PRIVATE" && (
+                    <FormGroup>
+                      <label>TYPE DE STRUCTURE PRIVÉE</label>
+                      <Field validate={(v) => !v && requiredMessage} component="select" name="structurePriveeType" value={values.structurePriveeType} onChange={handleChange}>
+                        <option key="" value="" />
+                        {privateTypes.map((e) => {
+                          return (
+                            <option key={e} value={e}>
+                              {e}
+                            </option>
+                          );
+                        })}
+                      </Field>
+                    </FormGroup>
+                  )}
+                  {values.legalStatus === "PUBLIC" && (
+                    <div>
+                      <FormGroup>
+                        <label>TYPE DE STRUCTURE PUBLIQUE</label>
+                        <Field validate={(v) => !v && requiredMessage} component="select" name="structurePubliqueType" value={values.structurePubliqueType} onChange={handleChange}>
+                          <option key="" value="" />
+                          {publicTypes.map((e) => {
+                            return (
+                              <option key={e} value={e}>
+                                {e}
+                              </option>
+                            );
+                          })}
+                        </Field>
+                      </FormGroup>
+                      {values.structurePubliqueType === "Service de l'Etat" && (
+                        <FormGroup>
+                          <label>TYPE DE SERVICE DE L'ETAT</label>
+                          <Field
+                            validate={(v) => !v && requiredMessage}
+                            component="select"
+                            name="structurePubliqueEtatType"
+                            value={values.structurePubliqueEtatType}
+                            onChange={handleChange}
+                          >
+                            <option key="" value="" />
+                            {publicEtatTypes.map((e) => {
+                              return (
+                                <option key={e} value={e}>
+                                  {e}
+                                </option>
+                              );
+                            })}
+                          </Field>
+                        </FormGroup>
+                      )}
+                    </div>
+                  )}
                   <FormGroup>
                     <label>
                       <span>*</span>PRÉSENTATION SYNTHÉTIQUE DE LA STRUCTURE
@@ -138,13 +220,13 @@ export default (props) => {
                     <Col md={6}>
                       <FormGroup>
                         <label>SITE INTERNET</label>
-                        <Field value={values.website} onChange={handleChange} name="website" placeholder="Site internet" />
+                        <Field value={values.website || ""} onChange={handleChange} name="website" placeholder="Site internet" />
                       </FormGroup>
                     </Col>
                     <Col md={6}>
                       <FormGroup>
                         <label>FACEBOOK</label>
-                        <Field value={values.facebook} onChange={handleChange} name="facebook" placeholder="Facebook" />
+                        <Field value={values.facebook || ""} onChange={handleChange} name="facebook" placeholder="Facebook" />
                       </FormGroup>
                     </Col>
                   </Row>
@@ -152,13 +234,13 @@ export default (props) => {
                     <Col md={6}>
                       <FormGroup>
                         <label>TWITTER</label>
-                        <Field value={values.twitter} onChange={handleChange} name="twitter" placeholder="Twitter" />
+                        <Field value={values.twitter || ""} onChange={handleChange} name="twitter" placeholder="Twitter" />
                       </FormGroup>
                     </Col>
                     <Col md={6}>
                       <FormGroup>
                         <label>INSTAGRAM</label>
-                        <Field value={values.instagram} onChange={handleChange} name="instagram" placeholder="Instagram" />
+                        <Field value={values.instagram || ""} onChange={handleChange} name="instagram" placeholder="Instagram" />
                       </FormGroup>
                     </Col>
                   </Row>
@@ -168,12 +250,28 @@ export default (props) => {
                       Si l’organisation est membre d'un réseau national (Les Banques alimentaires, Armée du Salut...), renseignez son nom. Vous permettez ainsi au superviseur de
                       votre réseau de visualiser les missions et bénévoles rattachés à votre organisation.
                     </p>
-                    {/* TODO */}
-                    <Field component="select" name="" value={""} onChange={handleChange}></Field>
+                    <Field component="select" name="networkId" value={values.networkId} onChange={handleChange}>
+                      <option key="" value="" />
+                      {networks &&
+                        networks.map((network) => {
+                          return (
+                            <option key={network._id} value={network._id}>
+                              {network.name}
+                            </option>
+                          );
+                        })}
+                    </Field>
                   </FormGroup>
                   <FormGroup>
                     <label>TÊTE DE RÉSEAU</label>
-                    {/* TODO */}
+                    <Field component="select" name="isNetwork" value={values.isNetwork} onChange={handleChange}>
+                      <option key="true" value="true">
+                        Oui
+                      </option>
+                      <option key="false" value="false">
+                        Non
+                      </option>
+                    </Field>
                   </FormGroup>
                 </Wrapper>
               </Col>
