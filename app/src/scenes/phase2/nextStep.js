@@ -56,7 +56,7 @@ export default () => {
           <p>Consulter des milliers de missions disponibles pour la réalisation de votre phase 2.</p>
         </div>
         <div style={{ minWidth: "30%", width: "100%", display: "flex", justifyContent: "flex-end", alignItems: "center", marginLeft: "1.5rem" }}>
-          <Link to="/preferences">
+          <Link to="/mission">
             <ContinueButton>Trouver une mission</ContinueButton>
           </Link>
         </div>
