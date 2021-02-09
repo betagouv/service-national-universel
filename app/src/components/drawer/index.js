@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
-import { YOUNG_PHASE, YOUNG_STATUS } from "../../utils";
+import { YOUNG_PHASE, YOUNG_STATUS, PHASE_STATUS } from "../../utils";
 import Item from "./item";
 import { DRAWER_TABS } from "../utils";
 
@@ -10,26 +10,26 @@ export default ({ inscription }) => {
   const [open, setOpen] = useState(true);
   const young = useSelector((state) => state.Auth.young);
 
-  const [status1, setStatus1] = useState("À venir");
-  const [status2, setStatus2] = useState("À venir");
-  const [status3, setStatus3] = useState("À venir");
+  const [status1, setStatus1] = useState(PHASE_STATUS.IN_COMING);
+  const [status2, setStatus2] = useState(PHASE_STATUS.IN_COMING);
+  const [status3, setStatus3] = useState(PHASE_STATUS.IN_COMING);
 
   const [activeTab, setActiveTab] = useState(DRAWER_TABS.HOME);
 
   useEffect(() => {
     if (young.cohort === "2019") {
-      setStatus1("Validée");
-      setStatus2("En cours");
+      setStatus1(PHASE_STATUS.VALIDATED);
+      setStatus2(PHASE_STATUS.IN_PROGRESS);
       return;
     }
     if (young.cohort === "2020") {
-      setStatus1("Annulée");
-      setStatus2("En cours");
+      setStatus1(PHASE_STATUS.CANCEL);
+      setStatus2(PHASE_STATUS.IN_PROGRESS);
       return;
     }
 
     if (young.status === YOUNG_STATUS.VALIDATED) {
-      setStatus1("En attente d'affectation");
+      setStatus1(PHASE_STATUS.WAITING_AFFECTATION);
     }
   }, [young]);
 
@@ -188,7 +188,7 @@ const Sidebar = styled.div`
     display: none;
   }
   background-color: #362f78;
-  width: 320px;
+  width: 350px;
   position: sticky;
   top: 68px;
   bottom: 0;
@@ -234,70 +234,6 @@ const HomeLink = styled(NavLink)`
 `;
 
 const MainNav = styled.ul`
-  > li {
-    margin-bottom: 5px;
-    background-size: 20px;
-    padding-left: 0;
-    margin-bottom: 15px;
-    .icon {
-      z-index: 999;
-      height: 32px;
-      width: 32px;
-      border-radius: 50%;
-      background-color: #8da2fb;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      svg {
-        stroke: #42389d;
-        height: 20px;
-      }
-    }
-    > a {
-      text-transform: uppercase;
-      color: #fff;
-      display: block;
-      font-size: 12px;
-      padding: 15px 10px 15px 35px;
-      height: 70px;
-      font-weight: 700;
-      position: relative;
-      display: flex;
-      align-items: center;
-    }
-    span {
-      display: block;
-      color: #b4c6fc;
-      font-size: 12px;
-      font-weight: 400;
-      text-transform: capitalize;
-    }
-    /* vertical line between */
-    :not(:last-child) {
-      position: relative;
-      ::after {
-        content: "";
-        display: block;
-        height: 100%;
-        width: 2px;
-        background-color: #8da2fb;
-        position: absolute;
-        left: 50px;
-        top: 40px;
-        z-index: 50;
-      }
-    }
-  }
-  li {
-    a.done {
-      .icon {
-        background-color: #31c48d;
-        svg {
-          stroke: #fff;
-        }
-      }
-    }
-  }
   .subNav {
     padding-left: 70px;
     margin-top: 10px;
@@ -323,20 +259,6 @@ const MyNav = styled.ul`
     padding: 12px 15px;
     border-radius: 6px;
   }
-`;
-
-const Icon = styled.img`
-  z-index: 999;
-  height: 32px;
-  width: 32px;
-  border-radius: 50%;
-  background-color: #8da2fb;
-  border-width: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 20px;
-  color: #42389d;
 `;
 
 const MenuBtn = styled.img`

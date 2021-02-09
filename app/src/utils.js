@@ -8,6 +8,10 @@ export const formatStringDate = (date) => {
 
 export const translate = (value) => {
   switch (value) {
+    case "IN_COMING":
+      return "À venir";
+    case "WAITING_AFFECTATION":
+      return "En attente d'affectation";
     case "WAITING_VALIDATION":
       return "En attente de validation";
     case "WAITING_CORRECTION":
@@ -566,6 +570,18 @@ export const YOUNG_STATUS = {
   WAITING_CORRECTION: "WAITING_CORRECTION",
   VALIDATED: "VALIDATED",
   REFUSED: "REFUSED",
+};
+
+export const PHASE_STATUS = {
+  IN_PROGRESS: "IN_PROGRESS",
+  IN_COMING: "IN_COMING",
+  VALIDATED: "VALIDATED",
+  CANCEL: "CANCEL",
+  WAITING_AFFECTATION: "WAITING_AFFECTATION",
+};
+export const PHASE_STATUS_COLOR = {
+  VALIDATED: "#6CC763",
+  CANCEL: "#FE7B52",
 };
 
 export const YOUNG_PHASE = {
