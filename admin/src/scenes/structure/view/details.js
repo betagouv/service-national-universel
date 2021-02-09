@@ -9,19 +9,9 @@ import api from "../../../services/api";
 import Avatar from "../../../components/Avatar";
 import SocialIcons from "../../../components/SocialIcons";
 
-export default ({ ...props }) => {
-  const [structure, setStructure] = useState();
+export default ({ structure }) => {
   const [referents, setReferents] = useState([]);
   const [parentStructure, setParentStructure] = useState(null);
-
-  useEffect(() => {
-    (async () => {
-      const id = props.match && props.match.params && props.match.params.id;
-      if (!id) return <div />;
-      const { data } = await api.get(`/structure/${id}`);
-      setStructure(data);
-    })();
-  }, []);
 
   useEffect(() => {
     if (!structure) return;

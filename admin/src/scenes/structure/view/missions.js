@@ -14,19 +14,9 @@ import SelectStatusMission from "../../../components/selectStatusMission";
 
 const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "REGION", "DEPARTMENT"];
 
-export default ({ ...props }) => {
-  const [data, setData] = useState();
-  const [structure, setStructure] = useState();
+export default ({ structure }) => {
+  const [data, setData] = useState([]);
   const [mission, setMission] = useState();
-
-  useEffect(() => {
-    (async () => {
-      const id = props.match && props.match.params && props.match.params.id;
-      if (!id) return <div />;
-      const { data } = await api.get(`/structure/${id}`);
-      setStructure(data);
-    })();
-  }, []);
 
   useEffect(() => {
     (async () => {
@@ -41,7 +31,6 @@ export default ({ ...props }) => {
     if (ok) setMission(data);
   };
 
-  if (!data) return <div />;
   if (!structure) return <div />;
 
   return (

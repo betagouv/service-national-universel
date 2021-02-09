@@ -14,19 +14,7 @@ const formatLongDate = (date) => {
   return d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" });
 };
 
-export default ({ ...props }) => {
-  const [structure, setStructure] = useState();
-
-  useEffect(() => {
-    (async () => {
-      const id = props.match && props.match.params && props.match.params.id;
-      if (!id) return <div />;
-      const { data } = await api.get(`/structure/${id}`);
-      setStructure(data);
-    })();
-  }, []);
-
-  if (!structure) return <div />;
+export default ({ structure }) => {
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <StructureView structure={structure} tab="historic">
