@@ -23,6 +23,8 @@ export const publicEtatTypes = [
   "Autre établissement public",
 ];
 
+export const corpsEnUniforme = ["SDIS (Service départemental d'Incendie et de Secours)", "Gendarmerie", "Police", "Armées"];
+
 export const formatDay = (date) => {
   if (!date) return "-";
   return new Date(date).toISOString().split("T")[0];

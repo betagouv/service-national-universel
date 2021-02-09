@@ -7,9 +7,9 @@ import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
 
-import { translate } from "../../utils";
+import { translate, corpsEnUniforme } from "../../utils";
 
-const FILTERS = ["SEARCH", "LEGAL_STATUS", "DEPARTMENT", "REGION"];
+const FILTERS = ["SEARCH", "LEGAL_STATUS", "DEPARTMENT", "REGION", "CORPS"];
 const formatLongDate = (date) => {
   if (!date) return "-";
   const d = new Date(date);
@@ -56,6 +56,23 @@ export default () => {
                   componentId="LEGAL_STATUS"
                   dataField="legalStatus.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "LEGAL_STATUS") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                />
+                <MultiDropdownList
+                  className="dropdown-filter"
+                  placeholder="Corps en uniforme"
+                  componentId="CORPS"
+                  dataField="structurePubliqueEtatType.keyword"
+                  transformData={(data) => {
+                    console.log(data);
+                    return data.filter((d) => corpsEnUniforme.includes(d.key));
+                  }}
+                  react={{ and: FILTERS.filter((e) => e !== "CORPS") }}
                   renderItem={(e, count) => {
                     return `${translate(e)} (${count})`;
                   }}
@@ -186,9 +203,7 @@ const Hit = ({ hit, onClick }) => {
       <td>
         {parentStructure ? <TagParent>{parentStructure.name}</TagParent> : null}
         {hit.department ? <TagDepartment>{translate(hit.department)}</TagDepartment> : null}
-        {["SDIS (Service départemental d'Incendie et de Secours)", "Gendarmerie", "Police", "Armées"].includes(hit.structurePubliqueEtatType) ? (
-          <TagDepartment>Corps en uniforme</TagDepartment>
-        ) : null}
+        {corpsEnUniforme.includes(hit.structurePubliqueEtatType) ? <TagDepartment>Corps en uniforme</TagDepartment> : null}
       </td>
     </tr>
   );
