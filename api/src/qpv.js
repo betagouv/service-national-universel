@@ -11,7 +11,7 @@ const url = "https://wsa.sig.ville.gouv.fr/service/georeferenceur.json";
 // QP : QUartier Prioritaire
 
 async function getQPV(postcode, commune, adresse) {
-  if (!QPV_USERNAME || !QPV_PASSWORD) return console.log("QPV ENV VARIABLES ARE NOT SET (QPV_USERNAME and QPV_PASSWORD) ")
+  if (!QPV_USERNAME || !QPV_PASSWORD) return console.log("QPV ENV VARIABLES ARE NOT SET (QPV_USERNAME and QPV_PASSWORD) ");
   // I need to remove postcode and city from the adresse
   let addresseFormated = adresse.replace(postcode, "").replace(commune, "");
 
@@ -39,8 +39,8 @@ async function getQPV(postcode, commune, adresse) {
       })
       .then((json) => {
         if (!json.reponses) {
-          capture(`Cant find ${postcode}, ${commune}, ${adresse}`);
-          return resolve();
+          capture(`Cant find ${postcode}, ${commune}, ${addresseFormated}`);
+          return resolve(false);
         }
         if (json.reponses.length && json.reponses[0].code_reponse === "OUI") return resolve(true);
         return resolve(false);

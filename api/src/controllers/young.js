@@ -83,15 +83,22 @@ router.put("/", passport.authenticate("young", { session: false }), async (req, 
   try {
     const obj = req.body;
 
-    //Check quartier prioritaires
-    if (obj.zip && obj.city && obj.address && !obj.qpv) {
-      const qpv = await getQPV(obj.zip, obj.city, obj.address);
-      if (qpv === true) obj.qpv = "true";
-      if (qpv === false) obj.qpv = "false";
-    }
-
     const young = await YoungObject.findByIdAndUpdate(req.user._id, obj, { new: true });
     res.status(200).send({ ok: true, data: young });
+
+    //Check quartier prioritaires.
+    if (obj.zip && obj.city && obj.address) {
+      const qpv = await getQPV(obj.zip, obj.city, obj.address);
+      console.log("QPV",qpv)
+      if (qpv === true) {
+        young.set({ qpv: "true" });
+      } else if (qpv === false) {
+        young.set({ qpv: "false" });
+      } else {
+        young.set({ qpv: "" });
+      }
+      await young.save();
+    }
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: SERVER_ERROR, error });
