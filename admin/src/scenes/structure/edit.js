@@ -6,6 +6,7 @@ import { Formik, Field } from "formik";
 import { Link, Redirect, useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
 
+import Avatar from "../../components/Avatar";
 import MultiSelect from "../../components/Multiselect";
 import AddressInput from "../../components/addressInput";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
@@ -17,6 +18,7 @@ export default (props) => {
   const [defaultValue, setDefaultValue] = useState();
   const [networks, setNetworks] = useState([]);
   const [redirect, setRedirect] = useState(false);
+  const [referents, setReferents] = useState([]);
   const user = useSelector((state) => state.Auth.user);
   const history = useHistory();
 
@@ -31,10 +33,22 @@ export default (props) => {
     })();
   }, []);
 
-  if (defaultValue === undefined) return <div>Chargement...</div>;
-  if (redirect) return <Redirect to="/structure" />;
+  useEffect(() => {
+    if (!defaultValue) return;
+    (async () => {
+      const structure = defaultValue;
+      const queries = [];
+      queries.push({ index: "referent", type: "_doc" });
+      queries.push({
+        query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": structure._id } }] } },
+      });
 
-  console.log(networks);
+      const { responses } = await api.esQuery(queries);
+      setReferents(responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
+    })();
+  }, [defaultValue]);
+
+  if (defaultValue === undefined) return <div>Chargement...</div>;
 
   return (
     <Formik
@@ -201,7 +215,7 @@ export default (props) => {
                       name="description"
                       component="textarea"
                       rows={4}
-                      value={values.description}
+                      value={values.description || ""}
                       onChange={handleChange}
                       placeholder="Décrivez en quelques mots votre structure"
                     />
@@ -209,7 +223,7 @@ export default (props) => {
                   </FormGroup>
                   <FormGroup>
                     <label>NUMÉRO DE SIRET (SI DISPONIBLE)</label>
-                    <Field value={values.siret} onChange={handleChange} name="siret" placeholder="Numéro de SIRET" />
+                    <Field value={values.siret || ""} onChange={handleChange} name="siret" placeholder="Numéro de SIRET" />
                   </FormGroup>
                   <Row>
                     <Col md={6}>
@@ -274,7 +288,20 @@ export default (props) => {
                   </FormGroup>
                 </Wrapper>
               </Col>
-              <Col md={6}>{/* <Row style={{ borderBottom: "2px solid #f4f5f7" }}></Row> */}</Col>
+              <Col md={6}>
+                <Wrapper>
+                  <Legend>{`Équipe (${referents.length})`}</Legend>
+                  {referents.length ? null : <i>Aucun compte n'est associé à cette structure.</i>}
+                  {referents.map((referent, k) => (
+                    <Link key={k} to={`/user/${referent._id}`}>
+                      <div style={{ display: "flex", alignItems: "center", marginTop: "1rem" }} key={k}>
+                        <Avatar name={`${referent.firstName} ${referent.lastName}`} />
+                        <div>{`${referent.firstName} ${referent.lastName}`}</div>
+                      </div>
+                    </Link>
+                  ))}
+                </Wrapper>
+              </Col>
             </Row>
             <Row>
               <Col md={12}>
