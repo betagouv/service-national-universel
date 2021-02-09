@@ -81,7 +81,7 @@ export default () => {
                   Consentement du ou des représentant légaux
                   <p>
                     Le consentement des représentants légaux est à faire <b>remplir et signer</b> par les <b>deux parents</b>, sauf dans le cas où l'autorité parentale n'est portée
-                    que par l'un des parents ou par une tiers personne.
+                    que par l'un des parents ou par une tierce personne.
                   </p>
                 </Label>
               </Col>
