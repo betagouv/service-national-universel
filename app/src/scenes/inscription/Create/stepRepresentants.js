@@ -252,7 +252,14 @@ export default () => {
     <Wrapper>
       <Heading>
         <h2>Coordonnées du ou des représentants légaux</h2>
-        <p>Faites compléter les informations ci-dessous par votre ou vos représentants légaux</p>
+        <p>Faites compléter les informations ci-dessous par votre ou vos représentants légaux.</p>
+        <Warning>
+          <img src={require("../../../assets/warning.png")} />
+          <p>
+            Les informations relatives aux <b>deux parents</b> sont requises, sauf dans le cas où l'autorité parentale n'est portée que par l'un des parents ou par une tiers
+            personne.
+          </p>
+        </Warning>
       </Heading>
       <Formik
         initialValues={initialValues}
@@ -329,6 +336,24 @@ const Heading = styled.div`
   p {
     color: #161e2e;
     font-size: 1rem;
+    margin: 0;
+  }
+`;
+const Warning = styled.div`
+  background-color: #88001711;
+  border-radius: 0.5rem;
+  border: 1px solid #880017;
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  img {
+    height: 1rem;
+    margin: 0.5rem;
+  }
+  p {
+    color: #880017;
+    font-size: 0.8rem;
   }
 `;
 

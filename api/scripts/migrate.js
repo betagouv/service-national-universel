@@ -1,4 +1,4 @@
-require("dotenv").config({ path: "./../.env-prod" });
+require("dotenv").config({ path: "./../.env-staging" });
 const esclient = require("../src/es");
 
 const Sequelize = require("sequelize");
@@ -134,8 +134,11 @@ async function migrateNetwork() {
     const s = structuresSQL[i];
 
     try {
-      const structure = await Structure.findOne({ sqlId: s.sqlNetworkId });
-      if (structure) await Structure.findByIdAndUpdate(s._id, { networkId: structure._id });
+      const structure = await Structure.findOne({ sqlId: s.reseau_id });
+      if (structure) {
+        console.log(`structure ${s.id} - ${s.name}: networkId ${structure._id} - ${structure.name} (${s.reseau_id})`);
+        await Structure.findOneAndUpdate({ sqlId: s.id }, { networkId: structure._id }, { useFindAndModify: false });
+      }
     } catch (error) {
       console.log("error while linking structure", error);
     }

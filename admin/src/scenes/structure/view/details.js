@@ -2,14 +2,17 @@ import React, { useEffect, useState } from "react";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
-import { toastr } from "react-redux-toastr";
 
-import { formatDay, translate, formatStringDate } from "../../../utils";
+import { translate } from "../../../utils";
+import StructureView from "./wrapper";
 import api from "../../../services/api";
 import Avatar from "../../../components/Avatar";
+import SocialIcons from "../../../components/SocialIcons";
 
 export default ({ structure }) => {
   const [referents, setReferents] = useState([]);
+  const [parentStructure, setParentStructure] = useState(null);
+
   useEffect(() => {
     if (!structure) return;
     (async () => {
@@ -18,65 +21,100 @@ export default ({ structure }) => {
       queries.push({
         query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": structure._id } }] } },
       });
+      if (structure.networkId) {
+        queries.push({ index: "structure", type: "_doc" });
+        queries.push({
+          query: { bool: { must: { match_all: {} }, filter: [{ term: { _id: structure.networkId } }] } },
+        });
+      }
 
       const { responses } = await api.esQuery(queries);
+      if (structure.networkId) {
+        const structures = responses[1]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+        setParentStructure(structures.length ? structures[0] : null);
+      } else {
+        setParentStructure(null);
+      }
       setReferents(responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
     })();
   }, [structure]);
-  return (
-    <Box>
-      <Row>
-        <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
-          <Wrapper>
-            <Legend>La structure</Legend>
 
-            <div className="detail">
-              <div className="detail-title">Présentation</div>
-              <div className="detail-text">{structure.description}</div>
-            </div>
-            <div className="detail">
-              <div className="detail-title">Status</div>
-              <div className="detail-text">{translate(structure.legalStatus)}</div>
-            </div>
-            <div className="detail">
-              <div className="detail-title">Région</div>
-              <div className="detail-text">{structure.region}</div>
-            </div>
-            <div className="detail">
-              <div className="detail-title">Dép.</div>
-              <div className="detail-text">{structure.department}</div>
-            </div>
-            <div className="detail">
-              <div className="detail-title">Ville</div>
-              <div className="detail-text">{structure.city}</div>
-            </div>
-            <div className="detail">
-              <div className="detail-title">Adresse</div>
-              <div className="detail-text">{structure.address}</div>
-            </div>
-            <div className="detail">
-              <div className="detail-title">Siret</div>
-              <div className="detail-text">{structure.siret}</div>
-            </div>
-            {/* todo tete de reseau */}
-          </Wrapper>
-        </Col>
-        <Col md={6}>
-          <Wrapper>
-            <Legend>{`Équipe (${referents.length})`}</Legend>
-            {referents.length ? null : <i>Aucun compte n'est associé à cette structure.</i>}
-            {referents.map((referent, k) => (
-              <Link to={`/user/${referent._id}`}>
-                <div style={{ display: "flex", alignItems: "center", marginTop: "1rem" }} key={k}>
-                  <Avatar name={`${referent.firstName} ${referent.lastName}`} />
-                  <div>{`${referent.firstName} ${referent.lastName}`}</div>
+  if (!structure) return <div />;
+
+  return (
+    <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
+      <StructureView structure={structure} tab="details">
+        <Box>
+          <Row>
+            <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
+              <Wrapper>
+                <div style={{ display: "flex" }}>
+                  <Legend>La structure</Legend>
+                  <div style={{ marginLeft: "auto" }}>
+                    <SocialIcons value={structure} />
+                  </div>
                 </div>
-              </Link>
-            ))}
-          </Wrapper>
-        </Col>
-      </Row>
-    </Box>
+
+                <div className="detail">
+                  <div className="detail-title">Présentation</div>
+                  <div className="detail-text">{structure.description}</div>
+                </div>
+                <div className="detail">
+                  <div className="detail-title">Status</div>
+                  <div className="detail-text">{translate(structure.legalStatus)}</div>
+                </div>
+                <div className="detail">
+                  <div className="detail-title">Région</div>
+                  <div className="detail-text">{structure.region}</div>
+                </div>
+                <div className="detail">
+                  <div className="detail-title">Dép.</div>
+                  <div className="detail-text">{structure.department}</div>
+                </div>
+                <div className="detail">
+                  <div className="detail-title">Ville</div>
+                  <div className="detail-text">{structure.city}</div>
+                </div>
+                <div className="detail">
+                  <div className="detail-title">Adresse</div>
+                  <div className="detail-text">{structure.address}</div>
+                </div>
+                <div className="detail">
+                  <div className="detail-title">Siret</div>
+                  <div className="detail-text">{structure.siret}</div>
+                </div>
+                {parentStructure ? (
+                  <div className="detail">
+                    <div className="detail-title">Réseau national</div>
+                    <div className="detail-text">
+                      <TagParent>{parentStructure.name}</TagParent>
+                    </div>
+                  </div>
+                ) : null}
+                <div className="detail">
+                  <div className="detail-title">Tête de réseau</div>
+                  <div className="detail-text">{structure.isNetwork === "true" ? "Cette structure est une tête de réseau" : "Cette structure n'est pas une tête de réseau"}</div>
+                </div>
+              </Wrapper>
+            </Col>
+            <Col md={6}>
+              <Wrapper>
+                <Legend>{`Équipe (${referents.length})`}</Legend>
+                {referents.length ? null : <i>Aucun compte n'est associé à cette structure.</i>}
+                {referents.map((referent, k) => (
+                  <Link to={`/user/${referent._id}`}>
+                    <div style={{ display: "flex", alignItems: "center", marginTop: "1rem" }} key={k}>
+                      <Avatar name={`${referent.firstName} ${referent.lastName}`} />
+                      <div>{`${referent.firstName} ${referent.lastName}`}</div>
+                    </div>
+                  </Link>
+                ))}
+              </Wrapper>
+            </Col>
+          </Row>
+        </Box>
+      </StructureView>
+    </div>
   );
 };
 
@@ -85,7 +123,7 @@ const Wrapper = styled.div`
   .detail {
     display: flex;
     align-items: flex-start;
-    font-size: 1rem;
+    font-size: 14px;
     text-align: left;
     margin-top: 1rem;
     &-title {
@@ -100,133 +138,11 @@ const Wrapper = styled.div`
   }
 `;
 
-const Header = styled.div`
-  padding: 0 25px 0;
-  display: flex;
-  margin-top: 25px;
-  align-items: flex-start;
-`;
-
-const FormGroup = styled.div`
-  margin-bottom: 25px;
-  > label {
-    font-size: 11px;
-    font-weight: 500;
-    text-transform: uppercase;
-    color: #6a6f85;
-    display: block;
-    margin-bottom: 10px;
-    > span {
-      color: red;
-      font-size: 10px;
-      margin-right: 5px;
-    }
-  }
-  select,
-  textarea,
-  input {
-    display: block;
-    width: 100%;
-    background-color: #fff;
-    color: #606266;
-    border: 0;
-    outline: 0;
-    padding: 11px 20px;
-    border-radius: 6px;
-    margin-right: 15px;
-    border: 1px solid #dcdfe6;
-    ::placeholder {
-      color: #d6d6e1;
-    }
-    :focus {
-      border: 1px solid #aaa;
-    }
-  }
-`;
-
-const Subtitle = styled.div`
-  color: rgb(113, 128, 150);
-  font-weight: 300;
-  font-size: 1rem;
-`;
-
-const SubtitleLink = styled(Subtitle)`
-  color: #5245cc;
-`;
-
-const Title = styled.div`
-  color: rgb(38, 42, 62);
-  font-weight: 700;
-  font-size: 24px;
-  margin-bottom: 10px;
-  flex: 1;
-`;
-
 const Legend = styled.div`
   color: rgb(38, 42, 62);
   margin-bottom: 20px;
   font-size: 1.3rem;
   font-weight: 500;
-`;
-
-const ButtonLight = styled.button`
-  background-color: #fff;
-  border: 1px solid #dcdfe6;
-  outline: 0;
-  align-self: flex-start;
-  border-radius: 4px;
-  padding: 10px 20px;
-  font-size: 14px;
-  width: 120px;
-  color: #646b7d;
-  cursor: pointer;
-  margin-right: 10px;
-  :hover {
-    color: rgb(49, 130, 206);
-    border-color: rgb(193, 218, 240);
-    background-color: rgb(234, 243, 250);
-  }
-`;
-const Button = styled.button`
-  background-color: #3182ce;
-  outline: 0;
-  border: 0;
-  color: #fff;
-  border-radius: 4px;
-  padding: 10px 20px;
-  font-size: 14px;
-  cursor: pointer;
-  :hover {
-    background-color: #5a9bd8;
-  }
-  :disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-`;
-
-const ButtonContainer = styled.div`
-  button {
-    background-color: #5245cc;
-    color: #fff;
-    &.white-button {
-      color: #000;
-      background-color: #fff;
-      :hover {
-        background: #ddd;
-      }
-    }
-    margin-left: 1rem;
-    border: none;
-    border-radius: 5px;
-    padding: 7px 30px;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    :hover {
-      background: #372f78;
-    }
-  }
 `;
 
 const Box = styled.div`
@@ -236,4 +152,21 @@ const Box = styled.div`
   filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.05));
   margin-bottom: 33px;
   border-radius: 8px;
+`;
+
+const Tag = styled.span`
+  align-self: flex-start;
+  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+  font-size: 13px;
+  white-space: nowrap;
+  font-weight: 400;
+  cursor: pointer;
+  margin-right: 5px;
+`;
+
+const TagParent = styled(Tag)`
+  color: #5245cc;
+  background: rgba(82, 69, 204, 0.1);
+  border: 0.5px solid #5245cc;
 `;

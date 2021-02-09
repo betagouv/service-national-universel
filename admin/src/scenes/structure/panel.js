@@ -12,6 +12,7 @@ import Team from "./components/Team";
 export default ({ onChange, value }) => {
   const [missionsInfo, setMissionsInfo] = useState({ count: "-", placesTotal: "-" });
   const [referents, setReferents] = useState([]);
+  const [parentStructure, setParentStructure] = useState(null);
   const history = useHistory();
   useEffect(() => {
     if (!value) return;
@@ -25,8 +26,21 @@ export default ({ onChange, value }) => {
       queries.push({
         query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": value._id } }] } },
       });
+      if (value.networkId) {
+        queries.push({ index: "structure", type: "_doc" });
+        queries.push({
+          query: { bool: { must: { match_all: {} }, filter: [{ term: { _id: value.networkId } }] } },
+        });
+      }
 
       const { responses } = await api.esQuery(queries);
+
+      if (value.networkId) {
+        const structures = responses[2]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+        setParentStructure(structures.length ? structures[0] : null);
+      } else {
+        setParentStructure(null);
+      }
       setMissionsInfo({
         count: responses[0].hits.hits.length,
         placesTotal: responses[0].hits.hits.reduce((acc, e) => acc + e._source.placesTotal, 0),
@@ -70,9 +84,16 @@ export default ({ onChange, value }) => {
         </Button>
       </div>
       <Info title="La structure">
-        <div className="">{value.description}</div>
-        <Details title="Agréments" value={value.associationTypes || "--"} />
+        <div>{value.description}</div>
         <Details title="Statut" value={translate(value.legalStatus) || "--"} />
+        {value.legalStatus === "ASSOCIATION" ? <Details title="Agréments" value={value.associationTypes ? value.associationTypes.join(",") : "--"} /> : null}
+        {value.legalStatus === "PUBLIC" ? (
+          <div>
+            <Details title="Type" value={value.structurePubliqueType || "--"} />
+            {value.structurePubliqueType === "Service de l'Etat" ? <Details title="Service" value={value.structurePubliqueEtatType || "--"} /> : null}
+          </div>
+        ) : null}
+        {value.legalStatus === "PRIVATE" ? <Details title="Type" value={value.structurePriveeType || "--"} /> : null}
         <Details title="Région" value={value.region || "--"} />
         <Details title="Dép." value={value.department || "--"} />
         <Details title="Ville" value={value.city || "--"} />
@@ -99,11 +120,14 @@ export default ({ onChange, value }) => {
         </table>
       </Info>
       <Team referents={referents} />
-      <div>
-        {Object.keys(value).map((e, k) => {
+      {parentStructure ? (
+        <Info title={`Réseau national`}>
+          <div style={{ marginTop: "1rem" }}>{parentStructure.name}</div>
+        </Info>
+      ) : null}
+      <div>{/*Object.keys(value).map((e, k) => {
           return <div key={k}>{`${e}:${value[e]}`}</div>;
-        })}
-      </div>
+        }) */}</div>
     </Panel>
   );
 };
@@ -194,12 +218,6 @@ const Panel = styled.div`
     font-size: 18px;
     font-weight: 400;
     font-style: italic;
-  }
-  .social-link {
-    border: solid 1px #aaa;
-    padding: 5px 7px 7px 7px;
-    margin: 5px;
-    border-radius: 5px;
   }
 `;
 

@@ -355,6 +355,7 @@ export default () => {
                   </Col>
                   <Col>
                     <DndFileInput
+                      optional
                       value={values.highSkilledActivityProofFiles}
                       name="highSkilledActivityProofFiles"
                       onChange={async (e) => {
