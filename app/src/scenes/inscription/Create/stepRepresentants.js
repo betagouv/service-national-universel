@@ -254,7 +254,7 @@ export default () => {
         <h2>Coordonnées du ou des représentants légaux</h2>
         <p>Faites compléter les informations ci-dessous par votre ou vos représentants légaux.</p>
         <p>
-          Les informations relatives aux <b>deux parents</b> sont requises, sauf dans le cas où l'autorité parentale n'est portée que par l'un des parents ou par une tiers
+          Les informations relatives aux <b>deux parents</b> sont requises, sauf dans le cas où l'autorité parentale n'est portée que par l'un des parents ou par une tierce
           personne.
         </p>
       </Heading>
