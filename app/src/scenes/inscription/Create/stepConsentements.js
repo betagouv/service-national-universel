@@ -77,7 +77,16 @@ export default () => {
           <>
             <FormRow>
               <Col md={4}>
-                <Label>Consentement du ou des représentant légaux</Label>
+                <Label>
+                  Consentement du ou des représentant légaux
+                  <Warning>
+                    <img src={require("../../../assets/warning.png")} />
+                    <p>
+                      Le consentement des représentants légaux est à faire <b>remplir et signer</b> par les <b>deux parents</b>, sauf dans le cas où l'autorité parentale n'est
+                      portée que par l'un des parents ou par une tierce personne.
+                    </p>
+                  </Warning>
+                </Label>
               </Col>
               <Col>
                 <div style={{ fontWeight: 400, fontSize: 14, margin: "0.8rem" }}>
@@ -280,6 +289,28 @@ const FormRow = styled(Row)`
 const Label = styled.div`
   color: #374151;
   margin-bottom: 10px;
+  p {
+    font-size: 0.9rem;
+    color: #6b7280;
+    margin: 0;
+  }
+`;
+const Warning = styled.div`
+  background-color: #88001711;
+  border-radius: 0.5rem;
+  border: 1px solid #880017;
+  padding: 0.5rem;
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  img {
+    height: 1rem;
+    margin: 0.5rem;
+  }
+  p {
+    color: #880017;
+    font-size: 0.8rem;
+  }
 `;
 
 const RadioLabel = styled.label`
