@@ -1,7 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
-import styled from "styled-components";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 
 import { YOUNG_STATUS } from "../../utils";
 import WaitingValidation from "./waitingValidation";

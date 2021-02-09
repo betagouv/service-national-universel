@@ -4,7 +4,7 @@ import { Container } from "reactstrap";
 import styled from "styled-components";
 import { Col, Row, Input } from "reactstrap";
 
-import MissionCard from "./components/missionCard";
+import MissionCard from "./components/application";
 import api from "../../services/api";
 import { translate, formatStringDate } from "../../utils";
 import SocialIcons from "../../components/SocialIcons";
@@ -275,7 +275,6 @@ const Heading = styled(Container)`
     color: #161e2e;
     font-size: 3rem;
     font-weight: 700;
-    padding-right: 3rem;
   }
   p {
     &.title {

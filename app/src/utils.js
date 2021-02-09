@@ -26,6 +26,8 @@ export const translate = (value) => {
       return "Refusée";
     case "CANCEL":
       return "Annulée";
+    case "DONE":
+      return "Effectuée";
     case "ARCHIVED":
       return "Archivée";
     case "ASSOCIATION":
@@ -569,6 +571,33 @@ export const YOUNG_STATUS = {
 export const YOUNG_PHASE = {
   INSCRIPTION: "INSCRIPTION",
   COHESION_STAY: "COHESION_STAY",
+};
+
+export const APPLICATION_STATUS = {
+  WAITING_VALIDATION: "WAITING_VALIDATION",
+  VALIDATED: "VALIDATED",
+  REFUSED: "REFUSED",
+  CANCEL: "CANCEL",
+  ARCHIVED: "ARCHIVED",
+  IN_PROGRESS: "IN_PROGRESS",
+  DONE: "DONE",
+  NOT_COMPLETED: "NOT_COMPLETED",
+  PRESELECTED: "PRESELECTED",
+  SIGNED_CONTRACT: "SIGNED_CONTRACT",
+};
+
+export const APPLICATION_STATUS_COLORS = {
+  WAITING_VALIDATION: "#FE7B52",
+  WAITING_CORRECTION: "#FEB951",
+  VALIDATED: "#6CC763",
+  DONE: "#1C7713",
+  PRESELECTED: "#d9bb71",
+  NOT_COMPLETED: "#d9bb71",
+  SIGNED_CONTRACT: "#d9bb71",
+  REFUSED: "#F8A9AD",
+  CANCEL: "#ffa987",
+  ARCHIVED: "#ffb3fb",
+  IN_PROGRESS: "#382F79",
 };
 
 export function getPasswordErrorMessage(v) {

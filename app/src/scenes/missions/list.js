@@ -12,7 +12,6 @@ import api from "../../services/api";
 const FILTERS = ["DOMAIN", "SEARCH", "STATUS"];
 
 export default () => {
-  console.log("yo");
   const [showAlert, setShowAlert] = useState(true);
 
   return (

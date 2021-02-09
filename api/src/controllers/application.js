@@ -19,7 +19,7 @@ router.post("/", passport.authenticate("young", { session: false }), async (req,
   }
 });
 
-router.put("/", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.put("/", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
     const application = await ApplicationObject.findByIdAndUpdate(req.body._id, req.body, { new: true });
     res.status(200).send({ ok: true, data: application });
@@ -40,9 +40,9 @@ router.get("/:id", passport.authenticate("referent", { session: false }), async 
   }
 });
 
-router.get("/young/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.get("/young/:id", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
-    const data = await ApplicationObject.findOne({ youngId: req.params.id });
+    const data = await ApplicationObject.find({ youngId: req.params.id });
     if (!data) return res.status(404).send({ ok: false, code: NOT_FOUND });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
