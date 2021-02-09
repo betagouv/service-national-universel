@@ -56,7 +56,7 @@ export default () => {
                   />
                 </Col>
               </Row>
-              <Row style={{ marginTop: "10px" }}>
+              <Row style={{ marginTop: "20px" }}>
                 <Col md={2}>
                   <DataSearch
                     showIcon={false}
@@ -66,7 +66,7 @@ export default () => {
                     react={{ and: FILTERS.filter((e) => e !== "LOCATION") }}
                     fuzziness={1}
                     style={{ flex: 2 }}
-                    innerClass={{ input: "searchbox" }}
+                    innerClass={{ input: "searchbox searchbox-city" }}
                     autosuggest={false}
                   />
                 </Col>
@@ -295,6 +295,11 @@ const Filter = styled.div`
     ::placeholder {
       color: #767676;
     }
+  }
+
+  .searchbox-city {
+    padding: 11px 12px;
+    margin-right: 10px;
   }
 
   .dropdown-filter {
