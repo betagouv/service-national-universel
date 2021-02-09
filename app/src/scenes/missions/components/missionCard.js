@@ -4,37 +4,49 @@ import styled from "styled-components";
 
 export default ({ id, title, image, subtitle, tags = [], places, location, onClick }) => {
   return (
-    <Card to={`/mission/${id}`}>
-      <div>
-        <div className="inner">
-          <div className="thumb">
-            <img src={image} />
+    <>
+      <Separator />
+      <Card to={`/mission/${id}`}>
+        <div>
+          <div className="inner">
+            <div className="thumb">
+              <img src={image} />
+            </div>
+            <div>
+              <h4>{title}</h4>
+              <p>{subtitle}</p>
+              <Tags>
+                {tags.map((e, i) => (
+                  <div key={i}>{e}</div>
+                ))}
+              </Tags>
+            </div>
           </div>
-          <div>
-            <h4>{title}</h4>
-            <p>{subtitle}</p>
-            <Tags>
-              {tags.map((e, i) => (
-                <div key={i}>{e}</div>
-              ))}
-            </Tags>
-          </div>
+          {location && <Location>{location}</Location>}
         </div>
-        {location && <Location>{location}</Location>}
-      </div>
-      <Button to="/phase3/une-missions">
-        {places} volontaire{places > 1 && "s"} recherché{places > 1 && "s"}
-      </Button>
-    </Card>
+        <Button to="/phase3/une-missions">
+          {places} volontaire{places > 1 && "s"} recherché{places > 1 && "s"}
+        </Button>
+      </Card>
+    </>
   );
 };
+
+const Separator = styled.hr`
+  margin: 0 2.5rem;
+  height: 1px;
+  border-style: none;
+  background-color: #e5e7eb;
+`;
 
 const Card = styled(Link)`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 3rem 0;
-  border-top: 1px solid #e5e7eb;
+  padding: 3rem 3rem;
+  :hover {
+    background-color: #f7f7f7;
+  }
   .inner {
     display: flex;
     align-items: flex-start;

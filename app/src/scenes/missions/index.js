@@ -5,7 +5,6 @@ import List from "./list";
 import View from "./view";
 
 export default () => {
-  console.log("yoooo");
   return (
     <Switch>
       <Route path="/mission/:id" component={View} />

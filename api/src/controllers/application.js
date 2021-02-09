@@ -9,10 +9,8 @@ const ApplicationObject = require("../models/application");
 const SERVER_ERROR = "SERVER_ERROR";
 const NOT_FOUND = "NOT_FOUND";
 
-router.post("/", async (req, res) => {
+router.post("/", passport.authenticate("young", { session: false }), async (req, res) => {
   try {
-    const obj = {};
-    // if (req.body.hasOwnProperty(`jobboard_indeed_status`)) obj.jobboard_indeed_status = req.body.jobboard_indeed_status;
     const data = await ApplicationObject.create(req.body);
     return res.status(200).send({ ok: true, data });
   } catch (error) {

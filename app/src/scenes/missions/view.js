@@ -8,9 +8,12 @@ import MissionCard from "./components/missionCard";
 import api from "../../services/api";
 import { translate, formatStringDate } from "../../utils";
 import SocialIcons from "../../components/SocialIcons";
+import ApplyModal from "./components/ApplyModal";
+import ApplyDoneModal from "./components/ApplyDoneModal";
 
 export default (props) => {
   const [mission, setMission] = useState();
+  const [modal, setModal] = useState(null);
   useEffect(() => {
     (async () => {
       const id = props.match && props.match.params && props.match.params.id;
@@ -32,6 +35,26 @@ export default (props) => {
 
   return (
     <Container>
+      {modal === "APPLY" && (
+        <ApplyModal
+          value={mission}
+          onChange={() => setModal(null)}
+          onSend={() => {
+            console.log("send");
+            setModal("DONE");
+          }}
+        />
+      )}
+      {modal === "DONE" && (
+        <ApplyDoneModal
+          value={mission}
+          onChange={() => setModal(null)}
+          onSend={() => {
+            console.log("send");
+            setModal(null);
+          }}
+        />
+      )}
       <Heading>
         <div>
           <p className="title">mission</p>
@@ -43,8 +66,8 @@ export default (props) => {
           </Tags>
         </div>
         <div>
-          <Button to="/phase3/une-missions">Candidater</Button>
-          <p className="button-subtitle">{mission.placesTotal} bénévoles recherchés</p>
+          <Button onClick={() => setModal("APPLY")}>Candidater</Button>
+          <p className="button-subtitle">{`${mission.placesTotal} bénévole${mission.placesTotal > 1 ? "s" : ""} recherché${mission.placesTotal > 1 ? "s" : ""}`}</p>
         </div>
       </Heading>
       <Box>
@@ -73,9 +96,7 @@ export default (props) => {
           </Col>
           <Col md={6}>
             <Wrapper>
-              <Legend>
-                Du {formatStringDate(mission.startAt)} au {formatStringDate(mission.endAt)}
-              </Legend>
+              <Legend>{mission.startAt && mission.endAt ? `Du ${formatStringDate(mission.startAt)} au ${formatStringDate(mission.endAt)}` : "Aucune date renseignée"}</Legend>
               <Detail title="Fréquence" content={mission.frequence} />
               <Detail title="Période pour réaliser la mission" content={mission.period} />
               <Detail title="Lieu" content={[mission.address, mission.zip, mission.city, mission.department]} />
@@ -83,7 +104,9 @@ export default (props) => {
           </Col>
         </Row>
       </Box>
-      <Button to="/phase3/une-missions">Proposer votre candidature</Button>
+      <Footer>
+        <Button onClick={() => setModal("APPLY")}>Proposer votre candidature</Button>
+      </Footer>
       {/* <Wrapper>
         <LeftBox style={{ padding: "50px 40px" }}>
           <div className="heading">
@@ -209,6 +232,11 @@ const InfoStructure = ({ title, structure }) => {
   );
 };
 
+const Footer = styled.div`
+  display: flex;
+  justify-content: center;
+`;
+
 const Legend = styled.div`
   color: rgb(38, 42, 62);
   margin-bottom: 20px;
@@ -224,7 +252,8 @@ const Box = styled.div`
   border-radius: 8px;
 `;
 
-const Button = styled(Link)`
+const Button = styled.div`
+  cursor: pointer;
   background-color: #31c48d;
   border-radius: 30px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
