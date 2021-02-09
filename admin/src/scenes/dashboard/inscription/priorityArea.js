@@ -5,32 +5,41 @@ import CircularProgress from "../components/CircularProgress";
 
 import api from "../../../services/api";
 
-export default () => {
+export default ({ filter }) => {
   const [value, setValue] = useState(null);
 
   useEffect(() => {
     (async () => {
-      // const queries = [];
-      // queries.push({ index: "young", type: "_doc" });
-      // queries.push({ query: { match_all: {} }, aggs: { status: { terms: { field: "gender.keyword" } } }, size: 0 });
-      // const { responses } = await api.esQuery(queries);
-      // const m = api.getAggregations(responses[0]);
-      // setValue(m);
+      const queries = [];
+      queries.push({ index: "young", type: "_doc" });
+      queries.push({
+        query: { bool: { must: { match_all: {} }, filter: [{ term: { "cohort.keyword": filter.cohort } }] } },
+        aggs: { status: { terms: { field: "qpv.keyword" } } },
+        size: 0,
+      });
+
+      if (filter.status) queries[1].query.bool.filter.push({ terms: { "status.keyword": filter.status } });
+      if (filter.region) queries[1].query.bool.filter.push({ term: { "region.keyword": filter.region } });
+      if (filter.department) queries[1].query.bool.filter.push({ term: { "department.keyword": filter.department } });
+
+      const { responses } = await api.esQuery(queries);
+      const m = api.getAggregations(responses[0]);
+      setValue(m);
     })();
-  }, []);
+  }, [JSON.stringify(filter)]);
 
   function render() {
     if (!value) return <div>Chargement ....</div>;
 
-    // const male = gender.male || 0;
-    // const female = gender.female || 0;
-    // const malePercent = ((male * 100) / (male + female)).toFixed(1);
-    // const femalePercent = ((female * 100) / (male + female)).toFixed(1);
+    const no = value.false || 0;
+    const yes = value.true || 0;
+    const noPercent = ((no * 100) / (no + yes)).toFixed(1);
+    const yesPercent = ((yes * 100) / (no + yes)).toFixed(1);
 
     return (
       <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-        {/* <CircularProgress circleProgressColor="#1B7BBF" percentage={malePercent} title={male} subtitle="Garçons" />
-        <CircularProgress circleProgressColor="#1B7BBF" percentage={femalePercent} title={female} subtitle="Filles" /> */}
+        <CircularProgress circleProgressColor="#1B7BBF" percentage={noPercent} title={no} subtitle="Non QPV" />
+        <CircularProgress circleProgressColor="#1B7BBF" percentage={yesPercent} title={yes} subtitle="QPV" />
       </div>
     );
   }
