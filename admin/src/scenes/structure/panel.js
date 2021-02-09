@@ -90,7 +90,9 @@ export default ({ onChange, value }) => {
         {value.legalStatus === "PUBLIC" ? (
           <div>
             <Details title="Type" value={value.structurePubliqueType || "--"} />
-            {value.structurePubliqueType === "Service de l'Etat" ? <Details title="Service" value={value.structurePubliqueEtatType || "--"} /> : null}
+            {["Service de l'Etat", "Etablissement public"].includes(value.structurePubliqueType) ? (
+              <Details title="Service" value={value.structurePubliqueEtatType || "--"} />
+            ) : null}
           </div>
         ) : null}
         {value.legalStatus === "PRIVATE" ? <Details title="Type" value={value.structurePriveeType || "--"} /> : null}

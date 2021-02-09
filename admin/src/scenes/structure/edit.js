@@ -183,7 +183,7 @@ export default (props) => {
                           })}
                         </Field>
                       </FormGroup>
-                      {values.structurePubliqueType === "Service de l'Etat" && (
+                      {["Service de l'Etat", "Etablissement public"].includes(values.structurePubliqueType) && (
                         <FormGroup>
                           <label>TYPE DE SERVICE DE L'ETAT</label>
                           <Field
