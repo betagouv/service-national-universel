@@ -5,16 +5,7 @@ import styled from "styled-components";
 import api from "../../../services/api";
 import { translate, APPLICATION_STATUS_COLORS, APPLICATION_STATUS } from "../../../utils";
 
-export default ({ missionId, rank, status, id }) => {
-  const [mission, setMission] = useState();
-  useEffect(() => {
-    (async () => {
-      if (!missionId) return setMission(null);
-      const { data } = await api.get(`/mission/${missionId}`);
-      return setMission(data);
-    })();
-  }, []);
-
+export default ({ application }) => {
   const getTags = (mission) => {
     if (!mission) return [];
     const tags = [];
@@ -23,55 +14,42 @@ export default ({ missionId, rank, status, id }) => {
     return tags;
   };
 
-  if (!mission) return <div />;
+  if (!application) return <div />;
 
   return (
     <Container>
-      <Header>CHOIX N°{rank}</Header>
+      <Header>CHOIX N°{application.priority}</Header>
       <Separator />
-      <Card to={`/mission/${mission._id}`}>
+      <Card to={`/mission/${application.mission._id}`}>
         <div className="info">
           <div className="inner">
             <div className="thumb">
               <img src={require("../../../assets/observe.svg")} />
             </div>
             <div>
-              <h4>{mission.structureName}</h4>
-              <p>{mission.name}</p>
+              <h4>{application.mission.structureName}</h4>
+              <p>{application.mission.name}</p>
               <Tags>
-                {getTags(mission).map((e, i) => (
+                {getTags(application.mission).map((e, i) => (
                   <div key={i}>{e}</div>
                 ))}
               </Tags>
             </div>
           </div>
         </div>
-        <Tag color={APPLICATION_STATUS_COLORS[status]}>{translate(status)}</Tag>
+        <Tag color={APPLICATION_STATUS_COLORS[application.status]}>{translate(application.status)}</Tag>
       </Card>
       <Separator />
-      <Footer status={status} id={id} tutorId={mission.tutorId} onChange={(e) => setMission(e)} />
+      <Footer application={application} tutor={application.tutor} onChange={() => {}} />
     </Container>
   );
 };
 
-const Footer = ({ id, status, tutorId, onChange }) => {
-  const [tutor, setTutor] = useState();
-
-  useEffect(() => {
-    //todo get the tutor infos
-    (async () => {
-      if (!tutorId) return setTutor(null);
-      const { ok, data, code } = await api.get(`/referent/${tutorId}`);
-      if (!ok) return toastr.error("Oups, une erreur est survenue", code);
-      if (data) return setTutor(data);
-      return setTutor(null);
-    })();
-  }, []);
-
+const Footer = ({ application, tutor, onChange }) => {
   const setStatus = async (status) => {
     if (!confirm("Êtes vous sûr de vouloir abandonner cette candidature ?")) return;
-    const { ok, data, code } = await api.put(`/application`, { _id: id, status });
-    onChange(data);
+    const { ok, data, code } = await api.put(`/application`, { _id: application._id, status });
+    // onChange(data);
   };
 
   const getFooter = (status) => {
@@ -81,10 +59,10 @@ const Footer = ({ id, status, tutorId, onChange }) => {
           {tutor ? (
             <>
               <div>
-                Tuteur:{tutor.firstName} {tutor.lastName}
+                Tuteur : {tutor.firstName} {tutor.lastName}
               </div>
-              <div>Tél:{tutor.phone}</div>
-              <div>Mail:{tutor.email}</div>
+              {tutor.phone ? <div>Tél : {tutor.phone}</div> : null}
+              <div>Mail : {tutor.email}</div>
             </>
           ) : null}
           <div onClick={() => setStatus(APPLICATION_STATUS.CANCEL)}>Abandonner la mission</div>
@@ -97,7 +75,7 @@ const Footer = ({ id, status, tutorId, onChange }) => {
     return null;
   };
 
-  return <ContainerFooter>{getFooter(status)}</ContainerFooter>;
+  return <ContainerFooter>{getFooter(application.status)}</ContainerFooter>;
 };
 
 const ContainerFooter = styled.div`
@@ -201,21 +179,6 @@ const Card = styled(Link)`
   }
 `;
 
-const Button = styled(Link)`
-  background-color: #31c48d;
-  border-radius: 30px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  color: #fff;
-  font-size: 13px;
-  padding: 10px 15px 8px;
-  margin-left: 10px;
-  white-space: nowrap;
-  :hover {
-    color: #fff;
-    background-color: #0e9f6e;
-  }
-`;
-
 const Tags = styled.div`
   display: flex;
   align-items: center;
@@ -230,14 +193,4 @@ const Tags = styled.div`
     font-size: 12px;
     font-weight: 500;
   }
-`;
-
-const Location = styled.div`
-  color: rgb(107, 114, 128);
-  background: url(${require("../../../assets/location.svg")}) left center no-repeat;
-  background-size: 22px;
-  font-weight: 400;
-  letter-spacing: 0.02em;
-  padding-left: 32px;
-  margin-bottom: 10px;
 `;

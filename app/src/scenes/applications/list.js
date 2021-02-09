@@ -35,11 +35,7 @@ export default () => {
       <Container>
         {applications.map((e, i) => {
           console.log(e);
-          // const tags = [];
-          // e.city && tags.push(e.city + (e.zip ? ` - ${e.zip}` : ""));
-          // e.domains.forEach((d) => tags.push(d));
-          return <Application key={i} rank={i + 1} id={e._id} missionId={e.missionId} status={e.status} />;
-          return <MissionCard id={e._id} title={e.structureName} image={require("../../assets/observe.svg")} subtitle={e.name} tags={tags} places={e.placesLeft} />;
+          return <Application key={i} rank={i + 1} application={e} />;
         })}
       </Container>
     </div>
