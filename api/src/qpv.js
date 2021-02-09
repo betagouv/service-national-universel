@@ -12,6 +12,7 @@ const url = "https://wsa.sig.ville.gouv.fr/service/georeferenceur.json";
 
 async function getQPV(postcode, commune, adresse) {
   if (!QPV_USERNAME || !QPV_PASSWORD) return console.log("QPV ENV VARIABLES ARE NOT SET (QPV_USERNAME and QPV_PASSWORD) ");
+
   // I need to remove postcode and city from the adresse
   let addresseFormated = adresse.replace(postcode, "").replace(commune, "");
 

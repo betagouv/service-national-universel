@@ -6,33 +6,36 @@ const StructureModel = require("../src/models/structure");
 const MissionModel = require("../src/models/mission");
 const ReferentModel = require("../src/models/referent");
 
-// (async function fetch() {
-//   await run(YoungModel);
-//   // await run(StructureModel);
-//   // await run(MissionModel);
-//   console.log("end");
-// })();
+const { getQPV } = require("../src/qpv");
 
-// let count = 0;
-// async function run(MyModel) {
-//   const cursor = MyModel.find({ phase: "INSCRIPTION" }).cursor();
-//   await cursor.eachAsync(async function (doc) {
-//     count++;
-//     if (count % 10 === 0) console.log(count);
-//     // await doc.set({ cniFiles: [] });
-//     // await doc.set({ parentConsentmentFiles: [] });
-//     try {
-//       await doc.save();
-//       await doc.index();
-//     } catch (e) {
-//       console.log("e", e);
-//     }
-//   });
-// }
-
-(async function () {
-  await ReferentModel.findOneAndUpdate({ email: "gabrielle.bouxin@gmail.com" }, { role: "admin" });
-  console.log("updated");
+(async function fetch() {
+  await run(YoungModel);
 })();
 
-//
+let count = 0;
+async function run(MyModel) {
+  const cursor = MyModel.find({ cohort: "2021" }).cursor();
+  await cursor.eachAsync(async function (doc) {
+    count++;
+    if (count % 10 === 0) console.log(count);
+
+    try {
+      if (!doc.zip || !doc.city || !doc.address) return;
+
+      const qpv = await getQPV(doc.zip, doc.city, doc.address);
+      if (qpv === true) {
+        doc.set({ qpv: "true" });
+      } else if (qpv === false) {
+        doc.set({ qpv: "false" });
+      } else {
+        doc.set({ qpv: "false" });
+      }
+      await doc.save();
+
+      // await doc.save();
+      // await doc.index();
+    } catch (e) {
+      console.log("e", e);
+    }
+  });
+}
