@@ -52,7 +52,7 @@ router.get("/networks", passport.authenticate("referent", { session: false }), a
   }
 });
 
-router.get("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.get("/:id", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
     const data = await StructureObject.findOne({ _id: req.params.id });
     if (!data) return res.status(404).send({ ok: false, code: NOT_FOUND });

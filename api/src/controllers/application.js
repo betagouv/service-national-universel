@@ -5,14 +5,14 @@ const passport = require("passport");
 const { capture } = require("../sentry");
 
 const ApplicationObject = require("../models/application");
+const MissionObject = require("../models/mission");
+const ReferentObject = require("../models/referent");
 
 const SERVER_ERROR = "SERVER_ERROR";
 const NOT_FOUND = "NOT_FOUND";
 
-router.post("/", async (req, res) => {
+router.post("/", passport.authenticate("young", { session: false }), async (req, res) => {
   try {
-    const obj = {};
-    // if (req.body.hasOwnProperty(`jobboard_indeed_status`)) obj.jobboard_indeed_status = req.body.jobboard_indeed_status;
     const data = await ApplicationObject.create(req.body);
     return res.status(200).send({ ok: true, data });
   } catch (error) {
@@ -21,7 +21,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.put("/", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.put("/", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
     const application = await ApplicationObject.findByIdAndUpdate(req.body._id, req.body, { new: true });
     res.status(200).send({ ok: true, data: application });
@@ -42,10 +42,17 @@ router.get("/:id", passport.authenticate("referent", { session: false }), async 
   }
 });
 
-router.get("/young/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.get("/young/:id", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
-    const data = await ApplicationObject.findOne({ youngId: req.params.id });
+    let data = await ApplicationObject.find({ youngId: req.params.id });
     if (!data) return res.status(404).send({ ok: false, code: NOT_FOUND });
+    for (let i = 0; i < data.length; i++) {
+      const application = data[i]._doc;
+      const mission = await MissionObject.findById(application.missionId);
+      let tutor = {};
+      if (mission) tutor = await ReferentObject.findById(mission.tutorId);
+      data[i] = { ...application, mission, tutor };
+    }
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);

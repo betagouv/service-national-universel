@@ -31,7 +31,7 @@ router.put("/", passport.authenticate("referent", { session: false }), async (re
   }
 });
 
-router.get("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.get("/:id", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
     const data = await MissionObject.findOne({ _id: req.params.id });
     if (!data) return res.status(404).send({ ok: false, code: NOT_FOUND });

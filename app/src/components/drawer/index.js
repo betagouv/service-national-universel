@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
-import { YOUNG_STATUS } from "../../utils";
+import { YOUNG_PHASE, YOUNG_STATUS } from "../../utils";
 import Item from "./item";
 import { DRAWER_TABS } from "../utils";
 
@@ -47,8 +47,7 @@ export default ({ inscription }) => {
       return [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status);
     }
     if (tab === DRAWER_TABS.PHASE2) {
-      if (young.cohort && young.cohort !== "2021") return false;
-      return [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.VALIDATED].includes(young.status);
+      return young.phase !== YOUNG_PHASE.COHESION_STAY;
     }
     if (tab === DRAWER_TABS.PHASE3) {
       //todo handle tab phase 3
@@ -109,10 +108,10 @@ export default ({ inscription }) => {
               <NavLink to="/preferences">Renseigner mes préférences</NavLink>
             </li>
             <li>
-              <NavLink to="/une-mission">Trouver une mission</NavLink>
+              <NavLink to="/mission">Trouver une mission</NavLink>
             </li>
             <li>
-              <NavLink to="/phase2/candidatures">Suivre mes candidatures</NavLink>
+              <NavLink to="/candidature">Suivre mes candidatures</NavLink>
             </li>
           </ul>
         </Item>
