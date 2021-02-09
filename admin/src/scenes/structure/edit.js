@@ -3,7 +3,8 @@ import { Col, Row, Input } from "reactstrap";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { Formik, Field } from "formik";
-import { Link, Redirect } from "react-router-dom";
+import { Link, Redirect, useHistory } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 import MultiSelect from "../../components/Multiselect";
 import AddressInput from "../../components/addressInput";
@@ -16,6 +17,8 @@ export default (props) => {
   const [defaultValue, setDefaultValue] = useState();
   const [networks, setNetworks] = useState([]);
   const [redirect, setRedirect] = useState(false);
+  const user = useSelector((state) => state.Auth.user);
+  const history = useHistory();
 
   useEffect(() => {
     (async () => {
@@ -27,12 +30,6 @@ export default (props) => {
       setDefaultValue(data);
     })();
   }, []);
-
-  const handleSave = async (values) => {
-    const { ok, code } = await api.put("/structure", values);
-    if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de votre progression", translate(code));
-    if (ok) toastr.success("Progression enregistrée");
-  };
 
   if (defaultValue === undefined) return <div>Chargement...</div>;
   if (redirect) return <Redirect to="/structure" />;
@@ -72,16 +69,14 @@ export default (props) => {
       }
       onSubmit={async (values) => {
         try {
-          console.log("values", values);
           if (!values._id) {
             values.placesLeft = values.placesTotal;
-            await api.post("/mission", values);
-            return toastr.success("Mission créée");
+            await api.post("/structure", values);
+            return toastr.success("Structure créée");
           }
-          //TODO PLACE TAKEN
-          values.placesLeft = values.placesTotal - values.placesTaken;
-          await api.put(`/mission/${values._id}`, values);
-          return toastr.success("Mission mise à jour");
+          await api.put(`/structure/${values._id}`, values);
+          history.push(`/structure/${values._id}`);
+          return toastr.success("Structure mise à jour");
         } catch (e) {
           console.log(e);
           toastr.error("Erreur!");
@@ -263,15 +258,19 @@ export default (props) => {
                     </Field>
                   </FormGroup>
                   <FormGroup>
-                    <label>TÊTE DE RÉSEAU</label>
-                    <Field component="select" name="isNetwork" value={values.isNetwork} onChange={handleChange}>
-                      <option key="true" value="true">
-                        Oui
-                      </option>
-                      <option key="false" value="false">
-                        Non
-                      </option>
-                    </Field>
+                    {user.role === "admin" && (
+                      <div>
+                        <label>TÊTE DE RÉSEAU</label>
+                        <Field component="select" name="isNetwork" value={values.isNetwork} onChange={handleChange}>
+                          <option key="true" value="true">
+                            Oui
+                          </option>
+                          <option key="false" value="false">
+                            Non
+                          </option>
+                        </Field>
+                      </div>
+                    )}
                   </FormGroup>
                 </Wrapper>
               </Col>
@@ -281,19 +280,14 @@ export default (props) => {
               <Col md={12}>
                 <Wrapper>
                   <Legend>Lieu de la structure</Legend>
-                  <FormGroup>
-                    <label>
-                      <span>*</span>LIEU
-                    </label>
-                    <AddressInput
-                      keys={{ city: "city", zip: "zip", address: "address", location: "location", department: "department", region: "region" }}
-                      values={values}
-                      handleChange={handleChange}
-                      errors={errors}
-                      touched={touched}
-                    />
-                    <p style={{ color: "#a0aec1", fontSize: 12 }}>Si l'adresse n'est pas reconnue, veuillez saisir le nom de la ville.</p>
-                  </FormGroup>
+                  <AddressInput
+                    keys={{ city: "city", zip: "zip", address: "address", location: "location", department: "department", region: "region" }}
+                    values={values}
+                    handleChange={handleChange}
+                    errors={errors}
+                    touched={touched}
+                  />
+                  <p style={{ color: "#a0aec1", fontSize: 12 }}>Si l'adresse n'est pas reconnue, veuillez saisir le nom de la ville.</p>
                 </Wrapper>
               </Col>
             </Row>
@@ -320,6 +314,9 @@ export default (props) => {
 
 const Wrapper = styled.div`
   padding: 3rem;
+  li {
+    list-style-type: none;
+  }
 `;
 
 const Header = styled.div`
