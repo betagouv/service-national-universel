@@ -186,6 +186,9 @@ const Hit = ({ hit, onClick }) => {
       <td>
         {parentStructure ? <TagParent>{parentStructure.name}</TagParent> : null}
         {hit.department ? <TagDepartment>{translate(hit.department)}</TagDepartment> : null}
+        {["SDIS (Service départemental d'Incendie et de Secours)", "Gendarmerie", "Police", "Armées"].includes(hit.structurePubliqueEtatType) ? (
+          <TagDepartment>Corps en uniforme</TagDepartment>
+        ) : null}
       </td>
     </tr>
   );
