@@ -29,7 +29,7 @@ export default () => {
           <WrapperItem>
             {/* todo add tag CANCEL */}
             <div className="title">
-              1. Un séjour de cohésion <Tag color="#c81e1e">Phase annulée</Tag>
+              1. Un séjour de cohésion <Tag color="#c81e1e">Phase&nbsp;annulée</Tag>
             </div>
             <div className="info">
               <div className="subtitle">Séjour annulé suite à la crise sanitaire.</div>
@@ -44,7 +44,7 @@ export default () => {
           <WrapperItem>
             {/* todo add tag IN_PROGRESS */}
             <div className="title">
-              2. Une première mission d'intérêt général <Tag color="#5145cd">En cours</Tag>
+              2. Une première mission d'intérêt général <Tag color="#5145cd">En&nbsp;cours</Tag>
             </div>
             <div className="info">
               <div className="subtitle">À réaliser dans l’année, jusqu’au 31 juin 2021.</div>

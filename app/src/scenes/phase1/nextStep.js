@@ -55,7 +55,7 @@ export default () => {
       <Content style={{ width: "100%" }}>
         <h1>Prochaine étape</h1>
         <p>
-          Vous êtes actuellement <Tag>en attente d'affectation à un centre de cohésion.</Tag>
+          Vous êtes actuellement <Tag>en&nbsp;attente&nbsp;d'affectation à un centre de cohésion.</Tag>
         </p>
         <p>Au mois de mai, vous serez informé par e-mail du lieu et des modalités de votre séjour.</p>
       </Content>
