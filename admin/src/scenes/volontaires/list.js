@@ -196,7 +196,10 @@ const Action = ({ hit, color }) => {
         </DropdownToggle>
         <DropdownMenu>
           <Link to={`/volontaire/${hit._id}`}>
-            <DropdownItem className="dropdown-item">Voir ou Modifier le profil</DropdownItem>
+            <DropdownItem className="dropdown-item">Consulter le profil</DropdownItem>
+          </Link>
+          <Link to={`/volontaire/${hit._id}/edit`}>
+            <DropdownItem className="dropdown-item">Modifier le profil</DropdownItem>
           </Link>
           {user.role === "admin" ? (
             <DropdownItem className="dropdown-item">

@@ -34,14 +34,21 @@ export default ({ onChange, value }) => {
             Né(e) le {formatDate(value.birthdateAt)} • {getAge(value.birthdateAt)} ans
           </div>
         )}
-        <Link to={`/volontaire/${value._id}`}>
-          <Button icon={require("../../assets/pencil.svg")} color="white">
-            Consulter / Modifier
-          </Button>
-        </Link>
+        <div style={{ display: "flex" }}>
+          <Link to={`/volontaire/${value._id}`}>
+            <Button icon={require("../../assets/eye.svg")} color="white">
+              Consulter
+            </Button>
+          </Link>
+          <Link to={`/volontaire/${value._id}/edit`}>
+            <Button icon={require("../../assets/pencil.svg")} color="white">
+              Modifier
+            </Button>
+          </Link>
+        </div>
         <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${value._id}`}>
           <Button icon={require("../../assets/impersonate.svg")} color="white">
-            Prendre sa place
+            Prendre&nbsp;sa&nbsp;place
           </Button>
         </a>
       </div>
@@ -127,7 +134,8 @@ const Button = styled(LoadingButton)`
   border: 0;
   outline: 0;
   border-radius: 5px;
-  padding: 8px 25px 8px 40px;
+  padding: 0.2rem 1rem;
+  padding-left: 2.5rem;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
