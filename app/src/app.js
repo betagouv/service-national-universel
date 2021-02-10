@@ -80,10 +80,10 @@ const Espace = () => {
 
   return (
     <>
-      <Header />
       <div style={{ display: "flex" }}>
         <Drawer />
         <Content>
+          <Header />
           <Switch>
             <Route path="/account" component={Account} />
             <Route path="/phase1" component={Phase1} />
@@ -115,9 +115,10 @@ function ScrollToTop() {
 }
 
 const Content = styled.div`
-  width: 100%;
-  padding: 2rem;
+  margin-left: auto;
+  width: 85%;
   @media (max-width: 768px) {
+    width: 100%;
     padding: 0;
   }
 `;

@@ -52,12 +52,11 @@ const Icon = styled.div`
   justify-content: center;
   margin-right: 0.5rem;
   svg {
-    height: 20px;
+    height: 65%;
   }
 `;
 
 const Item = styled.li`
-  margin-bottom: 5px;
   background-size: 20px;
   padding-left: 0;
   margin-bottom: 15px;
@@ -67,6 +66,9 @@ const Item = styled.li`
     display: block;
     font-size: 12px;
     padding: 15px 10px 15px 35px;
+    @media (max-width: 1400px) {
+      padding: 15px 10px 15px 20px;
+    }
     height: 70px;
     font-weight: 600;
     position: relative;
@@ -93,6 +95,9 @@ const Item = styled.li`
       left: 50px;
       top: 40px;
       z-index: 50;
+      @media (max-width: 1400px) {
+        left: 35px;
+      }
     }
   }
 `;

@@ -62,6 +62,16 @@ export default ({ inscription }) => {
 
   return (
     <Sidebar open={open}>
+      <Header>
+        <Logos>
+          <a href="https://www.snu.gouv.fr/">
+            <img src={require("../../assets/fr.png")} />
+          </a>
+          <a href="https://www.snu.gouv.fr/">
+            <img src={require("../../assets/logo-snu.png")} />
+          </a>
+        </Logos>
+      </Header>
       <MenuBtn onClick={() => setOpen(!open)} src={require("../../assets/menu.svg")} />
       <HomeLink exact to="/" onClick={(e) => handleClick(e, DRAWER_TABS.HOME)}>
         <div className="icon">
@@ -184,17 +194,19 @@ export default ({ inscription }) => {
 };
 
 const Sidebar = styled.div`
+  ::-webkit-scrollbar {
+    display: none;
+  }
   @media (max-width: 768px) {
     display: none;
   }
   background-color: #362f78;
-  width: 350px;
-  position: sticky;
-  top: 68px;
+  width: 15%;
+  position: fixed;
+  top: 0;
   bottom: 0;
   left: 0;
   z-index: 1;
-  padding-top: 3rem;
   min-height: 100vh;
   overflow-y: auto;
   transition: 0.2s;
@@ -226,6 +238,30 @@ const Sidebar = styled.div`
       }
     }
   }
+`;
+
+const Logos = styled.div`
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  a:hover {
+    background-color: transparent;
+    box-shadow: none;
+  }
+  img {
+    vertical-align: top;
+    height: 4rem;
+    @media (max-width: 1400px) {
+      height: 2.5rem;
+    }
+  }
+`;
+
+const Header = styled.div`
+  padding: 1rem 3rem;
+  margin-bottom: 2rem;
+  background-color: #fff;
 `;
 
 const HomeLink = styled(NavLink)`
