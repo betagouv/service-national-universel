@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 
 import { YOUNG_SITUATIONS, translate as t } from "../../utils";
 import LoadingButton from "../../components/loadingButton";
+import { appURL } from "../../config";
+import api from "../../services/api";
 
 export default ({ onChange, value }) => {
   console.log(value);
@@ -29,12 +31,19 @@ export default ({ onChange, value }) => {
         <div>{t(value.gender)}</div>
         {value.birthdateAt && (
           <div>
-            Né(e) le {formatDate(value.birthdateAt)} - {getAge(value.birthdateAt)} ans
+            Né(e) le {formatDate(value.birthdateAt)} • {getAge(value.birthdateAt)} ans
           </div>
         )}
         <Link to={`/volontaire/${value._id}`}>
-          <EditBtn color="white">Modifier</EditBtn>
+          <Button icon={require("../../assets/pencil.svg")} color="white">
+            Consulter / Modifier
+          </Button>
         </Link>
+        <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${value._id}`}>
+          <Button icon={require("../../assets/impersonate.svg")} color="white">
+            Prendre sa place
+          </Button>
+        </a>
       </div>
       <Info title="Coordonnées" id={value._id}>
         <Details title="E-mail" value={value.email} />
@@ -111,9 +120,9 @@ const Details = ({ title, value }) => {
   );
 };
 
-const EditBtn = styled(LoadingButton)`
+const Button = styled(LoadingButton)`
   color: #555;
-  background: url(${require("../../assets/pencil.svg")}) left 15px center no-repeat;
+  background: ${({ icon }) => `url(${icon}) left 15px center no-repeat`};
   box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.16);
   border: 0;
   outline: 0;
