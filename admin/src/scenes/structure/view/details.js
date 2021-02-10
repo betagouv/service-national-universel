@@ -8,6 +8,7 @@ import StructureView from "./wrapper";
 import api from "../../../services/api";
 import Avatar from "../../../components/Avatar";
 import SocialIcons from "../../../components/SocialIcons";
+import Invite from "../components/invite";
 
 export default ({ structure }) => {
   const [referents, setReferents] = useState([]);
@@ -98,18 +99,21 @@ export default ({ structure }) => {
               </Wrapper>
             </Col>
             <Col md={6}>
-              <Wrapper>
-                <Legend>{`Équipe (${referents.length})`}</Legend>
-                {referents.length ? null : <i>Aucun compte n'est associé à cette structure.</i>}
-                {referents.map((referent, k) => (
-                  <Link to={`/user/${referent._id}`}>
-                    <div style={{ display: "flex", alignItems: "center", marginTop: "1rem" }} key={k}>
-                      <Avatar name={`${referent.firstName} ${referent.lastName}`} />
-                      <div>{`${referent.firstName} ${referent.lastName}`}</div>
-                    </div>
-                  </Link>
-                ))}
-              </Wrapper>
+              <Row style={{ borderBottom: "2px solid #f4f5f7" }}>
+                <Wrapper>
+                  <Legend>{`Équipe (${referents.length})`}</Legend>
+                  {referents.length ? null : <i>Aucun compte n'est associé à cette structure.</i>}
+                  {referents.map((referent, k) => (
+                    <Link to={`/user/${referent._id}`}>
+                      <div style={{ display: "flex", alignItems: "center", marginTop: "1rem" }} key={k}>
+                        <Avatar name={`${referent.firstName} ${referent.lastName}`} />
+                        <div>{`${referent.firstName} ${referent.lastName}`}</div>
+                      </div>
+                    </Link>
+                  ))}
+                </Wrapper>
+              </Row>
+              <Invite structure={structure} />
             </Col>
           </Row>
         </Box>

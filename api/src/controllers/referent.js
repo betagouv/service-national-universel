@@ -79,6 +79,8 @@ router.post("/signup_invite/:role", passport.authenticate("referent", { session:
     if (req.body.hasOwnProperty(`region`)) obj.region = req.body.region; //TODO
     if (req.body.hasOwnProperty(`department`)) obj.department = req.body.department;
 
+    if (req.body.hasOwnProperty(`structureId`)) obj.structureId = req.body.structureId;
+
     const invitation_token = crypto.randomBytes(20).toString("hex");
     obj.invitationToken = invitation_token;
     obj.invitationExpires = Date.now() + 86400000 * 7; // 7 days
@@ -92,6 +94,9 @@ router.post("/signup_invite/:role", passport.authenticate("referent", { session:
     } else if (obj.role === "referent_region") {
       template = "../templates/inviteReferentRegion.html";
       mailObject = "Activez votre compte référent régional SNU";
+    } else if (obj.role === "structure_member") {
+      template = "../templates/inviteMember.html";
+      mailObject = "Activez votre compte de responsable de structure";
     } else if (obj.role === "admin") {
       template = "../templates/inviteAdmin.html";
       mailObject = "Activez votre compte administrateur SNU";
@@ -101,6 +106,7 @@ router.post("/signup_invite/:role", passport.authenticate("referent", { session:
     htmlContent = htmlContent.replace(/{{fromName}}/g, `${req.user.firstName} ${req.user.lastName}`);
     htmlContent = htmlContent.replace(/{{department}}/g, `${obj.department}`);
     htmlContent = htmlContent.replace(/{{region}}/g, `${obj.region}`);
+    htmlContent = htmlContent.replace(/{{structureName}}/g, req.body.structureName);
     htmlContent = htmlContent.replace(/{{cta}}/g, `${config.ADMIN_URL}/auth/signup?token=${invitation_token}`);
 
     await sendEmail({ name: `${obj.firstName} ${obj.lastName}`, email: obj.email }, mailObject, htmlContent);

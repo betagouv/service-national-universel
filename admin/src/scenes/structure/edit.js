@@ -10,6 +10,7 @@ import Avatar from "../../components/Avatar";
 import MultiSelect from "../../components/Multiselect";
 import AddressInput from "../../components/addressInput";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
+import Invite from "./components/invite";
 
 import { associationTypes, privateTypes, publicTypes, publicEtatTypes, translate } from "../../utils";
 import api from "../../services/api";
@@ -289,18 +290,21 @@ export default (props) => {
                 </Wrapper>
               </Col>
               <Col md={6}>
-                <Wrapper>
-                  <Legend>{`Équipe (${referents.length})`}</Legend>
-                  {referents.length ? null : <i>Aucun compte n'est associé à cette structure.</i>}
-                  {referents.map((referent, k) => (
-                    <Link key={k} to={`/user/${referent._id}`}>
-                      <div style={{ display: "flex", alignItems: "center", marginTop: "1rem" }} key={k}>
-                        <Avatar name={`${referent.firstName} ${referent.lastName}`} />
-                        <div>{`${referent.firstName} ${referent.lastName}`}</div>
-                      </div>
-                    </Link>
-                  ))}
-                </Wrapper>
+                <Row style={{ borderBottom: "2px solid #f4f5f7" }}>
+                  <Wrapper>
+                    <Legend>{`Équipe (${referents.length})`}</Legend>
+                    {referents.length ? null : <i>Aucun compte n'est associé à cette structure.</i>}
+                    {referents.map((referent, k) => (
+                      <Link to={`/user/${referent._id}`}>
+                        <div style={{ display: "flex", alignItems: "center", marginTop: "1rem" }} key={k}>
+                          <Avatar name={`${referent.firstName} ${referent.lastName}`} />
+                          <div>{`${referent.firstName} ${referent.lastName}`}</div>
+                        </div>
+                      </Link>
+                    ))}
+                  </Wrapper>
+                </Row>
+                <Invite structure={values} />
               </Col>
             </Row>
             <Row>

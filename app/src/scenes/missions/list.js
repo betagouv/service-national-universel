@@ -30,7 +30,7 @@ export default () => {
                 placeholder="Recherche..."
                 autosuggest={false}
                 componentId="SEARCH"
-                dataField={["name", "structureName", "description", "actions"]}
+                dataField={["name", "structureName", "description", "actions", "city"]}
               />
             </SearchBox>
             <Col>
