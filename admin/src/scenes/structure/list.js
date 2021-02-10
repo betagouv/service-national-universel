@@ -8,6 +8,7 @@ import { apiURL } from "../../config";
 import Panel from "./panel";
 
 import { translate, corpsEnUniforme } from "../../utils";
+import { Link } from "react-router-dom";
 
 const FILTERS = ["SEARCH", "LEGAL_STATUS", "DEPARTMENT", "REGION", "CORPS"];
 const formatLongDate = (date) => {
@@ -201,7 +202,12 @@ const Hit = ({ hit, onClick }) => {
         <div>{missionsInfo.placesTotal} places</div>
       </td>
       <td>
-        {parentStructure ? <TagParent>{parentStructure.name}</TagParent> : null}
+        {hit.isNetwork === "true" ? <TagNetwork>Tête de réseau</TagNetwork> : null}
+        {parentStructure ? (
+          <Link to={`structure/${parentStructure._id}`}>
+            <TagParent>{parentStructure.name}</TagParent>
+          </Link>
+        ) : null}
         {hit.department ? <TagDepartment>{translate(hit.department)}</TagDepartment> : null}
         {corpsEnUniforme.includes(hit.structurePubliqueEtatType) ? <TagDepartment>Corps en uniforme</TagDepartment> : null}
       </td>
@@ -403,88 +409,8 @@ const TagParent = styled(Tag)`
   border: 0.5px solid #5245cc;
 `;
 
-const ActionBox = styled.div`
-  .dropdown-menu {
-    min-width: 0;
-    a,
-    div {
-      white-space: nowrap;
-      font-size: 14px;
-      padding: 5px 15px;
-    }
-  }
-  button {
-    background-color: #feb951;
-    border: 1px solid #feb951;
-    display: inline-flex;
-    align-items: center;
-    text-align: left;
-    border-radius: 4px;
-    padding: 0 0 0 12px;
-    font-size: 12px;
-    min-width: 130px;
-    font-weight: 700;
-    color: #fff;
-    cursor: pointer;
-    outline: 0;
-    .edit-icon {
-      height: 17px;
-      margin-right: 10px;
-      path {
-        fill: #fff;
-      }
-    }
-    .down-icon {
-      margin-left: auto;
-      padding: 7px 15px;
-      border-left: 2px solid #fbd392;
-      margin-left: 15px;
-      svg {
-        height: 10px;
-      }
-      svg polygon {
-        fill: #fff;
-      }
-    }
-  }
-  ${({ color }) =>
-    color === "green" &&
-    `
-    button {
-      background-color: transparent;
-      border: 1px solid #6BC763;
-      color: #6BC763;
-      .edit-icon {
-        path {
-          fill: #6BC763;
-        }
-      }
-      .down-icon {
-        border-left: 1px solid #6BC763;
-        svg polygon {
-          fill: #6BC763;
-        }
-      }
-    }  
-  `}
-  ${({ color }) =>
-    color === "red" &&
-    `
-    button {
-      background-color: transparent;
-      border: 1px solid #F1545B;
-      color: #F1545B;
-      .edit-icon {
-        path {
-          fill: #F1545B;
-        }
-      }
-      .down-icon {
-        border-left: 1px solid #F1545B;
-        svg polygon {
-          fill: #F1545B;
-        }
-      }
-    }  
-  `}
+const TagNetwork = styled(Tag)`
+  color: #00f;
+  background: rgba(82, 69, 204, 0.1);
+  border: 0.5px solid #00f;
 `;
