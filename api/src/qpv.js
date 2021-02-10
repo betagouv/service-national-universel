@@ -40,7 +40,7 @@ async function getQPV(postcode, commune, adresse) {
       })
       .then((json) => {
         if (!json.reponses) {
-          capture(`Cant find ${postcode}, ${commune}, ${addresseFormated}`);
+          // capture(`Cant find ${postcode}, ${commune}, ${addresseFormated}`);
           return resolve(false);
         }
         if (json.reponses.length && json.reponses[0].code_reponse === "OUI") return resolve(true);
