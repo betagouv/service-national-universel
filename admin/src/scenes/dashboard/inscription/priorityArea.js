@@ -38,15 +38,15 @@ export default ({ filter }) => {
 
     return (
       <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-        <CircularProgress circleProgressColor="#1B7BBF" percentage={noPercent} title={no} subtitle="Non QPV" />
-        <CircularProgress circleProgressColor="#1B7BBF" percentage={yesPercent} title={yes} subtitle="QPV" />
+        <CircularProgress circleProgressColor="#1B7BBF" percentage={noPercent} title={no} subtitle="Non" />
+        <CircularProgress circleProgressColor="#1B7BBF" percentage={yesPercent} title={yes} subtitle="Oui" />
       </div>
     );
   }
 
   return (
     <Box>
-      <BoxTitle>Quartiers prioritaires de la ville</BoxTitle>
+      <BoxTitle>Issus d'un Quartier Prioritaire de la Ville</BoxTitle>
       <BoxContent direction="column">{render()}</BoxContent>
     </Box>
   );
