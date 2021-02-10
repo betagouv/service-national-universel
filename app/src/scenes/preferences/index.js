@@ -293,12 +293,12 @@ export default () => {
 const PreferenceItem = ({ title, children }) => {
   return (
     <Hero>
-      <Content style={{ width: "100%" }}>
+      <PreferenceContent style={{ width: "100%" }}>
         <Title>
           <span>{title}</span>
         </Title>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>{children}</div>
-      </Content>
+      </PreferenceContent>
     </Hero>
   );
 };
@@ -451,6 +451,11 @@ const Content = styled.div`
       stroke: #5145cd;
     }
   }
+`;
+
+const PreferenceContent = styled(Content)`
+  padding: 2rem;
+  padding-top: 0.5rem;
 `;
 
 const Wrapper = styled.div`
