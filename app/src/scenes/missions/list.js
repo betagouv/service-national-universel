@@ -77,7 +77,6 @@ export default () => {
             }}
             render={({ data }) => {
               return data.map((e) => {
-                console.log(e);
                 const tags = [];
                 e.city && tags.push(e.city + (e.zip ? ` - ${e.zip}` : ""));
                 // tags.push(e.remote ? "À distance" : "En présentiel");

@@ -7,6 +7,7 @@ import api from "../../../services/api";
 import { translate, APPLICATION_STATUS_COLORS, APPLICATION_STATUS } from "../../../utils";
 
 export default ({ application, index }) => {
+  const [value, setValue] = useState(application);
   const getTags = (mission) => {
     if (!mission) return [];
     const tags = [];
@@ -15,35 +16,40 @@ export default ({ application, index }) => {
     return tags;
   };
 
-  if (!application) return <div />;
+  if (!value) return <div />;
 
   return (
-    <Draggable draggableId={application._id} index={index}>
+    <Draggable draggableId={value._id} index={index}>
       {(provided) => (
         <Container ref={provided.innerRef} {...provided.draggableProps}>
-          <Header {...provided.dragHandleProps}>CHOIX N°{application.priority}</Header>
+          <Header {...provided.dragHandleProps}>CHOIX N°{value.priority}</Header>
           <Separator />
-          <Card to={`/mission/${application.mission._id}`}>
+          <Card to={`/mission/${value.mission._id}`}>
             <div className="info">
               <div className="inner">
                 <div className="thumb">
                   <img src={require("../../../assets/observe.svg")} />
                 </div>
                 <div>
-                  <h4>{application.mission.structureName}</h4>
-                  <p>{application.mission.name}</p>
+                  <h4>{value.mission.structureName}</h4>
+                  <p>{value.mission.name}</p>
                   <Tags>
-                    {getTags(application.mission).map((e, i) => (
+                    {getTags(value.mission).map((e, i) => (
                       <div key={i}>{e}</div>
                     ))}
                   </Tags>
                 </div>
               </div>
             </div>
-            <Tag color={APPLICATION_STATUS_COLORS[application.status]}>{translate(application.status)}</Tag>
+            <Tag color={APPLICATION_STATUS_COLORS[value.status]}>{translate(value.status)}</Tag>
           </Card>
-          <Separator />
-          <Footer application={application} tutor={application.tutor} onChange={() => {}} />
+          <Footer
+            application={value}
+            tutor={value.tutor}
+            onChange={(e) => {
+              setValue({ ...value, ...e });
+            }}
+          />
         </Container>
       )}
     </Draggable>
@@ -54,33 +60,43 @@ const Footer = ({ application, tutor, onChange }) => {
   const setStatus = async (status) => {
     if (!confirm("Êtes vous sûr de vouloir abandonner cette candidature ?")) return;
     const { ok, data, code } = await api.put(`/application`, { _id: application._id, status });
-    // onChange(data);
+    onChange(data);
   };
 
   const getFooter = (status) => {
-    if (status === APPLICATION_STATUS.WAITING_VALIDATION) {
+    if (status === APPLICATION_STATUS.VALIDATED) {
       return (
         <>
-          {tutor ? (
-            <>
-              <div>
-                Tuteur : {tutor.firstName} {tutor.lastName}
-              </div>
-              {tutor.phone ? <div>Tél : {tutor.phone}</div> : null}
-              <div>Mail : {tutor.email}</div>
-            </>
-          ) : null}
-          <div onClick={() => setStatus(APPLICATION_STATUS.CANCEL)}>Abandonner la mission</div>
+          <Separator />
+          <ContainerFooter>
+            {tutor ? (
+              <>
+                <div>
+                  Tuteur : {tutor.firstName} {tutor.lastName}
+                </div>
+                {tutor.phone ? <div>Tél : {tutor.phone}</div> : null}
+                <div>Mail : {tutor.email}</div>
+              </>
+            ) : null}
+            <div onClick={() => setStatus(APPLICATION_STATUS.CANCEL)}>Abandonner la mission</div>
+          </ContainerFooter>
           {/* <div onClick={() => setStatus(APPLICATION_STATUS.WAITING_VALIDATION)}>test</div> */}
         </>
       );
     } else if (status === APPLICATION_STATUS.WAITING_VALIDATION) {
-      return <div onClick={() => setStatus(APPLICATION_STATUS.CANCEL)}>Annuler cette candidature</div>;
+      return (
+        <>
+          <Separator />
+          <ContainerFooter>
+            <div onClick={() => setStatus(APPLICATION_STATUS.CANCEL)}>Annuler cette candidature</div>
+          </ContainerFooter>
+        </>
+      );
     }
     return null;
   };
 
-  return <ContainerFooter>{getFooter(application.status)}</ContainerFooter>;
+  return getFooter(application.status);
 };
 
 const ContainerFooter = styled.div`

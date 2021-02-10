@@ -13,7 +13,13 @@ const NOT_FOUND = "NOT_FOUND";
 
 router.post("/", passport.authenticate("young", { session: false }), async (req, res) => {
   try {
-    const data = await ApplicationObject.create(req.body);
+    const obj = req.body;
+    if (!obj.hasOwnProperty("priority")) {
+      const applications = await ApplicationObject.find({ youngId: obj.youngId });
+      applications.length;
+      obj.priority = applications.length + 1;
+    }
+    const data = await ApplicationObject.create(obj);
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
