@@ -647,7 +647,7 @@ const Checkbox = ({ title, name, value, values, handleChange, disabled, descript
 };
 
 const Badge = ({ value, color }) => {
-  return <BadgeStyle color={color}>{translate(value)}</BadgeStyle>;
+  return value && value.length ? <BadgeStyle color={color}>{translate(value)}</BadgeStyle> : null;
 };
 
 const BadgeStyle = styled.span`
