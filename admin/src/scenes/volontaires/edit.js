@@ -141,6 +141,7 @@ export default (props) => {
                 <Box>
                   <BoxTitle>Situations particulières</BoxTitle>
                   <BoxContent direction="column">
+                    <Item disabled title="Quartier Prioritaire de la Ville" values={values} name="qpv" />
                     <Select
                       name="handicap"
                       values={values}

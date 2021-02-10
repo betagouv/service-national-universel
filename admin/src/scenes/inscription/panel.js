@@ -77,24 +77,7 @@ export default ({ onChange, value }) => {
         <Details title="Adresse" value={value.address} />
       </Info>
       <Info title="Situation" id={value._id}>
-        <Details
-          title="Statut"
-          value={() => {
-            if (value.situation === YOUNG_SITUATIONS.GENERAL_SCHOOL) return "En enseignement général ou technologique";
-            if (value.situation === YOUNG_SITUATIONS.PROFESSIONAL_SCHOOL) return "En enseignement professionnel";
-            if (value.situation === YOUNG_SITUATIONS.AGRICULTURAL_SCHOOL) return "En lycée agricole";
-            if (value.situation === YOUNG_SITUATIONS.SPECIALIZED_SCHOOL) return "En établissement spécialisé";
-            if (value.situation === YOUNG_SITUATIONS.APPRENTICESHIP) return "En apprentissage";
-            if (value.situation === YOUNG_SITUATIONS.EMPLOYEE) return "Salarié(e)";
-            if (value.situation === YOUNG_SITUATIONS.INDEPENDANT) return "Indépendant(e)";
-            if (value.situation === YOUNG_SITUATIONS.SELF_EMPLOYED) return "Auto-entrepreneur";
-            if (value.situation === YOUNG_SITUATIONS.ADAPTED_COMPANY) return "En ESAT, CAT ou en entreprise adaptée";
-            if (value.situation === YOUNG_SITUATIONS.POLE_EMPLOI) return "Inscrit(e) à Pôle emploi";
-            if (value.situation === YOUNG_SITUATIONS.MISSION_LOCALE) return "Inscrit(e) à la Mission locale";
-            if (value.situation === YOUNG_SITUATIONS.CAP_EMPLOI) return "Inscrit(e) à Cap emploi";
-            if (value.situation === YOUNG_SITUATIONS.NOTHING) return "Inscrit(e) nulle part";
-          }}
-        />
+        <Details title="Statut" value={t(value.situation)} />
         <Details title="Type" value={value.schoolType} />
         <Details title="Nom" value={value.schoolName} />
         <Details title="Région" value={value.schoolRegion} />
@@ -103,6 +86,7 @@ export default ({ onChange, value }) => {
         <Details title="Adresse" value={value.schoolAdress} />
       </Info>
       <Info title="Situations particulières" id={value._id}>
+        <Details title="Quartier Prioritaire de la Ville" value={t(value.qpv)} />
         <Details title="Handicap" value={t(value.handicap)} />
         <Details title="PPS" value={t(value.ppsBeneficiary)} />
         <Details title="PAI" value={t(value.paiBeneficiary)} />

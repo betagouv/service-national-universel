@@ -71,6 +71,7 @@ export default ({ onChange, value }) => {
         <Details title="Adresse" value={value.schoolAdress} />
       </Info>
       <Info title="Situations particulières" id={value._id}>
+        <Details title="Quartier Prioritaire de la Ville" value={t(value.qpv)} />
         <Details title="Handicap" value={t(value.handicap)} />
         <Details title="PPS" value={t(value.ppsBeneficiary)} />
         <Details title="PAI" value={t(value.paiBeneficiary)} />
