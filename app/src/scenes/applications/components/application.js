@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
+import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
 import api from "../../../services/api";
 import { translate, APPLICATION_STATUS_COLORS, APPLICATION_STATUS } from "../../../utils";
 
-export default ({ application }) => {
+export default ({ application, index }) => {
   const getTags = (mission) => {
     if (!mission) return [];
     const tags = [];
@@ -17,31 +18,35 @@ export default ({ application }) => {
   if (!application) return <div />;
 
   return (
-    <Container>
-      <Header>CHOIX N°{application.priority}</Header>
-      <Separator />
-      <Card to={`/mission/${application.mission._id}`}>
-        <div className="info">
-          <div className="inner">
-            <div className="thumb">
-              <img src={require("../../../assets/observe.svg")} />
+    <Draggable draggableId={application._id} index={index}>
+      {(provided) => (
+        <Container ref={provided.innerRef} {...provided.draggableProps}>
+          <Header {...provided.dragHandleProps}>CHOIX N°{application.priority}</Header>
+          <Separator />
+          <Card to={`/mission/${application.mission._id}`}>
+            <div className="info">
+              <div className="inner">
+                <div className="thumb">
+                  <img src={require("../../../assets/observe.svg")} />
+                </div>
+                <div>
+                  <h4>{application.mission.structureName}</h4>
+                  <p>{application.mission.name}</p>
+                  <Tags>
+                    {getTags(application.mission).map((e, i) => (
+                      <div key={i}>{e}</div>
+                    ))}
+                  </Tags>
+                </div>
+              </div>
             </div>
-            <div>
-              <h4>{application.mission.structureName}</h4>
-              <p>{application.mission.name}</p>
-              <Tags>
-                {getTags(application.mission).map((e, i) => (
-                  <div key={i}>{e}</div>
-                ))}
-              </Tags>
-            </div>
-          </div>
-        </div>
-        <Tag color={APPLICATION_STATUS_COLORS[application.status]}>{translate(application.status)}</Tag>
-      </Card>
-      <Separator />
-      <Footer application={application} tutor={application.tutor} onChange={() => {}} />
-    </Container>
+            <Tag color={APPLICATION_STATUS_COLORS[application.status]}>{translate(application.status)}</Tag>
+          </Card>
+          <Separator />
+          <Footer application={application} tutor={application.tutor} onChange={() => {}} />
+        </Container>
+      )}
+    </Draggable>
   );
 };
 
