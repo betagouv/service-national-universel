@@ -1,7 +1,17 @@
 import passwordValidator from "password-validator";
 
+export const formatStringDate = (date) => {
+  if (!date) return "-";
+  const d = new Date(date);
+  return d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" });
+};
+
 export const translate = (value) => {
   switch (value) {
+    case "IN_COMING":
+      return "À venir";
+    case "WAITING_AFFECTATION":
+      return "En attente d'affectation";
     case "WAITING_VALIDATION":
       return "En attente de validation";
     case "WAITING_CORRECTION":
@@ -20,6 +30,8 @@ export const translate = (value) => {
       return "Refusée";
     case "CANCEL":
       return "Annulée";
+    case "DONE":
+      return "Effectuée";
     case "ARCHIVED":
       return "Archivée";
     case "ASSOCIATION":
@@ -560,9 +572,48 @@ export const YOUNG_STATUS = {
   REFUSED: "REFUSED",
 };
 
+export const PHASE_STATUS = {
+  IN_PROGRESS: "IN_PROGRESS",
+  IN_COMING: "IN_COMING",
+  VALIDATED: "VALIDATED",
+  CANCEL: "CANCEL",
+  WAITING_AFFECTATION: "WAITING_AFFECTATION",
+};
+export const PHASE_STATUS_COLOR = {
+  VALIDATED: "#6CC763",
+  CANCEL: "#FE7B52",
+};
+
 export const YOUNG_PHASE = {
   INSCRIPTION: "INSCRIPTION",
   COHESION_STAY: "COHESION_STAY",
+};
+
+export const APPLICATION_STATUS = {
+  WAITING_VALIDATION: "WAITING_VALIDATION",
+  VALIDATED: "VALIDATED",
+  REFUSED: "REFUSED",
+  CANCEL: "CANCEL",
+  ARCHIVED: "ARCHIVED",
+  IN_PROGRESS: "IN_PROGRESS",
+  DONE: "DONE",
+  NOT_COMPLETED: "NOT_COMPLETED",
+  PRESELECTED: "PRESELECTED",
+  SIGNED_CONTRACT: "SIGNED_CONTRACT",
+};
+
+export const APPLICATION_STATUS_COLORS = {
+  WAITING_VALIDATION: "#FE7B52",
+  WAITING_CORRECTION: "#FEB951",
+  VALIDATED: "#6CC763",
+  DONE: "#1C7713",
+  PRESELECTED: "#d9bb71",
+  NOT_COMPLETED: "#d9bb71",
+  SIGNED_CONTRACT: "#d9bb71",
+  REFUSED: "#F8A9AD",
+  CANCEL: "#ffa987",
+  ARCHIVED: "#ffb3fb",
+  IN_PROGRESS: "#382F79",
 };
 
 export function getPasswordErrorMessage(v) {

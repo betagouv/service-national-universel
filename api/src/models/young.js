@@ -18,7 +18,7 @@ const Schema = new mongoose.Schema({
   phone: { type: String },
   gender: { type: String },
   birthdateAt: { type: Date },
-  cohort: { type: String, default: "2021", enum: ["2021", "2020"] },
+  cohort: { type: String, default: "2021", enum: ["2021", "2020", "2019"] },
   phase: { type: String, default: "INSCRIPTION", enum: ["INSCRIPTION", "COHESION_STAY"] },
   status: {
     type: String,
@@ -64,6 +64,7 @@ const Schema = new mongoose.Schema({
   department: { type: String },
   region: { type: String },
   location: { lat: Number, lon: Number },
+  qpv: { type: String, enum: ["true", "false", ""], default: "" },
 
   // * School informations
   situation: { type: String },
@@ -94,6 +95,7 @@ const Schema = new mongoose.Schema({
   parent1Department: { type: String },
   parent1Region: { type: String },
   parent1Location: { lat: Number, lon: Number },
+  parent1FromFranceConnect: { type: String, enum: ["true", "false"], default: "false" },
 
   parent2Status: { type: String },
   parent2FirstName: { type: String },
@@ -108,6 +110,7 @@ const Schema = new mongoose.Schema({
   parent2Department: { type: String },
   parent2Region: { type: String },
   parent2Location: { lat: Number, lon: Number },
+  parent2FromFranceConnect: { type: String, enum: ["true", "false"], default: "false" },
 
   // * Situations particulières
   handicap: { type: String, enum: ["true", "false"] },
@@ -135,6 +138,8 @@ const Schema = new mongoose.Schema({
   // * Consentements
   parentConsentment: { type: String, enum: ["true", "false"] },
   parentConsentmentFiles: { type: [String], default: [] },
+  parentConsentmentFilesCompliant: { type: String, enum: ["true", "false"] },
+  parentConsentmentFilesCompliantInfo: { type: String },
   consentment: { type: String, enum: ["true", "false"] },
   imageRight: { type: String, enum: ["true", "false"] },
   imageRightFiles: { type: [String], default: [] },

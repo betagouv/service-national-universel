@@ -2,6 +2,8 @@ import React from "react";
 import { Switch, Route } from "react-router-dom";
 
 import View from "./view";
+import Missions from "./view/missions";
+import Historic from "./view/historic";
 import Edit from "./edit";
 import List from "./list";
 

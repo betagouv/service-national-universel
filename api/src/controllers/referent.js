@@ -20,6 +20,8 @@ const { decrypt } = require("../cryptoUtils");
 const { sendEmail } = require("../sendinblue");
 const { validatePassword } = require("../utils");
 const { onlyAdmin } = require("../middleware/admin");
+const { uploadFile } = require("../utils");
+const { encrypt } = require("../cryptoUtils");
 const ReferentAuth = new AuthObject(ReferentObject);
 
 const SERVER_ERROR = "SERVER_ERROR";
@@ -48,10 +50,11 @@ router.post("/forgot_password", async (req, res) => ReferentAuth.forgotPassword(
 router.post("/forgot_password_reset", async (req, res) => ReferentAuth.forgotPasswordReset(req, res));
 router.post("/reset_password", passport.authenticate("referent", { session: false }), async (req, res) => ReferentAuth.resetPassword(req, res));
 
-router.post("/signin_as/:type/:id", passport.authenticate("referent", { session: false }), onlyAdmin, async (req, res) => {
+router.post("/signin_as/:type/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const { type, id } = req.params;
     let user = null;
+    if (type === "referent" && req.user.role !== "admin") return res.status(401).send({ ok: false, code: OPERATION_UNAUTHORIZED });
     if (type === "referent") user = await ReferentObject.findById(id);
     else if (type === "young") user = await YoungObject.findById(id);
     if (!user) return res.status(404).send({ code: NOT_FOUND, ok: false });
@@ -76,6 +79,8 @@ router.post("/signup_invite/:role", passport.authenticate("referent", { session:
     if (req.body.hasOwnProperty(`region`)) obj.region = req.body.region; //TODO
     if (req.body.hasOwnProperty(`department`)) obj.department = req.body.department;
 
+    if (req.body.hasOwnProperty(`structureId`)) obj.structureId = req.body.structureId;
+
     const invitation_token = crypto.randomBytes(20).toString("hex");
     obj.invitationToken = invitation_token;
     obj.invitationExpires = Date.now() + 86400000 * 7; // 7 days
@@ -89,6 +94,9 @@ router.post("/signup_invite/:role", passport.authenticate("referent", { session:
     } else if (obj.role === "referent_region") {
       template = "../templates/inviteReferentRegion.html";
       mailObject = "Activez votre compte référent régional SNU";
+    } else if (obj.role === "structure_member") {
+      template = "../templates/inviteMember.html";
+      mailObject = "Activez votre compte de responsable de structure";
     } else if (obj.role === "admin") {
       template = "../templates/inviteAdmin.html";
       mailObject = "Activez votre compte administrateur SNU";
@@ -98,6 +106,7 @@ router.post("/signup_invite/:role", passport.authenticate("referent", { session:
     htmlContent = htmlContent.replace(/{{fromName}}/g, `${req.user.firstName} ${req.user.lastName}`);
     htmlContent = htmlContent.replace(/{{department}}/g, `${obj.department}`);
     htmlContent = htmlContent.replace(/{{region}}/g, `${obj.region}`);
+    htmlContent = htmlContent.replace(/{{structureName}}/g, req.body.structureName);
     htmlContent = htmlContent.replace(/{{cta}}/g, `${config.ADMIN_URL}/auth/signup?token=${invitation_token}`);
 
     await sendEmail({ name: `${obj.firstName} ${obj.lastName}`, email: obj.email }, mailObject, htmlContent);
@@ -219,8 +228,10 @@ router.post("/email/:template/:youngId", passport.authenticate("referent", { ses
       subject = "Votre candidature au SNU a été validée";
     } else if (template === "refuse") {
       htmlContent = fs.readFileSync(path.resolve(__dirname, "../templates/rejected.html")).toString();
+      htmlContent = htmlContent.replace(/{{message}}/g, `${req.body.message}`);
       htmlContent = htmlContent.replace(/{{firstName}}/g, young.firstName);
       htmlContent = htmlContent.replace(/{{lastName}}/g, young.lastName);
+      htmlContent = htmlContent.replace(/\n/g, "<br/>");
       subject = "Votre candidature au SNU a été refusée";
     }
 
@@ -252,6 +263,37 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
     });
   } catch (error) {
     capture(error);
+    return res.status(500).send({ ok: false, code: SERVER_ERROR });
+  }
+});
+
+router.post("/file/:key", passport.authenticate("referent", { session: false }), async (req, res) => {
+  try {
+    const key = req.params.key;
+    const { names, youngId } = JSON.parse(req.body.body);
+    const files = Object.keys(req.files || {}).map((e) => req.files[e]);
+
+    const young = await YoungObject.findById(youngId);
+    if (!young) return res.status(404).send({ ok: false });
+
+    for (let i = 0; i < files.length; i++) {
+      let currentFile = files[i];
+      // If multiple file with same names are provided, currentFile is an array. We just take the latest.
+      if (Array.isArray(currentFile)) {
+        currentFile = currentFile[currentFile.length - 1];
+      }
+      const { name, data, mimetype } = currentFile;
+
+      const encryptedBuffer = encrypt(data);
+      const resultingFile = { mimetype: "image/png", encoding: "7bit", data: encryptedBuffer };
+      await uploadFile(`app/young/${young._id}/${key}/${name}`, resultingFile);
+    }
+    young.set({ [key]: names });
+    await young.save();
+    return res.status(200).send({ data: names, ok: true });
+  } catch (error) {
+    capture(error);
+    if (error === "FILE_CORRUPTED") return res.status(500).send({ ok: false, code: FILE_CORRUPTED });
     return res.status(500).send({ ok: false, code: SERVER_ERROR });
   }
 });

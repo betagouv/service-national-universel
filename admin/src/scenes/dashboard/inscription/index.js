@@ -73,9 +73,9 @@ export default () => {
         <Col md={12} lg={6}>
           <Gender filter={filter} />
         </Col>
-        {/* <Col md={12} lg={6}>
-            <PriorityArea />
-          </Col> */}
+        <Col md={12} lg={6}>
+          <PriorityArea filter={filter} />
+        </Col>
         <Col md={12}>
           <Schools filter={filter} />
         </Col>

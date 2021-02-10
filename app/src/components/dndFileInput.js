@@ -8,7 +8,7 @@ function getFileName(file) {
   return (file && file.name) || file;
 }
 
-export default ({ value, onChange, name, errorMessage = requiredMessage, placeholder = "votre fichier" }) => {
+export default ({ optional, value, onChange, name, errorMessage = requiredMessage, placeholder = "votre fichier" }) => {
   const [filesList, setFilesList] = useState(value || []);
 
   useEffect(() => {
@@ -33,14 +33,31 @@ export default ({ value, onChange, name, errorMessage = requiredMessage, placeho
         for (let i = 0; i < files.length; i++) {
           if (!isFileSupported(files[i].name)) return toastr.error(`Le type du fichier ${files[i].name} n'est pas supporté.`);
           if (files[i].size > 5000000) return toastr.error(`Ce fichier ${files[i].name} est trop volumineux.`);
+          const fileName = files[i].name.match(/(.*)(\..*)/);
+          const newName = `${fileName[1]}-${filesList.length + i}${fileName[2]}`;
+          Object.defineProperty(files[i], "name", {
+            writable: true,
+            value: newName,
+          });
         }
-        handleChange(files);
+        handleChange([...filesList, ...files]);
       },
       false
     );
-  });
+  }, []);
 
   function onAdd(files) {
+    for (let index = 0; index < Object.keys(files).length; index++) {
+      let i = Object.keys(files)[index];
+      if (!isFileSupported(files[i].name)) return toastr.error(`Le type du fichier ${files[i].name} n'est pas supporté.`);
+      if (files[i].size > 5000000) return toastr.error(`Ce fichier ${files[i].name} est trop volumineux.`);
+      const fileName = files[i].name.match(/(.*)(\..*)/);
+      const newName = `${fileName[1]}-${filesList.length + index}${fileName[2]}`;
+      Object.defineProperty(files[i], "name", {
+        writable: true,
+        value: newName,
+      });
+    }
     handleChange([...filesList, ...files]);
   }
 
@@ -59,7 +76,7 @@ export default ({ value, onChange, name, errorMessage = requiredMessage, placeho
           multiple
           name={name}
           value={[]}
-          validate={(v) => ((!v || !v.length) && errorMessage) || (v && v.size > 5000000 && "Ce fichier est trop volumineux.")}
+          validate={(v) => (!optional && (!v || !v.length) && errorMessage) || (v && v.size > 5000000 && "Ce fichier est trop volumineux.")}
           onChange={(e) => onAdd(e.target.files)}
         />
         <img src={require("../assets/image.svg")} />

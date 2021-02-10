@@ -21,13 +21,22 @@ const HistoricItem = ({ item }) => {
   if (item.status === YOUNG_STATUS.REFUSED) color = "#F8A9AD";
   if (item.status === YOUNG_STATUS.IN_PROGRESS) color = "#382F79";
 
+  const getLabel = () =>
+    item.userName ? (
+      <>
+        Par <b>{item.userName}</b>
+      </>
+    ) : (
+      <b>Validation Automatique</b>
+    );
+
   return (
     <Item>
       <Badge color={color}>{translate(item.status)}</Badge>
       <div className="history-detail">
         {item.note ? <Note value={item.note} /> : null}
         <div>
-          Par <b>{item.userName}</b> • le {formatStringLongDate(item.createdAt)}
+          {getLabel()} • le {formatStringLongDate(item.createdAt)}
         </div>
       </div>
     </Item>

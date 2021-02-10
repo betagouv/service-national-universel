@@ -10,7 +10,7 @@ const { capture } = require("../sentry");
 
 const { uploadFile } = require("../utils");
 const { encrypt } = require("../cryptoUtils");
-
+const { getQPV } = require("../qpv");
 const YoungObject = require("../models/young");
 const AuthObject = require("../auth");
 
@@ -19,6 +19,7 @@ const YoungAuth = new AuthObject(YoungObject);
 const SERVER_ERROR = "SERVER_ERROR";
 const FILE_CORRUPTED = "FILE_CORRUPTED";
 const YOUNG_ALREADY_REGISTERED = "YOUNG_ALREADY_REGISTERED";
+const UNSUPPORTED_TYPE = "UNSUPPORTED_TYPE";
 
 router.post("/signin", (req, res) => YoungAuth.signin(req, res));
 router.post("/logout", (req, res) => YoungAuth.logout(req, res));
@@ -42,6 +43,7 @@ router.post("/file/:key", passport.authenticate("young", { session: false }), as
         currentFile = currentFile[currentFile.length - 1];
       }
       const { name, data, mimetype } = currentFile;
+      if (!["image/jpeg", "image/png", "application/pdf"].includes(mimetype)) return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
 
       const encryptedBuffer = encrypt(data);
       const resultingFile = { mimetype: "image/png", encoding: "7bit", data: encryptedBuffer };
@@ -81,8 +83,24 @@ router.get("/", passport.authenticate("young", { session: false }), async (req, 
 //@check
 router.put("/", passport.authenticate("young", { session: false }), async (req, res) => {
   try {
-    const young = await YoungObject.findByIdAndUpdate(req.user._id, req.body, { new: true });
+    const obj = req.body;
+
+    const young = await YoungObject.findByIdAndUpdate(req.user._id, obj, { new: true });
     res.status(200).send({ ok: true, data: young });
+
+    //Check quartier prioritaires.
+    if (obj.zip && obj.city && obj.address) {
+      const qpv = await getQPV(obj.zip, obj.city, obj.address);
+      console.log("QPV",qpv)
+      if (qpv === true) {
+        young.set({ qpv: "true" });
+      } else if (qpv === false) {
+        young.set({ qpv: "false" });
+      } else {
+        young.set({ qpv: "" });
+      }
+      await young.save();
+    }
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: SERVER_ERROR, error });
@@ -131,7 +149,7 @@ router.post("/france-connect/user-info", async (req, res) => {
     headers: { Authorization: `Bearer ${token["access_token"]}` },
   });
   const userInfo = await userInfoResponse.json();
-  res.status(200).send({ ok: true, data: userInfo });
+  res.status(200).send({ ok: true, data: userInfo, tokenId: token["id_token"] });
 });
 
 // Delete one user (only admin can delete user)

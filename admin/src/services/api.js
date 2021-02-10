@@ -171,6 +171,31 @@ class api {
     });
   }
 
+  uploadFile(path, arr, properties) {
+    const names = arr.map((e) => e.name || e);
+    const files = arr.filter((e) => typeof e === "object");
+    let formData = new FormData();
+    for (let i = 0; i < files.length; i++) {
+      formData.append(files[i].name, files[i], files[i].name);
+    }
+    formData.append("body", JSON.stringify({ names, ...properties }));
+    return new Promise(async (resolve, reject) => {
+      try {
+        const response = await fetch(`${apiURL}${path}`, {
+          mode: "cors",
+          method: "POST",
+          credentials: "include",
+          headers: { Authorization: `JWT ${this.token}` },
+          body: formData,
+        });
+        const res = await response.json();
+        resolve(res);
+      } catch (e) {
+        reject(e);
+      }
+    });
+  }
+
   post(path, body) {
     return new Promise(async (resolve, reject) => {
       try {

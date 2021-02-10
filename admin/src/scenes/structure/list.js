@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Col, DropdownItem, DropdownMenu, DropdownToggle, Label, Pagination, PaginationItem, PaginationLink, Row, UncontrolledDropdown } from "reactstrap";
-import { ReactiveBase, ReactiveList, SingleList, MultiDropdownList, MultiList, DataSearch } from "@appbaseio/reactivesearch";
+import { ReactiveBase, ReactiveList, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
 
 import ExportComponent from "../../components/ExportXlsx";
@@ -8,10 +7,9 @@ import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
 
-import { translate } from "../../utils";
-import { Link } from "react-router-dom";
+import { translate, corpsEnUniforme } from "../../utils";
 
-const FILTERS = ["SEARCH", "LEGAL_STATUS", "DEPARTMENT", "REGION"];
+const FILTERS = ["SEARCH", "LEGAL_STATUS", "DEPARTMENT", "REGION", "CORPS"];
 const formatLongDate = (date) => {
   if (!date) return "-";
   const d = new Date(date);
@@ -58,6 +56,23 @@ export default () => {
                   componentId="LEGAL_STATUS"
                   dataField="legalStatus.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "LEGAL_STATUS") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                />
+                <MultiDropdownList
+                  className="dropdown-filter"
+                  placeholder="Corps en uniforme"
+                  componentId="CORPS"
+                  dataField="structurePubliqueEtatType.keyword"
+                  transformData={(data) => {
+                    console.log(data);
+                    return data.filter((d) => corpsEnUniforme.includes(d.key));
+                  }}
+                  react={{ and: FILTERS.filter((e) => e !== "CORPS") }}
                   renderItem={(e, count) => {
                     return `${translate(e)} (${count})`;
                   }}
@@ -145,6 +160,7 @@ export default () => {
 
 const Hit = ({ hit, onClick }) => {
   const [missionsInfo, setMissionsInfo] = useState({ count: "-", placesTotal: "-" });
+  const [parentStructure, setParentStructure] = useState(null);
   useEffect(() => {
     (async () => {
       const queries = [];
@@ -152,8 +168,20 @@ const Hit = ({ hit, onClick }) => {
       queries.push({
         query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": hit._id } }] } },
       });
+      if (hit.networkId) {
+        queries.push({ index: "structure", type: "_doc" });
+        queries.push({
+          query: { bool: { must: { match_all: {} }, filter: [{ term: { _id: hit.networkId } }] } },
+        });
+      }
 
       const { responses } = await api.esQuery(queries);
+      if (hit.networkId) {
+        const structures = responses[1]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+        setParentStructure(structures.length ? structures[0] : null);
+      } else {
+        setParentStructure(null);
+      }
       setMissionsInfo({
         count: responses[0].hits.hits.length,
         placesTotal: responses[0].hits.hits.reduce((acc, e) => acc + e._source.placesTotal, 0),
@@ -173,31 +201,11 @@ const Hit = ({ hit, onClick }) => {
         <div>{missionsInfo.placesTotal} places</div>
       </td>
       <td>
-        <Tag>{translate(hit.department)}</Tag>
+        {parentStructure ? <TagParent>{parentStructure.name}</TagParent> : null}
+        {hit.department ? <TagDepartment>{translate(hit.department)}</TagDepartment> : null}
+        {corpsEnUniforme.includes(hit.structurePubliqueEtatType) ? <TagDepartment>Corps en uniforme</TagDepartment> : null}
       </td>
     </tr>
-  );
-};
-const Action = ({ hit, color }) => {
-  return (
-    <ActionBox color={color}>
-      <UncontrolledDropdown setActiveFromChild>
-        <DropdownToggle tag="button">
-          En attente de validation
-          <div className="down-icon">
-            <svg viewBox="0 0 407.437 407.437">
-              <polygon points="386.258,91.567 203.718,273.512 21.179,91.567 0,112.815 203.718,315.87 407.437,112.815 " />
-            </svg>
-          </div>
-        </DropdownToggle>
-        <DropdownMenu>
-          <DropdownItem tag={Link} to={"#"}>
-            View
-          </DropdownItem>
-          <DropdownItem tag="div">Dupliquer</DropdownItem>
-        </DropdownMenu>
-      </UncontrolledDropdown>
-    </ActionBox>
   );
 };
 
@@ -207,13 +215,6 @@ const Header = styled.div`
   align-items: flex-start;
   margin-top: 20px;
   justify-content: space-between;
-`;
-
-const Subtitle = styled.div`
-  color: rgb(113, 128, 150);
-  font-weight: 400;
-  text-transform: uppercase;
-  font-size: 18px;
 `;
 
 const Title = styled.div`
@@ -380,17 +381,26 @@ const Export = styled.div`
 `;
 
 const Tag = styled.span`
-  background-color: rgb(253, 246, 236);
-  border: 1px solid rgb(250, 236, 216);
-  color: rgb(230, 162, 60);
   align-self: flex-start;
   border-radius: 4px;
-  padding: 8px 15px;
+  padding: 0.25rem 0.5rem;
   font-size: 13px;
   white-space: nowrap;
   font-weight: 400;
   cursor: pointer;
   margin-right: 5px;
+`;
+
+const TagDepartment = styled(Tag)`
+  background: #f7f7f7;
+  color: #9a9a9a;
+  border: 0.5px solid #cecece;
+`;
+
+const TagParent = styled(Tag)`
+  color: #5245cc;
+  background: rgba(82, 69, 204, 0.1);
+  border: 0.5px solid #5245cc;
 `;
 
 const ActionBox = styled.div`

@@ -17,6 +17,8 @@ import Phase2 from "./scenes/phase2";
 import Phase3 from "./scenes/phase3";
 import Documents from "./scenes/documents";
 import Preferences from "./scenes/preferences";
+import Missions from "./scenes/missions";
+import Applications from "./scenes/applications";
 
 import Header from "./components/header";
 import Drawer from "./components/drawer";
@@ -78,10 +80,10 @@ const Espace = () => {
 
   return (
     <>
-      <Header />
       <div style={{ display: "flex" }}>
         <Drawer />
         <Content>
+          <Header />
           <Switch>
             <Route path="/account" component={Account} />
             <Route path="/phase1" component={Phase1} />
@@ -89,6 +91,8 @@ const Espace = () => {
             <Route path="/phase3" component={Phase3} />
             <Route path="/documents" component={Documents} />
             <Route path="/preferences" component={Preferences} />
+            <Route path="/mission" component={Missions} />
+            <Route path="/candidature" component={Applications} />
             <Route path="/" component={Home} />
           </Switch>
         </Content>
@@ -111,9 +115,10 @@ function ScrollToTop() {
 }
 
 const Content = styled.div`
-  width: 100%;
-  padding: 2rem;
+  margin-left: auto;
+  width: 85%;
   @media (max-width: 768px) {
+    width: 100%;
     padding: 0;
   }
 `;

@@ -1,14 +1,19 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import SocialIcons from "../../components/SocialIcons";
+import { toastr } from "react-redux-toastr";
 import { Link } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 
 import api from "../../services/api";
-
 import { translate } from "../../utils";
+import Team from "./components/Team";
 
 export default ({ onChange, value }) => {
   const [missionsInfo, setMissionsInfo] = useState({ count: "-", placesTotal: "-" });
+  const [referents, setReferents] = useState([]);
+  const [parentStructure, setParentStructure] = useState(null);
+  const history = useHistory();
   useEffect(() => {
     if (!value) return;
     (async () => {
@@ -17,15 +22,47 @@ export default ({ onChange, value }) => {
       queries.push({
         query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": value._id } }] } },
       });
+      queries.push({ index: "referent", type: "_doc" });
+      queries.push({
+        query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": value._id } }] } },
+      });
+      if (value.networkId) {
+        queries.push({ index: "structure", type: "_doc" });
+        queries.push({
+          query: { bool: { must: { match_all: {} }, filter: [{ term: { _id: value.networkId } }] } },
+        });
+      }
 
       const { responses } = await api.esQuery(queries);
+
+      if (value.networkId) {
+        const structures = responses[2]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+        setParentStructure(structures.length ? structures[0] : null);
+      } else {
+        setParentStructure(null);
+      }
       setMissionsInfo({
         count: responses[0].hits.hits.length,
         placesTotal: responses[0].hits.hits.reduce((acc, e) => acc + e._source.placesTotal, 0),
         placesLeft: responses[0].hits.hits.reduce((acc, e) => acc + e._source.placesLeft, 0),
       });
+      setReferents(responses[1]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
     })();
   }, [value]);
+
+  const handleDelete = async (structure) => {
+    if (!confirm("Êtes-vous sûr(e) de vouloir supprimer cette structure ?")) return;
+    try {
+      const { ok, code } = await api.remove(`/structure/${structure._id}`);
+      if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
+      if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+      toastr.success("Cette structure a été supprimée.");
+      return history.go(0);
+    } catch (e) {
+      console.log(e);
+      return toastr.error("Oups, une erreur est survenue pendant la supression de la structure :", translate(e.code));
+    }
+  };
 
   if (!value) return <div />;
   return (
@@ -42,14 +79,23 @@ export default ({ onChange, value }) => {
         <Link to={`/structure/${value._id}/edit`}>
           <Button className="btn-blue">Modifier</Button>
         </Link>
-        <Link to={`/structure/${value._id}`}>
-          <Button className="btn-red">Supprimer</Button>
-        </Link>
+        <Button onClick={() => handleDelete(value)} className="btn-red">
+          Supprimer
+        </Button>
       </div>
       <Info title="La structure">
-        <div className="">{value.description}</div>
-        <Details title="Agréments" value={value.associationTypes || "--"} />
+        <div>{value.description}</div>
         <Details title="Statut" value={translate(value.legalStatus) || "--"} />
+        {value.legalStatus === "ASSOCIATION" ? <Details title="Agréments" value={value.associationTypes ? value.associationTypes.join(",") : "--"} /> : null}
+        {value.legalStatus === "PUBLIC" ? (
+          <div>
+            <Details title="Type" value={value.structurePubliqueType || "--"} />
+            {["Service de l'Etat", "Etablissement public"].includes(value.structurePubliqueType) ? (
+              <Details title="Service" value={value.structurePubliqueEtatType || "--"} />
+            ) : null}
+          </div>
+        ) : null}
+        {value.legalStatus === "PRIVATE" ? <Details title="Type" value={value.structurePriveeType || "--"} /> : null}
         <Details title="Région" value={value.region || "--"} />
         <Details title="Dép." value={value.department || "--"} />
         <Details title="Ville" value={value.city || "--"} />
@@ -75,11 +121,15 @@ export default ({ onChange, value }) => {
           </tbody>
         </table>
       </Info>
-      <div>
-        {Object.keys(value).map((e, k) => {
+      <Team referents={referents} />
+      {parentStructure ? (
+        <Info title={`Réseau national`}>
+          <div style={{ marginTop: "1rem" }}>{parentStructure.name}</div>
+        </Info>
+      ) : null}
+      <div>{/*Object.keys(value).map((e, k) => {
           return <div key={k}>{`${e}:${value[e]}`}</div>;
-        })}
-      </div>
+        }) */}</div>
     </Panel>
   );
 };
@@ -143,7 +193,7 @@ const Panel = styled.div`
   .title {
     font-size: 24px;
     font-weight: 800;
-    margin-bottom: 2px;
+    margin-bottom: 12px;
   }
   .info {
     padding: 2rem 0;
@@ -170,12 +220,6 @@ const Panel = styled.div`
     font-size: 18px;
     font-weight: 400;
     font-style: italic;
-  }
-  .social-link {
-    border: solid 1px #aaa;
-    padding: 5px 7px 7px 7px;
-    margin: 5px;
-    border-radius: 5px;
   }
 `;
 

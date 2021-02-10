@@ -6,13 +6,10 @@ import { YOUNG_SITUATIONS, translate as t } from "../../utils";
 import LoadingButton from "../../components/loadingButton";
 import DownloadButton from "../../components/DownloadButton";
 import Historic from "../../components/historic";
-import DocumentInModal from "../../components/DocumentInModal";
 import api from "../../services/api";
 
 export default ({ onChange, value }) => {
   const [young, setYoung] = useState(null);
-  const [file, setFile] = useState(null);
-  const [buttonsLoading, setButtonsLoading] = useState({});
 
   useEffect(() => {
     (async () => {
@@ -37,13 +34,8 @@ export default ({ onChange, value }) => {
     return Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
   };
 
-  const setButtonLoading = (btn, v) => {
-    setButtonsLoading({ ...buttonsLoading, [btn]: v });
-  };
-
   return (
     <Panel>
-      {file && <DocumentInModal value={file} onChange={() => setFile(null)} />}
       <div className="close" onClick={onChange} />
       <div className="info">
         <div className="title">{`${value.firstName} ${value.lastName}`}</div>
@@ -59,50 +51,22 @@ export default ({ onChange, value }) => {
       </div>
       {young && young.historic && young.historic.length !== 0 && <Historic value={young.historic} />}
       <Info title="Pièce d’identité" id={value._id}>
-        {(value.cniFiles || []).map((e, i) => {
-          return (
-            <div key={i}>
-              <InfoBtn
-                color="white"
-                loading={buttonsLoading[`cniFiles${i}`]}
-                onClick={async () => {
-                  setButtonLoading(`cniFiles${i}`, true);
-                  const f = await api.get(`/referent/youngFile/${value._id}/cniFiles/${e}`);
-                  setButtonLoading(`cniFiles${i}`, false);
-                  setFile(f);
-                }}
-              >{`Visualiser la pièce d’identité (${i + 1}/${value.cniFiles.length})`}</InfoBtn>
-              <DownloadButton
-                source={() => api.get(`/referent/youngFile/${value._id}/cniFiles/${e}`)}
-                title={`Télécharger la pièce d’identité (${i + 1}/${value.cniFiles.length})`}
-              />
-            </div>
-          );
-        })}
+        {(value.cniFiles || []).map((e, i) => (
+          <DownloadButton
+            key={i}
+            source={() => api.get(`/referent/youngFile/${value._id}/cniFiles/${e}`)}
+            title={`Télécharger la pièce d’identité (${i + 1}/${value.cniFiles.length})`}
+          />
+        ))}
       </Info>
       <Info title="Consentements du ou des représentants légaux" id={value._id}>
-        {(value.parentConsentmentFiles || []).map((e, i) => {
-          return (
-            <div key={i}>
-              <InfoBtn
-                color="white"
-                loading={buttonsLoading[`parentConsentmentFiles${i}`]}
-                onClick={async () => {
-                  setButtonLoading(`parentConsentmentFiles${i}`, true);
-                  const f = await api.get(`/referent/youngFile/${value._id}/parentConsentmentFiles/${e}`);
-                  setButtonLoading(`parentConsentmentFiles${i}`, false);
-                  setFile(f);
-                }}
-              >
-                Visualiser le formulaire
-              </InfoBtn>
-              <DownloadButton
-                source={() => api.get(`/referent/youngFile/${value._id}/parentConsentmentFiles/${e}`)}
-                title={`Télécharger le formulaire (${i + 1}/${value.cniFiles.length})`}
-              />
-            </div>
-          );
-        })}
+        {(value.parentConsentmentFiles || []).map((e, i) => (
+          <DownloadButton
+            key={i}
+            source={() => api.get(`/referent/youngFile/${value._id}/parentConsentmentFiles/${e}`)}
+            title={`Télécharger le formulaire (${i + 1}/${value.parentConsentmentFiles.length})`}
+          />
+        ))}
       </Info>
       <Info title="Coordonnées" id={value._id}>
         <Details title="E-mail" value={value.email} />
@@ -113,24 +77,7 @@ export default ({ onChange, value }) => {
         <Details title="Adresse" value={value.address} />
       </Info>
       <Info title="Situation" id={value._id}>
-        <Details
-          title="Statut"
-          value={() => {
-            if (value.situation === YOUNG_SITUATIONS.GENERAL_SCHOOL) return "En enseignement général ou technologique";
-            if (value.situation === YOUNG_SITUATIONS.PROFESSIONAL_SCHOOL) return "En enseignement professionnel";
-            if (value.situation === YOUNG_SITUATIONS.AGRICULTURAL_SCHOOL) return "En lycée agricole";
-            if (value.situation === YOUNG_SITUATIONS.SPECIALIZED_SCHOOL) return "En établissement spécialisé";
-            if (value.situation === YOUNG_SITUATIONS.APPRENTICESHIP) return "En apprentissage";
-            if (value.situation === YOUNG_SITUATIONS.EMPLOYEE) return "Salarié(e)";
-            if (value.situation === YOUNG_SITUATIONS.INDEPENDANT) return "Indépendant(e)";
-            if (value.situation === YOUNG_SITUATIONS.SELF_EMPLOYED) return "Auto-entrepreneur";
-            if (value.situation === YOUNG_SITUATIONS.ADAPTED_COMPANY) return "En ESAT, CAT ou en entreprise adaptée";
-            if (value.situation === YOUNG_SITUATIONS.POLE_EMPLOI) return "Inscrit(e) à Pôle emploi";
-            if (value.situation === YOUNG_SITUATIONS.MISSION_LOCALE) return "Inscrit(e) à la Mission locale";
-            if (value.situation === YOUNG_SITUATIONS.CAP_EMPLOI) return "Inscrit(e) à Cap emploi";
-            if (value.situation === YOUNG_SITUATIONS.NOTHING) return "Inscrit(e) nulle part";
-          }}
-        />
+        <Details title="Statut" value={t(value.situation)} />
         <Details title="Type" value={value.schoolType} />
         <Details title="Nom" value={value.schoolName} />
         <Details title="Région" value={value.schoolRegion} />
@@ -139,6 +86,7 @@ export default ({ onChange, value }) => {
         <Details title="Adresse" value={value.schoolAdress} />
       </Info>
       <Info title="Situations particulières" id={value._id}>
+        <Details title="Quartier Prioritaire de la Ville" value={t(value.qpv)} />
         <Details title="Handicap" value={t(value.handicap)} />
         <Details title="PPS" value={t(value.ppsBeneficiary)} />
         <Details title="PAI" value={t(value.paiBeneficiary)} />
@@ -207,9 +155,9 @@ const Details = ({ title, value }) => {
   );
 };
 
-const InfoBtn = styled(LoadingButton)`
+const EditBtn = styled(LoadingButton)`
   color: #555;
-  background: url(${require("../../assets/eye.svg")}) left 15px center no-repeat;
+  background: url(${require("../../assets/pencil.svg")}) left 15px center no-repeat;
   box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.16);
   border: 0;
   outline: 0;
@@ -220,10 +168,6 @@ const InfoBtn = styled(LoadingButton)`
   cursor: pointer;
   margin-right: 5px;
   margin-top: 1rem;
-`;
-
-const EditBtn = styled(InfoBtn)`
-  background: url(${require("../../assets/pencil.svg")}) left 15px center no-repeat;
 `;
 
 const Panel = styled.div`

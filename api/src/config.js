@@ -16,6 +16,8 @@ const CELLAR_KEYID = process.env.CELLAR_KEYID || "";
 const CELLAR_KEYSECRET = process.env.CELLAR_KEYSECRET || "";
 const FILE_ENCRYPTION_SECRET = process.env.FILE_ENCRYPTION_SECRET || "";
 const BUCKET_NAME = process.env.BUCKET_NAME || "";
+const QPV_USERNAME = process.env.QPV_USERNAME || "";
+const QPV_PASSWORD = process.env.QPV_PASSWORD || "";
 
 module.exports = {
   PORT,
@@ -32,6 +34,8 @@ module.exports = {
   FILE_ENCRYPTION_SECRET,
   BUCKET_NAME,
   SENTRY_URL,
+  QPV_USERNAME,
+  QPV_PASSWORD,
 };
 
 console.log("CELLAR_ENDPOINT", CELLAR_ENDPOINT);

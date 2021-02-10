@@ -54,6 +54,10 @@ export default ({ mission }) => {
               <div className="detail-text">{mission.department}</div>
             </div>
             <div className="detail">
+              <div className="detail-title">Format</div>
+              <div className="detail-text">{translate(mission.format)}</div>
+            </div>
+            <div className="detail">
               <div className="detail-title">Fréquence</div>
               <div className="detail-text">{mission.frequence}</div>
             </div>
@@ -111,7 +115,7 @@ export default ({ mission }) => {
                 </Legend>
                 <div className="detail">
                   <div className="detail-title">Statut</div>
-                  <div className="detail-text">{translate(structure.status)}</div>
+                  <div className="detail-text">{translate(structure.legalStatus)}</div>
                 </div>
                 <div className="detail">
                   <div className="detail-title">Région</div>

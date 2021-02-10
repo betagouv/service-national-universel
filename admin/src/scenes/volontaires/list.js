@@ -40,7 +40,7 @@ export default ({ setYoung }) => {
               </Export>
             </Header>
             <Filter>
-              <ReactiveFilter componentId="PHASE" filter={{ phase: "COHESION_STAY" }} />
+              <ReactiveFilter componentId="STATUS" query={{ query: { bool: { filter: { term: { "status.keyword": "VALIDATED" } } } }, value: "" }} />
               <DataSearch
                 showIcon={false}
                 placeholder="Rechercher par mots clés, mission ou structure..."
@@ -57,7 +57,7 @@ export default ({ setYoung }) => {
                   className="dropdown-filter"
                   componentId="STATUS"
                   dataField="status.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
+                  react={{ and: FILTERS }}
                   renderItem={(e, count) => {
                     return `${translate(e)} (${count})`;
                   }}
@@ -397,43 +397,52 @@ const ActionBox = styled.div`
     div {
       white-space: nowrap;
       font-size: 14px;
+      :hover {
+        color: inherit;
+      }
     }
   }
   button {
-    background-color: #feb951;
-    border: 1px solid #feb951;
+    ${({ color }) => `
+      background-color: ${color}15;
+      border: 1px solid ${color};
+      color: ${color};
+    `}
     display: inline-flex;
+    flex: 1;
+    justify-content: space-between;
     align-items: center;
     text-align: left;
-    border-radius: 4px;
+    border-radius: 0.5rem;
     padding: 0 0 0 12px;
     font-size: 12px;
-    min-width: 130px;
-    font-weight: 400;
-    color: #fff;
+    font-weight: 700;
     cursor: pointer;
     outline: 0;
+    width: 100%;
+    max-width: 250px;
     .edit-icon {
       height: 17px;
       margin-right: 10px;
       path {
-        fill: #fff;
+        fill: ${({ color }) => `${color}`};
       }
     }
     .down-icon {
       margin-left: auto;
       padding: 7px 15px;
-      border-left: 2px solid #fbd392;
+      /* border-left: 1px solid ${({ color }) => `${color}`}; */
       margin-left: 15px;
       svg {
         height: 10px;
       }
       svg polygon {
-        fill: #fff;
+        fill: ${({ color }) => `${color}`};
       }
     }
   }
   .dropdown-item {
+    border-radius: 0;
     background-color: transparent;
     border: none;
     color: #767676;
@@ -442,31 +451,7 @@ const ActionBox = styled.div`
     padding: 5px 15px;
     font-weight: 400;
     :hover {
-      background-color: #eaf3fa;
-      color: #3182ce;
-    }
-    a {
-      color: inherit;
-      text-decoration: none;
+      background-color: #f3f3f3;
     }
   }
-
-  ${({ color }) => `
-    button {
-      background-color: transparent;
-      border: 1px solid ${color};
-      color: ${color};
-      .edit-icon {
-        path {
-          fill: ${color};
-        }
-      }
-      .down-icon {
-        border-left: 1px solid ${color};
-        svg polygon {
-          fill: ${color};
-        }
-      }
-    }  
-  `}
 `;

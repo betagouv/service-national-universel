@@ -10,13 +10,15 @@ import { toastr } from "react-redux-toastr";
 import matomo from "../services/matomo";
 
 import MailCorrection from "../scenes/inscription/MailCorrection";
+import MailRefused from "../scenes/inscription/MailRefused";
 
 export default ({ hit }) => {
-  const STATUS = [YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.VALIDATED, YOUNG_STATUS.REFUSED];
-
-  const [modal, setModal] = useState(false);
+  const [modal, setModal] = useState(null);
   const [young, setYoung] = useState(null);
   const user = useSelector((state) => state.Auth.user);
+
+  let STATUS = [YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.VALIDATED, YOUNG_STATUS.REFUSED];
+  if (user.role === "admin") STATUS.push(YOUNG_STATUS.WAITING_VALIDATION);
 
   useEffect(() => {
     (async () => {
@@ -31,14 +33,15 @@ export default ({ hit }) => {
 
   const handleClickStatus = (status) => {
     if (!confirm("Êtes-vous sûr(e) de vouloir modifier le statut de ce profil?\nUn email sera automatiquement envoyé à l'utlisateur.")) return;
-    if (status === YOUNG_STATUS.WAITING_CORRECTION) return setModal(true);
+    if (status === YOUNG_STATUS.WAITING_CORRECTION) return setModal(YOUNG_STATUS.WAITING_CORRECTION);
+    if (status === YOUNG_STATUS.REFUSED) return setModal(YOUNG_STATUS.REFUSED);
     setStatus(status);
   };
 
   const setStatus = async (status, note) => {
     try {
       young.historic.push({ phase: YOUNG_PHASE.INSCRIPTION, userName: `${user.firstName} ${user.lastName}`, userId: user._id, status, note });
-      const { ok, code, data: newYoung } = await api.put(`/referent/young/${young._id}`, { historic: young.historic, status });
+      const { ok, code, data: newYoung } = await api.put(`/referent/young/${young._id}`, { historic: young.historic, status, lastStatusAt: Date.now() });
 
       if (status === YOUNG_STATUS.VALIDATED) {
         matomo.logEvent("status_update", YOUNG_STATUS.VALIDATED);
@@ -47,7 +50,6 @@ export default ({ hit }) => {
 
       if (status === YOUNG_STATUS.REFUSED) {
         matomo.logEvent("status_update", YOUNG_STATUS.REFUSED);
-        await api.post(`/referent/email/refuse/${young._id}`, { subject: "Inscription refusée" });
       }
 
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
@@ -61,12 +63,22 @@ export default ({ hit }) => {
 
   return (
     <>
-      {modal && (
+      {modal === YOUNG_STATUS.WAITING_CORRECTION && (
         <MailCorrection
           value={young}
           onChange={() => setModal(false)}
-          onSend={(note) => {
-            setStatus(YOUNG_STATUS.WAITING_CORRECTION, note);
+          onSend={(msg) => {
+            setStatus(YOUNG_STATUS.WAITING_CORRECTION, msg);
+            setModal(false);
+          }}
+        />
+      )}
+      {modal === YOUNG_STATUS.REFUSED && (
+        <MailRefused
+          value={young}
+          onChange={() => setModal(false)}
+          onSend={(msg) => {
+            setStatus(YOUNG_STATUS.REFUSED, msg);
             setModal(false);
           }}
         />
@@ -105,7 +117,9 @@ const ActionBox = styled.div`
     div {
       white-space: nowrap;
       font-size: 14px;
-      padding: 5px 15px;
+      :hover {
+        color: inherit;
+      }
     }
   }
   button {
@@ -148,6 +162,7 @@ const ActionBox = styled.div`
     }
   }
   .dropdown-item {
+    border-radius: 0;
     background-color: transparent;
     border: none;
     color: #767676;

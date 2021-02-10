@@ -9,7 +9,7 @@ const esClient = require("../es");
 
 router.post("/_msearch", passport.authenticate(["young", "referent"], { session: false }), (req, res) => exec(req, res, ""));
 
-router.post("/mission/_msearch", passport.authenticate(["referent"], { session: false }), (req, res) => exec(req, res, "mission"));
+router.post("/mission/_msearch", passport.authenticate(["young", "referent"], { session: false }), (req, res) => exec(req, res, "mission"));
 router.post("/young/_msearch", passport.authenticate(["referent"], { session: false }), (req, res) => exec(req, res, "young"));
 router.post("/structure/_msearch", passport.authenticate(["referent"], { session: false }), (req, res) => exec(req, res, "structure"));
 router.post("/referent/_msearch", passport.authenticate(["referent"], { session: false }), (req, res) => exec(req, res, "referent"));
@@ -20,7 +20,7 @@ async function exec(req, res, index = "") {
     const user = req.user;
 
     //Dirty hack for young. They should access only to school. I think we need to do a separate route @raph
-    if (user.constructor.modelName === "young") {
+    if (user.constructor.modelName === "young" && !index) {
       const d = await esClient.msearch({ index: "school", body: body });
       return res.status(200).send(d.body);
     }

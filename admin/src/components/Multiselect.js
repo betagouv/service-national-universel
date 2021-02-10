@@ -43,7 +43,13 @@ const Wrapper = styled.div`
     border-color: #aaa;
   }
   cursor: pointer;
+  div.item-renderer {
+    display: flex;
+    align-items: center;
+    width: 100%;
+  }
   div {
+    width: 100%;
     span {
       text-transform: capitalize;
       color: #6a6f85;
@@ -56,7 +62,6 @@ const Wrapper = styled.div`
     }
     input[type="checkbox"] {
       width: auto;
-      display: inline-block;
       margin-right: 5px;
     }
   }

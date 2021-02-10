@@ -24,7 +24,7 @@ export default () => {
           <strong>{young.firstName},</strong> bienvenue dans votre espace personnel.
         </h1>
         <p>
-          Votre inscription a bien été enregistrée et est <b style={{ color: "#5145cd" }}>en cours de validation</b> par l'administration. Vous serez prochainement informé par
+          Votre inscription a bien été enregistrée et est <b style={{ color: "#5145cd" }}>en cours de validation</b> par l'administration. Vous serez prochainement informé(e) par
           e-mail de l'avancement de votre candidature.
         </p>
         <p>Vous pouvez cependant continuer à éditer les informations renseignées lors de votre inscription.</p>
@@ -54,7 +54,7 @@ const Separator = styled.hr`
 
 const Content = styled.div`
   margin-top: ${({ showAlert }) => (showAlert ? "2rem" : "")};
-  width: 65%;
+  width: 50%;
   @media (max-width: 768px) {
     width: 100%;
   }
@@ -76,19 +76,7 @@ const Hero = styled.div`
   overflow: hidden;
   display: flex;
   justify-content: space-between;
-  .content {
-    width: 65%;
-    @media (max-width: 768px) {
-      width: 100%;
-    }
-    padding: 60px 30px 60px 50px;
-    position: relative;
-    background-color: #fff;
-    > * {
-      position: relative;
-      z-index: 2;
-    }
-  }
+  background-color: #fff;
   h1 {
     font-size: 3rem;
     @media (max-width: 768px) {
@@ -119,6 +107,8 @@ const Hero = styled.div`
     @media (max-width: 768px) {
       display: none;
     }
+    -webkit-clip-path: polygon(15% 0, 0 100%, 100% 100%, 100% 0);
+    clip-path: polygon(15% 0, 0 100%, 100% 100%, 100% 0);
   }
 `;
 

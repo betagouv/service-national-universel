@@ -1,17 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 
 import { YOUNG_SITUATIONS, translate as t } from "../../utils";
 import LoadingButton from "../../components/loadingButton";
-import Historic from "../../components/historic";
-import DocumentInModal from "../../components/DocumentInModal";
-import api from "../../services/api";
 
 export default ({ onChange, value }) => {
-  const [file, setFile] = useState(null);
-  const [buttonsLoading, setButtonsLoading] = useState({});
-
   console.log(value);
   if (!value) return <div />;
 
@@ -27,13 +21,8 @@ export default ({ onChange, value }) => {
     return Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
   };
 
-  const setButtonLoading = (btn, v) => {
-    setButtonsLoading({ ...buttonsLoading, [btn]: v });
-  };
-
   return (
     <Panel>
-      {file && <DocumentInModal value={file} onChange={() => setFile(null)} />}
       <div className="close" onClick={onChange} />
       <div className="info">
         <div className="title">{`${value.firstName} ${value.lastName}`}</div>
@@ -82,6 +71,7 @@ export default ({ onChange, value }) => {
         <Details title="Adresse" value={value.schoolAdress} />
       </Info>
       <Info title="Situations particulières" id={value._id}>
+        <Details title="Quartier Prioritaire de la Ville" value={t(value.qpv)} />
         <Details title="Handicap" value={t(value.handicap)} />
         <Details title="PPS" value={t(value.ppsBeneficiary)} />
         <Details title="PAI" value={t(value.paiBeneficiary)} />
@@ -121,9 +111,9 @@ const Details = ({ title, value }) => {
   );
 };
 
-const InfoBtn = styled(LoadingButton)`
+const EditBtn = styled(LoadingButton)`
   color: #555;
-  background: url(${require("../../assets/eye.svg")}) left 15px center no-repeat;
+  background: url(${require("../../assets/pencil.svg")}) left 15px center no-repeat;
   box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.16);
   border: 0;
   outline: 0;
@@ -134,10 +124,6 @@ const InfoBtn = styled(LoadingButton)`
   cursor: pointer;
   margin-right: 5px;
   margin-top: 1rem;
-`;
-
-const EditBtn = styled(InfoBtn)`
-  background: url(${require("../../assets/pencil.svg")}) left 15px center no-repeat;
 `;
 
 const Panel = styled.div`
