@@ -9,7 +9,11 @@ const SENDER_EMAIL = "contact@snu.gouv.fr";
 //https://my.sendinblue.com/lists/add-attributes
 
 const api = async (path, options = {}) => {
-  if (!SENDINBLUEKEY) return console.log("NOT SENDINBLUE KEY");
+  if (!SENDINBLUEKEY) {
+    console.log("NO SENDINBLUE KEY");
+    console.log(options);
+    return console.log("Mail was not sent.");
+  }
 
   const res = await fetch(`https://api.sendinblue.com/v3${path}`, {
     ...options,
