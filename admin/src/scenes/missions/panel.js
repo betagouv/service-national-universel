@@ -16,10 +16,14 @@ export default ({ onChange, mission }) => {
   useEffect(() => {
     (async () => {
       if (!mission) return;
-      const { ok: ok1, data: dataTutor, code: code1 } = await api.get(`/referent/${mission.tutorId}`);
+      if (mission.tutorId) {
+        const { ok: ok1, data: dataTutor, code: code1 } = await api.get(`/referent/${mission.tutorId}`);
+        if (!ok1) toastr.error("Oups, une erreur est survnue lors de la récuperation du tuteur", translate(code1));
+        else setTutor(dataTutor);
+      } else {
+        setTutor(null);
+      }
       const { ok: ok2, data: dataStructure, code: code2 } = await api.get(`/structure/${mission.structureId}`);
-      if (!ok1) toastr.error("Oups, une erreur est survnue lors de la récuperation du tuteur", translate(code1));
-      else setTutor(dataTutor);
       if (!ok2) toastr.error("Oups, une erreur est survnue lors de la récuperation de la structure", translate(code2));
       else setStructure(dataStructure);
       return;
