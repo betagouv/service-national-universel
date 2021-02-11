@@ -248,9 +248,8 @@ const Action = ({ hit, color }) => {
         </DropdownToggle>
         <DropdownMenu>
           <DropdownItem className="dropdown-item">
-            <Link to={`/volontaire/${hit._id}`}>Voir ou Modifier le profil</Link>
+            <Link to={`/volontaire/${hit._id}/edit`}>Modifier le profil</Link>
           </DropdownItem>
-
           <DropdownItem className="dropdown-item">
             <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${hit._id}`}>Prendre sa place</a>
           </DropdownItem>
