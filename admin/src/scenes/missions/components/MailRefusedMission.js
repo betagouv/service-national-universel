@@ -12,22 +12,18 @@ export default ({ value, onChange, onSend }) => {
 
   useEffect(() => {
     setMessage(`Bonjour ${value.tutor?.firstName || ""} ${value.tutor?.lastName || ""},
-En vue de la publication de votre mission "${
-      value.name
-    }" et suite à l'étude de son contenu, il vous est demandé d'apporter des précisions pour respecter le cadre du Service National Universel, à savoir :
+    Suite à l'étude de son contenu, votre mission "${value.name}" a été refusée, ne respectant pas le cadre du Service National Universel car :
 - ...
-- ...
-
-Merci d'effectuer ces modifications depuis votre espace.`);
+- ...`);
   }, [value]);
 
   if (!value) return <div />;
 
   const send = async () => {
     setSending(true);
-    await api.post(`/referent/email-tutor/correction/${value.tutor.id}`, {
+    await api.post(`/referent/email-tutor/refused/${value.tutor.id}`, {
       message,
-      subject: `Votre mission d'intérêt général "${value.name}" est en attente de correction`,
+      subject: `Votre mission d'intérêt général "${value.name}" est refusée`,
     });
     toastr.success("Email envoyé !");
     onSend(message);
@@ -37,11 +33,11 @@ Merci d'effectuer ces modifications depuis votre espace.`);
     <Modal isOpen={true} toggle={onChange}>
       <ModalContainer>
         <img src={require("../../../assets/close.svg")} height={10} onClick={onChange} />
-        <h1>Veuillez éditer le message ci-dessous pour préciser les corrections à apporter avant de l'envoyer</h1>
+        <h1>Veuillez éditer le message ci-dessous pour préciser les motifs de refus avant de l'envoyer</h1>
         <h3>votre message</h3>
         <textarea rows="15" value={message} onChange={(e) => setMessage(e.target.value)} />
         <button disabled={sending} onClick={send}>
-          Envoyer la demande de correction
+          Envoyer la notification de refus
         </button>
       </ModalContainer>
     </Modal>

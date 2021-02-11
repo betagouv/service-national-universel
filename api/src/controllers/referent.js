@@ -219,6 +219,11 @@ router.post("/email-tutor/:template/:tutorId", passport.authenticate("referent",
       htmlContent = htmlContent.replace(/{{message}}/g, `${req.body.message.replace(/\n/g, "<br/>")}`);
       htmlContent = htmlContent.replace(/{{cta}}/g, "https://candidature.snu.gouv.fr");
       subject = req.body.subject;
+    } else if (template === "refused") {
+      htmlContent = fs.readFileSync(path.resolve(__dirname, "../templates/refusedMission.html")).toString();
+      htmlContent = htmlContent.replace(/{{message}}/g, `${req.body.message.replace(/\n/g, "<br/>")}`);
+      htmlContent = htmlContent.replace(/{{cta}}/g, "https://candidature.snu.gouv.fr");
+      subject = req.body.subject;
     } else {
       throw new Error("Template de mail introuvable");
     }
