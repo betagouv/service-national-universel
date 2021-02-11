@@ -94,16 +94,7 @@ export default ({ inscription }) => {
           to="/phase1"
           disabled={getDisabled(DRAWER_TABS.PHASE1)}
           handleClick={(event) => handleClick(event, DRAWER_TABS.PHASE1)}
-          open={activeTab === DRAWER_TABS.PHASE1 || young.cohort === "2020"}
-        >
-          {young.cohort === "2020" ? (
-            <ul className="subNav">
-              <li>
-                <Link to="/inscription/profil">Candidater à la session 2021</Link>
-              </li>
-            </ul>
-          ) : null}
-        </Item>
+        />
         <Item
           title="mission d'intérêt général"
           subtitle="Phase 2"

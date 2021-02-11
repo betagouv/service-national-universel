@@ -27,22 +27,14 @@ export default () => {
           <Separator />
           <p style={{ color: "#161e2e", fontSize: "1.5rem", fontWeight: 700 }}>Votre parcours</p>
           <WrapperItem>
-            {/* todo add tag CANCEL */}
             <div className="title">
               1. Un séjour de cohésion <Tag color="#c81e1e">Phase&nbsp;annulée</Tag>
             </div>
             <div className="info">
               <div className="subtitle">Séjour annulé suite à la crise sanitaire.</div>
-              <div className="subtitle">
-                Vous pouvez cependant demander à{" "}
-                <a style={{ color: "inherit", textDecoration: "underline" }} href="/inscription/profil" target="blank">
-                  participer à la session 2021.
-                </a>
-              </div>
             </div>
           </WrapperItem>
           <WrapperItem>
-            {/* todo add tag IN_PROGRESS */}
             <div className="title">
               2. Une première mission d'intérêt général <Tag color="#5145cd">En&nbsp;cours</Tag>
             </div>
