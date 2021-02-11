@@ -67,7 +67,7 @@ export default (props) => {
         </div>
         <div>
           <Button onClick={() => setModal("APPLY")}>Candidater</Button>
-          <p className="button-subtitle">{`${mission.placesLeft} bénévole${mission.placesLeft > 1 ? "s" : ""} recherché${mission.placesLeft > 1 ? "s" : ""}`}</p>
+          <p className="button-subtitle">{`${mission.placesLeft} volontaire${mission.placesLeft > 1 ? "s" : ""} recherché${mission.placesLeft > 1 ? "s" : ""}`}</p>
         </div>
       </Heading>
       <Box>
@@ -88,6 +88,7 @@ export default (props) => {
           <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
             <Wrapper>
               <Legend>La mission en quelques mots</Legend>
+              <Detail title="Format" content={translate(mission.format)} />
               <Detail title="Objectifs" content={mission.description} />
               <Detail title="Actions" content={mission.actions} />
               <Detail title="Contraintes" content={mission.contraintes} />
@@ -235,6 +236,7 @@ const InfoStructure = ({ title, structure }) => {
 const Footer = styled.div`
   display: flex;
   justify-content: center;
+  margin-bottom: 2rem;
 `;
 
 const Legend = styled.div`

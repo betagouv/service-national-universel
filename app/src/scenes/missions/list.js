@@ -103,6 +103,7 @@ const Filters = styled(Container)`
 `;
 
 const AlertBox = ({ onClose }) => (
+  //todo change message depending on the cohort
   <Alert>
     <img src={require("../../assets/information.svg")} height={15} />
     <div className="text">

@@ -81,7 +81,7 @@ export default ({ setYoung }) => {
                 />
                 <MultiDropdownList
                   className="dropdown-filter"
-                  placeholder="Cohort"
+                  placeholder="Cohorte"
                   componentId="COHORT"
                   dataField="cohort.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "COHORT") }}

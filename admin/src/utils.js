@@ -59,9 +59,9 @@ export const translate = (value) => {
     case "VALIDATED":
       return "Validée";
     case "CONTINUOUS":
-      return "Mission continue (12 jours d'affilée sauf exception)";
+      return "Mission regroupée sur des journées";
     case "DISCONTINUOUS":
-      return "Mission perlée (84 heures tout au long de l'année)";
+      return "Mission répartie sur des heures";
     case "DRAFT":
       return "Brouillon";
     case "REFUSED":

@@ -10,7 +10,7 @@ import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 
 export default () => {
-  const [applications, setApplications] = useState([]);
+  const [applications, setApplications] = useState(null);
   const young = useSelector((state) => state.Auth.young);
 
   const reorder = (list, startIndex, endIndex) => {
@@ -45,6 +45,8 @@ export default () => {
     })();
   }, []);
 
+  if (!applications) return <div>Chargement</div>;
+
   return (
     <div>
       <Heading>
@@ -52,18 +54,27 @@ export default () => {
         <h1>Suivez vos candidatures aux missions d'intérêt général</h1>
       </Heading>
       <Container>
-        <DragDropContext onDragEnd={onDragEnd}>
-          <Droppable droppableId="list">
-            {(provided) => (
-              <div ref={provided.innerRef} {...provided.droppableProps}>
-                {applications.map((e, i) => (
-                  <Application key={e._id} index={i} application={e} />
-                ))}
-                {provided.placeholder}
-              </div>
-            )}
-          </Droppable>
-        </DragDropContext>
+        {applications.length ? (
+          <DragDropContext onDragEnd={onDragEnd}>
+            <Droppable droppableId="list">
+              {(provided) => (
+                <div ref={provided.innerRef} {...provided.droppableProps}>
+                  {applications.map((e, i) => (
+                    <Application key={e._id} index={i} application={e} />
+                  ))}
+                  {provided.placeholder}
+                </div>
+              )}
+            </Droppable>
+          </DragDropContext>
+        ) : (
+          <NoResult>
+            <p>Vous n'avez candidaté à aucune mission.</p>
+            <Link to="/mission">
+              <Button>Trouver des missions</Button>
+            </Link>
+          </NoResult>
+        )}
       </Container>
     </div>
   );
@@ -85,6 +96,17 @@ const Heading = styled(Container)`
   }
 `;
 
+const NoResult = styled.div`
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  p {
+    color: #3d4151;
+    font-size: 0.8rem;
+    font-style: italic;
+  }
+`;
+
 const Modifybutton = styled(Link)`
   border: 1px solid #d2d6dc;
   padding: 10px 15px 10px 30px;
@@ -99,5 +121,20 @@ const Modifybutton = styled(Link)`
   top: 20px; */
   :hover {
     color: #333;
+  }
+`;
+
+const Button = styled.div`
+  width: fit-content;
+  cursor: pointer;
+  background-color: #31c48d;
+  border-radius: 30px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  color: #fff;
+  font-size: 1rem;
+  padding: 0.8rem 3rem;
+  :hover {
+    color: #fff;
+    background-color: #0e9f6e;
   }
 `;
