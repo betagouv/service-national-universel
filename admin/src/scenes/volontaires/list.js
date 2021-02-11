@@ -12,7 +12,7 @@ import api from "../../services/api";
 import { apiURL, appURL } from "../../config";
 import Panel from "./panel";
 
-import { translate, getFilterLabel, YOUNG_STATUS_COLORS } from "../../utils";
+import { translate, getFilterLabel, YOUNG_STATUS_COLORS, formatStringLongDate } from "../../utils";
 import { Link } from "react-router-dom";
 
 const FILTERS = ["SEARCH", "STATUS", "PHASE", "COHORT"];
@@ -125,7 +125,8 @@ export default ({ setYoung }) => {
                     <thead>
                       <tr>
                         <th width="40%">Email</th>
-                        <th width="40%">Statut d'inscription</th>
+                        <th width="40%">Contextes</th>
+                        <th width="40%">Dernière connexion</th>
                         <th>Actions</th>
                       </tr>
                     </thead>
@@ -153,15 +154,25 @@ export default ({ setYoung }) => {
 };
 
 const Hit = ({ hit, onClick }) => {
+  const getAge = (d) => {
+    const now = new Date();
+    const date = new Date(d);
+    const diffTime = Math.abs(date - now);
+    return Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
+  };
+
   return (
     <tr onClick={onClick}>
       <td>
         <div className="name">{`${hit.firstName} ${hit.lastName}`}</div>
-        <div className="email">{hit.email}</div>
+        <div className="email">{`${getAge(hit.birthdateAt)} ans • ${hit.city}(${hit.department})`}</div>
       </td>
       <td>
-        <Badge color={YOUNG_STATUS_COLORS[hit.status]}>{translate(hit.status)}</Badge>
+        <Badge>{`COHORTE ${hit.cohort}`}</Badge>
+        {hit.cohort === "2019" ? <Badge color="#6CC763">Phase 1</Badge> : null}
+        {hit.cohort === "2020" ? <Badge color="#ffa987">Phase 1</Badge> : null}
       </td>
+      <td>{formatStringLongDate(hit.lastLoginAt)}</td>
       <td onClick={(e) => e.stopPropagation()}>
         <Action hit={hit} />
       </td>
@@ -176,7 +187,7 @@ const Action = ({ hit, color }) => {
     <ActionBox color={"#444"}>
       <UncontrolledDropdown setActiveFromChild>
         <DropdownToggle tag="button">
-          Choisissez une action
+          Choisissez&nbsp;une&nbsp;action
           <div className="down-icon">
             <svg viewBox="0 0 407.437 407.437">
               <polygon points="386.258,91.567 203.718,273.512 21.179,91.567 0,112.815 203.718,315.87 407.437,112.815 " />
@@ -185,7 +196,10 @@ const Action = ({ hit, color }) => {
         </DropdownToggle>
         <DropdownMenu>
           <Link to={`/volontaire/${hit._id}`}>
-            <DropdownItem className="dropdown-item">Voir ou Modifier le profil</DropdownItem>
+            <DropdownItem className="dropdown-item">Consulter le profil</DropdownItem>
+          </Link>
+          <Link to={`/volontaire/${hit._id}/edit`}>
+            <DropdownItem className="dropdown-item">Modifier le profil</DropdownItem>
           </Link>
           {user.role === "admin" ? (
             <DropdownItem className="dropdown-item">
@@ -352,6 +366,7 @@ const Table = styled.table`
     }
     .name {
       color: black;
+      font-weight: 600;
     }
     .email {
       font-size: 0.8rem;
@@ -381,12 +396,17 @@ const Badge = styled.span`
   margin: 0 0.25rem;
   border-radius: 99999px;
   font-size: 0.8rem;
+  font-weight: 500;
   margin-bottom: 5px;
   margin-top: 15px;
+  color: #9a9a9a;
+  background-color: #f6f6f6;
+  border: 1px solid #cecece;
   ${({ color }) => `
     color: ${color};
     background-color: ${color}33;
-  `}
+    border: 1px solid ${color};
+  `};
 `;
 
 const ActionBox = styled.div`

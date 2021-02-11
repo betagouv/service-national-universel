@@ -45,7 +45,7 @@ export default ({ onChange, value }) => {
             Né(e) le {formatDate(value.birthdateAt)} - {getAge(value.birthdateAt)} ans
           </div>
         )}
-        <Link to={`/volontaire/${value._id}`}>
+        <Link to={`/volontaire/${value._id}/edit`}>
           <EditBtn color="white">Modifier</EditBtn>
         </Link>
       </div>

@@ -1,13 +1,25 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 
-import { YOUNG_SITUATIONS, translate as t } from "../../utils";
+import { YOUNG_SITUATIONS, YOUNG_PHASE, translate as t } from "../../utils";
 import LoadingButton from "../../components/loadingButton";
+import { appURL } from "../../config";
+import api from "../../services/api";
 
 export default ({ onChange, value }) => {
-  console.log(value);
-  if (!value) return <div />;
+  const [young, setYoung] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      const id = value && value._id;
+      if (!id) return setYoung(null);
+      const { data } = await api.get(`/referent/young/${id}`);
+      setYoung(data);
+    })();
+  }, [value]);
+
+  if (!value || !young) return <div />;
 
   const formatDate = (d) => {
     const date = new Date(d);
@@ -25,64 +37,83 @@ export default ({ onChange, value }) => {
     <Panel>
       <div className="close" onClick={onChange} />
       <div className="info">
-        <div className="title">{`${value.firstName} ${value.lastName}`}</div>
-        <div>{t(value.gender)}</div>
-        {value.birthdateAt && (
+        <div className="title">{`${young.firstName} ${young.lastName}`}</div>
+        <div>{t(young.gender)}</div>
+        {young.birthdateAt && (
           <div>
-            Né(e) le {formatDate(value.birthdateAt)} - {getAge(value.birthdateAt)} ans
+            Né(e) le {formatDate(young.birthdateAt)} • {getAge(young.birthdateAt)} ans
           </div>
         )}
-        <Link to={`/volontaire/${value._id}`}>
-          <EditBtn color="white">Modifier</EditBtn>
-        </Link>
+        <div style={{ display: "flex" }}>
+          <Link to={`/volontaire/${young._id}`}>
+            <Button icon={require("../../assets/eye.svg")} color="white">
+              Consulter
+            </Button>
+          </Link>
+          <Link to={`/volontaire/${young._id}/edit`}>
+            <Button icon={require("../../assets/pencil.svg")} color="white">
+              Modifier
+            </Button>
+          </Link>
+        </div>
+        <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`}>
+          <Button icon={require("../../assets/impersonate.svg")} color="white">
+            Prendre&nbsp;sa&nbsp;place
+          </Button>
+        </a>
       </div>
-      <Info title="Coordonnées" id={value._id}>
-        <Details title="E-mail" value={value.email} />
-        <Details title="Tel" value={value.phone} />
-        <Details title="Région" value={value.region} />
-        <Details title="Dép" value={value.department} />
-        <Details title="Ville" value={value.city && value.zip && `${value.city} (${value.zip})`} />
-        <Details title="Adresse" value={value.address} />
+      {young.phase === YOUNG_PHASE.INTEREST_MISSION ? (
+        <Info title="Recherche de MIG" id={young._id}>
+          {young.applications.length && young.applications.map((a, i) => <Details title="E-mail" value={i} />)}
+        </Info>
+      ) : null}
+      <Info title="Coordonnées" id={young._id}>
+        <Details title="E-mail" value={young.email} />
+        <Details title="Tel" value={young.phone} />
+        <Details title="Région" value={young.region} />
+        <Details title="Dép" value={young.department} />
+        <Details title="Ville" value={young.city && young.zip && `${young.city} (${young.zip})`} />
+        <Details title="Adresse" value={young.address} />
       </Info>
-      <Info title="Situation" id={value._id}>
+      <Info title="Situation" id={young._id}>
         <Details
           title="Statut"
           value={() => {
-            if (value.situation === YOUNG_SITUATIONS.GENERAL_SCHOOL) return "En enseignement général ou technologique";
-            if (value.situation === YOUNG_SITUATIONS.PROFESSIONAL_SCHOOL) return "En enseignement professionnel";
-            if (value.situation === YOUNG_SITUATIONS.AGRICULTURAL_SCHOOL) return "En lycée agricole";
-            if (value.situation === YOUNG_SITUATIONS.SPECIALIZED_SCHOOL) return "En établissement spécialisé";
-            if (value.situation === YOUNG_SITUATIONS.APPRENTICESHIP) return "En apprentissage";
-            if (value.situation === YOUNG_SITUATIONS.EMPLOYEE) return "Salarié(e)";
-            if (value.situation === YOUNG_SITUATIONS.INDEPENDANT) return "Indépendant(e)";
-            if (value.situation === YOUNG_SITUATIONS.SELF_EMPLOYED) return "Auto-entrepreneur";
-            if (value.situation === YOUNG_SITUATIONS.ADAPTED_COMPANY) return "En ESAT, CAT ou en entreprise adaptée";
-            if (value.situation === YOUNG_SITUATIONS.POLE_EMPLOI) return "Inscrit(e) à Pôle emploi";
-            if (value.situation === YOUNG_SITUATIONS.MISSION_LOCALE) return "Inscrit(e) à la Mission locale";
-            if (value.situation === YOUNG_SITUATIONS.CAP_EMPLOI) return "Inscrit(e) à Cap emploi";
-            if (value.situation === YOUNG_SITUATIONS.NOTHING) return "Inscrit(e) nulle part";
+            if (young.situation === YOUNG_SITUATIONS.GENERAL_SCHOOL) return "En enseignement général ou technologique";
+            if (young.situation === YOUNG_SITUATIONS.PROFESSIONAL_SCHOOL) return "En enseignement professionnel";
+            if (young.situation === YOUNG_SITUATIONS.AGRICULTURAL_SCHOOL) return "En lycée agricole";
+            if (young.situation === YOUNG_SITUATIONS.SPECIALIZED_SCHOOL) return "En établissement spécialisé";
+            if (young.situation === YOUNG_SITUATIONS.APPRENTICESHIP) return "En apprentissage";
+            if (young.situation === YOUNG_SITUATIONS.EMPLOYEE) return "Salarié(e)";
+            if (young.situation === YOUNG_SITUATIONS.INDEPENDANT) return "Indépendant(e)";
+            if (young.situation === YOUNG_SITUATIONS.SELF_EMPLOYED) return "Auto-entrepreneur";
+            if (young.situation === YOUNG_SITUATIONS.ADAPTED_COMPANY) return "En ESAT, CAT ou en entreprise adaptée";
+            if (young.situation === YOUNG_SITUATIONS.POLE_EMPLOI) return "Inscrit(e) à Pôle emploi";
+            if (young.situation === YOUNG_SITUATIONS.MISSION_LOCALE) return "Inscrit(e) à la Mission locale";
+            if (young.situation === YOUNG_SITUATIONS.CAP_EMPLOI) return "Inscrit(e) à Cap emploi";
+            if (young.situation === YOUNG_SITUATIONS.NOTHING) return "Inscrit(e) nulle part";
           }}
         />
-        <Details title="Type" value={value.schoolType} />
-        <Details title="Nom" value={value.schoolName} />
-        <Details title="Région" value={value.schoolRegion} />
-        <Details title="Dép" value={value.schoolDepartment} />
-        <Details title="Ville" value={value.schoolCity && value.schoolZip && `${value.schoolCity} (${value.schoolZip})`} />
-        <Details title="Adresse" value={value.schoolAdress} />
+        <Details title="Type" value={young.schoolType} />
+        <Details title="Nom" value={young.schoolName} />
+        <Details title="Région" value={young.schoolRegion} />
+        <Details title="Dép" value={young.schoolDepartment} />
+        <Details title="Ville" value={young.schoolCity && young.schoolZip && `${young.schoolCity} (${young.schoolZip})`} />
+        <Details title="Adresse" value={young.schoolAdress} />
       </Info>
-      <Info title="Situations particulières" id={value._id}>
-        <Details title="Quartier Prioritaire de la Ville" value={t(value.qpv)} />
-        <Details title="Handicap" value={t(value.handicap)} />
-        <Details title="PPS" value={t(value.ppsBeneficiary)} />
-        <Details title="PAI" value={t(value.paiBeneficiary)} />
-        <Details title="Suivi médicosociale" value={t(value.medicosocialStructure)} />
-        <Details title="Aménagement spécifique" value={t(value.medicosocialStructure)} />
-        <Details title="Activités de haut niveau" value={t(value.highSkilledActivity)} />
+      <Info title="Situations particulières" id={young._id}>
+        <Details title="Quartier Prioritaire de la Ville" value={t(young.qpv)} />
+        <Details title="Handicap" value={t(young.handicap)} />
+        <Details title="PPS" value={t(young.ppsBeneficiary)} />
+        <Details title="PAI" value={t(young.paiBeneficiary)} />
+        <Details title="Suivi médicosociale" value={t(young.medicosocialStructure)} />
+        <Details title="Aménagement spécifique" value={t(young.specificAmenagment)} />
+        <Details title="Activités de haut niveau" value={t(young.highSkilledActivity)} />
       </Info>
-      {value.motivations && (
+      {young.motivations && (
         <div className="info">
           <div className="info-title">Motivations</div>
-          <div className="quote">{`« ${value.motivations} »`}</div>
+          <div className="quote">{`« ${young.motivations} »`}</div>
         </div>
       )}
     </Panel>
@@ -111,14 +142,15 @@ const Details = ({ title, value }) => {
   );
 };
 
-const EditBtn = styled(LoadingButton)`
+const Button = styled(LoadingButton)`
   color: #555;
-  background: url(${require("../../assets/pencil.svg")}) left 15px center no-repeat;
+  background: ${({ icon }) => `url(${icon}) left 15px center no-repeat`};
   box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.16);
   border: 0;
   outline: 0;
   border-radius: 5px;
-  padding: 8px 25px 8px 40px;
+  padding: 0.2rem 1rem;
+  padding-left: 2.5rem;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;

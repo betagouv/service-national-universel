@@ -14,6 +14,7 @@ const { capture } = require("../sentry");
 
 const ReferentObject = require("../models/referent");
 const YoungObject = require("../models/young");
+const ApplicationObject = require("../models/application");
 const AuthObject = require("../auth");
 
 const { decrypt } = require("../cryptoUtils");
@@ -337,7 +338,8 @@ router.get("/young/:id", passport.authenticate("referent", { session: false }), 
       capture(`Young not found ${req.params.id}`);
       return res.status(404).send({ ok: false, code: NOT_FOUND });
     }
-    return res.status(200).send({ ok: true, data });
+    const applications = await ApplicationObject.find({ youngId: data._id });
+    return res.status(200).send({ ok: true, data: { ...data._doc, applications } });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: SERVER_ERROR, error });
