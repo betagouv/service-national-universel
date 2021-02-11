@@ -31,7 +31,7 @@ export default ({ children, young, tab }) => {
       <Header>
         <div style={{ flex: 1 }}>
           <Title>
-            {young.firstName} {young.lastName}
+            {young.firstName} {young.lastName} <Badge>Cohorte {young.cohort}</Badge>
           </Title>
           <TabNavigationList>
             <TabItem isActive={tab === "details"} onClick={() => history.push(`/volontaire/${young._id}`)}>
@@ -84,6 +84,24 @@ export default ({ children, young, tab }) => {
   );
 };
 
+const Badge = styled.span`
+  display: inline-block;
+  padding: 0.25rem 1rem;
+  margin: 0 0.25rem;
+  border-radius: 99999px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  margin: 1rem;
+  color: #9a9a9a;
+  background-color: #f6f6f6;
+  border: 1px solid #cecece;
+  ${({ color }) => `
+    color: ${color};
+    background-color: ${color}33;
+    border: 1px solid ${color};
+  `};
+`;
+
 const TabNavigationList = styled.ul`
   display: flex;
   list-style-type: none;
@@ -121,10 +139,12 @@ const TabItem = styled.li`
 `;
 
 const Title = styled.div`
+  display: flex;
   color: rgb(38, 42, 62);
   font-weight: 700;
   font-size: 24px;
   margin-bottom: 10px;
+  align-items: center;
 `;
 
 const Header = styled.div`

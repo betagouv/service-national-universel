@@ -118,10 +118,16 @@ export const translate = (value) => {
       return "Référent départemental";
     case "referent_region":
       return "Référent régional";
-    case "COHESION_STAY":
-      return "Séjour de cohésion";
+    case "responsible":
+      return "Résponsable";
+    case "supervisor":
+      return "Superviseur";
     case "INSCRIPTION":
       return "Inscription";
+    case "COHESION_STAY":
+      return "Séjour de cohésion";
+    case "INTEREST_MISSION":
+      return "Mission d'interêt générale";
     case "SUMMER":
       return "Vacances d'été (juillet ou août)";
     case "AUTUMN":

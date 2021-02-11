@@ -1,11 +1,24 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
+import { Link } from "react-router-dom";
+
 import { translate } from "../../utils";
 import LoadingButton from "../../components/loadingButton";
-import { Link } from "react-router-dom";
+import api from "../../services/api";
 
 export default ({ onChange, value }) => {
   if (!value) return <div />;
+  const [structure, setStructure] = useState({});
+
+  useEffect(() => {
+    (async () => {
+      if (!value.structureId) return;
+      const { ok, data, code } = await api.get(`/structure/${value.structureId}`);
+      if (!ok) return toastr.error("Oups, une erreur est survnue lors de la récuperation de la structure", translate(code));
+      return setStructure(data);
+    })();
+  }, [value]);
+
   return (
     <Panel>
       <div className="close" onClick={onChange} />
@@ -20,6 +33,12 @@ export default ({ onChange, value }) => {
       </Info>
       <Info title="Informations">
         <Details title="Rôle" value={translate(value.role)} />
+        <div className="detail">
+          <div className="detail-title">Structure :</div>
+          <Link to={`/structure/${structure._id}`}>
+            <div className="detail-text">{structure.name}</div>
+          </Link>
+        </div>
         <Details title="Région" value={value.region} />
         <Details title="Département" value={value.department} />
       </Info>
