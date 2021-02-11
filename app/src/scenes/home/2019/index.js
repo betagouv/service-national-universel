@@ -27,7 +27,6 @@ export default () => {
           <Separator />
           <p style={{ color: "#161e2e", fontSize: "1.5rem", fontWeight: 700 }}>Votre parcours</p>
           <WrapperItem>
-            {/* todo add tag CANCEL */}
             <div className="title">
               1. Un séjour de cohésion{" "}
               <Tag color="#046c4e">
@@ -46,7 +45,6 @@ export default () => {
             </div>
           </WrapperItem>
           <WrapperItem>
-            {/* todo add tag IN_PROGRESS */}
             <div className="title">
               2. Une première mission d'intérêt général <Tag color="#5145cd">En&nbsp;cours</Tag>
             </div>
