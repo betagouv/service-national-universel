@@ -9,7 +9,7 @@ import { formatDay, translate, formatStringDate } from "../../utils";
 import api from "../../services/api";
 import SelectStatusMission from "../../components/selectStatusMission";
 
-export default ({ onClose, mission }) => {
+export default ({ onChange, mission }) => {
   const [tutor, setTutor] = useState();
   const [structure, setStructure] = useState({});
 
@@ -31,7 +31,7 @@ export default ({ onClose, mission }) => {
     <Panel>
       <div style={{ display: "flex", marginBottom: "15px" }}>
         <Subtitle>MISSION</Subtitle>
-        <div className="close" onClick={onClose} />
+        <div className="close" onClick={onChange} />
       </div>
       <div className="title">{mission.name}</div>
       <Link to={`/mission/${mission._id}`}>

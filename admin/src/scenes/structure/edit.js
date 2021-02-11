@@ -3,7 +3,7 @@ import { Col, Row, Input } from "reactstrap";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { Formik, Field } from "formik";
-import { Link, Redirect, useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 import Avatar from "../../components/Avatar";
@@ -18,7 +18,6 @@ import api from "../../services/api";
 export default (props) => {
   const [defaultValue, setDefaultValue] = useState();
   const [networks, setNetworks] = useState([]);
-  const [redirect, setRedirect] = useState(false);
   const [referents, setReferents] = useState([]);
   const user = useSelector((state) => state.Auth.user);
   const history = useHistory();
