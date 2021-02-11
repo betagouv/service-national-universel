@@ -78,7 +78,7 @@ export default (props) => {
                 <img src={require("../../assets/observe.svg")} />
               </div>
               <p>
-                Au sein de l'association <span>{mission.structureName}</span>
+                Au sein de la structure <span>{mission.structureName}</span>
               </p>
               <SocialIcons structure={mission.structureId} />
             </HeadCard>
