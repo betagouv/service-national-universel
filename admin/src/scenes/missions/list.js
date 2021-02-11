@@ -292,12 +292,12 @@ const FilterRow = styled.div`
     margin-bottom: 15px;
   }
   .searchbox-city {
-    min-width: 160px;
-    max-width: 160px;
+    min-width: 165px;
+    max-width: 165px;
     margin-right: 15px;
     margin-bottom: 15px;
     input {
-      padding: 11px 12px;
+      padding: 10.5px 12px;
     }
   }
   button {
