@@ -22,7 +22,7 @@ export default ({ application, index }) => {
     <Draggable draggableId={value._id} index={index}>
       {(provided) => (
         <Container ref={provided.innerRef} {...provided.draggableProps}>
-          <Header {...provided.dragHandleProps}>CHOIX N°{value.priority}</Header>
+          <Header {...provided.dragHandleProps}>CHOIX N°{index + 1}</Header>
           <Separator />
           <Card to={`/mission/${value.mission._id}`}>
             <div className="info">
