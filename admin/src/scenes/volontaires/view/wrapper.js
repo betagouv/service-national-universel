@@ -7,6 +7,7 @@ import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 
 import { translate } from "../../../utils";
+import SelectStatus from "../../../components/selectStatus";
 
 export default ({ children, young, tab }) => {
   const history = useHistory();
@@ -36,25 +37,47 @@ export default ({ children, young, tab }) => {
             <TabItem isActive={tab === "details"} onClick={() => history.push(`/volontaire/${young._id}`)}>
               Détails
             </TabItem>
-            <TabItem isActive={tab === "missions"} onClick={() => history.push(`/volontaire/${young._id}/phase1`)}>
+            <TabItem isActive={tab === "phase1"} onClick={() => history.push(`/volontaire/${young._id}/phase1`)}>
               Phase 1
             </TabItem>
-            <TabItem isActive={tab === "historic"} onClick={() => history.push(`/volontaire/${young._id}/phase2`)}>
+            <TabItem isActive={tab === "phase2"} onClick={() => history.push(`/volontaire/${young._id}/phase2`)}>
               Phase 2
             </TabItem>
-            <TabItem isActive={tab === "historic"} onClick={() => history.push(`/volontaire/${young._id}/phase3`)}>
+            <TabItem isActive={tab === "phase3"} onClick={() => history.push(`/volontaire/${young._id}/phase3`)}>
               Phase 3
             </TabItem>
           </TabNavigationList>
         </div>
-        <div style={{ display: "flex" }}>
+        <Row style={{ minWidth: "20%" }}>
+          <Col md={12}>
+            <Row>
+              <Col md={12}>
+                <SelectStatus hit={young} />
+              </Col>
+            </Row>
+            <Row style={{ marginTop: "0.5rem" }}>
+              <Col md={6}>
+                <Link to={`/volontaire/${young._id}/edit`}>
+                  <Button className="btn-blue">Modifier</Button>
+                </Link>
+              </Col>
+              <Col md={6}>
+                <Button onClick={handleDelete} className="btn-red">
+                  Supprimer
+                </Button>
+              </Col>
+            </Row>
+          </Col>
+        </Row>
+
+        {/* <div style={{ display: "flex" }}>
           <Link to={`/volontaire/${young._id}/edit`}>
             <Button className="btn-blue">Modifier</Button>
           </Link>
           <Button style={{ marginLeft: "0.5rem" }} onClick={handleDelete} className="btn-red">
             Supprimer
           </Button>
-        </div>
+        </div> */}
       </Header>
       {children}
     </div>

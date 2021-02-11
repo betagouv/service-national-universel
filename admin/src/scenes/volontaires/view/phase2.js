@@ -4,24 +4,18 @@ import styled from "styled-components";
 import { Link } from "react-router-dom";
 
 import { translate } from "../../../utils";
-import StructureView from "./wrapper";
+import Wrapper from "./wrapper";
 import api from "../../../services/api";
 import Avatar from "../../../components/Avatar";
 
-const formatLongDate = (date) => {
-  if (!date) return "-";
-  const d = new Date(date);
-  return d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" });
-};
-
-export default ({ structure }) => {
+export default ({ young }) => {
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-      <StructureView structure={structure} tab="historic">
+      <Wrapper young={young} tab="phase2">
         <Box>
-          <p style={{ padding: "2rem" }}>Dernière mise à jour : {formatLongDate(structure.updatedAt)}</p>
+          <p style={{ padding: "2rem" }}>Tic tac tic tac</p>
         </Box>
-      </StructureView>
+      </Wrapper>
     </div>
   );
 };

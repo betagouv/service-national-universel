@@ -3,8 +3,9 @@ import { Switch, Route } from "react-router-dom";
 
 import api from "../../../services/api";
 import Details from "./details";
-import Missions from "./missions";
-import Historic from "./historic";
+import Phase1 from "./phase1";
+import Phase2 from "./phase2";
+import Phase3 from "./phase3";
 
 export default ({ ...props }) => {
   const [young, setYoung] = useState();
@@ -21,8 +22,9 @@ export default ({ ...props }) => {
   if (!young) return <div />;
   return (
     <Switch>
-      <Route path="/volontaire/:id/missions" component={() => <Missions young={young} />} />
-      <Route path="/volontaire/:id/historic" component={() => <Historic young={young} />} />
+      <Route path="/volontaire/:id/phase1" component={() => <Phase1 young={young} />} />
+      <Route path="/volontaire/:id/phase2" component={() => <Phase2 young={young} />} />
+      <Route path="/volontaire/:id/phase3" component={() => <Phase3 young={young} />} />
       <Route path="/volontaire/:id" component={() => <Details young={young} />} />
     </Switch>
   );
