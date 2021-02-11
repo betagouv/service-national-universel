@@ -72,6 +72,7 @@ export default (props) => {
                   <BoxContent direction="column">
                     <Item title="Nom" values={values} name={"lastName"} handleChange={handleChange} />
                     <Item title="Prénom" values={values} name="firstName" handleChange={handleChange} />
+                    <Item title="ddd" values={values} name="phase" handleChange={handleChange} />
                     <Item title="Date de naissance" type="date" values={values} name="birthdateAt" handleChange={handleChange} />
                     <Documents>
                       <h4>Pièces d'identité</h4>

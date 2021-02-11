@@ -43,7 +43,9 @@ export default () => {
               <NavLink to="/user">Utilisateurs</NavLink>
             </li>
             <li>
-              <NavLink to="/volontaire">Volontaires</NavLink>
+              <NavLink to="/volontaire">
+                Volontaires <i>(BÊTA)</i>
+              </NavLink>
             </li>
           </>
         )}

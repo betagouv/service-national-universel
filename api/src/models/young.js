@@ -19,7 +19,7 @@ const Schema = new mongoose.Schema({
   gender: { type: String },
   birthdateAt: { type: Date },
   cohort: { type: String, default: "2021", enum: ["2021", "2020", "2019"] },
-  phase: { type: String, default: "INSCRIPTION", enum: ["INSCRIPTION", "COHESION_STAY"] },
+  phase: { type: String, default: "INSCRIPTION", enum: ["INSCRIPTION", "COHESION_STAY", "INTEREST_MISSION"] },
   status: {
     type: String,
     default: "IN_PROGRESS",
