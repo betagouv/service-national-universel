@@ -205,6 +205,33 @@ router.put("/young/:id", passport.authenticate("referent", { session: false }), 
   }
 });
 
+router.post("/email-tutor/:template/:tutorId", passport.authenticate("referent", { session: false }), async (req, res) => {
+  try {
+    const { tutorId, template } = req.params;
+    const tutor = await ReferentObject.findById(tutorId);
+    if (!tutor) return res.status(200).send({ ok: true });
+
+    let htmlContent = "";
+    let subject = "";
+
+    if (template === "correction") {
+      htmlContent = fs.readFileSync(path.resolve(__dirname, "../templates/correctionMission.html")).toString();
+      htmlContent = htmlContent.replace(/{{message}}/g, `${req.body.message.replace(/\n/g, "<br/>")}`);
+      htmlContent = htmlContent.replace(/{{cta}}/g, "https://candidature.snu.gouv.fr");
+      subject = req.body.subject;
+    } else {
+      throw new Error("Template de mail introuvable");
+    }
+
+    await sendEmail({ name: `${tutor.firstName} ${tutor.lastName}`, email: "raph@selego.co" }, subject, htmlContent);
+    return res.status(200).send({ ok: true }); //todo
+  } catch (error) {
+    console.log(error);
+    capture(error);
+    return res.status(500).send({ ok: false, code: SERVER_ERROR });
+  }
+});
+
 router.post("/email/:template/:youngId", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const { youngId, template } = req.params;

@@ -8,7 +8,7 @@ import api from "../services/api";
 import { translate, MISSION_STATUS_COLORS, MISSION_STATUS } from "../utils";
 import { toastr } from "react-redux-toastr";
 
-import MailCorrection from "../scenes/inscription/MailCorrection";
+import MailCorrectionMission from "../scenes/missions/components/MailCorrectionMission";
 
 export default ({ hit }) => {
   // const STATUS = [YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.VALIDATED, YOUNG_STATUS.REFUSED];
@@ -57,16 +57,16 @@ export default ({ hit }) => {
 
   return (
     <>
-      {/* {modal && (
-        <MailCorrection
-          value={young}
+      {modal && (
+        <MailCorrectionMission
+          value={mission}
           onChange={() => setModal(false)}
           onSend={(note) => {
-            setStatus(YOUNG_STATUS.WAITING_CORRECTION, note);
+            setStatus(MISSION_STATUS.WAITING_CORRECTION, note);
             setModal(false);
           }}
         />
-      )} */}
+      )}
       <ActionBox color={MISSION_STATUS_COLORS[mission.status]}>
         <UncontrolledDropdown setActiveFromChild>
           <DropdownToggle tag="button">
