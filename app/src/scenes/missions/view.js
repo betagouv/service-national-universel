@@ -10,6 +10,7 @@ import { translate, formatStringDate } from "../../utils";
 import SocialIcons from "../../components/SocialIcons";
 import ApplyModal from "./components/ApplyModal";
 import ApplyDoneModal from "./components/ApplyDoneModal";
+import Loader from "../../components/loader";
 
 export default (props) => {
   const [mission, setMission] = useState();
@@ -31,7 +32,7 @@ export default (props) => {
     return tags;
   };
 
-  if (mission === undefined) return <div>Chargement...</div>;
+  if (mission === undefined) return <Loader />;
 
   return (
     <Container>

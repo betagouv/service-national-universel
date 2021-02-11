@@ -2,8 +2,10 @@ import React, { useState, useEffect } from "react";
 import queryString from "query-string";
 import { useDispatch } from "react-redux";
 import { Redirect } from "react-router-dom";
+
 import api from "../../services/api";
 import { setYoung } from "../../redux/auth/actions";
+import Loader from "../../components/Loader";
 
 export default ({ location }) => {
   const [loading, setLoading] = useState(true);
@@ -38,6 +40,6 @@ export default ({ location }) => {
     dispatch(setYoung(data));
   }
 
-  if (loading) return <div>En cours de chargement...</div>;
+  if (loading) return <Loader />;
   return <Redirect to="/" />;
 };

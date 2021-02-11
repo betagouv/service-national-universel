@@ -4,10 +4,11 @@ import { Col, Container } from "reactstrap";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { toastr } from "react-redux-toastr";
 
+import Loader from "../../components/Loader";
 import Application from "./components/application";
 import api from "../../services/api";
-import { toastr } from "react-redux-toastr";
 
 export default () => {
   const [applications, setApplications] = useState(null);
@@ -45,7 +46,7 @@ export default () => {
     })();
   }, []);
 
-  if (!applications) return <div>Chargement</div>;
+  if (!applications) return <Loader />;
 
   return (
     <div>

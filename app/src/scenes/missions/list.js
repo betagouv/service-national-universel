@@ -73,7 +73,7 @@ export default () => {
             dataField="created_at"
             renderResultStats={({ numberOfResults, time }) => {
               // return <div />;
-              return <div className="results">{`${numberOfResults} résultats trouvés`}</div>;
+              return <div className="info">{`${numberOfResults} mission${numberOfResults > 1 && "s"} trouvée${numberOfResults > 1 && "s"}`}</div>;
             }}
             render={({ data }) => {
               return data.map((e) => {
@@ -84,6 +84,7 @@ export default () => {
                 return <MissionCard id={e._id} title={e.structureName} image={require("../../assets/observe.svg")} subtitle={e.name} tags={tags} places={e.placesLeft} />;
               });
             }}
+            renderNoResults={() => <div className="info">Aucune mission ne correspond à votre recherche</div>}
           />
         </Missions>
       </ReactiveBase>
@@ -120,7 +121,7 @@ const Missions = styled(Container)`
   background: #fff;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   position: relative;
-  .results {
+  .info {
     flex: 1;
     text-align: center;
     font-size: 0.8rem;
