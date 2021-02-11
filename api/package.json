@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "clean:es": "cd scripts/es && node clean.js && node sync.js",
     "dev": "nodemon ./src/index.js",
     "start": "npm run install:gm && node ./src/index.js",
     "install:gm": "cave resolve media-gfx/GraphicsMagick"
