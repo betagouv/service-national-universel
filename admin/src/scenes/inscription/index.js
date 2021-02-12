@@ -162,7 +162,7 @@ export default () => {
                 size={10}
                 showLoader={true}
                 sortBy="desc"
-                dataField="createdAt"
+                dataField="lastStatusAt"
                 loader={<div style={{ padding: "0 20px" }}>Chargement...</div>}
                 innerClass={{ pagination: "pagination" }}
                 renderNoResults={() => <div />}
@@ -214,7 +214,7 @@ export default () => {
 
 const Hit = ({ hit, index, onClick }) => {
   dayjs.extend(relativeTime).locale("fr");
-  const diff = dayjs(new Date(hit.createdAt)).fromNow();
+  const diff = dayjs(new Date(hit.lastStatusAt)).fromNow();
   const user = useSelector((state) => state.Auth.user);
 
   let STATUS = [YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.VALIDATED, YOUNG_STATUS.REFUSED];
@@ -227,7 +227,7 @@ const Hit = ({ hit, index, onClick }) => {
         <strong>
           {hit.firstName} {hit.lastName}
         </strong>
-        <div>{`Inscrit(e) ${diff} • ${formatStringLongDate(hit.createdAt)}`}</div>
+        <div>{`Statut mis à jour ${diff} • ${formatStringLongDate(hit.lastStatusAt)}`}</div>
       </td>
       <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
         <SelectStatus hit={hit} options={STATUS} />
