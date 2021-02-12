@@ -41,7 +41,7 @@ export default () => {
               </Tag>
             </div>
             <div className="info">
-              <div className="subtitle">Réalisé du 21 juin au 2 juillet 2019.</div>
+              <div className="subtitle">Réalisé du 16 au 28 juin 2019.</div>
             </div>
           </WrapperItem>
           <WrapperItem>

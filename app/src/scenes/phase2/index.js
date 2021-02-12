@@ -12,9 +12,10 @@ export default () => {
             Réalisez votre <strong>mission d'intérêt général</strong>
           </h1>
           <p>
-            Culpa voluptate deserunt proident anim ex sunt ad adipisicing enim et pariatur anim. Lorem sint ipsum cupidatat sit laborum Lorem dolor id laborum adipisicing non et.
-            Aliquip aute voluptate amet irure cillum esse mollit veniam reprehenderit.
+            Partez à la découverte de l'engagement en réalisant 84 heures de mission d'intérêt général, au sein d'une ou plusieurs structures, en contribuant à leurs activités
+            concrètes !
           </p>
+          <p>A vous de jouez : candidatez directement sur des missions parmi celles proposées dans cet espace !</p>
         </div>
         <div className="thumb" />
       </Hero>
