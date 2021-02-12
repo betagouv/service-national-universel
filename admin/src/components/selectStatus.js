@@ -12,13 +12,10 @@ import matomo from "../services/matomo";
 import MailCorrection from "../scenes/inscription/MailCorrection";
 import MailRefused from "../scenes/inscription/MailRefused";
 
-export default ({ hit }) => {
+export default ({ hit, options = YOUNG_STATUS }) => {
   const [modal, setModal] = useState(null);
   const [young, setYoung] = useState(null);
   const user = useSelector((state) => state.Auth.user);
-
-  let STATUS = [YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.VALIDATED, YOUNG_STATUS.REFUSED];
-  if (user.role === "admin") STATUS.push(YOUNG_STATUS.WAITING_VALIDATION);
 
   useEffect(() => {
     (async () => {
@@ -94,7 +91,7 @@ export default ({ hit }) => {
             </div>
           </DropdownToggle>
           <DropdownMenu>
-            {STATUS.map((status) => {
+            {options.map((status) => {
               return (
                 <DropdownItem key={status} className="dropdown-item" onClick={() => handleClickStatus(status)}>
                   {translate(status)}

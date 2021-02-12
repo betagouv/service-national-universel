@@ -6,7 +6,7 @@ import api from "../../../services/api";
 import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 
-import { translate } from "../../../utils";
+import { translate, YOUNG_STATUS } from "../../../utils";
 import SelectStatus from "../../../components/selectStatus";
 
 export default ({ children, young, tab }) => {
@@ -52,7 +52,7 @@ export default ({ children, young, tab }) => {
           <Col md={12}>
             <Row>
               <Col md={12}>
-                <SelectStatus hit={young} />
+                <SelectStatus hit={young} options={[YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WITHDRAWN]} />
               </Col>
             </Row>
             <Row style={{ marginTop: "0.5rem" }}>

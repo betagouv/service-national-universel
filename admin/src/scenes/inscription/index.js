@@ -6,6 +6,7 @@ import dayjs from "dayjs";
 import "dayjs/locale/fr";
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 import ExportComponent from "../../components/ExportXlsx";
 import ReactiveFilter from "../../components/ReactiveFilter";
@@ -13,7 +14,7 @@ import SelectStatus from "../../components/selectStatus";
 import api from "../../services/api";
 import { apiURL, appURL } from "../../config";
 import Panel from "./panel";
-import { translate, getFilterLabel, formatStringLongDate } from "../../utils";
+import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS } from "../../utils";
 
 const FILTERS = ["SEARCH", "STATUS", "REGION", "DEPARTMENT", "PHASE", "REMOVEINPROGRESS"];
 
@@ -214,6 +215,10 @@ export default () => {
 const Hit = ({ hit, index, onClick }) => {
   dayjs.extend(relativeTime).locale("fr");
   const diff = dayjs(new Date(hit.createdAt)).fromNow();
+  const user = useSelector((state) => state.Auth.user);
+
+  let STATUS = [YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.VALIDATED, YOUNG_STATUS.REFUSED];
+  if (user.role === "admin") STATUS.push(YOUNG_STATUS.WAITING_VALIDATION);
 
   return (
     <tr onClick={onClick} key={hit._id}>
@@ -225,7 +230,7 @@ const Hit = ({ hit, index, onClick }) => {
         <div>{`Inscrit(e) ${diff} • ${formatStringLongDate(hit.createdAt)}`}</div>
       </td>
       <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
-        <SelectStatus hit={hit} />
+        <SelectStatus hit={hit} options={STATUS} />
       </td>
       <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
         <Action hit={hit} />

@@ -70,6 +70,8 @@ export const translate = (value) => {
       return "Annulée";
     case "ARCHIVED":
       return "Archivée";
+    case "WITHDRAWN":
+      return "Désisté";
     case "DONE":
       return "Effectuée";
     case "NOT_COMPLETED":
@@ -632,6 +634,7 @@ export const YOUNG_STATUS = {
   VALIDATED: "VALIDATED",
   REFUSED: "REFUSED",
   IN_PROGRESS: "IN_PROGRESS",
+  WITHDRAWN: "WITHDRAWN",
 };
 
 export const YOUNG_PHASE = {
@@ -662,6 +665,7 @@ export const YOUNG_STATUS_COLORS = {
   VALIDATED: "#6CC763",
   REFUSED: "#F8A9AD",
   IN_PROGRESS: "#382F79",
+  WITHDRAWN: "#884500",
 };
 
 export const REFERENT_ROLES = {
