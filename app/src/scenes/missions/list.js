@@ -1,18 +1,36 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Col, Container, CustomInput, Input, Row } from "reactstrap";
 import { ReactiveBase, ReactiveList, SingleList, MultiList, DataSearch, SingleDropdownList } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
+import { useSelector } from "react-redux";
 
 import MissionCard from "./components/missionCard";
 import ReactiveFilter from "../../components/ReactiveFilter";
 import { apiURL } from "../../config";
 import api from "../../services/api";
+import Loader from "../../components/Loader";
 
 const FILTERS = ["DOMAIN", "SEARCH", "STATUS"];
 
 export default () => {
+  const young = useSelector((state) => state.Auth.young);
   const [showAlert, setShowAlert] = useState(true);
+  const [applications, setApplications] = useState();
+
+  useEffect(() => {
+    (async () => {
+      if (!young) return setApplications(null);
+      const { data } = await api.get(`/application/young/${young._id}`);
+      const app = data.reduce((acc, a) => {
+        acc.push(a.missionId);
+        return acc;
+      }, []);
+      return setApplications(app);
+    })();
+  }, []);
+
+  if (!applications) return <Loader />;
 
   return (
     <div>
@@ -81,7 +99,18 @@ export default () => {
                 e.city && tags.push(e.city + (e.zip ? ` - ${e.zip}` : ""));
                 // tags.push(e.remote ? "À distance" : "En présentiel");
                 e.domains.forEach((d) => tags.push(d));
-                return <MissionCard id={e._id} title={e.structureName} image={require("../../assets/observe.svg")} subtitle={e.name} tags={tags} places={e.placesLeft} />;
+                return (
+                  <MissionCard
+                    applied={applications && applications.includes(e._id)}
+                    key={e._id}
+                    id={e._id}
+                    title={e.structureName}
+                    image={require("../../assets/observe.svg")}
+                    subtitle={e.name}
+                    tags={tags}
+                    places={e.placesLeft}
+                  />
+                );
               });
             }}
             renderNoResults={() => <div className="info">Aucune mission ne correspond à votre recherche</div>}

@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 
-export default ({ id, title, image, subtitle, tags = [], places, location, onClick }) => {
+export default ({ id, title, image, subtitle, tags = [], places, location, onClick, applied }) => {
   return (
     <>
       <Separator />
@@ -24,9 +24,13 @@ export default ({ id, title, image, subtitle, tags = [], places, location, onCli
           </div>
           {location && <Location>{location}</Location>}
         </div>
-        <Button to="/phase3/une-missions">
-          {places} volontaire{places > 1 && "s"} recherché{places > 1 && "s"}
-        </Button>
+        {applied ? (
+          <Button to={`/candidature`}>Voir la candidature</Button>
+        ) : (
+          <Button to={`/mission/${id}`}>
+            {places} volontaire{places > 1 && "s"} recherché{places > 1 && "s"}
+          </Button>
+        )}
       </Card>
     </>
   );

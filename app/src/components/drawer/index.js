@@ -47,7 +47,7 @@ export default ({ inscription }) => {
       return [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status);
     }
     if (tab === DRAWER_TABS.PHASE2) {
-      return young.phase !== YOUNG_PHASE.COHESION_STAY;
+      if (young.cohort && young.cohort !== "2021") return false;
     }
     if (tab === DRAWER_TABS.PHASE3) {
       //todo handle tab phase 3

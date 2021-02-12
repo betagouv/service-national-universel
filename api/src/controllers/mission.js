@@ -6,7 +6,7 @@ const { capture } = require("../sentry");
 
 const MissionObject = require("../models/mission");
 const UserObject = require("../models/referent");
-
+const ApplicationModel = require("../models/application");
 const SERVER_ERROR = "SERVER_ERROR";
 const NOT_FOUND = "PASSWORD_TOKEN_EXPIRED_OR_INVALID";
 
@@ -53,7 +53,8 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
       const tutor = await UserObject.findOne({ _id: mission.tutorId });
       mission.tutor = { firstName: tutor.firstName, lastName: tutor.lastName, email: tutor.email, id: tutor._id };
     }
-    return res.status(200).send({ ok: true, data: mission });
+    const application = await ApplicationModel.findOne({ missionId: req.params.id, youngId: req.user._id });
+    return res.status(200).send({ ok: true, data: { ...mission, application } });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: SERVER_ERROR, error });
