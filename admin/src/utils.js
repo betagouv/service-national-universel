@@ -71,7 +71,7 @@ export const translate = (value) => {
     case "ARCHIVED":
       return "Archivée";
     case "WITHDRAWN":
-      return "Désisté";
+      return "Désistée";
     case "DONE":
       return "Effectuée";
     case "NOT_COMPLETED":
