@@ -6,6 +6,7 @@ import dayjs from "dayjs";
 import "dayjs/locale/fr";
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 import ExportComponent from "../../components/ExportXlsx";
 import ReactiveFilter from "../../components/ReactiveFilter";
@@ -13,7 +14,7 @@ import SelectStatus from "../../components/selectStatus";
 import api from "../../services/api";
 import { apiURL, appURL } from "../../config";
 import Panel from "./panel";
-import { translate, getFilterLabel, formatStringLongDate } from "../../utils";
+import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS } from "../../utils";
 
 const FILTERS = ["SEARCH", "STATUS", "REGION", "DEPARTMENT", "PHASE", "REMOVEINPROGRESS"];
 
@@ -161,7 +162,7 @@ export default () => {
                 size={10}
                 showLoader={true}
                 sortBy="desc"
-                dataField="createdAt"
+                dataField="lastStatusAt"
                 loader={<div style={{ padding: "0 20px" }}>Chargement...</div>}
                 innerClass={{ pagination: "pagination" }}
                 renderNoResults={() => <div />}
@@ -213,7 +214,11 @@ export default () => {
 
 const Hit = ({ hit, index, onClick }) => {
   dayjs.extend(relativeTime).locale("fr");
-  const diff = dayjs(new Date(hit.createdAt)).fromNow();
+  const diff = dayjs(new Date(hit.lastStatusAt)).fromNow();
+  const user = useSelector((state) => state.Auth.user);
+
+  let STATUS = [YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.VALIDATED, YOUNG_STATUS.REFUSED];
+  if (user.role === "admin") STATUS.push(YOUNG_STATUS.WAITING_VALIDATION);
 
   return (
     <tr onClick={onClick} key={hit._id}>
@@ -222,10 +227,10 @@ const Hit = ({ hit, index, onClick }) => {
         <strong>
           {hit.firstName} {hit.lastName}
         </strong>
-        <div>{`Inscrit(e) ${diff} • ${formatStringLongDate(hit.createdAt)}`}</div>
+        <div>{`Statut mis à jour ${diff} • ${formatStringLongDate(hit.lastStatusAt)}`}</div>
       </td>
       <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
-        <SelectStatus hit={hit} />
+        <SelectStatus hit={hit} options={STATUS} />
       </td>
       <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
         <Action hit={hit} />
@@ -248,9 +253,8 @@ const Action = ({ hit, color }) => {
         </DropdownToggle>
         <DropdownMenu>
           <DropdownItem className="dropdown-item">
-            <Link to={`/volontaire/${hit._id}`}>Voir ou Modifier le profil</Link>
+            <Link to={`/volontaire/${hit._id}/edit`}>Modifier le profil</Link>
           </DropdownItem>
-
           <DropdownItem className="dropdown-item">
             <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${hit._id}`}>Prendre sa place</a>
           </DropdownItem>

@@ -10,6 +10,7 @@ import { translate, formatStringDate } from "../../utils";
 import SocialIcons from "../../components/SocialIcons";
 import ApplyModal from "./components/ApplyModal";
 import ApplyDoneModal from "./components/ApplyDoneModal";
+import Loader from "../../components/Loader";
 
 export default (props) => {
   const [mission, setMission] = useState();
@@ -31,7 +32,7 @@ export default (props) => {
     return tags;
   };
 
-  if (mission === undefined) return <div>Chargement...</div>;
+  if (mission === undefined) return <Loader />;
 
   return (
     <Container>
@@ -66,8 +67,7 @@ export default (props) => {
           </Tags>
         </div>
         <div>
-          <Button onClick={() => setModal("APPLY")}>Candidater</Button>
-          <p className="button-subtitle">{`${mission.placesLeft} bénévole${mission.placesLeft > 1 ? "s" : ""} recherché${mission.placesLeft > 1 ? "s" : ""}`}</p>
+          <ApplyButton applied={mission.application} placesLeft={mission.placesLeft} />
         </div>
       </Heading>
       <Box>
@@ -78,7 +78,7 @@ export default (props) => {
                 <img src={require("../../assets/observe.svg")} />
               </div>
               <p>
-                Au sein de l'association <span>{mission.structureName}</span>
+                Au sein de la structure <span>{mission.structureName}</span>
               </p>
               <SocialIcons structure={mission.structureId} />
             </HeadCard>
@@ -88,6 +88,7 @@ export default (props) => {
           <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
             <Wrapper>
               <Legend>La mission en quelques mots</Legend>
+              <Detail title="Format" content={translate(mission.format)} />
               <Detail title="Objectifs" content={mission.description} />
               <Detail title="Actions" content={mission.actions} />
               <Detail title="Contraintes" content={mission.contraintes} />
@@ -105,73 +106,25 @@ export default (props) => {
         </Row>
       </Box>
       <Footer>
-        <Button onClick={() => setModal("APPLY")}>Proposer votre candidature</Button>
+        <ApplyButton applied={mission.application} placesLeft={mission.placesLeft} />
       </Footer>
-      {/* <Wrapper>
-        <LeftBox style={{ padding: "50px 40px" }}>
-          <div className="heading">
-            <p>MISSION</p>
-            <h2>Connaissance du fonctionnement d'une Association de bénévoles</h2>
-          </div>
-          <div className="title">
-            <span>DOMAINE D'ACTION</span>
-          </div>
-          <div style={{ marginBottom: 60 }}>
-            <div className="domain">Citoyenneté</div>
-          </div>
-          <div className="title">
-            <span>DESCRIPTIF DE LA MISSION</span>
-          </div>
-          <div className="text" style={{ marginBottom: 60 }}>
-            Connaître le fonctionnement d'une association de bénévoles Accompagner les bénévoles et en partager avec eux la réalisation de leurs actions en faveur des jeunes :
-            rencontres avec enseignants ou responsables d'entreprises, interventions devant des jeunes, participation aux visites, debriefing des actions, …
-          </div>
-          <div className="title">
-            <span>CONTRAINTES</span>
-          </div>
-          <div className="text">Être disponible pour participer aux actions en journée (pour les actions vers les jeunes) ou en soirée (pour les réunions de bénévoles)</div>
-        </LeftBox>
-        <RightBox>
-          <div className="title">Candidatez à cette mission</div>
-          <div className="subtitle">LA STRUCTURE RECHERCHE</div>
-          <div className="tag">7 volontaires</div>
-          <div className="date">
-            Du <strong>7 octobre 2019</strong>
-          </div>
-          <div className="date">
-            au <strong>26 juin 2020</strong>
-          </div>
-          <Link to="" className="button">
-            Proposer votre aide
-          </Link>
-          <div className="text">Vous serez mis en relation avec la structure</div>
-        </RightBox>
-      </Wrapper>
-      <Others>
-        <div className="title">AUTRES MISSIONS DISPONIBLES DANS LE DÉPARTEMENT</div>
-        <MissionCard
-          title={"Défense et sécurité"}
-          image={require("../../assets/observe.svg")}
-          subtitle={"J'assiste les policiers dans leurs missions de médiations et gestions des conflits"}
-          location={"Noisy-le-Grand (93) - Commissariat de Police"}
-          places={7}
-        />
-        <MissionCard
-          title={"Défense et sécurité"}
-          image={require("../../assets/observe.svg")}
-          subtitle={"J'assiste les policiers dans leurs missions de médiations et gestions des conflits"}
-          location={"Noisy-le-Grand (93) - Commissariat de Police"}
-          places={7}
-        />
-        <MissionCard
-          title={"Défense et sécurité"}
-          image={require("../../assets/observe.svg")}
-          subtitle={"J'assiste les policiers dans leurs missions de médiations et gestions des conflits"}
-          location={"Noisy-le-Grand (93) - Commissariat de Police"}
-          places={7}
-        />
-      </Others>*/}
     </Container>
+  );
+};
+
+const ApplyButton = ({ applied, placesLeft }) => {
+  return applied ? (
+    <>
+      <Link to="/candidature">
+        <Button>Voir la candidature</Button>
+      </Link>
+      <p className="button-subtitle">Vous avez déjà candidaté à cette mission</p>
+    </>
+  ) : (
+    <>
+      <Button onClick={() => setModal("APPLY")}>Candidater</Button>
+      <p className="button-subtitle">{`${placesLeft} volontaire${placesLeft > 1 ? "s" : ""} recherché${placesLeft > 1 ? "s" : ""}`}</p>
+    </>
   );
 };
 
@@ -235,6 +188,15 @@ const InfoStructure = ({ title, structure }) => {
 const Footer = styled.div`
   display: flex;
   justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  margin-bottom: 2rem;
+  p {
+    margin-top: 1rem;
+    text-align: center;
+    color: #6b7280;
+    font-size: 0.75rem;
+  }
 `;
 
 const Legend = styled.div`
@@ -260,6 +222,7 @@ const Button = styled.div`
   color: #fff;
   font-size: 1rem;
   padding: 0.8rem 3rem;
+  width: fit-content;
   :hover {
     color: #fff;
     background-color: #0e9f6e;

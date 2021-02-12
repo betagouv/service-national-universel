@@ -1,0 +1,26 @@
+<mjml>
+  <mj-body>
+    <mj-section>
+      <mj-column>
+        <mj-text>
+          <h1 font-size="20px">Notification de refus de mission</h1>
+        </mj-text>
+        <mj-text font-size="18px" color="#3D4852">
+          Vous recevez cet email car votre mission d'intérêt général a été refusée. Un référent vous a laissé un message :
+        </mj-text>
+        <mj-text line-height="1.5" font-size="16px" color="#000">{{message}}</mj-text>
+
+        <mj-button font-size="20px" background-color="#3490DC" href="{{cta}}"> Accéder à mon compte </mj-button>
+
+        <mj-text font-size="18px" color="#3D4852"> Bien cordialement,</mj-text>
+        <mj-text font-size="18px" color="#3D4852">
+Les équipes du Service National Universel</mj-text>
+
+        <mj-divider border-color="#F6F7F8"></mj-divider>
+        <mj-text>
+          Si vous ne parvenez pas à cliquer sur le bouton "Accéder à mon compte ", copiez-collez l'URL ci-dessous dans votre navigateur: {{cta}}
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

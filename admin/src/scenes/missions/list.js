@@ -41,103 +41,86 @@ export default () => {
               </ButtonContainer>
             </Header>
             <Filter>
-              <Row>
-                <Col md={12}>
-                  <DataSearch
-                    showIcon={false}
-                    placeholder="Rechercher par mots clés, mission ou structure..."
-                    componentId="SEARCH"
-                    dataField={["name"]}
-                    react={{ and: FILTERS }}
-                    // fuzziness={1}
-                    style={{ flex: 2 }}
-                    innerClass={{ input: "searchbox" }}
-                    autosuggest={false}
-                  />
-                </Col>
-              </Row>
-              <Row style={{ marginTop: "20px" }}>
-                <Col md={2}>
-                  <DataSearch
-                    showIcon={false}
-                    placeholder="Ville ou code postal"
-                    componentId="LOCATION"
-                    dataField={["city", "zip"]}
-                    react={{ and: FILTERS.filter((e) => e !== "LOCATION") }}
-                    fuzziness={1}
-                    style={{ flex: 2 }}
-                    innerClass={{ input: "searchbox searchbox-city" }}
-                    autosuggest={false}
-                  />
-                </Col>
-                <Col md={2}>
-                  <MultiDropdownList
-                    className="dropdown-filter"
-                    componentId="STATUS"
-                    dataField="status.keyword"
-                    react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
-                    renderItem={(e, count) => {
-                      return `${translate(e)} (${count})`;
-                    }}
-                    title=""
-                    URLParams={true}
-                    showSearch={false}
-                    renderLabel={(items) => getFilterLabel(items, "Statut")}
-                  />
-                </Col>
-                <Col md={2}>
-                  <MultiDropdownList
-                    className="dropdown-filter"
-                    placeholder="Régions"
-                    componentId="REGION"
-                    dataField="region.keyword"
-                    title=""
-                    react={{ and: FILTERS.filter((e) => e !== "REGION") }}
-                    URLParams={true}
-                    showSearch={false}
-                    sortBy="asc"
-                  />
-                </Col>
-                <Col md={2}>
-                  <MultiDropdownList
-                    className="dropdown-filter"
-                    placeholder="Départements"
-                    componentId="DEPARTMENT"
-                    dataField="department.keyword"
-                    title=""
-                    react={{ and: FILTERS.filter((e) => e !== "DEPARTMENT") }}
-                    URLParams={true}
-                    showSearch={false}
-                    sortBy="asc"
-                  />
-                </Col>
-                <Col md={2}>
-                  <MultiDropdownList
-                    className="dropdown-filter"
-                    placeholder="Domaine"
-                    componentId="DOMAIN"
-                    dataField="domains.keyword"
-                    react={{ and: FILTERS.filter((e) => e !== "DOMAIN") }}
-                    title=""
-                    URLParams={true}
-                    showSearch={false}
-                  />
-                </Col>
-                <Col md={2}>
-                  <div className="dropdown-filter">
-                    <MultiDropdownList
-                      className="dropdown-filter"
-                      placeholder="Places restantes"
-                      componentId="PLACES"
-                      dataField="placesLeft"
-                      react={{ and: FILTERS.filter((e) => e !== "PLACES") }}
-                      title=""
-                      URLParams={true}
-                      showSearch={false}
-                    />
-                  </div>
-                </Col>
-              </Row>
+              <DataSearch
+                showIcon={false}
+                placeholder="Rechercher par mots clés, mission ou structure..."
+                componentId="SEARCH"
+                dataField={["name"]}
+                react={{ and: FILTERS }}
+                // fuzziness={1}
+                style={{ flex: 2 }}
+                innerClass={{ input: "searchbox" }}
+                autosuggest={false}
+              />
+              <FilterRow>
+                <DataSearch
+                  showIcon={false}
+                  placeholder="Ville ou code postal"
+                  componentId="LOCATION"
+                  dataField={["city", "zip"]}
+                  react={{ and: FILTERS.filter((e) => e !== "LOCATION") }}
+                  fuzziness={1}
+                  style={{ flex: 2 }}
+                  innerClass={{ input: "searchbox" }}
+                  className="searchbox-city"
+                  autosuggest={false}
+                />
+                <MultiDropdownList
+                  className="dropdown-filter"
+                  componentId="STATUS"
+                  dataField="status.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Statut")}
+                />
+                <MultiDropdownList
+                  className="dropdown-filter"
+                  placeholder="Régions"
+                  componentId="REGION"
+                  dataField="region.keyword"
+                  title=""
+                  react={{ and: FILTERS.filter((e) => e !== "REGION") }}
+                  URLParams={true}
+                  showSearch={false}
+                  sortBy="asc"
+                />
+                <MultiDropdownList
+                  className="dropdown-filter"
+                  placeholder="Départements"
+                  componentId="DEPARTMENT"
+                  dataField="department.keyword"
+                  title=""
+                  react={{ and: FILTERS.filter((e) => e !== "DEPARTMENT") }}
+                  URLParams={true}
+                  showSearch={false}
+                  sortBy="asc"
+                />
+                <MultiDropdownList
+                  className="dropdown-filter"
+                  placeholder="Domaine"
+                  componentId="DOMAIN"
+                  dataField="domains.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "DOMAIN") }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                />
+                <MultiDropdownList
+                  className="dropdown-filter"
+                  placeholder="Places restantes"
+                  componentId="PLACES"
+                  dataField="placesLeft"
+                  react={{ and: FILTERS.filter((e) => e !== "PLACES") }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                />
+              </FilterRow>
             </Filter>
             <ResultTable>
               <ReactiveList
@@ -168,10 +151,10 @@ export default () => {
                   <Table>
                     <thead>
                       <tr>
-                        <th width="40%">Mission</th>
-                        <th>Dates</th>
-                        <th>Places</th>
-                        <th width="20%">Statut</th>
+                        <th>Mission</th>
+                        <th style={{ width: "200px" }}>Dates</th>
+                        <th style={{ width: "90px" }}>Places</th>
+                        <th style={{ width: "250px" }}>Statut</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -296,28 +279,41 @@ const Filter = styled.div`
       color: #767676;
     }
   }
+`;
 
-  .searchbox-city {
-    padding: 11px 12px;
-    margin-right: 10px;
-  }
+const FilterRow = styled.div`
+  padding: 15px 0 0;
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
 
   .dropdown-filter {
-    button {
-      background-color: #fff;
-      box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
-      border: 0;
-      border-radius: 6px;
-      padding: 10px 20px;
-      font-size: 14px;
-      color: #242526;
-      min-width: 150px;
-      margin-right: 15px;
-      cursor: pointer;
-      div {
-        width: 100%;
-        overflow: visible;
-      }
+    margin-right: 15px;
+    margin-bottom: 15px;
+  }
+  .searchbox-city {
+    min-width: 165px;
+    max-width: 165px;
+    margin-right: 15px;
+    margin-bottom: 15px;
+    input {
+      padding: 10.5px 12px;
+    }
+  }
+  button {
+    background-color: #fff;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
+    border: 0;
+    border-radius: 6px;
+    padding: 10px 20px;
+    font-size: 14px;
+    color: #242526;
+    min-width: 150px;
+    margin-right: 15px;
+    cursor: pointer;
+    div {
+      width: 100%;
+      overflow: visible;
     }
   }
 `;
@@ -330,7 +326,6 @@ const TeamMember = styled.div`
     margin-bottom: 5px;
   }
   p {
-    text-transform: uppercase;
     color: #606266;
     font-size: 12px;
     margin: 0;

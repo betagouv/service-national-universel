@@ -7,7 +7,7 @@ export default function Team({ referents }) {
   return (
     <Info title={`Équipe (${referents.length})`}>
       {referents.map((referent, k) => (
-        <Link to={`/user/${referent._id}`}>
+        <Link key={k} to={`/user/${referent._id}`}>
           <div style={{ display: "flex", alignItems: "center", marginTop: "1rem" }} key={k}>
             <Avatar name={`${referent.firstName} ${referent.lastName}`} />
             <div>{`${referent.firstName} ${referent.lastName}`}</div>

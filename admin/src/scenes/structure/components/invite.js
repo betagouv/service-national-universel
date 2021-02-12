@@ -15,6 +15,10 @@ export default ({ structure }) => {
         initialValues={{ role: "structure_member", structureId: structure._id, structureName: structure.name }}
         onSubmit={async (values, actions) => {
           try {
+            if (!values.firstName || !values.lastName || !values.email) {
+              toastr.error("Vous devez remplir tous les champs", "nom, prénom et e-mail");
+              return;
+            }
             const { ok, code } = await api.post(`/referent/signup_invite/${values.role}`, values);
             if (!ok) toastr.error("Oups, une erreur est survenue lors de l'ajout du nouveau membre", translate(code));
             return toastr.success("Invitation envoyée");
@@ -154,10 +158,9 @@ const Button = styled.button`
   /* margin: 0 0.5rem; */
   align-self: flex-start;
   border-radius: 4px;
-  padding: 5px;
-  font-size: 12px;
+  padding: 10px 15px;
+  font-size: 1rem;
   /* min-width: 100px; */
-  width: 20%;
   font-weight: 400;
   cursor: pointer;
   background-color: #fff;

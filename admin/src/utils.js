@@ -59,9 +59,9 @@ export const translate = (value) => {
     case "VALIDATED":
       return "Validée";
     case "CONTINUOUS":
-      return "Mission continue (12 jours d'affilée sauf exception)";
+      return "Mission regroupée sur des journées";
     case "DISCONTINUOUS":
-      return "Mission perlée (84 heures tout au long de l'année)";
+      return "Mission répartie sur des heures";
     case "DRAFT":
       return "Brouillon";
     case "REFUSED":
@@ -70,6 +70,8 @@ export const translate = (value) => {
       return "Annulée";
     case "ARCHIVED":
       return "Archivée";
+    case "WITHDRAWN":
+      return "Désistée";
     case "DONE":
       return "Effectuée";
     case "NOT_COMPLETED":
@@ -118,10 +120,16 @@ export const translate = (value) => {
       return "Référent départemental";
     case "referent_region":
       return "Référent régional";
-    case "COHESION_STAY":
-      return "Séjour de cohésion";
+    case "responsible":
+      return "Résponsable";
+    case "supervisor":
+      return "Superviseur";
     case "INSCRIPTION":
       return "Inscription";
+    case "COHESION_STAY":
+      return "Séjour de cohésion";
+    case "INTEREST_MISSION":
+      return "Mission d'interêt générale";
     case "SUMMER":
       return "Vacances d'été (juillet ou août)";
     case "AUTUMN":
@@ -626,11 +634,13 @@ export const YOUNG_STATUS = {
   VALIDATED: "VALIDATED",
   REFUSED: "REFUSED",
   IN_PROGRESS: "IN_PROGRESS",
+  WITHDRAWN: "WITHDRAWN",
 };
 
 export const YOUNG_PHASE = {
   INSCRIPTION: "INSCRIPTION",
   COHESION_STAY: "COHESION_STAY",
+  INTEREST_MISSION: "INTEREST_MISSION",
 };
 
 export const YOUNG_SITUATIONS = {
@@ -655,6 +665,7 @@ export const YOUNG_STATUS_COLORS = {
   VALIDATED: "#6CC763",
   REFUSED: "#F8A9AD",
   IN_PROGRESS: "#382F79",
+  WITHDRAWN: "#884500",
 };
 
 export const REFERENT_ROLES = {

@@ -19,6 +19,7 @@ import Documents from "./scenes/documents";
 import Preferences from "./scenes/preferences";
 import Missions from "./scenes/missions";
 import Applications from "./scenes/applications";
+import Loader from "./components/Loader";
 
 import Header from "./components/header";
 import Drawer from "./components/drawer";
@@ -56,7 +57,7 @@ export default () => {
     fetchData();
   }, []);
 
-  if (loading) return <div>Chargement...</div>;
+  if (loading) return <Loader />;
 
   return (
     <Router>

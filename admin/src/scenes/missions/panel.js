@@ -9,17 +9,21 @@ import { formatDay, translate, formatStringDate } from "../../utils";
 import api from "../../services/api";
 import SelectStatusMission from "../../components/selectStatusMission";
 
-export default ({ onClose, mission }) => {
+export default ({ onChange, mission }) => {
   const [tutor, setTutor] = useState();
   const [structure, setStructure] = useState({});
 
   useEffect(() => {
     (async () => {
       if (!mission) return;
-      const { ok: ok1, data: dataTutor, code: code1 } = await api.get(`/referent/${mission.tutorId}`);
+      if (mission.tutorId) {
+        const { ok: ok1, data: dataTutor, code: code1 } = await api.get(`/referent/${mission.tutorId}`);
+        if (!ok1) toastr.error("Oups, une erreur est survnue lors de la récuperation du tuteur", translate(code1));
+        else setTutor(dataTutor);
+      } else {
+        setTutor(null);
+      }
       const { ok: ok2, data: dataStructure, code: code2 } = await api.get(`/structure/${mission.structureId}`);
-      if (!ok1) toastr.error("Oups, une erreur est survnue lors de la récuperation du tuteur", translate(code1));
-      else setTutor(dataTutor);
       if (!ok2) toastr.error("Oups, une erreur est survnue lors de la récuperation de la structure", translate(code2));
       else setStructure(dataStructure);
       return;
@@ -31,7 +35,7 @@ export default ({ onClose, mission }) => {
     <Panel>
       <div style={{ display: "flex", marginBottom: "15px" }}>
         <Subtitle>MISSION</Subtitle>
-        <div className="close" onClick={onClose} />
+        <div className="close" onClick={onChange} />
       </div>
       <div className="title">{mission.name}</div>
       <Link to={`/mission/${mission._id}`}>

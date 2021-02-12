@@ -32,14 +32,14 @@ const migrate = async (model, migration) => {
 };
 
 sequelize.authenticate().then(async (e) => {
-  try {
-    await esclient.indices.delete({ index: "structure" });
-  } catch (error) {
-    console.log("ERROR ES", error);
-  }
-  await Structure.deleteMany({});
-  await migrate("Structure", migrateStructure);
-  await migrate("Network", migrateNetwork);
+  // try {
+  //   await esclient.indices.delete({ index: "structure" });
+  // } catch (error) {
+  //   console.log("ERROR ES", error);
+  // }
+  // await Structure.deleteMany({});
+  // await migrate("Structure", migrateStructure);
+  // await migrate("Network", migrateNetwork);
 
   // await esclient.indices.delete({ index: "referent" });
   await Referent.deleteMany({ sqlId: { $ne: null } });
@@ -69,13 +69,13 @@ sequelize.authenticate().then(async (e) => {
   //   console.log(e);
   // }
 
-  try {
-    await esclient.indices.delete({ index: "application" });
-  } catch (error) {
-    console.log("ERROR ES", error);
-  }
-  await Application.deleteMany({});
-  await migrate("Application", migrateApplication);
+  // try {
+  //   await esclient.indices.delete({ index: "application" });
+  // } catch (error) {
+  //   console.log("ERROR ES", error);
+  // }
+  // await Application.deleteMany({});
+  // await migrate("Application", migrateApplication);
   process.exit(1);
 });
 
@@ -340,9 +340,9 @@ async function migrateReferent() {
           referent.role = "referent_department";
           referent.department = departmentList[u.referent_department];
         } else if (u.context_role === "superviseur") {
-          referent.role = "structure_responsible";
+          referent.role = "supervisor";
         } else {
-          referent.role = "structure_member";
+          referent.role = "responsible";
         }
         await Referent.create(referent);
         count++;

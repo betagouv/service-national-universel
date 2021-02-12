@@ -1,21 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { Col, DropdownItem, DropdownMenu, DropdownToggle, Label, Pagination, PaginationItem, PaginationLink, Row, UncontrolledDropdown } from "reactstrap";
+import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import styled from "styled-components";
-import { useSelector } from "react-redux";
-
-import api from "../services/api";
-
-import { translate, MISSION_STATUS_COLORS, MISSION_STATUS } from "../utils";
 import { toastr } from "react-redux-toastr";
 
-import MailCorrection from "../scenes/inscription/MailCorrection";
+import api from "../services/api";
+import { translate, MISSION_STATUS_COLORS, MISSION_STATUS } from "../utils";
+import MailCorrectionMission from "../scenes/missions/components/MailCorrectionMission";
+import MailRefusedMission from "../scenes/missions/components/MailRefusedMission";
 
 export default ({ hit }) => {
-  // const STATUS = [YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.VALIDATED, YOUNG_STATUS.REFUSED];
-
-  const [modal, setModal] = useState(false);
+  const [waitingCorrectionModal, setWaitingCorrectionModal] = useState(false);
+  const [refusedModal, setRefusedModal] = useState(false);
   const [mission, setMission] = useState(null);
-  const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
     (async () => {
@@ -29,22 +25,15 @@ export default ({ hit }) => {
   if (!mission) return <div />;
 
   const handleClickStatus = (status) => {
-    if (!confirm("Êtes-vous sûr(e) de vouloir modifier le statut de cette mission?\nUn email sera automatiquement envoyé.")) return;
-    if (status === MISSION_STATUS.WAITING_CORRECTION) return setModal(true);
+    if (!confirm("Êtes-vous sûr(e) de vouloir modifier le statut de cette mission ?")) return;
+    if (status === MISSION_STATUS.WAITING_CORRECTION && mission.tutor) return setWaitingCorrectionModal(true);
+    if (status === MISSION_STATUS.REFUSED && mission.tutor) return setRefusedModal(true);
     setStatus(status);
   };
 
   const setStatus = async (status) => {
     try {
       const { ok, code, data: newMission } = await api.put(`/mission/${mission._id}`, { status });
-
-      // if (status === MISSION_STATUS.VALIDATED) {
-      //   await api.post(`/referent/email/validate/${young._id}`, { subject: "Inscription validée" });
-      // }
-
-      // if (status === MISSION_STATUS.REFUSED) {
-      //   await api.post(`/referent/email/refuse/${young._id}`, { subject: "Inscription refusée" });
-      // }
 
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       setMission(newMission);
@@ -57,16 +46,26 @@ export default ({ hit }) => {
 
   return (
     <>
-      {/* {modal && (
-        <MailCorrection
-          value={young}
-          onChange={() => setModal(false)}
+      {waitingCorrectionModal && (
+        <MailCorrectionMission
+          value={mission}
+          onChange={() => setWaitingCorrectionModal(false)}
           onSend={(note) => {
-            setStatus(YOUNG_STATUS.WAITING_CORRECTION, note);
-            setModal(false);
+            setStatus(MISSION_STATUS.WAITING_CORRECTION, note);
+            setWaitingCorrectionModal(false);
           }}
         />
-      )} */}
+      )}
+      {refusedModal && (
+        <MailRefusedMission
+          value={mission}
+          onChange={() => setRefusedModal(false)}
+          onSend={(note) => {
+            setStatus(MISSION_STATUS.REFUSED, note);
+            setRefusedModal(false);
+          }}
+        />
+      )}
       <ActionBox color={MISSION_STATUS_COLORS[mission.status]}>
         <UncontrolledDropdown setActiveFromChild>
           <DropdownToggle tag="button">

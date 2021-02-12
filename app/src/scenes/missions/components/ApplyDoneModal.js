@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import api from "../../../services/api";
 
 import { toastr } from "react-redux-toastr";
+import { Link } from "react-router-dom";
 
 export default ({ value, onChange, onSend }) => {
   const [sending, setSending] = useState(false);
@@ -42,6 +43,9 @@ export default ({ value, onChange, onSend }) => {
         {/* todo: gerer classement candidature */}
         {/* <h2>Positionnez cette candidature dans vos préférences.</h2> */}
         {/* <Select></Select> */}
+        <Link to="/candidature">
+          <Button>Classer mes missions</Button>
+        </Link>
         <CancelButton onClick={onChange}>Fermer</CancelButton>
       </ModalContainer>
     </Modal>

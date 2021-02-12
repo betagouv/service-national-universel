@@ -21,9 +21,9 @@ export const translate = (value) => {
     case "VALIDATED":
       return "Validée";
     case "CONTINUOUS":
-      return "Mission perlée (84 heures tout au long de l'année)";
+      return "Mission regroupée sur des journées";
     case "DISCONTINUOUS":
-      return "Mission continue (12 jours d'affilée sauf exception)";
+      return "Mission répartie sur des heures";
     case "DRAFT":
       return "Brouillon";
     case "REFUSED":
@@ -673,7 +673,7 @@ export const TRANSPORT = {
   OTHER: "OTHER",
 };
 
-export function getPasswordErrorMessage(v) {
+export function getPasswordErrorMessage(v, matomo) {
   if (!v) return "Ce champ est obligatoire";
   const schema = new passwordValidator();
   schema
@@ -689,6 +689,7 @@ export function getPasswordErrorMessage(v) {
     .symbols(); // Must have symbols
 
   if (!schema.validate(v)) {
+    matomo.logEvent("inscription", "password_failed");
     return "Votre mot de passe doit contenir au moins 8 caractères, dont une majuscule, une minuscule, un chiffre et un symbole";
   }
 }

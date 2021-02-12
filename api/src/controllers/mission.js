@@ -5,7 +5,8 @@ const passport = require("passport");
 const { capture } = require("../sentry");
 
 const MissionObject = require("../models/mission");
-
+const UserObject = require("../models/referent");
+const ApplicationModel = require("../models/application");
 const SERVER_ERROR = "SERVER_ERROR";
 const NOT_FOUND = "PASSWORD_TOKEN_EXPIRED_OR_INVALID";
 
@@ -31,11 +32,29 @@ router.put("/", passport.authenticate("referent", { session: false }), async (re
   }
 });
 
+router.put("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
+  try {
+    const mission = await MissionObject.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.status(200).send({ ok: true, data: mission });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: SERVER_ERROR, error });
+  }
+});
+
 router.get("/:id", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
     const data = await MissionObject.findOne({ _id: req.params.id });
     if (!data) return res.status(404).send({ ok: false, code: NOT_FOUND });
-    return res.status(200).send({ ok: true, data });
+
+    const mission = data.toJSON();
+
+    if (mission.tutorId) {
+      const tutor = await UserObject.findOne({ _id: mission.tutorId });
+      mission.tutor = { firstName: tutor.firstName, lastName: tutor.lastName, email: tutor.email, id: tutor._id };
+    }
+    const application = await ApplicationModel.findOne({ missionId: req.params.id, youngId: req.user._id });
+    return res.status(200).send({ ok: true, data: { ...mission, application } });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: SERVER_ERROR, error });
