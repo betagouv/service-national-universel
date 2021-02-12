@@ -46,6 +46,7 @@ const Icon = styled.div`
   z-index: 999;
   height: 32px;
   width: 32px;
+  min-width: 32px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -60,6 +61,7 @@ const Item = styled.li`
   background-size: 20px;
   padding-left: 0;
   margin-bottom: 15px;
+  width: 100%;
   > a {
     text-transform: uppercase;
     color: #fff;

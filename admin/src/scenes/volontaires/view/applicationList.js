@@ -23,31 +23,24 @@ export default ({ young }) => {
   if (!applications) return <div>Chargement</div>;
 
   return (
-    <Table>
-      <thead>
-        <tr>
-          <th>Missions candidatées</th>
-          <th style={{ width: "200px" }}>Dates</th>
-          <th style={{ width: "90px" }}>Places</th>
-          <th style={{ width: "250px" }}>Statut</th>
-        </tr>
-      </thead>
-      {applications.length ? null : <i>Aucune candidature n'est liée à ce volontaire.</i>}
-      <tbody>
-        {applications.map((hit, i) => (
-          <Hit key={i} hit={hit} index={i} />
-        ))}
-      </tbody>
-    </Table>
-    // <div>
-    //   {applications.length ? (
-    //     applications.map((e, i) => <Application key={e._id} index={i} application={e} />)
-    //   ) : (
-    //     <NoResult>
-    //       <p>Aucune candidatures pour ce volontaire.</p>
-    //     </NoResult>
-    //   )}
-    // </div>
+    <>
+      <Table>
+        <thead>
+          <tr>
+            <th>Missions candidatées</th>
+            <th style={{ width: "200px" }}>Dates</th>
+            <th style={{ width: "90px" }}>Places</th>
+            <th style={{ width: "250px" }}>Statut</th>
+          </tr>
+        </thead>
+        <tbody>
+          {applications.map((hit, i) => (
+            <Hit key={i} hit={hit} index={i} />
+          ))}
+        </tbody>
+      </Table>
+      {applications.length ? null : <NoResult>Aucune candidature n'est liée à ce volontaire.</NoResult>}
+    </>
   );
 };
 
@@ -95,6 +88,11 @@ const Hit = ({ hit, index }) => {
     </tr>
   );
 };
+const NoResult = styled.div`
+  text-align: center;
+  font-style: italic;
+  margin: 2rem;
+`;
 const Table = styled.table`
   width: 100%;
   color: #242526;
