@@ -3,146 +3,134 @@ import { Link } from "react-router-dom";
 import { Col, Row, Input } from "reactstrap";
 import styled from "styled-components";
 import { formatDay, translate, formatStringDate } from "../../../utils";
+import MissionView from "./wrapper";
 import api from "../../../services/api";
 import { toastr } from "react-redux-toastr";
 
-export default ({ mission }) => {
-  const [tutor, setTutor] = useState();
-  //todo ajouter tout le tutor et structure dans le modele mission ?
-  const [structure, setStructure] = useState();
-
-  useEffect(() => {
-    (async () => {
-      if (!mission) return;
-      const { ok: ok1, data: dataTutor, code: code1 } = await api.get(`/referent/${mission.tutorId}`);
-      const { ok: ok2, data: dataStructure, code: code2 } = await api.get(`/structure/${mission.structureId}`);
-      if (!ok1) toastr.error("Oups, une erreur est survnue lors de la récuperation du tuteur", translate(code1));
-      else setTutor(dataTutor);
-      if (!ok2) toastr.error("Oups, une erreur est survnue lors de la récuperation de la structure", translate(code2));
-      else setStructure(dataStructure);
-      return;
-    })();
-  }, []);
-
+export default ({ mission, structure, tutor }) => {
   return (
-    <Box>
-      <Row>
-        <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
-          <Wrapper>
-            <Legend>
-              La mission<Subtitle>{translate(mission.format)}</Subtitle>
-            </Legend>
-
-            <div className="detail">
-              <div className="detail-title">Domaines</div>
-              <div className="detail-text">{mission.domains.join(", ")}</div>
-            </div>
-            <div className="detail">
-              <div className="detail-title">Début</div>
-              <div className="detail-text">{formatStringDate(mission.startAt)}</div>
-            </div>
-            <div className="detail">
-              <div className="detail-title">Fin</div>
-              <div className="detail-text">{formatStringDate(mission.endAt)}</div>
-            </div>
-            <div className="detail">
-              <div className="detail-title">Adresse</div>
-              <div className="detail-text">{mission.address}</div>
-            </div>
-            <div className="detail">
-              <div className="detail-title">Dép.</div>
-              <div className="detail-text">{mission.department}</div>
-            </div>
-            <div className="detail">
-              <div className="detail-title">Format</div>
-              <div className="detail-text">{translate(mission.format)}</div>
-            </div>
-            <div className="detail">
-              <div className="detail-title">Fréquence</div>
-              <div className="detail-text">{mission.frequence}</div>
-            </div>
-            <div className="detail">
-              <div className="detail-title">Périodes</div>
-              <div className="detail-text">{mission.period}</div>
-            </div>
-            <div className="detail">
-              <div className="detail-title">Objectifs</div>
-              <div className="detail-text">{mission.description}</div>
-            </div>
-            <div className="detail">
-              <div className="detail-title">Actions</div>
-              <div className="detail-text">{mission.actions}</div>
-            </div>
-            <div className="detail">
-              <div className="detail-title">Contraintes</div>
-              <div className="detail-text">{mission.contraintes}</div>
-            </div>
-          </Wrapper>
-        </Col>
-        <Col md={6}>
-          <Row style={{ borderBottom: "2px solid #f4f5f7" }}>
-            {tutor ? (
-              <Wrapper>
-                <Legend>
-                  Le tuteur
-                  <Link to={`/user/${tutor._id}`}>
-                    <SubtitleLink>{`${tutor.firstName} ${tutor.lastName} >`}</SubtitleLink>
-                  </Link>
-                </Legend>
-                <div className="detail">
-                  <div className="detail-title">E-mail</div>
-                  <div className="detail-text">{tutor.email}</div>
-                </div>
-                <div className="detail">
-                  <div className="detail-title">Tel. fixe</div>
-                  <div className="detail-text">{tutor.phone}</div>
-                </div>
-                <div className="detail">
-                  <div className="detail-title">Tel. mobile</div>
-                  <div className="detail-text">{mission.mobile}</div>
-                </div>
-              </Wrapper>
-            ) : null}
-          </Row>
+    <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
+      <MissionView mission={mission} tab="details">
+        <Box>
           <Row>
-            {structure ? (
+            <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
               <Wrapper>
                 <Legend>
-                  Le structure
-                  <Link to={`/structure/${structure._id}`}>
-                    <SubtitleLink>{`${structure.name} >`}</SubtitleLink>
-                  </Link>
+                  La mission<Subtitle>{translate(mission.format)}</Subtitle>
                 </Legend>
+
                 <div className="detail">
-                  <div className="detail-title">Statut</div>
-                  <div className="detail-text">{translate(structure.legalStatus)}</div>
+                  <div className="detail-title">Domaines</div>
+                  <div className="detail-text">{mission.domains.join(", ")}</div>
                 </div>
                 <div className="detail">
-                  <div className="detail-title">Région</div>
-                  <div className="detail-text">{structure.region}</div>
+                  <div className="detail-title">Début</div>
+                  <div className="detail-text">{formatStringDate(mission.startAt)}</div>
                 </div>
                 <div className="detail">
-                  <div className="detail-title">Dép.</div>
-                  <div className="detail-text">{structure.department}</div>
-                </div>
-                <div className="detail">
-                  <div className="detail-title">Ville</div>
-                  <div className="detail-text">{structure.city}</div>
+                  <div className="detail-title">Fin</div>
+                  <div className="detail-text">{formatStringDate(mission.endAt)}</div>
                 </div>
                 <div className="detail">
                   <div className="detail-title">Adresse</div>
-                  <div className="detail-text">{structure.address}</div>
+                  <div className="detail-text">{mission.address}</div>
                 </div>
                 <div className="detail">
-                  <div className="detail-title">Présentation</div>
-                  <div className="detail-text">{structure.description}</div>
+                  <div className="detail-title">Dép.</div>
+                  <div className="detail-text">{mission.department}</div>
+                </div>
+                <div className="detail">
+                  <div className="detail-title">Format</div>
+                  <div className="detail-text">{translate(mission.format)}</div>
+                </div>
+                <div className="detail">
+                  <div className="detail-title">Fréquence</div>
+                  <div className="detail-text">{mission.frequence}</div>
+                </div>
+                <div className="detail">
+                  <div className="detail-title">Périodes</div>
+                  <div className="detail-text">{mission.period}</div>
+                </div>
+                <div className="detail">
+                  <div className="detail-title">Objectifs</div>
+                  <div className="detail-text">{mission.description}</div>
+                </div>
+                <div className="detail">
+                  <div className="detail-title">Actions</div>
+                  <div className="detail-text">{mission.actions}</div>
+                </div>
+                <div className="detail">
+                  <div className="detail-title">Contraintes</div>
+                  <div className="detail-text">{mission.contraintes}</div>
                 </div>
               </Wrapper>
-            ) : null}
+            </Col>
+            <Col md={6}>
+              <Row style={{ borderBottom: "2px solid #f4f5f7" }}>
+                {tutor ? (
+                  <Wrapper>
+                    <Legend>
+                      Le tuteur
+                      <Link to={`/user/${tutor._id}`}>
+                        <SubtitleLink>{`${tutor.firstName} ${tutor.lastName} >`}</SubtitleLink>
+                      </Link>
+                    </Legend>
+                    <div className="detail">
+                      <div className="detail-title">E-mail</div>
+                      <div className="detail-text">{tutor.email}</div>
+                    </div>
+                    <div className="detail">
+                      <div className="detail-title">Tel. fixe</div>
+                      <div className="detail-text">{tutor.phone}</div>
+                    </div>
+                    <div className="detail">
+                      <div className="detail-title">Tel. mobile</div>
+                      <div className="detail-text">{mission.mobile}</div>
+                    </div>
+                  </Wrapper>
+                ) : null}
+              </Row>
+              <Row>
+                {structure ? (
+                  <Wrapper>
+                    <Legend>
+                      Le structure
+                      <Link to={`/structure/${structure._id}`}>
+                        <SubtitleLink>{`${structure.name} >`}</SubtitleLink>
+                      </Link>
+                    </Legend>
+                    <div className="detail">
+                      <div className="detail-title">Statut</div>
+                      <div className="detail-text">{translate(structure.legalStatus)}</div>
+                    </div>
+                    <div className="detail">
+                      <div className="detail-title">Région</div>
+                      <div className="detail-text">{structure.region}</div>
+                    </div>
+                    <div className="detail">
+                      <div className="detail-title">Dép.</div>
+                      <div className="detail-text">{structure.department}</div>
+                    </div>
+                    <div className="detail">
+                      <div className="detail-title">Ville</div>
+                      <div className="detail-text">{structure.city}</div>
+                    </div>
+                    <div className="detail">
+                      <div className="detail-title">Adresse</div>
+                      <div className="detail-text">{structure.address}</div>
+                    </div>
+                    <div className="detail">
+                      <div className="detail-title">Présentation</div>
+                      <div className="detail-text">{structure.description}</div>
+                    </div>
+                  </Wrapper>
+                ) : null}
+              </Row>
+            </Col>
           </Row>
-        </Col>
-      </Row>
-    </Box>
+        </Box>
+      </MissionView>
+    </div>
   );
 };
 

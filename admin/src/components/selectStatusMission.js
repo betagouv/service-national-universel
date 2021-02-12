@@ -11,7 +11,7 @@ import MailRefusedMission from "../scenes/missions/components/MailRefusedMission
 export default ({ hit }) => {
   const [waitingCorrectionModal, setWaitingCorrectionModal] = useState(false);
   const [refusedModal, setRefusedModal] = useState(false);
-  const [mission, setMission] = useState(null);
+  const [mission, setMission] = useState(hit);
 
   useEffect(() => {
     (async () => {

@@ -1,25 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Col, DropdownItem, DropdownMenu, DropdownToggle, Label, Pagination, PaginationItem, PaginationLink, Row, UncontrolledDropdown } from "reactstrap";
-import { ReactiveBase, ReactiveList, SingleList, MultiDropdownList, MultiList, DataSearch } from "@appbaseio/reactivesearch";
+import { DropdownItem, DropdownMenu, DropdownToggle, Label, Pagination, PaginationItem, PaginationLink, Row, UncontrolledDropdown } from "reactstrap";
+import { ReactiveBase } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
 import SelectStatusApplication from "../../../components/selectStatusApplication";
 import api from "../../../services/api";
 import { apiURL } from "../../../config";
+import MissionView from "./wrapper";
 
 import { formatStringLongDate } from "../../../utils";
 
-const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "REGION", "DEPARTMENT"];
-
-export default ({ mission, setYoung }) => {
-  const [data, setData] = useState();
-
-  useEffect(() => {
-    (async () => {
-      const { ok, data } = await api.get(`/application/mission/${mission._id}`);
-      if (ok) setData(data);
-    })();
-  }, []);
+export default ({ mission, applications }) => {
+  const data = applications;
 
   const handleClick = async (application) => {
     const { ok, data } = await api.get(`/referent/young/${application.youngId}`);
@@ -30,26 +22,24 @@ export default ({ mission, setYoung }) => {
 
   return (
     <div>
-      <ReactiveBase url={`${apiURL}/es`} app="mission" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-        <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-          <div style={{ flex: 2, position: "relative" }}>
-            <Table>
-              <thead>
-                <tr>
-                  <th width="40%">Volontaire</th>
-                  <th>Date</th>
-                  <th width="20%">Statut pour la mission</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.map((hit, i) => (
-                  <Hit key={i} hit={hit} onClick={() => handleClick(hit)} />
-                ))}
-              </tbody>
-            </Table>
-          </div>
-        </div>
-      </ReactiveBase>
+      <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
+        <MissionView mission={mission} tab="youngs">
+          <Table>
+            <thead>
+              <tr>
+                <th width="40%">Volontaire</th>
+                <th>Date</th>
+                <th width="20%">Statut pour la mission</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.map((hit, i) => (
+                <Hit key={i} hit={hit} onClick={() => handleClick(hit)} />
+              ))}
+            </tbody>
+          </Table>
+        </MissionView>
+      </div>
     </div>
   );
 };

@@ -192,6 +192,7 @@ const Subtitle = styled.div`
 
 const SubtitleLink = styled(Subtitle)`
   color: #5245cc;
+  text-transform: none;
 `;
 
 const Tag = styled.span`

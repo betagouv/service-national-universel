@@ -120,6 +120,11 @@ export default ({ onChange, value }) => {
             </tr>
           </tbody>
         </table>
+        {missionsInfo.count > 0 ? (
+          <Link to={`/structure/${value._id}/missions`}>
+            <Button className="btn-missions">Consulter toutes ses missions</Button>
+          </Link>
+        ) : null}
       </Info>
       <Team referents={referents} />
       {parentStructure ? (
@@ -248,6 +253,17 @@ const Button = styled.button`
     :hover {
       border-color: rgb(240, 218, 218);
       background-color: rgb(250, 230, 230);
+    }
+  }
+  &.btn-missions {
+    color: #646b7d;
+    border: 1px solid #dcdfe6;
+    font-size: 14px;
+    padding: 5px 15px;
+    :hover {
+      color: rgb(49, 130, 206);
+      border-color: rgb(193, 218, 240);
+      background-color: rgb(234, 243, 250);
     }
   }
 `;
