@@ -215,6 +215,14 @@ export const translate = (value) => {
       return "Ce fichier est corrompu";
     case "YOUNG_ALREADY_REGISTERED":
       return "Utilisateur déjà inscrit";
+    case "PUBLIC_TRANSPORT":
+      return "Transport en commun";
+    case "BIKE":
+      return "Vélo";
+    case "MOTOR":
+      return "Motorisé";
+    case "CARPOOLING":
+      return "Covoiturage";
     default:
       return value;
   }

@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import { translate as t } from "../../../utils";
 import WrapperPhase2 from "./wrapper";
 import api from "../../../services/api";
-import Avatar from "../../../components/Avatar";
+import ApplicationList from "./applicationList.js";
 
 export default ({ young }) => {
   return (
@@ -32,14 +32,18 @@ export default ({ young }) => {
             >
               <Bloc borderBottom>
                 <Details title="Domaines">{young.domains && young.domains.map((d, i) => <Badge key={i}>{t(d)}</Badge>)}</Details>
-                <Details title="Projet professionnel" value={`${young.professionnalProject} (${young.professionnalProjectPrecision})`} />
+                <Details title="Projet professionnel">
+                  {young.professionnalProject ? (
+                    <div>
+                      {t(young.professionnalProject)} {young.professionnalProjectPrecision ? `(${young.professionnalProjectPrecision})` : null}
+                    </div>
+                  ) : null}
+                </Details>
               </Bloc>
               <Bloc>
                 <Details title="Période privilégiée">
                   <div style={{ fontWeight: 600 }}>{t(young.period)}</div>
-                  {young.periodRanking.map((p, i) => (
-                    <div key={i} style={{ marginLeft: "1rem" }}>{`${i + 1}. ${t(p)}`}</div>
-                  ))}
+                  {young.periodRanking && young.periodRanking.map((p, i) => <div key={i} style={{ marginLeft: "1rem" }}>{`${i + 1}. ${t(p)}`}</div>)}
                 </Details>
                 <Details title="Mission à proximité de">
                   {young.mobilityNearHome === "true" ? <div>Votre domicile</div> : null}
@@ -52,11 +56,12 @@ export default ({ young }) => {
                   ) : null}
                 </Details>
                 <Details title="Transports privilégiés">
-                  {young.mobilityTransport.map((transport, i) => (
-                    <div key={i}>
-                      {t(transport)} {transport === "OTHER" ? `(${young.mobilityTransportOther})` : null}
-                    </div>
-                  ))}
+                  {young.mobilityTransport &&
+                    young.mobilityTransport.map((transport, i) => (
+                      <div key={i}>
+                        {t(transport)} {transport === "OTHER" ? `(${young.mobilityTransportOther})` : null}
+                      </div>
+                    ))}
                 </Details>
               </Bloc>
             </Col>
@@ -74,6 +79,9 @@ export default ({ young }) => {
             </Col>
           </Row>
         </ToggleBox>
+        <Box>
+          <ApplicationList young={young} />
+        </Box>
       </WrapperPhase2>
     </div>
   );
@@ -115,21 +123,6 @@ const Details = ({ title, value, children }) => {
   );
 };
 
-const DetailsToogle = ({ title, name, values, handleChange, disabled, optionLabels }) => {
-  return (
-    <div className="detail">
-      <div className="detail-title">{`${title} :`}</div>
-      <ToggleSwitch
-        optionLabels={optionLabels}
-        id={name}
-        checked={values[name] === "true"}
-        onChange={(checked) => handleChange({ target: { value: checked ? "true" : "false", name } })}
-        disabled={disabled}
-      />
-    </div>
-  );
-};
-
 const ToggleBox = ({ children }) => {
   const [hide, setHide] = useState(true);
   const toggle = () => {
@@ -139,7 +132,6 @@ const ToggleBox = ({ children }) => {
     <>
       <Box hide={hide} style={{ borderBottomLeftRadius: 0, borderBottomRightRadius: 0, marginBottom: 0 }}>
         {children}
-        {hide ? <Gradient color="white" /> : null}
       </Box>
       <Box style={{ borderTopLeftRadius: 0, borderTopRightRadius: 0, marginTop: 0 }}>
         <SeeMore onClick={toggle}>
@@ -179,21 +171,6 @@ const Badge = styled.span`
     background-color: ${color}33;
     border: 1px solid ${color};
   `};
-`;
-
-const Gradient = styled.div`
-  position: absolute;
-  bottom: 0px;
-  left: 0px;
-  width: 100%;
-  height: 100px;
-  background: -moz-linear-gradient(top, rgba(137, 255, 241, 0) 0%, rgba(255, 255, 255, 1) 100%); /* FF3.6+ */
-  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, rgba(137, 255, 241, 0)), color-stop(100%, rgba(255, 255, 255, 1))); /* Chrome,Safari4+ */
-  background: -webkit-linear-gradient(top, rgba(137, 255, 241, 0) 0%, rgba(255, 255, 255, 1) 100%); /* Chrome10+,Safari5.1+ */
-  background: -o-linear-gradient(top, rgba(137, 255, 241, 0) 0%, rgba(255, 255, 255, 1) 100%); /* Opera 11.10+ */
-  background: -ms-linear-gradient(top, rgba(137, 255, 241, 0) 0%, rgba(255, 255, 255, 1) 100%); /* IE10+ */
-  background: linear-gradient(to bottom, rgba(137, 255, 241, 0) 0%, rgba(255, 255, 255, 1) 80%); /* W3C */
-  filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#0089fff1', endColorstr='#FFFFFF',GradientType=0 ); /* IE6-9 */
 `;
 
 const Box = styled.div`
