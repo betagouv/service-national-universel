@@ -616,7 +616,7 @@ export const APPLICATION_STATUS_COLORS = {
   IN_PROGRESS: "#382F79",
 };
 
-export function getPasswordErrorMessage(v) {
+export function getPasswordErrorMessage(v, matomo) {
   if (!v) return "Ce champ est obligatoire";
   const schema = new passwordValidator();
   schema
@@ -632,6 +632,7 @@ export function getPasswordErrorMessage(v) {
     .symbols(); // Must have symbols
 
   if (!schema.validate(v)) {
+    matomo.logEvent("inscription", "password_failed");
     return "Votre mot de passe doit contenir au moins 8 caractères, dont une majuscule, une minuscule, un chiffre et un symbole";
   }
 }
