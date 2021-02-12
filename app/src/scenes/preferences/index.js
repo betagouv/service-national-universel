@@ -12,9 +12,8 @@ import Button from "./button";
 import RankingPeriod from "./rankingPeriod";
 import MobilityCard from "./mobilityCard";
 import TransportCard from "./transportCard";
-import { MISSION_DOMAINS, PERIOD, PROFESSIONNAL_PROJECT, PROFESSIONNAL_PROJECT_PRECISION } from "./utils";
 import ErrorMessage, { requiredMessage } from "./errorMessage";
-import { translate } from "../../utils";
+import { translate, MISSION_DOMAINS, PERIOD, PROFESSIONNAL_PROJECT, PROFESSIONNAL_PROJECT_PRECISION } from "../../utils";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);

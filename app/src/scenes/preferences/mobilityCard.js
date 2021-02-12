@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { translate } from "./utils";
+import { translate } from "../../utils";
 import Button from "./button";
 import { Field } from "formik";
 import ErrorMessage, { requiredMessage } from "./errorMessage";

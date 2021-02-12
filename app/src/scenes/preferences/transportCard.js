@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { translate } from "./utils";
+import { translate as t, TRANSPORT } from "../../utils";
 import Button from "./button";
 import { Field } from "formik";
 import { Row, Col } from "reactstrap";
@@ -18,23 +18,29 @@ export default ({ title, handleChange, values, errors, touched }) => {
     }
     handleChange({ target: { name: "mobilityTransport", value: d } });
     // delete the other if the other is unselected
-    if (d.indexOf("OTHER") === -1) handleChange({ target: { name: "mobilityTransportOther", value: "" } });
+    if (d.indexOf(TRANSPORT.OTHER) === -1) handleChange({ target: { name: "mobilityTransportOther", value: "" } });
   };
 
   return (
     <Container>
       <Title>{title}</Title>
       <Row style={{ marginBottom: "1rem" }}>
-        <Button name="mobilityTransport" onClick={() => onClick("PUBLIC")} values={values} value="PUBLIC" title="Réseau de transport en commun" />
-        <Button name="mobilityTransport" onClick={() => onClick("BIKE")} values={values} value="BIKE" title="Vélo" />
+        <Button
+          name="mobilityTransport"
+          onClick={() => onClick(TRANSPORT.PUBLIC_TRANSPORT)}
+          values={values}
+          value={TRANSPORT.PUBLIC_TRANSPORT}
+          title={t(TRANSPORT.PUBLIC_TRANSPORT)}
+        />
+        <Button name="mobilityTransport" onClick={() => onClick(TRANSPORT.BIKE)} values={values} value={TRANSPORT.BIKE} title={t(TRANSPORT.BIKE)} />
       </Row>
       <Row>
-        <Button name="mobilityTransport" onClick={() => onClick("MOTOR")} values={values} value="MOTOR" title="Motorisé" />
-        <Button name="mobilityTransport" onClick={() => onClick("CARPOOLING")} values={values} value="CARPOOLING" title="Covoiturage" />
-        <Button name="mobilityTransport" onClick={() => onClick("OTHER")} values={values} value="OTHER" title="Autre" />
+        <Button name="mobilityTransport" onClick={() => onClick(TRANSPORT.MOTOR)} values={values} value={TRANSPORT.MOTOR} title={t(TRANSPORT.MOTOR)} />
+        <Button name="mobilityTransport" onClick={() => onClick(TRANSPORT.CARPOOLING)} values={values} value={TRANSPORT.CARPOOLING} title={t(TRANSPORT.CARPOOLING)} />
+        <Button name="mobilityTransport" onClick={() => onClick(TRANSPORT.OTHER)} values={values} value={TRANSPORT.OTHER} title={t(TRANSPORT.OTHER)} />
       </Row>
       <ErrorMessage errors={errors} touched={touched} name="mobilityTransport" />
-      {values.mobilityTransport.indexOf("OTHER") !== -1 ? (
+      {values.mobilityTransport.indexOf(TRANSPORT.OTHER) !== -1 ? (
         <>
           <span style={{ textTransform: "uppercase", letterSpacing: "0.05rem", margin: "0.75rem 0", fontSize: "0,875rem", fontWeight: "500", color: "#6b7280" }}>Précisez</span>
           <Field

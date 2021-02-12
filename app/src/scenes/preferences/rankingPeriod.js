@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { PERIOD_DURING_HOLIDAYS, PERIOD_DURING_SCHOOL, PERIOD, translate } from "./utils";
+import { PERIOD_DURING_HOLIDAYS, PERIOD_DURING_SCHOOL, PERIOD, translate } from "../../utils";
 
 export default ({ title, period, handleChange, name, values }) => {
   const [items, setItems] = useState(values[name]);
