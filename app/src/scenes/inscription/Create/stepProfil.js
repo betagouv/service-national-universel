@@ -158,7 +158,7 @@ export default () => {
                 <Field
                   placeholder="Tapez votre mot de passe"
                   className="form-control"
-                  validate={getPasswordErrorMessage}
+                  validate={(v) => getPasswordErrorMessage(v, matomo)}
                   type="password"
                   name="password"
                   value={values.password}
