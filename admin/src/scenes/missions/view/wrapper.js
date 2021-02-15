@@ -37,7 +37,7 @@ export default ({ mission, tab, children }) => {
               Détails
             </TabItem>
             <TabItem isActive={tab === "youngs"} onClick={() => history.push(`/mission/${mission._id}/youngs`)}>
-              Youngs
+              Volontaires
             </TabItem>
             <TabItem isActive={tab === "historic"} onClick={() => history.push(`/mission/${mission._id}/historic`)}>
               Historique
