@@ -1,14 +1,16 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 import { translate as t } from "../../../utils";
 import WrapperPhase2 from "./wrapper";
-import api from "../../../services/api";
 import ApplicationList from "./applicationList.js";
 
 export default ({ young }) => {
+  const user = useSelector((state) => state.Auth.user);
+
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <WrapperPhase2 young={young} tab="phase2">
@@ -82,6 +84,13 @@ export default ({ young }) => {
         <Box>
           <ApplicationList young={young} />
         </Box>
+        {user.structureId && (
+          <Link to={`/mission/create/${user.structureId}`}>
+            <Box style={{ zIndex: -1, position: "relative" }}>
+              <Bloc title="Créer une nouvelle mission" />
+            </Box>
+          </Link>
+        )}
       </WrapperPhase2>
     </div>
   );
@@ -177,6 +186,7 @@ const Box = styled.div`
   width: ${(props) => props.width || 100}%;
   height: 100%;
   max-height: ${({ hide }) => (hide ? "20rem" : "none")};
+  ${({ hide }) => (hide ? "overflow: hidden;" : "")};
   background-color: #fff;
   filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.05));
   margin-bottom: 33px;

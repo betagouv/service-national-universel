@@ -96,6 +96,7 @@ const Hit = ({ hit, index }) => {
 
 const Proposal = ({}) => {
   const FILTERS = ["SEARCH"];
+  const [value, setValue] = useState("");
   return (
     <ProposalContainer>
       <ProposalTitle>Proposer une mission au volontaire</ProposalTitle>
@@ -112,9 +113,10 @@ const Proposal = ({}) => {
                 style={{ flex: 2 }}
                 innerClass={{ input: "searchbox" }}
                 autosuggest={false}
+                onValueChange={setValue}
               />
             </Filter>
-            <ResultTable>
+            <ResultTable hide={!value}>
               <ReactiveList
                 componentId="result"
                 react={{ and: FILTERS }}
@@ -246,6 +248,7 @@ const Filter = styled.div`
 `;
 
 const ResultTable = styled.div`
+  ${({ hide }) => (hide ? "display: none;" : "")}
   background-color: #fff;
   position: relative;
   padding-bottom: 10px;
