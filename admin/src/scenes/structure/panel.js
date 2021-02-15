@@ -120,11 +120,13 @@ export default ({ onChange, value }) => {
             </tr>
           </tbody>
         </table>
-        {missionsInfo.count > 0 ? (
-          <Link to={`/structure/${value._id}/missions`}>
-            <Button className="btn-missions">Consulter toutes ses missions</Button>
-          </Link>
-        ) : null}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+          {missionsInfo.count > 0 ? (
+            <Link to={`/structure/${value._id}/missions`}>
+              <Button className="btn-missions">Consulter toutes ses missions</Button>
+            </Link>
+          ) : null}
+        </div>
       </Info>
       <Team referents={referents} />
       {parentStructure ? (
