@@ -234,9 +234,9 @@ export default () => {
             </PreferenceItem>
             <PreferenceItem title="Quel format de mission préfèrez-vous ?">
               <Wrapper style={{ alignItems: "center", marginBottom: "0.5rem" }}>
-                <Button name="missionFormat" handleChange={handleChange} values={values} value="CONTINUOUS" title="Mission en continue (12 jours consécutifs)" />
+                <Button name="missionFormat" handleChange={handleChange} values={values} value="CONTINUOUS" title={translate("CONTINUOUS")} />
                 OU
-                <Button name="missionFormat" handleChange={handleChange} values={values} value="DISCONTINUOUS" title="Mission perlée (84 heures réparties sur l'année)" />
+                <Button name="missionFormat" handleChange={handleChange} values={values} value="DISCONTINUOUS" title={translate("DISCONTINUOUS")} />
               </Wrapper>
               <ErrorMessage errors={errors} touched={touched} name="missionFormat" />
             </PreferenceItem>
