@@ -533,7 +533,9 @@ export default (props) => {
                       <Badge color="#555555" value={values.mobilityNearRelativeZip} />
                     </ItemParent>
                     <ItemParent title="Moyen de transport priviligé">
-                      <Badge color="#555555" value={values.mobilityTransport} />
+                      {values.mobilityTransport.map((m, i) => (
+                        <Badge key={i} color="#555555" value={m} />
+                      ))}
                       {values.mobilityTransportOther ? <Badge color="#555555" value={values.mobilityTransportOther} /> : null}
                     </ItemParent>
                     <ItemParent title="Format de mission">

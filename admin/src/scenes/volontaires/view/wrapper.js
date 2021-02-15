@@ -43,7 +43,7 @@ export default ({ children, young, tab }) => {
             <TabItem isActive={tab === "phase2"} onClick={() => history.push(`/volontaire/${young._id}/phase2`)}>
               Phase 2
             </TabItem>
-            <TabItem isActive={tab === "phase3"} onClick={() => history.push(`/volontaire/${young._id}/phase3`)}>
+            <TabItem disabled isActive={tab === "phase3"} onClick={() => {}}>
               Phase 3
             </TabItem>
           </TabNavigationList>
@@ -116,7 +116,6 @@ const TabItem = styled.li`
   font-weight: 300;
   border-radius: 0.5rem;
   overflow: hidden;
-
   ${(props) =>
     props.isActive &&
     `
@@ -135,6 +134,12 @@ const TabItem = styled.li`
       border-top-left-radius: 4px;
       border-top-right-radius: 4px;
     }
+  `}
+  ${(props) =>
+    props.disabled &&
+    `
+    color: #bbb;
+    cursor: not-allowed;
   `}
 `;
 

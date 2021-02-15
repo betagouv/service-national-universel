@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import styled from "styled-components";
 
 import User from "./user";
@@ -7,7 +8,9 @@ export default ({ step }) => {
   return (
     <>
       <HeaderNav>
-        <h1>Mon espace volontaire</h1>
+        <Link to="/">
+          <h1>Mon espace volontaire</h1>
+        </Link>
         <User />
       </HeaderNav>
     </>
