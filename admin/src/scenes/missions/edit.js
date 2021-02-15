@@ -2,45 +2,56 @@ import React, { useEffect, useState } from "react";
 import { Col, Row, Input } from "reactstrap";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { Formik, Field } from "formik";
-import { Link, Redirect } from "react-router-dom";
+import { Redirect } from "react-router-dom";
 
 import MultiSelect from "../../components/Multiselect";
 import AddressInput from "../../components/addressInput";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
-
-import { domains, translate, departmentList, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL } from "../../utils";
+import { ReactiveBase, ReactiveList, SingleList, MultiDropdownList, MultiList, DataSearch } from "@appbaseio/reactivesearch";
+import { apiURL } from "../../config";
+import { domains, translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL } from "../../utils";
 import api from "../../services/api";
 
-export default (props) => {
-  const [defaultValue, setDefaultValue] = useState();
+export default ({ isNew, ...props }) => {
+  const [defaultValue, setDefaultValue] = useState(null);
   const [redirect, setRedirect] = useState(false);
   const [structure, setStructure] = useState();
 
   const user = useSelector((state) => state.Auth.user);
+  const canSelectStructure = user.role === "admin" || user.role === "referent";
 
   useEffect(() => {
     (async () => {
+      if (isNew) return;
       const id = props.match && props.match.params && props.match.params.id;
-      if (!id) return setDefaultValue(null);
       const { data } = await api.get(`/mission/${id}`);
       setDefaultValue(data);
     })();
     (async () => {
       if (!user.structureId) return setStructure({});
-      const { data } = await api.get(`/structure/${user.structureId}`);
-      setStructure(data);
+      const { data, ok } = await api.get(`/structure/${user.structureId}`);
+      if (ok) return setStructure(data);
+      console.error("Structure introuvable");
+      setStructure({});
     })();
   }, []);
 
   const handleSave = async (values) => {
-    const { ok, code, data: mission } = await api.put("/mission", values);
-    if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de votre progression", translate(code));
-    if (ok) toastr.success("Progression enregistrée");
+    if (!values._id) {
+      values.placesLeft = values.placesTotal;
+      const { ok, code, data: mission } = await api.post("/mission", values);
+      if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", translate(code));
+      if (ok) toastr.success("Mission enregistrée");
+    } else {
+      const { ok, code, data: mission } = await api.put("/mission", values);
+      if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", translate(code));
+      if (ok) toastr.success("Mission enregistrée");
+    }
   };
 
-  if (defaultValue === undefined || structure === undefined) return <div>Chargement...</div>;
+  if ((!defaultValue && !isNew) || structure === undefined) return <div>Chargement...</div>;
   if (redirect) return <Redirect to="/mission" />;
 
   return (
@@ -89,7 +100,7 @@ export default (props) => {
       }}
     >
       {({ values, handleChange, handleSubmit, isValid, errors, touched }) => (
-        <Wrapper>
+        <div>
           <Header>
             <Title>{defaultValue ? values.name : "Création d'une mission"}</Title>
             {Object.keys(errors).length ? <h3>Vous ne pouvez pas porposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
@@ -118,202 +129,199 @@ export default (props) => {
               </button>
             </ButtonContainer>
           </Header>
-          <Box>
-            <Row style={{ borderBottom: "2px solid #f4f5f7" }}>
-              <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
-                <Wrapper>
-                  <Legend>Détails de la mission</Legend>
-                  <FormGroup>
-                    <label>
-                      <span>*</span>NOM DE LA MISSION
-                    </label>
-                    <p style={{ color: "#a0aec1", fontSize: 12 }}>
-                      Privilégiez une phrase précisant l'action du volontaire.
-                      <br />
-                      Exemple: "Je fais les courses de produits pour mes voisons les plus fragiles
-                    </p>
-                    <Field validate={(v) => !v && requiredMessage} value={values.name} onChange={handleChange} name="name" placeholder="Nom de votre mission" />
-                    <ErrorMessage errors={errors} touched={touched} name="name" />
-                  </FormGroup>
-                  <FormGroup>
-                    <label>STRUCTURE RATTACHÉE</label>
-                    <Input disabled value={values.structureName} placeholder="Structure de la mission" />
-                  </FormGroup>
-                  <FormGroup>
-                    <label>DOMAINES D'ACTION</label>
-                    <MultiSelect value={values.domains} onChange={handleChange} name="domains" options={domains} placeholder="Sélectionnez un ou plusieurs domains" />
-                  </FormGroup>
-                  <FormGroup>
-                    <label>
-                      <span>*</span>TYPE DE MISSION
-                    </label>
-                    <Field validate={(v) => !v && requiredMessage} component="select" name="format" value={values.format} onChange={handleChange}>
-                      <option key="CONTINUOUS" value="CONTINUOUS">
-                        {translate("CONTINUOUS")}
-                      </option>
-                      <option key="DISCONTINUOUS" value="DISCONTINUOUS">
-                        {translate("DISCONTINUOUS")}
-                      </option>
-                    </Field>
-                    <ErrorMessage errors={errors} touched={touched} name="format" />
-                  </FormGroup>
-                  <FormGroup>
-                    <label>
-                      <span>*</span>OBJECTIFS DE LA MISSION
-                    </label>
-                    <Field
-                      validate={(v) => !v && requiredMessage}
-                      name="description"
-                      component="textarea"
-                      rows={2}
-                      value={values.description}
-                      onChange={handleChange}
-                      placeholder="Décrivez en quelques mots votre mission"
-                    />
-                    <ErrorMessage errors={errors} touched={touched} name="description" />
-                  </FormGroup>
-                  <FormGroup>
-                    <label>
-                      <span>*</span>ACTIONS CONCRÈTES CONFIÉES AU(X) VOLONTAIRE(S)
-                    </label>
-                    <Field
-                      validate={(v) => !v && requiredMessage}
-                      name="actions"
-                      component="textarea"
-                      rows={2}
-                      value={values.actions}
-                      onChange={handleChange}
-                      placeholder="Listez briévement les actions confiées au(x) volontaire(s)"
-                    />
-                    <ErrorMessage errors={errors} touched={touched} name="actions" />
-                  </FormGroup>
-                  <FormGroup>
-                    <label>CONTRAINTES SPÉCIFIQUES POUR CETTE MISSION ?</label>
-                    <p style={{ color: "#a0aec1", fontSize: 12 }}>
-                      Précisez les informations complémentaires à préciser au volontaire.
-                      <br />
-                      Exemple : Conditons physiques / Période de formation / Mission en soirée / etc
-                    </p>
-                    <Field
-                      name="contraintes"
-                      component="textarea"
-                      rows={2}
-                      value={values.contraintes}
-                      onChange={handleChange}
-                      placeholder="Spécifiez les contraintes liées à la mission"
-                    />
-                  </FormGroup>
-                </Wrapper>
-              </Col>
-              <Col md={6}>
-                <Row style={{ borderBottom: "2px solid #f4f5f7" }}>
+          <Wrapper>
+            <Box>
+              <Row style={{ borderBottom: "2px solid #f4f5f7" }}>
+                <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
                   <Wrapper>
-                    <Legend>Date et places disponibles</Legend>
+                    <Legend>Détails de la mission</Legend>
                     <FormGroup>
                       <label>
-                        <span>*</span>DATES DE LA MISSION
+                        <span>*</span>NOM DE LA MISSION
                       </label>
-                      <Row>
-                        <Col>
-                          <Field
-                            validate={(v) => {
-                              if (!v) return requiredMessage;
-                              const start = new Date(v);
-                              if (start.getTime() < Date.now()) return "La date de début ne peut pas être dans le passé.";
-                            }}
-                            type="date"
-                            name="startAt"
-                            value={values.startAt}
-                            onChange={handleChange}
-                            placeholder="Date de début"
-                          />
-                          <ErrorMessage errors={errors} touched={touched} name="startAt" />
-                        </Col>
-                        <Col>
-                          <Field
-                            validate={(v) => {
-                              if (!v) return requiredMessage;
-                              const end = new Date(v);
-                              const start = new Date(values.startAt);
-                              if (end.getTime() < start.getTime()) return "La date de fin doit être après la date de début.";
-                            }}
-                            type="date"
-                            name="endAt"
-                            value={values.endAt}
-                            onChange={handleChange}
-                            placeholder="Date de fin"
-                          />
-                          <ErrorMessage errors={errors} touched={touched} name="endAt" />
-                        </Col>
-                      </Row>
+                      <p style={{ color: "#a0aec1", fontSize: 12 }}>
+                        Privilégiez une phrase précisant l'action du volontaire.
+                        <br />
+                        Exemple: "Je fais les courses de produits pour mes voisons les plus fragiles"
+                      </p>
+                      <Field validate={(v) => !v && requiredMessage} value={values.name} onChange={handleChange} name="name" placeholder="Nom de votre mission" />
+                      <ErrorMessage errors={errors} touched={touched} name="name" />
                     </FormGroup>
                     <FormGroup>
-                      <label>FRÉQUENCE ESTIMÉE DE LA MISSION</label>
-                      <p style={{ color: "#a0aec1", fontSize: 12 }}>Par exemple, tous les mardis soirs, le samedi, tous les mercredis après-midi pendant un trimestre, etc.</p>
+                      <label>STRUCTURE RATTACHÉE</label>
+                      <Input disabled value={values.structureName} placeholder="Structure de la mission" />
+                    </FormGroup>
+                    <FormGroup>
+                      <label>DOMAINES D'ACTION</label>
+                      <MultiSelect value={values.domains} onChange={handleChange} name="domains" options={domains} placeholder="Sélectionnez un ou plusieurs domains" />
+                    </FormGroup>
+                    <FormGroup>
+                      <label>
+                        <span>*</span>TYPE DE MISSION
+                      </label>
+                      <Field validate={(v) => !v && requiredMessage} component="select" name="format" value={values.format} onChange={handleChange}>
+                        <option key="CONTINUOUS" value="CONTINUOUS">
+                          {translate("CONTINUOUS")}
+                        </option>
+                        <option key="DISCONTINUOUS" value="DISCONTINUOUS">
+                          {translate("DISCONTINUOUS")}
+                        </option>
+                      </Field>
+                      <ErrorMessage errors={errors} touched={touched} name="format" />
+                    </FormGroup>
+                    <FormGroup>
+                      <label>
+                        <span>*</span>OBJECTIFS DE LA MISSION
+                      </label>
                       <Field
-                        // validate={(v) => !v.length}
-                        name="frequence"
+                        validate={(v) => !v && requiredMessage}
+                        name="description"
                         component="textarea"
                         rows={2}
-                        value={values.frequence}
+                        value={values.description}
                         onChange={handleChange}
-                        placeholder="Fréquence estimée de la mission"
+                        placeholder="Décrivez en quelques mots votre mission"
                       />
+                      <ErrorMessage errors={errors} touched={touched} name="description" />
                     </FormGroup>
                     <FormGroup>
-                      <label>PÉRIODES POSSIBLES POUR RÉALISER LA MISSION</label>
-                      <MultiSelect
-                        value={values.period}
+                      <label>
+                        <span>*</span>ACTIONS CONCRÈTES CONFIÉES AU(X) VOLONTAIRE(S)
+                      </label>
+                      <Field
+                        validate={(v) => !v && requiredMessage}
+                        name="actions"
+                        component="textarea"
+                        rows={2}
+                        value={values.actions}
                         onChange={handleChange}
-                        name="period"
-                        options={Object.keys(MISSION_PERIOD_DURING_SCHOOL)
-                          .concat(Object.keys(MISSION_PERIOD_DURING_HOLIDAYS))
-                          .map((p) => translate(p))}
-                        placeholder="Sélectionnez une ou plusieurs périodes"
+                        placeholder="Listez briévement les actions confiées au(x) volontaire(s)"
                       />
+                      <ErrorMessage errors={errors} touched={touched} name="actions" />
                     </FormGroup>
                     <FormGroup>
-                      <label>NOMBRE DE VOLONTAIRES RECHERCHÉS POUR CETTE MISSION</label>
+                      <label>CONTRAINTES SPÉCIFIQUES POUR CETTE MISSION ?</label>
                       <p style={{ color: "#a0aec1", fontSize: 12 }}>
-                        Précisez ce nombre en fonction de vos contraintes logistiques et votre capacité à accompagner les volontaires.
+                        Précisez les informations complémentaires à préciser au volontaire.
+                        <br />
+                        Exemple : Conditons physiques / Période de formation / Mission en soirée / etc
                       </p>
-                      <Input name="placesTotal" onChange={handleChange} value={values.placesTotal} type="number" min={1} max={999} />
+                      <Field
+                        name="contraintes"
+                        component="textarea"
+                        rows={2}
+                        value={values.contraintes}
+                        onChange={handleChange}
+                        placeholder="Spécifiez les contraintes liées à la mission"
+                      />
                     </FormGroup>
                   </Wrapper>
-                </Row>
-                <Wrapper>
-                  <Legend>Tuteur de la mission</Legend>
-                  <FormGroup>
-                    <label>
-                      <span>*</span>TUTEUR
-                    </label>
-                    <p style={{ color: "#a0aec1", fontSize: 12 }}>
-                      Sélectionner le tuteur qui va s'occuper de la mission. <br />
-                      {/* todo invite tuteur */}
-                      {/* Vous pouvez également{" "}
+                </Col>
+                <Col md={6}>
+                  <Row style={{ borderBottom: "2px solid #f4f5f7" }}>
+                    <Wrapper>
+                      <Legend>Date et places disponibles</Legend>
+                      <FormGroup>
+                        <label>
+                          <span>*</span>DATES DE LA MISSION
+                        </label>
+                        <Row>
+                          <Col>
+                            <Field
+                              validate={(v) => {
+                                if (!v) return requiredMessage;
+                                const start = new Date(v);
+                                if (start.getTime() < Date.now()) return "La date de début ne peut pas être dans le passé.";
+                              }}
+                              type="date"
+                              name="startAt"
+                              value={values.startAt}
+                              onChange={handleChange}
+                              placeholder="Date de début"
+                            />
+                            <ErrorMessage errors={errors} touched={touched} name="startAt" />
+                          </Col>
+                          <Col>
+                            <Field
+                              validate={(v) => {
+                                if (!v) return requiredMessage;
+                                const end = new Date(v);
+                                const start = new Date(values.startAt);
+                                if (end.getTime() < start.getTime()) return "La date de fin doit être après la date de début.";
+                              }}
+                              type="date"
+                              name="endAt"
+                              value={values.endAt}
+                              onChange={handleChange}
+                              placeholder="Date de fin"
+                            />
+                            <ErrorMessage errors={errors} touched={touched} name="endAt" />
+                          </Col>
+                        </Row>
+                      </FormGroup>
+                      <FormGroup>
+                        <label>FRÉQUENCE ESTIMÉE DE LA MISSION</label>
+                        <p style={{ color: "#a0aec1", fontSize: 12 }}>Par exemple, tous les mardis soirs, le samedi, tous les mercredis après-midi pendant un trimestre, etc.</p>
+                        <Field
+                          // validate={(v) => !v.length}
+                          name="frequence"
+                          component="textarea"
+                          rows={2}
+                          value={values.frequence}
+                          onChange={handleChange}
+                          placeholder="Fréquence estimée de la mission"
+                        />
+                      </FormGroup>
+                      <FormGroup>
+                        <label>PÉRIODES POSSIBLES POUR RÉALISER LA MISSION</label>
+                        <MultiSelect
+                          value={values.period}
+                          onChange={handleChange}
+                          name="period"
+                          options={Object.keys(MISSION_PERIOD_DURING_SCHOOL)
+                            .concat(Object.keys(MISSION_PERIOD_DURING_HOLIDAYS))
+                            .map((p) => translate(p))}
+                          placeholder="Sélectionnez une ou plusieurs périodes"
+                        />
+                      </FormGroup>
+                      <FormGroup>
+                        <label>NOMBRE DE VOLONTAIRES RECHERCHÉS POUR CETTE MISSION</label>
+                        <p style={{ color: "#a0aec1", fontSize: 12 }}>
+                          Précisez ce nombre en fonction de vos contraintes logistiques et votre capacité à accompagner les volontaires.
+                        </p>
+                        <Input name="placesTotal" onChange={handleChange} value={values.placesTotal} type="number" min={1} max={999} />
+                      </FormGroup>
+                    </Wrapper>
+                  </Row>
+                  <Wrapper>
+                    <Legend>Tuteur de la mission</Legend>
+                    <FormGroup>
+                      <label>
+                        <span>*</span>TUTEUR
+                      </label>
+                      <p style={{ color: "#a0aec1", fontSize: 12 }}>
+                        Sélectionner le tuteur qui va s'occuper de la mission. <br />
+                        {/* todo invite tuteur */}
+                        {/* Vous pouvez également{" "}
                       <u>
                         <Link to="/team/invite">ajouter un nouveau tuteur</Link>
                       </u>{" "}
                       à votre équipe. */}
-                    </p>
-                    <Field component="select" name="tuteur_id" value={values.tuteur_id} onChange={handleChange}>
-                      <option value="">Sélectionner un tuteur</option>
-                      {/* todo map sur les tuteurs de la structure */}
-                      <option value="CONTINUOUS">{translate("CONTINUOUS")}</option>
-                      <option value="DISCONTINUOUS">{translate("DISCONTINUOUS")}</option>
-                    </Field>
-                  </FormGroup>
-                </Wrapper>
-              </Col>
-            </Row>
-            <Row>
-              <Col md={12}>
-                <Wrapper>
-                  <Legend>Lieu où se déroule la mission</Legend>
-                  <FormGroup>
-                    <label>
-                      <span>*</span>LIEU
-                    </label>
+                      </p>
+                      <Field component="select" name="tuteur_id" value={values.tuteur_id} onChange={handleChange}>
+                        <option value="">Sélectionner un tuteur</option>
+                        {/* todo map sur les tuteurs de la structure */}
+                        <option value="CONTINUOUS">{translate("CONTINUOUS")}</option>
+                        <option value="DISCONTINUOUS">{translate("DISCONTINUOUS")}</option>
+                      </Field>
+                    </FormGroup>
+                  </Wrapper>
+                </Col>
+              </Row>
+              <Row>
+                <Col md={12}>
+                  <Wrapper>
+                    <Legend>Lieu où se déroule la mission</Legend>
                     <AddressInput
                       keys={{ city: "city", zip: "zip", address: "address", location: "location", department: "department", region: "region" }}
                       values={values}
@@ -322,12 +330,11 @@ export default (props) => {
                       touched={touched}
                     />
                     <p style={{ color: "#a0aec1", fontSize: 12 }}>Si l'adresse n'est pas reconnue, veuillez saisir le nom de la ville.</p>
-                  </FormGroup>
-                </Wrapper>
-              </Col>
-            </Row>
+                  </Wrapper>
+                </Col>
+              </Row>
 
-            {/* <Legend>Détail de la mission</Legend>
+              {/* <Legend>Détail de la mission</Legend>
             <FormGroup>
               <label>
                 <span>*</span>EN QUOI LA MISSION PROPOSÉE PERMETTRA-T-ELLE AU VOLONTAIRE D’AGIR EN FAVEUR DE L’INTÉRÊT GÉNÉRAL ?
@@ -345,40 +352,44 @@ export default (props) => {
                 placeholder="Décrivez votre mission, en quelques mots"
               />
             </FormGroup> */}
-          </Box>
-          <Header style={{ justifyContent: "flex-end" }}>
-            {Object.keys(errors).length ? <h3>Vous ne pouvez pas porposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
-            <ButtonContainer>
-              <button
-                className="white-button"
-                disabled={!isValid}
-                onClick={() => {
-                  console.log("SAVE");
-                  handleChange({ target: { value: "DRAFT", name: "status" } });
-                  handleSubmit();
-                }}
-              >
-                Enregistrer
-              </button>
-              <button
-                disabled={!isValid}
-                onClick={() => {
-                  handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
-                  handleSubmit();
-                }}
-              >
-                Enregistrer et proposer la mission
-              </button>
-            </ButtonContainer>
-          </Header>
-        </Wrapper>
+            </Box>
+            <Header style={{ justifyContent: "flex-end" }}>
+              {Object.keys(errors).length ? <h3>Vous ne pouvez pas porposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
+              <ButtonContainer>
+                <button
+                  className="white-button"
+                  disabled={!isValid}
+                  onClick={() => {
+                    console.log("SAVE");
+                    handleChange({ target: { value: "DRAFT", name: "status" } });
+                    handleSubmit();
+                  }}
+                >
+                  Enregistrer
+                </button>
+                <button
+                  disabled={!isValid}
+                  onClick={() => {
+                    handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
+                    handleSubmit();
+                  }}
+                >
+                  Enregistrer et proposer la mission
+                </button>
+              </ButtonContainer>
+            </Header>
+          </Wrapper>
+        </div>
       )}
     </Formik>
   );
 };
 
 const Wrapper = styled.div`
-  padding: 3rem;
+  padding: 2rem;
+  li {
+    list-style-type: none;
+  }
 `;
 
 const Header = styled.div`
