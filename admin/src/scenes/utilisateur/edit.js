@@ -5,6 +5,7 @@ import { Field, Formik } from "formik";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/fr";
+import { useSelector } from "react-redux";
 
 import DateInput from "../../components/dateInput";
 import { departmentList, regionList, translate, REFERENT_ROLES } from "../../utils";
@@ -13,6 +14,7 @@ import { toastr } from "react-redux-toastr";
 
 export default (props) => {
   const [user, setUser] = useState();
+  const currentUser = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
     (async () => {
@@ -76,29 +78,31 @@ export default (props) => {
                   </BoxContent>
                 </Box>
               </Col>
-              <Col md={6} style={{ marginBottom: "20px" }}>
-                <Box>
-                  <BoxTitle>Information</BoxTitle>
-                  <BoxContent direction="column">
-                    <Select
-                      name="role"
-                      values={values}
-                      handleChange={handleChange}
-                      title="Rôle"
-                      options={[REFERENT_ROLES.REFERENT_DEPARTMENT, REFERENT_ROLES.REFERENT_REGION, REFERENT_ROLES.ADMIN].map((key) => ({ value: key, label: translate(key) }))}
-                    />
-                    <Select name="department" values={values} handleChange={handleChange} title="Département" options={departmentList.map((d) => ({ value: d, label: d }))} />
-                    <Select
-                      disabled={values.role === REFERENT_ROLES.REFERENT_DEPARTMENT}
-                      name="region"
-                      values={values}
-                      handleChange={handleChange}
-                      title="Région"
-                      options={regionList.map((r) => ({ value: r, label: r }))}
-                    />
-                  </BoxContent>
-                </Box>
-              </Col>
+              {currentUser.role === "admin" && (
+                <Col md={6} style={{ marginBottom: "20px" }}>
+                  <Box>
+                    <BoxTitle>Information</BoxTitle>
+                    <BoxContent direction="column">
+                      <Select
+                        name="role"
+                        values={values}
+                        handleChange={handleChange}
+                        title="Rôle"
+                        options={[REFERENT_ROLES.REFERENT_DEPARTMENT, REFERENT_ROLES.REFERENT_REGION, REFERENT_ROLES.ADMIN].map((key) => ({ value: key, label: translate(key) }))}
+                      />
+                      <Select name="department" values={values} handleChange={handleChange} title="Département" options={departmentList.map((d) => ({ value: d, label: d }))} />
+                      <Select
+                        disabled={values.role === REFERENT_ROLES.REFERENT_DEPARTMENT}
+                        name="region"
+                        values={values}
+                        handleChange={handleChange}
+                        title="Région"
+                        options={regionList.map((r) => ({ value: r, label: r }))}
+                      />
+                    </BoxContent>
+                  </Box>
+                </Col>
+              )}
             </Row>
           </>
         )}

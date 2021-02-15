@@ -12,6 +12,7 @@ export default () => {
     if (user.role === "admin") return "Espace modérateur";
     if (user.role === "referent_department") return "ESPACE RÉFÉRENT DÉPARTEMENTAL";
     if (user.role === "referent_region") return "ESPACE RÉFÉRENT REGIONAL";
+    if (user.role === "responsible") return "Espace responsable";
     return "";
   }
 
@@ -27,6 +28,21 @@ export default () => {
         <li>
           <NavLink to="/dashboard">Tableau de bord</NavLink>
         </li>
+        {user.role === "responsible" && (
+          <>
+            <li>
+              <NavLink to={`/structure/${user.structureId}`}>Ma structure</NavLink>
+            </li>
+            <li>
+              <NavLink to="/mission">Missions</NavLink>
+            </li>
+            <li>
+              <NavLink to="/volontaire">
+                Volontaires <i>(BÊTA)</i>
+              </NavLink>
+            </li>
+          </>
+        )}
         {user.role === "admin" && (
           <>
             <li>
@@ -52,9 +68,11 @@ export default () => {
         {/*   <li>
           <NavLink to="/tuteur">Tuteurs</NavLink>
         </li> */}
-        <li>
-          <NavLink to="/inscription">Inscriptions</NavLink>
-        </li>
+        {user.role !== "responsible" && (
+          <li>
+            <NavLink to="/inscription">Inscriptions</NavLink>
+          </li>
+        )}
       </ul>
       {/* <Version>
         <a href="#" className="info help">

@@ -41,11 +41,25 @@ function filter(body, user, index) {
   let filter = [];
   if (user.role === "admin") return body;
 
-  filter.push({ terms: { "status.keyword": ["WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "VALIDATED"] } });
-  // filter.push({ terms: { "phase.keyword": ["INSCRIPTION"] } });
+  // Filter young when user is not admin
+  //
+  // WARNING!
+  // There is a big design issue here. I spent 15 minutes to figure out why my ES query failed.
+  // This sounds like a hack and it's not scalable.
+  //
+  // @rap2h (from @rap2h): refactor this please.
+  if (index === "young") {
+    filter.push({ terms: { "status.keyword": ["WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "VALIDATED"] } });
 
-  if (user.role === "referent_region") filter.push({ term: { "region.keyword": user.region } });
-  if (user.role === "referent_department") filter.push({ term: { "department.keyword": user.department } });
+    if (user.role === "referent_region") filter.push({ term: { "region.keyword": user.region } });
+    if (user.role === "referent_department") filter.push({ term: { "department.keyword": user.department } });
+  }
+  if (index === "referent") {
+    if (user.role === "responsible") filter.push({ terms: { "role.keyword": ["responsible", "supervisor"] } });
+  }
+  if (index === "mission") {
+    if (user.role === "responsible") filter.push({ terms: { "structureId.keyword": [user.structureId] } });
+  }
 
   const arr = body.split(`\n`);
   const newArr = [];

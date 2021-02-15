@@ -13,6 +13,8 @@ import Profil from "./scenes/profil";
 import Settings from "./scenes/settings";
 
 import Dashboard from "./scenes/dashboard";
+import DashboardResponsible from "./scenes/dashboard-responsible";
+
 import Structure from "./scenes/structure";
 import Missions from "./scenes/missions";
 import Volontaires from "./scenes/volontaires";
@@ -91,7 +93,7 @@ const Home = () => {
           <RestrictedRoute path="/mission" component={Missions} />
           <RestrictedRoute path="/inscription" component={Inscription} />
           <RestrictedRoute path="/user" component={Utilisateur} />
-          <RestrictedRoute path="/" component={Dashboard} />
+          <RestrictedRoute path="/" component={["supervisor", "responsible"].includes(user?.role) ? DashboardResponsible : Dashboard} />
         </Switch>
       </div>
     </div>

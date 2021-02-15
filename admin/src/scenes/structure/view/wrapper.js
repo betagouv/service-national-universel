@@ -2,14 +2,18 @@ import React from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { Col, Row } from "reactstrap";
-import api from "../../../services/api";
+
 import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
+import { useSelector } from "react-redux";
 
 import { translate } from "../../../utils";
+import api from "../../../services/api";
 
 export default ({ children, structure, tab }) => {
   const history = useHistory();
+  const user = useSelector((state) => state.Auth.user);
+  const isResponsible = user.role === "responsible";
 
   const handleDelete = async () => {
     if (!confirm("Êtes-vous sûr(e) de vouloir supprimer cette structure ?")) return;
@@ -35,18 +39,24 @@ export default ({ children, structure, tab }) => {
             <TabItem isActive={tab === "details"} onClick={() => history.push(`/structure/${structure._id}`)}>
               Détails
             </TabItem>
-            <TabItem isActive={tab === "missions"} onClick={() => history.push(`/structure/${structure._id}/missions`)}>
-              Missions
-            </TabItem>
-            <TabItem isActive={tab === "historic"} onClick={() => history.push(`/structure/${structure._id}/historic`)}>
-              Historique
-            </TabItem>
+            {!isResponsible && (
+              <>
+                <TabItem isActive={tab === "missions"} onClick={() => history.push(`/structure/${structure._id}/missions`)}>
+                  Missions
+                </TabItem>
+                <TabItem isActive={tab === "historic"} onClick={() => history.push(`/structure/${structure._id}/historic`)}>
+                  Historique
+                </TabItem>
+              </>
+            )}
           </TabNavigationList>
         </div>
         <div style={{ display: "flex" }}>
-          <Link to={`/mission/create/${structure._id}`}>
-            <Button className="btn-blue">Nouvelle mission</Button>
-          </Link>
+          {!isResponsible && (
+            <Link to={`/mission/create/${structure._id}`}>
+              <Button className="btn-blue">Nouvelle mission</Button>
+            </Link>
+          )}
           <Link to={`/structure/${structure._id}/edit`}>
             <Button className="btn-blue">Modifier</Button>
           </Link>

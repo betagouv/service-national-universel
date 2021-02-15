@@ -177,6 +177,7 @@ const Action = ({ hit, color }) => {
       if (!ok) return toastr.error("Oops, une erreur est survenu lors de la masquarade !", translate(e.code));
       if (token) api.setToken(token);
       if (data) dispatch(setUser(data));
+      window.location.href = "/";
     } catch (e) {
       console.log(e);
       toastr.error("Oops, une erreur est survenu lors de la masquarade !", translate(e.code));

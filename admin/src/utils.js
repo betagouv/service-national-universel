@@ -121,7 +121,7 @@ export const translate = (value) => {
     case "referent_region":
       return "Référent régional";
     case "responsible":
-      return "Résponsable";
+      return "Responsable";
     case "supervisor":
       return "Superviseur";
     case "INSCRIPTION":
