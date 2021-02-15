@@ -36,6 +36,7 @@ const Schema = new mongoose.Schema({
     type: String,
     enum: [
       "WAITING_VALIDATION",
+      "WAITING_ACCEPTATION",
       "VALIDATED",
       "REFUSED",
       "CANCEL",

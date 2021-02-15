@@ -14,6 +14,8 @@ export const translate = (value) => {
       return "En attente d'affectation";
     case "WAITING_VALIDATION":
       return "En attente de validation";
+    case "WAITING_ACCEPTATION":
+      return "En attente d'acceptation";
     case "WAITING_CORRECTION":
       return "En attente de correction";
     case "IN_PROGRESS":
@@ -597,6 +599,7 @@ export const YOUNG_PHASE = {
 
 export const APPLICATION_STATUS = {
   WAITING_VALIDATION: "WAITING_VALIDATION",
+  WAITING_ACCEPTATION: "WAITING_ACCEPTATION",
   VALIDATED: "VALIDATED",
   REFUSED: "REFUSED",
   CANCEL: "CANCEL",
@@ -610,7 +613,7 @@ export const APPLICATION_STATUS = {
 
 export const APPLICATION_STATUS_COLORS = {
   WAITING_VALIDATION: "#FE7B52",
-  WAITING_CORRECTION: "#FEB951",
+  WAITING_ACCEPTATION: "#FEB951",
   VALIDATED: "#6CC763",
   DONE: "#1C7713",
   PRESELECTED: "#d9bb71",

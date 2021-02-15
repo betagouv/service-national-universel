@@ -11,7 +11,7 @@ const ReferentObject = require("../models/referent");
 const SERVER_ERROR = "SERVER_ERROR";
 const NOT_FOUND = "NOT_FOUND";
 
-router.post("/", passport.authenticate("young", { session: false }), async (req, res) => {
+router.post("/", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
   try {
     const obj = req.body;
     if (!obj.hasOwnProperty("priority")) {

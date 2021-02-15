@@ -22,7 +22,7 @@ export default ({ application, index }) => {
     <Draggable draggableId={value._id} index={index}>
       {(provided) => (
         <Container ref={provided.innerRef} {...provided.draggableProps}>
-          <Header {...provided.dragHandleProps}>CHOIX N°{index + 1}</Header>
+          <Header {...provided.dragHandleProps}>{value.status === APPLICATION_STATUS.WAITING_ACCEPTATION ? "PROPOSITION" : `CHOIX N°${index + 1}`}</Header>
           <Separator />
           <Card to={`/mission/${value.mission._id}`}>
             <div className="info">
@@ -58,7 +58,7 @@ export default ({ application, index }) => {
 
 const Footer = ({ application, tutor, onChange }) => {
   const setStatus = async (status) => {
-    if (!confirm("Êtes vous sûr de vouloir abandonner cette candidature ?")) return;
+    if (!confirm("Êtes vous sûr de vouloir modifier cette candidature ?")) return;
     const { ok, data, code } = await api.put(`/application`, { _id: application._id, status });
     onChange(data);
   };
@@ -89,6 +89,16 @@ const Footer = ({ application, tutor, onChange }) => {
           <Separator />
           <ContainerFooter>
             <div onClick={() => setStatus(APPLICATION_STATUS.CANCEL)}>Annuler cette candidature</div>
+          </ContainerFooter>
+        </>
+      );
+    } else if (status === APPLICATION_STATUS.WAITING_ACCEPTATION) {
+      return (
+        <>
+          <Separator />
+          <ContainerFooter>
+            <div onClick={() => setStatus(APPLICATION_STATUS.CANCEL)}>Décliner cette proposition</div>
+            <div onClick={() => setStatus(APPLICATION_STATUS.WAITING_VALIDATION)}>Accepter cette proposition</div>
           </ContainerFooter>
         </>
       );

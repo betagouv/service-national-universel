@@ -266,6 +266,15 @@ router.post("/email/:template/:youngId", passport.authenticate("referent", { ses
       htmlContent = htmlContent.replace(/{{lastName}}/g, young.lastName);
       htmlContent = htmlContent.replace(/\n/g, "<br/>");
       subject = "Votre candidature au SNU a été refusée";
+    } else if (template === "apply") {
+      htmlContent = fs.readFileSync(path.resolve(__dirname, "../templates/apply.html")).toString();
+      htmlContent = htmlContent.replace(/{{cta}}/g, "https://inscription.snu.gouv.fr/auth");
+      htmlContent = htmlContent.replace(/{{firstName}}/g, young.firstName);
+      htmlContent = htmlContent.replace(/{{lastName}}/g, young.lastName);
+      htmlContent = htmlContent.replace(/{{missionName}}/g, req.body.missionName);
+      htmlContent = htmlContent.replace(/{{structureName}}/g, req.body.structureName);
+      htmlContent = htmlContent.replace(/\n/g, "<br/>");
+      subject = `La mission ${req.body.missionName} devrait vous intéresser !`;
     }
 
     await sendEmail({ name: `${young.firstName} ${young.lastName}`, email: young.email }, subject, htmlContent);

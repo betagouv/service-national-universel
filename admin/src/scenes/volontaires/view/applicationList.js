@@ -6,21 +6,23 @@ import { ReactiveBase, ReactiveList, SingleList, MultiDropdownList, MultiList, D
 import { apiURL } from "../../../config";
 import api from "../../../services/api";
 import SelectStatusApplication from "../../../components/selectStatusApplication";
-import { formatStringDate } from "../../../utils";
+import { APPLICATION_STATUS, formatStringDate } from "../../../utils";
 import { Link } from "react-router-dom";
 
 export default ({ young }) => {
   const [applications, setApplications] = useState(null);
 
   useEffect(() => {
-    (async () => {
-      if (!young) return;
-      const { ok, data, code } = await api.get(`/application/young/${young._id}`);
-      if (!ok) return toastr.error("Oups, une erreur est survenue", code);
-      data.sort((a, b) => (parseInt(a.priority) > parseInt(b.priority) ? 1 : parseInt(b.priority) > parseInt(a.priority) ? -1 : 0));
-      return setApplications(data);
-    })();
+    getApplications();
   }, []);
+
+  const getApplications = async () => {
+    if (!young) return;
+    const { ok, data, code } = await api.get(`/application/young/${young._id}`);
+    if (!ok) return toastr.error("Oups, une erreur est survenue", code);
+    data.sort((a, b) => (parseInt(a.priority) > parseInt(b.priority) ? 1 : parseInt(b.priority) > parseInt(a.priority) ? -1 : 0));
+    return setApplications(data);
+  };
 
   if (!applications) return <div>Chargement</div>;
 
@@ -44,7 +46,7 @@ export default ({ young }) => {
         </tbody>
       </Table>
       {applications.length ? null : <NoResult>Aucune candidature n'est liée à ce volontaire.</NoResult>}
-      <Proposal />
+      <Proposal young={young} onSend={getApplications} />
     </>
   );
 };
@@ -65,7 +67,7 @@ const Hit = ({ hit, index }) => {
       <td>
         <Mission to={`/mission/${hit.missionId}`}>
           <div>
-            <h3>Choix {index + 1}</h3>
+            <h3>{hit.status === APPLICATION_STATUS.WAITING_ACCEPTATION ? "Mission proposée au volontaire" : `Choix ${index + 1}`}</h3>
             <h2>{mission.name}</h2>
             <p>
               {mission.structureName} {`• ${mission.city} (${mission.department})`}
@@ -94,9 +96,35 @@ const Hit = ({ hit, index }) => {
   );
 };
 
-const Proposal = ({}) => {
+const Proposal = ({ young, onSend }) => {
   const FILTERS = ["SEARCH"];
-  const [value, setValue] = useState("");
+  const [searchedValue, setSearchedValue] = useState("");
+
+  const handleProposal = async (mission) => {
+    const application = {
+      youngId: young._id,
+      youngFirstName: young.firstName,
+      youngLastName: young.lastName,
+      youngEmail: young.email,
+      youngBirthdateAt: young.birthdateAt,
+      youngCity: young.city,
+      youngDepartment: young.department,
+      missionId: mission._id,
+      missionName: mission.name,
+      missionDepartment: mission.department,
+      missionRegion: mission.region,
+      status: APPLICATION_STATUS.WAITING_ACCEPTATION,
+    };
+    const { ok, code } = await api.post(`/application`, application);
+    if (!ok) return toastr.error("Oups, une erreur est survenue lors de la candidature", code);
+
+    //send mail
+    const { ok: okMail, code: codeMail } = await api.post(`/referent/email/apply/${young._id}`, { missionName: mission.name, structureName: mission.structureName });
+    if (!okMail) return toastr.error("Oups, une erreur est survenue lors de l'envoi du mail", codeMail);
+    toastr.success("Email envoyé !");
+    return onSend();
+  };
+
   return (
     <ProposalContainer>
       <ProposalTitle>Proposer une mission au volontaire</ProposalTitle>
@@ -113,10 +141,10 @@ const Proposal = ({}) => {
                 style={{ flex: 2 }}
                 innerClass={{ input: "searchbox" }}
                 autosuggest={false}
-                onValueChange={setValue}
+                onValueChange={setSearchedValue}
               />
             </Filter>
-            <ResultTable hide={!value}>
+            <ResultTable hide={!searchedValue}>
               <ReactiveList
                 componentId="result"
                 react={{ and: FILTERS }}
@@ -150,7 +178,7 @@ const Proposal = ({}) => {
                     </thead> */}
                     <tbody>
                       {data.map((hit, i) => (
-                        <HitMission key={i} hit={hit} onClick={() => {}} />
+                        <HitMission key={i} hit={hit} onSend={() => handleProposal(hit)} />
                       ))}
                     </tbody>
                   </Table>
@@ -164,10 +192,10 @@ const Proposal = ({}) => {
   );
 };
 
-const HitMission = ({ hit, onClick }) => {
+const HitMission = ({ hit, onSend }) => {
   // console.log("h", hit);
   return (
-    <tr onClick={onClick}>
+    <tr>
       <td>
         <TeamMember to={`/mission/${hit._id}`}>
           <div>
@@ -192,7 +220,11 @@ const HitMission = ({ hit, onClick }) => {
           {hit.placesTaken} / {hit.placesTotal}
         </div>
       </td>
-      <td onClick={(e) => e.stopPropagation()}>Proposer cette mission</td>
+      <td onClick={(e) => e.stopPropagation()}>
+        <Button className="btn-blue" onClick={onSend}>
+          Proposer cette mission
+        </Button>
+      </td>
     </tr>
   );
 };
@@ -362,5 +394,25 @@ const Mission = styled(Link)`
     color: #606266;
     font-size: 12px;
     margin: 0;
+  }
+`;
+
+const Button = styled.button`
+  /* margin: 0 0.5rem; */
+  align-self: flex-start;
+  border-radius: 0.5rem;
+  padding: 5px;
+  font-size: 0.9rem;
+  /* min-width: 100px; */
+  width: 100%;
+  font-weight: 500;
+  cursor: pointer;
+  background-color: #fff;
+  color: #242526;
+  border: 1px solid #dcdfe6;
+  :hover {
+    color: rgb(49, 130, 206);
+    border-color: rgb(193, 218, 240);
+    background-color: rgb(234, 243, 250);
   }
 `;
