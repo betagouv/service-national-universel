@@ -9,34 +9,47 @@ import { Redirect } from "react-router-dom";
 import MultiSelect from "../../components/Multiselect";
 import AddressInput from "../../components/addressInput";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
-import { ReactiveBase, ReactiveList, SingleList, MultiDropdownList, MultiList, DataSearch } from "@appbaseio/reactivesearch";
-import { apiURL } from "../../config";
 import { domains, translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL } from "../../utils";
 import api from "../../services/api";
+import Invite from "../structure/components/invite";
 
 export default ({ isNew = false, ...props }) => {
   const [defaultValue, setDefaultValue] = useState(null);
   const [redirect, setRedirect] = useState(false);
   const [structure, setStructure] = useState();
-
+  const [referents, setReferents] = useState([]);
+  const [showTutor, setShowTutor] = useState();
   const user = useSelector((state) => state.Auth.user);
-  const canSelectStructure = user.role === "admin" || user.role === "referent";
+
+  async function initMission() {
+    if (isNew) return setDefaultValue(null);
+    const id = props.match && props.match.params && props.match.params.id;
+    const { data } = await api.get(`/mission/${id}`);
+    setDefaultValue(data);
+  }
+  async function initReferents() {
+    if (!structure) return;
+    const queries = [{ index: "referent", type: "_doc" }, { query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": structure._id } }] } } }];
+    const { responses } = await api.esQuery(queries);
+    if (responses) setReferents(responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
+  }
+
+  // When mission is new, we take the structure of the current user.
+  async function initStructure() {
+    if (defaultValue === null && !user.structureId) return setStructure(null);
+    const { data, ok } = await api.get(`/structure/${defaultValue === null ? user.structureId : defaultValue.structureId}`);
+    return setStructure(ok ? data : null);
+  }
 
   useEffect(() => {
-    (async () => {
-      if (isNew) return;
-      const id = props.match && props.match.params && props.match.params.id;
-      const { data } = await api.get(`/mission/${id}`);
-      setDefaultValue(data);
-    })();
-    (async () => {
-      if (!user.structureId) return setStructure({});
-      const { data, ok } = await api.get(`/structure/${user.structureId}`);
-      if (ok) return setStructure(data);
-      console.error("Structure introuvable");
-      setStructure({});
-    })();
+    initMission();
   }, []);
+  useEffect(() => {
+    initStructure();
+  }, [defaultValue]);
+  useEffect(() => {
+    initReferents();
+  }, [structure]);
 
   const handleSave = async (values) => {
     if (!values._id) {
@@ -83,13 +96,11 @@ export default ({ isNew = false, ...props }) => {
       }
       onSubmit={async (values) => {
         try {
-          console.log("values", values);
           if (!values._id) {
             values.placesLeft = values.placesTotal;
             await api.post("/mission", values);
             return toastr.success("Mission créée");
           }
-          //TODO PLACE TAKEN
           values.placesLeft = values.placesTotal - values.placesTaken;
           await api.put(`/mission/${values._id}`, values);
           return toastr.success("Mission mise à jour");
@@ -110,7 +121,6 @@ export default ({ isNew = false, ...props }) => {
                   className="white-button"
                   disabled={!isValid}
                   onClick={() => {
-                    console.log("SAVE");
                     handleChange({ target: { value: "DRAFT", name: "status" } });
                     handleSave(values);
                   }}
@@ -177,7 +187,7 @@ export default ({ isNew = false, ...props }) => {
                         validate={(v) => !v && requiredMessage}
                         name="description"
                         component="textarea"
-                        rows={2}
+                        rows={4}
                         value={values.description}
                         onChange={handleChange}
                         placeholder="Décrivez en quelques mots votre mission"
@@ -192,7 +202,7 @@ export default ({ isNew = false, ...props }) => {
                         validate={(v) => !v && requiredMessage}
                         name="actions"
                         component="textarea"
-                        rows={2}
+                        rows={4}
                         value={values.actions}
                         onChange={handleChange}
                         placeholder="Listez briévement les actions confiées au(x) volontaire(s)"
@@ -209,8 +219,8 @@ export default ({ isNew = false, ...props }) => {
                       <Field
                         name="contraintes"
                         component="textarea"
-                        rows={2}
-                        value={values.contraintes}
+                        rows={4}
+                        value={values.contraintes || ""}
                         onChange={handleChange}
                         placeholder="Spécifiez les contraintes liées à la mission"
                       />
@@ -230,12 +240,10 @@ export default ({ isNew = false, ...props }) => {
                             <Field
                               validate={(v) => {
                                 if (!v) return requiredMessage;
-                                const start = new Date(v);
-                                if (start.getTime() < Date.now()) return "La date de début ne peut pas être dans le passé.";
                               }}
                               type="date"
                               name="startAt"
-                              value={values.startAt}
+                              value={new Date(values.startAt).toISOString().split("T")[0]}
                               onChange={handleChange}
                               placeholder="Date de début"
                             />
@@ -251,7 +259,7 @@ export default ({ isNew = false, ...props }) => {
                               }}
                               type="date"
                               name="endAt"
-                              value={values.endAt}
+                              value={new Date(values.endAt).toISOString().split("T")[0]}
                               onChange={handleChange}
                               placeholder="Date de fin"
                             />
@@ -303,18 +311,31 @@ export default ({ isNew = false, ...props }) => {
                       <p style={{ color: "#a0aec1", fontSize: 12 }}>
                         Sélectionner le tuteur qui va s'occuper de la mission. <br />
                         {/* todo invite tuteur */}
-                        {/* Vous pouvez également{" "}
-                      <u>
-                        <Link to="/team/invite">ajouter un nouveau tuteur</Link>
-                      </u>{" "}
-                      à votre équipe. */}
+                        {structure && (
+                          <span>
+                            Vous pouvez également{" "}
+                            <u>
+                              <a
+                                style={{ textDecoration: "underline", cursor: "pointer" }}
+                                onClick={() => {
+                                  setShowTutor(true);
+                                }}
+                              >
+                                ajouter un nouveau tuteur
+                              </a>
+                            </u>{" "}
+                            à votre équipe.
+                          </span>
+                        )}
                       </p>
-                      <Field component="select" name="tuteur_id" value={values.tuteur_id} onChange={handleChange}>
+                      <Field component="select" name="tutorId" value={values.tutorId} onChange={handleChange}>
                         <option value="">Sélectionner un tuteur</option>
-                        {/* todo map sur les tuteurs de la structure */}
-                        <option value="CONTINUOUS">{translate("CONTINUOUS")}</option>
-                        <option value="DISCONTINUOUS">{translate("DISCONTINUOUS")}</option>
+                        {referents &&
+                          referents.map((referent) => {
+                            return <option value={referent._id}>{`${referent.firstName} ${referent.lastName}`}</option>;
+                          })}
                       </Field>
+                      {structure && showTutor && <Invite structure={structure} />}
                     </FormGroup>
                   </Wrapper>
                 </Col>
@@ -357,17 +378,18 @@ export default ({ isNew = false, ...props }) => {
             <Header style={{ justifyContent: "flex-end" }}>
               {Object.keys(errors).length ? <h3>Vous ne pouvez pas porposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
               <ButtonContainer>
-                <button
-                  className="white-button"
-                  disabled={!isValid}
-                  onClick={() => {
-                    console.log("SAVE");
-                    handleChange({ target: { value: "DRAFT", name: "status" } });
-                    handleSubmit();
-                  }}
-                >
-                  Enregistrer
-                </button>
+                {!defaultValue ? (
+                  <button
+                    className="white-button"
+                    disabled={!isValid}
+                    onClick={() => {
+                      handleChange({ target: { value: "DRAFT", name: "status" } });
+                      handleSave(values);
+                    }}
+                  >
+                    Enregistrer
+                  </button>
+                ) : null}
                 <button
                   disabled={!isValid}
                   onClick={() => {
@@ -375,7 +397,7 @@ export default ({ isNew = false, ...props }) => {
                     handleSubmit();
                   }}
                 >
-                  Enregistrer et proposer la mission
+                  {defaultValue ? "Enregistrer les modifications" : "Enregistrer et proposer la mission"}
                 </button>
               </ButtonContainer>
             </Header>
