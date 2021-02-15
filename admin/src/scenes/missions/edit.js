@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 import { Formik, Field } from "formik";
-import { Redirect } from "react-router-dom";
+import { Redirect, useHistory } from "react-router-dom";
 
 import MultiSelect from "../../components/Multiselect";
 import AddressInput from "../../components/addressInput";
@@ -19,6 +19,7 @@ export default (props) => {
   const [structure, setStructure] = useState();
   const [referents, setReferents] = useState([]);
   const [showTutor, setShowTutor] = useState();
+  const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
   const isNew = !props?.match?.params?.id;
 
@@ -91,6 +92,7 @@ export default (props) => {
         try {
           const { ok, code, data: mission } = await api[values._id ? "put" : "post"]("/mission", values);
           if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", translate(code));
+          history.push(`/mission/${mission._id}`);
           toastr.success("Mission enregistrée");
         } catch (e) {
           return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", e?.error?.message);
