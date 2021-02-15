@@ -136,7 +136,7 @@ export default () => {
               <ErrorMessage errors={errors} touched={touched} name="domains" />
             </PreferenceItem>
             <PreferenceItem title="Quel est votre projet professionnel ?">
-              <div style={{ display: "flex" }}>
+              <Wrapper>
                 <Button
                   name="professionnalProject"
                   handleChange={handleChange}
@@ -167,7 +167,7 @@ export default () => {
                     handleChange({ target: { name: "professionnalProjectPrecision", value: "" } });
                   }}
                 />
-              </div>
+              </Wrapper>
               <ErrorMessage errors={errors} touched={touched} name="professionnalProject" />
               {values.professionnalProject && values.professionnalProject !== PROFESSIONNAL_PROJECT.UNKNOWN ? (
                 <>
@@ -175,7 +175,7 @@ export default () => {
                     Précisez
                   </span>
                   {values.professionnalProject === PROFESSIONNAL_PROJECT.UNIFORM ? (
-                    <div style={{ display: "flex" }}>
+                    <Wrapper>
                       <Button
                         name="professionnalProjectPrecision"
                         handleChange={handleChange}
@@ -185,7 +185,7 @@ export default () => {
                       />
                       <Button name="professionnalProjectPrecision" handleChange={handleChange} values={values} value={PROFESSIONNAL_PROJECT_PRECISION.POLICE} title="Police" />
                       <Button name="professionnalProjectPrecision" handleChange={handleChange} values={values} value={PROFESSIONNAL_PROJECT_PRECISION.ARMY} title="Militaire" />
-                    </div>
+                    </Wrapper>
                   ) : (
                     <>
                       <Field
@@ -206,11 +206,11 @@ export default () => {
               ) : null}
             </PreferenceItem>
             <PreferenceItem title="Quelle période privilégiez-vous pour réaliser la mission d'intérêt général ?">
-              <div style={{ display: "flex", alignItems: "center", marginBottom: "0.5rem" }}>
+              <Wrapper style={{ alignItems: "center", marginBottom: "0.5rem" }}>
                 <Button name="period" handleChange={handleChange} values={values} value={PERIOD.DURING_HOLIDAYS} title="Sur les vacances scolaires" />
-                OU
+                <span>OU</span>
                 <Button name="period" handleChange={handleChange} values={values} value={PERIOD.DURING_SCHOOL} title="Sur le temps scolaire" />
-              </div>
+              </Wrapper>
               <ErrorMessage errors={errors} touched={touched} name="period" />
               {values.period ? (
                 <RankingPeriod
@@ -233,11 +233,11 @@ export default () => {
               </Row>
             </PreferenceItem>
             <PreferenceItem title="Quel format de mission préfèrez-vous ?">
-              <div style={{ display: "flex", alignItems: "center", marginBottom: "0.5rem" }}>
+              <Wrapper style={{ alignItems: "center", marginBottom: "0.5rem" }}>
                 <Button name="missionFormat" handleChange={handleChange} values={values} value="CONTINUOUS" title="Mission en continue (12 jours consécutifs)" />
                 OU
                 <Button name="missionFormat" handleChange={handleChange} values={values} value="DISCONTINUOUS" title="Mission perlée (84 heures réparties sur l'année)" />
-              </div>
+              </Wrapper>
               <ErrorMessage errors={errors} touched={touched} name="missionFormat" />
             </PreferenceItem>
             <PreferenceItem title="Etes-vous engagés comme bénévole en parallèle de votre inscription au SNU ?">
@@ -302,7 +302,19 @@ const PreferenceItem = ({ title, children }) => {
   );
 };
 
+const Wrapper = styled.div`
+  display: flex;
+  text-align: center;
+  @media (max-width: 767px) {
+    display: block;
+    > * {
+      margin: 0.5rem auto;
+    }
+  }
+`;
+
 const Footer = styled.div`
+  margin-bottom: 2rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -319,25 +331,6 @@ const Footer = styled.div`
   }
 `;
 
-const Item = ({ title, subtitle, name, values, handleChange }) => {
-  return (
-    <FormRow>
-      <Col md={8}>
-        <Label>{title}</Label>
-        <Description>{subtitle}</Description>
-      </Col>
-      <Col md={4}>
-        <CustomInput id={name} name={name} value={values[name]} onChange={handleChange} type="select">
-          <option value={5} label="Très intéressé" />
-          <option value={4} label="Intéressé" />
-          <option value={3} label="Assez intéressé" />
-          <option value={2} label="Peu intéressé" />
-          <option value={1} label="Pas intéressé" />
-        </CustomInput>
-      </Col>
-    </FormRow>
-  );
-};
 const Title = styled.div`
   position: relative;
   text-align: center;
@@ -371,7 +364,7 @@ const Title = styled.div`
 
 const Hero = styled.div`
   textarea {
-    width: 50rem;
+    width: 90%;
     padding: 20px 15px;
     font-size: 18px;
     ::placeholder {
@@ -379,7 +372,7 @@ const Hero = styled.div`
     }
   }
   input {
-    width: 50rem;
+    width: 90%;
     padding: 20px 15px;
     font-size: 18px;
     ::placeholder {
@@ -457,90 +450,6 @@ const PreferenceContent = styled(Content)`
   padding-top: 0.5rem;
 `;
 
-const Wrapper = styled.div`
-  padding: 20px 40px;
-  border-radius: 6px;
-  background: #fff;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-`;
-const Heading = styled.div`
-  margin-bottom: 30px;
-  h1 {
-    color: #161e2e;
-    font-size: 45px;
-    font-weight: 700;
-  }
-  span {
-    color: #42389d;
-    font-size: 16px;
-    font-weight: 700;
-    margin-bottom: 5px;
-  }
-  p {
-    color: #6b7280;
-    margin-bottom: 0;
-    font-size: 15px;
-    font-weight: 400;
-  }
-`;
-
-const FormLegend = styled.div`
-  color: #161e2e;
-  font-size: 18px;
-  border-top: 1px solid #e5e7eb;
-  border-bottom: 1px solid #e5e7eb;
-  padding: 20px 0;
-  p {
-    color: #6b7280;
-    margin-bottom: 0;
-    font-size: 15px;
-    font-weight: 400;
-  }
-`;
-
-const FormRow = styled(Row)`
-  border-top: 1px solid #e5e7eb;
-  padding-top: 20px;
-  padding-bottom: 20px;
-  align-items: ${({ align }) => align};
-  text-align: left;
-  input[type="text"] {
-    max-width: 500px;
-  }
-`;
-
-const Label = styled.div`
-  color: #191f2c;
-`;
-
-const Description = styled.div`
-  color: #6b7280;
-  margin-bottom: 0;
-  font-size: 15px;
-  font-weight: 400;
-`;
-
-const ImageInput = styled.label`
-  border: 1px dashed #d2d6dc;
-  padding: 25px;
-  text-align: center;
-  display: block;
-  outline: 0;
-  border-radius: 6px;
-  cursor: pointer;
-  color: #4b5563;
-  max-width: 500px;
-  font-size: 14px;
-  line-height: 1.7;
-  cursor: pointer;
-
-  img {
-    height: 40px;
-    display: block;
-    margin: 10px auto;
-  }
-`;
-
 const ContinueButton = styled.button`
   color: #fff;
   background-color: #5145cd;
@@ -558,18 +467,5 @@ const ContinueButton = styled.button`
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   :hover {
     opacity: 0.9;
-  }
-`;
-
-const Modifybutton = styled(Link)`
-  border: 1px solid #d2d6dc;
-  padding: 10px 15px;
-  color: #3d4151;
-  font-size: 12px;
-  border-radius: 4px;
-  margin-top: 5px;
-  display: inline-block;
-  :hover {
-    color: #333;
   }
 `;

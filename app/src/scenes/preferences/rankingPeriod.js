@@ -6,9 +6,9 @@ export default ({ title, period, handleChange, name, values }) => {
   const [items, setItems] = useState(values[name]);
 
   useEffect(() => {
-    let defaultRanking = [];
-    if (period === PERIOD.DURING_HOLIDAYS) defaultRanking = Object.keys(PERIOD_DURING_HOLIDAYS);
-    if (period === PERIOD.DURING_SCHOOL) defaultRanking = Object.keys(PERIOD_DURING_SCHOOL);
+    let defaultRanking = items;
+    if (period === PERIOD.DURING_HOLIDAYS && !Object.keys(PERIOD_DURING_HOLIDAYS).includes(items[0])) defaultRanking = Object.keys(PERIOD_DURING_HOLIDAYS);
+    if (period === PERIOD.DURING_SCHOOL && !Object.keys(PERIOD_DURING_SCHOOL).includes(items[0])) defaultRanking = Object.keys(PERIOD_DURING_SCHOOL);
     handleChange({ target: { name, value: defaultRanking } });
     setItems(defaultRanking);
   }, [period]);

@@ -38,7 +38,7 @@ const Container = styled.div`
   :hover {
     background-color: ${({ selected }) => (selected ? "#42389dbb" : "#f9fafb")};
   }
-  margin: 0 0.5rem;
+  margin: 0.5rem 0.5rem;
   display: flex;
   align-items: center;
   width: fit-content;

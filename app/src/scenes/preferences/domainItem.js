@@ -41,6 +41,9 @@ export default ({ title, subtitle, handleChange, name, values, value }) => {
 const Container = styled.div`
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   width: 50%;
+  @media (max-width: 767px) {
+    width: 90%;
+  }
   padding: 1rem;
   border-width: ${({ selected }) => (selected ? "2px" : "1px")};
   border-radius: 0.5rem;

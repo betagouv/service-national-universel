@@ -47,18 +47,29 @@ const Item = ({ values, handleChange, name, label, errors, touched }) => {
   return (
     <>
       <ItemContainer>
-        <div style={{ display: "flex", flex: 1 }}>
+        <Wrapper>
           <Label>{translate(label)}</Label>
-        </div>
-        <div style={{ display: "flex" }}>
+        </Wrapper>
+        <Wrapper>
           <Button name={name} handleChange={handleChange} values={values} value="true" title="Oui" />
           <Button name={name} handleChange={handleChange} values={values} value="false" title="Non" />
-        </div>
+        </Wrapper>
       </ItemContainer>
       <ErrorMessage errors={errors} touched={touched} name={name} />
     </>
   );
 };
+
+const Wrapper = styled.div`
+  display: flex;
+  text-align: center;
+  @media (max-width: 767px) {
+    display: block;
+    > * {
+      margin: 0.5rem auto;
+    }
+  }
+`;
 
 const Label = styled.div`
   margin: 0 1rem;
@@ -100,4 +111,12 @@ const ItemContainer = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
+  text-align: center;
+  @media (max-width: 767px) {
+    padding: 0;
+    display: block;
+    > * {
+      margin: 0.5rem auto;
+    }
+  }
 `;

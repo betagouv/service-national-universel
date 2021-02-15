@@ -24,7 +24,7 @@ export default ({ title, handleChange, values, errors, touched }) => {
   return (
     <Container>
       <Title>{title}</Title>
-      <Row style={{ marginBottom: "1rem" }}>
+      <Row>
         <Button
           name="mobilityTransport"
           onClick={() => onClick(TRANSPORT.PUBLIC_TRANSPORT)}
