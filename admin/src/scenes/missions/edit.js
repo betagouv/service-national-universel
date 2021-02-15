@@ -14,7 +14,7 @@ import { apiURL } from "../../config";
 import { domains, translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL } from "../../utils";
 import api from "../../services/api";
 
-export default ({ isNew, ...props }) => {
+export default ({ isNew = false, ...props }) => {
   const [defaultValue, setDefaultValue] = useState(null);
   const [redirect, setRedirect] = useState(false);
   const [structure, setStructure] = useState();
@@ -153,7 +153,7 @@ export default ({ isNew, ...props }) => {
                     </FormGroup>
                     <FormGroup>
                       <label>DOMAINES D'ACTION</label>
-                      <MultiSelect value={values.domains} onChange={handleChange} name="domains" options={domains} placeholder="Sélectionnez un ou plusieurs domains" />
+                      <MultiSelect value={values.domains || []} onChange={handleChange} name="domains" options={domains} placeholder="Sélectionnez un ou plusieurs domains" />
                     </FormGroup>
                     <FormGroup>
                       <label>
@@ -219,7 +219,7 @@ export default ({ isNew, ...props }) => {
                 </Col>
                 <Col md={6}>
                   <Row style={{ borderBottom: "2px solid #f4f5f7" }}>
-                    <Wrapper>
+                    <Wrapper style={{ maxWidth: "100%" }}>
                       <Legend>Date et places disponibles</Legend>
                       <FormGroup>
                         <label>
@@ -280,6 +280,7 @@ export default ({ isNew, ...props }) => {
                           name="period"
                           options={Object.keys(MISSION_PERIOD_DURING_SCHOOL)
                             .concat(Object.keys(MISSION_PERIOD_DURING_HOLIDAYS))
+                            .concat(values.period || [])
                             .map((p) => translate(p))}
                           placeholder="Sélectionnez une ou plusieurs périodes"
                         />
