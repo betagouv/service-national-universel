@@ -114,8 +114,6 @@ export const translate = (value) => {
       return "Sport";
     case "UNIFORM":
       return "Corps en uniforme";
-    case "OTHER":
-      return "Autre";
     case "UNKNOWN":
       return "Non connu pour le moment";
     case "FIREFIGHTER":
@@ -163,6 +161,14 @@ export const translate = (value) => {
       return "Ce fichier est corrompu";
     case "YOUNG_ALREADY_REGISTERED":
       return "Utilisateur déjà inscrit";
+    case "PUBLIC_TRANSPORT":
+      return "Transport en commun";
+    case "BIKE":
+      return "Vélo";
+    case "MOTOR":
+      return "Motorisé";
+    case "CARPOOLING":
+      return "Covoiturage";
     default:
       return value;
   }
@@ -614,6 +620,57 @@ export const APPLICATION_STATUS_COLORS = {
   CANCEL: "#ffa987",
   ARCHIVED: "#ffb3fb",
   IN_PROGRESS: "#382F79",
+};
+
+export const PERIOD_DURING_HOLIDAYS = {
+  SUMMER: "SUMMER",
+  AUTUMN: "AUTUMN",
+  DECEMBER: "DECEMBER",
+  WINTER: "WINTER",
+  SPRING: "SPRING",
+};
+
+export const PERIOD_DURING_SCHOOL = {
+  EVENING: "EVENING",
+  END_DAY: "END_DAY",
+  WEEKEND: "WEEKEND",
+};
+
+export const MISSION_DOMAINS = {
+  CITIZENSHIP: "CITIZENSHIP",
+  CULTURE: "CULTURE",
+  DEFENSE: "DEFENSE",
+  EDUCATION: "EDUCATION",
+  ENVIRONMENT: "ENVIRONMENT",
+  HEALTH: "HEALTH",
+  SECURITY: "SECURITY",
+  SOLIDARITY: "SOLIDARITY",
+  SPORT: "SPORT",
+};
+
+export const PROFESSIONNAL_PROJECT = {
+  UNIFORM: "UNIFORM",
+  OTHER: "OTHER",
+  UNKNOWN: "UNKNOWN",
+};
+
+export const PROFESSIONNAL_PROJECT_PRECISION = {
+  FIREFIGHTER: "FIREFIGHTER",
+  POLICE: "POLICE",
+  ARMY: "ARMY",
+};
+
+export const PERIOD = {
+  DURING_HOLIDAYS: "DURING_HOLIDAYS",
+  DURING_SCHOOL: "DURING_SCHOOL",
+};
+
+export const TRANSPORT = {
+  PUBLIC_TRANSPORT: "PUBLIC_TRANSPORT",
+  BIKE: "BIKE",
+  MOTOR: "MOTOR",
+  CARPOOLING: "CARPOOLING",
+  OTHER: "OTHER",
 };
 
 export function getPasswordErrorMessage(v, matomo) {

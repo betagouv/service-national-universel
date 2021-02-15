@@ -127,7 +127,6 @@ const Schema = new mongoose.Schema({
   medicosocialStructureRegion: { type: String },
   medicosocialStructureLocation: { lat: Number, lon: Number },
 
-  engaged: { type: String, enum: ["true", "false"] },
   engagedStructure: { type: String },
   specificAmenagment: { type: String, enum: ["true", "false"] },
   specificAmenagmentType: { type: String },
@@ -148,6 +147,24 @@ const Schema = new mongoose.Schema({
   // * Motivations
   motivations: { type: String },
 
+  // * Preferences
+  domains: { type: [String], default: [] },
+  professionnalProject: { type: String, enum: ["UNIFORM", "OTHER", "UNKNOWN"] },
+  professionnalProjectPrecision: { type: String },
+  period: { type: String, enum: ["DURING_HOLIDAYS", "DURING_SCHOOL"] },
+  periodRanking: { type: [String] },
+  mobilityNearSchool: { type: String, enum: ["true", "false"] },
+  mobilityNearHome: { type: String, enum: ["true", "false"] },
+  mobilityNearRelative: { type: String, enum: ["true", "false"] },
+  mobilityNearRelativeName: { type: String },
+  mobilityNearRelativeZip: { type: String },
+  mobilityTransport: { type: [String] },
+  mobilityTransportOther: { type: String },
+  missionFormat: { type: String, enum: ["CONTINUOUS", "DISCONTINUOUS"] },
+  engaged: { type: String, enum: ["true", "false"] },
+  engagedDescription: { type: String },
+  desiredLocation: { type: String },
+
   // TODO : clean interests
   defenseInterest: { type: String },
   defenseTypeInterest: { type: String },
@@ -165,11 +182,6 @@ const Schema = new mongoose.Schema({
 
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
-
-  // missionFormat: { type: String, default: "CONTINUOUS", enum: ["CONTINUOUS", "DISCONTINUOUS"] },
-  // mission_format: { type: String },
-  // mission_autonome_projet: { type: String },
-  // mission_autonome_structure: { type: String },
 });
 
 Schema.pre("save", function (next) {

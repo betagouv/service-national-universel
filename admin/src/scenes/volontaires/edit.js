@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { Col, Row } from "reactstrap";
+import { Col, Row, Input } from "reactstrap";
 import { Field, Formik } from "formik";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -505,6 +505,50 @@ export default (props) => {
                   </BoxContent>
                 </Box>
               </Col>
+              <Col md={6} style={{ marginBottom: "20px" }}>
+                <Box>
+                  <BoxTitle>Préférences</BoxTitle>
+                  <BoxContent direction="column">
+                    <ItemParent title="Domaines">
+                      {values.domains.map((d, i) => (
+                        <Badge key={i} color="#555555" value={d} />
+                      ))}
+                    </ItemParent>
+                    <ItemParent title="Projet Professionnel">
+                      <Badge color="#555555" value={values.professionnalProject} />
+                      {values.professionnalProjectPrecision ? <Badge color="#555555" value={values.professionnalProjectPrecision} /> : null}
+                    </ItemParent>
+                    <ItemParent title="période privilégiée">
+                      <Badge color="#555555" value={values.period} />
+                    </ItemParent>
+                    <ItemParent title="Mission à proximité de l'établissement scolaire">
+                      <Badge color="#555555" value={values.mobilityNearSchool} />
+                    </ItemParent>
+                    <ItemParent title="Mission à proximité du domicile">
+                      <Badge color="#555555" value={values.mobilityNearHome} />
+                    </ItemParent>
+                    <ItemParent title="Mission à proximité d'un proche">
+                      <Badge color="#555555" value={values.mobilityNearRelative} />
+                      <Badge color="#555555" value={values.mobilityNearRelativeName} />
+                      <Badge color="#555555" value={values.mobilityNearRelativeZip} />
+                    </ItemParent>
+                    <ItemParent title="Moyen de transport priviligé">
+                      <Badge color="#555555" value={values.mobilityTransport} />
+                      {values.mobilityTransportOther ? <Badge color="#555555" value={values.mobilityTransportOther} /> : null}
+                    </ItemParent>
+                    <ItemParent title="Format de mission">
+                      <Badge color="#555555" value={values.missionFormat} />
+                    </ItemParent>
+                    <ItemParent title="Engagement parallèle">
+                      <Badge color="#555555" value={values.engaged} />
+                      {values.engagedDescription ? <Input disabled type="textarea" rows={1} defaultValue={values.engagedDescription} /> : null}
+                    </ItemParent>
+                    <ItemParent title="Localisation privilégiée">
+                      {values.desiredLocation ? <Input disabled type="textarea" rows={2} defaultValue={values.desiredLocation} /> : null}
+                    </ItemParent>
+                  </BoxContent>
+                </Box>
+              </Col>
             </Row>
           </>
         )}
@@ -557,6 +601,17 @@ const Item = ({ title, values, name, handleChange, type = "text", disabled = fal
   );
 };
 
+const ItemParent = ({ title, children }) => {
+  return (
+    <Row className="detail">
+      <Col md={4}>
+        <label>{title}</label>
+      </Col>
+      <Col md={8}>{children}</Col>
+    </Row>
+  );
+};
+
 const Select = ({ title, name, values, handleChange, disabled, errors, touched, validate, options }) => {
   return (
     <Row className="detail">
@@ -590,6 +645,24 @@ const Checkbox = ({ title, name, value, values, handleChange, disabled, descript
     </Row>
   );
 };
+
+const Badge = ({ value, color }) => {
+  return value && value.length ? <BadgeStyle color={color}>{translate(value)}</BadgeStyle> : null;
+};
+
+const BadgeStyle = styled.span`
+  display: inline-block;
+  padding: 0.25rem 1rem;
+  margin: 0 0.25rem;
+  border-radius: 99999px;
+  font-size: 0.8rem;
+  margin-bottom: 5px;
+  margin-top: 15px;
+  ${({ color }) => `
+    color: ${color};
+    background-color: ${color}33;
+  `}
+`;
 
 const Documents = styled.div`
   margin-left: 1rem;
