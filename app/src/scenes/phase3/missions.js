@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Col, Container, CustomInput, Input, Row } from "reactstrap";
 import { ReactiveBase, ReactiveList, SingleList, MultiList, DataSearch, SingleDropdownList } from "@appbaseio/reactivesearch";
@@ -61,11 +61,27 @@ export default () => {
             loader="Chargement..."
             innerClass={{ pagination: "pagination" }}
             dataField="created_at"
+            defaultQuery={function (value, props) {
+              return {
+                query: { match_all: {} },
+                sort: [
+                  {
+                    _geo_distance: {
+                      location: [2.32219, 48.8574],
+                      order: "asc",
+                      unit: "km",
+                      mode: "min",
+                    },
+                  },
+                ],
+              };
+            }}
             renderResultStats={({ numberOfResults, time }) => {
               return <div />;
               return <div className="results">{`${numberOfResults} résultats trouvés en ${time}ms`}</div>;
             }}
             render={({ data }) => {
+              console.log("e", data);
               return data.map((e) => {
                 const tags = [];
                 tags.push(e.remote ? "À distance" : "En présentiel");
