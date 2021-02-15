@@ -36,6 +36,7 @@ export default ({ structure }) => {
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <StructureView structure={structure} tab="missions">
+        <Button>Ajouter une mission</Button>
         <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
           <div style={{ flex: 2, position: "relative" }}>
             <Table>

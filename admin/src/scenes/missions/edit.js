@@ -13,13 +13,14 @@ import { domains, translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURI
 import api from "../../services/api";
 import Invite from "../structure/components/invite";
 
-export default ({ isNew = false, ...props }) => {
+export default (props) => {
   const [defaultValue, setDefaultValue] = useState(null);
   const [redirect, setRedirect] = useState(false);
   const [structure, setStructure] = useState();
   const [referents, setReferents] = useState([]);
   const [showTutor, setShowTutor] = useState();
   const user = useSelector((state) => state.Auth.user);
+  const isNew = !props?.match?.params?.id;
 
   async function initMission() {
     if (isNew) return setDefaultValue(null);
@@ -34,10 +35,14 @@ export default ({ isNew = false, ...props }) => {
     if (responses) setReferents(responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
   }
 
-  // When mission is new, we take the structure of the current user.
   async function initStructure() {
-    if (defaultValue === null && !user.structureId) return setStructure(null);
-    const { data, ok } = await api.get(`/structure/${defaultValue === null ? user.structureId : defaultValue.structureId}`);
+    let structureId;
+    console.log(props.match.params);
+    if (props?.match?.params?.structureId) structureId = props.match.params.structureId;
+    else if (defaultValue) structureId = defaultValue.structureId;
+    else if (user.structureId) structureId = user.structureId;
+
+    const { data, ok } = await api.get(`/structure/${structureId}`);
     return setStructure(ok ? data : null);
   }
 
@@ -51,20 +56,7 @@ export default ({ isNew = false, ...props }) => {
     initReferents();
   }, [structure]);
 
-  const handleSave = async (values) => {
-    if (!values._id) {
-      values.placesLeft = values.placesTotal;
-      const { ok, code, data: mission } = await api.post("/mission", values);
-      if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", translate(code));
-      if (ok) toastr.success("Mission enregistrée");
-    } else {
-      const { ok, code, data: mission } = await api.put("/mission", values);
-      if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", translate(code));
-      if (ok) toastr.success("Mission enregistrée");
-    }
-  };
-
-  if ((!defaultValue && !isNew) || structure === undefined) return <div>Chargement...</div>;
+  if ((!defaultValue && !isNew) || !structure) return <div>Chargement...</div>;
   if (redirect) return <Redirect to="/mission" />;
 
   return (
@@ -84,8 +76,8 @@ export default ({ isNew = false, ...props }) => {
           contraintes: "",
           departement: "",
           tuteur: "",
-          startAt: "",
-          endAt: "",
+          startAt: Date.now(),
+          endAt: Date.now() + 1000 * 60 * 60 * 24 * 7,
           city: "",
           zip: "",
           address: "",
@@ -95,18 +87,13 @@ export default ({ isNew = false, ...props }) => {
         }
       }
       onSubmit={async (values) => {
+        if (!values._id) values.placesLeft = values.placesTotal;
         try {
-          if (!values._id) {
-            values.placesLeft = values.placesTotal;
-            await api.post("/mission", values);
-            return toastr.success("Mission créée");
-          }
-          values.placesLeft = values.placesTotal - values.placesTaken;
-          await api.put(`/mission/${values._id}`, values);
-          return toastr.success("Mission mise à jour");
+          const { ok, code, data: mission } = await api[values._id ? "put" : "post"]("/mission", values);
+          if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", translate(code));
+          toastr.success("Mission enregistrée");
         } catch (e) {
-          console.log(e);
-          toastr.error("Erreur!");
+          return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", e?.error?.message);
         }
       }}
     >
@@ -114,7 +101,6 @@ export default ({ isNew = false, ...props }) => {
         <div>
           <Header>
             <Title>{defaultValue ? values.name : "Création d'une mission"}</Title>
-            {Object.keys(errors).length ? <h3>Vous ne pouvez pas porposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
             <ButtonContainer>
               {!defaultValue ? (
                 <button
@@ -122,7 +108,7 @@ export default ({ isNew = false, ...props }) => {
                   disabled={!isValid}
                   onClick={() => {
                     handleChange({ target: { value: "DRAFT", name: "status" } });
-                    handleSave(values);
+                    handleSubmit();
                   }}
                 >
                   Enregistrer
@@ -140,6 +126,7 @@ export default ({ isNew = false, ...props }) => {
             </ButtonContainer>
           </Header>
           <Wrapper>
+            {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas porposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
             <Box>
               <Row style={{ borderBottom: "2px solid #f4f5f7" }}>
                 <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
@@ -332,7 +319,7 @@ export default ({ isNew = false, ...props }) => {
                         <option value="">Sélectionner un tuteur</option>
                         {referents &&
                           referents.map((referent) => {
-                            return <option value={referent._id}>{`${referent.firstName} ${referent.lastName}`}</option>;
+                            return <option key={referent._id} value={referent._id}>{`${referent.firstName} ${referent.lastName}`}</option>;
                           })}
                       </Field>
                       {structure && showTutor && <Invite structure={structure} />}
@@ -375,8 +362,8 @@ export default ({ isNew = false, ...props }) => {
               />
             </FormGroup> */}
             </Box>
+            {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas porposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
             <Header style={{ justifyContent: "flex-end" }}>
-              {Object.keys(errors).length ? <h3>Vous ne pouvez pas porposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
               <ButtonContainer>
                 {!defaultValue ? (
                   <button
@@ -384,7 +371,7 @@ export default ({ isNew = false, ...props }) => {
                     disabled={!isValid}
                     onClick={() => {
                       handleChange({ target: { value: "DRAFT", name: "status" } });
-                      handleSave(values);
+                      handleSubmit();
                     }}
                   >
                     Enregistrer
@@ -413,14 +400,7 @@ const Wrapper = styled.div`
   li {
     list-style-type: none;
   }
-`;
-
-const Header = styled.div`
-  padding: 0 25px 0;
-  display: flex;
-  margin-top: 25px;
-  align-items: center;
-  h3 {
+  h3.alert {
     border: 1px solid #fc8181;
     border-radius: 0.25em;
     background-color: #fff5f5;
@@ -429,6 +409,13 @@ const Header = styled.div`
     font-size: 12px;
     padding: 1em;
   }
+`;
+
+const Header = styled.div`
+  padding: 0 25px 0;
+  display: flex;
+  margin-top: 25px;
+  align-items: center;
 `;
 
 const FormGroup = styled.div`

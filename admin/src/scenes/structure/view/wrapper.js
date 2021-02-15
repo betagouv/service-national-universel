@@ -44,6 +44,9 @@ export default ({ children, structure, tab }) => {
           </TabNavigationList>
         </div>
         <div style={{ display: "flex" }}>
+          <Link to={`/mission/create/${structure._id}`}>
+            <Button className="btn-blue">Nouvelle mission</Button>
+          </Link>
           <Link to={`/structure/${structure._id}/edit`}>
             <Button className="btn-blue">Modifier</Button>
           </Link>
@@ -108,13 +111,13 @@ const Header = styled.div`
 `;
 
 const Button = styled.button`
-  /* margin: 0 0.5rem; */
+  margin: 0 0.5rem;
   align-self: flex-start;
   border-radius: 4px;
-  padding: 5px;
+  padding: 5px 10px;
   font-size: 12px;
   /* min-width: 100px; */
-  width: 100%;
+  /* width: 100%; */
   font-weight: 400;
   cursor: pointer;
   background-color: #fff;
