@@ -70,6 +70,11 @@ router.get("/mission/:id", passport.authenticate("referent", { session: false })
   try {
     const data = await ApplicationObject.find({ missionId: req.params.id });
     if (!data) return res.status(404).send({ ok: false, code: NOT_FOUND });
+    for (let i = 0; i < data.length; i++) {
+      const application = data[i]._doc;
+      const mission = await MissionObject.findById(application.missionId);
+      data[i] = { ...application, mission };
+    }
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
