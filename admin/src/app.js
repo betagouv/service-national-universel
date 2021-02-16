@@ -18,6 +18,7 @@ import DashboardResponsible from "./scenes/dashboard-responsible";
 import Structure from "./scenes/structure";
 import Missions from "./scenes/missions";
 import Volontaires from "./scenes/volontaires";
+import VolontairesResponsible from "./scenes/volontaires-responsible";
 import Tuteur from "./scenes/tuteur";
 import Utilisateur from "./scenes/utilisateur";
 
@@ -88,7 +89,7 @@ const Home = () => {
           <RestrictedRoute path="/settings" component={Settings} />
           <RestrictedRoute path="/profil" component={Profil} />
           <RestrictedRoute path="/team" component={Team} />
-          <RestrictedRoute path="/volontaire" component={Volontaires} />
+          <RestrictedRoute path="/volontaire" component={["supervisor", "responsible"].includes(user?.role) ? VolontairesResponsible : Volontaires} />
           <RestrictedRoute path="/tuteur" component={Tuteur} />
           <RestrictedRoute path="/mission" component={Missions} />
           <RestrictedRoute path="/inscription" component={Inscription} />
