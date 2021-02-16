@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { ReactiveBase, ReactiveList, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
+import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 
 import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
-
 import { translate, corpsEnUniforme } from "../../utils";
-import { Link } from "react-router-dom";
+import ReactiveFilter from "../../components/ReactiveFilter";
 
-const FILTERS = ["SEARCH", "LEGAL_STATUS", "DEPARTMENT", "REGION", "CORPS"];
+const FILTERS = ["SEARCH", "LEGAL_STATUS", "DEPARTMENT", "REGION", "CORPS", "NETWORK"];
 const formatLongDate = (date) => {
   if (!date) return "-";
   const d = new Date(date);
@@ -19,6 +20,8 @@ const formatLongDate = (date) => {
 
 export default () => {
   const [structure, setStructure] = useState(null);
+  const user = useSelector((state) => state.Auth.user);
+
   return (
     <div>
       <ReactiveBase url={`${apiURL}/es`} app="structure" headers={{ Authorization: `JWT ${api.getToken()}` }}>
@@ -105,6 +108,9 @@ export default () => {
                 />
               </FilterRow>
             </Filter>
+            {user.role === "supervisor" ? (
+              <ReactiveFilter componentId="NETWORK" query={{ query: { bool: { filter: { term: { "networkId.keyword": user.structureId } } } }, value: "" }} />
+            ) : null}
             <ResultTable>
               <ReactiveList
                 componentId="result"

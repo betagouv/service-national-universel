@@ -52,6 +52,16 @@ router.get("/networks", passport.authenticate("referent", { session: false }), a
   }
 });
 
+router.get("/network/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
+  try {
+    const data = await StructureObject.find({ networkId: req.params.id });
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: SERVER_ERROR, error });
+  }
+});
+
 router.get("/:id", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
     const data = await StructureObject.findOne({ _id: req.params.id });

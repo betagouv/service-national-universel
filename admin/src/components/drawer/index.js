@@ -20,6 +20,26 @@ function responsible(user) {
     </>
   );
 }
+function supervisor(user) {
+  return (
+    <>
+      <li>
+        <NavLink to="/structure">Structures</NavLink>
+      </li>
+      <li>
+        <NavLink to="/mission">Missions</NavLink>
+      </li>
+      <li>
+        <NavLink to="/user">Utilisateurs</NavLink>
+      </li>
+      <li>
+        <NavLink to="/volontaire">
+          Volontaires <i>(BÊTA)</i>
+        </NavLink>
+      </li>
+    </>
+  );
+}
 
 function admin() {
   return (
@@ -72,6 +92,7 @@ export default () => {
     if (user.role === "referent_department") return "ESPACE RÉFÉRENT DÉPARTEMENTAL";
     if (user.role === "referent_region") return "ESPACE RÉFÉRENT REGIONAL";
     if (user.role === "responsible") return "Espace responsable";
+    if (user.role === "supervisor") return "Espace superviseur";
     return "";
   }
 
@@ -87,6 +108,7 @@ export default () => {
         <li>
           <NavLink to="/dashboard">Tableau de bord</NavLink>
         </li>
+        {user.role === "supervisor" && supervisor(user)}
         {user.role === "responsible" && responsible(user)}
         {user.role === "admin" && admin()}
         {["referent_department", "referent_region"].includes(user.role) && referent()}

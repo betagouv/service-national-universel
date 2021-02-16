@@ -15,19 +15,35 @@ import { formatStringLongDate, formatStringDate } from "../../utils";
 export default () => {
   const user = useSelector((state) => state.Auth.user);
   const [missions, setMissions] = useState([]);
-  const [applications, setApplications] = useState([]);
+  const [applications, setApplications] = useState();
   const structureId = user.structureId;
   const [panelYoung, setPanelYoung] = useState(null);
   const [panelApplication, setPanelApplication] = useState(null);
 
-  async function initMissions() {
-    const missionsResponse = await api.get(`/mission/structure/${structureId}`);
+  async function appendMissions(structure) {
+    const missionsResponse = await api.get(`/mission/structure/${structure}`);
     if (!missionsResponse.ok) {
       toastr.error("Oups, une erreur est survenue lors de la récuperation des missions", translate(missionsResponse.code));
-      history.push("/");
-    } else {
-      setMissions(missionsResponse.data);
+      return history.push("/");
     }
+    return missionsResponse.data;
+  }
+
+  async function initMissions(structure) {
+    const m = await appendMissions(structure);
+    if (user.role === "supervisor") {
+      const subStructures = await api.get(`/structure/network/${structure}`);
+      if (!subStructures.ok) {
+        toastr.error("Oups, une erreur est survenue lors de la récuperation des missions des antennes", translate(subStructures.code));
+        return history.push("/");
+      }
+      for (let i = 0; i < subStructures.data.length; i++) {
+        const subStructure = subStructures.data[i];
+        const tempMissions = await appendMissions(subStructure._id);
+        m.push(...tempMissions);
+      }
+    }
+    setMissions(m);
   }
 
   async function initApplications() {
@@ -44,7 +60,7 @@ export default () => {
 
   // Get all missions from structure then get all applications int order to display the volontaires' list.
   useEffect(() => {
-    initMissions();
+    initMissions(structureId);
   }, [structureId, user]);
   useEffect(() => {
     initApplications();
@@ -59,7 +75,6 @@ export default () => {
   };
 
   if (!applications) return <div />;
-  console.log(applications);
 
   return (
     <div>

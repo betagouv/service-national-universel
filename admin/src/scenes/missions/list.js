@@ -1,22 +1,36 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Col, DropdownItem, DropdownMenu, DropdownToggle, Label, Pagination, PaginationItem, PaginationLink, Row, UncontrolledDropdown } from "reactstrap";
 import { ReactiveBase, ReactiveList, SingleList, MultiDropdownList, MultiList, DataSearch } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
+import { useSelector } from "react-redux";
 
 import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
-
 import { formatStringDate, translate, getFilterLabel } from "../../utils";
 import CustomFilter from "./customFilter";
 import SelectStatusMission from "../../components/selectStatusMission";
+import ReactiveFilter from "../../components/ReactiveFilter";
 
-const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "REGION", "DEPARTMENT"];
+const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "REGION", "DEPARTMENT", "NETWORK"];
 
 export default () => {
   const [mission, setMission] = useState(null);
+  const [structureIds, setStructureIds] = useState([]);
+  const user = useSelector((state) => state.Auth.user);
+
+  useEffect(() => {
+    if (user.role !== "supervisor") return;
+    (async () => {
+      const { data } = await api.get(`/structure/network/${user.structureId}`);
+      const ids = data.map((s) => s._id);
+      console.log(ids);
+      setStructureIds(ids);
+    })();
+    return;
+  }, []);
 
   return (
     <div>
@@ -123,6 +137,9 @@ export default () => {
                 />
               </FilterRow>
             </Filter>
+            {user.role === "supervisor" && structureIds.length ? (
+              <ReactiveFilter componentId="NETWORK" query={{ query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } } }} />
+            ) : null}
             <ResultTable>
               <ReactiveList
                 componentId="result"

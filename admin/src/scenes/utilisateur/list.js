@@ -1,23 +1,35 @@
-import React, { useState } from "react";
-import { Col, DropdownItem, DropdownMenu, DropdownToggle, Label, Pagination, PaginationItem, PaginationLink, Row, UncontrolledDropdown } from "reactstrap";
-import { ReactiveBase, ReactiveList, SingleList, MultiDropdownList, MultiList, DataSearch } from "@appbaseio/reactivesearch";
+import React, { useState, useEffect } from "react";
+import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
+import { ReactiveBase, ReactiveList, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { setUser } from "../../redux/auth/actions";
-
+import ReactiveFilter from "../../components/ReactiveFilter";
 import { translate, getFilterLabel, formatStringLongDate } from "../../utils";
 import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
 
-const FILTERS = ["SEARCH", "ROLE", "REGION", "DEPARTMENT"];
+const FILTERS = ["SEARCH", "ROLE", "REGION", "DEPARTMENT", "NETWORK"];
 
 export default () => {
   const [responsable, setResponsable] = useState(null);
   const user = useSelector((state) => state.Auth.user);
+  const [structureIds, setStructureIds] = useState([]);
+
+  useEffect(() => {
+    if (user.role !== "supervisor") return;
+    (async () => {
+      const { data } = await api.get(`/structure/network/${user.structureId}`);
+      const ids = data.map((s) => s._id);
+      console.log(ids);
+      setStructureIds(ids);
+    })();
+    return;
+  }, []);
 
   return (
     <div>
@@ -95,6 +107,9 @@ export default () => {
                 />
               </FilterRow>
             </Filter>
+            {user.role === "supervisor" && structureIds.length ? (
+              <ReactiveFilter componentId="NETWORK" query={{ query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } } }} />
+            ) : null}
             <ResultTable>
               <ReactiveList
                 componentId="result"
