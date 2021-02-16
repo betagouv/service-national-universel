@@ -52,57 +52,111 @@ export default () => {
   }, [applications]);
 
   return (
-    <Row>
-      <Col md={12}>
-        <h4 style={{ fontWeight: "normal", margin: "25px 0" }}>Volontaires candidatant sur des missions de ma structure</h4>
-      </Col>
-      <Col md={6} xl={3}>
-        <Link to='/inscription?STATUS=%5B"WAITING_VALIDATION"%5D'>
-          <Card borderBottomColor={APPLICATION_STATUS_COLORS.WAITING_VALIDATION}>
-            <CardTitle>En attente de validation</CardTitle>
-            <CardValueWrapper>
-              <CardValue>{stats.WAITING_VALIDATION || "-"}</CardValue>
-              <CardArrow />
-            </CardValueWrapper>
-          </Card>
-        </Link>
-      </Col>
-      <Col md={6} xl={3}>
-        <Link to='/inscription/?STATUS=%5B"VALIDATED"%5D'>
-          <Card borderBottomColor={APPLICATION_STATUS_COLORS.VALIDATED}>
-            <CardTitle>Validées</CardTitle>
-            <CardValueWrapper>
-              <CardValue>{stats.VALIDATED || "-"}</CardValue>
-              <CardArrow />
-            </CardValueWrapper>
-          </Card>
-        </Link>
-      </Col>
-      <Col md={6} xl={3}>
-        <Link to='/inscription/?STATUS=%5B"REFUSED"%5D'>
-          <Card borderBottomColor={APPLICATION_STATUS_COLORS.REFUSED}>
-            <CardTitle>Refusées</CardTitle>
-            <CardValueWrapper>
-              <CardValue>{stats.REFUSED || "-"}</CardValue>
-              <CardArrow />
-            </CardValueWrapper>
-          </Card>
-        </Link>
-      </Col>
-      <Col md={6} xl={3}>
-        <Link to='/inscription/?STATUS=%5B"REFUSED"%5D'>
-          <Card borderBottomColor={APPLICATION_STATUS_COLORS.CANCEL}>
-            <CardTitle>Annulés</CardTitle>
-            <CardValueWrapper>
-              <CardValue>{stats.CANCEL || "-"}</CardValue>
-              <CardArrow />
-            </CardValueWrapper>
-          </Card>
-        </Link>
-      </Col>
-    </Row>
+    <>
+      <Row>
+        <Col md={12}>
+          <h4 style={{ fontWeight: "normal", margin: "25px 0" }}>Volontaires candidatant sur des missions de ma structure</h4>
+        </Col>
+        <Col md={6} xl={3}>
+          <CardContainer>
+            <Card borderBottomColor={APPLICATION_STATUS_COLORS.WAITING_VALIDATION}>
+              <CardTitle>En attente de validation</CardTitle>
+              <CardValueWrapper>
+                <CardValue>{stats.WAITING_VALIDATION || "-"}</CardValue>
+                <CardArrow />
+              </CardValueWrapper>
+            </Card>
+            {stats.WAITING_VALIDATION ? (
+              <div style={{ textAlign: "center" }}>
+                <Badge color={APPLICATION_STATUS_COLORS.WAITING_VALIDATION}>À&nbsp;Modérer</Badge>
+              </div>
+            ) : null}
+          </CardContainer>
+        </Col>
+        <Col md={6} xl={3}>
+          <CardContainer>
+            <Card borderBottomColor={APPLICATION_STATUS_COLORS.VALIDATED}>
+              <CardTitle>Validées</CardTitle>
+              <CardValueWrapper>
+                <CardValue>{stats.VALIDATED || "-"}</CardValue>
+                <CardArrow />
+              </CardValueWrapper>
+            </Card>
+            {stats.VALIDATED ? (
+              <div style={{ textAlign: "center" }}>
+                <Badge color={APPLICATION_STATUS_COLORS.VALIDATED}>Volontaires&nbsp;à&nbsp;suivre</Badge>
+              </div>
+            ) : null}
+          </CardContainer>
+        </Col>
+        <Col md={6} xl={3}>
+          <CardContainer>
+            <Card borderBottomColor={APPLICATION_STATUS_COLORS.REFUSED}>
+              <CardTitle>Refusées</CardTitle>
+              <CardValueWrapper>
+                <CardValue>{stats.REFUSED || "-"}</CardValue>
+                <CardArrow />
+              </CardValueWrapper>
+            </Card>
+          </CardContainer>
+        </Col>
+        <Col md={6} xl={3}>
+          <CardContainer>
+            <Card borderBottomColor={APPLICATION_STATUS_COLORS.CANCEL}>
+              <CardTitle>Annulés</CardTitle>
+              <CardValueWrapper>
+                <CardValue>{stats.CANCEL || "-"}</CardValue>
+                <CardArrow />
+              </CardValueWrapper>
+            </Card>
+          </CardContainer>
+        </Col>
+      </Row>
+      <Row>
+        <Col md={12}>
+          <h4 style={{ fontWeight: "normal", margin: "25px 0" }}>Volontaires participant à des missions de ma structure</h4>
+        </Col>
+        <Col md={6} xl={3}>
+          <CardContainer>
+            <Card borderBottomColor={APPLICATION_STATUS_COLORS.IN_PROGRESS}>
+              <CardTitle>En cours sur une MIG</CardTitle>
+              <CardValueWrapper>
+                <CardValue>{stats.IN_PROGRESS || "-"}</CardValue>
+                <CardArrow />
+              </CardValueWrapper>
+            </Card>
+          </CardContainer>
+        </Col>
+        <Col md={6} xl={3}>
+          <CardContainer>
+            <Card borderBottomColor={APPLICATION_STATUS_COLORS.VALIDATED}>
+              <CardTitle>Ayant effectué leur MIG</CardTitle>
+              <CardValueWrapper>
+                <CardValue>{stats.DONE || "-"}</CardValue>
+                <CardArrow />
+              </CardValueWrapper>
+            </Card>
+          </CardContainer>
+        </Col>
+        <Col md={6} xl={3}>
+          <CardContainer>
+            <Card borderBottomColor={APPLICATION_STATUS_COLORS.NOT_COMPLETED}>
+              <CardTitle>Ayant abandonné leur MIG</CardTitle>
+              <CardValueWrapper>
+                <CardValue>{stats.NOT_COMPLETED || "-"}</CardValue>
+                <CardArrow />
+              </CardValueWrapper>
+            </Card>
+          </CardContainer>
+        </Col>
+      </Row>
+    </>
   );
 };
+
+const CardContainer = styled.div`
+  margin-bottom: 33px;
+`;
 
 const Card = styled.div`
   /* max-width: 325px; */
@@ -112,7 +166,6 @@ const Card = styled.div`
   border-radius: 8px;
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
   background-color: #fff;
-  margin-bottom: 33px;
 `;
 const CardTitle = styled.h3`
   color: #171725;
@@ -134,4 +187,17 @@ const CardArrow = styled.span`
   width: 15px;
   height: 15px;
   background-image: url(${require("../../../assets/arrow.png")});
+`;
+
+const Badge = styled.span`
+  display: inline-block;
+  padding: 0.25rem 1rem;
+  margin: 0 auto;
+  border-radius: 99999px;
+  font-size: 0.8rem;
+  margin-top: 15px;
+  ${({ color }) => `
+    color: ${color};
+    background-color: ${color}33;
+  `}
 `;
