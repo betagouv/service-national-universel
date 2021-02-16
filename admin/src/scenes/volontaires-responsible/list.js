@@ -121,7 +121,9 @@ const Hit = ({ hit, onClick }) => {
       <td>
         <TeamMember>
           <div>
-            <h2>{hit.missionName}</h2>
+            <h2>
+              <span>CHOIX {hit.priority}</span> : {hit.missionName}
+            </h2>
             <p>{formatStringLongDate(hit.createdAt)}</p>
           </div>
         </TeamMember>
@@ -244,6 +246,10 @@ const TeamMember = styled.div`
     font-size: 14px;
     font-weight: 400;
     margin-bottom: 5px;
+    span {
+      color: #5245cc;
+      font-size: 12px;
+    }
   }
   p {
     color: #606266;
