@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import Volontaires from "./volontaires";
-// import Missions from "./missions";
+import Missions from "./missions";
 
 export default () => {
   const [currentTab, setCurrentTab] = useState("volontaires");
@@ -20,7 +20,7 @@ export default () => {
       </TabNavigation>
       <Wrapper>
         {currentTab === "volontaires" && <Volontaires />}
-        {currentTab === "missions" && <div />}
+        {currentTab === "missions" && <Missions />}
       </Wrapper>
     </>
   );
