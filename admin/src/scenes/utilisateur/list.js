@@ -4,6 +4,7 @@ import { ReactiveBase, ReactiveList, SingleList, MultiDropdownList, MultiList, D
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { useDispatch, useSelector } from "react-redux";
+import { useHistory } from "react-router-dom";
 import { setUser } from "../../redux/auth/actions";
 
 import { translate, getFilterLabel, formatStringLongDate } from "../../utils";
@@ -173,6 +174,7 @@ const Hit = ({ hit, onClick, user }) => {
 
 const Action = ({ hit, color }) => {
   const dispatch = useDispatch();
+  const history = useHistory();
 
   const handleImpersonate = async () => {
     try {
@@ -180,6 +182,7 @@ const Action = ({ hit, color }) => {
       if (!ok) return toastr.error("Oops, une erreur est survenu lors de la masquarade !", translate(e.code));
       if (token) api.setToken(token);
       if (data) dispatch(setUser(data));
+      history.push("/dashboard");
     } catch (e) {
       console.log(e);
       toastr.error("Oops, une erreur est survenu lors de la masquarade !", translate(e.code));

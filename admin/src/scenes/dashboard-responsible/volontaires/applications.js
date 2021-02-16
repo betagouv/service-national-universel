@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Col, Row, Input } from "reactstrap";
-import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { Link, useHistory } from "react-router-dom";
 import { APPLICATION_STATUS_COLORS } from "../../../utils";
 
 import api from "../../../services/api";
@@ -12,6 +12,7 @@ export default () => {
   const [missions, setMissions] = useState([]);
   const [applications, setApplications] = useState([]);
   const [stats, setStats] = useState({});
+  const history = useHistory();
   const structureId = user.structureId;
 
   // Get all missions from structure then get all applications int order to display the volontaires' list.
