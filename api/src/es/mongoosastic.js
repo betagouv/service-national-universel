@@ -21,9 +21,10 @@ function Mongoosastic(schema, index) {
   async function createMapping() {
     try {
       const exists = await esClient.indices.exists({ index: indexName });
-      if (!exists) await esClient.indices.create({ index: indexName });
+      if (!exists.body) await esClient.indices.create({ index: indexName });
+      await esClient.indices.putMapping({ index: indexName, body: mapping });
     } catch (e) {
-      console.log("Error update mapping", e);
+      console.log("Error update mapping", JSON.stringify(e, null, 2));
     }
   }
 
@@ -31,8 +32,8 @@ function Mongoosastic(schema, index) {
 
   schema.methods.index = function schemaIndex() {
     return new Promise(async (resolve, reject) => {
+      const _opts = { index: indexName, type: typeName, refresh: true };
       try {
-        const _opts = { index: indexName, type: typeName, refresh: true };
         _opts.body = serialize(this, mapping);
         _opts.id = this._id.toString();
         const t = await esClient.index(_opts);
@@ -212,9 +213,10 @@ function serialize(model, mapping) {
     for (field in mappingData.properties) {
       if (mappingData.properties.hasOwnProperty(field)) {
         val = serialize.call(object, object[field], mappingData.properties[field]);
-        if (val !== undefined) {
-          serialized[field] = val;
-        }
+        if (val === undefined) continue;
+        if (mappingData.properties[field].type === "geo_point" && val && (val.lat === undefined || val.lon === undefined)) continue;
+
+        serialized[field] = val;
       }
     }
     return serialized;
