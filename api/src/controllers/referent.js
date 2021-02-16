@@ -371,7 +371,10 @@ router.get("/:id", passport.authenticate("referent", { session: false }), async 
     const isAdmin = req.user.role === "admin";
     const isResponsibleModifyingResponsible =
       ["responsible", "supervisor"].includes(req.user.role) && ["responsible", "supervisor"].includes(data.role);
-    const authorized = isAdmin || isResponsibleModifyingResponsible;
+    // See: https://trello.com/c/Wv2TrQnQ/383-admin-ajouter-onglet-utilisateurs-pour-les-r%C3%A9f%C3%A9rents
+    const isReferentModifyingReferent =
+      ["referent_department", "referent_region"].includes(req.user.role) && ["referent_department", "referent_region"].includes(data.role);
+    const authorized = isAdmin || isResponsibleModifyingResponsible || isReferentModifyingReferent;
     if (!authorized) return res.status(401).send({ ok: false, code: OPERATION_UNAUTHORIZED });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
@@ -391,7 +394,17 @@ router.put("/:id", passport.authenticate("referent", { session: false }), async 
       ["responsible", "supervisor"].includes(data.role) &&
       // ... witout changing its role.
       ["responsible", "supervisor"].includes(req.body.role);
-    const authorized = isAdmin || isResponsibleModifyingResponsibleWithoutChangingRole;
+
+    // TODO: we must handle rights more precisely.
+    // See: https://trello.com/c/Wv2TrQnQ/383-admin-ajouter-onglet-utilisateurs-pour-les-r%C3%A9f%C3%A9rents
+    const isReferentModifyingReferentWithoutChangingRole =
+      // Is referent...
+      ["referent_department", "referent_region"].includes(req.user.role) &&
+      // ... modifying referent ...
+      ["referent_department", "referent_region"].includes(data.role) &&
+      // ... witout changing its role.
+      ["referent_department", "referent_region"].includes(req.body.role);
+    const authorized = isAdmin || isResponsibleModifyingResponsibleWithoutChangingRole || isReferentModifyingReferentWithoutChangingRole;
 
     if (!authorized) return res.status(401).send({ ok: false, code: OPERATION_UNAUTHORIZED });
     const referent = await ReferentObject.findByIdAndUpdate(req.params.id, req.body, { new: true });

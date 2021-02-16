@@ -1,14 +1,30 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
 
 import { translate } from "../../utils";
 import LoadingButton from "../../components/loadingButton";
 import api from "../../services/api";
 
+// Sorry about that: return true, return false, false, true, false.
+function canModify(user, value) {
+  if (user.role === "admin") return true;
+  // https://trello.com/c/Wv2TrQnQ/383-admin-ajouter-onglet-utilisateurs-pour-les-r%C3%A9f%C3%A9rents
+  if (user.role === "referent_region") {
+    if (["referent_department", "referent_region"].includes(value.role) && user.region === value.region) return true;
+    return false;
+  }
+  if (user.role === "referent_department") {
+    if (user.role === value.role && user.department === value.department) return true;
+    return false;
+  }
+}
+
 export default ({ onChange, value }) => {
   if (!value) return <div />;
   const [structure, setStructure] = useState({});
+  const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
     (async () => {
@@ -24,9 +40,11 @@ export default ({ onChange, value }) => {
       <div className="close" onClick={onChange} />
       <div className="info">
         <div className="title">{`${value.firstName} ${value.lastName}`}</div>
-        <Link to={`/user/${value._id}`}>
-          <EditBtn color="white">Modifier</EditBtn>
-        </Link>
+        {canModify(user, value) && (
+          <Link to={`/user/${value._id}`}>
+            <EditBtn color="white">Modifier</EditBtn>
+          </Link>
+        )}
       </div>
       <Info title="Coordonnées">
         <Details title="E-mail" value={value.email} />

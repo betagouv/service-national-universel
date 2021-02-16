@@ -39,6 +39,7 @@ async function exec(req, res, index = "") {
 
 function filter(body, user, index) {
   let filter = [];
+
   if (user.role === "admin") return body;
 
   // Filter young when user is not admin
@@ -54,9 +55,28 @@ function filter(body, user, index) {
     if (user.role === "referent_region") filter.push({ term: { "region.keyword": user.region } });
     if (user.role === "referent_department") filter.push({ term: { "department.keyword": user.department } });
   }
+
   if (index === "referent") {
     if (user.role === "responsible") filter.push({ terms: { "role.keyword": ["responsible", "supervisor"] } });
+
+    // See: https://trello.com/c/Wv2TrQnQ/383-admin-ajouter-onglet-utilisateurs-pour-les-r%C3%A9f%C3%A9rents
+    // a `referent_region` sees only other referent_region and `referent_department` from their region.
+    if (user.role === "referent_department") {
+      filter.push({ terms: { "role.keyword": ["referent_region", "referent_department"] } });
+    }
+    // a `referent_region` sees only other referent_region and `referent_department` from their region.
+    if (user.role === "referent_region") {
+      filter.push({
+        bool: {
+          should: [
+            { term: { "role.keyword": "referent_region" } },
+            { bool: { must: [{ term: { "role.keyword": "referent_department" } }, { term: { "region.keyword": user.region } }] } },
+          ],
+        },
+      });
+    }
   }
+
   if (index === "mission") {
     if (user.role === "responsible") filter.push({ terms: { "structureId.keyword": [user.structureId] } });
   }

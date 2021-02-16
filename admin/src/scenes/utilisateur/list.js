@@ -3,7 +3,7 @@ import { Col, DropdownItem, DropdownMenu, DropdownToggle, Label, Pagination, Pag
 import { ReactiveBase, ReactiveList, SingleList, MultiDropdownList, MultiList, DataSearch } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setUser } from "../../redux/auth/actions";
 
 import { translate, getFilterLabel, formatStringLongDate } from "../../utils";
@@ -16,6 +16,7 @@ const FILTERS = ["SEARCH", "ROLE", "REGION", "DEPARTMENT"];
 
 export default () => {
   const [responsable, setResponsable] = useState(null);
+  const user = useSelector((state) => state.Auth.user);
 
   return (
     <div>
@@ -129,12 +130,12 @@ export default () => {
                         <th>Rôle</th>
                         <th>Crée le</th>
                         <th>Dernière connexion le</th>
-                        <th>Actions</th>
+                        {!["referent_department", "referent_region"].includes(user.role) && <th>Actions</th>}
                       </tr>
                     </thead>
                     <tbody>
                       {data.map((hit, i) => (
-                        <Hit key={i} hit={hit} onClick={() => setResponsable(hit)} />
+                        <Hit key={i} hit={hit} user={user} onClick={() => setResponsable(hit)} />
                       ))}
                     </tbody>
                   </Table>
@@ -149,7 +150,7 @@ export default () => {
   );
 };
 
-const Hit = ({ hit, onClick }) => {
+const Hit = ({ hit, onClick, user }) => {
   return (
     <tr onClick={onClick}>
       <td>
@@ -161,9 +162,11 @@ const Hit = ({ hit, onClick }) => {
       </td>
       <td>{formatStringLongDate(hit.createdAt)}</td>
       <td>{formatStringLongDate(hit.lastLoginAt)}</td>
-      <td onClick={(e) => e.stopPropagation()}>
-        <Action hit={hit} />
-      </td>
+      {!["referent_department", "referent_region"].includes(user.role) && (
+        <td onClick={(e) => e.stopPropagation()}>
+          <Action hit={hit} />
+        </td>
+      )}
     </tr>
   );
 };

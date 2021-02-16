@@ -3,6 +3,65 @@ import { NavLink, Link } from "react-router-dom";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
+function responsible(user) {
+  return (
+    <>
+      <li>
+        <NavLink to={`/structure/${user.structureId}`}>Ma structure</NavLink>
+      </li>
+      <li>
+        <NavLink to="/mission">Missions</NavLink>
+      </li>
+      <li>
+        <NavLink to="/volontaire">
+          Volontaires <i>(BÊTA)</i>
+        </NavLink>
+      </li>
+    </>
+  );
+}
+
+function admin() {
+  return (
+    <>
+      <li>
+        <NavLink to="/structure">
+          Structures <i>(BÊTA)</i>
+        </NavLink>
+      </li>
+      <li>
+        <NavLink to="/mission">
+          Missions <i>(BÊTA)</i>
+        </NavLink>
+      </li>
+      <li>
+        <NavLink to="/user">Utilisateurs</NavLink>
+      </li>
+      <li>
+        <NavLink to="/volontaire">
+          Volontaires <i>(BÊTA)</i>
+        </NavLink>
+      </li>
+      <li>
+        <NavLink to="/inscription">Inscriptions</NavLink>
+      </li>
+    </>
+  );
+}
+
+function referent() {
+  return (
+    <>
+      <li>
+        <NavLink to="/user">Utilisateurs</NavLink>
+      </li>
+      <li>
+        <NavLink to="/inscription">Inscriptions</NavLink>
+      </li>
+    </>
+  );
+}
+
 export default () => {
   const user = useSelector((state) => state.Auth.user);
 
@@ -28,52 +87,13 @@ export default () => {
         <li>
           <NavLink to="/dashboard">Tableau de bord</NavLink>
         </li>
-        {user.role === "responsible" && (
-          <>
-            <li>
-              <NavLink to={`/structure/${user.structureId}`}>Ma structure</NavLink>
-            </li>
-            <li>
-              <NavLink to="/mission">Missions</NavLink>
-            </li>
-            <li>
-              <NavLink to="/volontaire">
-                Volontaires <i>(BÊTA)</i>
-              </NavLink>
-            </li>
-          </>
-        )}
-        {user.role === "admin" && (
-          <>
-            <li>
-              <NavLink to="/structure">
-                Structures <i>(BÊTA)</i>
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="/mission">
-                Missions <i>(BÊTA)</i>
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="/user">Utilisateurs</NavLink>
-            </li>
-            <li>
-              <NavLink to="/volontaire">
-                Volontaires <i>(BÊTA)</i>
-              </NavLink>
-            </li>
-          </>
-        )}
-        {/*   <li>
+        {user.role === "responsible" && responsible(user)}
+        {user.role === "admin" && admin()}
+        {["referent_department", "referent_region"].includes(user.role) && referent()}
+      </ul>
+      {/*   <li>
           <NavLink to="/tuteur">Tuteurs</NavLink>
         </li> */}
-        {user.role !== "responsible" && (
-          <li>
-            <NavLink to="/inscription">Inscriptions</NavLink>
-          </li>
-        )}
-      </ul>
       {/* <Version>
         <a href="#" className="info help">
           Centre d’aide
