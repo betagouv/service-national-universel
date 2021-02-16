@@ -42,7 +42,7 @@ export default ({ filter }) => {
         return (
           <Col md={6} xl={3} key={key}>
             <Card borderBottomColor={MISSION_STATUS_COLORS[key]}>
-              <CardTitle>En attente de validation</CardTitle>
+              <CardTitle>{translate(MISSION_STATUS[key])}</CardTitle>
               <CardValueWrapper>
                 <CardValue>{val}</CardValue>
                 <CardArrow />
