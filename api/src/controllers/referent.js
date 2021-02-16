@@ -60,8 +60,7 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
     else if (type === "young") user = await YoungObject.findById(id);
     if (!user) return res.status(404).send({ code: NOT_FOUND, ok: false });
     const token = jwt.sign({ _id: user.id }, config.secret, { expiresIn: JWT_MAX_AGE });
-    const opts = { maxAge: COOKIE_MAX_AGE, secure: config.ENVIRONMENT === "development" ? false : true, httpOnly: true };
-    res.cookie("jwt", token, opts);
+    res.cookie("jwt", token, cookieOptions());
     return res.status(200).send({ data: user, ok: true, token });
   } catch (error) {
     capture(error);
