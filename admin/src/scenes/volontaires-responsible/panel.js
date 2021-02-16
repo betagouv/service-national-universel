@@ -58,14 +58,13 @@ export default ({ onChange, value, application }) => {
           </a> */}
         </div>
       </div>
-      <Info title="Statut de la mission">
+      <Info title="Mission">
+        <ApplicationDetails application={application} />
         <SelectStatusApplication hit={application} />
       </Info>
 
       <Info title="Coordonnées">
         <Details title="E-mail" value={young.email} />
-        <Details title="Tel" value={young.phone} />
-        <Details title="Région" value={young.region} />
         <Details title="Dép" value={young.department} />
         <Details title="Ville" value={young.city && young.zip && `${young.city} (${young.zip})`} />
         <Details title="Adresse" value={young.address} />
@@ -134,6 +133,18 @@ const Details = ({ title, value }) => {
       <div className="detail-title">{`${title} :`}</div>
       <div className="detail-text">{value}</div>
     </div>
+  );
+};
+
+const ApplicationDetails = ({ application }) => {
+  if (!application) return <div />;
+  return (
+    <Link to={`/mission/${application.missionId}`}>
+      <div className="application-detail">
+        <div className="application-detail-priority">{`CHOIX ${application.priority}`}</div>
+        <div className="application-detail-text">{application.missionName}</div>
+      </div>
+    </Link>
   );
 };
 
@@ -218,6 +229,25 @@ const Panel = styled.div`
       margin-right: 5px;
     }
   }
+  .application-detail {
+    display: flex;
+    flex-direction: column;
+    padding: 5px 20px;
+    margin-bottom: 1rem;
+    text-align: left;
+    :hover {
+      background: #f9f9f9;
+    }
+    &-priority {
+      font-size: 0.75rem;
+      color: #5245cc;
+    }
+    &-text {
+      margin-top: 0.5rem;
+      color: inherit;
+    }
+  }
+
   .quote {
     font-size: 18px;
     font-weight: 400;
