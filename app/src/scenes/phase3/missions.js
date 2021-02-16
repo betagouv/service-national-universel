@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Col, Container, CustomInput, Input, Row } from "reactstrap";
-import { ReactiveBase, ReactiveList, SingleList, MultiList, DataSearch, SingleDropdownList } from "@appbaseio/reactivesearch";
+import { ReactiveBase, ReactiveList, DataSearch, SingleDropdownList } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
+import { useSelector } from "react-redux";
+
 import MissionCard from "./components/missionCard";
 
 import { apiURL } from "../../config";
@@ -12,6 +14,8 @@ import api from "../../services/api";
 const FILTERS = ["DOMAIN", "SEARCH"];
 
 export default () => {
+  const young = useSelector((state) => state.Auth.young);
+
   return (
     <div>
       <AlertBox />
@@ -61,6 +65,22 @@ export default () => {
             loader="Chargement..."
             innerClass={{ pagination: "pagination" }}
             dataField="created_at"
+            defaultQuery={function (value, props) {
+              if (!young.location || !young.location.lat || !young.location.lon) return { query: { match_all: {} } };
+              return {
+                query: { match_all: {} },
+                sort: [
+                  {
+                    _geo_distance: {
+                      location: [young.location.lon, young.location.lat],
+                      order: "asc",
+                      unit: "km",
+                      mode: "min",
+                    },
+                  },
+                ],
+              };
+            }}
             renderResultStats={({ numberOfResults, time }) => {
               return <div />;
               return <div className="results">{`${numberOfResults} résultats trouvés en ${time}ms`}</div>;
