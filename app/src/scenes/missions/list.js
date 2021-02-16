@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Col, Container, CustomInput, Input, Row } from "reactstrap";
-import { ReactiveBase, ReactiveList, SingleList, MultiList, DataSearch, SingleDropdownList } from "@appbaseio/reactivesearch";
+import { Col, Container, Row } from "reactstrap";
+import { ReactiveBase, ReactiveList, DataSearch, SingleDropdownList } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
@@ -10,8 +10,9 @@ import ReactiveFilter from "../../components/ReactiveFilter";
 import { apiURL } from "../../config";
 import api from "../../services/api";
 import Loader from "../../components/Loader";
+import FilterGeoloc from "./components/FilterGeoloc";
 
-const FILTERS = ["DOMAIN", "SEARCH", "STATUS"];
+const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "GEOLOC"];
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
@@ -42,30 +43,16 @@ export default () => {
       <ReactiveBase url={`${apiURL}/es`} app="mission" headers={{ Authorization: `JWT ${api.getToken()}` }}>
         <Filters>
           <Row>
-            <SearchBox>
+            <SearchBox md={6}>
               <DataSearch
                 innerClass={{ input: "form-control" }}
-                placeholder="Recherche..."
+                placeholder="Recherche par mots clés..."
                 autosuggest={false}
                 componentId="SEARCH"
                 dataField={["name", "structureName", "description", "actions", "city"]}
               />
             </SearchBox>
-            <Col>
-              <CustomInput id="DISTANCE" type="select" defaultValue="null">
-                <option value="null" disabled>
-                  Rayon de recherche maximum
-                </option>
-                <option value="2">Distance max. 2km</option>
-                <option value="5">Distance max. 5km</option>
-                <option value="20">Distance max. 20km</option>
-                <option value="10">Distance max. 10km</option>
-                <option value="50">Distance max. 50km</option>
-                <option value="100">Distance max. 100km</option>
-                {/* <option value="-1">France entière : préparations militaires uniquement</option> */}
-              </CustomInput>
-            </Col>
-            <DomainsFilter>
+            <DomainsFilter md={6}>
               <SingleDropdownList
                 selectAllLabel="Tous les domaines"
                 URLParams={true}
@@ -77,6 +64,11 @@ export default () => {
               />
             </DomainsFilter>
           </Row>
+          <Row>
+            <Col md={12}>
+              <FilterGeoloc componentId="GEOLOC" placeholder="Recherche par ville..." />
+            </Col>
+          </Row>
         </Filters>
         <Missions>
           <ReactiveFilter componentId="STATUS" query={{ query: { bool: { filter: { term: { "status.keyword": "VALIDATED" } } } }, value: "" }} />
@@ -84,14 +76,14 @@ export default () => {
             componentId="result"
             react={{ and: FILTERS }}
             pagination={true}
+            paginationAt="bottom"
             size={25}
             showLoader={true}
             loader="Chargement..."
             innerClass={{ pagination: "pagination" }}
             dataField="created_at"
-            renderResultStats={({ numberOfResults, time }) => {
-              // return <div />;
-              return <div className="info">{`${numberOfResults} mission${numberOfResults > 1 && "s"} trouvée${numberOfResults > 1 && "s"}`}</div>;
+            renderResultStats={({ numberOfResults }) => {
+              return <div className="info">{`${numberOfResults} mission${numberOfResults > 1 ? "s" : ""} trouvée${numberOfResults > 1 ? "s" : ""}`}</div>;
             }}
             render={({ data }) => {
               return data.map((e) => {
@@ -114,6 +106,22 @@ export default () => {
               });
             }}
             renderNoResults={() => <div className="info">Aucune mission ne correspond à votre recherche</div>}
+            defaultQuery={() => {
+              if (!young.location || !young.location.lat || !young.location.lon) return { query: { match_all: {} } };
+              return {
+                query: { match_all: {} },
+                sort: [
+                  {
+                    _geo_distance: {
+                      location: [young.location.lon, young.location.lat],
+                      order: "asc",
+                      unit: "km",
+                      mode: "min",
+                    },
+                  },
+                ],
+              };
+            }}
           />
         </Missions>
       </ReactiveBase>
@@ -126,6 +134,7 @@ const Filters = styled(Container)`
   input,
   button,
   select {
+    margin: 0.5rem 0;
     border-radius: 0.5rem;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     border: 0;
@@ -147,6 +156,7 @@ const AlertBox = ({ onClose }) => (
 const Missions = styled(Container)`
   padding: 20px 0;
   border-radius: 6px;
+  margin-bottom: 2rem;
   background: #fff;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   position: relative;
@@ -155,6 +165,40 @@ const Missions = styled(Container)`
     text-align: center;
     font-size: 0.8rem;
     color: #767a83;
+  }
+  .pagination {
+    display: flex;
+    justify-content: flex-end;
+    padding: 10px 25px;
+    margin: 0;
+    background: #fff;
+    a {
+      background: #f7fafc;
+      color: #242526;
+      padding: 3px 10px;
+      font-size: 12px;
+      margin: 0 5px;
+    }
+    a.active {
+      font-weight: 700;
+      /* background: #5245cc;
+      color: #fff; */
+    }
+    a:first-child {
+      background-image: url(${require("../../assets/left.svg")});
+    }
+    a:last-child {
+      background-image: url(${require("../../assets/right.svg")});
+    }
+    a:first-child,
+    a:last-child {
+      font-size: 0;
+      height: 24px;
+      width: 30px;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: 8px;
+    }
   }
 `;
 
@@ -171,23 +215,6 @@ const Heading = styled(Container)`
     font-weight: 700;
     margin-bottom: 5px;
     text-transform: uppercase;
-  }
-`;
-
-const Modifybutton = styled(Link)`
-  border: 1px solid #d2d6dc;
-  padding: 10px 15px 10px 30px;
-  color: #3d4151;
-  font-size: 12px;
-  border-radius: 4px;
-  background: url(${require("../../assets/pen.svg")}) left 5px center no-repeat;
-  background-size: 18px;
-  height: fit-content;
-  /* position: absolute;
-  right: 40px;
-  top: 20px; */
-  :hover {
-    color: #333;
   }
 `;
 
