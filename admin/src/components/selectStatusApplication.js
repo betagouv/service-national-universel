@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Col, DropdownItem, DropdownMenu, DropdownToggle, Label, Pagination, PaginationItem, PaginationLink, Row, UncontrolledDropdown } from "reactstrap";
+import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
@@ -8,12 +8,7 @@ import api from "../services/api";
 import { translate, APPLICATION_STATUS_COLORS, APPLICATION_STATUS } from "../utils";
 import { toastr } from "react-redux-toastr";
 
-import MailCorrection from "../scenes/inscription/MailCorrection";
-
-export default ({ hit }) => {
-  // const STATUS = [YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.VALIDATED, YOUNG_STATUS.REFUSED];
-
-  const [modal, setModal] = useState(false);
+export default ({ hit, options = [] }) => {
   const [application, setApplication] = useState(null);
   const user = useSelector((state) => state.Auth.user);
 
@@ -27,6 +22,10 @@ export default ({ hit }) => {
   }, [hit]);
 
   if (!application) return <div />;
+
+  if (application.status === APPLICATION_STATUS.WAITING_VALIDATION) options.push(APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.REFUSED);
+  if (application.status === APPLICATION_STATUS.VALIDATED) options.push(APPLICATION_STATUS.IN_PROGRESS, APPLICATION_STATUS.DONE, APPLICATION_STATUS.CANCEL);
+  if (user.role === "admin") options = Object.keys(APPLICATION_STATUS);
 
   const handleClickStatus = (status) => {
     if (!confirm("Êtes-vous sûr(e) de vouloir modifier le statut de cette candidature?\nUn email sera automatiquement envoyé.")) return;
@@ -58,7 +57,7 @@ export default ({ hit }) => {
             </div>
           </DropdownToggle>
           <DropdownMenu>
-            {Object.keys(APPLICATION_STATUS).map((status) => {
+            {options.map((status) => {
               return (
                 <DropdownItem key={status} className="dropdown-item" onClick={() => handleClickStatus(status)}>
                   {translate(status)}

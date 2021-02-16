@@ -12,7 +12,7 @@ import matomo from "../services/matomo";
 import MailCorrection from "../scenes/inscription/MailCorrection";
 import MailRefused from "../scenes/inscription/MailRefused";
 
-export default ({ hit, options = YOUNG_STATUS }) => {
+export default ({ hit, options = Object.keys(YOUNG_STATUS) }) => {
   const [modal, setModal] = useState(null);
   const [young, setYoung] = useState(null);
   const user = useSelector((state) => state.Auth.user);
