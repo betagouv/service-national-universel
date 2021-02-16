@@ -64,7 +64,14 @@ export default ({ onChange, value }) => {
       </div>
       {young.phase === YOUNG_PHASE.INTEREST_MISSION ? (
         <Info title="Recherche de MIG" id={young._id}>
-          {young.applications.length && young.applications.map((a, i) => <Details title="E-mail" value={i} />)}
+          {young.applications.length &&
+            young.applications
+              .sort((a, b) => (parseInt(a.priority) > parseInt(b.priority) ? 1 : parseInt(b.priority) > parseInt(a.priority) ? -1 : 0))
+              .slice(0, 3)
+              .map((a, i) => <ApplicationDetails application={a} />)}
+          <Link to={`/volontaire/${young._id}/phase2`}>
+            <div style={{ textAlign: "center", color: "#5245cc" }}>{"Toutes ses candidatures >"}</div>
+          </Link>
         </Info>
       ) : null}
       <Info title="Coordonnées" id={young._id}>
@@ -139,6 +146,18 @@ const Details = ({ title, value }) => {
       <div className="detail-title">{`${title} :`}</div>
       <div className="detail-text">{value}</div>
     </div>
+  );
+};
+
+const ApplicationDetails = ({ application }) => {
+  if (!application) return <div />;
+  return (
+    <Link to={`/mission/${application.missionId}`}>
+      <div className="application-detail">
+        <div className="application-detail-priority">{`CHOIX ${application.priority}`}</div>
+        <div className="application-detail-text">{application.missionName}</div>
+      </div>
+    </Link>
   );
 };
 
@@ -221,6 +240,24 @@ const Panel = styled.div`
       min-width: 100px;
       width: 100px;
       margin-right: 5px;
+    }
+  }
+  .application-detail {
+    display: flex;
+    flex-direction: column;
+    padding: 5px 20px;
+    margin-bottom: 1rem;
+    text-align: left;
+    :hover {
+      background: #f9f9f9;
+    }
+    &-priority {
+      font-size: 0.75rem;
+      color: #5245cc;
+    }
+    &-text {
+      margin-top: 0.5rem;
+      color: inherit;
     }
   }
   .quote {
