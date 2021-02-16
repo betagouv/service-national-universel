@@ -1,19 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { Container, Table, Modal, ModalHeader, ModalBody, Button, Row, Col, FormGroup, Input } from "reactstrap";
-import { useHistory } from "react-router-dom";
+import { Modal, ModalHeader, ModalBody, Row, Col, FormGroup, Input } from "reactstrap";
 import { Formik, Field } from "formik";
 import styled from "styled-components";
-import { useDispatch, useSelector } from "react-redux";
-
+import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
-import { translate, departmentList, regionList, region2department, REFERENT_ROLES } from "../../utils";
+import { translate, departmentList, regionList, region2department, department2region, REFERENT_ROLES } from "../../utils";
 import LoadingButton from "../../components/loadingButton";
 import api from "../../services/api";
 
 export default ({ setOpen, open, label = "Inviter un référent", role = "" }) => {
-  const { user } = useSelector((state) => state.Auth);
-
   return (
     <Invitation style={{ marginBottom: 10, textAlign: "right" }}>
       <Modal isOpen={open} toggle={() => setOpen(false)} size="lg">
@@ -33,7 +29,10 @@ export default ({ setOpen, open, label = "Inviter un référent", role = "" }) =
               }}
               onSubmit={async (values, { setSubmitting }) => {
                 try {
-                  await api.post(`/referent/signup_invite/${role}`, values);
+                  const obj = { ...values };
+                  if (obj.department && !obj.region) obj.region = department2region[obj.department];
+
+                  await api.post(`/referent/signup_invite/${role}`, obj);
                   toastr.success("Invitation envoyée");
                   setOpen();
                   setOpen(false);
