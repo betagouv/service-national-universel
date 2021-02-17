@@ -28,6 +28,7 @@ import Team from "./scenes/team";
 
 import Drawer from "./components/drawer";
 import Header from "./components/header";
+import Footer from "./components/footer";
 
 import api from "./services/api";
 
@@ -96,6 +97,7 @@ const Home = () => {
           <RestrictedRoute path="/user" component={Utilisateur} />
           <RestrictedRoute path="/" component={["supervisor", "responsible"].includes(user?.role) ? DashboardResponsible : Dashboard} />
         </Switch>
+        <Footer />
       </div>
     </div>
   );
