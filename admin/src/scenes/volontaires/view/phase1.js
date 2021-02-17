@@ -11,29 +11,33 @@ import ToggleSwitch from "../../../components/ToogleSwitch";
 
 export default ({ young }) => {
   const [disabled, setDisabled] = useState(young.phase === YOUNG_PHASE.INSCRIPTION);
+  const getCohesionStay = (young) => {
+    if (young.cohort === "2019") return <p>Le volontaire a réalisé son séjour de cohésion.</p>;
+    if (young.cohort === "2020") return <p>Le séjour de cohésion a été annulé.</p>;
+    return young.cohesionCity ? (
+      <>
+        <p>
+          Le volontaire a été affecté au centre de {young.cohesionCity}({young.cohesionDepartment})
+        </p>
+        <Details title="Région" value={null} />
+        <Details title="Dép." value={null} />
+        <Details title="Ville" value={null} />
+        <Details title="Adresse" value={null} />
+        <Details title="Chef de centre" value={null} />
+        <Details title="E-mail" value={null} />
+        <Details title="Tel." value={null} />
+      </>
+    ) : (
+      <p>Le volontaire est en attente d'affectation à un centre de cohésion</p>
+    );
+  };
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <WrapperPhase1 young={young} tab="phase1">
         <Box>
           <Row>
             <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
-              <Bloc title="Séjour de cohésion">
-                {young.cohesionCity ? (
-                  <p>
-                    Le volontaire a été affecté au centre de {young.cohesionCity}({young.cohesionDepartment})
-                  </p>
-                ) : (
-                  <p>Le volontaire est en attente d'affectation à un centre de cohésion</p>
-                )}
-                {/* todo update model to integrate cohesion infos */}
-                <Details title="Région" value={null} />
-                <Details title="Dép." value={null} />
-                <Details title="Ville" value={null} />
-                <Details title="Adresse" value={null} />
-                <Details title="Chef de centre" value={null} />
-                <Details title="E-mail" value={null} />
-                <Details title="Tel." value={null} />
-              </Bloc>
+              <Bloc title="Séjour de cohésion">{getCohesionStay(young)}</Bloc>
             </Col>
             <Col md={6}>
               <Formik

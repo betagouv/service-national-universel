@@ -263,6 +263,11 @@ async function migrateYoung() {
       young.status = "IN_PROGRESS";
       young.cohort = y.cohort;
 
+      if (young.cohort === "2019") {
+        young.cohesionStayPresence = "true";
+        young.cohesionStayMedicalFileReceived = "true";
+      }
+
       young.complementAddress = y.complement_adresse;
       if (y.longitude && y.latitude) {
         young.location = { lon: parseFloat(y.longitude), lat: parseFloat(y.latitude) };

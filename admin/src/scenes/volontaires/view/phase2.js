@@ -10,14 +10,17 @@ import ApplicationList from "./applicationList.js";
 
 export default ({ young }) => {
   const user = useSelector((state) => state.Auth.user);
-
+  const getDate = () => {
+    if (young.cohort === "2019") return "31 mars 2021";
+    return "31 décembre 2021";
+  };
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <WrapperPhase2 young={young} tab="phase2">
         <Box>
           <Bloc title="Réalisation d'une mission d'interêt général">
             <p>
-              Le volontaire doit achever sa phase 2 avant le <b>31 décembre 2021</b>
+              Le volontaire doit achever sa phase 2 avant le <b>{getDate()}</b>
             </p>
           </Bloc>
         </Box>

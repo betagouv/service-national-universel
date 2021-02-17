@@ -56,6 +56,10 @@ const Schema = new mongoose.Schema({
 
   cniFiles: { type: [String], default: [] },
 
+  // * phase1 infos
+  cohesionStayPresence: { type: String, enum: ["true", "false"] },
+  cohesionStayMedicalFileReceived: { type: String, enum: ["true", "false"] },
+
   // * address
   address: { type: String },
   complementAddress: { type: String },
