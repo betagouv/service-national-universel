@@ -23,7 +23,7 @@ function canModify(user, value) {
 
 export default ({ onChange, value }) => {
   if (!value) return <div />;
-  const [structure, setStructure] = useState({});
+  const [structure, setStructure] = useState();
   const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
@@ -51,12 +51,14 @@ export default ({ onChange, value }) => {
       </Info>
       <Info title="Informations">
         <Details title="Rôle" value={translate(value.role)} />
-        <div className="detail">
-          <div className="detail-title">Structure :</div>
-          <Link to={`/structure/${structure._id}`}>
-            <div className="detail-text">{structure.name}</div>
-          </Link>
-        </div>
+        {structure ? (
+          <div className="detail">
+            <div className="detail-title">Structure :</div>
+            <Link to={`/structure/${structure._id}`}>
+              <div className="detail-text">{structure.name}</div>
+            </Link>
+          </div>
+        ) : null}
         <Details title="Région" value={value.region} />
         <Details title="Département" value={value.department} />
       </Info>
@@ -80,12 +82,13 @@ const Info = ({ children, title }) => {
   );
 };
 
-const Details = ({ title, value }) => {
+const Details = ({ title, value, children }) => {
   if (!value) return <div />;
   return (
     <div className="detail">
       <div className="detail-title">{`${title} :`}</div>
       <div className="detail-text">{value}</div>
+      {children ? children : null}
     </div>
   );
 };

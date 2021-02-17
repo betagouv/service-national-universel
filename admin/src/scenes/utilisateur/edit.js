@@ -34,6 +34,11 @@ export default (props) => {
     return `Inscrit(e) ${diff} - ${createdAt.toLocaleDateString()}`;
   };
 
+  const clearDepartmentAndRegion = (handleChange) => {
+    handleChange({ target: { name: "region", value: "" } });
+    handleChange({ target: { name: "department", value: "" } });
+  };
+
   return (
     //@todo fix the depart and region
     <Wrapper>
@@ -88,7 +93,11 @@ export default (props) => {
                       <Select
                         name="role"
                         values={values}
-                        onChange={handleChange}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          clearDepartmentAndRegion(handleChange);
+                          handleChange({ target: { name: "role", value } });
+                        }}
                         title="Rôle"
                         options={[
                           REFERENT_ROLES.REFERENT_DEPARTMENT,
@@ -98,29 +107,33 @@ export default (props) => {
                           REFERENT_ROLES.SUPERVISOR,
                         ].map((key) => ({ value: key, label: translate(key) }))}
                       />
-                      {[REFERENT_ROLES.REFERENT_DEPARTMENT, REFERENT_ROLES.REFERENT_REGION].includes(values.role) ? (
-                        <>
-                          <Select
-                            name="department"
-                            values={values}
-                            onChange={(e) => {
-                              const value = e.target.value;
-                              handleChange({ target: { name: "department", value } });
-                              const region = department2region[value];
-                              handleChange({ target: { name: "region", value: region } });
-                            }}
-                            title="Département"
-                            options={departmentList.map((d) => ({ value: d, label: d }))}
-                          />
-                          <Select
-                            disabled={values.role === REFERENT_ROLES.REFERENT_DEPARTMENT}
-                            name="region"
-                            values={values}
-                            onChange={handleChange}
-                            title="Région"
-                            options={regionList.map((r) => ({ value: r, label: r }))}
-                          />
-                        </>
+                      {values.role === REFERENT_ROLES.REFERENT_DEPARTMENT ? (
+                        <Select
+                          name="department"
+                          values={values}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            handleChange({ target: { name: "department", value } });
+                            const region = department2region[value];
+                            handleChange({ target: { name: "region", value: region } });
+                          }}
+                          title="Département"
+                          options={departmentList.map((d) => ({ value: d, label: d }))}
+                        />
+                      ) : null}
+                      {values.role === REFERENT_ROLES.REFERENT_REGION ? (
+                        <Select
+                          disabled={values.role === REFERENT_ROLES.REFERENT_DEPARTMENT}
+                          name="region"
+                          values={values}
+                          onChange={(e) => {
+                            const value = e.target.value;
+                            handleChange({ target: { name: "region", value } });
+                            handleChange({ target: { name: "department", value: "" } });
+                          }}
+                          title="Région"
+                          options={regionList.map((r) => ({ value: r, label: r }))}
+                        />
                       ) : null}
                     </BoxContent>
                   </Box>
