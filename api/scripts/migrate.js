@@ -42,32 +42,32 @@ sequelize.authenticate().then(async (e) => {
   // await migrate("Network", migrateNetwork);
 
   // await esclient.indices.delete({ index: "referent" });
-  await Referent.deleteMany({ sqlId: { $ne: null } });
-  await migrate("Referent", migrateReferent);
-  await migrate("Referent / Members", migrateStructureMembers);
-
-  try {
-    await esclient.indices.delete({ index: "mission" });
-  } catch (error) {
-    console.log("ERROR ES", error);
-  }
-  await Mission.deleteMany({});
-  await migrate("Mission", migrateMission);
+  // await Referent.deleteMany({ sqlId: { $ne: null } });
+  // await migrate("Referent", migrateReferent);
+  // await migrate("Referent / Members", migrateStructureMembers);
 
   // try {
-  //   // Migrate people in the cohesion stay
-  //   console.log(`### START MONGO DELETE Young`);
-  //   await Young.deleteMany({ phase: "COHESION_STAY" });
-  //   console.log(`### END DELETE young`);
-  //   await migrate("Young", migrateYoung);
-  //   console.log(`### END MONGO DELETE young`);
-  //   await Young.unsynchronize();
-  //   console.log(`### END DELETED ES Indice for young`);
-  //   await Young.synchronize();
-  //   console.log(`### END SYNC ES Indice for young`);
-  // } catch (e) {
-  //   console.log(e);
+  //   await esclient.indices.delete({ index: "mission" });
+  // } catch (error) {
+  //   console.log("ERROR ES", error);
   // }
+  // await Mission.deleteMany({});
+  // await migrate("Mission", migrateMission);
+
+  try {
+    // Migrate people in the cohesion stay
+    // console.log(`### START MONGO DELETE Young`);
+    // await Young.deleteMany({ phase: "COHESION_STAY" });
+    // console.log(`### END DELETE young`);
+    // await migrate("Young", migrateYoung);
+    // console.log(`### END MONGO DELETE young`);
+    // await Young.unsynchronize();
+    // console.log(`### END DELETED ES Indice for young`);
+    // await Young.synchronize();
+    // console.log(`### END SYNC ES Indice for young`);
+  } catch (e) {
+    console.log(e);
+  }
 
   // try {
   //   await esclient.indices.delete({ index: "application" });
@@ -242,24 +242,26 @@ async function migrateYoung() {
       young.updatedAt = y.updated_at;
 
       young.gender = y.genre === "Fille" ? "female" : "male";
-      const fn = faker.name.firstName(young.gender);
-      young.firstName = fn.charAt(0).toUpperCase() + fn.slice(1);
-      const ln = faker.name.lastName();
-      young.lastName = ln.toUpperCase();
+      // const fn = faker.name.firstName(young.gender);
+      // young.firstName = fn.charAt(0).toUpperCase() + fn.slice(1);
+      // const ln = faker.name.lastName();
+      // young.lastName = ln.toUpperCase();
+      young.firstName = y.first_name;
+      young.lastName = y.last_name.toUpperCase();
 
       if (y.birthdate) young.birthdateAt = new Date(y.birthdate);
 
       // @todo not anonymyse for the real migration
-      young.email = `${y.id}@mail.com`;
-      // young.email = (young.email || "").toLowerCase();
+      // young.email = `${y.id}@mail.com`;
+      young.email = (y.email || "").toLowerCase();
 
-      young.password = "Selego1!";
+      // young.password = "Selego1!";
       young.frenchNationality = y.nationalite_francaise === 1 ? "true" : "false";
       young.schooled = y.situation && y.situation.includes("Scolarisé") ? "true" : "false";
 
-      young.cohort = "2020";
       young.phase = "COHESION_STAY";
-      young.status = "VALIDATED";
+      young.status = "IN_PROGRESS";
+      young.cohort = y.cohort;
 
       young.complementAddress = y.complement_adresse;
       if (y.longitude && y.latitude) {
@@ -267,21 +269,6 @@ async function migrateYoung() {
       }
       young.department = departmentList[y.department];
       young.region = regionList[department2region[y.department]];
-
-      young.defenseInterest = INTEREST_LOOKUP[y.interet_defense];
-      young.defenseTypeInterest = INTEREST_LOOKUP[y.interet_defense_type];
-      young.defenseDomainInterest = INTEREST_LOOKUP[y.interet_defense_domaine];
-      young.defenseMotivationInterest = INTEREST_LOOKUP[y.interet_defense_motivation];
-      young.securityInterest = INTEREST_LOOKUP[y.interet_securite];
-      young.securityDomainInterest = INTEREST_LOOKUP[y.interet_securite_domaine];
-      young.solidarityInterest = INTEREST_LOOKUP[y.interet_solidarite];
-      young.healthInterest = INTEREST_LOOKUP[y.interet_sante];
-      young.educationInterest = INTEREST_LOOKUP[y.interet_education];
-      young.cultureInterest = INTEREST_LOOKUP[y.interet_culture];
-      young.sportInterest = INTEREST_LOOKUP[y.interet_sport];
-      young.environmentInterest = INTEREST_LOOKUP[y.interet_environnement];
-      young.citizenshipInterest = INTEREST_LOOKUP[y.interet_citoyennete];
-
       // @todo check if ok
       young.parent1Status = y.status_representant;
       young.parent1FirstName = y.prenom_representant;
@@ -289,14 +276,27 @@ async function migrateYoung() {
       young.parent1Email = y.email_representant;
       young.parent1Phone = y.telephone_representant;
       young.parent1OwnAddress = y.adresse_identique_representant ? "false" : "true"; // adresse identique => !ownaddress
-
       young.ppsBeneficiary = y.beneficiaire_pps ? "true" : "false";
       young.paiBeneficiary = y.beneficiaire_pai ? "true" : "false";
 
-      young.engaged = young.engaged === "Non" ? "false" : "true";
+      const interests = [
+        { name: "DEFENSE", value: INTEREST_LOOKUP[y.interet_defense] },
+        { name: "SECURITY", value: INTEREST_LOOKUP[y.interet_securite] },
+        { name: "SOLIDARITY", value: INTEREST_LOOKUP[y.interet_solidarite] },
+        { name: "HEALTH", value: INTEREST_LOOKUP[y.interet_sante] },
+        { name: "EDUCATION", value: INTEREST_LOOKUP[y.interet_education] },
+        { name: "CULTURE", value: INTEREST_LOOKUP[y.interet_culture] },
+        { name: "SPORT", value: INTEREST_LOOKUP[y.interet_sport] },
+        { name: "ENVIRONMENT", value: INTEREST_LOOKUP[y.interet_environnement] },
+        { name: "CITIZENSHIP", value: INTEREST_LOOKUP[y.interet_citoyennete] },
+      ];
 
+      const sortedInterest = interests.sort((a, b) => (a.value < b.value ? 1 : b.value < a.value ? -1 : 0));
+      young.domains = sortedInterest.slice(0, 3).map((i) => i.name);
+      young.engaged = young.engaged === "Non" ? "false" : "true";
       young.engagedStructure = young.engaged_structure;
       young.missionFormat = young.mission_format === "Continue" ? "CONTINUOUS" : "DISCONTINUOUS";
+
       if (count++ % 10 === 0) console.log(`${count} young added`);
       await Young.create(young);
     } catch (error) {
@@ -339,6 +339,7 @@ async function migrateReferent() {
         } else if (u.referent_department) {
           referent.role = "referent_department";
           referent.department = departmentList[u.referent_department];
+          referent.region = department2region[referent.department];
         } else if (u.context_role === "superviseur") {
           referent.role = "supervisor";
         } else {
@@ -365,7 +366,11 @@ async function migrateStructureMembers() {
 
     try {
       const structure = await Structure.findOne({ sqlId: m.structure_id });
-      if (structure) await Referent.findOneAndUpdate({ sqlId: m.profile_id }, { structureId: structure._id }, { useFindAndModify: false });
+      if (structure) {
+        let obj = { structureId: structure._id };
+        if (structure.isNetwork === "true") obj.role = "supervisor";
+        await Referent.findOneAndUpdate({ sqlId: m.profile_id }, obj, { useFindAndModify: false });
+      }
     } catch (error) {
       console.log("error while linking ref/structure", error);
     }
@@ -391,6 +396,7 @@ async function migrateApplication() {
         app.missionName = mission.name;
         app.missionDepartment = mission.department;
         app.missionRegion = mission.region;
+        app.structureId = mission.structureId;
       } else {
         app.missionId = "N/A";
       }
@@ -413,7 +419,7 @@ async function migrateApplication() {
         if (my.status === "CANDIDATURE_VALIDEE") return "VALIDATED";
         if (my.status === "CANDIDATURE_REFUSEE") return "REFUSED";
         if (my.status === "CANDIDATURE_ANNULEE") return "CANCEL";
-        if (my.status === "CANDIDATURE_PRESELECTIONNEE") return "PRESELECTED";
+        if (my.status === "CANDIDATURE_PRESELECTIONNEE") return "WAITING_VALIDATION";
         if (my.status === "CANDIDATURE_CONTRAT_SIGNE") return "SIGNED_CONTRACT";
         if (my.status === "MISSION_EN_COURS") return "IN_PROGRESS";
         if (my.status === "MISSION_EFFECTUEE") return "DONE";
@@ -424,7 +430,9 @@ async function migrateApplication() {
       app.updatedAt = my.updated_at;
       count++;
       if (count % 100 === 0) logPrecentage(count, missionYoungSQL.length);
-      a.push(app);
+      await Application.create(app);
+      if (app.status === "DONE" && young && (young.cohort === "2020" || young.cohort === "2019"))
+        await Young.findOneAndUpdate({ _id: young._id }, { status: "VALIDATED" }, { useFindAndModify: false });
     } catch (error) {
       console.log(error);
     }

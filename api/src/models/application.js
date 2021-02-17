@@ -18,6 +18,8 @@ const Schema = new mongoose.Schema({
   missionDepartment: { type: String },
   missionRegion: { type: String },
 
+  structureId: { type: String },
+
   priority: { type: String },
 
   // STATUS EXISTANT :
