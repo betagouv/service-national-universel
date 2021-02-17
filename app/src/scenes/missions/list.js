@@ -12,7 +12,7 @@ import api from "../../services/api";
 import Loader from "../../components/Loader";
 import FilterGeoloc from "./components/FilterGeoloc";
 
-const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "GEOLOC"];
+const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "GEOLOC", "DATE"];
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
@@ -72,6 +72,25 @@ export default () => {
         </Filters>
         <Missions>
           <ReactiveFilter componentId="STATUS" query={{ query: { bool: { filter: { term: { "status.keyword": "VALIDATED" } } } }, value: "" }} />
+          <ReactiveFilter
+            componentId="DATE"
+            query={{
+              query: {
+                bool: {
+                  filter: [
+                    {
+                      range: {
+                        endAt: {
+                          lt: "now",
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+              value: "",
+            }}
+          />
           <ReactiveList
             componentId="result"
             react={{ and: FILTERS }}
