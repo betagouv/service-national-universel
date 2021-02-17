@@ -48,6 +48,8 @@ export default () => {
       VALIDATED: applications.filter((e) => e.status === "VALIDATED").length,
       REFUSED: applications.filter((e) => e.status === "REFUSED").length,
       CANCEL: applications.filter((e) => e.status === "CANCEL").length,
+      IN_PROGRESS: applications.filter((e) => e.status === "IN_PROGRESS").length,
+      DONE: applications.filter((e) => e.status === "DONE").length,
     });
   }, [applications]);
 
