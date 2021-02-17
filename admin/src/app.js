@@ -67,11 +67,15 @@ export default () => {
   if (loading) return <div>Loading...</div>;
 
   return (
-    <div style={{ display: "flex", height: "100%" }}>
-      <Router>
-        <Home />
-      </Router>
-    </div>
+    <Router>
+      <div className="main">
+        <Switch>
+          <Route path="/auth" component={Auth} />
+          <Route path="/" component={Home} />
+        </Switch>
+        <Footer />
+      </div>
+    </Router>
   );
 };
 
