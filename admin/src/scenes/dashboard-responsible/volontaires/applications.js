@@ -57,7 +57,9 @@ export default () => {
     <>
       <Row>
         <Col md={12}>
-          <h4 style={{ fontWeight: "normal", margin: "25px 0" }}>Volontaires candidatant sur des missions de ma structure</h4>
+          <h4 style={{ fontWeight: "normal", margin: "25px 0" }}>
+            Volontaires candidatant sur des missions de {user.role === "supervisor" ? "mes" : "ma"} structure{user.role === "supervisor" ? "s" : ""}
+          </h4>
         </Col>
         <Col md={6} xl={3}>
           <CardContainer>
@@ -116,7 +118,9 @@ export default () => {
       </Row>
       <Row>
         <Col md={12}>
-          <h4 style={{ fontWeight: "normal", margin: "25px 0" }}>Volontaires participant à des missions de ma structure</h4>
+          <h4 style={{ fontWeight: "normal", margin: "25px 0" }}>
+            Volontaires participant à des missions de {user.role === "supervisor" ? "mes" : "ma"} structure{user.role === "supervisor" ? "s" : ""}
+          </h4>
         </Col>
         <Col md={6} xl={3}>
           <CardContainer>

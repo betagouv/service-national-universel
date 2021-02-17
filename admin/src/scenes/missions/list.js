@@ -14,7 +14,7 @@ import CustomFilter from "./customFilter";
 import SelectStatusMission from "../../components/selectStatusMission";
 import ReactiveFilter from "../../components/ReactiveFilter";
 
-const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "REGION", "DEPARTMENT", "NETWORK"];
+const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "REGION", "DEPARTMENT", "NETWORK", "STRUCTURE"];
 
 export default () => {
   const [mission, setMission] = useState(null);
@@ -135,6 +135,19 @@ export default () => {
                   URLParams={true}
                   showSearch={false}
                 />
+                {user.role === "supervisor" ? (
+                  <MultiDropdownList
+                    className="dropdown-filter"
+                    placeholder="Structure"
+                    componentId="STRUCTURE"
+                    dataField="structureName.keyword"
+                    react={{ and: FILTERS.filter((e) => e !== "STRUCTURE") }}
+                    title=""
+                    URLParams={true}
+                    showSearch={false}
+                    sortBy="asc"
+                  />
+                ) : null}
               </FilterRow>
             </Filter>
             {user.role === "supervisor" && structureIds.length ? (
