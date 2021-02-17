@@ -18,7 +18,7 @@ export default () => {
   const user = useSelector((state) => state.Auth.user);
   const [userIsValid, setUserIsValid] = useState(true);
 
-  if (user) return <Redirect to="/" />;
+  if (user) return <Redirect to="/auth/signup/structure" />;
 
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
@@ -31,7 +31,7 @@ export default () => {
               <Title>Espace Administrateur</Title>
               <Subtitle>A destination des référents et des structures d’accueil</Subtitle>
               <Formik
-                initialValues={{ email: "", password: "" }}
+                initialValues={{ email: "tangimds+31@gmail.com", password: "d" }}
                 onSubmit={async (values, actions) => {
                   try {
                     const { user, token } = await api.post(`/referent/signin`, values);
@@ -59,6 +59,7 @@ export default () => {
 
                       <StyledFormGroup>
                         <div>
+                          <label htmlFor="email">E-mail</label>
                           <InputField
                             // validate={(v) => !validator.isEmail(v) && "Invalid email address"}
                             className="form-control"
@@ -69,12 +70,12 @@ export default () => {
                             value={values.email}
                             onChange={handleChange}
                           />
-                          <label htmlFor="email">E-mail</label>
                         </div>
                         <p style={{ fontSize: 12, color: "rgb(253, 49, 49)", marginTop: 5 }}>{errors.email}</p>
                       </StyledFormGroup>
                       <StyledFormGroup>
                         <div>
+                          <label htmlFor="password">Mot de passe</label>
                           <InputField
                             // validate={(v) => validator.isEmpty(v) && "This field is Required"}
                             className="form-control"
@@ -85,7 +86,6 @@ export default () => {
                             value={values.password}
                             onChange={handleChange}
                           />
-                          <label htmlFor="password">Mot de passe</label>
                         </div>
                         <p style={{ fontSize: 12, color: "rgb(253, 49, 49)", marginTop: 5 }}>{errors.password}</p>
                       </StyledFormGroup>
@@ -175,16 +175,12 @@ const LoginBox = styled.div`
 `;
 
 const StyledFormGroup = styled(FormGroup)`
-  margin-bottom: 20px;
-  div {
-    display: flex;
-    flex-direction: column-reverse;
-  }
+  margin-bottom: 25px;
   label {
-    color: #37415b;
-    font-size: 14px;
-    margin-bottom: 5px;
-    cursor: pointer;
+    color: rgb(106, 111, 133);
+    font-size: 10px;
+    text-transform: uppercase;
+    font-weight: 700;
   }
 `;
 const InputField = styled(Field)`

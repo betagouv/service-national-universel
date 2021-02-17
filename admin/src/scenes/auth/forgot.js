@@ -64,7 +64,7 @@ export default () => {
                       Obtenir le lien de réinitialisation par email
                     </Submit>
                     <Account>
-                      Vous avez déjà un compte ? <Link to="/auth/signup">Connectez vous</Link>
+                      Vous avez déjà un compte ? <Link to="/auth">Connectez vous</Link>
                     </Account>
                   </form>
                 );
