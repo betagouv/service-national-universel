@@ -2,16 +2,18 @@ import React, { useEffect, useState } from "react";
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
+import { useSelector } from "react-redux";
 
 import api from "../services/api";
 import { translate, MISSION_STATUS_COLORS, MISSION_STATUS } from "../utils";
 import MailCorrectionMission from "../scenes/missions/components/MailCorrectionMission";
 import MailRefusedMission from "../scenes/missions/components/MailRefusedMission";
 
-export default ({ hit }) => {
+export default ({ hit, options = [] }) => {
   const [waitingCorrectionModal, setWaitingCorrectionModal] = useState(false);
   const [refusedModal, setRefusedModal] = useState(false);
   const [mission, setMission] = useState(hit);
+  const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
     (async () => {
@@ -23,6 +25,9 @@ export default ({ hit }) => {
   }, [hit]);
 
   if (!mission) return <div />;
+
+  if (user.role === "responsible") options.push(MISSION_STATUS.WAITING_VALIDATION, MISSION_STATUS.DRAFT, MISSION_STATUS.CANCEL, MISSION_STATUS.ARCHIVED);
+  if (user.role === "admin") options = Object.keys(MISSION_STATUS);
 
   const handleClickStatus = (status) => {
     if (!confirm("Êtes-vous sûr(e) de vouloir modifier le statut de cette mission ?")) return;
@@ -77,7 +82,7 @@ export default ({ hit }) => {
             </div>
           </DropdownToggle>
           <DropdownMenu>
-            {Object.keys(MISSION_STATUS).map((status) => {
+            {options.map((status) => {
               return (
                 <DropdownItem key={status} className="dropdown-item" onClick={() => handleClickStatus(status)}>
                   {translate(status)}
