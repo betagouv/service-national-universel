@@ -160,17 +160,24 @@ const Filters = styled(Container)`
   }
 `;
 
-const AlertBox = ({ onClose }) => (
-  //todo change message depending on the cohort
-  <Alert>
-    <img src={require("../../assets/information.svg")} height={15} />
-    <div className="text">
-      <strong>Vous pourrez faire une mission jusqu’en juin 2022.</strong>
-      <p>Des missions supplémentaires seront proposées tout au long de l’année. Vous serez informé par e-mail dès qu’une mission répondant à vos préférences sera publiée.</p>
-    </div>
-    <img src={require("../../assets/close.svg")} height={15} onClick={onClose} style={{ cursor: "pointer" }} />
-  </Alert>
-);
+const AlertBox = ({ onClose }) => {
+  const young = useSelector((state) => state.Auth.young);
+  const getLimitDate = () => {
+    if (young.cohort === "2019") return "23 mars 2021";
+    if (young.cohort === "2020") return "31 décembre 2021 ";
+    return "30 juin 2022";
+  };
+  return (
+    <Alert>
+      <img src={require("../../assets/information.svg")} height={15} />
+      <div className="text">
+        <strong>Vous pourrez faire une mission jusqu’au {getLimitDate()}.</strong>
+        <p>Des missions supplémentaires seront proposées tout au long de l’année. Vous serez informé par e-mail dès qu’une mission répondant à vos préférences sera publiée.</p>
+      </div>
+      <img src={require("../../assets/close.svg")} height={15} onClick={onClose} style={{ cursor: "pointer" }} />
+    </Alert>
+  );
+};
 
 const Missions = styled(Container)`
   padding: 20px 0;
