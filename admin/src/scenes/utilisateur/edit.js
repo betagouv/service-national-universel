@@ -8,7 +8,7 @@ import "dayjs/locale/fr";
 import { useSelector } from "react-redux";
 
 import DateInput from "../../components/dateInput";
-import { departmentList, regionList, translate, REFERENT_ROLES } from "../../utils";
+import { departmentList, regionList, department2region, translate, REFERENT_ROLES } from "../../utils";
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 
@@ -55,7 +55,7 @@ export default (props) => {
           <>
             <TitleWrapper>
               <div>
-                <Title>{`Profil Référent de ${values.firstName} ${values.lastName}`}</Title>
+                <Title>{`Profil Utilisateur de ${values.firstName} ${values.lastName}`}</Title>
                 <SubTitle>{getSubtitle()}</SubTitle>
               </div>
               <button onClick={handleSubmit}>Enregistrer</button>
@@ -75,6 +75,8 @@ export default (props) => {
                   <BoxTitle>Coordonnées</BoxTitle>
                   <BoxContent direction="column">
                     <Item title="E-mail" values={values} name="email" handleChange={handleChange} />
+                    <Item title="Tel. fixe" values={values} name="phone" handleChange={handleChange} />
+                    <Item title="Tel. mobile" values={values} name="mobile" handleChange={handleChange} />
                   </BoxContent>
                 </Box>
               </Col>
@@ -86,19 +88,40 @@ export default (props) => {
                       <Select
                         name="role"
                         values={values}
-                        handleChange={handleChange}
+                        onChange={handleChange}
                         title="Rôle"
-                        options={[REFERENT_ROLES.REFERENT_DEPARTMENT, REFERENT_ROLES.REFERENT_REGION, REFERENT_ROLES.ADMIN].map((key) => ({ value: key, label: translate(key) }))}
+                        options={[
+                          REFERENT_ROLES.REFERENT_DEPARTMENT,
+                          REFERENT_ROLES.REFERENT_REGION,
+                          REFERENT_ROLES.ADMIN,
+                          REFERENT_ROLES.RESPONSIBLE,
+                          REFERENT_ROLES.SUPERVISOR,
+                        ].map((key) => ({ value: key, label: translate(key) }))}
                       />
-                      <Select name="department" values={values} handleChange={handleChange} title="Département" options={departmentList.map((d) => ({ value: d, label: d }))} />
-                      <Select
-                        disabled={values.role === REFERENT_ROLES.REFERENT_DEPARTMENT}
-                        name="region"
-                        values={values}
-                        handleChange={handleChange}
-                        title="Région"
-                        options={regionList.map((r) => ({ value: r, label: r }))}
-                      />
+                      {[REFERENT_ROLES.REFERENT_DEPARTMENT, REFERENT_ROLES.REFERENT_REGION].includes(values.role) ? (
+                        <>
+                          <Select
+                            name="department"
+                            values={values}
+                            onChange={(e) => {
+                              const value = e.target.value;
+                              handleChange({ target: { name: "department", value } });
+                              const region = department2region[value];
+                              handleChange({ target: { name: "region", value: region } });
+                            }}
+                            title="Département"
+                            options={departmentList.map((d) => ({ value: d, label: d }))}
+                          />
+                          <Select
+                            disabled={values.role === REFERENT_ROLES.REFERENT_DEPARTMENT}
+                            name="region"
+                            values={values}
+                            onChange={handleChange}
+                            title="Région"
+                            options={regionList.map((r) => ({ value: r, label: r }))}
+                          />
+                        </>
+                      ) : null}
                     </BoxContent>
                   </Box>
                 </Col>
@@ -150,14 +173,14 @@ const Item = ({ title, values, name, handleChange, type = "text", disabled = fal
   );
 };
 
-const Select = ({ title, name, values, handleChange, disabled, errors, touched, validate, options }) => {
+const Select = ({ title, name, values, onChange, disabled, errors, touched, validate, options }) => {
   return (
     <Row className="detail">
       <Col md={4}>
         <label>{title}</label>
       </Col>
       <Col md={8}>
-        <select disabled={disabled} className="form-control" className="form-control" name={name} value={values[name]} onChange={handleChange}>
+        <select disabled={disabled} className="form-control" className="form-control" name={name} value={values[name]} onChange={onChange}>
           <option key={-1} value="" label="" />
           {options.map((o, i) => (
             <option key={i} value={o.value} label={o.label} />

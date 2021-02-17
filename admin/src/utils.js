@@ -682,6 +682,8 @@ export const REFERENT_ROLES = {
   ADMIN: "admin",
   REFERENT_DEPARTMENT: "referent_department",
   REFERENT_REGION: "referent_region",
+  RESPONSIBLE: "responsible",
+  SUPERVISOR: "supervisor",
 };
 
 export const MISSION_STATUS = {
