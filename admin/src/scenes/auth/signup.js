@@ -38,7 +38,7 @@ export default () => {
           <LoginBox>
             <div>
               <Title>Inscrivez votre structure d'accueil</Title>
-              <Subtitle style={{ color: "#6E757C" }}>A destination des structures souhaitant accueillir des volontaire</Subtitle>
+              <Subtitle style={{ color: "#6E757C" }}>A destination des structures souhaitant accueillir des volontaires</Subtitle>
               <Formik
                 validateOnChange={false}
                 validateOnBlur={false}
