@@ -9,7 +9,7 @@ import { Redirect, useHistory } from "react-router-dom";
 import MultiSelect from "../../components/Multiselect";
 import AddressInput from "../../components/addressInput";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
-import { domains, translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL } from "../../utils";
+import { domains, translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, MISSION_DOMAINS } from "../../utils";
 import api from "../../services/api";
 import Invite from "../structure/components/invite";
 
@@ -152,7 +152,13 @@ export default (props) => {
                     </FormGroup>
                     <FormGroup>
                       <label>DOMAINES D'ACTION</label>
-                      <MultiSelect value={values.domains || []} onChange={handleChange} name="domains" options={domains} placeholder="Sélectionnez un ou plusieurs domains" />
+                      <MultiSelect
+                        value={values.domains || []}
+                        onChange={handleChange}
+                        name="domains"
+                        options={Object.keys(MISSION_DOMAINS).concat(values.domains || [])}
+                        placeholder="Sélectionnez un ou plusieurs domains"
+                      />
                     </FormGroup>
                     <FormGroup>
                       <label>
@@ -277,8 +283,7 @@ export default (props) => {
                           name="period"
                           options={Object.keys(MISSION_PERIOD_DURING_SCHOOL)
                             .concat(Object.keys(MISSION_PERIOD_DURING_HOLIDAYS))
-                            .concat(values.period || [])
-                            .map((p) => translate(p))}
+                            .concat(values.period || [])}
                           placeholder="Sélectionnez une ou plusieurs périodes"
                         />
                       </FormGroup>

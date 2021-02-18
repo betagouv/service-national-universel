@@ -152,6 +152,17 @@ async function migrateMission() {
   let a = [];
   let count = 0;
   console.log(`${missionsSQL.length} missions detected`);
+  const LOOKUP_DOMAINS = {
+    Citoyenneté: "CITIZENSHIP",
+    Culture: "CULTURE",
+    "Défense et mémoire": "DEFENSE",
+    Éducation: "EDUCATION",
+    Environnement: "ENVIRONMENT",
+    Santé: "HEALTH",
+    Sécurité: "SECURITY",
+    Solidarité: "SOLIDARITY",
+    Sport: "SPORT",
+  };
 
   for (let i = 0; i < missionsSQL.length; i++) {
     const m = missionsSQL[i];
@@ -181,7 +192,7 @@ async function migrateMission() {
       mission.remote = m.is_everywhere ? "true" : "false";
 
       //todo translates domains
-      mission.domains = JSON.parse(m.domaines);
+      mission.domains = JSON.parse(m.domaines).map((d) => LOOKUP_DOMAINS[d]);
       if (m.format === "Perlée") {
         mission.format = "DISCONTINUOUS";
       } else if (m.format === "Continue") {

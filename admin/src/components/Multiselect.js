@@ -1,10 +1,11 @@
 import React from "react";
 import MultiSelect from "react-multi-select-component";
 import styled from "styled-components";
+import { translate } from "../utils";
 
 export default ({ value, name, onChange, options, placeholder }) => {
   const transformOptions = options.map((e) => {
-    return { label: e, value: e };
+    return { label: translate(e), value: e };
   });
 
   function valueForMultiselect(options, values) {

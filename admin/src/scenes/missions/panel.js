@@ -94,7 +94,7 @@ export default ({ onChange, mission }) => {
       <div className="title">La mission</div>
       <div className="detail">
         <div className="detail-title">Domaines</div>
-        <div className="detail-text">{mission.domains.join(", ")}</div>
+        <div className="detail-text">{mission.domains.map((d) => translate(d)).join(", ")}</div>
       </div>
       <div className="detail">
         <div className="detail-title">Début</div>
@@ -122,7 +122,7 @@ export default ({ onChange, mission }) => {
       </div>
       <div className="detail">
         <div className="detail-title">Périodes</div>
-        <div className="detail-text">{mission.period}</div>
+        <div className="detail-text">{mission.period.map((p) => translate(p)).join(", ")}</div>
       </div>
       <div className="detail">
         <div className="detail-title">Objectifs</div>
