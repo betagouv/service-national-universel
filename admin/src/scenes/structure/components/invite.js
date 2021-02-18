@@ -12,7 +12,7 @@ export default ({ structure }) => {
   return (
     <Wrapper>
       <Formik
-        initialValues={{ role: "structure_member", structureId: structure._id, structureName: structure.name }}
+        initialValues={{ role: "responsible", structureId: structure._id, structureName: structure.name }}
         onSubmit={async (values, actions) => {
           try {
             if (!values.firstName || !values.lastName || !values.email) {

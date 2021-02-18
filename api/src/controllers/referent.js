@@ -94,7 +94,7 @@ router.post("/signup_invite/:role", passport.authenticate("referent", { session:
     } else if (obj.role === "referent_region") {
       template = "../templates/inviteReferentRegion.html";
       mailObject = "Activez votre compte référent régional SNU";
-    } else if (obj.role === "structure_member") {
+    } else if (obj.role === "responsible") {
       template = "../templates/inviteMember.html";
       mailObject = "Activez votre compte de responsable de structure";
     } else if (obj.role === "admin") {
