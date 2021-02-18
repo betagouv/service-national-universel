@@ -73,6 +73,7 @@ export default () => {
           <Route path="/auth" component={Auth} />
           <Route path="/" component={Home} />
         </Switch>
+        <Footer />
       </div>
     </Router>
   );
@@ -82,7 +83,7 @@ const Home = () => {
   const user = useSelector((state) => state.Auth.user);
   // if (user && !user.structureId) return <Onboarding />;
   return (
-    <div className="main">
+    <div>
       <Drawer />
       <div className="screen-container" style={{ marginLeft: !user && 0 }}>
         <Header />
@@ -100,7 +101,6 @@ const Home = () => {
           <RestrictedRoute path="/user" component={Utilisateur} />
           <RestrictedRoute path="/" component={["supervisor", "responsible"].includes(user?.role) ? DashboardResponsible : Dashboard} />
         </Switch>
-        <Footer />
       </div>
     </div>
   );
