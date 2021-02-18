@@ -10,7 +10,7 @@ import api from "../../../services/api";
 import matomo from "../../../services/matomo";
 
 import ErrorMessage, { requiredMessage } from "../components/errorMessage";
-import AddressInput from "../components/addressInput";
+import AddressInput from "../../../components/addressInput";
 import DndFileInput from "../../../components/dndFileInput";
 
 import { saveYoung, STEPS } from "../utils";

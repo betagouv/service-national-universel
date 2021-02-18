@@ -7,7 +7,7 @@ import { toastr } from "react-redux-toastr";
 import validator from "validator";
 import { useHistory } from "react-router-dom";
 
-import AddressInput from "../components/addressInput";
+import AddressInput from "../../../components/addressInput";
 import api from "../../../services/api";
 import matomo from "../../../services/matomo";
 

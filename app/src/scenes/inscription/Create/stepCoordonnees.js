@@ -18,7 +18,7 @@ import matomo from "../../../services/matomo";
 
 import { saveYoung, STEPS, YOUNG_SITUATIONS } from "../utils";
 
-import AddressInput from "../components/addressInput";
+import AddressInput from "../../../components/addressInput";
 import Etablissement from "../components/etablissmentInput";
 import { translate } from "../../../utils";
 

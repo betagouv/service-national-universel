@@ -10,6 +10,7 @@ import { setYoung } from "../redux/auth/actions";
 import ErrorMessage, { requiredMessage } from "../scenes/inscription/components/errorMessage";
 import { getPasswordErrorMessage, translate } from "../utils";
 import validator from "validator";
+import AddressInput from "../components/addressInput";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
@@ -136,7 +137,7 @@ export default () => {
           }
         }}
       >
-        {({ values, handleChange, handleSubmit, isSubmitting, submitForm }) => (
+        {({ values, handleChange, handleSubmit, isSubmitting, submitForm, errors, touched }) => (
           <>
             <Title>Mon profil</Title>
             <FormRow>
@@ -154,6 +155,15 @@ export default () => {
               />
               <Item name="phone" values={values} handleChange={handleChange} title="Téléphone" />
             </FormRow>
+            <div style={{ marginBottom: "1.5rem" }}>
+              <AddressInput
+                keys={{ city: "city", zip: "zip", address: "address", location: "location", department: "department", region: "region" }}
+                values={values}
+                handleChange={handleChange}
+                errors={errors}
+                touched={touched}
+              />
+            </div>
             <Title>Représentant Légal</Title>
             <FormRow>
               <Select

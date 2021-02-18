@@ -3,8 +3,8 @@ import styled from "styled-components";
 import { Row, Col, Input } from "reactstrap";
 import Autosuggest from "react-autosuggest";
 import { Field } from "formik";
-import { department2region, departmentLookUp, departmentList, regionList, region2department } from "../../../utils";
-import ErrorMessage, { requiredMessage } from "../components/errorMessage";
+import { department2region, departmentLookUp, departmentList, regionList, region2department } from "../utils";
+import ErrorMessage, { requiredMessage } from "../scenes/inscription/components/errorMessage";
 
 const NORESULTMESSAGE = "Rentrer manuellement l'adresse";
 
