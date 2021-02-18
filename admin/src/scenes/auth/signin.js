@@ -115,7 +115,7 @@ export default () => {
 
 const Thumb = styled.div`
   min-height: 400px;
-  background: url(${require("../../assets/rang.jpeg")}) no-repeat center;
+  background: url(${require("../../assets/computer.jpeg")}) no-repeat center;
   background-size: cover;
   flex: 1;
 `;
