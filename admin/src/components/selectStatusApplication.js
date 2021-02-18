@@ -23,8 +23,8 @@ export default ({ hit, options = [] }) => {
 
   if (!application) return <div />;
 
-  if (application.status === APPLICATION_STATUS.WAITING_VALIDATION) options.push(APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.REFUSED);
-  if (application.status === APPLICATION_STATUS.VALIDATED) options.push(APPLICATION_STATUS.IN_PROGRESS, APPLICATION_STATUS.DONE, APPLICATION_STATUS.CANCEL);
+  options = [APPLICATION_STATUS.IN_PROGRESS, APPLICATION_STATUS.DONE, APPLICATION_STATUS.CANCEL];
+  if (application.status === APPLICATION_STATUS.WAITING_VALIDATION) options = [APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.REFUSED];
   if (user.role === "admin") options = Object.keys(APPLICATION_STATUS);
 
   const handleClickStatus = (status) => {
