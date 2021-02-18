@@ -28,6 +28,7 @@ import Team from "./scenes/team";
 
 import Drawer from "./components/drawer";
 import Header from "./components/header";
+import Footer from "./components/footer";
 
 import api from "./services/api";
 
@@ -66,11 +67,15 @@ export default () => {
   if (loading) return <div>Loading...</div>;
 
   return (
-    <div style={{ display: "flex", height: "100%" }}>
-      <Router>
-        <Home />
-      </Router>
-    </div>
+    <Router>
+      <div className="main">
+        <Switch>
+          <Route path="/auth" component={Auth} />
+          <Route path="/" component={Home} />
+        </Switch>
+        <Footer />
+      </div>
+    </Router>
   );
 };
 
@@ -78,7 +83,7 @@ const Home = () => {
   const user = useSelector((state) => state.Auth.user);
   // if (user && !user.structureId) return <Onboarding />;
   return (
-    <div className="main">
+    <div>
       <Drawer />
       <div className="screen-container" style={{ marginLeft: !user && 0 }}>
         <Header />

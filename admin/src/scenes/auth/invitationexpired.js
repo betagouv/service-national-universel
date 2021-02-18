@@ -7,6 +7,7 @@ import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
 
 import { setUser, setStructure } from "../../redux/auth/actions";
+import Header from "./components/header";
 
 import api from "../../services/api";
 import LoadingButton from "../../components/loadingButton";
@@ -16,77 +17,84 @@ export default () => {
   const urlParams = new URLSearchParams(window.location.search);
 
   return (
-    <Wrapper noGutters>
-      <Col sm={6}>
-        <AuthWrapper>
-          <div style={{ marginBottom: 60 }}>
-            <img src={require("../../assets/logo-snu.png")} width={100} />
-          </div>
-          <Title>Votre lien d'invitation à expiré</Title>
-          <Formik
-            initialValues={{ email: urlParams.get("email") || "" }}
-            onSubmit={async (values, actions) => {
-              try {
-                const { ok, code } = await api.post(`/referent/signup_retry`, values);
-                if (!ok) return toastr.error("Erreur !", translate(code));
-                toastr.success("Email envoyé");
-              } catch (e) {
-                toastr.error("Erreur !", translate(e.code));
-              }
-              actions.setSubmitting(false);
-            }}
-          >
-            {({ values, errors, isSubmitting, handleChange, handleSubmit }) => {
-              return (
-                <form onSubmit={handleSubmit}>
-                  <StyledFormGroup>
-                    <label>ADRESSE EMAIL</label>
-                    <InputField
-                      validate={(v) => !validator.isEmail(v) && "Veuillez renseigner votre email"}
-                      name="email"
-                      type="email"
-                      value={values.email}
-                      onChange={handleChange}
-                      placeholder="EMAIL"
-                      hasError={errors.email}
-                    />
-                    <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.email}</p>
-                  </StyledFormGroup>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 40 }}>
-                    <Submit loading={isSubmitting} type="submit" color="primary">
-                      Cliquez ici pour recevoir une nouvelle invitation valide
-                    </Submit>
-                  </div>
-                  <Account>
-                    Si le problème persiste, ou si vous ne recevez pas de mail, contactez nous sur <a href="mailto:contact@snu.gouv.fr">contact@snu.gouv.fr</a>
-                  </Account>
-                </form>
-              );
-            }}
-          </Formik>
-        </AuthWrapper>
-      </Col>
-      <Col sm={6} style={{ background: "rgb(245, 249, 252)" }}>
-        <Thumb>
-          <h1>Plateforme du Service National Universel</h1>
-          <img src={require("../../assets/auth.png")} />
-        </Thumb>
-      </Col>
-    </Wrapper>
+    <div style={{ display: "flex", flexDirection: "column" }}>
+      <Header />
+
+      <AuthWrapper>
+        <Thumb />
+        <div>
+          <LoginBox>
+            <Title>Votre lien d'invitation à expiré</Title>
+            <Formik
+              initialValues={{ email: urlParams.get("email") || "" }}
+              onSubmit={async (values, actions) => {
+                try {
+                  const { ok, code } = await api.post(`/referent/signup_retry`, values);
+                  if (!ok) return toastr.error("Erreur !", translate(code));
+                  toastr.success("Email envoyé");
+                } catch (e) {
+                  toastr.error("Erreur !", translate(e.code));
+                }
+                actions.setSubmitting(false);
+              }}
+            >
+              {({ values, errors, isSubmitting, handleChange, handleSubmit }) => {
+                return (
+                  <form onSubmit={handleSubmit}>
+                    <StyledFormGroup>
+                      <label>ADRESSE EMAIL</label>
+                      <InputField
+                        validate={(v) => !validator.isEmail(v) && "Veuillez renseigner votre email"}
+                        name="email"
+                        type="email"
+                        value={values.email}
+                        onChange={handleChange}
+                        placeholder="EMAIL"
+                        haserror={errors.email}
+                      />
+                      <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.email}</p>
+                    </StyledFormGroup>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 40 }}>
+                      <Submit loading={isSubmitting} type="submit" color="primary">
+                        Cliquez ici pour recevoir une nouvelle invitation valide
+                      </Submit>
+                    </div>
+                    <Account>
+                      Si le problème persiste, ou si vous ne recevez pas de mail, contactez nous sur <a href="mailto:contact@snu.gouv.fr">contact@snu.gouv.fr</a>
+                    </Account>
+                  </form>
+                );
+              }}
+            </Formik>
+          </LoginBox>
+        </div>
+      </AuthWrapper>
+    </div>
   );
 };
 
-const Wrapper = styled(Row)`
-  height: 100vh;
-  overflow: hidden;
+const LoginBox = styled.div`
+  padding: 4rem;
+  background-color: #f6f6f6;
+  @media (max-width: 768px) {
+    border-radius: 0;
+    margin: 0;
+  }
+`;
+
+const Thumb = styled.div`
+  min-height: 400px;
+  background: url(${require("../../assets/rang.jpeg")}) no-repeat center;
+  background-size: cover;
+  flex: 1;
 `;
 
 const AuthWrapper = styled.div`
-  padding: 20px;
-  max-width: 380px;
+  display: flex;
   width: 100%;
-  margin: 0 auto;
-  overflow-y: auto;
+  > * {
+    flex: 1;
+  }
 `;
 
 const Title = styled.div`
@@ -116,7 +124,7 @@ const InputField = styled(Field)`
   padding: 9px 20px;
   border-radius: 4px;
   border: 1px solid;
-  border-color: ${({ hasError }) => (hasError ? "red" : "#dcdfe6")};
+  border-color: ${({ haserror }) => (haserror ? "red" : "#dcdfe6")};
   ::placeholder {
     color: #d6d6e1;
   }
@@ -126,23 +134,29 @@ const InputField = styled(Field)`
 `;
 
 const Submit = styled(LoadingButton)`
-  background-color: #3182ce;
-  outline: 0;
+  display: block;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: 0;
+  padding: 0.5rem 3rem;
   border: 0;
-  color: #fff;
-  border-radius: 4px;
-  padding: 10px 20px;
-  font-size: 14px;
+  background-color: #5145cd;
+  margin-top: 30px;
+  margin-bottom: 30px;
+  border-radius: 10px;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
   cursor: pointer;
   :hover {
-    background-color: #5a9bd8;
+    background-color: #42389d;
+  }
+  :focus {
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
   }
   :disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
 `;
-
 const Account = styled.div`
   border-top: 1px solid #cbd5e0;
   padding-top: 25px;
@@ -153,21 +167,5 @@ const Account = styled.div`
     color: #262a3e;
     font-weight: 600;
     margin-left: 5px;
-  }
-`;
-
-const Thumb = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  height: 100%;
-  h1 {
-    color: rgb(49, 130, 206);
-    margin-bottom: 60px;
-    font-size: 24px;
-  }
-  img {
-    max-width: 280px;
   }
 `;

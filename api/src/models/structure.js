@@ -15,7 +15,7 @@ const Schema = new mongoose.Schema({
   twitter: { type: String },
   instagram: { type: String },
 
-  status: { type: String, default: "WAITING_VALIDATION", enum: ["WAITING_VALIDATION", "WAITING_CORRECTION", "VALIDATED"] },
+  status: { type: String, default: "WAITING_VALIDATION", enum: ["WAITING_VALIDATION", "WAITING_CORRECTION", "VALIDATED", "DRAFT"] },
 
   sqlUserId: { type: String },
   isNetwork: { type: String, enum: ["true", "false"] },

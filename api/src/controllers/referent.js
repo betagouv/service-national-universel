@@ -45,6 +45,7 @@ function cookieOptions() {
 
 router.post("/signin", (req, res) => ReferentAuth.signin(req, res));
 router.post("/logout", (req, res) => ReferentAuth.logout(req, res));
+router.post("/signup", (req, res) => ReferentAuth.signup(req, res));
 
 router.get("/signin_token", passport.authenticate("referent", { session: false }), (req, res) => ReferentAuth.signinToken(req, res));
 router.post("/forgot_password", async (req, res) => ReferentAuth.forgotPassword(req, res, `${config.ADMIN_URL}/auth/reset`));
@@ -107,7 +108,7 @@ router.post("/signup_invite/:role", passport.authenticate("referent", { session:
     htmlContent = htmlContent.replace(/{{department}}/g, `${obj.department}`);
     htmlContent = htmlContent.replace(/{{region}}/g, `${obj.region}`);
     htmlContent = htmlContent.replace(/{{structureName}}/g, req.body.structureName);
-    htmlContent = htmlContent.replace(/{{cta}}/g, `${config.ADMIN_URL}/auth/signup?token=${invitation_token}`);
+    htmlContent = htmlContent.replace(/{{cta}}/g, `${config.ADMIN_URL}/auth/signup/invite?token=${invitation_token}`);
 
     await sendEmail({ name: `${obj.firstName} ${obj.lastName}`, email: obj.email }, mailObject, htmlContent);
 
@@ -134,7 +135,7 @@ router.post("/signup_retry", async (req, res) => {
     htmlContent = htmlContent.replace(/{{toName}}/g, `${referent.firstName} ${referent.lastName}`);
     htmlContent = htmlContent.replace(/{{fromName}}/g, `contact@snu.gouv.fr`);
     htmlContent = htmlContent.replace(/{{department}}/g, `${referent.department}`);
-    htmlContent = htmlContent.replace(/{{cta}}/g, `${config.ADMIN_URL}/auth/signup?token=${invitationToken}`);
+    htmlContent = htmlContent.replace(/{{cta}}/g, `${config.ADMIN_URL}/auth/signup/invite?token=${invitationToken}`);
     await sendEmail(
       { name: `${referent.firstName} ${referent.lastName}`, email: referent.email },
       "Activez votre compte référent départemental SNU",
@@ -160,7 +161,7 @@ router.post("/signup_verify", async (req, res) => {
     return res.status(500).send({ ok: false, code: SERVER_ERROR });
   }
 });
-router.post("/signup", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.post("/signup_invite", async (req, res) => {
   try {
     const email = (req.body.email || "").trim().toLowerCase();
 
