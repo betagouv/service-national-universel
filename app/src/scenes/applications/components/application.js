@@ -78,7 +78,7 @@ const Footer = ({ application, tutor, onChange }) => {
                 <div>Mail : {tutor.email}</div>
               </>
             ) : null}
-            <div onClick={() => setStatus(APPLICATION_STATUS.CANCEL)}>Abandonner la mission</div>
+            <div onClick={() => setStatus(APPLICATION_STATUS.ABANDON)}>Abandonner la mission</div>
           </ContainerFooter>
           {/* <div onClick={() => setStatus(APPLICATION_STATUS.WAITING_VALIDATION)}>test</div> */}
         </>

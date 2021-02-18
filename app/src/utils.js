@@ -32,6 +32,8 @@ export const translate = (value) => {
       return "Refusée";
     case "CANCEL":
       return "Annulée";
+    case "ABANDON":
+      return "Abandonnée";
     case "DONE":
       return "Effectuée";
     case "ARCHIVED":
@@ -609,6 +611,7 @@ export const APPLICATION_STATUS = {
   NOT_COMPLETED: "NOT_COMPLETED",
   PRESELECTED: "PRESELECTED",
   SIGNED_CONTRACT: "SIGNED_CONTRACT",
+  ABANDON: "ABANDON",
 };
 
 export const APPLICATION_STATUS_COLORS = {
@@ -623,6 +626,7 @@ export const APPLICATION_STATUS_COLORS = {
   CANCEL: "#ffa987",
   ARCHIVED: "#ffb3fb",
   IN_PROGRESS: "#382F79",
+  ABANDON: "#BE3B12",
 };
 
 export const PERIOD_DURING_HOLIDAYS = {

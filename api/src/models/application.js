@@ -48,6 +48,7 @@ const Schema = new mongoose.Schema({
       "NOT_COMPLETED",
       "PRESELECTED",
       "SIGNED_CONTRACT",
+      "ABANDON",
     ],
     default: "WAITING_VALIDATION",
   },
