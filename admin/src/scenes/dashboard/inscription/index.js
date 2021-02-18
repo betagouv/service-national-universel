@@ -30,11 +30,12 @@ export default () => {
   }
 
   useEffect(() => {
+    const status = Object.keys(YOUNG_STATUS).filter((e) => e !== "IN_PROGRESS");
     if (user.role === REFERENT_ROLES.REFERENT_DEPARTMENT) {
-      updateFilter({ department: user.department });
+      updateFilter({ department: user.department, status });
     }
     if (user.role === REFERENT_ROLES.REFERENT_REGION) {
-      updateFilter({ region: user.region });
+      updateFilter({ region: user.region, status });
     }
   }, []);
 
