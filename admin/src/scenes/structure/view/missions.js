@@ -58,7 +58,7 @@ export default ({ structure }) => {
       </StructureView>
       <Panel
         mission={mission}
-        onClose={() => {
+        onChange={() => {
           setMission(null);
         }}
       />
