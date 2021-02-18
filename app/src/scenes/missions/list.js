@@ -12,7 +12,7 @@ import api from "../../services/api";
 import Loader from "../../components/Loader";
 import FilterGeoloc from "./components/FilterGeoloc";
 
-const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "GEOLOC", "DATE"];
+const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "GEOLOC", "DATE", "PERIOD"];
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
@@ -63,34 +63,24 @@ export default () => {
                 showSearch={false}
               />
             </DomainsFilter>
-          </Row>
-          <Row>
-            <Col md={12}>
-              <FilterGeoloc componentId="GEOLOC" placeholder="Recherche par ville..." />
+            <DomainsFilter md={6}>
+              <SingleDropdownList
+                selectAllLabel="Toutes les périodes"
+                URLParams={true}
+                componentId="PERIOD"
+                placeholder="Filtrer par période"
+                dataField="period.keyword"
+                react={{ and: FILTERS.filter((e) => e !== "PERIOD") }}
+                showSearch={false}
+              />
+            </DomainsFilter>
+            <Col md={6}>
+              <FilterGeoloc city={young.city} componentId="GEOLOC" placeholder="Recherche par ville..." />
             </Col>
           </Row>
         </Filters>
         <Missions>
           <ReactiveFilter componentId="STATUS" query={{ query: { bool: { filter: { term: { "status.keyword": "VALIDATED" } } } }, value: "" }} />
-          <ReactiveFilter
-            componentId="DATE"
-            query={{
-              query: {
-                bool: {
-                  filter: [
-                    {
-                      range: {
-                        endAt: {
-                          lt: "now",
-                        },
-                      },
-                    },
-                  ],
-                },
-              },
-              value: "",
-            }}
-          />
           <ReactiveList
             componentId="result"
             react={{ and: FILTERS }}
@@ -128,7 +118,19 @@ export default () => {
             defaultQuery={() => {
               if (!young.location || !young.location.lat || !young.location.lon) return { query: { match_all: {} } };
               return {
-                query: { match_all: {} },
+                query: {
+                  bool: {
+                    filter: [
+                      {
+                        range: {
+                          endAt: {
+                            gt: "now",
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
                 sort: [
                   {
                     _geo_distance: {

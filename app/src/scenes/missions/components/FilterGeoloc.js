@@ -2,12 +2,12 @@ import React, { useEffect, useState } from "react";
 import { ReactiveComponent } from "@appbaseio/reactivesearch";
 import { Col, Container, CustomInput, Input, Row } from "reactstrap";
 
-export default ({ componentId = "FILTER", placeholder }) => {
-  return <ReactiveComponent componentId={componentId} render={(data) => <SubComponent placeholder={placeholder} {...data} />} />;
+export default ({ componentId = "FILTER", placeholder, city }) => {
+  return <ReactiveComponent componentId={componentId} render={(data) => <SubComponent city={city} placeholder={placeholder} {...data} />} />;
 };
 
-const SubComponent = ({ setQuery, placeholder }) => {
-  const [city, setCity] = useState("");
+const SubComponent = ({ setQuery, placeholder, city = "Paris" }) => {
+  // const [city, setCity] = useState("");
   const [distance, setDistance] = useState("");
 
   useEffect(() => {
@@ -33,9 +33,9 @@ const SubComponent = ({ setQuery, placeholder }) => {
       }
       setQuery({ query });
     })();
-  }, [city, distance]);
+  }, [distance]);
 
-  const handleChangeCity = (e) => setCity(e.target.value);
+  // const handleChangeCity = (e) => setCity(e.target.value);
   const handleChangeDistance = (e) => setDistance(e.target.value);
   const getCoordinates = async (c) => {
     try {
@@ -53,18 +53,18 @@ const SubComponent = ({ setQuery, placeholder }) => {
   return (
     <>
       <Row>
-        <Col md={6}>
+        {/* <Col md={6}>
           <input id="search" className="form-control" value={city} onChange={handleChangeCity} placeholder={placeholder} />
-        </Col>
-        <Col md={6}>
+        </Col> */}
+        <Col md={12}>
           <select disabled={!city} id="distance" className="form-control" value={distance} onChange={handleChangeDistance}>
             <option value="" disabled selected>
               Rayon de recherche maximum
             </option>
             <option value="2">Distance max. 2km</option>
             <option value="5">Distance max. 5km</option>
-            <option value="20">Distance max. 20km</option>
             <option value="10">Distance max. 10km</option>
+            <option value="20">Distance max. 20km</option>
             <option value="50">Distance max. 50km</option>
             <option value="100">Distance max. 100km</option>
           </select>
