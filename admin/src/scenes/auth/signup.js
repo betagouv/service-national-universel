@@ -40,6 +40,8 @@ export default () => {
               <Title>Inscrivez votre structure d'accueil</Title>
               <Subtitle style={{ color: "#6E757C" }}>A destination des structures souhaitant accueillir des volontaire</Subtitle>
               <Formik
+                validateOnChange={false}
+                validateOnBlur={false}
                 initialValues={{ firstName: "", lastName: "", email: "", password: "", role: "responsible" }}
                 onSubmit={async (values, actions) => {
                   try {

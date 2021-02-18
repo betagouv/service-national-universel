@@ -38,6 +38,8 @@ export default () => {
     <div style={{ display: "flex", flexDirection: "column" }}>
       <Header />
       <Formik
+        validateOnChange={false}
+        validateOnBlur={false}
         initialValues={{
           mobile: "",
           phone: "",
