@@ -39,7 +39,10 @@ export default () => {
       <Header />
       <Formik
         initialValues={{
+          mobile: "",
+          phone: "",
           name: "",
+          status: "WAITING_VALIDATION",
           legalStatus: "",
           associationTypes: "",
           structurePriveeType: "",
@@ -61,7 +64,13 @@ export default () => {
         }}
         onSubmit={async (values, actions) => {
           try {
-            await api.post("/structure", values);
+            console.log(values);
+            let { mobile, phone } = values;
+            if (mobile || phone) {
+              const { ok, data, code } = await api.put("/referent", { mobile, phone });
+              if (ok) dispatch(setUser(data));
+            }
+            await api.put("/structure", { ...values, _id: user.structureId });
             toastr.success("Structure créée");
             return history.push("/");
           } catch (e) {
@@ -82,30 +91,15 @@ export default () => {
                     <form onSubmit={handleSubmit}>
                       <StyledFormGroup>
                         <label>Téléphone mobile</label>
-                        <InputField
-                          name="userMobile"
-                          type="tel"
-                          value={values.userMobile}
-                          onChange={handleChange}
-                          placeholder="Numéro de téléphone mobile"
-                          haserror={errors.userMobile}
-                        />
-                        <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.userMobile}</p>
+                        <InputField name="mobile" type="tel" value={values.mobile} onChange={handleChange} placeholder="Numéro de téléphone mobile" haserror={errors.mobile} />
+                        <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.mobile}</p>
                       </StyledFormGroup>
                       <Row noGutters>
                         <Col>
                           <StyledFormGroup>
                             <label>Téléphone fixe</label>
-                            <InputField
-                              type="tel"
-                              name="userPhone"
-                              id="userPhone"
-                              value={values.userPhone}
-                              onChange={handleChange}
-                              placeholder="Numéro de téléphone fixe"
-                              haserror={errors.userPhone}
-                            />
-                            <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.userPhone}</p>
+                            <InputField type="tel" name="phone" value={values.phone} onChange={handleChange} placeholder="Numéro de téléphone fixe" haserror={errors.phone} />
+                            <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.phone}</p>
                           </StyledFormGroup>
                         </Col>
                       </Row>
@@ -118,7 +112,6 @@ export default () => {
                 <Row style={{ borderBottom: "2px solid #f4f5f7" }}>
                   <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
                     <Wrapper>
-                      {/*<pre>{JSON.stringify(values, null, 2)}</pre>*/}
                       <FormGroup2>
                         <label>
                           <span>*</span>NOM DE LA STRUCTURE
@@ -307,7 +300,7 @@ export default () => {
                   </Col>
                 </Row>
                 <Footer>
-                  <Submit loading={isSubmitting} type="submit" color="primary">
+                  <Submit loading={isSubmitting} type="submit" onClick={handleSubmit}>
                     Terminer l'inscription
                   </Submit>
                 </Footer>

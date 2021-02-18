@@ -73,7 +73,6 @@ export default () => {
           <Route path="/auth" component={Auth} />
           <Route path="/" component={Home} />
         </Switch>
-        <Footer />
       </div>
     </Router>
   );

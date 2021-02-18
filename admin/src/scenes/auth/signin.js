@@ -18,7 +18,7 @@ export default () => {
   const user = useSelector((state) => state.Auth.user);
   const [userIsValid, setUserIsValid] = useState(true);
 
-  if (user) return <Redirect to="/auth/signup/structure" />;
+  if (user) return <Redirect to="/" />;
 
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
@@ -31,7 +31,7 @@ export default () => {
               <Title>Espace Administrateur</Title>
               <Subtitle>A destination des référents et des structures d’accueil</Subtitle>
               <Formik
-                initialValues={{ email: "tangimds+31@gmail.com", password: "d" }}
+                initialValues={{ email: "", password: "" }}
                 onSubmit={async (values, actions) => {
                   try {
                     const { user, token } = await api.post(`/referent/signin`, values);

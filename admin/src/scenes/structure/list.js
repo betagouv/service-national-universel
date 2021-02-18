@@ -208,6 +208,7 @@ const Hit = ({ hit, onClick }) => {
         <div>{missionsInfo.placesTotal} places</div>
       </td>
       <td>
+        {hit.status === "DRAFT" ? <TagStatus>{translate(hit.status)}</TagStatus> : null}
         {hit.isNetwork === "true" ? <TagNetwork>Tête de réseau</TagNetwork> : null}
         {parentStructure ? (
           <Link to={`structure/${parentStructure._id}`}>
@@ -419,4 +420,10 @@ const TagNetwork = styled(Tag)`
   color: #00f;
   background: rgba(82, 69, 204, 0.1);
   border: 0.5px solid #00f;
+`;
+
+const TagStatus = styled(Tag)`
+  color: #d9bb71;
+  background: #d9bb7133;
+  border: 0.5px solid #d9bb71;
 `;

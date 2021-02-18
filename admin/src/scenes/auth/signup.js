@@ -22,6 +22,13 @@ export default () => {
   const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
   if (user) return <Redirect to="/" />;
+
+  const createStructure = async () => {
+    const { data, ok, code } = await api.post(`/structure`, { name: "Ma nouvelle structure", status: "DRAFT" });
+    if (!ok) return toastr.error("Une erreur s'est produite lors de l'initialisation de votre structure", translate(code));
+    return data._id;
+  };
+
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       <Header />
@@ -49,7 +56,8 @@ export default () => {
                       return toastr.error("Problème", translate(code));
                     }
                     if (token) api.setToken(token);
-                    const newValues = { ...values, ...user };
+                    const structureId = await createStructure();
+                    const newValues = { ...values, structureId, ...user };
                     const { ok: okPut, code: codePut, data: referent } = await api.put("/referent", newValues);
                     if (!okPut) return toastr.error("Une erreur s'est produite :", translate(codePut));
                     dispatch(setUser(referent));
