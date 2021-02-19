@@ -21,61 +21,41 @@ const logPrecentage = (value, total) => {
   console.log(`${parseInt((value * 100) / total)} %`);
 };
 
-const migrate = async (model, migration) => {
-  console.log(`>>> START ${model}`);
+const migrate = async ({ model, migration, syncES = false }) => {
+  console.log(`>>> START ${model.modelName}`);
   try {
-    console.log(`MIGRATION ${model} START`);
+    console.log(`MIGRATION ${model.modelName} START`);
     await migration();
+    if (syncES) {
+      await model.unsynchronize();
+      console.log(`### END DELETED ES Indice for ${model.modelName}`);
+      await model.synchronize();
+      console.log(`### END SYNC ES Indice for ${model.modelName}`);
+    }
   } catch (error) {
     console.log(error);
   }
 };
 
 sequelize.authenticate().then(async (e) => {
-  // try {
-  //   await esclient.indices.delete({ index: "structure" });
-  // } catch (error) {
-  //   console.log("ERROR ES", error);
-  // }
-  // await Structure.deleteMany({});
-  // await migrate("Structure", migrateStructure);
-  // await migrate("Network", migrateNetwork);
+  const syncES = true;
 
-  // await esclient.indices.delete({ index: "referent" });
+  await Structure.deleteMany({});
+  await migrate({ model: Structure, migration: migrateStructure, syncES });
+  await migrate({ model: Structure, migration: migrateNetwork, syncES });
+
   // await Referent.deleteMany({ sqlId: { $ne: null } });
-  // await migrate("Referent", migrateReferent);
-  // await migrate("Referent / Members", migrateStructureMembers);
+  // await migrate({ model: Referent, migration: migrateReferent, syncES });
+  // await migrate({ model: Referent, migration: migrateStructureMembers, syncES });
 
-  // try {
-  //   await esclient.indices.delete({ index: "mission" });
-  // } catch (error) {
-  //   console.log("ERROR ES", error);
-  // }
   // await Mission.deleteMany({});
-  // await migrate("Mission", migrateMission);
+  // await migrate({ model: Mission, migration: migrateMission, syncES });
 
-  try {
-    // Migrate people in the cohesion stay
-    // console.log(`### START MONGO DELETE Young`);
-    // await Young.deleteMany({ phase: "COHESION_STAY" });
-    // console.log(`### END DELETE young`);
-    // await migrate("Young", migrateYoung);
-    // console.log(`### END MONGO DELETE young`);
-    // await Young.unsynchronize();
-    // console.log(`### END DELETED ES Indice for young`);
-    // await Young.synchronize();
-    // console.log(`### END SYNC ES Indice for young`);
-  } catch (e) {
-    console.log(e);
-  }
+  // await Young.deleteMany({ cohort: { $in: ["2019", "2020"] } });
+  // await migrate({ model: Young, migration: migrateYoung, syncES });
 
-  // try {
-  //   await esclient.indices.delete({ index: "application" });
-  // } catch (error) {
-  //   console.log("ERROR ES", error);
-  // }
   // await Application.deleteMany({});
-  // await migrate("Application", migrateApplication);
+  // await migrate({ model: Application, migration: migrateApplication, syncES });
   process.exit(1);
 });
 
@@ -225,11 +205,9 @@ async function migrateMission() {
     }
   }
   await Mission.insertMany(a);
-  console.log(`${a.length} added`);
 }
 
 async function migrateYoung() {
-  let count = 0;
   const INTEREST_LOOKUP = {
     "Très intéressé": 5,
     Intéressé: 4,
@@ -239,12 +217,11 @@ async function migrateYoung() {
   };
 
   const youngsSQL = await sequelize.query("SELECT * FROM `youngs`", { type: QueryTypes.SELECT });
-  const arr = [];
-  youngsSQL.forEach((y) => arr.push(y));
-
-  for (let i = 0; i < arr.length; i++) {
+  let count = 0;
+  console.log(`${youngsSQL.length} youngs detected`);
+  for (let i = 0; i < youngsSQL.length; i++) {
     try {
-      const y = arr[i];
+      const y = youngsSQL[i];
       const young = {};
 
       // @todo password
@@ -271,6 +248,7 @@ async function migrateYoung() {
       young.schooled = y.situation && y.situation.includes("Scolarisé") ? "true" : "false";
 
       young.cohort = y.cohort;
+      young.inscriptionStep = "DONE";
 
       if (young.cohort === "2019") {
         young.cohesionStayPresence = "true";
@@ -278,7 +256,7 @@ async function migrateYoung() {
         young.phase = "INTEREST_MISSION";
         young.status = "VALIDATED"; // inscription validée puisque déja dans le snu
         young.statusPhase1 = "DONE";
-        young.statusPhase2 = "IN_PROGRESS";
+        young.statusPhase2 = "WAITING_REALISATION";
       }
       if (young.cohort === "2020") {
         young.cohesionStayPresence = "false";
@@ -286,8 +264,10 @@ async function migrateYoung() {
         young.phase = "INTEREST_MISSION";
         young.status = "VALIDATED"; // inscription validée puisque déja dans le snu
         young.statusPhase2 = "CANCEL";
-        young.statusPhase2 = "IN_PROGRESS";
+        young.statusPhase2 = "WAITING_REALISATION";
       }
+
+      if (y.deleted_at) young.status = "WITHDRAWN";
 
       young.complementAddress = y.complement_adresse;
       if (y.longitude && y.latitude) {
@@ -322,8 +302,7 @@ async function migrateYoung() {
       young.engaged = young.engaged === "Non" ? "false" : "true";
       young.engagedStructure = young.engaged_structure;
       young.missionFormat = young.mission_format === "Continue" ? "CONTINUOUS" : "DISCONTINUOUS";
-
-      if (count++ % 10 === 0) console.log(`${count} young added`);
+      if (count % 100 === 0) logPrecentage(count, youngsSQL.length);
       await Young.create(young);
     } catch (error) {
       console.log(error);
@@ -415,6 +394,7 @@ async function migrateApplication() {
     const my = missionYoungSQL[i];
     try {
       const app = { ...my };
+      app.sqlId = my.id;
 
       const mission = await Mission.findOne({ sqlId: my.mission_id });
       if (mission) {
@@ -449,16 +429,24 @@ async function migrateApplication() {
         if (my.status === "CANDIDATURE_CONTRAT_SIGNE") return "VALIDATED";
         if (my.status === "MISSION_EN_COURS") return "IN_PROGRESS";
         if (my.status === "MISSION_EFFECTUEE") return "DONE";
-        if (my.status === "MISSION_NON_ACHEVEE") return "NOT_COMPLETED";
+        if (my.status === "MISSION_NON_ACHEVEE") return "ABANDON";
       })();
 
       app.createdAt = my.created_at;
       app.updatedAt = my.updated_at;
-      count++;
-      if (count % 100 === 0) logPrecentage(count, missionYoungSQL.length);
       await Application.create(app);
       if (app.status === "DONE" && young && (young.cohort === "2020" || young.cohort === "2019"))
-        await Young.findOneAndUpdate({ _id: young._id }, { status: "VALIDATED" }, { useFindAndModify: false });
+        await Young.findOneAndUpdate({ _id: young._id }, { statusPhase2: "VALIDATED" }, { useFindAndModify: false });
+      else if (
+        app.status !== "CANCEL" &&
+        app.status !== "ABANDON" &&
+        young &&
+        young.statusPhase2 !== "VALIDATED" &&
+        (young.cohort === "2020" || young.cohort === "2019")
+      )
+        await Young.findOneAndUpdate({ _id: young._id }, { statusPhase2: "IN_PROGRESS" }, { useFindAndModify: false });
+      count++;
+      if (count % 100 === 0) logPrecentage(count, missionYoungSQL.length);
     } catch (error) {
       console.log(error);
     }
@@ -468,7 +456,6 @@ async function migrateApplication() {
   } catch (error) {
     console.log("error while inserting applications", error);
   }
-  console.log(`${a.length} added`);
 }
 
 const departmentList = {

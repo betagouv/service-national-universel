@@ -16,8 +16,6 @@ const Schema = new mongoose.Schema(
   { timestamps: true }
 );
 
-
-
 Schema.plugin(mongoosastic, MODELNAME);
 
 Schema.index({ postcode: 1, name2: 1 }, { unique: true });
