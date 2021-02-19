@@ -15,7 +15,7 @@ import LoadingButton from "../../components/loadingButton";
 import Header from "./components/header";
 
 import matomo from "../../services/matomo";
-import { translate } from "../../utils";
+import { DEFAULT_STRUCTURE_NAME, translate } from "../../utils";
 
 export default () => {
   const dispatch = useDispatch();
@@ -24,7 +24,7 @@ export default () => {
   if (user) return <Redirect to="/" />;
 
   const createStructure = async () => {
-    const { data, ok, code } = await api.post(`/structure`, { name: "Ma nouvelle structure", status: "DRAFT" });
+    const { data, ok, code } = await api.post(`/structure`, { name: DEFAULT_STRUCTURE_NAME, status: "DRAFT" });
     if (!ok) return toastr.error("Une erreur s'est produite lors de l'initialisation de votre structure", translate(code));
     return data._id;
   };

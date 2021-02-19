@@ -763,3 +763,5 @@ export const MISSION_DOMAINS = {
   SOLIDARITY: "SOLIDARITY",
   SPORT: "SPORT",
 };
+
+export const DEFAULT_STRUCTURE_NAME = "Ma nouvelle Structure";

@@ -1,13 +1,30 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
+import { Col, Container, Row } from "reactstrap";
+import { Link } from "react-router-dom";
+
 import Volontaires from "./volontaires";
 import Missions from "./missions";
+import { useSelector } from "react-redux";
+import { apiURL } from "../../config";
+import api from "../../services/api";
+import { DEFAULT_STRUCTURE_NAME } from "../../utils";
 
 export default () => {
   const [currentTab, setCurrentTab] = useState("volontaires");
+  const [showAlert, setShowAlert] = useState(false);
+  const user = useSelector((state) => state.Auth.user);
+
+  useEffect(() => {
+    (async () => {
+      const { ok, data } = await api.get("/structure");
+      if (ok) setShowAlert(data.name.toUpperCase() === DEFAULT_STRUCTURE_NAME.toUpperCase());
+    })();
+  }, []);
 
   return (
     <>
+      {showAlert ? <AlertBox onClose={() => setShowAlert(false)} /> : null}
       <TabNavigation>
         <TabNavigationList>
           <TabItem onClick={() => setCurrentTab("volontaires")} isActive={currentTab === "volontaires"}>
@@ -23,6 +40,22 @@ export default () => {
         {currentTab === "missions" && <Missions />}
       </Wrapper>
     </>
+  );
+};
+
+const AlertBox = ({ onClose }) => {
+  const user = useSelector((state) => state.Auth.user);
+  return (
+    <Link to={`/structure/${user.structureId}/edit`}>
+      <Alert>
+        <img src={require("../../assets/information.svg")} height={15} />
+        <div className="text">
+          <strong>Vous n'avez pas terminé l'inscription de votre structure !</strong>
+          <p>Cliquez ici pour renseigner toutes ses informations.</p>
+        </div>
+        {/* <img src={require("../../assets/close.svg")} height={15} onClick={onClose} style={{ cursor: "pointer" }}/> */}
+      </Alert>
+    </Link>
   );
 };
 
@@ -61,4 +94,31 @@ const TabItem = styled.li`
       border-top-right-radius: 4px;
     }
   `}
+`;
+
+const Alert = styled(Container)`
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  background-color: #5949d0;
+  margin: 2rem;
+  padding: 10px 20px;
+  color: #fff;
+  a:hover {
+    color: #fff;
+  }
+  .text {
+    margin-left: 20px;
+    margin-right: auto;
+    strong {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 3px;
+    }
+    p {
+      margin-bottom: 0;
+      font-size: 12px;
+      font-weight: 500;
+    }
+  }
 `;
