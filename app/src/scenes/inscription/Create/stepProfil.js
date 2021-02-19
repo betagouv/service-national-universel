@@ -19,6 +19,9 @@ import api from "../../../services/api";
 
 import { YOUNG_STATUS, YOUNG_PHASE } from "../../../utils";
 
+import EyeOpen from "../../../assets/eye.svg";
+import EyeClose from "../../../assets/eye-slash.svg";
+
 export default () => {
   useEffect(() => {
     matomo.logEvent("inscription", "open_step", "step", 0);
@@ -167,18 +170,18 @@ export default () => {
                 </div>
               </Col>
               <Col>
-                <Field
-                  placeholder="Tapez votre mot de passe"
-                  className="form-control"
-                  validate={(v) => getPasswordErrorMessage(v, matomo)}
-                  type={passwordText ? "text" : "password"}
-                  name="password"
-                  value={values.password}
-                  onChange={handleChange}
-                />
-                <ShowPassword>
-                  <input type="checkbox" onClick={() => setPasswordText(!passwordText)} /> Afficher le mot de passe
-                </ShowPassword>
+                <ContainerPassword>
+                  <Field
+                    placeholder="Tapez votre mot de passe"
+                    className="form-control"
+                    validate={(v) => getPasswordErrorMessage(v, matomo)}
+                    type={passwordText ? "text" : "password"}
+                    name="password"
+                    value={values.password}
+                    onChange={handleChange}
+                  />
+                  <EyeIcon src={passwordText ? EyeClose : EyeOpen} onClick={() => setPasswordText(!passwordText)} />
+                </ContainerPassword>
                 <ErrorMessage errors={errors} touched={touched} name="password" />
               </Col>
             </FormRow>
@@ -195,17 +198,22 @@ export default () => {
   );
 };
 
-const ShowPassword = styled.label`
-  float: right;
-  margin-top: 5px;
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  font-size: 12px;
+const ContainerPassword = styled.div`
+  position: relative;
   input {
-    transform: scale(0.8);
-    margin-right: 5px;
+    padding-right: 40px !important;
   }
+`;
+
+const EyeIcon = styled.img`
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  height: 18px;
+  opacity: 0.7;
+  transform: translateY(-50%);
+  font-size: 18px;
+  cursor: pointer;
 `;
 
 const Wrapper = styled.div`
