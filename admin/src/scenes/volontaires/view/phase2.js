@@ -4,9 +4,10 @@ import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-import { translate as t } from "../../../utils";
+import { translate as t, YOUNG_PHASE, YOUNG_STATUS_PHASE2 } from "../../../utils";
 import WrapperPhase2 from "./wrapper";
 import ApplicationList from "./applicationList.js";
+import SelectStatus from "../../../components/selectStatus";
 
 export default ({ young }) => {
   const user = useSelector((state) => state.Auth.user);
@@ -19,9 +20,12 @@ export default ({ young }) => {
       <WrapperPhase2 young={young} tab="phase2">
         <Box>
           <Bloc title="Réalisation d'une mission d'interêt général">
-            <p>
-              Le volontaire doit achever sa phase 2 avant le <b>{getDate()}</b>
-            </p>
+            <div style={{ display: "flex" }}>
+              <p style={{ flex: 1 }}>
+                Le volontaire doit achever sa phase 2 avant le <b>{getDate()}</b>
+              </p>
+              <SelectStatus hit={young} statusName="statusPhase2" phase={YOUNG_PHASE.INTEREST_MISSION} options={Object.keys(YOUNG_STATUS_PHASE2)} />
+            </div>
           </Bloc>
         </Box>
         <ToggleBox>
