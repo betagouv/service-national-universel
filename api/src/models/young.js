@@ -23,7 +23,7 @@ const Schema = new mongoose.Schema({
   status: {
     type: String,
     default: "IN_PROGRESS",
-    enum: ["IN_PROGRESS", "WAITING_VALIDATION", "WAITING_CORRECTION", "VALIDATED", "REFUSED"],
+    enum: ["IN_PROGRESS", "WAITING_VALIDATION", "WAITING_CORRECTION", "VALIDATED", "REFUSED", "WITHDRAWN"],
   },
   statusPhase1: {
     type: String,
@@ -32,8 +32,8 @@ const Schema = new mongoose.Schema({
   },
   statusPhase2: {
     type: String,
-    default: "IN_PROGRESS",
-    enum: ["IN_PROGRESS", "VALIDATED"],
+    default: "WAITING_REALISATION",
+    enum: ["WAITING_REALISATION", "IN_PROGRESS", "VALIDATED"],
   },
   statusPhase3: {
     type: String,
