@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Row, Col } from "reactstrap";
 import { Field, Formik } from "formik";
@@ -23,7 +23,7 @@ export default () => {
   useEffect(() => {
     matomo.logEvent("inscription", "open_step", "step", 0);
   }, []);
-
+  const [passwordText, setPasswordText] = useState(false);
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young) || { frenchNationality: "", firstName: "", lastName: "", birthdateAt: "", email: "", password: "", repassword: "" };
   const history = useHistory();
@@ -171,29 +171,15 @@ export default () => {
                   placeholder="Tapez votre mot de passe"
                   className="form-control"
                   validate={(v) => getPasswordErrorMessage(v, matomo)}
-                  type="password"
+                  type={passwordText ? "text" : "password"}
                   name="password"
                   value={values.password}
                   onChange={handleChange}
                 />
+                <ShowPassword>
+                  <input type="checkbox" onClick={() => setPasswordText(!passwordText)} /> Afficher le mot de passe
+                </ShowPassword>
                 <ErrorMessage errors={errors} touched={touched} name="password" />
-              </Col>
-            </FormRow>
-            <FormRow align="center">
-              <Col md={4}>
-                <Label>Confirmer le mot de passe</Label>
-              </Col>
-              <Col>
-                <Field
-                  placeholder="Retapez votre mot de passe"
-                  className="form-control"
-                  validate={(v) => (!v && requiredMessage) || (v !== values.password && "Les mots de passe renseignés ne sont pas identiques")}
-                  type="password"
-                  name="repassword"
-                  value={values.repassword}
-                  onChange={handleChange}
-                />
-                <ErrorMessage errors={errors} touched={touched} name="repassword" />
               </Col>
             </FormRow>
             <Footer>
@@ -208,6 +194,19 @@ export default () => {
     </Wrapper>
   );
 };
+
+const ShowPassword = styled.label`
+  float: right;
+  margin-top: 5px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 12px;
+  input {
+    transform: scale(0.8);
+    margin-right: 5px;
+  }
+`;
 
 const Wrapper = styled.div`
   padding: 40px;
@@ -241,6 +240,9 @@ const FormRow = styled(Row)`
   text-align: left;
   input[type="text"] {
     max-width: 500px;
+  }
+  input[name="password"] {
+    max-width: 100%;
   }
   @media (max-width: 768px) {
     margin: 0 -22px;
