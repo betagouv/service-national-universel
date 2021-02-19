@@ -622,9 +622,11 @@ const Select = ({ title, name, values, handleChange, disabled, errors, touched, 
       </Col>
       <Col md={8}>
         <select disabled={disabled} className="form-control" name={name} value={values[name]} onChange={handleChange}>
-          <option key={-1} value="" label="" />
+          <option key={-1} value="" label=""></option>
           {options.map((o, i) => (
-            <option key={i} value={o.value} label={o.label} />
+            <option key={i} value={o.value} label={o.label}>
+              {o.value}
+            </option>
           ))}
         </select>
       </Col>

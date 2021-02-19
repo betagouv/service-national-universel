@@ -193,10 +193,12 @@ const Select = ({ title, name, values, onChange, disabled, errors, touched, vali
         <label>{title}</label>
       </Col>
       <Col md={8}>
-        <select disabled={disabled} className="form-control" className="form-control" name={name} value={values[name]} onChange={onChange}>
-          <option key={-1} value="" label="" />
+        <select disabled={disabled} className="form-control" name={name} value={values[name]} onChange={onChange}>
+          <option key={-1} value="" label=""></option>
           {options.map((o, i) => (
-            <option key={i} value={o.value} label={o.label} />
+            <option key={i} value={o.value} label={o.label}>
+              {o.value}
+            </option>
           ))}
         </select>
       </Col>
