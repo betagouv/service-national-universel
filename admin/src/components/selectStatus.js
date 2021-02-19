@@ -12,7 +12,7 @@ import matomo from "../services/matomo";
 import MailCorrection from "../scenes/inscription/MailCorrection";
 import MailRefused from "../scenes/inscription/MailRefused";
 
-export default ({ hit, options = Object.keys(YOUNG_STATUS) }) => {
+export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status", phase = YOUNG_PHASE.INSCRIPTION }) => {
   const [modal, setModal] = useState(null);
   const [young, setYoung] = useState(null);
   const user = useSelector((state) => state.Auth.user);
@@ -37,8 +37,8 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS) }) => {
 
   const setStatus = async (status, note) => {
     try {
-      young.historic.push({ phase: YOUNG_PHASE.INSCRIPTION, userName: `${user.firstName} ${user.lastName}`, userId: user._id, status, note });
-      const { ok, code, data: newYoung } = await api.put(`/referent/young/${young._id}`, { historic: young.historic, status, lastStatusAt: Date.now() });
+      young.historic.push({ phase, userName: `${user.firstName} ${user.lastName}`, userId: user._id, status, note });
+      const { ok, code, data: newYoung } = await api.put(`/referent/young/${young._id}`, { historic: young.historic, [statusName]: status, lastStatusAt: Date.now() });
 
       if (status === YOUNG_STATUS.VALIDATED) {
         matomo.logEvent("status_update", YOUNG_STATUS.VALIDATED);
@@ -80,10 +80,10 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS) }) => {
           }}
         />
       )}
-      <ActionBox color={YOUNG_STATUS_COLORS[young.status]}>
+      <ActionBox color={YOUNG_STATUS_COLORS[young[statusName]]}>
         <UncontrolledDropdown setActiveFromChild>
           <DropdownToggle tag="button">
-            {translate(young.status)}
+            {translate(young[statusName])}
             <div className="down-icon">
               <svg viewBox="0 0 407.437 407.437">
                 <polygon points="386.258,91.567 203.718,273.512 21.179,91.567 0,112.815 203.718,315.87 407.437,112.815 " />

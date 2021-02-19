@@ -25,6 +25,20 @@ const Schema = new mongoose.Schema({
     default: "IN_PROGRESS",
     enum: ["IN_PROGRESS", "WAITING_VALIDATION", "WAITING_CORRECTION", "VALIDATED", "REFUSED"],
   },
+  statusPhase1: {
+    type: String,
+    default: "WAITING_AFFECTATION",
+    enum: ["AFFECTED", "WAITING_AFFECTATION", "CANCEL", "DONE", "NOT_DONE"],
+  },
+  statusPhase2: {
+    type: String,
+    default: "IN_PROGRESS",
+    enum: ["IN_PROGRESS", "VALIDATED"],
+  },
+  statusPhase3: {
+    type: String,
+    enum: [],
+  },
   lastStatusAt: { type: Date, default: Date.now },
 
   //keep track of the current inscription step
