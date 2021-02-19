@@ -69,9 +69,9 @@ export default () => {
               {missions.length ? <ReactiveFilter componentId="MISSIONS" query={{ query: { bool: { filter: { terms: { "missionId.keyword": missions } } } } }} /> : null}
               <DataSearch
                 showIcon={false}
-                placeholder="Rechercher par mots clés, mission ou structure..."
+                placeholder="Rechercher par mots clés, mission ou volontaire..."
                 componentId="SEARCH"
-                dataField={["email", "firstName", "lastName"]}
+                dataField={["youngFirstName", "youngLastName", "youngEmail", "missionName"]}
                 react={{ and: FILTERS }}
                 // fuzziness={2}
                 style={{ flex: 2 }}
