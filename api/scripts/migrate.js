@@ -40,9 +40,9 @@ const migrate = async ({ model, migration, syncES = false }) => {
 sequelize.authenticate().then(async (e) => {
   const syncES = true;
 
-  await Structure.deleteMany({});
-  await migrate({ model: Structure, migration: migrateStructure, syncES });
-  await migrate({ model: Structure, migration: migrateNetwork, syncES });
+  // await Structure.deleteMany({});
+  // await migrate({ model: Structure, migration: migrateStructure, syncES });
+  // await migrate({ model: Structure, migration: migrateNetwork, syncES });
 
   // await Referent.deleteMany({ sqlId: { $ne: null } });
   // await migrate({ model: Referent, migration: migrateReferent, syncES });
@@ -54,8 +54,8 @@ sequelize.authenticate().then(async (e) => {
   // await Young.deleteMany({ cohort: { $in: ["2019", "2020"] } });
   // await migrate({ model: Young, migration: migrateYoung, syncES });
 
-  // await Application.deleteMany({});
-  // await migrate({ model: Application, migration: migrateApplication, syncES });
+  await Application.deleteMany({});
+  await migrate({ model: Application, migration: migrateApplication, syncES });
   process.exit(1);
 });
 
@@ -223,6 +223,7 @@ async function migrateYoung() {
     try {
       const y = youngsSQL[i];
       const young = {};
+      if (!y.email) continue;
 
       // @todo password
       young.sqlId = y.id;
@@ -302,6 +303,7 @@ async function migrateYoung() {
       young.engaged = young.engaged === "Non" ? "false" : "true";
       young.engagedStructure = young.engaged_structure;
       young.missionFormat = young.mission_format === "Continue" ? "CONTINUOUS" : "DISCONTINUOUS";
+      count++;
       if (count % 100 === 0) logPrecentage(count, youngsSQL.length);
       await Young.create(young);
     } catch (error) {
