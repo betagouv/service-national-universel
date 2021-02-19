@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import Inscription from "./inscription";
+import Volontaire from "./volontaire";
+import Structure from "./structure";
+import Mission from "./missions";
 
 export default () => {
   const [currentTab, setCurrentTab] = useState("inscriptions");
@@ -15,8 +18,8 @@ export default () => {
           <TabItem onClick={() => setCurrentTab("volontaires")} isActive={currentTab === "volontaires"}>
             Volontaires
           </TabItem>
-          <TabItem onClick={() => setCurrentTab("organisations")} isActive={currentTab === "organisations"}>
-            Organisations
+          <TabItem onClick={() => setCurrentTab("structures")} isActive={currentTab === "structures"}>
+            Structures
           </TabItem>
           <TabItem onClick={() => setCurrentTab("missions")} isActive={currentTab === "missions"}>
             Missions
@@ -25,9 +28,9 @@ export default () => {
       </TabNavigation>
       <Wrapper>
         {currentTab === "inscriptions" && <Inscription />}
-        {currentTab === "volontaires" && <div>Bientôt disponible</div>}
-        {currentTab === "organisations" && <div>Bientôt disponible</div>}
-        {currentTab === "missions" && <div>Bientôt disponible</div>}
+        {currentTab === "volontaires" && <Volontaire />}
+        {currentTab === "structures" && <Structure />}
+        {currentTab === "missions" && <Mission />}
       </Wrapper>
     </>
   );

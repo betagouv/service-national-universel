@@ -183,6 +183,7 @@ const Hit = ({ hit, onClick }) => {
       }
 
       const { responses } = await api.esQuery(queries);
+      console.log(hit.networkId);
       if (hit.networkId) {
         const structures = responses[1]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
         setParentStructure(structures.length ? structures[0] : null);
