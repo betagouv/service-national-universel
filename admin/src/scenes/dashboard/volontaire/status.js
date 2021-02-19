@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { Col, Row, Input } from "reactstrap";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { YOUNG_STATUS_COLORS } from "../../../utils";
+import { translate, YOUNG_STATUS_COLORS, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE2_COLORS } from "../../../utils";
 
 import api from "../../../services/api";
 
@@ -42,44 +42,66 @@ export default ({ filter }) => {
   }, [JSON.stringify(filter)]);
 
   return (
-    <Row>
-      <Col md={6} xl={3}>
-        <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
-          <CardTitle>Volontaires</CardTitle>
-          <CardValueWrapper>
-            <CardValue>{status.VALIDATED || 0}</CardValue>
-            <CardArrow />
-          </CardValueWrapper>
-        </Card>
-      </Col>
-      <Col md={6} xl={3}>
-        <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
-          <CardTitle>Ayant validé la phase 1</CardTitle>
-          <CardValueWrapper>
-            <CardValue>{statusPhase1.AFFECTED || 0}</CardValue>
-            <CardArrow />
-          </CardValueWrapper>
-        </Card>
-      </Col>
-      <Col md={6} xl={3}>
-        <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
-          <CardTitle>Ayant validé la phase 2</CardTitle>
-          <CardValueWrapper>
-            <CardValue>{statusPhase2.VALIDATED || 0}</CardValue>
-            <CardArrow />
-          </CardValueWrapper>
-        </Card>
-      </Col>
-      <Col md={6} xl={3}>
-        <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
-          <CardTitle>Ayant validé la phase 3</CardTitle>
-          <CardValueWrapper>
-            <CardValue>{statusPhase3.VALIDATED || 0}</CardValue>
-            <CardArrow />
-          </CardValueWrapper>
-        </Card>
-      </Col>
-    </Row>
+    <>
+      <Row>
+        <Col md={6} xl={3}>
+          <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
+            <CardTitle>Volontaires</CardTitle>
+            <CardValueWrapper>
+              <CardValue>{status.VALIDATED || 0}</CardValue>
+              <CardArrow />
+            </CardValueWrapper>
+          </Card>
+        </Col>
+        <Col md={6} xl={3}>
+          <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
+            <CardTitle>Ayant validé la phase 1</CardTitle>
+            <CardValueWrapper>
+              <CardValue>{statusPhase1.AFFECTED || 0}</CardValue>
+              <CardArrow />
+            </CardValueWrapper>
+          </Card>
+        </Col>
+        <Col md={6} xl={3}>
+          <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
+            <CardTitle>Ayant validé la phase 2</CardTitle>
+            <CardValueWrapper>
+              <CardValue>{statusPhase2.VALIDATED || 0}</CardValue>
+              <CardArrow />
+            </CardValueWrapper>
+          </Card>
+        </Col>
+        <Col md={6} xl={3}>
+          <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
+            <CardTitle>Ayant validé la phase 3</CardTitle>
+            <CardValueWrapper>
+              <CardValue>{statusPhase3.VALIDATED || 0}</CardValue>
+              <CardArrow />
+            </CardValueWrapper>
+          </Card>
+        </Col>
+      </Row>
+      <Row>
+        <Col md={12}>
+          <h3>Phase 2</h3>
+        </Col>
+      </Row>
+      <Row>
+        {Object.values(YOUNG_STATUS_PHASE2).map((e) => {
+          return (
+            <Col md={6} xl={3} k={e}>
+              <Card borderBottomColor={YOUNG_STATUS_PHASE2_COLORS[e]}>
+                <CardTitle>{e === "VALIDATED" ? "Réalisée" : translate(e)}</CardTitle>
+                <CardValueWrapper>
+                  <CardValue>{statusPhase2[e] || 0}</CardValue>
+                  <CardArrow />
+                </CardValueWrapper>
+              </Card>
+            </Col>
+          );
+        })}
+      </Row>
+    </>
   );
 };
 

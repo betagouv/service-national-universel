@@ -227,6 +227,8 @@ export const translate = (value) => {
       return "Motorisé";
     case "CARPOOLING":
       return "Covoiturage";
+    case "WAITING_REALISATION":
+      return "En attente de réalisation";
     default:
       return value;
   }
@@ -658,6 +660,7 @@ export const YOUNG_STATUS_PHASE1 = {
 };
 
 export const YOUNG_STATUS_PHASE2 = {
+  WAITING_REALISATION: "WAITING_REALISATION",
   VALIDATED: "VALIDATED",
   IN_PROGRESS: "IN_PROGRESS",
 };
@@ -691,6 +694,12 @@ export const YOUNG_STATUS_COLORS = {
   REFUSED: "#F8A9AD",
   IN_PROGRESS: "#382F79",
   WITHDRAWN: "#884500",
+};
+
+export const YOUNG_STATUS_PHASE2_COLORS = {
+  WAITING_REALISATION: "#FE7B52",
+  IN_PROGRESS: "#382F79",
+  VALIDATED: "#6CC763",
 };
 
 export const REFERENT_ROLES = {
