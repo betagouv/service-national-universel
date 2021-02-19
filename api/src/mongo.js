@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const { MONGO_URL } = require("./config.js");
 
-console.log("Connect to MONGO ");
+console.log("Connect to MONGO ", MONGO_URL);
 //Set up default mongoose connection
 
 if (MONGO_URL) {

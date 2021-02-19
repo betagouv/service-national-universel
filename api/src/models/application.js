@@ -5,6 +5,7 @@ const mongoosastic = require("../es/mongoosastic");
 const MODELNAME = "application";
 
 const Schema = new mongoose.Schema({
+  sqlId: { type: String },
   youngId: { type: String },
   youngFirstName: { type: String },
   youngLastName: { type: String },
@@ -36,20 +37,7 @@ const Schema = new mongoose.Schema({
 
   status: {
     type: String,
-    enum: [
-      "WAITING_VALIDATION",
-      "WAITING_ACCEPTATION",
-      "VALIDATED",
-      "REFUSED",
-      "CANCEL",
-      "ARCHIVED",
-      "IN_PROGRESS",
-      "DONE",
-      "NOT_COMPLETED",
-      "PRESELECTED",
-      "SIGNED_CONTRACT",
-      "ABANDON",
-    ],
+    enum: ["WAITING_VALIDATION", "WAITING_ACCEPTATION", "VALIDATED", "REFUSED", "CANCEL", "IN_PROGRESS", "DONE", "ABANDON"],
     default: "WAITING_VALIDATION",
   },
 
