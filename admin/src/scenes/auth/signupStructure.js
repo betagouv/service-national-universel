@@ -44,7 +44,7 @@ export default () => {
           mobile: "",
           phone: "",
           name: "",
-          status: "WAITING_VALIDATION",
+          status: "VALIDATED",
           legalStatus: "",
           associationTypes: "",
           structurePriveeType: "",

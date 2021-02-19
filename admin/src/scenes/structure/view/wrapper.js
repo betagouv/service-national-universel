@@ -7,7 +7,7 @@ import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
-import { translate } from "../../../utils";
+import { translate, STRUCTURE_STATUS_COLORS } from "../../../utils";
 import api from "../../../services/api";
 
 export default ({ children, structure, tab }) => {
@@ -33,7 +33,9 @@ export default ({ children, structure, tab }) => {
     <div style={{ flex: tab === "missions" ? "0%" : 2, position: "relative", padding: "3rem" }}>
       <Header>
         <div style={{ flex: 1 }}>
-          <Title>{structure.name}</Title>
+          <Title>
+            {structure.name} <Tag color={STRUCTURE_STATUS_COLORS[structure.status]}>{translate(structure.status)}</Tag>
+          </Title>
 
           <TabNavigationList>
             <TabItem isActive={tab === "details"} onClick={() => history.push(`/structure/${structure._id}`)}>
@@ -148,4 +150,22 @@ const Button = styled.button`
       background-color: rgb(250, 230, 230);
     }
   }
+`;
+
+const Tag = styled.span`
+  align-self: flex-start;
+  border-radius: 4px;
+  padding: 0.25rem 0.5rem;
+  font-size: 13px;
+  white-space: nowrap;
+  font-weight: 400;
+  cursor: pointer;
+  margin-right: 5px;
+  ${({ color }) => {
+    return `
+    color: ${color};
+    background: ${color}22;
+    border: 0.5px solid ${color};
+    `;
+  }}
 `;

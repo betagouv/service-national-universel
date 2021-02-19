@@ -102,11 +102,7 @@ export default (props) => {
           <Header>
             <Title>{defaultValue ? values.name : "Création d'une structure"}</Title>
             {Object.keys(errors).length ? <h3>Vous ne pouvez pas continuer car tous les champs ne sont pas correctement renseignés.</h3> : null}
-            <ButtonContainer>
-              <button disabled={!isValid} onClick={handleSubmit}>
-                {defaultValue ? "Enregistrer les modifications" : "Créer la structure"}
-              </button>
-            </ButtonContainer>
+            <SaveButton isValid={isValid} handleChange={handleChange} handleSubmit={handleSubmit} defaultValue={defaultValue} />
           </Header>
           <Box>
             <Row style={{ borderBottom: "2px solid #f4f5f7" }}>
@@ -324,23 +320,27 @@ export default (props) => {
           </Box>
           <Header style={{ justifyContent: "flex-end" }}>
             {Object.keys(errors).length ? <h3>Vous ne pouvez pas continuer car tous les champs ne sont pas correctement renseignés.</h3> : null}
-            <ButtonContainer>
-              <button
-                disabled={!isValid}
-                onClick={() => {
-                  handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
-                  handleSubmit();
-                }}
-              >
-                {defaultValue ? "Enregistrer les modifications" : "Créer la structure"}
-              </button>
-            </ButtonContainer>
+            <SaveButton isValid={isValid} handleChange={handleChange} handleSubmit={handleSubmit} defaultValue={defaultValue} />
           </Header>
         </Wrapper>
       )}
     </Formik>
   );
 };
+
+const SaveButton = ({ isValid, handleChange, handleSubmit, defaultValue }) => (
+  <ButtonContainer>
+    <button
+      disabled={!isValid}
+      onClick={() => {
+        handleChange({ target: { value: "VALIDATED", name: "status" } });
+        handleSubmit();
+      }}
+    >
+      {defaultValue ? "Enregistrer les modifications" : "Créer la structure"}
+    </button>
+  </ButtonContainer>
+);
 
 const Wrapper = styled.div`
   padding: 3rem;
