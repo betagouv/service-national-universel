@@ -162,6 +162,9 @@ export default () => {
             <FormRow align="center">
               <Col md={4}>
                 <Label>Choisissez un mot de passe</Label>
+                <div style={{ fontSize: "12px", color: "#666", marginBottom: "5px" }}>
+                  👉 Il doit contenir au moins 8 caractères, dont une majuscule, une minuscule, un chiffre et un symbole
+                </div>
               </Col>
               <Col>
                 <Field
