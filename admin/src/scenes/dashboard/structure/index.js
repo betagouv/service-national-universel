@@ -7,10 +7,10 @@ import Dropdown from "../components/Dropdown";
 
 import Status from "./status";
 
-import { departmentList, regionList, YOUNG_STATUS, translate, region2department, REFERENT_ROLES } from "../../../utils";
+import { departmentList, regionList, translate, region2department, REFERENT_ROLES } from "../../../utils";
 
 export default () => {
-  const [filter, setFilter] = useState({ status: Object.keys(YOUNG_STATUS), region: "", department: "", cohort: "2021" });
+  const [filter, setFilter] = useState();
   const user = useSelector((state) => state.Auth.user);
 
   function updateFilter(n) {
@@ -18,12 +18,12 @@ export default () => {
   }
 
   useEffect(() => {
-    const status = Object.keys(YOUNG_STATUS).filter((e) => e !== "IN_PROGRESS");
     if (user.role === REFERENT_ROLES.REFERENT_DEPARTMENT) {
-      updateFilter({ department: user.department, status });
-    }
-    if (user.role === REFERENT_ROLES.REFERENT_REGION) {
-      updateFilter({ region: user.region, status });
+      updateFilter({ department: user.department });
+    } else if (user.role === REFERENT_ROLES.REFERENT_REGION) {
+      updateFilter({ region: user.region });
+    } else {
+      updateFilter({ region: "", department: "", cohort: "2021" });
     }
   }, []);
 
@@ -34,11 +34,15 @@ export default () => {
           <Title>Structures</Title>
         </Col>
       </Row>
-      <FiltersList>
-        <FilterRegion updateFilter={updateFilter} filter={filter} />
-        <FilterDepartment updateFilter={updateFilter} filter={filter} />
-      </FiltersList>
-      <Status filter={filter} />
+      {filter && (
+        <>
+          <FiltersList>
+            <FilterRegion updateFilter={updateFilter} filter={filter} />
+            <FilterDepartment updateFilter={updateFilter} filter={filter} />
+          </FiltersList>
+          <Status filter={filter} />
+        </>
+      )}
     </>
   );
 };

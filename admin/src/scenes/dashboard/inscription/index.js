@@ -18,24 +18,21 @@ import PriorityArea from "./priorityArea";
 import { departmentList, regionList, YOUNG_STATUS, translate, region2department, REFERENT_ROLES } from "../../../utils";
 
 export default () => {
-  const [filter, setFilter] = useState({ status: Object.keys(YOUNG_STATUS), region: "", department: "", cohort: "2021" });
+  const [filter, setFilter] = useState();
   const user = useSelector((state) => state.Auth.user);
 
-  const onExportButtonClicked = () => {
-    console.log("Export button clicked");
-  };
-
   function updateFilter(n) {
-    setFilter({ ...filter, ...n });
+    setFilter({ ...(filter || { status: Object.keys(YOUNG_STATUS), region: "", department: "", cohort: "2021" }), ...n });
   }
 
   useEffect(() => {
     const status = Object.keys(YOUNG_STATUS).filter((e) => e !== "IN_PROGRESS");
     if (user.role === REFERENT_ROLES.REFERENT_DEPARTMENT) {
       updateFilter({ department: user.department, status });
-    }
-    if (user.role === REFERENT_ROLES.REFERENT_REGION) {
+    } else if (user.role === REFERENT_ROLES.REFERENT_REGION) {
       updateFilter({ region: user.region, status });
+    } else {
+      updateFilter();
     }
   }, []);
 
@@ -46,41 +43,45 @@ export default () => {
           <Title>Inscriptions</Title>
         </Col>
       </Row>
-      <FiltersList>
-        <FilterRegion updateFilter={updateFilter} filter={filter} />
-        <FilterDepartment updateFilter={updateFilter} filter={filter} />
-        <FilterWrapper>
-          <YearPicker options={["2020", "2021"]} onChange={(cohort) => updateFilter({ cohort })} value={filter.cohort} />
-        </FilterWrapper>
-      </FiltersList>
-      <Status filter={filter} />
-      <Title>Dans le détails</Title>
-      <FiltersList>
-        <FilterStatus value={filter.status} onChange={(status) => updateFilter({ status })} />
-        {/*   <FilterWrapper>
+      {filter && (
+        <>
+          <FiltersList>
+            <FilterRegion updateFilter={updateFilter} filter={filter} />
+            <FilterDepartment updateFilter={updateFilter} filter={filter} />
+            <FilterWrapper>
+              <YearPicker options={["2020", "2021"]} onChange={(cohort) => updateFilter({ cohort })} value={filter.cohort} />
+            </FilterWrapper>
+          </FiltersList>
+          <Status filter={filter} />
+          <Title>Dans le détails</Title>
+          <FiltersList>
+            <FilterStatus value={filter.status} onChange={(status) => updateFilter({ status })} />
+            {/*   <FilterWrapper>
           <ExportButton onClick={onExportButtonClicked}>Exporter les données</ExportButton>
         </FilterWrapper> */}
-      </FiltersList>
-      <Row>
-        <Col md={12} lg={6}>
-          <BirthDate filter={filter} />
-        </Col>
-        <Col md={12} lg={6}>
-          <ParticularSituation filter={filter} />
-        </Col>
-        <Col md={12}>
-          <ScholarshopSituation filter={filter} />
-        </Col>
-        <Col md={12} lg={6}>
-          <Gender filter={filter} />
-        </Col>
-        <Col md={12} lg={6}>
-          <PriorityArea filter={filter} />
-        </Col>
-        <Col md={12}>
-          <Schools filter={filter} />
-        </Col>
-      </Row>
+          </FiltersList>
+          <Row>
+            <Col md={12} lg={6}>
+              <BirthDate filter={filter} />
+            </Col>
+            <Col md={12} lg={6}>
+              <ParticularSituation filter={filter} />
+            </Col>
+            <Col md={12}>
+              <ScholarshopSituation filter={filter} />
+            </Col>
+            <Col md={12} lg={6}>
+              <Gender filter={filter} />
+            </Col>
+            <Col md={12} lg={6}>
+              <PriorityArea filter={filter} />
+            </Col>
+            <Col md={12}>
+              <Schools filter={filter} />
+            </Col>
+          </Row>
+        </>
+      )}
     </>
   );
 };

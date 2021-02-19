@@ -34,7 +34,6 @@ export default ({ filter }) => {
       if (filter.department) queries[1].query.bool.filter.push({ term: { "department.keyword": filter.department } });
 
       const { responses } = await api.esQuery(queries);
-      console.log(responses);
       setStatus(responses[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
       setStatusPhase1(responses[0].aggregations.statusPhase1.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
       setStatusPhase2(responses[0].aggregations.statusPhase2.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
