@@ -415,6 +415,7 @@ const Wrapper = styled.div`
     font-weight: 400;
     font-size: 12px;
     padding: 1em;
+    text-align: center;
   }
 `;
 

@@ -97,13 +97,13 @@ export default (props) => {
         }
       }}
     >
-      {({ values, handleChange, handleSubmit, isValid, errors, touched }) => (
+      {({ values, handleChange, handleSubmit, errors, touched }) => (
         <Wrapper>
           <Header>
             <Title>{defaultValue ? values.name : "Création d'une structure"}</Title>
-            {Object.keys(errors).length ? <h3>Vous ne pouvez pas continuer car tous les champs ne sont pas correctement renseignés.</h3> : null}
-            <SaveButton isValid={isValid} handleChange={handleChange} handleSubmit={handleSubmit} defaultValue={defaultValue} />
+            <SaveButton handleChange={handleChange} handleSubmit={handleSubmit} defaultValue={defaultValue} />
           </Header>
+          {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas continuer car tous les champs ne sont pas correctement renseignés.</h3> : null}
           <Box>
             <Row style={{ borderBottom: "2px solid #f4f5f7" }}>
               <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
@@ -290,8 +290,8 @@ export default (props) => {
                     <Legend>{`Équipe (${referents.length})`}</Legend>
                     {referents.length ? null : <i>Aucun compte n'est associé à cette structure.</i>}
                     {referents.map((referent, k) => (
-                      <Link to={`/user/${referent._id}`}>
-                        <div style={{ display: "flex", alignItems: "center", marginTop: "1rem" }} key={k}>
+                      <Link to={`/user/${referent._id}`} key={k}>
+                        <div style={{ display: "flex", alignItems: "center", marginTop: "1rem" }}>
                           <Avatar name={`${referent.firstName} ${referent.lastName}`} />
                           <div>{`${referent.firstName} ${referent.lastName}`}</div>
                         </div>
@@ -318,9 +318,9 @@ export default (props) => {
               </Col>
             </Row>
           </Box>
+          {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas continuer car tous les champs ne sont pas correctement renseignés.</h3> : null}
           <Header style={{ justifyContent: "flex-end" }}>
-            {Object.keys(errors).length ? <h3>Vous ne pouvez pas continuer car tous les champs ne sont pas correctement renseignés.</h3> : null}
-            <SaveButton isValid={isValid} handleChange={handleChange} handleSubmit={handleSubmit} defaultValue={defaultValue} />
+            <SaveButton handleChange={handleChange} handleSubmit={handleSubmit} defaultValue={defaultValue} />
           </Header>
         </Wrapper>
       )}
@@ -328,10 +328,10 @@ export default (props) => {
   );
 };
 
-const SaveButton = ({ isValid, handleChange, handleSubmit, defaultValue }) => (
+const SaveButton = ({ handleChange, handleSubmit, defaultValue }) => (
   <ButtonContainer>
     <button
-      disabled={!isValid}
+      type="submit"
       onClick={() => {
         handleChange({ target: { value: "VALIDATED", name: "status" } });
         handleSubmit();
@@ -347,6 +347,16 @@ const Wrapper = styled.div`
   li {
     list-style-type: none;
   }
+  h3.alert {
+    border: 1px solid #fc8181;
+    border-radius: 0.25em;
+    background-color: #fff5f5;
+    color: #c53030;
+    font-weight: 400;
+    font-size: 12px;
+    padding: 1em;
+    text-align: center;
+  }
 `;
 
 const Header = styled.div`
@@ -355,15 +365,6 @@ const Header = styled.div`
   margin-top: 25px;
   margin-bottom: 2rem;
   align-items: center;
-  h3 {
-    border: 1px solid #fc8181;
-    border-radius: 0.25em;
-    background-color: #fff5f5;
-    color: #c53030;
-    font-weight: 400;
-    font-size: 12px;
-    padding: 1em;
-  }
 `;
 
 const FormGroup = styled.div`
