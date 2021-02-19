@@ -10,7 +10,7 @@ import Avatar from "../../../components/Avatar";
 import ToggleSwitch from "../../../components/ToogleSwitch";
 
 export default ({ young }) => {
-  const [disabled, setDisabled] = useState(young.phase === YOUNG_PHASE.INSCRIPTION);
+  const [disabled, setDisabled] = useState(young.phase !== YOUNG_PHASE.COHESION_STAY);
   const getCohesionStay = (young) => {
     if (young.cohort === "2019") return <p>Le volontaire a réalisé son séjour de cohésion.</p>;
     if (young.cohort === "2020") return <p>Le séjour de cohésion a été annulé.</p>;

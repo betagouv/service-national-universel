@@ -270,13 +270,23 @@ async function migrateYoung() {
       young.frenchNationality = y.nationalite_francaise === 1 ? "true" : "false";
       young.schooled = y.situation && y.situation.includes("Scolarisé") ? "true" : "false";
 
-      young.phase = "COHESION_STAY";
-      young.status = "IN_PROGRESS";
       young.cohort = y.cohort;
 
       if (young.cohort === "2019") {
         young.cohesionStayPresence = "true";
         young.cohesionStayMedicalFileReceived = "true";
+        young.phase = "INTEREST_MISSION";
+        young.status = "VALIDATED"; // inscription validée puisque déja dans le snu
+        young.statusPhase1 = "DONE";
+        young.statusPhase2 = "IN_PROGRESS";
+      }
+      if (young.cohort === "2020") {
+        young.cohesionStayPresence = "false";
+        young.cohesionStayMedicalFileReceived = "false";
+        young.phase = "INTEREST_MISSION";
+        young.status = "VALIDATED"; // inscription validée puisque déja dans le snu
+        young.statusPhase2 = "CANCEL";
+        young.statusPhase2 = "IN_PROGRESS";
       }
 
       young.complementAddress = y.complement_adresse;
@@ -436,7 +446,7 @@ async function migrateApplication() {
         if (my.status === "CANDIDATURE_REFUSEE") return "REFUSED";
         if (my.status === "CANDIDATURE_ANNULEE") return "CANCEL";
         if (my.status === "CANDIDATURE_PRESELECTIONNEE") return "WAITING_VALIDATION";
-        if (my.status === "CANDIDATURE_CONTRAT_SIGNE") return "SIGNED_CONTRACT";
+        if (my.status === "CANDIDATURE_CONTRAT_SIGNE") return "VALIDATED";
         if (my.status === "MISSION_EN_COURS") return "IN_PROGRESS";
         if (my.status === "MISSION_EFFECTUEE") return "DONE";
         if (my.status === "MISSION_NON_ACHEVEE") return "NOT_COMPLETED";
