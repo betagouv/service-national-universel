@@ -62,7 +62,7 @@ export default ({ young }) => {
                         title="Présence"
                         optionLabels={["Présent", "Absent"]}
                         values={values}
-                        name={"cohesionPresence"}
+                        name={"cohesionStayPresence"}
                         handleChange={handleChange}
                         disabled={disabled}
                       />
@@ -72,7 +72,7 @@ export default ({ young }) => {
                         title="Document"
                         optionLabels={["Réceptionné", "Non réceptionné"]}
                         values={values}
-                        name={"cohesionSanitaryFile"}
+                        name={"cohesionStayMedicalFileReceived"}
                         handleChange={handleChange}
                         disabled={disabled}
                       />
