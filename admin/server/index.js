@@ -8,7 +8,7 @@ const port = 8080;
 
 app.use(
   forceDomain({
-    hostname: "candidature.snu.gouv.fr",
+    hostname: "admin.snu.gouv.fr",
     protocol: "https",
     excludeRule: /[a-zA-Z0-9-]+\.cleverapps\.io/,
   })
