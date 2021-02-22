@@ -60,6 +60,7 @@
     "dayjs": "^1.10.3",
     "express": "^4.17.1",
     "file-saver": "^2.0.5",
+    "forcedomain": "^2.2.2",
     "formik": "^2.1.5",
     "hsts": "^2.2.0",
     "isomorphic-fetch": "^3.0.0",
