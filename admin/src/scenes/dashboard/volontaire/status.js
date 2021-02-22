@@ -80,6 +80,15 @@ export default ({ filter }) => {
             </CardValueWrapper>
           </Card>
         </Col>
+        <Col md={6} xl={3}>
+          <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
+            <CardTitle>Désistés</CardTitle>
+            <CardValueWrapper>
+              <CardValue>{status.WITHDRAWN || 0}</CardValue>
+              <CardArrow />
+            </CardValueWrapper>
+          </Card>
+        </Col>
       </Row>
       <Row>
         <Col md={12}>
