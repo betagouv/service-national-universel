@@ -30,7 +30,7 @@ export default () => {
     })();
     return;
   }, []);
-  if (!structureIds) return <div>Chargement</div>;
+  if (user.role === "supervisor" && !structureIds) return <div>Chargement</div>;
 
   return (
     <div>
