@@ -13,9 +13,7 @@ function responsible(user) {
         <NavLink to="/mission">Missions</NavLink>
       </li>
       <li>
-        <NavLink to="/volontaire">
-          Volontaires <i>(BÊTA)</i>
-        </NavLink>
+        <NavLink to="/volontaire">Volontaires</NavLink>
       </li>
     </>
   );
@@ -33,9 +31,7 @@ function supervisor(user) {
         <NavLink to="/user">Utilisateurs</NavLink>
       </li>
       <li>
-        <NavLink to="/volontaire">
-          Volontaires <i>(BÊTA)</i>
-        </NavLink>
+        <NavLink to="/volontaire">Volontaires</NavLink>
       </li>
     </>
   );
@@ -45,22 +41,16 @@ function admin() {
   return (
     <>
       <li>
-        <NavLink to="/structure">
-          Structures <i>(BÊTA)</i>
-        </NavLink>
+        <NavLink to="/structure">Structures</NavLink>
       </li>
       <li>
-        <NavLink to="/mission">
-          Missions <i>(BÊTA)</i>
-        </NavLink>
+        <NavLink to="/mission">Missions</NavLink>
       </li>
       <li>
         <NavLink to="/user">Utilisateurs</NavLink>
       </li>
       <li>
-        <NavLink to="/volontaire">
-          Volontaires <i>(BÊTA)</i>
-        </NavLink>
+        <NavLink to="/volontaire">Volontaires</NavLink>
       </li>
       <li>
         <NavLink to="/inscription">Inscriptions</NavLink>
@@ -73,7 +63,16 @@ function referent() {
   return (
     <>
       <li>
+        <NavLink to="/structure">Structures</NavLink>
+      </li>
+      <li>
+        <NavLink to="/mission">Missions</NavLink>
+      </li>
+      <li>
         <NavLink to="/user">Utilisateurs</NavLink>
+      </li>
+      <li>
+        <NavLink to="/volontaire">Volontaires</NavLink>
       </li>
       <li>
         <NavLink to="/inscription">Inscriptions</NavLink>

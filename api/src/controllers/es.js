@@ -57,6 +57,16 @@ function filter(body, user, index) {
     if (user.role === "referent_department") filter.push({ term: { "department.keyword": user.department } });
   }
 
+  if (index === "mission") {
+    if (user.role === "referent_region") filter.push({ term: { "region.keyword": user.region } });
+    if (user.role === "referent_department") filter.push({ term: { "department.keyword": user.department } });
+  }
+
+  if (index === "structure") {
+    if (user.role === "referent_region") filter.push({ term: { "region.keyword": user.region } });
+    if (user.role === "referent_department") filter.push({ term: { "department.keyword": user.department } });
+  }
+
   if (index === "referent") {
     if (user.role === "responsible") filter.push({ terms: { "role.keyword": ["responsible", "supervisor"] } });
 
