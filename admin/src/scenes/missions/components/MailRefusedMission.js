@@ -9,21 +9,32 @@ import { toastr } from "react-redux-toastr";
 export default ({ value, onChange, onSend }) => {
   const [message, setMessage] = useState();
   const [sending, setSending] = useState(false);
+  const [mission, setMission] = useState(null);
 
   useEffect(() => {
-    setMessage(`Bonjour ${value.tutor?.firstName || ""} ${value.tutor?.lastName || ""},
-    Suite à l'étude de son contenu, votre mission "${value.name}" a été refusée, ne respectant pas le cadre du Service National Universel car :
-- ...
-- ...`);
+    (async () => {
+      const id = value && value._id;
+      if (!id) return;
+      const { data } = await api.get(`/mission/${id}`);
+      setMission(data);
+    })();
   }, [value]);
 
-  if (!value) return <div />;
+  useEffect(() => {
+    if (!mission) return;
+    setMessage(`Bonjour ${mission.tutor?.firstName || ""} ${mission.tutor?.lastName || ""},
+    Suite à l'étude de son contenu, votre mission "${mission.name}" a été refusée, ne respectant pas le cadre du Service National Universel car :
+- ...
+- ...`);
+  }, [mission]);
+
+  if (!mission) return <div />;
 
   const send = async () => {
     setSending(true);
-    await api.post(`/referent/email-tutor/refused/${value.tutor.id}`, {
+    await api.post(`/referent/email-tutor/refused/${mission.tutor.id}`, {
       message,
-      subject: `Votre mission d'intérêt général "${value.name}" est refusée`,
+      subject: `Votre mission d'intérêt général "${mission.name}" est refusée`,
     });
     toastr.success("Email envoyé !");
     onSend(message);

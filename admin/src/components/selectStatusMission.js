@@ -10,38 +10,30 @@ import MailCorrectionMission from "../scenes/missions/components/MailCorrectionM
 import MailRefusedMission from "../scenes/missions/components/MailRefusedMission";
 
 export default ({ hit, options = [] }) => {
+  console.log(hit);
   const [waitingCorrectionModal, setWaitingCorrectionModal] = useState(false);
   const [refusedModal, setRefusedModal] = useState(false);
-  const [mission, setMission] = useState(hit);
+  const [status, setStatus] = useState(null);
   const user = useSelector((state) => state.Auth.user);
 
-  useEffect(() => {
-    (async () => {
-      const id = hit && hit._id;
-      if (!id) return setMission(null);
-      const { data } = await api.get(`/mission/${id}`);
-      setMission(data);
-    })();
-  }, [hit]);
-
-  if (!mission) return <div />;
+  if (!hit || !hit._id) return <div />;
 
   if (user.role === "responsible") options.push(MISSION_STATUS.WAITING_VALIDATION, MISSION_STATUS.DRAFT, MISSION_STATUS.CANCEL, MISSION_STATUS.ARCHIVED);
   if (user.role === "admin") options = Object.keys(MISSION_STATUS);
 
-  const handleClickStatus = (status) => {
+  const handleClickStatus = (newStatus) => {
     if (!confirm("Êtes-vous sûr(e) de vouloir modifier le statut de cette mission ?")) return;
-    if (status === MISSION_STATUS.WAITING_CORRECTION && mission.tutor) return setWaitingCorrectionModal(true);
-    if (status === MISSION_STATUS.REFUSED && mission.tutor) return setRefusedModal(true);
-    setStatus(status);
+    if (newStatus === MISSION_STATUS.WAITING_CORRECTION && hit.tutorId) return setWaitingCorrectionModal(true);
+    if (newStatus === MISSION_STATUS.REFUSED && hit.tutorId) return setRefusedModal(true);
+    updateStatus(newStatus);
   };
 
-  const setStatus = async (status) => {
+  const updateStatus = async (newStatus) => {
     try {
-      const { ok, code, data: newMission } = await api.put(`/mission/${mission._id}`, { status });
+      const { ok, code } = await api.put(`/mission/${hit._id}`, { status: newStatus });
 
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
-      setMission(newMission);
+      setStatus(newStatus);
       toastr.success("Mis à jour!");
     } catch (e) {
       console.log(e);
@@ -53,28 +45,28 @@ export default ({ hit, options = [] }) => {
     <>
       {waitingCorrectionModal && (
         <MailCorrectionMission
-          value={mission}
+          value={hit}
           onChange={() => setWaitingCorrectionModal(false)}
           onSend={(note) => {
-            setStatus(MISSION_STATUS.WAITING_CORRECTION, note);
+            updateStatus(MISSION_STATUS.WAITING_CORRECTION, note);
             setWaitingCorrectionModal(false);
           }}
         />
       )}
       {refusedModal && (
         <MailRefusedMission
-          value={mission}
+          value={hit}
           onChange={() => setRefusedModal(false)}
           onSend={(note) => {
-            setStatus(MISSION_STATUS.REFUSED, note);
+            updateStatus(MISSION_STATUS.REFUSED, note);
             setRefusedModal(false);
           }}
         />
       )}
-      <ActionBox color={MISSION_STATUS_COLORS[mission.status]}>
+      <ActionBox color={MISSION_STATUS_COLORS[status || hit.status]}>
         <UncontrolledDropdown setActiveFromChild>
           <DropdownToggle tag="button">
-            {translate(mission.status)}
+            {translate(status || hit.status)}
             <div className="down-icon">
               <svg viewBox="0 0 407.437 407.437">
                 <polygon points="386.258,91.567 203.718,273.512 21.179,91.567 0,112.815 203.718,315.87 407.437,112.815 " />
@@ -82,16 +74,15 @@ export default ({ hit, options = [] }) => {
             </div>
           </DropdownToggle>
           <DropdownMenu>
-            {options.map((status) => {
+            {options.map((item) => {
               return (
-                <DropdownItem key={status} className="dropdown-item" onClick={() => handleClickStatus(status)}>
-                  {translate(status)}
+                <DropdownItem key={item} className="dropdown-item" onClick={() => handleClickStatus(item)}>
+                  {translate(item)}
                 </DropdownItem>
               );
             })}
           </DropdownMenu>
         </UncontrolledDropdown>
-        {/* <div>{JSON.stringify(young)}</div> */}
       </ActionBox>
     </>
   );

@@ -9,25 +9,36 @@ import { toastr } from "react-redux-toastr";
 export default ({ value, onChange, onSend }) => {
   const [message, setMessage] = useState();
   const [sending, setSending] = useState(false);
+  const [mission, setMission] = useState(null);
 
   useEffect(() => {
-    setMessage(`Bonjour ${value.tutor?.firstName || ""} ${value.tutor?.lastName || ""},
+    (async () => {
+      const id = value && value._id;
+      if (!id) return;
+      const { data } = await api.get(`/mission/${id}`);
+      setMission(data);
+    })();
+  }, [value]);
+
+  useEffect(() => {
+    if (!mission) return;
+    setMessage(`Bonjour ${mission.tutor?.firstName || ""} ${mission.tutor?.lastName || ""},
 En vue de la publication de votre mission "${
-      value.name
+      mission.name
     }" et suite à l'étude de son contenu, il vous est demandé d'apporter des précisions pour respecter le cadre du Service National Universel, à savoir :
 - ...
 - ...
 
 Merci d'effectuer ces modifications depuis votre espace.`);
-  }, [value]);
+  }, [mission]);
 
-  if (!value) return <div />;
+  if (!mission) return <div />;
 
   const send = async () => {
     setSending(true);
-    await api.post(`/referent/email-tutor/correction/${value.tutor.id}`, {
+    await api.post(`/referent/email-tutor/correction/${mission.tutor.id}`, {
       message,
-      subject: `Votre mission d'intérêt général "${value.name}" est en attente de correction`,
+      subject: `Votre mission d'intérêt général "${mission.name}" est en attente de correction`,
     });
     toastr.success("Email envoyé !");
     onSend(message);
