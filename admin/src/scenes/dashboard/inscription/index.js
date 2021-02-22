@@ -49,7 +49,7 @@ export default () => {
             <FilterRegion updateFilter={updateFilter} filter={filter} />
             <FilterDepartment updateFilter={updateFilter} filter={filter} />
             <FilterWrapper>
-              <YearPicker options={["2020", "2021"]} onChange={(cohort) => updateFilter({ cohort })} value={filter.cohort} />
+              <YearPicker options={["2019", "2020", "2021"]} onChange={(cohort) => updateFilter({ cohort })} value={filter.cohort} />
             </FilterWrapper>
           </FiltersList>
           <Status filter={filter} />

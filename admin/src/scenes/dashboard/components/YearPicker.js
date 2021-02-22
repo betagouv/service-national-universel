@@ -22,6 +22,7 @@ const YearPickerWrapper = styled.div`
   border-radius: 6px;
 `;
 const StyledOption = styled.div`
+  cursor: pointer;
   padding: 2px 14px;
   color: ${(props) => (props.isActive ? "white" : "#44444F")};
   background-color: ${(props) => props.isActive && "#696974"};
