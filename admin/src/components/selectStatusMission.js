@@ -26,8 +26,9 @@ export default ({ hit, options = [] }) => {
 
   if (!mission) return <div />;
 
-  if (user.role === "responsible") options.push(MISSION_STATUS.WAITING_VALIDATION, MISSION_STATUS.DRAFT, MISSION_STATUS.CANCEL, MISSION_STATUS.ARCHIVED);
-  if (user.role === "admin") options = Object.keys(MISSION_STATUS);
+  if (user.role === "responsible" || user.role === "supervisor")
+    options.push(MISSION_STATUS.WAITING_VALIDATION, MISSION_STATUS.DRAFT, MISSION_STATUS.CANCEL, MISSION_STATUS.ARCHIVED);
+  if (user.role === "admin" || user.role === "referent_department" || user.role === "referent_region") options = Object.keys(MISSION_STATUS);
 
   const handleClickStatus = (status) => {
     if (!confirm("Êtes-vous sûr(e) de vouloir modifier le statut de cette mission ?")) return;
