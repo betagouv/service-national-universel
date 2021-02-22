@@ -73,7 +73,6 @@ export default () => {
                   componentId="CORPS"
                   dataField="structurePubliqueEtatType.keyword"
                   transformData={(data) => {
-                    console.log(data);
                     return data.filter((d) => corpsEnUniforme.includes(d.key));
                   }}
                   react={{ and: FILTERS.filter((e) => e !== "CORPS") }}
@@ -183,7 +182,6 @@ const Hit = ({ hit, onClick }) => {
       }
 
       const { responses } = await api.esQuery(queries);
-      console.log(hit.networkId);
       if (hit.networkId) {
         const structures = responses[1]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
         setParentStructure(structures.length ? structures[0] : null);
