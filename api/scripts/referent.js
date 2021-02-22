@@ -78,7 +78,7 @@ async function send(req) {
     htmlContent = htmlContent.replace(/{{toName}}/g, `${obj.firstName} ${obj.lastName}`);
     htmlContent = htmlContent.replace(/{{fromName}}/g, `Gabrielle Bouxin`);
     htmlContent = htmlContent.replace(/{{region}}/g, `${obj.region}`);
-    htmlContent = htmlContent.replace(/{{cta}}/g, `https://candidature.snu.gouv.fr/auth/signup?token=${invitation_token}`);
+    htmlContent = htmlContent.replace(/{{cta}}/g, `https://admin.snu.gouv.fr/auth/signup?token=${invitation_token}`);
 
     await sendEmail({ name: `${obj.firstName} ${obj.lastName}`, email: obj.email }, "Activez votre compte référent régional SNU", htmlContent);
 
