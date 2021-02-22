@@ -18,7 +18,7 @@ const FILTERS = ["SEARCH", "ROLE", "REGION", "DEPARTMENT", "NETWORK"];
 export default () => {
   const [responsable, setResponsable] = useState(null);
   const user = useSelector((state) => state.Auth.user);
-  const [structureIds, setStructureIds] = useState([]);
+  const [structureIds, setStructureIds] = useState();
 
   useEffect(() => {
     if (user.role !== "supervisor") return;
@@ -30,6 +30,7 @@ export default () => {
     })();
     return;
   }, []);
+  if (!structureIds) return <div>Chargement</div>;
 
   return (
     <div>
@@ -107,7 +108,7 @@ export default () => {
                 />
               </FilterRow>
             </Filter>
-            {user.role === "supervisor" && structureIds.length ? (
+            {user.role === "supervisor" ? (
               <ReactiveFilter componentId="NETWORK" query={{ query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } } }} />
             ) : null}
             <ResultTable>
