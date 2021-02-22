@@ -36,7 +36,7 @@ const COOKIE_MAX_AGE = 60 * 60 * 2 * 1000; // 2h
 const JWT_MAX_AGE = 60 * 60 * 2; // 2h
 
 function cookieOptions() {
-  if (process.env.NODE_ENV !== "production") {
+  if (config.ENVIRONMENT === "development") {
     return { maxAge: COOKIE_MAX_AGE, httpOnly: true, secure: false };
   } else {
     return { maxAge: COOKIE_MAX_AGE, httpOnly: true, secure: true, sameSite: "none" };
