@@ -43,10 +43,11 @@ export default () => {
                 <Title>Missions</Title>
               </div>
               <ButtonContainer>
-                {/* On remettra seulement ça pour les profils des equipes d'une structure qui n'ont qu'une structure. */}
-                {/* <Link to="/mission/create">
-                  <button>Nouvelle mission</button>
-  </Link> */}
+                {user.role === "responsible" && user.structureId && (
+                  <Link to={`/mission/create/${user.structureId}`}>
+                    <button>Nouvelle mission</button>
+                  </Link>
+                )}
                 <ExportComponent
                   title="Exporter les missions"
                   collection="mission"
