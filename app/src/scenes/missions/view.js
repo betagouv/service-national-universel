@@ -67,7 +67,7 @@ export default (props) => {
           </Tags>
         </div>
         <div>
-          <ApplyButton applied={mission.application} placesLeft={mission.placesLeft} />
+          <ApplyButton applied={mission.application} placesLeft={mission.placesLeft} setModal={setModal} />
         </div>
       </Heading>
       <Box>
@@ -106,13 +106,13 @@ export default (props) => {
         </Row>
       </Box>
       <Footer>
-        <ApplyButton applied={mission.application} placesLeft={mission.placesLeft} />
+        <ApplyButton applied={mission.application} placesLeft={mission.placesLeft} setModal={setModal} />
       </Footer>
     </Container>
   );
 };
 
-const ApplyButton = ({ applied, placesLeft }) => {
+const ApplyButton = ({ applied, placesLeft, setModal }) => {
   return applied ? (
     <>
       <Link to="/candidature">
