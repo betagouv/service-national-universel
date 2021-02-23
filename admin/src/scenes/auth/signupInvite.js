@@ -41,6 +41,13 @@ export default () => {
 
   if (!newuser) return <div>Chargement...</div>;
 
+  let title;
+  if (newuser.department && newuser.role === "referent_department") {
+    title = `Activez votre compte de Référent du département : ${newuser.department}`;
+  } else {
+    title = "Activez votre compte";
+  }
+
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       <Header />
@@ -48,7 +55,7 @@ export default () => {
         <Thumb />
         <div>
           <LoginBox>
-            <Title>{`Activez votre compte de Référent du département : ${newuser.department}`}</Title>
+            <Title>{title}</Title>
             <Formik
               initialValues={{ firstName: newuser.firstName, lastName: newuser.lastName, email: newuser.email, password: "", role: newuser.role }}
               onSubmit={async (values, actions) => {
