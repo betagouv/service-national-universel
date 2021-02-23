@@ -1,12 +1,18 @@
 const express = require("express");
 const path = require("path");
 const hsts = require("hsts");
+const { forceDomain } = require("forcedomain");
 
 const app = express();
 const port = 8080;
 
-console.log("coucou");
-
+app.use(
+  forceDomain({
+    hostname: "inscription.snu.gouv.fr",
+    protocol: "https",
+    excludeRule: /[a-zA-Z0-9-]+\.cleverapps\.io/,
+  })
+);
 app.use(hsts({ maxAge: 31536000, includeSubDomains: true, preload: true }));
 app.use(express.static(path.join(__dirname, "../build")));
 
