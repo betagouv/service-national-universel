@@ -83,7 +83,7 @@ const Home = () => {
   const user = useSelector((state) => state.Auth.user);
   // if (user && !user.structureId) return <Onboarding />;
   return (
-    <div>
+    <div style={{ display: "flex", flex: 1 }}>
       <Drawer />
       <div className="screen-container" style={{ marginLeft: !user && 0 }}>
         <Header />

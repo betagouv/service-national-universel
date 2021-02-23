@@ -27,12 +27,17 @@ ul {
 }
 
 .main {
+  display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+    /*
   flex: 1;
   height: 100%;
   flex-direction: column;
   display: flex;
   height: 100%;
   overflow-y: auto;
+  */
 }
 
 input:focus,
@@ -55,5 +60,6 @@ a:hover {
 
 .screen-container {
   height: 100%;
-  margin-left: 250px;
+  width: 100%;
+  /* margin-left: 250px; */
 }
