@@ -3,22 +3,23 @@ import { Link } from "react-router-dom";
 import { DropdownItem, DropdownMenu, DropdownToggle, Label, Pagination, PaginationItem, PaginationLink, Row, UncontrolledDropdown } from "reactstrap";
 import { ReactiveBase } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
+
 import SelectStatusApplication from "../../../components/selectStatusApplication";
 import api from "../../../services/api";
 import { apiURL } from "../../../config";
 import MissionView from "./wrapper";
-
+import Panel from "../../volontaires/panel";
 import { formatStringLongDate } from "../../../utils";
 
 export default ({ mission, applications }) => {
   const data = applications;
-
+  const [young, setYoung] = useState();
   const handleClick = async (application) => {
     const { ok, data } = await api.get(`/referent/young/${application.youngId}`);
     if (ok) setYoung(data);
   };
 
-  if (!data) return <div />;
+  if (!data) return <div>Chargement...</div>;
 
   return (
     <div>
@@ -39,6 +40,12 @@ export default ({ mission, applications }) => {
             </tbody>
           </Table>
         </MissionView>
+        <Panel
+          value={young}
+          onChange={() => {
+            setYoung(null);
+          }}
+        />
       </div>
     </div>
   );

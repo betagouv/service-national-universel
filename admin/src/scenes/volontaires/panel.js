@@ -68,7 +68,7 @@ export default ({ onChange, value }) => {
             young.applications
               .sort((a, b) => (parseInt(a.priority) > parseInt(b.priority) ? 1 : parseInt(b.priority) > parseInt(a.priority) ? -1 : 0))
               .slice(0, 3)
-              .map((a, i) => <ApplicationDetails application={a} />)}
+              .map((a, i) => <ApplicationDetails key={i} application={a} i={i + 1} />)}
           <Link to={`/volontaire/${young._id}/phase2`}>
             <div style={{ textAlign: "center", color: "#5245cc" }}>{"Toutes ses candidatures >"}</div>
           </Link>
@@ -149,12 +149,12 @@ const Details = ({ title, value }) => {
   );
 };
 
-const ApplicationDetails = ({ application }) => {
+const ApplicationDetails = ({ application, i }) => {
   if (!application) return <div />;
   return (
     <Link to={`/mission/${application.missionId}`}>
       <div className="application-detail">
-        <div className="application-detail-priority">{`CHOIX ${application.priority}`}</div>
+        <div className="application-detail-priority">{`CHOIX ${i}`}</div>
         <div className="application-detail-text">{application.missionName}</div>
       </div>
     </Link>
