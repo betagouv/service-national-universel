@@ -158,7 +158,9 @@ const Hit = ({ hit, onClick }) => {
     const now = new Date();
     const date = new Date(d);
     const diffTime = Math.abs(date - now);
-    return Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
+    const age = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
+    if (!age || isNaN(age)) return "?";
+    return age;
   };
 
   return (
