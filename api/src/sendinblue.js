@@ -1,6 +1,6 @@
 const fetch = require("node-fetch");
 
-const { SENDINBLUEKEY } = require("./config");
+const { SENDINBLUEKEY, ENVIRONMENT } = require("./config");
 const { capture } = require("./sentry");
 
 const SENDER_NAME = "Service National Universel";
@@ -30,7 +30,7 @@ async function sendEmail(to, subject, htmlContent, { params, attachment } = {}) 
     const body = {};
 
     body.to = [to];
-    if (config.ENVIRONMENT === "development") {
+    if (ENVIRONMENT === "development") {
       body.to = body.to.filter((e) => e.email.match(/(selego\.co|beta\.gouv\.fr)/));
     }
     body.htmlContent = htmlContent;
