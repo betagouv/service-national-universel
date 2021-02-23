@@ -167,7 +167,7 @@ const Hit = ({ hit, onClick }) => {
     <tr onClick={onClick}>
       <td>
         <div className="name">{`${hit.firstName} ${hit.lastName}`}</div>
-        <div className="email">{`${getAge(hit.birthdateAt)} ans • ${hit.city}(${hit.department})`}</div>
+        <div className="email">{`${getAge(hit.birthdateAt)} ans • ${hit.city || ""} ${hit.department ? `(${hit.department})` : ""}`}</div>
       </td>
       <td>
         <Badge>{`COHORTE ${hit.cohort}`}</Badge>
