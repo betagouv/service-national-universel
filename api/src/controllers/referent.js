@@ -381,6 +381,16 @@ router.get("/:id", passport.authenticate("referent", { session: false }), async 
   }
 });
 
+router.get("/structure/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
+  try {
+    const data = await ReferentObject.find({ structureId: req.params.id });
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: SERVER_ERROR, error });
+  }
+});
+
 router.put("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const data = await ReferentObject.findOne({ _id: req.params.id });

@@ -83,14 +83,30 @@ export default (props) => {
       }
       onSubmit={async (values) => {
         try {
-          if (!values._id) {
+          let id = values._id;
+          if (!id) {
             values.placesLeft = values.placesTotal;
-            await api.post("/structure", values);
-            return toastr.success("Structure créée");
+            const { ok, data, code } = await api.post("/structure", values);
+            if (!ok) return toastr.error("Une erreur s'est produite lors de la création de la structure", translate(code));
+            id = data._id;
+            toastr.success("Structure créée");
+          } else {
+            await api.put(`/structure/${values._id}`, values);
+            history.push(`/structure/${values._id}`);
+            toastr.success("Structure mise à jour");
           }
-          await api.put(`/structure/${values._id}`, values);
-          history.push(`/structure/${values._id}`);
-          return toastr.success("Structure mise à jour");
+
+          if (values.isNetwork === "true" && defaultValue.isNetwork !== "true") {
+            const { data: members } = await api.get(`/referent/structure/${id}`);
+            for (let i = 0; i < members.length; i++) {
+              await api.put(`/referent/${members[i]._id}`, { role: "supervisor" });
+            }
+          } else if (values.isNetwork === "false" && defaultValue.isNetwork !== "false") {
+            const { data: members } = await api.get(`/referent/structure/${id}`);
+            for (let i = 0; i < members.length; i++) {
+              await api.put(`/referent/${members[i]._id}`, { role: "responsible" });
+            }
+          }
         } catch (e) {
           console.log(e);
           toastr.error("Erreur!");
