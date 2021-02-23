@@ -5,7 +5,10 @@ import { FormGroup, Row, Col } from "reactstrap";
 import { toastr } from "react-redux-toastr";
 import { Redirect } from "react-router-dom";
 import styled from "styled-components";
-import validator from "validator";
+import passwordValidator from "password-validator";
+
+import EyeOpen from "../../assets/eye.svg";
+import EyeClose from "../../assets/eye-slash.svg";
 
 import api from "../../services/api";
 import LoadingButton from "../../components/loadingButton";
@@ -23,11 +26,13 @@ export default ({ location }) => {
           </div>
           <Title>Créer un nouveau mot de passe</Title>
           <Formik
-            initialValues={{ password: "", password1: "" }}
+            initialValues={{ password: "" }}
+            validateOnChange={false}
+            validateOnBlur={false}
             onSubmit={async (values, actions) => {
               try {
+                console.log("RUN");
                 const { token } = queryString.parse(location.search);
-                if (values.password !== values.password1) return toastr.error("Les mots de passes ne coincident pas");
                 const res = await api.post("/referent/forgot_password_reset", { password: values.password, token });
                 if (!res.ok) throw res;
                 toastr.success("Mot de passe créé");
@@ -44,27 +49,9 @@ export default ({ location }) => {
                   {redirect && <Redirect to="/" />}
                   <StyledFormGroup>
                     <label>Mot de passe</label>
-                    <InputField
-                      validate={(v) => validator.isEmpty(v) && "Ce champ est requis"}
-                      name="password"
-                      type="password"
-                      value={values.password}
-                      onChange={handleChange}
-                      hasError={errors.password}
-                    />
+                    <Password value={values.password} onChange={handleChange} />
                     <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.password}</p>
-                  </StyledFormGroup>
-                  <StyledFormGroup>
-                    <label>Confirmez votre mot de passe</label>
-                    <InputField
-                      validate={(v) => validator.isEmpty(v) && "Ce champ est requis"}
-                      name="password1"
-                      type="password"
-                      value={values.password1}
-                      onChange={handleChange}
-                      hasError={errors.password1}
-                    />
-                    <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.password1}</p>
+                    <p>👉 Il doit contenir au moins 8 caractères, dont une majuscule, une minuscule, un chiffre et un symbole</p>
                   </StyledFormGroup>
                   <div className="button">
                     <Submit loading={isSubmitting} type="submit" color="primary" disabled={isSubmitting}>
@@ -86,6 +73,65 @@ export default ({ location }) => {
     </Wrapper>
   );
 };
+
+
+
+const Password = ({ value, onChange }) => {
+  const [passwordText, setPasswordText] = useState(false);
+
+  function getPasswordErrorMessage(v) {
+    if (!v) return "Ce champ est obligatoire";
+    const schema = new passwordValidator();
+    schema
+      .is()
+      .min(8) // Minimum length 8
+      .has()
+      .uppercase() // Must have uppercase letters
+      .has()
+      .lowercase() // Must have lowercase letters
+      .has()
+      .digits() // Must have digits
+      .has()
+      .symbols(); // Must have symbols
+
+    if (!schema.validate(v)) {
+      return "Votre mot de passe doit contenir au moins 8 caractères, dont une majuscule, une minuscule, un chiffre et un symbole";
+    }
+  }
+
+  return (
+    <ContainerPassword>
+      <InputField
+        placeholder="Tapez votre mot de passe"
+        className="form-control"
+        validate={(v) => getPasswordErrorMessage(v)}
+        type={passwordText ? "text" : "password"}
+        name="password"
+        value={value}
+        onChange={onChange}
+      />
+      <EyeIcon src={passwordText ? EyeClose : EyeOpen} onClick={() => setPasswordText(!passwordText)} />
+    </ContainerPassword>
+  );
+};
+
+const ContainerPassword = styled.div`
+  position: relative;
+  input {
+    padding-right: 40px !important;
+  }
+`;
+
+const EyeIcon = styled.img`
+  position: absolute;
+  right: 15px;
+  top: 50%;
+  height: 18px;
+  opacity: 0.7;
+  transform: translateY(-50%);
+  font-size: 18px;
+  cursor: pointer;
+`;
 
 const Wrapper = styled(Row)`
   height: 100vh;
