@@ -31,7 +31,7 @@ export default ({ structure }) => {
     if (ok) setMission(data);
   };
 
-  if (!structure) return <div />;
+  if (!structure) return <div>Chargement...</div>;
 
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>

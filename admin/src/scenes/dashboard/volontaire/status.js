@@ -57,7 +57,7 @@ export default ({ filter }) => {
           <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
             <CardTitle>Ayant validé la phase 1</CardTitle>
             <CardValueWrapper>
-              <CardValue>{statusPhase1.AFFECTED || 0}</CardValue>
+              <CardValue>{statusPhase1.DONE || 0}</CardValue>
               <CardArrow />
             </CardValueWrapper>
           </Card>
