@@ -6,6 +6,14 @@ const { forceDomain } = require("forcedomain");
 const app = express();
 const port = 8080;
 
+app.use(function (req, res, next) {
+  if (req.headers.host === "moncompte.snu.gouv.fr") {
+    res.redirect(301, "https://inscription.snu.gouv.fr/auth");
+  } else {
+    next();
+  }
+});
+
 app.use(
   forceDomain({
     hostname: "inscription.snu.gouv.fr",
