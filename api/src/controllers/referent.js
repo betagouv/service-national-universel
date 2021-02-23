@@ -449,4 +449,17 @@ router.put("/", passport.authenticate("referent", { session: false }), async (re
   }
 });
 
+// Delete one user (only admin can delete user)
+router.delete("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
+  try {
+    const referent = await ReferentObject.findOne({ _id: req.params.id });
+    await referent.remove();
+    console.log(`Referent ${req.params.id} has been deleted`);
+    res.status(200).send({ ok: true });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, error, code: SERVER_ERROR });
+  }
+});
+
 module.exports = router;
