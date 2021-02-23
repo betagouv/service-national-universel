@@ -12,6 +12,7 @@ import EyeClose from "../../assets/eye-slash.svg";
 
 import api from "../../services/api";
 import LoadingButton from "../../components/loadingButton";
+import PasswordEye from "../../components/PasswordEye";
 import { translate } from "../../utils";
 
 export default ({ location }) => {
@@ -31,7 +32,6 @@ export default ({ location }) => {
             validateOnBlur={false}
             onSubmit={async (values, actions) => {
               try {
-                console.log("RUN");
                 const { token } = queryString.parse(location.search);
                 const res = await api.post("/referent/forgot_password_reset", { password: values.password, token });
                 if (!res.ok) throw res;
@@ -49,7 +49,7 @@ export default ({ location }) => {
                   {redirect && <Redirect to="/" />}
                   <StyledFormGroup>
                     <label>Mot de passe</label>
-                    <Password value={values.password} onChange={handleChange} />
+                    <PasswordEye value={values.password} onChange={handleChange} />
                     <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.password}</p>
                     <p>👉 Il doit contenir au moins 8 caractères, dont une majuscule, une minuscule, un chiffre et un symbole</p>
                   </StyledFormGroup>
@@ -73,65 +73,6 @@ export default ({ location }) => {
     </Wrapper>
   );
 };
-
-
-
-const Password = ({ value, onChange }) => {
-  const [passwordText, setPasswordText] = useState(false);
-
-  function getPasswordErrorMessage(v) {
-    if (!v) return "Ce champ est obligatoire";
-    const schema = new passwordValidator();
-    schema
-      .is()
-      .min(8) // Minimum length 8
-      .has()
-      .uppercase() // Must have uppercase letters
-      .has()
-      .lowercase() // Must have lowercase letters
-      .has()
-      .digits() // Must have digits
-      .has()
-      .symbols(); // Must have symbols
-
-    if (!schema.validate(v)) {
-      return "Votre mot de passe doit contenir au moins 8 caractères, dont une majuscule, une minuscule, un chiffre et un symbole";
-    }
-  }
-
-  return (
-    <ContainerPassword>
-      <InputField
-        placeholder="Tapez votre mot de passe"
-        className="form-control"
-        validate={(v) => getPasswordErrorMessage(v)}
-        type={passwordText ? "text" : "password"}
-        name="password"
-        value={value}
-        onChange={onChange}
-      />
-      <EyeIcon src={passwordText ? EyeClose : EyeOpen} onClick={() => setPasswordText(!passwordText)} />
-    </ContainerPassword>
-  );
-};
-
-const ContainerPassword = styled.div`
-  position: relative;
-  input {
-    padding-right: 40px !important;
-  }
-`;
-
-const EyeIcon = styled.img`
-  position: absolute;
-  right: 15px;
-  top: 50%;
-  height: 18px;
-  opacity: 0.7;
-  transform: translateY(-50%);
-  font-size: 18px;
-  cursor: pointer;
-`;
 
 const Wrapper = styled(Row)`
   height: 100vh;

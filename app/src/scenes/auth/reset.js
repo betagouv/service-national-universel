@@ -1,16 +1,15 @@
 import React, { useState } from "react";
 import { FormGroup } from "reactstrap";
 import { Formik, Field } from "formik";
-import classnames from "classnames";
 import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
 import { Link, Redirect } from "react-router-dom";
 import queryString from "query-string";
+import PasswordEye from "../../components/PasswordEye";
 
-import { getPasswordErrorMessage, translate } from "../../utils";
+import { translate } from "../../utils";
 import LoadingButton from "../../components/loadingButton";
 import api from "../../services/api";
-import { requiredMessage } from "../inscription/components/errorMessage";
 
 export default () => {
   const [redirect, setRedirect] = useState(false);
@@ -33,7 +32,7 @@ export default () => {
         </Title>
         <Subtitle>Récupérer mon mot de passe</Subtitle>
         <Formik
-          initialValues={{ password: "", password1: "" }}
+          initialValues={{ password: "" }}
           validateOnChange={false}
           validateOnBlur={false}
           onSubmit={async (values, actions) => {
@@ -52,35 +51,12 @@ export default () => {
           {({ values, errors, isSubmitting, handleChange, handleSubmit }) => {
             return (
               <form onSubmit={handleSubmit}>
+                {redirect && <Redirect to="/" />}
                 <StyledFormGroup>
-                  <div>
-                    <InputField
-                      validate={getPasswordErrorMessage}
-                      className={classnames({ "has-error": errors.password })}
-                      name="password"
-                      type="password"
-                      id="password"
-                      value={values.password}
-                      onChange={handleChange}
-                    />
-                    <label htmlFor="password">Nouveau mot de passe</label>
-                  </div>
+                  <label>Mot de passe</label>
+                  <PasswordEye value={values.password} onChange={handleChange} />
                   <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.password}</p>
-                </StyledFormGroup>
-                <StyledFormGroup>
-                  <div>
-                    <InputField
-                      validate={(v) => (!v && requiredMessage) || (v !== values.password && "Les mots de passe renseignés ne sont pas identiques")}
-                      className={classnames({ "has-error": errors.password1 })}
-                      name="password1"
-                      type="password"
-                      id="password1"
-                      value={values.password1}
-                      onChange={handleChange}
-                    />
-                    <label htmlFor="password1">Confirmer votre nouveau mot de passe</label>
-                  </div>
-                  <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.password1}</p>
+                  <p>👉 Il doit contenir au moins 8 caractères, dont une majuscule, une minuscule, un chiffre et un symbole</p>
                 </StyledFormGroup>
                 <div className="button">
                   <Submit loading={isSubmitting} type="submit" color="primary" disabled={isSubmitting}>
