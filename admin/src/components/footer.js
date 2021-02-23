@@ -81,9 +81,6 @@ const Footer = styled.footer`
   font-size: 14px;
   padding: 5px 0;
   background: #fff;
-  margin-top: auto;
-  position: relative;
-  z-index: 2;
   ul {
     margin: 10px 0;
   }
