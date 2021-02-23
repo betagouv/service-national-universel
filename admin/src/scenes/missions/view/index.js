@@ -6,6 +6,7 @@ import Details from "./details";
 import Youngs from "./youngs";
 import Historic from "./historic";
 import { toastr } from "react-redux-toastr";
+import { translate } from "../../../utils";
 
 export default ({ ...props }) => {
   const [mission, setMission] = useState();
