@@ -6,7 +6,7 @@ const { capture } = require("../sentry");
 const StructureObject = require("../models/structure");
 
 const SERVER_ERROR = "SERVER_ERROR";
-const NOT_FOUND = "PASSWORD_TOKEN_EXPIRED_OR_INVALID";
+const NOT_FOUND = "NOT_FOUND";
 
 router.post("/", async (req, res) => {
   try {

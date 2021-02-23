@@ -32,7 +32,7 @@ export default ({ ...props }) => {
         toastr.error("Oups, une erreur est survenue lors de la récuperation de la structure", translate(structureResponse.code));
         return history.push("/mission");
       }
-      setStructure(missionResponse.data);
+      setStructure(structureResponse.data);
 
       if (missionResponse.data.tutorId) {
         console.log(missionResponse.data.tutorId);
