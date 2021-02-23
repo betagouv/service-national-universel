@@ -25,7 +25,15 @@ export default ({ hit, options = [] }) => {
 
   options = [APPLICATION_STATUS.IN_PROGRESS, APPLICATION_STATUS.DONE, APPLICATION_STATUS.ABANDON];
   if (application.status === APPLICATION_STATUS.WAITING_VALIDATION) options = [APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.REFUSED, APPLICATION_STATUS.CANCEL];
-  if (user.role === "admin") options = Object.keys(APPLICATION_STATUS);
+  if (user.role === "admin")
+    options = [
+      APPLICATION_STATUS.WAITING_VALIDATION,
+      APPLICATION_STATUS.VALIDATED,
+      APPLICATION_STATUS.REFUSED,
+      APPLICATION_STATUS.CANCEL,
+      APPLICATION_STATUS.IN_PROGRESS,
+      APPLICATION_STATUS.ABANDON,
+    ];
 
   const handleClickStatus = (status) => {
     if (!confirm("Êtes-vous sûr(e) de vouloir modifier le statut de cette candidature?\nUn email sera automatiquement envoyé.")) return;
