@@ -20,7 +20,6 @@ const Schema = new mongoose.Schema({
   missionRegion: { type: String },
 
   structureId: { type: String },
-  structureName: { type: String },
 
   tutorId: { type: String },
   tutorName: { type: String },
