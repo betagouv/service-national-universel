@@ -1,11 +1,10 @@
 import React, { useEffect, useState, useReducer } from "react";
 import styled from "styled-components";
-import { Col, Row, Input } from "reactstrap";
+import { Col, Row } from "reactstrap";
 import { useSelector } from "react-redux";
 
 import YearPicker from "../components/YearPicker";
 import Dropdown from "../components/Dropdown";
-import Checkbox from "../components/Checkbox";
 
 import Status from "./status";
 
@@ -14,10 +13,6 @@ import { departmentList, regionList, YOUNG_STATUS, translate, region2department,
 export default () => {
   const [filter, setFilter] = useState({ status: Object.keys(YOUNG_STATUS), region: "", department: "", cohort: "2021" });
   const user = useSelector((state) => state.Auth.user);
-
-  const onExportButtonClicked = () => {
-    console.log("Export button clicked");
-  };
 
   function updateFilter(n) {
     setFilter({ ...filter, ...n });
