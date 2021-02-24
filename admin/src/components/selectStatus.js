@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 
 import api from "../services/api";
 
-import { translate, YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_COLORS } from "../utils";
+import { translate, YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_COLORS, YOUNG_STATUS_PHASE1 } from "../utils";
 import { toastr } from "react-redux-toastr";
 import matomo from "../services/matomo";
 
@@ -36,20 +36,23 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
   };
 
   const setStatus = async (status, note) => {
+    young.historic.push({ phase, userName: `${user.firstName} ${user.lastName}`, userId: user._id, status, note });
+    young[statusName] = status;
+    young.lastStatusAt = Date.now();
     try {
-      young.historic.push({ phase, userName: `${user.firstName} ${user.lastName}`, userId: user._id, status, note });
-      const { ok, code, data: newYoung } = await api.put(`/referent/young/${young._id}`, { historic: young.historic, [statusName]: status, lastStatusAt: Date.now() });
+      if (status === YOUNG_STATUS.VALIDATED && young.phase === YOUNG_PHASE.INSCRIPTION) {
+        young.phase = YOUNG_PHASE.COHESION_STAY;
+      }
+      const { ok, code, data: newYoung } = await api.put(`/referent/young/${young._id}`, young);
+      if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
 
       if (status === YOUNG_STATUS.VALIDATED) {
         matomo.logEvent("status_update", YOUNG_STATUS.VALIDATED);
         await api.post(`/referent/email/validate/${young._id}`, { subject: "Inscription validée" });
       }
-
       if (status === YOUNG_STATUS.REFUSED) {
         matomo.logEvent("status_update", YOUNG_STATUS.REFUSED);
       }
-
-      if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       setYoung(newYoung);
       toastr.success("Mis à jour!");
     } catch (e) {
