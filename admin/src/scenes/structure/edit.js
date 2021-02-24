@@ -96,16 +96,16 @@ export default (props) => {
             toastr.success("Structure mise à jour");
           }
 
-          if (values.isNetwork === "true" && defaultValue.isNetwork !== "true") {
-            const { data: members } = await api.get(`/referent/structure/${id}`);
-            for (let i = 0; i < members.length; i++) {
-              await api.put(`/referent/${members[i]._id}`, { role: "supervisor" });
-            }
-          } else if (values.isNetwork === "false" && defaultValue.isNetwork !== "false") {
-            const { data: members } = await api.get(`/referent/structure/${id}`);
-            for (let i = 0; i < members.length; i++) {
-              await api.put(`/referent/${members[i]._id}`, { role: "responsible" });
-            }
+          if (values.isNetwork !== defaultValue.isNetwork) {
+            const { data: members, ok } = await api.get(`/referent/structure/${id}`);
+            if (!ok) return;
+            members
+              .filter((m) => ["supervisor", "responsible"].includes(m.role))
+              .forEach(async (m) => {
+                await api.put(`/referent/${m._id}`, {
+                  role: values.isNetwork === "true" ? "supervisor" : "responsible",
+                });
+              });
           }
         } catch (e) {
           console.log(e);
