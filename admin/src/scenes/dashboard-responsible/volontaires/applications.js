@@ -62,58 +62,66 @@ export default () => {
           </h4>
         </Col>
         <Col md={6} xl={3}>
-          <CardContainer>
-            <Card borderBottomColor={APPLICATION_STATUS_COLORS.WAITING_VALIDATION}>
-              <CardTitle>En attente de validation</CardTitle>
-              <CardValueWrapper>
-                <CardValue>{stats.WAITING_VALIDATION || "-"}</CardValue>
-                <CardArrow />
-              </CardValueWrapper>
-            </Card>
-            {stats.WAITING_VALIDATION ? (
-              <div style={{ textAlign: "center" }}>
-                <Badge color={APPLICATION_STATUS_COLORS.WAITING_VALIDATION}>À&nbsp;Modérer</Badge>
-              </div>
-            ) : null}
-          </CardContainer>
+          <Link to={`/volontaire?STATUS=%5B"WAITING_VALIDATION"%5D`}>
+            <CardContainer>
+              <Card borderBottomColor={APPLICATION_STATUS_COLORS.WAITING_VALIDATION}>
+                <CardTitle>En attente de validation</CardTitle>
+                <CardValueWrapper>
+                  <CardValue>{stats.WAITING_VALIDATION || "-"}</CardValue>
+                  <CardArrow />
+                </CardValueWrapper>
+              </Card>
+              {stats.WAITING_VALIDATION ? (
+                <div style={{ textAlign: "center" }}>
+                  <Badge color={APPLICATION_STATUS_COLORS.WAITING_VALIDATION}>À&nbsp;Modérer</Badge>
+                </div>
+              ) : null}
+            </CardContainer>
+          </Link>
         </Col>
         <Col md={6} xl={3}>
-          <CardContainer>
-            <Card borderBottomColor={APPLICATION_STATUS_COLORS.VALIDATED}>
-              <CardTitle>Validées</CardTitle>
-              <CardValueWrapper>
-                <CardValue>{stats.VALIDATED || "-"}</CardValue>
-                <CardArrow />
-              </CardValueWrapper>
-            </Card>
-            {stats.VALIDATED ? (
-              <div style={{ textAlign: "center" }}>
-                <Badge color={APPLICATION_STATUS_COLORS.VALIDATED}>Volontaires&nbsp;à&nbsp;suivre</Badge>
-              </div>
-            ) : null}
-          </CardContainer>
+          <Link to={`/volontaire?STATUS=%5B"VALIDATED"%5D`}>
+            <CardContainer>
+              <Card borderBottomColor={APPLICATION_STATUS_COLORS.VALIDATED}>
+                <CardTitle>Validées</CardTitle>
+                <CardValueWrapper>
+                  <CardValue>{stats.VALIDATED || "-"}</CardValue>
+                  <CardArrow />
+                </CardValueWrapper>
+              </Card>
+              {stats.VALIDATED ? (
+                <div style={{ textAlign: "center" }}>
+                  <Badge color={APPLICATION_STATUS_COLORS.VALIDATED}>Volontaires&nbsp;à&nbsp;suivre</Badge>
+                </div>
+              ) : null}
+            </CardContainer>
+          </Link>
         </Col>
         <Col md={6} xl={3}>
-          <CardContainer>
-            <Card borderBottomColor={APPLICATION_STATUS_COLORS.REFUSED}>
-              <CardTitle>Refusées</CardTitle>
-              <CardValueWrapper>
-                <CardValue>{stats.REFUSED || "-"}</CardValue>
-                <CardArrow />
-              </CardValueWrapper>
-            </Card>
-          </CardContainer>
+          <Link to={`/volontaire?STATUS=%5B"REFUSED"%5D`}>
+            <CardContainer>
+              <Card borderBottomColor={APPLICATION_STATUS_COLORS.REFUSED}>
+                <CardTitle>Refusées</CardTitle>
+                <CardValueWrapper>
+                  <CardValue>{stats.REFUSED || "-"}</CardValue>
+                  <CardArrow />
+                </CardValueWrapper>
+              </Card>
+            </CardContainer>
+          </Link>
         </Col>
         <Col md={6} xl={3}>
-          <CardContainer>
-            <Card borderBottomColor={APPLICATION_STATUS_COLORS.CANCEL}>
-              <CardTitle>Annulés</CardTitle>
-              <CardValueWrapper>
-                <CardValue>{stats.CANCEL || "-"}</CardValue>
-                <CardArrow />
-              </CardValueWrapper>
-            </Card>
-          </CardContainer>
+          <Link to={`/volontaire?STATUS=%5B"CANCEL"%5D`}>
+            <CardContainer>
+              <Card borderBottomColor={APPLICATION_STATUS_COLORS.CANCEL}>
+                <CardTitle>Annulés</CardTitle>
+                <CardValueWrapper>
+                  <CardValue>{stats.CANCEL || "-"}</CardValue>
+                  <CardArrow />
+                </CardValueWrapper>
+              </Card>
+            </CardContainer>
+          </Link>
         </Col>
       </Row>
       <Row>
@@ -123,37 +131,43 @@ export default () => {
           </h4>
         </Col>
         <Col md={6} xl={3}>
-          <CardContainer>
-            <Card borderBottomColor={APPLICATION_STATUS_COLORS.IN_PROGRESS}>
-              <CardTitle>En cours sur une MIG</CardTitle>
-              <CardValueWrapper>
-                <CardValue>{stats.IN_PROGRESS || "-"}</CardValue>
-                <CardArrow />
-              </CardValueWrapper>
-            </Card>
-          </CardContainer>
+          <Link to={`/volontaire?STATUS=%5B"IN_PROGRESS"%5D`}>
+            <CardContainer>
+              <Card borderBottomColor={APPLICATION_STATUS_COLORS.IN_PROGRESS}>
+                <CardTitle>En cours sur une MIG</CardTitle>
+                <CardValueWrapper>
+                  <CardValue>{stats.IN_PROGRESS || "-"}</CardValue>
+                  <CardArrow />
+                </CardValueWrapper>
+              </Card>
+            </CardContainer>
+          </Link>
         </Col>
         <Col md={6} xl={3}>
-          <CardContainer>
-            <Card borderBottomColor={APPLICATION_STATUS_COLORS.VALIDATED}>
-              <CardTitle>Ayant effectué leur MIG</CardTitle>
-              <CardValueWrapper>
-                <CardValue>{stats.DONE || "-"}</CardValue>
-                <CardArrow />
-              </CardValueWrapper>
-            </Card>
-          </CardContainer>
+          <Link to={`/volontaire?STATUS=%5B"DONE"%5D`}>
+            <CardContainer>
+              <Card borderBottomColor={APPLICATION_STATUS_COLORS.VALIDATED}>
+                <CardTitle>Ayant effectué leur MIG</CardTitle>
+                <CardValueWrapper>
+                  <CardValue>{stats.DONE || "-"}</CardValue>
+                  <CardArrow />
+                </CardValueWrapper>
+              </Card>
+            </CardContainer>
+          </Link>
         </Col>
         <Col md={6} xl={3}>
-          <CardContainer>
-            <Card borderBottomColor={APPLICATION_STATUS_COLORS.NOT_COMPLETED}>
-              <CardTitle>Ayant abandonné leur MIG</CardTitle>
-              <CardValueWrapper>
-                <CardValue>{stats.NOT_COMPLETED || "-"}</CardValue>
-                <CardArrow />
-              </CardValueWrapper>
-            </Card>
-          </CardContainer>
+          <Link to={`/volontaire?STATUS=%5B"NOT_COMPLETED"%5D`}>
+            <CardContainer>
+              <Card borderBottomColor={APPLICATION_STATUS_COLORS.NOT_COMPLETED}>
+                <CardTitle>Ayant abandonné leur MIG</CardTitle>
+                <CardValueWrapper>
+                  <CardValue>{stats.NOT_COMPLETED || "-"}</CardValue>
+                  <CardArrow />
+                </CardValueWrapper>
+              </Card>
+            </CardContainer>
+          </Link>
         </Col>
       </Row>
     </>
