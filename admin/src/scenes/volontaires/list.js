@@ -92,6 +92,32 @@ export default ({ setYoung }) => {
                   URLParams={true}
                   showSearch={false}
                 />
+                <MultiDropdownList
+                  className="dropdown-filter"
+                  componentId="STATUS_PHASE_1"
+                  dataField="statusPhase1.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "STATUS_PHASE_1") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Statut phase 1")}
+                />
+                <MultiDropdownList
+                  className="dropdown-filter"
+                  componentId="STATUS_PHASE_2"
+                  dataField="statusPhase2.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "STATUS_PHASE_2") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Statut phase 2")}
+                />
               </FilterRow>
             </Filter>
             <ResultTable>

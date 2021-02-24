@@ -54,6 +54,8 @@ export const translate = (value) => {
       return "En attente de validation";
     case "WAITING_ACCEPTATION":
       return "En attente d'acceptation";
+    case "WAITING_AFFECTATION":
+      return "En attente d'affectation";
     case "WAITING_CORRECTION":
       return "En attente de correction";
     case "IN_PROGRESS":
