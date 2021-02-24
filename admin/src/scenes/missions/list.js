@@ -14,7 +14,7 @@ import CustomFilter from "./customFilter";
 import SelectStatusMission from "../../components/selectStatusMission";
 import ReactiveFilter from "../../components/ReactiveFilter";
 
-const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "REGION", "DEPARTMENT", "NETWORK", "STRUCTURE"];
+const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "TUTOR", "REGION", "DEPARTMENT", "NETWORK", "STRUCTURE"];
 
 export default () => {
   const [mission, setMission] = useState(null);
@@ -133,6 +133,16 @@ export default () => {
                   componentId="PLACES"
                   dataField="placesLeft"
                   react={{ and: FILTERS.filter((e) => e !== "PLACES") }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                />
+                <MultiDropdownList
+                  className="dropdown-filter"
+                  placeholder="Tuteur"
+                  componentId="TUTOR"
+                  dataField="tutorName.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "TUTOR") }}
                   title=""
                   URLParams={true}
                   showSearch={false}

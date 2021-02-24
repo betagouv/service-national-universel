@@ -11,7 +11,7 @@ import ReactiveFilter from "../../components/ReactiveFilter";
 
 import { translate, getFilterLabel, formatStringLongDate, formatStringDate } from "../../utils";
 
-const FILTERS = ["SEARCH", "STATUS", "PHASE", "COHORT", "MISSIONS"];
+const FILTERS = ["SEARCH", "STATUS", "PHASE", "COHORT", "MISSIONS", "TUTOR"];
 
 export default () => {
   const user = useSelector((state) => state.Auth.user);
@@ -91,6 +91,16 @@ export default () => {
                   URLParams={true}
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Statut")}
+                />
+                <MultiDropdownList
+                  className="dropdown-filter"
+                  placeholder="Tuteur"
+                  componentId="TUTOR"
+                  dataField="tutorName.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "TUTOR") }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
                 />
               </FilterRow>
             </Filter>

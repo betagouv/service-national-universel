@@ -23,8 +23,7 @@ const Schema = new mongoose.Schema({
   structureName: { type: String },
 
   tutorId: { type: String },
-  tutorFirstName: { type: String },
-  tutorLastName: { type: String },
+  tutorName: { type: String },
 
   priority: { type: String },
 

@@ -9,12 +9,12 @@ const ReferentModel = require("../src/models/referent");
   const cursor = MissionModel.find({}).cursor();
   await cursor.eachAsync(async function (mission) {
     try {
-      if (mission.tutorId) {
+      if (mission.tutorId && !mission.tutorName) {
         // Get tutor for the mission
         const tutor = await ReferentModel.findOne({ _id: mission.tutorId });
         if (tutor) {
           console.log(`Update mission #${mission._id} tutor : ${mission.tutorId} : ${tutor.firstName} ${tutor.lastName}`);
-          mission.set({ tutorFirstName: tutor.firstName, tutorLastName: tutor.lastName });
+          mission.set({ tutorName: `${tutor.firstName} ${tutor.lastName}` });
           await mission.save();
           await mission.index();
 
@@ -23,12 +23,14 @@ const ReferentModel = require("../src/models/referent");
           if (applications && applications.length) {
             for (let application of applications) {
               console.log(`Update application #${application._id} tutor : ${mission.tutorId} : ${tutor.firstName} ${tutor.lastName}`);
-              application.set({ tutorId: mission.tutorId, tutorFirstName: tutor.firstName, tutorLastName: tutor.lastName });
+              application.set({ tutorId: mission.tutorId, tutorName: `${tutor.firstName} ${tutor.lastName}` });
               await application.save();
               await application.index();
             }
           }
         }
+      } else {
+        console.log(`Skip: mission ${mission._id} (already done)`);
       }
     } catch (e) {
       console.log(e);
