@@ -123,7 +123,7 @@ export default () => {
                 dataField="createdAt"
                 sortBy="desc"
                 loader={<div style={{ padding: "0 20px" }}>Chargement...</div>}
-                renderNoResults={() => <div style={{ padding: "10px 25px" }}>No Results found.</div>}
+                renderNoResults={() => <div style={{ padding: "10px 25px" }}>Aucun résultat.</div>}
                 onError={() => {
                   window.location.href = "/auth?unauthorized=1";
                 }}
