@@ -153,7 +153,6 @@ const Logo = styled.h1`
 const Sidebar = styled.div`
   background-color: #372f78;
   width: 250px;
-  position: fixed;
   top: 0;
   bottom: 0;
   left: 0;

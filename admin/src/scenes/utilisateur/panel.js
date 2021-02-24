@@ -2,11 +2,13 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 
 import { translate } from "../../utils";
 import LoadingButton from "../../components/loadingButton";
 import api from "../../services/api";
+import { setUser } from "../../redux/auth/actions";
 
 // Sorry about that: return true, return false, false, true, false.
 function canModify(user, value) {
@@ -26,6 +28,8 @@ export default ({ onChange, value }) => {
   if (!value) return <div />;
   const [structure, setStructure] = useState();
   const user = useSelector((state) => state.Auth.user);
+  const dispatch = useDispatch();
+  const history = useHistory();
 
   useEffect(() => {
     (async () => {
@@ -36,15 +40,35 @@ export default ({ onChange, value }) => {
     })();
   }, [value]);
 
+  const handleImpersonate = async () => {
+    try {
+      const { ok, data, token } = await api.post(`/referent/signin_as/referent/${value._id}`);
+      if (!ok) return toastr.error("Oops, une erreur est survenu lors de la masquarade !", translate(e.code));
+      if (token) api.setToken(token);
+      if (data) dispatch(setUser(data));
+      history.push("/dashboard");
+    } catch (e) {
+      console.log(e);
+      toastr.error("Oops, une erreur est survenu lors de la masquarade !", translate(e.code));
+    }
+  };
+
   return (
     <Panel>
       <div className="close" onClick={onChange} />
       <div className="info">
         <div className="title">{`${value.firstName} ${value.lastName}`}</div>
         {canModify(user, value) && (
-          <Link to={`/user/${value._id}`}>
-            <EditBtn color="white">Modifier</EditBtn>
-          </Link>
+          <div style={{ display: "flex" }}>
+            <Link to={`/user/${value._id}`}>
+              <Button icon={require("../../assets/eye.svg")} color="white">
+                Consulter
+              </Button>
+            </Link>
+            <Button onClick={handleImpersonate} icon={require("../../assets/impersonate.svg")} color="white">
+              Prendre&nbsp;sa&nbsp;place
+            </Button>
+          </div>
         )}
       </div>
       <Info title="Coordonnées">
@@ -181,6 +205,18 @@ const InfoBtn = styled(LoadingButton)`
   margin-top: 1rem;
 `;
 
-const EditBtn = styled(InfoBtn)`
-  background: url(${require("../../assets/pencil.svg")}) left 15px center no-repeat;
+const Button = styled(LoadingButton)`
+  color: #555;
+  background: ${({ icon }) => `url(${icon}) left 15px center no-repeat`};
+  box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.16);
+  border: 0;
+  outline: 0;
+  border-radius: 5px;
+  padding: 0.2rem 1rem;
+  padding-left: 2.5rem;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-right: 5px;
+  margin-top: 1rem;
 `;

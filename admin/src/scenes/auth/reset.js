@@ -5,10 +5,14 @@ import { FormGroup, Row, Col } from "reactstrap";
 import { toastr } from "react-redux-toastr";
 import { Redirect } from "react-router-dom";
 import styled from "styled-components";
-import validator from "validator";
+import passwordValidator from "password-validator";
+
+import EyeOpen from "../../assets/eye.svg";
+import EyeClose from "../../assets/eye-slash.svg";
 
 import api from "../../services/api";
 import LoadingButton from "../../components/loadingButton";
+import PasswordEye from "../../components/PasswordEye";
 import { translate } from "../../utils";
 
 export default ({ location }) => {
@@ -23,11 +27,12 @@ export default ({ location }) => {
           </div>
           <Title>Créer un nouveau mot de passe</Title>
           <Formik
-            initialValues={{ password: "", password1: "" }}
+            initialValues={{ password: "" }}
+            validateOnChange={false}
+            validateOnBlur={false}
             onSubmit={async (values, actions) => {
               try {
                 const { token } = queryString.parse(location.search);
-                if (values.password !== values.password1) return toastr.error("Les mots de passes ne coincident pas");
                 const res = await api.post("/referent/forgot_password_reset", { password: values.password, token });
                 if (!res.ok) throw res;
                 toastr.success("Mot de passe créé");
@@ -44,27 +49,9 @@ export default ({ location }) => {
                   {redirect && <Redirect to="/" />}
                   <StyledFormGroup>
                     <label>Mot de passe</label>
-                    <InputField
-                      validate={(v) => validator.isEmpty(v) && "Ce champ est requis"}
-                      name="password"
-                      type="password"
-                      value={values.password}
-                      onChange={handleChange}
-                      hasError={errors.password}
-                    />
+                    <PasswordEye value={values.password} onChange={handleChange} />
                     <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.password}</p>
-                  </StyledFormGroup>
-                  <StyledFormGroup>
-                    <label>Confirmez votre mot de passe</label>
-                    <InputField
-                      validate={(v) => validator.isEmpty(v) && "Ce champ est requis"}
-                      name="password1"
-                      type="password"
-                      value={values.password1}
-                      onChange={handleChange}
-                      hasError={errors.password1}
-                    />
-                    <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.password1}</p>
+                    <p>👉 Il doit contenir au moins 8 caractères, dont une majuscule, une minuscule, un chiffre et un symbole</p>
                   </StyledFormGroup>
                   <div className="button">
                     <Submit loading={isSubmitting} type="submit" color="primary" disabled={isSubmitting}>

@@ -3,6 +3,8 @@ import styled from "styled-components";
 import { Col, Row, Input } from "reactstrap";
 import { useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
+
 import { MISSION_STATUS_COLORS, MISSION_STATUS, translate } from "../../../utils";
 
 import api from "../../../services/api";
@@ -42,13 +44,15 @@ export default ({ filter }) => {
       {Object.entries(stats).map(([key, val]) => {
         return (
           <Col md={6} xl={3} key={key}>
-            <Card borderBottomColor={MISSION_STATUS_COLORS[key]}>
-              <CardTitle>{translate(MISSION_STATUS[key])}</CardTitle>
-              <CardValueWrapper>
-                <CardValue>{val}</CardValue>
-                <CardArrow />
-              </CardValueWrapper>
-            </Card>
+            <Link to={`/mission?STATUS=%5B"${key}"%5D`}>
+              <Card borderBottomColor={MISSION_STATUS_COLORS[key]}>
+                <CardTitle>{translate(MISSION_STATUS[key])}</CardTitle>
+                <CardValueWrapper>
+                  <CardValue>{val}</CardValue>
+                  <CardArrow />
+                </CardValueWrapper>
+              </Card>
+            </Link>
           </Col>
         );
       })}

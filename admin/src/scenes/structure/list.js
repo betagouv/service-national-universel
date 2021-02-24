@@ -11,7 +11,7 @@ import Panel from "./panel";
 import { translate, corpsEnUniforme } from "../../utils";
 import ReactiveFilter from "../../components/ReactiveFilter";
 
-const FILTERS = ["SEARCH", "LEGAL_STATUS", "DEPARTMENT", "REGION", "CORPS", "NETWORK"];
+const FILTERS = ["SEARCH", "LEGAL_STATUS", "DEPARTMENT", "REGION", "CORPS", "NETWORK", "WITH_NETWORK"];
 const formatLongDate = (date) => {
   if (!date) return "-";
   const d = new Date(date);
@@ -31,15 +31,22 @@ export default () => {
               <div>
                 <Title>Structures</Title>
               </div>
-              <Export>
-                <ExportComponent
-                  title="Exporter les structures"
-                  collection="structure"
-                  transform={(e) => {
-                    return e;
-                  }}
-                />
-              </Export>
+              <div style={{ display: "flex" }}>
+                <Link to="/structure/create">
+                  <ButtonHeader>
+                    <p>Inviter une nouvelle structure</p>
+                  </ButtonHeader>
+                </Link>
+                <ButtonHeader>
+                  <ExportComponent
+                    title="Exporter les structures"
+                    collection="structure"
+                    transform={(e) => {
+                      return e;
+                    }}
+                  />
+                </ButtonHeader>
+              </div>
             </Header>
             <Filter>
               <DataSearch
@@ -101,6 +108,17 @@ export default () => {
                   dataField="region.keyword"
                   title=""
                   react={{ and: FILTERS.filter((e) => e !== "REGION") }}
+                  URLParams={true}
+                  showSearch={false}
+                  sortBy="asc"
+                />
+                <MultiDropdownList
+                  className="dropdown-filter"
+                  placeholder="Affiliation à un réseau national"
+                  componentId="WITH_NETWORK"
+                  dataField="networkId.keyword"
+                  title=""
+                  react={{ and: FILTERS.filter((e) => e !== "WITH_NETWORK") }}
                   URLParams={true}
                   showSearch={false}
                   sortBy="asc"
@@ -376,12 +394,13 @@ const Table = styled.table`
   }
 `;
 
-const Export = styled.div`
-  button {
+const ButtonHeader = styled.div`
+  > * {
     background-color: #5245cc;
     border: none;
     border-radius: 5px;
     padding: 7px 30px;
+    margin-left: 1rem;
     font-size: 14px;
     font-weight: 700;
     color: #fff;

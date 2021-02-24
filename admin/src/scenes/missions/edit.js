@@ -42,12 +42,14 @@ export default (props) => {
     else if (defaultValue) structureId = defaultValue.structureId;
     else if (user.structureId) structureId = user.structureId;
 
-    const { data, ok } = await api.get(`/structure/${structureId}`);
-    if (!ok) {
-      toastr.error("Impossible de trouver la structure pour créer la mission", "Vous devez créer la mission depuis à partir d'une structure existante", { timeOut: 5000 });
-      history.goBack();
+    if (structureId) {
+      const { data, ok } = await api.get(`/structure/${structureId}`);
+      if (!ok && isNew) {
+        toastr.error("Impossible de trouver la structure pour créer la mission", "Vous devez créer la mission depuis une structure existante", { timeOut: 5000 });
+        history.goBack();
+      }
+      return setStructure(ok ? data : null);
     }
-    return setStructure(ok ? data : null);
   }
 
   useEffect(() => {

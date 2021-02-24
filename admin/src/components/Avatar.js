@@ -3,7 +3,10 @@ import styled from "styled-components";
 
 const getInitials = (word = "") => {
   const arr = word.toUpperCase().split(" ");
-  return arr.reduce((acc, b) => (b[0] ? acc + b[0] : acc), "");
+  return arr
+    .reduce((acc, b) => (b[0] ? acc + b[0] : acc), "")
+    .replace(/[^a-z0-9]/i, "")
+    .substring(0, 3);
 };
 
 export default ({ name, logo, size = "medium" }) => {

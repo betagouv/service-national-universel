@@ -147,6 +147,7 @@ const Proposal = ({ young, onSend }) => {
             <ResultTable hide={!searchedValue}>
               <ReactiveList
                 componentId="result"
+                scrollOnChange={false}
                 react={{ and: FILTERS }}
                 pagination={true}
                 paginationAt="bottom"

@@ -20,7 +20,7 @@ export default ({ filter }) => {
       const queries = [];
       queries.push({ index: "young", type: "_doc" });
       queries.push({
-        query: { bool: { must: { match_all: {} }, filter: [{ term: { "cohort.keyword": filter.cohort } }, { term: { "status.keyword": "VALIDATED" } }] } },
+        query: { bool: { must: { match_all: {} }, filter: [{ term: { "cohort.keyword": filter.cohort } }, { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } }] } },
         aggs: {
           status: { terms: { field: "status.keyword" } },
           statusPhase1: { terms: { field: "statusPhase1.keyword" } },
@@ -41,35 +41,49 @@ export default ({ filter }) => {
     })();
   }, [JSON.stringify(filter)]);
 
+  const replaceSpaces = (v) => v.replace(/\s+/g, "+");
+
+  const getLink = (link) => {
+    if (filter.region) link += `&REGION=%5B"${replaceSpaces(filter.region)}"%5D`;
+    if (filter.department) link += `&DEPARTMENT=%5B"${replaceSpaces(filter.department)}"%5D`;
+    return link;
+  };
+
   return (
     <>
       <Row>
         <Col md={6} xl={3}>
-          <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
-            <CardTitle>Volontaires</CardTitle>
-            <CardValueWrapper>
-              <CardValue>{status.VALIDATED || 0}</CardValue>
-              <CardArrow />
-            </CardValueWrapper>
-          </Card>
+          <Link to={getLink(`/volontaire?COHORT=%5B"${filter.cohort}"%5D&STATUS=%5B"VALIDATED"%5D`)}>
+            <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
+              <CardTitle>Volontaires</CardTitle>
+              <CardValueWrapper>
+                <CardValue>{status.VALIDATED || 0}</CardValue>
+                <CardArrow />
+              </CardValueWrapper>
+            </Card>
+          </Link>
         </Col>
         <Col md={6} xl={3}>
-          <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
-            <CardTitle>Ayant validé la phase 1</CardTitle>
-            <CardValueWrapper>
-              <CardValue>{statusPhase1.DONE || 0}</CardValue>
-              <CardArrow />
-            </CardValueWrapper>
-          </Card>
+          <Link to={getLink(`/volontaire?COHORT=%5B"${filter.cohort}"%5D&STATUS_PHASE_1=%5B"DONE"%5D`)}>
+            <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
+              <CardTitle>Ayant validé la phase 1</CardTitle>
+              <CardValueWrapper>
+                <CardValue>{statusPhase1.DONE || 0}</CardValue>
+                <CardArrow />
+              </CardValueWrapper>
+            </Card>
+          </Link>
         </Col>
         <Col md={6} xl={3}>
-          <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
-            <CardTitle>Ayant validé la phase 2</CardTitle>
-            <CardValueWrapper>
-              <CardValue>{statusPhase2.VALIDATED || 0}</CardValue>
-              <CardArrow />
-            </CardValueWrapper>
-          </Card>
+          <Link to={getLink(`/volontaire?COHORT=%5B"${filter.cohort}"%5D&STATUS_PHASE_2=%5B"VALIDATED"%5D`)}>
+            <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
+              <CardTitle>Ayant validé la phase 2</CardTitle>
+              <CardValueWrapper>
+                <CardValue>{statusPhase2.VALIDATED || 0}</CardValue>
+                <CardArrow />
+              </CardValueWrapper>
+            </Card>
+          </Link>
         </Col>
         <Col md={6} xl={3}>
           <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
@@ -81,13 +95,15 @@ export default ({ filter }) => {
           </Card>
         </Col>
         <Col md={6} xl={3}>
-          <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
-            <CardTitle>Désistés</CardTitle>
-            <CardValueWrapper>
-              <CardValue>{status.WITHDRAWN || 0}</CardValue>
-              <CardArrow />
-            </CardValueWrapper>
-          </Card>
+          <Link to={getLink(`/volontaire?COHORT=%5B"${filter.cohort}"%5D&STATUS=%5B"WITHDRAWN"%5D`)}>
+            <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
+              <CardTitle>Désistés</CardTitle>
+              <CardValueWrapper>
+                <CardValue>{status.WITHDRAWN || 0}</CardValue>
+                <CardArrow />
+              </CardValueWrapper>
+            </Card>
+          </Link>
         </Col>
       </Row>
       <Row>
@@ -99,13 +115,15 @@ export default ({ filter }) => {
         {Object.values(YOUNG_STATUS_PHASE2).map((e) => {
           return (
             <Col md={6} xl={3} k={e}>
-              <Card borderBottomColor={YOUNG_STATUS_PHASE2_COLORS[e]}>
-                <CardTitle>{e === "VALIDATED" ? "Réalisée" : translate(e)}</CardTitle>
-                <CardValueWrapper>
-                  <CardValue>{statusPhase2[e] || 0}</CardValue>
-                  <CardArrow />
-                </CardValueWrapper>
-              </Card>
+              <Link to={getLink(`/volontaire?COHORT=%5B"${filter.cohort}"%5D&STATUS_PHASE_2=%5B"${e}"%5D`)}>
+                <Card borderBottomColor={YOUNG_STATUS_PHASE2_COLORS[e]}>
+                  <CardTitle>{e === "VALIDATED" ? "Réalisée" : translate(e)}</CardTitle>
+                  <CardValueWrapper>
+                    <CardValue>{statusPhase2[e] || 0}</CardValue>
+                    <CardArrow />
+                  </CardValueWrapper>
+                </Card>
+              </Link>
             </Col>
           );
         })}
