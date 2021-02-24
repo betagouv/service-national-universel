@@ -15,7 +15,7 @@ import Panel from "./panel";
 import { translate, getFilterLabel, formatStringLongDate } from "../../utils";
 import { Link } from "react-router-dom";
 
-const FILTERS = ["SEARCH", "STATUS", "STATUS_STATIC", "PHASE", "COHORT"];
+const FILTERS = ["SEARCH", "STATUS", "STATUS_STATIC", "PHASE", "COHORT", "DEPARTMENT", "REGION"];
 
 export default ({ setYoung }) => {
   const [volontaire, setVolontaire] = useState(null);
@@ -78,6 +78,28 @@ export default ({ setYoung }) => {
                   URLParams={true}
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Phase")}
+                />
+                <MultiDropdownList
+                  className="dropdown-filter"
+                  placeholder="Départements"
+                  componentId="DEPARTMENT"
+                  dataField="department.keyword"
+                  title=""
+                  react={{ and: FILTERS.filter((e) => e !== "DEPARTMENT") }}
+                  URLParams={true}
+                  showSearch={false}
+                  sortBy="asc"
+                />
+                <MultiDropdownList
+                  className="dropdown-filter"
+                  placeholder="Régions"
+                  componentId="REGION"
+                  dataField="region.keyword"
+                  title=""
+                  react={{ and: FILTERS.filter((e) => e !== "REGION") }}
+                  URLParams={true}
+                  showSearch={false}
+                  sortBy="asc"
                 />
                 <MultiDropdownList
                   className="dropdown-filter"

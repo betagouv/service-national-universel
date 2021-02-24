@@ -43,39 +43,53 @@ export default ({ filter }) => {
     initStatus();
   }, [JSON.stringify(filter)]);
 
+  const replaceSpaces = (v) => v.replace(/\s+/g, "+");
+
+  const getLink = (link) => {
+    if (filter.region) link += `REGION=%5B"${replaceSpaces(filter.region)}"%5D`;
+    if (filter.department) link += `&DEPARTMENT=%5B"${replaceSpaces(filter.department)}"%5D`;
+    return link;
+  };
+
   return (
     <>
       <Row>
         <Col md={6} xl={6}>
-          <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
-            <CardTitle>Structures</CardTitle>
-            <CardValueWrapper>
-              <CardValue>{total || 0}</CardValue>
-              <CardArrow />
-            </CardValueWrapper>
-          </Card>
+          <Link to={getLink(`/structure?`)}>
+            <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
+              <CardTitle>Structures</CardTitle>
+              <CardValueWrapper>
+                <CardValue>{total || 0}</CardValue>
+                <CardArrow />
+              </CardValueWrapper>
+            </Card>
+          </Link>
         </Col>
         <Col md={6} xl={6}>
-          <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
-            <CardTitle>Affiliées à un réseau national</CardTitle>
-            <CardValueWrapper>
-              <CardValue>{withNetworkId || 0}</CardValue>
-              <CardArrow />
-            </CardValueWrapper>
-          </Card>
+          <Link to={getLink(`/structure?`)}>
+            <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
+              <CardTitle>Affiliées à un réseau national</CardTitle>
+              <CardValueWrapper>
+                <CardValue>{withNetworkId || 0}</CardValue>
+                <CardArrow />
+              </CardValueWrapper>
+            </Card>
+          </Link>
         </Col>
       </Row>
       <Row>
         {legalStatusTypes.map((l, k) => {
           return (
             <Col md={6} xl={3} key={k}>
-              <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
-                <CardTitle>{translate(l)}</CardTitle>
-                <CardValueWrapper>
-                  <CardValue>{status[l] || 0}</CardValue>
-                  <CardArrow />
-                </CardValueWrapper>
-              </Card>
+              <Link to={getLink(`/structure?LEGAL_STATUS=%5B"${l}"%5D&`)}>
+                <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
+                  <CardTitle>{translate(l)}</CardTitle>
+                  <CardValueWrapper>
+                    <CardValue>{status[l] || 0}</CardValue>
+                    <CardArrow />
+                  </CardValueWrapper>
+                </Card>
+              </Link>
             </Col>
           );
         })}

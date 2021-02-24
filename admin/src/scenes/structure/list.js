@@ -11,7 +11,7 @@ import Panel from "./panel";
 import { translate, corpsEnUniforme } from "../../utils";
 import ReactiveFilter from "../../components/ReactiveFilter";
 
-const FILTERS = ["SEARCH", "LEGAL_STATUS", "DEPARTMENT", "REGION", "CORPS", "NETWORK"];
+const FILTERS = ["SEARCH", "LEGAL_STATUS", "DEPARTMENT", "REGION", "CORPS", "NETWORK", "WITH_NETWORK"];
 const formatLongDate = (date) => {
   if (!date) return "-";
   const d = new Date(date);
@@ -101,6 +101,17 @@ export default () => {
                   dataField="region.keyword"
                   title=""
                   react={{ and: FILTERS.filter((e) => e !== "REGION") }}
+                  URLParams={true}
+                  showSearch={false}
+                  sortBy="asc"
+                />
+                <MultiDropdownList
+                  className="dropdown-filter"
+                  placeholder="Affiliation à un réseau national"
+                  componentId="WITH_NETWORK"
+                  dataField="networkId.keyword"
+                  title=""
+                  react={{ and: FILTERS.filter((e) => e !== "WITH_NETWORK") }}
                   URLParams={true}
                   showSearch={false}
                   sortBy="asc"
