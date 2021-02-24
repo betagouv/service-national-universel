@@ -10,7 +10,6 @@ import MailCorrectionMission from "../scenes/missions/components/MailCorrectionM
 import MailRefusedMission from "../scenes/missions/components/MailRefusedMission";
 
 export default ({ hit, options = [] }) => {
-  console.log(hit);
   const [waitingCorrectionModal, setWaitingCorrectionModal] = useState(false);
   const [refusedModal, setRefusedModal] = useState(false);
   const [status, setStatus] = useState(null);
