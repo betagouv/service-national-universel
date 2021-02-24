@@ -14,6 +14,7 @@ const { capture } = require("../sentry");
 
 const ReferentObject = require("../models/referent");
 const YoungObject = require("../models/young");
+const MissionObject = require("../models/mission");
 const ApplicationObject = require("../models/application");
 const AuthObject = require("../auth");
 
@@ -40,6 +41,29 @@ function cookieOptions() {
     return { maxAge: COOKIE_MAX_AGE, httpOnly: true, secure: false };
   } else {
     return { maxAge: COOKIE_MAX_AGE, httpOnly: true, secure: true, sameSite: "none" };
+  }
+}
+
+async function updateTutorNameInMissionsAndApplications(tutor) {
+  if (!tutor || !tutor.firstName || !tutor.lastName) return;
+
+  const missions = await MissionObject.find({ tutorId: tutor._id });
+  // Update missions
+  if (missions && missions.length) {
+    for (let mission of missions) {
+      mission.set({ tutorFirstName: tutor.firstName, tutorLastName: tutor.lastName });
+      await mission.save();
+      await mission.index();
+      // ... and update each application
+      const applications = await ApplicationModel.find({ missionId: mission._id });
+      if (applications && applications.length) {
+        for (let application of applications) {
+          application.set({ tutorId: mission.tutorId, tutorFirstName: tutor.firstName, tutorLastName: tutor.lastName });
+          await application.save();
+          await application.index();
+        }
+      }
+    }
   }
 }
 
@@ -87,6 +111,8 @@ router.post("/signup_invite/:role", passport.authenticate("referent", { session:
     obj.invitationExpires = Date.now() + 86400000 * 7; // 7 days
 
     const referent = await ReferentObject.create(obj);
+    await updateTutorNameInMissionsAndApplications(referent);
+
     let template = "";
     let mailObject = "";
     if (obj.role === "referent_department") {
@@ -172,6 +198,7 @@ router.post("/signup_invite", async (req, res) => {
 
     if (!validatePassword(req.body.password)) return res.status(200).send({ ok: false, prescriber: null, code: PASSWORD_NOT_VALIDATED });
 
+    // Todo: firstname should be firstName, maybe we missed something here.
     referent.set({ firstname: req.body.firstname });
     referent.set({ lastname: req.body.lastname });
     referent.set({ password: req.body.password });
@@ -185,6 +212,7 @@ router.post("/signup_invite", async (req, res) => {
     res.cookie("jwt", token, cookieOptions());
 
     await referent.save();
+    await updateTutorNameInMissionsAndApplications(referent);
 
     referent.password = undefined;
 
@@ -416,6 +444,7 @@ router.put("/:id", passport.authenticate("referent", { session: false }), async 
 
     if (!authorized) return res.status(401).send({ ok: false, code: OPERATION_UNAUTHORIZED });
     const referent = await ReferentObject.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    await updateTutorNameInMissionsAndApplications(referent);
     res.status(200).send({ ok: true, data: referent });
   } catch (error) {
     capture(error);
@@ -442,6 +471,7 @@ router.put("/:id", passport.authenticate("referent", { session: false }), async 
 router.put("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const user = await ReferentObject.findByIdAndUpdate(req.user._id, req.body, { new: true });
+    await updateTutorNameInMissionsAndApplications(user);
     res.status(200).send({ ok: true, data: user });
   } catch (error) {
     capture(error);
