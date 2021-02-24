@@ -12,10 +12,10 @@ import api from "../../services/api";
 import { apiURL, appURL } from "../../config";
 import Panel from "./panel";
 
-import { translate, getFilterLabel, YOUNG_STATUS_COLORS, formatStringLongDate } from "../../utils";
+import { translate, getFilterLabel, formatStringLongDate } from "../../utils";
 import { Link } from "react-router-dom";
 
-const FILTERS = ["SEARCH", "STATUS", "PHASE", "COHORT"];
+const FILTERS = ["SEARCH", "STATUS", "STATUS_STATIC", "PHASE", "COHORT"];
 
 export default ({ setYoung }) => {
   const [volontaire, setVolontaire] = useState(null);
@@ -40,7 +40,7 @@ export default ({ setYoung }) => {
               </Export>
             </Header>
             <Filter>
-              <ReactiveFilter componentId="STATUS" query={{ query: { bool: { filter: { term: { "status.keyword": "VALIDATED" } } } }, value: "" }} />
+              <ReactiveFilter componentId="STATUS_STATIC" query={{ query: { bool: { filter: { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } } } }, value: "" }} />
               <DataSearch
                 showIcon={false}
                 placeholder="Rechercher par mots clés, mission ou structure..."
@@ -57,7 +57,7 @@ export default ({ setYoung }) => {
                   className="dropdown-filter"
                   componentId="STATUS"
                   dataField="status.keyword"
-                  react={{ and: FILTERS }}
+                  react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
                   renderItem={(e, count) => {
                     return `${translate(e)} (${count})`;
                   }}
@@ -173,6 +173,7 @@ const Hit = ({ hit, onClick }) => {
         <Badge>{`COHORTE ${hit.cohort}`}</Badge>
         {hit.cohort === "2019" ? <Badge color="#6CC763">Phase 1</Badge> : null}
         {hit.cohort === "2020" ? <Badge color="#ffa987">Phase 1</Badge> : null}
+        {hit.status === "WITHDRAWN" ? <Badge color="#F8A9AD">Désisté</Badge> : null}
       </td>
       <td>{formatStringLongDate(hit.lastLoginAt)}</td>
       <td onClick={(e) => e.stopPropagation()}>
