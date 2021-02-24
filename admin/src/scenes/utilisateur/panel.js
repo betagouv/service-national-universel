@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
+import { toastr } from "react-redux-toastr";
 
 import { translate } from "../../utils";
 import LoadingButton from "../../components/loadingButton";
