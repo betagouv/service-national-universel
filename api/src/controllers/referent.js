@@ -53,14 +53,12 @@ async function updateTutorNameInMissionsAndApplications(tutor) {
     for (let mission of missions) {
       mission.set({ tutorName: `${tutor.firstName} ${tutor.lastName}` });
       await mission.save();
-      await mission.index();
       // ... and update each application
-      const applications = await ApplicationModel.find({ missionId: mission._id });
+      const applications = await ApplicationObject.find({ missionId: mission._id });
       if (applications && applications.length) {
         for (let application of applications) {
           application.set({ tutorId: mission.tutorId, tutorName: `${tutor.firstName} ${tutor.lastName}` });
           await application.save();
-          await application.index();
         }
       }
     }

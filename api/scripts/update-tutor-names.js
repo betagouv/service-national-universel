@@ -9,7 +9,7 @@ const ReferentModel = require("../src/models/referent");
   const cursor = MissionModel.find({}).cursor();
   await cursor.eachAsync(async function (mission) {
     try {
-      if (mission.tutorId && !mission.tutorName) {
+      if (mission.tutorId) {
         // Get tutor for the mission
         const tutor = await ReferentModel.findOne({ _id: mission.tutorId });
         if (tutor) {
