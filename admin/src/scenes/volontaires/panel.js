@@ -64,14 +64,20 @@ export default ({ onChange, value }) => {
       </div>
       {young.phase === YOUNG_PHASE.INTEREST_MISSION ? (
         <Info title="Recherche de MIG" id={young._id}>
-          {young.applications.length &&
-            young.applications
-              .sort((a, b) => (parseInt(a.priority) > parseInt(b.priority) ? 1 : parseInt(b.priority) > parseInt(a.priority) ? -1 : 0))
-              .slice(0, 3)
-              .map((a, i) => <ApplicationDetails key={i} application={a} i={i + 1} />)}
-          <Link to={`/volontaire/${young._id}/phase2`}>
-            <div style={{ textAlign: "center", color: "#5245cc" }}>{"Toutes ses candidatures >"}</div>
-          </Link>
+          {young.applications.length ? (
+            <>
+              {young.applications.length &&
+                young.applications
+                  .sort((a, b) => (parseInt(a.priority) > parseInt(b.priority) ? 1 : parseInt(b.priority) > parseInt(a.priority) ? -1 : 0))
+                  .slice(0, 3)
+                  .map((a, i) => <ApplicationDetails key={i} application={a} i={i + 1} />)}
+              <Link to={`/volontaire/${young._id}/phase2`}>
+                <div style={{ textAlign: "center", color: "#5245cc" }}>{"Toutes ses candidatures >"}</div>
+              </Link>
+            </>
+          ) : (
+            <NoResult>Aucune candidature n'est liée à ce volontaire.</NoResult>
+          )}
         </Info>
       ) : null}
       <Info title="Coordonnées" id={young._id}>
@@ -265,4 +271,10 @@ const Panel = styled.div`
     font-weight: 400;
     font-style: italic;
   }
+`;
+
+const NoResult = styled.div`
+  text-align: center;
+  font-style: italic;
+  margin: 1rem;
 `;
