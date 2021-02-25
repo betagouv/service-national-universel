@@ -25,7 +25,7 @@ const updateStatusPhase2 = async (app) => {
       return;
     }
     // if at least one application is not ABANDON or CANCEL, phase 2 is in progress
-    if (["WAITING_VALIDATION", "WAITING_ACCEPTATION", "VALIDATED", "IN_PROGRESS"].includes(application.status)) {
+    if (["WAITING_VALIDATION", "VALIDATED", "IN_PROGRESS"].includes(application.status)) {
       young.set({ statusPhase2: "IN_PROGRESS" });
     }
   }
