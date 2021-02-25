@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
+const mongooseElastic = require("@selego/mongoose-elastic");
+const esClient = require("../es");
 
-const mongoosastic = require("@selego/mongoose-elastic")
 const MODELNAME = "application";
 
 const Schema = new mongoose.Schema({
@@ -44,7 +45,7 @@ const Schema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
-Schema.plugin(mongoosastic, MODELNAME);
+Schema.plugin(mongooseElastic(esClient), MODELNAME);
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 module.exports = OBJ;

@@ -1,8 +1,7 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
-
-const mongoosastic = require("@selego/mongoose-elastic")
-
+const mongooseElastic = require("@selego/mongoose-elastic");
+const esClient = require("../es");
 const sendinblue = require("../sendinblue");
 
 const MODELNAME = "young";
@@ -229,7 +228,7 @@ Schema.post("remove", function (doc) {
   sendinblue.unsync(doc);
 });
 
-Schema.plugin(mongoosastic, MODELNAME);
+Schema.plugin(mongooseElastic(esClient), MODELNAME);
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 module.exports = OBJ;

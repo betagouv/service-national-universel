@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
-
-const mongoosastic = require("@selego/mongoose-elastic")
+const mongooseElastic = require("@selego/mongoose-elastic");
+const esClient = require("../es");
 
 const MODELNAME = "school";
 
@@ -16,7 +16,7 @@ const Schema = new mongoose.Schema(
   { timestamps: true }
 );
 
-Schema.plugin(mongoosastic, MODELNAME);
+Schema.plugin(mongooseElastic(esClient), MODELNAME);
 
 Schema.index({ postcode: 1, name2: 1 }, { unique: true });
 
