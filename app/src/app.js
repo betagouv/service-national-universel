@@ -78,13 +78,14 @@ const Espace = () => {
   const young = useSelector((state) => state.Auth.young);
   if (!young) return <Redirect to="/inscription" />;
   if (young.status === YOUNG_STATUS.IN_PROGRESS) return <Redirect to="/inscription/coordonnees" />;
+  const [drawerIsOpen, setDrawerIsOpen] = useState(false);
 
   return (
     <>
       <div style={{ display: "flex" }}>
-        <Drawer />
+        <Drawer open={drawerIsOpen} />
         <Content>
-          <Header />
+          <Header onOpen={() => setDrawerIsOpen(!drawerIsOpen)} />
           <Switch>
             <Route path="/account" component={Account} />
             <Route path="/phase1" component={Phase1} />

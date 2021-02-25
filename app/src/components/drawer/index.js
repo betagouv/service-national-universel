@@ -6,8 +6,8 @@ import { YOUNG_PHASE, YOUNG_STATUS, PHASE_STATUS } from "../../utils";
 import Item from "./item";
 import { DRAWER_TABS } from "../utils";
 
-export default ({ inscription }) => {
-  const [open, setOpen] = useState(true);
+export default ({ inscription, open = true }) => {
+  // const [open, setOpen] = useState(false);
   const young = useSelector((state) => state.Auth.young);
 
   const [status1, setStatus1] = useState(PHASE_STATUS.IN_COMING);
@@ -184,13 +184,50 @@ export default ({ inscription }) => {
   );
 };
 
+const Menu = styled.div`
+  min-width: 150px;
+  border-radius: 0.375rem;
+  background-color: #fff;
+  opacity: ${({ open }) => (open ? 1 : 0)};
+  visibility: ${({ open }) => (open ? "visible" : "hidden")};
+  -webkit-transition: all 0.3s;
+  transition: all 0.3s;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 10px);
+  z-index: 100;
+  box-shadow: 0 0 18px 0 rgba(0, 0, 0, 0.12);
+  @media (max-width: 767px) {
+    position: fixed;
+    top: 0;
+    left: 0;
+    transform: translateX(${({ open }) => (open ? 0 : "105%")});
+    opacity: 1;
+    visibility: visible;
+    height: 100vh;
+    width: 100vw;
+    background-color: #fff;
+    z-index: 11;
+  }
+`;
+
 const Sidebar = styled.div`
   ::-webkit-scrollbar {
     display: none;
   }
-  @media (max-width: 768px) {
-    display: none;
+  @media (max-width: 767px) {
+    position: fixed;
+    top: 0;
+    left: 0;
+    transform: translateX(${({ open }) => (open ? "-10%" : "-105%")});
+    opacity: 1;
+    visibility: visible;
+    height: 100vh;
+    width: 100vw;
+    background-color: #fff;
+    z-index: 11;
   }
+
   background-color: #362f78;
   width: 15%;
   position: fixed;
@@ -201,7 +238,7 @@ const Sidebar = styled.div`
   min-height: 100vh;
   overflow-y: auto;
   transition: 0.2s;
-  transform: ${({ open }) => (open ? "translateX(0)" : "translateX(-85%)")};
+  /* transform: ${({ open }) => (open ? "translateX(0)" : "translateX(-85%)")}; */
   a {
     font-size: 13px;
     color: #fff;

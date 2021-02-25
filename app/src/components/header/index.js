@@ -4,10 +4,10 @@ import styled from "styled-components";
 
 import User from "./user";
 
-export default ({ step }) => {
+export default ({ step, onOpen }) => {
   return (
     <>
-      <HeaderNav>
+      <HeaderNav onClick={onOpen}>
         <Link to="/">
           <h1>Mon espace volontaire</h1>
         </Link>
