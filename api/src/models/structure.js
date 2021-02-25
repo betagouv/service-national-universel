@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 
-const mongoosastic = require("../es/mongoosastic");
+const mongoosastic = require("@selego/mongoose-elastic");
 
 const MODELNAME = "structure";
 

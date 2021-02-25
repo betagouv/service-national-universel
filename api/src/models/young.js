@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 
-const mongoosastic = require("../es/mongoosastic");
+const mongoosastic = require("@selego/mongoose-elastic")
 
 const sendinblue = require("../sendinblue");
 
