@@ -38,6 +38,7 @@ const Schema = new mongoose.Schema({
   // structure_id: { type: String, required: true },
   // referent_id: { type: String, required: true },
   tutorId: { type: String },
+  tutorName: { type: String },
 
   //
 

@@ -21,6 +21,9 @@ const Schema = new mongoose.Schema({
 
   structureId: { type: String },
 
+  tutorId: { type: String },
+  tutorName: { type: String },
+
   priority: { type: String },
 
   // STATUS EXISTANT :
