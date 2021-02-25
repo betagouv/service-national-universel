@@ -15,6 +15,7 @@ const NOT_FOUND = "NOT_FOUND";
 const updateStatusPhase2 = async (app) => {
   const young = await YoungObject.findById(app.youngId);
   const applications = await ApplicationObject.find({ youngId: young._id });
+  young.set({ statusPhase2: "WAITING_REALISATION" });
   for (let application of applications) {
     // if at least one application is DONE, phase 2 is validated
     if (application.status === "DONE") {
@@ -24,7 +25,7 @@ const updateStatusPhase2 = async (app) => {
       return;
     }
     // if at least one application is not ABANDON or CANCEL, phase 2 is in progress
-    if (["WAITING_VALIDATION", "WAITING_ACCEPTATION", "VALIDATED", "REFUSED", "IN_PROGRESS"].includes(application.status)) {
+    if (["WAITING_VALIDATION", "WAITING_ACCEPTATION", "VALIDATED", "IN_PROGRESS"].includes(application.status)) {
       young.set({ statusPhase2: "IN_PROGRESS" });
     }
   }
