@@ -47,7 +47,7 @@ export default () => {
   // Get all missions from structure then get all applications int order to display the volontaires' list.
   useEffect(() => {
     initMissions(user.structureId);
-  }, [user]);
+  }, []);
 
   const handleClick = async (application) => {
     const { ok, data } = await api.get(`/referent/young/${application.youngId}`);
@@ -66,7 +66,6 @@ export default () => {
               </div>
             </Header>
             <Filter>
-              {missions.length ? <ReactiveFilter componentId="MISSIONS" query={{ query: { bool: { filter: { terms: { "missionId.keyword": missions } } } } }} /> : null}
               <DataSearch
                 showIcon={false}
                 placeholder="Rechercher par mots clés, mission ou volontaire..."
@@ -108,6 +107,7 @@ export default () => {
               <ReactiveList
                 componentId="result"
                 react={{ and: FILTERS }}
+                defaultQuery={() => ({ query: { bool: { filter: { terms: { "missionId.keyword": missions } } } } })}
                 pagination={true}
                 paginationAt="both"
                 innerClass={{ pagination: "pagination" }}
