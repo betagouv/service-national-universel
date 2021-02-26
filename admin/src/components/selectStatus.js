@@ -40,9 +40,14 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
     young[statusName] = status;
     young.lastStatusAt = Date.now();
     try {
-      if (status === YOUNG_STATUS.VALIDATED && young.phase === YOUNG_PHASE.INSCRIPTION) {
-        young.phase = YOUNG_PHASE.COHESION_STAY;
-      }
+      // we decided to let the validated youngs in the INSCRIPTION phase
+      // referents use the export and need ALL the youngs of the current year
+      // we'll pass every youngs currently in INSCRIPTION in COHESION_STAY once the campaign is done (~20 april 2021)
+
+      // if (status === YOUNG_STATUS.VALIDATED && young.phase === YOUNG_PHASE.INSCRIPTION) {
+      //   young.phase = YOUNG_PHASE.COHESION_STAY;
+      // }
+
       const { ok, code, data: newYoung } = await api.put(`/referent/young/${young._id}`, young);
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
 
