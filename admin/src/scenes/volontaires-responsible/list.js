@@ -53,7 +53,7 @@ export default () => {
     if (ok) setPanel({ application, young: data });
   };
 
-  if (!missions.length) return <div />;
+  if (!missions.length) return <div>Chargement...</div>;
   return (
     <div>
       <ReactiveBase url={`${apiURL}/es`} app="application" headers={{ Authorization: `JWT ${api.getToken()}` }}>
