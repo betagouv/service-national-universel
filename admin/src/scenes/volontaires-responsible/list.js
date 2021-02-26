@@ -16,6 +16,7 @@ export default () => {
   const user = useSelector((state) => state.Auth.user);
   const [missions, setMissions] = useState([]);
   const [panel, setPanel] = useState(null);
+  const DEFAULT_QUERY = () => ({ query: { bool: { filter: { terms: { "missionId.keyword": missions } } } } });
 
   async function appendMissions(structure) {
     const missionsResponse = await api.get(`/mission/structure/${structure}`);
@@ -78,6 +79,7 @@ export default () => {
               />
               <FilterRow>
                 <MultiDropdownList
+                  defaultQuery={DEFAULT_QUERY}
                   className="dropdown-filter"
                   componentId="STATUS"
                   dataField="status.keyword"
@@ -91,6 +93,7 @@ export default () => {
                   renderLabel={(items) => getFilterLabel(items, "Statut")}
                 />
                 <MultiDropdownList
+                  defaultQuery={DEFAULT_QUERY}
                   className="dropdown-filter"
                   placeholder="Tuteur"
                   componentId="TUTOR"
@@ -106,7 +109,7 @@ export default () => {
               <ReactiveList
                 componentId="result"
                 react={{ and: FILTERS }}
-                defaultQuery={() => ({ query: { bool: { filter: { terms: { "missionId.keyword": missions } } } } })}
+                defaultQuery={DEFAULT_QUERY}
                 pagination={true}
                 paginationAt="both"
                 innerClass={{ pagination: "pagination" }}

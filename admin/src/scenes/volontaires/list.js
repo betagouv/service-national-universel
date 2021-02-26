@@ -18,7 +18,7 @@ const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION"];
 
 export default ({ setYoung }) => {
   const [volontaire, setVolontaire] = useState(null);
-
+  const DEFAULT_QUERY = () => ({ query: { bool: { filter: { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } } } } });
   return (
     <div>
       <ReactiveBase url={`${apiURL}/es`} app="young" headers={{ Authorization: `JWT ${api.getToken()}` }}>
@@ -52,6 +52,7 @@ export default ({ setYoung }) => {
               />
               <FilterRow>
                 <MultiDropdownList
+                  defaultQuery={DEFAULT_QUERY}
                   className="dropdown-filter"
                   componentId="STATUS"
                   dataField="status.keyword"
@@ -65,6 +66,7 @@ export default ({ setYoung }) => {
                   renderLabel={(items) => getFilterLabel(items, "Statut")}
                 />
                 <MultiDropdownList
+                  defaultQuery={DEFAULT_QUERY}
                   className="dropdown-filter"
                   placeholder="Départements"
                   componentId="DEPARTMENT"
@@ -76,6 +78,7 @@ export default ({ setYoung }) => {
                   sortBy="asc"
                 />
                 <MultiDropdownList
+                  defaultQuery={DEFAULT_QUERY}
                   className="dropdown-filter"
                   placeholder="Régions"
                   componentId="REGION"
@@ -87,6 +90,7 @@ export default ({ setYoung }) => {
                   sortBy="asc"
                 />
                 <MultiDropdownList
+                  defaultQuery={DEFAULT_QUERY}
                   className="dropdown-filter"
                   placeholder="Cohorte"
                   componentId="COHORT"
@@ -100,6 +104,7 @@ export default ({ setYoung }) => {
                   showSearch={false}
                 />
                 <MultiDropdownList
+                  defaultQuery={DEFAULT_QUERY}
                   className="dropdown-filter"
                   componentId="STATUS_PHASE_1"
                   dataField="statusPhase1.keyword"
@@ -113,6 +118,7 @@ export default ({ setYoung }) => {
                   renderLabel={(items) => getFilterLabel(items, "Statut phase 1")}
                 />
                 <MultiDropdownList
+                  defaultQuery={DEFAULT_QUERY}
                   className="dropdown-filter"
                   componentId="STATUS_PHASE_2"
                   dataField="statusPhase2.keyword"
@@ -129,7 +135,7 @@ export default ({ setYoung }) => {
             </Filter>
             <ResultTable>
               <ReactiveList
-                defaultQuery={() => ({ query: { bool: { filter: { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } } } } })}
+                defaultQuery={DEFAULT_QUERY}
                 componentId="result"
                 react={{ and: FILTERS }}
                 pagination={true}

@@ -20,7 +20,7 @@ const formatLongDate = (date) => {
 export default () => {
   const [structure, setStructure] = useState(null);
   const user = useSelector((state) => state.Auth.user);
-
+  const DEFAULT_QUERY = () => (user.role === "supervisor" ? { query: { bool: { filter: { term: { "networkId.keyword": user.structureId } } } } } : { query: { match_all: {} } });
   return (
     <div>
       <ReactiveBase url={`${apiURL}/es`} app="structure" headers={{ Authorization: `JWT ${api.getToken()}` }}>
@@ -61,6 +61,7 @@ export default () => {
               />
               <FilterRow>
                 <MultiDropdownList
+                  defaultQuery={DEFAULT_QUERY}
                   className="dropdown-filter"
                   placeholder="Statut juridique"
                   componentId="LEGAL_STATUS"
@@ -74,6 +75,7 @@ export default () => {
                   showSearch={false}
                 />
                 <MultiDropdownList
+                  defaultQuery={DEFAULT_QUERY}
                   className="dropdown-filter"
                   placeholder="Corps en uniforme"
                   componentId="CORPS"
@@ -90,6 +92,7 @@ export default () => {
                   showSearch={false}
                 />
                 <MultiDropdownList
+                  defaultQuery={DEFAULT_QUERY}
                   className="dropdown-filter"
                   placeholder="Départements"
                   componentId="DEPARTMENT"
@@ -101,6 +104,7 @@ export default () => {
                   sortBy="asc"
                 />
                 <MultiDropdownList
+                  defaultQuery={DEFAULT_QUERY}
                   className="dropdown-filter"
                   placeholder="Régions"
                   componentId="REGION"
@@ -126,9 +130,7 @@ export default () => {
             </Filter>
             <ResultTable>
               <ReactiveList
-                defaultQuery={() =>
-                  user.role === "supervisor" ? { query: { bool: { filter: { term: { "networkId.keyword": user.structureId } } } } } : { query: { match_all: {} } }
-                }
+                defaultQuery={DEFAULT_QUERY}
                 componentId="result"
                 react={{ and: FILTERS }}
                 pagination={true}

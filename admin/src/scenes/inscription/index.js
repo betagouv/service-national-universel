@@ -19,6 +19,7 @@ const FILTERS = ["SEARCH", "STATUS", "REGION", "DEPARTMENT", "REMOVEINPROGRESS"]
 
 export default () => {
   const [young, setYoung] = useState(null);
+  const DEFAULT_QUERY = () => ({ query: { bool: { filter: { term: { "phase.keyword": "INSCRIPTION" } } } } });
 
   return (
     <div>
@@ -113,6 +114,7 @@ export default () => {
               />
               <FilterRow>
                 <MultiDropdownList
+                  defaultQuery={DEFAULT_QUERY}
                   className="dropdown-filter"
                   componentId="STATUS"
                   dataField="status.keyword"
@@ -126,6 +128,7 @@ export default () => {
                   renderLabel={(items) => getFilterLabel(items, "Statut")}
                 />
                 <MultiDropdownList
+                  defaultQuery={DEFAULT_QUERY}
                   className="dropdown-filter"
                   placeholder="Régions"
                   componentId="REGION"
@@ -137,6 +140,7 @@ export default () => {
                   sortBy="asc"
                 />
                 <MultiDropdownList
+                  defaultQuery={DEFAULT_QUERY}
                   className="dropdown-filter"
                   placeholder="Départements"
                   componentId="DEPARTMENT"
@@ -151,7 +155,7 @@ export default () => {
             </Filter>
             <ResultTable>
               <ReactiveList
-                defaultQuery={() => ({ query: { bool: { filter: { term: { "phase.keyword": "INSCRIPTION" } } } } })}
+                defaultQuery={DEFAULT_QUERY}
                 componentId="result"
                 react={{ and: FILTERS }}
                 pagination={true}

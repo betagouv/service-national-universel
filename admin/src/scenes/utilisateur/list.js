@@ -18,6 +18,7 @@ export default () => {
   const [responsable, setResponsable] = useState(null);
   const user = useSelector((state) => state.Auth.user);
   const [structureIds, setStructureIds] = useState();
+  const DEFAULT_QUERY = () => (user.role === "supervisor" ? { query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } } } : { query: { match_all: {} } });
 
   useEffect(() => {
     if (user.role !== "supervisor") return;
@@ -65,6 +66,7 @@ export default () => {
               />
               <FilterRow>
                 <MultiDropdownList
+                  defaultQuery={DEFAULT_QUERY}
                   className="dropdown-filter"
                   componentId="ROLE"
                   dataField="role.keyword"
@@ -78,6 +80,7 @@ export default () => {
                   renderLabel={(items) => getFilterLabel(items, "Rôle")}
                 />
                 <MultiDropdownList
+                  defaultQuery={DEFAULT_QUERY}
                   className="dropdown-filter"
                   placeholder="Région"
                   componentId="REGION"
@@ -92,6 +95,7 @@ export default () => {
                   sortBy="asc"
                 />
                 <MultiDropdownList
+                  defaultQuery={DEFAULT_QUERY}
                   className="dropdown-filter"
                   placeholder="Département"
                   componentId="DEPARTMENT"
@@ -109,9 +113,7 @@ export default () => {
             </Filter>
             <ResultTable>
               <ReactiveList
-                defaultQuery={() =>
-                  user.role === "supervisor" ? { query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } } } : { query: { match_all: {} } }
-                }
+                defaultQuery={DEFAULT_QUERY}
                 componentId="result"
                 react={{ and: FILTERS }}
                 pagination={true}

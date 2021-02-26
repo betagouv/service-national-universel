@@ -19,6 +19,7 @@ export default () => {
   const [mission, setMission] = useState(null);
   const [structureIds, setStructureIds] = useState();
   const user = useSelector((state) => state.Auth.user);
+  const DEFAULT_QUERY = () => (user.role === "supervisor" ? { query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } } } : { query: { match_all: {} } });
 
   useEffect(() => {
     if (user.role !== "supervisor") return;
@@ -70,6 +71,7 @@ export default () => {
               />
               <FilterRow>
                 <DataSearch
+                  defaultQuery={DEFAULT_QUERY}
                   showIcon={false}
                   placeholder="Ville ou code postal"
                   componentId="LOCATION"
@@ -82,6 +84,7 @@ export default () => {
                   autosuggest={false}
                 />
                 <MultiDropdownList
+                  defaultQuery={DEFAULT_QUERY}
                   className="dropdown-filter"
                   componentId="STATUS"
                   dataField="status.keyword"
@@ -95,6 +98,7 @@ export default () => {
                   renderLabel={(items) => getFilterLabel(items, "Statut")}
                 />
                 <MultiDropdownList
+                  defaultQuery={DEFAULT_QUERY}
                   className="dropdown-filter"
                   placeholder="Régions"
                   componentId="REGION"
@@ -106,6 +110,7 @@ export default () => {
                   sortBy="asc"
                 />
                 <MultiDropdownList
+                  defaultQuery={DEFAULT_QUERY}
                   className="dropdown-filter"
                   placeholder="Départements"
                   componentId="DEPARTMENT"
@@ -117,6 +122,7 @@ export default () => {
                   sortBy="asc"
                 />
                 <MultiDropdownList
+                  defaultQuery={DEFAULT_QUERY}
                   className="dropdown-filter"
                   placeholder="Domaine"
                   componentId="DOMAIN"
@@ -127,6 +133,7 @@ export default () => {
                   showSearch={false}
                 />
                 <MultiDropdownList
+                  defaultQuery={DEFAULT_QUERY}
                   className="dropdown-filter"
                   placeholder="Places restantes"
                   componentId="PLACES"
@@ -137,6 +144,7 @@ export default () => {
                   showSearch={false}
                 />
                 <MultiDropdownList
+                  defaultQuery={DEFAULT_QUERY}
                   className="dropdown-filter"
                   placeholder="Tuteur"
                   componentId="TUTOR"
@@ -148,6 +156,7 @@ export default () => {
                 />
                 {user.role === "supervisor" ? (
                   <MultiDropdownList
+                    defaultQuery={DEFAULT_QUERY}
                     className="dropdown-filter"
                     placeholder="Structure"
                     componentId="STRUCTURE"
@@ -163,9 +172,7 @@ export default () => {
             </Filter>
             <ResultTable>
               <ReactiveList
-                defaultQuery={() =>
-                  user.role === "supervisor" ? { query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } } } : { query: { match_all: {} } }
-                }
+                defaultQuery={DEFAULT_QUERY}
                 componentId="result"
                 react={{ and: FILTERS }}
                 pagination={true}
