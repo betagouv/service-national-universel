@@ -8,7 +8,7 @@ import "dayjs/locale/fr";
 import { useSelector } from "react-redux";
 
 import Historic from "../../components/historic";
-
+import LoadingButton from "../../components/loadingButton";
 import DateInput from "../../components/dateInput";
 import { departmentList, regionList, YOUNG_STATUS, translate } from "../../utils";
 import api from "../../services/api";
@@ -63,7 +63,9 @@ export default (props) => {
                 <Title>{`Profil de ${values.firstName} ${values.lastName}`}</Title>
                 <SubTitle>{getSubtitle()}</SubTitle>
               </div>
-              <button onClick={handleSubmit}>Enregistrer</button>
+              <SaveBtn loading={isSubmitting} onClick={handleSubmit}>
+                Enregistrer
+              </SaveBtn>
             </TitleWrapper>
             <Row>
               <Col md={6} style={{ marginBottom: "20px" }}>
@@ -808,5 +810,29 @@ const RadioLabel = styled.label`
     height: 15px;
     min-width: 15px;
     min-height: 15px;
+  }
+`;
+
+const SaveBtn = styled(LoadingButton)`
+  background-color: #5245cc;
+  border: none;
+  border-radius: 5px;
+  padding: 7px 30px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  :hover {
+    background: #372f78;
+  }
+  &.outlined {
+    :hover {
+      background: #fff;
+    }
+    background-color: transparent;
+    border: solid 1px #5245cc;
+    color: #5245cc;
+    font-size: 13px;
+    padding: 4px 20px;
   }
 `;

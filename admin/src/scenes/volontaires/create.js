@@ -8,14 +8,14 @@ import "dayjs/locale/fr";
 import { useSelector } from "react-redux";
 
 import Historic from "../../components/historic";
-
+import LoadingButton from "../../components/loadingButton";
 import DateInput from "../../components/dateInput";
 import { departmentList, regionList, YOUNG_STATUS, translate } from "../../utils";
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import DndFileInput from "../../components/dndFileInput";
-import { requiredMessage } from "../../components/errorMessage";
+import Error, { requiredMessage } from "../../components/errorMessage";
 
 export default (props) => {
   const user = useSelector((state) => state.Auth.user);
@@ -52,21 +52,23 @@ export default (props) => {
           }
         }}
       >
-        {({ values, handleChange, handleSubmit, isSubmitting, submitForm }) => (
+        {({ values, handleChange, handleSubmit, isSubmitting, submitForm, errors, touched }) => (
           <>
             <TitleWrapper>
               <div>
                 <Title>{`Création du profil ${values.firstName ? `de ${values.firstName}  ${values.lastName}` : ""}`}</Title>
               </div>
-              <button onClick={handleSubmit}>Valider cette candidature</button>
+              <SaveBtn loading={isSubmitting} onClick={handleSubmit}>
+                Valider cette candidature
+              </SaveBtn>
             </TitleWrapper>
             <Row>
               <Col md={6} style={{ marginBottom: "20px" }}>
                 <Box>
                   <BoxTitle>Identité</BoxTitle>
                   <BoxContent direction="column">
-                    <Item title="Nom" values={values} name={"lastName"} handleChange={handleChange} />
-                    <Item title="Prénom" values={values} name="firstName" handleChange={handleChange} />
+                    <Item title="Nom" values={values} name={"lastName"} handleChange={handleChange} required errors={errors} touched={touched} />
+                    <Item title="Prénom" values={values} name="firstName" handleChange={handleChange} required errors={errors} touched={touched} />
                     <Item title="Date de naissance" type="date" values={values} name="birthdateAt" handleChange={handleChange} />
                     <Documents>
                       <h4>Pièces d'identité</h4>
@@ -99,7 +101,7 @@ export default (props) => {
                 <Box>
                   <BoxTitle>Coordonnées</BoxTitle>
                   <BoxContent direction="column">
-                    <Item title="E-mail" values={values} name="email" handleChange={handleChange} />
+                    <Item title="E-mail" values={values} name="email" handleChange={handleChange} required errors={errors} touched={touched} />
                     <Item title="Tél." values={values} name="phone" handleChange={handleChange} />
                     <Item title="Adresse" values={values} name="address" handleChange={handleChange} />
                     <Item title="Ville" values={values} name="city" handleChange={handleChange} />
@@ -492,7 +494,7 @@ export default (props) => {
   );
 };
 
-const Item = ({ title, values, name, handleChange, type = "text", disabled = false, required = false }) => {
+const Item = ({ errors, touched, title, values, name, handleChange, type = "text", disabled = false, required = false }) => {
   const renderInput = () => {
     if (type === "date") {
       return (
@@ -508,15 +510,18 @@ const Item = ({ title, values, name, handleChange, type = "text", disabled = fal
       );
     }
     return (
-      <Field
-        disabled={disabled}
-        className="form-control"
-        value={translate(values[name])}
-        name={name}
-        onChange={handleChange}
-        type={type}
-        validate={(v) => required && !v && requiredMessage}
-      />
+      <>
+        <Field
+          disabled={disabled}
+          className="form-control"
+          value={translate(values[name])}
+          name={name}
+          onChange={handleChange}
+          type={type}
+          validate={(v) => required && !v && requiredMessage}
+        />
+        {errors && touched && <Error errors={errors} touched={touched} name={name} />}
+      </>
     );
   };
   return (
@@ -686,5 +691,29 @@ const RadioLabel = styled.label`
     height: 15px;
     min-width: 15px;
     min-height: 15px;
+  }
+`;
+
+const SaveBtn = styled(LoadingButton)`
+  background-color: #5245cc;
+  border: none;
+  border-radius: 5px;
+  padding: 7px 30px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  :hover {
+    background: #372f78;
+  }
+  &.outlined {
+    :hover {
+      background: #fff;
+    }
+    background-color: transparent;
+    border: solid 1px #5245cc;
+    color: #5245cc;
+    font-size: 13px;
+    padding: 4px 20px;
   }
 `;
