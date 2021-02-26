@@ -6,7 +6,6 @@ import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
 import ExportComponent from "../../components/ExportXlsx";
-import ReactiveFilter from "../../components/ReactiveFilter";
 
 import api from "../../services/api";
 import { apiURL, appURL } from "../../config";
@@ -15,7 +14,7 @@ import Panel from "./panel";
 import { translate, getFilterLabel, formatStringLongDate } from "../../utils";
 import { Link } from "react-router-dom";
 
-const FILTERS = ["SEARCH", "STATUS", "STATUS_STATIC", "PHASE", "COHORT", "DEPARTMENT", "REGION"];
+const FILTERS = ["SEARCH", "STATUS", "PHASE", "COHORT", "DEPARTMENT", "REGION"];
 
 export default ({ setYoung }) => {
   const [volontaire, setVolontaire] = useState(null);
@@ -40,7 +39,6 @@ export default ({ setYoung }) => {
               </Export>
             </Header>
             <Filter>
-              <ReactiveFilter componentId="STATUS_STATIC" query={{ query: { bool: { filter: { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } } } }, value: "" }} />
               <DataSearch
                 showIcon={false}
                 placeholder="Rechercher par mots clés, mission ou structure..."
@@ -144,6 +142,7 @@ export default ({ setYoung }) => {
             </Filter>
             <ResultTable>
               <ReactiveList
+                defaultQuery={() => ({ query: { bool: { filter: { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } } } } })}
                 componentId="result"
                 react={{ and: FILTERS }}
                 pagination={true}

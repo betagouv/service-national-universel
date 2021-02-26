@@ -6,14 +6,13 @@ import { toastr } from "react-redux-toastr";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { setUser } from "../../redux/auth/actions";
-import ReactiveFilter from "../../components/ReactiveFilter";
 import { translate, getFilterLabel, formatStringLongDate } from "../../utils";
 import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
 
-const FILTERS = ["SEARCH", "ROLE", "REGION", "DEPARTMENT", "NETWORK"];
+const FILTERS = ["SEARCH", "ROLE", "REGION", "DEPARTMENT"];
 
 export default () => {
   const [responsable, setResponsable] = useState(null);
@@ -108,11 +107,11 @@ export default () => {
                 />
               </FilterRow>
             </Filter>
-            {user.role === "supervisor" ? (
-              <ReactiveFilter componentId="NETWORK" query={{ query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } } }} />
-            ) : null}
             <ResultTable>
               <ReactiveList
+                defaultQuery={() =>
+                  user.role === "supervisor" ? { query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } } } : { query: { match_all: {} } }
+                }
                 componentId="result"
                 react={{ and: FILTERS }}
                 pagination={true}

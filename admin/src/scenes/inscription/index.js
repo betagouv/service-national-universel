@@ -9,14 +9,13 @@ import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 import ExportComponent from "../../components/ExportXlsx";
-import ReactiveFilter from "../../components/ReactiveFilter";
 import SelectStatus from "../../components/selectStatus";
 import api from "../../services/api";
 import { apiURL, appURL } from "../../config";
 import Panel from "./panel";
 import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS } from "../../utils";
 
-const FILTERS = ["SEARCH", "STATUS", "REGION", "DEPARTMENT", "PHASE", "REMOVEINPROGRESS"];
+const FILTERS = ["SEARCH", "STATUS", "REGION", "DEPARTMENT", "REMOVEINPROGRESS"];
 
 export default () => {
   const [young, setYoung] = useState(null);
@@ -150,9 +149,9 @@ export default () => {
                 />
               </FilterRow>
             </Filter>
-            <ReactiveFilter componentId="PHASE" query={{ query: { bool: { filter: { term: { "phase.keyword": "INSCRIPTION" } } } }, value: "" }} />
             <ResultTable>
               <ReactiveList
+                defaultQuery={() => ({ query: { bool: { filter: { term: { "phase.keyword": "INSCRIPTION" } } } } })}
                 componentId="result"
                 react={{ and: FILTERS }}
                 pagination={true}

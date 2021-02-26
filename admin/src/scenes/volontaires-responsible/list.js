@@ -7,7 +7,6 @@ import SelectStatusApplication from "../../components/selectStatusApplication";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
-import ReactiveFilter from "../../components/ReactiveFilter";
 
 import { translate, getFilterLabel, formatStringLongDate, formatStringDate } from "../../utils";
 

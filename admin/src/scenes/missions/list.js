@@ -12,9 +12,8 @@ import Panel from "./panel";
 import { formatStringDate, translate, getFilterLabel } from "../../utils";
 import CustomFilter from "./customFilter";
 import SelectStatusMission from "../../components/selectStatusMission";
-import ReactiveFilter from "../../components/ReactiveFilter";
 
-const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "TUTOR", "REGION", "DEPARTMENT", "NETWORK", "STRUCTURE"];
+const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "TUTOR", "REGION", "DEPARTMENT", "STRUCTURE"];
 
 export default () => {
   const [mission, setMission] = useState(null);
@@ -162,11 +161,11 @@ export default () => {
                 ) : null}
               </FilterRow>
             </Filter>
-            {user.role === "supervisor" ? (
-              <ReactiveFilter componentId="NETWORK" query={{ query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } } }} />
-            ) : null}
             <ResultTable>
               <ReactiveList
+                defaultQuery={() =>
+                  user.role === "supervisor" ? { query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } } } : { query: { match_all: {} } }
+                }
                 componentId="result"
                 react={{ and: FILTERS }}
                 pagination={true}

@@ -9,9 +9,8 @@ import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
 import { translate, corpsEnUniforme } from "../../utils";
-import ReactiveFilter from "../../components/ReactiveFilter";
 
-const FILTERS = ["SEARCH", "LEGAL_STATUS", "DEPARTMENT", "REGION", "CORPS", "NETWORK", "WITH_NETWORK"];
+const FILTERS = ["SEARCH", "LEGAL_STATUS", "DEPARTMENT", "REGION", "CORPS", "WITH_NETWORK"];
 const formatLongDate = (date) => {
   if (!date) return "-";
   const d = new Date(date);
@@ -125,11 +124,11 @@ export default () => {
                 />
               </FilterRow>
             </Filter>
-            {user.role === "supervisor" ? (
-              <ReactiveFilter componentId="NETWORK" query={{ query: { bool: { filter: { term: { "networkId.keyword": user.structureId } } } }, value: "" }} />
-            ) : null}
             <ResultTable>
               <ReactiveList
+                defaultQuery={() =>
+                  user.role === "supervisor" ? { query: { bool: { filter: { term: { "networkId.keyword": user.structureId } } } } } : { query: { match_all: {} } }
+                }
                 componentId="result"
                 react={{ and: FILTERS }}
                 pagination={true}
