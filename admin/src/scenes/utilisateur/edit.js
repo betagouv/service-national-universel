@@ -8,6 +8,7 @@ import "dayjs/locale/fr";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 
+import LoadingButton from "../../components/loadingButton";
 import { setUser as setUserRedux } from "../../redux/auth/actions";
 import DateInput from "../../components/dateInput";
 import { departmentList, regionList, department2region, translate, REFERENT_ROLES } from "../../utils";
@@ -79,13 +80,15 @@ export default (props) => {
               <div>
                 <Title>{`Profil Utilisateur de ${values.firstName} ${values.lastName}`}</Title>
                 <SubTitle>{getSubtitle()}</SubTitle>
-                {!["referent_department", "referent_region"].includes(currentUser.role) && (
+                {/* {!["referent_department", "referent_region"].includes(currentUser.role) && (
                   <button className="outlined" onClick={handleImpersonate}>
                     Prendre sa place
                   </button>
-                )}
+                )} */}
               </div>
-              <button onClick={handleSubmit}>Enregistrer</button>
+              <SaveBtn loading={isSubmitting} onClick={handleSubmit}>
+                Enregistrer
+              </SaveBtn>
             </TitleWrapper>
             <Row>
               <Col md={6} style={{ marginBottom: "20px" }}>
@@ -257,29 +260,6 @@ const TitleWrapper = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  button {
-    background-color: #5245cc;
-    border: none;
-    border-radius: 5px;
-    padding: 7px 30px;
-    font-size: 14px;
-    font-weight: 700;
-    color: #fff;
-    cursor: pointer;
-    :hover {
-      background: #372f78;
-    }
-    &.outlined {
-      :hover {
-        background: #fff;
-      }
-      background-color: transparent;
-      border: solid 1px #5245cc;
-      color: #5245cc;
-      font-size: 13px;
-      padding: 4px 20px;
-    }
-  }
 `;
 const Title = styled.h2`
   color: #242526;
@@ -372,5 +352,29 @@ const DeleteBtn = styled.button`
   cursor: pointer;
   :hover {
     background: #dc3545;
+  }
+`;
+
+const SaveBtn = styled(LoadingButton)`
+  background-color: #5245cc;
+  border: none;
+  border-radius: 5px;
+  padding: 7px 30px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  :hover {
+    background: #372f78;
+  }
+  &.outlined {
+    :hover {
+      background: #fff;
+    }
+    background-color: transparent;
+    border: solid 1px #5245cc;
+    color: #5245cc;
+    font-size: 13px;
+    padding: 4px 20px;
   }
 `;
