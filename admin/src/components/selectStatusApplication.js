@@ -47,6 +47,12 @@ export default ({ hit, options = [] }) => {
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       setApplication(data);
       toastr.success("Mis à jour!");
+      if (status === APPLICATION_STATUS.VALIDATED) {
+        await api.post(`/application/${data._id}/notify/validated_responsible`);
+        await api.post(`/application/${data._id}/notify/validated_young`);
+      } else {
+        await api.post(`/application/${data._id}/notify/${status.toLowerCase()}`);
+      }
     } catch (e) {
       console.log(e);
       toastr.error("Oups, une erreur est survenue :", translate(e.code));

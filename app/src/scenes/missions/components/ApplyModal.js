@@ -30,6 +30,7 @@ export default ({ value, onChange, onSend }) => {
     };
     const { ok, data, code } = await api.post(`/application`, application);
     if (!ok) return toastr.error("Oups, une erreur est survenue lors de la candidature", code);
+    await api.post(`/application/${data._id}/notify/waiting_validation`);
     onSend();
   };
 
