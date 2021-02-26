@@ -91,7 +91,7 @@ export default ({ value, onChange, name, errorMessage = requiredMessage, placeho
           multiple
           name={name}
           value={[]}
-          validate={(v) => ((!v || !v.length) && errorMessage) || (v && v.size > 5000000 && "Ce fichier est trop volumineux.")}
+          validate={(v) => v && v.size > 5000000 && "Ce fichier est trop volumineux."}
           onChange={(e) => onAdd(e.target.files)}
         />
         <>
