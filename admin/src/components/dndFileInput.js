@@ -9,7 +9,7 @@ function getFileName(file) {
   return (file && file.name) || file;
 }
 
-export default ({ value, onChange, name, errorMessage = requiredMessage, placeholder = "votre fichier", source }) => {
+export default ({ value, onChange, name, errorMessage = requiredMessage, placeholder = "votre fichier", source, required }) => {
   const [filesList, setFilesList] = useState(value || []);
 
   // useEffect(() => {
@@ -91,7 +91,7 @@ export default ({ value, onChange, name, errorMessage = requiredMessage, placeho
           multiple
           name={name}
           value={[]}
-          validate={(v) => ((!v || !v.length) && errorMessage) || (v && v.size > 5000000 && "Ce fichier est trop volumineux.")}
+          validate={(v) => (required && (!v || !v.length) && errorMessage) || (v && v.size > 5000000 && "Ce fichier est trop volumineux.")}
           onChange={(e) => onAdd(e.target.files)}
         />
         <>

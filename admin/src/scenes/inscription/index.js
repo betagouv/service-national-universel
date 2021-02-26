@@ -29,6 +29,9 @@ export default () => {
             <Header>
               <Title>Inscriptions</Title>
               <Export>
+                <Link to="/volontaire/create">
+                  <button>Nouvelle inscription</button>
+                </Link>
                 <ExportComponent
                   title="Exporter les inscriptions"
                   collection="candidature"
@@ -423,6 +426,7 @@ const Table = styled.table`
 
 const Export = styled.div`
   button {
+    margin-left: 1rem;
     background-color: #5245cc;
     border: none;
     border-radius: 5px;

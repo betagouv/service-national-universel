@@ -232,6 +232,17 @@ router.put("/young/:id", passport.authenticate("referent", { session: false }), 
   }
 });
 
+router.post("/young", passport.authenticate("referent", { session: false }), async (req, res) => {
+  try {
+    const young = await YoungObject.create(req.body);
+    return res.status(200).send({ young, ok: true });
+  } catch (error) {
+    if (error.code === 11000) return res.status(409).send({ ok: false, code: USER_ALREADY_REGISTERED });
+    capture(error);
+    return res.status(500).send({ ok: false, code: SERVER_ERROR });
+  }
+});
+
 router.post("/email-tutor/:template/:tutorId", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const { tutorId, template } = req.params;
