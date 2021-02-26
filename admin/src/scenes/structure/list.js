@@ -111,7 +111,7 @@ export default () => {
                   showSearch={false}
                   sortBy="asc"
                 />
-                <MultiDropdownList
+                {/* <MultiDropdownList
                   className="dropdown-filter"
                   placeholder="Affiliation à un réseau national"
                   componentId="WITH_NETWORK"
@@ -121,7 +121,7 @@ export default () => {
                   URLParams={true}
                   showSearch={false}
                   sortBy="asc"
-                />
+                /> */}
               </FilterRow>
             </Filter>
             <ResultTable>
