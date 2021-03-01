@@ -34,9 +34,6 @@ export default () => {
       <Heading>
         <h2>Journée de Défense et Citoyenneté</h2>
         <p>Informez ci-dessous l'administration de votre situation</p>
-        <a target="blank" href="https://apicivique.s3.eu-west-3.amazonaws.com/Note_relative_aux_situations_particulie%CC%80res.pdf">
-          En savoir plus
-        </a>
       </Heading>
       <Formik
         initialValues={young}
@@ -59,7 +56,6 @@ export default () => {
       >
         {({ values, handleChange, handleSubmit, isSubmitting, submitForm, errors, touched }) => (
           <>
-            <FormLegend>Handicap et pathologies chroniques</FormLegend>
             <FormRow>
               <Col md={4}>
                 <Label>Avez-vous réalisé votre Journée de Défense et Citoyenneté ?</Label>
