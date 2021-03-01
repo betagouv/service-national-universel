@@ -4,10 +4,7 @@ import { Row, Col } from "reactstrap";
 import { Field, Formik } from "formik";
 import { useSelector, useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import validator from "validator";
 import { useHistory } from "react-router-dom";
-
-import DndFileInput from "../../components/dndFileInput";
 
 import ErrorMessage, { requiredMessage } from "../inscription/components/errorMessage";
 
@@ -15,7 +12,7 @@ import { setYoung } from "../../redux/auth/actions";
 
 import api from "../../services/api";
 
-import { saveYoung, STEPS, YOUNG_SITUATIONS } from "../inscription/utils";
+import { saveYoung, STEPS_2020, YOUNG_SITUATIONS } from "../inscription/utils";
 
 import AddressInput from "../../components/addressInput";
 import Etablissement from "../inscription/components/etablissmentInput";
@@ -60,12 +57,11 @@ export default () => {
         validateOnBlur={false}
         onSubmit={async (values) => {
           try {
-            if (!confirm("Avez-vous bien pensé à téléverser le RECTO et le VERSO de votre pièce d'identité ?")) return;
-            values.inscriptionStep = STEPS.PARTICULIERES;
+            values.cohesion2020Step = STEPS_2020.PARTICULIERES;
             const { ok, code, data: young } = await api.put("/young", values);
             if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             dispatch(setYoung(young));
-            history.push("/inscription/particulieres");
+            history.push("/cohesion/particulieres");
           } catch (e) {
             console.log(e);
             toastr.error("Erreur !");

@@ -9,7 +9,7 @@ import { useHistory } from "react-router-dom";
 import { setYoung } from "../../redux/auth/actions";
 import DndFileInput from "../../components/dndFileInput";
 import ErrorMessage, { requiredMessage } from "../inscription/components/errorMessage";
-import { saveYoung, STEPS } from "../inscription/utils";
+import { saveYoung, STEPS_2020 } from "../inscription/utils";
 
 import api from "../../services/api";
 import { translate } from "../../utils";
@@ -17,7 +17,6 @@ import { translate } from "../../utils";
 export default () => {
   const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
-  const [clickedRules, setClickedRules] = useState(false);
   const dispatch = useDispatch();
   if (!young) {
     history.push("/inscription/profil");
@@ -59,18 +58,18 @@ export default () => {
             console.log(values);
             values.parentConsentment = "true";
             values.consentment = "true";
-            values.inscriptionStep = STEPS.MOTIVATIONS;
+            values.cohesion2020Step = STEPS_2020.COORDONNEES;
             const { ok, code, data: young } = await api.put("/young", values);
             if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             dispatch(setYoung(young));
-            history.push("/inscription/motivations");
+            history.push("/cohesion/coordonnees");
           } catch (e) {
             console.log(e);
             toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code));
           }
         }}
       >
-        {({ values, handleChange, handleSubmit, isSubmitting, submitForm, errors, touched }) => (
+        {({ values, handleChange, handleSubmit, errors, touched }) => (
           <>
             <FormRow>
               <Col md={4}>
@@ -97,7 +96,7 @@ export default () => {
                   Merci de télécharger le consentement du ou des representants légaux{" "}
                   <a
                     style={{ color: "#5145cd", textDecoration: "underline" }}
-                    href="https://apicivique.s3.eu-west-3.amazonaws.com/SNU_-_Consentement_repre%CC%81sentant(s)_le%CC%81gal(aux).pdf"
+                    href="https://apicivique.s3.eu-west-3.amazonaws.com/SNU-_Consentement_du_repre%CC%81sentant_le%CC%81gal_-_2020.pdf"
                     target="blank"
                   >
                     ci-joint

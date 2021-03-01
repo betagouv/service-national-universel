@@ -40,11 +40,18 @@ const Schema = new mongoose.Schema({
   },
   lastStatusAt: { type: Date, default: Date.now },
 
-  //keep track of the current inscription step
+  // keep track of the current inscription step
   inscriptionStep: {
     type: String,
     default: "COORDONNEES", // if the young is created, it passed the first step, so default is COORDONNEES
     enum: ["PROFIL", "COORDONNEES", "PARTICULIERES", "REPRESENTANTS", "CONSENTEMENTS", "MOTIVATIONS", "DONE"],
+  },
+
+  // keep track of the current cohesion inscription step for 2020 users
+  cohesion2020Step: {
+    type: String,
+    default: "CONSENTEMENTS",
+    enum: ["CONSENTEMENTS", "COORDONNEES", "PARTICULIERES", "JDC", "DONE"],
   },
 
   // userName and userId because it can be a young or a referent

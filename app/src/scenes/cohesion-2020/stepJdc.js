@@ -44,11 +44,13 @@ export default () => {
         validateOnBlur={false}
         onSubmit={async (values) => {
           try {
-            values.inscriptionStep = STEPS.REPRESENTANTS;
+            values.cohesion2020Step = STEPS_2020.DONE;
+            values.statusPhase1 === "WAITING_AFFECTATION";
+            values.status === "VALIDATED";
             const { ok, code, data: young } = await api.put("/young", values);
             if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             dispatch(setYoung(young));
-            history.push("/inscription/representants");
+            history.push("/cohesion/done");
           } catch (e) {
             console.log(e);
             toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code));
@@ -60,7 +62,7 @@ export default () => {
             <FormLegend>Handicap et pathologies chroniques</FormLegend>
             <FormRow>
               <Col md={4}>
-                <Label>Avez-vous réaliser votre Journée de Défense et Citoyenneté ?</Label>
+                <Label>Avez-vous réalisé votre Journée de Défense et Citoyenneté ?</Label>
               </Col>
               <Col>
                 <RadioLabel>

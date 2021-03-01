@@ -13,7 +13,7 @@ import ErrorMessage, { requiredMessage } from "../inscription/components/errorMe
 import AddressInput from "../../components/addressInput";
 import DndFileInput from "../../components/dndFileInput";
 
-import { saveYoung, STEPS } from "../inscription/utils";
+import { saveYoung, STEPS_2020 } from "../inscription/utils";
 import { toastr } from "react-redux-toastr";
 import { translate } from "../../utils";
 
@@ -47,11 +47,11 @@ export default () => {
         validateOnBlur={false}
         onSubmit={async (values) => {
           try {
-            values.inscriptionStep = STEPS.REPRESENTANTS;
+            values.cohesion2020Step = STEPS_2020.JDC;
             const { ok, code, data: young } = await api.put("/young", values);
             if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             dispatch(setYoung(young));
-            history.push("/inscription/representants");
+            history.push("/cohesion/jdc");
           } catch (e) {
             console.log(e);
             toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code));
@@ -390,6 +390,7 @@ export default () => {
 
 const Wrapper = styled.div`
   padding: 40px;
+  width: 100%;
   @media (max-width: 768px) {
     padding: 22px;
   }

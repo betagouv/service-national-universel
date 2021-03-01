@@ -21,24 +21,14 @@ export default ({ step }) => {
     return "done";
   };
 
-  const logout = async () => {
-    try {
-      await api.post(`/young/logout`);
-    } catch (error) {
-      console.log({ error });
-    }
-    dispatch(setYoung(null));
-    // window.location.href = "/";
-  };
-
   const handleClick = (s) => {
     if (s === step || !young) return; //click on same step or not connected
-    console.log(young.inscriptionStep, s, Object.keys(STEPS_2020));
+    console.log(young.cohesion2020Step);
     const stepIndex = Object.keys(STEPS_2020).indexOf(s);
-    const limitIndex = Object.keys(STEPS_2020).indexOf(young.inscriptionStep);
-    if (limitIndex < stepIndex) return;
+    const limitIndex = Object.keys(STEPS_2020).indexOf(young.cohesion2020Step);
+    if (limitIndex > 0 && limitIndex < stepIndex) return;
 
-    return history.push(`/inscription/2020/${s.toLowerCase()}`);
+    return history.push(`/cohesion/${s.toLowerCase()}`);
   };
 
   return (

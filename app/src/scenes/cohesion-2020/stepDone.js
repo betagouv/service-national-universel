@@ -19,12 +19,10 @@ export default () => {
         </svg>
       </Logo>
       <h2>Merci {young.firstName}</h2>
-      <p>Bravo, votre inscription a bien été enregistrée. Votre candidature est en cours de traitement.</p>
-      <p>Vous serez prochainement contacté(e) par e-mail.</p>
-      <p>Vous pouvez continuer à éditer vos informations personnelles jusqu'à la validation de votre inscription.</p>
+      <p>Votre participation au séjour de cohésion a bien été enregistrée.</p>
       <Footer>
         <ButtonContainer>
-          <Button to="/">Accéder à mon espace volontaire</Button>
+          <Button to="/">Retourner à mon espace volontaire</Button>
         </ButtonContainer>
       </Footer>
     </Wrapper>
