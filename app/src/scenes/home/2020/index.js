@@ -7,7 +7,7 @@ import NextStep from "../../phase2/nextStep";
 export default () => {
   const young = useSelector((state) => state.Auth.young);
   // See: https://trello.com/c/vOUIhdhu/406-volontaire-formulaire-all%C3%A9g%C3%A9-pour-les-2020
-  const isBornBefore20030702 = new Date(young.birthdateAt) < new Date("2003-07-02");
+  const isBornBefore20030702 = young.cohort === "2020" && new Date(young.birthdateAt) < new Date("2003-07-02");
 
   const goTo = (id) => {
     if (document.getElementById) {
