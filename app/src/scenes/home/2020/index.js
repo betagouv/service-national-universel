@@ -6,6 +6,8 @@ import NextStep from "../../phase2/nextStep";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
+  // See: https://trello.com/c/vOUIhdhu/406-volontaire-formulaire-all%C3%A9g%C3%A9-pour-les-2020
+  const isBornBefore20030702 = new Date(young.birthdateAt) < new Date("2003-07-02");
 
   const goTo = (id) => {
     if (document.getElementById) {
@@ -32,6 +34,16 @@ export default () => {
             </div>
             <div className="info">
               <div className="subtitle">Séjour annulé suite à la crise sanitaire.</div>
+              {isBornBefore20030702 ? (
+                <div class="subtitle more-info">
+                  Malheureusement, vous aurez 18 ans révolus au moment du séjour de cohésion, vous ne pouvez vous y inscrire. Si vous n'avez pas réalisé votre JDC, nous vous
+                  invitons à vous inscrire sur{" "}
+                  <a href="majdc.fr" target="_blank">
+                    majdc.fr
+                  </a>{" "}
+                  et à demander à être convoqué pour une session en ligne.
+                </div>
+              ) : null}
             </div>
           </WrapperItem>
           <WrapperItem>
@@ -77,6 +89,9 @@ const WrapperItem = styled.div`
       color: #6b7280;
       font-size: 0.875rem !important;
       font-weight: 500;
+    }
+    .more-info {
+      font-weight: normal;
     }
     .link {
       color: #6b7280;
