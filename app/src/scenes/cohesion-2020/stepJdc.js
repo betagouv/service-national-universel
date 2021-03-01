@@ -42,8 +42,7 @@ export default () => {
         onSubmit={async (values) => {
           try {
             values.cohesion2020Step = STEPS_2020.DONE;
-            values.statusPhase1 === "WAITING_AFFECTATION";
-            values.status === "VALIDATED";
+            values.statusPhase1 = "WAITING_AFFECTATION";
             const { ok, code, data: young } = await api.put("/young", values);
             if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             dispatch(setYoung(young));

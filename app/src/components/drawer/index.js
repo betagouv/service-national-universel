@@ -22,7 +22,7 @@ export default ({ inscription }) => {
       setStatus2(PHASE_STATUS.IN_PROGRESS);
       return;
     }
-    if (young.cohort === "2020") {
+    if (young.cohort === "2020" && young.cohesion2020Step !== "DONE") {
       setStatus1(PHASE_STATUS.CANCEL);
       setStatus2(PHASE_STATUS.IN_PROGRESS);
       return;
