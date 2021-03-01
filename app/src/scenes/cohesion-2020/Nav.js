@@ -23,7 +23,6 @@ export default ({ step }) => {
 
   const handleClick = (s) => {
     if (s === step || !young) return; //click on same step or not connected
-    console.log(young.cohesion2020Step);
     const stepIndex = Object.keys(STEPS_2020).indexOf(s);
     const limitIndex = Object.keys(STEPS_2020).indexOf(young.cohesion2020Step || "CONSENTEMENTS");
     if (limitIndex < stepIndex) return;
