@@ -77,16 +77,16 @@ export default () => {
               </Col>
               <Col>
                 <div style={{ display: "flex" }}>
-                  <div style={{ flex: 1 }}>
-                    REPRÉSENTANT LÉGAL N°1
-                    <div>
+                  <div style={{ flex: 1, marginLeft: "0.8rem" }}>
+                    <span style={{ fontSize: "12px", fontWeight: "bold", color: "#aaa" }}>REPRÉSENTANT LÉGAL N°1</span>
+                    <div style={{ fontWeight: "bold", fontSize: 18 }}>
                       {young.parent1FirstName} {young.parent1LastName}
                     </div>
                   </div>
                   {young.parent2FirstName ? (
-                    <div style={{ flex: 1 }}>
-                      REPRÉSENTANT LÉGAL N°2
-                      <div>
+                    <div style={{ flex: 1, marginLeft: "0.8rem" }}>
+                      <span style={{ fontSize: "12px", fontWeight: "bold", color: "#aaa" }}>REPRÉSENTANT LÉGAL N°2</span>
+                      <div style={{ fontWeight: "bold", fontSize: 18 }}>
                         {young.parent2FirstName} {young.parent2LastName}
                       </div>
                     </div>
