@@ -12,6 +12,14 @@ export const STEPS = {
   DONE: "DONE",
 };
 
+export const STEPS_2020 = {
+  CONSENTEMENTS: "CONSENTEMENTS",
+  COORDONNEES: "COORDONNEES",
+  PARTICULIERES: "PARTICULIERES",
+  JDC: "JDC",
+  DONE: "DONE",
+};
+
 export const saveYoung = async (values) => {
   const { ok, code, data: young } = await api.put("/young", values);
   if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de votre progression", translate(code));

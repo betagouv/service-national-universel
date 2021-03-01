@@ -15,7 +15,7 @@ export default () => {
 
   const renderStep = () => {
     if (young.cohort === "2019") return <Cohort2019 />;
-    if (young.cohort === "2020") return <Cohort2020 />;
+    if (young.cohort === "2020" && young.cohesion2020Step !== "DONE") return <Cohort2020 />;
     if (young.status === YOUNG_STATUS.WAITING_CORRECTION) return <WaitingCorrection />;
     if (young.status === YOUNG_STATUS.WAITING_VALIDATION) return <WaitingValidation />;
     if (young.status === YOUNG_STATUS.VALIDATED) return <Validated />;

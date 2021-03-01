@@ -8,6 +8,7 @@ export default () => {
   const young = useSelector((state) => state.Auth.young);
   // See: https://trello.com/c/vOUIhdhu/406-volontaire-formulaire-all%C3%A9g%C3%A9-pour-les-2020
   const isBornBefore20030702 = young.cohort === "2020" && new Date(young.birthdateAt) < new Date("2003-07-02");
+  const needsToRegisterToCohesion = !isBornBefore20030702;
 
   const goTo = (id) => {
     if (document.getElementById) {
@@ -42,6 +43,14 @@ export default () => {
                     majdc.fr
                   </a>{" "}
                   et à demander à être convoqué pour une session en ligne.
+                </div>
+              ) : null}
+              {needsToRegisterToCohesion ? (
+                <div class="subtitle more-info">
+                  Vous pouvez cependant demander à participer à la session 2021, sous réserve de votre disponibilité du 21 juin au 2 juillet 2021.
+                  <Link to="/cohesion/consentements">
+                    <BackButton>Je confirme ma participation au séjour de cohésion</BackButton>
+                  </Link>
                 </div>
               ) : null}
             </div>
@@ -136,6 +145,26 @@ const Content = styled.div`
       width: 1.5rem;
       stroke: #5145cd;
     }
+  }
+`;
+
+const BackButton = styled.button`
+  color: #374151;
+  margin-top: 1rem;
+  background-color: #fff;
+  padding: 0.5rem 1rem;
+  border: 1px solid #d2d6dc;
+  outline: 0;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 1rem;
+  display: block;
+  outline: 0;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  position: relative;
+  z-index: 2;
+  :hover {
+    opacity: 0.9;
   }
 `;
 
