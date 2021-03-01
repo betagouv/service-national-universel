@@ -19,6 +19,7 @@ import Documents from "./scenes/documents";
 import Preferences from "./scenes/preferences";
 import Missions from "./scenes/missions";
 import Applications from "./scenes/applications";
+import Cohesion from "./scenes/cohesion-2020/";
 import Loader from "./components/Loader";
 
 import Header from "./components/header";
@@ -94,6 +95,7 @@ const Espace = () => {
             <Route path="/preferences" component={Preferences} />
             <Route path="/mission" component={Missions} />
             <Route path="/candidature" component={Applications} />
+            <Route path="/cohesion" component={Cohesion} />
             <Route path="/" component={Home} />
           </Switch>
         </Content>
