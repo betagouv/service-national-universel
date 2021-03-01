@@ -38,7 +38,7 @@ export default () => {
                 <div class="subtitle more-info">
                   Malheureusement, vous aurez 18 ans révolus au moment du séjour de cohésion, vous ne pouvez vous y inscrire. Si vous n'avez pas réalisé votre JDC, nous vous
                   invitons à vous inscrire sur{" "}
-                  <a href="majdc.fr" target="_blank">
+                  <a href="http://majdc.fr" target="_blank">
                     majdc.fr
                   </a>{" "}
                   et à demander à être convoqué pour une session en ligne.
