@@ -214,7 +214,7 @@ const Hit = ({ hit, onClick }) => {
       <td>
         <Badge>{`COHORTE ${hit.cohort}`}</Badge>
         {hit.cohort === "2019" ? <Badge color="#6CC763">Phase 1</Badge> : null}
-        {hit.cohort === "2020" ? <Badge color="#ffa987">Phase 1</Badge> : null}
+        {hit.cohort === "2020" && hit.cohesion2020Step !== "DONE" ? <Badge color="#ffa987">Phase 1</Badge> : null}
         {hit.status === "WITHDRAWN" ? <Badge color="#F8A9AD">Désisté</Badge> : null}
       </td>
       <td>{formatStringLongDate(hit.lastLoginAt)}</td>
