@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
 import { requiredMessage } from "./errorMessage";
-import DownloadButton from "./DownloadButton";
+import DownloadButton from "./buttons/DownloadButton";
 
 function getFileName(file) {
   return (file && file.name) || file;

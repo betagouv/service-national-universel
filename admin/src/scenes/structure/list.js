@@ -9,6 +9,7 @@ import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
 import { translate, corpsEnUniforme } from "../../utils";
+import VioletHeaderButton from "../../components/buttons/VioletHeaderButton";
 
 const FILTERS = ["SEARCH", "LEGAL_STATUS", "DEPARTMENT", "REGION", "CORPS", "WITH_NETWORK"];
 const formatLongDate = (date) => {
@@ -32,11 +33,11 @@ export default () => {
               </div>
               <div style={{ display: "flex" }}>
                 <Link to="/structure/create">
-                  <ButtonHeader>
+                  <VioletHeaderButton>
                     <p>Inviter une nouvelle structure</p>
-                  </ButtonHeader>
+                  </VioletHeaderButton>
                 </Link>
-                <ButtonHeader>
+                <VioletHeaderButton>
                   <ExportComponent
                     title="Exporter les structures"
                     collection="structure"
@@ -44,7 +45,7 @@ export default () => {
                       return e;
                     }}
                   />
-                </ButtonHeader>
+                </VioletHeaderButton>
               </div>
             </Header>
             <Filter>
@@ -378,23 +379,6 @@ const Table = styled.table`
     border-bottom: 1px solid #f4f5f7;
     :hover {
       background-color: #e6ebfa;
-    }
-  }
-`;
-
-const ButtonHeader = styled.div`
-  > * {
-    background-color: #5245cc;
-    border: none;
-    border-radius: 5px;
-    padding: 7px 30px;
-    margin-left: 1rem;
-    font-size: 14px;
-    font-weight: 700;
-    color: #fff;
-    cursor: pointer;
-    :hover {
-      background: #372f78;
     }
   }
 `;

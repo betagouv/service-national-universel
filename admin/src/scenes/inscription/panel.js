@@ -3,8 +3,8 @@ import styled from "styled-components";
 import { Link } from "react-router-dom";
 
 import { YOUNG_SITUATIONS, translate as t } from "../../utils";
-import LoadingButton from "../../components/loadingButton";
-import DownloadButton from "../../components/DownloadButton";
+import LoadingButton from "../../components/buttons/LoadingButton";
+import DownloadButton from "../../components/buttons/DownloadButton";
 import Historic from "../../components/historic";
 import api from "../../services/api";
 
