@@ -136,12 +136,13 @@ const Proposal = ({ young, onSend }) => {
                 showIcon={false}
                 placeholder="Rechercher une mission par mots clés..."
                 componentId="SEARCH"
-                dataField={["name", "description", "justifications", "contraintes", "frequence", "period"]}
+                dataField={["name^10", "description", "justifications", "contraintes", "frequence", "period"]}
                 fuzziness={1}
                 style={{ flex: 2 }}
                 innerClass={{ input: "searchbox" }}
                 autosuggest={false}
                 onValueChange={setSearchedValue}
+                queryFormat="and"
               />
             </Filter>
             <ResultTable hide={!searchedValue}>
