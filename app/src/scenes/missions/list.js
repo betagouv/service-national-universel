@@ -49,7 +49,8 @@ export default () => {
                 placeholder="Recherche par mots clés..."
                 autosuggest={false}
                 componentId="SEARCH"
-                dataField={["name", "structureName", "description", "actions", "city"]}
+                dataField={["name^10", "structureName", "description", "actions", "city"]}
+                queryFormat="and"
               />
             </SearchBox>
             <DomainsFilter md={6}>
