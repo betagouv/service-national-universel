@@ -10,15 +10,6 @@ export default () => {
   const isBornBefore20030702 = young.cohort === "2020" && new Date(young.birthdateAt) < new Date("2003-07-02");
   const needsToRegisterToCohesion = !isBornBefore20030702;
 
-  const goTo = (id) => {
-    if (document.getElementById) {
-      const yOffset = -70; // header's height
-      const element = document.getElementById(id);
-      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-      window.scrollTo({ top: y, behavior: "smooth" });
-    }
-  };
-
   return (
     <>
       <Hero>
@@ -49,7 +40,7 @@ export default () => {
                 <div class="subtitle more-info">
                   Vous pouvez cependant demander à participer à la session 2021, sous réserve de votre disponibilité du 21 juin au 2 juillet 2021.
                   <Link to="/cohesion/consentements">
-                    <BackButton>Je confirme ma participation au séjour de cohésion</BackButton>
+                    <Button>Je confirme ma participation au séjour de cohésion</Button>
                   </Link>
                 </div>
               ) : null}
@@ -148,24 +139,18 @@ const Content = styled.div`
   }
 `;
 
-const BackButton = styled.button`
-  color: #374151;
-  margin-top: 1rem;
-  background-color: #fff;
-  padding: 0.5rem 1rem;
-  border: 1px solid #d2d6dc;
-  outline: 0;
-  border-radius: 6px;
-  font-weight: 500;
-  font-size: 1rem;
-  display: block;
-  outline: 0;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  position: relative;
-  z-index: 2;
-  :hover {
-    opacity: 0.9;
-  }
+const Button = styled.button`
+  display: inline-block;
+  padding: 10px 40px;
+  background-color: #31c48d;
+  color: #fff;
+  font-size: 16px;
+  text-align: center;
+  font-weight: 700;
+  margin: 25px auto 10px;
+  border-radius: 30px;
+  border: none;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
 `;
 
 const Hero = styled.div`
