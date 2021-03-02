@@ -505,6 +505,26 @@ export default (props) => {
                   </BoxContent>
                 </Box>
               </Col>
+              {user.role === "admin" ? (
+                <Col md={6} style={{ marginBottom: "20px" }}>
+                  <Box>
+                    <BoxTitle>Cohorte</BoxTitle>
+                    <BoxContent direction="column">
+                      <Select
+                        name="cohort"
+                        values={values}
+                        handleChange={handleChange}
+                        title="Cohorte"
+                        options={[
+                          { value: "2021", label: "2021" },
+                          { value: "2020", label: "2020" },
+                          { value: "2019", label: "2019" },
+                        ]}
+                      />
+                    </BoxContent>
+                  </Box>
+                </Col>
+              ) : null}
               {values.cohort === "2020" ? (
                 <Col md={6} style={{ marginBottom: "20px" }}>
                   <Box>
