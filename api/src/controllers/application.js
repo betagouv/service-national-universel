@@ -6,10 +6,32 @@ const { capture } = require("../sentry");
 
 const ApplicationObject = require("../models/application");
 const MissionObject = require("../models/mission");
+const YoungObject = require("../models/young");
 const ReferentObject = require("../models/referent");
 
 const SERVER_ERROR = "SERVER_ERROR";
 const NOT_FOUND = "NOT_FOUND";
+
+const updateStatusPhase2 = async (app) => {
+  const young = await YoungObject.findById(app.youngId);
+  const applications = await ApplicationObject.find({ youngId: young._id });
+  young.set({ statusPhase2: "WAITING_REALISATION" });
+  for (let application of applications) {
+    // if at least one application is DONE, phase 2 is validated
+    if (application.status === "DONE") {
+      young.set({ statusPhase2: "VALIDATED" });
+      await young.save();
+      await young.index();
+      return;
+    }
+    // if at least one application is not ABANDON or CANCEL, phase 2 is in progress
+    if (["WAITING_VALIDATION", "VALIDATED", "IN_PROGRESS"].includes(application.status)) {
+      young.set({ statusPhase2: "IN_PROGRESS" });
+    }
+  }
+  await young.save();
+  await young.index();
+};
 
 router.post("/", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
   try {
@@ -20,6 +42,7 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false }
       obj.priority = applications.length + 1;
     }
     const data = await ApplicationObject.create(obj);
+    await updateStatusPhase2(data);
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
@@ -30,6 +53,7 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false }
 router.put("/", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
     const application = await ApplicationObject.findByIdAndUpdate(req.body._id, req.body, { new: true });
+    await updateStatusPhase2(application);
     res.status(200).send({ ok: true, data: application });
   } catch (error) {
     capture(error);
