@@ -1,16 +1,15 @@
 import React from "react";
 import { Route, Switch } from "react-router-dom";
+import styled from "styled-components";
+import Nav from "./components/Nav";
+import FranceConnectCallback from "./components/FranceConnectCallback";
 import Profil from "./Create/stepProfil";
 import Coordonnees from "./Create/stepCoordonnees";
 import Representants from "./Create/stepRepresentants";
 import Particulieres from "./Create/stepParticulieres";
 import Consentements from "./Create/stepConsentements";
 import Motivations from "./Create/stepMotivations";
-import Nav from "./components/Nav";
-import FranceConnectCallback from "./components/FranceConnectCallback";
 import Done from "./Create/stepDone";
-import styled from "styled-components";
-
 import Drawer from "./Create/drawer";
 
 import Home from "./Home/index.js";

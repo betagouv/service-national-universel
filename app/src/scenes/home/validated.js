@@ -6,7 +6,7 @@ import NextStep from "../phase1/nextStep";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
-  const [showAlert, setShowAlert] = useState(true);
+  const [showAlert, setShowAlert] = useState(young.cohort !== "2020");
 
   const goTo = (id) => {
     if (document.getElementById) {
