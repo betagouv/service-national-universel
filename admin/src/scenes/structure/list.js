@@ -115,17 +115,17 @@ export default () => {
                   showSearch={false}
                   sortBy="asc"
                 />
-                {/* <MultiDropdownList
+                <MultiDropdownList
                   className="dropdown-filter"
                   placeholder="Affiliation à un réseau national"
                   componentId="WITH_NETWORK"
-                  dataField="networkId.keyword"
+                  dataField="networkName.keyword"
                   title=""
                   react={{ and: FILTERS.filter((e) => e !== "WITH_NETWORK") }}
                   URLParams={true}
                   showSearch={false}
                   sortBy="asc"
-                /> */}
+                />
               </FilterRow>
             </Filter>
             <ResultTable>
