@@ -42,6 +42,13 @@ export default () => {
                   <Link to="/cohesion/consentements">
                     <Button>Je confirme ma participation au séjour de cohésion</Button>
                   </Link>
+                  <div style={{ marginTop: "1rem", fontStyle: "italic" }}>
+                    Si vous n'êtes pas disponible sur ces dates et que vous n'avez pas réalisé votre JDC, nous vous invitons à vous inscrire sur{" "}
+                    <a href="http://majdc.fr" target="_blank">
+                      majdc.fr
+                    </a>{" "}
+                    et à demander à être convoqué pour une session en ligne.
+                  </div>
                 </div>
               ) : null}
             </div>
