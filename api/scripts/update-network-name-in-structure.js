@@ -1,4 +1,4 @@
-require("dotenv").config({ path: "../.env-prod" });
+require("dotenv").config({ path: "../.env-staging" });
 
 require("../src/mongo");
 const StructureModel = require("../src/models/structure");
