@@ -232,6 +232,30 @@ router.put("/young/:id", passport.authenticate("referent", { session: false }), 
   }
 });
 
+router.post("/young", passport.authenticate("referent", { session: false }), async (req, res) => {
+  try {
+    const obj = { ...req.body };
+    const invitation_token = crypto.randomBytes(20).toString("hex");
+    obj.invitationToken = invitation_token;
+    obj.invitationExpires = Date.now() + 86400000 * 7; // 7 days
+
+    const young = await YoungObject.create(obj);
+
+    let htmlContent = fs.readFileSync(path.resolve(__dirname, "../templates/inviteYoung.html")).toString();
+    htmlContent = htmlContent.replace(/{{toName}}/g, `${young.firstName} ${young.lastName}`);
+    htmlContent = htmlContent.replace(/{{fromName}}/g, `${req.user.firstName} ${req.user.lastName}`);
+    htmlContent = htmlContent.replace(/{{cta}}/g, `${config.APP_URL}/auth/signup/invite?token=${invitation_token}`);
+
+    await sendEmail({ name: `${young.firstName} ${young.lastName}`, email: young.email }, "Activez votre compte SNU", htmlContent);
+
+    return res.status(200).send({ young, ok: true });
+  } catch (error) {
+    if (error.code === 11000) return res.status(409).send({ ok: false, code: USER_ALREADY_REGISTERED });
+    capture(error);
+    return res.status(500).send({ ok: false, code: SERVER_ERROR });
+  }
+});
+
 router.post("/email-tutor/:template/:tutorId", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const { tutorId, template } = req.params;

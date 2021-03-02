@@ -73,6 +73,8 @@ const Schema = new mongoose.Schema({
   lastLoginAt: { type: Date, default: Date.now },
   forgotPasswordResetToken: { type: String, default: "" },
   forgotPasswordResetExpires: { type: Date },
+  invitationToken: { type: String, default: "" },
+  invitationExpires: { type: Date },
 
   cniFiles: { type: [String], default: [] },
 

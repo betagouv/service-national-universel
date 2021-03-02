@@ -15,56 +15,51 @@ import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import DndFileInput from "../../components/dndFileInput";
+import Error, { requiredMessage } from "../../components/errorMessage";
 
 export default (props) => {
-  const [young, setYoung] = useState();
   const user = useSelector((state) => state.Auth.user);
   const history = useHistory();
-
-  useEffect(() => {
-    (async () => {
-      const id = props.match && props.match.params && props.match.params.id;
-      if (!id) return setYoung(null);
-      const { data } = await api.get(`/referent/young/${id}`);
-      return setYoung(data);
-    })();
-  }, []);
-
-  if (young === undefined) return <div>Chargement...</div>;
-
-  const getSubtitle = () => {
-    const createdAt = new Date(young.createdAt);
-
-    dayjs.extend(relativeTime).locale("fr");
-    const diff = dayjs(createdAt).fromNow();
-    return `Inscrit(e) ${diff} - ${createdAt.toLocaleDateString()}`;
-  };
 
   return (
     //@todo fix the depart and region
     <Wrapper>
       <Formik
-        initialValues={young}
+        initialValues={{
+          status: "VALIDATED",
+          firstName: "",
+          lastName: "",
+          birthdateAt: "",
+          cniFiles: [],
+          email: "",
+          phone: "",
+          address: "",
+          city: "",
+          zip: "",
+          department: "",
+          region: "",
+          parentConsentmentFiles: [],
+        }}
         onSubmit={async (values) => {
           try {
-            const { ok, code, data: young } = await api.put(`/referent/young/${values._id}`, values);
+            const { ok, code, data: young } = await api.post("/referent/young", values);
             if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
-            toastr.success("Mis à jour!");
+            toastr.success("Volontaire créé !");
+            return history.push("/inscription");
           } catch (e) {
             console.log(e);
-            toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
+            toastr.error("Oups, une erreur est survenue pendant la création du volontaire :", translate(e.code));
           }
         }}
       >
-        {({ values, handleChange, handleSubmit, isSubmitting, submitForm }) => (
+        {({ values, handleChange, handleSubmit, isSubmitting, submitForm, errors, touched }) => (
           <>
             <TitleWrapper>
               <div>
-                <Title>{`Profil de ${values.firstName} ${values.lastName}`}</Title>
-                <SubTitle>{getSubtitle()}</SubTitle>
+                <Title>{`Création du profil ${values.firstName ? `de ${values.firstName}  ${values.lastName}` : ""}`}</Title>
               </div>
               <SaveBtn loading={isSubmitting} onClick={handleSubmit}>
-                Enregistrer
+                Valider cette candidature
               </SaveBtn>
             </TitleWrapper>
             <Row>
@@ -72,8 +67,8 @@ export default (props) => {
                 <Box>
                   <BoxTitle>Identité</BoxTitle>
                   <BoxContent direction="column">
-                    <Item title="Nom" values={values} name={"lastName"} handleChange={handleChange} />
-                    <Item title="Prénom" values={values} name="firstName" handleChange={handleChange} />
+                    <Item title="Nom" values={values} name={"lastName"} handleChange={handleChange} required errors={errors} touched={touched} />
+                    <Item title="Prénom" values={values} name="firstName" handleChange={handleChange} required errors={errors} touched={touched} />
                     <Item title="Date de naissance" type="date" values={values} name="birthdateAt" handleChange={handleChange} />
                     <Documents>
                       <h4>Pièces d'identité</h4>
@@ -104,17 +99,9 @@ export default (props) => {
               </Col>
               <Col md={6} style={{ marginBottom: "20px" }}>
                 <Box>
-                  <div>
-                    <BoxTitle>{` Status : ${translate(young.status)}`}</BoxTitle>
-                  </div>
-                  <BoxContent direction="column">{young && young.historic && young.historic.length !== 0 && <Historic value={young.historic} />}</BoxContent>
-                </Box>
-              </Col>
-              <Col md={6} style={{ marginBottom: "20px" }}>
-                <Box>
                   <BoxTitle>Coordonnées</BoxTitle>
                   <BoxContent direction="column">
-                    <Item title="E-mail" values={values} name="email" handleChange={handleChange} />
+                    <Item title="E-mail" values={values} name="email" handleChange={handleChange} required errors={errors} touched={touched} />
                     <Item title="Tél." values={values} name="phone" handleChange={handleChange} />
                     <Item title="Adresse" values={values} name="address" handleChange={handleChange} />
                     <Item title="Ville" values={values} name="city" handleChange={handleChange} />
@@ -288,14 +275,6 @@ export default (props) => {
                         }}
                       />
                     </Documents>
-                  </BoxContent>
-                </Box>
-              </Col>
-              <Col md={6} style={{ marginBottom: "20px" }}>
-                <Box>
-                  <BoxTitle>Motivations</BoxTitle>
-                  <BoxContent direction="column" style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                    <div className="quote">{values.motivations ? `« ${values.motivations} »` : "Non renseignées"}</div>
                   </BoxContent>
                 </Box>
               </Col>
@@ -507,122 +486,20 @@ export default (props) => {
                   </BoxContent>
                 </Box>
               </Col>
-              {user.role === "admin" ? (
-                <Col md={6} style={{ marginBottom: "20px" }}>
-                  <Box>
-                    <BoxTitle>Cohorte</BoxTitle>
-                    <BoxContent direction="column">
-                      <Select
-                        name="cohort"
-                        values={values}
-                        handleChange={handleChange}
-                        title="Cohorte"
-                        options={[
-                          { value: "2021", label: "2021" },
-                          { value: "2020", label: "2020" },
-                          { value: "2019", label: "2019" },
-                        ]}
-                      />
-                    </BoxContent>
-                  </Box>
-                </Col>
-              ) : null}
-              {values.cohort === "2020" ? (
-                <Col md={6} style={{ marginBottom: "20px" }}>
-                  <Box>
-                    <BoxTitle>Journée de Défense et Citoyenneté (cohorte 2020)</BoxTitle>
-                    <BoxContent direction="column">
-                      <Select
-                        name="jdc"
-                        values={values}
-                        handleChange={handleChange}
-                        title="JDC réalisée"
-                        options={[
-                          { value: "true", label: "Oui" },
-                          { value: "false", label: "Non" },
-                        ]}
-                      />
-                    </BoxContent>
-                  </Box>
-                </Col>
-              ) : null}
-              <Col md={6} style={{ marginBottom: "20px" }}>
-                <Box>
-                  <BoxTitle>Préférences</BoxTitle>
-                  <BoxContent direction="column">
-                    <ItemParent title="Domaines">
-                      {values.domains.map((d, i) => (
-                        <Badge key={i} color="#555555" value={d} />
-                      ))}
-                    </ItemParent>
-                    <ItemParent title="Projet Professionnel">
-                      <Badge color="#555555" value={values.professionnalProject} />
-                      {values.professionnalProjectPrecision ? <Badge color="#555555" value={values.professionnalProjectPrecision} /> : null}
-                    </ItemParent>
-                    <ItemParent title="période privilégiée">
-                      <Badge color="#555555" value={values.period} />
-                    </ItemParent>
-                    <ItemParent title="Mission à proximité de l'établissement scolaire">
-                      <Badge color="#555555" value={values.mobilityNearSchool} />
-                    </ItemParent>
-                    <ItemParent title="Mission à proximité du domicile">
-                      <Badge color="#555555" value={values.mobilityNearHome} />
-                    </ItemParent>
-                    <ItemParent title="Mission à proximité d'un proche">
-                      <Badge color="#555555" value={values.mobilityNearRelative} />
-                      <Badge color="#555555" value={values.mobilityNearRelativeName} />
-                      <Badge color="#555555" value={values.mobilityNearRelativeZip} />
-                    </ItemParent>
-                    <ItemParent title="Moyen de transport priviligé">
-                      {values.mobilityTransport.map((m, i) => (
-                        <Badge key={i} color="#555555" value={m} />
-                      ))}
-                      {values.mobilityTransportOther ? <Badge color="#555555" value={values.mobilityTransportOther} /> : null}
-                    </ItemParent>
-                    <ItemParent title="Format de mission">
-                      <Badge color="#555555" value={values.missionFormat} />
-                    </ItemParent>
-                    <ItemParent title="Engagement parallèle">
-                      <Badge color="#555555" value={values.engaged} />
-                      {values.engagedDescription ? <Input disabled type="textarea" rows={1} defaultValue={values.engagedDescription} /> : null}
-                    </ItemParent>
-                    <ItemParent title="Localisation privilégiée">
-                      {values.desiredLocation ? <Input disabled type="textarea" rows={2} defaultValue={values.desiredLocation} /> : null}
-                    </ItemParent>
-                  </BoxContent>
-                </Box>
-              </Col>
             </Row>
           </>
         )}
       </Formik>
-      <DeleteBtn
-        onClick={async () => {
-          if (!confirm("Êtes-vous sûr(e) de vouloir supprimer ce profil")) return;
-          try {
-            const { ok, code } = await api.remove(`/young/${young._id}`);
-            if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
-            if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
-            toastr.success("Ce profil a été supprimé.");
-            return history.push(`/inscription`);
-          } catch (e) {
-            console.log(e);
-            return toastr.error("Oups, une erreur est survenue pendant la supression du profil :", translate(e.code));
-          }
-        }}
-      >
-        Supprimer
-      </DeleteBtn>
     </Wrapper>
   );
 };
 
-const Item = ({ title, values, name, handleChange, type = "text", disabled = false }) => {
+const Item = ({ errors, touched, title, values, name, handleChange, type = "text", disabled = false, required = false }) => {
   const renderInput = () => {
     if (type === "date") {
       return (
         <>
-          <Field hidden name="birthdateAt" value={values.birthdateAt} />
+          <Field hidden name="birthdateAt" value={values.birthdateAt} validate={(v) => required && !v && requiredMessage} />
           <DateInput
             value={values.birthdateAt}
             onChange={(date) => {
@@ -632,7 +509,20 @@ const Item = ({ title, values, name, handleChange, type = "text", disabled = fal
         </>
       );
     }
-    return <Field disabled={disabled} className="form-control" value={translate(values[name])} name={name} onChange={handleChange} type={type} />;
+    return (
+      <>
+        <Field
+          disabled={disabled}
+          className="form-control"
+          value={translate(values[name])}
+          name={name}
+          onChange={handleChange}
+          type={type}
+          validate={(v) => required && !v && requiredMessage}
+        />
+        {errors && touched && <Error errors={errors} touched={touched} name={name} />}
+      </>
+    );
   };
   return (
     <Row className="detail">
@@ -640,17 +530,6 @@ const Item = ({ title, values, name, handleChange, type = "text", disabled = fal
         <label>{title}</label>
       </Col>
       <Col md={8}>{renderInput()}</Col>
-    </Row>
-  );
-};
-
-const ItemParent = ({ title, children }) => {
-  return (
-    <Row className="detail">
-      <Col md={4}>
-        <label>{title}</label>
-      </Col>
-      <Col md={8}>{children}</Col>
     </Row>
   );
 };
@@ -691,24 +570,6 @@ const Checkbox = ({ title, name, value, values, handleChange, disabled, descript
   );
 };
 
-const Badge = ({ value, color }) => {
-  return value && value.length ? <BadgeStyle color={color}>{translate(value)}</BadgeStyle> : null;
-};
-
-const BadgeStyle = styled.span`
-  display: inline-block;
-  padding: 0.25rem 1rem;
-  margin: 0 0.25rem;
-  border-radius: 99999px;
-  font-size: 0.8rem;
-  margin-bottom: 5px;
-  margin-top: 15px;
-  ${({ color }) => `
-    color: ${color};
-    background-color: ${color}33;
-  `}
-`;
-
 const Documents = styled.div`
   margin-left: 1rem;
   margin-right: 1rem;
@@ -721,20 +582,6 @@ const Documents = styled.div`
   label {
     display: block !important;
     width: 100%;
-  }
-`;
-
-const DeleteBtn = styled.button`
-  background-color: #bd2130;
-  border: none;
-  border-radius: 5px;
-  padding: 7px 30px;
-  font-size: 14px;
-  font-weight: 700;
-  color: #fff;
-  cursor: pointer;
-  :hover {
-    background: #dc3545;
   }
 `;
 
@@ -766,11 +613,6 @@ const Title = styled.h2`
   color: #242526;
   font-weight: bold;
   font-size: 28px;
-`;
-const SubTitle = styled.h2`
-  color: #242526;
-  font-size: 1rem;
-  font-weight: 300;
 `;
 
 const Box = styled.div`
