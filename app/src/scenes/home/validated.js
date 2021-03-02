@@ -6,7 +6,8 @@ import NextStep from "../phase1/nextStep";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
-  const [showAlert, setShowAlert] = useState(young.cohort !== "2020");
+  const is2020 = young.cohort === "2020";
+  const [showAlert, setShowAlert] = useState(!is2020);
 
   const goTo = (id) => {
     if (document.getElementById) {
@@ -29,11 +30,22 @@ export default () => {
           </Alert>
         )}
         <Content showAlert={showAlert}>
-          <h1>
-            <strong>{young.firstName},</strong> votre candidature a été retenue !
-          </h1>
-          <p>Félicitations, vous allez pouvoir débuter prochainement votre parcours SNU.</p>
-          <p>Ceci est votre espace volontaire, il vous permettra de vous guider à chaque étape de votre SNU.</p>
+          {is2020 ? (
+            <>
+              <h1>
+                <strong>{young.firstName},</strong> ravis de vous retrouver !
+              </h1>
+              <p>Votre espace volontaire vous accompagne à chaque étape de votre SNU.</p>
+            </>
+          ) : (
+            <>
+              <h1>
+                <strong>{young.firstName},</strong> votre candidature a été retenue !
+              </h1>
+              <p>Félicitations, vous allez pouvoir débuter prochainement votre parcours SNU.</p>
+              <p>Ceci est votre espace volontaire, il vous permettra de vous guider à chaque étape de votre SNU.</p>
+            </>
+          )}
           <p style={{ color: "#161e2e", fontSize: "1.5rem", fontWeight: 700 }}>Au programme</p>
           <WrapperItem>
             <div className="title">1. Un séjour de cohésion</div>
