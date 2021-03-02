@@ -51,7 +51,9 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
 
     if (mission.tutorId) {
       const tutor = await UserObject.findOne({ _id: mission.tutorId });
-      mission.tutor = { firstName: tutor.firstName, lastName: tutor.lastName, email: tutor.email, id: tutor._id };
+      if (tutor) {
+        mission.tutor = { firstName: tutor.firstName, lastName: tutor.lastName, email: tutor.email, id: tutor._id };
+      }
     }
     const application = await ApplicationModel.findOne({ missionId: req.params.id, youngId: req.user._id });
     return res.status(200).send({ ok: true, data: { ...mission, application } });
