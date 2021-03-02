@@ -20,6 +20,7 @@ const Schema = new mongoose.Schema({
   sqlUserId: { type: String },
   isNetwork: { type: String, enum: ["true", "false"] },
   networkId: { type: String },
+  networkName: { type: String },
   sqlNetworkId: { type: String },
 
   legalStatus: { type: String, default: "ASSOCIATION", enum: ["ASSOCIATION", "PUBLIC", "PRIVATE", "OTHER"] },
