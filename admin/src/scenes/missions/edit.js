@@ -27,6 +27,8 @@ export default (props) => {
     if (isNew) return setDefaultValue(null);
     const id = props.match && props.match.params && props.match.params.id;
     const { data } = await api.get(`/mission/${id}`);
+    if (data && data.startAt) data.startAt = dateForDatePicker(data.startAt);
+    if (data && data.endAt) data.endAt = dateForDatePicker(data.endAt);
     setDefaultValue(data);
   }
   async function initReferents() {
@@ -50,6 +52,10 @@ export default (props) => {
       }
       return setStructure(ok ? data : null);
     }
+  }
+
+  function dateForDatePicker(d) {
+    return new Date(d).toISOString().split("T")[0];
   }
 
   useEffect(() => {
@@ -82,8 +88,8 @@ export default (props) => {
           contraintes: "",
           departement: "",
           tuteur: "",
-          startAt: Date.now(),
-          endAt: Date.now() + 1000 * 60 * 60 * 24 * 7,
+          startAt: dateForDatePicker(Date.now()),
+          endAt: dateForDatePicker(Date.now() + 1000 * 60 * 60 * 24 * 7),
           city: "",
           zip: "",
           address: "",
@@ -243,7 +249,6 @@ export default (props) => {
                               }}
                               type="date"
                               name="startAt"
-                              value={new Date(values.startAt).toISOString().split("T")[0]}
                               onChange={handleChange}
                               placeholder="Date de début"
                             />
@@ -259,7 +264,6 @@ export default (props) => {
                               }}
                               type="date"
                               name="endAt"
-                              value={new Date(values.endAt).toISOString().split("T")[0]}
                               onChange={handleChange}
                               placeholder="Date de fin"
                             />
