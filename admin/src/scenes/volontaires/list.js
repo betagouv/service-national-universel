@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import { ReactiveBase, ReactiveList, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
-import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
+import VioletHeaderButton from "../../components/buttons/VioletHeaderButton";
 
 import ExportComponent from "../../components/ExportXlsx";
 
@@ -28,7 +28,7 @@ export default ({ setYoung }) => {
               <div>
                 <Title>Volontaires</Title>
               </div>
-              <Export>
+              <VioletHeaderButton>
                 <ExportComponent
                   title="Exporter les volontaires"
                   collection="volontaire"
@@ -100,7 +100,7 @@ export default ({ setYoung }) => {
                     };
                   }}
                 />
-              </Export>
+              </VioletHeaderButton>
             </Header>
             <Filter>
               <DataSearch
@@ -480,22 +480,6 @@ const Table = styled.table`
     }
     .email {
       font-size: 0.8rem;
-    }
-  }
-`;
-
-const Export = styled.div`
-  button {
-    background-color: #5245cc;
-    border: none;
-    border-radius: 5px;
-    padding: 7px 30px;
-    font-size: 14px;
-    font-weight: 700;
-    color: #fff;
-    cursor: pointer;
-    :hover {
-      background: #372f78;
     }
   }
 `;
