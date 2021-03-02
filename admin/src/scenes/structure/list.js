@@ -185,7 +185,6 @@ export default () => {
 
 const Hit = ({ hit, onClick }) => {
   const [missionsInfo, setMissionsInfo] = useState({ count: "-", placesTotal: "-" });
-  const [parentStructure, setParentStructure] = useState(null);
   useEffect(() => {
     (async () => {
       const queries = [];
@@ -193,20 +192,8 @@ const Hit = ({ hit, onClick }) => {
       queries.push({
         query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": hit._id } }] } },
       });
-      if (hit.networkId) {
-        queries.push({ index: "structure", type: "_doc" });
-        queries.push({
-          query: { bool: { must: { match_all: {} }, filter: [{ term: { _id: hit.networkId } }] } },
-        });
-      }
 
       const { responses } = await api.esQuery(queries);
-      if (hit.networkId) {
-        const structures = responses[1]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-        setParentStructure(structures.length ? structures[0] : null);
-      } else {
-        setParentStructure(null);
-      }
       setMissionsInfo({
         count: responses[0].hits.hits.length,
         placesTotal: responses[0].hits.hits.reduce((acc, e) => acc + e._source.placesTotal, 0),
@@ -228,9 +215,9 @@ const Hit = ({ hit, onClick }) => {
       <td>
         {hit.status === "DRAFT" ? <TagStatus>{translate(hit.status)}</TagStatus> : null}
         {hit.isNetwork === "true" ? <TagNetwork>Tête de réseau</TagNetwork> : null}
-        {parentStructure ? (
-          <Link to={`structure/${parentStructure._id}`}>
-            <TagParent>{parentStructure.name}</TagParent>
+        {hit.networkName ? (
+          <Link to={`structure/${hit.networkId}`}>
+            <TagParent>{hit.networkName}</TagParent>
           </Link>
         ) : null}
         {hit.department ? <TagDepartment>{translate(hit.department)}</TagDepartment> : null}
