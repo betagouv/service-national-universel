@@ -505,6 +505,25 @@ export default (props) => {
                   </BoxContent>
                 </Box>
               </Col>
+              {values.cohort === "2020" ? (
+                <Col md={6} style={{ marginBottom: "20px" }}>
+                  <Box>
+                    <BoxTitle>Journée de Défense et Citoyenneté (cohorte 2020)</BoxTitle>
+                    <BoxContent direction="column">
+                      <Select
+                        name="jdc"
+                        values={values}
+                        handleChange={handleChange}
+                        title="JDC réalisée"
+                        options={[
+                          { value: "true", label: "Oui" },
+                          { value: "false", label: "Non" },
+                        ]}
+                      />
+                    </BoxContent>
+                  </Box>
+                </Col>
+              ) : null}
               <Col md={6} style={{ marginBottom: "20px" }}>
                 <Box>
                   <BoxTitle>Préférences</BoxTitle>

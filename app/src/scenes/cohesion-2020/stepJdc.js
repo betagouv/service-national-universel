@@ -61,14 +61,14 @@ export default () => {
               </Col>
               <Col>
                 <RadioLabel>
-                  <Field validate={(v) => !v && requiredMessage} type="radio" name="handicap" value="false" checked={values.handicap === "false"} onChange={handleChange} />
+                  <Field validate={(v) => !v && requiredMessage} type="radio" name="jdc" value="false" checked={values.jdc === "false"} onChange={handleChange} />
                   Non
                 </RadioLabel>
                 <RadioLabel>
-                  <Field validate={(v) => !v && requiredMessage} type="radio" name="handicap" value="true" checked={values.handicap === "true"} onChange={handleChange} />
+                  <Field validate={(v) => !v && requiredMessage} type="radio" name="jdc" value="true" checked={values.jdc === "true"} onChange={handleChange} />
                   Oui
                 </RadioLabel>
-                <ErrorMessage errors={errors} touched={touched} name="handicap" />
+                <ErrorMessage errors={errors} touched={touched} name="jdc" />
               </Col>
             </FormRow>
             <Footer>

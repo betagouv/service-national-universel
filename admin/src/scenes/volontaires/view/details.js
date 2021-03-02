@@ -74,6 +74,11 @@ export default ({ young }) => {
                 <Details title="Ville" value={young.schoolCity && young.schoolZip && `${young.schoolCity} (${young.schoolZip})`} />
                 <Details title="Adresse" value={young.schoolAdress} />
               </Bloc>
+              {young.jdc && young.cohort === "2020" && (
+                <Bloc title="Journée de Défense et Citoyenneté">
+                  <Details title="JDC réalisée" value={t(young.jdc)} />
+                </Bloc>
+              )}
               <Bloc title="Représentant légal n°1">
                 <Details title="Statut" value={t(young.parent1Status)} />
                 <Details title="Prénom" value={young.parent1FirstName} />

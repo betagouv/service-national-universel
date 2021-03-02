@@ -168,6 +168,9 @@ const Schema = new mongoose.Schema({
   imageRight: { type: String, enum: ["true", "false"] },
   imageRightFiles: { type: [String], default: [] },
 
+  // * JDC
+  jdc: { type: String, enum: ["true", "false"] },
+
   // * Motivations
   motivations: { type: String },
 
