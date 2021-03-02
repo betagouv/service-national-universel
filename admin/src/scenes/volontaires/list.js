@@ -14,7 +14,7 @@ import Panel from "./panel";
 import { translate, getFilterLabel, formatStringLongDate } from "../../utils";
 import { Link } from "react-router-dom";
 
-const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION"];
+const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_PHASE_1", "STATUS_PHASE_2"];
 
 export default ({ setYoung }) => {
   const [volontaire, setVolontaire] = useState(null);
