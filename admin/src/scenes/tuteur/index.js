@@ -38,7 +38,7 @@ export default () => {
             <Filter>
               <DataSearch
                 showIcon={false}
-                placeholder="Rechercher par mots clés, mission ou structure..."
+                placeholder="Rechercher par prénom, nom, email..."
                 componentId="SEARCH"
                 dataField={["email.keyword", "firstName", "lastName"]}
                 react={{ and: FILTERS }}
@@ -46,6 +46,7 @@ export default () => {
                 style={{ flex: 2 }}
                 innerClass={{ input: "searchbox" }}
                 autosuggest={false}
+                queryFormat="and"
               />
               <FilterRow>
                 {/* <MultiDropdownList

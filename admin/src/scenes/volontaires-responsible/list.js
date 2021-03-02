@@ -76,6 +76,7 @@ export default () => {
                 style={{ flex: 2 }}
                 innerClass={{ input: "searchbox" }}
                 autosuggest={false}
+                queryFormat="and"
               />
               <FilterRow>
                 <MultiDropdownList
