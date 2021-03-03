@@ -3,7 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { BrowserRouter as Router, Route, Switch, Redirect, useLocation } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import * as Sentry from "@sentry/browser";
-
+import { Helmet } from "react-helmet";
 import styled from "styled-components";
 
 import { setYoung } from "./redux/auth/actions";
@@ -62,6 +62,14 @@ export default () => {
 
   return (
     <Router>
+      <Helmet>
+        <script>{`
+          gtag('event', 'conversion', {
+            'allow_custom_scripts': true,
+            'send_to': 'DC-2971054/snuiz0/inscsnu+unique'
+          });`}</script>
+        <noscript>{`<img src="https://ad.doubleclick.net/ddm/activity/src=2971054;type=snuiz0;cat=inscsnu;dc_lat=;dc_rdid=;tag_for_child_directed_treatment=;tfua=;npa=;gdpr=\${GDPR};gdpr_consent=\${GDPR_CONSENT_755};ord=1;num=1?" width="1" height="1" alt=""/>`}</noscript>
+      </Helmet>
       <ScrollToTop />
       <div className="main">
         <Switch>
