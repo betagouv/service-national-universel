@@ -4,6 +4,7 @@ import Inscription from "./inscription";
 import Volontaire from "./volontaire";
 import Structure from "./structure";
 import Mission from "./missions";
+import VioletHeaderButton from "../../components/buttons/VioletHeaderButton";
 
 export default () => {
   const [currentTab, setCurrentTab] = useState("inscriptions");
@@ -25,6 +26,9 @@ export default () => {
             Missions
           </TabItem>
         </TabNavigationList>
+        <VioletHeaderButton onClick={() => print()}>
+          <p>Exporter les statistiques</p>
+        </VioletHeaderButton>
       </TabNavigation>
       <Wrapper>
         {currentTab === "inscriptions" && <Inscription />}
@@ -38,8 +42,23 @@ export default () => {
 
 const Wrapper = styled.div`
   padding: 20px 40px;
+  @media print {
+    background-color: #fff;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 2rem;
+    z-index: 999;
+  }
 `;
-const TabNavigation = styled.nav``;
+const TabNavigation = styled.nav`
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+`;
 const TabNavigationList = styled.ul`
   padding-left: 30px;
   display: flex;
