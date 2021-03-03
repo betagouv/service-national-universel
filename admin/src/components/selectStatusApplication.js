@@ -25,7 +25,7 @@ export default ({ hit, options = [] }) => {
 
   options = [APPLICATION_STATUS.IN_PROGRESS, APPLICATION_STATUS.DONE, APPLICATION_STATUS.ABANDON];
   if (application.status === APPLICATION_STATUS.WAITING_VALIDATION) options = [APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.REFUSED, APPLICATION_STATUS.CANCEL];
-  if (user.role === "admin")
+  if (["admin", "referent_department", "referent_region"].includes(user.role))
     options = [
       APPLICATION_STATUS.WAITING_VALIDATION,
       APPLICATION_STATUS.VALIDATED,
