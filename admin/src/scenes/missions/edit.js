@@ -139,7 +139,7 @@ export default (props) => {
             </ButtonContainer>
           </Header>
           <Wrapper>
-            {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas porposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
+            {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas proposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
             <Box>
               <Row style={{ borderBottom: "2px solid #f4f5f7" }}>
                 <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
@@ -378,7 +378,7 @@ export default (props) => {
               />
             </FormGroup> */}
             </Box>
-            {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas porposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
+            {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas proposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
             <Header style={{ justifyContent: "flex-end" }}>
               <ButtonContainer>
                 {!defaultValue ? (
