@@ -7,7 +7,11 @@ import { useSelector } from "react-redux";
 import { translate as t, YOUNG_PHASE, YOUNG_STATUS_PHASE2 } from "../../../utils";
 import WrapperPhase2 from "./wrapper";
 import ApplicationList from "./applicationList.js";
+import ProposalMission from "./proposalMission";
+import CreateMission from "./createMission";
 import SelectStatus from "../../../components/selectStatus";
+import PlusSVG from "../../../assets/plus.svg";
+import CrossSVG from "../../../assets/cross.svg";
 
 export default ({ young }) => {
   const user = useSelector((state) => state.Auth.user);
@@ -91,13 +95,13 @@ export default ({ young }) => {
         <Box>
           <ApplicationList young={young} />
         </Box>
-        {user.structureId && (
+        {/* {user.structureId && (
           <Link to={`/mission/create/${user.structureId}`}>
             <Box style={{ zIndex: -1, position: "relative" }}>
               <Bloc title="Créer une nouvelle mission" />
             </Box>
           </Link>
-        )}
+        )} */}
       </WrapperPhase2>
     </div>
   );
