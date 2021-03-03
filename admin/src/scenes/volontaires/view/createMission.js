@@ -2,26 +2,21 @@ import React, { useEffect, useState } from "react";
 import { Col, Row, Input } from "reactstrap";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
-import { useSelector } from "react-redux";
 import { Formik, Field } from "formik";
-import { Redirect, useHistory } from "react-router-dom";
 import Select from "react-select";
 
 import MultiSelect from "../../../components/Multiselect";
 import AddressInput from "../../../components/addressInput";
 import ErrorMessage, { requiredMessage } from "../../../components/errorMessage";
-import { domains, translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, MISSION_DOMAINS } from "../../../utils";
+import { translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, MISSION_DOMAINS, APPLICATION_STATUS } from "../../../utils";
 import api from "../../../services/api";
 import Invite from "../../structure/components/invite";
 
-export default (props) => {
+export default ({ young, onSend }) => {
   const [structures, setStructures] = useState();
   const [structure, setStructure] = useState();
   const [referents, setReferents] = useState([]);
   const [showTutor, setShowTutor] = useState();
-  const history = useHistory();
-  const user = useSelector((state) => state.Auth.user);
-  const isNew = !props?.match?.params?.id;
 
   useEffect(() => {
     (async () => {
@@ -43,6 +38,29 @@ export default (props) => {
   function dateForDatePicker(d) {
     return new Date(d).toISOString().split("T")[0];
   }
+
+  const handleProposal = async (mission) => {
+    const application = {
+      status: APPLICATION_STATUS.DONE,
+      youngId: young._id,
+      youngFirstName: young.firstName,
+      youngLastName: young.lastName,
+      youngEmail: young.email,
+      youngBirthdateAt: young.birthdateAt,
+      youngCity: young.city,
+      youngDepartment: young.department,
+      missionId: mission._id,
+      missionName: mission.name,
+      missionDepartment: mission.department,
+      missionRegion: mission.region,
+      structureId: structure._id,
+      tutorId: mission.tutorId,
+      tutorName: mission.tutorName,
+    };
+    const { ok, code } = await api.post(`/application`, application);
+    if (!ok) return toastr.error("Oups, une erreur est survenue lors de la candidature", code);
+    return toastr.success("Candidature ajoutée !", code);
+  };
 
   return (
     <Formik
@@ -71,11 +89,11 @@ export default (props) => {
       onSubmit={async (values) => {
         if (!values._id) values.placesLeft = values.placesTotal;
         try {
-          return console.log(values);
           const { ok, code, data: mission } = await api.post("/mission", values);
           if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", translate(code));
-          // history.push(`/mission/${mission._id}`);
+          await handleProposal(mission);
           toastr.success("Mission enregistrée");
+          onSend();
         } catch (e) {
           return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", e?.error?.message);
         }
@@ -83,19 +101,6 @@ export default (props) => {
     >
       {({ values, handleChange, handleSubmit, errors, touched }) => (
         <div>
-          {/* <Header>
-            <ButtonContainer>
-              <button
-                disabled={!isValid}
-                onClick={() => {
-                  handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
-                  handleSubmit();
-                }}
-              >
-                Enregistrer et proposer la mission
-              </button>
-            </ButtonContainer>
-          </Header> */}
           <Wrapper>
             {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas proposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
             <Row style={{ borderBottom: "2px solid #f4f5f7" }}>
@@ -426,60 +431,10 @@ const FormGroup = styled.div`
   }
 `;
 
-const Subtitle = styled.div`
-  color: rgb(113, 128, 150);
-  font-weight: 400;
-  text-transform: uppercase;
-  font-size: 18px;
-`;
-const Title = styled.div`
-  color: rgb(38, 42, 62);
-  font-weight: 700;
-  font-size: 24px;
-  margin-bottom: 10px;
-  flex: 1;
-`;
-
 const Legend = styled.div`
   color: rgb(38, 42, 62);
   margin-bottom: 20px;
   font-size: 20px;
-`;
-
-const ButtonLight = styled.button`
-  background-color: #fff;
-  border: 1px solid #dcdfe6;
-  outline: 0;
-  align-self: flex-start;
-  border-radius: 4px;
-  padding: 10px 20px;
-  font-size: 14px;
-  width: 120px;
-  color: #646b7d;
-  cursor: pointer;
-  margin-right: 10px;
-  :hover {
-    color: rgb(49, 130, 206);
-    border-color: rgb(193, 218, 240);
-    background-color: rgb(234, 243, 250);
-  }
-`;
-const Button = styled.button`
-  background-color: #3182ce;
-  outline: 0;
-  border: 0;
-  color: #fff;
-  border-radius: 4px;
-  padding: 10px 20px;
-  font-size: 14px;
-  cursor: pointer;
-  :hover {
-    background-color: #5a9bd8;
-  }
-  :disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
 `;
 
 const ButtonContainer = styled.div`
@@ -504,14 +459,4 @@ const ButtonContainer = styled.div`
       background: #372f78;
     }
   }
-`;
-
-const Box = styled.div`
-  width: ${(props) => props.width || 100}%;
-  min-height: 400px;
-  height: 100%;
-  background-color: #fff;
-  filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.05));
-  margin-bottom: 33px;
-  border-radius: 8px;
 `;

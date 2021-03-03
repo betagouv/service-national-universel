@@ -15,6 +15,7 @@ export default ({ young, onSend }) => {
 
   const handleProposal = async (mission) => {
     const application = {
+      status: APPLICATION_STATUS.WAITING_ACCEPTATION,
       youngId: young._id,
       youngFirstName: young.firstName,
       youngLastName: young.lastName,
@@ -26,7 +27,9 @@ export default ({ young, onSend }) => {
       missionName: mission.name,
       missionDepartment: mission.department,
       missionRegion: mission.region,
-      status: APPLICATION_STATUS.WAITING_ACCEPTATION,
+      structureId: mission.structureId,
+      tutorId: mission.tutorId,
+      tutorName: mission.tutorName,
     };
     const { ok, code } = await api.post(`/application`, application);
     if (!ok) return toastr.error("Oups, une erreur est survenue lors de la candidature", code);

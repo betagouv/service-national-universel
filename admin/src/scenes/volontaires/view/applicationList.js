@@ -63,7 +63,7 @@ export default ({ young }) => {
           setCreateMissionVisible(!createMissionVisible);
         }}
       >
-        <CreateMission young={young} onSend={() => {}} />
+        <CreateMission young={young} onSend={getApplications} />
       </ToggleBloc>
     </>
   );
