@@ -30,6 +30,7 @@ export const publicEtatTypes = [
 
 export const corpsEnUniforme = ["SDIS (Service départemental d'Incendie et de Secours)", "Gendarmerie", "Police", "Armées"];
 
+import { translate } from "./translation";
 export const getFilterLabel = (selected, placeholder = "Choisissez un filtre") => {
   if (Object.keys(selected).length === 0) return placeholder;
   const translated = Object.keys(selected).map((item) => {
