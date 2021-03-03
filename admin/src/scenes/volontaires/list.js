@@ -311,7 +311,7 @@ const Action = ({ hit, color }) => {
           <Link to={`/volontaire/${hit._id}/edit`}>
             <DropdownItem className="dropdown-item">Modifier le profil</DropdownItem>
           </Link>
-          {user.role === "admin" ? (
+          {["admin", "referent_department", "referent_region"].includes(user.role) ? (
             <DropdownItem className="dropdown-item">
               <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${hit._id}`}>Prendre sa place</a>
             </DropdownItem>
