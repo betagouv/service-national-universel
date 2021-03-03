@@ -10,7 +10,7 @@ import styled from "styled-components";
 import { setUser, setStructure } from "../../redux/auth/actions";
 import api from "../../services/api";
 import matomo from "../../services/matomo";
-import LoadingButton from "../../components/loadingButton";
+import LoadingButton from "../../components/buttons/LoadingButton";
 import Header from "./components/header";
 
 export default () => {

@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { Link } from "react-router-dom";
 
 import { YOUNG_SITUATIONS, YOUNG_PHASE, translate as t } from "../../utils";
-import LoadingButton from "../../components/loadingButton";
+import LoadingButton from "../../components/buttons/LoadingButton";
 import { appURL } from "../../config";
 import api from "../../services/api";
 

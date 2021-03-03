@@ -8,7 +8,7 @@ import "dayjs/locale/fr";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 
-import LoadingButton from "../../components/loadingButton";
+import LoadingButton from "../../components/buttons/LoadingButton";
 import { setUser as setUserRedux } from "../../redux/auth/actions";
 import DateInput from "../../components/dateInput";
 import { departmentList, regionList, department2region, translate, REFERENT_ROLES } from "../../utils";

@@ -10,7 +10,7 @@ import { setUser, setStructure } from "../../redux/auth/actions";
 import Header from "./components/header";
 
 import api from "../../services/api";
-import LoadingButton from "../../components/loadingButton";
+import LoadingButton from "../../components/buttons/LoadingButton";
 import { translate } from "../../utils";
 
 export default () => {

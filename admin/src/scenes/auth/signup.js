@@ -11,7 +11,7 @@ import { useHistory } from "react-router-dom";
 import { setUser, setStructure } from "../../redux/auth/actions";
 
 import api from "../../services/api";
-import LoadingButton from "../../components/loadingButton";
+import LoadingButton from "../../components/buttons/LoadingButton";
 import Header from "./components/header";
 
 import matomo from "../../services/matomo";
