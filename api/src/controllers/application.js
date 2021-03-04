@@ -33,6 +33,26 @@ const updateStatusPhase2 = async (app) => {
   await young.index();
 };
 
+const updatePlacesMission = async (app) => {
+  try {
+    // Get all application for the mission
+    const mission = await MissionObject.findById(app.missionId);
+    const applications = await ApplicationObject.find({ missionId: mission._id });
+    const placesTaken = applications.filter((application) => {
+      return ["VALIDATED", "IN_PROGRESS", "DONE", "ABANDON"].includes(application.status);
+    }).length;
+    const placesLeft = Math.max(0, mission.placesTotal - placesTaken);
+    if (mission.placesLeft !== placesLeft) {
+      console.log(`Mission ${mission.id}: total ${mission.placesTotal}, left from ${mission.placesLeft} to ${placesLeft}`);
+      mission.set({ placesLeft });
+      await mission.save();
+      await mission.index();
+    }
+  } catch (e) {
+    console.log(e);
+  }
+};
+
 router.post("/", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
   try {
     const obj = req.body;
@@ -43,6 +63,7 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false }
     }
     const data = await ApplicationObject.create(obj);
     await updateStatusPhase2(data);
+    await updatePlacesMission(data);
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
@@ -54,6 +75,7 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false })
   try {
     const application = await ApplicationObject.findByIdAndUpdate(req.body._id, req.body, { new: true });
     await updateStatusPhase2(application);
+    await updatePlacesMission(application);
     res.status(200).send({ ok: true, data: application });
   } catch (error) {
     capture(error);

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Col, DropdownItem, DropdownMenu, DropdownToggle, Label, Pagination, PaginationItem, PaginationLink, Row, UncontrolledDropdown } from "reactstrap";
-import { ReactiveBase, ReactiveList, SingleList, MultiDropdownList, MultiList, DataSearch } from "@appbaseio/reactivesearch";
+import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
+import { ReactiveBase, ReactiveList, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
@@ -10,7 +10,6 @@ import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
 import { formatStringDate, translate, getFilterLabel } from "../../utils";
-import CustomFilter from "./customFilter";
 import SelectStatusMission from "../../components/selectStatusMission";
 import VioletHeaderButton from "../../components/buttons/VioletHeaderButton";
 
@@ -20,7 +19,12 @@ export default () => {
   const [mission, setMission] = useState(null);
   const [structureIds, setStructureIds] = useState();
   const user = useSelector((state) => state.Auth.user);
-  const DEFAULT_QUERY = () => (user.role === "supervisor" ? { query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } } } : { query: { match_all: {} } });
+  const DEFAULT_QUERY = () => {
+    if (user.role === "supervisor") return { query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } } };
+    if (user.role === "referent_department") return { query: { bool: { filter: { term: { "department.keyword": user.department } } } } };
+    if (user.role === "referent_region") return { query: { bool: { filter: { term: { "region.keyword": user.region } } } } };
+    return { query: { match_all: {} } };
+  };
 
   useEffect(() => {
     if (user.role !== "supervisor") return;
@@ -131,9 +135,13 @@ export default () => {
                   componentId="DOMAIN"
                   dataField="domains.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "DOMAIN") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
                   title=""
                   URLParams={true}
                   showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Domaine")}
                 />
                 <MultiDropdownList
                   defaultQuery={DEFAULT_QUERY}
@@ -251,7 +259,7 @@ const Hit = ({ hit, onClick }) => {
       <td>
         {hit.placesTotal <= 1 ? `${hit.placesTotal} place` : `${hit.placesTotal} places`}
         <div style={{ fontSize: 12, color: "rgb(113,128,150)" }}>
-          {hit.placesTaken} / {hit.placesTotal}
+          {hit.placesTotal - hit.placesLeft} / {hit.placesTotal}
         </div>
       </td>
       <td onClick={(e) => e.stopPropagation()}>
