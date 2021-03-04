@@ -60,7 +60,7 @@ export default () => {
           <WrapperItem>
             <div className="title">2. Une première mission d'intérêt général</div>
             <div className="info">
-              <div className="subtitle">À réaliser dans l’année, jusqu’au 31 juin 2022.</div>
+              <div className="subtitle">À réaliser dans l’année, jusqu’au {is2020 ? "31 décembre 2021" : "30 juin 2022"}.</div>
               <div className="link">
                 <Link to="/preferences">
                   <span>Indiquez vos préférences de mission</span>

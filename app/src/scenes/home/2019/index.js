@@ -49,7 +49,7 @@ export default () => {
               2. Une première mission d'intérêt général <Tag color="#5145cd">En&nbsp;cours</Tag>
             </div>
             <div className="info">
-              <div className="subtitle">À réaliser dans l’année, jusqu’au 31 juin 2021.</div>
+              <div className="subtitle">À réaliser dans l’année, jusqu’au 30 juin 2021.</div>
             </div>
           </WrapperItem>
           <WrapperItem>
