@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { Col, DropdownItem, DropdownMenu, DropdownToggle, Label, Pagination, PaginationItem, PaginationLink, Row, UncontrolledDropdown } from "reactstrap";
-import { ReactiveBase, ReactiveList, SingleList, MultiDropdownList, MultiList, DataSearch } from "@appbaseio/reactivesearch";
+import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
+import { ReactiveBase, ReactiveList, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
@@ -19,7 +19,12 @@ export default () => {
   const [mission, setMission] = useState(null);
   const [structureIds, setStructureIds] = useState();
   const user = useSelector((state) => state.Auth.user);
-  const DEFAULT_QUERY = () => (user.role === "supervisor" ? { query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } } } : { query: { match_all: {} } });
+  const DEFAULT_QUERY = () => {
+    if (user.role === "supervisor") return { query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } } };
+    if (user.role === "referent_department") return { query: { bool: { filter: { term: { "department.keyword": user.department } } } } };
+    if (user.role === "referent_region") return { query: { bool: { filter: { term: { "region.keyword": user.region } } } } };
+    return { query: { match_all: {} } };
+  };
 
   useEffect(() => {
     if (user.role !== "supervisor") return;
