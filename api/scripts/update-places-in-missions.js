@@ -6,6 +6,7 @@ const MissionModel = require("../src/models/mission");
 
 (async function run() {
   const cursor = MissionModel.find({}).cursor();
+  let count = 0;
   await cursor.eachAsync(async function (doc) {
     try {
       // Get all application for the mission
@@ -13,18 +14,18 @@ const MissionModel = require("../src/models/mission");
       const placesTaken = applications.filter((application) => {
         return ["VALIDATED", "IN_PROGRESS", "DONE", "ABANDON"].includes(application.status);
       }).length;
-
-      if (doc.placesTaken !== placesTaken) {
-        const placesLeft = Math.max(0, doc.placesTotal - placesTaken);
-        console.log(`Mission ${doc.id}: total ${doc.placesTotal}, taken from ${doc.placesTaken} to ${placesTaken}, left: ${placesLeft}`);
-        await doc.set({ placesTaken, placesLeft });
+      const placesLeft = Math.max(0, doc.placesTotal - placesTaken);
+      if (doc.placesLeft !== placesLeft) {
+        console.log(`Mission ${doc.id}: total ${doc.placesTotal}, left from ${doc.placesLeft} to ${placesLeft}`);
+        doc.set({ placesLeft });
         await doc.save();
         await doc.index();
+        count++;
       }
     } catch (e) {
       console.log(e);
     }
   });
-  console.log("DONE.");
+  console.log("DONE.", count);
   process.exit(0);
 })();

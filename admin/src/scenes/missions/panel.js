@@ -54,9 +54,9 @@ export default ({ onChange, mission }) => {
         <div className="description">A noter que des notifications emails seront envoyées</div>
       </div>
       <hr />
-      <div className="title">{`Volontaire(s) (${mission.placesTaken})`}</div>
+      <div className="title">{`Volontaire(s) (${mission.placesTotal - mission.placesLeft})`}</div>
       <div className="detail">
-        <div className="description">{`Cette mission a reçu ${mission.placesTaken} candidature(s)`}</div>
+        <div className="description">{`Cette mission a reçu ${mission.placesTotal - mission.placesLeft} candidature(s)`}</div>
       </div>
       {/* <Link to={``}>
         <button>Consulter tous les volontaires</button>

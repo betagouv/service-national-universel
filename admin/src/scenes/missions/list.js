@@ -10,7 +10,6 @@ import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
 import { formatStringDate, translate, getFilterLabel } from "../../utils";
-import CustomFilter from "./customFilter";
 import SelectStatusMission from "../../components/selectStatusMission";
 import VioletHeaderButton from "../../components/buttons/VioletHeaderButton";
 
@@ -251,7 +250,7 @@ const Hit = ({ hit, onClick }) => {
       <td>
         {hit.placesTotal <= 1 ? `${hit.placesTotal} place` : `${hit.placesTotal} places`}
         <div style={{ fontSize: 12, color: "rgb(113,128,150)" }}>
-          {hit.placesTaken} / {hit.placesTotal}
+          {hit.placesTotal - hit.placesLeft} / {hit.placesTotal}
         </div>
       </td>
       <td onClick={(e) => e.stopPropagation()}>
