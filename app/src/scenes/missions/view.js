@@ -11,6 +11,7 @@ import SocialIcons from "../../components/SocialIcons";
 import ApplyModal from "./components/ApplyModal";
 import ApplyDoneModal from "./components/ApplyDoneModal";
 import Loader from "../../components/Loader";
+import { toastr } from "react-redux-toastr";
 
 export default (props) => {
   const [mission, setMission] = useState();
