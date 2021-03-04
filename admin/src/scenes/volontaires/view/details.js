@@ -67,6 +67,7 @@ export default ({ young }) => {
             <Col md={6}>
               <Bloc title="Situation">
                 <Details title="Statut" value={t(young.situation)} />
+                <Details title="Classe" value={t(young.grade)} />
                 <Details title="Type" value={young.schoolType} />
                 <Details title="Nom" value={young.schoolName} />
                 <Details title="Région" value={young.schoolRegion} />

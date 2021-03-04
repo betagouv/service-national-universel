@@ -107,6 +107,7 @@ export default ({ onChange, value }) => {
             if (young.situation === YOUNG_SITUATIONS.NOTHING) return "Inscrit(e) nulle part";
           }}
         />
+        <Details title="Classe" value={young.grade} />
         <Details title="Type" value={young.schoolType} />
         <Details title="Nom" value={young.schoolName} />
         <Details title="Région" value={young.schoolRegion} />

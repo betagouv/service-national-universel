@@ -195,12 +195,43 @@ export default () => {
                   YOUNG_SITUATIONS.AGRICULTURAL_SCHOOL,
                   YOUNG_SITUATIONS.SPECIALIZED_SCHOOL,
                   YOUNG_SITUATIONS.APPRENTICESHIP,
-                ].includes(values.situation) && (
-                  <div style={{ marginBottom: "10px" }}>
-                    <RadioLabel style={{ fontWeight: "bold" }}>Trouver votre établissement</RadioLabel>
-                    <Etablissement values={values} handleChange={handleChange} />
-                  </div>
-                )}
+                ].includes(values.situation) ? (
+                  <>
+                    <div style={{ marginBottom: "10px" }}>
+                      <RadioLabel style={{ fontWeight: "bold" }}>En classe de :</RadioLabel>
+                      <Field
+                        as="select"
+                        style={{ maxWidth: "150px" }}
+                        validate={(v) => !v && requiredMessage}
+                        className="form-control"
+                        placeholder="Ma classe"
+                        name="grade"
+                        value={values.grade}
+                        onChange={handleChange}
+                      >
+                        <option label=""></option>
+                        <option label="3eme" value="3eme">
+                          3eme
+                        </option>
+                        <option label="2nde" value="2nde">
+                          2nde
+                        </option>
+                        <option label="1ere" value="1ere">
+                          1ere
+                        </option>
+                        <option label="Terminale" value="Terminale">
+                          Terminale
+                        </option>
+                      </Field>
+                      <ErrorMessage errors={errors} touched={touched} name="grade" />
+                    </div>
+
+                    <div style={{ marginBottom: "10px" }}>
+                      <RadioLabel style={{ fontWeight: "bold" }}>Trouver votre établissement</RadioLabel>
+                      <Etablissement values={values} handleChange={handleChange} />
+                    </div>
+                  </>
+                ) : null}
                 <RadioLabel style={{ fontWeight: "bold" }}>Je suis en emploi :</RadioLabel>
                 <div style={{ marginLeft: "1rem" }}>
                   <RadioLabel>
