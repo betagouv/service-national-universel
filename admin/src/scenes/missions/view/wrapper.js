@@ -25,6 +25,15 @@ export default ({ mission, tab, children }) => {
     }
   };
 
+  const duplicate = async () => {
+    mission.name += " (copie)";
+    delete mission._id;
+    const { data, ok, code } = await api.post("/mission", mission);
+    if (!ok) toastr.error("Oups, une erreur est survnue lors de la duplication de la mission", translate(code));
+    toastr.success("Mission dupliquée !");
+    return history.push(`/mission/${data._id}`);
+  };
+
   if (!mission) return null;
   return (
     <div style={{ flex: tab === "missions" ? "0%" : 2, position: "relative", padding: "3rem" }}>
@@ -44,8 +53,8 @@ export default ({ mission, tab, children }) => {
             </TabItem>
           </TabNavigationList>
         </div>
-        <Row style={{ minWidth: "30%" }}>
-          <Col md={6}>
+        <Row style={{ minWidth: "40%" }}>
+          <Col md={4}>
             <BoxPlaces>
               <table>
                 <tbody>
@@ -63,19 +72,24 @@ export default ({ mission, tab, children }) => {
               </table>
             </BoxPlaces>
           </Col>
-          <Col md={6}>
+          <Col md={8}>
             <Row>
               <Col md={12}>
                 <SelectStatusMission hit={mission} />
               </Col>
             </Row>
             <Row style={{ marginTop: "0.5rem" }}>
-              <Col md={6}>
+              <Col md={4}>
                 <Link to={`/mission/${mission._id}/edit`}>
                   <Button className="btn-blue">Modifier</Button>
                 </Link>
               </Col>
-              <Col md={6}>
+              <Col md={4}>
+                <Button onClick={duplicate} className="btn-blue">
+                  Dupliquer
+                </Button>
+              </Col>
+              <Col md={4}>
                 <Button onClick={handleDelete} className="btn-red">
                   Supprimer
                 </Button>
