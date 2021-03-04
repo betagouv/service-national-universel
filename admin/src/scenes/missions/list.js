@@ -135,9 +135,13 @@ export default () => {
                   componentId="DOMAIN"
                   dataField="domains.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "DOMAIN") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
                   title=""
                   URLParams={true}
                   showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Domaine")}
                 />
                 <MultiDropdownList
                   defaultQuery={DEFAULT_QUERY}

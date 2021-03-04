@@ -8,6 +8,7 @@ import { useSelector } from "react-redux";
 import MissionCard from "./components/missionCard";
 import ReactiveFilter from "../../components/ReactiveFilter";
 import { apiURL } from "../../config";
+import { translate } from "../../utils";
 import api from "../../services/api";
 import Loader from "../../components/Loader";
 import FilterGeoloc from "./components/FilterGeoloc";
@@ -92,9 +93,12 @@ export default () => {
                 selectAllLabel="Tous les domaines"
                 URLParams={true}
                 componentId="DOMAIN"
-                placeholder="Filtrer par domaines"
                 dataField="domains.keyword"
                 react={{ and: FILTERS.filter((e) => e !== "DOMAIN") }}
+                renderItem={(e, count) => {
+                  return `${translate(e)} ${count ? `(${count})` : ""}`;
+                }}
+                renderLabel={(item) => translate(item) || "Filtrer par domaine"}
                 showSearch={false}
               />
             </DomainsFilter>
