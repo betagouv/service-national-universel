@@ -51,7 +51,7 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
       const { ok, code, data: newYoung } = await api.put(`/referent/young/${young._id}`, young);
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
 
-      if (status === YOUNG_STATUS.VALIDATED) {
+      if (status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INSCRIPTION) {
         matomo.logEvent("status_update", YOUNG_STATUS.VALIDATED);
         await api.post(`/referent/email/validate/${young._id}`, { subject: "Inscription validée" });
       }
