@@ -24,7 +24,6 @@ import Loader from "./components/Loader";
 
 import Header from "./components/header";
 import Drawer from "./components/drawer";
-
 import Footer from "./components/footer";
 
 import api from "./services/api";

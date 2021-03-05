@@ -8,7 +8,7 @@ import "dayjs/locale/fr";
 import { useSelector } from "react-redux";
 
 import Historic from "../../components/historic";
-import LoadingButton from "../../components/loadingButton";
+import LoadingButton from "../../components/buttons/LoadingButton";
 import DateInput from "../../components/dateInput";
 import { departmentList, regionList, YOUNG_STATUS, translate } from "../../utils";
 import api from "../../services/api";
@@ -129,6 +129,18 @@ export default (props) => {
                   <BoxTitle>Situation</BoxTitle>
                   <BoxContent direction="column">
                     <Item title="Status" values={values} name="situation" handleChange={handleChange} />
+                    <Select
+                      title="Classe"
+                      values={values}
+                      name="grade"
+                      handleChange={handleChange}
+                      options={[
+                        { value: "3eme", label: "3eme" },
+                        { value: "2nde", label: "2nde" },
+                        { value: "1ere", label: "1ere" },
+                        { value: "Terminale", label: "Terminale" },
+                      ]}
+                    />
                     <Item title="Type" values={values} name="schoolType" handleChange={handleChange} />
                     <Item title="Nom" values={values} name="schoolName" handleChange={handleChange} />
                     <Item title="Adresse" values={values} name="schoolAddress" handleChange={handleChange} />

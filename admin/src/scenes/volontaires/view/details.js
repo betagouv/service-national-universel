@@ -8,7 +8,7 @@ import YoungView from "./wrapper";
 import api from "../../../services/api";
 import Avatar from "../../../components/Avatar";
 import SocialIcons from "../../../components/SocialIcons";
-import DownloadButton from "../../../components/DownloadButton";
+import DownloadButton from "../../../components/buttons/DownloadButton";
 
 export default ({ young }) => {
   return (
@@ -67,6 +67,7 @@ export default ({ young }) => {
             <Col md={6}>
               <Bloc title="Situation">
                 <Details title="Statut" value={t(young.situation)} />
+                <Details title="Classe" value={t(young.grade)} />
                 <Details title="Type" value={young.schoolType} />
                 <Details title="Nom" value={young.schoolName} />
                 <Details title="Région" value={young.schoolRegion} />

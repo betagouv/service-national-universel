@@ -8,7 +8,7 @@ import api from "../services/api";
 import { translate, APPLICATION_STATUS_COLORS, APPLICATION_STATUS } from "../utils";
 import { toastr } from "react-redux-toastr";
 
-export default ({ hit, options = [] }) => {
+export default ({ hit, options = [], callback }) => {
   const [application, setApplication] = useState(null);
   const user = useSelector((state) => state.Auth.user);
 
@@ -47,6 +47,7 @@ export default ({ hit, options = [] }) => {
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       setApplication(data);
       toastr.success("Mis à jour!");
+      callback();
     } catch (e) {
       console.log(e);
       toastr.error("Oups, une erreur est survenue :", translate(e.code));

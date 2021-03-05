@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { Link } from "react-router-dom";
 
 import { YOUNG_SITUATIONS, YOUNG_PHASE, translate as t } from "../../utils";
-import LoadingButton from "../../components/loadingButton";
+import LoadingButton from "../../components/buttons/LoadingButton";
 import { appURL } from "../../config";
 import api from "../../services/api";
 
@@ -107,6 +107,7 @@ export default ({ onChange, value }) => {
             if (young.situation === YOUNG_SITUATIONS.NOTHING) return "Inscrit(e) nulle part";
           }}
         />
+        <Details title="Classe" value={young.grade} />
         <Details title="Type" value={young.schoolType} />
         <Details title="Nom" value={young.schoolName} />
         <Details title="Région" value={young.schoolRegion} />

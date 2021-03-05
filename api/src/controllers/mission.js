@@ -9,6 +9,14 @@ const UserObject = require("../models/referent");
 const ApplicationModel = require("../models/application");
 const SERVER_ERROR = "SERVER_ERROR";
 const NOT_FOUND = "PASSWORD_TOKEN_EXPIRED_OR_INVALID";
+const OPERATION_UNAUTHORIZED = "OPERATION_UNAUTHORIZED";
+
+const canModify = (user, mission) => {
+  return !(
+    (user.role === "referent_department" && user.department !== mission.department) ||
+    (user.role === "referent_region" && user.region !== mission.region)
+  );
+};
 
 router.post("/", async (req, res) => {
   try {
@@ -24,6 +32,8 @@ router.post("/", async (req, res) => {
 
 router.put("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
+    const m = await MissionObject.findById(req.body._id);
+    if (!canModify(req.user, m)) return res.status(404).send({ ok: false, code: OPERATION_UNAUTHORIZED });
     const mission = await MissionObject.findByIdAndUpdate(req.body._id, req.body, { new: true });
     res.status(200).send({ ok: true, data: mission });
   } catch (error) {
@@ -34,6 +44,8 @@ router.put("/", passport.authenticate("referent", { session: false }), async (re
 
 router.put("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
+    const m = await MissionObject.findById(req.params.id);
+    if (!canModify(req.user, m)) return res.status(404).send({ ok: false, code: OPERATION_UNAUTHORIZED });
     const mission = await MissionObject.findByIdAndUpdate(req.params.id, req.body, { new: true });
     res.status(200).send({ ok: true, data: mission });
   } catch (error) {

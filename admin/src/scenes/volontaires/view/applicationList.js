@@ -104,7 +104,7 @@ const Hit = ({ hit, index }) => {
       <td>
         {mission.placesTotal <= 1 ? `${mission.placesTotal} place` : `${mission.placesTotal} places`}
         <div style={{ fontSize: 12, color: "rgb(113,128,150)" }}>
-          {mission.placesTaken} / {mission.placesTotal}
+          {mission.placesTotal - mission.placesLeft} / {mission.placesTotal}
         </div>
       </td>
       <td onClick={(e) => e.stopPropagation()}>

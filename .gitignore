@@ -4,3 +4,4 @@
 api/.env
 api/.env-prod
 api/.env-staging
+.vscode

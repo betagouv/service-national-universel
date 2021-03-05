@@ -6,7 +6,7 @@ import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 
 import { translate } from "../../utils";
-import LoadingButton from "../../components/loadingButton";
+import LoadingButton from "../../components/buttons/LoadingButton";
 import api from "../../services/api";
 import { setUser } from "../../redux/auth/actions";
 

@@ -94,6 +94,7 @@ const Schema = new mongoose.Schema({
 
   // * School informations
   situation: { type: String },
+  grade: { type: String },
   schoolCertification: { type: String, enum: ["true", "false"] },
   schooled: { type: String, enum: ["true", "false"] },
   schoolName: { type: String },

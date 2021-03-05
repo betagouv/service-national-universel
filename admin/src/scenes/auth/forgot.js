@@ -5,7 +5,7 @@ import validator from "validator";
 import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
 
-import LoadingButton from "../../components/loadingButton";
+import LoadingButton from "../../components/buttons/LoadingButton";
 import api from "../../services/api";
 import { Link } from "react-router-dom";
 import { translate } from "../../utils";

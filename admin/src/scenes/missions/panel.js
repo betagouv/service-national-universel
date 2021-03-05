@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import { Field, Formik } from "formik";
+import { useHistory } from "react-router-dom";
 
 import { formatDay, translate, formatStringDate } from "../../utils";
 
@@ -12,6 +13,7 @@ import SelectStatusMission from "../../components/selectStatusMission";
 export default ({ onChange, mission }) => {
   const [tutor, setTutor] = useState();
   const [structure, setStructure] = useState({});
+  const history = useHistory();
 
   useEffect(() => {
     (async () => {
@@ -30,6 +32,16 @@ export default ({ onChange, mission }) => {
     })();
   }, [mission]);
 
+  const duplicate = async () => {
+    mission.name += " (copie)";
+    delete mission._id;
+    mission.placesLeft = mission.placesTotal;
+    const { data, ok, code } = await api.post("/mission", mission);
+    if (!ok) toastr.error("Oups, une erreur est survnue lors de la duplication de la mission", translate(code));
+    toastr.success("Mission dupliquée !");
+    return history.push(`/mission/${data._id}`);
+  };
+
   if (!mission) return <div />;
   return (
     <Panel>
@@ -44,6 +56,9 @@ export default ({ onChange, mission }) => {
       <Link to={`/mission/${mission._id}/edit`}>
         <Button className="btn-blue">Modifier</Button>
       </Link>
+      <Button onClick={duplicate} className="btn-blue">
+        Dupliquer
+      </Button>
       <Link to={`/mission/${mission._id}`}>
         <Button className="btn-red">Supprimer</Button>
       </Link>
@@ -54,9 +69,9 @@ export default ({ onChange, mission }) => {
         <div className="description">A noter que des notifications emails seront envoyées</div>
       </div>
       <hr />
-      <div className="title">{`Volontaire(s) (${mission.placesTaken})`}</div>
+      <div className="title">{`Volontaire(s) (${mission.placesTotal - mission.placesLeft})`}</div>
       <div className="detail">
-        <div className="description">{`Cette mission a reçu ${mission.placesTaken} candidature(s)`}</div>
+        <div className="description">{`Cette mission a reçu ${mission.placesTotal - mission.placesLeft} candidature(s)`}</div>
       </div>
       {/* <Link to={``}>
         <button>Consulter tous les volontaires</button>
@@ -351,7 +366,7 @@ const FormGroup = styled.div`
 `;
 
 const Button = styled.button`
-  margin: 0 0.5rem;
+  margin: 0.5rem 0.5rem;
   align-self: flex-start;
   border-radius: 4px;
   padding: 5px;

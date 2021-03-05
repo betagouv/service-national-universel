@@ -1,11 +1,20 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
+import { Helmet } from "react-helmet";
 import Header from "./header";
 
 export default ({}) => {
   return (
     <div>
+      <Helmet>
+        <script>{`
+            gtag('event', 'conversion', {
+              'allow_custom_scripts': true,
+              'send_to': 'DC-2971054/snuiz0/snu21lp+unique'
+            });`}</script>
+        <noscript>{`<img src="https://ad.doubleclick.net/ddm/activity/src=2971054;type=snuiz0;cat=snu21lp;dc_lat=;dc_rdid=;tag_for_child_directed_treatment=;tfua=;npa=;gdpr=\${GDPR};gdpr_consent=\${GDPR_CONSENT_755};ord=1;num=1?" width="1" height="1" alt=""/>`}</noscript>
+      </Helmet>
       <Header />
       <Wrapper>
         <ConnectBtn to="/auth">se connecter</ConnectBtn>

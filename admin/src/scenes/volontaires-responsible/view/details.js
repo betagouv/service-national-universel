@@ -8,7 +8,7 @@ import YoungView from "./wrapper";
 import api from "../../../services/api";
 import Avatar from "../../../components/Avatar";
 import SocialIcons from "../../../components/SocialIcons";
-import DownloadButton from "../../../components/DownloadButton";
+import DownloadButton from "../../../components/buttons/DownloadButton";
 
 export default ({ young }) => {
   return (

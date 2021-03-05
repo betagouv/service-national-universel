@@ -8,7 +8,7 @@ import "dayjs/locale/fr";
 import { useSelector } from "react-redux";
 
 import Historic from "../../components/historic";
-import LoadingButton from "../../components/loadingButton";
+import LoadingButton from "../../components/buttons/LoadingButton";
 import DateInput from "../../components/dateInput";
 import { departmentList, regionList, YOUNG_STATUS, translate } from "../../utils";
 import api from "../../services/api";
