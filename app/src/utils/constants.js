@@ -95,3 +95,15 @@ export const TRANSPORT = {
   CARPOOLING: "CARPOOLING",
   OTHER: "OTHER",
 };
+
+export const COHESION_STAY_LIMIT_DATE = {
+  2019: "du 16 au 28 juin 2019",
+  2020: "Du 21 juin au 2 juillet 2021",
+  2021: "Du 21 juin au 2 juillet 2021",
+};
+
+export const INTEREST_MISSION_LIMIT_DATE = {
+  2019: "23 mars 2021",
+  2020: "31 décembre 2021",
+  2021: "30 juin 2022",
+};

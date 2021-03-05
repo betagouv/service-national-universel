@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 import NextStep from "../../phase2/nextStep";
+import { COHESION_STAY_LIMIT_DATE, INTEREST_MISSION_LIMIT_DATE } from "../../../utils";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
@@ -41,7 +42,7 @@ export default () => {
               </Tag>
             </div>
             <div className="info">
-              <div className="subtitle">Réalisé du 16 au 28 juin 2019.</div>
+              <div className="subtitle">Réalisé {COHESION_STAY_LIMIT_DATE[young.cohort]}.</div>
             </div>
           </WrapperItem>
           <WrapperItem>
@@ -49,7 +50,7 @@ export default () => {
               2. Une première mission d'intérêt général <Tag color="#5145cd">En&nbsp;cours</Tag>
             </div>
             <div className="info">
-              <div className="subtitle">À réaliser dans l’année, jusqu’au 30 juin 2021.</div>
+              <div className="subtitle">À réaliser dans l’année, jusqu’au {INTEREST_MISSION_LIMIT_DATE[young.cohort]}.</div>
             </div>
           </WrapperItem>
           <WrapperItem>
