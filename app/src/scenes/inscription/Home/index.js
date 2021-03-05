@@ -70,7 +70,7 @@ export default ({}) => {
                 Pour compléter l'inscription en quelques minutes, il vous faudra :
                 <div>
                   • Une <b>pièce d'identité</b> (Carte Nationale d'Identité ou Passeport)
-                  <br />• La présence de vos <b>représentants légaux</b> pour obtenir leurs signatures
+                  <br />• L'accord de votre ou vos <b>représentants légaux</b>
                 </div>
               </Infos>
             </li>
