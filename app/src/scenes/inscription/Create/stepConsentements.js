@@ -77,16 +77,7 @@ export default () => {
           <>
             <FormRow>
               <Col md={4}>
-                <Label>
-                  Consentement du ou des représentant légaux
-                  <Warning>
-                    <img src={require("../../../assets/warning.png")} />
-                    <p>
-                      Le consentement des représentants légaux est à faire <b>remplir et signer</b> par les <b>deux parents</b>, sauf dans le cas où l'autorité parentale n'est
-                      portée que par l'un des parents ou par une tierce personne.
-                    </p>
-                  </Warning>
-                </Label>
+                <Label>Consentement du ou des représentant légaux</Label>
               </Col>
               <Col>
                 <div style={{ fontWeight: 400, fontSize: 14, margin: "0.8rem" }}>
