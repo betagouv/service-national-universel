@@ -20,19 +20,10 @@ const AuthObject = require("../auth");
 
 const { decrypt } = require("../cryptoUtils");
 const { sendEmail } = require("../sendinblue");
-const { validatePassword } = require("../utils");
-const { onlyAdmin } = require("../middleware/admin");
-const { uploadFile } = require("../utils");
+const { uploadFile, validatePassword, ERRORS } = require("../utils");
 const { encrypt } = require("../cryptoUtils");
 const ReferentAuth = new AuthObject(ReferentObject);
 
-const SERVER_ERROR = "SERVER_ERROR";
-const USER_ALREADY_REGISTERED = "USER_ALREADY_REGISTERED";
-const PASSWORD_NOT_VALIDATED = "PASSWORD_NOT_VALIDATED";
-const INVITATION_TOKEN_EXPIRED_OR_INVALID = "INVITATION_TOKEN_EXPIRED_OR_INVALID";
-const NOT_FOUND = "NOT_FOUND";
-const USER_NOT_FOUND = "USER_NOT_FOUND";
-const OPERATION_UNAUTHORIZED = "OPERATION_UNAUTHORIZED";
 const COOKIE_MAX_AGE = 60 * 60 * 2 * 1000; // 2h
 const JWT_MAX_AGE = 60 * 60 * 2; // 2h
 
@@ -78,16 +69,16 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
   try {
     const { type, id } = req.params;
     let user = null;
-    if (type === "referent" && req.user.role !== "admin") return res.status(401).send({ ok: false, code: OPERATION_UNAUTHORIZED });
+    if (type === "referent" && req.user.role !== "admin") return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     if (type === "referent") user = await ReferentObject.findById(id);
     else if (type === "young") user = await YoungObject.findById(id);
-    if (!user) return res.status(404).send({ code: NOT_FOUND, ok: false });
+    if (!user) return res.status(404).send({ code: ERRORS.USER_NOT_FOUND, ok: false });
     const token = jwt.sign({ _id: user.id }, config.secret, { expiresIn: JWT_MAX_AGE });
     res.cookie("jwt", token, cookieOptions());
     return res.status(200).send({ data: user, ok: true, token });
   } catch (error) {
     capture(error);
-    return res.status(500).send({ ok: false, code: SERVER_ERROR });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -138,9 +129,9 @@ router.post("/signup_invite/:role", passport.authenticate("referent", { session:
 
     return res.status(200).send({ data: referent, ok: true });
   } catch (error) {
-    if (error.code === 11000) return res.status(409).send({ ok: false, code: USER_ALREADY_REGISTERED });
+    if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
     capture(error);
-    return res.status(500).send({ ok: false, code: SERVER_ERROR });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -149,7 +140,7 @@ router.post("/signup_retry", async (req, res) => {
     const email = (req.body.email || "").trim().toLowerCase();
 
     const referent = await ReferentObject.findOne({ email });
-    if (!referent) return res.status(400).send({ ok: false, code: USER_NOT_FOUND });
+    if (!referent) return res.status(400).send({ ok: false, code: ERRORS.USER_NOT_FOUND });
 
     const invitationToken = crypto.randomBytes(20).toString("hex");
     referent.set({ invitationToken });
@@ -170,19 +161,19 @@ router.post("/signup_retry", async (req, res) => {
     return res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
-    return res.status(500).send({ ok: false, code: SERVER_ERROR });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
 router.post("/signup_verify", async (req, res) => {
   try {
     const referent = await ReferentObject.findOne({ invitationToken: req.body.invitationToken, invitationExpires: { $gt: Date.now() } });
-    if (!referent) return res.status(200).send({ ok: false, code: INVITATION_TOKEN_EXPIRED_OR_INVALID });
+    if (!referent) return res.status(200).send({ ok: false, code: ERRORS.INVITATION_TOKEN_EXPIRED_OR_INVALID });
     const token = jwt.sign({ _id: referent._id }, config.secret, { expiresIn: "30d" });
     return res.status(200).send({ ok: true, token, data: referent });
   } catch (error) {
     capture(error);
-    return res.status(500).send({ ok: false, code: SERVER_ERROR });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 router.post("/signup_invite", async (req, res) => {
@@ -190,11 +181,11 @@ router.post("/signup_invite", async (req, res) => {
     const email = (req.body.email || "").trim().toLowerCase();
 
     const referent = await ReferentObject.findOne({ email });
-    if (!referent) return res.status(200).send({ ok: false, data: null, code: USER_NOT_FOUND });
+    if (!referent) return res.status(200).send({ ok: false, data: null, code: ERRORS.USER_NOT_FOUND });
 
-    if (referent.registredAt) return res.status(200).send({ ok: false, data: null, code: USER_ALREADY_REGISTERED });
+    if (referent.registredAt) return res.status(200).send({ ok: false, data: null, code: ERRORS.USER_ALREADY_REGISTERED });
 
-    if (!validatePassword(req.body.password)) return res.status(200).send({ ok: false, prescriber: null, code: PASSWORD_NOT_VALIDATED });
+    if (!validatePassword(req.body.password)) return res.status(200).send({ ok: false, prescriber: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
 
     // Todo: firstname should be firstName, maybe we missed something here.
     referent.set({ firstname: req.body.firstname });
@@ -217,7 +208,7 @@ router.post("/signup_invite", async (req, res) => {
     return res.status(200).send({ data: referent, token, ok: true });
   } catch (error) {
     capture(error);
-    return res.sendStatus(500).send({ ok: false, code: SERVER_ERROR });
+    return res.sendStatus(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -228,7 +219,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false }), 
     res.status(200).send({ ok: true, data: young });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
 
@@ -250,9 +241,9 @@ router.post("/young", passport.authenticate("referent", { session: false }), asy
 
     return res.status(200).send({ young, ok: true });
   } catch (error) {
-    if (error.code === 11000) return res.status(409).send({ ok: false, code: USER_ALREADY_REGISTERED });
+    if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
     capture(error);
-    return res.status(500).send({ ok: false, code: SERVER_ERROR });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -284,7 +275,7 @@ router.post("/email-tutor/:template/:tutorId", passport.authenticate("referent",
   } catch (error) {
     console.log(error);
     capture(error);
-    return res.status(500).send({ ok: false, code: SERVER_ERROR });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -332,7 +323,7 @@ router.post("/email/:template/:youngId", passport.authenticate("referent", { ses
   } catch (error) {
     console.log(error);
     capture(error);
-    return res.status(500).send({ ok: false, code: SERVER_ERROR });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -355,7 +346,7 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
     });
   } catch (error) {
     capture(error);
-    return res.status(500).send({ ok: false, code: SERVER_ERROR });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -386,7 +377,7 @@ router.post("/file/:key", passport.authenticate("referent", { session: false }),
   } catch (error) {
     capture(error);
     if (error === "FILE_CORRUPTED") return res.status(500).send({ ok: false, code: FILE_CORRUPTED });
-    return res.status(500).send({ ok: false, code: SERVER_ERROR });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -395,13 +386,13 @@ router.get("/young/:id", passport.authenticate("referent", { session: false }), 
     const data = await YoungObject.findOne({ _id: req.params.id });
     if (!data) {
       capture(`Young not found ${req.params.id}`);
-      return res.status(404).send({ ok: false, code: NOT_FOUND });
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
     const applications = await ApplicationObject.find({ youngId: data._id });
     return res.status(200).send({ ok: true, data: { ...data._doc, applications } });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
 
@@ -411,7 +402,7 @@ router.get("/", passport.authenticate("referent", { session: false }), async (re
     return res.status(200).send({ ok: true, user });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
 
@@ -423,11 +414,11 @@ router.get("/:id", passport.authenticate("referent", { session: false }), async 
       ["responsible", "supervisor"].includes(req.user.role) && ["responsible", "supervisor"].includes(data.role);
     // See: https://trello.com/c/Wv2TrQnQ/383-admin-ajouter-onglet-utilisateurs-pour-les-r%C3%A9f%C3%A9rents
     const authorized = isAdminOrReferent || isResponsibleModifyingResponsible;
-    if (!authorized) return res.status(401).send({ ok: false, code: OPERATION_UNAUTHORIZED });
+    if (!authorized) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
 
@@ -437,7 +428,7 @@ router.get("/structure/:id", passport.authenticate("referent", { session: false 
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
 
@@ -464,13 +455,13 @@ router.put("/:id", passport.authenticate("referent", { session: false }), async 
       ["referent_department", "referent_region"].includes(req.body.role);
     const authorized = isAdmin || isResponsibleModifyingResponsibleWithoutChangingRole || isReferentModifyingReferentWithoutChangingRole;
 
-    if (!authorized) return res.status(401).send({ ok: false, code: OPERATION_UNAUTHORIZED });
+    if (!authorized) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const referent = await ReferentObject.findByIdAndUpdate(req.params.id, req.body, { new: true });
     await updateTutorNameInMissionsAndApplications(referent);
     res.status(200).send({ ok: true, data: referent });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
 
@@ -485,7 +476,7 @@ router.put("/:id", passport.authenticate("referent", { session: false }), async 
 //     res.status(200).send({ ok: true, url: "" });
 //   } catch (error) {
 //     capture(error);
-//     res.status(500).send({ ok: false, code: SERVER_ERROR, error });
+//     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
 //   }
 // });
 
@@ -497,20 +488,20 @@ router.put("/", passport.authenticate("referent", { session: false }), async (re
     res.status(200).send({ ok: true, data: user });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
 
 router.delete("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    if (req.user.role !== "admin") return res.status(401).send({ ok: false, code: OPERATION_UNAUTHORIZED });
+    if (req.user.role !== "admin") return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const referent = await ReferentObject.findOne({ _id: req.params.id });
     await referent.remove();
     console.log(`Referent ${req.params.id} has been deleted`);
     res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, error, code: SERVER_ERROR });
+    res.status(500).send({ ok: false, error, code: ERRORS.SERVER_ERROR });
   }
 });
 

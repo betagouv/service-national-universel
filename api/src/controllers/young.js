@@ -9,23 +9,14 @@ const jwt = require("jsonwebtoken");
 const config = require("../config");
 const { capture } = require("../sentry");
 
-const { uploadFile } = require("../utils");
 const { encrypt } = require("../cryptoUtils");
 const { getQPV } = require("../qpv");
 const YoungObject = require("../models/young");
 const AuthObject = require("../auth");
-const { validatePassword } = require("../utils");
+const { uploadFile, validatePassword, ERRORS } = require("../utils");
 
 const YoungAuth = new AuthObject(YoungObject);
 
-const SERVER_ERROR = "SERVER_ERROR";
-const FILE_CORRUPTED = "FILE_CORRUPTED";
-const YOUNG_ALREADY_REGISTERED = "YOUNG_ALREADY_REGISTERED";
-const UNSUPPORTED_TYPE = "UNSUPPORTED_TYPE";
-const INVITATION_TOKEN_EXPIRED_OR_INVALID = "INVITATION_TOKEN_EXPIRED_OR_INVALID";
-const USER_NOT_FOUND = "USER_NOT_FOUND";
-const USER_ALREADY_REGISTERED = "USER_ALREADY_REGISTERED";
-const PASSWORD_NOT_VALIDATED = "PASSWORD_NOT_VALIDATED";
 const COOKIE_MAX_AGE = 60 * 60 * 2 * 1000; // 2h
 
 router.post("/signin", (req, res) => YoungAuth.signin(req, res));
@@ -69,20 +60,20 @@ router.post("/file/:key", passport.authenticate("young", { session: false }), as
     return res.status(200).send({ data: names, ok: true });
   } catch (error) {
     capture(error);
-    if (error === "FILE_CORRUPTED") return res.status(500).send({ ok: false, code: FILE_CORRUPTED });
-    return res.status(500).send({ ok: false, code: SERVER_ERROR });
+    if (error === "FILE_CORRUPTED") return res.status(500).send({ ok: false, code: ERRORS.FILE_CORRUPTED });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
 router.post("/signup_verify", async (req, res) => {
   try {
     const young = await YoungObject.findOne({ invitationToken: req.body.invitationToken, invitationExpires: { $gt: Date.now() } });
-    if (!young) return res.status(200).send({ ok: false, code: INVITATION_TOKEN_EXPIRED_OR_INVALID });
+    if (!young) return res.status(200).send({ ok: false, code: ERRORS.INVITATION_TOKEN_EXPIRED_OR_INVALID });
     const token = jwt.sign({ _id: young._id }, config.secret, { expiresIn: "30d" });
     return res.status(200).send({ ok: true, token, data: young });
   } catch (error) {
     capture(error);
-    return res.status(500).send({ ok: false, code: SERVER_ERROR });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -91,11 +82,11 @@ router.post("/signup_invite", async (req, res) => {
     const email = (req.body.email || "").trim().toLowerCase();
 
     const young = await YoungObject.findOne({ email });
-    if (!young) return res.status(200).send({ ok: false, data: null, code: USER_NOT_FOUND });
+    if (!young) return res.status(200).send({ ok: false, data: null, code: ERRORS.USER_NOT_FOUND });
 
-    if (young.registredAt) return res.status(200).send({ ok: false, data: null, code: USER_ALREADY_REGISTERED });
+    if (young.registredAt) return res.status(200).send({ ok: false, data: null, code: ERRORS.YOUNG_ALREADY_REGISTERED });
 
-    if (!validatePassword(req.body.password)) return res.status(200).send({ ok: false, prescriber: null, code: PASSWORD_NOT_VALIDATED });
+    if (!validatePassword(req.body.password)) return res.status(200).send({ ok: false, prescriber: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
 
     young.set({ password: req.body.password });
     young.set({ registredAt: Date.now() });
@@ -113,7 +104,7 @@ router.post("/signup_invite", async (req, res) => {
     return res.status(200).send({ data: young, token, ok: true });
   } catch (error) {
     capture(error);
-    return res.sendStatus(500).send({ ok: false, code: SERVER_ERROR });
+    return res.sendStatus(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -122,9 +113,9 @@ router.post("/", async (req, res) => {
     const young = await YoungObject.create(req.body);
     return res.status(200).send({ young, ok: true });
   } catch (error) {
-    if (error.code === 11000) return res.status(409).send({ ok: false, code: YOUNG_ALREADY_REGISTERED });
+    if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.YOUNG_ALREADY_REGISTERED });
     capture(error);
-    return res.status(500).send({ ok: false, code: SERVER_ERROR });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -134,7 +125,7 @@ router.get("/", passport.authenticate("young", { session: false }), async (req, 
     return res.status(200).send({ ok: true, young });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
 
@@ -161,7 +152,7 @@ router.put("/", passport.authenticate("young", { session: false }), async (req, 
     }
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
 
@@ -219,7 +210,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false }), asy
     res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, error, code: SERVER_ERROR });
+    res.status(500).send({ ok: false, error, code: ERRORS.SERVER_ERROR });
   }
 });
 
