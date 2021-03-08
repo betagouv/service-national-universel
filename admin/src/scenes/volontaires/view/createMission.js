@@ -10,13 +10,15 @@ import AddressInput from "../../../components/addressInput";
 import ErrorMessage, { requiredMessage } from "../../../components/errorMessage";
 import { translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, MISSION_DOMAINS, APPLICATION_STATUS } from "../../../utils";
 import api from "../../../services/api";
-import Invite from "../../structure/components/invite";
+import PlusSVG from "../../../assets/plus.svg";
+import CrossSVG from "../../../assets/cross.svg";
 
 export default ({ young, onSend }) => {
   const [structures, setStructures] = useState();
   const [structure, setStructure] = useState();
   const [referents, setReferents] = useState([]);
-  const [showTutor, setShowTutor] = useState();
+  const [createStructureVisible, setCreateStructureVisible] = useState(false);
+  const [createTutorVisible, setCreateTutorVisible] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -53,7 +55,7 @@ export default ({ young, onSend }) => {
       missionName: mission.name,
       missionDepartment: mission.department,
       missionRegion: mission.region,
-      structureId: structure._id,
+      structureId: mission.structureId,
       tutorId: mission.tutorId,
       tutorName: mission.tutorName,
     };
@@ -85,16 +87,53 @@ export default ({ young, onSend }) => {
         location: "",
         department: "",
         region: "",
+        structureLegalStatus: "PUBLIC",
       }}
       onSubmit={async (values) => {
-        if (!values._id) values.placesLeft = values.placesTotal;
+        values.placesLeft = values.placesTotal;
         try {
-          const { ok, code, data: mission } = await api.post("/mission", values);
-          if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", translate(code));
-          await handleProposal(mission);
+          // create the strucutre if it is a new one
+          if (createStructureVisible) {
+            const responseStructure = await api.post("/structure", {
+              name: values.structureName,
+              legalStatus: values.structureLegalStatus,
+              description: values.structureDescription,
+            });
+            if (!responseStructure.ok) return toastr.error("Une erreur s'est produite lors de la creation de la strucutre", translate(responseStructure.code));
+            values.structureId = responseStructure.data._id;
+          }
+          // create the responsible if it is a new one
+          if (createTutorVisible) {
+            const responseResponsible = await api.post("/referent/signup_invite/responsible", {
+              role: "responsible",
+              structureId: values.structureId,
+              structureName: values.structureName,
+              firstName: values.tutorFirstName,
+              lastName: values.tutorLastName,
+              email: values.tutorEmail,
+            });
+            if (!responseResponsible.ok) return toastr.error("Une erreur s'est produite lors de la creation du responsable", translate(responseResponsible.code));
+            values.tutorId = responseResponsible.data._id;
+            values.tutorName = `${responseResponsible.data.firstName} ${responseResponsible.data.lastName}`;
+          }
+
+          // if the user selected the responsible from the list, we do not have his name,
+          // we get it from the db
+          if (values.tutorId && !values.tutorName) {
+            const ref = await api.get(`/referent/${values.tutorId}`);
+            if (ref.ok) values.tutorName = `${ref.data.firstName} ${ref.data.lastName}`;
+          }
+
+          //then, we create the mission with all the information...
+          const responseMission = await api.post("/mission", values);
+          if (!responseMission.ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", translate(responseMission.code));
+
+          //...finally, we create the application
+          await handleProposal(responseMission.data);
           toastr.success("Mission enregistrée");
           onSend();
         } catch (e) {
+          console.log("ERRROR", e);
           return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", e?.error?.message);
         }
       }}
@@ -121,18 +160,68 @@ export default ({ young, onSend }) => {
                   </FormGroup>
                   <FormGroup>
                     <label>STRUCTURE RATTACHÉE</label>
-                    {structures ? (
-                      <AutocompleteSelectStructure
-                        values={values}
-                        handleChange={handleChange}
-                        placeholder="Choisir une structure"
-                        options={structures}
-                        onSelect={(e) => {
-                          setStructure(e);
-                        }}
-                      />
+                    {structures && !createStructureVisible ? (
+                      <>
+                        <AutocompleteSelectStructure
+                          values={values}
+                          handleChange={handleChange}
+                          placeholder="Choisir une structure"
+                          options={structures}
+                          onSelect={(e) => {
+                            setStructure(e);
+                          }}
+                        />
+                        <ErrorMessage errors={errors} touched={touched} name="structureId" />
+                      </>
                     ) : null}
-                    <ErrorMessage errors={errors} touched={touched} name="structureId" />
+                    <ToggleBloc
+                      visible={createStructureVisible}
+                      onClick={() => {
+                        setCreateStructureVisible(!createStructureVisible);
+                      }}
+                      title="Créer une nouvelle structure"
+                    >
+                      <FormGroup>
+                        <Field
+                          validate={(v) => !v && requiredMessage}
+                          value={values.structureName}
+                          onChange={handleChange}
+                          name="structureName"
+                          placeholder="Nom de la structure"
+                        />
+                        <ErrorMessage errors={errors} touched={touched} name="structureName" />
+                      </FormGroup>
+                      <FormGroup>
+                        <Field validate={(v) => !v && requiredMessage} component="select" name="structureLegalStatus" value={values.structureLegalStatus} onChange={handleChange}>
+                          <option key="null"></option>
+                          <option key="PUBLIC" value="PUBLIC">
+                            {translate("PUBLIC")}
+                          </option>
+                          <option key="PRIVATE" value="PRIVATE">
+                            {translate("PRIVATE")}
+                          </option>
+                          <option key="ASSOCIATION" value="ASSOCIATION">
+                            {translate("ASSOCIATION")}
+                          </option>
+                          <option key="OTHER" value="OTHER">
+                            {translate("OTHER")}
+                          </option>
+                        </Field>
+                        <ErrorMessage errors={errors} touched={touched} name="structureLegalStatus" />
+                      </FormGroup>
+                      <FormGroup>
+                        <Field
+                          validate={(v) => !v && requiredMessage}
+                          name="structureDescription"
+                          component="textarea"
+                          rows={4}
+                          value={values.structureDescription}
+                          onChange={handleChange}
+                          placeholder="Présentez en quelques mots la structure"
+                        />
+                        <ErrorMessage errors={errors} touched={touched} name="structureDescription" />
+                      </FormGroup>
+                    </ToggleBloc>
                   </FormGroup>
                   <FormGroup>
                     <label>DOMAINES D'ACTION</label>
@@ -280,39 +369,61 @@ export default ({ young, onSend }) => {
                 </Row>
                 <Wrapper>
                   <Legend>Tuteur de la mission</Legend>
-                  <FormGroup>
-                    <label>
-                      <span>*</span>TUTEUR
-                    </label>
-                    <p style={{ color: "#a0aec1", fontSize: 12 }}>
-                      Sélectionner le tuteur qui va s'occuper de la mission. <br />
-                      {/* todo invite tuteur */}
-                      {structure && (
-                        <span>
-                          Vous pouvez également{" "}
-                          <u>
-                            <a
-                              style={{ textDecoration: "underline", cursor: "pointer" }}
-                              onClick={() => {
-                                setShowTutor(true);
-                              }}
-                            >
-                              ajouter un nouveau tuteur
-                            </a>
-                          </u>{" "}
-                          à votre équipe.
-                        </span>
-                      )}
-                    </p>
-                    <Field component="select" name="tutorId" value={values.tutorId} onChange={handleChange}>
-                      <option value="">Sélectionner un tuteur</option>
-                      {referents &&
-                        referents.map((referent) => {
-                          return <option key={referent._id} value={referent._id}>{`${referent.firstName} ${referent.lastName}`}</option>;
-                        })}
-                    </Field>
-                    {structure && showTutor && <Invite structure={structure} />}
-                  </FormGroup>
+                  {structure ? (
+                    <FormGroup>
+                      <label>
+                        <span>*</span>TUTEUR
+                      </label>
+                      <p style={{ color: "#a0aec1", fontSize: 12 }}>
+                        Sélectionner le tuteur qui va s'occuper de la mission. <br />
+                        {/* todo invite tuteur */}
+                        {structure && (
+                          <span>
+                            Vous pouvez également{" "}
+                            <u>
+                              <a
+                                style={{ textDecoration: "underline", cursor: "pointer" }}
+                                onClick={() => {
+                                  setCreateTutorVisible(true);
+                                }}
+                              >
+                                ajouter un nouveau tuteur
+                              </a>
+                            </u>{" "}
+                            à votre équipe.
+                          </span>
+                        )}
+                      </p>
+                      <Field validate={(v) => !v && requiredMessage} component="select" name="tutorId" value={values.tutorId} onChange={handleChange}>
+                        <option value="">Sélectionner un tuteur</option>
+                        {referents &&
+                          referents.map((referent) => {
+                            return <option key={referent._id} value={referent._id}>{`${referent.firstName} ${referent.lastName}`}</option>;
+                          })}
+                      </Field>
+                      <ErrorMessage errors={errors} touched={touched} name="tutorId" />
+                    </FormGroup>
+                  ) : null}
+                  <ToggleBloc
+                    visible={createTutorVisible || createStructureVisible}
+                    onClick={() => {
+                      setCreateTutorVisible(!createTutorVisible);
+                    }}
+                    title="Ajouter un nouveau tuteur"
+                  >
+                    <FormGroup>
+                      <Field validate={(v) => !v && requiredMessage} value={values.tutorFirstName} onChange={handleChange} name="tutorFirstName" placeholder="Prénom" />
+                      <ErrorMessage errors={errors} touched={touched} name="tutorFirstName" />
+                    </FormGroup>
+                    <FormGroup>
+                      <Field validate={(v) => !v && requiredMessage} value={values.tutorLastName} onChange={handleChange} name="tutorLastName" placeholder="Nom" />
+                      <ErrorMessage errors={errors} touched={touched} name="tutorLastName" />
+                    </FormGroup>
+                    <FormGroup>
+                      <Field validate={(v) => !v && requiredMessage} value={values.tutorEmail} onChange={handleChange} name="tutorEmail" placeholder="E-mail" />
+                      <ErrorMessage errors={errors} touched={touched} name="tutorEmail" />
+                    </FormGroup>
+                  </ToggleBloc>
                 </Wrapper>
               </Col>
             </Row>
@@ -367,6 +478,20 @@ const AutocompleteSelectStructure = ({ values, handleChange, placeholder, option
         }}
       />
     </>
+  );
+};
+
+const ToggleBloc = ({ children, title, borderBottom, borderRight, borderLeft, disabled, onClick, visible }) => {
+  return (
+    <Wrapper style={{ marginTop: "1rem", padding: ".5rem", border: "1px solid #cccccc", borderRadius: ".5rem" }}>
+      <div onClick={onClick} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer" }}>
+        <div style={{ color: "#808080" }}>{title}</div>
+        <div>
+          <Icon src={visible ? CrossSVG : PlusSVG} />
+        </div>
+      </div>
+      {visible ? <div style={{ marginTop: "1rem" }}>{children} </div> : null}
+    </Wrapper>
   );
 };
 
@@ -459,4 +584,10 @@ const ButtonContainer = styled.div`
       background: #372f78;
     }
   }
+`;
+
+const Icon = styled.img`
+  height: 14px;
+  font-size: 14px;
+  cursor: pointer;
 `;
