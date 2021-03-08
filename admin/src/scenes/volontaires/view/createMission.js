@@ -104,7 +104,7 @@ export default ({ young, onSend }) => {
           }
           // create the responsible if it is a new one
           if (createTutorVisible) {
-            const responseResponsible = await api.post("/referent/signup_invite/responsible", {
+            const responseResponsible = await api.post(`/referent/signup_invite/${createStructureVisible ? "responsible_new_structure" : "responsible"}`, {
               role: "responsible",
               structureId: values.structureId,
               structureName: values.structureName,
@@ -178,6 +178,8 @@ export default ({ young, onSend }) => {
                       visible={createStructureVisible}
                       onClick={() => {
                         setCreateStructureVisible(!createStructureVisible);
+                        setCreateTutorVisible(!createStructureVisible);
+                        setStructure(null);
                       }}
                       title="Créer une nouvelle structure"
                     >

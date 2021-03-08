@@ -91,9 +91,10 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
   }
 });
 
-router.post("/signup_invite/:role", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.post("/signup_invite/:template", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const obj = {};
+    const reqTemplate = req.params.template;
     if (req.body.hasOwnProperty(`email`)) obj.email = req.body.email.trim().toLowerCase();
     if (req.body.hasOwnProperty(`firstName`)) obj.firstName = req.body.firstName;
     if (req.body.hasOwnProperty(`lastName`)) obj.lastName = req.body.lastName;
@@ -113,16 +114,19 @@ router.post("/signup_invite/:role", passport.authenticate("referent", { session:
 
     let template = "";
     let mailObject = "";
-    if (obj.role === "referent_department") {
+    if (reqTemplate === "referent_department") {
       template = "../templates/inviteReferentDepartment.html";
       mailObject = "Activez votre compte référent départemental SNU";
-    } else if (obj.role === "referent_region") {
+    } else if (reqTemplate === "referent_region") {
       template = "../templates/inviteReferentRegion.html";
       mailObject = "Activez votre compte référent régional SNU";
-    } else if (obj.role === "responsible") {
+    } else if (reqTemplate === "responsible") {
       template = "../templates/inviteMember.html";
       mailObject = "Activez votre compte de responsable de structure";
-    } else if (obj.role === "admin") {
+    } else if (reqTemplate === "responsible_new_structure") {
+      template = "../templates/inviteMemberNewStructure.html";
+      mailObject = "Activez votre compte de responsable de structure";
+    } else if (reqTemplate === "admin") {
       template = "../templates/inviteAdmin.html";
       mailObject = "Activez votre compte administrateur SNU";
     }
