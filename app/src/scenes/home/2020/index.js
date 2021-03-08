@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 import NextStep from "../../phase2/nextStep";
-import { INTEREST_MISSION_LIMIT_DATE } from "../../../utils";
+import { INTEREST_MISSION_LIMIT_DATE, PHASE_STATUS_COLOR, translate } from "../../../utils";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
@@ -23,12 +23,12 @@ export default () => {
           <p style={{ color: "#161e2e", fontSize: "1.5rem", fontWeight: 700 }}>Votre parcours</p>
           <WrapperItem>
             <div className="title">
-              1. Un séjour de cohésion <Tag color="#c81e1e">Phase&nbsp;annulée</Tag>
+              1. Un séjour de cohésion <Tag color={PHASE_STATUS_COLOR[young.statusPhase1]}>{translate(young.statusPhase1)}</Tag>
             </div>
             <div className="info">
               <div className="subtitle">Séjour annulé suite à la crise sanitaire.</div>
               {isBornBefore20030702 ? (
-                <div class="subtitle more-info">
+                <div className="subtitle more-info">
                   Malheureusement, vous aurez 18 ans révolus au moment du séjour de cohésion, vous ne pouvez vous y inscrire. Si vous n'avez pas réalisé votre JDC, nous vous
                   invitons à vous inscrire sur{" "}
                   <a href="http://majdc.fr" target="_blank">
@@ -38,7 +38,7 @@ export default () => {
                 </div>
               ) : null}
               {needsToRegisterToCohesion ? (
-                <div class="subtitle more-info">
+                <div className="subtitle more-info">
                   Vous pouvez cependant demander à participer à la session 2021, sous réserve de votre disponibilité du 21 juin au 2 juillet 2021.
                   <Link to="/cohesion/consentements">
                     <Button>Je confirme ma participation au séjour de cohésion</Button>
@@ -56,7 +56,7 @@ export default () => {
           </WrapperItem>
           <WrapperItem>
             <div className="title">
-              2. Une première mission d'intérêt général <Tag color="#5145cd">En&nbsp;cours</Tag>
+              2. Une première mission d'intérêt général <Tag color={PHASE_STATUS_COLOR[young.statusPhase2]}>{translate(young.statusPhase2)}</Tag>
             </div>
             <div className="info">
               <div className="subtitle">À réaliser dans l’année, jusqu’au {INTEREST_MISSION_LIMIT_DATE[young.cohort]}.</div>

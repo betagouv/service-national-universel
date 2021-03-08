@@ -28,9 +28,10 @@ export const PHASE_STATUS = {
   WAITING_AFFECTATION: "WAITING_AFFECTATION",
 };
 export const PHASE_STATUS_COLOR = {
-  VALIDATED: "#6CC763",
-  DONE: "#6CC763",
+  VALIDATED: "#046c4e",
+  DONE: "#046c4e",
   CANCEL: "#FE7B52",
+  IN_PROGRESS: "#5145cd",
 };
 
 export const YOUNG_PHASE = {

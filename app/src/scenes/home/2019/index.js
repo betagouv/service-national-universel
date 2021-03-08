@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 import NextStep from "../../phase2/nextStep";
-import { COHESION_STAY_LIMIT_DATE, INTEREST_MISSION_LIMIT_DATE } from "../../../utils";
+import { COHESION_STAY_LIMIT_DATE, INTEREST_MISSION_LIMIT_DATE, translate, PHASE_STATUS_COLOR } from "../../../utils";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
@@ -29,17 +29,7 @@ export default () => {
           <p style={{ color: "#161e2e", fontSize: "1.5rem", fontWeight: 700 }}>Votre parcours</p>
           <WrapperItem>
             <div className="title">
-              1. Un séjour de cohésion{" "}
-              <Tag color="#046c4e">
-                <svg class="ml-1 mr-0.5 h-5 w-5 text-green-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                  <path
-                    fill-rule="evenodd"
-                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
-                    clip-rule="evenodd"
-                  ></path>
-                </svg>
-                Phase&nbsp;validée
-              </Tag>
+              1. Un séjour de cohésion <Tag color={PHASE_STATUS_COLOR[young.statusPhase1]}>{translate(young.statusPhase1)}</Tag>
             </div>
             <div className="info">
               <div className="subtitle">Réalisé {COHESION_STAY_LIMIT_DATE[young.cohort]}.</div>
@@ -47,7 +37,7 @@ export default () => {
           </WrapperItem>
           <WrapperItem>
             <div className="title">
-              2. Une première mission d'intérêt général <Tag color="#5145cd">En&nbsp;cours</Tag>
+              2. Une première mission d'intérêt général <Tag color={PHASE_STATUS_COLOR[young.statusPhase2]}>{translate(young.statusPhase2)}</Tag>
             </div>
             <div className="info">
               <div className="subtitle">À réaliser dans l’année, jusqu’au {INTEREST_MISSION_LIMIT_DATE[young.cohort]}.</div>
@@ -77,7 +67,7 @@ const Separator = styled.hr`
 const Tag = styled.span`
   color: ${({ color }) => color || "#42389d"};
   background-color: ${({ color }) => `${color}11` || "#42389d22"};
-  padding: 0.25rem 0.75rem 0.25rem 0;
+  padding: 0.25rem 0.75rem;
   margin: 0 0.25rem;
   border-radius: 99999px;
   font-size: 0.85rem;
