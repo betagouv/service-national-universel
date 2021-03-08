@@ -186,7 +186,7 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
       subject = `Votre candidature sur la mission d'intérêt général ${mission.name} a été validée`;
       to = { name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail };
     } else if (template === "cancel") {
-      htmlContent = fs.readFileSync(path.resolve(__dirname, "../templates/application/canceled.html")).toString();
+      htmlContent = fs.readFileSync(path.resolve(__dirname, "../templates/application/cancel.html")).toString();
       htmlContent = htmlContent.replace(/{{firstName}}/g, referent.firstName);
       htmlContent = htmlContent.replace(/{{lastName}}/g, referent.lastName);
       htmlContent = htmlContent.replace(/{{youngFirstName}}/g, application.youngFirstName);

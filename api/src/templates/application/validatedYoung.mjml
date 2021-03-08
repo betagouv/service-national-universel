@@ -5,7 +5,8 @@
         <mj-text font-size="18px" color="#000"> Bonjour {{firstName}} {{lastName}}, </mj-text>
         <mj-text line-height="1.5" font-size="18px" color="#000">
           Votre candidature sur la mission {{missionName}} proposée par {{structureName}} a été validée. Rapprochez-vous du référent de votre mission
-          pour compléter ensemble la convention d'engagement SNU ci-joint : LINK
+          pour compléter ensemble la convention d'engagement SNU
+          <a href="https://drive.google.com/file/d/1R3eKLsJYsLD9V-UWxMmZzJ8YVSomQDZd/view"> ci-joint</a>
         </mj-text>
         <mj-text line-height="1.5" font-size="18px" color="#000">
           La signature de votre représentant légal et de votre responsable de mission est nécessaire avant de renvoyer le document à votre référent
