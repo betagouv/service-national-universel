@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import { ReactiveBase, ReactiveList, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
-import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
+import VioletHeaderButton from "../../components/buttons/VioletHeaderButton";
 
 import ExportComponent from "../../components/ExportXlsx";
 
@@ -14,7 +14,7 @@ import Panel from "./panel";
 import { translate, getFilterLabel, formatStringLongDate } from "../../utils";
 import { Link } from "react-router-dom";
 
-const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION"];
+const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_PHASE_1", "STATUS_PHASE_2"];
 
 export default ({ setYoung }) => {
   const [volontaire, setVolontaire] = useState(null);
@@ -28,27 +28,92 @@ export default ({ setYoung }) => {
               <div>
                 <Title>Volontaires</Title>
               </div>
-              <Export>
+              <VioletHeaderButton>
                 <ExportComponent
                   title="Exporter les volontaires"
                   collection="volontaire"
-                  transform={(e) => {
-                    return e;
+                  transform={(data) => {
+                    return {
+                      _id: data._id,
+                      Cohorte: data.cohort,
+                      Prénom: data.firstName,
+                      Nom: data.lastName,
+                      "Date de naissance": data.birthdateAt,
+                      Sexe: data.gender,
+                      Email: data.email,
+                      Téléphone: data.phone,
+                      "Adresse postale": data.address,
+                      "Code postal": data.zip,
+                      Ville: data.city,
+                      Département: data.department,
+                      Région: data.region,
+                      Situation: data.situation,
+                      "Type d'établissement": data.schoolType,
+                      "Nom de l'établissement": data.schoolName,
+                      "Code postal de l'établissement": data.schoolZip,
+                      "Ville de l'établissement": data.schoolCity,
+                      "Département de l'établissement": data.schoolDepartment,
+                      Handicap: data.handicap,
+                      "Bénéficiaire d'un PPS": data.ppsBeneficiary,
+                      "Bénéficiaire d'un PAI": data.paiBeneficiary,
+                      "Structure médico-sociale": data.medicosocialStructure,
+                      "Nom de la structure médico-sociale": data.medicosocialStructureName,
+                      "Adresse de la structure médico-sociale": data.medicosocialStructureAddress,
+                      "Code postal de la structure médico-sociale": data.medicosocialStructureZip,
+                      "Ville de la structure médico-sociale": data.medicosocialStructureCity,
+                      "Aménagement spécifique": data.specificAmenagment,
+                      "Nature de l'aménagement spécifique": data.specificAmenagmentType,
+                      "Activité de haut-niveau": data.highSkilledActivity,
+                      "Nature de l'activité de haut-niveau": data.highSkilledActivityType,
+                      "Document activité de haut-niveau ": data.highSkilledActivityProofFiles,
+                      "Consentement des représentants légaux": data.parentConsentment,
+                      "Statut représentant légal 1": data.parent1Status,
+                      "Prénom représentant légal 1": data.parent1FirstName,
+                      "Nom représentant légal 1": data.parent1LastName,
+                      "Email représentant légal 1": data.parent1Email,
+                      "Téléphone représentant légal 1": data.parent1Phone,
+                      "Adresse représentant légal 1": data.parent1Address,
+                      "Code postal représentant légal 1": data.parent1Zip,
+                      "Ville représentant légal 1": data.parent1City,
+                      "Département représentant légal 1": data.parent1Department,
+                      "Région représentant légal 1": data.parent1Region,
+                      "Statut représentant légal 2": data.parent2Status,
+                      "Prénom représentant légal 2": data.parent2FirstName,
+                      "Nom représentant légal 2": data.parent2LastName,
+                      "Email représentant légal 2": data.parent2Email,
+                      "Téléphone représentant légal 2": data.parent2Phone,
+                      "Adresse représentant légal 2": data.parent2Address,
+                      "Code postal représentant légal 2": data.parent2Zip,
+                      "Ville représentant légal 2": data.parent2City,
+                      "Département représentant légal 2": data.parent2Department,
+                      "Région représentant légal 2": data.parent2Region,
+                      Motivation: data.motivations,
+                      Phase: data.phase,
+                      "Créé lé": data.createdAt,
+                      "Mis à jour le": data.updatedAt,
+                      "Dernière connexion le": data.lastLoginAt,
+                      Statut: data.status,
+                      "Statut Phase 1": data.statusPhase1,
+                      "Statut Phase 2": data.statusPhase2,
+                      "Statut Phase 3": data.statusPhase3,
+                      "Dernier statut le": data.lastStatusAt,
+                    };
                   }}
                 />
-              </Export>
+              </VioletHeaderButton>
             </Header>
             <Filter>
               <DataSearch
                 showIcon={false}
-                placeholder="Rechercher par mots clés, mission ou structure..."
+                placeholder="Rechercher par prénom, nom, email..."
                 componentId="SEARCH"
-                dataField={["email", "firstName", "lastName"]}
+                dataField={["email.keyword", "firstName", "lastName"]}
                 react={{ and: FILTERS }}
                 // fuzziness={2}
                 style={{ flex: 2 }}
                 innerClass={{ input: "searchbox" }}
                 autosuggest={false}
+                queryFormat="and"
               />
               <FilterRow>
                 <MultiDropdownList
@@ -214,7 +279,7 @@ const Hit = ({ hit, onClick }) => {
       <td>
         <Badge>{`COHORTE ${hit.cohort}`}</Badge>
         {hit.cohort === "2019" ? <Badge color="#6CC763">Phase 1</Badge> : null}
-        {hit.cohort === "2020" ? <Badge color="#ffa987">Phase 1</Badge> : null}
+        {hit.cohort === "2020" && hit.cohesion2020Step !== "DONE" ? <Badge color="#ffa987">Phase 1</Badge> : null}
         {hit.status === "WITHDRAWN" ? <Badge color="#F8A9AD">Désisté</Badge> : null}
       </td>
       <td>{formatStringLongDate(hit.lastLoginAt)}</td>
@@ -246,7 +311,7 @@ const Action = ({ hit, color }) => {
           <Link to={`/volontaire/${hit._id}/edit`}>
             <DropdownItem className="dropdown-item">Modifier le profil</DropdownItem>
           </Link>
-          {user.role === "admin" ? (
+          {["admin", "referent_department", "referent_region"].includes(user.role) ? (
             <DropdownItem className="dropdown-item">
               <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${hit._id}`}>Prendre sa place</a>
             </DropdownItem>
@@ -415,22 +480,6 @@ const Table = styled.table`
     }
     .email {
       font-size: 0.8rem;
-    }
-  }
-`;
-
-const Export = styled.div`
-  button {
-    background-color: #5245cc;
-    border: none;
-    border-radius: 5px;
-    padding: 7px 30px;
-    font-size: 14px;
-    font-weight: 700;
-    color: #fff;
-    cursor: pointer;
-    :hover {
-      background: #372f78;
     }
   }
 `;

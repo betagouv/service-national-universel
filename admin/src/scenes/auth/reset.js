@@ -11,7 +11,7 @@ import EyeOpen from "../../assets/eye.svg";
 import EyeClose from "../../assets/eye-slash.svg";
 
 import api from "../../services/api";
-import LoadingButton from "../../components/loadingButton";
+import LoadingButton from "../../components/buttons/LoadingButton";
 import PasswordEye from "../../components/PasswordEye";
 import { translate } from "../../utils";
 

@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import LoadingButton from "./loadingButton";
 import styled from "styled-components";
 import * as FileSaver from "file-saver";
 import { toastr } from "react-redux-toastr";
+
+import LoadingButton from "./LoadingButton";
 
 export default function DownloadButton({ source, title, ...rest }) {
   const [buttonsLoading, setButtonsLoading] = useState(false);
@@ -33,7 +34,7 @@ export default function DownloadButton({ source, title, ...rest }) {
 
 const DownloadBtn = styled(LoadingButton)`
   color: #555;
-  background: url(${require("../assets/download.svg")}) left 15px center no-repeat;
+  background: url(${require("../../assets/download.svg")}) left 15px center no-repeat;
   box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.16);
   border: 0;
   outline: 0;

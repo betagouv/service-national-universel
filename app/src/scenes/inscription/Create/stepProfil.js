@@ -7,8 +7,8 @@ import { useHistory } from "react-router-dom";
 import validator from "validator";
 import { toastr } from "react-redux-toastr";
 import DateInput from "../components/dateInput";
-import { getPasswordErrorMessage, translate } from "../../../utils";
 import { Helmet } from "react-helmet";
+import { getPasswordErrorMessage, translate } from "../../../utils";
 
 import ErrorMessage, { requiredMessage } from "../components/errorMessage";
 

@@ -40,11 +40,18 @@ const Schema = new mongoose.Schema({
   },
   lastStatusAt: { type: Date, default: Date.now },
 
-  //keep track of the current inscription step
+  // keep track of the current inscription step
   inscriptionStep: {
     type: String,
     default: "COORDONNEES", // if the young is created, it passed the first step, so default is COORDONNEES
     enum: ["PROFIL", "COORDONNEES", "PARTICULIERES", "REPRESENTANTS", "CONSENTEMENTS", "MOTIVATIONS", "DONE"],
+  },
+
+  // keep track of the current cohesion inscription step for 2020 users
+  cohesion2020Step: {
+    type: String,
+    default: "CONSENTEMENTS",
+    enum: ["CONSENTEMENTS", "COORDONNEES", "PARTICULIERES", "JDC", "DONE"],
   },
 
   // userName and userId because it can be a young or a referent
@@ -66,6 +73,8 @@ const Schema = new mongoose.Schema({
   lastLoginAt: { type: Date, default: Date.now },
   forgotPasswordResetToken: { type: String, default: "" },
   forgotPasswordResetExpires: { type: Date },
+  invitationToken: { type: String, default: "" },
+  invitationExpires: { type: Date },
 
   cniFiles: { type: [String], default: [] },
 
@@ -85,6 +94,7 @@ const Schema = new mongoose.Schema({
 
   // * School informations
   situation: { type: String },
+  grade: { type: String },
   schoolCertification: { type: String, enum: ["true", "false"] },
   schooled: { type: String, enum: ["true", "false"] },
   schoolName: { type: String },
@@ -160,6 +170,9 @@ const Schema = new mongoose.Schema({
   consentment: { type: String, enum: ["true", "false"] },
   imageRight: { type: String, enum: ["true", "false"] },
   imageRightFiles: { type: [String], default: [] },
+
+  // * JDC
+  jdc: { type: String, enum: ["true", "false"] },
 
   // * Motivations
   motivations: { type: String },

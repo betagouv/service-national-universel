@@ -5,14 +5,12 @@ import styled from "styled-components";
 import { translate, PHASE_STATUS_COLOR, PHASE_STATUS } from "../../utils";
 
 export default ({ title, subtitle, to, status, handleClick, disabled, children, open }) => {
-  const [color, setColor] = useState("#8da2fb");
-  const [strokeColor, setStrokeColor] = useState("#42389d");
+  const [color, setColor] = useState();
+  const [strokeColor, setStrokeColor] = useState();
   useEffect(() => {
-    console.log(status);
-    if (status === PHASE_STATUS.VALIDATED || status === PHASE_STATUS.CANCEL) {
-      setColor(PHASE_STATUS_COLOR[status]);
-      setStrokeColor("#fff");
-    }
+    let c = PHASE_STATUS_COLOR[status];
+    setColor(c || "#8da2fb");
+    setStrokeColor(c ? "#fff" : "#42389d");
   }, [status]);
 
   return (

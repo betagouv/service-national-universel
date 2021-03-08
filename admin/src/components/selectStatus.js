@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 
 import api from "../services/api";
 
-import { translate, YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_COLORS, YOUNG_STATUS_PHASE1 } from "../utils";
+import { translate, YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_COLORS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2_COLORS } from "../utils";
 import { toastr } from "react-redux-toastr";
 import matomo from "../services/matomo";
 
@@ -51,7 +51,7 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
       const { ok, code, data: newYoung } = await api.put(`/referent/young/${young._id}`, young);
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
 
-      if (status === YOUNG_STATUS.VALIDATED) {
+      if (status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INSCRIPTION) {
         matomo.logEvent("status_update", YOUNG_STATUS.VALIDATED);
         await api.post(`/referent/email/validate/${young._id}`, { subject: "Inscription validée" });
       }
@@ -88,7 +88,7 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
           }}
         />
       )}
-      <ActionBox color={YOUNG_STATUS_COLORS[young[statusName]]}>
+      <ActionBox color={YOUNG_STATUS_COLORS[young[statusName]] || YOUNG_STATUS_PHASE2_COLORS[young[statusName]]}>
         <UncontrolledDropdown setActiveFromChild>
           <DropdownToggle tag="button">
             {translate(young[statusName])}

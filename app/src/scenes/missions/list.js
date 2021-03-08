@@ -8,6 +8,7 @@ import { useSelector } from "react-redux";
 import MissionCard from "./components/missionCard";
 import ReactiveFilter from "../../components/ReactiveFilter";
 import { apiURL } from "../../config";
+import { translate } from "../../utils";
 import api from "../../services/api";
 import Loader from "../../components/Loader";
 import FilterGeoloc from "./components/FilterGeoloc";
@@ -18,6 +19,39 @@ export default () => {
   const young = useSelector((state) => state.Auth.young);
   const [showAlert, setShowAlert] = useState(true);
   const [applications, setApplications] = useState();
+  const DEFAULT_QUERY = () => ({
+    query: {
+      bool: {
+        filter: [
+          {
+            range: {
+              endAt: {
+                gt: "now",
+              },
+            },
+          },
+          { term: { "status.keyword": "VALIDATED" } },
+          {
+            range: {
+              placesLeft: {
+                gt: 0,
+              },
+            },
+          },
+        ],
+      },
+    },
+    sort: [
+      {
+        _geo_distance: {
+          location: [young.location.lon, young.location.lat],
+          order: "asc",
+          unit: "km",
+          mode: "min",
+        },
+      },
+    ],
+  });
 
   useEffect(() => {
     (async () => {
@@ -49,22 +83,28 @@ export default () => {
                 placeholder="Recherche par mots clés..."
                 autosuggest={false}
                 componentId="SEARCH"
-                dataField={["name", "structureName", "description", "actions", "city"]}
+                dataField={["name^10", "structureName", "description", "actions", "city"]}
+                queryFormat="and"
               />
             </SearchBox>
             <DomainsFilter md={6}>
               <SingleDropdownList
+                defaultQuery={DEFAULT_QUERY}
                 selectAllLabel="Tous les domaines"
                 URLParams={true}
                 componentId="DOMAIN"
-                placeholder="Filtrer par domaines"
                 dataField="domains.keyword"
                 react={{ and: FILTERS.filter((e) => e !== "DOMAIN") }}
+                renderItem={(e, count) => {
+                  return `${translate(e)} ${count ? `(${count})` : ""}`;
+                }}
+                renderLabel={(item) => translate(item) || "Filtrer par domaine"}
                 showSearch={false}
               />
             </DomainsFilter>
             <DomainsFilter md={6}>
               <SingleDropdownList
+                defaultQuery={DEFAULT_QUERY}
                 selectAllLabel="Toutes les périodes"
                 URLParams={true}
                 componentId="PERIOD"
@@ -82,6 +122,7 @@ export default () => {
         <Missions>
           <ReactiveFilter componentId="STATUS" query={{ query: { bool: { filter: { term: { "status.keyword": "VALIDATED" } } } }, value: "" }} />
           <ReactiveList
+            defaultQuery={DEFAULT_QUERY}
             componentId="result"
             react={{ and: FILTERS }}
             pagination={true}
@@ -115,34 +156,6 @@ export default () => {
               });
             }}
             renderNoResults={() => <div className="info">Aucune mission ne correspond à votre recherche</div>}
-            defaultQuery={() => {
-              if (!young.location || !young.location.lat || !young.location.lon) return { query: { match_all: {} } };
-              return {
-                query: {
-                  bool: {
-                    filter: [
-                      {
-                        range: {
-                          endAt: {
-                            gt: "now",
-                          },
-                        },
-                      },
-                    ],
-                  },
-                },
-                sort: [
-                  {
-                    _geo_distance: {
-                      location: [young.location.lon, young.location.lat],
-                      order: "asc",
-                      unit: "km",
-                      mode: "min",
-                    },
-                  },
-                ],
-              };
-            }}
           />
         </Missions>
       </ReactiveBase>

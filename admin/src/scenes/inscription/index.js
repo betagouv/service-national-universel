@@ -7,6 +7,7 @@ import "dayjs/locale/fr";
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
+import VioletHeaderButton from "../../components/buttons/VioletHeaderButton";
 
 import ExportComponent from "../../components/ExportXlsx";
 import SelectStatus from "../../components/selectStatus";
@@ -28,84 +29,91 @@ export default () => {
           <div style={{ flex: 1, position: "relative" }}>
             <Header>
               <Title>Inscriptions</Title>
-              <Export>
-                <ExportComponent
-                  title="Exporter les inscriptions"
-                  collection="candidature"
-                  react={{ and: FILTERS }}
-                  transform={(data) => {
-                    return {
-                      _id: data._id,
-                      Cohorte: data.cohort,
-                      Prénom: data.firstName,
-                      Nom: data.lastName,
-                      "Date de naissance": data.birthdateAt,
-                      Sexe: data.gender,
-                      Email: data.email,
-                      Téléphone: data.phone,
-                      "Adresse postale": data.address,
-                      "Code postal": data.zip,
-                      Ville: data.city,
-                      Département: data.department,
-                      Région: data.region,
-                      Situation: data.situation,
-                      "Type d'établissement": data.schoolType,
-                      "Nom de l'établissement": data.schoolName,
-                      "Code postal de l'établissement": data.schoolZip,
-                      "Ville de l'établissement": data.schoolCity,
-                      "Département de l'établissement": data.schoolDepartment,
-                      Handicap: data.handicap,
-                      "Bénéficiaire d'un PPS": data.ppsBeneficiary,
-                      "Bénéficiaire d'un PAI": data.paiBeneficiary,
-                      "Structure médico-sociale": data.medicosocialStructure,
-                      "Nom de la structure médico-sociale": data.medicosocialStructureName,
-                      "Adresse de la structure médico-sociale": data.medicosocialStructureAddress,
-                      "Code postal de la structure médico-sociale": data.medicosocialStructureZip,
-                      "Ville de la structure médico-sociale": data.medicosocialStructureCity,
-                      "Aménagement spécifique": data.specificAmenagment,
-                      "Nature de l'aménagement spécifique": data.specificAmenagmentType,
-                      "Activité de haut-niveau": data.highSkilledActivity,
-                      "Nature de l'activité de haut-niveau": data.highSkilledActivityType,
-                      "Document activité de haut-niveau ": data.highSkilledActivityProofFiles,
-                      "Consentement des représentants légaux": data.parentConsentment,
-                      "Statut représentant légal 1": data.parent1Status,
-                      "Prénom représentant légal 1": data.parent1FirstName,
-                      "Nom représentant légal 1": data.parent1LastName,
-                      "Email représentant légal 1": data.parent1Email,
-                      "Téléphone représentant légal 1": data.parent1Phone,
-                      "Adresse représentant légal 1": data.parent1Address,
-                      "Code postal représentant légal 1": data.parent1Zip,
-                      "Ville représentant légal 1": data.parent1City,
-                      "Département représentant légal 1": data.parent1Department,
-                      "Région représentant légal 1": data.parent1Region,
-                      "Statut représentant légal 2": data.parent2Status,
-                      "Prénom représentant légal 2": data.parent2FirstName,
-                      "Nom représentant légal 2": data.parent2LastName,
-                      "Email représentant légal 2": data.parent2Email,
-                      "Téléphone représentant légal 2": data.parent2Phone,
-                      "Adresse représentant légal 2": data.parent2Address,
-                      "Code postal représentant légal 2": data.parent2Zip,
-                      "Ville représentant légal 2": data.parent2City,
-                      "Département représentant légal 2": data.parent2Department,
-                      "Région représentant légal 2": data.parent2Region,
-                      Motivation: data.motivations,
-                      Phase: data.phase,
-                      "Créé lé": data.createdAt,
-                      "Mis à jour le": data.updatedAt,
-                      "Dernière connexion le": data.lastLoginAt,
-                      Statut: data.status,
-                      "Dernier statut le": data.lastStatusAt,
-                    };
-                  }}
-                />
-              </Export>
+              <div style={{ display: "flex" }}>
+                <Link to="/volontaire/create">
+                  <VioletHeaderButton>
+                    <p>Nouvelle inscription</p>
+                  </VioletHeaderButton>
+                </Link>
+                <VioletHeaderButton>
+                  <ExportComponent
+                    title="Exporter les inscriptions"
+                    collection="candidature"
+                    react={{ and: FILTERS }}
+                    transform={(data) => {
+                      return {
+                        _id: data._id,
+                        Cohorte: data.cohort,
+                        Prénom: data.firstName,
+                        Nom: data.lastName,
+                        "Date de naissance": data.birthdateAt,
+                        Sexe: data.gender,
+                        Email: data.email,
+                        Téléphone: data.phone,
+                        "Adresse postale": data.address,
+                        "Code postal": data.zip,
+                        Ville: data.city,
+                        Département: data.department,
+                        Région: data.region,
+                        Situation: data.situation,
+                        "Type d'établissement": data.schoolType,
+                        "Nom de l'établissement": data.schoolName,
+                        "Code postal de l'établissement": data.schoolZip,
+                        "Ville de l'établissement": data.schoolCity,
+                        "Département de l'établissement": data.schoolDepartment,
+                        Handicap: data.handicap,
+                        "Bénéficiaire d'un PPS": data.ppsBeneficiary,
+                        "Bénéficiaire d'un PAI": data.paiBeneficiary,
+                        "Structure médico-sociale": data.medicosocialStructure,
+                        "Nom de la structure médico-sociale": data.medicosocialStructureName,
+                        "Adresse de la structure médico-sociale": data.medicosocialStructureAddress,
+                        "Code postal de la structure médico-sociale": data.medicosocialStructureZip,
+                        "Ville de la structure médico-sociale": data.medicosocialStructureCity,
+                        "Aménagement spécifique": data.specificAmenagment,
+                        "Nature de l'aménagement spécifique": data.specificAmenagmentType,
+                        "Activité de haut-niveau": data.highSkilledActivity,
+                        "Nature de l'activité de haut-niveau": data.highSkilledActivityType,
+                        "Document activité de haut-niveau ": data.highSkilledActivityProofFiles,
+                        "Consentement des représentants légaux": data.parentConsentment,
+                        "Statut représentant légal 1": data.parent1Status,
+                        "Prénom représentant légal 1": data.parent1FirstName,
+                        "Nom représentant légal 1": data.parent1LastName,
+                        "Email représentant légal 1": data.parent1Email,
+                        "Téléphone représentant légal 1": data.parent1Phone,
+                        "Adresse représentant légal 1": data.parent1Address,
+                        "Code postal représentant légal 1": data.parent1Zip,
+                        "Ville représentant légal 1": data.parent1City,
+                        "Département représentant légal 1": data.parent1Department,
+                        "Région représentant légal 1": data.parent1Region,
+                        "Statut représentant légal 2": data.parent2Status,
+                        "Prénom représentant légal 2": data.parent2FirstName,
+                        "Nom représentant légal 2": data.parent2LastName,
+                        "Email représentant légal 2": data.parent2Email,
+                        "Téléphone représentant légal 2": data.parent2Phone,
+                        "Adresse représentant légal 2": data.parent2Address,
+                        "Code postal représentant légal 2": data.parent2Zip,
+                        "Ville représentant légal 2": data.parent2City,
+                        "Département représentant légal 2": data.parent2Department,
+                        "Région représentant légal 2": data.parent2Region,
+                        Motivation: data.motivations,
+                        Phase: data.phase,
+                        "Créé lé": data.createdAt,
+                        "Mis à jour le": data.updatedAt,
+                        "Dernière connexion le": data.lastLoginAt,
+                        Statut: data.status,
+                        "Dernier statut le": data.lastStatusAt,
+                      };
+                    }}
+                  />
+                </VioletHeaderButton>
+              </div>
             </Header>
             <Filter>
               <DataSearch
                 showIcon={false}
                 placeholder="Rechercher une inscription..."
                 componentId="SEARCH"
-                dataField={["email", "firstName", "lastName", "phone"]}
+                dataField={["email.keyword", "firstName", "lastName", "phone"]}
                 react={{ and: FILTERS }}
                 // fuzziness={2}
                 style={{ flex: 2 }}
@@ -417,22 +425,6 @@ const Table = styled.table`
     border-bottom: 1px solid #f4f5f7;
     :hover {
       background-color: #e6ebfa;
-    }
-  }
-`;
-
-const Export = styled.div`
-  button {
-    background-color: #5245cc;
-    border: none;
-    border-radius: 5px;
-    padding: 7px 30px;
-    font-size: 14px;
-    font-weight: 700;
-    color: #fff;
-    cursor: pointer;
-    :hover {
-      background: #372f78;
     }
   }
 `;

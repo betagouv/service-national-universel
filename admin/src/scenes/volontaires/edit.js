@@ -8,7 +8,7 @@ import "dayjs/locale/fr";
 import { useSelector } from "react-redux";
 
 import Historic from "../../components/historic";
-
+import LoadingButton from "../../components/buttons/LoadingButton";
 import DateInput from "../../components/dateInput";
 import { departmentList, regionList, YOUNG_STATUS, translate } from "../../utils";
 import api from "../../services/api";
@@ -63,7 +63,9 @@ export default (props) => {
                 <Title>{`Profil de ${values.firstName} ${values.lastName}`}</Title>
                 <SubTitle>{getSubtitle()}</SubTitle>
               </div>
-              <button onClick={handleSubmit}>Enregistrer</button>
+              <SaveBtn loading={isSubmitting} onClick={handleSubmit}>
+                Enregistrer
+              </SaveBtn>
             </TitleWrapper>
             <Row>
               <Col md={6} style={{ marginBottom: "20px" }}>
@@ -127,6 +129,18 @@ export default (props) => {
                   <BoxTitle>Situation</BoxTitle>
                   <BoxContent direction="column">
                     <Item title="Status" values={values} name="situation" handleChange={handleChange} />
+                    <Select
+                      title="Classe"
+                      values={values}
+                      name="grade"
+                      handleChange={handleChange}
+                      options={[
+                        { value: "3eme", label: "3eme" },
+                        { value: "2nde", label: "2nde" },
+                        { value: "1ere", label: "1ere" },
+                        { value: "Terminale", label: "Terminale" },
+                      ]}
+                    />
                     <Item title="Type" values={values} name="schoolType" handleChange={handleChange} />
                     <Item title="Nom" values={values} name="schoolName" handleChange={handleChange} />
                     <Item title="Adresse" values={values} name="schoolAddress" handleChange={handleChange} />
@@ -505,6 +519,45 @@ export default (props) => {
                   </BoxContent>
                 </Box>
               </Col>
+              {user.role === "admin" ? (
+                <Col md={6} style={{ marginBottom: "20px" }}>
+                  <Box>
+                    <BoxTitle>Cohorte</BoxTitle>
+                    <BoxContent direction="column">
+                      <Select
+                        name="cohort"
+                        values={values}
+                        handleChange={handleChange}
+                        title="Cohorte"
+                        options={[
+                          { value: "2021", label: "2021" },
+                          { value: "2020", label: "2020" },
+                          { value: "2019", label: "2019" },
+                        ]}
+                      />
+                    </BoxContent>
+                  </Box>
+                </Col>
+              ) : null}
+              {values.cohort === "2020" ? (
+                <Col md={6} style={{ marginBottom: "20px" }}>
+                  <Box>
+                    <BoxTitle>Journée de Défense et Citoyenneté (cohorte 2020)</BoxTitle>
+                    <BoxContent direction="column">
+                      <Select
+                        name="jdc"
+                        values={values}
+                        handleChange={handleChange}
+                        title="JDC réalisée"
+                        options={[
+                          { value: "true", label: "Oui" },
+                          { value: "false", label: "Non" },
+                        ]}
+                      />
+                    </BoxContent>
+                  </Box>
+                </Col>
+              ) : null}
               <Col md={6} style={{ marginBottom: "20px" }}>
                 <Box>
                   <BoxTitle>Préférences</BoxTitle>
@@ -808,5 +861,29 @@ const RadioLabel = styled.label`
     height: 15px;
     min-width: 15px;
     min-height: 15px;
+  }
+`;
+
+const SaveBtn = styled(LoadingButton)`
+  background-color: #5245cc;
+  border: none;
+  border-radius: 5px;
+  padding: 7px 30px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  cursor: pointer;
+  :hover {
+    background: #372f78;
+  }
+  &.outlined {
+    :hover {
+      background: #fff;
+    }
+    background-color: transparent;
+    border: solid 1px #5245cc;
+    color: #5245cc;
+    font-size: 13px;
+    padding: 4px 20px;
   }
 `;

@@ -253,13 +253,6 @@ export default () => {
       <Heading>
         <h2>Coordonnées du ou des représentants légaux</h2>
         <p>Faites compléter les informations ci-dessous par votre ou vos représentants légaux.</p>
-        <Warning>
-          <img src={require("../../../assets/warning.png")} />
-          <p>
-            Les informations relatives aux <b>deux parents</b> sont requises, sauf dans le cas où l'autorité parentale n'est portée que par l'un des parents ou par une tiers
-            personne.
-          </p>
-        </Warning>
       </Heading>
       <Formik
         initialValues={initialValues}

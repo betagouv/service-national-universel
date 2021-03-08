@@ -3,13 +3,13 @@ import React, { useState, useEffect } from "react";
 import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
 import { requiredMessage } from "./errorMessage";
-import DownloadButton from "./DownloadButton";
+import DownloadButton from "./buttons/DownloadButton";
 
 function getFileName(file) {
   return (file && file.name) || file;
 }
 
-export default ({ value, onChange, name, errorMessage = requiredMessage, placeholder = "votre fichier", source }) => {
+export default ({ value, onChange, name, errorMessage = requiredMessage, placeholder = "votre fichier", source, required }) => {
   const [filesList, setFilesList] = useState(value || []);
 
   // useEffect(() => {
@@ -91,7 +91,7 @@ export default ({ value, onChange, name, errorMessage = requiredMessage, placeho
           multiple
           name={name}
           value={[]}
-          validate={(v) => ((!v || !v.length) && errorMessage) || (v && v.size > 5000000 && "Ce fichier est trop volumineux.")}
+          validate={(v) => (required && (!v || !v.length) && errorMessage) || (v && v.size > 5000000 && "Ce fichier est trop volumineux.")}
           onChange={(e) => onAdd(e.target.files)}
         />
         <>

@@ -4,9 +4,7 @@ const passport = require("passport");
 const { capture } = require("../sentry");
 
 const StructureObject = require("../models/structure");
-
-const SERVER_ERROR = "SERVER_ERROR";
-const NOT_FOUND = "NOT_FOUND";
+const { ERRORS } = require("../utils");
 
 router.post("/", async (req, res) => {
   try {
@@ -14,7 +12,7 @@ router.post("/", async (req, res) => {
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
 
@@ -22,11 +20,11 @@ router.put("/", passport.authenticate("referent", { session: false }), async (re
   try {
     let obj = req.body;
     const data = await StructureObject.findByIdAndUpdate(req.user.structureId, obj, { new: true });
-    if (!data) return res.status(404).send({ ok: false, code: NOT_FOUND });
+    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
 
@@ -34,11 +32,11 @@ router.put("/:id", passport.authenticate("referent", { session: false }), async 
   try {
     let obj = req.body;
     const data = await StructureObject.findByIdAndUpdate(req.params.id, obj, { new: true });
-    if (!data) return res.status(404).send({ ok: false, code: NOT_FOUND });
+    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
 
@@ -48,7 +46,7 @@ router.get("/networks", passport.authenticate("referent", { session: false }), a
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
 
@@ -58,18 +56,18 @@ router.get("/network/:id", passport.authenticate("referent", { session: false })
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
 
 router.get("/:id", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
     const data = await StructureObject.findOne({ _id: req.params.id });
-    if (!data) return res.status(404).send({ ok: false, code: NOT_FOUND });
+    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
 
@@ -79,7 +77,7 @@ router.get("/", passport.authenticate("referent", { session: false }), async (re
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
 
@@ -91,7 +89,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false }), asy
     res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, error, code: SERVER_ERROR });
+    res.status(500).send({ ok: false, error, code: ERRORS.SERVER_ERROR });
   }
 });
 

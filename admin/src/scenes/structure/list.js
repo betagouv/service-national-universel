@@ -9,6 +9,7 @@ import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
 import { translate, corpsEnUniforme } from "../../utils";
+import VioletHeaderButton from "../../components/buttons/VioletHeaderButton";
 
 const FILTERS = ["SEARCH", "LEGAL_STATUS", "DEPARTMENT", "REGION", "CORPS", "WITH_NETWORK"];
 const formatLongDate = (date) => {
@@ -32,11 +33,11 @@ export default () => {
               </div>
               <div style={{ display: "flex" }}>
                 <Link to="/structure/create">
-                  <ButtonHeader>
+                  <VioletHeaderButton>
                     <p>Inviter une nouvelle structure</p>
-                  </ButtonHeader>
+                  </VioletHeaderButton>
                 </Link>
-                <ButtonHeader>
+                <VioletHeaderButton>
                   <ExportComponent
                     title="Exporter les structures"
                     collection="structure"
@@ -44,7 +45,7 @@ export default () => {
                       return e;
                     }}
                   />
-                </ButtonHeader>
+                </VioletHeaderButton>
               </div>
             </Header>
             <Filter>
@@ -115,17 +116,17 @@ export default () => {
                   showSearch={false}
                   sortBy="asc"
                 />
-                {/* <MultiDropdownList
+                <MultiDropdownList
                   className="dropdown-filter"
                   placeholder="Affiliation à un réseau national"
                   componentId="WITH_NETWORK"
-                  dataField="networkId.keyword"
+                  dataField="networkName.keyword"
                   title=""
                   react={{ and: FILTERS.filter((e) => e !== "WITH_NETWORK") }}
                   URLParams={true}
                   showSearch={false}
                   sortBy="asc"
-                /> */}
+                />
               </FilterRow>
             </Filter>
             <ResultTable>
@@ -185,7 +186,6 @@ export default () => {
 
 const Hit = ({ hit, onClick }) => {
   const [missionsInfo, setMissionsInfo] = useState({ count: "-", placesTotal: "-" });
-  const [parentStructure, setParentStructure] = useState(null);
   useEffect(() => {
     (async () => {
       const queries = [];
@@ -193,20 +193,8 @@ const Hit = ({ hit, onClick }) => {
       queries.push({
         query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": hit._id } }] } },
       });
-      if (hit.networkId) {
-        queries.push({ index: "structure", type: "_doc" });
-        queries.push({
-          query: { bool: { must: { match_all: {} }, filter: [{ term: { _id: hit.networkId } }] } },
-        });
-      }
 
       const { responses } = await api.esQuery(queries);
-      if (hit.networkId) {
-        const structures = responses[1]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-        setParentStructure(structures.length ? structures[0] : null);
-      } else {
-        setParentStructure(null);
-      }
       setMissionsInfo({
         count: responses[0].hits.hits.length,
         placesTotal: responses[0].hits.hits.reduce((acc, e) => acc + e._source.placesTotal, 0),
@@ -228,9 +216,9 @@ const Hit = ({ hit, onClick }) => {
       <td>
         {hit.status === "DRAFT" ? <TagStatus>{translate(hit.status)}</TagStatus> : null}
         {hit.isNetwork === "true" ? <TagNetwork>Tête de réseau</TagNetwork> : null}
-        {parentStructure ? (
-          <Link to={`structure/${parentStructure._id}`}>
-            <TagParent>{parentStructure.name}</TagParent>
+        {hit.networkName ? (
+          <Link to={`structure/${hit.networkId}`}>
+            <TagParent>{hit.networkName}</TagParent>
           </Link>
         ) : null}
         {hit.department ? <TagDepartment>{translate(hit.department)}</TagDepartment> : null}
@@ -391,23 +379,6 @@ const Table = styled.table`
     border-bottom: 1px solid #f4f5f7;
     :hover {
       background-color: #e6ebfa;
-    }
-  }
-`;
-
-const ButtonHeader = styled.div`
-  > * {
-    background-color: #5245cc;
-    border: none;
-    border-radius: 5px;
-    padding: 7px 30px;
-    margin-left: 1rem;
-    font-size: 14px;
-    font-weight: 700;
-    color: #fff;
-    cursor: pointer;
-    :hover {
-      background: #372f78;
     }
   }
 `;

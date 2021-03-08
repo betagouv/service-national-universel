@@ -3,18 +3,13 @@ import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 import NextStep from "../../phase2/nextStep";
+import { INTEREST_MISSION_LIMIT_DATE, PHASE_STATUS_COLOR, translate } from "../../../utils";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
-
-  const goTo = (id) => {
-    if (document.getElementById) {
-      const yOffset = -70; // header's height
-      const element = document.getElementById(id);
-      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-      window.scrollTo({ top: y, behavior: "smooth" });
-    }
-  };
+  // See: https://trello.com/c/vOUIhdhu/406-volontaire-formulaire-all%C3%A9g%C3%A9-pour-les-2020
+  const isBornBefore20030702 = young.cohort === "2020" && new Date(young.birthdateAt) < new Date("2003-07-02");
+  const needsToRegisterToCohesion = !isBornBefore20030702;
 
   return (
     <>
@@ -28,18 +23,43 @@ export default () => {
           <p style={{ color: "#161e2e", fontSize: "1.5rem", fontWeight: 700 }}>Votre parcours</p>
           <WrapperItem>
             <div className="title">
-              1. Un séjour de cohésion <Tag color="#c81e1e">Phase&nbsp;annulée</Tag>
+              1. Un séjour de cohésion <Tag color={PHASE_STATUS_COLOR[young.statusPhase1]}>{translate(young.statusPhase1)}</Tag>
             </div>
             <div className="info">
               <div className="subtitle">Séjour annulé suite à la crise sanitaire.</div>
+              {isBornBefore20030702 ? (
+                <div className="subtitle more-info">
+                  Malheureusement, vous aurez 18 ans révolus au moment du séjour de cohésion, vous ne pouvez vous y inscrire. Si vous n'avez pas réalisé votre JDC, nous vous
+                  invitons à vous inscrire sur{" "}
+                  <a href="http://majdc.fr" target="_blank">
+                    majdc.fr
+                  </a>{" "}
+                  et à demander à être convoqué pour une session en ligne.
+                </div>
+              ) : null}
+              {needsToRegisterToCohesion ? (
+                <div className="subtitle more-info">
+                  Vous pouvez cependant demander à participer à la session 2021, sous réserve de votre disponibilité du 21 juin au 2 juillet 2021.
+                  <Link to="/cohesion/consentements">
+                    <Button>Je confirme ma participation au séjour de cohésion</Button>
+                  </Link>
+                  <div style={{ marginTop: "1rem", fontStyle: "italic" }}>
+                    Si vous n'êtes pas disponible sur ces dates et que vous n'avez pas réalisé votre JDC, nous vous invitons à vous inscrire sur{" "}
+                    <a href="http://majdc.fr" target="_blank">
+                      majdc.fr
+                    </a>{" "}
+                    et à demander à être convoqué pour une session en ligne.
+                  </div>
+                </div>
+              ) : null}
             </div>
           </WrapperItem>
           <WrapperItem>
             <div className="title">
-              2. Une première mission d'intérêt général <Tag color="#5145cd">En&nbsp;cours</Tag>
+              2. Une première mission d'intérêt général <Tag color={PHASE_STATUS_COLOR[young.statusPhase2]}>{translate(young.statusPhase2)}</Tag>
             </div>
             <div className="info">
-              <div className="subtitle">À réaliser dans l’année, jusqu’au 31 juin 2021.</div>
+              <div className="subtitle">À réaliser dans l’année, jusqu’au {INTEREST_MISSION_LIMIT_DATE[young.cohort]}.</div>
             </div>
           </WrapperItem>
           <WrapperItem>
@@ -77,6 +97,9 @@ const WrapperItem = styled.div`
       color: #6b7280;
       font-size: 0.875rem !important;
       font-weight: 500;
+    }
+    .more-info {
+      font-weight: normal;
     }
     .link {
       color: #6b7280;
@@ -122,6 +145,20 @@ const Content = styled.div`
       stroke: #5145cd;
     }
   }
+`;
+
+const Button = styled.button`
+  display: inline-block;
+  padding: 10px 40px;
+  background-color: #31c48d;
+  color: #fff;
+  font-size: 16px;
+  text-align: center;
+  font-weight: 700;
+  margin: 25px auto 10px;
+  border-radius: 30px;
+  border: none;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
 `;
 
 const Hero = styled.div`

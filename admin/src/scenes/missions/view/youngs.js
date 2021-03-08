@@ -12,6 +12,7 @@ import Panel from "../../volontaires/panel";
 import { formatStringLongDate } from "../../../utils";
 
 export default ({ mission, applications }) => {
+  const [missionTemp, setMissionTemp] = useState(mission);
   const data = applications;
   const [young, setYoung] = useState();
   const handleClick = async (application) => {
@@ -19,12 +20,17 @@ export default ({ mission, applications }) => {
     if (ok) setYoung(data);
   };
 
+  const updateMission = async () => {
+    const { data, ok, code } = await api.get(`/mission/${mission._id}`);
+    if (ok) setMissionTemp(data);
+  };
+
   if (!data) return <div>Chargement...</div>;
 
   return (
     <div>
       <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-        <MissionView mission={mission} tab="youngs">
+        <MissionView mission={missionTemp} tab="youngs">
           <Table>
             <thead>
               <tr>
@@ -35,7 +41,7 @@ export default ({ mission, applications }) => {
             </thead>
             <tbody>
               {data.map((hit, i) => (
-                <Hit key={i} hit={hit} onClick={() => handleClick(hit)} />
+                <Hit key={i} hit={hit} onClick={() => handleClick(hit)} onChangeApplication={updateMission} />
               ))}
             </tbody>
           </Table>
@@ -51,7 +57,7 @@ export default ({ mission, applications }) => {
   );
 };
 
-const Hit = ({ hit, onClick }) => {
+const Hit = ({ hit, onClick, onChangeApplication }) => {
   const getAge = (d) => {
     const now = new Date();
     const date = new Date(d);
@@ -74,7 +80,7 @@ const Hit = ({ hit, onClick }) => {
         <div>{formatStringLongDate(hit.createdAt)}</div>
       </td>
       <td onClick={(e) => e.stopPropagation()}>
-        <SelectStatusApplication hit={hit} />
+        <SelectStatusApplication hit={hit} callback={onChangeApplication} />
       </td>
     </tr>
   );

@@ -55,14 +55,15 @@ export default () => {
             <Filter>
               <DataSearch
                 showIcon={false}
-                placeholder="Rechercher par prenom, nom, email .."
+                placeholder="Rechercher par prénom, nom, email..."
                 componentId="SEARCH"
-                dataField={["email", "firstName", "lastName"]}
+                dataField={["email.keyword", "firstName", "lastName"]}
                 react={{ and: FILTERS }}
                 // fuzziness={2}
                 style={{ flex: 2 }}
                 innerClass={{ input: "searchbox" }}
                 autosuggest={false}
+                queryFormat="and"
               />
               <FilterRow>
                 <MultiDropdownList

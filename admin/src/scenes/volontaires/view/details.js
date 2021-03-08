@@ -8,7 +8,7 @@ import YoungView from "./wrapper";
 import api from "../../../services/api";
 import Avatar from "../../../components/Avatar";
 import SocialIcons from "../../../components/SocialIcons";
-import DownloadButton from "../../../components/DownloadButton";
+import DownloadButton from "../../../components/buttons/DownloadButton";
 
 export default ({ young }) => {
   return (
@@ -67,6 +67,7 @@ export default ({ young }) => {
             <Col md={6}>
               <Bloc title="Situation">
                 <Details title="Statut" value={t(young.situation)} />
+                <Details title="Classe" value={t(young.grade)} />
                 <Details title="Type" value={young.schoolType} />
                 <Details title="Nom" value={young.schoolName} />
                 <Details title="Région" value={young.schoolRegion} />
@@ -74,6 +75,11 @@ export default ({ young }) => {
                 <Details title="Ville" value={young.schoolCity && young.schoolZip && `${young.schoolCity} (${young.schoolZip})`} />
                 <Details title="Adresse" value={young.schoolAdress} />
               </Bloc>
+              {young.jdc && young.cohort === "2020" && (
+                <Bloc title="Journée de Défense et Citoyenneté">
+                  <Details title="JDC réalisée" value={t(young.jdc)} />
+                </Bloc>
+              )}
               <Bloc title="Représentant légal n°1">
                 <Details title="Statut" value={t(young.parent1Status)} />
                 <Details title="Prénom" value={young.parent1FirstName} />

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
-import { YOUNG_PHASE, YOUNG_STATUS, PHASE_STATUS } from "../../utils";
+import { YOUNG_PHASE, YOUNG_STATUS, PHASE_STATUS, YOUNG_STATUS_PHASE1 } from "../../utils";
 import Item from "./item";
 import { DRAWER_TABS } from "../utils";
 
@@ -17,20 +17,14 @@ export default ({ inscription }) => {
   const [activeTab, setActiveTab] = useState(DRAWER_TABS.HOME);
 
   useEffect(() => {
-    if (young.cohort === "2019") {
-      setStatus1(PHASE_STATUS.VALIDATED);
-      setStatus2(PHASE_STATUS.IN_PROGRESS);
-      return;
-    }
-    if (young.cohort === "2020") {
-      setStatus1(PHASE_STATUS.CANCEL);
-      setStatus2(PHASE_STATUS.IN_PROGRESS);
-      return;
-    }
+    // if the young is not validated yet
+    if (young.status !== YOUNG_STATUS.VALIDATED) return;
 
-    if (young.status === YOUNG_STATUS.VALIDATED) {
-      setStatus1(PHASE_STATUS.WAITING_AFFECTATION);
-    }
+    setStatus1(young.statusPhase1);
+    if (young.phase === YOUNG_PHASE.COHESION_STAY || young.phase === YOUNG_PHASE.INSCRIPTION) return;
+
+    setStatus2(young.statusPhase2);
+    if (young.phase === YOUNG_PHASE.INTEREST_MISSION) return;
   }, [young]);
 
   if (open) {
@@ -43,11 +37,11 @@ export default ({ inscription }) => {
     if (tab === DRAWER_TABS.HOME) return false;
     if (young.status === YOUNG_STATUS.REFUSED) return true;
     if (tab === DRAWER_TABS.PHASE1) {
-      if (young.cohort && young.cohort !== "2021") return true;
+      if (young.cohort && young.cohort !== "2021") return [YOUNG_STATUS_PHASE1.CANCEL, YOUNG_STATUS_PHASE1.DONE].includes(young.statusPhase1);
       return [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status);
     }
     if (tab === DRAWER_TABS.PHASE2) {
-      if (young.cohort && young.cohort !== "2021") return false;
+      return [YOUNG_PHASE.INSCRIPTION, YOUNG_PHASE.COHESION_STAY].includes(young.phase);
     }
     if (tab === DRAWER_TABS.PHASE3) {
       //todo handle tab phase 3

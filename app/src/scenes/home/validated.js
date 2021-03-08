@@ -3,10 +3,12 @@ import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 import NextStep from "../phase1/nextStep";
+import { COHESION_STAY_LIMIT_DATE, INTEREST_MISSION_LIMIT_DATE } from "../../utils";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
-  const [showAlert, setShowAlert] = useState(true);
+  const is2020 = young.cohort === "2020";
+  const [showAlert, setShowAlert] = useState(!is2020);
 
   const goTo = (id) => {
     if (document.getElementById) {
@@ -29,16 +31,27 @@ export default () => {
           </Alert>
         )}
         <Content showAlert={showAlert}>
-          <h1>
-            <strong>{young.firstName},</strong> votre candidature a été retenue !
-          </h1>
-          <p>Félicitations, vous allez pouvoir débuter prochainement votre parcours SNU.</p>
-          <p>Ceci est votre espace volontaire, il vous permettra de vous guider à chaque étape de votre SNU.</p>
+          {is2020 ? (
+            <>
+              <h1>
+                <strong>{young.firstName},</strong> ravis de vous retrouver !
+              </h1>
+              <p>Votre espace volontaire vous accompagne à chaque étape de votre SNU.</p>
+            </>
+          ) : (
+            <>
+              <h1>
+                <strong>{young.firstName},</strong> votre candidature a été retenue !
+              </h1>
+              <p>Félicitations, vous allez pouvoir débuter prochainement votre parcours SNU.</p>
+              <p>Ceci est votre espace volontaire, il vous permettra de vous guider à chaque étape de votre SNU.</p>
+            </>
+          )}
           <p style={{ color: "#161e2e", fontSize: "1.5rem", fontWeight: 700 }}>Au programme</p>
           <WrapperItem>
             <div className="title">1. Un séjour de cohésion</div>
             <div className="info">
-              <div className="subtitle">Du 21 juin au 2 juillet 2021</div>
+              <div className="subtitle">{COHESION_STAY_LIMIT_DATE[young.cohort]}</div>
               <div className="link">
                 Renseignez votre <span onClick={() => goTo("sanitaire")}>fiche sanitaire</span> et votre{" "}
                 <span onClick={() => goTo("imageRight")}>consentement de droit à l'image</span>
@@ -48,7 +61,7 @@ export default () => {
           <WrapperItem>
             <div className="title">2. Une première mission d'intérêt général</div>
             <div className="info">
-              <div className="subtitle">À réaliser dans l’année, jusqu’au 31 juin 2022.</div>
+              <div className="subtitle">À réaliser dans l’année, jusqu’au {INTEREST_MISSION_LIMIT_DATE[young.cohort]}</div>
               <div className="link">
                 <Link to="/preferences">
                   <span>Indiquez vos préférences de mission</span>

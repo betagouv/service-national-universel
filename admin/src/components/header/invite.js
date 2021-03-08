@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
 import { translate, departmentList, regionList, region2department, department2region, REFERENT_ROLES } from "../../utils";
-import LoadingButton from "../../components/loadingButton";
+import LoadingButton from "../../components/buttons/LoadingButton";
 import api from "../../services/api";
 
 export default ({ setOpen, open, label = "Inviter un référent", role = "" }) => {
