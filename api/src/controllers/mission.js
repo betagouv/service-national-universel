@@ -7,9 +7,7 @@ const { capture } = require("../sentry");
 const MissionObject = require("../models/mission");
 const UserObject = require("../models/referent");
 const ApplicationModel = require("../models/application");
-const SERVER_ERROR = "SERVER_ERROR";
-const NOT_FOUND = "PASSWORD_TOKEN_EXPIRED_OR_INVALID";
-const OPERATION_UNAUTHORIZED = "OPERATION_UNAUTHORIZED";
+const { ERRORS } = require("../utils");
 
 const canModify = (user, mission) => {
   return !(
@@ -26,38 +24,38 @@ router.post("/", async (req, res) => {
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
 
 router.put("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const m = await MissionObject.findById(req.body._id);
-    if (!canModify(req.user, m)) return res.status(404).send({ ok: false, code: OPERATION_UNAUTHORIZED });
+    if (!canModify(req.user, m)) return res.status(404).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const mission = await MissionObject.findByIdAndUpdate(req.body._id, req.body, { new: true });
     res.status(200).send({ ok: true, data: mission });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
 
 router.put("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const m = await MissionObject.findById(req.params.id);
-    if (!canModify(req.user, m)) return res.status(404).send({ ok: false, code: OPERATION_UNAUTHORIZED });
+    if (!canModify(req.user, m)) return res.status(404).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const mission = await MissionObject.findByIdAndUpdate(req.params.id, req.body, { new: true });
     res.status(200).send({ ok: true, data: mission });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
 
 router.get("/:id", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
     const data = await MissionObject.findOne({ _id: req.params.id });
-    if (!data) return res.status(404).send({ ok: false, code: NOT_FOUND });
+    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const mission = data.toJSON();
 
@@ -71,18 +69,18 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
     return res.status(200).send({ ok: true, data: { ...mission, application } });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
 
 router.get("/structure/:structureId", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const data = await MissionObject.find({ structureId: req.params.structureId });
-    if (!data) return res.status(404).send({ ok: false, code: NOT_FOUND });
+    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
 
@@ -92,7 +90,7 @@ router.get("/structure/:structureId", passport.authenticate("referent", { sessio
 //     return res.status(200).send({ ok: true, data });
 //   } catch (error) {
 //     capture(error);
-//     res.status(500).send({ ok: false, code: SERVER_ERROR, error });
+//     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
 //   }
 // });
 
@@ -103,7 +101,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false }), asy
     res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, error, code: SERVER_ERROR });
+    res.status(500).send({ ok: false, error, code: ERRORS.SERVER_ERROR });
   }
 });
 
