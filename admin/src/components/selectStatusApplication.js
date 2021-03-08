@@ -53,7 +53,7 @@ export default ({ hit, options = [], callback }) => {
       } else {
         await api.post(`/application/${data._id}/notify/${status.toLowerCase()}`);
       }
-      callback();
+      callback && callback();
     } catch (e) {
       console.log(e);
       toastr.error("Oups, une erreur est survenue :", translate(e.code));

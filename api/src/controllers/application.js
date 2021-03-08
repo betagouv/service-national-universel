@@ -144,11 +144,11 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
     const { id, template } = req.params;
 
     const application = await ApplicationObject.findById(id);
-    if (!application) return res.status(404).send({ ok: false, code: NOT_FOUND + "_app" });
+    if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const mission = await MissionObject.findById(application.missionId);
-    if (!mission) return res.status(404).send({ ok: false, code: NOT_FOUND + "_mission" });
+    if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const referent = await ReferentObject.findById(mission.tutorId);
-    if (!referent) return res.status(404).send({ ok: false, code: NOT_FOUND + "_referent" });
+    if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     let htmlContent = "";
     let subject = "";
@@ -211,7 +211,7 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
     return res.status(200).send({ ok: true }); //todo
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
 
