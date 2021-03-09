@@ -5,10 +5,10 @@ import { toastr } from "react-redux-toastr";
 import { Field, Formik } from "formik";
 import { useHistory } from "react-router-dom";
 
-import { formatDay, translate, formatStringDate } from "../../utils";
-
+import { translate, formatStringDate } from "../../utils";
 import api from "../../services/api";
 import SelectStatusMission from "../../components/selectStatusMission";
+import PanelActionButton from "../../components/buttons/PanelActionButton";
 
 export default ({ onChange, mission }) => {
   const [tutor, setTutor] = useState();
@@ -50,18 +50,20 @@ export default ({ onChange, mission }) => {
         <div className="close" onClick={onChange} />
       </div>
       <div className="title">{mission.name}</div>
-      <Link to={`/mission/${mission._id}`}>
-        <Button className="btn-blue">Consulter</Button>
-      </Link>
-      <Link to={`/mission/${mission._id}/edit`}>
-        <Button className="btn-blue">Modifier</Button>
-      </Link>
-      <Button onClick={duplicate} className="btn-blue">
-        Dupliquer
-      </Button>
-      <Link to={`/mission/${mission._id}`}>
-        <Button className="btn-red">Supprimer</Button>
-      </Link>
+      <div style={{ display: "flex" }}>
+        <Link to={`/mission/${mission._id}`}>
+          <PanelActionButton icon="eye" title="Consulter" />
+        </Link>
+        <Link to={`/mission/${mission._id}/edit`}>
+          <PanelActionButton icon="pencil" title="Modifier" />
+        </Link>
+        <PanelActionButton onClick={duplicate} icon="duplicate" title="Dupliquer" />
+      </div>
+      <div style={{ display: "flex" }}>
+        <Link to={`/mission/${mission._id}`}>
+          <PanelActionButton icon="bin" title="Supprimer" />
+        </Link>
+      </div>
       <hr />
       <div>
         <div className="title">Statut</div>
@@ -210,19 +212,6 @@ const SubtitleLink = styled(Subtitle)`
   text-transform: none;
 `;
 
-const Tag = styled.span`
-  background-color: rgb(253, 246, 236);
-  border: 1px solid rgb(250, 236, 216);
-  color: rgb(230, 162, 60);
-  align-self: flex-start;
-  border-radius: 4px;
-  padding: 8px 15px;
-  font-size: 13px;
-  font-weight: 400;
-  cursor: pointer;
-  margin-right: 5px;
-`;
-
 const Panel = styled.div`
   background: #ffffff;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
@@ -361,35 +350,6 @@ const FormGroup = styled.div`
     border: 1px solid #dcdfe6;
     :focus {
       border: 1px solid #aaa;
-    }
-  }
-`;
-
-const Button = styled.button`
-  margin: 0.5rem 0.5rem;
-  align-self: flex-start;
-  border-radius: 4px;
-  padding: 5px;
-  font-size: 12px;
-  min-width: 100px;
-  font-weight: 400;
-  cursor: pointer;
-  background-color: #fff;
-  &.btn-blue {
-    color: #646b7d;
-    border: 1px solid #dcdfe6;
-    :hover {
-      color: rgb(49, 130, 206);
-      border-color: rgb(193, 218, 240);
-      background-color: rgb(234, 243, 250);
-    }
-  }
-  &.btn-red {
-    border: 1px solid #f6cccf;
-    color: rgb(206, 90, 90);
-    :hover {
-      border-color: rgb(240, 218, 218);
-      background-color: rgb(250, 230, 230);
     }
   }
 `;
