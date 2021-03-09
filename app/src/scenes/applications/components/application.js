@@ -58,9 +58,14 @@ export default ({ application, index }) => {
 
 const Footer = ({ application, tutor, onChange }) => {
   const setStatus = async (status) => {
-    if (!confirm("Êtes vous sûr de vouloir modifier cette candidature ?")) return;
-    const { ok, data, code } = await api.put(`/application`, { _id: application._id, status });
-    onChange(data);
+    try {
+      if (!confirm("Êtes vous sûr de vouloir modifier cette candidature ?")) return;
+      const { data } = await api.put(`/application`, { _id: application._id, status });
+      await api.post(`/application/${application._id}/notify/${status.toLowerCase()}`);
+      onChange(data);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const getFooter = (status) => {
