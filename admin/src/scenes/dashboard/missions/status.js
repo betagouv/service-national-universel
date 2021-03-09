@@ -31,6 +31,9 @@ export default ({ filter }) => {
   const [missionsDomains, setMissionsDomains] = useState({});
   const [missionsPeriod, setMissionsPeriod] = useState({});
   const [missionsFormat, setMissionsFormat] = useState({});
+  const [missionPlaceTotal, setMissionPlaceTotal] = useState(0);
+  const [missionPlaceLeft, setMissionPlaceLeft] = useState(0);
+
   const [mobilityNearSchool, setMobilityNearSchool] = useState({});
   const [mobilityNearRelative, setMobilityNearRelative] = useState({});
   const [mobilityNearHome, setMobilityNearHome] = useState({});
@@ -47,6 +50,8 @@ export default ({ filter }) => {
           domains: { terms: { field: "domains.keyword" } },
           period: { terms: { field: "period.keyword" } },
           format: { terms: { field: "format.keyword" } },
+          placesTotal: { sum: { field: "placesTotal" } },
+          placesLeft: { sum: { field: "placesLeft" } },
         },
         size: 0,
       });
@@ -73,12 +78,14 @@ export default ({ filter }) => {
       if (filter.department) queries[3].query.bool.filter.push({ term: { "department.keyword": filter.department } });
 
       const { responses } = await api.esQuery(queries);
+      console.log("re", responses);
       setMissionsStatus(responses[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
       setMissionsDomains(responses[0].aggregations.domains.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
       setMissionsPeriod(responses[0].aggregations.period.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
       setMissionsFormat(responses[0].aggregations.format.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+      setMissionPlaceTotal(responses[0].aggregations.placesTotal.value);
+      setMissionPlaceLeft(responses[0].aggregations.placesLeft.value);
 
-      //
       setMobilityNearSchool(responses[1].aggregations.mobilityNearSchool.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
       setMobilityNearHome(responses[1].aggregations.mobilityNearHome.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
       setMobilityNearRelative(responses[1].aggregations.mobilityNearRelative.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
@@ -103,7 +110,8 @@ export default ({ filter }) => {
 
   return (
     <React.Fragment>
-      <ProposedPlaces getLink={getLink} />
+      <ProposedPlaces getLink={getLink} missionPlaceLeft={missionPlaceLeft} missionPlaceTotal={missionPlaceTotal} />
+
       <Status getLink={getLink} data={missionsStatus} />
       <MissionDetail missionsDomains={missionsDomains} youngsDomains={youngsDomains} />
       <Period youngsPeriod={youngsPeriod} missionsPeriod={missionsPeriod} />
@@ -115,7 +123,7 @@ export default ({ filter }) => {
   );
 };
 
-const ProposedPlaces = ({ getLink }) => {
+const ProposedPlaces = ({ missionPlaceLeft, missionPlaceTotal, getLink }) => {
   return (
     <React.Fragment>
       <CardSubtitle>Places proposées par les structures</CardSubtitle>
@@ -125,7 +133,7 @@ const ProposedPlaces = ({ getLink }) => {
             <Card borderBottomColor="#372F78">
               <CardTitle>Places totales</CardTitle>
               <CardValueWrapper>
-                <CardValue>TODO</CardValue>
+                <CardValue>{missionPlaceTotal}</CardValue>
                 <CardPercentage>
                   100%
                   <CardArrow />
@@ -139,9 +147,9 @@ const ProposedPlaces = ({ getLink }) => {
             <Card borderBottomColor="#FEB951">
               <CardTitle>Places occupées</CardTitle>
               <CardValueWrapper>
-                <CardValue>TODO</CardValue>
+                <CardValue>{missionPlaceTotal - missionPlaceLeft}</CardValue>
                 <CardPercentage>
-                  100%
+                  {`${missionPlaceTotal ? (((missionPlaceTotal - missionPlaceLeft) * 100) / missionPlaceTotal).toFixed(0) : `0`}%`}
                   <CardArrow />
                 </CardPercentage>
               </CardValueWrapper>
@@ -153,9 +161,9 @@ const ProposedPlaces = ({ getLink }) => {
             <Card borderBottomColor="#6BC763">
               <CardTitle>Places disponibles</CardTitle>
               <CardValueWrapper>
-                <CardValue>TODO</CardValue>
+                <CardValue>{missionPlaceLeft}</CardValue>
                 <CardPercentage>
-                  100%
+                  {`${missionPlaceTotal ? ((missionPlaceLeft * 100) / missionPlaceTotal).toFixed(0) : `0`}%`}
                   <CardArrow />
                 </CardPercentage>
               </CardValueWrapper>
