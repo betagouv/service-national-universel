@@ -116,6 +116,7 @@ export default () => {
                       handleChange={handleChange}
                       errors={errors}
                       touched={touched}
+                      departAndRegionVisible={false}
                     />
                   </Col>
                 </Row>
