@@ -103,56 +103,72 @@ export default () => {
             <p>Votre représentant légal peut dès-à-présent renseigner le formulaire relatif au droit à l'image. Cette étape est un pré-requis au séjour de cohésion.</p>
           </div>
         </div>
-        <ConsentementBox id="printArea">
-          <Formik
-            initialValues={{ ...young, firstName1: young.parent1FirstName, lastName1: young.parent1LastName, firstName2: young.parent2FirstName, lastName2: young.parent2LastName }}
-            validateOnChange={false}
-            validateOnBlur={false}
-            onSubmit={async (values) => {
-              try {
-                const { ok, code, data: young } = await api.put("/young", values);
-                if (!ok) return toastr.error("Une erreur s'est produite", translate(code));
-                dispatch(setYoung(young));
-                toastr.success("Mis à jour !");
-              } catch (e) {
-                console.log(e);
-                toastr.error("Erreur !");
-              }
-            }}
-          >
-            {({ values, handleChange, handleSubmit, errors, touched, isSubmitting, submitForm }) => (
-              <>
-                <Title>
-                  <span>Seuls les représentants légaux sont habilités à valider ce consentement</span>
-                </Title>
-                <FormGroup>
-                  <label>REPRÉSENTANT LÉGAL N°1</label>
-                  <Row>
-                    <Col md={6}>
-                      <Field
-                        validate={(v) => !v && requiredMessage}
-                        placeholder="Prénom du représentants légal n°1"
-                        name="firstName1"
-                        value={values.firstName1}
-                        onChange={handleChange}
-                        className="form-control"
-                      />
-                      <ErrorMessage errors={errors} touched={touched} name="firstName1" />
-                    </Col>
-                    <Col md={6}>
-                      <Field
-                        validate={(v) => !v && requiredMessage}
-                        placeholder="Nom du représentants légal n°1"
-                        name="lastName1"
-                        value={values.lastName1}
-                        onChange={handleChange}
-                        className="form-control"
-                      />
-                      <ErrorMessage errors={errors} touched={touched} name="lastName1" />
-                    </Col>
-                  </Row>
-                </FormGroup>
-                {values.firstName2 ? (
+        {young.imageRightFiles && young.imageRightFiles.length ? (
+          <SuccessMessage>
+            <Logo>
+              <svg height={64} width={64} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#057a55" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+            </Logo>
+            Vous avez bien renseigné le document
+          </SuccessMessage>
+        ) : (
+          <ConsentementBox id="printArea">
+            <Formik
+              initialValues={{
+                ...young,
+                firstName1: young.parent1FirstName,
+                lastName1: young.parent1LastName,
+                firstName2: young.parent2FirstName,
+                lastName2: young.parent2LastName,
+              }}
+              validateOnChange={false}
+              validateOnBlur={false}
+              onSubmit={async (values) => {
+                try {
+                  const { ok, code, data: young } = await api.put("/young", values);
+                  if (!ok) return toastr.error("Une erreur s'est produite", translate(code));
+                  dispatch(setYoung(young));
+                  toastr.success("Mis à jour !");
+                } catch (e) {
+                  console.log(e);
+                  toastr.error("Erreur !");
+                }
+              }}
+            >
+              {({ values, handleChange, handleSubmit, errors, touched, isSubmitting, submitForm }) => (
+                <>
+                  <Title>
+                    <span>Seuls les représentants légaux sont habilités à valider ce consentement</span>
+                  </Title>
+                  <FormGroup>
+                    <label>REPRÉSENTANT LÉGAL N°1</label>
+                    <Row>
+                      <Col md={6}>
+                        <Field
+                          validate={(v) => !v && requiredMessage}
+                          placeholder="Prénom du représentants légal n°1"
+                          name="firstName1"
+                          value={values.firstName1}
+                          onChange={handleChange}
+                          className="form-control"
+                        />
+                        <ErrorMessage errors={errors} touched={touched} name="firstName1" />
+                      </Col>
+                      <Col md={6}>
+                        <Field
+                          validate={(v) => !v && requiredMessage}
+                          placeholder="Nom du représentants légal n°1"
+                          name="lastName1"
+                          value={values.lastName1}
+                          onChange={handleChange}
+                          className="form-control"
+                        />
+                        <ErrorMessage errors={errors} touched={touched} name="lastName1" />
+                      </Col>
+                    </Row>
+                  </FormGroup>
+                  {/* {values.firstName2 ? ( */}
                   <FormGroup>
                     <label>REPRÉSENTANT LÉGAL N°2</label>
                     <Row>
@@ -180,128 +196,172 @@ export default () => {
                       </Col>
                     </Row>
                   </FormGroup>
-                ) : null}
-                <Title>
-                  <span>Autorisez ou non le droit à l'image</span>
-                </Title>
-                <FormRow>
-                  <Col>
-                    <RadioLabel>
-                      <Field
-                        id="true"
-                        validate={(v) => !v && requiredMessage}
-                        type="radio"
-                        name="imageRight"
-                        value="true"
-                        checked={values.imageRight === "true"}
-                        onChange={handleChange}
-                      />
-                      <label htmlFor="true">
-                        Nous autorisons l'Administration à reproduire et exploiter l'image et la voix de{" "}
-                        <b>
-                          {young.firstName} {young.lastName}
-                        </b>{" "}
-                        que nous représentons légalement, sur les supports visés ci-après à des fins de promotion du Service Nationnel Universel
-                      </label>
-                    </RadioLabel>
-                    <RadioLabel>
-                      <Field
-                        id="false"
-                        validate={(v) => !v && requiredMessage}
-                        type="radio"
-                        name="imageRight"
-                        value="false"
-                        checked={values.imageRight === "false"}
-                        onChange={handleChange}
-                      />
-                      <label htmlFor="false">
-                        Nous n'autorisons pas l'Administration à reproduire et exploiter l'image et la voix de{" "}
-                        <b>
-                          {young.firstName} {young.lastName}
-                        </b>{" "}
-                        que nous représentons légalement, sur les supports visés ci-après à des fins de promotion du Service Nationnel Universel
-                      </label>
-                    </RadioLabel>
-                    <ErrorMessage errors={errors} touched={touched} name="imageRight" />
-                  </Col>
-                </FormRow>
-                <Info className="noPrint">
-                  <AuthorizationIntro />
-                  {expandInfo ? <AuthorizationDetails /> : "..."}
-                  <span onClick={toggleInfo}>{expandInfo ? "  VOIR MOINS" : "  VOIR PLUS"}</span>
-                </Info>
-                <Info className="onlyPrint">
-                  <AuthorizationIntro />
-                  <AuthorizationDetails />
-                </Info>
-                <div className="noPrint">
-                  {/* @todo add with france connect */}
-                  {/* <Title>
+                  {/* ) : null} */}
+                  <Title>
+                    <span>Autorisez ou non le droit à l'image</span>
+                  </Title>
+                  <FormRow>
+                    <Col>
+                      <RadioLabel>
+                        <Field
+                          id="true"
+                          validate={(v) => !v && requiredMessage}
+                          type="radio"
+                          name="imageRight"
+                          value="true"
+                          checked={values.imageRight === "true"}
+                          onChange={handleChange}
+                        />
+                        <label htmlFor="true">
+                          Nous autorisons l'Administration à reproduire et exploiter l'image et la voix de .........................................
+                          <br />
+                          {/* <b>
+                            {young.firstName} {young.lastName}
+                          </b>{" "} */}
+                          que nous représentons légalement, sur les supports visés ci-après à des fins de promotion du Service Nationnel Universel
+                        </label>
+                      </RadioLabel>
+                      <RadioLabel>
+                        <Field
+                          id="false"
+                          validate={(v) => !v && requiredMessage}
+                          type="radio"
+                          name="imageRight"
+                          value="false"
+                          checked={values.imageRight === "false"}
+                          onChange={handleChange}
+                        />
+                        <label htmlFor="false">
+                          Nous n'autorisons pas l'Administration à reproduire et exploiter l'image et la voix de .........................................
+                          <br />
+                          {/* <b>
+                            {young.firstName} {young.lastName}
+                          </b>{" "} */}
+                          que nous représentons légalement, sur les supports visés ci-après à des fins de promotion du Service Nationnel Universel
+                        </label>
+                      </RadioLabel>
+                      <ErrorMessage errors={errors} touched={touched} name="imageRight" />
+                    </Col>
+                  </FormRow>
+                  <Info className="noPrint">
+                    <AuthorizationIntro />
+                    {expandInfo ? <AuthorizationDetails /> : "..."}
+                    <span onClick={toggleInfo}>{expandInfo ? "  VOIR MOINS" : "  VOIR PLUS"}</span>
+                  </Info>
+                  <Info className="onlyPrint">
+                    <AuthorizationIntro />
+                    <AuthorizationDetails />
+                  </Info>
+                  <div className="noPrint">
+                    {/* @todo add with france connect */}
+                    {/* <Title>
                     <span>Vous pouvez signer le formulaire de deux façons</span>
                   </Title> */}
-                  <div style={{ display: "flex", justifyContent: "center" }}>
-                    <div>
-                      <BackButton style={{ marginBottom: "1rem" }} onClick={() => print()}>
-                        Imprimer le formulaire pré-rempli
-                      </BackButton>
-                      <DndFileInput
-                        placeholder="le formulaire"
-                        errorMessage="Vous devez téléverser le formulaire"
-                        value={values.imageRightFiles}
-                        name="imageRightFiles"
-                        onChange={async (e) => {
-                          const res = await api.uploadFile("/young/file/imageRightFiles", e.target.files);
-                          if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
-                          // We update it instant ( because the bucket is updated instant )
-                          toastr.success("Fichier téléversé");
-                          handleChange({ target: { value: res.data, name: "imageRightFiles" } });
-                        }}
-                      />
-                      <ErrorMessage errors={errors} touched={touched} name="imageRightFiles" />
-                    </div>
-                    {/* <div>OU</div>
+                    <div style={{ display: "flex", justifyContent: "center" }}>
+                      <div>
+                        <BackButton onClick={() => print()}>Imprimer le formulaire pré-rempli</BackButton>
+                        <DownloadText>
+                          Ou{" "}
+                          <a href="https://apicivique.s3.eu-west-3.amazonaws.com/consentement_droit_image.pdf" target="_blank">
+                            télécharger le modèle à remplir
+                          </a>
+                        </DownloadText>
+                        <DndFileInput
+                          placeholder="le formulaire"
+                          errorMessage="Vous devez téléverser le formulaire"
+                          value={values.imageRightFiles}
+                          name="imageRightFiles"
+                          onChange={async (e) => {
+                            const res = await api.uploadFile("/young/file/imageRightFiles", e.target.files);
+                            if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
+                            // We update it instant ( because the bucket is updated instant )
+                            toastr.success("Fichier téléversé");
+                            handleChange({ target: { value: res.data, name: "imageRightFiles" } });
+                          }}
+                        />
+                        <ErrorMessage errors={errors} touched={touched} name="imageRightFiles" />
+                      </div>
+                      {/* <div>OU</div>
                     <div>FRANCE CONNECT</div> */}
+                    </div>
                   </div>
-                </div>
-                <SignBox className="onlyPrint">
-                  <Row>
-                    <Col md={6}>
-                      <div>Sous réserve du respect de l’ensemble de ces conditions, le consentement délivré est libre et éclairé.</div>
-                      <div>Fait à :</div>
-                      <div>Le :</div>
-                      <div>
-                        Signature du représentant légal n°1
-                        <br />
-                        Précédée(s) de la mention « lu et approuvé – bon pour accord »
-                      </div>
-                    </Col>
-                    <Col md={6}>
-                      <div>Sous réserve du respect de l’ensemble de ces conditions, le consentement délivré est libre et éclairé.</div>
-                      <div>Fait à :</div>
-                      <div>Le :</div>
-                      <div>
-                        Signature du représentant légal n°2
-                        <br />
-                        Précédée(s) de la mention « lu et approuvé – bon pour accord »
-                      </div>
-                    </Col>
-                  </Row>
-                </SignBox>
-                <Footer className="noPrint">
-                  <Title />
-                  <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                    <ContinueButton onClick={handleSubmit}>Valider le consentement</ContinueButton>
-                  </div>
-                  {Object.keys(errors).length ? <h3>Vous ne pouvez pas valider le formulaire car tous les champs ne sont pas correctement renseignés.</h3> : null}
-                </Footer>
-              </>
-            )}
-          </Formik>
-        </ConsentementBox>
+                  <SignBox className="onlyPrint">
+                    <Row>
+                      <Col md={6}>
+                        <div>Sous réserve du respect de l’ensemble de ces conditions, le consentement délivré est libre et éclairé.</div>
+                        <div>Fait à :</div>
+                        <div>Le :</div>
+                        <div>
+                          Signature du représentant légal n°1
+                          <br />
+                          Précédée(s) de la mention « lu et approuvé – bon pour accord »
+                        </div>
+                      </Col>
+                      <Col md={6}>
+                        <div>Sous réserve du respect de l’ensemble de ces conditions, le consentement délivré est libre et éclairé.</div>
+                        <div>Fait à :</div>
+                        <div>Le :</div>
+                        <div>
+                          Signature du représentant légal n°2
+                          <br />
+                          Précédée(s) de la mention « lu et approuvé – bon pour accord »
+                        </div>
+                      </Col>
+                    </Row>
+                  </SignBox>
+                  <Footer className="noPrint">
+                    <Title />
+                    <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                      <ContinueButton onClick={handleSubmit}>Valider le consentement</ContinueButton>
+                    </div>
+                    {Object.keys(errors).length ? <h3>Vous ne pouvez pas valider le formulaire car tous les champs ne sont pas correctement renseignés.</h3> : null}
+                  </Footer>
+                </>
+              )}
+            </Formik>
+          </ConsentementBox>
+        )}
       </Content>
     </Hero>
   );
 };
+
+const Logo = styled.div`
+  width: 5rem;
+  height: 5rem;
+  border-radius: 50%;
+  background-color: #def7ec;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1rem;
+  img {
+    color: #057a55;
+  }
+`;
+const SuccessMessage = styled.div`
+  padding: 0.5rem;
+  margin: 0 auto;
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #046c4e;
+  font-size: 0.8rem;
+  width: fit-content;
+`;
+
+const DownloadText = styled.div`
+  font-size: 0.8rem;
+  color: #555;
+  width: 100%;
+  text-align: center;
+  margin-top: 0.2rem;
+  margin-bottom: 1rem;
+  a {
+    color: #5850ec;
+  }
+`;
 
 const Tag = styled.span`
   color: #42389d;
