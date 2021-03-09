@@ -99,7 +99,11 @@ export default (props) => {
         }
       }
       onSubmit={async (values) => {
-        if (!values._id) values.placesLeft = values.placesTotal;
+        //if new mission, init placesLeft to placesTotal
+        if (isNew) values.placesLeft = values.placesTotal;
+        //if edit mission, add modified delta to placesLeft
+        else values.placesLeft += values.placesTotal - defaultValue.placesTotal;
+
         try {
           const { ok, code, data: mission } = await api[values._id ? "put" : "post"]("/mission", values);
           if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", translate(code));
