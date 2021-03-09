@@ -74,11 +74,12 @@ export default ({ filter }) => {
         size: 0,
       });
 
+      if (filter.region) queries[1].query.bool.filter.push({ term: { "region.keyword": filter.region } });
+      if (filter.department) queries[1].query.bool.filter.push({ term: { "department.keyword": filter.department } });
       if (filter.region) queries[3].query.bool.filter.push({ term: { "region.keyword": filter.region } });
       if (filter.department) queries[3].query.bool.filter.push({ term: { "department.keyword": filter.department } });
 
       const { responses } = await api.esQuery(queries);
-      console.log("re", responses);
       setMissionsStatus(responses[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
       setMissionsDomains(responses[0].aggregations.domains.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
       setMissionsPeriod(responses[0].aggregations.period.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
