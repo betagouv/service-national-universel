@@ -204,7 +204,7 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
       subject = `Votre candidature sur la mission d'intérêt général ${mission.name} a été refusée.`;
       to = { name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail };
     } else {
-      throw new Error("Template de mail introuvable");
+      return res.status(501).send({ ok: false });
     }
 
     await sendEmail(to, subject, htmlContent);
