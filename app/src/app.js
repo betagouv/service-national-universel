@@ -75,6 +75,7 @@ export default () => {
 };
 
 const Espace = () => {
+  const [menuVisible, setMenuVisible] = useState(false);
   const young = useSelector((state) => state.Auth.young);
   if (!young) return <Redirect to="/inscription" />;
   if (young.status === YOUNG_STATUS.IN_PROGRESS) return <Redirect to="/inscription/coordonnees" />;
@@ -82,9 +83,13 @@ const Espace = () => {
   return (
     <>
       <div style={{ display: "flex" }}>
-        <Drawer />
+        <Drawer open={menuVisible} onOpen={setMenuVisible} />
         <Content>
-          <Header />
+          <Header
+            onClickBurger={() => {
+              setMenuVisible(!menuVisible);
+            }}
+          />
           <Switch>
             <Route path="/account" component={Account} />
             <Route path="/phase1" component={Phase1} />
