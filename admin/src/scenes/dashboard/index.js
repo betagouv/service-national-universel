@@ -7,7 +7,7 @@ import Mission from "./missions";
 import VioletHeaderButton from "../../components/buttons/VioletHeaderButton";
 
 export default () => {
-  const [currentTab, setCurrentTab] = useState("inscriptions");
+  const [currentTab, setCurrentTab] = useState("missions");
 
   return (
     <>

@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { Col, Row, Input } from "reactstrap";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { translate, YOUNG_STATUS_COLORS, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE2_COLORS } from "../../../utils";
+import { translate, YOUNG_STATUS_COLORS, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE1_COLOR, YOUNG_STATUS_PHASE2_COLORS } from "../../../utils";
 
 import api from "../../../services/api";
 
@@ -12,6 +12,7 @@ export default ({ filter }) => {
   const [statusPhase1, setStatusPhase1] = useState({});
   const [statusPhase2, setStatusPhase2] = useState({});
   const [statusPhase3, setStatusPhase3] = useState({});
+  const [cohesionStayPresence, setCohesionStayPresence] = useState({});
 
   const user = useSelector((state) => state.Auth.user);
 
@@ -26,6 +27,7 @@ export default ({ filter }) => {
           statusPhase1: { terms: { field: "statusPhase1.keyword" } },
           statusPhase2: { terms: { field: "statusPhase2.keyword" } },
           statusPhase3: { terms: { field: "statusPhase3.keyword" } },
+          cohesionStayPresence: { terms: { field: "cohesionStayPresence.keyword" } },
         },
         size: 0,
       });
@@ -35,9 +37,11 @@ export default ({ filter }) => {
 
       const { responses } = await api.esQuery(queries);
       setStatus(responses[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+
       setStatusPhase1(responses[0].aggregations.statusPhase1.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
       setStatusPhase2(responses[0].aggregations.statusPhase2.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
       setStatusPhase3(responses[0].aggregations.statusPhase3.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+      setCohesionStayPresence(responses[0].aggregations.cohesionStayPresence.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
     })();
   }, [JSON.stringify(filter)]);
 
@@ -45,82 +49,134 @@ export default ({ filter }) => {
 
   const getLink = (link) => {
     if (filter.region) link += `&REGION=%5B"${replaceSpaces(filter.region)}"%5D`;
+    if (filter.cohort) link += `&COHORT=%5B"${replaceSpaces(filter.cohort)}"%5D`;
     if (filter.department) link += `&DEPARTMENT=%5B"${replaceSpaces(filter.department)}"%5D`;
     return link;
   };
 
   return (
     <>
+      <Status status={status} statusPhase1={statusPhase1} statusPhase2={statusPhase2} statusPhase3={statusPhase3} getLink={getLink} />
+      <hr />
+      <Phase1 data={statusPhase1} getLink={getLink} />
+      <Participation data={cohesionStayPresence} getLink={getLink} />
+      <hr />
+      <Phase2 data={statusPhase2} getLink={getLink} />
+      <MissionStatus data={null} getLink={getLink} />
+    </>
+  );
+};
+
+const Status = ({ status, statusPhase1, statusPhase2, statusPhase3, getLink }) => {
+  const total = status.VALIDATED || 0;
+
+  return (
+    <React.Fragment>
       <Row>
-        <Col md={6} xl={3}>
-          <Link to={getLink(`/volontaire?COHORT=%5B"${filter.cohort}"%5D&STATUS=%5B"VALIDATED"%5D`)}>
+        <Col md={6} xl={4}>
+          <Link to={getLink(`/volontaire?STATUS=%5B"VALIDATED"%5D`)}>
             <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
               <CardTitle>Volontaires</CardTitle>
               <CardValueWrapper>
                 <CardValue>{status.VALIDATED || 0}</CardValue>
-                <CardArrow />
+                <CardPercentage>
+                  {total ? `${(((status.VALIDATED || 0) * 100) / total).toFixed(0)}%` : `0%`}
+                  <CardArrow />
+                </CardPercentage>
               </CardValueWrapper>
             </Card>
           </Link>
         </Col>
-        <Col md={6} xl={3}>
-          <Link to={getLink(`/volontaire?COHORT=%5B"${filter.cohort}"%5D&STATUS_PHASE_1=%5B"DONE"%5D`)}>
+        <Col md={6} xl={4}>
+          <Link to={getLink(`/volontaire?STATUS_PHASE_1=%5B"DONE"%5D`)}>
             <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
-              <CardTitle>Ayant validé la phase 1</CardTitle>
+              <CardTitle>Ayant validé la Phase 1</CardTitle>
               <CardValueWrapper>
                 <CardValue>{statusPhase1.DONE || 0}</CardValue>
-                <CardArrow />
+                <CardPercentage>
+                  {total ? `${(((statusPhase1.DONE || 0) * 100) / total).toFixed(0)}%` : `0%`}
+                  <CardArrow />
+                </CardPercentage>
               </CardValueWrapper>
             </Card>
           </Link>
         </Col>
-        <Col md={6} xl={3}>
-          <Link to={getLink(`/volontaire?COHORT=%5B"${filter.cohort}"%5D&STATUS_PHASE_2=%5B"VALIDATED"%5D`)}>
+        <Col md={6} xl={4}>
+          <Link to={getLink(`/volontaire?STATUS_PHASE_2=%5B"VALIDATED"%5D`)}>
             <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
-              <CardTitle>Ayant validé la phase 2</CardTitle>
+              <CardTitle>Ayant validé la Phase 2</CardTitle>
               <CardValueWrapper>
                 <CardValue>{statusPhase2.VALIDATED || 0}</CardValue>
-                <CardArrow />
+                <CardPercentage>
+                  {total ? `${(((statusPhase2.VALIDATED || 0) * 100) / total).toFixed(0)}%` : `0%`}
+                  <CardArrow />
+                </CardPercentage>
               </CardValueWrapper>
             </Card>
           </Link>
         </Col>
-        <Col md={6} xl={3}>
+        <Col md={6} xl={4}>
           <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
-            <CardTitle>Ayant validé la phase 3</CardTitle>
+            <CardTitle>Ayant validé la Phase 3</CardTitle>
             <CardValueWrapper>
               <CardValue>{statusPhase3.VALIDATED || 0}</CardValue>
-              <CardArrow />
+              <CardPercentage>
+                {total ? `${(((statusPhase3.VALIDATED || 0) * 100) / total).toFixed(0)}%` : `0%`}
+                <CardArrow />
+              </CardPercentage>
             </CardValueWrapper>
           </Card>
         </Col>
-        <Col md={6} xl={3}>
-          <Link to={getLink(`/volontaire?COHORT=%5B"${filter.cohort}"%5D&STATUS=%5B"WITHDRAWN"%5D`)}>
+        <Col md={6} xl={4}>
+          <Link to={getLink(`/volontaire?STATUS=%5B"WITHDRAWN"%5D`)}>
             <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
               <CardTitle>Désistés</CardTitle>
               <CardValueWrapper>
                 <CardValue>{status.WITHDRAWN || 0}</CardValue>
-                <CardArrow />
+                <CardPercentage>
+                  {total ? `${(((status.WITHDRAWN || 0) * 100) / total).toFixed(0)}%` : `0%`}
+                  <CardArrow />
+                </CardPercentage>
               </CardValueWrapper>
             </Card>
           </Link>
         </Col>
       </Row>
+    </React.Fragment>
+  );
+};
+
+const Phase2 = ({ data, getLink }) => {
+  const total = Object.keys(data).reduce((acc, a) => acc + data[a], 0);
+
+  function text(e) {
+    if (e === "WAITING_REALISATION") return "En attente de réalisation";
+    if (e === "IN_PROGRESS") return "En cours de réalisation";
+    if (e === "VALIDATED") return "Réalisé";
+    return e;
+  }
+
+  return (
+    <React.Fragment>
       <Row>
         <Col md={12}>
-          <h3>Phase 2</h3>
+          <CardSection>Phase 2</CardSection>
+          <CardSubtitle>Status</CardSubtitle>
         </Col>
       </Row>
       <Row>
         {Object.values(YOUNG_STATUS_PHASE2).map((e) => {
           return (
-            <Col md={6} xl={3} k={e}>
-              <Link to={getLink(`/volontaire?COHORT=%5B"${filter.cohort}"%5D&STATUS_PHASE_2=%5B"${e}"%5D`)}>
+            <Col md={6} xl={4} k={e}>
+              <Link to={getLink(`/volontaire?STATUS_PHASE_2=%5B"${e}"%5D`)}>
                 <Card borderBottomColor={YOUNG_STATUS_PHASE2_COLORS[e]}>
-                  <CardTitle>{e === "VALIDATED" ? "Réalisée" : translate(e)}</CardTitle>
+                  <CardTitle>{text(e)}</CardTitle>
                   <CardValueWrapper>
-                    <CardValue>{statusPhase2[e] || 0}</CardValue>
-                    <CardArrow />
+                    <CardValue>{data[e] || 0}</CardValue>
+                    <CardPercentage>
+                      {total ? `${(((data[e] || 0) * 100) / total).toFixed(0)}%` : `0%`}
+                      <CardArrow />
+                    </CardPercentage>
                   </CardValueWrapper>
                 </Card>
               </Link>
@@ -128,7 +184,112 @@ export default ({ filter }) => {
           );
         })}
       </Row>
-    </>
+    </React.Fragment>
+  );
+};
+const MissionStatus = ({}) => {
+  return (
+    <React.Fragment>
+      <Row>
+        <Col md={12}>
+          <CardSubtitle>Status sur une mission de phase 2</CardSubtitle>
+        </Col>
+      </Row>
+      {/* <Row>
+        {Object.values(YOUNG_STATUS_PHASE2).map((e) => {
+          return (
+            <Col md={6} xl={4} k={e}>
+              <Link to={getLink(`/volontaire?STATUS_PHASE_2=%5B"${e}"%5D`)}>
+                <Card borderBottomColor={YOUNG_STATUS_PHASE2_COLORS[e]}>
+                  <CardTitle>{text(e)}</CardTitle>
+                  <CardValueWrapper>
+                    <CardValue>{data[e] || 0}</CardValue>
+                    <CardPercentage>
+                      {total ? `${((data[e] || 0) * 100) / total}%` : `0%`}
+                      <CardArrow />
+                    </CardPercentage>
+                  </CardValueWrapper>
+                </Card>
+              </Link>
+            </Col>
+          );
+        })}
+      </Row> */}
+    </React.Fragment>
+  );
+};
+
+const Phase1 = ({ data, getLink }) => {
+  const total = Object.keys(data).reduce((acc, a) => acc + data[a], 0);
+
+  return (
+    <React.Fragment>
+      <Row>
+        <Col md={12}>
+          <CardSection>Phase 1</CardSection>
+          <CardSubtitle>Status</CardSubtitle>
+        </Col>
+      </Row>
+      <Row>
+        {Object.values(YOUNG_STATUS_PHASE1).map((e) => {
+          return (
+            <Col md={6} xl={4} k={e}>
+              <Link to={getLink(`/volontaire?STATUS_PHASE_1=%5B"${e}"%5D`)}>
+                <Card borderBottomColor={YOUNG_STATUS_PHASE1_COLOR[e]}>
+                  <CardTitle>{translate(e)}</CardTitle>
+                  <CardValueWrapper>
+                    <CardValue>{data[e] || 0}</CardValue>
+                    <CardPercentage>
+                      {total ? `${(((data[e] || 0) * 100) / total).toFixed(0)}%` : `0%`}
+                      <CardArrow />
+                    </CardPercentage>
+                  </CardValueWrapper>
+                </Card>
+              </Link>
+            </Col>
+          );
+        })}
+      </Row>
+    </React.Fragment>
+  );
+};
+
+const Participation = ({ data, getLink }) => {
+  const total = data["true"] + data["false"];
+  return (
+    <React.Fragment>
+      <CardSubtitle>Participations au séjour de cohésion</CardSubtitle>
+      <Row>
+        <Col md={6} xl={3} k="cohesionStayPresence_true">
+          <Link to={getLink(`/volontaire`)}>
+            <Card borderBottomColor="#6BC663">
+              <CardTitle>Présent au séjour de cohésion</CardTitle>
+              <CardValueWrapper>
+                <CardValue>{data["true"] || 0}</CardValue>
+                <CardPercentage>
+                  {total ? `${((data["true"] * 100) / total).toFixed(0)}%` : `0%`}
+                  <CardArrow />
+                </CardPercentage>
+              </CardValueWrapper>
+            </Card>
+          </Link>
+        </Col>
+        <Col md={6} xl={3} k="cohesionStayPresence_false">
+          <Link to={getLink(`/volontaire`)}>
+            <Card borderBottomColor="#EF4036">
+              <CardTitle>Absent au séjour de cohésion</CardTitle>
+              <CardValueWrapper>
+                <CardValue>{data["false"] || 0}</CardValue>
+                <CardPercentage>
+                  {total ? `${((data["false"] * 100) / total).toFixed(0)}%` : `0%`}
+                  <CardArrow />
+                </CardPercentage>
+              </CardValueWrapper>
+            </Card>
+          </Link>
+        </Col>
+      </Row>
+    </React.Fragment>
   );
 };
 
@@ -146,22 +307,41 @@ const CardTitle = styled.h3`
   font-size: 16px;
   font-weight: bold;
 `;
-const CardSubtitle = styled.h3`
-  font-size: 14px;
-  font-weight: 100;
-  color: #696974;
+
+const CardSection = styled.div`
+  font-family: Ubuntu;
+  font-style: normal;
+  font-weight: bold;
+  font-size: 16px;
+  line-height: 18px;
+  text-transform: uppercase;
+  color: #372f78;
 `;
+const CardSubtitle = styled.h3`
+  color: #242526;
+  font-size: 26px;
+  margin-bottom: 10px;
+  font-weight: normal;
+`;
+
 const CardValueWrapper = styled.div`
   position: relative;
+  display: flex;
+  justify-content: space-between;
 `;
 const CardValue = styled.span`
   font-size: 28px;
 `;
+
+const CardPercentage = styled.span`
+  font-size: 22px;
+  color: #a8a8b1;
+  display: flex;
+  align-items: center;
+  font-weight: 100;
+`;
+
 const CardArrow = styled.span`
-  position: absolute;
-  top: 50%;
-  right: 0;
-  transform: translateY(-50%);
   width: 15px;
   height: 15px;
   background-image: url(${require("../../../assets/arrow.png")});

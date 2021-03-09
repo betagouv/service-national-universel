@@ -33,6 +33,7 @@ export default () => {
       <Row style={{}}>
         <Col md={12}>
           <Title>Volontaires</Title>
+          <SubTitle>En quelques chiffres</SubTitle>
         </Col>
       </Row>
       <FiltersList>
@@ -94,6 +95,13 @@ const Title = styled.h2`
   font-weight: bold;
   font-size: 28px;
   margin-bottom: 10px;
+`;
+
+const SubTitle = styled.h2`
+  color: #242526;
+  font-size: 26px;
+  margin-bottom: 10px;
+  font-weight: normal;
 `;
 const FiltersList = styled.div`
   display: flex;
