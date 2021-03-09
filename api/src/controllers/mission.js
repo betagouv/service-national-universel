@@ -97,7 +97,9 @@ router.get("/structure/:structureId", passport.authenticate("referent", { sessio
 //@check
 router.delete("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    await MissionObject.findOneAndUpdate({ _id: req.params.id }, { deleted: "yes" });
+    const mission = await MissionObject.findOne({ _id: req.params.id });
+    await mission.remove();
+    console.log(`Mission ${req.params.id} has been deleted`);
     res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);

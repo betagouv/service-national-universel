@@ -16,7 +16,7 @@ export default ({ application, index }) => {
     return tags;
   };
 
-  if (!value) return <div />;
+  if (!value || !value.mission) return <div />;
 
   return (
     <Draggable draggableId={value._id} index={index}>

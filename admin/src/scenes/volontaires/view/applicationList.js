@@ -61,7 +61,7 @@ const Hit = ({ hit, index }) => {
       return setMission(data);
     })();
   }, []);
-  if (!mission) return <div>Chargement</div>;
+  if (!mission) return null;
   return (
     <tr>
       <td>
