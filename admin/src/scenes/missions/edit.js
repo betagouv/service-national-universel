@@ -94,6 +94,8 @@ export default (props) => {
           location: "",
           department: "",
           region: "",
+          period: [],
+          domains: [],
         }
       }
       onSubmit={async (values) => {
