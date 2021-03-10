@@ -109,6 +109,7 @@ const Proposal = ({ young, onSend }) => {
       youngBirthdateAt: young.birthdateAt,
       youngCity: young.city,
       youngDepartment: young.department,
+      youngCohort: young.cohort,
       missionId: mission._id,
       missionName: mission.name,
       missionDepartment: mission.department,

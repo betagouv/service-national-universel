@@ -13,6 +13,7 @@ const Schema = new mongoose.Schema({
   youngBirthdateAt: { type: String },
   youngCity: { type: String },
   youngDepartment: { type: String },
+  youngCohort: { type: String },
 
   missionId: { type: String },
   missionName: { type: String },
