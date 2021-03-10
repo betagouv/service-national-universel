@@ -51,7 +51,7 @@ function filter(body, user, index) {
   //
   // @rap2h (from @rap2h): refactor this please.
   if (index === "young") {
-    filter.push({ terms: { "status.keyword": ["WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "VALIDATED"] } });
+    filter.push({ terms: { "status.keyword": ["WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "VALIDATED", "WITHDRAWN"] } });
 
     if (user.role === "referent_region") filter.push({ term: { "region.keyword": user.region } });
     if (user.role === "referent_department") filter.push({ term: { "department.keyword": user.department } });
