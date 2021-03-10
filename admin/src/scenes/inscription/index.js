@@ -170,7 +170,7 @@ export default () => {
                 paginationAt="both"
                 innerClass={{ pagination: "pagination" }}
                 // renderPagination={(e) => <ResultFooter {...e} />}
-                size={10}
+                size={30}
                 showLoader={true}
                 sortBy="desc"
                 dataField="lastStatusAt"
