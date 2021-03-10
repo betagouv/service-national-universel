@@ -115,7 +115,7 @@ export default () => {
               />
             </DomainsFilter>
             <Col md={6}>
-              <FilterGeoloc city={young.city} componentId="GEOLOC" placeholder="Recherche par ville..." />
+              <FilterGeoloc location={young.location} componentId="GEOLOC" />
             </Col>
           </Row>
         </Filters>
