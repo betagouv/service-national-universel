@@ -98,6 +98,12 @@ export default ({ young, onSend }) => {
               name: values.structureName,
               legalStatus: values.structureLegalStatus,
               description: values.structureDescription,
+              address: values.address,
+              city: values.city,
+              zip: values.zip,
+              department: values.department,
+              region: values.region,
+              location: values.location,
             });
             if (!responseStructure.ok) return toastr.error("Une erreur s'est produite lors de la creation de la strucutre", translate(responseStructure.code));
             values.structureId = responseStructure.data._id;
