@@ -3,8 +3,16 @@ import styled from "styled-components";
 import { Col, Row, Input } from "reactstrap";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { translate, YOUNG_STATUS_COLORS, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE1_COLOR, YOUNG_STATUS_PHASE2_COLORS } from "../../../utils";
-
+import {
+  translate,
+  YOUNG_STATUS_COLORS,
+  YOUNG_STATUS_PHASE2,
+  YOUNG_STATUS_PHASE1,
+  YOUNG_STATUS_PHASE1_COLOR,
+  YOUNG_STATUS_PHASE2_COLORS,
+  APPLICATION_STATUS,
+  APPLICATION_STATUS_COLORS,
+} from "../../../utils";
 import api from "../../../services/api";
 
 export default ({ filter }) => {
@@ -13,8 +21,7 @@ export default ({ filter }) => {
   const [statusPhase2, setStatusPhase2] = useState({});
   const [statusPhase3, setStatusPhase3] = useState({});
   const [cohesionStayPresence, setCohesionStayPresence] = useState({});
-
-  const user = useSelector((state) => state.Auth.user);
+  const [statusApplication, setStatusApplication] = useState({});
 
   useEffect(() => {
     (async () => {
@@ -43,6 +50,23 @@ export default ({ filter }) => {
       setStatusPhase3(responses[0].aggregations.statusPhase3.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
       setCohesionStayPresence(responses[0].aggregations.cohesionStayPresence.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
     })();
+    (async () => {
+      const queries = [];
+      queries.push({ index: "application", type: "_doc" });
+      queries.push({
+        query: { bool: { must: { match_all: {} } /*, filter: [{ term: { "cohort.keyword": filter.cohort } }, { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } }]*/ } },
+        aggs: {
+          status: { terms: { field: "status.keyword" } },
+        },
+        size: 0,
+      });
+
+      if (filter.region) queries[1].query.bool.filter.push({ term: { "youngRegion.keyword": filter.region } });
+      if (filter.department) queries[1].query.bool.filter.push({ term: { "youngDepartment.keyword": filter.department } });
+
+      const { responses } = await api.esQuery(queries);
+      setStatusApplication(responses[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+    })();
   }, [JSON.stringify(filter)]);
 
   const replaceSpaces = (v) => v.replace(/\s+/g, "+");
@@ -62,7 +86,7 @@ export default ({ filter }) => {
       <Participation data={cohesionStayPresence} getLink={getLink} />
       <hr />
       <Phase2 data={statusPhase2} getLink={getLink} />
-      <MissionStatus data={null} getLink={getLink} />
+      <Application data={statusApplication} getLink={getLink} />
     </>
   );
 };
@@ -148,29 +172,21 @@ const Status = ({ status, statusPhase1, statusPhase2, statusPhase3, getLink }) =
 
 const Phase2 = ({ data, getLink }) => {
   const total = Object.keys(data).reduce((acc, a) => acc + data[a], 0);
-
-  function text(e) {
-    if (e === "WAITING_REALISATION") return "En attente de réalisation";
-    if (e === "IN_PROGRESS") return "En cours de réalisation";
-    if (e === "VALIDATED") return "Réalisé";
-    return e;
-  }
-
   return (
     <React.Fragment>
       <Row>
         <Col md={12}>
           <CardSection>Phase 2</CardSection>
-          <CardSubtitle>Status</CardSubtitle>
+          <CardSubtitle>Statut</CardSubtitle>
         </Col>
       </Row>
       <Row>
         {Object.values(YOUNG_STATUS_PHASE2).map((e) => {
           return (
-            <Col md={6} xl={4} k={e}>
+            <Col md={6} xl={4} key={e}>
               <Link to={getLink(`/volontaire?STATUS_PHASE_2=%5B"${e}"%5D`)}>
                 <Card borderBottomColor={YOUNG_STATUS_PHASE2_COLORS[e]}>
-                  <CardTitle>{text(e)}</CardTitle>
+                  <CardTitle>{translate(e)}</CardTitle>
                   <CardValueWrapper>
                     <CardValue>{data[e] || 0}</CardValue>
                     <CardPercentage>
@@ -187,34 +203,33 @@ const Phase2 = ({ data, getLink }) => {
     </React.Fragment>
   );
 };
-const MissionStatus = ({}) => {
+const Application = ({ data, getLink }) => {
+  const total = Object.keys(data).reduce((acc, e) => data[e] + acc, 0);
   return (
     <React.Fragment>
       <Row>
         <Col md={12}>
-          <CardSubtitle>Status sur une mission de phase 2</CardSubtitle>
+          <CardSubtitle>Statut sur une mission de phase 2</CardSubtitle>
         </Col>
       </Row>
-      {/* <Row>
-        {Object.values(YOUNG_STATUS_PHASE2).map((e) => {
+      <Row>
+        {Object.values(APPLICATION_STATUS).map((e) => {
           return (
-            <Col md={6} xl={4} k={e}>
-              <Link to={getLink(`/volontaire?STATUS_PHASE_2=%5B"${e}"%5D`)}>
-                <Card borderBottomColor={YOUNG_STATUS_PHASE2_COLORS[e]}>
-                  <CardTitle>{text(e)}</CardTitle>
-                  <CardValueWrapper>
-                    <CardValue>{data[e] || 0}</CardValue>
-                    <CardPercentage>
-                      {total ? `${((data[e] || 0) * 100) / total}%` : `0%`}
-                      <CardArrow />
-                    </CardPercentage>
-                  </CardValueWrapper>
-                </Card>
-              </Link>
+            <Col md={6} xl={4} key={e}>
+              <Card borderBottomColor={APPLICATION_STATUS_COLORS[e]}>
+                <CardTitle>{translate(e)}</CardTitle>
+                <CardValueWrapper>
+                  <CardValue>{data[e] || 0}</CardValue>
+                  <CardPercentage>
+                    {total ? `${(((data[e] || 0) * 100) / total).toFixed(0)}%` : `0%`}
+                    <CardArrow />
+                  </CardPercentage>
+                </CardValueWrapper>
+              </Card>
             </Col>
           );
         })}
-      </Row> */}
+      </Row>
     </React.Fragment>
   );
 };
@@ -227,13 +242,13 @@ const Phase1 = ({ data, getLink }) => {
       <Row>
         <Col md={12}>
           <CardSection>Phase 1</CardSection>
-          <CardSubtitle>Status</CardSubtitle>
+          <CardSubtitle>Statut</CardSubtitle>
         </Col>
       </Row>
       <Row>
         {Object.values(YOUNG_STATUS_PHASE1).map((e) => {
           return (
-            <Col md={6} xl={4} k={e}>
+            <Col md={6} xl={4} key={e}>
               <Link to={getLink(`/volontaire?STATUS_PHASE_1=%5B"${e}"%5D`)}>
                 <Card borderBottomColor={YOUNG_STATUS_PHASE1_COLOR[e]}>
                   <CardTitle>{translate(e)}</CardTitle>
