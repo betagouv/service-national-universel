@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
-import { ReactiveBase, ReactiveList, SingleList, MultiDropdownList, MultiList, DataSearch } from "@appbaseio/reactivesearch";
+import { ReactiveBase, ReactiveList } from "@appbaseio/reactivesearch";
 
 import Avatar from "../../components/Avatar";
 
@@ -47,7 +47,7 @@ export default () => {
 };
 
 const Hit = ({ referent }) => {
-  const fullname =`${referent.firstName} ${referent.lastName}`
+  const fullname = `${referent.firstName} ${referent.lastName}`;
   return (
     <TeamMember>
       <Avatar name={fullname} />

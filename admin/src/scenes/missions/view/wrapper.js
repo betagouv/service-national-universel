@@ -182,12 +182,10 @@ const BoxPlaces = styled(Box)`
 `;
 
 const Button = styled.button`
-  /* margin: 0 0.5rem; */
   align-self: flex-start;
   border-radius: 4px;
   padding: 5px;
   font-size: 12px;
-  /* min-width: 100px; */
   width: 100%;
   font-weight: 400;
   cursor: pointer;

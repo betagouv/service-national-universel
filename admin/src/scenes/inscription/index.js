@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { ReactiveBase, ReactiveList, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -250,7 +250,7 @@ const Hit = ({ hit, index, onClick }) => {
   );
 };
 
-const Action = ({ hit, color }) => {
+const Action = ({ hit }) => {
   return (
     <ActionBox color={"#444"}>
       <UncontrolledDropdown setActiveFromChild>
@@ -357,8 +357,6 @@ const ResultTable = styled.div`
     }
     a.active {
       font-weight: 700;
-      /* background: #5245cc;
-      color: #fff; */
     }
     a:first-child {
       background-image: url(${require("../../assets/left.svg")});
@@ -471,7 +469,6 @@ const ActionBox = styled.div`
     .down-icon {
       margin-left: auto;
       padding: 7px 15px;
-      /* border-left: 1px solid ${({ color }) => `${color}`}; */
       margin-left: 15px;
       svg {
         height: 10px;

@@ -1,18 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { Col, DropdownItem, DropdownMenu, DropdownToggle, Label, Pagination, PaginationItem, PaginationLink, Row, UncontrolledDropdown } from "reactstrap";
-import { ReactiveBase, ReactiveList, SingleList, MultiDropdownList, MultiList, DataSearch } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
-import SelectStatusApplication from "../../../components/selectStatusApplication";
 import api from "../../../services/api";
-import { apiURL } from "../../../config";
 import StructureView from "./wrapper";
 import Panel from "../../missions/panel";
 
-import { formatStringDate, formatStringLongDate } from "../../../utils";
+import { formatStringDate } from "../../../utils";
 import SelectStatusMission from "../../../components/selectStatusMission";
-
-const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "REGION", "DEPARTMENT"];
 
 export default ({ structure }) => {
   const [data, setData] = useState([]);
@@ -100,97 +93,6 @@ const Hit = ({ hit, onClick }) => {
   );
 };
 
-const Action = ({ hit, color }) => {
-  return (
-    <ActionBox color={color}>
-      <UncontrolledDropdown setActiveFromChild>
-        <DropdownToggle tag="button">
-          En attente de validation
-          <div className="down-icon">
-            <svg viewBox="0 0 407.437 407.437">
-              <polygon points="386.258,91.567 203.718,273.512 21.179,91.567 0,112.815 203.718,315.87 407.437,112.815 " />
-            </svg>
-          </div>
-        </DropdownToggle>
-        <DropdownMenu>
-          <DropdownItem tag={Link} to={"#"}>
-            Voir
-          </DropdownItem>
-          <DropdownItem tag="div">Dupliquer</DropdownItem>
-        </DropdownMenu>
-      </UncontrolledDropdown>
-    </ActionBox>
-  );
-};
-
-const Header = styled.div`
-  padding: 0 25px 0;
-  display: flex;
-  margin-top: 25px;
-  align-items: flex-start;
-  /* justify-content: space-between; */
-`;
-
-const Title = styled.div`
-  color: rgb(38, 42, 62);
-  font-weight: 700;
-  font-size: 24px;
-  margin-bottom: 30px;
-`;
-
-const Button = styled.div`
-  background-color: #3182ce;
-  color: #fff;
-  border-radius: 4px;
-  padding: 10px 20px;
-  font-size: 14px;
-  cursor: pointer;
-  :hover {
-    background-color: #5a9bd8;
-  }
-`;
-
-const Filter = styled.div`
-  padding: 0 25px;
-  margin-bottom: 20px;
-
-  .searchbox {
-    display: block;
-    width: 100%;
-    background-color: #fff;
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
-    color: #767676;
-    border: 0;
-    outline: 0;
-    padding: 15px 20px;
-    height: auto;
-    border-radius: 6px;
-    margin-right: 15px;
-    ::placeholder {
-      color: #767676;
-    }
-  }
-
-  .dropdown-filter {
-    button {
-      background-color: #fff;
-      box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
-      border: 0;
-      border-radius: 6px;
-      padding: 10px 20px;
-      font-size: 14px;
-      color: #242526;
-      min-width: 150px;
-      margin-right: 15px;
-      cursor: pointer;
-      div {
-        width: 100%;
-        overflow: visible;
-      }
-    }
-  }
-`;
-
 const TeamMember = styled.div`
   h2 {
     color: #333;
@@ -203,12 +105,6 @@ const TeamMember = styled.div`
     font-size: 12px;
     margin: 0;
   }
-`;
-
-const ResultStats = styled.div`
-  color: #242526;
-  font-size: 12px;
-  padding-left: 25px;
 `;
 
 const Table = styled.table`

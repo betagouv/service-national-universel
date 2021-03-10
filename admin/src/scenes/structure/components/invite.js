@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import { Col, Row, Input } from "reactstrap";
 import styled from "styled-components";
-import { Formik, Field } from "formik";
+import { Formik } from "formik";
 import { toastr } from "react-redux-toastr";
-import { Redirect } from "react-router-dom";
 
 import api from "../../../services/api";
 import { translate } from "../../../utils";
@@ -111,24 +110,6 @@ const FormGroup = styled.div`
     }
   }
 `;
-
-const RadioGroup = styled.label`
-  display: flex;
-  align-items: center;
-  color: rgb(106, 111, 133);
-  font-size: 13px;
-  cursor: pointer;
-  margin-bottom: 15px;
-  input[type="radio"] {
-    height: 16px;
-    width: 16px;
-    margin-right: 10px;
-    :checked + div span {
-      color: #3182ce;
-    }
-  }
-`;
-
 const Subtitle = styled.div`
   color: rgb(113, 128, 150);
   font-weight: 400;
@@ -141,13 +122,6 @@ const Title = styled.div`
   margin-bottom: 10px;
 `;
 
-const Legend = styled.div`
-  color: rgb(38, 42, 62);
-  margin-top: 30px;
-  margin-bottom: 20px;
-  font-size: 20px;
-`;
-
 const ButtonContainer = styled.div`
   display: flex;
   justify-content: center;
@@ -155,12 +129,10 @@ const ButtonContainer = styled.div`
 `;
 
 const Button = styled.button`
-  /* margin: 0 0.5rem; */
   align-self: flex-start;
   border-radius: 4px;
   padding: 10px 15px;
   font-size: 1rem;
-  /* min-width: 100px; */
   font-weight: 400;
   cursor: pointer;
   background-color: #fff;

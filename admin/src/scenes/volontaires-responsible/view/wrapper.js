@@ -1,13 +1,10 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import styled from "styled-components";
-import { Col, Row } from "reactstrap";
 import api from "../../../services/api";
 import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 
-import { translate, YOUNG_STATUS } from "../../../utils";
-import SelectStatus from "../../../components/selectStatus";
+import { translate } from "../../../utils";
 
 export default ({ children, young, tab }) => {
   const history = useHistory();
@@ -118,34 +115,4 @@ const Header = styled.div`
   display: flex;
   margin-bottom: 1rem;
   align-items: flex-start;
-`;
-
-const Button = styled.button`
-  /* margin: 0 0.5rem; */
-  align-self: flex-start;
-  border-radius: 4px;
-  padding: 5px;
-  font-size: 12px;
-  /* min-width: 100px; */
-  width: 100%;
-  font-weight: 400;
-  cursor: pointer;
-  background-color: #fff;
-  &.btn-blue {
-    color: #646b7d;
-    border: 1px solid #dcdfe6;
-    :hover {
-      color: rgb(49, 130, 206);
-      border-color: rgb(193, 218, 240);
-      background-color: rgb(234, 243, 250);
-    }
-  }
-  &.btn-red {
-    border: 1px solid #f6cccf;
-    color: rgb(206, 90, 90);
-    :hover {
-      border-color: rgb(240, 218, 218);
-      background-color: rgb(250, 230, 230);
-    }
-  }
 `;

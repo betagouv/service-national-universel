@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { FormGroup, Row, Col, Input } from "reactstrap";
+import React from "react";
+import { FormGroup, Row, Col } from "reactstrap";
 import { Formik, Field } from "formik";
 import validator from "validator";
 import { Link, Redirect } from "react-router-dom";
@@ -8,13 +8,12 @@ import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
 import { useHistory } from "react-router-dom";
 
-import { setUser, setStructure } from "../../redux/auth/actions";
+import { setUser } from "../../redux/auth/actions";
 
 import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import Header from "./components/header";
 
-import matomo from "../../services/matomo";
 import { DEFAULT_STRUCTURE_NAME, translate } from "../../utils";
 
 export default () => {
@@ -270,17 +269,5 @@ const Submit = styled(LoadingButton)`
   :disabled {
     opacity: 0.5;
     cursor: not-allowed;
-  }
-`;
-const Account = styled.div`
-  border-top: 1px solid #cbd5e0;
-  padding-top: 25px;
-  margin-top: 100px;
-  font-size: 14px;
-  color: #6a6f88;
-  a {
-    color: #262a3e;
-    font-weight: 600;
-    margin-left: 5px;
   }
 `;
