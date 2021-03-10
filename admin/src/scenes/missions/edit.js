@@ -169,7 +169,7 @@ export default (props) => {
                         value={values.domains || []}
                         onChange={handleChange}
                         name="domains"
-                        options={Object.keys(MISSION_DOMAINS).concat(values.domains || [])}
+                        options={Object.keys(MISSION_DOMAINS).concat(values.domains.filter((e) => !MISSION_DOMAINS.hasOwnProperty(e)))}
                         placeholder="Sélectionnez un ou plusieurs domains"
                       />
                     </FormGroup>
@@ -294,7 +294,7 @@ export default (props) => {
                           name="period"
                           options={Object.keys(MISSION_PERIOD_DURING_SCHOOL)
                             .concat(Object.keys(MISSION_PERIOD_DURING_HOLIDAYS))
-                            .concat(values.period || [])}
+                            .concat(values.period.filter((e) => !(MISSION_PERIOD_DURING_SCHOOL.hasOwnProperty(e) || MISSION_PERIOD_DURING_HOLIDAYS.hasOwnProperty(e))))}
                           placeholder="Sélectionnez une ou plusieurs périodes"
                         />
                       </FormGroup>
