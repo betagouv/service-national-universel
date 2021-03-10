@@ -16,6 +16,7 @@ import {
 } from "../../../utils";
 
 import api from "../../../services/api";
+import { PERIOD_DURING_HOLIDAYS, PERIOD_DURING_SCHOOL } from "../../../../../app/src/utils";
 
 const legalStatusTypes = ["ASSOCIATION", "PUBLIC", "PRIVATE", "OTHER"];
 
@@ -135,10 +136,10 @@ const ProposedPlaces = ({ missionPlaceLeft, missionPlaceTotal, getLink }) => {
               <CardTitle>Places totales</CardTitle>
               <CardValueWrapper>
                 <CardValue>{missionPlaceTotal}</CardValue>
-                <CardPercentage>
+                {/* <CardPercentage>
                   100%
                   <CardArrow />
-                </CardPercentage>
+                </CardPercentage> */}
               </CardValueWrapper>
             </Card>
           </Link>
@@ -149,10 +150,10 @@ const ProposedPlaces = ({ missionPlaceLeft, missionPlaceTotal, getLink }) => {
               <CardTitle>Places occupées</CardTitle>
               <CardValueWrapper>
                 <CardValue>{missionPlaceTotal - missionPlaceLeft}</CardValue>
-                <CardPercentage>
+                {/* <CardPercentage>
                   {`${missionPlaceTotal ? (((missionPlaceTotal - missionPlaceLeft) * 100) / missionPlaceTotal).toFixed(0) : `0`}%`}
                   <CardArrow />
-                </CardPercentage>
+                </CardPercentage> */}
               </CardValueWrapper>
             </Card>
           </Link>
@@ -163,10 +164,10 @@ const ProposedPlaces = ({ missionPlaceLeft, missionPlaceTotal, getLink }) => {
               <CardTitle>Places disponibles</CardTitle>
               <CardValueWrapper>
                 <CardValue>{missionPlaceLeft}</CardValue>
-                <CardPercentage>
+                {/* <CardPercentage>
                   {`${missionPlaceTotal ? ((missionPlaceLeft * 100) / missionPlaceTotal).toFixed(0) : `0`}%`}
                   <CardArrow />
-                </CardPercentage>
+                </CardPercentage> */}
               </CardValueWrapper>
             </Card>
           </Link>
@@ -181,7 +182,7 @@ const Status = ({ data, getLink }) => {
 
   return (
     <React.Fragment>
-      <CardSubtitle>Status des missions proposées par les structures</CardSubtitle>
+      <CardSubtitle>Statut des missions proposées par les structures</CardSubtitle>
       <Row>
         {Object.values(MISSION_STATUS).map((l, k) => {
           return (
@@ -227,7 +228,7 @@ const MissionDetail = ({ youngsDomains, missionsDomains, getLink }) => {
           <Col md={6} xl={6} key="1">
             {Object.values(MISSION_DOMAINS).map((l, k) => {
               return (
-                <CircularLine>
+                <CircularLine key={k}>
                   <CircularLineIndex>{`${k + 1}.`}</CircularLineIndex>
                   <CircularProgress
                     circleProgressColor="#1B7BBF"
@@ -242,7 +243,7 @@ const MissionDetail = ({ youngsDomains, missionsDomains, getLink }) => {
           <Col md={6} xl={6} key="2">
             {Object.values(MISSION_DOMAINS).map((l, k) => {
               return (
-                <CircularLine>
+                <CircularLine key={k}>
                   <CircularLineIndex>{`${k + 1}.`}</CircularLineIndex>
                   <CircularProgress
                     circleProgressColor="#1B7BBF"
@@ -264,6 +265,19 @@ const Period = ({ youngsPeriod, missionsPeriod }) => {
   const totalMissions = Object.keys(missionsPeriod).reduce((acc, a) => acc + missionsPeriod[a], 0);
   const totalYoungs = Object.keys(youngsPeriod).reduce((acc, a) => acc + youngsPeriod[a], 0);
 
+  const transformMissionsPeriod = () => {
+    const obj = { DURING_HOLIDAYS: 0, DURING_SCHOOL: 0 };
+    Object.keys(missionsPeriod).forEach((period) => {
+      if (PERIOD_DURING_HOLIDAYS.hasOwnProperty(period)) obj.DURING_HOLIDAYS += missionsPeriod[period];
+      else if (PERIOD_DURING_SCHOOL.hasOwnProperty(period)) obj.DURING_SCHOOL += missionsPeriod[period];
+      else if (period === "En-dehors des vacances scolaires (mercredi après-midi, soirées et/ou weekends)") obj.DURING_SCHOOL += missionsPeriod[period];
+      else if (period === "Pendant les vacances scolaires") obj.DURING_HOLIDAYS += missionsPeriod[period];
+    });
+    return obj;
+  };
+
+  const transformedMissionsPeriod = transformMissionsPeriod();
+
   return (
     <React.Fragment>
       <Box>
@@ -278,16 +292,15 @@ const Period = ({ youngsPeriod, missionsPeriod }) => {
         <hr />
         <Row>
           <Col md={6} xl={6} key="1">
-            {JSON.stringify(missionsPeriod, null, 2)}
             {Object.values(PERIOD).map((l, k) => {
               return (
-                <CircularLine>
+                <CircularLine key={k}>
                   <CircularLineIndex>{`${k + 1}.`}</CircularLineIndex>
                   <CircularProgress
                     circleProgressColor="#1B7BBF"
-                    percentage={((missionsPeriod[l] * 100) / totalMissions).toFixed(1)}
+                    percentage={((transformedMissionsPeriod[l] * 100) / totalMissions).toFixed(1)}
                     title={translate(l)}
-                    subtitle={`${missionsPeriod[l] || 0} missions`}
+                    subtitle={`${transformedMissionsPeriod[l] || 0} missions`}
                   />
                 </CircularLine>
               );
@@ -296,7 +309,7 @@ const Period = ({ youngsPeriod, missionsPeriod }) => {
           <Col md={6} xl={6} key="2">
             {Object.values(PERIOD).map((l, k) => {
               return (
-                <CircularLine>
+                <CircularLine key={k}>
                   <CircularLineIndex>{`${k + 1}.`}</CircularLineIndex>
                   <CircularProgress
                     circleProgressColor="#1B7BBF"
@@ -332,7 +345,7 @@ const ProfessionalProject = ({ youngsProfessionnalProjectPrecision, youngsProfes
             {Object.values(PROFESSIONNAL_PROJECT).map((l, k) => {
               if (l !== "OTHER")
                 return (
-                  <CircularLine>
+                  <CircularLine key={k}>
                     <CircularLineIndex>{`${k + 1}.`}</CircularLineIndex>
                     <CircularProgress
                       circleProgressColor="#1B7BBF"
@@ -343,7 +356,7 @@ const ProfessionalProject = ({ youngsProfessionnalProjectPrecision, youngsProfes
                   </CircularLine>
                 );
               return (
-                <Row>
+                <Row key={k}>
                   <Col md={4}>
                     <CircularLine>
                       <CircularLineIndex>{`${k + 1}.`}</CircularLineIndex>
@@ -356,9 +369,9 @@ const ProfessionalProject = ({ youngsProfessionnalProjectPrecision, youngsProfes
                     </CircularLine>
                   </Col>
                   <div style={{ border: "1px solid #F2F1F1" }} />
-                  {Object.values(PROFESSIONNAL_PROJECT_PRECISION).map((m) => {
+                  {Object.values(PROFESSIONNAL_PROJECT_PRECISION).map((m, i) => {
                     return (
-                      <Col md={2}>
+                      <Col md={2} key={i}>
                         <CircularLine>
                           <CircularProgress
                             circleProgressColor="#1B7BBF"
@@ -400,7 +413,7 @@ const Format = ({ youngsFormat, missionsFormat }) => {
           <Col md={6} xl={6} key="1">
             {Object.values(FORMAT).map((l, k) => {
               return (
-                <CircularLine>
+                <CircularLine key={k}>
                   <CircularLineIndex>{`${k + 1}.`}</CircularLineIndex>
                   <CircularProgress
                     circleProgressColor="#1B7BBF"
@@ -415,7 +428,7 @@ const Format = ({ youngsFormat, missionsFormat }) => {
           <Col md={6} xl={6} key="2">
             {Object.values(FORMAT).map((l, k) => {
               return (
-                <CircularLine>
+                <CircularLine key={k}>
                   <CircularLineIndex>{`${k}.`}</CircularLineIndex>
                   <CircularProgress
                     circleProgressColor="#1B7BBF"
@@ -483,7 +496,7 @@ const Mobility = ({ mobilityNearHome, mobilityNearRelative, mobilityNearSchool, 
             <div>Moyen(s) de transport privilégié</div>
             {Object.values(TRANSPORT).map((l, k) => {
               return (
-                <CircularLine>
+                <CircularLine key={k}>
                   <CircularLineIndex>{`${k + 1}.`}</CircularLineIndex>
                   <CircularProgress
                     circleProgressColor="#1B7BBF"
