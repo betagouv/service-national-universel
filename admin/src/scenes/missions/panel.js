@@ -42,6 +42,22 @@ export default ({ onChange, mission }) => {
     return history.push(`/mission/${data._id}`);
   };
 
+  const handleDelete = async () => {
+    if (!confirm("Êtes-vous sûr(e) de vouloir supprimer cette mission ?")) return;
+    try {
+      const { ok, code } = await api.remove(`/mission/${mission._id}`);
+      if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
+      if (!ok && code === "LINKED_OBJECT")
+        return toastr.error("Vous ne pouvez pas supprimer cette mission car des candidatures sont encore liées à cette mission.", { timeOut: 5000 });
+      if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+      toastr.success("Cette mission a été supprimée.");
+      return history.push(`/mission`);
+    } catch (e) {
+      console.log(e);
+      return toastr.error("Oups, une erreur est survenue pendant la supression de la mission :", translate(e.code));
+    }
+  };
+
   if (!mission) return <div />;
   return (
     <Panel>
@@ -59,9 +75,10 @@ export default ({ onChange, mission }) => {
       <Button onClick={duplicate} className="btn-blue">
         Dupliquer
       </Button>
-      <Link to={`/mission/${mission._id}`}>
-        <Button className="btn-red">Supprimer</Button>
-      </Link>
+      <Button onClick={handleDelete} className="btn-red">
+        Supprimer
+      </Button>
+
       <hr />
       <div>
         <div className="title">Statut</div>

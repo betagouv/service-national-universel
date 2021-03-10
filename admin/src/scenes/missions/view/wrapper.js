@@ -16,6 +16,8 @@ export default ({ mission, tab, children }) => {
     try {
       const { ok, code } = await api.remove(`/mission/${mission._id}`);
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
+      if (!ok && code === "LINKED_OBJECT")
+        return toastr.error("Vous ne pouvez pas supprimer cette mission car des candidatures sont encore liées à cette mission.", { timeOut: 5000 });
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       toastr.success("Cette mission a été supprimée.");
       return history.push(`/mission`);
