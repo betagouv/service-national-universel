@@ -1,6 +1,5 @@
 import { Field } from "formik";
-import React, { useState, useEffect } from "react";
-import { toastr } from "react-redux-toastr";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { requiredMessage } from "./errorMessage";
 import DownloadButton from "./buttons/DownloadButton";
@@ -11,35 +10,6 @@ function getFileName(file) {
 
 export default ({ value, onChange, name, errorMessage = requiredMessage, placeholder = "votre fichier", source, required }) => {
   const [filesList, setFilesList] = useState(value || []);
-
-  // useEffect(() => {
-  //   const dropArea = document.getElementById("file-drop");
-  //   dropArea.addEventListener("dragleave", (e) => e.preventDefault(), false);
-  //   dropArea.addEventListener("dragover", (e) => e.preventDefault(), false);
-  //   dropArea.addEventListener(
-  //     "dragenter",
-  //     (e) => {
-  //       e.preventDefault();
-  //       dropArea.style.background = "#eee";
-  //     },
-  //     false
-  //   );
-  //   dropArea.addEventListener(
-  //     "drop",
-  //     (e) => {
-  //       e.preventDefault();
-  //       let dt = e.dataTransfer;
-  //       let files = dt.files;
-  //       dropArea.style.background = "#fff";
-  //       for (let i = 0; i < files.length; i++) {
-  //         if (!isFileSupported(files[i].name)) return toastr.error(`Le type du fichier ${files[i].name} n'est pas supporté.`);
-  //         if (files[i].size > 5000000) return toastr.error(`Ce fichier ${files[i].name} est trop volumineux.`);
-  //       }
-  //       handleChange(files);
-  //     },
-  //     false
-  //   );
-  // });
 
   function onAdd(files) {
     Object.keys(files).forEach((i) => {
@@ -102,14 +72,6 @@ export default ({ value, onChange, name, errorMessage = requiredMessage, placeho
     </div>
   );
 };
-
-function isFileSupported(fileName) {
-  const allowTypes = ["jpg", "jpeg", "png", "pdf"];
-  const dotted = fileName.split(".");
-  const type = dotted[dotted.length - 1];
-  if (!allowTypes.includes(type)) return false;
-  return true;
-}
 
 const FileName = styled.span`
   white-space: nowrap;

@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Col, DropdownItem, DropdownMenu, DropdownToggle, Label, Pagination, PaginationItem, PaginationLink, Row, UncontrolledDropdown } from "reactstrap";
+import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
 import api from "../services/api";
 
-import { translate, YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_COLORS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2_COLORS } from "../utils";
+import { translate, YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_COLORS, YOUNG_STATUS_PHASE2_COLORS } from "../utils";
 import { toastr } from "react-redux-toastr";
 import matomo from "../services/matomo";
 
@@ -156,7 +156,6 @@ const ActionBox = styled.div`
     .down-icon {
       margin-left: auto;
       padding: 7px 15px;
-      /* border-left: 1px solid ${({ color }) => `${color}`}; */
       margin-left: 15px;
       svg {
         height: 10px;
