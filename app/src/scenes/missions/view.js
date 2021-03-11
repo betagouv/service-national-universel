@@ -28,7 +28,7 @@ export default (props) => {
     const tags = [];
     mission.city && tags.push(mission.city + (mission.zip ? ` - ${mission.zip}` : ""));
     // tags.push(mission.remote ? "À distance" : "En présentiel");
-    mission.domains.forEach((d) => tags.push(d));
+    mission.domains.forEach((d) => tags.push(translate(d)));
     return tags;
   };
 

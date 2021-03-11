@@ -111,9 +111,12 @@ export default () => {
                 selectAllLabel="Toutes les périodes"
                 URLParams={true}
                 componentId="PERIOD"
-                placeholder="Filtrer par période"
                 dataField="period.keyword"
                 react={{ and: FILTERS.filter((e) => e !== "PERIOD") }}
+                renderItem={(e, count) => {
+                  return `${translate(e)} ${count ? `(${count})` : ""}`;
+                }}
+                renderLabel={(item) => translate(item) || "Filtrer par période"}
                 showSearch={false}
               />
             </DomainsFilter>
@@ -143,7 +146,7 @@ export default () => {
                 const tags = [];
                 e.city && tags.push(e.city + (e.zip ? ` - ${e.zip}` : ""));
                 // tags.push(e.remote ? "À distance" : "En présentiel");
-                e.domains.forEach((d) => tags.push(d));
+                e.domains.forEach((d) => tags.push(translate(d)));
                 return (
                   <MissionCard
                     applied={applications && applications.includes(e._id)}
