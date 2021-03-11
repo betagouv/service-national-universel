@@ -1,12 +1,12 @@
-import React, { useEffect, useState, useReducer } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { Col, Row, Input } from "reactstrap";
+import { Col, Row } from "reactstrap";
 import { useSelector } from "react-redux";
 
 import YearPicker from "../components/YearPicker";
-import Dropdown from "../components/Dropdown";
 import Checkbox from "../components/Checkbox";
-
+import FilterRegion from "../components/FilterRegion";
+import FilterDepartment from "../components/FilterDepartment";
 import Schools from "./schools";
 import Gender from "./gender";
 import Status from "./status";
@@ -14,8 +14,7 @@ import BirthDate from "./birthdate";
 import ScholarshopSituation from "./scolarshipSituation";
 import ParticularSituation from "./particularSituation";
 import PriorityArea from "./priorityArea";
-
-import { departmentList, regionList, YOUNG_STATUS, translate, region2department, REFERENT_ROLES } from "../../../utils";
+import { YOUNG_STATUS, translate, REFERENT_ROLES } from "../../../utils";
 
 export default () => {
   const [filter, setFilter] = useState();
@@ -56,9 +55,6 @@ export default () => {
           <Title>Dans le détails</Title>
           <FiltersList>
             <FilterStatus value={filter.status} onChange={(status) => updateFilter({ status })} />
-            {/*   <FilterWrapper>
-          <ExportButton onClick={onExportButtonClicked}>Exporter les données</ExportButton>
-        </FilterWrapper> */}
           </FiltersList>
           <Row>
             <Col md={12} lg={6}>
@@ -83,47 +79,6 @@ export default () => {
         </>
       )}
     </>
-  );
-};
-
-const FilterRegion = ({ updateFilter, filter }) => {
-  const user = useSelector((state) => state.Auth.user);
-  if (user.role === REFERENT_ROLES.REFERENT_DEPARTMENT) return <div />;
-
-  if (user.role === REFERENT_ROLES.REFERENT_REGION) {
-    return (
-      <FilterWrapper>
-        <Dropdown disabled onChange={() => {}} selectedOption={filter.region} options={[]} prelabel="Régions" />
-      </FilterWrapper>
-    );
-  }
-
-  return (
-    <FilterWrapper>
-      <Dropdown onChange={(region) => updateFilter({ region })} selectedOption={filter.region} options={regionList} prelabel="Régions" />
-    </FilterWrapper>
-  );
-};
-
-const FilterDepartment = ({ updateFilter, filter }) => {
-  const user = useSelector((state) => state.Auth.user);
-  const filteredDepartment = () => {
-    if (!filter.region) return departmentList;
-    return region2department[filter.region];
-  };
-
-  if (user.role === REFERENT_ROLES.REFERENT_DEPARTMENT) {
-    return (
-      <FilterWrapper>
-        <Dropdown disabled onChange={() => {}} selectedOption={filter.department} options={[]} prelabel="Départements" />
-      </FilterWrapper>
-    );
-  }
-
-  return (
-    <FilterWrapper>
-      <Dropdown onChange={(department) => updateFilter({ department })} selectedOption={filter.department} options={filteredDepartment} prelabel="Départements" />
-    </FilterWrapper>
   );
 };
 
@@ -168,18 +123,4 @@ const FiltersList = styled.div`
 `;
 const FilterWrapper = styled.div`
   margin: 0 5px 10px;
-`;
-
-// Export button
-const ExportButton = styled.button`
-  border: 0;
-  border-radius: 8px;
-  padding: 7px 10px 7px 40px;
-  color: #242526;
-  font-size: 14px;
-  font-weight: bold;
-  background-image: url(${require("../../../assets/export_icon.png")});
-  background-color: white;
-  background-repeat: no-repeat;
-  background-position: 10px center;
 `;
