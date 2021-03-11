@@ -2,12 +2,12 @@ import React, { useEffect, useState } from "react";
 import { ReactiveComponent } from "@appbaseio/reactivesearch";
 import { Col, Row } from "reactstrap";
 
-export default ({ componentId = "FILTER", location }) => {
-  return <ReactiveComponent componentId={componentId} render={(data) => <SubComponent location={location} {...data} />} />;
+export default ({ componentId = "FILTER", young }) => {
+  return <ReactiveComponent componentId={componentId} render={(data) => <SubComponent young={young} {...data} />} />;
 };
 
-const SubComponent = ({ setQuery, location = "Paris" }) => {
-  const [distance, setDistance] = useState("");
+const SubComponent = ({ setQuery, young }) => {
+  const [distance, setDistance] = useState("50");
 
   useEffect(() => {
     (async () => {
@@ -18,20 +18,31 @@ const SubComponent = ({ setQuery, location = "Paris" }) => {
           },
         },
       };
+      let location = young.location || (await getCoordinates(young.city));
       if (location) {
-        !distance && setDistance("50");
         query.bool["filter"] = {
           geo_distance: {
             distance: `${distance}km`,
             location,
           },
         };
-      } else {
-        setDistance("");
       }
       setQuery({ query });
     })();
   }, [distance]);
+
+  const getCoordinates = async (c) => {
+    try {
+      let url = `https://api-adresse.data.gouv.fr/search/?q=${c}`;
+      const res = await fetch(url).then((response) => response.json());
+      const lon = res?.features[0]?.geometry?.coordinates[0] || null;
+      const lat = res?.features[0]?.geometry?.coordinates[1] || null;
+      return lon && lat && { lat, lon };
+    } catch (e) {
+      console.log("error", e);
+      return null;
+    }
+  };
 
   const handleChangeDistance = (e) => setDistance(e.target.value);
 
@@ -40,7 +51,7 @@ const SubComponent = ({ setQuery, location = "Paris" }) => {
       <Row>
         <Col md={12}>
           <select id="distance" className="form-control" value={distance} onChange={handleChangeDistance}>
-            <option value="" disabled selected>
+            <option value="" disabled>
               Rayon de recherche maximum
             </option>
             <option value="2">Distance max. 2km</option>

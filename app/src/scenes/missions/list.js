@@ -19,39 +19,43 @@ export default () => {
   const young = useSelector((state) => state.Auth.young);
   const [showAlert, setShowAlert] = useState(true);
   const [applications, setApplications] = useState();
-  const DEFAULT_QUERY = () => ({
-    query: {
-      bool: {
-        filter: [
-          {
-            range: {
-              endAt: {
-                gt: "now",
+  const DEFAULT_QUERY = () => {
+    let query = {
+      query: {
+        bool: {
+          filter: [
+            {
+              range: {
+                endAt: {
+                  gt: "now",
+                },
               },
             },
-          },
-          { term: { "status.keyword": "VALIDATED" } },
-          {
-            range: {
-              placesLeft: {
-                gt: 0,
+            { term: { "status.keyword": "VALIDATED" } },
+            {
+              range: {
+                placesLeft: {
+                  gt: 0,
+                },
               },
             },
-          },
-        ],
-      },
-    },
-    sort: [
-      {
-        _geo_distance: {
-          location: [young.location.lon, young.location.lat],
-          order: "asc",
-          unit: "km",
-          mode: "min",
+          ],
         },
       },
-    ],
-  });
+    };
+    if (young.location)
+      query.sort = [
+        {
+          _geo_distance: {
+            location: [young.location.lon, young.location.lat],
+            order: "asc",
+            unit: "km",
+            mode: "min",
+          },
+        },
+      ];
+    return query;
+  };
 
   useEffect(() => {
     (async () => {
@@ -115,7 +119,7 @@ export default () => {
               />
             </DomainsFilter>
             <Col md={6}>
-              <FilterGeoloc location={young.location} componentId="GEOLOC" />
+              <FilterGeoloc young={young} componentId="GEOLOC" />
             </Col>
           </Row>
         </Filters>
