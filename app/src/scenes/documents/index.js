@@ -1,6 +1,4 @@
 import React from "react";
-import { Link } from "react-router-dom";
-import { Col, Container, CustomInput, Input, Row } from "reactstrap";
 import styled from "styled-components";
 
 export default () => {

@@ -2,8 +2,6 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
-import { Col, Container, CustomInput, Input, Row } from "reactstrap";
-import { STEPS } from "../inscription/utils";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);

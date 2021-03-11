@@ -1,23 +1,8 @@
-import React, { useState } from "react";
+import React from "react";
 import styled from "styled-components";
-import { Row, Col } from "reactstrap";
-import { useSelector, useDispatch } from "react-redux";
-import { Formik, Field } from "formik";
-import DndFileInput from "../../components/dndFileInput";
-import ErrorMessage, { requiredMessage } from "../inscription/components/errorMessage";
-import api from "../../services/api";
-import { toastr } from "react-redux-toastr";
-import { setYoung } from "../../redux/auth/actions";
-import { translate } from "../../utils";
 import { Link } from "react-router-dom";
 
 export default () => {
-  const young = useSelector((state) => state.Auth.young);
-  const [expandInfo, setExpandInfo] = useState(false);
-  const dispatch = useDispatch();
-
-  const toggleInfo = () => setExpandInfo(!expandInfo);
-
   return (
     <Hero style={{ flexDirection: "column" }}>
       <Content style={{ width: "100%" }}>

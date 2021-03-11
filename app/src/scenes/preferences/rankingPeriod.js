@@ -149,9 +149,3 @@ const ItemContainer = styled.div`
   align-items: center;
   justify-content: space-between;
 `;
-
-const Separator = styled.hr`
-  color: #d2d6dc;
-  background-color: #d2d6dc;
-  height: 1px;
-`;

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { requiredMessage } from "./errorMessage";
 import styled from "styled-components";
 import { Field } from "formik";

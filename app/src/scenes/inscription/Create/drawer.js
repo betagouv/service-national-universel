@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import styled from "styled-components";
 import { STEPS } from "../utils";
 import { useHistory } from "react-router-dom";

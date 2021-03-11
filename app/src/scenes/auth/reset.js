@@ -142,35 +142,6 @@ const Submit = styled(LoadingButton)`
   }
 `;
 
-const InputField = styled(Field)`
-  background-color: transparent;
-  outline: 0;
-  display: block;
-  width: 100%;
-  padding: 15px;
-  margin-top: 3px;
-  margin-bottom: 0;
-  border: 1px solid #e2e8f0;
-  color: #798fb0;
-  -webkit-transition: border 0.2s ease;
-  transition: border 0.2s ease;
-  line-height: 1.2;
-  ::placeholder {
-    color: #798fb0;
-  }
-  &:focus {
-    outline: none;
-    border: 1px solid rgba(66, 153, 225, 0.5);
-    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.5);
-    & + label {
-      color: #434190;
-    }
-    ::placeholder {
-      color: #ccd5e0;
-    }
-  }
-`;
-
 const StyledFormGroup = styled(FormGroup)`
   margin-bottom: 20px;
   div {

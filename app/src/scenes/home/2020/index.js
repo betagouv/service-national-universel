@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
@@ -203,33 +203,5 @@ const Hero = styled.div`
     flex: 1;
     -webkit-clip-path: polygon(15% 0, 0 100%, 100% 100%, 100% 0);
     clip-path: polygon(15% 0, 0 100%, 100% 100%, 100% 0);
-  }
-`;
-
-const Alert = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #31c48d;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  margin-bottom: 20px;
-  padding: 10px 20px;
-  position: absolute;
-  z-index: 10;
-  width: 100%;
-  .text {
-    margin: 0 20px;
-    color: #fff;
-    strong {
-      font-size: 15px;
-      font-weight: 700;
-      margin-bottom: 3px;
-    }
-  }
-  img {
-    position: absolute;
-    right: 0;
-    margin-right: 1rem;
-    cursor: pointer;
   }
 `;

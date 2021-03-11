@@ -1,15 +1,12 @@
 import React from "react";
 import styled from "styled-components";
-import { useSelector, useDispatch } from "react-redux";
-import { Link, useHistory } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { useHistory } from "react-router-dom";
 
-import api from "../../services/api";
-import { setYoung } from "../../redux/auth/actions";
 import { STEPS_2020 } from "../inscription/utils";
 
 export default ({ step }) => {
   const history = useHistory();
-  const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
 
   const currentIndex = Object.keys(STEPS_2020).indexOf(step);
@@ -54,46 +51,6 @@ export default ({ step }) => {
     </>
   );
 };
-
-const HeaderNav = styled.div`
-  display: flex;
-  align-items: center;
-  padding: 1rem 0.5rem;
-  margin-bottom: 1rem;
-  justify-content: space-between;
-  h1 {
-    color: #6b7280;
-    font-size: 1.5rem;
-    font-weight: 500;
-    margin-bottom: 0;
-  }
-  @media (max-width: 768px) {
-    .mobileHide {
-      display: none;
-    }
-  }
-`;
-
-const Button = styled.button`
-  text-transform: capitalize;
-  color: #4b5563;
-  background-color: #fff;
-  padding: 0.5rem 1rem;
-  border: 0;
-  outline: 0;
-  white-space: nowrap;
-  border-radius: 0.5rem;
-  font-weight: 500;
-  font-size: 0.75rem;
-  display: block;
-  outline: 0;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  position: relative;
-  z-index: 2;
-  :hover {
-    opacity: 0.9;
-  }
-`;
 
 const Topbar = styled.ul`
   background-color: #fff;

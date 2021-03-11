@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Col, Container } from "reactstrap";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { DragDropContext, Droppable } from "react-beautiful-dnd";
 import { toastr } from "react-redux-toastr";
 
 import Loader from "../../components/Loader";
@@ -105,23 +105,6 @@ const NoResult = styled.div`
     color: #3d4151;
     font-size: 0.8rem;
     font-style: italic;
-  }
-`;
-
-const Modifybutton = styled(Link)`
-  border: 1px solid #d2d6dc;
-  padding: 10px 15px 10px 30px;
-  color: #3d4151;
-  font-size: 12px;
-  border-radius: 4px;
-  background: url(${require("../../assets/pen.svg")}) left 5px center no-repeat;
-  background-size: 18px;
-  height: fit-content;
-  /* position: absolute;
-  right: 40px;
-  top: 20px; */
-  :hover {
-    color: #333;
   }
 `;
 

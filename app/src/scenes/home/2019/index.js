@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import React from "react";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 import NextStep from "../../phase2/nextStep";
@@ -7,15 +6,6 @@ import { COHESION_STAY_LIMIT_DATE, INTEREST_MISSION_LIMIT_DATE, translate, PHASE
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
-
-  const goTo = (id) => {
-    if (document.getElementById) {
-      const yOffset = -70; // header's height
-      const element = document.getElementById(id);
-      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-      window.scrollTo({ top: y, behavior: "smooth" });
-    }
-  };
 
   return (
     <>
@@ -173,33 +163,5 @@ const Hero = styled.div`
     flex: 1;
     -webkit-clip-path: polygon(15% 0, 0 100%, 100% 100%, 100% 0);
     clip-path: polygon(15% 0, 0 100%, 100% 100%, 100% 0);
-  }
-`;
-
-const Alert = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #31c48d;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  margin-bottom: 20px;
-  padding: 10px 20px;
-  position: absolute;
-  z-index: 10;
-  width: 100%;
-  .text {
-    margin: 0 20px;
-    color: #fff;
-    strong {
-      font-size: 15px;
-      font-weight: 700;
-      margin-bottom: 3px;
-    }
-  }
-  img {
-    position: absolute;
-    right: 0;
-    margin-right: 1rem;
-    cursor: pointer;
   }
 `;

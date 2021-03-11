@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Modal } from "reactstrap";
 import styled from "styled-components";
 import { useSelector } from "react-redux";

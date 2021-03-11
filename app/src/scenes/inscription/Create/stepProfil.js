@@ -323,10 +323,3 @@ const ContinueButton = styled.button`
     opacity: 0.9;
   }
 `;
-
-const SaveButton = styled(ContinueButton)`
-  color: #374151;
-  background-color: #f9fafb;
-  border-width: 1px;
-  border-color: transparent;
-`;

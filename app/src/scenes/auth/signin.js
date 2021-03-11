@@ -1,10 +1,8 @@
 import React, { useState } from "react";
 import { FormGroup } from "reactstrap";
 import { Formik, Field } from "formik";
-import validator from "validator";
 import { Link, Redirect } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
 
 import { setYoung } from "../../redux/auth/actions";

@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from "react";
-import { Container, FormGroup, Input, Button, Row, Col, Modal, ModalHeader, ModalBody } from "reactstrap";
+import React from "react";
+import { Row, Col } from "reactstrap";
 import { useSelector, useDispatch } from "react-redux";
-import { Field, Formik, validateYupSchema } from "formik";
+import { Field, Formik } from "formik";
 import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
 import api from "../services/api";
-import LoadingButton from "../components/loadingButton";
 import { setYoung } from "../redux/auth/actions";
 import ErrorMessage, { requiredMessage } from "../scenes/inscription/components/errorMessage";
 import { getPasswordErrorMessage, translate } from "../utils";

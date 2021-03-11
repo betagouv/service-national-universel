@@ -286,23 +286,6 @@ const Label = styled.div`
     margin: 0;
   }
 `;
-const Warning = styled.div`
-  background-color: #88001711;
-  border-radius: 0.5rem;
-  border: 1px solid #880017;
-  padding: 0.5rem;
-  margin-top: 0.5rem;
-  display: flex;
-  align-items: center;
-  img {
-    height: 1rem;
-    margin: 0.5rem;
-  }
-  p {
-    color: #880017;
-    font-size: 0.8rem;
-  }
-`;
 
 const RadioLabel = styled.label`
   div {
@@ -327,16 +310,7 @@ const RadioLabel = styled.label`
     min-height: 15px;
   }
 `;
-const List = styled.ul`
-  list-style: disc;
-  padding-left: 40px;
-  font-size: 14px;
-  color: #374151;
-  font-weight: 400;
-  li {
-    margin-bottom: 5px;
-  }
-`;
+
 const SubTitle = styled.div`
   margin: 25px 0;
   font-size: 18px;
