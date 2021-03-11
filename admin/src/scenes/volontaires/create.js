@@ -1,16 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import styled from "styled-components";
-import { Col, Row, Input } from "reactstrap";
+import { Col, Row } from "reactstrap";
 import { Field, Formik } from "formik";
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/fr";
 import { useSelector } from "react-redux";
 
-import Historic from "../../components/historic";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import DateInput from "../../components/dateInput";
-import { departmentList, regionList, YOUNG_STATUS, translate } from "../../utils";
+import { departmentList, regionList, translate } from "../../utils";
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
@@ -18,7 +15,6 @@ import DndFileInput from "../../components/dndFileInput";
 import Error, { requiredMessage } from "../../components/errorMessage";
 
 export default (props) => {
-  const user = useSelector((state) => state.Auth.user);
   const history = useHistory();
 
   return (

@@ -83,10 +83,13 @@ export default ({ filter }) => {
             <Col md={6} xl={3} key={k}>
               <Link to={getLink(`/structure?LEGAL_STATUS=%5B"${l}"%5D&`)}>
                 <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
-                  <CardTitle>{translate(l)}</CardTitle>
+                  <CardTitle>{`${translate(l)}s`}</CardTitle>
                   <CardValueWrapper>
                     <CardValue>{status[l] || 0}</CardValue>
-                    <CardArrow />
+                    <CardPercentage>
+                      {total ? `${(((status[l] || 0) * 100) / total).toFixed(0)}%` : `0%`}
+                      <CardArrow />
+                    </CardPercentage>
                   </CardValueWrapper>
                 </Card>
               </Link>
@@ -117,8 +120,19 @@ const CardSubtitle = styled.h3`
   font-weight: 100;
   color: #696974;
 `;
+
+const CardPercentage = styled.span`
+  font-size: 22px;
+  color: #a8a8b1;
+  display: flex;
+  align-items: center;
+  font-weight: 100;
+`;
+
 const CardValueWrapper = styled.div`
   position: relative;
+  display: flex;
+  justify-content: space-between;
 `;
 const CardValue = styled.span`
   font-size: 28px;

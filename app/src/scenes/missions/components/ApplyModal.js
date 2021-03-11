@@ -23,6 +23,7 @@ export default ({ value, onChange, onSend }) => {
       youngBirthdateAt: young.birthdateAt,
       youngCity: young.city,
       youngDepartment: young.department,
+      youngCohort: young.cohort,
       missionId: value._id,
       missionName: value.name,
       missionDepartment: value.department,

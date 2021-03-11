@@ -168,7 +168,7 @@ export default (props) => {
           </>
         )}
       </Formik>
-      {currentUser.role === "admin" ? (
+      {currentUser.role === "admin" || (["referent_department", "referent_region"].includes(currentUser.role) && ["responsible", "supervisor"].includes(user.role)) ? (
         <DeleteBtn
           onClick={async () => {
             if (!confirm("Êtes-vous sûr(e) de vouloir supprimer ce profil")) return;

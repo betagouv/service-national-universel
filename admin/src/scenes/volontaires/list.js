@@ -32,6 +32,7 @@ export default ({ setYoung }) => {
                 <ExportComponent
                   title="Exporter les volontaires"
                   collection="volontaire"
+                  react={{ and: FILTERS }}
                   transform={(data) => {
                     return {
                       _id: data._id,
@@ -206,7 +207,7 @@ export default ({ setYoung }) => {
                 pagination={true}
                 paginationAt="both"
                 innerClass={{ pagination: "pagination" }}
-                size={10}
+                size={30}
                 showLoader={true}
                 dataField="createdAt"
                 sortBy="desc"

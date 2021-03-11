@@ -5,10 +5,6 @@ import { FormGroup, Row, Col } from "reactstrap";
 import { toastr } from "react-redux-toastr";
 import { Redirect } from "react-router-dom";
 import styled from "styled-components";
-import passwordValidator from "password-validator";
-
-import EyeOpen from "../../assets/eye.svg";
-import EyeClose from "../../assets/eye-slash.svg";
 
 import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
@@ -104,25 +100,6 @@ const StyledFormGroup = styled(FormGroup)`
   }
 `;
 
-const InputField = styled(Field)`
-  display: block;
-  width: 100%;
-  margin-bottom: 0.375rem;
-  background-color: #fff;
-  color: #606266;
-  outline: 0;
-  padding: 9px 20px;
-  border-radius: 4px;
-  border: 1px solid;
-  border-color: ${({ hasError }) => (hasError ? "red" : "#dcdfe6")};
-  ::placeholder {
-    color: #d6d6e1;
-  }
-  :focus {
-    border: 1px solid #aaa;
-  }
-`;
-
 const Submit = styled(LoadingButton)`
   background-color: #3182ce;
   outline: 0;
@@ -138,19 +115,6 @@ const Submit = styled(LoadingButton)`
   :disabled {
     opacity: 0.5;
     cursor: not-allowed;
-  }
-`;
-
-const Account = styled.div`
-  border-top: 1px solid #cbd5e0;
-  padding-top: 25px;
-  margin-top: 100px;
-  font-size: 14px;
-  color: #6a6f88;
-  a {
-    color: #262a3e;
-    font-weight: 600;
-    margin-left: 5px;
   }
 `;
 

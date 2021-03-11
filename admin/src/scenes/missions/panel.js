@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
-import { Field, Formik } from "formik";
 import { useHistory } from "react-router-dom";
 
 import { translate, formatStringDate } from "../../utils";
@@ -42,6 +41,22 @@ export default ({ onChange, mission }) => {
     return history.push(`/mission/${data._id}`);
   };
 
+  const handleDelete = async () => {
+    if (!confirm("Êtes-vous sûr(e) de vouloir supprimer cette mission ?")) return;
+    try {
+      const { ok, code } = await api.remove(`/mission/${mission._id}`);
+      if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
+      if (!ok && code === "LINKED_OBJECT")
+        return toastr.error("Vous ne pouvez pas supprimer cette mission car des candidatures sont encore liées à cette mission.", { timeOut: 5000 });
+      if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+      toastr.success("Cette mission a été supprimée.");
+      return history.push(`/mission`);
+    } catch (e) {
+      console.log(e);
+      return toastr.error("Oups, une erreur est survenue pendant la supression de la mission :", translate(e.code));
+    }
+  };
+
   if (!mission) return <div />;
   return (
     <Panel>
@@ -60,9 +75,7 @@ export default ({ onChange, mission }) => {
         <PanelActionButton onClick={duplicate} icon="duplicate" title="Dupliquer" />
       </div>
       <div style={{ display: "flex" }}>
-        <Link to={`/mission/${mission._id}`}>
-          <PanelActionButton icon="bin" title="Supprimer" />
-        </Link>
+          <PanelActionButton onClick={handleDelete} icon="bin" title="Supprimer" />
       </div>
       <hr />
       <div>
@@ -161,42 +174,6 @@ export default ({ onChange, mission }) => {
       {/* <div className="others-title">Volontaires (0)</div>
       <div className="others-text">Aucun volontaire n'a encore été assigné. // TODO</div> */}
     </Panel>
-  );
-};
-
-const Status = ({ mission }) => {
-  return (
-    <StatusBox>
-      <div className="title">Statut</div>
-      <Formik
-        initialValues={{ status: mission.status }}
-        onSubmit={async (values) => {
-          try {
-            await api.put(`/mission/${mission._id}`, values);
-            toastr.success("Success");
-          } catch (e) {
-            toastr.error("Erreur !");
-          }
-        }}
-      >
-        {({ values, handleChange, handleSubmit, isSubmitting }) => (
-          <div>
-            <FormGroup>
-              <Field name="status" component="select" rows={2} value={values.status} onChange={handleChange}>
-                <option value="WAITING_VALIDATION">En attente de validation</option>
-                <option value="WAITING_CORRECTION">En attente de correction</option>
-                <option value="VALIDATED">Validée</option>
-                <option value="DRAFT">Brouillon</option>
-                <option value="REFUSED">Refusée</option>
-                <option value="CANCEL">Annulée</option>
-                <option value="ARCHIVED">Archivée</option>
-              </Field>
-            </FormGroup>
-            <div className="description">A noter que des notifications emails seront envoyées</div>
-          </div>
-        )}
-      </Formik>
-    </StatusBox>
   );
 };
 

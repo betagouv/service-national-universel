@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FormGroup, Row, Col, Input } from "reactstrap";
+import { FormGroup, Row, Col } from "reactstrap";
 import { Formik, Field } from "formik";
 import validator from "validator";
 import { Link, Redirect } from "react-router-dom";
@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
 
-import { setUser, setStructure } from "../../redux/auth/actions";
+import { setUser } from "../../redux/auth/actions";
 
 import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";

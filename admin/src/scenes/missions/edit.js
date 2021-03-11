@@ -4,18 +4,17 @@ import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 import { Formik, Field } from "formik";
-import { Redirect, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 
 import MultiSelect from "../../components/Multiselect";
 import AddressInput from "../../components/addressInput";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
-import { domains, translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, MISSION_DOMAINS } from "../../utils";
+import { translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, MISSION_DOMAINS, PERIOD } from "../../utils";
 import api from "../../services/api";
 import Invite from "../structure/components/invite";
 
 export default (props) => {
   const [defaultValue, setDefaultValue] = useState(null);
-  const [redirect, setRedirect] = useState(false);
   const [structure, setStructure] = useState();
   const [referents, setReferents] = useState([]);
   const [showTutor, setShowTutor] = useState();
@@ -69,7 +68,6 @@ export default (props) => {
   }, [structure]);
 
   if ((!defaultValue && !isNew) || !structure) return <div>Chargement...</div>;
-  if (redirect) return <Redirect to="/mission" />;
 
   return (
     <Formik
@@ -96,10 +94,23 @@ export default (props) => {
           location: "",
           department: "",
           region: "",
+          period: [],
+          domains: [],
+          subPeriod: [],
         }
       }
       onSubmit={async (values) => {
-        if (!values._id) values.placesLeft = values.placesTotal;
+        //if new mission, init placesLeft to placesTotal
+        if (isNew) values.placesLeft = values.placesTotal;
+        //if edit mission, add modified delta to placesLeft
+        else values.placesLeft += values.placesTotal - defaultValue.placesTotal;
+
+        //get the period given the subperiods
+        values.subPeriod.forEach((p) => {
+          if (MISSION_PERIOD_DURING_HOLIDAYS[p] && values.period.indexOf(PERIOD.DURING_HOLIDAYS) === -1) values.period.push(PERIOD.DURING_HOLIDAYS);
+          if (MISSION_PERIOD_DURING_SCHOOL[p] && values.period.indexOf(PERIOD.DURING_SCHOOL) === -1) values.period.push(PERIOD.DURING_SCHOOL);
+        });
+
         try {
           const { ok, code, data: mission } = await api[values._id ? "put" : "post"]("/mission", values);
           if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", translate(code));
@@ -167,7 +178,7 @@ export default (props) => {
                         value={values.domains || []}
                         onChange={handleChange}
                         name="domains"
-                        options={Object.keys(MISSION_DOMAINS).concat(values.domains || [])}
+                        options={Object.keys(MISSION_DOMAINS).concat(values.domains.filter((e) => !MISSION_DOMAINS.hasOwnProperty(e)))}
                         placeholder="Sélectionnez un ou plusieurs domains"
                       />
                     </FormGroup>
@@ -287,12 +298,12 @@ export default (props) => {
                       <FormGroup>
                         <label>PÉRIODES POSSIBLES POUR RÉALISER LA MISSION</label>
                         <MultiSelect
-                          value={values.period}
+                          value={values.subPeriod}
                           onChange={handleChange}
-                          name="period"
+                          name="subPeriod"
                           options={Object.keys(MISSION_PERIOD_DURING_SCHOOL)
                             .concat(Object.keys(MISSION_PERIOD_DURING_HOLIDAYS))
-                            .concat(values.period || [])}
+                            .concat(values.subPeriod.filter((e) => !(MISSION_PERIOD_DURING_SCHOOL.hasOwnProperty(e) || MISSION_PERIOD_DURING_HOLIDAYS.hasOwnProperty(e))))}
                           placeholder="Sélectionnez une ou plusieurs périodes"
                         />
                       </FormGroup>
@@ -358,25 +369,6 @@ export default (props) => {
                   </Wrapper>
                 </Col>
               </Row>
-
-              {/* <Legend>Détail de la mission</Legend>
-            <FormGroup>
-              <label>
-                <span>*</span>EN QUOI LA MISSION PROPOSÉE PERMETTRA-T-ELLE AU VOLONTAIRE D’AGIR EN FAVEUR DE L’INTÉRÊT GÉNÉRAL ?
-              </label>
-              <p style={{ color: "#a0aec1", fontSize: 12 }}>
-                Les réponses à cette question ne seront pas publiées. Elles permettront aux services référents de valider les missions.
-              </p>
-              <Field
-                // validate={(v) => !v.length}
-                name="justifications"
-                component="textarea"
-                rows={2}
-                value={values.justifications}
-                onChange={handleChange}
-                placeholder="Décrivez votre mission, en quelques mots"
-              />
-            </FormGroup> */}
             </Box>
             {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas proposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
             <Header style={{ justifyContent: "flex-end" }}>
@@ -472,12 +464,6 @@ const FormGroup = styled.div`
   }
 `;
 
-const Subtitle = styled.div`
-  color: rgb(113, 128, 150);
-  font-weight: 400;
-  text-transform: uppercase;
-  font-size: 18px;
-`;
 const Title = styled.div`
   color: rgb(38, 42, 62);
   font-weight: 700;
@@ -490,42 +476,6 @@ const Legend = styled.div`
   color: rgb(38, 42, 62);
   margin-bottom: 20px;
   font-size: 20px;
-`;
-
-const ButtonLight = styled.button`
-  background-color: #fff;
-  border: 1px solid #dcdfe6;
-  outline: 0;
-  align-self: flex-start;
-  border-radius: 4px;
-  padding: 10px 20px;
-  font-size: 14px;
-  width: 120px;
-  color: #646b7d;
-  cursor: pointer;
-  margin-right: 10px;
-  :hover {
-    color: rgb(49, 130, 206);
-    border-color: rgb(193, 218, 240);
-    background-color: rgb(234, 243, 250);
-  }
-`;
-const Button = styled.button`
-  background-color: #3182ce;
-  outline: 0;
-  border: 0;
-  color: #fff;
-  border-radius: 4px;
-  padding: 10px 20px;
-  font-size: 14px;
-  cursor: pointer;
-  :hover {
-    background-color: #5a9bd8;
-  }
-  :disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
 `;
 
 const ButtonContainer = styled.div`

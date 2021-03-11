@@ -1,5 +1,9 @@
 export const translate = (value) => {
   switch (value) {
+    case "AFFECTED":
+      return "Affectée";
+    case "NOT_DONE":
+      return "Non réalisée";
     case "WAITING_VALIDATION":
       return "En attente de validation";
     case "WAITING_ACCEPTATION":
@@ -16,6 +20,8 @@ export const translate = (value) => {
       return "Mission regroupée sur des journées";
     case "DISCONTINUOUS":
       return "Mission répartie sur des heures";
+    case "AUTONOMOUS":
+      return "En autonomie";
     case "DRAFT":
       return "Brouillon";
     case "REFUSED":
