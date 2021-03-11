@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
-import { Col, Row } from "reactstrap";
 
 import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
@@ -128,8 +127,6 @@ const Button = styled.button`
   border-radius: 4px;
   padding: 5px 10px;
   font-size: 12px;
-  /* min-width: 100px; */
-  /* width: 100%; */
   font-weight: 400;
   cursor: pointer;
   background-color: #fff;

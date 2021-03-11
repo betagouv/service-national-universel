@@ -1,12 +1,10 @@
-import React, { useState } from "react";
-import { FormGroup, Row, Col } from "reactstrap";
+import React from "react";
+import { FormGroup } from "reactstrap";
 import { Formik, Field } from "formik";
 import validator from "validator";
-import { Link, Redirect } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
 
-import { setUser, setStructure } from "../../redux/auth/actions";
 import Header from "./components/header";
 
 import api from "../../services/api";

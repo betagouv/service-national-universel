@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { ReactiveComponent } from "@appbaseio/reactivesearch";
 import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
+import { translate } from "../utils";
 
 export default function ExportComponent({ title, collection, react, transform }) {
   const [exporting, setExporting] = useState(false);
@@ -71,7 +72,7 @@ async function exportData(fileName, entities, transform) {
 
   for (let j = 0; j < entities.length; j++) {
     const obj = transform ? transform(entities[j]) : entities[j];
-    const arr = columns.map((key) => `${obj[key] || ""}`);
+    const arr = columns.map((key) => `${translate(obj[key]) || ""}`);
     csv.push(arr);
   }
 

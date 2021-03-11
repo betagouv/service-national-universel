@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import { ReactiveBase, ReactiveList, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
@@ -189,7 +188,7 @@ export default () => {
                 pagination={true}
                 paginationAt="both"
                 innerClass={{ pagination: "pagination" }}
-                size={10}
+                size={30}
                 showLoader={true}
                 dataField="createdAt"
                 sortBy="desc"
@@ -269,29 +268,6 @@ const Hit = ({ hit, onClick }) => {
   );
 };
 
-const Action = ({ hit, color }) => {
-  return (
-    <ActionBox color={color}>
-      <UncontrolledDropdown setActiveFromChild>
-        <DropdownToggle tag="button">
-          En attente de validation
-          <div className="down-icon">
-            <svg viewBox="0 0 407.437 407.437">
-              <polygon points="386.258,91.567 203.718,273.512 21.179,91.567 0,112.815 203.718,315.87 407.437,112.815 " />
-            </svg>
-          </div>
-        </DropdownToggle>
-        <DropdownMenu>
-          <DropdownItem tag={Link} to={"#"}>
-            Voir
-          </DropdownItem>
-          <DropdownItem tag="div">Dupliquer</DropdownItem>
-        </DropdownMenu>
-      </UncontrolledDropdown>
-    </ActionBox>
-  );
-};
-
 const Header = styled.div`
   padding: 0 25px 0;
   display: flex;
@@ -305,18 +281,6 @@ const Title = styled.div`
   font-weight: 700;
   font-size: 24px;
   margin-bottom: 30px;
-`;
-
-const Button = styled.div`
-  background-color: #3182ce;
-  color: #fff;
-  border-radius: 4px;
-  padding: 10px 20px;
-  font-size: 14px;
-  cursor: pointer;
-  :hover {
-    background-color: #5a9bd8;
-  }
 `;
 
 const Filter = styled.div`
@@ -481,90 +445,4 @@ const Table = styled.table`
       background-color: #e6ebfa;
     }
   }
-`;
-
-const ActionBox = styled.div`
-  .dropdown-menu {
-    min-width: 0;
-    a,
-    div {
-      white-space: nowrap;
-      font-size: 14px;
-      padding: 5px 15px;
-    }
-  }
-  button {
-    background-color: #feb951;
-    border: 1px solid #feb951;
-    display: inline-flex;
-    align-items: center;
-    text-align: left;
-    border-radius: 4px;
-    padding: 0 0 0 12px;
-    font-size: 12px;
-    min-width: 130px;
-    font-weight: 700;
-    color: #fff;
-    cursor: pointer;
-    outline: 0;
-    .edit-icon {
-      height: 17px;
-      margin-right: 10px;
-      path {
-        fill: #fff;
-      }
-    }
-    .down-icon {
-      margin-left: auto;
-      padding: 7px 15px;
-      border-left: 2px solid #fbd392;
-      margin-left: 15px;
-      svg {
-        height: 10px;
-      }
-      svg polygon {
-        fill: #fff;
-      }
-    }
-  }
-  ${({ color }) =>
-    color === "green" &&
-    `
-    button {
-      background-color: transparent;
-      border: 1px solid #6BC763;
-      color: #6BC763;
-      .edit-icon {
-        path {
-          fill: #6BC763;
-        }
-      }
-      .down-icon {
-        border-left: 1px solid #6BC763;
-        svg polygon {
-          fill: #6BC763;
-        }
-      }
-    }  
-  `}
-  ${({ color }) =>
-    color === "red" &&
-    `
-    button {
-      background-color: transparent;
-      border: 1px solid #F1545B;
-      color: #F1545B;
-      .edit-icon {
-        path {
-          fill: #F1545B;
-        }
-      }
-      .down-icon {
-        border-left: 1px solid #F1545B;
-        svg polygon {
-          fill: #F1545B;
-        }
-      }
-    }  
-  `}
 `;

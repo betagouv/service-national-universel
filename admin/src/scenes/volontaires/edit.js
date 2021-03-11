@@ -10,7 +10,7 @@ import { useSelector } from "react-redux";
 import Historic from "../../components/historic";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import DateInput from "../../components/dateInput";
-import { departmentList, regionList, YOUNG_STATUS, translate } from "../../utils";
+import { departmentList, regionList, translate } from "../../utils";
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
-import { ReactiveBase, ReactiveList, SingleList, MultiDropdownList, MultiList, DataSearch } from "@appbaseio/reactivesearch";
+import { ReactiveBase, ReactiveList, DataSearch } from "@appbaseio/reactivesearch";
 
 import { apiURL } from "../../../config";
 import api from "../../../services/api";
@@ -331,11 +331,6 @@ const ResultStats = styled.div`
   padding-left: 25px;
 `;
 
-const TopResultStats = styled(ResultStats)`
-  position: absolute;
-  top: 25px;
-  left: 0;
-`;
 const BottomResultStats = styled(ResultStats)`
   position: absolute;
   top: calc(100% - 50px);

@@ -6,7 +6,7 @@ const { capture } = require("../sentry");
 
 const MissionObject = require("../models/mission");
 const UserObject = require("../models/referent");
-const ApplicationModel = require("../models/application");
+const ApplicationObject = require("../models/application");
 const { ERRORS } = require("../utils");
 
 const canModify = (user, mission) => {
@@ -65,7 +65,7 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
         mission.tutor = { firstName: tutor.firstName, lastName: tutor.lastName, email: tutor.email, id: tutor._id };
       }
     }
-    const application = await ApplicationModel.findOne({ missionId: req.params.id, youngId: req.user._id });
+    const application = await ApplicationObject.findOne({ missionId: req.params.id, youngId: req.user._id });
     return res.status(200).send({ ok: true, data: { ...mission, application } });
   } catch (error) {
     capture(error);
@@ -98,6 +98,8 @@ router.get("/structure/:structureId", passport.authenticate("referent", { sessio
 router.delete("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const mission = await MissionObject.findOne({ _id: req.params.id });
+    const applications = await ApplicationObject.find({ missionId: mission._id });
+    if (applications && applications.length) return res.status(500).send({ ok: false, code: ERRORS.LINKED_OBJECT });
     await mission.remove();
     console.log(`Mission ${req.params.id} has been deleted`);
     res.status(200).send({ ok: true });

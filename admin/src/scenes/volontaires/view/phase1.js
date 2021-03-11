@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 import { Formik } from "formik";
@@ -6,11 +6,10 @@ import { Formik } from "formik";
 import { translate as t, YOUNG_PHASE } from "../../../utils";
 import WrapperPhase1 from "./wrapper";
 import api from "../../../services/api";
-import Avatar from "../../../components/Avatar";
 import ToggleSwitch from "../../../components/ToogleSwitch";
 
 export default ({ young }) => {
-  const [disabled, setDisabled] = useState(young.phase !== YOUNG_PHASE.COHESION_STAY);
+  const disabled = young.phase !== YOUNG_PHASE.COHESION_STAY;
   const getCohesionStay = (young) => {
     if (young.statusPhase1 === "DONE") return <p>Le volontaire a réalisé son séjour de cohésion.</p>;
     if (young.statusPhase1 === "CANCEL" && young.cohesion2020Step !== "DONE") return <p>Le séjour de cohésion a été annulé.</p>;

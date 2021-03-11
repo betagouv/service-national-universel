@@ -2,10 +2,9 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
-import { Field, Formik } from "formik";
 import { useHistory } from "react-router-dom";
 
-import { formatDay, translate, formatStringDate } from "../../utils";
+import { translate, formatStringDate } from "../../utils";
 
 import api from "../../services/api";
 import SelectStatusMission from "../../components/selectStatusMission";
@@ -42,6 +41,22 @@ export default ({ onChange, mission }) => {
     return history.push(`/mission/${data._id}`);
   };
 
+  const handleDelete = async () => {
+    if (!confirm("Êtes-vous sûr(e) de vouloir supprimer cette mission ?")) return;
+    try {
+      const { ok, code } = await api.remove(`/mission/${mission._id}`);
+      if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
+      if (!ok && code === "LINKED_OBJECT")
+        return toastr.error("Vous ne pouvez pas supprimer cette mission car des candidatures sont encore liées à cette mission.", { timeOut: 5000 });
+      if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+      toastr.success("Cette mission a été supprimée.");
+      return history.push(`/mission`);
+    } catch (e) {
+      console.log(e);
+      return toastr.error("Oups, une erreur est survenue pendant la supression de la mission :", translate(e.code));
+    }
+  };
+
   if (!mission) return <div />;
   return (
     <Panel>
@@ -59,9 +74,10 @@ export default ({ onChange, mission }) => {
       <Button onClick={duplicate} className="btn-blue">
         Dupliquer
       </Button>
-      <Link to={`/mission/${mission._id}`}>
-        <Button className="btn-red">Supprimer</Button>
-      </Link>
+      <Button onClick={handleDelete} className="btn-red">
+        Supprimer
+      </Button>
+
       <hr />
       <div>
         <div className="title">Statut</div>
@@ -162,42 +178,6 @@ export default ({ onChange, mission }) => {
   );
 };
 
-const Status = ({ mission }) => {
-  return (
-    <StatusBox>
-      <div className="title">Statut</div>
-      <Formik
-        initialValues={{ status: mission.status }}
-        onSubmit={async (values) => {
-          try {
-            await api.put(`/mission/${mission._id}`, values);
-            toastr.success("Success");
-          } catch (e) {
-            toastr.error("Erreur !");
-          }
-        }}
-      >
-        {({ values, handleChange, handleSubmit, isSubmitting }) => (
-          <div>
-            <FormGroup>
-              <Field name="status" component="select" rows={2} value={values.status} onChange={handleChange}>
-                <option value="WAITING_VALIDATION">En attente de validation</option>
-                <option value="WAITING_CORRECTION">En attente de correction</option>
-                <option value="VALIDATED">Validée</option>
-                <option value="DRAFT">Brouillon</option>
-                <option value="REFUSED">Refusée</option>
-                <option value="CANCEL">Annulée</option>
-                <option value="ARCHIVED">Archivée</option>
-              </Field>
-            </FormGroup>
-            <div className="description">A noter que des notifications emails seront envoyées</div>
-          </div>
-        )}
-      </Formik>
-    </StatusBox>
-  );
-};
-
 const Subtitle = styled.div`
   color: rgb(113, 128, 150);
   font-weight: 400;
@@ -208,19 +188,6 @@ const Subtitle = styled.div`
 const SubtitleLink = styled(Subtitle)`
   color: #5245cc;
   text-transform: none;
-`;
-
-const Tag = styled.span`
-  background-color: rgb(253, 246, 236);
-  border: 1px solid rgb(250, 236, 216);
-  color: rgb(230, 162, 60);
-  align-self: flex-start;
-  border-radius: 4px;
-  padding: 8px 15px;
-  font-size: 13px;
-  font-weight: 400;
-  cursor: pointer;
-  margin-right: 5px;
 `;
 
 const Panel = styled.div`
@@ -314,54 +281,6 @@ const Panel = styled.div`
     font-size: 12px;
     color: #aeb7d6;
     padding: 15px;
-  }
-`;
-
-const StatusBox = styled.div`
-  margin: 30px 0;
-  .title {
-    color: #262a3e;
-    font-size: 22px;
-    font-weight: 400;
-    margin-bottom: 15px;
-  }
-  .subtitle {
-    color: #a0afc0;
-    font-size: 14px;
-    display: flex;
-    align-items: flex-start;
-    margin: 15px 0;
-    img {
-      margin-right: 10px;
-      margin-top: 5px;
-    }
-  }
-`;
-const FormGroup = styled.div`
-  margin-bottom: 25px;
-  > label {
-    font-size: 11px;
-    font-weight: 500;
-    text-transform: uppercase;
-    color: #6a6f85;
-    display: block;
-    margin-bottom: 10px;
-    padding-left: 15px;
-  }
-  select {
-    display: block;
-    width: 100%;
-    background-color: #fff;
-    color: #606266;
-    border: 0;
-    outline: 0;
-    padding: 10px 15px;
-    border-radius: 6px;
-    margin-right: 15px;
-    border: 1px solid #dcdfe6;
-    :focus {
-      border: 1px solid #aaa;
-    }
   }
 `;
 

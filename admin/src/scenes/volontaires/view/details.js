@@ -1,13 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
-import { Link } from "react-router-dom";
 
 import { translate as t } from "../../../utils";
 import YoungView from "./wrapper";
 import api from "../../../services/api";
-import Avatar from "../../../components/Avatar";
-import SocialIcons from "../../../components/SocialIcons";
 import DownloadButton from "../../../components/buttons/DownloadButton";
 
 export default ({ young }) => {
@@ -181,10 +178,4 @@ const Tag = styled.span`
   font-weight: 400;
   cursor: pointer;
   margin-right: 5px;
-`;
-
-const TagParent = styled(Tag)`
-  color: #5245cc;
-  background: rgba(82, 69, 204, 0.1);
-  border: 0.5px solid #5245cc;
 `;
