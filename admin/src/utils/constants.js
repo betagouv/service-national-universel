@@ -5,6 +5,7 @@ export const YOUNG_STATUS = {
   REFUSED: "REFUSED",
   IN_PROGRESS: "IN_PROGRESS",
   WITHDRAWN: "WITHDRAWN",
+  DELETED: "DELETED",
 };
 
 export const YOUNG_STATUS_PHASE1 = {
@@ -146,8 +147,6 @@ export const TRANSPORT = {
   CARPOOLING: "CARPOOLING",
   OTHER: "OTHER",
 };
-
-
 
 export const MISSION_PERIOD_DURING_HOLIDAYS = {
   SUMMER: "SUMMER",
