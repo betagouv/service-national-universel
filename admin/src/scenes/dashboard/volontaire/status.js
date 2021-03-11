@@ -54,7 +54,7 @@ export default ({ filter }) => {
       const queries = [];
       queries.push({ index: "application", type: "_doc" });
       queries.push({
-        query: { bool: { must: { match_all: {} }, filter: [{ term: { "cohort.keyword": filter.cohort } }] } },
+        query: { bool: { must: { match_all: {} }, filter: [{ term: { "youngCohort.keyword": filter.cohort } }] } },
         aggs: {
           status: { terms: { field: "status.keyword" } },
         },

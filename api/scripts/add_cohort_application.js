@@ -1,4 +1,4 @@
-require("dotenv").config({ path: "../.env-staging" });
+require("dotenv").config({ path: "../.env-prod" });
 
 require("../src/mongo");
 const ApplicationModel = require("../src/models/application");
@@ -15,8 +15,8 @@ const YoungModel = require("../src/models/young");
         doc.set({ youngCohort: young.cohort });
         await doc.save();
         await doc.index();
-        console.log(doc.youngEmail);
         count++;
+        console.log(count);
       } else {
         console.log("NOPE", doc.youngId);
       }

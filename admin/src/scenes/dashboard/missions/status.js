@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { Col, Row, Input } from "reactstrap";
+import { Col, Row } from "reactstrap";
 import { Link } from "react-router-dom";
 import CircularProgress from "../components/CircularProgress";
 import {
@@ -16,9 +16,6 @@ import {
 } from "../../../utils";
 
 import api from "../../../services/api";
-import { PERIOD_DURING_HOLIDAYS, PERIOD_DURING_SCHOOL } from "../../../../../app/src/utils";
-
-const legalStatusTypes = ["ASSOCIATION", "PUBLIC", "PRIVATE", "OTHER"];
 
 export default ({ filter }) => {
   const [youngsDomains, setYoungsDomains] = useState({});
@@ -265,19 +262,6 @@ const Period = ({ youngsPeriod, missionsPeriod }) => {
   const totalMissions = Object.keys(missionsPeriod).reduce((acc, a) => acc + missionsPeriod[a], 0);
   const totalYoungs = Object.keys(youngsPeriod).reduce((acc, a) => acc + youngsPeriod[a], 0);
 
-  const transformMissionsPeriod = () => {
-    const obj = { DURING_HOLIDAYS: 0, DURING_SCHOOL: 0 };
-    Object.keys(missionsPeriod).forEach((period) => {
-      if (PERIOD_DURING_HOLIDAYS.hasOwnProperty(period)) obj.DURING_HOLIDAYS += missionsPeriod[period];
-      else if (PERIOD_DURING_SCHOOL.hasOwnProperty(period)) obj.DURING_SCHOOL += missionsPeriod[period];
-      else if (period === "En-dehors des vacances scolaires (mercredi après-midi, soirées et/ou weekends)") obj.DURING_SCHOOL += missionsPeriod[period];
-      else if (period === "Pendant les vacances scolaires") obj.DURING_HOLIDAYS += missionsPeriod[period];
-    });
-    return obj;
-  };
-
-  const transformedMissionsPeriod = transformMissionsPeriod();
-
   return (
     <React.Fragment>
       <Box>
@@ -298,9 +282,9 @@ const Period = ({ youngsPeriod, missionsPeriod }) => {
                   <CircularLineIndex>{`${k + 1}.`}</CircularLineIndex>
                   <CircularProgress
                     circleProgressColor="#1B7BBF"
-                    percentage={((transformedMissionsPeriod[l] * 100) / totalMissions).toFixed(1)}
+                    percentage={((missionsPeriod[l] * 100) / totalMissions).toFixed(1)}
                     title={translate(l)}
-                    subtitle={`${transformedMissionsPeriod[l] || 0} missions`}
+                    subtitle={`${missionsPeriod[l] || 0} missions`}
                   />
                 </CircularLine>
               );

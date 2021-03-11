@@ -9,7 +9,7 @@ import { Redirect, useHistory } from "react-router-dom";
 import MultiSelect from "../../components/Multiselect";
 import AddressInput from "../../components/addressInput";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
-import { domains, translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, MISSION_DOMAINS } from "../../utils";
+import { domains, translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, MISSION_DOMAINS, PERIOD } from "../../utils";
 import api from "../../services/api";
 import Invite from "../structure/components/invite";
 
@@ -96,6 +96,9 @@ export default (props) => {
           location: "",
           department: "",
           region: "",
+          period: [],
+          domains: [],
+          subPeriod: [],
         }
       }
       onSubmit={async (values) => {
@@ -103,6 +106,12 @@ export default (props) => {
         if (isNew) values.placesLeft = values.placesTotal;
         //if edit mission, add modified delta to placesLeft
         else values.placesLeft += values.placesTotal - defaultValue.placesTotal;
+
+        //get the period given the subperiods
+        values.subPeriod.forEach((p) => {
+          if (MISSION_PERIOD_DURING_HOLIDAYS[p] && values.period.indexOf(PERIOD.DURING_HOLIDAYS) === -1) values.period.push(PERIOD.DURING_HOLIDAYS);
+          if (MISSION_PERIOD_DURING_SCHOOL[p] && values.period.indexOf(PERIOD.DURING_SCHOOL) === -1) values.period.push(PERIOD.DURING_SCHOOL);
+        });
 
         try {
           const { ok, code, data: mission } = await api[values._id ? "put" : "post"]("/mission", values);
@@ -291,12 +300,12 @@ export default (props) => {
                       <FormGroup>
                         <label>PÉRIODES POSSIBLES POUR RÉALISER LA MISSION</label>
                         <MultiSelect
-                          value={values.period}
+                          value={values.subPeriod}
                           onChange={handleChange}
-                          name="period"
+                          name="subPeriod"
                           options={Object.keys(MISSION_PERIOD_DURING_SCHOOL)
                             .concat(Object.keys(MISSION_PERIOD_DURING_HOLIDAYS))
-                            .concat(values.period || [])}
+                            .concat(values.subPeriod || [])}
                           placeholder="Sélectionnez une ou plusieurs périodes"
                         />
                       </FormGroup>
