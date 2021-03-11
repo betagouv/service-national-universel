@@ -11,7 +11,7 @@ import api from "../../services/api";
 import { apiURL, appURL } from "../../config";
 import Panel from "./panel";
 
-import { translate, getFilterLabel, formatStringLongDate } from "../../utils";
+import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS_PHASE1_COLOR, YOUNG_STATUS_PHASE2_COLOR } from "../../utils";
 import { Link } from "react-router-dom";
 
 const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_PHASE_1", "STATUS_PHASE_2"];
@@ -279,8 +279,12 @@ const Hit = ({ hit, onClick }) => {
       </td>
       <td>
         <Badge>{`COHORTE ${hit.cohort}`}</Badge>
-        {hit.cohort === "2019" ? <Badge color="#6CC763">Phase 1</Badge> : null}
-        {hit.cohort === "2020" && hit.cohesion2020Step !== "DONE" ? <Badge color="#ffa987">Phase 1</Badge> : null}
+        <Badge color={YOUNG_STATUS_PHASE1_COLOR[hit.statusPhase1]}>
+          Phase 1<div className="tooltiptext">{translate(hit.statusPhase1)}</div>
+        </Badge>
+        <Badge color={YOUNG_STATUS_PHASE2_COLOR[hit.statusPhase2]}>
+          Phase 2<div className="tooltiptext">{translate(hit.statusPhase2)}</div>
+        </Badge>
         {hit.status === "WITHDRAWN" ? <Badge color="#F8A9AD">Désisté</Badge> : null}
       </td>
       <td>{formatStringLongDate(hit.lastLoginAt)}</td>
@@ -485,7 +489,8 @@ const Table = styled.table`
   }
 `;
 
-const Badge = styled.span`
+const Badge = styled.div`
+  position: relative;
   display: inline-block;
   padding: 0.25rem 1rem;
   margin: 0 0.25rem;
@@ -502,6 +507,27 @@ const Badge = styled.span`
     background-color: ${color}33;
     border: 1px solid ${color};
   `};
+  /* Tooltip text */
+  .tooltiptext {
+    font-size: 0.75rem;
+    visibility: hidden;
+    ${({ color }) => `
+      color: ${color};
+    `};
+    text-align: center;
+    /* Position the tooltip text - see examples below! */
+    position: absolute;
+    z-index: 1;
+    width: 120px;
+    bottom: 95%;
+    left: 50%;
+    margin-left: -60px; /* Use half of the width (120/2 = 60), to center the tooltip */
+  }
+
+  /* Show the tooltip text when you mouse over the tooltip container */
+  :hover .tooltiptext {
+    visibility: visible;
+  }
 `;
 
 const ActionBox = styled.div`
