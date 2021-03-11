@@ -168,35 +168,35 @@ export default () => {
                       </Col>
                     </Row>
                   </FormGroup>
-                  {/* {values.firstName2 ? ( */}
-                  <FormGroup>
-                    <label>REPRÉSENTANT LÉGAL N°2</label>
-                    <Row>
-                      <Col md={6}>
-                        <Field
-                          validate={(v) => !v && requiredMessage}
-                          placeholder="Prénom du représentants légal n°2"
-                          name="firstName2"
-                          value={values.firstName2}
-                          onChange={handleChange}
-                          className="form-control"
-                        />
-                        <ErrorMessage errors={errors} touched={touched} name="firstName2" />
-                      </Col>
-                      <Col md={6}>
-                        <Field
-                          validate={(v) => !v && requiredMessage}
-                          placeholder="Nom du représentants légal n°2"
-                          name="lastName2"
-                          value={values.lastName2}
-                          onChange={handleChange}
-                          className="form-control"
-                        />
-                        <ErrorMessage errors={errors} touched={touched} name="lastName2" />
-                      </Col>
-                    </Row>
-                  </FormGroup>
-                  {/* ) : null} */}
+                  {values.firstName2 ? (
+                    <FormGroup>
+                      <label>REPRÉSENTANT LÉGAL N°2</label>
+                      <Row>
+                        <Col md={6}>
+                          <Field
+                            validate={(v) => !v && requiredMessage}
+                            placeholder="Prénom du représentants légal n°2"
+                            name="firstName2"
+                            value={values.firstName2}
+                            onChange={handleChange}
+                            className="form-control"
+                          />
+                          <ErrorMessage errors={errors} touched={touched} name="firstName2" />
+                        </Col>
+                        <Col md={6}>
+                          <Field
+                            validate={(v) => !v && requiredMessage}
+                            placeholder="Nom du représentants légal n°2"
+                            name="lastName2"
+                            value={values.lastName2}
+                            onChange={handleChange}
+                            className="form-control"
+                          />
+                          <ErrorMessage errors={errors} touched={touched} name="lastName2" />
+                        </Col>
+                      </Row>
+                    </FormGroup>
+                  ) : null}
                   <Title>
                     <span>Autorisez ou non le droit à l'image</span>
                   </Title>
@@ -213,11 +213,10 @@ export default () => {
                           onChange={handleChange}
                         />
                         <label htmlFor="true">
-                          Nous autorisons l'Administration à reproduire et exploiter l'image et la voix de .........................................
-                          <br />
-                          {/* <b>
+                          Nous autorisons l'Administration à reproduire et exploiter l'image et la voix de{" "}
+                          <b>
                             {young.firstName} {young.lastName}
-                          </b>{" "} */}
+                          </b>{" "}
                           que nous représentons légalement, sur les supports visés ci-après à des fins de promotion du Service Nationnel Universel
                         </label>
                       </RadioLabel>
@@ -232,11 +231,10 @@ export default () => {
                           onChange={handleChange}
                         />
                         <label htmlFor="false">
-                          Nous n'autorisons pas l'Administration à reproduire et exploiter l'image et la voix de .........................................
-                          <br />
-                          {/* <b>
+                          Nous n'autorisons pas l'Administration à reproduire et exploiter l'image et la voix de{" "}
+                          <b>
                             {young.firstName} {young.lastName}
-                          </b>{" "} */}
+                          </b>{" "}
                           que nous représentons légalement, sur les supports visés ci-après à des fins de promotion du Service Nationnel Universel
                         </label>
                       </RadioLabel>
