@@ -32,7 +32,7 @@ export default ({ value, name, onChange, options, placeholder }) => {
         options={transformOptions}
         value={selected}
         onChange={(v) => handleChange(v)}
-        overrideStrings={{ selectSomeItems: placeholder }}
+        overrideStrings={{ selectSomeItems: placeholder, allItemsAreSelected: "Toutes les options." }}
       />
     </Wrapper>
   );
@@ -52,7 +52,6 @@ const Wrapper = styled.div`
   div {
     width: 100%;
     span {
-      text-transform: capitalize;
       color: #6a6f85;
       font-size: 14px;
       margin-right: 0;
