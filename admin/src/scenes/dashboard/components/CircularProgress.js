@@ -54,6 +54,7 @@ const CircularProgressTitle = styled.h4`
 `;
 const CircularProgressSubtitle = styled.h5`
   margin: 0;
+  font-weight: normal;
   font-size: 14px;
   color: #696974;
 `;

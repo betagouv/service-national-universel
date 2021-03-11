@@ -16,10 +16,10 @@ const Schema = new mongoose.Schema({
   format: { type: String, default: "CONTINUOUS", enum: ["CONTINUOUS", "DISCONTINUOUS", "AUTONOMOUS"] },
   frequence: { type: String },
   period: { type: [String] },
+  subPeriod: { type: [String] },
 
   placesTotal: { type: Number, default: 1 }, // OK
   placesLeft: { type: Number, default: 1 }, // OK
-  //   placesTaken: { type: Number, default: 0 }, // OK
 
   actions: { type: String }, // OK
   description: { type: String }, // OK
