@@ -6,9 +6,9 @@ import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 
 import { translate } from "../../utils";
-import LoadingButton from "../../components/buttons/LoadingButton";
 import api from "../../services/api";
 import { setUser } from "../../redux/auth/actions";
+import PanelActionButton from "../../components/buttons/PanelActionButton";
 
 // Sorry about that: return true, return false, false, true, false.
 function canModify(user, value) {
@@ -61,13 +61,9 @@ export default ({ onChange, value }) => {
         {canModify(user, value) && (
           <div style={{ display: "flex" }}>
             <Link to={`/user/${value._id}`}>
-              <Button icon={require("../../assets/eye.svg")} color="white">
-                Consulter
-              </Button>
+              <PanelActionButton icon="eye" title="Consulter" />
             </Link>
-            <Button onClick={handleImpersonate} icon={require("../../assets/impersonate.svg")} color="white">
-              Prendre&nbsp;sa&nbsp;place
-            </Button>
+            <PanelActionButton onClick={handleImpersonate} icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
           </div>
         )}
       </div>
@@ -188,20 +184,4 @@ const Panel = styled.div`
     font-weight: 400;
     font-style: italic;
   }
-`;
-
-const Button = styled(LoadingButton)`
-  color: #555;
-  background: ${({ icon }) => `url(${icon}) left 15px center no-repeat`};
-  box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.16);
-  border: 0;
-  outline: 0;
-  border-radius: 5px;
-  padding: 0.2rem 1rem;
-  padding-left: 2.5rem;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  margin-right: 5px;
-  margin-top: 1rem;
 `;

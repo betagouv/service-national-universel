@@ -6,6 +6,7 @@ import { YOUNG_SITUATIONS, YOUNG_PHASE, translate as t } from "../../utils";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import { appURL } from "../../config";
 import api from "../../services/api";
+import PanelActionButton from "../../components/buttons/PanelActionButton";
 
 export default ({ onChange, value }) => {
   const [young, setYoung] = useState(null);
@@ -46,20 +47,14 @@ export default ({ onChange, value }) => {
         )}
         <div style={{ display: "flex" }}>
           <Link to={`/volontaire/${young._id}`}>
-            <Button icon={require("../../assets/eye.svg")} color="white">
-              Consulter
-            </Button>
+            <PanelActionButton icon="eye" title="Consulter" />
           </Link>
           <Link to={`/volontaire/${young._id}/edit`}>
-            <Button icon={require("../../assets/pencil.svg")} color="white">
-              Modifier
-            </Button>
+            <PanelActionButton icon="pencil" title="Modifier" />
           </Link>
         </div>
         <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`}>
-          <Button icon={require("../../assets/impersonate.svg")} color="white">
-            Prendre&nbsp;sa&nbsp;place
-          </Button>
+          <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
         </a>
       </div>
       {young.phase === YOUNG_PHASE.INTEREST_MISSION ? (
@@ -167,22 +162,6 @@ const ApplicationDetails = ({ application, i }) => {
     </Link>
   );
 };
-
-const Button = styled(LoadingButton)`
-  color: #555;
-  background: ${({ icon }) => `url(${icon}) left 15px center no-repeat`};
-  box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.16);
-  border: 0;
-  outline: 0;
-  border-radius: 5px;
-  padding: 0.2rem 1rem;
-  padding-left: 2.5rem;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  margin-right: 5px;
-  margin-top: 1rem;
-`;
 
 const Panel = styled.div`
   background: #ffffff;

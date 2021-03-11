@@ -8,6 +8,7 @@ import { useHistory } from "react-router-dom";
 import api from "../../services/api";
 import { translate } from "../../utils";
 import Team from "./components/Team";
+import PanelActionButton from "../../components/buttons/PanelActionButton";
 
 export default ({ onChange, value }) => {
   const [missionsInfo, setMissionsInfo] = useState({ count: "-", placesTotal: "-" });
@@ -73,15 +74,15 @@ export default ({ onChange, value }) => {
       </div>
       <div className="info">
         <div className="title">{value.name}</div>
-        <Link to={`/structure/${value._id}`}>
-          <Button className="btn-blue">Consulter</Button>
-        </Link>
-        <Link to={`/structure/${value._id}/edit`}>
-          <Button className="btn-blue">Modifier</Button>
-        </Link>
-        <Button onClick={() => handleDelete(value)} className="btn-red">
-          Supprimer
-        </Button>
+        <div style={{ display: "flex" }}>
+          <Link to={`/structure/${value._id}`}>
+            <PanelActionButton icon="eye" title="Consulter" />
+          </Link>
+          <Link to={`/structure/${value._id}/edit`}>
+            <PanelActionButton icon="pencil" title="Modifier" />
+          </Link>
+          <PanelActionButton onClick={() => handleDelete(value)} icon="bin" title="Supprimer" />
+        </div>
       </div>
       <Info title="La structure">
         <div>{value.description}</div>
