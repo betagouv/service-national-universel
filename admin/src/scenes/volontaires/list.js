@@ -10,7 +10,7 @@ import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
 import { apiURL, appURL } from "../../config";
 import Panel from "./panel";
-
+import Badge from "../../components/Badge";
 import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS_PHASE1_COLOR, YOUNG_STATUS_PHASE2_COLOR } from "../../utils";
 import { Link } from "react-router-dom";
 
@@ -278,14 +278,10 @@ const Hit = ({ hit, onClick }) => {
         </div>
       </td>
       <td>
-        <Badge>{`COHORTE ${hit.cohort}`}</Badge>
-        <Badge color={YOUNG_STATUS_PHASE1_COLOR[hit.statusPhase1]}>
-          Phase 1<div className="tooltiptext">{translate(hit.statusPhase1)}</div>
-        </Badge>
-        <Badge color={YOUNG_STATUS_PHASE2_COLOR[hit.statusPhase2]}>
-          Phase 2<div className="tooltiptext">{translate(hit.statusPhase2)}</div>
-        </Badge>
-        {hit.status === "WITHDRAWN" ? <Badge color="#F8A9AD">Désisté</Badge> : null}
+        <Badge text={`Cohorte ${hit.cohort}`} />
+        <Badge text="Phase 1" tooltipText={translate(hit.statusPhase1)} color={YOUNG_STATUS_PHASE1_COLOR[hit.statusPhase1]} />
+        <Badge text="Phase 2" tooltipText={translate(hit.statusPhase2)} color={YOUNG_STATUS_PHASE2_COLOR[hit.statusPhase2]} />
+        {hit.status === "WITHDRAWN" ? <Badge text="Désisté" color="#F8A9AD" /> : null}
       </td>
       <td>{formatStringLongDate(hit.lastLoginAt)}</td>
       <td onClick={(e) => e.stopPropagation()}>
@@ -486,47 +482,6 @@ const Table = styled.table`
     .email {
       font-size: 0.8rem;
     }
-  }
-`;
-
-const Badge = styled.div`
-  position: relative;
-  display: inline-block;
-  padding: 0.25rem 1rem;
-  margin: 0 0.25rem;
-  border-radius: 99999px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  margin-bottom: 5px;
-  margin-top: 15px;
-  color: #9a9a9a;
-  background-color: #f6f6f6;
-  border: 1px solid #cecece;
-  ${({ color }) => `
-    color: ${color};
-    background-color: ${color}33;
-    border: 1px solid ${color};
-  `};
-  /* Tooltip text */
-  .tooltiptext {
-    font-size: 0.75rem;
-    visibility: hidden;
-    ${({ color }) => `
-      color: ${color};
-    `};
-    text-align: center;
-    /* Position the tooltip text - see examples below! */
-    position: absolute;
-    z-index: 1;
-    width: 120px;
-    bottom: 95%;
-    left: 50%;
-    margin-left: -60px; /* Use half of the width (120/2 = 60), to center the tooltip */
-  }
-
-  /* Show the tooltip text when you mouse over the tooltip container */
-  :hover .tooltiptext {
-    visibility: visible;
   }
 `;
 

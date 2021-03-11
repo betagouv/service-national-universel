@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { translate, YOUNG_STATUS, formatStringLongDate } from "../utils";
+import { translate, YOUNG_STATUS, formatStringLongDate, YOUNG_STATUS_COLORS } from "../utils";
+import Badge from "../components/Badge";
 
 export default ({ value }) => {
   if (!value) return <div />;
@@ -15,12 +16,6 @@ export default ({ value }) => {
 };
 
 const HistoricItem = ({ item }) => {
-  let color = "#6CC763";
-  if (item.status === YOUNG_STATUS.WAITING_CORRECTION) color = "#FEB951";
-  if (item.status === YOUNG_STATUS.WAITING_VALIDATION) color = "#FE7B52";
-  if (item.status === YOUNG_STATUS.REFUSED) color = "#F8A9AD";
-  if (item.status === YOUNG_STATUS.IN_PROGRESS) color = "#382F79";
-
   const getLabel = () =>
     item.userName ? (
       <>
@@ -32,7 +27,7 @@ const HistoricItem = ({ item }) => {
 
   return (
     <Item>
-      <Badge color={color}>{translate(item.status)}</Badge>
+      <Badge text={translate(item.status)} color={YOUNG_STATUS_COLORS[item.status]} />
       <div className="history-detail">
         {item.note ? <Note value={item.note} /> : null}
         <div>
@@ -61,19 +56,6 @@ const Note = ({ value }) => {
     </div>
   );
 };
-
-const Badge = styled.span`
-  display: inline-block;
-  padding: 0.25rem 1rem;
-  margin: 0 0.25rem;
-  border-radius: 99999px;
-  font-size: 0.8rem;
-  margin-top: 15px;
-  ${({ color }) => `
-    color: ${color};
-    background-color: ${color}33;
-  `}
-`;
 
 const Item = styled.li`
   padding-left: 1rem;
