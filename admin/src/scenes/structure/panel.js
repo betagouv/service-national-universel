@@ -81,7 +81,7 @@ export default ({ onChange, value }) => {
           <Link to={`/structure/${value._id}/edit`}>
             <PanelActionButton icon="pencil" title="Modifier" />
           </Link>
-          <PanelActionButton colorBtn="#ff0000" onClick={() => handleDelete(value)} icon="bin" title="Supprimer" />
+          <PanelActionButton onClick={() => handleDelete(value)} icon="bin" title="Supprimer" />
         </div>
       </div>
       <Info title="La structure">

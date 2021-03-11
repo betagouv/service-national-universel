@@ -75,7 +75,7 @@ export default ({ onChange, mission }) => {
         <PanelActionButton onClick={duplicate} icon="duplicate" title="Dupliquer" />
       </div>
       <div style={{ display: "flex" }}>
-          <PanelActionButton onClick={handleDelete} icon="bin" title="Supprimer" />
+        <PanelActionButton onClick={handleDelete} icon="bin" title="Supprimer" />
       </div>
       <hr />
       <div>
@@ -280,53 +280,5 @@ const Panel = styled.div`
     font-size: 12px;
     color: #aeb7d6;
     padding: 15px;
-  }
-`;
-
-const StatusBox = styled.div`
-  margin: 30px 0;
-  .title {
-    color: #262a3e;
-    font-size: 22px;
-    font-weight: 400;
-    margin-bottom: 15px;
-  }
-  .subtitle {
-    color: #a0afc0;
-    font-size: 14px;
-    display: flex;
-    align-items: flex-start;
-    margin: 15px 0;
-    img {
-      margin-right: 10px;
-      margin-top: 5px;
-    }
-  }
-`;
-const FormGroup = styled.div`
-  margin-bottom: 25px;
-  > label {
-    font-size: 11px;
-    font-weight: 500;
-    text-transform: uppercase;
-    color: #6a6f85;
-    display: block;
-    margin-bottom: 10px;
-    padding-left: 15px;
-  }
-  select {
-    display: block;
-    width: 100%;
-    background-color: #fff;
-    color: #606266;
-    border: 0;
-    outline: 0;
-    padding: 10px 15px;
-    border-radius: 6px;
-    margin-right: 15px;
-    border: 1px solid #dcdfe6;
-    :focus {
-      border: 1px solid #aaa;
-    }
   }
 `;
