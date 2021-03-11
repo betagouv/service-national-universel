@@ -6,15 +6,17 @@ import { YOUNG_PHASE, YOUNG_STATUS, PHASE_STATUS, YOUNG_STATUS_PHASE1 } from "..
 import Item from "./item";
 import { DRAWER_TABS } from "../utils";
 
-export default ({ inscription }) => {
-  const [open, setOpen] = useState(true);
-  const young = useSelector((state) => state.Auth.young);
-
+export default (props) => {
+  const [open, setOpen] = useState();
   const [status1, setStatus1] = useState(PHASE_STATUS.IN_COMING);
   const [status2, setStatus2] = useState(PHASE_STATUS.IN_COMING);
   const [status3, setStatus3] = useState(PHASE_STATUS.IN_COMING);
-
   const [activeTab, setActiveTab] = useState(DRAWER_TABS.HOME);
+  const young = useSelector((state) => state.Auth.young);
+
+  useEffect(() => {
+    setOpen(props.open);
+  }, [props.open]);
 
   useEffect(() => {
     // if the young is not validated yet
@@ -26,12 +28,6 @@ export default ({ inscription }) => {
     setStatus2(young.statusPhase2);
     if (young.phase === YOUNG_PHASE.INTEREST_MISSION) return;
   }, [young]);
-
-  if (open) {
-    document.body.classList.add("open-drawer");
-  } else {
-    document.body.classList.remove("open-drawer");
-  }
 
   const getDisabled = (tab) => {
     if (tab === DRAWER_TABS.HOME) return false;
@@ -52,6 +48,9 @@ export default ({ inscription }) => {
   const handleClick = (e, tab) => {
     if (getDisabled(tab)) return e.preventDefault();
     setActiveTab(tab);
+    if (open) {
+      props.onOpen(false);
+    }
   };
 
   return (
@@ -64,9 +63,9 @@ export default ({ inscription }) => {
           <a href="https://www.snu.gouv.fr/">
             <img src={require("../../assets/logo-snu.png")} />
           </a>
+          <Close onClick={() => props.onOpen(false)}>&times;</Close>
         </Logos>
       </Header>
-      <MenuBtn onClick={() => setOpen(!open)} src={require("../../assets/menu.svg")} />
       <HomeLink exact to="/" onClick={(e) => handleClick(e, DRAWER_TABS.HOME)}>
         <div className="icon">
           <svg fill="none" viewBox="0 0 24 24">
@@ -182,8 +181,13 @@ const Sidebar = styled.div`
   ::-webkit-scrollbar {
     display: none;
   }
-  @media (max-width: 768px) {
-    display: none;
+  @media (max-width: 767px) {
+    transform: translateX(${({ open }) => (open ? 0 : "-105%")});
+    opacity: 1;
+    visibility: visible;
+    height: 100vh;
+    width: 100vw;
+    z-index: 11;
   }
   background-color: #362f78;
   width: 15%;
@@ -195,7 +199,6 @@ const Sidebar = styled.div`
   min-height: 100vh;
   overflow-y: auto;
   transition: 0.2s;
-  transform: ${({ open }) => (open ? "translateX(0)" : "translateX(-85%)")};
   a {
     font-size: 13px;
     color: #fff;
@@ -247,6 +250,9 @@ const Header = styled.div`
   padding: 1rem 3rem;
   margin-bottom: 2rem;
   background-color: #fff;
+  @media (max-width: 767px) {
+    padding: 0.5rem 0.5rem;
+  }
 `;
 
 const HomeLink = styled(NavLink)`
@@ -282,17 +288,14 @@ const MyNav = styled.ul`
   }
 `;
 
-const MenuBtn = styled.img`
-  height: 1.5rem;
-  z-index: 1;
-  margin: 0.5rem;
-  position: absolute;
-  z-index: 12;
-  top: 0;
-  right: 0;
-  cursor: pointer;
-  /* display: none;
+const Close = styled.div`
+  font-size: 32px;
+  color: #666;
+  padding: 0 15px 20px;
+  display: none;
+  width: 45px;
+  padding: 0 15px;
   @media (max-width: 767px) {
     display: block;
-  } */
+  }
 `;
