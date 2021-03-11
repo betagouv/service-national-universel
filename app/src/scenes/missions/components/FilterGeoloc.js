@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { ReactiveComponent } from "@appbaseio/reactivesearch";
-import { Col, Container, CustomInput, Input, Row } from "reactstrap";
+import { Col, Row } from "reactstrap";
 
-export default ({ componentId = "FILTER", placeholder, city }) => {
-  return <ReactiveComponent componentId={componentId} render={(data) => <SubComponent city={city} placeholder={placeholder} {...data} />} />;
+export default ({ componentId = "FILTER", young }) => {
+  return <ReactiveComponent componentId={componentId} render={(data) => <SubComponent young={young} {...data} />} />;
 };
 
-const SubComponent = ({ setQuery, placeholder, city = "Paris" }) => {
-  // const [city, setCity] = useState("");
-  const [distance, setDistance] = useState("");
+const SubComponent = ({ setQuery, young }) => {
+  const [distance, setDistance] = useState("50");
 
   useEffect(() => {
     (async () => {
@@ -19,24 +18,19 @@ const SubComponent = ({ setQuery, placeholder, city = "Paris" }) => {
           },
         },
       };
-      if (city) {
-        !distance && setDistance("50");
-        const location = await getCoordinates(city);
+      let location = young.location || (await getCoordinates(young.city));
+      if (location) {
         query.bool["filter"] = {
           geo_distance: {
             distance: `${distance}km`,
-            location: location,
+            location,
           },
         };
-      } else {
-        setDistance("");
       }
       setQuery({ query });
     })();
   }, [distance]);
 
-  // const handleChangeCity = (e) => setCity(e.target.value);
-  const handleChangeDistance = (e) => setDistance(e.target.value);
   const getCoordinates = async (c) => {
     try {
       let url = `https://api-adresse.data.gouv.fr/search/?q=${c}`;
@@ -50,15 +44,14 @@ const SubComponent = ({ setQuery, placeholder, city = "Paris" }) => {
     }
   };
 
+  const handleChangeDistance = (e) => setDistance(e.target.value);
+
   return (
     <>
       <Row>
-        {/* <Col md={6}>
-          <input id="search" className="form-control" value={city} onChange={handleChangeCity} placeholder={placeholder} />
-        </Col> */}
         <Col md={12}>
-          <select disabled={!city} id="distance" className="form-control" value={distance} onChange={handleChangeDistance}>
-            <option value="" disabled selected>
+          <select id="distance" className="form-control" value={distance} onChange={handleChangeDistance}>
+            <option value="" disabled>
               Rayon de recherche maximum
             </option>
             <option value="2">Distance max. 2km</option>
