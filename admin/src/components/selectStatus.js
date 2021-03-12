@@ -36,6 +36,7 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
   };
 
   const setStatus = async (status, note) => {
+    const prevStatus = young.status;
     young.historic.push({ phase, userName: `${user.firstName} ${user.lastName}`, userId: user._id, status, note });
     young[statusName] = status;
     young.lastStatusAt = Date.now();
@@ -53,7 +54,7 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
 
       if (status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INSCRIPTION) {
         matomo.logEvent("status_update", YOUNG_STATUS.VALIDATED);
-        await api.post(`/referent/email/validate/${young._id}`, { subject: "Inscription validée" });
+        await api.post(`/referent/email/validate/${young._id}`, { subject: "Inscription validée", prevStatus });
       }
       if (status === YOUNG_STATUS.REFUSED) {
         matomo.logEvent("status_update", YOUNG_STATUS.REFUSED);
