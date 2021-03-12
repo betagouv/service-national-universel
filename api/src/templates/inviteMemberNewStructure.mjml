@@ -1,0 +1,36 @@
+<mjml>
+  <mj-body>
+    <mj-section>
+      <mj-column>
+        <mj-text>
+          <h1 font-size="20px">Bonjour {{toName}}</h1>
+        </mj-text>
+        <mj-text font-size="18px" color="#3D4852">
+          Votre structure a été enregistrée sur la plateforme du SNU par {{fromName}} et une mission a été déposée.
+        </mj-text>
+        <mj-text font-size="18px" color="#3D4852"> Vous pouvez désormais :</mj-text>
+        <mj-text font-size="18px" color="#3D4852"> - Proposer d'autre mission d'intérêt général </mj-text>
+        <mj-text font-size="18px" color="#3D4852">
+          - Inviter d'autres membres de l'équipe de votre structure à proposer une mission d'intérêt général
+        </mj-text>
+        <mj-text font-size="18px" color="#3D4852"> - Gérer les volontaires qui candidatent sur vos missions </mj-text>
+        <mj-text font-size="18px" color="#3D4852"
+          >Pour plus d'information sur l'usage de la plateforme, vous pouvez consulter
+          <a href="https://docs.google.com/document/d/1o_kwRRBCjcIQXHcxVTYOP8Si2XHp3oGVpUD1XuJmDgo">ici</a>
+
+          un tutoriel d'utilisation.</mj-text
+        >
+
+        <mj-button font-size="20px" background-color="#3490DC" href="{{cta}}"> Activer mon compte </mj-button>
+
+        <mj-text font-size="18px" color="#3D4852">Cordialement,</mj-text>
+        <mj-text font-size="18px" color="#3D4852">L'équipe du Service National Universel</mj-text>
+
+        <mj-divider border-color="#F6F7F8"></mj-divider>
+        <mj-text>
+          Si vous ne parvenez pas à cliquer sur le bouton "Activer mon compte", copiez-collez l'URL ci-dessous dans votre navigateur: {{cta}}
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>
