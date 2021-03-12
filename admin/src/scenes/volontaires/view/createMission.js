@@ -41,9 +41,9 @@ export default ({ young, onSend }) => {
     return new Date(d).toISOString().split("T")[0];
   }
 
-  const handleProposal = async (mission) => {
+  const handleProposal = async (mission, status) => {
     const application = {
-      status: APPLICATION_STATUS.DONE,
+      status,
       youngId: young._id,
       youngFirstName: young.firstName,
       youngLastName: young.lastName,
@@ -88,6 +88,7 @@ export default ({ young, onSend }) => {
         department: "",
         region: "",
         structureLegalStatus: "PUBLIC",
+        applicationStatus: "DONE",
       }}
       onSubmit={async (values) => {
         values.placesLeft = values.placesTotal;
@@ -135,7 +136,7 @@ export default ({ young, onSend }) => {
           if (!responseMission.ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", translate(responseMission.code));
 
           //...finally, we create the application
-          await handleProposal(responseMission.data);
+          await handleProposal(responseMission.data, values.applicationStatus);
           toastr.success("Mission enregistrée");
           onSend();
         } catch (e) {
@@ -432,6 +433,17 @@ export default ({ young, onSend }) => {
                       <ErrorMessage errors={errors} touched={touched} name="tutorEmail" />
                     </FormGroup>
                   </ToggleBloc>
+                </Wrapper>
+                <Wrapper>
+                  <Legend>Statut de la mission</Legend>
+                  <FormGroup>
+                    <Field validate={(v) => !v && requiredMessage} component="select" name="applicationStatus" value={values.applicationStatus} onChange={handleChange}>
+                      <option value="DONE">{translate("DONE")}</option>
+                      <option value="VALIDATED">{translate("VALIDATED")}</option>
+                      <option value="IN_PROGRESS">{translate("IN_PROGRESS")}</option>
+                    </Field>
+                    <ErrorMessage errors={errors} touched={touched} name="applicationStatus" />
+                  </FormGroup>
                 </Wrapper>
               </Col>
             </Row>
