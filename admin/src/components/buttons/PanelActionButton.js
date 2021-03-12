@@ -28,6 +28,5 @@ const Button = styled(LoadingButton)`
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  margin-right: 0.5rem;
-  margin-top: 0.5rem;
+  margin: 0.5rem 0.5rem 0 0;
 `;

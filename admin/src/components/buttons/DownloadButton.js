@@ -35,8 +35,7 @@ export default function DownloadButton({ source, title, ...rest }) {
 const DownloadBtn = styled(LoadingButton)`
   color: #555;
   background: url(${require("../../assets/download.svg")}) left 15px center no-repeat;
-  box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.16);
-  border: 0;
+  border: 1px solid #eee;
   outline: 0;
   border-radius: 5px;
   padding: 8px 25px 8px 40px;
@@ -46,4 +45,8 @@ const DownloadBtn = styled(LoadingButton)`
   margin-right: 5px;
   margin-top: 1rem;
   width: fit-content;
+  :hover {
+    background: url(${require("../../assets/download.svg")}) left 15px center no-repeat;
+    box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.16);
+  }
 `;

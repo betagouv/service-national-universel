@@ -7,6 +7,7 @@ import DownloadButton from "../../components/buttons/DownloadButton";
 import Historic from "../../components/historic";
 import api from "../../services/api";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
+import { appURL } from "../../config";
 
 export default ({ onChange, value }) => {
   const [young, setYoung] = useState(null);
@@ -45,9 +46,14 @@ export default ({ onChange, value }) => {
             Né(e) le {formatDate(value.birthdateAt)} - {getAge(value.birthdateAt)} ans
           </div>
         )}
-        <Link to={`/volontaire/${value._id}/edit`}>
-          <PanelActionButton icon="pencil" title="Modifier" />
-        </Link>
+        <div style={{ display: "flex" }}>
+          <Link to={`/volontaire/${value._id}/edit`}>
+            <PanelActionButton icon="pencil" title="Modifier" />
+          </Link>
+          <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${value._id}`}>
+            <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
+          </a>
+        </div>
       </div>
       {young && young.historic && young.historic.length !== 0 && <Historic value={young.historic} />}
       <Info title="Pièce d’identité" id={value._id}>
