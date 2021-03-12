@@ -21,6 +21,7 @@ const USER_ALREADY_REGISTERED = "USER_ALREADY_REGISTERED";
 const PASSWORD_NOT_VALIDATED = "PASSWORD_NOT_VALIDATED";
 const ACOUNT_NOT_ACTIVATED = "ACOUNT_NOT_ACTIVATED";
 const USER_NOT_EXISTS = "USER_NOT_EXISTS";
+const OPERATION_UNAUTHORIZED = "OPERATION_UNAUTHORIZED";
 
 const COOKIE_MAX_AGE = 60 * 60 * 2 * 1000; // 2h
 const JWT_MAX_AGE = 60 * 60 * 2; // 2h
@@ -54,7 +55,7 @@ class Auth {
     try {
       const user = await this.model.findOne({ email });
       if (!user) return res.status(401).send({ ok: false, code: USER_NOT_EXISTS });
-
+      if (user.status === "WITHDRAWN" || user.status === "DELETED") res.status(401).send({ ok: false, code: OPERATION_UNAUTHORIZED });
       // simplify
       let match = await user.comparePassword(password);
       if (config.ENVIRONMENT === "development") {

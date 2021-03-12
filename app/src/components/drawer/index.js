@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
-import { useSelector } from "react-redux";
-import { YOUNG_PHASE, YOUNG_STATUS, PHASE_STATUS, YOUNG_STATUS_PHASE1 } from "../../utils";
+import { useSelector, useDispatch } from "react-redux";
+import { toastr } from "react-redux-toastr";
+
+import { setYoung } from "../../redux/auth/actions";
+import { YOUNG_PHASE, YOUNG_STATUS, PHASE_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2 } from "../../utils";
 import Item from "./item";
 import { DRAWER_TABS } from "../utils";
+import api from "../../services/api";
 
 export default (props) => {
   const [open, setOpen] = useState();
@@ -133,21 +137,6 @@ export default (props) => {
       </MainNav>
       <MyNav>
         {/* <li>
-          <NavLink to="/mes-missions">
-            <div className="icon">
-              <svg fill="none" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
-                ></path>
-              </svg>
-            </div>
-            Mes missions
-          </NavLink>
-        </li> */}
-        {/* <li>
           <NavLink to="/documents">
             <div className="icon">
               <svg fill="none" viewBox="0 0 24 24">
@@ -157,7 +146,7 @@ export default (props) => {
             Mes documents
           </NavLink>
         </li> */}
-        <li>
+        <DrawerButton>
           <a href="https://www.snu.gouv.fr/foire-aux-questions-11" target="blank">
             <div className="icon">
               <svg fill="none" viewBox="0 0 24 24">
@@ -171,10 +160,45 @@ export default (props) => {
             </div>
             Foire aux questions
           </a>
-        </li>
+        </DrawerButton>
+        <DrawerButton>
+          <DeleteAccountButton young={young} />
+        </DrawerButton>
       </MyNav>
     </Sidebar>
   );
+};
+
+const DeleteAccountButton = ({ young }) => {
+  const mandatoryPhasesDone = young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE && young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED;
+  const dispatch = useDispatch();
+
+  const getLabel = () => {
+    return mandatoryPhasesDone ? "Supprimer mon compte" : "Se désister du SNU";
+  };
+
+  const handleDelete = async () => {
+    if (!confirm("Attention, vous êtes sur le point de supprimer votre compte. Vous serez immédiatement déconnecté. Souhaitez-vous réellement supprimer votre compte ?")) return;
+    // todo : anonymiser data
+    const { ok, code } = await api.put("/young", { status: "DELETED" });
+    if (!ok) return toastr.error("Une erreur est survenu lors du traitement de votre demande", translate(code));
+    logout();
+  };
+
+  const handleWithdrawn = async () => {
+    if (!confirm("Attention, vous êtes sur le point de vous désister du SNU. Vous serez immédiatement déconnecté. Souhaitez-vous réellement vous désister ?")) return;
+    const { ok, code } = await api.put("/young", { status: "WITHDRAWN" });
+    if (!ok) return toastr.error("Une erreur est survenu lors du traitement de votre demande", translate(code));
+    // todo : send notif to young and referent
+    logout();
+  };
+
+  async function logout() {
+    await api.post(`/young/logout`);
+    dispatch(setYoung(null));
+  }
+
+  return <div onClick={mandatoryPhasesDone ? handleDelete : handleWithdrawn}>{getLabel()}</div>;
 };
 
 const Sidebar = styled.div`
@@ -276,7 +300,7 @@ const MainNav = styled.ul`
 
 const MyNav = styled.ul`
   margin-top: 25px;
-  padding-top: 3rem;
+  padding-top: 1rem;
   border-top: 1px solid #42389d;
   li {
     padding: 2px 20px;
@@ -297,5 +321,42 @@ const Close = styled.div`
   padding: 0 15px;
   @media (max-width: 767px) {
     display: block;
+  }
+`;
+
+const DrawerButton = styled.li`
+  margin-bottom: 0.5rem;
+  padding: 2px 20px;
+  > * {
+    cursor: pointer;
+    font-size: 0.75rem;
+    padding: 12px 15px;
+    border-radius: 6px;
+    color: ${({ color }) => (color ? color : "#fff")};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    &.active,
+    :hover {
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      background-color: ${({ color }) => (color ? "transparent" : "#5145cd")};
+      border: ${({ color }) => (color ? "" : "none")};
+    }
+    &.disabled {
+      cursor: default;
+    }
+    &.disabled:hover {
+      background-color: transparent;
+      box-shadow: none;
+    }
+    .icon {
+      height: 24px;
+      width: 24px;
+      margin-right: 20px;
+      svg {
+        stroke: #8da2fb;
+      }
+    }
   }
 `;

@@ -16,6 +16,8 @@ export const translate = (value) => {
       return "En cours";
     case "VALIDATED":
       return "Validée";
+    case "DELETED":
+      return "Supprimée";
     case "CONTINUOUS":
       return "Mission regroupée sur des journées";
     case "DISCONTINUOUS":
