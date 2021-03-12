@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { Row, Col, Input } from "reactstrap";
+import { Row, Col } from "reactstrap";
 import Autosuggest from "react-autosuggest";
 import { Field } from "formik";
 import { department2region, departmentLookUp, departmentList, regionList, region2department } from "../utils";
@@ -8,7 +8,7 @@ import ErrorMessage, { requiredMessage } from "../scenes/inscription/components/
 
 const NORESULTMESSAGE = "Rentrer manuellement l'adresse";
 
-export default ({ keys, values, handleChange, errors, touched }) => {
+export default ({ keys, values, handleChange, errors, touched, departAndRegionVisible = true }) => {
   const [str, setStr] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [noResultMode, setNoResultMode] = useState(false);
@@ -38,6 +38,7 @@ export default ({ keys, values, handleChange, errors, touched }) => {
     handleChange({ target: { name: keys.zip, value: suggestion.properties.postcode } });
     handleChange({ target: { name: keys.address, value: suggestion.properties.label } });
     handleChange({ target: { name: keys.location, value: { lon: suggestion.geometry.coordinates[0], lat: suggestion.geometry.coordinates[1] } } });
+    if (values.cohort === "2020") return;
     handleChange({ target: { name: keys.department, value: departmentLookUp[depart] } });
     handleChange({ target: { name: keys.region, value: department2region[departmentLookUp[depart]] } });
   };
@@ -128,59 +129,63 @@ export default ({ keys, values, handleChange, errors, touched }) => {
           />
           <ErrorMessage errors={errors} touched={touched} name={keys.zip} />
         </Col>
-        <Col md={6} style={{ marginTop: 15 }}>
-          <Label>Département</Label>
-          <Field
-            as="select"
-            validate={(v) => !v && requiredMessage}
-            disabled={!noResultMode}
-            className="form-control"
-            placeholder="Département"
-            name={keys.department}
-            value={values[keys.department]}
-            onChange={(e) => {
-              const value = e.target.value;
-              handleChange({ target: { name: keys.department, value } });
-              // filter and preselect the region
-              setRegionListFiltered(value ? [department2region[value]] : regionList);
-              handleChange({ target: { name: keys.region, value: department2region[value] || "" } });
-            }}
-          >
-            <option label=""></option>
-            {departmentListFiltered.map((d) => (
-              <option key={d} value={d}>
-                {d}
-              </option>
-            ))}
-          </Field>
-          <ErrorMessage errors={errors} touched={touched} name={keys.department} />
-        </Col>
-        <Col md={6} style={{ marginTop: 15 }}>
-          <Label>Région</Label>
-          <Field
-            as="select"
-            validate={(v) => !v && requiredMessage}
-            disabled={!noResultMode}
-            className="form-control"
-            placeholder="Région"
-            name={keys.region}
-            value={values[keys.region]}
-            onChange={(e) => {
-              const value = e.target.value;
-              handleChange({ target: { name: keys.region, value } });
-              // filter departments
-              setDepartmentListFiltered(value ? region2department[value] : departmentList);
-            }}
-          >
-            <option label=""></option>
-            {regionListFiltered.map((r) => (
-              <option key={r} value={r}>
-                {r}
-              </option>
-            ))}
-          </Field>
-          <ErrorMessage errors={errors} touched={touched} name={keys.region} />
-        </Col>
+        {departAndRegionVisible ? (
+          <>
+            <Col md={6} style={{ marginTop: 15 }}>
+              <Label>Département</Label>
+              <Field
+                as="select"
+                validate={(v) => !v && requiredMessage}
+                disabled={!noResultMode}
+                className="form-control"
+                placeholder="Département"
+                name={keys.department}
+                value={values[keys.department]}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  handleChange({ target: { name: keys.department, value } });
+                  // filter and preselect the region
+                  setRegionListFiltered(value ? [department2region[value]] : regionList);
+                  handleChange({ target: { name: keys.region, value: department2region[value] || "" } });
+                }}
+              >
+                <option label=""></option>
+                {departmentListFiltered.map((d) => (
+                  <option key={d} value={d}>
+                    {d}
+                  </option>
+                ))}
+              </Field>
+              <ErrorMessage errors={errors} touched={touched} name={keys.department} />
+            </Col>
+            <Col md={6} style={{ marginTop: 15 }}>
+              <Label>Région</Label>
+              <Field
+                as="select"
+                validate={(v) => !v && requiredMessage}
+                disabled={!noResultMode}
+                className="form-control"
+                placeholder="Région"
+                name={keys.region}
+                value={values[keys.region]}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  handleChange({ target: { name: keys.region, value } });
+                  // filter departments
+                  setDepartmentListFiltered(value ? region2department[value] : departmentList);
+                }}
+              >
+                <option label=""></option>
+                {regionListFiltered.map((r) => (
+                  <option key={r} value={r}>
+                    {r}
+                  </option>
+                ))}
+              </Field>
+              <ErrorMessage errors={errors} touched={touched} name={keys.region} />
+            </Col>
+          </>
+        ) : null}
       </Row>
     </Wrapper>
   );

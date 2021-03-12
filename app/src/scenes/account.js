@@ -161,6 +161,7 @@ export default () => {
                 handleChange={handleChange}
                 errors={errors}
                 touched={touched}
+                departAndRegionVisible={false}
               />
             </div>
             <Title>Représentant Légal</Title>
