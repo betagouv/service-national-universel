@@ -96,13 +96,6 @@ export default ({ young }) => {
         <Box>
           <ApplicationList young={young} />
         </Box>
-        {/* {user.structureId && (
-          <Link to={`/mission/create/${user.structureId}`}>
-            <Box style={{ zIndex: -1, position: "relative" }}>
-              <Bloc title="Créer une nouvelle mission" />
-            </Box>
-          </Link>
-        )} */}
       </WrapperPhase2>
     </div>
   );
