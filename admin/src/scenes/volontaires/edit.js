@@ -13,8 +13,10 @@ import DateInput from "../../components/dateInput";
 import { departmentList, regionList, translate } from "../../utils";
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
-import { useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import DndFileInput from "../../components/dndFileInput";
+import PanelActionButton from "../../components/buttons/PanelActionButton";
+import { appURL } from "../../config";
 
 export default (props) => {
   const [young, setYoung] = useState();
@@ -63,9 +65,17 @@ export default (props) => {
                 <Title>{`Profil de ${values.firstName} ${values.lastName}`}</Title>
                 <SubTitle>{getSubtitle()}</SubTitle>
               </div>
-              <SaveBtn loading={isSubmitting} onClick={handleSubmit}>
-                Enregistrer
-              </SaveBtn>
+              <div style={{ display: "flex" }}>
+                <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`}>
+                  <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
+                </a>
+                <Link to={`/volontaire/${young._id}`}>
+                  <PanelActionButton icon="eye" title="Consulter" />
+                </Link>
+                <LoadingButton loading={isSubmitting} onClick={handleSubmit}>
+                  Enregistrer
+                </LoadingButton>
+              </div>
             </TitleWrapper>
             <Row>
               <Col md={6} style={{ marginBottom: "20px" }}>
@@ -696,20 +706,8 @@ const TitleWrapper = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  button {
-    background-color: #5245cc;
-    border: none;
-    border-radius: 5px;
-    padding: 7px 30px;
-    font-size: 14px;
-    font-weight: 700;
-    color: #fff;
-    cursor: pointer;
-    :hover {
-      background: #372f78;
-    }
-  }
 `;
+
 const Title = styled.h2`
   color: #242526;
   font-weight: bold;

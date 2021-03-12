@@ -14,7 +14,10 @@ export default function DownloadButton({ icon, title, ...rest }) {
 const Button = styled(LoadingButton)`
   color: #555;
   background: ${({ icon }) => `url(${icon}) left 15px center no-repeat`};
+  background-color: #fff;
   :hover {
+    background: ${({ icon }) => `url(${icon}) left 15px center no-repeat`};
+    background-color: #fff;
     box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.16);
   }
   border: 1px solid #eee;

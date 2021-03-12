@@ -146,6 +146,7 @@ const ActionBox = styled.div`
     outline: 0;
     width: 100%;
     max-width: 250px;
+    min-width: 250px;
     .edit-icon {
       height: 17px;
       margin-right: 10px;

@@ -9,6 +9,8 @@ import { toastr } from "react-redux-toastr";
 import { translate, YOUNG_STATUS } from "../../../utils";
 import SelectStatus from "../../../components/selectStatus";
 import Badge from "../../../components/Badge";
+import PanelActionButton from "../../../components/buttons/PanelActionButton";
+import { appURL } from "../../../config";
 
 export default ({ children, young, tab }) => {
   const history = useHistory();
@@ -49,24 +51,21 @@ export default ({ children, young, tab }) => {
             </TabItem>
           </TabNavigationList>
         </div>
-        <Row style={{ minWidth: "20%" }}>
+        <Row style={{ minWidth: "30%" }}>
           <Col md={12}>
             <Row>
-              <Col md={12}>
+              <Col md={12} style={{ display: "flex", justifyContent: "flex-end" }}>
                 <SelectStatus hit={young} options={[YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WITHDRAWN]} />
               </Col>
             </Row>
             <Row style={{ marginTop: "0.5rem" }}>
-              <Col md={6}>
-                <Link to={`/volontaire/${young._id}/edit`}>
-                  <Button className="btn-blue">Modifier</Button>
-                </Link>
-              </Col>
-              <Col md={6}>
-                <Button onClick={handleDelete} className="btn-red">
-                  Supprimer
-                </Button>
-              </Col>
+              <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`}>
+                <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
+              </a>
+              <Link to={`/volontaire/${young._id}/edit`}>
+                <PanelActionButton icon="pencil" title="Modifier" />
+              </Link>
+              <PanelActionButton onClick={handleDelete} icon="bin" title="Supprimer" />
             </Row>
           </Col>
         </Row>
