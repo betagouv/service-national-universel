@@ -1,12 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { Col, Row } from "reactstrap";
+import React from "react";
 import styled from "styled-components";
-import { Link } from "react-router-dom";
 
-import { translate } from "../../../utils";
 import StructureView from "./wrapper";
-import api from "../../../services/api";
-import Avatar from "../../../components/Avatar";
 
 const formatLongDate = (date) => {
   if (!date) return "-";

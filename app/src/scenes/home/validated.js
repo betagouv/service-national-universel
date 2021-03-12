@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 import NextStep from "../phase1/nextStep";
+import { COHESION_STAY_LIMIT_DATE, INTEREST_MISSION_LIMIT_DATE } from "../../utils";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
@@ -50,7 +51,7 @@ export default () => {
           <WrapperItem>
             <div className="title">1. Un séjour de cohésion</div>
             <div className="info">
-              <div className="subtitle">Du 21 juin au 2 juillet 2021</div>
+              <div className="subtitle">{COHESION_STAY_LIMIT_DATE[young.cohort]}</div>
               <div className="link">
                 Renseignez votre <span onClick={() => goTo("sanitaire")}>fiche sanitaire</span> et votre{" "}
                 <span onClick={() => goTo("imageRight")}>consentement de droit à l'image</span>
@@ -60,7 +61,7 @@ export default () => {
           <WrapperItem>
             <div className="title">2. Une première mission d'intérêt général</div>
             <div className="info">
-              <div className="subtitle">À réaliser dans l’année, jusqu’au {is2020 ? "31 décembre 2021" : "30 juin 2022"}.</div>
+              <div className="subtitle">À réaliser dans l’année, jusqu’au {INTEREST_MISSION_LIMIT_DATE[young.cohort]}</div>
               <div className="link">
                 <Link to="/preferences">
                   <span>Indiquez vos préférences de mission</span>

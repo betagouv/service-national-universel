@@ -1,7 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { Row, Col, Input, Container, CustomInput } from "reactstrap";
-import { Link } from "react-router-dom";
+import { Row, Col, Input } from "reactstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { Field, Formik } from "formik";
 import api from "../../services/api";

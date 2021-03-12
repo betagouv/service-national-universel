@@ -1,16 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { Col, Row, Input } from "reactstrap";
+import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { Formik, Field } from "formik";
-import { Link, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-import Avatar from "../../components/Avatar";
 import MultiSelect from "../../components/Multiselect";
 import AddressInput from "../../components/addressInput";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
-import Invite from "./components/invite";
 
 import { associationTypes, privateTypes, publicTypes, publicEtatTypes, translate } from "../../utils";
 import api from "../../services/api";
@@ -325,7 +323,7 @@ export default (props) => {
   );
 };
 
-const SaveButton = ({ handleChange, handleSubmit, values }) => {
+const SaveButton = ({ handleSubmit }) => {
   const handleSave = async () => {
     handleSubmit();
   };
@@ -400,12 +398,6 @@ const FormGroup = styled.div`
   }
 `;
 
-const Subtitle = styled.div`
-  color: rgb(113, 128, 150);
-  font-weight: 400;
-  text-transform: uppercase;
-  font-size: 18px;
-`;
 const Title = styled.div`
   color: rgb(38, 42, 62);
   font-weight: 700;
@@ -418,42 +410,6 @@ const Legend = styled.div`
   color: rgb(38, 42, 62);
   margin-bottom: 20px;
   font-size: 20px;
-`;
-
-const ButtonLight = styled.button`
-  background-color: #fff;
-  border: 1px solid #dcdfe6;
-  outline: 0;
-  align-self: flex-start;
-  border-radius: 4px;
-  padding: 10px 20px;
-  font-size: 14px;
-  width: 120px;
-  color: #646b7d;
-  cursor: pointer;
-  margin-right: 10px;
-  :hover {
-    color: rgb(49, 130, 206);
-    border-color: rgb(193, 218, 240);
-    background-color: rgb(234, 243, 250);
-  }
-`;
-const Button = styled.button`
-  background-color: #3182ce;
-  outline: 0;
-  border: 0;
-  color: #fff;
-  border-radius: 4px;
-  padding: 10px 20px;
-  font-size: 14px;
-  cursor: pointer;
-  :hover {
-    background-color: #5a9bd8;
-  }
-  :disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
 `;
 
 const ButtonContainer = styled.div`

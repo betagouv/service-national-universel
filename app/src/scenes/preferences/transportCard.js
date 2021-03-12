@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { translate as t, TRANSPORT } from "../../utils";
 import Button from "./button";
 import { Field } from "formik";
-import { Row, Col } from "reactstrap";
+import { Row } from "reactstrap";
 import ErrorMessage, { requiredMessage } from "./errorMessage";
 
 export default ({ title, handleChange, values, errors, touched }) => {

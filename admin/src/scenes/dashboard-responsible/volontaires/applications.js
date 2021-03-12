@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { Col, Row, Input } from "reactstrap";
+import { Col, Row } from "reactstrap";
 import { useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
-import { APPLICATION_STATUS_COLORS } from "../../../utils";
 
+import { APPLICATION_STATUS_COLORS } from "../../../utils";
+import Badge from "../../../components/Badge";
 import api from "../../../services/api";
 
 export default () => {
@@ -73,7 +74,7 @@ export default () => {
               </Card>
               {stats.WAITING_VALIDATION ? (
                 <div style={{ textAlign: "center" }}>
-                  <Badge color={APPLICATION_STATUS_COLORS.WAITING_VALIDATION}>À&nbsp;Modérer</Badge>
+                  <Badge color={APPLICATION_STATUS_COLORS.WAITING_VALIDATION} text="À&nbsp;Modérer" />
                 </div>
               ) : null}
             </CardContainer>
@@ -91,7 +92,7 @@ export default () => {
               </Card>
               {stats.VALIDATED ? (
                 <div style={{ textAlign: "center" }}>
-                  <Badge color={APPLICATION_STATUS_COLORS.VALIDATED}>Volontaires&nbsp;à&nbsp;suivre</Badge>
+                  <Badge color={APPLICATION_STATUS_COLORS.VALIDATED} text="Volontaires&nbsp;à&nbsp;suivre" />
                 </div>
               ) : null}
             </CardContainer>
@@ -207,17 +208,4 @@ const CardArrow = styled.span`
   width: 15px;
   height: 15px;
   background-image: url(${require("../../../assets/arrow.png")});
-`;
-
-const Badge = styled.span`
-  display: inline-block;
-  padding: 0.25rem 1rem;
-  margin: 0 auto;
-  border-radius: 99999px;
-  font-size: 0.8rem;
-  margin-top: 15px;
-  ${({ color }) => `
-    color: ${color};
-    background-color: ${color}33;
-  `}
 `;

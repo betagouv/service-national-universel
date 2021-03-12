@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { FormGroup } from "reactstrap";
 import { Formik, Field } from "formik";
-import validator from "validator";
 import { Link, Redirect } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
@@ -264,37 +263,4 @@ const Submit = styled(LoadingButton)`
   :focus {
     box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
   }
-`;
-
-const Register = styled(Link)`
-  width: 100%;
-  display: block;
-  font-size: 18px;
-  font-weight: 700;
-  border-radius: 0;
-  padding: 12px;
-  border: 0;
-  background-color: #fff;
-  margin-top: 20px;
-  border-radius: 10px;
-  border: 1px solid #e5e7eb;
-  color: #000;
-  text-align: center;
-  cursor: pointer;
-  :hover {
-    background-color: #f4f5f7;
-    color: #000;
-  }
-`;
-const ErrorLogin = styled.div`
-  background-color: #fff5f5;
-  display: block;
-  width: 100%;
-  padding: 15px;
-  margin-top: 3px;
-  margin-bottom: 0;
-  border: 1px solid #fc8180;
-  color: #c73738;
-  line-height: 1.2;
-  border-radius: 5px;
 `;

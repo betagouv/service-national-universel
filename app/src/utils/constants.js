@@ -6,6 +6,20 @@ export const YOUNG_STATUS = {
   REFUSED: "REFUSED",
 };
 
+export const YOUNG_STATUS_PHASE1 = {
+  AFFECTED: "AFFECTED",
+  WAITING_AFFECTATION: "WAITING_AFFECTATION",
+  CANCEL: "CANCEL",
+  DONE: "DONE",
+  NOT_DONE: "NOT_DONE",
+};
+
+export const YOUNG_STATUS_PHASE2 = {
+  WAITING_REALISATION: "WAITING_REALISATION",
+  VALIDATED: "VALIDATED",
+  IN_PROGRESS: "IN_PROGRESS",
+};
+
 export const PHASE_STATUS = {
   IN_PROGRESS: "IN_PROGRESS",
   IN_COMING: "IN_COMING",
@@ -14,8 +28,10 @@ export const PHASE_STATUS = {
   WAITING_AFFECTATION: "WAITING_AFFECTATION",
 };
 export const PHASE_STATUS_COLOR = {
-  VALIDATED: "#6CC763",
+  VALIDATED: "#046c4e",
+  DONE: "#046c4e",
   CANCEL: "#FE7B52",
+  IN_PROGRESS: "#5145cd",
 };
 
 export const YOUNG_PHASE = {
@@ -94,4 +110,16 @@ export const TRANSPORT = {
   MOTOR: "MOTOR",
   CARPOOLING: "CARPOOLING",
   OTHER: "OTHER",
+};
+
+export const COHESION_STAY_LIMIT_DATE = {
+  2019: "du 16 au 28 juin 2019",
+  2020: "Du 21 juin au 2 juillet 2021",
+  2021: "Du 21 juin au 2 juillet 2021",
+};
+
+export const INTEREST_MISSION_LIMIT_DATE = {
+  2019: "23 mars 2021",
+  2020: "31 décembre 2021",
+  2021: "30 juin 2022",
 };

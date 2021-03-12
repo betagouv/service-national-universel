@@ -1,13 +1,11 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import styled from "styled-components";
-import { Col, Row } from "reactstrap";
 import api from "../../../services/api";
 import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 
-import { translate, YOUNG_STATUS } from "../../../utils";
-import SelectStatus from "../../../components/selectStatus";
+import { translate } from "../../../utils";
+import Badge from "../../../components/Badge";
 
 export default ({ children, young, tab }) => {
   const history = useHistory();
@@ -31,7 +29,7 @@ export default ({ children, young, tab }) => {
       <Header>
         <div style={{ flex: 1 }}>
           <Title>
-            {young.firstName} {young.lastName} <Badge>Cohorte {young.cohort}</Badge>
+            {young.firstName} {young.lastName} <Badge text={`Cohorte ${young.cohort}`} />
           </Title>
           <TabNavigationList>
             <TabItem isActive={tab === "details"} onClick={() => history.push(`/volontaire/${young._id}`)}>
@@ -44,24 +42,6 @@ export default ({ children, young, tab }) => {
     </div>
   );
 };
-
-const Badge = styled.span`
-  display: inline-block;
-  padding: 0.25rem 1rem;
-  margin: 0 0.25rem;
-  border-radius: 99999px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  margin: 1rem;
-  color: #9a9a9a;
-  background-color: #f6f6f6;
-  border: 1px solid #cecece;
-  ${({ color }) => `
-    color: ${color};
-    background-color: ${color}33;
-    border: 1px solid ${color};
-  `};
-`;
 
 const TabNavigationList = styled.ul`
   display: flex;
@@ -118,34 +98,4 @@ const Header = styled.div`
   display: flex;
   margin-bottom: 1rem;
   align-items: flex-start;
-`;
-
-const Button = styled.button`
-  /* margin: 0 0.5rem; */
-  align-self: flex-start;
-  border-radius: 4px;
-  padding: 5px;
-  font-size: 12px;
-  /* min-width: 100px; */
-  width: 100%;
-  font-weight: 400;
-  cursor: pointer;
-  background-color: #fff;
-  &.btn-blue {
-    color: #646b7d;
-    border: 1px solid #dcdfe6;
-    :hover {
-      color: rgb(49, 130, 206);
-      border-color: rgb(193, 218, 240);
-      background-color: rgb(234, 243, 250);
-    }
-  }
-  &.btn-red {
-    border: 1px solid #f6cccf;
-    color: rgb(206, 90, 90);
-    :hover {
-      border-color: rgb(240, 218, 218);
-      background-color: rgb(250, 230, 230);
-    }
-  }
 `;

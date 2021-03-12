@@ -1,0 +1,26 @@
+<mjml>
+  <mj-body>
+    <mj-section>
+      <mj-column>
+        <mj-text font-size="18px" color="#000"> Bonjour {{firstName}} {{lastName}}, </mj-text>
+        <mj-text line-height="1.5" font-size="18px" color="#000">
+          {{youngFirstName}} {{youngLastName}} a candidaté sur votre mission {{missionName}}.
+        </mj-text>
+        <mj-text line-height="1.5" font-size="18px" color="#000">
+          Nous vous invitons à étudier sa candidature et prendre contact avec lui/elle pour échanger sur la mission. Si vous le retenez, merci de
+          valider sa candidature. Autrement, merci de la refuser.
+        </mj-text>
+        <mj-button font-size="20px" background-color="#3490DC" href="{{cta}}"> Accéder à mon compte pour étudier le candidature </mj-button>
+
+        <mj-text font-size="18px" color="#000">Cordialement,</mj-text>
+        <mj-text font-size="18px" color="#000">Les équipes du Service National Universel</mj-text>
+
+        <mj-divider border-color="#F6F7F8"></mj-divider>
+        <mj-text>
+          Si vous ne parvenez pas à cliquer sur le bouton "Accéder à mon compte pour étudier le candidature", copiez-collez l'URL ci-dessous dans
+          votre navigateur: {{cta}}
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

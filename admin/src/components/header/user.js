@@ -6,12 +6,10 @@ import { useDispatch, useSelector } from "react-redux";
 import Invite from "./invite";
 import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
-import { REFERENT_ROLES } from "../../utils";
 
 import Avatar from "../Avatar";
 
 export default () => {
-  const [open, setOpen] = useState(false);
   const dispatch = useDispatch();
 
   const { user } = useSelector((state) => state.Auth);
@@ -25,38 +23,17 @@ export default () => {
   return (
     <Dropdown>
       <div>
-        {/* onClick={() => setOpen(!open)} */}
         <MenuToggle>
           <Avatar name={`${user.firstName} ${user.lastName}`} />
-          {/* <div>
-            <h2>{`${user.firstName} ${user.lastName}`}</h2>
-            <p>{user.role}</p>
-          </div> */}
         </MenuToggle>
       </div>
-      <Menu open={open}>
-        {/* <Close onClick={() => setOpen(false)}>&times;</Close> */}
-        {/* <Item>
-          {structure && (
-            <NavLink to="/structure" style={{ padding: "2px 10px 2px 25px ", display: "flex", alignItems: "center", fontSize: 12 }}>
-              <Avatar name={structure.name} size="small" />
-              {structure.name}
-            </NavLink>
-          )}
-        </Item> */}
-        {/* <Item>
-          <NavLink to="/team">Gérer votre équipe</NavLink>
-        </Item> */}
-        {/* <hr /> */}
+      <Menu>
         <Item>
           <InviteReferent role={user.role} />
         </Item>
         <Item>
           <NavLink to="/profil">Profil</NavLink>
         </Item>
-        {/* <Item>
-          <NavLink to="/settings">Paramètres de compte</NavLink>
-        </Item> */}
         <hr />
         <Item onClick={logout}>
           <NavLink style={{ color: "rgb(245 105 100)" }} to="/logout">
@@ -113,8 +90,8 @@ const Menu = styled.div`
   min-width: 230px;
   border-radius: 2px;
   background-color: #fff;
-  opacity: ${({ open }) => (open ? 1 : 0)};
-  visibility: ${({ open }) => (open ? "visible" : "hidden")};
+  opacity: 0;
+  visibility: hidden;
   -webkit-transition: all 0.3s;
   transition: all 0.3s;
   position: absolute;
@@ -177,17 +154,5 @@ const Item = styled.div`
       background-color: #eaf3fa;
       color: #3182ce;
     }
-  }
-`;
-const Close = styled.div`
-  font-size: 32px;
-  color: #666;
-  padding: 0 15px 20px;
-  display: none;
-  width: 45px;
-  padding: 0 15px;
-  margin-left: auto;
-  @media (max-width: 767px) {
-    display: block;
   }
 `;

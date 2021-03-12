@@ -7,7 +7,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { setUser } from "../../redux/auth/actions";
 import { translate, getFilterLabel, formatStringLongDate } from "../../utils";
-import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
@@ -120,7 +119,7 @@ export default () => {
                 pagination={true}
                 paginationAt="both"
                 innerClass={{ pagination: "pagination" }}
-                size={10}
+                size={30}
                 showLoader={true}
                 dataField="createdAt"
                 sortBy="desc"
@@ -291,21 +290,6 @@ const FilterRow = styled.div`
   }
 `;
 
-const TeamMember = styled.div`
-  h2 {
-    color: #333;
-    font-size: 14px;
-    font-weight: 400;
-    margin-bottom: 5px;
-  }
-  p {
-    text-transform: uppercase;
-    color: #606266;
-    font-size: 12px;
-    margin: 0;
-  }
-`;
-
 const ResultTable = styled.div`
   background-color: #fff;
   position: relative;
@@ -409,22 +393,6 @@ const Tag = styled.span`
   cursor: pointer;
   margin-right: 5px;
   text-transform: capitalize;
-`;
-
-const Export = styled.div`
-  button {
-    background-color: #5245cc;
-    border: none;
-    border-radius: 5px;
-    padding: 7px 30px;
-    font-size: 14px;
-    font-weight: 700;
-    color: #fff;
-    cursor: pointer;
-    :hover {
-      background: #372f78;
-    }
-  }
 `;
 
 const ActionBox = styled.div`

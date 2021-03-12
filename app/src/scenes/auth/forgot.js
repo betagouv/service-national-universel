@@ -5,7 +5,7 @@ import classnames from "classnames";
 import validator from "validator";
 import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
-import { Link, Redirect } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import LoadingButton from "../../components/loadingButton";
 import api from "../../services/api";

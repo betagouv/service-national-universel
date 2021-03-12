@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Col, Row, Input } from "reactstrap";
 import styled from "styled-components";
-import { Formik, Field } from "formik";
+import { Formik } from "formik";
 import { toastr } from "react-redux-toastr";
 import { Redirect } from "react-router-dom";
 

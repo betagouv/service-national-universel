@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { Col, Row, Input } from "reactstrap";
+import { Col, Row } from "reactstrap";
 import { Field, Formik } from "formik";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -10,11 +10,13 @@ import { useSelector } from "react-redux";
 import Historic from "../../components/historic";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import DateInput from "../../components/dateInput";
-import { departmentList, regionList, YOUNG_STATUS, translate } from "../../utils";
+import { departmentList, regionList, translate } from "../../utils";
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
-import { useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import DndFileInput from "../../components/dndFileInput";
+import PanelActionButton from "../../components/buttons/PanelActionButton";
+import { appURL } from "../../config";
 
 export default (props) => {
   const [young, setYoung] = useState();
@@ -63,9 +65,17 @@ export default (props) => {
                 <Title>{`Profil de ${values.firstName} ${values.lastName}`}</Title>
                 <SubTitle>{getSubtitle()}</SubTitle>
               </div>
-              <SaveBtn loading={isSubmitting} onClick={handleSubmit}>
-                Enregistrer
-              </SaveBtn>
+              <div style={{ display: "flex" }}>
+                <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`}>
+                  <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
+                </a>
+                <Link to={`/volontaire/${young._id}`}>
+                  <PanelActionButton icon="eye" title="Consulter" />
+                </Link>
+                <LoadingButton loading={isSubmitting} onClick={handleSubmit}>
+                  Enregistrer
+                </LoadingButton>
+              </div>
             </TitleWrapper>
             <Row>
               <Col md={6} style={{ marginBottom: "20px" }}>
@@ -558,52 +568,6 @@ export default (props) => {
                   </Box>
                 </Col>
               ) : null}
-              <Col md={6} style={{ marginBottom: "20px" }}>
-                <Box>
-                  <BoxTitle>Préférences</BoxTitle>
-                  <BoxContent direction="column">
-                    <ItemParent title="Domaines">
-                      {values.domains.map((d, i) => (
-                        <Badge key={i} color="#555555" value={d} />
-                      ))}
-                    </ItemParent>
-                    <ItemParent title="Projet Professionnel">
-                      <Badge color="#555555" value={values.professionnalProject} />
-                      {values.professionnalProjectPrecision ? <Badge color="#555555" value={values.professionnalProjectPrecision} /> : null}
-                    </ItemParent>
-                    <ItemParent title="période privilégiée">
-                      <Badge color="#555555" value={values.period} />
-                    </ItemParent>
-                    <ItemParent title="Mission à proximité de l'établissement scolaire">
-                      <Badge color="#555555" value={values.mobilityNearSchool} />
-                    </ItemParent>
-                    <ItemParent title="Mission à proximité du domicile">
-                      <Badge color="#555555" value={values.mobilityNearHome} />
-                    </ItemParent>
-                    <ItemParent title="Mission à proximité d'un proche">
-                      <Badge color="#555555" value={values.mobilityNearRelative} />
-                      <Badge color="#555555" value={values.mobilityNearRelativeName} />
-                      <Badge color="#555555" value={values.mobilityNearRelativeZip} />
-                    </ItemParent>
-                    <ItemParent title="Moyen de transport priviligé">
-                      {values.mobilityTransport.map((m, i) => (
-                        <Badge key={i} color="#555555" value={m} />
-                      ))}
-                      {values.mobilityTransportOther ? <Badge color="#555555" value={values.mobilityTransportOther} /> : null}
-                    </ItemParent>
-                    <ItemParent title="Format de mission">
-                      <Badge color="#555555" value={values.missionFormat} />
-                    </ItemParent>
-                    <ItemParent title="Engagement parallèle">
-                      <Badge color="#555555" value={values.engaged} />
-                      {values.engagedDescription ? <Input disabled type="textarea" rows={1} defaultValue={values.engagedDescription} /> : null}
-                    </ItemParent>
-                    <ItemParent title="Localisation privilégiée">
-                      {values.desiredLocation ? <Input disabled type="textarea" rows={2} defaultValue={values.desiredLocation} /> : null}
-                    </ItemParent>
-                  </BoxContent>
-                </Box>
-              </Col>
             </Row>
           </>
         )}
@@ -703,24 +667,6 @@ const Checkbox = ({ title, name, value, values, handleChange, disabled, descript
   );
 };
 
-const Badge = ({ value, color }) => {
-  return value && value.length ? <BadgeStyle color={color}>{translate(value)}</BadgeStyle> : null;
-};
-
-const BadgeStyle = styled.span`
-  display: inline-block;
-  padding: 0.25rem 1rem;
-  margin: 0 0.25rem;
-  border-radius: 99999px;
-  font-size: 0.8rem;
-  margin-bottom: 5px;
-  margin-top: 15px;
-  ${({ color }) => `
-    color: ${color};
-    background-color: ${color}33;
-  `}
-`;
-
 const Documents = styled.div`
   margin-left: 1rem;
   margin-right: 1rem;
@@ -760,20 +706,8 @@ const TitleWrapper = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  button {
-    background-color: #5245cc;
-    border: none;
-    border-radius: 5px;
-    padding: 7px 30px;
-    font-size: 14px;
-    font-weight: 700;
-    color: #fff;
-    cursor: pointer;
-    :hover {
-      background: #372f78;
-    }
-  }
 `;
+
 const Title = styled.h2`
   color: #242526;
   font-weight: bold;

@@ -2,13 +2,13 @@ import React from "react";
 import { Col, Row, Input } from "reactstrap";
 import styled from "styled-components";
 import { useDispatch, useSelector } from "react-redux";
-import { Formik, Field } from "formik";
+import { Formik } from "formik";
 import { toastr } from "react-redux-toastr";
 
 import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
 
-import { departmentList, translate, REFERENT_ROLES, regionList } from "../../utils";
+import { translate, REFERENT_ROLES } from "../../utils";
 
 export default () => {
   const user = useSelector((state) => state.Auth.user);
@@ -101,10 +101,6 @@ export default () => {
       </Formik>
     </Wrapper>
   );
-};
-
-const Roles = () => {
-  return;
 };
 
 const Wrapper = styled.div`

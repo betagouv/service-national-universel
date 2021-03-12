@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { ReactiveBase, ReactiveList, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -47,7 +47,7 @@ export default () => {
                         Prénom: data.firstName,
                         Nom: data.lastName,
                         "Date de naissance": data.birthdateAt,
-                        Sexe: data.gender,
+                        Sexe: translate(data.gender),
                         Email: data.email,
                         Téléphone: data.phone,
                         "Adresse postale": data.address,
@@ -55,27 +55,27 @@ export default () => {
                         Ville: data.city,
                         Département: data.department,
                         Région: data.region,
-                        Situation: data.situation,
+                        Situation: translate(data.situation),
                         "Type d'établissement": data.schoolType,
                         "Nom de l'établissement": data.schoolName,
                         "Code postal de l'établissement": data.schoolZip,
                         "Ville de l'établissement": data.schoolCity,
                         "Département de l'établissement": data.schoolDepartment,
-                        Handicap: data.handicap,
-                        "Bénéficiaire d'un PPS": data.ppsBeneficiary,
-                        "Bénéficiaire d'un PAI": data.paiBeneficiary,
+                        Handicap: translate(data.handicap),
+                        "Bénéficiaire d'un PPS": translate(data.ppsBeneficiary),
+                        "Bénéficiaire d'un PAI": translate(data.paiBeneficiary),
                         "Structure médico-sociale": data.medicosocialStructure,
                         "Nom de la structure médico-sociale": data.medicosocialStructureName,
                         "Adresse de la structure médico-sociale": data.medicosocialStructureAddress,
                         "Code postal de la structure médico-sociale": data.medicosocialStructureZip,
                         "Ville de la structure médico-sociale": data.medicosocialStructureCity,
-                        "Aménagement spécifique": data.specificAmenagment,
+                        "Aménagement spécifique": translate(data.specificAmenagment),
                         "Nature de l'aménagement spécifique": data.specificAmenagmentType,
-                        "Activité de haut-niveau": data.highSkilledActivity,
+                        "Activité de haut-niveau": translate(data.highSkilledActivity),
                         "Nature de l'activité de haut-niveau": data.highSkilledActivityType,
                         "Document activité de haut-niveau ": data.highSkilledActivityProofFiles,
-                        "Consentement des représentants légaux": data.parentConsentment,
-                        "Statut représentant légal 1": data.parent1Status,
+                        "Consentement des représentants légaux": translate(data.parentConsentment),
+                        "Statut représentant légal 1": translate(data.parent1Status),
                         "Prénom représentant légal 1": data.parent1FirstName,
                         "Nom représentant légal 1": data.parent1LastName,
                         "Email représentant légal 1": data.parent1Email,
@@ -85,7 +85,7 @@ export default () => {
                         "Ville représentant légal 1": data.parent1City,
                         "Département représentant légal 1": data.parent1Department,
                         "Région représentant légal 1": data.parent1Region,
-                        "Statut représentant légal 2": data.parent2Status,
+                        "Statut représentant légal 2": translate(data.parent2Status),
                         "Prénom représentant légal 2": data.parent2FirstName,
                         "Nom représentant légal 2": data.parent2LastName,
                         "Email représentant légal 2": data.parent2Email,
@@ -96,11 +96,11 @@ export default () => {
                         "Département représentant légal 2": data.parent2Department,
                         "Région représentant légal 2": data.parent2Region,
                         Motivation: data.motivations,
-                        Phase: data.phase,
+                        Phase: translate(data.phase),
                         "Créé lé": data.createdAt,
                         "Mis à jour le": data.updatedAt,
                         "Dernière connexion le": data.lastLoginAt,
-                        Statut: data.status,
+                        Statut: translate(data.status),
                         "Dernier statut le": data.lastStatusAt,
                       };
                     }}
@@ -170,7 +170,7 @@ export default () => {
                 paginationAt="both"
                 innerClass={{ pagination: "pagination" }}
                 // renderPagination={(e) => <ResultFooter {...e} />}
-                size={10}
+                size={30}
                 showLoader={true}
                 sortBy="desc"
                 dataField="lastStatusAt"
@@ -250,7 +250,7 @@ const Hit = ({ hit, index, onClick }) => {
   );
 };
 
-const Action = ({ hit, color }) => {
+const Action = ({ hit }) => {
   return (
     <ActionBox color={"#444"}>
       <UncontrolledDropdown setActiveFromChild>
@@ -357,8 +357,6 @@ const ResultTable = styled.div`
     }
     a.active {
       font-weight: 700;
-      /* background: #5245cc;
-      color: #fff; */
     }
     a:first-child {
       background-image: url(${require("../../assets/left.svg")});
@@ -471,7 +469,6 @@ const ActionBox = styled.div`
     .down-icon {
       margin-left: auto;
       padding: 7px 15px;
-      /* border-left: 1px solid ${({ color }) => `${color}`}; */
       margin-left: 15px;
       svg {
         height: 10px;

@@ -12,6 +12,7 @@ import CreateMission from "./createMission";
 import SelectStatus from "../../../components/selectStatus";
 import PlusSVG from "../../../assets/plus.svg";
 import CrossSVG from "../../../assets/cross.svg";
+import Badge from "../../../components/Badge";
 
 export default ({ young }) => {
   const user = useSelector((state) => state.Auth.user);
@@ -44,7 +45,7 @@ export default ({ young }) => {
               }}
             >
               <Bloc borderBottom>
-                <Details title="Domaines">{young.domains && young.domains.map((d, i) => <Badge key={i}>{t(d)}</Badge>)}</Details>
+                <Details title="Domaines">{young.domains && young.domains.map((d, i) => <Badge key={i} text={t(d)} />)}</Details>
                 <Details title="Projet professionnel">
                   {young.professionnalProject ? (
                     <div>
@@ -175,23 +176,6 @@ const ToggleBox = ({ children }) => {
     </>
   );
 };
-
-const Badge = styled.span`
-  display: inline-block;
-  padding: 0.25rem 1rem;
-  margin: 0 0.25rem 0.25rem 0.25rem;
-  border-radius: 99999px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: #9a9a9a;
-  background-color: #f6f6f6;
-  border: 1px solid #cecece;
-  ${({ color }) => `
-    color: ${color};
-    background-color: ${color}33;
-    border: 1px solid ${color};
-  `};
-`;
 
 const Box = styled.div`
   width: ${(props) => props.width || 100}%;

@@ -71,9 +71,6 @@ const ActionBox = styled.div`
     cursor: pointer;
     outline: 0;
     :hover {
-      /* color: rgb(49, 130, 206);
-      border-color: rgb(193, 218, 240);
-      background-color: rgb(234, 243, 250); */
       svg polygon {
         fill: rgb(49, 130, 206);
       }

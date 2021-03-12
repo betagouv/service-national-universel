@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
-import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { Draggable } from "react-beautiful-dnd";
 
 import api from "../../../services/api";
 import { translate, APPLICATION_STATUS_COLORS, APPLICATION_STATUS } from "../../../utils";
@@ -16,7 +16,7 @@ export default ({ application, index }) => {
     return tags;
   };
 
-  if (!value) return <div />;
+  if (!value || !value.mission) return <div />;
 
   return (
     <Draggable draggableId={value._id} index={index}>
@@ -58,9 +58,14 @@ export default ({ application, index }) => {
 
 const Footer = ({ application, tutor, onChange }) => {
   const setStatus = async (status) => {
-    if (!confirm("Êtes vous sûr de vouloir modifier cette candidature ?")) return;
-    const { ok, data, code } = await api.put(`/application`, { _id: application._id, status });
-    onChange(data);
+    try {
+      if (!confirm("Êtes vous sûr de vouloir modifier cette candidature ?")) return;
+      const { data } = await api.put(`/application`, { _id: application._id, status });
+      await api.post(`/application/${application._id}/notify/${status.toLowerCase()}`);
+      onChange(data);
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const getFooter = (status) => {

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 import ProgramCard from "../phase3/components/programCard";
-import { Container, Row, Col } from "reactstrap";
+import { Row, Col } from "reactstrap";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
@@ -74,13 +74,6 @@ export default () => {
   );
 };
 
-const Separator = styled.hr`
-  margin: 2.5rem 0;
-  height: 1px;
-  border-style: none;
-  background-color: #e5e7eb;
-`;
-
 const Content = styled.div`
   margin-top: ${({ showAlert }) => (showAlert ? "2rem" : "")};
   width: 50%;
@@ -138,26 +131,6 @@ const Hero = styled.div`
     }
     -webkit-clip-path: polygon(15% 0, 0 100%, 100% 100%, 100% 0);
     clip-path: polygon(15% 0, 0 100%, 100% 100%, 100% 0);
-  }
-`;
-
-const BackButton = styled.button`
-  color: #374151;
-  margin-top: 1rem;
-  background-color: #fff;
-  padding: 0.5rem 1rem;
-  border: 1px solid #d2d6dc;
-  outline: 0;
-  border-radius: 6px;
-  font-weight: 500;
-  font-size: 1rem;
-  display: block;
-  outline: 0;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  position: relative;
-  z-index: 2;
-  :hover {
-    opacity: 0.9;
   }
 `;
 

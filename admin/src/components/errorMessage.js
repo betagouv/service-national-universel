@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 
-export default ({ errors, touched, name }) => {
+export default ({ errors, name }) => {
   return <Error>{errors[name]}</Error>;
 };
 

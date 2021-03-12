@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import styled from "styled-components";
 import { Row, Col } from "reactstrap";
 import { Field, Formik } from "formik";
@@ -107,20 +107,6 @@ const Heading = styled.div`
   }
   p {
     color: #161e2e;
-  }
-`;
-
-const FormLegend = styled.div`
-  color: #161e2e;
-  font-size: 20px;
-  font-weight: 700;
-  margin-top: 2rem;
-  padding: 20px 0;
-  p {
-    color: #6b7280;
-    margin-bottom: 0;
-    font-size: 16px;
-    font-weight: 400;
   }
 `;
 

@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { Col, DropdownItem, DropdownMenu, DropdownToggle, Label, Pagination, PaginationItem, PaginationLink, Row, UncontrolledDropdown } from "reactstrap";
+import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
 import api from "../services/api";
 
-import { translate, YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_COLORS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2_COLORS } from "../utils";
+import { translate, YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_COLORS, YOUNG_STATUS_PHASE2_COLORS } from "../utils";
 import { toastr } from "react-redux-toastr";
 import matomo from "../services/matomo";
 
@@ -51,7 +51,7 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
       const { ok, code, data: newYoung } = await api.put(`/referent/young/${young._id}`, young);
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
 
-      if (status === YOUNG_STATUS.VALIDATED) {
+      if (status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INSCRIPTION) {
         matomo.logEvent("status_update", YOUNG_STATUS.VALIDATED);
         await api.post(`/referent/email/validate/${young._id}`, { subject: "Inscription validée" });
       }
@@ -146,6 +146,7 @@ const ActionBox = styled.div`
     outline: 0;
     width: 100%;
     max-width: 250px;
+    min-width: 250px;
     .edit-icon {
       height: 17px;
       margin-right: 10px;
@@ -156,7 +157,6 @@ const ActionBox = styled.div`
     .down-icon {
       margin-left: auto;
       padding: 7px 15px;
-      /* border-left: 1px solid ${({ color }) => `${color}`}; */
       margin-left: 15px;
       svg {
         height: 10px;

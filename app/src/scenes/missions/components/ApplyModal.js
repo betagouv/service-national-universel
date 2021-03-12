@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Modal } from "reactstrap";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
@@ -23,6 +23,7 @@ export default ({ value, onChange, onSend }) => {
       youngBirthdateAt: young.birthdateAt,
       youngCity: young.city,
       youngDepartment: young.department,
+      youngCohort: young.cohort,
       missionId: value._id,
       missionName: value.name,
       missionDepartment: value.department,
@@ -30,6 +31,7 @@ export default ({ value, onChange, onSend }) => {
     };
     const { ok, data, code } = await api.post(`/application`, application);
     if (!ok) return toastr.error("Oups, une erreur est survenue lors de la candidature", code);
+    await api.post(`/application/${data._id}/notify/waiting_validation`);
     onSend();
   };
 

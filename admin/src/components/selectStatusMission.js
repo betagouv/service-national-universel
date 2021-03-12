@@ -101,7 +101,6 @@ export default ({ hit, options = [] }) => {
 const ActionBox = styled.div`
   .dropdown-menu {
     min-width: 0;
-    /* width: 400px; */
     a,
     div {
       white-space: nowrap;
@@ -138,7 +137,6 @@ const ActionBox = styled.div`
     .down-icon {
       margin-left: auto;
       padding: 7px 15px;
-      /* border-left: 1px solid ${({ color }) => `${color}`}; */
       margin-left: 15px;
       svg {
         height: 10px;

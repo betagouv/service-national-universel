@@ -10,8 +10,8 @@ import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
 import { apiURL, appURL } from "../../config";
 import Panel from "./panel";
-
-import { translate, getFilterLabel, formatStringLongDate } from "../../utils";
+import Badge from "../../components/Badge";
+import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS_PHASE1_COLOR, YOUNG_STATUS_PHASE2_COLOR } from "../../utils";
 import { Link } from "react-router-dom";
 
 const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_PHASE_1", "STATUS_PHASE_2"];
@@ -32,6 +32,7 @@ export default ({ setYoung }) => {
                 <ExportComponent
                   title="Exporter les volontaires"
                   collection="volontaire"
+                  react={{ and: FILTERS }}
                   transform={(data) => {
                     return {
                       _id: data._id,
@@ -206,7 +207,7 @@ export default ({ setYoung }) => {
                 pagination={true}
                 paginationAt="both"
                 innerClass={{ pagination: "pagination" }}
-                size={10}
+                size={30}
                 showLoader={true}
                 dataField="createdAt"
                 sortBy="desc"
@@ -277,10 +278,10 @@ const Hit = ({ hit, onClick }) => {
         </div>
       </td>
       <td>
-        <Badge>{`COHORTE ${hit.cohort}`}</Badge>
-        {hit.cohort === "2019" ? <Badge color="#6CC763">Phase 1</Badge> : null}
-        {hit.cohort === "2020" && hit.cohesion2020Step !== "DONE" ? <Badge color="#ffa987">Phase 1</Badge> : null}
-        {hit.status === "WITHDRAWN" ? <Badge color="#F8A9AD">Désisté</Badge> : null}
+        <Badge text={`Cohorte ${hit.cohort}`} />
+        <Badge text="Phase 1" tooltipText={translate(hit.statusPhase1)} color={YOUNG_STATUS_PHASE1_COLOR[hit.statusPhase1]} />
+        <Badge text="Phase 2" tooltipText={translate(hit.statusPhase2)} color={YOUNG_STATUS_PHASE2_COLOR[hit.statusPhase2]} />
+        {hit.status === "WITHDRAWN" ? <Badge text="Désisté" color="#F8A9AD" /> : null}
       </td>
       <td>{formatStringLongDate(hit.lastLoginAt)}</td>
       <td onClick={(e) => e.stopPropagation()}>
@@ -482,25 +483,6 @@ const Table = styled.table`
       font-size: 0.8rem;
     }
   }
-`;
-
-const Badge = styled.span`
-  display: inline-block;
-  padding: 0.25rem 1rem;
-  margin: 0 0.25rem;
-  border-radius: 99999px;
-  font-size: 0.8rem;
-  font-weight: 500;
-  margin-bottom: 5px;
-  margin-top: 15px;
-  color: #9a9a9a;
-  background-color: #f6f6f6;
-  border: 1px solid #cecece;
-  ${({ color }) => `
-    color: ${color};
-    background-color: ${color}33;
-    border: 1px solid ${color};
-  `};
 `;
 
 const ActionBox = styled.div`

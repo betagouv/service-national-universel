@@ -32,8 +32,8 @@ export default () => {
   return (
     <div className="User">
       <Dropdown>
-        <Title>{young.firstName}</Title>
-        <Aavatar onClick={() => setOpen(!open)} src={require("../../assets/avatar.jpg")} />
+        <Title className="mobileHide">{young.firstName}</Title>
+        <Avatar onClick={() => setOpen(!open)} src={require("../../assets/avatar.jpg")} />
         <Menu open={open}>
           <Close onClick={() => setOpen(false)}>&times;</Close>
           <Item onClick={() => setOpen(false)}>
@@ -97,7 +97,7 @@ const Menu = styled.div`
   }
 `;
 
-const Aavatar = styled.img`
+const Avatar = styled.img`
   width: 32px;
   height: 32px;
   background-color: #aaa;

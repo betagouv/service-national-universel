@@ -47,7 +47,13 @@ export default ({ hit, options = [], callback }) => {
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       setApplication(data);
       toastr.success("Mis à jour!");
-      callback();
+      if (status === APPLICATION_STATUS.VALIDATED) {
+        await api.post(`/application/${data._id}/notify/validated_responsible`);
+        await api.post(`/application/${data._id}/notify/validated_young`);
+      } else {
+        await api.post(`/application/${data._id}/notify/${status.toLowerCase()}`);
+      }
+      callback && callback();
     } catch (e) {
       console.log(e);
       toastr.error("Oups, une erreur est survenue :", translate(e.code));
@@ -122,7 +128,6 @@ const ActionBox = styled.div`
     .down-icon {
       margin-left: auto;
       padding: 7px 15px;
-      /* border-left: 1px solid ${({ color }) => `${color}`}; */
       margin-left: 15px;
       svg {
         height: 10px;

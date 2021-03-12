@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { Col, Container, Row } from "reactstrap";
 import { ReactiveBase, ReactiveList, DataSearch, SingleDropdownList } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
@@ -19,39 +18,43 @@ export default () => {
   const young = useSelector((state) => state.Auth.young);
   const [showAlert, setShowAlert] = useState(true);
   const [applications, setApplications] = useState();
-  const DEFAULT_QUERY = () => ({
-    query: {
-      bool: {
-        filter: [
-          {
-            range: {
-              endAt: {
-                gt: "now",
+  const DEFAULT_QUERY = () => {
+    let query = {
+      query: {
+        bool: {
+          filter: [
+            {
+              range: {
+                endAt: {
+                  gt: "now",
+                },
               },
             },
-          },
-          { term: { "status.keyword": "VALIDATED" } },
-          {
-            range: {
-              placesLeft: {
-                gt: 0,
+            { term: { "status.keyword": "VALIDATED" } },
+            {
+              range: {
+                placesLeft: {
+                  gt: 0,
+                },
               },
             },
-          },
-        ],
-      },
-    },
-    sort: [
-      {
-        _geo_distance: {
-          location: [young.location.lon, young.location.lat],
-          order: "asc",
-          unit: "km",
-          mode: "min",
+          ],
         },
       },
-    ],
-  });
+    };
+    if (young.location)
+      query.sort = [
+        {
+          _geo_distance: {
+            location: [young.location.lon, young.location.lat],
+            order: "asc",
+            unit: "km",
+            mode: "min",
+          },
+        },
+      ];
+    return query;
+  };
 
   useEffect(() => {
     (async () => {
@@ -108,14 +111,17 @@ export default () => {
                 selectAllLabel="Toutes les périodes"
                 URLParams={true}
                 componentId="PERIOD"
-                placeholder="Filtrer par période"
                 dataField="period.keyword"
                 react={{ and: FILTERS.filter((e) => e !== "PERIOD") }}
+                renderItem={(e, count) => {
+                  return `${translate(e)} ${count ? `(${count})` : ""}`;
+                }}
+                renderLabel={(item) => translate(item) || "Filtrer par période"}
                 showSearch={false}
               />
             </DomainsFilter>
             <Col md={6}>
-              <FilterGeoloc city={young.city} componentId="GEOLOC" placeholder="Recherche par ville..." />
+              <FilterGeoloc young={young} componentId="GEOLOC" />
             </Col>
           </Row>
         </Filters>
@@ -140,7 +146,7 @@ export default () => {
                 const tags = [];
                 e.city && tags.push(e.city + (e.zip ? ` - ${e.zip}` : ""));
                 // tags.push(e.remote ? "À distance" : "En présentiel");
-                e.domains.forEach((d) => tags.push(d));
+                e.domains.forEach((d) => tags.push(translate(d)));
                 return (
                   <MissionCard
                     applied={applications && applications.includes(e._id)}

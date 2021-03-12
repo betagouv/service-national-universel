@@ -1,38 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Modal } from "reactstrap";
 import styled from "styled-components";
-import { useSelector } from "react-redux";
 
-import api from "../../../services/api";
-
-import { toastr } from "react-redux-toastr";
 import { Link } from "react-router-dom";
 
-export default ({ value, onChange, onSend }) => {
-  const [sending, setSending] = useState(false);
-  const young = useSelector((state) => state.Auth.young);
-
+export default ({ value, onChange }) => {
   if (!value) return <div />;
-
-  const send = async () => {
-    setSending(true);
-    const application = {
-      youngId: young._id,
-      youngFirstName: young.firstName,
-      youngLastName: young.lastName,
-      youngEmail: young.email,
-      youngBirthdateAt: young.birthdateAt,
-      youngCity: young.city,
-      youngDepartment: young.department,
-      missionId: value._id,
-      missionName: value.name,
-      missionDepartment: value.department,
-      missionRegion: value.region,
-    };
-    // const { ok, data, code } = await api.post(`/application`, application);
-    // if (!ok) return toastr.error("Oups, une erreur est survenue lors de la candidature", code);
-    onSend();
-  };
 
   return (
     <Modal isOpen={true} toggle={onChange} style={{}}>
