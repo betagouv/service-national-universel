@@ -159,9 +159,11 @@ export default (props) => {
             Foire aux questions
           </a>
         </DrawerButton>
-        <DrawerButton>
-          <DeleteAccountButton young={young} />
-        </DrawerButton>
+        {young.status === YOUNG_STATUS.VALIDATED ? (
+          <DrawerButton>
+            <DeleteAccountButton young={young} />
+          </DrawerButton>
+        ) : null}
       </MyNav>
     </Sidebar>
   );
