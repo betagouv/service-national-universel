@@ -7,6 +7,8 @@ import SelectStatusApplication from "../../components/selectStatusApplication";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
+import VioletHeaderButton from "../../components/buttons/VioletHeaderButton";
+import ExportComponent from "../../components/ExportXlsx";
 
 import { translate, getFilterLabel, formatStringLongDate, formatStringDate } from "../../utils";
 
@@ -64,6 +66,32 @@ export default () => {
               <div>
                 <Title>Volontaires</Title>
               </div>
+              <VioletHeaderButton>
+                <ExportComponent
+                  defaultQuery={DEFAULT_QUERY}
+                  title="Exporter les volontaires"
+                  collection="volontaire"
+                  react={{ and: FILTERS }}
+                  transform={(data) => {
+                    return {
+                      _id: data._id,
+                      Cohorte: data.youngCohort,
+                      Prénom: data.youngFirstName,
+                      Nom: data.youngLastName,
+                      "Date de naissance": data.youngBirthdateAt,
+                      Email: data.youngEmail,
+                      "Ville du volontaire": data.youngCity,
+                      "Département du volontaire": data.youngDepartment,
+                      "Nom de la mission": data.missionName,
+                      "Département de la mission": data.missionDepartment,
+                      "Régino de la mission": data.missionRegion,
+                      "Candidature créée lé": data.createdAt,
+                      "Candidature mise à jour le": data.updatedAt,
+                      "Statut de la candidature": data.status,
+                    };
+                  }}
+                />
+              </VioletHeaderButton>
             </Header>
             <Filter>
               <DataSearch
@@ -230,11 +258,11 @@ const Hit = ({ hit, onClick }) => {
 };
 
 const Header = styled.div`
-  padding: 0 25px 0;
+  padding: 0 40px 0;
   display: flex;
-  margin-top: 25px;
   align-items: flex-start;
-  /* justify-content: space-between; */
+  margin-top: 20px;
+  justify-content: space-between;
 `;
 
 const Title = styled.div`

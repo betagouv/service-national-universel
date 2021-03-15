@@ -11,7 +11,7 @@ export default ({ loading, children, disabled, ...rest }) => (
       alignItems: "center",
       justifyContent: "center",
       opacity: loading ? 0.7 : 1,
-      cursor: loading ? "not-allowed" : "pointer",
+      cursor: loading || disabled ? "not-allowed" : "pointer",
     }}
   >
     {loading && <Spinner size="sm" style={{ borderWidth: "0.1em" }} />}
@@ -30,7 +30,5 @@ const VioletButtonHeader = styled(Button)`
   font-weight: 700;
   color: #fff;
   cursor: pointer;
-  :hover {
-    background: #372f78;
-  }
+  ${({ disabled }) => (!disabled ? ":hover {background: #372f78;}" : null)}
 `;
