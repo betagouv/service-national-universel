@@ -99,7 +99,7 @@ export default () => {
         <Title>
           <span>Vous n'êtes pas encore inscrit ?</span>
         </Title>
-        <Register to="/inscription">Commencer l'inscription</Register>
+        <Register to="/inscription/profil">Commencer l'inscription</Register>
       </LoginBox>
     </div>
   );
