@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 
-import { YOUNG_SITUATIONS, YOUNG_PHASE, translate as t } from "../../utils";
+import { YOUNG_SITUATIONS, YOUNG_PHASE, translate as t, YOUNG_STATUS } from "../../utils";
 import { appURL } from "../../config";
 import api from "../../services/api";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
@@ -57,6 +57,11 @@ export default ({ onChange, value }) => {
           <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
         </a>
       </div>
+      {young.status === YOUNG_STATUS.WITHDRAWN ? (
+        <Info title="Désistement">
+          <div className="quote">{`« ${young.withdrawnMessage} »`}</div>
+        </Info>
+      ) : null}
       {young && young.historic && young.historic.length !== 0 && <Historic value={young.historic} />}
       {young.phase === YOUNG_PHASE.INTEREST_MISSION ? (
         <Info title="Recherche de MIG" id={young._id}>
