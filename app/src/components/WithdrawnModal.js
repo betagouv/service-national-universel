@@ -4,6 +4,7 @@ import styled from "styled-components";
 import { useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
+import LoadingButton from "../components/buttons/LoadingButton";
 import { setYoung } from "../redux/auth/actions";
 import api from "../services/api";
 
@@ -46,16 +47,16 @@ export default ({ value, onChange, status }) => {
       <>
         <h1>Veuillez précisez le motif de votre désistement ci-dessous avant de valider.</h1>
         <textarea rows="6" value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Je souhaite me désister du Service National Universel car..." />
-        <Button disabled={sending || !message} onClick={send}>
+        <LoadingButton disabled={sending || !message} onClick={send}>
           Valider mon désistement
-        </Button>
+        </LoadingButton>
       </>
     ) : (
       <>
         <h1>Vous êtes sur le point de supprimer votre compte. Vous seres immédiatement déconnecté. Souhaitez-vous réellement supprimer votre compte ?</h1>
-        <Button disabled={sending || !message} onClick={send}>
+        <LoadingButton disabled={sending || !message} onClick={send}>
           Supprimer mon compte
-        </Button>
+        </LoadingButton>
       </>
     );
   };
@@ -103,20 +104,6 @@ const ModalContainer = styled.div`
     border-radius: 0.5rem;
     border: 1px solid #ccc;
     min-width: 100%;
-  }
-`;
-
-const Button = styled.div`
-  cursor: pointer;
-  background-color: #31c48d;
-  border-radius: 30px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  color: #fff;
-  font-size: 1rem;
-  padding: 0.8rem 3rem;
-  :hover {
-    color: #fff;
-    background-color: #0e9f6e;
   }
 `;
 
