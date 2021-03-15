@@ -9,6 +9,7 @@ import { YOUNG_PHASE, YOUNG_STATUS, PHASE_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STA
 import Item from "./item";
 import { DRAWER_TABS } from "../utils";
 import api from "../../services/api";
+import WithdrawnModal from "../WithdrawnModal";
 
 export default (props) => {
   const [open, setOpen] = useState();
@@ -170,6 +171,8 @@ export default (props) => {
 };
 
 const DeleteAccountButton = ({ young }) => {
+  const [modal, setModal] = useState(null);
+
   const mandatoryPhasesDone = young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE && young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED;
   const dispatch = useDispatch();
 
@@ -180,17 +183,26 @@ const DeleteAccountButton = ({ young }) => {
   const handleDelete = async () => {
     if (!confirm("Attention, vous êtes sur le point de supprimer votre compte. Vous serez immédiatement déconnecté. Souhaitez-vous réellement supprimer votre compte ?")) return;
     // todo : anonymiser data
-    const { ok, code } = await api.put("/young", { status: "DELETED" });
-    if (!ok) return toastr.error("Une erreur est survenu lors du traitement de votre demande", translate(code));
-    logout();
+    setStatus("DELETED");
   };
 
   const handleWithdrawn = async () => {
     if (!confirm("Attention, vous êtes sur le point de vous désister du SNU. Vous serez immédiatement déconnecté. Souhaitez-vous réellement vous désister ?")) return;
-    const { ok, code } = await api.put("/young", { status: "WITHDRAWN" });
-    if (!ok) return toastr.error("Une erreur est survenu lors du traitement de votre demande", translate(code));
-    // todo : send notif to young and referent
-    logout();
+    setModal("WITHDRAWN");
+  };
+
+  const setStatus = async (status, note) => {
+    young.historic.push({ phase: young.phase, userName: `${young.firstName} ${young.lastName}`, userId: young._id, status, note });
+    young.status = status;
+    young.lastStatusAt = Date.now();
+    try {
+      const { ok, code, data } = await api.put(`/young`, young);
+      if (!ok) return toastr.error("Une erreur est survenu lors du traitement de votre demande :", translate(code));
+      logout();
+    } catch (e) {
+      console.log(e);
+      toastr.error("Oups, une erreur est survenue :", translate(e.code));
+    }
   };
 
   async function logout() {
@@ -198,7 +210,21 @@ const DeleteAccountButton = ({ young }) => {
     dispatch(setYoung(null));
   }
 
-  return <div onClick={mandatoryPhasesDone ? handleDelete : handleWithdrawn}>{getLabel()}</div>;
+  return (
+    <>
+      {modal === "WITHDRAWN" && (
+        <WithdrawnModal
+          value={young}
+          onChange={() => setModal(null)}
+          onSend={(msg) => {
+            setStatus("WITHDRAWN", msg);
+            setModal(null);
+          }}
+        />
+      )}
+      <div onClick={mandatoryPhasesDone ? handleDelete : handleWithdrawn}>{getLabel()}</div>
+    </>
+  );
 };
 
 const Sidebar = styled.div`
