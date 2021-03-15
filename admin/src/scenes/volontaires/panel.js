@@ -57,6 +57,11 @@ export default ({ onChange, value }) => {
           <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
         </a>
       </div>
+      {young.withdrawnMessage ? (
+        <Info title="Désistement">
+          <div className="quote">{`« ${young.withdrawnMessage} »`}</div>
+        </Info>
+      ) : null}
       {young.phase === YOUNG_PHASE.INTEREST_MISSION ? (
         <Info title="Recherche de MIG" id={young._id}>
           {young.applications.length ? (

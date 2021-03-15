@@ -101,6 +101,11 @@ export default ({ young }) => {
                   <Details title="Adresse" value={young.parent2Address} />
                 </Bloc>
               ) : null}
+              {young.withdrawnMessage ? (
+                <Bloc title="Désistement">
+                  <div className="quote">{`« ${young.withdrawnMessage} »`}</div>
+                </Bloc>
+              ) : null}
             </Col>
           </Row>
         </Box>

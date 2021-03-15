@@ -1,32 +1,70 @@
 import React, { useState } from "react";
 import { Modal } from "reactstrap";
 import styled from "styled-components";
-import { useSelector } from "react-redux";
-
-import api from "../services/api";
-
+import { useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
-export default ({ value, onChange, onSend }) => {
+import { setYoung } from "../redux/auth/actions";
+import api from "../services/api";
+
+export default ({ value, onChange, status }) => {
   const [sending, setSending] = useState(false);
   const [message, setMessage] = useState();
+  const dispatch = useDispatch();
 
   if (!value) return <div />;
 
   const send = async () => {
+    if (!confirm("Êtes-vous certain(e) de vouloir effectuer cette démarche ?")) return;
     setSending(true);
-    onSend(message);
+    setStatus(message);
+    onChange();
+  };
+
+  const setStatus = async (note) => {
+    value.historic.push({ phase: value.phase, userName: `${value.firstName} ${value.lastName}`, userId: value._id, status, note });
+    value.status = status;
+    if (note) value.withdrawnMessage = note;
+    value.lastStatusAt = Date.now();
+    try {
+      const { ok, code, data } = await api.put(`/young`, value);
+      if (!ok) return toastr.error("Une erreur est survenu lors du traitement de votre demande :", translate(code));
+      logout();
+    } catch (e) {
+      console.log(e);
+      toastr.error("Oups, une erreur est survenue :", translate(e.code));
+    }
+  };
+
+  async function logout() {
+    await api.post(`/young/logout`);
+    dispatch(setYoung(null));
+  }
+
+  const render = () => {
+    return status === "WITHDRAWN" ? (
+      <>
+        <h1>Veuillez précisez le motif de votre désistement ci-dessous avant de valider.</h1>
+        <textarea rows="6" value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Je souhaite me désister du Service National Universel car..." />
+        <Button disabled={sending || !message} onClick={send}>
+          Valider mon désistement
+        </Button>
+      </>
+    ) : (
+      <>
+        <h1>Vous êtes sur le point de supprimer votre compte. Vous seres immédiatement déconnecté. Souhaitez-vous réellement supprimer votre compte ?</h1>
+        <Button disabled={sending || !message} onClick={send}>
+          Supprimer mon compte
+        </Button>
+      </>
+    );
   };
 
   return (
     <Modal isOpen={true} toggle={onChange} style={{}}>
       <ModalContainer>
         <img src={require("../assets/close.svg")} height={10} onClick={onChange} />
-        <h1>Veuillez précisez le motif de votre désistement ci-dessous avant de valider.</h1>
-        <textarea rows="6" value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Je souhaite me désister du Service National Universel car..." />
-        <Button disabled={sending || !message} onClick={send}>
-          Valider mon désistement
-        </Button>
+        {render()}
         <CancelButton onClick={onChange}>Annuler</CancelButton>
       </ModalContainer>
     </Modal>

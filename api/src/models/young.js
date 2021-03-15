@@ -39,6 +39,7 @@ const Schema = new mongoose.Schema({
     enum: [],
   },
   lastStatusAt: { type: Date, default: Date.now },
+  withdrawnMessage: { type: String },
 
   // keep track of the current inscription step
   inscriptionStep: {

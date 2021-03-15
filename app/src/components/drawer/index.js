@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
-import { useSelector, useDispatch } from "react-redux";
-import { toastr } from "react-redux-toastr";
+import { useSelector } from "react-redux";
 
-import { setYoung } from "../../redux/auth/actions";
 import { YOUNG_PHASE, YOUNG_STATUS, PHASE_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2 } from "../../utils";
 import Item from "./item";
 import { DRAWER_TABS } from "../utils";
-import api from "../../services/api";
 import WithdrawnModal from "../WithdrawnModal";
 
 export default (props) => {
@@ -172,57 +169,13 @@ export default (props) => {
 
 const DeleteAccountButton = ({ young }) => {
   const [modal, setModal] = useState(null);
-
   const mandatoryPhasesDone = young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE && young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED;
-  const dispatch = useDispatch();
-
-  const getLabel = () => {
-    return mandatoryPhasesDone ? "Supprimer mon compte" : "Se désister du SNU";
-  };
-
-  const handleDelete = async () => {
-    if (!confirm("Attention, vous êtes sur le point de supprimer votre compte. Vous serez immédiatement déconnecté. Souhaitez-vous réellement supprimer votre compte ?")) return;
-    // todo : anonymiser data
-    setStatus("DELETED");
-  };
-
-  const handleWithdrawn = async () => {
-    if (!confirm("Attention, vous êtes sur le point de vous désister du SNU. Vous serez immédiatement déconnecté. Souhaitez-vous réellement vous désister ?")) return;
-    setModal("WITHDRAWN");
-  };
-
-  const setStatus = async (status, note) => {
-    young.historic.push({ phase: young.phase, userName: `${young.firstName} ${young.lastName}`, userId: young._id, status, note });
-    young.status = status;
-    young.lastStatusAt = Date.now();
-    try {
-      const { ok, code, data } = await api.put(`/young`, young);
-      if (!ok) return toastr.error("Une erreur est survenu lors du traitement de votre demande :", translate(code));
-      logout();
-    } catch (e) {
-      console.log(e);
-      toastr.error("Oups, une erreur est survenue :", translate(e.code));
-    }
-  };
-
-  async function logout() {
-    await api.post(`/young/logout`);
-    dispatch(setYoung(null));
-  }
+  const getLabel = () => (mandatoryPhasesDone ? "Supprimer mon compte" : "Se désister du SNU");
 
   return (
     <>
-      {modal === "WITHDRAWN" && (
-        <WithdrawnModal
-          value={young}
-          onChange={() => setModal(null)}
-          onSend={(msg) => {
-            setStatus("WITHDRAWN", msg);
-            setModal(null);
-          }}
-        />
-      )}
-      <div onClick={mandatoryPhasesDone ? handleDelete : handleWithdrawn}>{getLabel()}</div>
+      {modal && <WithdrawnModal status={modal} value={young} onChange={() => setModal(null)} />}
+      <div onClick={mandatoryPhasesDone ? () => setModal("DELETED") : () => setModal("WITHDRAWN")}>{getLabel()}</div>
     </>
   );
 };
