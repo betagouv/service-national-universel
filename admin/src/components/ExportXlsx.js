@@ -4,15 +4,15 @@ import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
 import { translate } from "../utils";
 
-export default function ExportComponent({ title, collection, react, transform }) {
+export default function ExportComponent({ title, collection, react, transform, defaultQuery = () => ({ query: { query: { match_all: {} } }, size: 10000 }) }) {
   const [exporting, setExporting] = useState(false);
 
   if (exporting) {
     return (
       <ReactiveComponent
+        defaultQuery={defaultQuery}
         componentId="EXPORT"
         react={react}
-        defaultQuery={() => ({ query: { query: { match_all: {} } }, size: 10000 })}
         render={({ setQuery, data, loading }) => {
           return <Loading setQuery={setQuery} data={data} loading={loading} onFinish={() => setExporting(false)} collection={collection} transform={transform} />;
         }}
