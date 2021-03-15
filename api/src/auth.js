@@ -55,7 +55,7 @@ class Auth {
     try {
       const user = await this.model.findOne({ email });
       if (!user) return res.status(401).send({ ok: false, code: USER_NOT_EXISTS });
-      if (user.status === "WITHDRAWN" || user.status === "DELETED") res.status(401).send({ ok: false, code: OPERATION_UNAUTHORIZED });
+      if (user.status === "WITHDRAWN" || user.status === "DELETED") return res.status(401).send({ ok: false, code: OPERATION_UNAUTHORIZED });
       // simplify
       let match = await user.comparePassword(password);
       if (config.ENVIRONMENT === "development") {
