@@ -38,7 +38,7 @@ export default ({ handleChange, values }) => {
             handleChange({ target: { name: "schoolId", value: suggestion._id } });
             handleChange({ target: { name: "schoolCity", value: suggestion.city } });
             handleChange({ target: { name: "schoolZip", value: suggestion.postcode } });
-            handleChange({ target: { name: "schoolDepartment", value: departmentLookUp[depart] } });
+            handleChange({ target: { name: "schoolDepartment", value: depart } });
             handleChange({ target: { name: "schoolName", value: suggestion.name2 } });
             handleChange({ target: { name: "schoolType", value: suggestion.type } });
           }}
