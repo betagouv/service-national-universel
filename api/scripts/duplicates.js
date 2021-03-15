@@ -15,12 +15,12 @@ const YoungModel = require("../src/models/young");
     });
   }
   console.log("step done");
-  const similarFound = [];
+  let similarFound = [];
   buffer.forEach((b) => {
     const similar = buffer.filter((a) => a.name === b.name && a.birthdate === b.birthdate);
     const alreadyFound = similarFound.find((a) => a.name === b.name && a.birthdate === b.birthdate);
     if (!alreadyFound && similar.length > 1) {
-      similarFound.push(b);
+      similarFound = [...similarFound, ...similar];
       console.log(`Similar found for ${b.name} (${similar.length}), emails: ${similar.map((e) => `${e.email} (${e.status})`).join()}`);
     }
   });
