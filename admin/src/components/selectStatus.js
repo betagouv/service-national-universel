@@ -9,8 +9,9 @@ import { translate, YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_COLORS, YOUNG_STATUS
 import { toastr } from "react-redux-toastr";
 import matomo from "../services/matomo";
 
-import MailCorrection from "../scenes/inscription/MailCorrection";
-import MailRefused from "../scenes/inscription/MailRefused";
+import ModalCorrection from "./modals/ModalCorrection";
+import ModalRefused from "./modals/ModalRefused";
+import ModalWithdrawn from "./modals/ModalWithdrawn";
 
 export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status", phase = YOUNG_PHASE.INSCRIPTION }) => {
   const [modal, setModal] = useState(null);
@@ -30,8 +31,7 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
 
   const handleClickStatus = (status) => {
     if (!confirm("Êtes-vous sûr(e) de vouloir modifier le statut de ce profil?\nUn email sera automatiquement envoyé à l'utlisateur.")) return;
-    if (status === YOUNG_STATUS.WAITING_CORRECTION) return setModal(YOUNG_STATUS.WAITING_CORRECTION);
-    if (status === YOUNG_STATUS.REFUSED) return setModal(YOUNG_STATUS.REFUSED);
+    if ([YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.REFUSED, YOUNG_STATUS.WITHDRAWN].includes(status)) return setModal(status);
     setStatus(status);
   };
 
@@ -70,22 +70,32 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
   return (
     <>
       {modal === YOUNG_STATUS.WAITING_CORRECTION && (
-        <MailCorrection
+        <ModalCorrection
           value={young}
           onChange={() => setModal(false)}
           onSend={(msg) => {
             setStatus(YOUNG_STATUS.WAITING_CORRECTION, msg);
-            setModal(false);
+            setModal(null);
           }}
         />
       )}
       {modal === YOUNG_STATUS.REFUSED && (
-        <MailRefused
+        <ModalRefused
           value={young}
           onChange={() => setModal(false)}
           onSend={(msg) => {
             setStatus(YOUNG_STATUS.REFUSED, msg);
-            setModal(false);
+            setModal(null);
+          }}
+        />
+      )}
+      {modal === YOUNG_STATUS.WITHDRAWN && (
+        <ModalWithdrawn
+          value={young}
+          onChange={() => setModal(false)}
+          onSend={(msg) => {
+            setStatus(YOUNG_STATUS.WITHDRAWN, msg);
+            setModal(null);
           }}
         />
       )}
