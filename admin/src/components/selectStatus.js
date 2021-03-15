@@ -40,6 +40,7 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
     young.historic.push({ phase, userName: `${user.firstName} ${user.lastName}`, userId: user._id, status, note });
     young[statusName] = status;
     young.lastStatusAt = Date.now();
+    if (status === "WITHDRAWN" && note) young.withdrawnMessage = note;
     try {
       // we decided to let the validated youngs in the INSCRIPTION phase
       // referents use the export and need ALL the youngs of the current year
