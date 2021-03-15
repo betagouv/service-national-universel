@@ -53,8 +53,8 @@ export default ({ value, onChange, status }) => {
       </>
     ) : (
       <>
-        <h1>Vous êtes sur le point de supprimer votre compte. Vous seres immédiatement déconnecté. Souhaitez-vous réellement supprimer votre compte ?</h1>
-        <LoadingButton disabled={sending || !message} onClick={send}>
+        <h1>Vous êtes sur le point de supprimer votre compte. Vous serez immédiatement déconnecté(e). Souhaitez-vous réellement supprimer votre compte ?</h1>
+        <LoadingButton disabled={sending} onClick={send}>
           Supprimer mon compte
         </LoadingButton>
       </>
