@@ -5,6 +5,7 @@ import styled from "styled-components";
 import api from "../../services/api";
 
 import { toastr } from "react-redux-toastr";
+import LoadingButton from "../buttons/LoadingButton";
 
 export default ({ value, onChange, onSend }) => {
   const [message, setMessage] = useState();
@@ -14,21 +15,19 @@ export default ({ value, onChange, onSend }) => {
     setMessage(`Bonjour ${value.firstName} ${value.lastName},
 Votre candidature au SNU a bien été étudiée par l'équipe de votre département.
 
-Nous n'avons malheureusement pu donner suite à votre candidature au Service Nationale Universel édition 2021.
-En voici les principales raisons :
+Il nous manque les éléments suivants pour compléter votre dossier :
 -
 -
 -
 
-Merci pour votre compréhension.
-En vous souhaitant une excellente continuation.`);
+Merci de vous reconnecter à votre compte pour apporter les modifications demandées.`);
   }, [value]);
 
   if (!value) return <div />;
 
   const send = async () => {
     setSending(true);
-    await api.post(`/referent/email/refuse/${value._id}`, { message });
+    await api.post(`/referent/email/correction/${value._id}`, { message, subject: "Demande de correction" });
     toastr.success("Email envoyé !");
     onSend(message);
   };
@@ -37,12 +36,12 @@ En vous souhaitant une excellente continuation.`);
     <Modal isOpen={true} toggle={onChange}>
       <ModalContainer>
         <img src={require("../../assets/close.svg")} height={10} onClick={onChange} />
-        <h1>Veuillez éditer le message ci-dessous pour préciser les raisons du refus avant de l'envoyer</h1>
+        <h1>Veuillez éditer le message ci-dessous pour préciser les corrections à apporter avant de l'envoyer</h1>
         <h3>votre message</h3>
         <textarea rows="15" value={message} onChange={(e) => setMessage(e.target.value)} />
-        <button disabled={sending} onClick={send}>
-          Envoyer la notification
-        </button>
+        <LoadingButton disabled={sending || !message} onClick={send}>
+          Envoyer la demande de correction
+        </LoadingButton>
       </ModalContainer>
     </Modal>
   );
@@ -77,19 +76,6 @@ const ModalContainer = styled.div`
     border-radius: 0.5rem;
     border: 1px solid #ccc;
     min-width: 100%;
-  }
-  button {
-    margin-top: 2rem;
-    background-color: #5245cc;
-    border: none;
-    border-radius: 5px;
-    padding: 7px 30px;
-    font-size: 14px;
-    font-weight: 700;
-    color: #fff;
-    cursor: pointer;
-    :hover {
-      background: #372f78;
-    }
+    margin-bottom: 2rem;
   }
 `;

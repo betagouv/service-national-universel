@@ -18,7 +18,7 @@ export default () => {
   const user = useSelector((state) => state.Auth.user);
   const [missions, setMissions] = useState([]);
   const [panel, setPanel] = useState(null);
-  const DEFAULT_QUERY = () => ({ query: { bool: { filter: { terms: { "missionId.keyword": missions } } } } });
+  const DEFAULT_QUERY = () => ({ query: { bool: { filter: { terms: { "missionId.keyword": missions } } } }, size: 10000 });
 
   async function appendMissions(structure) {
     const missionsResponse = await api.get(`/mission/structure/${structure}`);
@@ -88,6 +88,7 @@ export default () => {
                       "Candidature créée lé": data.createdAt,
                       "Candidature mise à jour le": data.updatedAt,
                       "Statut de la candidature": data.status,
+                      Tuteur: data.tutorName,
                     };
                   }}
                 />

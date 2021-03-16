@@ -47,11 +47,16 @@ const Note = ({ value }) => {
     setExpandNote(!expandNote);
   };
 
+  const renderText = () => {
+    if (!rest) return preview;
+    return preview + (expandNote ? rest : " ...");
+  };
+
   return (
     <div>
-      " {preview + (expandNote ? rest : " ...")} "
+      « {renderText()} »
       <div className="see-more" onClick={toggleNote}>
-        {expandNote ? "  VOIR MOINS" : "  VOIR PLUS"}
+        {rest ? (expandNote ? "  VOIR MOINS" : "  VOIR PLUS") : null}
       </div>
     </div>
   );
