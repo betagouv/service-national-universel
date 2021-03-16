@@ -56,7 +56,7 @@ export default ({ hit, options = [], callback }) => {
       callback && callback();
     } catch (e) {
       console.log(e);
-      toastr.error("Oups, une erreur est survenue :", translate(e.code));
+      if (e.code !== "NO_TEMPLATE_FOUND") toastr.error("Oups, une erreur est survenue :", translate(e.code));
     }
   };
 
