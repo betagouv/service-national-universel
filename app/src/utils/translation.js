@@ -89,7 +89,7 @@ export const translate = (value) => {
     case "EVENING":
       return "En soirée";
     case "END_DAY":
-      return "En fin de journée";
+      return "Pendant l'après-midi";
     case "WEEKEND":
       return "Durant le week-end";
     case "CITIZENSHIP":
