@@ -25,6 +25,7 @@ import EyeClose from "../../../assets/eye-slash.svg";
 export default () => {
   useEffect(() => {
     matomo.logEvent("inscription", "open_step", "step", 0);
+    window.lumiere("sendEvent", "inscription", "open_step", {step: 0});
   }, []);
   const [passwordText, setPasswordText] = useState(false);
   const dispatch = useDispatch();

@@ -22,6 +22,7 @@ export function getPasswordErrorMessage(v, matomo) {
 
   if (!schema.validate(v)) {
     matomo.logEvent("inscription", "password_failed");
+    window.lumiere("sendEvent", "inscription", "password_failed");
     return "Votre mot de passe doit contenir au moins 8 caractères, dont une majuscule, une minuscule, un chiffre et un symbole";
   }
 }
