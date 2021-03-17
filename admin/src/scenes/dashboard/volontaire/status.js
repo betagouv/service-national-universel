@@ -3,16 +3,7 @@ import styled from "styled-components";
 import { Col, Row, Input } from "reactstrap";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
-import {
-  translate,
-  YOUNG_STATUS_COLORS,
-  YOUNG_STATUS_PHASE2,
-  YOUNG_STATUS_PHASE1,
-  YOUNG_STATUS_PHASE1_COLOR,
-  YOUNG_STATUS_PHASE2_COLORS,
-  APPLICATION_STATUS,
-  APPLICATION_STATUS_COLORS,
-} from "../../../utils";
+import { translate, YOUNG_STATUS_COLORS, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE1, APPLICATION_STATUS, APPLICATION_STATUS_COLORS } from "../../../utils";
 import api from "../../../services/api";
 
 export default ({ filter }) => {
@@ -185,7 +176,7 @@ const Phase2 = ({ data, getLink }) => {
           return (
             <Col md={6} xl={4} key={e}>
               <Link to={getLink(`/volontaire?STATUS_PHASE_2=%5B"${e}"%5D`)}>
-                <Card borderBottomColor={YOUNG_STATUS_PHASE2_COLORS[e]}>
+                <Card borderBottomColor={YOUNG_STATUS_COLORS[e]}>
                   <CardTitle>{translate(e)}</CardTitle>
                   <CardValueWrapper>
                     <CardValue>{data[e] || 0}</CardValue>
@@ -250,7 +241,7 @@ const Phase1 = ({ data, getLink }) => {
           return (
             <Col md={6} xl={4} key={e}>
               <Link to={getLink(`/volontaire?STATUS_PHASE_1=%5B"${e}"%5D`)}>
-                <Card borderBottomColor={YOUNG_STATUS_PHASE1_COLOR[e]}>
+                <Card borderBottomColor={YOUNG_STATUS_COLORS[e]}>
                   <CardTitle>{translate(e)}</CardTitle>
                   <CardValueWrapper>
                     <CardValue>{data[e] || 0}</CardValue>

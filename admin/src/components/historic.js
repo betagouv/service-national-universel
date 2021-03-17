@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { translate, YOUNG_STATUS, formatStringLongDate, YOUNG_STATUS_COLORS } from "../utils";
+import { translate, formatStringLongDate, YOUNG_STATUS_COLORS } from "../utils";
 import Badge from "../components/Badge";
 
 export default ({ value }) => {
