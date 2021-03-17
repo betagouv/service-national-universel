@@ -4,13 +4,21 @@ import styled from "styled-components";
 
 import { translate, PHASE_STATUS_COLOR, PHASE_STATUS } from "../../utils";
 
-export default ({ title, subtitle, to, status, handleClick, disabled, children, open }) => {
+export default ({ title, subtitle, to, status, handleClick, disabled, children, open, phase }) => {
   const [color, setColor] = useState();
   const [strokeColor, setStrokeColor] = useState();
+  const [icon, setIcon] = useState();
+
   useEffect(() => {
     let c = PHASE_STATUS_COLOR[status];
     setColor(c || "#8da2fb");
     setStrokeColor(c ? "#fff" : "#42389d");
+    if (phase === "1")
+      setIcon(
+        "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+      );
+    if (phase === "2") setIcon("M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z");
+    if (phase === "3") setIcon("M16 4v12l-4-2-4 2V4M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z");
   }, [status]);
 
   return (
@@ -18,13 +26,7 @@ export default ({ title, subtitle, to, status, handleClick, disabled, children, 
       <NavLink to={to} onClick={handleClick} className={disabled ? "disabled" : ""}>
         <Icon color={color}>
           <svg fill="none" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              stroke={strokeColor}
-              d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-            ></path>
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" stroke={strokeColor} d={icon}></path>
           </svg>
         </Icon>
         <div>
