@@ -51,7 +51,7 @@ export default () => {
         if (token) api.setToken(token);
         if (ok && user) {
           dispatch(setYoung(user));
-          // window.lumiere("registerUser", user._id);
+          window.lumiere("registerUser", user._id);
           matomo.setUserId(user._id);
         }
       } catch (e) {

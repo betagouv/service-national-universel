@@ -25,7 +25,7 @@ import EyeClose from "../../../assets/eye-slash.svg";
 export default () => {
   useEffect(() => {
     matomo.logEvent("inscription", "open_step", "step", 0);
-    window.lumiere("sendEvent", "inscription", "open_step", {step: 0});
+    window.lumiere("sendEvent", "inscription", "open_step", { step: 0 });
   }, []);
   const [passwordText, setPasswordText] = useState(false);
   const dispatch = useDispatch();
@@ -71,6 +71,7 @@ export default () => {
             if (!okPut) return toastr.error("Une erreur s'est produite :", codePut);
             dispatch(setYoung(young));
             matomo.setUserId(young._id);
+            window.lumiere("registerUser", young._id);
             history.push("/inscription/coordonnees");
           } catch (e) {
             console.log(e);

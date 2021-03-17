@@ -39,6 +39,7 @@ export default () => {
               if (young) {
                 dispatch(setYoung(young));
                 matomo.setUserId(young._id);
+                window.lumiere("registerUser", young._id);
               }
             } catch (e) {
               console.log("e", e);
