@@ -32,6 +32,7 @@ export default () => {
         <Row>
           <Col>
             <ProgramCard
+              enableToggle={false}
               title="Le Service Civique"
               image={require("../../assets/programmes-engagement/service-civique.jpg")}
               details="Un engagement volontaire au service de l’intérêt général, en France ou à l’étranger, auprès d’organisations à but non lucratif ou publiques."
@@ -39,6 +40,7 @@ export default () => {
           </Col>
           <Col>
             <ProgramCard
+              enableToggle={false}
               title="Les Sapeurs-Pompiers de France"
               image={require("../../assets/programmes-engagement/sapeur-pompier-2.jpg")}
               details="Si vous souhaitez vous engager pour aider votre prochain tout en ayant une autre activité professionnelle, le statut de sapeur-pompier volontaire peut vous permettre d’y parvenir."
@@ -46,8 +48,9 @@ export default () => {
           </Col>
           <Col>
             <ProgramCard
-              title="Plan Mercredi"
-              image={require("../../assets/programmes-engagement/plan-mercredi.png")}
+              enableToggle={false}
+              title="JeVeuxAider"
+              image={require("../../assets/programmes-engagement/je-veux-aider.png")}
               details="Devenez bénévole et trouvez des missions en quelques clics près de chez vous ou à distance. Plus de 330 000 bénévoles soutiennent des milliers d'associations et d'organisations publiques."
             />
           </Col>

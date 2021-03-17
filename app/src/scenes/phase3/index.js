@@ -12,8 +12,8 @@ export default () => {
     <div>
       <Switch>
         <Route path="/phase3/valider" component={Valider} />
-        <Route path="/phase3/une-mission/:id" component={Mission} />
-        <Route path="/phase3/une-mission" component={Missions} />
+        <Route path="/phase3/mission/:id" component={Mission} />
+        <Route path="/phase3/mission" component={Missions} />
         <Route path="/phase3/les-programmes" component={Engagement} />
         <Route path="/phase3" component={Home} />
       </Switch>

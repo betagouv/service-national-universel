@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 
-export default ({ title, image, details, href }) => {
+export default ({ title, image, details, href, enableToggle = true }) => {
   const [expandDetails, setExpandDetails] = useState(false);
   const preview = details.substring(0, 130);
   const rest = details.substring(130);
@@ -11,6 +11,7 @@ export default ({ title, image, details, href }) => {
   };
 
   const renderText = () => {
+    if (!enableToggle) return details;
     if (!rest) return preview;
 
     return (
