@@ -20,7 +20,6 @@ export default ({ loading, children, disabled, ...rest }) => (
 );
 
 const VioletButtonHeader = styled(Button)`
-  background-color: #5245cc;
   border: none;
   border-radius: 5px;
   padding: 7px 30px;
@@ -30,5 +29,6 @@ const VioletButtonHeader = styled(Button)`
   font-weight: 700;
   color: #fff;
   cursor: pointer;
-  ${({ disabled }) => (!disabled ? ":hover {background: #372f78;}" : null)}
+  ${({ disabled, color }) => (!disabled && !color ? ":hover {background: #372f78;}" : null)}
+  ${({ color }) => (color ? `background-color: ${color};}` : "background-color: #5245cc;")}
 `;

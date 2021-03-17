@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Col, Row, Input } from "reactstrap";
 import styled from "styled-components";
 import { Formik } from "formik";
@@ -6,9 +6,18 @@ import { toastr } from "react-redux-toastr";
 
 import api from "../../../services/api";
 import { translate } from "../../../utils";
+import LoadingButton from "../../../components/buttons/LoadingButton";
 
-export default ({ structure }) => {
-  return (
+export default ({ structure, onSent }) => {
+  const [sent, setSent] = useState();
+  return sent ? (
+    <Wrapper>
+      <Title>{sent} a été invité dans votre structure.</Title>
+      <ButtonContainer>
+        <LoadingButton onClick={() => setSent(false)}>Inviter un(e) autre responsable</LoadingButton>
+      </ButtonContainer>
+    </Wrapper>
+  ) : (
     <Wrapper>
       <Formik
         initialValues={{ role: "responsible", structureId: structure._id, structureName: structure.name }}
@@ -20,6 +29,8 @@ export default ({ structure }) => {
             }
             const { ok, code } = await api.post(`/referent/signup_invite/${values.role}`, values);
             if (!ok) toastr.error("Oups, une erreur est survenue lors de l'ajout du nouveau membre", translate(code));
+            setSent(`${values.firstName} ${values.lastName}`);
+            onSent();
             return toastr.success("Invitation envoyée");
           } catch (e) {
             toastr.error("Oups, une erreur est survenue lors de l'ajout du nouveau membre", translate(e));
@@ -57,9 +68,9 @@ export default ({ structure }) => {
                 <Input type="email" value={values.email} name="email" onChange={handleChange} placeholder="Adresse Email" />
               </FormGroup>
               <ButtonContainer>
-                <Button className="btn-blue" type="submit" onClick={handleSubmit}>
+                <LoadingButton type="submit" onClick={handleSubmit}>
                   Envoyer l'invitation
-                </Button>
+                </LoadingButton>
               </ButtonContainer>
             </form>
           );
@@ -126,31 +137,4 @@ const ButtonContainer = styled.div`
   display: flex;
   justify-content: center;
   padding: 1rem;
-`;
-
-const Button = styled.button`
-  align-self: flex-start;
-  border-radius: 4px;
-  padding: 10px 15px;
-  font-size: 1rem;
-  font-weight: 400;
-  cursor: pointer;
-  background-color: #fff;
-  &.btn-blue {
-    color: #646b7d;
-    border: 1px solid #dcdfe6;
-    :hover {
-      color: rgb(49, 130, 206);
-      border-color: rgb(193, 218, 240);
-      background-color: rgb(234, 243, 250);
-    }
-  }
-  &.btn-red {
-    border: 1px solid #f6cccf;
-    color: rgb(206, 90, 90);
-    :hover {
-      border-color: rgb(240, 218, 218);
-      background-color: rgb(250, 230, 230);
-    }
-  }
 `;

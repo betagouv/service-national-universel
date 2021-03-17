@@ -14,30 +14,32 @@ export default ({ structure }) => {
   const [referents, setReferents] = useState([]);
   const [parentStructure, setParentStructure] = useState(null);
 
-  useEffect(() => {
+  const getReferents = async () => {
     if (!structure) return;
-    (async () => {
-      const queries = [];
-      queries.push({ index: "referent", type: "_doc" });
+    const queries = [];
+    queries.push({ index: "referent", type: "_doc" });
+    queries.push({
+      query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": structure._id } }] } },
+    });
+    if (structure.networkId) {
+      queries.push({ index: "structure", type: "_doc" });
       queries.push({
-        query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": structure._id } }] } },
+        query: { bool: { must: { match_all: {} }, filter: [{ term: { _id: structure.networkId } }] } },
       });
-      if (structure.networkId) {
-        queries.push({ index: "structure", type: "_doc" });
-        queries.push({
-          query: { bool: { must: { match_all: {} }, filter: [{ term: { _id: structure.networkId } }] } },
-        });
-      }
+    }
 
-      const { responses } = await api.esQuery(queries);
-      if (structure.networkId) {
-        const structures = responses[1]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-        setParentStructure(structures.length ? structures[0] : null);
-      } else {
-        setParentStructure(null);
-      }
-      setReferents(responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
-    })();
+    const { responses } = await api.esQuery(queries);
+    if (structure.networkId) {
+      const structures = responses[1]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+      setParentStructure(structures.length ? structures[0] : null);
+    } else {
+      setParentStructure(null);
+    }
+    setReferents(responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
+  };
+
+  useEffect(() => {
+    getReferents();
   }, [structure]);
 
   if (!structure) return <div />;
@@ -113,7 +115,7 @@ export default ({ structure }) => {
                   ))}
                 </Wrapper>
               </Row>
-              <Invite structure={structure} />
+              <Invite structure={structure} onSent={getReferents} />
             </Col>
           </Row>
         </Box>

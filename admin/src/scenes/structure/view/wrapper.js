@@ -1,11 +1,11 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
-
 import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
+import PanelActionButton from "../../../components/buttons/PanelActionButton";
 import { translate, STRUCTURE_STATUS_COLORS } from "../../../utils";
 import api from "../../../services/api";
 
@@ -55,15 +55,13 @@ export default ({ children, structure, tab }) => {
         <div style={{ display: "flex" }}>
           {!isResponsible && (
             <Link to={`/mission/create/${structure._id}`}>
-              <Button className="btn-blue">Nouvelle mission</Button>
+              <PanelActionButton icon="plus" title="Nouvelle mission" />
             </Link>
           )}
           <Link to={`/structure/${structure._id}/edit`}>
-            <Button className="btn-blue">Modifier</Button>
+            <PanelActionButton icon="pencil" title="Modifier" />
           </Link>
-          <Button style={{ marginLeft: "0.5rem" }} onClick={handleDelete} className="btn-red">
-            Supprimer
-          </Button>
+          <PanelActionButton onClick={handleDelete} icon="bin" title="Supprimer" />
         </div>
       </Header>
       {children}
