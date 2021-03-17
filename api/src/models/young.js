@@ -36,7 +36,8 @@ const Schema = new mongoose.Schema({
   },
   statusPhase3: {
     type: String,
-    enum: [],
+    default: "WAITING_REALISATION",
+    enum: ["WAITING_REALISATION", "WAITING_VALIDATION", "VALIDATED"],
   },
   lastStatusAt: { type: Date, default: Date.now },
   withdrawnMessage: { type: String },
