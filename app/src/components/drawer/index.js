@@ -128,7 +128,7 @@ export default (props) => {
               <NavLink to="/phase3/les-programmes">Les programmes d'engagement</NavLink>
             </li>
             <li>
-              <NavLink to="/une-mission">Trouver une mission</NavLink>
+              <NavLink to="/phase3/mission">Trouver une mission</NavLink>
             </li>
             <li>
               <NavLink to="/phase3/valider">Valider ma phase 3</NavLink>
