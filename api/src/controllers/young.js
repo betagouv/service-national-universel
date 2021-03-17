@@ -140,7 +140,6 @@ router.put("/", passport.authenticate("young", { session: false }), async (req, 
     //Check quartier prioritaires.
     if (obj.zip && obj.city && obj.address) {
       const qpv = await getQPV(obj.zip, obj.city, obj.address);
-      console.log("QPV", qpv);
       if (qpv === true) {
         young.set({ qpv: "true" });
       } else if (qpv === false) {
