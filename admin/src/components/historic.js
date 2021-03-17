@@ -8,9 +8,11 @@ export default ({ value }) => {
 
   return (
     <Historic className="info">
-      {value.map((historicItem, key) => (
-        <HistoricItem key={key} item={historicItem} />
-      ))}
+      {value
+        .sort((a, b) => (a.createdAt < b.createdAt ? 1 : b.createdAt < a.createdAt ? -1 : 0))
+        .map((historicItem, key) => (
+          <HistoricItem key={key} item={historicItem} />
+        ))}
     </Historic>
   );
 };
@@ -67,6 +69,10 @@ const Item = styled.li`
 `;
 
 const Historic = styled.ul`
+  display: flex;
+  flex-direction: column-reverse;
+  max-height: 400px;
+  overflow: auto;
   list-style-type: none;
   > li {
     ::before {
@@ -79,10 +85,10 @@ const Historic = styled.ul`
       border-radius: 50%;
       position: relative;
       left: calc(-1rem - 5px);
-      top: 32px;
+      top: 23px;
       z-index: 1;
     }
-    :not(:last-child) {
+    :not(:first-child) {
       position: relative;
       ::after {
         content: "";
@@ -92,7 +98,7 @@ const Historic = styled.ul`
         background-color: #dfdfdf;
         position: absolute;
         left: 0;
-        top: 32px;
+        top: 23px;
         z-index: -1;
       }
     }
