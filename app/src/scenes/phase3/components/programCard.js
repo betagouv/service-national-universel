@@ -4,9 +4,9 @@ import styled from "styled-components";
 export default ({ title, image, details, href }) => {
   return (
     <Card>
-      <div className="thumb">
+      <a href={href} className="thumb">
         <img src={image} />
-      </div>
+      </a>
       <h4>{title}</h4>
       <p>{details}</p>
       <SeeMore href={href} target="_blank">
@@ -21,6 +21,7 @@ const Card = styled.div`
   .thumb {
     margin-bottom: 20px;
     img {
+      margin-bottom: 20px;
       border-radius: 6px;
       width: 100%;
       height: 200px;

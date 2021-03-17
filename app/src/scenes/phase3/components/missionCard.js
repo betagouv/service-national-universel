@@ -16,8 +16,8 @@ export default ({ title, image, subtitle, tags = [], places, location }) => {
           </div>
         </div>
         <Tags>
-          {tags.map((e) => (
-            <div>{e}</div>
+          {tags.map((e, i) => (
+            <div key={i}>{e}</div>
           ))}
         </Tags>
         {location && <Location>{location}</Location>}

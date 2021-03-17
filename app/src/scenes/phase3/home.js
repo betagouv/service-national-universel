@@ -33,21 +33,21 @@ export default () => {
           <Col>
             <ProgramCard
               title="Le Service Civique"
-              image={require("../../assets/engagement-1.jpg")}
+              image={require("../../assets/programmes-engagement/service-civique.jpg")}
               details="Un engagement volontaire au service de l’intérêt général, en France ou à l’étranger, auprès d’organisations à but non lucratif ou publiques."
             />
           </Col>
           <Col>
             <ProgramCard
               title="Les Sapeurs-Pompiers de France"
-              image={require("../../assets/engagement-2.jpg")}
+              image={require("../../assets/programmes-engagement/sapeur-pompier-2.jpg")}
               details="Si vous souhaitez vous engager pour aider votre prochain tout en ayant une autre activité professionnelle, le statut de sapeur-pompier volontaire peut vous permettre d’y parvenir."
             />
           </Col>
           <Col>
             <ProgramCard
               title="Plan Mercredi"
-              image={require("../../assets/engagement-3.png")}
+              image={require("../../assets/programmes-engagement/plan-mercredi.png")}
               details="Devenez bénévole et trouvez des missions en quelques clics près de chez vous ou à distance. Plus de 330 000 bénévoles soutiennent des milliers d'associations et d'organisations publiques."
             />
           </Col>
