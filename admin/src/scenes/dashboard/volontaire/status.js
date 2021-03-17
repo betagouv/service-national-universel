@@ -7,7 +7,6 @@ import api from "../../../services/api";
 
 export default ({ filter }) => {
   const [status, setStatus] = useState({});
-  const [statusWithdrawn, setStatusWithdrawn] = useState({});
   const [statusPhase1, setStatusPhase1] = useState({});
   const [statusPhase2, setStatusPhase2] = useState({});
   const [statusPhase3, setStatusPhase3] = useState({});
@@ -39,9 +38,10 @@ export default ({ filter }) => {
       queries2[1].query.bool.filter = [{ term: { "cohort.keyword": filter.cohort } }, { terms: { "status.keyword": ["WITHDRAWN"] } }];
       const { responses: responses2 } = await api.esQuery(queries2);
 
-      setStatus(responses[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-      setStatusWithdrawn(responses2[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-
+      setStatus({
+        VALIDATED: responses[0].aggregations.status.buckets.reduce((acc, c) => acc + c.doc_count, 0),
+        WITHDRAWN: responses2[0].aggregations.status.buckets.reduce((acc, c) => acc + c.doc_count, 0),
+      });
       setStatusPhase1(responses[0].aggregations.statusPhase1.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
       setStatusPhase2(responses[0].aggregations.statusPhase2.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
       setStatusPhase3(responses[0].aggregations.statusPhase3.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
@@ -77,7 +77,7 @@ export default ({ filter }) => {
 
   return (
     <>
-      <Status status={status} statusPhase1={statusPhase1} statusPhase2={statusPhase2} statusPhase3={statusPhase3} statusWithdrawn={statusWithdrawn} getLink={getLink} />
+      <Status status={status} statusPhase1={statusPhase1} statusPhase2={statusPhase2} statusPhase3={statusPhase3} getLink={getLink} />
       <hr />
       <Phase1 data={statusPhase1} getLink={getLink} />
       <Participation data={cohesionStayPresence} getLink={getLink} />
@@ -88,8 +88,8 @@ export default ({ filter }) => {
   );
 };
 
-const Status = ({ status, statusPhase1, statusPhase2, statusPhase3, statusWithdrawn, getLink }) => {
-  const total = status.VALIDATED + statusWithdrawn.WITHDRAWN || 0;
+const Status = ({ status, statusPhase1, statusPhase2, statusPhase3, getLink }) => {
+  const total = Object.keys(status).reduce((acc, a) => acc + status[a], 0);
 
   return (
     <React.Fragment>
@@ -157,9 +157,9 @@ const Status = ({ status, statusPhase1, statusPhase2, statusPhase3, statusWithdr
             <Card borderBottomColor={YOUNG_STATUS_COLORS.WITHDRAWN}>
               <CardTitle>Désistés</CardTitle>
               <CardValueWrapper>
-                <CardValue>{statusWithdrawn.WITHDRAWN || 0}</CardValue>
+                <CardValue>{status.WITHDRAWN || 0}</CardValue>
                 <CardPercentage>
-                  {total ? `${(((statusWithdrawn.WITHDRAWN || 0) * 100) / total).toFixed(0)}%` : `0%`}
+                  {total ? `${(((status.WITHDRAWN || 0) * 100) / total).toFixed(0)}%` : `0%`}
                   <CardArrow />
                 </CardPercentage>
               </CardValueWrapper>
