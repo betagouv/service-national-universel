@@ -1,14 +1,41 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 
 export default ({ title, image, details, href }) => {
+  const [expandDetails, setExpandDetails] = useState(false);
+  const preview = details.substring(0, 130);
+  const rest = details.substring(130);
+
+  const toggleDetails = () => {
+    setExpandDetails(!expandDetails);
+  };
+
+  const renderText = () => {
+    if (!rest) return preview;
+
+    return (
+      <>
+        {preview}{" "}
+        {expandDetails ? (
+          <>
+            {rest} <ToogleText onClick={toggleDetails}>réduire</ToogleText>
+          </>
+        ) : (
+          <>
+            ...<ToogleText onClick={toggleDetails}>lire plus</ToogleText>
+          </>
+        )}
+      </>
+    );
+  };
+
   return (
     <Card>
       <a href={href} className="thumb">
         <img src={image} />
       </a>
       <h4>{title}</h4>
-      <p>{details}</p>
+      <p>{renderText()}</p>
       <SeeMore href={href} target="_blank">
         DÉCOUVRIR
       </SeeMore>
@@ -48,4 +75,12 @@ const SeeMore = styled.a`
   color: #5145cd;
   font-size: 16px;
   font-weight: 600;
+`;
+
+const ToogleText = styled.span`
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #333;
+  text-transform: uppercase;
+  cursor: pointer;
 `;
