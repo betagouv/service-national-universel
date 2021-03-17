@@ -34,9 +34,8 @@ const Card = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-top: 30px;
   padding-bottom: 30px;
-  border-top: 1px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
   .inner {
     display: flex;
     align-items: center;

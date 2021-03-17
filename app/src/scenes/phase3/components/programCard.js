@@ -23,7 +23,7 @@ const Card = styled.div`
     img {
       border-radius: 6px;
       width: 100%;
-      height: 290px;
+      height: 200px;
       object-fit: cover;
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }
@@ -31,7 +31,7 @@ const Card = styled.div`
   h4 {
     font-size: 18px;
     font-weight: 700;
-    margin-bottom: 0;
+    margin-bottom: 0.5rem;
   }
   p {
     color: #6b7280;
@@ -40,7 +40,11 @@ const Card = styled.div`
 `;
 
 const SeeMore = styled.a`
-  color: #42389d;
+  :hover {
+    color: #372f78;
+  }
+  cursor: pointer;
+  color: #5145cd;
   font-size: 16px;
   font-weight: 600;
 `;
