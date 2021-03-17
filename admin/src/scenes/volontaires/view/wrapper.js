@@ -46,7 +46,7 @@ export default ({ children, young, tab }) => {
             <TabItem isActive={tab === "phase2"} onClick={() => history.push(`/volontaire/${young._id}/phase2`)}>
               Phase 2
             </TabItem>
-            <TabItem disabled isActive={tab === "phase3"} onClick={() => {}}>
+            <TabItem isActive={tab === "phase3"} onClick={() => history.push(`/volontaire/${young._id}/phase3`)}>
               Phase 3
             </TabItem>
           </TabNavigationList>
@@ -69,15 +69,6 @@ export default ({ children, young, tab }) => {
             </Row>
           </Col>
         </Row>
-
-        {/* <div style={{ display: "flex" }}>
-          <Link to={`/volontaire/${young._id}/edit`}>
-            <Button className="btn-blue">Modifier</Button>
-          </Link>
-          <Button style={{ marginLeft: "0.5rem" }} onClick={handleDelete} className="btn-red">
-            Supprimer
-          </Button>
-        </div> */}
       </Header>
       {children}
     </div>
@@ -90,6 +81,10 @@ const TabNavigationList = styled.ul`
 `;
 
 const TabItem = styled.li`
+  width: 90px;
+  margin: 0 0.3rem;
+  height: 40px;
+  text-align: center;
   padding: 0.5rem 1rem;
   position: relative;
   font-size: 1rem;
@@ -98,6 +93,9 @@ const TabItem = styled.li`
   font-weight: 300;
   border-radius: 0.5rem;
   overflow: hidden;
+  :hover {
+    box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.16);
+  }
   ${(props) =>
     props.isActive &&
     `
