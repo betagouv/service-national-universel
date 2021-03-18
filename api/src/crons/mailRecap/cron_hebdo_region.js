@@ -34,8 +34,8 @@ async function sendRecapRegion() {
         htmlContent = htmlContent.replace(/{{new_structure}}/g, dataStructure.new_structure);
         htmlContent = htmlContent.replace(/{{inscription_waiting_validation}}/g, dataInscriptions.inscription_waiting_validation);
         htmlContent = htmlContent.replace(/{{inscription_validated}}/g, dataInscriptions.inscription_validated);
-        await sendEmail({ name: toName, email: `tangi.mendes+${region.replace(/\s+/, "-")}@selego.co` }, subject, htmlContent);
-        console.log("recap hebdo", region, "sent to :", toName);
+        // await sendEmail({ name: toName, email: ref.email }, subject, htmlContent);
+        console.log("recap hebdo", region, "sent to :", ref.email);
       }
     }
   }

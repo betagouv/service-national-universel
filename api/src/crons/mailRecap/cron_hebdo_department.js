@@ -35,8 +35,8 @@ async function sendRecapDepartmentTuesday() {
         htmlContent = htmlContent.replace(/{{new_structure}}/g, dataStructure.new_structure);
         htmlContent = htmlContent.replace(/{{inscription_waiting_validation}}/g, dataInscriptions.inscription_waiting_validation);
         htmlContent = htmlContent.replace(/{{inscription_validated}}/g, dataInscriptions.inscription_validated);
-        await sendEmail({ name: toName, email: `tangi.mendes+${department.replace(/\s+/, "-")}@selego.co` }, subject, htmlContent);
-        console.log("recap hebdo", department, "sent to :", toName);
+        // await sendEmail({ name: toName, email: ref.email }, subject, htmlContent);
+        console.log("recap hebdo", department, "sent to :", ref.email);
       }
     }
   }
@@ -70,8 +70,8 @@ async function sendRecapDepartmentThursday() {
         htmlContent = htmlContent.replace(/{{new_structure}}/g, dataStructure.new_structure);
         htmlContent = htmlContent.replace(/{{inscription_waiting_validation}}/g, dataInscriptions.inscription_waiting_validation);
         htmlContent = htmlContent.replace(/{{inscription_validated}}/g, dataInscriptions.inscription_validated);
-        await sendEmail({ name: toName, email: `tangi.mendes+${department.replace(/\s+/, "-")}@selego.co` }, subject, htmlContent);
-        console.log("recap hebdo", department, "sent to :", toName);
+        // await sendEmail({ name: toName, email: ref.email }, subject, htmlContent);
+        console.log("recap hebdo", department, "sent to :", ref.email);
       }
     }
   }
