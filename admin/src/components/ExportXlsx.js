@@ -7,6 +7,16 @@ import { translate } from "../utils";
 export default function ExportComponent({ title, collection, react, transform, defaultQuery = () => ({ query: { query: { match_all: {} } }, size: 10000 }) }) {
   const [exporting, setExporting] = useState(false);
 
+  const handleExport = () => {
+    if (
+      !confirm(
+        "En téléchargeant ces informations, vous vous engagez à les supprimer après consultation en application des dispositions légales sur la protection des données personnelles (RGPD, CNIL)"
+      )
+    )
+      return;
+    setExporting(true);
+  };
+
   if (exporting) {
     return (
       <ReactiveComponent
@@ -20,7 +30,7 @@ export default function ExportComponent({ title, collection, react, transform, d
     );
   }
 
-  return <button onClick={() => setExporting(true)}>{title}</button>;
+  return <button onClick={handleExport}>{title}</button>;
 }
 
 function Loading({ onFinish, collection, data, loading, transform }) {
