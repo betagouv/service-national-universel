@@ -209,8 +209,8 @@ export default ({ setYoung }) => {
                 innerClass={{ pagination: "pagination" }}
                 size={30}
                 showLoader={true}
-                dataField="createdAt"
-                sortBy="desc"
+                dataField="lastName.keyword"
+                sortBy="asc"
                 loader={<div style={{ padding: "0 20px" }}>Chargement...</div>}
                 innerClass={{ pagination: "pagination" }}
                 renderNoResults={() => <div style={{ padding: "10px 25px" }}>Aucun résultat.</div>}
