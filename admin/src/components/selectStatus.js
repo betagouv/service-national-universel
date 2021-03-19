@@ -55,10 +55,12 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
 
       if (status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INSCRIPTION) {
         matomo.logEvent("status_update", YOUNG_STATUS.VALIDATED);
+        window.lumiere("sendEvent", "status_update", YOUNG_STATUS.VALIDATED, { prevStatus, status: YOUNG_STATUS.VALIDATED }); // cat, action, props
         await api.post(`/referent/email/validate/${young._id}`, { subject: "Inscription validée", prevStatus });
       }
       if (status === YOUNG_STATUS.REFUSED) {
         matomo.logEvent("status_update", YOUNG_STATUS.REFUSED);
+        window.lumiere("sendEvent", "status_update", YOUNG_STATUS.REFUSED, { prevStatus, status: YOUNG_STATUS.REFUSED }); // cat, action, props
       }
       setYoung(newYoung);
       toastr.success("Mis à jour!");
