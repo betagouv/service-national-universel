@@ -10,6 +10,8 @@ import { translate, YOUNG_STATUS } from "../../../utils";
 import SelectStatus from "../../../components/selectStatus";
 import Badge from "../../../components/Badge";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
+import TabList from "../../../components/views/TabList";
+import Tab from "../../../components/views/Tab";
 import { appURL } from "../../../config";
 
 export default ({ children, young, tab }) => {
@@ -36,20 +38,20 @@ export default ({ children, young, tab }) => {
           <Title>
             {young.firstName} {young.lastName} <Badge text={`Cohorte ${young.cohort}`} />
           </Title>
-          <TabNavigationList>
-            <TabItem isActive={tab === "details"} onClick={() => history.push(`/volontaire/${young._id}`)}>
+          <TabList>
+            <Tab isActive={tab === "details"} onClick={() => history.push(`/volontaire/${young._id}`)}>
               Détails
-            </TabItem>
-            <TabItem isActive={tab === "phase1"} onClick={() => history.push(`/volontaire/${young._id}/phase1`)}>
+            </Tab>
+            <Tab isActive={tab === "phase1"} onClick={() => history.push(`/volontaire/${young._id}/phase1`)}>
               Phase 1
-            </TabItem>
-            <TabItem isActive={tab === "phase2"} onClick={() => history.push(`/volontaire/${young._id}/phase2`)}>
+            </Tab>
+            <Tab isActive={tab === "phase2"} onClick={() => history.push(`/volontaire/${young._id}/phase2`)}>
               Phase 2
-            </TabItem>
-            <TabItem isActive={tab === "phase3"} onClick={() => history.push(`/volontaire/${young._id}/phase3`)}>
+            </Tab>
+            <Tab isActive={tab === "phase3"} onClick={() => history.push(`/volontaire/${young._id}/phase3`)}>
               Phase 3
-            </TabItem>
-          </TabNavigationList>
+            </Tab>
+          </TabList>
         </div>
         <Row style={{ minWidth: "30%" }}>
           <Col md={12}>
@@ -75,54 +77,6 @@ export default ({ children, young, tab }) => {
   );
 };
 
-const TabNavigationList = styled.ul`
-  display: flex;
-  list-style-type: none;
-`;
-
-const TabItem = styled.li`
-  width: 90px;
-  margin: 0 0.3rem;
-  height: 40px;
-  text-align: center;
-  padding: 0.5rem 1rem;
-  position: relative;
-  font-size: 1rem;
-  color: #979797;
-  cursor: pointer;
-  font-weight: 300;
-  border-radius: 0.5rem;
-  overflow: hidden;
-  :hover {
-    box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.16);
-  }
-  ${(props) =>
-    props.isActive &&
-    `
-    color: #222;
-    font-weight: 500;
-    background-color:#fff;
-
-    &:after {
-      content: "";
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background-color: #5245CC;
-      border-top-left-radius: 4px;
-      border-top-right-radius: 4px;
-    }
-  `}
-  ${(props) =>
-    props.disabled &&
-    `
-    color: #bbb;
-    cursor: not-allowed;
-  `}
-`;
-
 const Title = styled.div`
   display: flex;
   color: rgb(38, 42, 62);
@@ -137,34 +91,4 @@ const Header = styled.div`
   display: flex;
   margin-bottom: 1rem;
   align-items: flex-start;
-`;
-
-const Button = styled.button`
-  /* margin: 0 0.5rem; */
-  align-self: flex-start;
-  border-radius: 4px;
-  padding: 5px;
-  font-size: 12px;
-  /* min-width: 100px; */
-  width: 100%;
-  font-weight: 400;
-  cursor: pointer;
-  background-color: #fff;
-  &.btn-blue {
-    color: #646b7d;
-    border: 1px solid #dcdfe6;
-    :hover {
-      color: rgb(49, 130, 206);
-      border-color: rgb(193, 218, 240);
-      background-color: rgb(234, 243, 250);
-    }
-  }
-  &.btn-red {
-    border: 1px solid #f6cccf;
-    color: rgb(206, 90, 90);
-    :hover {
-      border-color: rgb(240, 218, 218);
-      background-color: rgb(250, 230, 230);
-    }
-  }
 `;

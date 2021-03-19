@@ -1,20 +1,8 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { Col, Row, Input } from "reactstrap";
+import { Col, Row } from "reactstrap";
 import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
-import {
-  translate,
-  YOUNG_STATUS_COLORS,
-  YOUNG_STATUS_PHASE1,
-  YOUNG_STATUS_PHASE1_COLORS,
-  YOUNG_STATUS_PHASE2,
-  YOUNG_STATUS_PHASE2_COLORS,
-  YOUNG_STATUS_PHASE3,
-  YOUNG_STATUS_PHASE3_COLORS,
-  APPLICATION_STATUS,
-  APPLICATION_STATUS_COLORS,
-} from "../../../utils";
+import { translate, YOUNG_STATUS_COLORS, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE1, APPLICATION_STATUS, APPLICATION_STATUS_COLORS } from "../../../utils";
 import api from "../../../services/api";
 
 export default ({ filter }) => {
@@ -30,7 +18,7 @@ export default ({ filter }) => {
       const queries = [];
       queries.push({ index: "young", type: "_doc" });
       queries.push({
-        query: { bool: { must: { match_all: {} }, filter: [{ term: { "cohort.keyword": filter.cohort } }, { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } }] } },
+        query: { bool: { must: { match_all: {} }, filter: [{ term: { "cohort.keyword": filter.cohort } }, { terms: { "status.keyword": ["VALIDATED"] } }] } },
         aggs: {
           status: { terms: { field: "status.keyword" } },
           statusPhase1: { terms: { field: "statusPhase1.keyword" } },
@@ -45,8 +33,15 @@ export default ({ filter }) => {
       if (filter.department) queries[1].query.bool.filter.push({ term: { "department.keyword": filter.department } });
 
       const { responses } = await api.esQuery(queries);
-      setStatus(responses[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
 
+      const queries2 = [...queries];
+      queries2[1].query.bool.filter = [{ term: { "cohort.keyword": filter.cohort } }, { terms: { "status.keyword": ["WITHDRAWN"] } }];
+      const { responses: responses2 } = await api.esQuery(queries2);
+
+      setStatus({
+        VALIDATED: responses[0].aggregations.status.buckets.reduce((acc, c) => acc + c.doc_count, 0),
+        WITHDRAWN: responses2[0].aggregations.status.buckets.reduce((acc, c) => acc + c.doc_count, 0),
+      });
       setStatusPhase1(responses[0].aggregations.statusPhase1.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
       setStatusPhase2(responses[0].aggregations.statusPhase2.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
       setStatusPhase3(responses[0].aggregations.statusPhase3.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
@@ -96,7 +91,7 @@ export default ({ filter }) => {
 };
 
 const Status = ({ status, statusPhase1, statusPhase2, statusPhase3, getLink }) => {
-  const total = status.VALIDATED || 0;
+  const total = Object.keys(status).reduce((acc, a) => acc + status[a], 0);
 
   return (
     <React.Fragment>
@@ -115,9 +110,11 @@ const Status = ({ status, statusPhase1, statusPhase2, statusPhase3, getLink }) =
             </Card>
           </Link>
         </Col>
+      </Row>
+      <Row>
         <Col md={6} xl={4}>
           <Link to={getLink(`/volontaire?STATUS_PHASE_1=%5B"DONE"%5D`)}>
-            <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
+            <Card borderBottomColor={YOUNG_STATUS_COLORS.VALIDATED}>
               <CardTitle>Ayant validé la Phase 1</CardTitle>
               <CardValueWrapper>
                 <CardValue>{statusPhase1.DONE || 0}</CardValue>
@@ -131,7 +128,7 @@ const Status = ({ status, statusPhase1, statusPhase2, statusPhase3, getLink }) =
         </Col>
         <Col md={6} xl={4}>
           <Link to={getLink(`/volontaire?STATUS_PHASE_2=%5B"VALIDATED"%5D`)}>
-            <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
+            <Card borderBottomColor={YOUNG_STATUS_COLORS.VALIDATED}>
               <CardTitle>Ayant validé la Phase 2</CardTitle>
               <CardValueWrapper>
                 <CardValue>{statusPhase2.VALIDATED || 0}</CardValue>
@@ -144,7 +141,7 @@ const Status = ({ status, statusPhase1, statusPhase2, statusPhase3, getLink }) =
           </Link>
         </Col>
         <Col md={6} xl={4}>
-          <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
+          <Card borderBottomColor={YOUNG_STATUS_COLORS.VALIDATED}>
             <CardTitle>Ayant validé la Phase 3</CardTitle>
             <CardValueWrapper>
               <CardValue>{statusPhase3.VALIDATED || 0}</CardValue>
@@ -155,9 +152,11 @@ const Status = ({ status, statusPhase1, statusPhase2, statusPhase3, getLink }) =
             </CardValueWrapper>
           </Card>
         </Col>
+      </Row>
+      <Row>
         <Col md={6} xl={4}>
           <Link to={getLink(`/volontaire?STATUS=%5B"WITHDRAWN"%5D`)}>
-            <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
+            <Card borderBottomColor={YOUNG_STATUS_COLORS.WITHDRAWN}>
               <CardTitle>Désistés</CardTitle>
               <CardValueWrapper>
                 <CardValue>{status.WITHDRAWN || 0}</CardValue>
@@ -222,7 +221,7 @@ const Phase2 = ({ data, getLink }) => {
           return (
             <Col md={6} xl={4} key={e}>
               <Link to={getLink(`/volontaire?STATUS_PHASE_2=%5B"${e}"%5D`)}>
-                <Card borderBottomColor={YOUNG_STATUS_PHASE2_COLORS[e]}>
+                <Card borderBottomColor={YOUNG_STATUS_COLORS[e]}>
                   <CardTitle>{translate(e)}</CardTitle>
                   <CardValueWrapper>
                     <CardValue>{data[e] || 0}</CardValue>
@@ -287,7 +286,7 @@ const Phase1 = ({ data, getLink }) => {
           return (
             <Col md={6} xl={4} key={e}>
               <Link to={getLink(`/volontaire?STATUS_PHASE_1=%5B"${e}"%5D`)}>
-                <Card borderBottomColor={YOUNG_STATUS_PHASE1_COLORS[e]}>
+                <Card borderBottomColor={YOUNG_STATUS_COLORS[e]}>
                   <CardTitle>{translate(e)}</CardTitle>
                   <CardValueWrapper>
                     <CardValue>{data[e] || 0}</CardValue>
@@ -307,7 +306,7 @@ const Phase1 = ({ data, getLink }) => {
 };
 
 const Participation = ({ data, getLink }) => {
-  const total = data["true"] + data["false"];
+  const total = Object.keys(data).reduce((acc, a) => acc + data[a], 0);
   return (
     <React.Fragment>
       <CardSubtitle>Participations au séjour de cohésion</CardSubtitle>
@@ -319,7 +318,7 @@ const Participation = ({ data, getLink }) => {
               <CardValueWrapper>
                 <CardValue>{data["true"] || 0}</CardValue>
                 <CardPercentage>
-                  {total ? `${((data["true"] * 100) / total).toFixed(0)}%` : `0%`}
+                  {total ? `${(((data["true"] || 0) * 100) / total).toFixed(0)}%` : `0%`}
                   <CardArrow />
                 </CardPercentage>
               </CardValueWrapper>
@@ -333,7 +332,7 @@ const Participation = ({ data, getLink }) => {
               <CardValueWrapper>
                 <CardValue>{data["false"] || 0}</CardValue>
                 <CardPercentage>
-                  {total ? `${((data["false"] * 100) / total).toFixed(0)}%` : `0%`}
+                  {total ? `${(((data["false"] || 0) * 100) / total).toFixed(0)}%` : `0%`}
                   <CardArrow />
                 </CardPercentage>
               </CardValueWrapper>

@@ -2,11 +2,15 @@ import React from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { Col, Row } from "reactstrap";
-import api from "../../../services/api";
-import SelectStatusMission from "../../../components/selectStatusMission";
 import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
+
+import api from "../../../services/api";
+import SelectStatusMission from "../../../components/selectStatusMission";
 import { translate } from "../../../utils";
+import TabList from "../../../components/views/TabList";
+import Tab from "../../../components/views/Tab";
+import PanelActionButton from "../../../components/buttons/PanelActionButton";
 
 export default ({ mission, tab, children }) => {
   const history = useHistory();
@@ -43,19 +47,19 @@ export default ({ mission, tab, children }) => {
         <div style={{ flex: 1 }}>
           <Title>{mission.name}</Title>
 
-          <TabNavigationList>
-            <TabItem isActive={tab === "details"} onClick={() => history.push(`/mission/${mission._id}`)}>
+          <TabList>
+            <Tab isActive={tab === "details"} onClick={() => history.push(`/mission/${mission._id}`)}>
               Détails
-            </TabItem>
-            <TabItem isActive={tab === "youngs"} onClick={() => history.push(`/mission/${mission._id}/youngs`)}>
+            </Tab>
+            <Tab isActive={tab === "youngs"} onClick={() => history.push(`/mission/${mission._id}/youngs`)}>
               Volontaires
-            </TabItem>
-            <TabItem isActive={tab === "historic"} onClick={() => history.push(`/mission/${mission._id}/historic`)}>
+            </Tab>
+            <Tab isActive={tab === "historic"} onClick={() => history.push(`/mission/${mission._id}/historic`)}>
               Historique
-            </TabItem>
-          </TabNavigationList>
+            </Tab>
+          </TabList>
         </div>
-        <Row style={{ minWidth: "40%" }}>
+        <Row style={{ minWidth: "30%" }}>
           <Col md={4}>
             <BoxPlaces>
               <table>
@@ -76,26 +80,16 @@ export default ({ mission, tab, children }) => {
           </Col>
           <Col md={8}>
             <Row>
-              <Col md={12}>
+              <Col md={12} style={{ display: "flex", justifyContent: "flex-end" }}>
                 <SelectStatusMission hit={mission} />
               </Col>
             </Row>
             <Row style={{ marginTop: "0.5rem" }}>
-              <Col md={4}>
-                <Link to={`/mission/${mission._id}/edit`}>
-                  <Button className="btn-blue">Modifier</Button>
-                </Link>
-              </Col>
-              <Col md={4}>
-                <Button onClick={duplicate} className="btn-blue">
-                  Dupliquer
-                </Button>
-              </Col>
-              <Col md={4}>
-                <Button onClick={handleDelete} className="btn-red">
-                  Supprimer
-                </Button>
-              </Col>
+              <Link to={`/mission/${mission._id}/edit`}>
+                <PanelActionButton title="Modifier" icon="pencil" />
+              </Link>
+              <PanelActionButton onClick={duplicate} title="Dupliquer" icon="duplicate" />
+              <PanelActionButton onClick={handleDelete} title="Supprimer" icon="bin" />
             </Row>
           </Col>
         </Row>
@@ -104,42 +98,6 @@ export default ({ mission, tab, children }) => {
     </div>
   );
 };
-
-const TabNavigationList = styled.ul`
-  display: flex;
-  list-style-type: none;
-`;
-
-const TabItem = styled.li`
-  padding: 0.5rem 1rem;
-  position: relative;
-  font-size: 1rem;
-  color: #979797;
-  cursor: pointer;
-  font-weight: 300;
-  border-radius: 0.5rem;
-  overflow: hidden;
-
-  ${(props) =>
-    props.isActive &&
-    `
-    color: #222;
-    font-weight: 500;
-    background-color:#fff;
-
-    &:after {
-      content: "";
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background-color: #5245CC;
-      border-top-left-radius: 4px;
-      border-top-right-radius: 4px;
-    }
-  `}
-`;
 
 const Title = styled.div`
   color: rgb(38, 42, 62);
@@ -177,34 +135,6 @@ const BoxPlaces = styled(Box)`
     color: black;
     &.places {
       color: #777;
-    }
-  }
-`;
-
-const Button = styled.button`
-  align-self: flex-start;
-  border-radius: 4px;
-  padding: 5px;
-  font-size: 12px;
-  width: 100%;
-  font-weight: 400;
-  cursor: pointer;
-  background-color: #fff;
-  &.btn-blue {
-    color: #646b7d;
-    border: 1px solid #dcdfe6;
-    :hover {
-      color: rgb(49, 130, 206);
-      border-color: rgb(193, 218, 240);
-      background-color: rgb(234, 243, 250);
-    }
-  }
-  &.btn-red {
-    border: 1px solid #f6cccf;
-    color: rgb(206, 90, 90);
-    :hover {
-      border-color: rgb(240, 218, 218);
-      background-color: rgb(250, 230, 230);
     }
   }
 `;

@@ -11,7 +11,7 @@ import api from "../../services/api";
 import { apiURL, appURL } from "../../config";
 import Panel from "./panel";
 import Badge from "../../components/Badge";
-import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS_PHASE1_COLORS, YOUNG_STATUS_PHASE2_COLORS } from "../../utils";
+import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS_COLORS } from "../../utils";
 import { Link } from "react-router-dom";
 
 const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_PHASE_1", "STATUS_PHASE_2"];
@@ -209,8 +209,8 @@ export default ({ setYoung }) => {
                 innerClass={{ pagination: "pagination" }}
                 size={30}
                 showLoader={true}
-                dataField="createdAt"
-                sortBy="desc"
+                dataField="lastName.keyword"
+                sortBy="asc"
                 loader={<div style={{ padding: "0 20px" }}>Chargement...</div>}
                 innerClass={{ pagination: "pagination" }}
                 renderNoResults={() => <div style={{ padding: "10px 25px" }}>Aucun résultat.</div>}
@@ -279,9 +279,9 @@ const Hit = ({ hit, onClick }) => {
       </td>
       <td>
         <Badge text={`Cohorte ${hit.cohort}`} />
-        <Badge text="Phase 1" tooltipText={translate(hit.statusPhase1)} color={YOUNG_STATUS_PHASE1_COLORS[hit.statusPhase1]} />
-        <Badge text="Phase 2" tooltipText={translate(hit.statusPhase2)} color={YOUNG_STATUS_PHASE2_COLORS[hit.statusPhase2]} />
-        {hit.status === "WITHDRAWN" ? <Badge text="Désisté" color="#F8A9AD" /> : null}
+        <Badge text="Phase 1" tooltipText={translate(hit.statusPhase1)} color={YOUNG_STATUS_COLORS[hit.statusPhase1]} />
+        <Badge text="Phase 2" tooltipText={translate(hit.statusPhase2)} color={YOUNG_STATUS_COLORS[hit.statusPhase2]} />
+        {hit.status === "WITHDRAWN" ? <Badge text="Désisté" color={YOUNG_STATUS_COLORS.WITHDRAWN} /> : null}
       </td>
       <td>{formatStringLongDate(hit.lastLoginAt)}</td>
       <td onClick={(e) => e.stopPropagation()}>

@@ -6,6 +6,8 @@ import { toastr } from "react-redux-toastr";
 
 import { translate } from "../../../utils";
 import Badge from "../../../components/Badge";
+import TabList from "../../../components/views/TabList";
+import Tab from "../../../components/views/Tab";
 
 export default ({ children, young, tab }) => {
   const history = useHistory();
@@ -31,58 +33,17 @@ export default ({ children, young, tab }) => {
           <Title>
             {young.firstName} {young.lastName} <Badge text={`Cohorte ${young.cohort}`} />
           </Title>
-          <TabNavigationList>
-            <TabItem isActive={tab === "details"} onClick={() => history.push(`/volontaire/${young._id}`)}>
+          <TabList>
+            <Tab isActive={tab === "details"} onClick={() => history.push(`/volontaire/${young._id}`)}>
               Détails
-            </TabItem>
-          </TabNavigationList>
+            </Tab>
+          </TabList>
         </div>
       </Header>
       {children}
     </div>
   );
 };
-
-const TabNavigationList = styled.ul`
-  display: flex;
-  list-style-type: none;
-`;
-
-const TabItem = styled.li`
-  padding: 0.5rem 1rem;
-  position: relative;
-  font-size: 1rem;
-  color: #979797;
-  cursor: pointer;
-  font-weight: 300;
-  border-radius: 0.5rem;
-  overflow: hidden;
-  ${(props) =>
-    props.isActive &&
-    `
-    color: #222;
-    font-weight: 500;
-    background-color:#fff;
-
-    &:after {
-      content: "";
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background-color: #5245CC;
-      border-top-left-radius: 4px;
-      border-top-right-radius: 4px;
-    }
-  `}
-  ${(props) =>
-    props.disabled &&
-    `
-    color: #bbb;
-    cursor: not-allowed;
-  `}
-`;
 
 const Title = styled.div`
   display: flex;

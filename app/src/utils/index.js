@@ -4,6 +4,7 @@ export * from "./region-and-departments";
 export * from "./constants";
 export * from "./translation";
 export * from "./date";
+export * from "./colors";
 
 export function getPasswordErrorMessage(v, matomo) {
   if (!v) return "Ce champ est obligatoire";

@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 
 import api from "../services/api";
 
-import { translate, YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_COLORS, YOUNG_STATUS_PHASE2_COLORS } from "../utils";
+import { translate, YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_COLORS } from "../utils";
 import { toastr } from "react-redux-toastr";
 import matomo from "../services/matomo";
 
@@ -100,7 +100,7 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
           }}
         />
       )}
-      <ActionBox color={YOUNG_STATUS_COLORS[young[statusName]] || YOUNG_STATUS_PHASE2_COLORS[young[statusName]]}>
+      <ActionBox color={YOUNG_STATUS_COLORS[young[statusName]]}>
         <UncontrolledDropdown setActiveFromChild>
           <DropdownToggle tag="button">
             {translate(young[statusName])}
