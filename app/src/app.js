@@ -40,7 +40,7 @@ export default () => {
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
   useEffect(() => {
-    window.lumiere("init", LUMIERE_APP_ID);
+    window.lumiere("init", LUMIERE_APP_ID, "app");
     window.lumiere("setEnv", environment);
     window.lumiere("sendEvent", "initialization", "page-loaded"); // cat, action, props
 
