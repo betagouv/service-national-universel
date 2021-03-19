@@ -1,9 +1,20 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Col, Container, Row } from "reactstrap";
 import styled from "styled-components";
+import { toastr } from "react-redux-toastr";
+
 import ProgramCard from "./components/programCard";
+import api from "../../services/api";
 
 export default () => {
+  const [programs, setPrograms] = useState();
+  useEffect(() => {
+    (async () => {
+      const { data, ok, code } = await api.get("/program");
+      if (!ok) return toastr.error("nope");
+      setPrograms(data);
+    })();
+  }, []);
   return (
     <Container>
       <Heading>
