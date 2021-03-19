@@ -31,11 +31,20 @@ export default ({ filter }) => {
     })();
   }, [JSON.stringify(filter)]);
 
+  const replaceSpaces = (v) => v.replace(/\s+/g, "+");
+
+  const getLink = (link) => {
+    if (filter.region) link += `&REGION=%5B"${replaceSpaces(filter.region)}"%5D`;
+    if (filter.cohort) link += `&COHORT=%5B"${replaceSpaces(filter.cohort)}"%5D`;
+    if (filter.department) link += `&DEPARTMENT=%5B"${replaceSpaces(filter.department)}"%5D`;
+    return link;
+  };
+
   return (
     <Row>
       {user.role === "admin" && (
         <Col md={6} xl={2}>
-          <Link to='/inscription?STATUS=%5B"IN_PROGRESS"%5D'>
+          <Link to={getLink('/inscription?STATUS=%5B"IN_PROGRESS"%5D')}>
             <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
               <CardTitle>En cours</CardTitle>
               <CardSubtitle>Inscriptions en cours</CardSubtitle>
@@ -48,7 +57,7 @@ export default ({ filter }) => {
         </Col>
       )}
       <Col md={6} xl={2}>
-        <Link to='/inscription?STATUS=%5B"WAITING_VALIDATION"%5D'>
+        <Link to={getLink('/inscription?STATUS=%5B"WAITING_VALIDATION"%5D')}>
           <Card borderBottomColor={YOUNG_STATUS_COLORS.WAITING_VALIDATION}>
             <CardTitle>En attente de validation</CardTitle>
             <CardValueWrapper>
@@ -69,7 +78,7 @@ export default ({ filter }) => {
         </Card>
       </Col> */}
       <Col md={6} xl={2}>
-        <Link to='/inscription/?STATUS=%5B"WAITING_CORRECTION"%5D'>
+        <Link to={getLink('/inscription/?STATUS=%5B"WAITING_CORRECTION"%5D')}>
           <Card borderBottomColor={YOUNG_STATUS_COLORS.WAITING_CORRECTION}>
             <CardTitle>En attente de correction</CardTitle>
             <CardValueWrapper>
@@ -80,7 +89,7 @@ export default ({ filter }) => {
         </Link>
       </Col>
       <Col md={6} xl={2}>
-        <Link to='/inscription/?STATUS=%5B"VALIDATED"%5D'>
+        <Link to={getLink('/inscription/?STATUS=%5B"VALIDATED"%5D')}>
           <Card borderBottomColor={YOUNG_STATUS_COLORS.VALIDATED}>
             <CardTitle>Validées</CardTitle>
             <CardValueWrapper>
@@ -91,7 +100,7 @@ export default ({ filter }) => {
         </Link>
       </Col>
       <Col md={6} xl={2}>
-        <Link to='/inscription/?STATUS=%5B"REFUSED"%5D'>
+        <Link to={getLink('/inscription/?STATUS=%5B"REFUSED"%5D')}>
           <Card borderBottomColor={YOUNG_STATUS_COLORS.REFUSED}>
             <CardTitle>Refusées</CardTitle>
             <CardValueWrapper>
