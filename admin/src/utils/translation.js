@@ -93,7 +93,7 @@ export const translate = (value) => {
     case "COHESION_STAY":
       return "Séjour de cohésion";
     case "INTEREST_MISSION":
-      return "Mission d'interêt générale";
+      return "Mission d'intérêt général";
     case "SUMMER":
       return "Vacances d'été (juillet ou août)";
     case "AUTUMN":
