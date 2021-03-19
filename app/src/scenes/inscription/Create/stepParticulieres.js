@@ -20,6 +20,7 @@ import { translate } from "../../../utils";
 export default () => {
   useEffect(() => {
     matomo.logEvent("inscription", "open_step", "step", 2);
+    window.lumiere("sendEvent", "inscription", "open_step", { step: 2 });
   }, []);
 
   const history = useHistory();

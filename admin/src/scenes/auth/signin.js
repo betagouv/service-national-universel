@@ -10,6 +10,7 @@ import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import Header from "./components/header";
+import matomo from "../../services/matomo";
 
 export default () => {
   const dispatch = useDispatch();
@@ -36,6 +37,8 @@ export default () => {
                     if (token) api.setToken(token);
                     if (user) {
                       dispatch(setUser(user));
+                      matomo.setUserId(user._id);
+                      window.lumiere("registerUser", user._id);
                     }
                   } catch (e) {
                     if (e && (e.code === "EMAIL_OR_PASSWORD_INVALID" || e.code === "USER_NOT_EXISTS")) {

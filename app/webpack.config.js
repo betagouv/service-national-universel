@@ -17,6 +17,7 @@ module.exports = (env) => {
     //   seed: require("./public/manifest.json")
     // }),
     new CopyWebpackPlugin([
+      { from: "./public/lum.js", to: "./lum.js" },
       { from: "./public/robots.txt", to: "./robots.txt" },
       { from: "./public/logo.png", to: "./logo.png" },
     ]),
@@ -88,13 +89,13 @@ module.exports = (env) => {
           exclude: /node_modules/,
           use: [
             {
-              loader: 'file-loader',
+              loader: "file-loader",
               options: {
                 esModule: false,
               },
             },
             {
-              loader: 'image-webpack-loader',
+              loader: "image-webpack-loader",
               options: {
                 disable: true,
               },

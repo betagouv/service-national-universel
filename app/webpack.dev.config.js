@@ -1,8 +1,8 @@
-const path = require('path');
-const webpack = require('webpack');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ManifestPlugin = require('webpack-manifest-plugin');
-
+const path = require("path");
+const webpack = require("webpack");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const ManifestPlugin = require("webpack-manifest-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = (env) => {
   const plugins = [
@@ -10,31 +10,32 @@ module.exports = (env) => {
     // new ManifestPlugin({
     //   seed: require('./public/manifest.json')
     // }),
+    new CopyWebpackPlugin([{ from: "./public/lum.js", to: "./lum.js" }]),
     new HtmlWebpackPlugin({
-      template: './public/index.html',
-      filename: 'index.html',
-      inject: 'body',
-      favicon: path.join('public/favicon.ico'),
+      template: "./public/index.html",
+      filename: "index.html",
+      inject: "body",
+      favicon: path.join("public/favicon.ico"),
     }),
   ];
 
   return {
-    mode: 'development',
-    entry: ['./src/index.js'],
-    devtool: 'source-map',
+    mode: "development",
+    entry: ["./src/index.js"],
+    devtool: "source-map",
     output: {
-      path: path.resolve('build'),
-      filename: '[hash].index.js',
-      publicPath: '/',
+      path: path.resolve("build"),
+      filename: "[hash].index.js",
+      publicPath: "/",
     },
     devServer: {
-      contentBase: 'build',
+      contentBase: "build",
       historyApiFallback: true,
       inline: true,
-      hot: true
+      hot: true,
     },
     node: {
-      fs: 'empty',
+      fs: "empty",
     },
     module: {
       rules: [
@@ -44,27 +45,27 @@ module.exports = (env) => {
         },
         {
           test: /\.js$/,
-          loader: 'babel-loader',
-          include: path.resolve('src'),
+          loader: "babel-loader",
+          include: path.resolve("src"),
           exclude: /node_modules/,
           query: {
-            babelrc: true
-          }
+            babelrc: true,
+          },
         },
         {
           test: /\.(gif|png|jpe?g|svg|woff|woff2)$/i,
           exclude: /node_modules/,
           use: [
             {
-              loader: 'file-loader',
+              loader: "file-loader",
               options: {
                 esModule: false,
               },
             },
           ],
         },
-      ]
+      ],
     },
     plugins,
   };
-}
+};
