@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Col, Row } from "reactstrap";
 import { Link } from "react-router-dom";
-import { translate, YOUNG_STATUS_COLORS, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE1, APPLICATION_STATUS, APPLICATION_STATUS_COLORS } from "../../../utils";
+import { translate, YOUNG_STATUS_COLORS, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE1, APPLICATION_STATUS, APPLICATION_STATUS_COLORS, YOUNG_STATUS_PHASE3 } from "../../../utils";
 import api from "../../../services/api";
 
 export default ({ filter }) => {
