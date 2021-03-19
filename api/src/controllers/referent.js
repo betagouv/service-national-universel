@@ -87,8 +87,9 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
     const obj = {};
     const reqTemplate = req.params.template;
     if (req.body.hasOwnProperty(`email`)) obj.email = req.body.email.trim().toLowerCase();
-    if (req.body.hasOwnProperty(`firstName`)) obj.firstName = req.body.firstName;
-    if (req.body.hasOwnProperty(`lastName`)) obj.lastName = req.body.lastName;
+    if (req.body.hasOwnProperty(`firstName`))
+      obj.firstName = req.body.firstName.charAt(0).toUpperCase() + (req.body.firstName || "").toLowerCase().slice(1);
+    if (req.body.hasOwnProperty(`lastName`)) obj.lastName = req.body.lastName.toUpperCase();
     if (req.body.hasOwnProperty(`role`)) obj.role = req.body.role;
 
     if (req.body.hasOwnProperty(`region`)) obj.region = req.body.region; //TODO
@@ -488,7 +489,11 @@ router.put("/:id", passport.authenticate("referent", { session: false }), async 
 //@check
 router.put("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const user = await ReferentObject.findByIdAndUpdate(req.user._id, req.body, { new: true });
+    const obj = req.body;
+    obj.email = req.body.email && req.body.email.trim().toLowerCase();
+    obj.firstName = req.body.firstName && req.body.firstName.charAt(0).toUpperCase() + (req.body.firstName || "").toLowerCase().slice(1);
+    obj.lastName = req.body.lastName && req.body.lastName.toUpperCase();
+    const user = await ReferentObject.findByIdAndUpdate(req.user._id, obj, { new: true });
     await updateTutorNameInMissionsAndApplications(user);
     res.status(200).send({ ok: true, data: user });
   } catch (error) {
