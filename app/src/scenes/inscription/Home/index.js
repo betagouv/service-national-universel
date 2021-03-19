@@ -81,6 +81,8 @@ export default ({}) => {
                 <a href="https://apicivique.s3.eu-west-3.amazonaws.com/SNU+Dossier+Inscriptions+De%CC%81rogation+2021.pdf" target="_blank">
                   Voici le lien du formulaire à <b>imprimer et remplir</b>.
                 </a>
+                <br />
+                Merci de renvoyer le formulaire rempli à <a href="mailto:contact@snu.gouv.fr">contact@snu.gouv.fr</a>
               </Infos>
             </li>
           </ul>
