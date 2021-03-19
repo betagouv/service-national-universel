@@ -103,6 +103,7 @@ export default () => {
                   URLParams={true}
                   showSearch={false}
                   sortBy="asc"
+                  defaultValue={user.role === "referent_department" && [user.department]}
                 />
                 <MultiDropdownList
                   defaultQuery={DEFAULT_QUERY}
@@ -115,6 +116,7 @@ export default () => {
                   URLParams={true}
                   showSearch={false}
                   sortBy="asc"
+                  defaultValue={user.role === "referent_region" && [user.region]}
                 />
                 <MultiDropdownList
                   className="dropdown-filter"

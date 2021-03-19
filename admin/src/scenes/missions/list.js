@@ -20,8 +20,6 @@ export default () => {
   const user = useSelector((state) => state.Auth.user);
   const DEFAULT_QUERY = () => {
     if (user.role === "supervisor") return { query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } } };
-    if (user.role === "referent_department") return { query: { bool: { filter: { term: { "department.keyword": user.department } } } } };
-    if (user.role === "referent_region") return { query: { bool: { filter: { term: { "region.keyword": user.region } } } } };
     return { query: { match_all: {} } };
   };
 
@@ -114,6 +112,7 @@ export default () => {
                   URLParams={true}
                   showSearch={false}
                   sortBy="asc"
+                  defaultValue={user.role === "referent_region" && [user.region]}
                 />
                 <MultiDropdownList
                   defaultQuery={DEFAULT_QUERY}
@@ -126,6 +125,7 @@ export default () => {
                   URLParams={true}
                   showSearch={false}
                   sortBy="asc"
+                  defaultValue={user.role === "referent_department" && [user.department]}
                 />
                 <MultiDropdownList
                   defaultQuery={DEFAULT_QUERY}
