@@ -188,7 +188,7 @@ const Phase3 = ({ data, getLink }) => {
           return (
             <Col md={6} xl={4} key={e}>
               <Link to={getLink(`/volontaire?STATUS_PHASE_3=%5B"${e}"%5D`)}>
-                <Card borderBottomColor={YOUNG_STATUS_PHASE3_COLORS[e]}>
+                <Card borderBottomColor={YOUNG_STATUS_COLORS[e]}>
                   <CardTitle>{translate(e)}</CardTitle>
                   <CardValueWrapper>
                     <CardValue>{data[e] || 0}</CardValue>
