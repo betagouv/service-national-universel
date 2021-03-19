@@ -84,6 +84,7 @@ export default (props) => {
       <MainNav>
         <Item
           title="séjour de cohésion"
+          phase="1"
           subtitle="Phase 1"
           status={status1}
           to="/phase1"
@@ -92,6 +93,7 @@ export default (props) => {
         />
         <Item
           title="mission d'intérêt général"
+          phase="2"
           subtitle="Phase 2"
           status={status2}
           to="/phase2"
@@ -113,6 +115,7 @@ export default (props) => {
         </Item>
         <Item
           title="poursuivre mon snu"
+          phase="3"
           subtitle="Phase 3"
           status={status3}
           to="/phase3"
@@ -125,7 +128,7 @@ export default (props) => {
               <NavLink to="/phase3/les-programmes">Les programmes d'engagement</NavLink>
             </li>
             <li>
-              <NavLink to="/une-mission">Trouver une mission</NavLink>
+              <NavLink to="/phase3/mission">Trouver une mission</NavLink>
             </li>
             <li>
               <NavLink to="/phase3/valider">Valider ma phase 3</NavLink>

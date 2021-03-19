@@ -24,7 +24,7 @@ export default ({ young }) => {
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <WrapperPhase2 young={young} tab="phase2">
         <Box>
-          <Bloc title="Réalisation d'une mission d'interêt général">
+          <Bloc title="Réalisation d'une mission d'intérêt général">
             <div style={{ display: "flex" }}>
               <p style={{ flex: 1 }}>
                 Le volontaire doit achever sa phase 2 avant le <b>{getDate()}</b>

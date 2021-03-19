@@ -84,6 +84,8 @@ export default ({ filter }) => {
       <hr />
       <Phase2 data={statusPhase2} getLink={getLink} />
       <Application data={statusApplication} getLink={getLink} />
+      <hr />
+      <Phase3 data={statusPhase3} getLink={getLink} />
     </>
   );
 };
@@ -171,6 +173,39 @@ const Status = ({ status, statusPhase1, statusPhase2, statusPhase3, getLink }) =
   );
 };
 
+const Phase3 = ({ data, getLink }) => {
+  const total = Object.keys(data).reduce((acc, a) => acc + data[a], 0);
+  return (
+    <React.Fragment>
+      <Row>
+        <Col md={12}>
+          <CardSection>Phase 3</CardSection>
+          <CardSubtitle>Statut</CardSubtitle>
+        </Col>
+      </Row>
+      <Row>
+        {Object.values(YOUNG_STATUS_PHASE3).map((e) => {
+          return (
+            <Col md={6} xl={4} key={e}>
+              <Link to={getLink(`/volontaire?STATUS_PHASE_3=%5B"${e}"%5D`)}>
+                <Card borderBottomColor={YOUNG_STATUS_PHASE3_COLORS[e]}>
+                  <CardTitle>{translate(e)}</CardTitle>
+                  <CardValueWrapper>
+                    <CardValue>{data[e] || 0}</CardValue>
+                    <CardPercentage>
+                      {total ? `${(((data[e] || 0) * 100) / total).toFixed(0)}%` : `0%`}
+                      <CardArrow />
+                    </CardPercentage>
+                  </CardValueWrapper>
+                </Card>
+              </Link>
+            </Col>
+          );
+        })}
+      </Row>
+    </React.Fragment>
+  );
+};
 const Phase2 = ({ data, getLink }) => {
   const total = Object.keys(data).reduce((acc, a) => acc + data[a], 0);
   return (

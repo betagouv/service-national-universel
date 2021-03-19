@@ -48,7 +48,7 @@ export default ({ children, young, tab }) => {
             <Tab isActive={tab === "phase2"} onClick={() => history.push(`/volontaire/${young._id}/phase2`)}>
               Phase 2
             </Tab>
-            <Tab disabled isActive={tab === "phase3"} onClick={() => {}}>
+            <Tab isActive={tab === "phase3"} onClick={() => history.push(`/volontaire/${young._id}/phase3`)}>
               Phase 3
             </Tab>
           </TabList>
