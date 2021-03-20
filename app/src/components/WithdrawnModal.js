@@ -7,6 +7,7 @@ import { toastr } from "react-redux-toastr";
 import LoadingButton from "../components/buttons/LoadingButton";
 import { setYoung } from "../redux/auth/actions";
 import api from "../services/api";
+import { translate } from "../utils";
 
 export default ({ value, onChange, status }) => {
   const [sending, setSending] = useState(false);
