@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 
+import { translate } from "../../../utils";
+
 export default ({ program, image, enableToggle = true }) => {
   console.log(program);
   const [expandDetails, setExpandDetails] = useState(false);
@@ -32,12 +34,20 @@ export default ({ program, image, enableToggle = true }) => {
     );
   };
 
+  const renderVisibility = () => {
+    if (program.visibility === "NATIONAL") return `Visibilité Nationale`;
+    if (program.visibility === "DEPARTMENT") return `Visibilité Departement : ${program.department}`;
+    if (program.visibility === "REGION") return `Visibilité Departement : ${program.region}`;
+  };
+
   return (
     <Card>
       <a href={program.href} className="thumb">
         <img src={image} />
+        <Badge>{program.type}</Badge>
       </a>
       <Description>
+        <p>{renderVisibility()}</p>
         <h4>{program.name}</h4>
         <p>{renderText()}</p>
       </Description>
@@ -47,12 +57,20 @@ export default ({ program, image, enableToggle = true }) => {
 };
 
 const Actions = ({ id }) => {
+  const handleDelete = () => {
+    console.log("delete");
+  };
+
   return (
     <ActionStyle>
-      <Link to={`/contenu/${id}/edit`}>
-        <div>Edit</div>
-      </Link>
-      <div>Suppr</div>
+      <Action>
+        <Link to={`/contenu/${id}/edit`}>
+          <div>Editer</div>
+        </Link>
+      </Action>
+      <Action>
+        <div onClick={handleDelete}>Supprimer</div>
+      </Action>
     </ActionStyle>
   );
 };
@@ -60,21 +78,36 @@ const Actions = ({ id }) => {
 const ActionStyle = styled.div`
   display: flex;
   justify-content: space-around;
+  border-top: 1px solid #ddd;
+`;
+
+const Action = styled.div`
+  color: #333;
+  :hover {
+    color: #000 !important;
+    background-color: #f8f8f8;
+  }
+  text-align: center;
+  flex: 1;
+  padding: 1rem;
+  border-right: 1px solid #ddd;
+  cursor: pointer;
 `;
 
 const Description = styled.div`
+  flex: 1;
   padding: 1rem;
 `;
 
 const Card = styled.div`
+  display: flex;
+  flex-direction: column;
   background-color: #fff;
   margin-bottom: 50px;
   border-radius: 1rem;
   overflow: hidden;
   .thumb {
-    margin-bottom: 20px;
     img {
-      margin-bottom: 20px;
       width: 100%;
       height: 200px;
       object-fit: cover;
@@ -108,4 +141,17 @@ const ToogleText = styled.span`
   color: #333;
   text-transform: uppercase;
   cursor: pointer;
+`;
+
+const Badge = styled.div`
+  font-size: 0.8rem;
+  color: #222;
+  background: #fff;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 0.5rem 1.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 `;

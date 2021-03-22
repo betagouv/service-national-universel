@@ -72,9 +72,7 @@ export default (props) => {
           <Header>
             <Title>{defaultValue ? values.name : "Nouvelle possibilité d'engagement"}</Title>
             <ButtonContainer>
-              <button disabled={!isValid} onClick={handleSubmit}>
-                {defaultValue ? "Enregistrer les modifications" : "Enregistrer et publier"}
-              </button>
+              <button onClick={handleSubmit}>{defaultValue ? "Enregistrer les modifications" : "Enregistrer et publier"}</button>
             </ButtonContainer>
           </Header>
           <Wrapper>
@@ -123,34 +121,37 @@ export default (props) => {
                           <span>*</span>TYPE DE DISPOSITIF
                         </label>
                         <Field validate={(v) => !v && requiredMessage} component="select" name="type" value={values.type} onChange={handleChange}>
-                          <option key="ENGAGEMENT" value="ENGAGEMENT">
-                            {translate("ENGAGEMENT")}
+                          <option key="" value="" disabled>
+                            Choisir un type
                           </option>
-                          <option key="FORMATION" value="FORMATION">
-                            {translate("FORMATION")}
+                          <option key="ENGAGEMENT" value="Engagement">
+                            Engagement
                           </option>
-                          <option key="RECONNAISSANCE" value="RECONNAISSANCE">
-                            {translate("RECONNAISSANCE")}
+                          <option key="FORMATION" value="Formation">
+                            Formation
+                          </option>
+                          <option key="RECONNAISSANCE" value="Reconnaissance">
+                            Reconnaissance
                           </option>
                         </Field>
                         <ErrorMessage errors={errors} touched={touched} name="type" />
                       </FormGroup>
                       <FormGroup>
                         <label>Visibilité</label>
-                        <ChooseVisibility value={values.visibility} onChange={handleChange} />
+                        <ChooseVisibility validate={(v) => !v && requiredMessage} value={values.visibility} onChange={handleChange} />
                         <ErrorMessage errors={errors} touched={touched} name="visibility" />
                       </FormGroup>
                       {values.visibility === "DEPARTMENT" ? (
                         <FormGroup>
                           <label>Département</label>
-                          <ChooseDepartment validate={(v) => !v} value={values.department} onChange={handleChange} />
+                          <ChooseDepartment validate={(v) => !v && requiredMessage} value={values.department} onChange={handleChange} />
                           <ErrorMessage errors={errors} touched={touched} name="department" />
                         </FormGroup>
                       ) : null}
                       {values.visibility === "REGION" ? (
                         <FormGroup>
                           <label>Région</label>
-                          <ChooseRegion validate={(v) => !v} value={values.region} onChange={handleChange} />
+                          <ChooseRegion validate={(v) => !v && requiredMessage} value={values.region} onChange={handleChange} />
                           <ErrorMessage errors={errors} touched={touched} name="region" />
                         </FormGroup>
                       ) : null}
@@ -162,27 +163,7 @@ export default (props) => {
             {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas proposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
             <Header style={{ justifyContent: "flex-end" }}>
               <ButtonContainer>
-                {!defaultValue ? (
-                  <button
-                    className="white-button"
-                    disabled={!isValid}
-                    onClick={() => {
-                      handleChange({ target: { value: "DRAFT", name: "status" } });
-                      handleSubmit();
-                    }}
-                  >
-                    Enregistrer
-                  </button>
-                ) : null}
-                <button
-                  disabled={!isValid}
-                  onClick={() => {
-                    handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
-                    handleSubmit();
-                  }}
-                >
-                  {defaultValue ? "Enregistrer les modifications" : "Enregistrer et proposer la mission"}
-                </button>
+                <button onClick={handleSubmit}>{defaultValue ? "Enregistrer les modifications" : "Enregistrer et publier"}</button>
               </ButtonContainer>
             </Header>
           </Wrapper>
@@ -192,11 +173,11 @@ export default (props) => {
   );
 };
 
-const ChooseVisibility = ({ value, onChange }) => {
+const ChooseVisibility = ({ value, onChange, validate }) => {
   const { user } = useSelector((state) => state.Auth);
 
   return (
-    <Field component="select" name="visibility" value={value} onChange={onChange}>
+    <Field validate={validate} component="select" name="visibility" value={value} onChange={onChange}>
       <option value=""></option>
       <option value="DEPARTMENT">{translate("DEPARTMENT")}</option>
       {user.role === REFERENT_ROLES.ADMIN || user.role === REFERENT_ROLES.REFERENT_REGION ? <option value="REGION">{translate("REGION")}</option> : null}
@@ -205,7 +186,7 @@ const ChooseVisibility = ({ value, onChange }) => {
   );
 };
 
-const ChooseDepartment = ({ value, onChange }) => {
+const ChooseDepartment = ({ value, onChange, validate }) => {
   const { user } = useSelector((state) => state.Auth);
   const [list, setList] = useState(departmentList);
 
@@ -222,7 +203,7 @@ const ChooseDepartment = ({ value, onChange }) => {
   }, []);
 
   return (
-    <Field component="select" disabled={user.role === REFERENT_ROLES.REFERENT_DEPARTMENT} name="department" value={value} onChange={onChange}>
+    <Field validate={validate} component="select" disabled={user.role === REFERENT_ROLES.REFERENT_DEPARTMENT} name="department" value={value} onChange={onChange}>
       {list.map((e) => {
         return (
           <option value={e} key={e}>
@@ -234,7 +215,7 @@ const ChooseDepartment = ({ value, onChange }) => {
   );
 };
 
-const ChooseRegion = ({ value, onChange }) => {
+const ChooseRegion = ({ value, onChange, validate }) => {
   const { user } = useSelector((state) => state.Auth);
 
   useEffect(() => {
@@ -245,7 +226,7 @@ const ChooseRegion = ({ value, onChange }) => {
   }, []);
 
   return (
-    <Field component="select" disabled={user.role === REFERENT_ROLES.REFERENT_REGION} name="region" value={value} onChange={onChange}>
+    <Field validate={validate} component="select" disabled={user.role === REFERENT_ROLES.REFERENT_REGION} name="region" value={value} onChange={onChange}>
       {regionList.map((e) => {
         return (
           <option value={e} key={e}>

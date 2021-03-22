@@ -30,7 +30,7 @@ export default () => {
           .filter((p) => p.visibility === "NATIONAL" || p.region === young.region || p.department === young.department)
           .map((p, i) => (
             <Col key={i} md={4}>
-              <ProgramCard href={p.url} title={p.name} image={p.imageFile ? p.imageFile : require(`../../assets/programmes-engagement/${p.imageString}`)} details={p.description} />
+              <ProgramCard program={p} image={p.imageFile ? p.imageFile : require(`../../assets/programmes-engagement/${p.imageString}`)} />
             </Col>
           ))}
         {/* 
