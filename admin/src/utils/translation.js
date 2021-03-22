@@ -88,6 +88,18 @@ export const translate = (value) => {
       return "Responsable";
     case "supervisor":
       return "Superviseur";
+    case "manager_department":
+      return "Chef de projet départemental";
+    case "assistant_manager_department":
+      return "Chef de projet départemental adjoint";
+    case "manager_department_phase2":
+      return "Référent départemental phase 2";
+    case "secretariat":
+      return "Secrétariat";
+    case "coordinator":
+      return "Coordinateur régional";
+    case "assistant_coordinator":
+      return "Coordinateur régional adjoint";
     case "INSCRIPTION":
       return "Inscription";
     case "COHESION_STAY":

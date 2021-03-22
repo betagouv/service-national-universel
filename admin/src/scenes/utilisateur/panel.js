@@ -72,6 +72,7 @@ export default ({ onChange, value }) => {
       </Info>
       <Info title="Informations">
         <Details title="Rôle" value={translate(value.role)} />
+        <Details title="Fonction" value={translate(value.subRole)} />
         {structure ? (
           <div className="detail">
             <div className="detail-title">Structure :</div>

@@ -77,6 +77,17 @@ export const REFERENT_ROLES = {
   SUPERVISOR: "supervisor",
 };
 
+export const REFERENT_DEPARTMENT_SUBROLE = {
+  manager_department: "manager_department",
+  assistant_manager_department: "assistant_manager_department",
+  manager_department_phase2: "manager_department_phase2",
+  secretariat: "secretariat",
+};
+export const REFERENT_REGION_SUBROLE = {
+  coordinator: "coordinator",
+  assistant_coordinator: "assistant_coordinator",
+};
+
 export const MISSION_STATUS = {
   WAITING_VALIDATION: "WAITING_VALIDATION",
   WAITING_CORRECTION: "WAITING_CORRECTION",
