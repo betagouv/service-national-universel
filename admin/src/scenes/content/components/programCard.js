@@ -3,7 +3,6 @@ import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { useHistory } from "react-router-dom";
 
 import api from "../../../services/api";
 import { translate } from "../../../utils";
@@ -61,7 +60,6 @@ export default ({ program, image, enableToggle = true, onDelete }) => {
 
 const Actions = ({ id, onDelete }) => {
   const user = useSelector((state) => state.Auth.user);
-  const history = useHistory();
 
   const handleDelete = async () => {
     if (!confirm("Êtes-vous sûr(e) de vouloir supprimer cette possibilité d'engagement ?")) return;
