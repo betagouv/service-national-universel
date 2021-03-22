@@ -8,11 +8,12 @@ const Schema = new mongoose.Schema({
   description: { type: String },
   url: { type: String },
   imageFile: { type: String }, //todo
+  imageString: { type: String, default: "default.png" }, //todo
   type: { type: String },
 
   department: { type: String },
   region: { type: String },
-  isNational: { type: String, enum: ["true", "false"] },
+  visibility: { type: String },
 
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },

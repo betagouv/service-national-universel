@@ -6,27 +6,27 @@ const { capture } = require("../sentry");
 const ProgramObject = require("../models/program");
 const { ERRORS } = require("../utils");
 
-// router.post("/", async (req, res) => {
-//   try {
-//     const data = await StructureObject.create(req.body);
-//     return res.status(200).send({ ok: true, data });
-//   } catch (error) {
-//     capture(error);
-//     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
-//   }
-// });
+router.post("/", async (req, res) => {
+  try {
+    const data = await ProgramObject.create(req.body);
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
 
-// router.put("/", passport.authenticate("referent", { session: false }), async (req, res) => {
-//   try {
-//     let obj = req.body;
-//     const data = await StructureObject.findByIdAndUpdate(req.user.structureId, obj, { new: true });
-//     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-//     return res.status(200).send({ ok: true, data });
-//   } catch (error) {
-//     capture(error);
-//     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
-//   }
-// });
+router.put("/", passport.authenticate("referent", { session: false }), async (req, res) => {
+  try {
+    let obj = req.body;
+    const data = await ProgramObject.findByIdAndUpdate(req.body._id, obj, { new: true });
+    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
 
 // router.put("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
 //   try {
@@ -40,15 +40,23 @@ const { ERRORS } = require("../utils");
 //   }
 // });
 
+router.get("/:id", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
+  try {
+    const data = await ProgramObject.findOne({ _id: req.params.id });
+    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
 router.get("/", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
-    const data = await ProgramObject.find({ isNational: "true" });
-    const filter = {};
-    if (req.user.department) filter.department = req.user.department;
-    else if (req.user.region) filter.region = req.user.region;
-    let dataZone = [];
-    if (filter.department || filter.region) dataZone = await ProgramObject.find(filter);
-    return res.status(200).send({ ok: true, data: [...data, ...dataZone] });
+    let data = [];
+    if (req.user.role === "admin") data = await ProgramObject.find({});
+    else data = await ProgramObject.find({ $or: [{ visibility: "NATIONAL" }, { department: req.user.department }, { region: req.user.region }] });
+    return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
