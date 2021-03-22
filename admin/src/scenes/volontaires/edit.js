@@ -10,7 +10,7 @@ import { useSelector } from "react-redux";
 import Historic from "../../components/historic";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import DateInput from "../../components/dateInput";
-import { departmentList, regionList, translate } from "../../utils";
+import { departmentList, regionList, translate, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3 } from "../../utils";
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
@@ -558,6 +558,27 @@ export default (props) => {
                           { value: "2020", label: "2020" },
                           { value: "2019", label: "2019" },
                         ]}
+                      />
+                      <Select
+                        name="statusPhase1"
+                        values={values}
+                        handleChange={handleChange}
+                        title="Statut Phase 1"
+                        options={Object.keys(YOUNG_STATUS_PHASE1).map((s) => ({ value: s, label: translate(s) }))}
+                      />
+                      <Select
+                        name="statusPhase2"
+                        values={values}
+                        handleChange={handleChange}
+                        title="Statut Phase 2"
+                        options={Object.keys(YOUNG_STATUS_PHASE2).map((s) => ({ value: s, label: translate(s) }))}
+                      />
+                      <Select
+                        name="statusPhase3"
+                        values={values}
+                        handleChange={handleChange}
+                        title="Statut Phase 3"
+                        options={Object.keys(YOUNG_STATUS_PHASE3).map((s) => ({ value: s, label: translate(s) }))}
                       />
                     </BoxContent>
                   </Box>
