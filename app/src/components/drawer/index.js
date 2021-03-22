@@ -32,7 +32,6 @@ export default (props) => {
   }, [young]);
 
   const getDisabled = (tab) => {
-    return false;
     if (tab === DRAWER_TABS.HOME) return false;
     if (young.status === YOUNG_STATUS.REFUSED) return true;
     if (tab === DRAWER_TABS.PHASE1) {

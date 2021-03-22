@@ -18,7 +18,6 @@ export default () => {
 
   return (
     <div>
-      <AlertBox />
       <Missions>
         <ReactiveBase url={`${apiURL}/es`} app="mission" headers={{ Authorization: `JWT ${api.getToken()}` }}>
           <Modifybutton to="/preferences">Modifier mes préférences</Modifybutton>
@@ -99,17 +98,6 @@ export default () => {
     </div>
   );
 };
-
-const AlertBox = () => (
-  <Alert>
-    <img src={require("../../assets/information.svg")} height={15} />
-    <div className="text">
-      <strong>Vous pourez faire une mission .....</strong>
-      <p>lorem ipsum dollar aggo pata nai ki likhya lorem ipsum dollar aggo pata nai ki likhya</p>
-    </div>
-    <img src={require("../../assets/close.svg")} height={15} />
-  </Alert>
-);
 
 const Missions = styled(Container)`
   padding: 20px 40px;
