@@ -43,7 +43,7 @@ export default ({}) => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
               </svg>
               <div>
-                Je suis né(e) entre le <strong> 2 juillet 2003</strong> et le <strong> 20 avril 2006</strong>
+                Je suis né(e) entre le <strong> 2 juillet 2003</strong> et le <strong> 20 avril 2006</strong> *
               </div>
             </li>
             <li>
@@ -74,6 +74,17 @@ export default ({}) => {
                 </div>
               </Infos>
             </li>
+            <li>
+              <Infos>
+                * Vous êtes scolarisé(e) en <b>classe de seconde</b> et né(e) après le 20 avril 2006 ?<br />
+                Une procédure dérogatoire vous permet de vous inscrire !<br />
+                <a href="https://apicivique.s3.eu-west-3.amazonaws.com/SNU+Dossier+Inscriptions+De%CC%81rogatoires+2021.pdf" target="_blank">
+                  Voici le lien du formulaire à <b>imprimer et remplir</b>.
+                </a>
+                <br />
+                Merci de renvoyer le formulaire rempli à <a href="mailto:contact@snu.gouv.fr">contact@snu.gouv.fr</a>
+              </Infos>
+            </li>
           </ul>
         </Points>
         <a style={{ fontSize: 12, color: "#000" }} href="https://www.snu.gouv.fr/foire-aux-questions-11" target="blank">
@@ -87,6 +98,12 @@ export default ({}) => {
 const Infos = styled.div`
   font-size: 0.8rem;
   color: #6a7181;
+  a {
+    color: #42389d;
+    :hover {
+      text-decoration: underline;
+    }
+  }
 `;
 
 const Wrapper = styled.div`
