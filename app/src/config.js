@@ -24,6 +24,4 @@ function getEnvironment() {
   return "production";
 }
 
-const LUMIERE_APP_ID = "app_Pemqr1RIvcJ9lVNp_zeVF";
-
 export { apiURL, S3PREFIX, SENTRY_URL, environment, franceConnectUrl, LUMIERE_APP_ID };
