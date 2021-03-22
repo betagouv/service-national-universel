@@ -78,7 +78,7 @@ export default ({}) => {
               <Infos>
                 * Vous êtes scolarisé(e) en <b>classe de seconde</b> et né(e) après le 20 avril 2006 ?<br />
                 Une procédure dérogatoire vous permet de vous inscrire !<br />
-                <a href="https://apicivique.s3.eu-west-3.amazonaws.com/SNU+Dossier+Inscriptions+De%CC%81rogation+2021.pdf" target="_blank">
+                <a href="https://apicivique.s3.eu-west-3.amazonaws.com/SNU+Dossier+Inscriptions+De%CC%81rogatoires+2021.pdf" target="_blank">
                   Voici le lien du formulaire à <b>imprimer et remplir</b>.
                 </a>
                 <br />
