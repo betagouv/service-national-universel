@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { Container, Row, Col } from "reactstrap";
 import styled from "styled-components";
@@ -6,9 +6,19 @@ import { useSelector } from "react-redux";
 
 import ProgramCard from "./components/programCard";
 import MissionCard from "./components/missionCard";
+import api from "../../services/api";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young) || {};
+  const [programs, setPrograms] = useState([]);
+
+  useEffect(() => {
+    (async () => {
+      const { data, ok, code } = await api.get("/program");
+      if (!ok) return toastr.error("nope");
+      setPrograms(data);
+    })();
+  }, []);
 
   return (
     <>
@@ -30,30 +40,11 @@ export default () => {
           <p>Rejoignez plus de 100 000 jeunes français déjà engagés dans de grandes causes</p>
         </Heading>
         <Row>
-          <Col>
-            <ProgramCard
-              enableToggle={false}
-              title="Le Service Civique"
-              image={require("../../assets/programmes-engagement/service-civique.jpg")}
-              details="Un engagement volontaire au service de l’intérêt général, en France ou à l’étranger, auprès d’organisations à but non lucratif ou publiques."
-            />
-          </Col>
-          <Col>
-            <ProgramCard
-              enableToggle={false}
-              title="Les Sapeurs-Pompiers de France"
-              image={require("../../assets/programmes-engagement/sapeur-pompier-2.jpg")}
-              details="Si vous souhaitez vous engager pour aider votre prochain tout en ayant une autre activité professionnelle, le statut de sapeur-pompier volontaire peut vous permettre d’y parvenir."
-            />
-          </Col>
-          <Col>
-            <ProgramCard
-              enableToggle={false}
-              title="JeVeuxAider"
-              image={require("../../assets/programmes-engagement/je-veux-aider.png")}
-              details="Devenez bénévole et trouvez des missions en quelques clics près de chez vous ou à distance. Plus de 330 000 bénévoles soutiennent des milliers d'associations et d'organisations publiques."
-            />
-          </Col>
+          {programs.slice(0, 3).map((p, i) => (
+            <Col key={i}>
+              <ProgramCard program={p} image={p.imageFile ? p.imageFile : require(`../../assets/programmes-engagement/${p.imageString}`)} />
+            </Col>
+          ))}
         </Row>
         <SeeMore to="/phase3/les-programmes">Tous les programmes d'engagement →</SeeMore>
         <hr style={{ margin: "40px 0", opacity: 0.8 }} />

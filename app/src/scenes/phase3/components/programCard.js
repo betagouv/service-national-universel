@@ -12,7 +12,7 @@ export default ({ program, image, enableToggle = true }) => {
   };
 
   const renderText = () => {
-    if (!enableToggle) return program.description;
+    if (!enableToggle) return `${preview} ...`;
     if (!rest) return preview;
 
     return (
