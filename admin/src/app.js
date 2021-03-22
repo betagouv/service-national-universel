@@ -45,7 +45,6 @@ export default () => {
   const dispatch = useDispatch();
   useEffect(() => {
     window.lumiere("init", LUMIERE_APP_ID, "admin");
-    if (environment !== "production") window.lumiere("setDisable", true);
     window.lumiere("setEnv", environment);
 
     window.lumiere("sendEvent", "start", "open_app"); // cat, action, props
