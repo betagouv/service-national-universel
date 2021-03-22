@@ -60,21 +60,34 @@
     <script async src="https://www.googletagmanager.com/gtag/js?id=DC-2971054"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
 
-      gtag('config', 'DC-2971054');
+      gtag("config", "DC-2971054");
     </script>
     <!-- End of global snippet: Please do not remove -->
 
-    <!-- Lumiere -->
-    <script type=" text/javascript">
+    <!-- Lumiere init -->
+    <script type="text/javascript">
+      // initialize lumiere
       window._lumiere = window._lumiere || {};
-      window.lumiere = function () {};
+      window._lumiere.q = window._lumiere.q || [];
+      window.lumiere = function () {
+        window._lumiere.q.push(arguments);
+      };
+      (function () {
+        var d = document,
+          g = d.createElement("script"),
+          s = d.getElementsByTagName("script")[0];
+        g.type = "text/javascript";
+        g.async = true;
+        g.src = "https://lumiere.cleverapps.io/lib.js?timestamp=" + Date.now; // for cache supression
+        s.parentNode.insertBefore(g, s);
+      })();
     </script>
-
-    <script src="/lum.js"></script>
-    <!-- End Lumiere -->
+    <!-- End Lumiere Code -->
   </head>
 
   <body>

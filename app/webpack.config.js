@@ -17,7 +17,6 @@ module.exports = (env) => {
     //   seed: require("./public/manifest.json")
     // }),
     new CopyWebpackPlugin([
-      { from: "./public/lum.js", to: "./lum.js" },
       { from: "./public/robots.txt", to: "./robots.txt" },
       { from: "./public/logo.png", to: "./logo.png" },
     ]),

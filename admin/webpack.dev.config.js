@@ -2,7 +2,6 @@ const path = require("path");
 const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const ManifestPlugin = require("webpack-manifest-plugin");
-const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = (env) => {
   const plugins = [
@@ -10,7 +9,6 @@ module.exports = (env) => {
     // new ManifestPlugin({
     //   seed: require('./public/manifest.json')
     // }),
-    new CopyWebpackPlugin([{ from: "./public/lum.js", to: "./lum.js" }]),
     new HtmlWebpackPlugin({
       template: "./public/index.html",
       filename: "index.html",

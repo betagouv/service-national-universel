@@ -41,7 +41,6 @@ export default () => {
   const dispatch = useDispatch();
   useEffect(() => {
     window.lumiere("init", LUMIERE_APP_ID, "app");
-    if (environment !== "production") window.lumiere("setDisable", true);
     window.lumiere("setEnv", environment);
     window.lumiere("sendEvent", "initialization", "page-loaded"); // cat, action, props
 
