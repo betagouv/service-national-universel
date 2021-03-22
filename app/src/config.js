@@ -16,7 +16,11 @@ if (environment === "production") {
 const S3PREFIX = "";
 const SENTRY_URL = "https://415a2c2d9246422fa05cd5e96dd39c23@o348403.ingest.sentry.io/5557988";
 
-const franceConnectUrl = "https://fcp.integ01.dev-franceconnect.fr/api/v1";
+let franceConnectUrl = "https://fcp.integ01.dev-franceconnect.fr/api/v1";
+
+if (environment === "production") {
+  franceConnectUrl = "https://app.franceconnect.gouv.fr/api/v1";
+}
 
 function getEnvironment() {
   if (window.location.href.indexOf("localhost") !== -1 || window.location.href.indexOf("127.0.0.1") !== -1) return "development";
