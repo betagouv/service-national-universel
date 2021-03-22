@@ -10,13 +10,16 @@ import VioletHeaderButton from "../../components/buttons/VioletHeaderButton";
 
 export default () => {
   const [programs, setPrograms] = useState();
+
+  const getPrograms = async () => {
+    const { data, ok, code } = await api.get("/program");
+    if (!ok) return toastr.error("nope");
+    setPrograms(data);
+  };
   useEffect(() => {
-    (async () => {
-      const { data, ok, code } = await api.get("/program");
-      if (!ok) return toastr.error("nope");
-      setPrograms(data);
-    })();
+    getPrograms();
   }, []);
+
   if (!programs) return <div>Chargéééé !!</div>;
   return (
     <>
@@ -27,22 +30,24 @@ export default () => {
         </div>
         <Link to="/contenu/create">
           <VioletHeaderButton>
-            <p>Nouveau</p>
+            <p>Ajouter un nouveau dispositif</p>
           </VioletHeaderButton>
         </Link>
       </Header>
-      <Container>
-        <Row>
-          {programs.map((p, i) => (
-            <Col key={i} md={4}>
-              <ProgramCard program={p} image={p.imageFile ? p.imageFile : require(`../../assets/programmes-engagement/${p.imageString || "default.png"}`)} />
-            </Col>
-          ))}
-        </Row>
-      </Container>
+      <Wrapper>
+        {programs.map((p, i) => (
+          <Col key={i} md={3}>
+            <ProgramCard onDelete={getPrograms} program={p} image={p.imageFile ? p.imageFile : require(`../../assets/programmes-engagement/${p.imageString || "default.png"}`)} />
+          </Col>
+        ))}
+      </Wrapper>
     </>
   );
 };
+
+const Wrapper = styled(Row)`
+  padding: 2rem;
+`;
 
 const Title = styled.div`
   color: rgb(38, 42, 62);

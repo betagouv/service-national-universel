@@ -1,11 +1,14 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { toastr } from "react-redux-toastr";
+import { useHistory } from "react-router-dom";
 
+import api from "../../../services/api";
 import { translate } from "../../../utils";
 
-export default ({ program, image, enableToggle = true }) => {
-  console.log(program);
+export default ({ program, image, enableToggle = true, onDelete }) => {
   const [expandDetails, setExpandDetails] = useState(false);
   const preview = program.description.substring(0, 130);
   const rest = program.description.substring(130);
@@ -51,26 +54,41 @@ export default ({ program, image, enableToggle = true }) => {
         <h4>{program.name}</h4>
         <p>{renderText()}</p>
       </Description>
-      <Actions id={program._id} />
+      <Actions id={program._id} onDelete={onDelete} />
     </Card>
   );
 };
 
-const Actions = ({ id }) => {
-  const handleDelete = () => {
-    console.log("delete");
+const Actions = ({ id, onDelete }) => {
+  const user = useSelector((state) => state.Auth.user);
+  const history = useHistory();
+
+  const handleDelete = async () => {
+    if (!confirm("Êtes-vous sûr(e) de vouloir supprimer cette possibilité d'engagement ?")) return;
+    try {
+      const { ok, code } = await api.remove(`/program/${id}`);
+      if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
+      if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+      toastr.success("Cette possibilité d'engagement a été supprimée.");
+      return onDelete();
+    } catch (e) {
+      console.log(e);
+      return toastr.error("Oups, une erreur est survenue pendant la supression de la mission :", translate(e.code));
+    }
   };
 
   return (
     <ActionStyle>
-      <Action>
-        <Link to={`/contenu/${id}/edit`}>
+      <Link to={`/contenu/${id}/edit`}>
+        <Action>
           <div>Editer</div>
-        </Link>
-      </Action>
-      <Action>
-        <div onClick={handleDelete}>Supprimer</div>
-      </Action>
+        </Action>
+      </Link>
+      {user.role === "admin" ? (
+        <Action onClick={handleDelete}>
+          <div>Supprimer</div>
+        </Action>
+      ) : null}
     </ActionStyle>
   );
 };
@@ -79,6 +97,9 @@ const ActionStyle = styled.div`
   display: flex;
   justify-content: space-around;
   border-top: 1px solid #ddd;
+  > * {
+    flex: 1;
+  }
 `;
 
 const Action = styled.div`
@@ -88,8 +109,7 @@ const Action = styled.div`
     background-color: #f8f8f8;
   }
   text-align: center;
-  flex: 1;
-  padding: 1rem;
+  padding: 1rem 0;
   border-right: 1px solid #ddd;
   cursor: pointer;
 `;

@@ -60,7 +60,7 @@ export default (props) => {
         try {
           const { ok, code, data } = await api[values._id ? "put" : "post"]("/program", values);
           if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette possibilité d'engagement", translate(code));
-          history.push(`/program`);
+          history.push(`/contenu`);
           toastr.success("Enregistrée");
         } catch (e) {
           return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette possibilité d'engagement", e?.error?.message);
