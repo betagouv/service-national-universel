@@ -473,7 +473,7 @@ export default (props) => {
                           <br />
                           <b>Consentement parental validé via FranceConnect.</b>
                           <br />
-                          Les représentants légaux ont utilisé FranceConnect pour s’identifier, ce qui permet de s’affranchir du document de consentement papier.
+                          Les représentants légaux ont utilisé FranceConnect pour s’identifier et consentir, ce qui permet de s’affranchir du document de consentement papier.
                         </div>
                       ) : (
                         <DndFileInput
