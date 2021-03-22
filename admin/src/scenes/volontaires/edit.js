@@ -42,6 +42,10 @@ export default (props) => {
     return `Inscrit(e) ${diff} - ${createdAt.toLocaleDateString()}`;
   };
 
+  function isFromFranceConnect(values) {
+    return values.parent1FromFranceConnect === "true" && (!values.parent2Status || values.parent2FromFranceConnect === "true");
+  }
+
   return (
     //@todo fix the depart and region
     <Wrapper>
@@ -463,27 +467,37 @@ export default (props) => {
                     ) : null}
                     <Documents>
                       <h4>Attestations des représentants légaux</h4>
-                      <DndFileInput
-                        placeholder="un document justificatif"
-                        errorMessage="Vous devez téléverser un document justificatif"
-                        value={values.parentConsentmentFiles}
-                        source={(e) => api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${e}`)}
-                        name="cniFiles"
-                        onChange={async (e) => {
-                          const res = await api.uploadFile("/referent/file/parentConsentmentFiles", e.target.files, { youngId: values._id });
-                          if (res.code === "FILE_CORRUPTED") {
-                            return toastr.error(
-                              "Le fichier semble corrompu",
-                              "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
-                              { timeOut: 0 }
-                            );
-                          }
-                          if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
-                          // We update and save it instant.
-                          handleChange({ target: { value: res.data, name: "parentConsentmentFiles" } });
-                          handleSubmit();
-                        }}
-                      />
+                      {isFromFranceConnect(values) ? (
+                        <div style={{ marginTop: "1rem" }}>
+                          <img src={require("../../assets/fc_logo_v2.png")} height={60} />
+                          <br />
+                          <b>Consentement parental validé via FranceConnect.</b>
+                          <br />
+                          Les représentants légaux ont utilisé FranceConnect pour s’identifier, ce qui permet de s’affranchir du document de consentement papier.
+                        </div>
+                      ) : (
+                        <DndFileInput
+                          placeholder="un document justificatif"
+                          errorMessage="Vous devez téléverser un document justificatif"
+                          value={values.parentConsentmentFiles}
+                          source={(e) => api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${e}`)}
+                          name="cniFiles"
+                          onChange={async (e) => {
+                            const res = await api.uploadFile("/referent/file/parentConsentmentFiles", e.target.files, { youngId: values._id });
+                            if (res.code === "FILE_CORRUPTED") {
+                              return toastr.error(
+                                "Le fichier semble corrompu",
+                                "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
+                                { timeOut: 0 }
+                              );
+                            }
+                            if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
+                            // We update and save it instant.
+                            handleChange({ target: { value: res.data, name: "parentConsentmentFiles" } });
+                            handleSubmit();
+                          }}
+                        />
+                      )}
                     </Documents>
                   </BoxContent>
                 </Box>
