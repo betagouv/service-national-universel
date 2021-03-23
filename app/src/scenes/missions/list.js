@@ -12,10 +12,11 @@ import api from "../../services/api";
 import Loader from "../../components/Loader";
 import FilterGeoloc from "./components/FilterGeoloc";
 
-const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "GEOLOC", "DATE", "PERIOD"];
+const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "GEOLOC", "DATE", "PERIOD", "RELATIVE"];
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
+  const [targetLocation, setTargetLocation] = useState("");
   const [showAlert, setShowAlert] = useState(true);
   const [applications, setApplications] = useState();
   const DEFAULT_QUERY = () => {
@@ -42,7 +43,7 @@ export default () => {
         },
       },
     };
-    if (young.location)
+    if (young.location && !targetLocation)
       query.sort = [
         {
           _geo_distance: {
@@ -68,6 +69,8 @@ export default () => {
     })();
   }, []);
 
+  const handleChangeTargetLocation = (e) => setTargetLocation(e.target.value);
+
   if (!applications) return <Loader />;
 
   return (
@@ -80,6 +83,15 @@ export default () => {
       <ReactiveBase url={`${apiURL}/es`} app="mission" headers={{ Authorization: `JWT ${api.getToken()}` }}>
         <Filters>
           <Row>
+            <DomainsFilter md={6}>
+              <select id="tl" className="form-control" value={targetLocation} onChange={handleChangeTargetLocation}>
+                <option value="">A proximité de mon domicile ({young.city})</option>
+                <option value={young.mobilityNearRelativeZip}>
+                  A proximité d'un proche ({young.mobilityNearRelativeName} - {young.mobilityNearRelativeZip})
+                </option>
+              </select>
+            </DomainsFilter>
+
             <SearchBox md={6}>
               <DataSearch
                 innerClass={{ input: "form-control" }}
@@ -121,7 +133,7 @@ export default () => {
               />
             </DomainsFilter>
             <Col md={6}>
-              <FilterGeoloc young={young} componentId="GEOLOC" />
+              <FilterGeoloc young={young} targetLocation={targetLocation} componentId="GEOLOC" />
             </Col>
           </Row>
         </Filters>
