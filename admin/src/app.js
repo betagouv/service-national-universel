@@ -32,7 +32,7 @@ import Footer from "./components/footer";
 
 import api from "./services/api";
 
-import { SENTRY_URL, environment, LUMIERE_APP_ID } from "./config";
+import { SENTRY_URL, environment } from "./config";
 
 import matomo from "./services/matomo";
 
@@ -44,9 +44,6 @@ export default () => {
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
   useEffect(() => {
-    window.lumiere("init", LUMIERE_APP_ID, "admin");
-    window.lumiere("setEnv", environment);
-
     window.lumiere("sendEvent", "start", "open_app"); // cat, action, props
     matomo.logEvent("start", "open_app");
     async function fetchData() {

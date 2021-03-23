@@ -3,14 +3,12 @@ const forceProd = false;
 const environment = getEnvironment();
 
 let apiURL = "http://localhost:8080";
-let LUMIERE_APP_ID = "app_1i-pkr9c9sY-6k1ML5o8_";
 
 if (environment === "staging") {
   apiURL = "https://app-a29a266c-556d-4f95-bc0e-9583a27f3f85.cleverapps.io";
 }
 if (environment === "production") {
   apiURL = "https://app-5a3e097d-fdf1-44fa-9172-88ad9d7b2b20.cleverapps.io";
-  LUMIERE_APP_ID = "app_Pemqr1RIvcJ9lVNp_zeVF";
 }
 
 const S3PREFIX = "";
@@ -28,4 +26,4 @@ function getEnvironment() {
   return "production";
 }
 
-export { apiURL, S3PREFIX, SENTRY_URL, environment, franceConnectUrl, LUMIERE_APP_ID };
+export { apiURL, S3PREFIX, SENTRY_URL, environment, franceConnectUrl };
