@@ -29,6 +29,17 @@ export default ({ title, handleChange, values, errors, touched }) => {
           <Field
             validate={(v) => {
               if (!v) return requiredMessage;
+            }}
+            placeholder="Adresse"
+            className="form-control"
+            name="mobilityNearRelativeAddress"
+            value={values.mobilityNearRelativeAddress}
+            onChange={handleChange}
+          />
+          <ErrorMessage errors={errors} touched={touched} name="mobilityNearRelativeAddress" />
+          <Field
+            validate={(v) => {
+              if (!v) return requiredMessage;
               if (!/\d{5}/.test(v)) return "Format incorrect";
             }}
             placeholder="Code postal"

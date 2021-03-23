@@ -83,16 +83,7 @@ export default () => {
       <ReactiveBase url={`${apiURL}/es`} app="mission" headers={{ Authorization: `JWT ${api.getToken()}` }}>
         <Filters>
           <Row>
-            <DomainsFilter md={6}>
-              <select id="tl" className="form-control" value={targetLocation} onChange={handleChangeTargetLocation}>
-                <option value="">A proximité de mon domicile ({young.city})</option>
-                <option value={young.mobilityNearRelativeZip}>
-                  A proximité d'un proche ({young.mobilityNearRelativeName} - {young.mobilityNearRelativeZip})
-                </option>
-              </select>
-            </DomainsFilter>
-
-            <SearchBox md={6}>
+            <SearchBox md={12}>
               <DataSearch
                 innerClass={{ input: "form-control" }}
                 placeholder="Recherche par mots clés..."
@@ -102,6 +93,19 @@ export default () => {
                 queryFormat="and"
               />
             </SearchBox>
+            <DomainsFilter md={6}>
+              <select id="tl" className="form-control" value={targetLocation} onChange={handleChangeTargetLocation}>
+                <option value="">A proximité de mon domicile ({young.city})</option>
+                {young.mobilityNearRelativeZip && (
+                  <option value="relative">
+                    A proximité d'un proche ({young.mobilityNearRelativeName} - {young.mobilityNearRelativeZip})
+                  </option>
+                )}
+              </select>
+            </DomainsFilter>
+            <Col md={6}>
+              <FilterGeoloc young={young} targetLocation={targetLocation} componentId="GEOLOC" />
+            </Col>
             <DomainsFilter md={6}>
               <SingleDropdownList
                 defaultQuery={DEFAULT_QUERY}
@@ -132,9 +136,6 @@ export default () => {
                 showSearch={false}
               />
             </DomainsFilter>
-            <Col md={6}>
-              <FilterGeoloc young={young} targetLocation={targetLocation} componentId="GEOLOC" />
-            </Col>
           </Row>
         </Filters>
         <Missions>

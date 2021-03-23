@@ -189,6 +189,7 @@ const Schema = new mongoose.Schema({
   mobilityNearHome: { type: String, enum: ["true", "false"] },
   mobilityNearRelative: { type: String, enum: ["true", "false"] },
   mobilityNearRelativeName: { type: String },
+  mobilityNearRelativeAddress: { type: String },
   mobilityNearRelativeZip: { type: String },
   mobilityTransport: { type: [String] },
   mobilityTransportOther: { type: String },

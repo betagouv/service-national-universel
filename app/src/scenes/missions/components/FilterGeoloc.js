@@ -19,7 +19,7 @@ const SubComponent = ({ setQuery, young, targetLocation }) => {
         },
       };
       let location;
-      if (targetLocation) location = await getCoordinates({ postcode: targetLocation });
+      if (targetLocation === "relative") location = await getCoordinates({ q: young.mobilityNearRelativeAddress, postcode: young.mobilityNearRelativeZip });
       else location = young.location || (await getCoordinates({ q: young.city }));
       if (location) {
         query.bool["filter"] = {
