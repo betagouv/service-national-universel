@@ -27,11 +27,7 @@
     <!-- End Matomo Code -->
     <!-- Lumiere init -->
     <script type="text/javascript">
-      var isProduction = (function () {
-        if (window.location.href.indexOf("localhost") !== -1 || window.location.href.indexOf("127.0.0.1") !== -1) return "development";
-        if (window.location.href.indexOf("app-735c50af-69c1-4a10-ac30-7ba11d1112f7.cleverapps.io") !== -1) return "staging";
-        return "production";
-      })() === "production";
+      var isProduction = window.location.href.indexOf("admin.snu.gouv.fr") !== -1;
       (function (l, u, m, i, E, r, e, s) {
         l[m] = function () {
           (l[m].q = l[m].q || []).push(arguments);

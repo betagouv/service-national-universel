@@ -70,11 +70,7 @@
     <!-- End of global snippet: Please do not remove -->
     <!-- Lumiere init -->
     <script type="text/javascript">
-      var isProduction = (function () {
-        if (window.location.href.indexOf("localhost") !== -1 || window.location.href.indexOf("127.0.0.1") !== -1) return "development";
-        if (window.location.href.indexOf("app-66aba4d6-e5fc-4c74-b252-f55fb0e9d37f.cleverapps.io") !== -1) return "staging";
-        return "production";
-      })() === "production";
+      var isProduction = window.location.href.indexOf("inscription.snu.gouv.fr") !== -1;
       (function (l, u, m, i, E, r, e, s) {
         l[m] = function () {
           (l[m].q = l[m].q || []).push(arguments);
