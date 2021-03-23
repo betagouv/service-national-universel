@@ -68,24 +68,24 @@
       gtag("config", "DC-2971054");
     </script>
     <!-- End of global snippet: Please do not remove -->
-
     <!-- Lumiere init -->
     <script type="text/javascript">
-      // initialize lumiere
-      window._lumiere = window._lumiere || {};
-      window._lumiere.q = window._lumiere.q || [];
-      window.lumiere = function () {
-        window._lumiere.q.push(arguments);
-      };
-      (function () {
-        var d = document,
-          g = d.createElement("script"),
-          s = d.getElementsByTagName("script")[0];
-        g.type = "text/javascript";
-        g.async = true;
-        g.src = "https://lumiere.cleverapps.io/lib.js?timestamp=" + Date.now; // for cache supression
-        s.parentNode.insertBefore(g, s);
-      })();
+      var isProduction = (function () {
+        if (window.location.href.indexOf("localhost") !== -1 || window.location.href.indexOf("127.0.0.1") !== -1) return "development";
+        if (window.location.href.indexOf("app-66aba4d6-e5fc-4c74-b252-f55fb0e9d37f.cleverapps.io") !== -1) return "staging";
+        return "production";
+      })() === "production";
+      (function (l, u, m, i, E, r, e, s) {
+        l[m] = function () {
+          (l[m].q = l[m].q || []).push(arguments);
+        };
+        var c = u.createElement("script"),
+          h = u.getElementsByTagName("head")[0];
+        c.type = "text/javascript";
+        c.async = true;
+        c.src = "https://lumiere.cleverapps.io/lib.js?a=" + i + "&n=" + E + "&e=" + r + "&d=" + e + "&b=" + s + "&t=" + Date.now();
+        h.appendChild(c);
+      })(window, document, "lumiere", isProduction ? "app_Pemqr1RIvcJ9lVNp_zeVF" : "app_1i-pkr9c9sY-6k1ML5o8_", "app", isProduction, !isProduction, !isProduction);
     </script>
     <!-- End Lumiere Code -->
   </head>
