@@ -5,6 +5,7 @@ require("../../mongo");
 const { sendEmail } = require("../../sendinblue");
 const ReferentModel = require("../../models/referent");
 const { regionListTest, regionList, getDataInscriptions, getDataStructure } = require("../utils");
+const { capture } = require("../../sentry");
 
 const arr = regionList;
 
@@ -27,7 +28,7 @@ async function sendRecapRegion() {
         const ref = referents[j];
         let htmlContent = htmlContentDefault;
         let toName = `${ref.firstName} ${ref.lastName}`;
-        let email = "tangi.mendes+reg@selego.co";
+        let email = ref.email;
         htmlContent = htmlContent.replace(/{{cta}}/g, "https://admin.snu.gouv.fr");
         htmlContent = htmlContent.replace(/{{toName}}/g, toName);
         htmlContent = htmlContent.replace(/{{region}}/g, region);
@@ -42,7 +43,7 @@ async function sendRecapRegion() {
       }
     }
   }
-  console.log("DONE sendRecapRegion", count);
+  capture(`RECAP REGION SENT : ${count} mails`);
 }
 
 module.exports = {

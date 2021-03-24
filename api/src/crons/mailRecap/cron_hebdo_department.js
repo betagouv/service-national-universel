@@ -5,6 +5,7 @@ require("../../mongo");
 const { sendEmail } = require("../../sendinblue");
 const ReferentModel = require("../../models/referent");
 const { departmentListTest, departmentList, getDataInscriptions, getDataStructure } = require("../utils");
+const { capture } = require("../../sentry");
 
 const arr = departmentList;
 
@@ -28,7 +29,7 @@ async function sendRecapDepartmentTuesday() {
         const ref = referents[j];
         let htmlContent = htmlContentDefault;
         let toName = `${ref.firstName} ${ref.lastName}`;
-        let email = "tangi.mendes+reg@selego.co";
+        let email = ref.email;
         htmlContent = htmlContent.replace(/{{sectionTitle}}/g, "Depuis jeudi dernier, il y a...");
         htmlContent = htmlContent.replace(/{{cta}}/g, "https://admin.snu.gouv.fr");
         htmlContent = htmlContent.replace(/{{toName}}/g, toName);
@@ -38,13 +39,13 @@ async function sendRecapDepartmentTuesday() {
         htmlContent = htmlContent.replace(/{{new_structure}}/g, dataStructure.new_structure);
         htmlContent = htmlContent.replace(/{{inscription_waiting_validation}}/g, dataInscriptions.inscription_waiting_validation);
         htmlContent = htmlContent.replace(/{{inscription_validated}}/g, dataInscriptions.inscription_validated);
-        // await sendEmail({ name: toName, email: ref.email }, subject, htmlContent, { bcc: [{ email: "tangi.mendes@selego.co" }] });
+        await sendEmail({ name: toName, email: email }, subject, htmlContent, { bcc: [{ email: "tangi.mendes@selego.co" }] });
         count++;
         console.log("recap hebdo", department, "sent to :", email);
       }
     }
   }
-  console.log("DONE sendRecapDepartmentTuesday", count);
+  capture(`RECAP DEPARTEMENT SENT : ${count} mails`);
 }
 
 async function sendRecapDepartmentThursday() {
@@ -66,7 +67,7 @@ async function sendRecapDepartmentThursday() {
         const ref = referents[j];
         let htmlContent = htmlContentDefault;
         let toName = `${ref.firstName} ${ref.lastName}`;
-        let email = "tangi.mendes+dep@selego.co";
+        let email = ref.email;
         htmlContent = htmlContent.replace(/{{sectionTitle}}/g, "Depuis mardi, il y a...");
         htmlContent = htmlContent.replace(/{{cta}}/g, "https://admin.snu.gouv.fr");
         htmlContent = htmlContent.replace(/{{toName}}/g, toName);
@@ -76,13 +77,13 @@ async function sendRecapDepartmentThursday() {
         htmlContent = htmlContent.replace(/{{new_structure}}/g, dataStructure.new_structure);
         htmlContent = htmlContent.replace(/{{inscription_waiting_validation}}/g, dataInscriptions.inscription_waiting_validation);
         htmlContent = htmlContent.replace(/{{inscription_validated}}/g, dataInscriptions.inscription_validated);
-        // await sendEmail({ name: toName, email }, subject, htmlContent, { bcc: [{ email: "tangimds@gmail.com" }] });
+        await sendEmail({ name: toName, email }, subject, htmlContent, { bcc: [{ email: "tangimds@gmail.com" }] });
         count++;
         console.log("recap hebdo", department, "sent to :", email);
       }
     }
   }
-  console.log("DONE sendRecapDepartmentThursday", count);
+  capture(`RECAP DEPARTEMENT SENT : ${count} mails`);
 }
 
 module.exports = {
