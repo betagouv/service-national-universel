@@ -24,7 +24,7 @@ export default ({}) => {
         <TitleContainer>
           <TopTitle className="mobileOnly">inscription 2021</TopTitle>
           <Title>Participez au SNU</Title>
-          <PlayButton href="https://youtu.be/HyirpmPL43I" target="_blank">
+          <PlayButton href="https://www.youtube.com/watch?v=rE-8fe9xPDo" target="_blank">
             <svg width="20" height="26" viewBox="0 0 20 26" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
                 d="M19.1346 11.0998L3.79966 0.640236C2.49183 -0.253291 0.722412 0.719077 0.722412 2.32217V23.2149C0.722412 24.8443 2.49183 25.7904 3.79966 24.8969L19.1346 14.4373C20.2886 13.6752 20.2886 11.8882 19.1346 11.0998Z"
