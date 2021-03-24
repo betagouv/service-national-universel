@@ -12,10 +12,11 @@ import api from "../../services/api";
 import Loader from "../../components/Loader";
 import FilterGeoloc from "./components/FilterGeoloc";
 
-const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "GEOLOC", "DATE", "PERIOD"];
+const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "GEOLOC", "DATE", "PERIOD", "RELATIVE"];
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
+  const [targetLocation, setTargetLocation] = useState("");
   const [showAlert, setShowAlert] = useState(true);
   const [applications, setApplications] = useState();
   const DEFAULT_QUERY = () => {
@@ -42,7 +43,7 @@ export default () => {
         },
       },
     };
-    if (young.location)
+    if (young.location && !targetLocation)
       query.sort = [
         {
           _geo_distance: {
@@ -68,6 +69,8 @@ export default () => {
     })();
   }, []);
 
+  const handleChangeTargetLocation = (e) => setTargetLocation(e.target.value);
+
   if (!applications) return <Loader />;
 
   return (
@@ -80,7 +83,7 @@ export default () => {
       <ReactiveBase url={`${apiURL}/es`} app="mission" headers={{ Authorization: `JWT ${api.getToken()}` }}>
         <Filters>
           <Row>
-            <SearchBox md={6}>
+            <SearchBox md={12}>
               <DataSearch
                 innerClass={{ input: "form-control" }}
                 placeholder="Recherche par mots clés..."
@@ -90,6 +93,19 @@ export default () => {
                 queryFormat="and"
               />
             </SearchBox>
+            <DomainsFilter md={6}>
+              <select id="tl" className="form-control" value={targetLocation} onChange={handleChangeTargetLocation}>
+                <option value="">A proximité de mon domicile ({young.city})</option>
+                {young.mobilityNearRelativeZip && (
+                  <option value="relative">
+                    A proximité d'un proche ({young.mobilityNearRelativeName} - {young.mobilityNearRelativeZip})
+                  </option>
+                )}
+              </select>
+            </DomainsFilter>
+            <Col md={6}>
+              <FilterGeoloc young={young} targetLocation={targetLocation} componentId="GEOLOC" />
+            </Col>
             <DomainsFilter md={6}>
               <SingleDropdownList
                 defaultQuery={DEFAULT_QUERY}
@@ -120,9 +136,6 @@ export default () => {
                 showSearch={false}
               />
             </DomainsFilter>
-            <Col md={6}>
-              <FilterGeoloc young={young} componentId="GEOLOC" />
-            </Col>
           </Row>
         </Filters>
         <Missions>

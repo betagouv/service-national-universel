@@ -2,11 +2,11 @@ import React, { useEffect, useState } from "react";
 import { ReactiveComponent } from "@appbaseio/reactivesearch";
 import { Col, Row } from "reactstrap";
 
-export default ({ componentId = "FILTER", young }) => {
-  return <ReactiveComponent componentId={componentId} render={(data) => <SubComponent young={young} {...data} />} />;
+export default ({ componentId = "FILTER", young, targetLocation }) => {
+  return <ReactiveComponent componentId={componentId} render={(data) => <SubComponent young={young} targetLocation={targetLocation} {...data} />} />;
 };
 
-const SubComponent = ({ setQuery, young }) => {
+const SubComponent = ({ setQuery, young, targetLocation }) => {
   const [distance, setDistance] = useState("50");
 
   useEffect(() => {
@@ -18,7 +18,9 @@ const SubComponent = ({ setQuery, young }) => {
           },
         },
       };
-      let location = young.location || (await getCoordinates(young.city));
+      let location;
+      if (targetLocation === "relative") location = await getCoordinates({ q: young.mobilityNearRelativeAddress, postcode: young.mobilityNearRelativeZip });
+      else location = young.location || (await getCoordinates({ q: young.city }));
       if (location) {
         query.bool["filter"] = {
           geo_distance: {
@@ -29,11 +31,12 @@ const SubComponent = ({ setQuery, young }) => {
       }
       setQuery({ query });
     })();
-  }, [distance]);
+  }, [distance, targetLocation]);
 
-  const getCoordinates = async (c) => {
+  const getCoordinates = async ({ q, postcode }) => {
     try {
-      let url = `https://api-adresse.data.gouv.fr/search/?q=${c}`;
+      let url = `https://api-adresse.data.gouv.fr/search/?q=${q || postcode}`;
+      if (postcode) url += `&postcode=${postcode}`;
       const res = await fetch(url).then((response) => response.json());
       const lon = res?.features[0]?.geometry?.coordinates[0] || null;
       const lat = res?.features[0]?.geometry?.coordinates[1] || null;
