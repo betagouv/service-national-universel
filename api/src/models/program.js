@@ -4,15 +4,56 @@ const esClient = require("../es");
 const MODELNAME = "program";
 
 const Schema = new mongoose.Schema({
-  name: { type: String, required: true },
-  description: { type: String },
-  url: { type: String },
-  imageFile: { type: String }, //todo
-  type: { type: String },
-
-  department: { type: String },
-  region: { type: String },
-  isNational: { type: String, enum: ["true", "false"] },
+  name: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "nom du programmes",
+    },
+  },
+  description: {
+    type: String,
+    documentation: {
+      description: "desc du programme",
+    },
+  },
+  url: {
+    type: String,
+    documentation: {
+      description: "lien vers son site web",
+    },
+  },
+  imageFile: {
+    type: String,
+    documentation: {
+      description: "image (fichier)",
+    },
+  }, //todo
+  type: {
+    type: String,
+    documentation: {
+      description: "Type de l'engagement (formation, engagement, ...)",
+    },
+  },
+  department: {
+    type: String,
+    documentation: {
+      description: "Département concerné, si applicable",
+    },
+  },
+  region: {
+    type: String,
+    documentation: {
+      description: "Région concernée, si applicable",
+    },
+  },
+  isNational: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "",
+    },
+  },
 
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
