@@ -25,13 +25,14 @@ const api = async (path, options = {}) => {
 };
 
 // https://developers.sendinblue.com/reference#sendtransacemail
-async function sendEmail(to, subject, htmlContent, { params, attachment } = {}) {
+async function sendEmail(to, subject, htmlContent, { params, attachment, bcc } = {}) {
   try {
     const body = {};
 
     body.to = [to];
+    body.bcc = bcc;
     if (ENVIRONMENT === "development") {
-      body.to = body.to.filter((e) => e.email.match(/(selego\.co|beta\.gouv\.fr)/));
+      body.to = body.to.filter((e) => e.email.match(/selego\.co/));
     }
     body.htmlContent = htmlContent;
     body.sender = { name: SENDER_NAME, email: SENDER_EMAIL };
