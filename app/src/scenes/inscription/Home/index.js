@@ -37,13 +37,13 @@ export default ({}) => {
           <CardTitle>Une aventure en trois phases</CardTitle>
           <div className="desktop">
             <CardPhase upText="phase 1" title="Le séjour de cohésion" downText="Du 21 juin au 2 juillet 2021" />
-            <CardPhase upText="phase 2" title="La mission d'intérêt général" downText="84 heures dans l'année" />
-            <CardPhase upText="phase 3 - facultative" title="L'engagement" downText="Mission de 3 mois min. - Facultative" />
+            <CardPhase upText="phase 2" title="La mission d'intérêt général" downText="84 heures à réaliser au cours de l'année suivant le séjour de cohésion" />
+            <CardPhase upText="phase 3 - facultative" title="L'engagement" downText="Mission facultative de 3 mois minimum" />
           </div>
           <Carousel className="mobile" showThumbs={false} showStatus={false} showArrows={true}>
             <CardPhase upText="phase 1" title="Le séjour de cohésion" downText="Du 21 juin au 2 juillet 2021" />
-            <CardPhase upText="phase 2" title="La mission d'intérêt général" downText="84 heures dans l'année" />
-            <CardPhase upText="phase 3 - facultative" title="L'engagement" downText="Mission de 3 mois min. - Facultative" />
+            <CardPhase upText="phase 2" title="La mission d'intérêt général" downText="84 heures à réaliser au cours de l'année suivant le séjour de cohésion" />
+            <CardPhase upText="phase 3 - facultative" title="L'engagement" downText="Mission facultative de 3 mois minimum" />
           </Carousel>
           <StartButtonContainer className="desktop">
             <StartButton to="/inscription/profil">Commencer&nbsp;l'inscription</StartButton>
