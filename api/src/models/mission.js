@@ -4,41 +4,158 @@ const esClient = require("../es");
 const MODELNAME = "mission";
 
 const Schema = new mongoose.Schema({
-  sqlId: { type: String, index: true }, // ID of the previous database
-  sqlStructureId: { type: String, index: true }, // ID of the previous database
-  sqlTutorId: { type: String, index: true }, // ID of the previous database
+  sqlId: {
+    type: String,
+    index: true,
+    documentation: {
+      description: "(migration) Identifiant dans l'ancienne base de données",
+    },
+  }, // ID of the previous database
+  sqlStructureId: {
+    type: String,
+    index: true,
+    documentation: {
+      description: "(migration) Identifiant de la structure dans l'ancienne base de données",
+    },
+  }, // ID of the previous database
+  sqlTutorId: {
+    type: String,
+    index: true,
+    documentation: {
+      description: "(migration) Identifiant de l'utilisateur tuteur de mission dans l'ancienne base de données",
+    },
+  }, // ID of the previous database
 
-  name: { type: String, required: true }, // OK
-  domains: { type: [String] }, // OK
+  name: {
+    type: String,
+    required: true,
+    documentation: {
+      description: "Titre de la mission",
+    },
+  }, // OK
+  domains: {
+    type: [String],
+    documentation: {
+      description: "Liste des domaines de la mission (citoyenneté, sport, culture, ...)",
+    },
+  }, // OK
 
-  startAt: { type: Date }, // OK
-  endAt: { type: Date }, // OK
-  format: { type: String, default: "CONTINUOUS", enum: ["CONTINUOUS", "DISCONTINUOUS", "AUTONOMOUS"] },
-  frequence: { type: String },
-  period: { type: [String] },
-  subPeriod: { type: [String] },
+  startAt: {
+    type: Date,
+    documentation: {
+      description: "Date du début de la mission",
+    },
+  }, // OK
+  endAt: {
+    type: Date,
+    documentation: {
+      description: "Date de fin de la mission",
+    },
+  }, // OK
+  format: {
+    type: String,
+    default: "CONTINUOUS",
+    enum: ["CONTINUOUS", "DISCONTINUOUS", "AUTONOMOUS"],
+    documentation: {
+      description: "Format de la mission",
+    },
+  },
 
-  placesTotal: { type: Number, default: 1 }, // OK
-  placesLeft: { type: Number, default: 1 }, // OK
+  frequence: {
+    type: String,
+    documentation: {
+      description: "Fréquence de la mission",
+    },
+  },
+  period: {
+    type: [String],
+    documentation: {
+      description: "Période de la mission (pendant les vacances scolaires, pendant l'année scolaire)",
+    },
+  },
+  subPeriod: {
+    type: [String],
+    documentation: {
+      description: "Période de la mission, détails",
+    },
+  },
 
-  actions: { type: String }, // OK
-  description: { type: String }, // OK
-  justifications: { type: String }, // OK
-  contraintes: { type: String }, // OK
+  placesTotal: {
+    type: Number,
+    default: 1,
+    documentation: {
+      description: "Nombre de places total pour cette mission",
+    },
+  }, // OK
+  placesLeft: {
+    type: Number,
+    default: 1,
+    documentation: {
+      description: "Nombre de places encore disponibles pour cette mission",
+    },
+  }, // OK
 
-  structureId: { type: String }, // OK
-  structureName: { type: String }, // OK ( slave data from structure)
+  actions: {
+    type: String,
+    documentation: {
+      description: "Actions concrètes confiées au(x) volontaire(s)",
+    },
+  }, // OK
+  description: {
+    type: String,
+    documentation: {
+      description: "Description de la mission",
+    },
+  }, // OK
+  justifications: {
+    type: String,
+    documentation: {
+      description: "",
+    },
+  }, // OK
+  contraintes: {
+    type: String,
+    documentation: {
+      description: "Contraintes spécifiques pour la mission",
+    },
+  }, // OK
+
+  structureId: {
+    type: String,
+    documentation: {
+      description: "Identifiant de la structure proposant la mission",
+    },
+  }, // OK
+  structureName: {
+    type: String,
+    documentation: {
+      description: "Nom de la structure proposant la mission",
+    },
+  }, // OK ( slave data from structure)
 
   status: {
     type: String,
     default: "DRAFT",
     enum: ["DRAFT", "WAITING_VALIDATION", "WAITING_CORRECTION", "VALIDATED", "REFUSED", "CANCEL", "ARCHIVED"],
+    documentation: {
+      description: "Statut de la mission",
+    },
   },
 
   // structure_id: { type: String, required: true },
   // referent_id: { type: String, required: true },
-  tutorId: { type: String },
-  tutorName: { type: String },
+  tutorId: {
+    type: String,
+    documentation: {
+      description: "Identifiant de l'utilisateur tuteur de la mission",
+    },
+  },
+  tutorName: {
+    type: String,
+    documentation: {
+      description: "Prénom et nom de l'utilisateur tuteur de la mission",
+    },
+  },
 
   //
 
@@ -47,17 +164,59 @@ const Schema = new mongoose.Schema({
   // frequence: { type: String },
   // planning: { type: String },
 
-  address: { type: String },
-  zip: { type: String },
-  city: { type: String },
-  department: { type: String },
-  region: { type: String },
-  country: { type: String },
-  location: {
-    lat: { type: Number },
-    lon: { type: Number },
+  address: {
+    type: String,
+    documentation: {
+      description: "Adresse du lieu où se déroule la mission",
+    },
   },
-  remote: { type: String },
+  zip: {
+    type: String,
+    documentation: {
+      description: "Code postal du lieu où se déroule la mission",
+    },
+  },
+  city: {
+    type: String,
+    documentation: {
+      description: "Ville où se déroule la mission",
+    },
+  },
+  department: {
+    type: String,
+    documentation: {
+      description: "Département où se déroule la mission",
+    },
+  },
+  region: {
+    type: String,
+    documentation: {
+      description: "Région où se déroule la mission",
+    },
+  },
+  country: {
+    type: String,
+    documentation: {
+      description: "",
+    },
+  },
+  location: {
+    lat: {
+      type: Number,
+    },
+    lon: {
+      type: Number,
+    },
+    documentation: {
+      description: "Coordonnées GPS du lieu où se déroule la mission",
+    },
+  },
+  remote: {
+    type: String,
+    documentation: {
+      description: "La mission peut se réaliser à distance",
+    },
+  },
   //
   //
   //
