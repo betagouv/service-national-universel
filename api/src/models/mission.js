@@ -201,15 +201,11 @@ const Schema = new mongoose.Schema({
     },
   },
   location: {
-    type: Object,
     lat: {
       type: Number,
     },
     lon: {
       type: Number,
-    },
-    documentation: {
-      description: "Coordonnées GPS du lieu où se déroule la mission : {lon, lat}",
     },
   },
   remote: {

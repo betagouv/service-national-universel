@@ -26,26 +26,25 @@ const Schema = new mongoose.Schema({
   imageFile: {
     type: String,
     documentation: {
-      description: "image",
+      description: "image (fichier)",
     },
   }, //todo
   type: {
     type: String,
     documentation: {
-      description: "",
+      description: "Type de l'engagement (formation, engagement, ...)",
     },
   },
-
   department: {
     type: String,
     documentation: {
-      description: "",
+      description: "Département concerné, si applicable",
     },
   },
   region: {
     type: String,
     documentation: {
-      description: "",
+      description: "Région concernée, si applicable",
     },
   },
   isNational: {
