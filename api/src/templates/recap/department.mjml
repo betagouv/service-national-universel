@@ -17,12 +17,9 @@
         <mj-text font-size="18px" color="#3D4852"
           ><span style="font-size: 28px; font-weight: bold; color: #5145cd">{{new_inscription_validated}}</span> Nouvelles candidatures validées
         </mj-text>
-        <mj-text font-size="18px" color="#3D4852"
-          ><span style="font-size: 28px; font-weight: bold; color: #5145cd">{{new_structure}}</span> Nouvelles structures inscrites
-        </mj-text>
 
         <mj-divider border-color="#F6F7F8"></mj-divider>
-        <mj-text font-size="23px" color="#000000" font-weight="bold">Au total</mj-text>
+        <mj-text font-size="23px" color="#000000" font-weight="bold">Au total, il y a</mj-text>
         <mj-text font-size="18px" color="#3D4852"
           ><span style="font-size: 28px; font-weight: bold; color: #5145cd">{{inscription_waiting_validation}}</span> Candidatures en attente de
           validation

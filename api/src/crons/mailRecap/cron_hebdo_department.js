@@ -11,6 +11,8 @@ const arr = departmentList;
 async function sendRecapDepartmentTuesday() {
   const htmlContentDefault = fs.readFileSync(path.resolve(__dirname, "../../templates/recap/department.html")).toString();
   const subject = "Synthèse des inscriptions 2021";
+  let count = 0;
+
   for (let i = 0; i < arr.length; i++) {
     const department = arr[i];
     console.log("> start department :", department);
@@ -26,7 +28,8 @@ async function sendRecapDepartmentTuesday() {
         const ref = referents[j];
         let htmlContent = htmlContentDefault;
         let toName = `${ref.firstName} ${ref.lastName}`;
-        htmlContent = htmlContent.replace(/{{sectionTitle}}/g, "Depuis jeudi dernier, il ya eu...");
+        let email = "tangi.mendes+reg@selego.co";
+        htmlContent = htmlContent.replace(/{{sectionTitle}}/g, "Depuis jeudi dernier, il y a...");
         htmlContent = htmlContent.replace(/{{cta}}/g, "https://admin.snu.gouv.fr");
         htmlContent = htmlContent.replace(/{{toName}}/g, toName);
         htmlContent = htmlContent.replace(/{{department}}/g, department);
@@ -35,17 +38,19 @@ async function sendRecapDepartmentTuesday() {
         htmlContent = htmlContent.replace(/{{new_structure}}/g, dataStructure.new_structure);
         htmlContent = htmlContent.replace(/{{inscription_waiting_validation}}/g, dataInscriptions.inscription_waiting_validation);
         htmlContent = htmlContent.replace(/{{inscription_validated}}/g, dataInscriptions.inscription_validated);
-        // await sendEmail({ name: toName, email: ref.email }, subject, htmlContent);
-        console.log("recap hebdo", department, "sent to :", ref.email);
+        // await sendEmail({ name: toName, email: ref.email }, subject, htmlContent, { bcc: [{ email: "tangi.mendes@selego.co" }] });
+        count++;
+        console.log("recap hebdo", department, "sent to :", email);
       }
     }
   }
-  console.log("DONE.");
+  console.log("DONE sendRecapDepartmentTuesday", count);
 }
 
 async function sendRecapDepartmentThursday() {
   const htmlContentDefault = fs.readFileSync(path.resolve(__dirname, "../../templates/recap/department.html")).toString();
   const subject = "Synthèse des inscriptions 2021";
+  let count = 0;
   for (let i = 0; i < arr.length; i++) {
     const department = arr[i];
     console.log("> start department :", department);
@@ -61,7 +66,8 @@ async function sendRecapDepartmentThursday() {
         const ref = referents[j];
         let htmlContent = htmlContentDefault;
         let toName = `${ref.firstName} ${ref.lastName}`;
-        htmlContent = htmlContent.replace(/{{sectionTitle}}/g, "Depuis mardi, il ya eu...");
+        let email = "tangi.mendes+dep@selego.co";
+        htmlContent = htmlContent.replace(/{{sectionTitle}}/g, "Depuis mardi, il y a...");
         htmlContent = htmlContent.replace(/{{cta}}/g, "https://admin.snu.gouv.fr");
         htmlContent = htmlContent.replace(/{{toName}}/g, toName);
         htmlContent = htmlContent.replace(/{{department}}/g, department);
@@ -70,12 +76,13 @@ async function sendRecapDepartmentThursday() {
         htmlContent = htmlContent.replace(/{{new_structure}}/g, dataStructure.new_structure);
         htmlContent = htmlContent.replace(/{{inscription_waiting_validation}}/g, dataInscriptions.inscription_waiting_validation);
         htmlContent = htmlContent.replace(/{{inscription_validated}}/g, dataInscriptions.inscription_validated);
-        // await sendEmail({ name: toName, email: ref.email }, subject, htmlContent);
-        console.log("recap hebdo", department, "sent to :", ref.email);
+        // await sendEmail({ name: toName, email }, subject, htmlContent, { bcc: [{ email: "tangimds@gmail.com" }] });
+        count++;
+        console.log("recap hebdo", department, "sent to :", email);
       }
     }
   }
-  console.log("DONE.");
+  console.log("DONE sendRecapDepartmentThursday", count);
 }
 
 module.exports = {
