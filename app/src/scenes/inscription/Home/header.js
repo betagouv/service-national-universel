@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 import styled from "styled-components";
 
 export default () => {
@@ -12,15 +13,41 @@ export default () => {
           <img src={require("../../../assets/logo-snu.png")} />
         </a>
       </Logos>
-      <Title>
+      <Title className="mobileHide">
         <h1>
-          Inscriptions <span className="mobileHide">au Service National Universel</span>
+          Inscriptions <span>au Service National Universel</span>
         </h1>
         <h3>Ouvertes jusqu'au 20 avril 2021</h3>
       </Title>
+      <AvatarContainer to="/auth/login">
+        <Avatar src={require("../../../assets/avatar.jpg")} />
+        <AvatarText>connexion</AvatarText>
+      </AvatarContainer>
     </Header>
   );
 };
+
+const AvatarContainer = styled(Link)`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+const AvatarText = styled.div`
+  color: #aaa;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+`;
+
+const Avatar = styled.img`
+  width: 32px;
+  height: 32px;
+  background-color: #aaa;
+  border-radius: 50%;
+  object-fit: cover;
+  object-fit: contain;
+  cursor: pointer;
+`;
 
 const Header = styled.div`
   padding: 24px;
@@ -48,7 +75,6 @@ const Logos = styled.div`
   align-items: center;
   img {
     vertical-align: top;
-    margin-right: 40px;
     height: 80px;
     @media (max-width: 768px) {
       height: 40px;
@@ -58,9 +84,9 @@ const Logos = styled.div`
 
 const Title = styled.div`
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   flex-direction: column;
-  text-align: right;
+  text-align: center;
   h1 {
     color: #151d2f;
     font-size: 1.5rem;
