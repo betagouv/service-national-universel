@@ -47,5 +47,7 @@ console.log("SENDINBLUEKEY", SENDINBLUEKEY);
 console.log("SENTRY_URL", SENTRY_URL);
 
 function getEnvironment() {
-  return process.env.DEV === "true" ? "development" : "production";
+  if (process.env.STAGING === "true") return "staging";
+  else if (process.env.PRODUCTION === "true") return "production";
+  return "development";
 }
