@@ -16,7 +16,7 @@ import { apiURL, appURL } from "../../config";
 import Panel from "./panel";
 import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS } from "../../utils";
 
-const FILTERS = ["SEARCH", "STATUS", "REGION", "DEPARTMENT", "REMOVEINPROGRESS"];
+const FILTERS = ["SEARCH", "STATUS", "REGION", "DEPARTMENT", "SCHOOL"];
 
 export default () => {
   const [young, setYoung] = useState(null);
@@ -121,6 +121,14 @@ export default () => {
                 autosuggest={false}
               />
               <FilterRow>
+                <MultiDropdownList
+                  style={{ display: "none" }}
+                  defaultQuery={DEFAULT_QUERY}
+                  componentId="SCHOOL"
+                  dataField="schoolName.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "SCHOOL") }}
+                  URLParams={true}
+                />
                 <MultiDropdownList
                   defaultQuery={DEFAULT_QUERY}
                   className="dropdown-filter"
