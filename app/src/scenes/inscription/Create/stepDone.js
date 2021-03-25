@@ -19,6 +19,8 @@ export default () => {
   useEffect(() => {
     matomo.logEvent("inscription", "open_step", "step", 6);
     window.lumiere("sendEvent", "inscription", "open_step", { step: 6 });
+    matomo.logEvent("inscription", "open_step", "step", 5);
+    window.lumiere("sendEvent", "inscription", "open_step", { step: 5 });
   }, []);
 
   if (!young) {
