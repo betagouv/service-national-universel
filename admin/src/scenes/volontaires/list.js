@@ -140,7 +140,8 @@ export default ({ setYoung }) => {
                   title=""
                   react={{ and: FILTERS.filter((e) => e !== "DEPARTMENT") }}
                   URLParams={true}
-                  showSearch={false}
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
                   sortBy="asc"
                 />
                 <MultiDropdownList
@@ -152,7 +153,8 @@ export default ({ setYoung }) => {
                   title=""
                   react={{ and: FILTERS.filter((e) => e !== "REGION") }}
                   URLParams={true}
-                  showSearch={false}
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
                   sortBy="asc"
                 />
                 <MultiDropdownList

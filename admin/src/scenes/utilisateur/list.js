@@ -91,7 +91,8 @@ export default () => {
                   react={{ and: FILTERS.filter((e) => e !== "REGION") }}
                   title=""
                   URLParams={true}
-                  showSearch={false}
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
                   sortBy="asc"
                 />
                 <MultiDropdownList
@@ -106,7 +107,8 @@ export default () => {
                   react={{ and: FILTERS.filter((e) => e !== "DEPARTMENT") }}
                   title=""
                   URLParams={true}
-                  showSearch={false}
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
                   sortBy="asc"
                 />
               </FilterRow>

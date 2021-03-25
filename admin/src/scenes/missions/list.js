@@ -110,7 +110,8 @@ export default () => {
                   title=""
                   react={{ and: FILTERS.filter((e) => e !== "REGION") }}
                   URLParams={true}
-                  showSearch={false}
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
                   sortBy="asc"
                   defaultValue={user.role === "referent_region" && [user.region]}
                 />
@@ -123,7 +124,8 @@ export default () => {
                   title=""
                   react={{ and: FILTERS.filter((e) => e !== "DEPARTMENT") }}
                   URLParams={true}
-                  showSearch={false}
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
                   sortBy="asc"
                   defaultValue={user.role === "referent_department" && [user.department]}
                 />
