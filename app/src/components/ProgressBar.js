@@ -1,0 +1,39 @@
+import React from "react";
+import styled from "styled-components";
+
+const ProgressBar = ({ backgroundColor, backgroundColorCompleted, completed }) => {
+  return (
+    <Container backgroundColor={backgroundColorCompleted}>
+      <Filler backgroundColor={backgroundColor} completed={completed}>
+        <Label>{`${completed} %`}</Label>
+      </Filler>
+    </Container>
+  );
+};
+
+const Container = styled.div`
+  height: 20;
+  width: 100%;
+  max-width: 1270px;
+  background-color: ${({ backgroundColor }) => backgroundColor || "#e0e0e0"};
+  border-radius: 1rem;
+  margin: 0.1rem auto 0;
+`;
+const Filler = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 0.8rem;
+  height: 100%;
+  width: ${({ completed }) => completed + "%"};
+  min-width: 50px;
+  background-color: ${({ backgroundColor }) => backgroundColor || "#fff"};
+  border-radius: 1rem;
+`;
+
+const Label = styled.span`
+  padding: 5;
+  color: white;
+  font-weight: 500;
+`;
+
+export default ProgressBar;

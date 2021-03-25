@@ -6,6 +6,7 @@ import { Link, useHistory } from "react-router-dom";
 import api from "../../../services/api";
 import { setYoung } from "../../../redux/auth/actions";
 import { STEPS } from "../utils";
+import ProgressBar from "../../../components/ProgressBar";
 
 export default ({ step }) => {
   const history = useHistory();
@@ -82,8 +83,9 @@ export default ({ step }) => {
         <Element status={getStatus(STEPS.MOTIVATIONS)} onClick={() => handleClick(STEPS.MOTIVATIONS)}>
           <a>Motivations</a>
         </Element>
-        <Element>{`${((currentIndex * 100) / (Object.keys(STEPS).length - 1)).toFixed(0)}%`}</Element>
+        <Element onClick={() => handleClick(STEPS.DONE)} />
       </Topbar>
+      <ProgressBar backgroundColor="#5850ec" backgroundColorCompleted="#fff" completed={((currentIndex * 100) / (Object.keys(STEPS).length - 1)).toFixed(0)} />
     </>
   );
 };
@@ -145,7 +147,7 @@ const Topbar = styled.ul`
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
   max-width: 1270px;
-  margin: 0 auto 20px;
+  margin: 0 auto 0.5rem;
   @media (max-width: 1240px) {
     box-shadow: none;
     background-color: transparent;
@@ -157,6 +159,7 @@ const Element = styled.li`
   position: relative;
   display: flex;
   align-items: center;
+  cursor: pointer;
   :not(:last-child)::after {
     content: "";
     display: block;
@@ -169,9 +172,17 @@ const Element = styled.li`
     right: 0;
   }
   :last-child {
-    color: #6b7280;
-    padding: 20px;
-    flex: 0 0 60px;
+    font-size: 0;
+    padding: 0;
+    background: url(${require("../../../assets/logo-snu.png")}) center no-repeat;
+    background-size: contain;
+    height: 35px;
+    width: 35px;
+    margin: auto auto;
+    @media (max-width: 1240px) {
+      margin: 0;
+    }
+    flex: 0 0 3rem;
   }
   a {
     text-decoration: none;
@@ -289,15 +300,6 @@ const Element = styled.li`
       left: 20px;
       top: 18px;
       transform: translateY(-50%);
-    }
-    :last-child {
-      font-size: 0;
-      padding: 0;
-      background: url(${require("../../../assets/logo-snu.png")}) center no-repeat;
-      background-size: contain;
-      height: 35px;
-      width: 35px;
-      flex: 0 0 3rem;
     }
     a {
       max-width: 3rem;
