@@ -218,7 +218,7 @@ export default () => {
                     </thead>
                     <tbody>
                       {data.map((hit, i) => (
-                        <Hit key={i} hit={hit} onClick={() => setMission(hit)} />
+                        <Hit key={i} hit={hit} onClick={() => setMission(hit)} selected={mission?._id === hit._id} />
                       ))}
                     </tbody>
                   </Table>
@@ -233,10 +233,10 @@ export default () => {
   );
 };
 
-const Hit = ({ hit, onClick }) => {
+const Hit = ({ hit, onClick, selected }) => {
   // console.log("h", hit);
   return (
-    <tr onClick={onClick}>
+    <tr style={{ backgroundColor: selected ? "#f1f1f1" : "transparent" }} onClick={onClick}>
       <td>
         <TeamMember>
           <div>

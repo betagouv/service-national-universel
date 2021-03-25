@@ -153,7 +153,7 @@ export default () => {
                     </thead>
                     <tbody>
                       {data.map((hit, i) => (
-                        <Hit key={i} hit={hit} user={user} onClick={() => setResponsable(hit)} />
+                        <Hit key={i} hit={hit} user={user} onClick={() => setResponsable(hit)} selected={responsable?._id === hit._id} />
                       ))}
                     </tbody>
                   </Table>
@@ -168,9 +168,9 @@ export default () => {
   );
 };
 
-const Hit = ({ hit, onClick, user }) => {
+const Hit = ({ hit, onClick, user, selected }) => {
   return (
-    <tr onClick={onClick}>
+    <tr style={{ backgroundColor: selected ? "#f1f1f1" : "transparent" }} onClick={onClick}>
       <td>
         <div style={{ color: "#1e242f", fontSize: 15, textTransform: "capitalize" }}>{`${hit.firstName} ${hit.lastName}`}</div>
         {hit.email}

@@ -175,7 +175,7 @@ export default () => {
                     </thead>
                     <tbody>
                       {data.map((hit, i) => (
-                        <Hit key={i} hit={hit} onClick={() => handleClick(hit)} />
+                        <Hit key={i} hit={hit} onClick={() => handleClick(hit)} selected={panel?.application?._id === hit._id} />
                       ))}
                     </tbody>
                   </Table>
@@ -196,7 +196,7 @@ export default () => {
   );
 };
 
-const Hit = ({ hit, onClick }) => {
+const Hit = ({ hit, onClick, selected }) => {
   const [mission, setMission] = useState();
   useEffect(() => {
     (async () => {
@@ -216,7 +216,7 @@ const Hit = ({ hit, onClick }) => {
 
   if (!mission) return <div>Chargement...</div>;
   return (
-    <tr onClick={onClick}>
+    <tr style={{ backgroundColor: selected ? "#f1f1f1" : "transparent" }} onClick={onClick}>
       <td>
         <TeamMember>
           <div>

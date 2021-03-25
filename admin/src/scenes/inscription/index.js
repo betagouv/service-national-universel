@@ -207,7 +207,13 @@ export default () => {
                       </thead>
                       <tbody>
                         {data.map((hit, i) => (
-                          <Hit key={i} hit={hit} index={i + resultStats.currentPage * resultStats.displayedResults} onClick={() => setYoung(hit)} />
+                          <Hit
+                            key={i}
+                            hit={hit}
+                            index={i + resultStats.currentPage * resultStats.displayedResults}
+                            onClick={() => setYoung(hit)}
+                            selected={young?._id === hit._id}
+                          />
                         ))}
                       </tbody>
                     </Table>
@@ -223,7 +229,7 @@ export default () => {
   );
 };
 
-const Hit = ({ hit, index, onClick }) => {
+const Hit = ({ hit, index, onClick, selected }) => {
   dayjs.extend(relativeTime).locale("fr");
   const diff = dayjs(new Date(hit.lastStatusAt)).fromNow();
   const user = useSelector((state) => state.Auth.user);
@@ -232,7 +238,7 @@ const Hit = ({ hit, index, onClick }) => {
   if (user.role === "admin") STATUS.push(YOUNG_STATUS.WAITING_VALIDATION);
 
   return (
-    <tr onClick={onClick} key={hit._id}>
+    <tr style={{ backgroundColor: selected ? "#f1f1f1" : "transparent" }} onClick={onClick} key={hit._id}>
       <td>{index + 1}</td>
       <td>
         <strong>
