@@ -164,7 +164,8 @@ export default () => {
                   react={{ and: FILTERS.filter((e) => e !== "TUTOR") }}
                   title=""
                   URLParams={true}
-                  showSearch={false}
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
                 />
                 {user.role === "supervisor" ? (
                   <MultiDropdownList

@@ -128,7 +128,8 @@ export default () => {
                   title=""
                   react={{ and: FILTERS.filter((e) => e !== "WITH_NETWORK") }}
                   URLParams={true}
-                  showSearch={false}
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
                   sortBy="asc"
                 />
               </FilterRow>
