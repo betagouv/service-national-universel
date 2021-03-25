@@ -8,7 +8,6 @@ import Coordonnees from "./Create/stepCoordonnees";
 import Representants from "./Create/stepRepresentants";
 import Particulieres from "./Create/stepParticulieres";
 import Consentements from "./Create/stepConsentements";
-import Motivations from "./Create/stepMotivations";
 import Done from "./Create/stepDone";
 import Drawer from "./Create/drawer";
 
@@ -21,7 +20,6 @@ const Step = ({ step }) => {
     if (step === STEPS.PARTICULIERES) return <Particulieres />;
     if (step === STEPS.REPRESENTANTS) return <Representants />;
     if (step === STEPS.CONSENTEMENTS) return <Consentements />;
-    if (step === STEPS.MOTIVATIONS) return <Motivations />;
     if (step === STEPS.DONE) return <Done />;
     return <Profil />;
   }
@@ -44,7 +42,6 @@ export default () => {
       <Route path="/inscription/particulieres" component={() => <Step step={STEPS.PARTICULIERES} />} />
       <Route path="/inscription/representants" component={() => <Step step={STEPS.REPRESENTANTS} />} />
       <Route path="/inscription/consentements" component={() => <Step step={STEPS.CONSENTEMENTS} />} />
-      <Route path="/inscription/motivations" component={() => <Step step={STEPS.MOTIVATIONS} />} />
       <Route path="/inscription/done" component={() => <Step step={STEPS.DONE} />} />
       <Route path="/inscription/france-connect-callback" component={() => <FranceConnectCallback />} />
       <Route path="/inscription" component={Home} />

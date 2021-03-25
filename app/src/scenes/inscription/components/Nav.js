@@ -80,9 +80,6 @@ export default ({ step }) => {
         <Element status={getStatus(STEPS.CONSENTEMENTS)} onClick={() => handleClick(STEPS.CONSENTEMENTS)}>
           <a>Consentements</a>
         </Element>
-        <Element status={getStatus(STEPS.MOTIVATIONS)} onClick={() => handleClick(STEPS.MOTIVATIONS)}>
-          <a>Motivations</a>
-        </Element>
         <Element onClick={() => handleClick(STEPS.DONE)} />
       </Topbar>
       <ProgressBar backgroundColor="#5850ec" backgroundColorCompleted="#fff" completed={((currentIndex * 100) / (Object.keys(STEPS).length - 1)).toFixed(0)} />

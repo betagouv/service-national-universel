@@ -13,7 +13,7 @@ import { saveYoung, STEPS } from "../utils";
 
 import api from "../../../services/api";
 import matomo from "../../../services/matomo";
-import { translate } from "../../../utils";
+import { translate, YOUNG_PHASE, YOUNG_STATUS } from "../../../utils";
 
 export default () => {
   useEffect(() => {
@@ -71,11 +71,23 @@ export default () => {
             console.log(values);
             values.parentConsentment = "true";
             values.consentment = "true";
-            values.inscriptionStep = STEPS.MOTIVATIONS;
+            if (values.status !== YOUNG_STATUS.WAITING_VALIDATION) {
+              values.status = YOUNG_STATUS.WAITING_VALIDATION;
+              values.lastStatusAt = Date.now();
+              values.historic.push({
+                phase: YOUNG_PHASE.INSCRIPTION,
+                createdAt: Date.now(),
+                userName: `${values.firstName} ${values.lastName}`,
+                userId: values._id,
+                status: YOUNG_STATUS.WAITING_VALIDATION,
+                note: "",
+              });
+            }
+            values.inscriptionStep = STEPS.DONE;
             const { ok, code, data: young } = await api.put("/young", values);
             if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             dispatch(setYoung(young));
-            history.push("/inscription/motivations");
+            history.push("/inscription/done");
           } catch (e) {
             console.log(e);
             toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code));

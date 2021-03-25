@@ -1,18 +1,25 @@
 import React, { useEffect } from "react";
 import styled from "styled-components";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
+import { Formik } from "formik";
+import { toastr } from "react-redux-toastr";
+import { Input } from "reactstrap";
 
 import matomo from "../../../services/matomo";
+import { translate } from "../../../utils";
+import api from "../../../services/api";
+import { setYoung } from "../../../redux/auth/actions";
 
 export default () => {
+  const dispatch = useDispatch();
+  const history = useHistory();
+  const young = useSelector((state) => state.Auth.young);
+
   useEffect(() => {
     matomo.logEvent("inscription", "open_step", "step", 6);
     window.lumiere("sendEvent", "inscription", "open_step", { step: 6 });
   }, []);
-
-  const history = useHistory();
-  const young = useSelector((state) => state.Auth.young);
 
   if (!young) {
     history.push("/inscription/profil");
@@ -26,14 +33,47 @@ export default () => {
         </svg>
       </Logo>
       <h2>Merci {young.firstName}</h2>
-      <p>Bravo, votre inscription a bien été enregistrée. Votre candidature est en cours de traitement.</p>
-      <p>Vous serez prochainement contacté(e) par e-mail.</p>
-      <p>Vous pouvez continuer à éditer vos informations personnelles jusqu'à la validation de votre inscription.</p>
+      <p>
+        Bravo, votre inscription a bien été enregistrée. Votre candidature est en cours de traitement.
+        <br />
+        Vous serez prochainement contacté(e) par e-mail.
+        <br />
+        Vous pouvez continuer à éditer vos informations personnelles jusqu'à la validation de votre inscription.
+      </p>
       <Footer>
         <ButtonContainer>
           <Button to="/">Accéder à mon espace volontaire</Button>
         </ButtonContainer>
       </Footer>
+      <Separator />
+      <Optional>Optionnel</Optional>
+      <h2>Vos motivations pour le SNU</h2>
+      <p>Exprimez en quelques mots pourquoi vous souhaitez participer au Service National Universel</p>
+      <Formik
+        initialValues={young}
+        onSubmit={async (values) => {
+          try {
+            const { ok, code, data } = await api.put("/young", values);
+            if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+            toastr.success("Enregistré");
+            dispatch(setYoung(data));
+          } catch (e) {
+            console.log(e);
+            toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code));
+          }
+        }}
+      >
+        {({ values, handleChange, handleSubmit }) => (
+          <>
+            <Input type="textarea" rows={10} placeholder="Vos motivations en quelques mots ..." name="motivations" value={values.motivations} onChange={handleChange} />
+            <Footer>
+              <ButtonContainer>
+                <SaveButton onClick={handleSubmit}>Enregistrer</SaveButton>
+              </ButtonContainer>
+            </Footer>
+          </>
+        )}
+      </Formik>
     </Wrapper>
   );
 };
@@ -118,4 +158,41 @@ const Button = styled(Link)`
     opacity: 0.9;
     color: #fff;
   }
+`;
+
+const Optional = styled.div`
+  font-weight: 400;
+  color: #6b7280;
+  padding-top: 5px;
+  font-size: 2rem;
+`;
+
+const SaveButton = styled.button`
+  color: #374151;
+  background-color: #f9fafb;
+  padding: 9px 20px;
+  border: 0;
+  outline: 0;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 20px;
+  margin-right: 10px;
+  margin-top: 40px;
+  display: block;
+  width: 140px;
+  outline: 0;
+  border-width: 1px;
+  border-color: transparent;
+
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  :hover {
+    opacity: 0.9;
+  }
+`;
+const Separator = styled.hr`
+  margin: 2.5rem 0;
+  height: 1px;
+  border-style: none;
+  background-color: #e5e7eb;
+  width: 100%;
 `;

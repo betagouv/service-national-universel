@@ -18,6 +18,7 @@ const Container = styled.div`
   background-color: ${({ backgroundColor }) => backgroundColor || "#e0e0e0"};
   border-radius: 1rem;
   margin: 0.1rem auto 0;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 `;
 const Filler = styled.div`
   display: flex;
@@ -28,6 +29,7 @@ const Filler = styled.div`
   min-width: 50px;
   background-color: ${({ backgroundColor }) => backgroundColor || "#fff"};
   border-radius: 1rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 `;
 
 const Label = styled.span`
