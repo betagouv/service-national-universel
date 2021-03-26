@@ -232,6 +232,27 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  // * phase 3 infos
+  phase3StructureName: { type: String },
+  phase3MissionDomain: { type: String },
+  phase3MissionDescription: { type: String },
+  phase3MissionStartAt: { type: Date },
+  phase3MissionEndAt: { type: Date },
+
+  phase3TutorFirstName: { type: String },
+  phase3TutorLastName: { type: String },
+  phase3TutorEmail: { type: String },
+  phase3TutorPhone: { type: String },
+  phase3TutorNote: { type: String },
+
+  phase3Token: {
+    type: String,
+    default: "",
+    documentation: {
+      description: "Token servant à la validation de la phase 3",
+    },
+  },
+
   // * address
   address: {
     type: String,

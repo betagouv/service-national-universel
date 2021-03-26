@@ -8,6 +8,7 @@ import { setUser, setStructure } from "./redux/auth/actions";
 
 import Auth from "./scenes/auth";
 import Onboarding from "./scenes/onboarding";
+import Validate from "./scenes/validate";
 
 import Profil from "./scenes/profil";
 import Settings from "./scenes/settings";
@@ -73,6 +74,7 @@ export default () => {
     <Router>
       <div className="main">
         <Switch>
+          <Route path="/validate" component={Validate} />
           <Route path="/auth" component={Auth} />
           <Route path="/" component={Home} />
         </Switch>
