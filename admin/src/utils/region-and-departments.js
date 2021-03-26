@@ -109,6 +109,8 @@ export const departmentLookUp = {
 
 export const departmentList = Object.values(departmentLookUp);
 
+export const getDepartmentNumber = (d) => Object.keys(departmentLookUp).find((key) => departmentLookUp[key] === d);
+
 export const regionList = [
   "Auvergne-Rhône-Alpes",
   "Bourgogne-Franche-Comté",

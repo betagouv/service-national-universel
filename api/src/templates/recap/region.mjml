@@ -1,0 +1,40 @@
+<mjml>
+  <mj-body>
+    <mj-section>
+      <mj-column>
+        <mj-image height="200px" width="200px" src="https://www.snu.gouv.fr/sites/default/files/2020-02/logo-snu_0.jpg"></mj-image>
+        <mj-text>
+          <h1 font-size="20px">Bonjour {{toName}}</h1>
+        </mj-text>
+        <mj-text font-size="18px" color="#3D4852"
+          >Dans le cadre de la campagne d’inscription au SNU édition 2021, il y a du nouveau dans votre région ({{region}}).</mj-text
+        >
+        <mj-text font-size="23px" color="#000000" font-weight="bold">Depuis la semaine dernière, il y a ...</mj-text>
+        <mj-text font-size="18px" color="#3D4852"
+          ><span style="font-size: 28px; font-weight: bold; color: #5145cd">{{new_inscription_waiting_validation}}</span> Nouvelles candidatures en
+          attente de validation
+        </mj-text>
+        <mj-text font-size="18px" color="#3D4852"
+          ><span style="font-size: 28px; font-weight: bold; color: #5145cd">{{new_inscription_validated}}</span> Nouvelles candidatures validées
+        </mj-text>
+        <mj-divider border-color="#F6F7F8"></mj-divider>
+        <mj-text font-size="23px" color="#000000" font-weight="bold">Au total, il y a</mj-text>
+        <mj-text font-size="18px" color="#3D4852"
+          ><span style="font-size: 28px; font-weight: bold; color: #5145cd">{{inscription_waiting_validation}}</span> Candidatures en attente de
+          validation
+        </mj-text>
+        <mj-text font-size="18px" color="#3D4852"
+          ><span style="font-size: 28px; font-weight: bold; color: #5145cd">{{inscription_validated}}</span> Candidatures validées
+        </mj-text>
+        <mj-divider border-color="#F6F7F8"></mj-divider>
+        <mj-button font-size="20px" background-color="#5145CD" href="{{cta}}"> Accéder mon compte </mj-button>
+
+        <mj-text font-size="18px" color="#3D4852"
+          >Pour rappel, le délai de validation est fixé à 15 jours, nous vous invitons à agir rapidement !</mj-text
+        >
+        <mj-text font-size="18px" color="#3D4852">Merci par avance</mj-text>
+        <mj-text font-size="18px" color="#3D4852">L’équipe du Service National Universel</mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

@@ -13,11 +13,11 @@ import { saveYoung, STEPS } from "../utils";
 
 import api from "../../../services/api";
 import matomo from "../../../services/matomo";
-import { translate } from "../../../utils";
+import { translate, YOUNG_PHASE, YOUNG_STATUS } from "../../../utils";
 
 export default () => {
   useEffect(() => {
-    window.lumiere("sendEvent", "inscription", "open_step", {step: 4});
+    window.lumiere("sendEvent", "inscription", "open_step", { step: 4 });
     matomo.logEvent("inscription", "open_step", "step", 4);
   }, []);
 
@@ -37,6 +37,14 @@ export default () => {
 
   const isPlural = () => {
     return young.parent1Status && young.parent2Status;
+  };
+
+  const isParentFromFranceConnect = () => {
+    if (young.parent1Status && young.parent2Status) {
+      return young.parent1FromFranceConnect === "true" && young.parent2FromFranceConnect === "true";
+    } else {
+      return young.parent1FromFranceConnect === "true";
+    }
   };
 
   return (
@@ -63,11 +71,23 @@ export default () => {
             console.log(values);
             values.parentConsentment = "true";
             values.consentment = "true";
-            values.inscriptionStep = STEPS.MOTIVATIONS;
+            if (values.status !== YOUNG_STATUS.WAITING_VALIDATION) {
+              values.status = YOUNG_STATUS.WAITING_VALIDATION;
+              values.lastStatusAt = Date.now();
+              values.historic.push({
+                phase: YOUNG_PHASE.INSCRIPTION,
+                createdAt: Date.now(),
+                userName: `${values.firstName} ${values.lastName}`,
+                userId: values._id,
+                status: YOUNG_STATUS.WAITING_VALIDATION,
+                note: "",
+              });
+            }
+            values.inscriptionStep = STEPS.DONE;
             const { ok, code, data: young } = await api.put("/young", values);
             if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             dispatch(setYoung(young));
-            history.push("/inscription/motivations");
+            history.push("/inscription/done");
           } catch (e) {
             console.log(e);
             toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code));
@@ -80,40 +100,45 @@ export default () => {
               <Col md={4}>
                 <Label>Consentement du ou des représentant légaux</Label>
               </Col>
+
               <Col>
-                <div style={{ fontWeight: 400, fontSize: 14, margin: "0.8rem" }}>
-                  Merci de télécharger le consentement du ou des representants légaux{" "}
-                  <a
-                    style={{ color: "#5145cd", textDecoration: "underline" }}
-                    href="https://apicivique.s3.eu-west-3.amazonaws.com/SNU_-_Consentement_repre%CC%81sentant(s)_le%CC%81gal(aux).pdf"
-                    target="blank"
-                  >
-                    ci-joint
-                  </a>{" "}
-                  , le compléter, le dater, le signer, le photographier ou le scanner et le déposer ici.
-                </div>
-                <DndFileInput
-                  placeholder="le consentement du ou des representants légaux"
-                  errorMessage="Vous devez téléverser le consentement du ou des representants légaux."
-                  name="parentConsentmentFiles"
-                  value={values.parentConsentmentFiles}
-                  onChange={async (e) => {
-                    let { data: files, ok, code } = await api.uploadFile("/young/file/parentConsentmentFiles", e.target.files);
+                {!isParentFromFranceConnect() && (
+                  <>
+                    <div style={{ fontWeight: 400, fontSize: 14, margin: "0.8rem" }}>
+                      Merci de télécharger le consentement du ou des representants légaux{" "}
+                      <a
+                        style={{ color: "#5145cd", textDecoration: "underline" }}
+                        href="https://apicivique.s3.eu-west-3.amazonaws.com/SNU_-_Consentement_repre%CC%81sentant(s)_le%CC%81gal(aux).pdf"
+                        target="blank"
+                      >
+                        ci-joint
+                      </a>{" "}
+                      , le compléter, le dater, le signer, le photographier ou le scanner et le déposer ici.
+                    </div>
+                    <DndFileInput
+                      placeholder="le consentement du ou des representants légaux"
+                      errorMessage="Vous devez téléverser le consentement du ou des representants légaux."
+                      name="parentConsentmentFiles"
+                      value={values.parentConsentmentFiles}
+                      onChange={async (e) => {
+                        let { data: files, ok, code } = await api.uploadFile("/young/file/parentConsentmentFiles", e.target.files);
 
-                    if (code === "FILE_CORRUPTED") {
-                      return toastr.error(
-                        "Le fichier semble corrompu",
-                        "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
-                        { timeOut: 0 }
-                      );
-                    }
+                        if (code === "FILE_CORRUPTED") {
+                          return toastr.error(
+                            "Le fichier semble corrompu",
+                            "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
+                            { timeOut: 0 }
+                          );
+                        }
 
-                    if (!ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
-                    handleChange({ target: { value: files, name: "parentConsentmentFiles" } });
-                    toastr.success("Fichier téléversé");
-                  }}
-                />
-                <ErrorMessage errors={errors} touched={touched} name="parentConsentmentFiles" />
+                        if (!ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
+                        handleChange({ target: { value: files, name: "parentConsentmentFiles" } });
+                        toastr.success("Fichier téléversé");
+                      }}
+                    />
+                    <ErrorMessage errors={errors} touched={touched} name="parentConsentmentFiles" />
+                  </>
+                )}
                 <RadioLabel style={{ marginBottom: 3 }}>
                   <Field
                     validate={(v) => !v && requiredMessage}

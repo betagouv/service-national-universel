@@ -35,6 +35,10 @@ export default ({ onChange, value }) => {
     return Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
   };
 
+  function isFromFranceConnect() {
+    return young && young.parent1FromFranceConnect === "true" && (!young.parent2Status || young.parent2FromFranceConnect === "true");
+  }
+
   return (
     <Panel>
       <div className="close" onClick={onChange} />
@@ -73,6 +77,15 @@ export default ({ onChange, value }) => {
             title={`Télécharger le formulaire (${i + 1}/${value.parentConsentmentFiles.length})`}
           />
         ))}
+        {isFromFranceConnect(young) && (
+          <div style={{ marginTop: "1rem" }}>
+            <img src={require("../../assets/fc_logo_v2.png")} height={60} />
+            <br />
+            <b>Consentement parental validé via FranceConnect.</b>
+            <br />
+            Les représentants légaux ont utilisé FranceConnect pour s’identifier et consentir, ce qui permet de s’affranchir du document de consentement papier.
+          </div>
+        )}
       </Info>
       <Info title="Coordonnées" id={value._id}>
         <Details title="E-mail" value={value.email} />

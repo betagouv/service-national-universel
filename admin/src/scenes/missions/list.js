@@ -110,7 +110,8 @@ export default () => {
                   title=""
                   react={{ and: FILTERS.filter((e) => e !== "REGION") }}
                   URLParams={true}
-                  showSearch={false}
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
                   sortBy="asc"
                   defaultValue={user.role === "referent_region" && [user.region]}
                 />
@@ -123,7 +124,8 @@ export default () => {
                   title=""
                   react={{ and: FILTERS.filter((e) => e !== "DEPARTMENT") }}
                   URLParams={true}
-                  showSearch={false}
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
                   sortBy="asc"
                   defaultValue={user.role === "referent_department" && [user.department]}
                 />
@@ -162,7 +164,8 @@ export default () => {
                   react={{ and: FILTERS.filter((e) => e !== "TUTOR") }}
                   title=""
                   URLParams={true}
-                  showSearch={false}
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
                 />
                 {user.role === "supervisor" ? (
                   <MultiDropdownList
@@ -218,7 +221,7 @@ export default () => {
                     </thead>
                     <tbody>
                       {data.map((hit, i) => (
-                        <Hit key={i} hit={hit} onClick={() => setMission(hit)} />
+                        <Hit key={i} hit={hit} onClick={() => setMission(hit)} selected={mission?._id === hit._id} />
                       ))}
                     </tbody>
                   </Table>
@@ -233,10 +236,10 @@ export default () => {
   );
 };
 
-const Hit = ({ hit, onClick }) => {
+const Hit = ({ hit, onClick, selected }) => {
   // console.log("h", hit);
   return (
-    <tr onClick={onClick}>
+    <tr style={{ backgroundColor: selected ? "#f1f1f1" : "transparent" }} onClick={onClick}>
       <td>
         <TeamMember>
           <div>

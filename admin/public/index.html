@@ -25,13 +25,22 @@
       })();
     </script>
     <!-- End Matomo Code -->
-    <!-- Lumiere -->
-    <script type=" text/javascript">
-      window._lumiere = window._lumiere || {};
-      window.lumiere = function () {};
+    <!-- Lumiere init -->
+    <script type="text/javascript">
+      var isProduction = window.location.href.indexOf("admin.snu.gouv.fr") !== -1;
+      (function (l, u, m, i, E, r, e, s) {
+        l[m] = function () {
+          (l[m].q = l[m].q || []).push(arguments);
+        };
+        var c = u.createElement("script"),
+          h = u.getElementsByTagName("head")[0];
+        c.type = "text/javascript";
+        c.async = true;
+        c.src = "https://lumiere.cleverapps.io/lib.js?a=" + i + "&n=" + E + "&e=" + r + "&d=" + e + "&b=" + s + "&t=" + Date.now();
+        h.appendChild(c);
+      })(window, document, "lumiere", isProduction ? "app_Pemqr1RIvcJ9lVNp_zeVF" : "app_1i-pkr9c9sY-6k1ML5o8_", "admin", isProduction, !isProduction, !isProduction);
     </script>
-    <script src="/lum.js"></script>
-    <!-- End Lumiere -->
+    <!-- End Lumiere Code -->
   </head>
 
   <body>

@@ -27,7 +27,7 @@ import Drawer from "./components/drawer";
 import Footer from "./components/footer";
 
 import api from "./services/api";
-import { SENTRY_URL, environment, LUMIERE_APP_ID } from "./config";
+import { SENTRY_URL, environment } from "./config";
 
 import "./index.css";
 import { YOUNG_STATUS } from "./utils";
@@ -40,9 +40,6 @@ export default () => {
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
   useEffect(() => {
-    window.lumiere("init", LUMIERE_APP_ID, "app");
-    if (environment !== "production") window.lumiere("setDisable", true);
-    window.lumiere("setEnv", environment);
     window.lumiere("sendEvent", "initialization", "page-loaded"); // cat, action, props
 
     matomo.logEvent("start", "open_app");
