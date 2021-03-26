@@ -5,8 +5,11 @@ import { toastr } from "react-redux-toastr";
 
 import ProgramCard from "./components/programCard";
 import api from "../../services/api";
+import Loader from "../../components/Loader";
+import { useSelector } from "react-redux";
 
 export default () => {
+  const young = useSelector((state) => state.Auth.young);
   const [programs, setPrograms] = useState();
   useEffect(() => {
     (async () => {
@@ -15,6 +18,7 @@ export default () => {
       setPrograms(data);
     })();
   }, []);
+  if (!programs) return <Loader />;
   return (
     <Container>
       <Heading>
@@ -22,6 +26,14 @@ export default () => {
         <p>Rejoignez plus 100 000 jeunes français déjà engagés dans de grandes causes</p>
       </Heading>
       <Row>
+        {programs
+          .filter((p) => p.visibility === "NATIONAL" || p.region === young.region || p.department === young.department)
+          .map((p, i) => (
+            <Col key={i} md={4}>
+              <ProgramCard program={p} image={p.imageFile ? p.imageFile : require(`../../assets/programmes-engagement/${p.imageString}`)} />
+            </Col>
+          ))}
+        {/* 
         <Col md={4}>
           <ProgramCard
             href="https://www.service-civique.gouv.fr/"
@@ -201,6 +213,7 @@ Est-ce indemnisé ? Ou i
 Quelle durée d’engagement ? De 6 à 12 mois"
           />
         </Col>
+       */}
       </Row>
     </Container>
   );

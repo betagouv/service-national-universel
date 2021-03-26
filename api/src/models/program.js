@@ -29,6 +29,13 @@ const Schema = new mongoose.Schema({
       description: "image (fichier)",
     },
   }, //todo
+  imageString: {
+    type: String,
+    default: "default.png", //todo
+    documentation: {
+      description: "nom fichier image",
+    },
+  },
   type: {
     type: String,
     documentation: {
@@ -47,9 +54,8 @@ const Schema = new mongoose.Schema({
       description: "Région concernée, si applicable",
     },
   },
-  isNational: {
+  visibility: {
     type: String,
-    enum: ["true", "false"],
     documentation: {
       description: "",
     },
