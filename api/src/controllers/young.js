@@ -130,6 +130,19 @@ router.get("/", passport.authenticate("young", { session: false }), async (req, 
 });
 
 //@check
+router.put("/validate_mission", passport.authenticate("young", { session: false }), async (req, res) => {
+  try {
+    const obj = req.body;
+    obj.phase3Token = crypto.randomBytes(20).toString("hex");
+    const young = await YoungObject.findByIdAndUpdate(req.user._id, obj, { new: true });
+    res.status(200).send({ ok: true, data: young });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+//@check
 router.put("/", passport.authenticate("young", { session: false }), async (req, res) => {
   try {
     const obj = req.body;

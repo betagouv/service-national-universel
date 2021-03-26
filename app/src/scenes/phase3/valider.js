@@ -1,13 +1,16 @@
 import React from "react";
 import styled from "styled-components";
-import { Row, Col, Input, Container, CustomInput } from "reactstrap";
+import { Row, Col, Container } from "reactstrap";
 import { Formik, Field } from "formik";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
+import { toastr } from "react-redux-toastr";
 
 import { MISSION_DOMAINS, translate } from "../../utils";
 import ErrorMessage, { requiredMessage } from "../inscription/components/errorMessage";
+import api from "../../services/api";
 
 export default () => {
+  const history = useHistory();
   return (
     <Wrapper>
       <Heading>
@@ -17,16 +20,26 @@ export default () => {
       <Formik
         validateOnChange={false}
         validateOnBlur={false}
-        initialValues={{}}
+        initialValues={{
+          phase3StructureName: "nom s",
+          phase3MissionDomain: "SPORT",
+          phase3MissionDescription: "des",
+          phase3MissionStartAt: "2021-03-01",
+          phase3MissionEndAt: "2021-03-10",
+          phase3TutorFirstName: "p",
+          phase3TutorName: "n",
+          phase3TutorEmail: "tangi.mendes+tutor@selego.co",
+          phase3TutorPhone: "0612345678",
+        }}
         onSubmit={async (values) => {
-          // try {
-          //   const { ok, code, data: mission } = await api[values._id ? "put" : "post"]("/mission", values);
-          //   if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", translate(code));
-          //   history.push(`/mission/${mission._id}`);
-          //   toastr.success("Mission enregistrée");
-          // } catch (e) {
-          //   return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", e?.error?.message);
-          // }
+          // return console.log(values);
+          try {
+            const { ok, code } = await api.put("/young/validate_mission", values);
+            if (!ok) return toastr.error("Une erreur s'est produite !", translate(code));
+            history.push(`/`);
+          } catch (e) {
+            return toastr.error("Une erreur s'est produite ", e?.error?.message);
+          }
         }}
       >
         {({ values, handleChange, handleSubmit, isValid, errors, touched }) => (
@@ -40,7 +53,15 @@ export default () => {
                 <Label>Nom de la structure</Label>
               </Col>
               <Col>
-                <Input />
+                <Field
+                  placeholder="Nom de la structure"
+                  className="form-control"
+                  validate={(v) => !v && requiredMessage}
+                  name="phase3StructureName"
+                  value={values.phase3StructureName}
+                  onChange={handleChange}
+                />
+                <ErrorMessage errors={errors} touched={touched} name="phase3StructureName" />
               </Col>
             </FormRow>
             <FormRow align="center">
@@ -48,7 +69,14 @@ export default () => {
                 <Label>Ma mission</Label>
               </Col>
               <Col>
-                <CustomInput type="select" id="domain" defaultValue="" style={{ marginBottom: 10 }}>
+                <Field
+                  className="form-control"
+                  validate={(v) => !v && requiredMessage}
+                  component="select"
+                  name="phase3MissionDomain"
+                  value={values.phase3MissionDomain}
+                  onChange={handleChange}
+                >
                   <option value="" disabled>
                     Domaine de la mission
                   </option>
@@ -57,36 +85,52 @@ export default () => {
                       {translate(d)}
                     </option>
                   ))}
-                </CustomInput>
-                <Input type="textarea" style={{ marginBottom: 10 }} rows={3} placeholder="Décrivez votre mission en quelques mots" />
+                </Field>
+                <ErrorMessage errors={errors} touched={touched} name="phase3StructureName" />
+
+                <Field
+                  component="textarea"
+                  placeholder="Décrivez votre mission en quelques mots"
+                  className="form-control"
+                  validate={(v) => !v && requiredMessage}
+                  name="phase3MissionDescription"
+                  value={values.phase3MissionDescription}
+                  onChange={handleChange}
+                  rows={3}
+                />
+                <ErrorMessage errors={errors} touched={touched} name="phase3MissionDescription" />
                 <FormGroup>
                   <Row>
-                    <Col>
+                    <Col style={{ display: "flex", alignItems: "center" }}>
+                      <span style={{ marginRight: "1rem" }}>de</span>
+
                       <Field
                         validate={(v) => {
                           if (!v) return requiredMessage;
                         }}
                         type="date"
-                        name="startAt"
+                        name="phase3MissionStartAt"
                         onChange={handleChange}
                         placeholder="Date de début"
                       />
-                      <ErrorMessage errors={errors} touched={touched} name="startAt" />
+                      <ErrorMessage errors={errors} touched={touched} name="phase3MissionStartAt" />
                     </Col>
-                    <Col>
+                    <Col style={{ display: "flex", alignItems: "center" }}>
+                      <span style={{ marginRight: "1rem" }}>à</span>
+
                       <Field
                         validate={(v) => {
                           if (!v) return requiredMessage;
                           const end = new Date(v);
-                          const start = new Date(values.startAt);
+                          const start = new Date(values.phase3MissionStartAt);
                           if (end.getTime() < start.getTime()) return "La date de fin doit être après la date de début.";
                         }}
                         type="date"
-                        name="endAt"
+                        name="phase3MissionEndAt"
                         onChange={handleChange}
                         placeholder="Date de fin"
                       />
-                      <ErrorMessage errors={errors} touched={touched} name="endAt" />
+                      <ErrorMessage errors={errors} touched={touched} name="phase3MissionEndAt" />
                     </Col>
                   </Row>
                 </FormGroup>
@@ -102,7 +146,15 @@ export default () => {
                 <Label>Prénom</Label>
               </Col>
               <Col>
-                <Input />
+                <Field
+                  placeholder="Prénom"
+                  className="form-control"
+                  validate={(v) => !v && requiredMessage}
+                  name="phase3TutorFirstName"
+                  value={values.phase3TutorFirstName}
+                  onChange={handleChange}
+                />
+                <ErrorMessage errors={errors} touched={touched} name="phase3TutorFirstName" />
               </Col>
             </FormRow>
             <FormRow>
@@ -110,7 +162,15 @@ export default () => {
                 <Label>Nom</Label>
               </Col>
               <Col>
-                <Input />
+                <Field
+                  placeholder="Nom"
+                  className="form-control"
+                  validate={(v) => !v && requiredMessage}
+                  name="phase3TutorName"
+                  value={values.phase3TutorName}
+                  onChange={handleChange}
+                />
+                <ErrorMessage errors={errors} touched={touched} name="phase3TutorName" />
               </Col>
             </FormRow>
             <FormRow>
@@ -118,7 +178,15 @@ export default () => {
                 <Label>Email</Label>
               </Col>
               <Col>
-                <Input />
+                <Field
+                  placeholder="Email"
+                  className="form-control"
+                  validate={(v) => !v && requiredMessage}
+                  name="phase3TutorEmail"
+                  value={values.phase3TutorEmail}
+                  onChange={handleChange}
+                />
+                <ErrorMessage errors={errors} touched={touched} name="phase3TutorEmail" />
               </Col>
             </FormRow>
             <FormRow>
@@ -126,17 +194,26 @@ export default () => {
                 <Label>Téléphone</Label>
               </Col>
               <Col>
-                <Input />
+                <Field
+                  placeholder="Téléphone"
+                  className="form-control"
+                  validate={(v) => !v && requiredMessage}
+                  name="phase3TutorPhone"
+                  value={values.phase3TutorPhone}
+                  onChange={handleChange}
+                />
+                <ErrorMessage errors={errors} touched={touched} name="phase3TutorPhone" />
               </Col>
             </FormRow>
             <Footer>
               <h1>Faites valider la réalisation de votre mission par votre tuteur</h1>
-              <h3>
+              <h2>
                 Un e-mail sera envoyé au tuteur pour valider votre mission.
                 <br />
                 L'administration pourra ensuite éditer votre attestion de réalisation du SNU.
-              </h3>
-              <ContinueButton>Faire valider ma phase 3</ContinueButton>
+              </h2>
+              <ContinueButton onClick={handleSubmit}>Faire valider ma phase 3</ContinueButton>
+              {Object.keys(errors).length ? <h3>Vous ne pouvez passer à l'étape suivante car tous les champs ne sont pas correctement renseignés.</h3> : null}
             </Footer>
           </>
         )}
@@ -154,10 +231,19 @@ const Footer = styled.div`
     font-size: 1.2rem;
     color: #000;
   }
-  h3 {
+  h2 {
     font-size: 1rem;
     color: #6b7280;
     font-weight: 400;
+  }
+  h3 {
+    border: 1px solid #fc8181;
+    border-radius: 0.25em;
+    background-color: #fff5f5;
+    color: #c53030;
+    font-weight: 400;
+    font-size: 12px;
+    padding: 1em;
   }
 `;
 
@@ -172,8 +258,11 @@ const Heading = styled.div`
   margin-bottom: 30px;
   h1 {
     color: #161e2e;
-    font-size: 36px;
+    font-size: 3rem;
     font-weight: 700;
+    @media (max-width: 768px) {
+      font-size: 2rem;
+    }
   }
   p {
     color: #42389d;
@@ -203,33 +292,17 @@ const FormRow = styled(Row)`
   padding-bottom: 20px;
   align-items: ${({ align }) => align};
   text-align: left;
+  input,
+  textarea,
+  select {
+    margin: 0.5rem;
+  }
 `;
 
 const Label = styled.div`
   color: #374151;
   font-weight: 500;
   margin-bottom: 10px;
-`;
-
-const ImageInput = styled.label`
-  border: 1px dashed #d2d6dc;
-  padding: 25px;
-  text-align: center;
-  display: block;
-  outline: 0;
-  border-radius: 6px;
-  cursor: pointer;
-  color: #4b5563;
-  max-width: 500px;
-  font-size: 14px;
-  line-height: 1.7;
-  cursor: pointer;
-
-  img {
-    height: 40px;
-    display: block;
-    margin: 10px auto;
-  }
 `;
 
 const ContinueButton = styled.button`
@@ -249,18 +322,6 @@ const ContinueButton = styled.button`
   }
 `;
 
-const Modifybutton = styled(Link)`
-  border: 1px solid #d2d6dc;
-  padding: 10px 15px;
-  color: #3d4151;
-  font-size: 12px;
-  border-radius: 4px;
-  margin-top: 5px;
-  display: inline-block;
-  :hover {
-    color: #333;
-  }
-`;
 const FormGroup = styled.div`
   margin-bottom: 25px;
   > label {
