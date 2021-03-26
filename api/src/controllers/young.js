@@ -5,6 +5,8 @@ const queryString = require("querystring");
 const crypto = require("crypto");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
+const fs = require("fs");
+const path = require("path");
 
 const config = require("../config");
 const { capture } = require("../sentry");
@@ -14,6 +16,7 @@ const { getQPV } = require("../qpv");
 const YoungObject = require("../models/young");
 const AuthObject = require("../auth");
 const { uploadFile, validatePassword, ERRORS } = require("../utils");
+const { sendEmail } = require("../sendinblue");
 
 const YoungAuth = new AuthObject(YoungObject);
 
@@ -119,6 +122,37 @@ router.post("/", async (req, res) => {
   }
 });
 
+router.get("/validate_phase3/:young/:token", async (req, res) => {
+  try {
+    const data = await YoungObject.findOne({ _id: req.params.young, phase3Token: req.params.token });
+    if (!data) {
+      capture(`Young not found ${req.params.id}`);
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+router.put("/validate_phase3/:young/:token", async (req, res) => {
+  try {
+    const data = await YoungObject.findOne({ _id: req.params.young, phase3Token: req.params.token });
+    if (!data) {
+      capture(`Young not found ${req.params.id}`);
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+    data.set({ statusPhase3: "VALIDATED", phase3TutorNote: req.body.phase3TutorNote });
+    await data.save();
+    await data.index();
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
 router.get("/", passport.authenticate("young", { session: false }), async (req, res) => {
   try {
     const young = await YoungObject.findOne({ user_id: req.user._id });
@@ -129,12 +163,24 @@ router.get("/", passport.authenticate("young", { session: false }), async (req, 
   }
 });
 
-//@check
 router.put("/validate_mission", passport.authenticate("young", { session: false }), async (req, res) => {
   try {
     const obj = req.body;
     obj.phase3Token = crypto.randomBytes(20).toString("hex");
     const young = await YoungObject.findByIdAndUpdate(req.user._id, obj, { new: true });
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    // todo send mail to tutor
+    let htmlContent = fs.readFileSync(path.resolve(__dirname, "../templates/validatePhase3.html")).toString();
+    let youngName = `${young.firstName} ${young.lastName}`;
+    let subject = `Confirmez la participation de ${youngName} sur votre mission`;
+    htmlContent = htmlContent.replace(/{{toName}}/g, `${young.phase3TutorFirstName} ${young.phase3TutorLastName}`);
+    htmlContent = htmlContent.replace(/{{youngName}}/g, youngName);
+    htmlContent = htmlContent.replace(/{{structureName}}/g, young.phase3StructureName);
+    htmlContent = htmlContent.replace(/{{startAt}}/g, young.phase3MissionStartAt.toLocaleDateString("fr"));
+    htmlContent = htmlContent.replace(/{{endAt}}/g, young.phase3MissionEndAt.toLocaleDateString("fr"));
+    htmlContent = htmlContent.replace(/{{cta}}/g, `${config.ADMIN_URL}/validate?token=${young.phase3Token}&young_id=${young._id}`);
+    await sendEmail({ name: `${young.phase3TutorFirstName} ${young.phase3TutorLastName}`, email: young.phase3TutorEmail }, subject, htmlContent);
+    young.phase3Token = null;
     res.status(200).send({ ok: true, data: young });
   } catch (error) {
     capture(error);

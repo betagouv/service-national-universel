@@ -27,7 +27,7 @@ export default () => {
           phase3MissionStartAt: "2021-03-01",
           phase3MissionEndAt: "2021-03-10",
           phase3TutorFirstName: "p",
-          phase3TutorName: "n",
+          phase3TutorLastName: "n",
           phase3TutorEmail: "tangi.mendes+tutor@selego.co",
           phase3TutorPhone: "0612345678",
         }}
@@ -36,6 +36,7 @@ export default () => {
           try {
             const { ok, code } = await api.put("/young/validate_mission", values);
             if (!ok) return toastr.error("Une erreur s'est produite !", translate(code));
+            toastr.success("Demande envoyée !");
             history.push(`/`);
           } catch (e) {
             return toastr.error("Une erreur s'est produite ", e?.error?.message);
@@ -166,11 +167,11 @@ export default () => {
                   placeholder="Nom"
                   className="form-control"
                   validate={(v) => !v && requiredMessage}
-                  name="phase3TutorName"
-                  value={values.phase3TutorName}
+                  name="phase3TutorLastName"
+                  value={values.phase3TutorLastName}
                   onChange={handleChange}
                 />
-                <ErrorMessage errors={errors} touched={touched} name="phase3TutorName" />
+                <ErrorMessage errors={errors} touched={touched} name="phase3TutorLastName" />
               </Col>
             </FormRow>
             <FormRow>

@@ -240,9 +240,10 @@ const Schema = new mongoose.Schema({
   phase3MissionEndAt: { type: Date },
 
   phase3TutorFirstName: { type: String },
-  phase3TutorName: { type: String },
+  phase3TutorLastName: { type: String },
   phase3TutorEmail: { type: String },
   phase3TutorPhone: { type: String },
+  phase3TutorNote: { type: String },
 
   phase3Token: {
     type: String,
