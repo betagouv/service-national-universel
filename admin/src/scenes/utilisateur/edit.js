@@ -11,7 +11,7 @@ import { useHistory } from "react-router-dom";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import { setUser as setUserRedux } from "../../redux/auth/actions";
 import DateInput from "../../components/dateInput";
-import { departmentList, regionList, department2region, translate, REFERENT_ROLES } from "../../utils";
+import { departmentList, regionList, department2region, translate, REFERENT_ROLES, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE } from "../../utils";
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 
@@ -55,6 +55,12 @@ export default (props) => {
       console.log(e);
       toastr.error("Oops, une erreur est survenu lors de la masquarade !", translate(e.code));
     }
+  };
+  const getSubRole = (role) => {
+    let subRole = [];
+    if (role === "referent_department") subRole = REFERENT_DEPARTMENT_SUBROLE;
+    if (role === "referent_region") subRole = REFERENT_REGION_SUBROLE;
+    return Object.keys(subRole).map((e) => ({ value: e, label: translate(subRole[e]) }));
   };
 
   return (
@@ -132,6 +138,9 @@ export default (props) => {
                           REFERENT_ROLES.SUPERVISOR,
                         ].map((key) => ({ value: key, label: translate(key) }))}
                       />
+                      {[REFERENT_ROLES.REFERENT_DEPARTMENT, REFERENT_ROLES.REFERENT_REGION].includes(values.role) ? (
+                        <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRole(values.role)} />
+                      ) : null}
                       {values.role === REFERENT_ROLES.REFERENT_DEPARTMENT ? (
                         <Select
                           name="department"
