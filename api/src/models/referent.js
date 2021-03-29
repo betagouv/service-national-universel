@@ -109,8 +109,6 @@ const Schema = new mongoose.Schema({
     type: String,
     enum: ["manager_department", "assistant_manager_department", "manager_department_phase2", "secretariat", "coordinator", "assistant_coordinator"],
   },
-  region: { type: String, default: "" },
-  department: { type: String, default: "" },
 
   phone: {
     type: String,
