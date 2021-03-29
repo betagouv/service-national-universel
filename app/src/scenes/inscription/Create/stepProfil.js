@@ -8,6 +8,7 @@ import validator from "validator";
 import { toastr } from "react-redux-toastr";
 import { Helmet } from "react-helmet";
 import DateInput from "../components/dateInput";
+import * as Sentry from "@sentry/browser";
 import { getPasswordErrorMessage, translate } from "../../../utils";
 
 import ErrorMessage, { requiredMessage } from "../components/errorMessage";
@@ -82,7 +83,8 @@ export default () => {
           } catch (e) {
             console.log(e);
             if (e.code === "USER_ALREADY_REGISTERED") return toastr.error("Cet email est déjà utilisé.", "Merci de vous connecter pour continuer votre inscription.");
-            return toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code));
+            toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code) || e.message);
+            Sentry.captureException(e);
           }
         }}
       >
