@@ -9,7 +9,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 
 import LoadingButton from "../../components/buttons/LoadingButton";
-import { setUser as setUserRedux } from "../../redux/auth/actions";
 import DateInput from "../../components/dateInput";
 import { departmentList, regionList, department2region, translate, REFERENT_ROLES, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE } from "../../utils";
 import api from "../../services/api";
@@ -18,7 +17,6 @@ import { toastr } from "react-redux-toastr";
 export default (props) => {
   const [user, setUser] = useState();
   const currentUser = useSelector((state) => state.Auth.user);
-  const dispatch = useDispatch();
   const history = useHistory();
 
   useEffect(() => {
@@ -44,18 +42,6 @@ export default (props) => {
     handleChange({ target: { name: "department", value: "" } });
   };
 
-  const handleImpersonate = async () => {
-    try {
-      const { ok, data, token } = await api.post(`/referent/signin_as/referent/${user._id}`);
-      if (!ok) return toastr.error("Oops, une erreur est survenu lors de la masquarade !", translate(e.code));
-      if (token) api.setToken(token);
-      if (data) dispatch(setUserRedux(data));
-      history.push("/dashboard");
-    } catch (e) {
-      console.log(e);
-      toastr.error("Oops, une erreur est survenu lors de la masquarade !", translate(e.code));
-    }
-  };
   const getSubRole = (role) => {
     let subRole = [];
     if (role === "referent_department") subRole = REFERENT_DEPARTMENT_SUBROLE;
@@ -86,11 +72,6 @@ export default (props) => {
               <div>
                 <Title>{`Profil Utilisateur de ${values.firstName} ${values.lastName}`}</Title>
                 <SubTitle>{getSubtitle()}</SubTitle>
-                {/* {!["referent_department", "referent_region"].includes(currentUser.role) && (
-                  <button className="outlined" onClick={handleImpersonate}>
-                    Prendre sa place
-                  </button>
-                )} */}
               </div>
               <SaveBtn loading={isSubmitting} onClick={handleSubmit}>
                 Enregistrer

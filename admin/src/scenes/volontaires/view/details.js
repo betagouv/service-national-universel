@@ -8,6 +8,9 @@ import api from "../../../services/api";
 import DownloadButton from "../../../components/buttons/DownloadButton";
 
 export default ({ young }) => {
+  function isFromFranceConnect() {
+    return young.parent1FromFranceConnect === "true" && (!young.parent2Status || young.parent2FromFranceConnect === "true");
+  }
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <YoungView young={young} tab="details">
@@ -99,6 +102,27 @@ export default ({ young }) => {
                   <Details title="Dép" value={young.parent2Department} />
                   <Details title="Ville" value={young.parent2City && young.parent2Zip && `${young.parent2City} (${young.parent2Zip})`} />
                   <Details title="Adresse" value={young.parent2Address} />
+                </Bloc>
+              ) : null}
+              {isFromFranceConnect() || (young.parentConsentmentFiles && young.parentConsentmentFiles.length) ? (
+                <Bloc title="Attestations des représentants légaux">
+                  {isFromFranceConnect() ? (
+                    <div style={{ marginTop: "1rem" }}>
+                      <img src={require("../../../assets/fc_logo_v2.png")} height={60} />
+                      <br />
+                      <b>Consentement parental validé via FranceConnect.</b>
+                      <br />
+                      Les représentants légaux ont utilisé FranceConnect pour s’identifier et consentir, ce qui permet de s’affranchir du document de consentement papier.
+                    </div>
+                  ) : (
+                    (young.parentConsentmentFiles || []).map((e, i) => (
+                      <DownloadButton
+                        key={i}
+                        source={() => api.get(`/referent/youngFile/${young._id}/parentConsentmentFiles/${e}`)}
+                        title={`Télécharger l'attestation (${i + 1}/${young.parentConsentmentFiles.length})`}
+                      />
+                    ))
+                  )}
                 </Bloc>
               ) : null}
               {young.withdrawnMessage ? (
