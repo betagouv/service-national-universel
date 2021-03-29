@@ -7,24 +7,103 @@ const sendinblue = require("../sendinblue");
 const MODELNAME = "referent";
 
 const Schema = new mongoose.Schema({
-  sqlId: { type: String, index: true },
-  firstName: { type: String },
-  lastName: { type: String },
-  email: { type: String, required: true, unique: true, trim: true },
+  sqlId: {
+    type: String,
+    index: true,
+    documentation: {
+      description: "Identifiant dans l'ancienne base de données",
+    },
+  },
+  firstName: {
+    type: String,
+    documentation: {
+      description: "Prénom de l'utilisateur",
+    },
+  },
+  lastName: {
+    type: String,
+    documentation: {
+      description: "Nom de l'utilisateur",
+    },
+  },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
+    documentation: {
+      description: "Email de l'utilisateur",
+    },
+  },
 
-  password: { type: String, select: false },
-  lastLoginAt: { type: Date },
-  registredAt: { type: Date },
+  password: {
+    type: String,
+    select: false,
+    documentation: {
+      description: "Mot de passe de l'utilisateur",
+    },
+  },
+  lastLoginAt: {
+    type: Date,
+    documentation: {
+      description: "Date de dernière connexion",
+    },
+  },
+  registredAt: {
+    type: Date,
+    documentation: {
+      description: "Date de création",
+    },
+  },
 
-  forgotPasswordResetToken: { type: String, default: "" },
-  forgotPasswordResetExpires: { type: Date },
+  forgotPasswordResetToken: {
+    type: String,
+    default: "",
+    documentation: {
+      description: "Token servant à la réinitialisation du mot de passe",
+    },
+  },
+  forgotPasswordResetExpires: {
+    type: Date,
+    documentation: {
+      description: "Date limite de validité du token pour réinitialiser le mot de passe",
+    },
+  },
 
-  invitationToken: { type: String, default: "" },
-  invitationExpires: { type: Date },
+  invitationToken: {
+    type: String,
+    default: "",
+    documentation: {
+      description: "Token d'invitation",
+    },
+  },
+  invitationExpires: {
+    type: Date,
+    documentation: {
+      description: "Date limite de validité du token d'invitation",
+    },
+  },
 
   role: {
     type: String,
     enum: ["admin", "referent_region", "referent_department", "structure_responsible", "structure_member", "responsible", "supervisor"],
+    documentation: {
+      description: "Rôle de l'utilisateur sur l'app",
+    },
+  },
+  region: {
+    type: String,
+    default: "",
+    documentation: {
+      description: "Région de l'utilisateur, si applicable",
+    },
+  },
+  department: {
+    type: String,
+    default: "",
+    documentation: {
+      description: "Département de l'utilisateur, si applicable",
+    },
   },
   subRole: {
     type: String,
@@ -33,10 +112,25 @@ const Schema = new mongoose.Schema({
   region: { type: String, default: "" },
   department: { type: String, default: "" },
 
-  phone: { type: String },
-  mobile: { type: String },
+  phone: {
+    type: String,
+    documentation: {
+      description: "Numéro de téléphone fix",
+    },
+  },
+  mobile: {
+    type: String,
+    documentation: {
+      description: "Numéro de portable",
+    },
+  },
 
-  structureId: { type: String },
+  structureId: {
+    type: String,
+    documentation: {
+      description: "Identifiant de la structrue de l'utilisateur, si applicable",
+    },
+  },
 
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },

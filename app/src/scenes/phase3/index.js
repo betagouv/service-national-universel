@@ -6,8 +6,12 @@ import Engagement from "./engagement";
 import Missions from "./missions";
 import Mission from "./mission";
 import Valider from "./valider";
+import { environment } from "../../config";
 
 export default () => {
+  //todo : remove when ready
+  if (environment === "production") return <div style={{ padding: "3rem", fontStyle: "italic" }}>Bientôt disponible !</div>;
+
   return (
     <div>
       <Switch>

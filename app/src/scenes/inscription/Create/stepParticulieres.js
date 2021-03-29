@@ -415,6 +415,7 @@ const Heading = styled.div`
   }
   p {
     color: #161e2e;
+    margin: 0;
   }
 `;
 

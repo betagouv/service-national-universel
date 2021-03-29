@@ -1,17 +1,18 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 
-export default ({ title, image, details, href, enableToggle = true }) => {
+export default ({ program, image, enableToggle = true }) => {
+  if (!program) return <div />;
   const [expandDetails, setExpandDetails] = useState(false);
-  const preview = details.substring(0, 130);
-  const rest = details.substring(130);
+  const preview = program.description.substring(0, 130);
+  const rest = program.description.substring(130);
 
   const toggleDetails = () => {
     setExpandDetails(!expandDetails);
   };
 
   const renderText = () => {
-    if (!enableToggle) return details;
+    if (!enableToggle) return `${preview} ...`;
     if (!rest) return preview;
 
     return (
@@ -32,12 +33,13 @@ export default ({ title, image, details, href, enableToggle = true }) => {
 
   return (
     <Card>
-      <a href={href} className="thumb">
+      <a href={program.url} className="thumb">
         <img src={image} />
+        <Badge>{program.type}</Badge>
       </a>
-      <h4>{title}</h4>
+      <h4>{program.name}</h4>
       <p>{renderText()}</p>
-      <SeeMore href={href} target="_blank">
+      <SeeMore href={program.url} target="_blank">
         DÉCOUVRIR
       </SeeMore>
     </Card>
@@ -84,4 +86,17 @@ const ToogleText = styled.span`
   color: #333;
   text-transform: uppercase;
   cursor: pointer;
+`;
+
+const Badge = styled.div`
+  font-size: 0.8rem;
+  color: #222;
+  background: #fff;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 0.5rem 1.5rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
 `;

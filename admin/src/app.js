@@ -8,6 +8,7 @@ import { setUser, setStructure } from "./redux/auth/actions";
 
 import Auth from "./scenes/auth";
 import Onboarding from "./scenes/onboarding";
+import Validate from "./scenes/validate";
 
 import Profil from "./scenes/profil";
 import Settings from "./scenes/settings";
@@ -21,6 +22,7 @@ import Volontaires from "./scenes/volontaires";
 import VolontairesResponsible from "./scenes/volontaires-responsible";
 import Tuteur from "./scenes/tuteur";
 import Utilisateur from "./scenes/utilisateur";
+import Content from "./scenes/content";
 
 import Inscription from "./scenes/inscription";
 
@@ -32,7 +34,7 @@ import Footer from "./components/footer";
 
 import api from "./services/api";
 
-import { SENTRY_URL, environment, LUMIERE_APP_ID } from "./config";
+import { SENTRY_URL, environment } from "./config";
 
 import matomo from "./services/matomo";
 
@@ -44,10 +46,6 @@ export default () => {
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
   useEffect(() => {
-    window.lumiere("init", LUMIERE_APP_ID, "admin");
-    if (environment !== "production") window.lumiere("setDisable", true);
-    window.lumiere("setEnv", environment);
-
     window.lumiere("sendEvent", "start", "open_app"); // cat, action, props
     matomo.logEvent("start", "open_app");
     async function fetchData() {
@@ -76,6 +74,7 @@ export default () => {
     <Router>
       <div className="main">
         <Switch>
+          <Route path="/validate" component={Validate} />
           <Route path="/auth" component={Auth} />
           <Route path="/" component={Home} />
         </Switch>
@@ -105,6 +104,7 @@ const Home = () => {
           <RestrictedRoute path="/mission" component={Missions} />
           <RestrictedRoute path="/inscription" component={Inscription} />
           <RestrictedRoute path="/user" component={Utilisateur} />
+          <RestrictedRoute path="/contenu" component={Content} />
           <RestrictedRoute path="/" component={["supervisor", "responsible"].includes(user?.role) ? DashboardResponsible : Dashboard} />
         </Switch>
       </div>

@@ -66,9 +66,6 @@ export default ({ step }) => {
             <Element status={getStatus(STEPS.CONSENTEMENTS)}>
               <a onClick={() => handleClick(STEPS.CONSENTEMENTS)}>Consentements</a>
             </Element>
-            <Element status={getStatus(STEPS.MOTIVATIONS)}>
-              <a onClick={() => handleClick(STEPS.MOTIVATIONS)}>Motivations</a>
-            </Element>
           </ul>
         </li>
       </MainNav>

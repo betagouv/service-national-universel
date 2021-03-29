@@ -125,6 +125,14 @@ export default () => {
       <Formik
         initialValues={young}
         onSubmit={async (values) => {
+          if (young.address !== values.address || young.city !== values.city || young.department !== values.department || young.region !== values.region) {
+            if (
+              !confirm(
+                "Attention, vous êtes sur le point de changer votre adresse. La proposition des missions et d'autres fonctionnalités dépendent de cette adresse.\n\nAssurez-vous que ce changement est indispensable avant de continuer ! Si ce n'est pas le cas, merci d'annuler cette action."
+              )
+            )
+              return;
+          }
           try {
             const { ok, code, data: young } = await api.put("/young", values);
             if (!ok) toastr.error("Une erreur s'est produite :", translate(code));

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { Col, Row } from "reactstrap";
+import { useHistory } from "react-router-dom";
 
 import api from "../../../services/api";
 
@@ -10,6 +10,7 @@ function round1Decimal(num) {
 
 export default ({ filter }) => {
   const [schools, setSchools] = useState([]);
+  const history = useHistory();
 
   useEffect(() => {
     (async () => {
@@ -61,6 +62,19 @@ export default ({ filter }) => {
     })();
   }, [JSON.stringify(filter)]);
 
+  const replaceSpaces = (v) => v.replace(/\s+/g, "+");
+
+  const getLink = (link) => {
+    if (filter.region) link += `&REGION=%5B"${replaceSpaces(filter.region)}"%5D`;
+    if (filter.cohort) link += `&COHORT=%5B"${replaceSpaces(filter.cohort)}"%5D`;
+    if (filter.department) link += `&DEPARTMENT=%5B"${replaceSpaces(filter.department)}"%5D`;
+    return link;
+  };
+
+  const handleClick = (link) => {
+    history.push(link);
+  };
+
   return (
     <TableWrapper>
       <Table>
@@ -75,7 +89,7 @@ export default ({ filter }) => {
         <tbody>
           {schools.map((e, i) => {
             return (
-              <TableRow key={i}>
+              <TableRow key={i} onClick={() => handleClick(getLink(`/inscription?SCHOOL=%5B"${replaceSpaces(e.name)}"%5D`))}>
                 <TableCell>
                   {e.name}
                   <div>

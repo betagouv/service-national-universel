@@ -14,9 +14,9 @@ import SelectStatus from "../../components/selectStatus";
 import api from "../../services/api";
 import { apiURL, appURL } from "../../config";
 import Panel from "./panel";
-import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS } from "../../utils";
+import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS, getDepartmentNumber } from "../../utils";
 
-const FILTERS = ["SEARCH", "STATUS", "REGION", "DEPARTMENT", "REMOVEINPROGRESS"];
+const FILTERS = ["SEARCH", "STATUS", "REGION", "DEPARTMENT", "SCHOOL"];
 
 export default () => {
   const [young, setYoung] = useState(null);
@@ -122,6 +122,14 @@ export default () => {
               />
               <FilterRow>
                 <MultiDropdownList
+                  style={{ display: "none" }}
+                  defaultQuery={DEFAULT_QUERY}
+                  componentId="SCHOOL"
+                  dataField="schoolName.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "SCHOOL") }}
+                  URLParams={true}
+                />
+                <MultiDropdownList
                   defaultQuery={DEFAULT_QUERY}
                   className="dropdown-filter"
                   componentId="STATUS"
@@ -144,8 +152,9 @@ export default () => {
                   title=""
                   react={{ and: FILTERS.filter((e) => e !== "REGION") }}
                   URLParams={true}
-                  showSearch={false}
                   sortBy="asc"
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
                 />
                 <MultiDropdownList
                   defaultQuery={DEFAULT_QUERY}
@@ -154,10 +163,14 @@ export default () => {
                   componentId="DEPARTMENT"
                   dataField="department.keyword"
                   title=""
+                  renderItem={(e, count) => {
+                    return `${getDepartmentNumber(e)} - ${e} (${count})`;
+                  }}
                   react={{ and: FILTERS.filter((e) => e !== "DEPARTMENT") }}
                   URLParams={true}
-                  showSearch={false}
                   sortBy="asc"
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
                 />
               </FilterRow>
             </Filter>
@@ -207,7 +220,13 @@ export default () => {
                       </thead>
                       <tbody>
                         {data.map((hit, i) => (
-                          <Hit key={i} hit={hit} index={i + resultStats.currentPage * resultStats.displayedResults} onClick={() => setYoung(hit)} />
+                          <Hit
+                            key={i}
+                            hit={hit}
+                            index={i + resultStats.currentPage * resultStats.displayedResults}
+                            onClick={() => setYoung(hit)}
+                            selected={young?._id === hit._id}
+                          />
                         ))}
                       </tbody>
                     </Table>
@@ -223,7 +242,7 @@ export default () => {
   );
 };
 
-const Hit = ({ hit, index, onClick }) => {
+const Hit = ({ hit, index, onClick, selected }) => {
   dayjs.extend(relativeTime).locale("fr");
   const diff = dayjs(new Date(hit.lastStatusAt)).fromNow();
   const user = useSelector((state) => state.Auth.user);
@@ -232,7 +251,7 @@ const Hit = ({ hit, index, onClick }) => {
   if (user.role === "admin") STATUS.push(YOUNG_STATUS.WAITING_VALIDATION);
 
   return (
-    <tr onClick={onClick} key={hit._id}>
+    <tr style={{ backgroundColor: selected ? "#f1f1f1" : "transparent" }} onClick={onClick} key={hit._id}>
       <td>{index + 1}</td>
       <td>
         <strong>

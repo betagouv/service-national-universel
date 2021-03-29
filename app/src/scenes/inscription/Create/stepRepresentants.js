@@ -24,7 +24,7 @@ const Parent = ({ id = 1, values, errors, touched, handleChange }) => {
     function getFranceConnectCallback(idRepresentant) {
       return `inscription/france-connect-callback?representant=${idRepresentant}`;
     }
-    if (environment === "production" && !document.cookie.match(/snu=fc/)) return null;
+    if (environment === "production") return null;
     if (isParentFromFranceConnect) {
       return <i>Les information en provenance de FranceConnect du représentant légal n°{id} ont bien été enregistrées.</i>;
     }

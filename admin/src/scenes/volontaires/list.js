@@ -140,7 +140,8 @@ export default ({ setYoung }) => {
                   title=""
                   react={{ and: FILTERS.filter((e) => e !== "DEPARTMENT") }}
                   URLParams={true}
-                  showSearch={false}
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
                   sortBy="asc"
                 />
                 <MultiDropdownList
@@ -152,7 +153,8 @@ export default ({ setYoung }) => {
                   title=""
                   react={{ and: FILTERS.filter((e) => e !== "REGION") }}
                   URLParams={true}
-                  showSearch={false}
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
                   sortBy="asc"
                 />
                 <MultiDropdownList
@@ -238,7 +240,7 @@ export default ({ setYoung }) => {
                     </thead>
                     <tbody>
                       {data.map((hit, i) => (
-                        <Hit key={i} hit={hit} onClick={() => setVolontaire(hit)} />
+                        <Hit key={i} hit={hit} onClick={() => setVolontaire(hit)} selected={volontaire?._id === hit._id} />
                       ))}
                     </tbody>
                   </Table>
@@ -259,7 +261,7 @@ export default ({ setYoung }) => {
   );
 };
 
-const Hit = ({ hit, onClick }) => {
+const Hit = ({ hit, onClick, selected }) => {
   const getAge = (d) => {
     const now = new Date();
     const date = new Date(d);
@@ -270,7 +272,7 @@ const Hit = ({ hit, onClick }) => {
   };
 
   return (
-    <tr onClick={onClick}>
+    <tr style={{ backgroundColor: selected ? "#f1f1f1" : "transparent" }} onClick={onClick}>
       <td>
         <div className="name">{`${hit.firstName} ${hit.lastName}`}</div>
         <div className="email">

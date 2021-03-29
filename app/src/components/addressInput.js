@@ -38,9 +38,11 @@ export default ({ keys, values, handleChange, errors, touched, departAndRegionVi
     handleChange({ target: { name: keys.zip, value: suggestion.properties.postcode } });
     handleChange({ target: { name: keys.address, value: suggestion.properties.label } });
     handleChange({ target: { name: keys.location, value: { lon: suggestion.geometry.coordinates[0], lat: suggestion.geometry.coordinates[1] } } });
-    if (values.cohort === "2020") return;
-    handleChange({ target: { name: keys.department, value: departmentLookUp[depart] } });
-    handleChange({ target: { name: keys.region, value: department2region[departmentLookUp[depart]] } });
+    if (values.cohort !== "2020") {
+      handleChange({ target: { name: keys.department, value: departmentLookUp[depart] } });
+      handleChange({ target: { name: keys.region, value: department2region[departmentLookUp[depart]] } });
+    }
+    return;
   };
 
   const renderSuggestion = (suggestion) => <div>{suggestion !== "noresult" ? suggestion.properties.label : NORESULTMESSAGE}</div>;

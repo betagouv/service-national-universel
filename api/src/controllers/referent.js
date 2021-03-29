@@ -502,10 +502,28 @@ router.put("/", passport.authenticate("referent", { session: false }), async (re
   }
 });
 
+function canDelete(user, value) {
+  if (user.role === "admin") return true;
+  // https://trello.com/c/Wv2TrQnQ/383-admin-ajouter-onglet-utilisateurs-pour-les-r%C3%A9f%C3%A9rents
+  if (user.role === "referent_region") {
+    if (
+      (["referent_department", "referent_region"].includes(value.role) && user.region === value.region) ||
+      ["supervisor", "responsible"].includes(value.role)
+    )
+      return true;
+    return false;
+  }
+  if (user.role === "referent_department") {
+    if ((user.role === value.role && user.department === value.department) || ["supervisor", "responsible"].includes(value.role)) return true;
+    return false;
+  }
+  return false;
+}
+
 router.delete("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    if (req.user.role !== "admin") return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const referent = await ReferentObject.findOne({ _id: req.params.id });
+    if (!canDelete(req.user, referent)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     await referent.remove();
     console.log(`Referent ${req.params.id} has been deleted`);
     res.status(200).send({ ok: true });

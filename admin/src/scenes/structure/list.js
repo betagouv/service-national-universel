@@ -101,7 +101,8 @@ export default () => {
                   title=""
                   react={{ and: FILTERS.filter((e) => e !== "DEPARTMENT") }}
                   URLParams={true}
-                  showSearch={false}
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
                   sortBy="asc"
                   defaultValue={user.role === "referent_department" && [user.department]}
                 />
@@ -114,7 +115,8 @@ export default () => {
                   title=""
                   react={{ and: FILTERS.filter((e) => e !== "REGION") }}
                   URLParams={true}
-                  showSearch={false}
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
                   sortBy="asc"
                   defaultValue={user.role === "referent_region" && [user.region]}
                 />
@@ -126,7 +128,8 @@ export default () => {
                   title=""
                   react={{ and: FILTERS.filter((e) => e !== "WITH_NETWORK") }}
                   URLParams={true}
-                  showSearch={false}
+                  showSearch={true}
+                  searchPlaceholder="Rechercher..."
                   sortBy="asc"
                 />
               </FilterRow>
@@ -170,7 +173,7 @@ export default () => {
                       </thead>
                       <tbody>
                         {data.map((hit, k) => (
-                          <Hit hit={hit} key={k} onClick={() => setStructure(hit)} />
+                          <Hit hit={hit} key={k} onClick={() => setStructure(hit)} selected={structure?._id === hit._id} />
                         ))}
                       </tbody>
                     </Table>
@@ -186,7 +189,7 @@ export default () => {
   );
 };
 
-const Hit = ({ hit, onClick }) => {
+const Hit = ({ hit, onClick, selected }) => {
   const [missionsInfo, setMissionsInfo] = useState({ count: "-", placesTotal: "-" });
   useEffect(() => {
     (async () => {
@@ -204,7 +207,7 @@ const Hit = ({ hit, onClick }) => {
     })();
   }, [hit]);
   return (
-    <tr onClick={onClick}>
+    <tr style={{ backgroundColor: selected ? "#f1f1f1" : "transparent" }} onClick={onClick}>
       <td>
         <div style={{ fontWeight: "bold" }}>{hit.name}</div>
         <div style={{ color: "#718096" }}>
