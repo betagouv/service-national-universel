@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import { translate as t, YOUNG_PHASE, YOUNG_STATUS_PHASE3 } from "../../../utils";
 import WrapperPhase3 from "./wrapper";
 import SelectStatus from "../../../components/selectStatus";
+import DownloadButton from "../../../components/buttons/DownloadButton";
 
 export default ({ young }) => {
   return (
@@ -19,7 +20,39 @@ export default ({ young }) => {
             </div>
           </Bloc>
         </Box>
+        {young.statusPhase3 === YOUNG_STATUS_PHASE3.VALIDATED ? (
+          <Box>
+            <Row>
+              <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
+                <Bloc title="Mission de phase 3 réalisée">
+                  <p style={{ flex: 1 }}>Le tuteur a validé la mission</p>
+                  <Details title="Structure" value={young.phase3StructureName} />
+                  <Details title="Descriptif" value={young.phase3MissionDescription} />
+                </Bloc>
+              </Col>
+              <Col md={6}>
+                <Bloc title="Tuteur">
+                  <Details title="Prénom" value={young.phase3TutorFirstName} />
+                  <Details title="Nom" value={young.phase3TutorLastName} />
+                  <Details title="E-mail" value={young.phase3TutorEmail} />
+                  <Details title="Téléphone" value={young.phase3TutorPhone} />
+                </Bloc>
+              </Col>
+            </Row>
+          </Box>
+        ) : null}
       </WrapperPhase3>
+    </div>
+  );
+};
+
+const Details = ({ title, value }) => {
+  if (!value) return <div />;
+  if (typeof value === "function") value = value();
+  return (
+    <div className="detail">
+      <div className="detail-title">{`${title} :`}</div>
+      <div className="detail-text">{value}</div>
     </div>
   );
 };

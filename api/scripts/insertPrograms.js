@@ -1,4 +1,4 @@
-require("dotenv").config({ path: "./../.env-staging" });
+require("dotenv").config({ path: "./../.env-prod" });
 require("../src/mongo");
 
 const ProgramModel = require("../src/models/program");
@@ -74,7 +74,7 @@ const programs = [
     imageString: "sapeur-pompier-2.jpg",
   },
   {
-    name: "Chantier de jeune bénévoles",
+    name: "Chantiers de jeune bénévoles",
     description:
       "Qu’est-ce que c’est ? Les chantiers de jeunes bénévoles vous proposent des expériences de bénévolat en France et à l’étranger et rassemblent des jeunes autour d’un projet utile à la collectivité C’est pour ... les jeunes à partir de 13 ans. Est-ce indemnisé ? Non. Quelle durée d’engagement ? De 2 à 3 semaine",
     url: "https://www.jeunes.gouv.fr/Chantiers-de-jeunes-benevoles",
