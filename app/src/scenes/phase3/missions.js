@@ -1,9 +1,8 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
-import { Col, Container, CustomInput, Input, Row } from "reactstrap";
+import { Col, Container, CustomInput, Row } from "reactstrap";
 import { ReactiveBase, ReactiveList, DataSearch, SingleDropdownList } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
-import { useSelector } from "react-redux";
 
 import MissionCard from "./components/missionCard";
 
@@ -14,8 +13,6 @@ import api from "../../services/api";
 const FILTERS = ["DOMAIN", "SEARCH"];
 
 export default () => {
-  const young = useSelector((state) => state.Auth.young);
-
   return (
     <div>
       <Missions>
@@ -25,11 +22,11 @@ export default () => {
             <p>TROUVEZ UNE MISSION DE BÉNÉVOLAT</p>
             <h1>Missions disponibles près de chez vous ou à distance</h1>
           </Heading>
-          <Row style={{ marginBottom: 20 }}>
-            <SearchBox>
+          <Filters style={{ marginBottom: 20 }}>
+            <SearchBox md={4}>
               <DataSearch innerClass={{ input: "form-control" }} placeholder="Recherche..." autosuggest={false} componentId="SEARCH" dataField={["title", "organisation"]} />
             </SearchBox>
-            <Col>
+            <Col md={4}>
               <CustomInput type="select" id="dist" defaultValue="">
                 <option value="null" disabled>
                   Rayon de recherche maximum
@@ -43,18 +40,18 @@ export default () => {
                 {/* <option value="-1">France entière : préparations militaires uniquement</option> */}
               </CustomInput>
             </Col>
-            <DomainsFilter>
+            <DomainsFilter md={4}>
               <SingleDropdownList
                 selectAllLabel="Tous les domaines"
                 URLParams={true}
                 componentId="DOMAIN"
                 placeholder="Filtrer par domaines"
-                dataField="domains.keyword"
+                dataField="domain.keyword"
                 react={{ and: FILTERS.filter((e) => e !== "DOMAIN") }}
                 showSearch={false}
               />
             </DomainsFilter>
-          </Row>
+          </Filters>
           <ReactiveList
             componentId="result"
             react={{ and: FILTERS }}
@@ -94,12 +91,22 @@ export default () => {
   );
 };
 
+const Filters = styled(Row)`
+  > * {
+    margin-bottom: 0.5rem;
+  }
+`;
+
 const Missions = styled(Container)`
   padding: 20px 40px;
   border-radius: 6px;
   background: #fff;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   position: relative;
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+    padding: 10px 15px;
+  }
 `;
 
 const Heading = styled.div`
@@ -107,14 +114,20 @@ const Heading = styled.div`
   h1 {
     margin-top: 25px;
     color: #161e2e;
-    font-size: 36px;
+    font-size: 2.5rem;
     font-weight: 700;
+    @media (max-width: 768px) {
+      font-size: 1.5rem;
+    }
   }
   p {
     color: #42389d;
-    font-size: 16px;
+    font-size: 1rem;
     font-weight: 700;
     margin-bottom: 5px;
+    @media (max-width: 768px) {
+      font-size: 0.8rem;
+    }
   }
 `;
 
@@ -163,30 +176,5 @@ const DomainsFilter = styled(Col)`
     border: 1px solid #ced4da;
     border-radius: 0.25rem;
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
-  }
-`;
-
-const Alert = styled(Container)`
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  background-color: #5949d0;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  margin-bottom: 20px;
-  padding: 10px 20px;
-  .text {
-    margin-left: 20px;
-    margin-right: auto;
-    color: #fff;
-    strong {
-      font-size: 15px;
-      font-weight: 700;
-      margin-bottom: 3px;
-    }
-    p {
-      margin-bottom: 0;
-      font-size: 12px;
-      font-weight: 500;
-    }
   }
 `;

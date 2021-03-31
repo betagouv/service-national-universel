@@ -1,18 +1,17 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 import { translate } from "../../../utils";
 
 export default ({ mission, image }) => {
   if (!mission) return <div />;
   const tags = [];
-  tags.push(mission.remote ? "À distance" : "En présentiel");
+  tags.push(mission.remote ? "À distance" : "En présentiel");
   mission.city && tags.push(mission.city);
   tags.push(translate(mission.domain));
-  let n = "tset";
   return (
     <Card>
-      <div>
+      <Col md={8}>
         <div className="inner">
           <div className="thumb">
             <img src={image} />
@@ -27,16 +26,18 @@ export default ({ mission, image }) => {
             <div key={i}>{e}</div>
           ))}
         </Tags>
-      </div>
-      <Button target="_blank" href={mission.applicationUrl}>
-        Voir la mission sur <b>{mission.publisherName}</b>
-        <img src={require("../../../assets/external-link.svg")} height={15} color="white" />
-      </Button>
+      </Col>
+      <Col md={4}>
+        <Button target="_blank" href={mission.applicationUrl}>
+          Voir la mission sur <b>{mission.publisherName}</b>
+          <img src={require("../../../assets/external-link.svg")} height={15} color="white" />
+        </Button>
+      </Col>
     </Card>
   );
 };
 
-const Card = styled.div`
+const Card = styled(Row)`
   margin-bottom: 30px;
   display: flex;
   align-items: center;
@@ -51,14 +52,27 @@ const Card = styled.div`
       margin-right: 20px;
       background-color: #42389d;
       height: 50px;
-      width: 48px;
+      width: 50px;
       border-radius: 4px;
       padding: 10px;
       text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      @media (max-width: 768px) {
+        height: 30px;
+        width: 30px;
+        margin-right: 10px;
+      }
       img {
         border-radius: 6px;
-        max-width: 100%;
+        /* max-width: 100%; */
         height: 30px;
+        width: 30px;
+        @media (max-width: 768px) {
+          height: 18px;
+          width: 18px;
+        }
         object-fit: cover;
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
       }
@@ -86,7 +100,7 @@ const Button = styled.a`
   color: #fff;
   font-size: 13px;
   padding: 10px 15px 8px;
-  margin-left: 10px;
+  margin: 0.5rem 0.5rem 0 0;
   white-space: nowrap;
   display: flex;
   justify-content: center;
@@ -102,6 +116,7 @@ const Button = styled.a`
 const Tags = styled.div`
   display: flex;
   align-items: center;
+  white-space: nowrap;
   div {
     color: #6b7280;
     border: 1px solid #e5e7eb;
@@ -110,14 +125,4 @@ const Tags = styled.div`
     margin-right: 15px;
     font-size: 12px;
   }
-`;
-
-const Location = styled.div`
-  color: rgb(107, 114, 128);
-  background: url(${require("../../../assets/location.svg")}) left center no-repeat;
-  background-size: 22px;
-  font-weight: 400;
-  letter-spacing: 0.02em;
-  padding-left: 32px;
-  margin-bottom: 10px;
 `;
