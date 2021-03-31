@@ -78,7 +78,7 @@ const Schema = new mongoose.Schema({
   phase: {
     type: String,
     default: "INSCRIPTION",
-    enum: ["INSCRIPTION", "COHESION_STAY", "INTEREST_MISSION"],
+    enum: ["INSCRIPTION", "COHESION_STAY", "INTEREST_MISSION", "CONTINUE"],
     documentation: {
       description: "Phase actuelle du volontaire",
     },

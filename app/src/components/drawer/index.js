@@ -45,7 +45,7 @@ export default (props) => {
       return [YOUNG_PHASE.INSCRIPTION, YOUNG_PHASE.COHESION_STAY].includes(young.phase);
     }
     if (tab === DRAWER_TABS.PHASE3) {
-      return !(young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE && young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED);
+      return !(young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED);
     }
     return true;
   };
