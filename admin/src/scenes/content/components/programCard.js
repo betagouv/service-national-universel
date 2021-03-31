@@ -38,8 +38,8 @@ export default ({ program, image, enableToggle = true, onDelete }) => {
 
   const renderVisibility = () => {
     if (program.visibility === "NATIONAL") return `Visibilité Nationale`;
-    if (program.visibility === "DEPARTMENT") return `Visibilité Departement : ${program.department}`;
-    if (program.visibility === "REGION") return `Visibilité Departement : ${program.region}`;
+    if (program.visibility === "DEPARTMENT") return `Visibilité Département : ${program.department}`;
+    if (program.visibility === "REGION") return `Visibilité Région : ${program.region}`;
   };
 
   return (

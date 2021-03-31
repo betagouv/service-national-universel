@@ -35,11 +35,17 @@ export default () => {
         </Link>
       </Header>
       <Wrapper>
-        {programs.map((p, i) => (
-          <Col key={i} md={3} sm={12} style={{ marginBottom: "1.5rem" }}>
-            <ProgramCard onDelete={getPrograms} program={p} image={p.imageFile ? p.imageFile : require(`../../assets/programmes-engagement/${p.imageString || "default.png"}`)} />
-          </Col>
-        ))}
+        {programs
+          .sort((a, b) => {
+            if (a.visibility === b.visibility) return 0;
+            if (a.visibility === "DEPARTMENT" || a.visibility === "REGION") return -1;
+            if (a.visibility === "NATIONAL") return 1;
+          })
+          .map((p, i) => (
+            <Col key={i} md={3} sm={12} style={{ marginBottom: "1.5rem" }}>
+              <ProgramCard onDelete={getPrograms} program={p} image={p.imageFile ? p.imageFile : require(`../../assets/programmes-engagement/${p.imageString || "default.png"}`)} />
+            </Col>
+          ))}
       </Wrapper>
     </>
   );
