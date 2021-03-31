@@ -37,9 +37,10 @@ export default () => {
       <Wrapper>
         {programs
           .sort((a, b) => {
-            if (a.visibility === b.visibility) return 0;
-            if (a.visibility === "DEPARTMENT" || a.visibility === "REGION") return -1;
-            if (a.visibility === "NATIONAL") return 1;
+            if (a.type === b.type) return 0;
+            if (a.type === "Engagement") return -1;
+            if (a.type === "Formation" && b.type !== "Engagement") return -1;
+            else return 0;
           })
           .map((p, i) => (
             <Col key={i} md={3} sm={12} style={{ marginBottom: "1.5rem" }}>

@@ -30,8 +30,8 @@ export default () => {
           .filter((p) => p.visibility === "NATIONAL" || p.region === young.region || p.department === young.department)
           .sort((a, b) => {
             if (a.type === b.type) return 0;
-            if (a.type === "Formation") return -1;
-            if (a.type === "Engagement" && b.type !== "Formation") return -1;
+            if (a.type === "Engagement") return -1;
+            if (a.type === "Formation" && b.type !== "Engagement") return -1;
             else return 0;
           })
           .map((p, i) => (
