@@ -11,10 +11,34 @@ const Schema = new mongoose.Schema({
       description: "nom du programmes",
     },
   },
-  description: {
+  descriptionText: {
     type: String,
     documentation: {
       description: "desc du programme",
+    },
+  },
+  descriptionWhat: {
+    type: String,
+    documentation: {
+      description: "desc du programme : Qu'est ce que c'est ?",
+    },
+  },
+  descriptionFor: {
+    type: String,
+    documentation: {
+      description: "desc du programme : C'est pour ?",
+    },
+  },
+  descriptionMoney: {
+    type: String,
+    documentation: {
+      description: "desc du programme : Est-ce indemnisé",
+    },
+  },
+  descriptionDuration: {
+    type: String,
+    documentation: {
+      description: "desc du programme : Quelle durée d'engagement ?",
     },
   },
   url: {
