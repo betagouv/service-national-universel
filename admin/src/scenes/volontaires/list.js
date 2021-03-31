@@ -14,7 +14,7 @@ import Badge from "../../components/Badge";
 import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS_COLORS } from "../../utils";
 import { Link } from "react-router-dom";
 
-const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_PHASE_1", "STATUS_PHASE_2"];
+const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_PHASE_1", "STATUS_PHASE_2", "STATUS_APPLICATION"];
 
 export default ({ setYoung }) => {
   const [volontaire, setVolontaire] = useState(null);
@@ -198,6 +198,20 @@ export default ({ setYoung }) => {
                   URLParams={true}
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Statut phase 2")}
+                />
+                <MultiDropdownList
+                  defaultQuery={DEFAULT_QUERY}
+                  className="dropdown-filter"
+                  componentId="STATUS_APPLICATION"
+                  dataField="phase2ApplicationStatus.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "STATUS_APPLICATION") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Statut mission")}
                 />
               </FilterRow>
             </Filter>

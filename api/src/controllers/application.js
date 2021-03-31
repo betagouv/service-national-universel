@@ -16,6 +16,7 @@ const updateStatusPhase2 = async (app) => {
   const young = await YoungObject.findById(app.youngId);
   const applications = await ApplicationObject.find({ youngId: young._id });
   young.set({ statusPhase2: "WAITING_REALISATION" });
+  young.set({ phase2ApplicationStatus: applications.map((e) => e.status) });
   for (let application of applications) {
     // if at least one application is DONE, phase 2 is validated
     if (application.status === "DONE") {

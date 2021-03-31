@@ -232,6 +232,15 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  // * phase 2 application infos
+  phase2ApplicationStatus: {
+    type: [String],
+    default: [],
+    documentation: {
+      description: "Liste des statuts des candidatures de phase 2 pour le jeune",
+    },
+  },
+
   // * phase 3 infos
   phase3StructureName: { type: String },
   phase3MissionDomain: { type: String },
