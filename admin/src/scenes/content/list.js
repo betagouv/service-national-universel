@@ -7,6 +7,7 @@ import { Link } from "react-router-dom";
 import ProgramCard from "./components/programCard";
 import api from "../../services/api";
 import VioletHeaderButton from "../../components/buttons/VioletHeaderButton";
+import Loader from "../../components/Loader";
 
 export default () => {
   const [programs, setPrograms] = useState();
@@ -20,7 +21,7 @@ export default () => {
     getPrograms();
   }, []);
 
-  if (!programs) return <div>Chargement...</div>;
+  if (!programs) return <Loader />;
   return (
     <>
       <Header>

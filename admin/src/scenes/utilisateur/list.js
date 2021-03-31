@@ -10,7 +10,7 @@ import { translate, getFilterLabel, formatStringLongDate } from "../../utils";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
-
+import Loader from "../../components/Loader";
 const FILTERS = ["SEARCH", "ROLE", "REGION", "DEPARTMENT"];
 
 export default () => {
@@ -29,7 +29,7 @@ export default () => {
     })();
     return;
   }, []);
-  if (user.role === "supervisor" && !structureIds) return <div>Chargement</div>;
+  if (user.role === "supervisor" && !structureIds) return <Loader />;
 
   return (
     <div>

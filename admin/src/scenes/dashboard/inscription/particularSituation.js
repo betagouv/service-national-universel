@@ -5,6 +5,7 @@ import { Col, Row, Input } from "reactstrap";
 import CircularProgress from "../components/CircularProgress";
 
 import api from "../../../services/api";
+import Loader from "../../../components/Loader";
 
 export default ({ filter }) => {
   const [handicap, setHandicap] = useState(null);
@@ -44,7 +45,7 @@ export default ({ filter }) => {
   }, [JSON.stringify(filter)]);
 
   function render() {
-    if (!handicap || !ppsBeneficiary || !paiBeneficiary) return <div>Chargement ....</div>;
+    if (!handicap || !ppsBeneficiary || !paiBeneficiary) return <Loader />;
     return (
       <Row>
         <Col style={{ marginBottom: 15 }}>

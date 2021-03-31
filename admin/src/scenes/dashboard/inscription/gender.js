@@ -5,6 +5,7 @@ import { Col, Row } from "reactstrap";
 import CircularProgress from "../components/CircularProgress";
 
 import api from "../../../services/api";
+import Loader from "../../../components/Loader";
 
 export default ({ filter }) => {
   const [gender, setGender] = useState(null);
@@ -30,7 +31,7 @@ export default ({ filter }) => {
   }, [JSON.stringify(filter)]);
 
   function render() {
-    if (!gender) return <div>Loading ....</div>;
+    if (!gender) return <Loader />;
 
     const male = gender.male || 0;
     const female = gender.female || 0;

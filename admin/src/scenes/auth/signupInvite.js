@@ -15,6 +15,7 @@ import Header from "./components/header";
 
 import matomo from "../../services/matomo";
 import { translate } from "../../utils";
+import Loader from "../../components/Loader";
 
 export default () => {
   const [invitation, setInvitation] = useState("");
@@ -39,7 +40,7 @@ export default () => {
   if (invitation === "INVITATION_TOKEN_EXPIRED_OR_INVALID") return <Redirect to="/auth/invitationexpired" />;
   if (user) return <Redirect to="/" />;
 
-  if (!newuser) return <div>Chargement...</div>;
+  if (!newuser) return <Loader />;
 
   let title;
   if (newuser.department && newuser.role === "referent_department") {

@@ -12,6 +12,7 @@ import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
 import { translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, MISSION_DOMAINS, PERIOD } from "../../utils";
 import api from "../../services/api";
 import Invite from "../structure/components/invite";
+import Loader from "../../components/Loader";
 
 export default (props) => {
   const [defaultValue, setDefaultValue] = useState(null);
@@ -67,7 +68,7 @@ export default (props) => {
     initReferents();
   }, [structure]);
 
-  if ((!defaultValue && !isNew) || !structure) return <div>Chargement...</div>;
+  if ((!defaultValue && !isNew) || !structure) return <Loader />;
 
   return (
     <Formik

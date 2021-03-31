@@ -4,6 +4,7 @@ import { Col, Row } from "reactstrap";
 import CircularProgress from "../components/CircularProgress";
 import api from "../../../services/api";
 import { translate } from "../../../utils";
+import Loader from "../../../components/Loader";
 
 export default ({ filter }) => {
   const [value, setValue] = useState(null);
@@ -29,7 +30,7 @@ export default ({ filter }) => {
   }, [JSON.stringify(filter)]);
 
   function render() {
-    if (!value) return <div>Chargement ....</div>;
+    if (!value) return <Loader />;
 
     const total = Object.keys(value).reduce((acc, e) => acc + value[e], 0);
 

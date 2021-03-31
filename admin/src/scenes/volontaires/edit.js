@@ -17,6 +17,7 @@ import { Link, useHistory } from "react-router-dom";
 import DndFileInput from "../../components/dndFileInput";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
 import { appURL } from "../../config";
+import Loader from "../../components/Loader";
 
 export default (props) => {
   const [young, setYoung] = useState();
@@ -32,7 +33,7 @@ export default (props) => {
     })();
   }, []);
 
-  if (young === undefined) return <div>Chargement...</div>;
+  if (young === undefined) return <Loader />;
 
   const getSubtitle = () => {
     const createdAt = new Date(young.createdAt);

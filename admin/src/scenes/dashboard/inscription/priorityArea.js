@@ -4,6 +4,7 @@ import styled from "styled-components";
 import CircularProgress from "../components/CircularProgress";
 
 import api from "../../../services/api";
+import Loader from "../../../components/Loader";
 
 export default ({ filter }) => {
   const [value, setValue] = useState(null);
@@ -29,7 +30,7 @@ export default ({ filter }) => {
   }, [JSON.stringify(filter)]);
 
   function render() {
-    if (!value) return <div>Chargement ....</div>;
+    if (!value) return <Loader />;
 
     const no = value.false || 0;
     const yes = value.true || 0;

@@ -13,6 +13,7 @@ import DateInput from "../../components/dateInput";
 import { departmentList, regionList, department2region, translate, REFERENT_ROLES, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE } from "../../utils";
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
+import Loader from "../../components/Loader";
 
 export default (props) => {
   const [user, setUser] = useState();
@@ -28,7 +29,7 @@ export default (props) => {
     })();
   }, []);
 
-  if (user === undefined) return <div>Chargement...</div>;
+  if (user === undefined) return <Loader />;
 
   const getSubtitle = () => {
     const createdAt = new Date(user.createdAt);

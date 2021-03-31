@@ -4,6 +4,7 @@ import { Col, Row } from "reactstrap";
 import CircularProgress from "../components/CircularProgress";
 
 import api from "../../../services/api";
+import Loader from "../../../components/Loader";
 
 export default ({ filter }) => {
   const [dates, setDates] = useState(null);
@@ -31,7 +32,7 @@ export default ({ filter }) => {
   }, [JSON.stringify(filter)]);
 
   function render() {
-    if (!dates) return <div>Loading ....</div>;
+    if (!dates) return <Loader />;
     const total = dates.reduce((acc, v) => acc + v.value, 0);
     return (
       <Row style={{ display: "flex", justifyContent: "space-around" }}>

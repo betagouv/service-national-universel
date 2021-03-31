@@ -6,6 +6,7 @@ import api from "../../../services/api";
 import MissionView from "./wrapper";
 import Panel from "../../volontaires/panel";
 import { formatStringLongDate } from "../../../utils";
+import Loader from "../../../components/Loader";
 
 export default ({ mission, applications }) => {
   const [missionTemp, setMissionTemp] = useState(mission);
@@ -21,7 +22,7 @@ export default ({ mission, applications }) => {
     if (ok) setMissionTemp(data);
   };
 
-  if (!data) return <div>Chargement...</div>;
+  if (!data) return <Loader />;
 
   return (
     <div>

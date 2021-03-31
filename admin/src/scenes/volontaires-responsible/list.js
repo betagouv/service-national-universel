@@ -9,7 +9,7 @@ import { apiURL } from "../../config";
 import Panel from "./panel";
 import VioletHeaderButton from "../../components/buttons/VioletHeaderButton";
 import ExportComponent from "../../components/ExportXlsx";
-
+import Loader from "../../components/Loader";
 import { translate, getFilterLabel, formatStringLongDate, formatStringDate } from "../../utils";
 
 const FILTERS = ["SEARCH", "STATUS", "PHASE", "COHORT", "MISSIONS", "TUTOR"];
@@ -56,7 +56,7 @@ export default () => {
     if (ok) setPanel({ application, young: data });
   };
 
-  if (!missions.length) return <div>Chargement...</div>;
+  if (!missions.length) return <Loader />;
   return (
     <div>
       <ReactiveBase url={`${apiURL}/es`} app="application" headers={{ Authorization: `JWT ${api.getToken()}` }}>
@@ -214,7 +214,7 @@ const Hit = ({ hit, onClick, selected }) => {
     return Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
   };
 
-  if (!mission) return <div>Chargement...</div>;
+  if (!mission) return <Loader />;
   return (
     <tr style={{ backgroundColor: selected ? "#f1f1f1" : "transparent" }} onClick={onClick}>
       <td>

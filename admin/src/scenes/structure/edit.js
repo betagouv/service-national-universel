@@ -11,7 +11,7 @@ import MultiSelect from "../../components/Multiselect";
 import AddressInput from "../../components/addressInput";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
 import Invite from "./components/invite";
-
+import Loader from "../../components/Loader";
 import { associationTypes, privateTypes, publicTypes, publicEtatTypes, translate } from "../../utils";
 import api from "../../services/api";
 
@@ -48,7 +48,7 @@ export default (props) => {
     })();
   }, [defaultValue]);
 
-  if (defaultValue === undefined) return <div>Chargement...</div>;
+  if (defaultValue === undefined) return <Loader />;
 
   return (
     <Formik

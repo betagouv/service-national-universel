@@ -31,6 +31,7 @@ import Team from "./scenes/team";
 import Drawer from "./components/drawer";
 import Header from "./components/header";
 import Footer from "./components/footer";
+import Loader from "./components/Loader";
 
 import api from "./services/api";
 
@@ -68,7 +69,7 @@ export default () => {
     fetchData();
   }, []);
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <Loader />;
 
   return (
     <Router>

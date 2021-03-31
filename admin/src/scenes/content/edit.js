@@ -1,27 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { Col, Row, Input } from "reactstrap";
+import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 import { Formik, Field } from "formik";
 import { useHistory } from "react-router-dom";
 
-import MultiSelect from "../../components/Multiselect";
-import AddressInput from "../../components/addressInput";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
-import {
-  translate,
-  MISSION_PERIOD_DURING_HOLIDAYS,
-  MISSION_PERIOD_DURING_SCHOOL,
-  MISSION_DOMAINS,
-  PERIOD,
-  REFERENT_ROLES,
-  departmentList,
-  regionList,
-  region2department,
-} from "../../utils";
+import { translate, REFERENT_ROLES, departmentList, regionList, region2department } from "../../utils";
 import api from "../../services/api";
-import Invite from "../structure/components/invite";
+import Loader from "../../components/Loader";
 
 export default (props) => {
   const [defaultValue, setDefaultValue] = useState(null);
@@ -38,7 +26,7 @@ export default (props) => {
     })();
   }, []);
 
-  if (!defaultValue && !isNew) return <div>Chargement...</div>;
+  if (!defaultValue && !isNew) return <Loader />;
 
   return (
     <Formik

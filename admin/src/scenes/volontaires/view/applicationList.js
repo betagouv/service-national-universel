@@ -13,6 +13,7 @@ import ProposalMission from "./proposalMission";
 import CreateMission from "./createMission";
 import PlusSVG from "../../../assets/plus.svg";
 import CrossSVG from "../../../assets/cross.svg";
+import Loader from "../../../components/Loader";
 
 export default ({ young }) => {
   const [applications, setApplications] = useState(null);
@@ -30,7 +31,7 @@ export default ({ young }) => {
     return setApplications(data);
   };
 
-  if (!applications) return <div>Chargement</div>;
+  if (!applications) return <Loader />;
 
   return (
     <>

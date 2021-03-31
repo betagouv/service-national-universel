@@ -6,6 +6,7 @@ import Panel from "../../missions/panel";
 
 import { formatStringDate } from "../../../utils";
 import SelectStatusMission from "../../../components/selectStatusMission";
+import Loader from "../../../components/Loader";
 
 export default ({ structure }) => {
   const [data, setData] = useState([]);
@@ -24,7 +25,7 @@ export default ({ structure }) => {
     if (ok) setMission(data);
   };
 
-  if (!structure) return <div>Chargement...</div>;
+  if (!structure) return <Loader />;
 
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>

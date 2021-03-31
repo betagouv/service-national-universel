@@ -1,18 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { FormGroup } from "reactstrap";
 import { Formik, Field } from "formik";
-import { Link, Redirect } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
+import { Redirect } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
 import queryString from "query-string";
 
-import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
-import matomo from "../../services/matomo";
-import { YOUNG_STATUS_PHASE3 } from "../../utils";
-
+import Loader from "../../components/Loader";
 import Done from "./done.js";
 
 export default () => {
@@ -37,7 +33,7 @@ export default () => {
       }
     })();
   }, []);
-  if (!young) return <div>Chargement !</div>;
+  if (!young) return <Loader />;
   if (done) return <Done />;
   else
     return (
