@@ -4,27 +4,31 @@ import styled from "styled-components";
 export default ({ program, image, enableToggle = true }) => {
   if (!program) return <div />;
   const [expandDetails, setExpandDetails] = useState(false);
-  const preview = program.description.substring(0, 130);
-  const rest = program.description.substring(130);
+  const preview = program.descriptionText.substring(0, 130);
+  const rest = program.descriptionText.substring(130);
 
   const toggleDetails = () => {
     setExpandDetails(!expandDetails);
   };
 
   const renderText = () => {
-    if (!enableToggle) return `${preview} ...`;
+    if (!enableToggle) return program.descriptionText;
     if (!rest) return preview;
 
     return (
       <>
-        {preview}{" "}
         {expandDetails ? (
           <>
-            {rest} <ToogleText onClick={toggleDetails}>réduire</ToogleText>
+            <Detail title="Qu'est ce que c'est ?" value={program.descriptionWhat} />
+            <Detail title="C'est pour ?" value={program.descriptionFor} />
+            <Detail title="Est-ce indemnisé ?" value={program.descriptionMoney} />
+            <Detail title="Quelle durée d'engagement ?" value={program.descriptionDuration} />
+            <Detail title="Description :" value={program.descriptionText} />
+            <ToogleText onClick={toggleDetails}>réduire</ToogleText>
           </>
         ) : (
           <>
-            ...<ToogleText onClick={toggleDetails}>lire plus</ToogleText>
+            {preview} ...<ToogleText onClick={toggleDetails}>lire plus</ToogleText>
           </>
         )}
       </>
@@ -38,11 +42,20 @@ export default ({ program, image, enableToggle = true }) => {
         <Badge>{program.type}</Badge>
       </a>
       <h4>{program.name}</h4>
-      <p>{renderText()}</p>
+      <div className="desc">{renderText()}</div>
       <SeeMore href={program.url} target="_blank">
         DÉCOUVRIR
       </SeeMore>
     </Card>
+  );
+};
+
+const Detail = ({ title, value }) => {
+  if (!value) return <span />;
+  return (
+    <div style={{ marginBottom: "0.3rem" }}>
+      <b>{title}</b> <span>{value}</span>
+    </div>
   );
 };
 
@@ -64,7 +77,7 @@ const Card = styled.div`
     font-weight: 700;
     margin-bottom: 0.5rem;
   }
-  p {
+  .desc {
     color: #6b7280;
     font-weight: 400;
   }

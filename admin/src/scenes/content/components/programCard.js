@@ -9,27 +9,31 @@ import { translate } from "../../../utils";
 
 export default ({ program, image, enableToggle = true, onDelete }) => {
   const [expandDetails, setExpandDetails] = useState(false);
-  const preview = program.description.substring(0, 130);
-  const rest = program.description.substring(130);
+  const preview = program.descriptionText.substring(0, 130);
+  const rest = program.descriptionText.substring(130);
 
   const toggleDetails = () => {
     setExpandDetails(!expandDetails);
   };
 
   const renderText = () => {
-    if (!enableToggle) return program.description;
+    if (!enableToggle) return program.descriptionText;
     if (!rest) return preview;
 
     return (
       <>
-        {preview}{" "}
         {expandDetails ? (
           <>
-            {rest} <ToogleText onClick={toggleDetails}>réduire</ToogleText>
+            <Detail title="Qu'est ce que c'est ?" value={program.descriptionWhat} />
+            <Detail title="C'est pour ?" value={program.descriptionFor} />
+            <Detail title="Est-ce indemnisé ?" value={program.descriptionMoney} />
+            <Detail title="Quelle durée d'engagement ?" value={program.descriptionDuration} />
+            <Detail title="Description :" value={program.descriptionText} />
+            <ToogleText onClick={toggleDetails}>réduire</ToogleText>
           </>
         ) : (
           <>
-            ...<ToogleText onClick={toggleDetails}>lire plus</ToogleText>
+            {preview} ...<ToogleText onClick={toggleDetails}>lire plus</ToogleText>
           </>
         )}
       </>
@@ -42,6 +46,15 @@ export default ({ program, image, enableToggle = true, onDelete }) => {
     if (program.visibility === "REGION") return `Visibilité Région : ${program.region}`;
   };
 
+  const Detail = ({ title, value }) => {
+    if (!value) return <span />;
+    return (
+      <div style={{ marginBottom: "0.3rem" }}>
+        <b>{title}</b> <span>{value}</span>
+      </div>
+    );
+  };
+
   return (
     <Card>
       <a href={program.href} className="thumb">
@@ -49,9 +62,9 @@ export default ({ program, image, enableToggle = true, onDelete }) => {
         <Badge>{program.type}</Badge>
       </a>
       <Description>
-        <p>{renderVisibility()}</p>
+        <div>{renderVisibility()}</div>
         <h4>{program.name}</h4>
-        <p>{renderText()}</p>
+        <div>{renderText()}</div>
       </Description>
       <Actions program={program} onDelete={onDelete} />
     </Card>
@@ -125,6 +138,14 @@ const Action = styled.div`
 const Description = styled.div`
   flex: 1;
   padding: 1rem;
+  color: #6b7280;
+  font-weight: 400;
+  h4 {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: #111;
+  }
 `;
 
 const Card = styled.div`
@@ -141,15 +162,6 @@ const Card = styled.div`
       object-fit: cover;
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }
-  }
-  h4 {
-    font-size: 18px;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-  }
-  p {
-    color: #6b7280;
-    font-weight: 400;
   }
 `;
 
