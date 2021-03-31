@@ -34,6 +34,10 @@ export default ({ keys, values, handleChange, errors, touched }) => {
     if (["97", "98"].includes(depart)) {
       depart = suggestion.properties.postcode.substr(0, 3);
     }
+    if (depart === "20") {
+      depart = suggestion.properties.context.substr(0, 2);
+      if (!["2A", "2B"].includes(depart)) depart = "2B";
+    }
     handleChange({ target: { name: keys.city, value: suggestion.properties.city } });
     handleChange({ target: { name: keys.zip, value: suggestion.properties.postcode } });
     handleChange({ target: { name: keys.address, value: suggestion.properties.label } });
