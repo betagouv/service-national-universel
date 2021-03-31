@@ -21,15 +21,15 @@ export default () => {
         validateOnChange={false}
         validateOnBlur={false}
         initialValues={{
-          phase3StructureName: "nom s",
-          phase3MissionDomain: "SPORT",
-          phase3MissionDescription: "des",
-          phase3MissionStartAt: "2021-03-01",
-          phase3MissionEndAt: "2021-03-10",
-          phase3TutorFirstName: "p",
-          phase3TutorLastName: "n",
-          phase3TutorEmail: "tangi.mendes+tutor@selego.co",
-          phase3TutorPhone: "0612345678",
+          phase3StructureName: "",
+          phase3MissionDomain: "",
+          phase3MissionDescription: "",
+          phase3MissionStartAt: "",
+          phase3MissionEndAt: "",
+          phase3TutorFirstName: "",
+          phase3TutorLastName: "",
+          phase3TutorEmail: "",
+          phase3TutorPhone: "",
         }}
         onSubmit={async (values) => {
           // return console.log(values);

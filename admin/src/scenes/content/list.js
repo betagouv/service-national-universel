@@ -20,7 +20,7 @@ export default () => {
     getPrograms();
   }, []);
 
-  if (!programs) return <div>Chargéééé !!</div>;
+  if (!programs) return <div>Chargement...</div>;
   return (
     <>
       <Header>
@@ -36,7 +36,7 @@ export default () => {
       </Header>
       <Wrapper>
         {programs.map((p, i) => (
-          <Col key={i} md={3}>
+          <Col key={i} md={3} sm={12} style={{ marginBottom: "1.5rem" }}>
             <ProgramCard onDelete={getPrograms} program={p} image={p.imageFile ? p.imageFile : require(`../../assets/programmes-engagement/${p.imageString || "default.png"}`)} />
           </Col>
         ))}

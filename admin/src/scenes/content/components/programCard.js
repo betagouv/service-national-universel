@@ -53,13 +53,19 @@ export default ({ program, image, enableToggle = true, onDelete }) => {
         <h4>{program.name}</h4>
         <p>{renderText()}</p>
       </Description>
-      <Actions id={program._id} onDelete={onDelete} />
+      <Actions program={program} onDelete={onDelete} />
     </Card>
   );
 };
 
-const Actions = ({ id, onDelete }) => {
+const Actions = ({ program, onDelete }) => {
   const user = useSelector((state) => state.Auth.user);
+  const id = program._id;
+
+  const handleUserAccess = () =>
+    (program.visibility === "NATIONAL" && user.role === "admin") ||
+    (program.visibility === "REGION" && ["admin", "referent_region"].includes(user.role)) ||
+    (program.visibility === "DEPARTMENT" && ["admin", "referent_region", "referent_department"].includes(user.role));
 
   const handleDelete = async () => {
     if (!confirm("Êtes-vous sûr(e) de vouloir supprimer cette possibilité d'engagement ?")) return;
@@ -76,18 +82,20 @@ const Actions = ({ id, onDelete }) => {
   };
 
   return (
-    <ActionStyle>
-      <Link to={`/contenu/${id}/edit`}>
-        <Action>
-          <div>Editer</div>
-        </Action>
-      </Link>
-      {user.role === "admin" ? (
-        <Action onClick={handleDelete}>
-          <div>Supprimer</div>
-        </Action>
-      ) : null}
-    </ActionStyle>
+    handleUserAccess() && (
+      <ActionStyle>
+        <Link to={`/contenu/${id}/edit`}>
+          <Action>
+            <div>Editer</div>
+          </Action>
+        </Link>
+        {user.role === "admin" ? (
+          <Action onClick={handleDelete}>
+            <div>Supprimer</div>
+          </Action>
+        ) : null}
+      </ActionStyle>
+    )
   );
 };
 
@@ -97,6 +105,9 @@ const ActionStyle = styled.div`
   border-top: 1px solid #ddd;
   > * {
     flex: 1;
+    :not(:last-child) {
+      border-right: 1px solid #ddd;
+    }
   }
 `;
 
@@ -108,7 +119,6 @@ const Action = styled.div`
   }
   text-align: center;
   padding: 1rem 0;
-  border-right: 1px solid #ddd;
   cursor: pointer;
 `;
 
@@ -121,9 +131,9 @@ const Card = styled.div`
   display: flex;
   flex-direction: column;
   background-color: #fff;
-  margin-bottom: 50px;
   border-radius: 1rem;
   overflow: hidden;
+  height: 100%;
   .thumb {
     img {
       width: 100%;

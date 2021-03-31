@@ -32,6 +32,7 @@ export default (props) => {
   }, [young]);
 
   const getDisabled = (tab) => {
+    // return false;
     if (tab === DRAWER_TABS.HOME) return false;
     if (young.status === YOUNG_STATUS.REFUSED) return true;
     if (tab === DRAWER_TABS.PHASE1) {
@@ -42,7 +43,7 @@ export default (props) => {
       return [YOUNG_PHASE.INSCRIPTION, YOUNG_PHASE.COHESION_STAY].includes(young.phase);
     }
     if (tab === DRAWER_TABS.PHASE3) {
-      //todo handle tab phase 3
+      return !(young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE && young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED);
     }
     return true;
   };
@@ -103,13 +104,19 @@ export default (props) => {
         >
           <ul className="subNav">
             <li>
-              <NavLink to="/preferences">Renseigner mes préférences</NavLink>
+              <NavLink to="/preferences" onClick={(event) => handleClick(event, DRAWER_TABS.PHASE2)}>
+                Renseigner mes préférences
+              </NavLink>
             </li>
             <li>
-              <NavLink to="/mission">Trouver une mission</NavLink>
+              <NavLink to="/mission" onClick={(event) => handleClick(event, DRAWER_TABS.PHASE2)}>
+                Trouver une mission
+              </NavLink>
             </li>
             <li>
-              <NavLink to="/candidature">Suivre mes candidatures</NavLink>
+              <NavLink to="/candidature" onClick={(event) => handleClick(event, DRAWER_TABS.PHASE2)}>
+                Suivre mes candidatures
+              </NavLink>
             </li>
           </ul>
         </Item>
@@ -125,13 +132,19 @@ export default (props) => {
         >
           <ul className="subNav">
             <li>
-              <NavLink to="/phase3/les-programmes">Les programmes d'engagement</NavLink>
+              <NavLink to="/phase3/les-programmes" onClick={(event) => handleClick(event, DRAWER_TABS.PHASE3)}>
+                Les programmes d'engagement
+              </NavLink>
             </li>
             <li>
-              <NavLink to="/phase3/mission">Trouver une mission</NavLink>
+              <NavLink to="/phase3/mission" onClick={(event) => handleClick(event, DRAWER_TABS.PHASE3)}>
+                Trouver une mission
+              </NavLink>
             </li>
             <li>
-              <NavLink to="/phase3/valider">Valider ma phase 3</NavLink>
+              <NavLink to="/phase3/valider" onClick={(event) => handleClick(event, DRAWER_TABS.PHASE3)}>
+                Valider ma phase 3
+              </NavLink>
             </li>
           </ul>
         </Item>

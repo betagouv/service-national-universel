@@ -19,8 +19,8 @@ export default () => {
   return (
     <div>
       <Missions>
-        <ReactiveBase url={`${apiURL}/es`} app="mission" headers={{ Authorization: `JWT ${api.getToken()}` }}>
-          <Modifybutton to="/preferences">Modifier mes préférences</Modifybutton>
+        <ReactiveBase url={`${apiURL}/es`} app="missionapi" headers={{ Authorization: `JWT ${api.getToken()}` }}>
+          {/* <Modifybutton to="/preferences">Modifier mes préférences</Modifybutton> */}
           <Heading>
             <p>TROUVEZ UNE MISSION DE BÉNÉVOLAT</p>
             <h1>Missions disponibles près de chez vous ou à distance</h1>
@@ -30,8 +30,8 @@ export default () => {
               <DataSearch innerClass={{ input: "form-control" }} placeholder="Recherche..." autosuggest={false} componentId="SEARCH" dataField={["title", "organisation"]} />
             </SearchBox>
             <Col>
-              <CustomInput type="select">
-                <option value="null" disabled selected>
+              <CustomInput type="select" id="dist" defaultValue="">
+                <option value="null" disabled>
                   Rayon de recherche maximum
                 </option>
                 <option value="2">Distance max. 2km</option>
@@ -64,33 +64,28 @@ export default () => {
             loader="Chargement..."
             innerClass={{ pagination: "pagination" }}
             dataField="created_at"
-            defaultQuery={function (value, props) {
-              if (!young.location || !young.location.lat || !young.location.lon) return { query: { match_all: {} } };
-              return {
-                query: { match_all: {} },
-                sort: [
-                  {
-                    _geo_distance: {
-                      location: [young.location.lon, young.location.lat],
-                      order: "asc",
-                      unit: "km",
-                      mode: "min",
-                    },
-                  },
-                ],
-              };
-            }}
+            // defaultQuery={function (value, props) {
+            //   if (!young.location || !young.location.lat || !young.location.lon) return { query: { match_all: {} } };
+            //   return {
+            //     query: { match_all: {} },
+            //     sort: [
+            //       {
+            //         _geo_distance: {
+            //           location: [young.location.lon, young.location.lat],
+            //           order: "asc",
+            //           unit: "km",
+            //           mode: "min",
+            //         },
+            //       },
+            //     ],
+            //   };
+            // }}
             renderResultStats={({ numberOfResults, time }) => {
               return <div />;
-              return <div className="results">{`${numberOfResults} résultats trouvés en ${time}ms`}</div>;
+              // return <div className="results">{`${numberOfResults} résultats trouvés en ${time}ms`}</div>;
             }}
             render={({ data }) => {
-              return data.map((e) => {
-                const tags = [];
-                tags.push(e.remote ? "À distance" : "En présentiel");
-                e.city && tags.push(e.city);
-                return <MissionCard title={e.domains[0]} image={require("../../assets/observe.svg")} subtitle={e.name} tags={tags} places={e.placesLeft} />;
-              });
+              return data.map((e, i) => <MissionCard mission={e} key={i} image={require("../../assets/observe.svg")} />);
             }}
           />
         </ReactiveBase>

@@ -14,6 +14,7 @@ router.post("/young/_msearch", passport.authenticate(["referent"], { session: fa
 router.post("/structure/_msearch", passport.authenticate(["referent"], { session: false }), (req, res) => exec(req, res, "structure"));
 router.post("/referent/_msearch", passport.authenticate(["referent"], { session: false }), (req, res) => exec(req, res, "referent"));
 router.post("/application/_msearch", passport.authenticate(["referent"], { session: false }), (req, res) => exec(req, res, "application"));
+router.post("/missionapi/_msearch", passport.authenticate(["young"], { session: false }), (req, res) => exec(req, res, "missionapi"));
 
 async function exec(req, res, index = "") {
   try {

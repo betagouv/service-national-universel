@@ -1,8 +1,15 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
+import { translate } from "../../../utils";
 
-export default ({ title, image, subtitle, tags = [], places, location }) => {
+export default ({ mission, image }) => {
+  if (!mission) return <div />;
+  const tags = [];
+  tags.push(mission.remote ? "À distance" : "En présentiel");
+  mission.city && tags.push(mission.city);
+  tags.push(translate(mission.domain));
+  let n = "tset";
   return (
     <Card>
       <div>
@@ -11,8 +18,8 @@ export default ({ title, image, subtitle, tags = [], places, location }) => {
             <img src={image} />
           </div>
           <div>
-            <h4>{title}</h4>
-            <p>{subtitle}</p>
+            <h4>{mission.organizationName}</h4>
+            <p>{mission.title}</p>
           </div>
         </div>
         <Tags>
@@ -20,10 +27,10 @@ export default ({ title, image, subtitle, tags = [], places, location }) => {
             <div key={i}>{e}</div>
           ))}
         </Tags>
-        {location && <Location>{location}</Location>}
       </div>
-      <Button to="/phase3/une-missions">
-        {places} volontaire{places > 1 && "s"} recherché{places > 1 && "s"}
+      <Button target="_blank" href={mission.applicationUrl}>
+        Voir la mission sur <b>{mission.publisherName}</b>
+        <img src={require("../../../assets/external-link.svg")} height={15} color="white" />
       </Button>
     </Card>
   );
@@ -72,7 +79,7 @@ const Card = styled.div`
   }
 `;
 
-const Button = styled(Link)`
+const Button = styled.a`
   background-color: #31c48d;
   border-radius: 30px;
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
@@ -81,9 +88,14 @@ const Button = styled(Link)`
   padding: 10px 15px 8px;
   margin-left: 10px;
   white-space: nowrap;
+  display: flex;
+  justify-content: center;
   :hover {
     color: #fff;
     background-color: #0e9f6e;
+  }
+  img {
+    margin-left: 0.5rem;
   }
 `;
 
