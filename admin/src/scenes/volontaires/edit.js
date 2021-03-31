@@ -120,7 +120,7 @@ export default (props) => {
               <Col md={6} style={{ marginBottom: "20px" }}>
                 <Box>
                   <div>
-                    <BoxTitle>{` Status : ${translate(young.status)}`}</BoxTitle>
+                    <BoxTitle>{` Statut : ${translate(young.status)}`}</BoxTitle>
                   </div>
                   <BoxContent direction="column">{young && young.historic && young.historic.length !== 0 && <Historic value={young.historic} />}</BoxContent>
                 </Box>
