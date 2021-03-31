@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Formik } from "formik";
 import { Link, Redirect } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import queryString from "query-string";
 
 import { setYoung } from "../../redux/auth/actions";
 import LoginBox from "./components/LoginBox";
@@ -20,8 +21,10 @@ export default () => {
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
   const [userIsValid, setUserIsValid] = useState(true);
+  const params = queryString.parse(location.search);
+  const { redirect } = params;
 
-  if (young) return <Redirect to="/" />;
+  if (young) return <Redirect to={"/" + (redirect || "")} />;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
