@@ -6,9 +6,6 @@
     "start": "npm run build && node server/index.js",
     "build": "webpack --env.production --env.NODE_ENV=production"
   },
-  "prettier": {
-    "printWidth": 180
-  },
   "browserslist": {
     "production": [
       ">0.2%",

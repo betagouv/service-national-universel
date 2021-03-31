@@ -7,9 +7,6 @@
     "build": "node --max-old-space-size=2048 node_modules/webpack/bin/webpack.js --env.production --env.NODE_ENV=production",
     "deploy": "npm run build && eb deploy maakyo-admin-production --profile postajob"
   },
-  "prettier": {
-    "printWidth": 180
-  },
   "browserslist": {
     "production": [
       ">0.1%",
