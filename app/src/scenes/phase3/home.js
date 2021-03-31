@@ -3,10 +3,12 @@ import { Link, NavLink } from "react-router-dom";
 import { Container, Row, Col } from "reactstrap";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
+import { ReactiveBase, ReactiveList } from "@appbaseio/reactivesearch";
 
 import ProgramCard from "./components/programCard";
 import MissionCard from "./components/missionCard";
 import api from "../../services/api";
+import { apiURL } from "../../config";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young) || {};
@@ -55,25 +57,22 @@ export default () => {
           <p>Plus de 30 000 missions disponibles pour poursuivre votre engagement</p>
         </Heading>
         <Missions>
-          <MissionCard
-            title="Hophopfood"
-            image={require("../../assets/observe.svg")}
-            subtitle="I assist the police in their mediation and conflict management missions"
-            tags={["Face-to-face mission - Paris (75)", "Nature protection"]}
-          />
-          <MissionCard
-            title="Pépins production"
-            image={require("../../assets/police-station.svg")}
-            subtitle="J'assiste les policiers dans leurs missions de médiations et gestions des conflits"
-            tags={["Mission à distance", "Protection de la nature"]}
-          />
-          <MissionCard
-            title="Hophopfood"
-            image={require("../../assets/observe.svg")}
-            subtitle="I assist the police in their mediation and conflict management missions"
-            tags={["Face-to-face mission - Paris (75)", "Nature protection"]}
-          />
-          <SeeMore to="/phase3/une-mission">Toutes les missions →</SeeMore>
+          <ReactiveBase url={`${apiURL}/es`} app="missionapi" headers={{ Authorization: `JWT ${api.getToken()}` }}>
+            <ReactiveList
+              componentId="result"
+              pagination={true}
+              size={3}
+              showLoader={true}
+              loader="Chargement..."
+              innerClass={{ pagination: "pagination" }}
+              dataField="created_at"
+              renderResultStats={() => <div />}
+              render={({ data }) => {
+                return data.map((e, i) => <MissionCard mission={e} key={i} image={require("../../assets/observe.svg")} />);
+              }}
+            />
+          </ReactiveBase>
+          <SeeMore to="/phase3/mission">Toutes les missions →</SeeMore>
         </Missions>
       </TransparentHero>
     </>
@@ -159,6 +158,9 @@ const Missions = styled.div`
   border-radius: 6px;
   background: #fff;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  .pagination {
+    display: none;
+  }
 `;
 
 const TransparentHero = styled.div`
