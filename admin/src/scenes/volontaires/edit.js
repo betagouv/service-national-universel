@@ -143,7 +143,7 @@ export default (props) => {
                 <Box>
                   <BoxTitle>Situation</BoxTitle>
                   <BoxContent direction="column">
-                    <Item title="Status" values={values} name="situation" handleChange={handleChange} />
+                    <Item title="Statut" values={values} name="situation" handleChange={handleChange} />
                     <Select
                       title="Classe"
                       values={values}
