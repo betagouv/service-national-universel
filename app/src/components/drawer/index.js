@@ -29,6 +29,8 @@ export default (props) => {
 
     setStatus2(young.statusPhase2);
     if (young.phase === YOUNG_PHASE.INTEREST_MISSION) return;
+
+    setStatus3(young.statusPhase3);
   }, [young]);
 
   const getDisabled = (tab) => {
