@@ -27,7 +27,7 @@ export default () => {
         </div>
         {infosHover || infosClick ? (
           <Infos>
-            Vous devez renseigner ici un engagement que vous avez réalisez sur une durée minimum de 3 mois, pour le valoriser comme mission de phase 3.
+            Vous devez renseigner ici un engagement que vous avez réalisé sur une durée minimum de 3 mois, pour le valoriser comme mission de phase 3.
             <br />
             Le tuteur de mission à déclarer est la personne qui vous a accompagné lors de votre mission. C'est lui qui sera en charge de valider la réalisation de votre mission de
             phase 3.
