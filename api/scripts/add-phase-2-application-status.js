@@ -9,10 +9,15 @@ const YoungModel = require("../src/models/young");
   await cursor.eachAsync(async function (young) {
     const applications = await ApplicationModel.find({ youngId: young._id });
     if (applications && applications.length) {
-      young.set({ phase2ApplicationStatus: applications.map((e) => e.status) });
-      await young.save();
-      await young.index();
-      console.log(young.email, young.phase2ApplicationStatus);
+      try {
+        young.set({ phase2ApplicationStatus: applications.map((e) => e.status) });
+        await young.save();
+        await young.index();
+        console.log(young.email, young.phase2ApplicationStatus);
+      } catch (e) {
+        console.error("error", young.email);
+        console.log(e);
+      }
     }
   });
   console.log("DONE.");
