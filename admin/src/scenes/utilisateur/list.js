@@ -12,7 +12,7 @@ import { apiURL } from "../../config";
 import Panel from "./panel";
 import Loader from "../../components/Loader";
 const FILTERS = ["SEARCH", "ROLE", "REGION", "DEPARTMENT"];
-import { RegionFilter } from "../../components/filters";
+import { RegionFilter, DepartmentFilter } from "../../components/filters";
 
 export default () => {
   const [responsable, setResponsable] = useState(null);
@@ -81,22 +81,7 @@ export default () => {
                   renderLabel={(items) => getFilterLabel(items, "Rôle")}
                 />
                 <RegionFilter defaultQuery={DEFAULT_QUERY} filters={FILTERS} />
-                <MultiDropdownList
-                  defaultQuery={DEFAULT_QUERY}
-                  className="dropdown-filter"
-                  placeholder="Département"
-                  componentId="DEPARTMENT"
-                  dataField="department.keyword"
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  react={{ and: FILTERS.filter((e) => e !== "DEPARTMENT") }}
-                  title=""
-                  URLParams={true}
-                  showSearch={true}
-                  searchPlaceholder="Rechercher..."
-                  sortBy="asc"
-                />
+                <DepartmentFilter defaultQuery={DEFAULT_QUERY} filters={FILTERS} />
               </FilterRow>
             </Filter>
             <ResultTable>

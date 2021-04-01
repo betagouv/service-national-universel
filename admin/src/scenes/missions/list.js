@@ -12,7 +12,7 @@ import { formatStringDate, translate, getFilterLabel } from "../../utils";
 import SelectStatusMission from "../../components/selectStatusMission";
 import VioletHeaderButton from "../../components/buttons/VioletHeaderButton";
 import Loader from "../../components/Loader";
-import { RegionFilter } from "../../components/filters";
+import { RegionFilter, DepartmentFilter } from "../../components/filters";
 
 const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "TUTOR", "REGION", "DEPARTMENT", "STRUCTURE"];
 
@@ -102,20 +102,7 @@ export default () => {
                   renderLabel={(items) => getFilterLabel(items, "Statut")}
                 />
                 <RegionFilter defaultQuery={DEFAULT_QUERY} filters={FILTERS} defaultValue={user.role === "referent_region" && [user.region]} />
-                <MultiDropdownList
-                  defaultQuery={DEFAULT_QUERY}
-                  className="dropdown-filter"
-                  placeholder="Départements"
-                  componentId="DEPARTMENT"
-                  dataField="department.keyword"
-                  title=""
-                  react={{ and: FILTERS.filter((e) => e !== "DEPARTMENT") }}
-                  URLParams={true}
-                  showSearch={true}
-                  searchPlaceholder="Rechercher..."
-                  sortBy="asc"
-                  defaultValue={user.role === "referent_department" && [user.department]}
-                />
+                <DepartmentFilter defaultQuery={DEFAULT_QUERY} filters={FILTERS} defaultValue={user.role === "referent_department" && [user.department]} />
                 <MultiDropdownList
                   defaultQuery={DEFAULT_QUERY}
                   className="dropdown-filter"

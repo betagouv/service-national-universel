@@ -15,7 +15,7 @@ import api from "../../services/api";
 import { apiURL, appURL } from "../../config";
 import Panel from "./panel";
 import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS, getDepartmentNumber } from "../../utils";
-import { RegionFilter } from "../../components/filters";
+import { RegionFilter, DepartmentFilter } from "../../components/filters";
 const FILTERS = ["SEARCH", "STATUS", "REGION", "DEPARTMENT", "SCHOOL"];
 
 export default () => {
@@ -142,22 +142,7 @@ export default () => {
                   renderLabel={(items) => getFilterLabel(items, "Statut")}
                 />
                 <RegionFilter defaultQuery={DEFAULT_QUERY} filters={FILTERS} />
-                <MultiDropdownList
-                  defaultQuery={DEFAULT_QUERY}
-                  className="dropdown-filter"
-                  placeholder="Départements"
-                  componentId="DEPARTMENT"
-                  dataField="department.keyword"
-                  title=""
-                  renderItem={(e, count) => {
-                    return `${getDepartmentNumber(e)} - ${e} (${count})`;
-                  }}
-                  react={{ and: FILTERS.filter((e) => e !== "DEPARTMENT") }}
-                  URLParams={true}
-                  sortBy="asc"
-                  showSearch={true}
-                  searchPlaceholder="Rechercher..."
-                />
+                <DepartmentFilter defaultQuery={DEFAULT_QUERY} filters={FILTERS} />
               </FilterRow>
             </Filter>
             <ResultTable>
