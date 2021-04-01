@@ -32,7 +32,7 @@ async function sendEmail(to, subject, htmlContent, { params, attachment, bcc } =
     body.to = [to];
     body.bcc = bcc;
     if (ENVIRONMENT !== "production") {
-      body.to = body.to.filter((e) => e.email.match(/selego\.co/));
+      body.to = body.to.filter((e) => e.email.match(/(selego\.co|beta\.gouv\.fr)/));
     }
     body.htmlContent = htmlContent;
     body.sender = { name: SENDER_NAME, email: SENDER_EMAIL };
