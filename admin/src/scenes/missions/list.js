@@ -52,15 +52,13 @@ export default () => {
                   </VioletHeaderButton>
                 </Link>
               )}
-              <VioletHeaderButton>
-                <ExportComponent
-                  title="Exporter les missions"
-                  collection="mission"
-                  transform={(e) => {
-                    return e;
-                  }}
-                />
-              </VioletHeaderButton>
+              <ExportComponent
+                title="Exporter les missions"
+                collection="mission"
+                transform={(e) => {
+                  return e;
+                }}
+              />
             </Header>
             <Filter>
               <DataSearch

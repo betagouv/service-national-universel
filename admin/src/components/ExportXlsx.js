@@ -3,6 +3,7 @@ import { ReactiveComponent } from "@appbaseio/reactivesearch";
 import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
 import { translate } from "../utils";
+import LoadingButton from "./buttons/LoadingButton";
 
 export default function ExportComponent({ title, collection, react, transform, defaultQuery = () => ({ query: { query: { match_all: {} } }, size: 10000 }) }) {
   const [exporting, setExporting] = useState(false);
@@ -30,7 +31,7 @@ export default function ExportComponent({ title, collection, react, transform, d
     );
   }
 
-  return <button onClick={handleExport}>{title}</button>;
+  return <LoadingButton onClick={handleExport}>{title}</LoadingButton>;
 }
 
 function Loading({ onFinish, collection, data, loading, transform }) {
@@ -55,20 +56,7 @@ function Loading({ onFinish, collection, data, loading, transform }) {
     }
   }, [run]);
 
-  const style = {
-    border: "2px solid transparent",
-    borderTop: "2px solid #720c32",
-    borderRadius: "50%",
-    width: "16px",
-    height: "16px",
-    animation: "spin 2s linear infinite",
-    display: "inline-block",
-  };
-  return (
-    <div>
-      <span className="spin" style={style} /> Chargement en cours
-    </div>
-  );
+  return <LoadingButton loading={loading}></LoadingButton>;
 }
 
 async function exportData(fileName, entities, transform) {

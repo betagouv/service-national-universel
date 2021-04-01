@@ -37,15 +37,13 @@ export default () => {
                     <p>Inviter une nouvelle structure</p>
                   </VioletHeaderButton>
                 </Link>
-                <VioletHeaderButton>
-                  <ExportComponent
-                    title="Exporter les structures"
-                    collection="structure"
-                    transform={(e) => {
-                      return e;
-                    }}
-                  />
-                </VioletHeaderButton>
+                <ExportComponent
+                  title="Exporter les structures"
+                  collection="structure"
+                  transform={(e) => {
+                    return e;
+                  }}
+                />
               </div>
             </Header>
             <Filter>

@@ -66,33 +66,31 @@ export default () => {
               <div>
                 <Title>Volontaires</Title>
               </div>
-              <VioletHeaderButton>
-                <ExportComponent
-                  defaultQuery={DEFAULT_QUERY}
-                  title="Exporter les volontaires"
-                  collection="volontaire"
-                  react={{ and: FILTERS }}
-                  transform={(data) => {
-                    return {
-                      _id: data._id,
-                      Cohorte: data.youngCohort,
-                      Prénom: data.youngFirstName,
-                      Nom: data.youngLastName,
-                      "Date de naissance": data.youngBirthdateAt,
-                      Email: data.youngEmail,
-                      "Ville du volontaire": data.youngCity,
-                      "Département du volontaire": data.youngDepartment,
-                      "Nom de la mission": data.missionName,
-                      "Département de la mission": data.missionDepartment,
-                      "Régino de la mission": data.missionRegion,
-                      "Candidature créée lé": data.createdAt,
-                      "Candidature mise à jour le": data.updatedAt,
-                      "Statut de la candidature": data.status,
-                      Tuteur: data.tutorName,
-                    };
-                  }}
-                />
-              </VioletHeaderButton>
+              <ExportComponent
+                defaultQuery={DEFAULT_QUERY}
+                title="Exporter les volontaires"
+                collection="volontaire"
+                react={{ and: FILTERS }}
+                transform={(data) => {
+                  return {
+                    _id: data._id,
+                    Cohorte: data.youngCohort,
+                    Prénom: data.youngFirstName,
+                    Nom: data.youngLastName,
+                    "Date de naissance": data.youngBirthdateAt,
+                    Email: data.youngEmail,
+                    "Ville du volontaire": data.youngCity,
+                    "Département du volontaire": data.youngDepartment,
+                    "Nom de la mission": data.missionName,
+                    "Département de la mission": data.missionDepartment,
+                    "Régino de la mission": data.missionRegion,
+                    "Candidature créée lé": data.createdAt,
+                    "Candidature mise à jour le": data.updatedAt,
+                    "Statut de la candidature": data.status,
+                    Tuteur: data.tutorName,
+                  };
+                }}
+              />
             </Header>
             <Filter>
               <DataSearch
