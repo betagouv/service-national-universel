@@ -4,13 +4,17 @@ import { Row, Col } from "reactstrap";
 import { Formik, Field } from "formik";
 import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
+import { useDispatch } from "react-redux";
 
+import { setYoung } from "../../../redux/auth/actions";
 import { MISSION_DOMAINS, translate, YOUNG_STATUS_PHASE3 } from "../../../utils";
 import ErrorMessage, { requiredMessage } from "../../inscription/components/errorMessage";
 import api from "../../../services/api";
 
 export default () => {
   const history = useHistory();
+  const dispatch = useDispatch();
+
   return (
     <Formik
       validateOnChange={false}
@@ -30,9 +34,10 @@ export default () => {
       onSubmit={async (values) => {
         // return console.log(values);
         try {
-          const { ok, code } = await api.put("/young/validate_mission", values);
+          const { ok, code, data } = await api.put("/young/validate_mission", values);
           if (!ok) return toastr.error("Une erreur s'est produite !", translate(code));
           toastr.success("Demande envoyée !");
+          dispatch(setYoung(data));
           history.push(`/`);
         } catch (e) {
           return toastr.error("Une erreur s'est produite ", e?.error?.message);

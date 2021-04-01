@@ -3,19 +3,15 @@ import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { Col, Row } from "reactstrap";
 
-import { translate, YOUNG_STATUS_COLORS } from "../../../utils";
+import { translate, YOUNG_STATUS_COLORS, formatStringDate } from "../../../utils";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
-  const formatDate = (d) => {
-    const date = new Date(d);
-    return date.toLocaleDateString("fr");
-  };
   const getTags = () => {
     const tags = [];
     young.phase3MissionDomain && tags.push(translate(young.phase3MissionDomain));
-    young.phase3MissionStartAt && tags.push("Début : " + formatDate(young.phase3MissionStartAt));
-    young.phase3MissionEndAt && tags.push("Fin : " + formatDate(young.phase3MissionEndAt));
+    young.phase3MissionStartAt && tags.push("Début : " + formatStringDate(young.phase3MissionStartAt));
+    young.phase3MissionEndAt && tags.push("Fin : " + formatStringDate(young.phase3MissionEndAt));
     return tags;
   };
 
