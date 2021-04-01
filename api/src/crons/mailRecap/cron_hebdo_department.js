@@ -39,7 +39,7 @@ async function sendRecapDepartmentTuesday() {
         htmlContent = htmlContent.replace(/{{new_structure}}/g, dataStructure.new_structure);
         htmlContent = htmlContent.replace(/{{inscription_waiting_validation}}/g, dataInscriptions.inscription_waiting_validation);
         htmlContent = htmlContent.replace(/{{inscription_validated}}/g, dataInscriptions.inscription_validated);
-        await sendEmail({ name: toName, email: email }, subject, htmlContent, { bcc: [{ email: "tangi.mendes@selego.co" }] });
+        await sendEmail({ name: toName, email: email }, subject, htmlContent);
         count++;
         console.log("recap hebdo", department, "sent to :", email);
       }
@@ -77,7 +77,7 @@ async function sendRecapDepartmentThursday() {
         htmlContent = htmlContent.replace(/{{new_structure}}/g, dataStructure.new_structure);
         htmlContent = htmlContent.replace(/{{inscription_waiting_validation}}/g, dataInscriptions.inscription_waiting_validation);
         htmlContent = htmlContent.replace(/{{inscription_validated}}/g, dataInscriptions.inscription_validated);
-        await sendEmail({ name: toName, email }, subject, htmlContent, { bcc: [{ email: "tangimds@gmail.com" }] });
+        await sendEmail({ name: toName, email }, subject, htmlContent);
         count++;
         console.log("recap hebdo", department, "sent to :", email);
       }
