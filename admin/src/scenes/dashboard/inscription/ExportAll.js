@@ -13,7 +13,7 @@ export default () => {
     const lines = [];
 
     const dates = [];
-    const d = new Date("2021-02-22");
+    const d = new Date("2021-01-04");
     const limit = new Date();
     limit.setDate(limit.getDate() - 7);
 
@@ -22,7 +22,9 @@ export default () => {
       d.setDate(d.getDate() + 7);
     }
     lines.push(["Région", "Numéro dtp", "Département", "Cible", ...dates.map((e) => e.toISOString().slice(0, 10))]);
-    const keys = Object.keys(departmentLookUp).sort((a, b) => a - b);
+    const keys = Object.keys(departmentLookUp)
+      .filter((e) => e !== "20")
+      .sort((a, b) => a - b);
     for (let i = 0; i < keys.length; i++) {
       const dptCode = keys[i];
       const dptName = departmentLookUp[dptCode];
