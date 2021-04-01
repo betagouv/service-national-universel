@@ -7,15 +7,15 @@ import "dayjs/locale/fr";
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
-import VioletHeaderButton from "../../components/buttons/VioletHeaderButton";
 
+import VioletHeaderButton from "../../components/buttons/VioletHeaderButton";
 import ExportComponent from "../../components/ExportXlsx";
 import SelectStatus from "../../components/selectStatus";
 import api from "../../services/api";
 import { apiURL, appURL } from "../../config";
 import Panel from "./panel";
 import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS, getDepartmentNumber } from "../../utils";
-
+import { RegionFilter } from "../../components/filters";
 const FILTERS = ["SEARCH", "STATUS", "REGION", "DEPARTMENT", "SCHOOL"];
 
 export default () => {
@@ -141,19 +141,7 @@ export default () => {
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Statut")}
                 />
-                <MultiDropdownList
-                  defaultQuery={DEFAULT_QUERY}
-                  className="dropdown-filter"
-                  placeholder="Régions"
-                  componentId="REGION"
-                  dataField="region.keyword"
-                  title=""
-                  react={{ and: FILTERS.filter((e) => e !== "REGION") }}
-                  URLParams={true}
-                  sortBy="asc"
-                  showSearch={true}
-                  searchPlaceholder="Rechercher..."
-                />
+                <RegionFilter defaultQuery={DEFAULT_QUERY} filters={FILTERS} />
                 <MultiDropdownList
                   defaultQuery={DEFAULT_QUERY}
                   className="dropdown-filter"

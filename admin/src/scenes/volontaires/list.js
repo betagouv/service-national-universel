@@ -13,6 +13,7 @@ import Panel from "./panel";
 import Badge from "../../components/Badge";
 import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS_COLORS } from "../../utils";
 import { Link } from "react-router-dom";
+import { RegionFilter } from "../../components/filters";
 
 const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_PHASE_1", "STATUS_PHASE_2", "STATUS_PHASE_3", "STATUS_APPLICATION"];
 
@@ -142,19 +143,7 @@ export default ({ setYoung }) => {
                   searchPlaceholder="Rechercher..."
                   sortBy="asc"
                 />
-                <MultiDropdownList
-                  defaultQuery={DEFAULT_QUERY}
-                  className="dropdown-filter"
-                  placeholder="Régions"
-                  componentId="REGION"
-                  dataField="region.keyword"
-                  title=""
-                  react={{ and: FILTERS.filter((e) => e !== "REGION") }}
-                  URLParams={true}
-                  showSearch={true}
-                  searchPlaceholder="Rechercher..."
-                  sortBy="asc"
-                />
+                <RegionFilter defaultQuery={DEFAULT_QUERY} filters={FILTERS} />
                 <MultiDropdownList
                   defaultQuery={DEFAULT_QUERY}
                   className="dropdown-filter"
