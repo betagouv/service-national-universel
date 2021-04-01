@@ -14,9 +14,10 @@ import AddressInput from "../../../components/addressInput";
 import DndFileInput from "../../../components/dndFileInput";
 import FormLegend from "../../../components/form/FormLegend";
 import FormRow from "../../../components/form/FormRow";
-import { saveYoung, STEPS } from "../utils";
+import { STEPS } from "../utils";
 import { translate } from "../../../utils";
 import FormFooter from "../../../components/form/FormFooter";
+import FormRadioLabelTrueFalse from "../../../components/form/FormRadioLabelTrueFalse";
 
 export default () => {
   useEffect(() => {
@@ -32,11 +33,6 @@ export default () => {
     history.push("/inscription/profil");
     return <div />;
   }
-
-  const handleSave = async (values) => {
-    const young = await saveYoung(values);
-    if (young) dispatch(setYoung(young));
-  };
 
   return (
     <Wrapper>
@@ -67,128 +63,45 @@ export default () => {
         {({ values, handleChange, handleSubmit, isSubmitting, submitForm, errors, touched }) => (
           <>
             <FormLegend>Handicap et pathologies chroniques</FormLegend>
-            <FormRow>
-              <Col md={4}>
-                <Label>Etes-vous en situation de handicap ?</Label>
-              </Col>
-              <Col>
-                <RadioLabel>
-                  <Field validate={(v) => !v && requiredMessage} type="radio" name="handicap" value="false" checked={values.handicap === "false"} onChange={handleChange} />
-                  Non
-                </RadioLabel>
-                <RadioLabel>
-                  <Field validate={(v) => !v && requiredMessage} type="radio" name="handicap" value="true" checked={values.handicap === "true"} onChange={handleChange} />
-                  Oui
-                </RadioLabel>
-                <ErrorMessage errors={errors} touched={touched} name="handicap" />
-              </Col>
-            </FormRow>
-            <FormRow>
-              <Col md={4}>
-                <Label>
-                  Etes-vous bénéficiaire d’un projet personnalisé de scolarisation (PPS)
-                  <div>
-                    <a href="https://www.service-public.fr/particuliers/vosdroits/F33865" target="_blank">
-                      En savoir plus
-                    </a>
-                  </div>
-                </Label>
-              </Col>
-              <Col>
-                <RadioLabel>
-                  <Field
-                    validate={(v) => !v && requiredMessage}
-                    type="radio"
-                    name="ppsBeneficiary"
-                    value="false"
-                    checked={values.ppsBeneficiary === "false"}
-                    onChange={handleChange}
-                  />
-                  Non
-                </RadioLabel>
-                <RadioLabel>
-                  <Field
-                    validate={(v) => !v && requiredMessage}
-                    type="radio"
-                    name="ppsBeneficiary"
-                    value="true"
-                    checked={values.ppsBeneficiary === "true"}
-                    onChange={handleChange}
-                  />
-                  Oui
-                </RadioLabel>
-                <ErrorMessage errors={errors} touched={touched} name="ppsBeneficiary" />
-              </Col>
-            </FormRow>
-            <FormRow>
-              <Col md={4}>
-                <Label>
-                  Etes-vous bénéficiaire d’un projet d'accueil individualisé (PAI) ?
-                  <div>
-                    <a href="https://www.service-public.fr/particuliers/vosdroits/F21392" target="_blank">
-                      En savoir plus
-                    </a>
-                  </div>
-                </Label>
-              </Col>
-              <Col>
-                <RadioLabel>
-                  <Field
-                    validate={(v) => !v && requiredMessage}
-                    type="radio"
-                    name="paiBeneficiary"
-                    value="false"
-                    checked={values.paiBeneficiary === "false"}
-                    onChange={handleChange}
-                  />
-                  Non
-                </RadioLabel>
-                <RadioLabel>
-                  <Field
-                    validate={(v) => !v && requiredMessage}
-                    type="radio"
-                    name="paiBeneficiary"
-                    value="true"
-                    checked={values.paiBeneficiary === "true"}
-                    onChange={handleChange}
-                  />
-                  Oui
-                </RadioLabel>
-                <ErrorMessage errors={errors} touched={touched} name="paiBeneficiary" />
-              </Col>
-            </FormRow>
+            <FormRadioLabelTrueFalse title="Etes-vous en situation de handicap ?" name="handicap" values={values} handleChange={handleChange} errors={errors} touched={touched} />
+            <FormRadioLabelTrueFalse
+              title="Etes-vous bénéficiaire d’un projet personnalisé de scolarisation (PPS)"
+              name="ppsBeneficiary"
+              values={values}
+              handleChange={handleChange}
+              errors={errors}
+              touched={touched}
+            >
+              <div>
+                <a href="https://www.service-public.fr/particuliers/vosdroits/F33865" target="_blank">
+                  En savoir plus
+                </a>
+              </div>
+            </FormRadioLabelTrueFalse>
+            <FormRadioLabelTrueFalse
+              title="Etes-vous bénéficiaire d’un projet d'accueil individualisé (PAI) ?"
+              name="paiBeneficiary"
+              values={values}
+              handleChange={handleChange}
+              errors={errors}
+              touched={touched}
+            >
+              <div>
+                <a href="https://www.service-public.fr/particuliers/vosdroits/F21392" target="_blank">
+                  En savoir plus
+                </a>
+              </div>
+            </FormRadioLabelTrueFalse>
             {(values["ppsBeneficiary"] === "true" || values["handicap"] === "true") && (
               <>
-                <FormRow>
-                  <Col md={4}>
-                    <Label>Etes-vous suivi par une structure médicosociale ?</Label>
-                  </Col>
-                  <Col>
-                    <RadioLabel>
-                      <Field
-                        validate={(v) => !v && requiredMessage}
-                        type="radio"
-                        name="medicosocialStructure"
-                        value="false"
-                        checked={values.medicosocialStructure === "false"}
-                        onChange={handleChange}
-                      />
-                      Non
-                    </RadioLabel>
-                    <RadioLabel>
-                      <Field
-                        validate={(v) => !v && requiredMessage}
-                        type="radio"
-                        name="medicosocialStructure"
-                        value="true"
-                        checked={values.medicosocialStructure === "true"}
-                        onChange={handleChange}
-                      />
-                      Oui
-                    </RadioLabel>
-                    <ErrorMessage errors={errors} touched={touched} name="medicosocialStructure" />
-                  </Col>
-                </FormRow>
+                <FormRadioLabelTrueFalse
+                  title="Etes-vous suivi par une structure médicosociale ?"
+                  name="medicosocialStructure"
+                  values={values}
+                  handleChange={handleChange}
+                  errors={errors}
+                  touched={touched}
+                />
                 {values["medicosocialStructure"] === "true" && (
                   <>
                     <FormRow align="center">
@@ -239,46 +152,22 @@ export default () => {
             )}
             {(values["ppsBeneficiary"] === "true" || values["paiBeneficiary"] === "true" || values["handicap"] === "true") && (
               <>
-                <FormRow>
-                  <Col md={4}>
-                    <Label>
-                      Avez-vous besoin d'un aménagement spécifique pour la réalisation du séjour de cohésion ?
-                      <div>
-                        <span>Affectation à proximité du domicile, participation de jour uniquement, activités sportives adaptées, ...</span>
-                      </div>
-                    </Label>
-                  </Col>
-                  <Col>
-                    <RadioLabel>
-                      <Field
-                        validate={(v) => !v && requiredMessage}
-                        type="radio"
-                        name="specificAmenagment"
-                        value="false"
-                        checked={values.specificAmenagment === "false"}
-                        onChange={handleChange}
-                      />
-                      Non
-                    </RadioLabel>
-                    <RadioLabel>
-                      <Field
-                        validate={(v) => !v && requiredMessage}
-                        type="radio"
-                        name="specificAmenagment"
-                        value="true"
-                        checked={values.specificAmenagment === "true"}
-                        onChange={handleChange}
-                      />
-                      Oui
-                    </RadioLabel>
-                    <ErrorMessage errors={errors} touched={touched} name="specificAmenagment" />
-                    {values["specificAmenagment"] === "true" && (
-                      <div style={{ fontSize: 14, fontWeight: 400, maxWidth: 500 }}>
-                        Le chef de centre vous contactera pour les aménagements nécessaires à votre séjour de cohésion.
-                      </div>
-                    )}
-                  </Col>
-                </FormRow>
+                <FormRadioLabelTrueFalse
+                  title="Avez-vous besoin d'un aménagement spécifique pour la réalisation du séjour de cohésion ?"
+                  name="specificAmenagment"
+                  values={values}
+                  handleChange={handleChange}
+                  errors={errors}
+                  touched={touched}
+                >
+                  <div className="info">Affectation à proximité du domicile, participation de jour uniquement, activités sportives adaptées, ...</div>
+                  {values["specificAmenagment"] === "true" && (
+                    <div className="info" style={{ marginTop: "1rem" }}>
+                      Le chef de centre vous contactera pour les aménagements nécessaires à votre séjour de cohésion.
+                    </div>
+                  )}
+                </FormRadioLabelTrueFalse>
+
                 {values["specificAmenagment"] === "true" && (
                   <FormRow align="center">
                     <Col md={4}>
@@ -303,36 +192,15 @@ export default () => {
               Activités de haut niveau (sport, musique, etc.)
               <p>pour laquelle une participation à un concours, une audition, une compétition est prévue pendant le séjour de cohésion</p>
             </FormLegend>
-            <FormRow>
-              <Col md={4}>
-                <Label>Pratiquez-vous une activité de haut-niveau (sport, musique, théâtre...) ?</Label>
-              </Col>
-              <Col>
-                <RadioLabel>
-                  <Field
-                    validate={(v) => !v && requiredMessage}
-                    type="radio"
-                    name="highSkilledActivity"
-                    value="false"
-                    checked={values.highSkilledActivity === "false"}
-                    onChange={handleChange}
-                  />
-                  Non
-                </RadioLabel>
-                <RadioLabel>
-                  <Field
-                    validate={(v) => !v && requiredMessage}
-                    type="radio"
-                    name="highSkilledActivity"
-                    value="true"
-                    checked={values.highSkilledActivity === "true"}
-                    onChange={handleChange}
-                  />
-                  Oui
-                </RadioLabel>
-                <ErrorMessage errors={errors} touched={touched} name="highSkilledActivity" />
-              </Col>
-            </FormRow>
+            <FormRadioLabelTrueFalse
+              title="Pratiquez-vous une activité de haut-niveau (sport, musique, théâtre...) ?"
+              name="highSkilledActivity"
+              values={values}
+              handleChange={handleChange}
+              errors={errors}
+              touched={touched}
+            />
+
             {values["highSkilledActivity"] === "true" && (
               <>
                 <FormRow align="center">

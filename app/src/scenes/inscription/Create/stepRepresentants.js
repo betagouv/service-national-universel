@@ -244,11 +244,6 @@ export default () => {
     return <div />;
   }
 
-  const handleSave = async (values) => {
-    const young = await saveYoung(values);
-    if (young) dispatch(setYoung(young));
-  };
-
   return (
     <Wrapper>
       <Heading>

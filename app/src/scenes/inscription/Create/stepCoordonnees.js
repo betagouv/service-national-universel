@@ -34,11 +34,6 @@ export default () => {
     return <div />;
   }
 
-  const handleSave = async (values) => {
-    const young = await saveYoung(values);
-    if (young) dispatch(setYoung(young));
-  };
-
   const cleanSchoolInformation = (v) => {
     delete v.schoolName;
     delete v.schoolType;
