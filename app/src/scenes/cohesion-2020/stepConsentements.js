@@ -9,10 +9,11 @@ import { useHistory } from "react-router-dom";
 import { setYoung } from "../../redux/auth/actions";
 import DndFileInput from "../../components/dndFileInput";
 import ErrorMessage, { requiredMessage } from "../inscription/components/errorMessage";
-import { saveYoung, STEPS_2020 } from "../inscription/utils";
-
+import { STEPS_2020 } from "../inscription/utils";
 import api from "../../services/api";
 import { translate } from "../../utils";
+import FormFooter from "../../components/form/FormFooter";
+import FormRow from "../../components/form/FormRow";
 
 export default () => {
   const history = useHistory();
@@ -22,11 +23,6 @@ export default () => {
     history.push("/inscription/profil");
     return <div />;
   }
-
-  const handleSave = async (values) => {
-    const young = await saveYoung(values);
-    if (young) dispatch(setYoung(young));
-  };
 
   const isPlural = () => {
     return young.parent1Status && young.parent2Status;
@@ -217,13 +213,7 @@ export default () => {
                 <ErrorMessage errors={errors} touched={touched} name="consentment1" />
               </Col>
             </FormRow>
-            <Footer>
-              <ButtonContainer>
-                <SaveButton onClick={() => handleSave(values)}>Enregistrer</SaveButton>
-                <ContinueButton onClick={handleSubmit}>Continuer</ContinueButton>
-              </ButtonContainer>
-              {Object.keys(errors).length ? <h3>Vous ne pouvez passer à l'étape suivante car tous les champs ne sont pas correctement renseignés.</h3> : null}
-            </Footer>
+            <FormFooter values={values} handleSubmit={handleSubmit} errors={errors} />
           </>
         )}
       </Formik>
@@ -247,17 +237,6 @@ const Heading = styled.div`
   p {
     color: #161e2e;
     font-size: 1rem;
-  }
-`;
-
-const FormRow = styled(Row)`
-  border-bottom: 1px solid #e5e7eb;
-  padding-top: 20px;
-  padding-bottom: 20px;
-  align-items: ${({ align }) => align};
-  text-align: left;
-  input[type="text"] {
-    max-width: 500px;
   }
 `;
 
@@ -293,54 +272,4 @@ const RadioLabel = styled.label`
     min-width: 15px;
     min-height: 15px;
   }
-`;
-
-const Footer = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  h3 {
-    border: 1px solid #fc8181;
-    border-radius: 0.25em;
-    margin-top: 1em;
-    background-color: #fff5f5;
-    color: #c53030;
-    font-weight: 400;
-    font-size: 12px;
-    padding: 1em;
-  }
-`;
-
-const ButtonContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
-
-const ContinueButton = styled.button`
-  color: #fff;
-  background-color: #5145cd;
-  padding: 9px 20px;
-  border: 0;
-  outline: 0;
-  border-radius: 6px;
-  font-weight: 500;
-  font-size: 20px;
-  margin-right: 10px;
-  margin-top: 40px;
-  display: block;
-  width: 140px;
-  outline: 0;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  :hover {
-    opacity: 0.9;
-  }
-`;
-
-const SaveButton = styled(ContinueButton)`
-  color: #374151;
-  background-color: #f9fafb;
-  border-width: 1px;
-  border-color: transparent;
 `;
