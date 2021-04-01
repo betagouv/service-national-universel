@@ -10,13 +10,13 @@ import BoxContent from "../components/BoxContent";
 import BoxTitle from "../components/BoxTitle";
 import Documents from "../components/Documents";
 
-export default ({ values, handleChange, handleSubmit }) => (
+export default ({ values, handleChange, handleSubmit, required = {}, errors, touched }) => (
   <Col md={6} style={{ marginBottom: "20px" }}>
     <Box>
       <BoxTitle>Identité</BoxTitle>
       <BoxContent direction="column">
-        <Item title="Nom" values={values} name={"lastName"} handleChange={handleChange} />
-        <Item title="Prénom" values={values} name="firstName" handleChange={handleChange} />
+        <Item title="Nom" values={values} name={"lastName"} handleChange={handleChange} required={required.lastName} errors={errors} touched={touched} />
+        <Item title="Prénom" values={values} name="firstName" handleChange={handleChange} required={required.firstName} errors={errors} touched={touched} />
         <Item title="Date de naissance" type="date" values={values} name="birthdateAt" handleChange={handleChange} />
         <Documents>
           <h4>Pièces d'identité</h4>

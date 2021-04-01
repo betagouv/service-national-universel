@@ -8,12 +8,12 @@ import BoxTitle from "../components/BoxTitle";
 import Item from "../components/Item";
 import Select from "../components/Select";
 
-export default ({ values, handleChange }) => (
+export default ({ values, handleChange, required = {}, errors, touched }) => (
   <Col md={6} style={{ marginBottom: "20px" }}>
     <Box>
       <BoxTitle>Coordonnées</BoxTitle>
       <BoxContent direction="column">
-        <Item title="E-mail" values={values} name="email" handleChange={handleChange} />
+        <Item title="E-mail" values={values} name="email" handleChange={handleChange} required={required.email} errors={errors} touched={touched} />
         <Item title="Tél." values={values} name="phone" handleChange={handleChange} />
         <Item title="Adresse" values={values} name="address" handleChange={handleChange} />
         <Item title="Ville" values={values} name="city" handleChange={handleChange} />
