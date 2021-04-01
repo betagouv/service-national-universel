@@ -1,14 +1,16 @@
-import React, { useState } from "react";
+import React from "react";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
-import { useSelector } from "react-redux";
 
-import { translate as t, YOUNG_PHASE, YOUNG_STATUS_PHASE3 } from "../../../utils";
+import { YOUNG_PHASE, YOUNG_STATUS_PHASE3 } from "../../../utils";
 import WrapperPhase3 from "./wrapper";
 import SelectStatus from "../../../components/selectStatus";
-import DownloadButton from "../../../components/buttons/DownloadButton";
 
 export default ({ young }) => {
+  const getText = () => {
+    if (young.statusPhase3 === YOUNG_STATUS_PHASE3.WAITING_VALIDATION) return "Le tuteur n'a pas encore validé la mission";
+    if (young.statusPhase3 === YOUNG_STATUS_PHASE3.VALIDATED) return "Le tuteur a validé la mission";
+  };
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <WrapperPhase3 young={young} tab="phase3">
@@ -20,12 +22,12 @@ export default ({ young }) => {
             </div>
           </Bloc>
         </Box>
-        {young.statusPhase3 === YOUNG_STATUS_PHASE3.VALIDATED ? (
+        {young.statusPhase3 !== YOUNG_STATUS_PHASE3.WAITING_REALISATION ? (
           <Box>
             <Row>
               <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
                 <Bloc title="Mission de phase 3 réalisée">
-                  <p style={{ flex: 1 }}>Le tuteur a validé la mission</p>
+                  <p style={{ flex: 1 }}>{getText()}</p>
                   <Details title="Structure" value={young.phase3StructureName} />
                   <Details title="Descriptif" value={young.phase3MissionDescription} />
                 </Bloc>
