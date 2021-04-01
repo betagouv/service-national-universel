@@ -145,7 +145,7 @@ export default ({ values, handleChange, handleSubmit }) => (
             errorMessage="Vous devez téléverser un document justificatif"
             value={values.highSkilledActivityProofFiles}
             source={(e) => api.get(`/referent/youngFile/${values._id}/highSkilledActivityProofFiles/${e}`)}
-            name="cniFiles"
+            name="highSkilledActivityProofFiles"
             onChange={async (e) => {
               const res = await api.uploadFile("/referent/file/highSkilledActivityProofFiles", e.target.files, { youngId: values._id });
               if (res.code === "FILE_CORRUPTED") {

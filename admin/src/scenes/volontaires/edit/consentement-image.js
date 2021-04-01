@@ -33,7 +33,7 @@ export default ({ values, handleChange, handleSubmit }) => (
             errorMessage="Vous devez téléverser un document justificatif"
             value={values.imageRightFiles}
             source={(e) => api.get(`/referent/youngFile/${values._id}/imageRightFiles/${e}`)}
-            name="cniFiles"
+            name="imageRightFiles"
             onChange={async (e) => {
               const res = await api.uploadFile("/referent/file/imageRightFiles", e.target.files, { youngId: values._id });
               if (res.code === "FILE_CORRUPTED") {

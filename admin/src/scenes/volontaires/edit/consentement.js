@@ -68,7 +68,7 @@ export default ({ values, handleChange, handleSubmit }) => {
                 errorMessage="Vous devez téléverser un document justificatif"
                 value={values.parentConsentmentFiles}
                 source={(e) => api.get(`/referent/youngFile/${values._id}/parentConsentmentFiles/${e}`)}
-                name="cniFiles"
+                name="parentConsentmentFiles"
                 onChange={async (e) => {
                   const res = await api.uploadFile("/referent/file/parentConsentmentFiles", e.target.files, { youngId: values._id });
                   if (res.code === "FILE_CORRUPTED") {
