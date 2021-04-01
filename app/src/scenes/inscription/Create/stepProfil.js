@@ -9,19 +9,17 @@ import { toastr } from "react-redux-toastr";
 import { Helmet } from "react-helmet";
 import DateInput from "../components/dateInput";
 import * as Sentry from "@sentry/browser";
+
 import { getPasswordErrorMessage, translate } from "../../../utils";
-
 import ErrorMessage, { requiredMessage } from "../components/errorMessage";
-
 import { setYoung } from "../../../redux/auth/actions";
-
+import FormRow from "../../../components/form/FormRow";
 import matomo from "../../../services/matomo";
 import api from "../../../services/api";
-
 import { YOUNG_STATUS, YOUNG_PHASE } from "../../../utils";
-
 import EyeOpen from "../../../assets/eye.svg";
 import EyeClose from "../../../assets/eye-slash.svg";
+import FormFooter from "../../../components/form/FormFooter";
 
 export default () => {
   useEffect(() => {
@@ -195,12 +193,7 @@ export default () => {
                 <ErrorMessage errors={errors} touched={touched} name="password" />
               </Col>
             </FormRow>
-            <Footer>
-              <ButtonContainer>
-                <ContinueButton onClick={handleSubmit}>Continuer</ContinueButton>
-              </ButtonContainer>
-              {Object.keys(errors).length ? <h3>Vous ne pouvez passer à l'étape suivante car tous les champs ne sont pas correctement renseignés.</h3> : null}
-            </Footer>
+            <FormFooter save={false} values={values} handleSubmit={handleSubmit} errors={errors} />
           </>
         )}
       </Formik>
@@ -250,23 +243,6 @@ const Heading = styled.div`
   }
 `;
 
-const FormRow = styled(Row)`
-  border-bottom: 1px solid #e5e7eb;
-  padding-top: 20px;
-  padding-bottom: 20px;
-  align-items: ${({ align }) => align};
-  text-align: left;
-  input[type="text"] {
-    max-width: 500px;
-  }
-  input[name="password"] {
-    max-width: 100%;
-  }
-  @media (max-width: 768px) {
-    margin: 0 -22px;
-  }
-`;
-
 const Label = styled.div`
   color: #374151;
   margin-bottom: 10px;
@@ -288,48 +264,5 @@ const RadioLabel = styled.label`
     height: 15px;
     min-width: 15px;
     min-height: 15px;
-  }
-`;
-
-const Footer = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  h3 {
-    border: 1px solid #fc8181;
-    border-radius: 0.25em;
-    margin-top: 1em;
-    background-color: #fff5f5;
-    color: #c53030;
-    font-weight: 400;
-    font-size: 12px;
-    padding: 1em;
-  }
-`;
-
-const ButtonContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
-
-const ContinueButton = styled.button`
-  color: #fff;
-  background-color: #5145cd;
-  padding: 9px 20px;
-  border: 0;
-  outline: 0;
-  border-radius: 6px;
-  font-weight: 500;
-  font-size: 20px;
-  margin-right: 10px;
-  margin-top: 40px;
-  display: block;
-  width: 140px;
-  outline: 0;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  :hover {
-    opacity: 0.9;
   }
 `;
