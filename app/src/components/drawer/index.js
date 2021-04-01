@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
-import { YOUNG_PHASE, YOUNG_STATUS, PHASE_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2 } from "../../utils";
+import { YOUNG_PHASE, YOUNG_STATUS, PHASE_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3 } from "../../utils";
 import Item from "./item";
 import { DRAWER_TABS } from "../utils";
 import WithdrawnModal from "../WithdrawnModal";
@@ -24,13 +24,13 @@ export default (props) => {
     // if the young is not validated yet
     if (young.status !== YOUNG_STATUS.VALIDATED) return;
 
-    setStatus1(young.statusPhase1);
+    young.statusPhase1 && setStatus1(young.statusPhase1);
     if (young.phase === YOUNG_PHASE.COHESION_STAY || young.phase === YOUNG_PHASE.INSCRIPTION) return;
 
-    setStatus2(young.statusPhase2);
-    if (young.phase === YOUNG_PHASE.INTEREST_MISSION) return;
+    young.statusPhase2 && setStatus2(young.statusPhase2);
+    if (young.statusPhase2 !== YOUNG_STATUS_PHASE2.VALIDATED) return;
 
-    setStatus3(young.statusPhase3);
+    young.statusPhase3 && setStatus3(young.statusPhase3);
   }, [young]);
 
   const getDisabled = (tab) => {
