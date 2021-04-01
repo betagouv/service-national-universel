@@ -4,26 +4,23 @@ import styled from "styled-components";
 export default ({ program, image, enableToggle = true }) => {
   if (!program) return <div />;
   const [expandDetails, setExpandDetails] = useState(false);
-  const preview = program.descriptionText.substring(0, 130);
-  const rest = program.descriptionText.substring(130);
+  const preview = program.description.substring(0, 130);
 
   const toggleDetails = () => {
     setExpandDetails(!expandDetails);
   };
 
   const renderText = () => {
-    if (!enableToggle) return program.descriptionText;
-    if (!rest) return preview;
+    if (!enableToggle) return program.description;
 
     return (
       <>
         {expandDetails ? (
           <>
-            <Detail title="Qu'est ce que c'est ?" value={program.descriptionWhat} />
+            <Detail title="Qu'est ce que c'est ?" value={program.description} />
             <Detail title="C'est pour ?" value={program.descriptionFor} />
             <Detail title="Est-ce indemnisé ?" value={program.descriptionMoney} />
             <Detail title="Quelle durée d'engagement ?" value={program.descriptionDuration} />
-            <Detail title="Description :" value={program.descriptionText} />
             <ToogleText onClick={toggleDetails}>réduire</ToogleText>
           </>
         ) : (
@@ -54,7 +51,7 @@ const Detail = ({ title, value }) => {
   if (!value) return <span />;
   return (
     <div style={{ marginBottom: "0.3rem" }}>
-      <b>{title}</b> <span>{value}</span>
+      <b>{title}</b> <p>{value}</p>
     </div>
   );
 };

@@ -78,8 +78,19 @@ export default (props) => {
                       <ErrorMessage errors={errors} touched={touched} name="name" />
                     </FormGroup>
                     <FormGroup>
-                      <label>Qu'est ce que c'est ?</label>
-                      <Field name="descriptionWhat" component="textarea" rows={2} value={values.descriptionWhat} onChange={handleChange} placeholder="Message..." />
+                      <label>
+                        <span>*</span>Qu'est ce que c'est ?
+                      </label>
+                      <Field
+                        validate={(v) => !v && requiredMessage}
+                        name="description"
+                        component="textarea"
+                        rows={2}
+                        value={values.description}
+                        onChange={handleChange}
+                        placeholder="Message..."
+                      />
+                      <ErrorMessage errors={errors} touched={touched} name="description" />
                     </FormGroup>
                     <FormGroup>
                       <label>C'est pour ?</label>
@@ -92,21 +103,6 @@ export default (props) => {
                     <FormGroup>
                       <label>Quelle durée d'engagement ?</label>
                       <Field name="descriptionDuration" component="textarea" rows={2} value={values.descriptionDuration} onChange={handleChange} placeholder="Message..." />
-                    </FormGroup>
-                    <FormGroup>
-                      <label>
-                        <span>*</span>Le dispositif en quelques mots
-                      </label>
-                      <Field
-                        validate={(v) => !v && requiredMessage}
-                        name="descriptionText"
-                        component="textarea"
-                        rows={4}
-                        value={values.descriptionText}
-                        onChange={handleChange}
-                        placeholder="Décrivez en quelques mots ce dispositif"
-                      />
-                      <ErrorMessage errors={errors} touched={touched} name="descriptionText" />
                     </FormGroup>
                     <FormGroup>
                       <label>
