@@ -1,13 +1,17 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
+import { useSelector } from "react-redux";
+
 import Inscription from "./inscription";
 import Volontaire from "./volontaire";
 import Structure from "./structure";
 import Mission from "./missions";
 import VioletHeaderButton from "../../components/buttons/VioletHeaderButton";
+import ExportAll from "./inscription/ExportAll";
 
 export default () => {
   const [currentTab, setCurrentTab] = useState("inscriptions");
+  const user = useSelector((state) => state.Auth.user);
 
   return (
     <>
@@ -26,9 +30,12 @@ export default () => {
             Missions
           </TabItem>
         </TabNavigationList>
-        <VioletHeaderButton onClick={() => print()}>
-          <p>Exporter les statistiques</p>
-        </VioletHeaderButton>
+        <div style={{ display: "flex" }}>
+          {user.role === "admin" ? <ExportAll /> : null}
+          <VioletHeaderButton onClick={() => print()}>
+            <p>Exporter les statistiques</p>
+          </VioletHeaderButton>
+        </div>
       </TabNavigation>
       <Wrapper>
         {currentTab === "inscriptions" && <Inscription />}
@@ -41,7 +48,7 @@ export default () => {
 };
 
 const Wrapper = styled.div`
-  padding: 20px 40px;
+  padding: 1.5rem;
   @media print {
     background-color: #fff;
     position: absolute;
@@ -54,7 +61,7 @@ const Wrapper = styled.div`
   }
 `;
 const TabNavigation = styled.nav`
-  padding: 1rem;
+  padding: 1.5rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
