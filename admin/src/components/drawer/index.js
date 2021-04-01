@@ -80,9 +80,9 @@ function referent() {
       <li>
         <NavLink to="/inscription">Inscriptions</NavLink>
       </li>
-      {/* <li>
+      <li>
         <NavLink to="/contenu">Contenus</NavLink>
-      </li> */}
+      </li>
     </>
   );
 }

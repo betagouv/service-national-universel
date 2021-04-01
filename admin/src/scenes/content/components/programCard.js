@@ -99,11 +99,9 @@ const Actions = ({ program, onDelete }) => {
             <div>Editer</div>
           </Action>
         </Link>
-        {user.role === "admin" ? (
-          <Action onClick={handleDelete}>
-            <div>Supprimer</div>
-          </Action>
-        ) : null}
+        <Action onClick={handleDelete}>
+          <div>Supprimer</div>
+        </Action>
       </ActionStyle>
     )
   );

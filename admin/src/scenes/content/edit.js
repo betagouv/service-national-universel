@@ -7,7 +7,7 @@ import { Formik, Field } from "formik";
 import { useHistory } from "react-router-dom";
 
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
-import { translate, REFERENT_ROLES, departmentList, regionList, region2department } from "../../utils";
+import { translate, REFERENT_ROLES, departmentList, regionList, region2department, department2region } from "../../utils";
 import api from "../../services/api";
 import Loader from "../../components/Loader";
 
@@ -46,6 +46,7 @@ export default (props) => {
       }
       onSubmit={async (values) => {
         try {
+          if (values.visibility === "DEPARTMENT") values.region = department2region[values.department];
           const { ok, code, data } = await api[values._id ? "put" : "post"]("/program", values);
           if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette possibilité d'engagement", translate(code));
           history.push(`/contenu`);
@@ -191,6 +192,8 @@ const ChooseDepartment = ({ value, onChange, validate }) => {
   const [list, setList] = useState(departmentList);
 
   useEffect(() => {
+    if (value) return;
+
     //force the value if it is a referent_department
     if (user.role === REFERENT_ROLES.REFERENT_DEPARTMENT) {
       return onChange({ target: { value: user.department, name: "department" } });
@@ -219,6 +222,8 @@ const ChooseRegion = ({ value, onChange, validate }) => {
   const { user } = useSelector((state) => state.Auth);
 
   useEffect(() => {
+    if (value) return;
+
     if (user.role === REFERENT_ROLES.REFERENT_REGION) {
       return onChange({ target: { value: user.region, name: "region" } });
     }
