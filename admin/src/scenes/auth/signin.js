@@ -41,7 +41,7 @@ export default () => {
                       window.lumiere("registerUser", user._id);
                     }
                   } catch (e) {
-                    if (e && (e.code === "EMAIL_OR_PASSWORD_INVALID" || e.code === "USER_NOT_EXISTS")) {
+                    if (e && ["EMAIL_OR_PASSWORD_INVALID", "USER_NOT_EXISTS", "EMAIL_AND_PASSWORD_REQUIRED"].includes(e.code)) {
                       return setUserIsValid(false);
                     }
                     toastr.error("Erreur détectée");
