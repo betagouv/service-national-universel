@@ -1,9 +1,9 @@
 import passwordValidator from "password-validator";
+export { formatDay, formatStringLongDate, formatStringDate } from "snu-lib";
 
 export * from "./region-and-departments";
 export * from "./constants";
 export * from "./translation";
-export * from "./date";
 export * from "./colors";
 
 export function getPasswordErrorMessage(v, matomo) {

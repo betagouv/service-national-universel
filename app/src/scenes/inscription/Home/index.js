@@ -7,10 +7,8 @@ import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a lo
 import { Carousel } from "react-responsive-carousel";
 import MobileView from "./MobileView";
 import DesktopView from "./DesktopView";
-import h from "snu-lib";
 
 export default ({}) => {
-  h("world");
   return (
     <div>
       <Helmet>

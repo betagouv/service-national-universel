@@ -80,6 +80,7 @@
     "react-select": "^4.1.0",
     "reactstrap": "^8.5.1",
     "redux": "^4.0.5",
+    "snu-lib": "file:../lib",
     "styled-components": "^5.1.1",
     "validator": "^13.1.1",
     "xlsx": "^0.16.9"
