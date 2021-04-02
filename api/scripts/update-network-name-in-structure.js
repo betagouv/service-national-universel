@@ -16,8 +16,13 @@ const StructureModel = require("../src/models/structure");
           await structure.save();
           await structure.index();
         }
+      } else if (structure.isNetwork === "true") {
+        console.log(`Update structure #${structure._id} network (structure IS network) : ${structure.name}`);
+        structure.set({ networkName: `${structure.name}` });
+        await structure.save();
+        await structure.index();
       } else {
-        console.log(`Skip: structure ${structure._id} (no networkId)`);
+        console.log(`Skip: structure ${structure._id}`);
       }
     } catch (e) {
       console.log(e);

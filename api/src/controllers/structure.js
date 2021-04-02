@@ -6,9 +6,38 @@ const { capture } = require("../sentry");
 const StructureObject = require("../models/structure");
 const { ERRORS } = require("../utils");
 
+// Update "network name" to ease search ("Affilié à un réseau national" filter).
+// See: https://trello.com/c/BjRN9NME/523-admin-filtre-affiliation-%C3%A0-une-t%C3%AAte-de-r%C3%A9seau
+async function updateNetworkName(structure) {
+  if (structure.networkId) {
+    // When the structure is a child (part of a network).
+    // Get network for the structure, then update networkName thanks to its name.
+    const network = await StructureObject.findOne({ _id: structure.networkId });
+    if (network) {
+      structure.set({ networkName: `${network.name}` });
+      await structure.save();
+      await structure.index();
+    }
+  } else if (structure.isNetwork === "true") {
+    // When the structure is a partent (is a network).
+    // Update the structure itself (a parent belongs to her own structure).
+    structure.set({ networkName: `${structure.name}` });
+    await structure.save();
+    await structure.index();
+    // Then update their childs.
+    const childs = await StructureObject.find({ networkId: structure._id });
+    for (const child of childs) {
+      child.set({ networkName: `${structure.name}` });
+      await child.save();
+      await child.index();
+    }
+  }
+}
+
 router.post("/", async (req, res) => {
   try {
     const data = await StructureObject.create(req.body);
+    await updateNetworkName(data);
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
@@ -20,6 +49,7 @@ router.put("/", passport.authenticate("referent", { session: false }), async (re
   try {
     let obj = req.body;
     const data = await StructureObject.findByIdAndUpdate(req.user.structureId, obj, { new: true });
+    await updateNetworkName(data);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
@@ -32,6 +62,7 @@ router.put("/:id", passport.authenticate("referent", { session: false }), async 
   try {
     let obj = req.body;
     const data = await StructureObject.findByIdAndUpdate(req.params.id, obj, { new: true });
+    await updateNetworkName(data);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
