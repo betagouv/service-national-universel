@@ -6,7 +6,7 @@ Cette application utilise l'[API du SNU](https://github.com/betagouv/service-nat
 
 NodeJS 12+ doit être installé pour faire fonctionner l'application.
 
-```
+```bash
 git clone https://github.com/betagouv/service-national-universel.git
 cd service-national-universel/app
 npm i
