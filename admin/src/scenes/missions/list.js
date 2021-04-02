@@ -101,8 +101,8 @@ export default () => {
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Statut")}
                 />
-                <RegionFilter defaultQuery={DEFAULT_QUERY} filters={FILTERS} defaultValue={user.role === "referent_region" && [user.region]} />
-                <DepartmentFilter defaultQuery={DEFAULT_QUERY} filters={FILTERS} defaultValue={user.role === "referent_department" && [user.department]} />
+                <RegionFilter defaultQuery={DEFAULT_QUERY} filters={FILTERS} defaultValue={user.role === "referent_region" ? [user.region] : []} />
+                <DepartmentFilter defaultQuery={DEFAULT_QUERY} filters={FILTERS} defaultValue={user.role === "referent_department" ? [user.department] : []} />
                 <MultiDropdownList
                   defaultQuery={DEFAULT_QUERY}
                   className="dropdown-filter"

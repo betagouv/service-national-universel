@@ -91,8 +91,8 @@ export default () => {
                   URLParams={true}
                   showSearch={false}
                 />
-                <RegionFilter defaultQuery={DEFAULT_QUERY} filters={FILTERS} defaultValue={user.role === "referent_region" && [user.region]} />
-                <DepartmentFilter defaultQuery={DEFAULT_QUERY} filters={FILTERS} defaultValue={user.role === "referent_department" && [user.department]} />
+                <RegionFilter defaultQuery={DEFAULT_QUERY} filters={FILTERS} defaultValue={user.role === "referent_region" ? [user.region] : []} />
+                <DepartmentFilter defaultQuery={DEFAULT_QUERY} filters={FILTERS} defaultValue={user.role === "referent_department" ? [user.department] : []} />
                 <MultiDropdownList
                   className="dropdown-filter"
                   placeholder="Affiliation à un réseau national"
