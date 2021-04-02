@@ -56,7 +56,7 @@ jobs:
       - name: Add lib into current folder
         run: |
           cp -Rf ./lib ./admin/snu-lib
-          sed -i 's/file:\.\.\/lib/file:.\/snu-lib/' package.json
+          sed -i 's/file:\.\.\/lib/file:.\/snu-lib/' ./admin/package.json
 
       - name: Push
         working-directory: ${{ env.SUBFOLDER_NAME }}
