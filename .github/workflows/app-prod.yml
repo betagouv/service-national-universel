@@ -53,6 +53,11 @@ jobs:
         run: |
           rm -rf .git
 
+      - name: Add lib into current folder
+        run: |
+          cp -Rf ./lib ./app/snu-lib
+          sed -i 's/file:\.\.\/lib/file:.\/snu-lib/' package.json
+
       - name: Push
         working-directory: ${{ env.SUBFOLDER_NAME }}
         run: |

@@ -1,7 +1,7 @@
+export { formatDay, formatStringLongDate, formatStringDate } from "snu-lib";
 export * from "./region-and-departments";
 export * from "./constants";
 export * from "./translation";
-export * from "./date";
 export * from "./colors";
 
 export const domains = ["Défense et mémoire", "Sécurité", "Solidarité", "Santé", "Éducation", "Culture", "Sport", "Environnement et développement durable", "Citoyenneté"];
