@@ -1,7 +1,7 @@
 import React from "react";
 import { Col } from "reactstrap";
 
-import { translate, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3 } from "../../../utils";
+import { translate, YOUNG_PHASE, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3 } from "../../../utils";
 import Box from "../components/Box";
 import BoxContent from "../components/BoxContent";
 import BoxTitle from "../components/BoxTitle";
@@ -23,6 +23,7 @@ export default ({ values, handleChange }) => (
             { value: "2019", label: "2019" },
           ]}
         />
+        <Select name="phase" values={values} handleChange={handleChange} title="Phase" options={Object.keys(YOUNG_PHASE).map((s) => ({ value: s, label: translate(s) }))} />
         <Select
           name="statusPhase1"
           values={values}

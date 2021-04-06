@@ -106,6 +106,8 @@ export const translate = (value) => {
       return "Séjour de cohésion";
     case "INTEREST_MISSION":
       return "Mission d'intérêt général";
+    case "CONTINUE":
+      return "Poursuivre le SNU";
     case "SUMMER":
       return "Vacances d'été (juillet ou août)";
     case "AUTUMN":
