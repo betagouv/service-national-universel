@@ -65,7 +65,6 @@ const ContainerFooter = styled.div`
   display: flex;
   padding: 0.7rem;
   div {
-    cursor: pointer;
     color: #6b7280;
     border: 1px solid #e5e7eb;
     border-radius: 0.2rem;

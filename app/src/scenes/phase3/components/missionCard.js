@@ -9,6 +9,9 @@ export default ({ mission, image }) => {
   tags.push(mission.remote ? "À distance" : "En présentiel");
   mission.city && tags.push(mission.city);
   tags.push(translate(mission.domain));
+  const handleClick = () => {
+    window.lumiere("sendEvent", "click", "open_mission_phase3", { publisherName: mission.publisherName, title: mission.title, organizationName: mission.organizationName });
+  };
   return (
     <Card>
       <Col md={8}>
@@ -28,7 +31,7 @@ export default ({ mission, image }) => {
         </Tags>
       </Col>
       <Col md={4}>
-        <Button target="_blank" href={mission.applicationUrl}>
+        <Button onClick={handleClick} target="_blank" href={mission.applicationUrl}>
           Voir la mission sur <b>{mission.publisherName}</b>
           <img src={require("../../../assets/external-link.svg")} height={15} color="white" />
         </Button>

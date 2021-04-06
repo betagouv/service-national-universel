@@ -214,7 +214,14 @@ export default () => {
               <br />
               L'administration pourra ensuite éditer votre attestion de réalisation du SNU.
             </h2>
-            <ContinueButton onClick={handleSubmit}>Faire valider ma phase 3</ContinueButton>
+            <ContinueButton
+              onClick={() => {
+                window.lumiere("sendEvent", "click", "validation_phase3");
+                handleSubmit();
+              }}
+            >
+              Faire valider ma phase 3
+            </ContinueButton>
             {Object.keys(errors).length ? <h3>Vous ne pouvez passer à l'étape suivante car tous les champs ne sont pas correctement renseignés.</h3> : null}
           </Footer>
         </>
