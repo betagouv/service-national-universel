@@ -179,9 +179,9 @@ const StartButtonContainer = styled.div`
   margin-top: 1rem;
   @media (max-width: 767px) {
     position: fixed;
-    left: 10px;
-    bottom: 30px;
-    width: 60%;
+    bottom: 80px;
+    left: 50%;
+    transform: translate(-50%, 0);
     &.mobile {
       display: inline-block;
     }
@@ -189,18 +189,21 @@ const StartButtonContainer = styled.div`
 `;
 
 const StartButton = styled(Link)`
-  padding: 0.8rem 1.3rem;
+  padding: 1rem 1.5rem;
   text-transform: uppercase;
   color: #fff;
   background-color: #61c091;
   font-weight: 500;
-  font-size: 0.8rem;
+  font-size: 1rem;
   cursor: pointer;
   letter-spacing: 0.03em;
   border-radius: 30px;
   :hover {
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     color: #fff;
+  }
+  &.mobile {
+    border: 3px #51b081 solid;
   }
 `;
 

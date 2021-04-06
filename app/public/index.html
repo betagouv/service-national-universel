@@ -105,5 +105,17 @@ Place this snippet between the <head> and </head> tags on every page of your sit
   <body>
     <noscript> You need to enable JavaScript to run this app. </noscript>
     <div id="root"></div>
+    <script>
+      window.axeptioSettings = {
+        clientId: "606c516d6ac944450f1e899d",
+        cookiesVersion: "snu-base",
+      };
+       
+      (function(d, s) {
+        var t = d.getElementsByTagName(s)[0], e = d.createElement(s);
+        e.async = true; e.src = "//static.axept.io/sdk.js";
+        t.parentNode.insertBefore(e, t);
+      })(document, "script");
+      </script>
   </body>
 </html>
