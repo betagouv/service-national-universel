@@ -19,7 +19,7 @@ const BUCKET_NAME = process.env.BUCKET_NAME || "";
 const QPV_USERNAME = process.env.QPV_USERNAME || "";
 const QPV_PASSWORD = process.env.QPV_PASSWORD || "";
 
-const API_ENGAGEMENT_KEY = process.env.process.env || "";
+const API_ENGAGEMENT_KEY = process.env.API_ENGAGEMENT_KEY || "";
 
 module.exports = {
   PORT,
