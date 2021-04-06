@@ -3,6 +3,7 @@ const { ENVIRONMENT } = require("../config");
 
 const { sendRecapRegion } = require("./mailRecap/cron_hebdo_region");
 const { sendRecapDepartmentTuesday, sendRecapDepartmentThursday } = require("./mailRecap/cron_hebdo_department");
+const apiEngagement = require("./syncApiEngagement");
 const { capture } = require("../sentry");
 
 // dev : */5 * * * * * (every 5 secs)
@@ -25,5 +26,10 @@ if (ENVIRONMENT === "production") {
   cron.schedule("0 8 * * 4", function () {
     capture("START CRON RECAP DEPARTEMENT");
     sendRecapDepartmentThursday();
+  });
+
+  // everyday at 0200
+  cron.schedule("0 12 * * *", () => {
+    apiEngagement.handler();
   });
 }
