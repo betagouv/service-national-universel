@@ -29,7 +29,7 @@ if (ENVIRONMENT === "production") {
   });
 
   // everyday at 0200
-  cron.schedule("0 12 * * *", () => {
+  cron.schedule("5 12 * * *", () => {
     apiEngagement.handler();
   });
 }

@@ -19,6 +19,8 @@ const BUCKET_NAME = process.env.BUCKET_NAME || "";
 const QPV_USERNAME = process.env.QPV_USERNAME || "";
 const QPV_PASSWORD = process.env.QPV_PASSWORD || "";
 
+const API_ENGAGEMENT_KEY = process.env.process.env || "";
+
 module.exports = {
   PORT,
   MONGO_URL,
@@ -36,6 +38,7 @@ module.exports = {
   SENTRY_URL,
   QPV_USERNAME,
   QPV_PASSWORD,
+  API_ENGAGEMENT_KEY,
 };
 
 console.log("CELLAR_ENDPOINT", CELLAR_ENDPOINT);
@@ -45,6 +48,7 @@ console.log("FILE_ENCRYPTION_SECRET", FILE_ENCRYPTION_SECRET);
 console.log("BUCKET_NAME", BUCKET_NAME);
 console.log("SENDINBLUEKEY", SENDINBLUEKEY);
 console.log("SENTRY_URL", SENTRY_URL);
+console.log("API_ENGAGEMENT_KEY", API_ENGAGEMENT_KEY);
 
 function getEnvironment() {
   if (process.env.STAGING === "true") return "staging";

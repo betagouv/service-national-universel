@@ -2,9 +2,9 @@ require("dotenv").config({ path: "./../../.env-staging" });
 
 const fetch = require("node-fetch");
 require("../mongo");
+const { API_ENGAGEMENT_KEY } = require("../config");
 const { capture } = require("../sentry");
 const MissionApiModel = require("../models/missionAPI");
-const API_ENGAGEMENT_KEY = process.env.API_ENGAGEMENT_KEY;
 
 const SIZE = 1000;
 let startTime = new Date();
