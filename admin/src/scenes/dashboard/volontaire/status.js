@@ -252,16 +252,18 @@ const Application = ({ data, getLink }) => {
         {Object.values(APPLICATION_STATUS).map((e) => {
           return (
             <Col md={6} xl={4} key={e}>
-              <Card borderBottomColor={APPLICATION_STATUS_COLORS[e]}>
-                <CardTitle>{translate(e)}</CardTitle>
-                <CardValueWrapper>
-                  <CardValue>{data[e] || 0}</CardValue>
-                  <CardPercentage>
-                    {total ? `${(((data[e] || 0) * 100) / total).toFixed(0)}%` : `0%`}
-                    <CardArrow />
-                  </CardPercentage>
-                </CardValueWrapper>
-              </Card>
+              <Link to={getLink(`/volontaire?STATUS_APPLICATION=%5B"${e}"%5D`)}>
+                <Card borderBottomColor={APPLICATION_STATUS_COLORS[e]}>
+                  <CardTitle>{translate(e)}</CardTitle>
+                  <CardValueWrapper>
+                    <CardValue>{data[e] || 0}</CardValue>
+                    <CardPercentage>
+                      {total ? `${(((data[e] || 0) * 100) / total).toFixed(0)}%` : `0%`}
+                      <CardArrow />
+                    </CardPercentage>
+                  </CardValueWrapper>
+                </Card>
+              </Link>
             </Col>
           );
         })}
