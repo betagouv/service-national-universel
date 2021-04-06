@@ -41,7 +41,6 @@ export default () => {
   const dispatch = useDispatch();
   useEffect(() => {
     window.lumiere("sendEvent", "initialization", "page-loaded"); // cat, action, props
-
     matomo.logEvent("start", "open_app");
     async function fetchData() {
       try {

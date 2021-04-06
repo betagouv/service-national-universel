@@ -32,8 +32,12 @@ export default ({ program, image, enableToggle = true }) => {
     );
   };
 
+  const handleClick = () => {
+    window.lumiere("sendEvent", "click", "programme_engagement", { program: program.name });
+  };
+
   return (
-    <Card>
+    <Card onClick={handleClick}>
       <a href={program.url} className="thumb">
         <img src={image} />
         <Badge>{program.type}</Badge>
