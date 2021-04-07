@@ -4,12 +4,23 @@ import { useSelector } from "react-redux";
 
 import User from "./user";
 
-export default () => {
+export default ({ onClickBurger }) => {
   const { user } = useSelector((state) => state.Auth);
   if (!user) return <div />;
 
+  function getName() {
+    if (user.role === "admin") return "Espace modérateur";
+    if (user.role === "referent_department") return "ESPACE RÉFÉRENT DÉPARTEMENTAL";
+    if (user.role === "referent_region") return "ESPACE RÉFÉRENT REGIONAL";
+    if (user.role === "responsible") return "Espace responsable";
+    if (user.role === "supervisor") return "Espace superviseur";
+    return "";
+  }
+
   return (
     <Header>
+      <Burger onClick={onClickBurger} src={require("../../assets/burger.svg")} />
+      <Title>{getName()}</Title>
       <div style={{ display: "flex", alignItems: "center" }}>
         <User />
       </div>
@@ -25,9 +36,37 @@ const Header = styled.div`
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  @media (max-width: 768px) {
+    justify-content: space-between;
+  }
   box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.05);
   position: sticky;
   left: 0;
   top: 0;
   z-index: 20;
+  padding: 1rem;
+`;
+
+const Burger = styled.img`
+  display: none;
+  @media (max-width: 768px) {
+    display: block;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    object-fit: contain;
+    cursor: pointer;
+    svg {
+      color: #f00;
+    }
+  }
+`;
+
+const Title = styled.div`
+  font-size: 1rem;
+  font-weight: 700;
+  @media (min-width: 768px) {
+    display: none;
+  }
 `;

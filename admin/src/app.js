@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { BrowserRouter as Router, Route, Switch, Redirect } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import * as Sentry from "@sentry/browser";
+import styled from "styled-components";
 
 import { setUser, setStructure } from "./redux/auth/actions";
 
@@ -87,12 +88,18 @@ export default () => {
 
 const Home = () => {
   const user = useSelector((state) => state.Auth.user);
+  const [menuVisible, setMenuVisible] = useState(false);
+
   // if (user && !user.structureId) return <Onboarding />;
   return (
-    <div className="parent-screen-container">
-      <Drawer />
-      <div className="screen-container" style={{ marginLeft: !user && 0 }}>
-        <Header />
+    <div style={{ display: "flex" }}>
+      <Drawer open={menuVisible} onOpen={setMenuVisible} />
+      <ContentContainer>
+        <Header
+          onClickBurger={() => {
+            setMenuVisible(!menuVisible);
+          }}
+        />
         <Switch>
           <Route path="/auth" component={Auth} />
           <Route path="/onboarding" component={Onboarding} />
@@ -108,7 +115,7 @@ const Home = () => {
           <RestrictedRoute path="/contenu" component={Content} />
           <RestrictedRoute path="/" component={["supervisor", "responsible"].includes(user?.role) ? DashboardResponsible : Dashboard} />
         </Switch>
-      </div>
+      </ContentContainer>
     </div>
   );
 };
@@ -118,3 +125,12 @@ const RestrictedRoute = ({ component: Component, isLoggedIn, ...rest }) => {
   if (!user) return <Redirect to={{ pathname: "/auth" }} />;
   return <Route {...rest} render={(props) => <Component {...props} />} />;
 };
+
+const ContentContainer = styled.div`
+  margin-left: auto;
+  width: 85%;
+  @media (max-width: 768px) {
+    width: 100%;
+    padding: 0;
+  }
+`;

@@ -9,16 +9,16 @@ const getInitials = (word = "") => {
     .substring(0, 3);
 };
 
-export default ({ name, logo, size = "medium" }) => {
+export default ({ name, logo, size = "medium", onClick }) => {
   if (!logo) {
     return (
-      <Round size={size}>
+      <Round size={size} onClick={onClick}>
         <div className="initials">{getInitials(name)}</div>
       </Round>
     );
   }
   return (
-    <Round size={size}>
+    <Round size={size} onClick={onClick}>
       <span>
         <img className="logo" src={logo} />
       </span>

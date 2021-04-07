@@ -11,7 +11,7 @@ import Avatar from "../Avatar";
 
 export default () => {
   const dispatch = useDispatch();
-
+  const [open, setOpen] = useState(false);
   const { user } = useSelector((state) => state.Auth);
 
   if (!user) return <div />;
@@ -21,27 +21,30 @@ export default () => {
     dispatch(setUser(null));
   }
   return (
-    <Dropdown>
-      <div>
-        <MenuToggle>
-          <Avatar name={`${user.firstName} ${user.lastName}`} />
-        </MenuToggle>
-      </div>
-      <Menu>
-        <Item>
-          <InviteReferent role={user.role} />
-        </Item>
-        <Item>
-          <NavLink to="/profil">Profil</NavLink>
-        </Item>
-        <hr />
-        <Item onClick={logout}>
-          <NavLink style={{ color: "rgb(245 105 100)" }} to="/logout">
-            Se déconnecter
-          </NavLink>
-        </Item>
-      </Menu>
-    </Dropdown>
+    <div className="User">
+      <Dropdown>
+        <div>
+          <MenuToggle>
+            <Avatar onClick={() => setOpen(!open)} name={`${user.firstName} ${user.lastName}`} />
+          </MenuToggle>
+        </div>
+        <Menu open={open}>
+          <Close onClick={() => setOpen(false)}>&times;</Close>
+          <Item>
+            <InviteReferent role={user.role} />
+          </Item>
+          <Item>
+            <NavLink to="/profil">Profil</NavLink>
+          </Item>
+          <hr />
+          <Item onClick={logout}>
+            <NavLink style={{ color: "rgb(245 105 100)" }} to="/logout">
+              Se déconnecter
+            </NavLink>
+          </Item>
+        </Menu>
+      </Dropdown>
+    </div>
   );
 };
 
@@ -90,13 +93,13 @@ const Menu = styled.div`
   min-width: 230px;
   border-radius: 2px;
   background-color: #fff;
-  opacity: 0;
-  visibility: hidden;
+  opacity: ${({ open }) => (open ? 1 : 0)};
+  visibility: ${({ open }) => (open ? "visible" : "hidden")};
   -webkit-transition: all 0.3s;
   transition: all 0.3s;
   position: absolute;
   top: calc(100% + 10px);
-  right: -10%;
+  right: 0;
   border-radius: 4px;
   z-index: 100;
   border: 1px solid rgb(235, 238, 245);
@@ -154,5 +157,18 @@ const Item = styled.div`
       background-color: #eaf3fa;
       color: #3182ce;
     }
+  }
+`;
+
+const Close = styled.div`
+  font-size: 32px;
+  color: #666;
+  padding: 0 15px 20px;
+  display: none;
+  width: 45px;
+  padding: 0 15px;
+  margin-left: auto;
+  @media (max-width: 767px) {
+    display: block;
   }
 `;
