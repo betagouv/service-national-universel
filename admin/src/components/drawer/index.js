@@ -1,94 +1,72 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { NavLink, Link } from "react-router-dom";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
-function responsible(user) {
+const DrawerTab = ({ title, to, onClick }) => (
+  <li onClick={onClick}>
+    <NavLink to={to}>{title}</NavLink>
+  </li>
+);
+
+function responsible({ user, onClick }) {
   return (
     <>
-      <li>
-        <NavLink to={`/structure/${user.structureId}`}>Ma structure</NavLink>
-      </li>
-      <li>
-        <NavLink to="/mission">Missions</NavLink>
-      </li>
-      <li>
-        <NavLink to="/volontaire">Volontaires</NavLink>
-      </li>
+      <DrawerTab to={`/structure/${user.structureId}`} title="Ma structure" onClick={onClick} />
+      <DrawerTab to="/mission" title="Missions" onClick={onClick} />
+      <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
     </>
   );
 }
-function supervisor(user) {
+function supervisor({ user, onClick }) {
   return (
     <>
-      <li>
-        <NavLink to="/structure">Structures</NavLink>
-      </li>
-      <li>
-        <NavLink to="/mission">Missions</NavLink>
-      </li>
-      <li>
-        <NavLink to="/user">Utilisateurs</NavLink>
-      </li>
-      <li>
-        <NavLink to="/volontaire">Volontaires</NavLink>
-      </li>
+      <DrawerTab to="/structure" title="Structures" onClick={onClick} />
+      <DrawerTab to="/mission" title="Missions" onClick={onClick} />
+      <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
+      <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
     </>
   );
 }
 
-function admin() {
+function admin({ onClick }) {
   return (
     <>
-      <li>
-        <NavLink to="/structure">Structures</NavLink>
-      </li>
-      <li>
-        <NavLink to="/mission">Missions</NavLink>
-      </li>
-      <li>
-        <NavLink to="/user">Utilisateurs</NavLink>
-      </li>
-      <li>
-        <NavLink to="/volontaire">Volontaires</NavLink>
-      </li>
-      <li>
-        <NavLink to="/inscription">Inscriptions</NavLink>
-      </li>
-      <li>
-        <NavLink to="/contenu">Contenus</NavLink>
-      </li>
+      <DrawerTab to="/structure" title="Structures" onClick={onClick} />
+      <DrawerTab to="/mission" title="Missions" onClick={onClick} />
+      <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
+      <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
+      <DrawerTab to="/inscription" title="Inscriptions" onClick={onClick} />
+      <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
     </>
   );
 }
 
-function referent() {
+function referent({ onClick }) {
   return (
     <>
-      <li>
-        <NavLink to="/structure">Structures</NavLink>
-      </li>
-      <li>
-        <NavLink to="/mission">Missions</NavLink>
-      </li>
-      <li>
-        <NavLink to="/user">Utilisateurs</NavLink>
-      </li>
-      <li>
-        <NavLink to="/volontaire">Volontaires</NavLink>
-      </li>
-      <li>
-        <NavLink to="/inscription">Inscriptions</NavLink>
-      </li>
-      <li>
-        <NavLink to="/contenu">Contenus</NavLink>
-      </li>
+      <DrawerTab to="/structure" title="Structures" onClick={onClick} />
+      <DrawerTab to="/mission" title="Missions" onClick={onClick} />
+      <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
+      <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
+      <DrawerTab to="/inscription" title="Inscriptions" onClick={onClick} />
+      <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
     </>
   );
 }
 
-export default () => {
+export default (props) => {
   const user = useSelector((state) => state.Auth.user);
+  const [open, setOpen] = useState();
+  useEffect(() => {
+    setOpen(props.open);
+  }, [props.open]);
+
+  const handleClick = () => {
+    if (open) {
+      props.onOpen(false);
+    }
+  };
 
   if (!user) return <div />;
 
@@ -102,7 +80,7 @@ export default () => {
   }
 
   return (
-    <Sidebar onClick={() => {}} id="drawer">
+    <Sidebar open={open} id="drawer">
       <Logo>
         <Link to="/">
           <img src={require("../../assets/logo-snu.png")} height={38} />
@@ -110,13 +88,11 @@ export default () => {
         </Link>
       </Logo>
       <ul>
-        <li>
-          <NavLink to="/dashboard">Tableau de bord</NavLink>
-        </li>
-        {user.role === "supervisor" && supervisor(user)}
-        {user.role === "responsible" && responsible(user)}
-        {user.role === "admin" && admin()}
-        {["referent_department", "referent_region"].includes(user.role) && referent()}
+        <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />
+        {user.role === "supervisor" && supervisor({ user, onClick: handleClick })}
+        {user.role === "responsible" && responsible({ user, onClick: handleClick })}
+        {user.role === "admin" && admin({ onClick: handleClick })}
+        {["referent_department", "referent_region"].includes(user.role) && referent({ onClick: handleClick })}
       </ul>
       {/*   <li>
           <NavLink to="/tuteur">Tuteurs</NavLink>
@@ -157,12 +133,27 @@ const Logo = styled.h1`
 `;
 
 const Sidebar = styled.div`
-  background-color: #372f78;
-  width: 250px;
+  ::-webkit-scrollbar {
+    display: none;
+  }
+  @media (max-width: 767px) {
+    transform: translateX(${({ open }) => (open ? 0 : "-105%")});
+    opacity: 1;
+    visibility: visible;
+    height: 100vh;
+    width: 100vw;
+    z-index: 11;
+  }
+  background-color: #362f78;
+  width: 15%;
+  position: fixed;
   top: 0;
   bottom: 0;
   left: 0;
   z-index: 1;
+  min-height: 100vh;
+  overflow-y: auto;
+  transition: 0.2s;
   ul {
     list-style: none;
     a {
@@ -196,33 +187,5 @@ const Sidebar = styled.div`
   }
   .has-child.open ul {
     display: block;
-  }
-`;
-
-const Version = styled.div`
-  position: absolute;
-  left: 0;
-  bottom: 0;
-  padding: 30px 20px 10px;
-  width: 100%;
-  background: linear-gradient(180deg, #261f5b 0%, #372f78 29.33%);
-  box-shadow: 0px -1px 0px #0e308a;
-  display: flex;
-  flex-direction: column;
-  .info {
-    color: #fff;
-    font-size: 16px;
-    padding-left: 40px;
-    margin-bottom: 15px;
-    text-decoration: none;
-    background-position: left center;
-    background-size: 20px;
-    background-repeat: no-repeat;
-  }
-  .help {
-    background-image: url(${require("../../assets/help.svg")});
-  }
-  .new {
-    background-image: url(${require("../../assets/new.svg")});
   }
 `;

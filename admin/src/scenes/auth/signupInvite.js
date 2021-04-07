@@ -172,6 +172,9 @@ const Thumb = styled.div`
   background: url(${require("../../assets/rang.jpeg")}) no-repeat center;
   background-size: cover;
   flex: 1;
+  @media (max-width: 768px) {
+    display: none;
+  }
 `;
 
 const AuthWrapper = styled.div`

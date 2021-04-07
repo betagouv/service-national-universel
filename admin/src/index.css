@@ -49,13 +49,3 @@ a {
 a:hover {
   text-decoration: none;
 }
-
-.screen-container {
-  height: 100%;
-  width: 100%;
-}
-
-.parent-screen-container {
-  display: flex;
-  flex: 1 0 auto;
-}
