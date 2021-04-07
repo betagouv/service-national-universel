@@ -8,12 +8,18 @@ import { toastr } from "react-redux-toastr";
 import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
 
-import { translate, REFERENT_ROLES } from "../../utils";
+import { translate, REFERENT_ROLES, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE } from "../../utils";
 
 export default () => {
   const user = useSelector((state) => state.Auth.user);
-
   const dispatch = useDispatch();
+
+  const getSubRole = (role) => {
+    let subRole = [];
+    if (role === "referent_department") subRole = REFERENT_DEPARTMENT_SUBROLE;
+    if (role === "referent_region") subRole = REFERENT_REGION_SUBROLE;
+    return Object.keys(subRole).map((e) => ({ value: e, label: translate(subRole[e]) }));
+  };
 
   return (
     <Wrapper>
@@ -92,6 +98,9 @@ export default () => {
                   </FormGroup>
                 </Col>
               </Row>
+              {["referent_department", "referent_region"].includes(values.role) ? (
+                <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRole(values.role)} />
+              ) : null}
               <Button type="submit" onClick={handleSubmit}>
                 Enregistrer
               </Button>
@@ -100,6 +109,26 @@ export default () => {
         }}
       </Formik>
     </Wrapper>
+  );
+};
+
+const Select = ({ title, name, values, onChange, disabled, errors, touched, validate, options }) => {
+  return (
+    <Row>
+      <Col md={6}>
+        <FormGroup>
+          <label>{title}</label>
+          <select disabled={disabled} className="form-control" name={name} value={values[name]} onChange={onChange}>
+            <option key={-1} value="" label=""></option>
+            {options.map((o, i) => (
+              <option key={i} value={o.value} label={o.label}>
+                {o.value}
+              </option>
+            ))}
+          </select>
+        </FormGroup>
+      </Col>
+    </Row>
   );
 };
 
