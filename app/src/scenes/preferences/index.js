@@ -221,7 +221,10 @@ export default () => {
                 />
               ) : null}
             </PreferenceItem>
-            <PreferenceItem title="Quelle est votre mobilité géographique ?">
+            <PreferenceItem
+              title="Quelle est votre mobilité géographique ?"
+              subtitle="Les frais de transport et d'hébergement sont à votre charge pour la réalisation de votre mission de phase 2."
+            >
               <Row style={{ width: "100%" }}>
                 <Col md={6}>
                   <MobilityCard title="MISSION À PROXIMITÉ DE" handleChange={handleChange} values={values} errors={errors} touched={touched} />
@@ -288,12 +291,22 @@ export default () => {
   );
 };
 
-const PreferenceItem = ({ title, children }) => {
+const Infos = styled.div`
+  font-size: 0.8rem;
+  color: #6a7181;
+  font-weight: 400;
+  @media (max-width: 768px) {
+    font-size: 0.7rem;
+  }
+`;
+
+const PreferenceItem = ({ title, children, subtitle }) => {
   return (
     <Hero>
       <PreferenceContent style={{ width: "100%" }}>
         <Title>
           <span>{title}</span>
+          <Infos>{subtitle}</Infos>
         </Title>
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>{children}</div>
       </PreferenceContent>
