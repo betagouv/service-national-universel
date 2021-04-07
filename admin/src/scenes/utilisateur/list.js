@@ -11,7 +11,7 @@ import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
 import Loader from "../../components/Loader";
-const FILTERS = ["SEARCH", "ROLE", "REGION", "DEPARTMENT"];
+const FILTERS = ["SEARCH", "ROLE", "SUBROLE", "REGION", "DEPARTMENT"];
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 
 export default () => {
@@ -79,6 +79,20 @@ export default () => {
                   URLParams={true}
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Rôle")}
+                />
+                <MultiDropdownList
+                  defaultQuery={DEFAULT_QUERY}
+                  className="dropdown-filter"
+                  componentId="SUBROLE"
+                  dataField="subRole.keyword"
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  react={{ and: FILTERS.filter((e) => e !== "SUBROLE") }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Fonction")}
                 />
                 <RegionFilter defaultQuery={DEFAULT_QUERY} filters={FILTERS} />
                 <DepartmentFilter defaultQuery={DEFAULT_QUERY} filters={FILTERS} />
