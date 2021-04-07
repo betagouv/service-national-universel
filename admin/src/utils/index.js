@@ -1,6 +1,5 @@
-export { formatDay, formatStringLongDate, formatStringDate } from "snu-lib";
+export * from "snu-lib";
 export * from "./region-and-departments";
-export * from "./constants";
 export * from "./translation";
 export * from "./colors";
 

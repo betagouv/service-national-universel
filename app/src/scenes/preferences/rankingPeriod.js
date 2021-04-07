@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
 
-import { PERIOD_DURING_HOLIDAYS, PERIOD_DURING_SCHOOL, PERIOD, translate } from "../../utils";
+import { MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, PERIOD, translate } from "../../utils";
 
 export default ({ title, period, handleChange, name, values }) => {
   const [items, setItems] = useState(values[name]);
@@ -27,8 +27,8 @@ export default ({ title, period, handleChange, name, values }) => {
 
   useEffect(() => {
     let defaultRanking = items;
-    if (period === PERIOD.DURING_HOLIDAYS && !Object.keys(PERIOD_DURING_HOLIDAYS).includes(items[0])) defaultRanking = Object.keys(PERIOD_DURING_HOLIDAYS);
-    if (period === PERIOD.DURING_SCHOOL && !Object.keys(PERIOD_DURING_SCHOOL).includes(items[0])) defaultRanking = Object.keys(PERIOD_DURING_SCHOOL);
+    if (period === PERIOD.DURING_HOLIDAYS && !Object.keys(MISSION_PERIOD_DURING_HOLIDAYS).includes(items[0])) defaultRanking = Object.keys(MISSION_PERIOD_DURING_HOLIDAYS);
+    if (period === PERIOD.DURING_SCHOOL && !Object.keys(MISSION_PERIOD_DURING_SCHOOL).includes(items[0])) defaultRanking = Object.keys(MISSION_PERIOD_DURING_SCHOOL);
     updateList(defaultRanking);
   }, [period]);
 
