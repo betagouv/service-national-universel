@@ -15,7 +15,7 @@ import PlusSVG from "../../../assets/plus.svg";
 import CrossSVG from "../../../assets/cross.svg";
 import Loader from "../../../components/Loader";
 
-export default ({ young }) => {
+export default ({ young, onChangeApplication }) => {
   const [applications, setApplications] = useState(null);
   const [createMissionVisible, setCreateMissionVisible] = useState(false);
 
@@ -47,7 +47,7 @@ export default ({ young }) => {
         <tbody>
           <>
             {applications.map((hit, i) => (
-              <Hit key={i} hit={hit} index={i} />
+              <Hit key={i} hit={hit} index={i} onChangeApplication={onChangeApplication} />
             ))}
           </>
         </tbody>
@@ -76,7 +76,7 @@ export default ({ young }) => {
   );
 };
 
-const Hit = ({ hit, index }) => {
+const Hit = ({ hit, index, onChangeApplication }) => {
   const [mission, setMission] = useState();
   useEffect(() => {
     (async () => {
@@ -115,7 +115,7 @@ const Hit = ({ hit, index }) => {
         </div>
       </td>
       <td onClick={(e) => e.stopPropagation()}>
-        <SelectStatusApplication hit={hit} />
+        <SelectStatusApplication hit={hit} callback={onChangeApplication} />
       </td>
     </tr>
   );

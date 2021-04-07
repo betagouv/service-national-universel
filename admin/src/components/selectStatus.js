@@ -41,6 +41,7 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
     young[statusName] = status;
     young.lastStatusAt = Date.now();
     if (status === "WITHDRAWN" && note) young.withdrawnMessage = note;
+    if (status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INTEREST_MISSION) young.phase = YOUNG_PHASE.CONTINUE;
     try {
       // we decided to let the validated youngs in the INSCRIPTION phase
       // referents use the export and need ALL the youngs of the current year

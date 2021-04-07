@@ -14,7 +14,7 @@ import PlusSVG from "../../../assets/plus.svg";
 import CrossSVG from "../../../assets/cross.svg";
 import Badge from "../../../components/Badge";
 
-export default ({ young }) => {
+export default ({ young, onChange }) => {
   const user = useSelector((state) => state.Auth.user);
   const getDate = () => {
     if (young.cohort === "2019") return "31 mars 2021";
@@ -94,7 +94,7 @@ export default ({ young }) => {
           </Row>
         </ToggleBox>
         <Box>
-          <ApplicationList young={young} />
+          <ApplicationList young={young} onChangeApplication={onChange} />
         </Box>
       </WrapperPhase2>
     </div>

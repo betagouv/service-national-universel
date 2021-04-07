@@ -10,20 +10,22 @@ import Phase3 from "./phase3";
 export default ({ ...props }) => {
   const [young, setYoung] = useState();
 
+  const getYoung = async () => {
+    const id = props.match && props.match.params && props.match.params.id;
+    if (!id) return <div />;
+    const { data } = await api.get(`/referent/young/${id}`);
+    setYoung(data);
+  };
+
   useEffect(() => {
-    (async () => {
-      const id = props.match && props.match.params && props.match.params.id;
-      if (!id) return <div />;
-      const { data } = await api.get(`/referent/young/${id}`);
-      setYoung(data);
-    })();
+    getYoung();
   }, [props.match.params.id]);
 
   if (!young) return <div />;
   return (
     <Switch>
       <Route path="/volontaire/:id/phase1" component={() => <Phase1 young={young} />} />
-      <Route path="/volontaire/:id/phase2" component={() => <Phase2 young={young} />} />
+      <Route path="/volontaire/:id/phase2" component={() => <Phase2 young={young} onChange={getYoung} />} />
       <Route path="/volontaire/:id/phase3" component={() => <Phase3 young={young} />} />
       <Route path="/volontaire/:id" component={() => <Details young={young} />} />
     </Switch>
