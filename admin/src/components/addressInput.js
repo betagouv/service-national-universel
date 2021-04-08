@@ -27,7 +27,10 @@ export default ({ keys, values, handleChange, errors, touched }) => {
   const onSuggestionsClearRequested = () => setSuggestions([]);
 
   const onSuggestionSelected = (event, { suggestion }) => {
-    if (suggestion === "noresult") return setNoResultMode(true);
+    if (suggestion === "noresult") {
+      handleChange({ target: { name: keys.location, value: null } });
+      return setNoResultMode(true);
+    }
     setNoResultMode(false);
 
     let depart = suggestion.properties.postcode.substr(0, 2);
