@@ -19,8 +19,10 @@ const SubComponent = ({ setQuery, young, targetLocation }) => {
         },
       };
       let location;
-      if (targetLocation === "relative") location = await getCoordinates({ q: young.mobilityNearRelativeAddress, postcode: young.mobilityNearRelativeZip });
-      else location = young.location || (await getCoordinates({ q: young.city }));
+      if (targetLocation === "relative") {
+        location = await getCoordinates({ q: young.mobilityNearRelativeAddress, postcode: young.mobilityNearRelativeZip });
+        if (!location) location = await getCoordinates({ postcode: young.mobilityNearRelativeZip });
+      } else location = young.location || (await getCoordinates({ q: young.city, postcode: young.zip }));
       if (location) {
         query.bool["filter"] = {
           geo_distance: {
