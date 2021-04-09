@@ -13,7 +13,7 @@ export default ({ values, handleChange }) => (
     <Box>
       <BoxTitle>Situation</BoxTitle>
       <BoxContent direction="column">
-        <Item title="Statut" values={values} name="situation" handleChange={handleChange} />
+        <Item disabled title="Statut" values={values} name="situation" handleChange={handleChange} />
         <Select
           title="Classe"
           values={values}
