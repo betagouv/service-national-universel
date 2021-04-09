@@ -69,6 +69,26 @@ class api {
     return this.token;
   }
 
+  openpdf(path, body) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const response = await fetch(`${apiURL}${path}`, {
+          mode: "cors",
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json", Authorization: this.token },
+          body: typeof body === "string" ? body : JSON.stringify(body),
+        });
+        if (response.status !== 200) return reject({});
+        const file = await response.blob();
+        resolve(file);
+      } catch (e) {
+        console.log(e);
+        reject();
+      }
+    });
+  }
+
   get(path) {
     return new Promise(async (resolve, reject) => {
       try {

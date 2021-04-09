@@ -1,0 +1,63 @@
+const fs = require("fs");
+const path = require("path");
+
+const getLocationCohesionCenter = (y) => {
+  let t = "";
+  if (y.cohestionCenterCity) {
+    t = `à ${y.cohestionCenterCity}`;
+    if (y.cohestionCenterZip) {
+      t += `, ${y.cohestionCenterZip}`;
+    }
+  }
+  return t;
+};
+
+const phase1 = (young) => {
+  const d = new Date();
+  const html = fs.readFileSync(path.resolve(__dirname, "./phase1.html"), "utf8");
+  const template = young.cohort === "2019" ? "certificateTemplate-2019.png" : "certificateTemplate.png";
+  const COHESION_CENTER_LOCATION = getLocationCohesionCenter(young);
+  return html
+    .replace(/{{FIRST_NAME}}/g, young.firstName)
+    .replace(/{{LAST_NAME}}/g, young.lastName)
+    .replace(/{{COHORT}}/g, young.cohort)
+    .replace(/{{COHESION_CENTER_NAME}}/g, young.cohesionCenterName || "")
+    .replace(/{{COHESION_CENTER_LOCATION}}/g, COHESION_CENTER_LOCATION)
+    .replace(/{{GENERAL_BG}}/g, template)
+    .replace(/{{DATE}}/g, d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" }));
+};
+
+const phase2 = (young) => {
+  const d = new Date();
+  const html = fs.readFileSync(path.resolve(__dirname, "./phase2.html"), "utf8");
+  return html
+    .replace(/{{FIRST_NAME}}/g, young.firstName)
+    .replace(/{{LAST_NAME}}/g, young.lastName)
+    .replace(/{{COHORT}}/g, young.cohort)
+    .replace(/{{GENERAL_BG}}/g, "certificateTemplate.png")
+    .replace(/{{DATE}}/g, d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" }));
+};
+
+const phase3 = (young) => {
+  const d = new Date();
+  const html = fs.readFileSync(path.resolve(__dirname, "./phase3.html"), "utf8");
+  return html
+    .replace(/{{FIRST_NAME}}/g, young.firstName)
+    .replace(/{{LAST_NAME}}/g, young.lastName)
+    .replace(/{{COHORT}}/g, young.cohort)
+    .replace(/{{GENERAL_BG}}/g, "certificateTemplate.png")
+    .replace(/{{DATE}}/g, d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" }));
+};
+
+const snu = (young) => {
+  const d = new Date();
+  const html = fs.readFileSync(path.resolve(__dirname, "./snu.html"), "utf8");
+  return html
+    .replace(/{{FIRST_NAME}}/g, young.firstName)
+    .replace(/{{LAST_NAME}}/g, young.lastName)
+    .replace(/{{COHORT}}/g, young.cohort)
+    .replace(/{{GENERAL_BG}}/g, "certificateTemplate.png")
+    .replace(/{{DATE}}/g, d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" }));
+};
+
+module.exports = { phase1, phase2, phase3, snu };

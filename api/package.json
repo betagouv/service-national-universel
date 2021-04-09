@@ -32,6 +32,7 @@
     "faker": "^5.1.0",
     "file-type": "^16.2.0",
     "gm": "^1.23.1",
+    "html-pdf": "^2.2.0",
     "http-aws-es": "^6.0.0",
     "jsonwebtoken": "^8.5.1",
     "mime-types": "^2.1.28",

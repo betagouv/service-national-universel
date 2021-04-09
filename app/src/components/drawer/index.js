@@ -7,6 +7,7 @@ import { YOUNG_PHASE, YOUNG_STATUS, PHASE_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STA
 import Item from "./item";
 import { DRAWER_TABS } from "../utils";
 import WithdrawnModal from "../WithdrawnModal";
+import DownloadAttestationButton from "../buttons/DownloadAttestationButton";
 
 export default (props) => {
   const [open, setOpen] = useState();
@@ -38,7 +39,7 @@ export default (props) => {
     if (tab === DRAWER_TABS.HOME) return false;
     if (young.status === YOUNG_STATUS.REFUSED) return true;
     if (tab === DRAWER_TABS.PHASE1) {
-      if (young.cohort && young.cohort !== "2021") return [YOUNG_STATUS_PHASE1.CANCEL, YOUNG_STATUS_PHASE1.DONE].includes(young.statusPhase1);
+      if (young.cohort && young.cohort !== "2021") return [YOUNG_STATUS_PHASE1.CANCEL].includes(young.statusPhase1);
       return [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status);
     }
     if (tab === DRAWER_TABS.PHASE2) {
@@ -63,100 +64,135 @@ export default (props) => {
   };
 
   return (
-    <Sidebar open={open}>
-      <Header>
-        <Logos>
-          <a href="https://www.snu.gouv.fr/">
-            <img src={require("../../assets/fr.png")} />
-          </a>
-          <a href="https://www.snu.gouv.fr/">
-            <img src={require("../../assets/logo-snu.png")} />
-          </a>
-          <Close onClick={() => props.onOpen(false)}>&times;</Close>
-        </Logos>
-      </Header>
-      <HomeLink exact to="/" onClick={(e) => handleClick(e, DRAWER_TABS.HOME)}>
-        <div className="icon">
-          <svg fill="none" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a1 1 0 001-1V10M9 21h6"
-            ></path>
-          </svg>
-        </div>
-        Accueil
-      </HomeLink>
-      <MainNav>
-        <Item
-          title="séjour de cohésion"
-          phase="1"
-          subtitle="Phase 1"
-          status={status1}
-          to="/phase1"
-          disabled={getDisabled(DRAWER_TABS.PHASE1)}
-          handleClick={(event) => handleClick(event, DRAWER_TABS.PHASE1)}
-        />
-        <Item
-          title="mission d'intérêt général"
-          phase="2"
-          subtitle="Phase 2"
-          status={status2}
-          to="/phase2"
-          disabled={getDisabled(DRAWER_TABS.PHASE2)}
-          handleClick={(event) => handleClick(event, DRAWER_TABS.PHASE2)}
-          open={activeTab === DRAWER_TABS.PHASE2}
-        >
-          <ul className="subNav">
+    <>
+      <Sidebar open={open}>
+        <Header>
+          <Logos>
+            <a href="https://www.snu.gouv.fr/">
+              <img src={require("../../assets/fr.png")} />
+            </a>
+            <a href="https://www.snu.gouv.fr/">
+              <img src={require("../../assets/logo-snu.png")} />
+            </a>
+            <Close onClick={() => props.onOpen(false)}>&times;</Close>
+          </Logos>
+        </Header>
+        <HomeLink exact to="/" onClick={(e) => handleClick(e, DRAWER_TABS.HOME)}>
+          <div className="icon">
+            <svg fill="none" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a1 1 0 001-1V10M9 21h6"
+              ></path>
+            </svg>
+          </div>
+          Accueil
+        </HomeLink>
+        <MainNav>
+          <Item
+            title="séjour de cohésion"
+            phase="1"
+            subtitle="Phase 1"
+            status={status1}
+            to="/phase1"
+            disabled={getDisabled(DRAWER_TABS.PHASE1)}
+            handleClick={(event) => handleClick(event, DRAWER_TABS.PHASE1)}
+            open={activeTab === DRAWER_TABS.PHASE1}
+          >
+            <ul className="subNav">
+              {young.statusPhase1 === "DONE" && young.cohesionCenter ? (
+                <li>
+                  <DownloadAttestationButton young={young} uri="1">
+                    Télécharger mon attestation
+                  </DownloadAttestationButton>
+                </li>
+              ) : null}
+            </ul>
+          </Item>
+          <Item
+            title="mission d'intérêt général"
+            phase="2"
+            subtitle="Phase 2"
+            status={status2}
+            to="/phase2"
+            disabled={getDisabled(DRAWER_TABS.PHASE2)}
+            handleClick={(event) => handleClick(event, DRAWER_TABS.PHASE2)}
+            open={activeTab === DRAWER_TABS.PHASE2}
+          >
+            <ul className="subNav">
+              <li>
+                <NavLink to="/preferences" onClick={(event) => handleClick(event, DRAWER_TABS.PHASE2, "preferences")}>
+                  Renseigner mes préférences
+                </NavLink>
+              </li>
+              <li>
+                <NavLink to="/mission" onClick={(event) => handleClick(event, DRAWER_TABS.PHASE2, "mission")}>
+                  Trouver une mission
+                </NavLink>
+              </li>
+              <li>
+                <NavLink to="/candidature" onClick={(event) => handleClick(event, DRAWER_TABS.PHASE2, "candidature")}>
+                  Suivre mes candidatures
+                </NavLink>
+              </li>
+              {young.statusPhase2 === "VALIDATED" ? (
+                <li>
+                  <DownloadAttestationButton young={young} uri="2">
+                    Télécharger mon attestation
+                  </DownloadAttestationButton>
+                </li>
+              ) : null}
+            </ul>
+          </Item>
+          <Item
+            title="poursuivre mon snu"
+            phase="3"
+            subtitle="Phase 3"
+            status={status3}
+            to="/phase3"
+            disabled={getDisabled(DRAWER_TABS.PHASE3)}
+            handleClick={(event) => handleClick(event, DRAWER_TABS.PHASE3)}
+            open={activeTab === DRAWER_TABS.PHASE3}
+          >
+            <ul className="subNav">
+              <li>
+                <NavLink to="/phase3/les-programmes" onClick={(event) => handleClick(event, DRAWER_TABS.PHASE3, "les-programmes")}>
+                  Les programmes d'engagement
+                </NavLink>
+              </li>
+              <li>
+                <NavLink to="/phase3/mission" onClick={(event) => handleClick(event, DRAWER_TABS.PHASE3, "mission")}>
+                  Trouver une mission
+                </NavLink>
+              </li>
+              <li>
+                <NavLink to="/phase3/valider" onClick={(event) => handleClick(event, DRAWER_TABS.PHASE3, "valider")}>
+                  Valider ma phase 3
+                </NavLink>
+              </li>
+              {young.statusPhase3 === "VALIDATED" ? (
+                <li>
+                  <DownloadAttestationButton young={young} uri="3">
+                    Télécharger mon attestation
+                  </DownloadAttestationButton>
+                </li>
+              ) : null}
+            </ul>
+          </Item>
+        </MainNav>
+        <ul className="subNav">
+          {young.statusPhase1 === "DONE" && young.statusPhase2 === "VALIDATED" ? (
             <li>
-              <NavLink to="/preferences" onClick={(event) => handleClick(event, DRAWER_TABS.PHASE2, "preferences")}>
-                Renseigner mes préférences
-              </NavLink>
+              <DownloadAttestationButton young={young} uri="snu">
+                Télécharger mon attestation
+              </DownloadAttestationButton>
             </li>
-            <li>
-              <NavLink to="/mission" onClick={(event) => handleClick(event, DRAWER_TABS.PHASE2, "mission")}>
-                Trouver une mission
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="/candidature" onClick={(event) => handleClick(event, DRAWER_TABS.PHASE2, "candidature")}>
-                Suivre mes candidatures
-              </NavLink>
-            </li>
-          </ul>
-        </Item>
-        <Item
-          title="poursuivre mon snu"
-          phase="3"
-          subtitle="Phase 3"
-          status={status3}
-          to="/phase3"
-          disabled={getDisabled(DRAWER_TABS.PHASE3)}
-          handleClick={(event) => handleClick(event, DRAWER_TABS.PHASE3)}
-          open={activeTab === DRAWER_TABS.PHASE3}
-        >
-          <ul className="subNav">
-            <li>
-              <NavLink to="/phase3/les-programmes" onClick={(event) => handleClick(event, DRAWER_TABS.PHASE3, "les-programmes")}>
-                Les programmes d'engagement
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="/phase3/mission" onClick={(event) => handleClick(event, DRAWER_TABS.PHASE3, "mission")}>
-                Trouver une mission
-              </NavLink>
-            </li>
-            <li>
-              <NavLink to="/phase3/valider" onClick={(event) => handleClick(event, DRAWER_TABS.PHASE3, "valider")}>
-                Valider ma phase 3
-              </NavLink>
-            </li>
-          </ul>
-        </Item>
-      </MainNav>
-      <MyNav>
-        {/* <li>
+          ) : null}
+        </ul>
+        <MyNav>
+          {/* <li>
           <NavLink to="/documents">
             <div className="icon">
               <svg fill="none" viewBox="0 0 24 24">
@@ -166,28 +202,29 @@ export default (props) => {
             Mes documents
           </NavLink>
         </li> */}
-        <DrawerButton>
-          <a href="https://www.snu.gouv.fr/foire-aux-questions-11" target="blank">
-            <div className="icon">
-              <svg fill="none" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                ></path>
-              </svg>
-            </div>
-            Foire aux questions
-          </a>
-        </DrawerButton>
-        {young.status === YOUNG_STATUS.VALIDATED ? (
           <DrawerButton>
-            <DeleteAccountButton young={young} />
+            <a href="https://www.snu.gouv.fr/foire-aux-questions-11" target="blank">
+              <div className="icon">
+                <svg fill="none" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  ></path>
+                </svg>
+              </div>
+              Foire aux questions
+            </a>
           </DrawerButton>
-        ) : null}
-      </MyNav>
-    </Sidebar>
+          {young.status === YOUNG_STATUS.VALIDATED ? (
+            <DrawerButton>
+              <DeleteAccountButton young={young} />
+            </DrawerButton>
+          ) : null}
+        </MyNav>
+      </Sidebar>
+    </>
   );
 };
 
