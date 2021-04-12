@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { FormGroup, Row, Col } from "reactstrap";
+import { FormGroup } from "reactstrap";
 import { Formik, Field } from "formik";
 import validator from "validator";
 import { toastr } from "react-redux-toastr";
@@ -9,99 +9,148 @@ import LoadingButton from "../../components/buttons/LoadingButton";
 import api from "../../services/api";
 import { Link } from "react-router-dom";
 import { translate } from "../../utils";
+import Header from "./components/header";
 
 export default () => {
-  const [done, setDone] = useState(false);
+  const [mail, setMail] = useState("");
 
   return (
-    <Wrapper noGutters>
-      <Col sm={6}>
-        {done ? (
-          <AuthWrapper>
-            <Title>Email envoyé</Title>
-            <HowReset>
-              Si vous possedez un compte chez nous, un email contenant les instructions pour réinitialiser votre mot de passe vient de vous être envoyé.
-              <br />
-              Si vous ne vous souvenez plus de votre email de connexion, écrivez-nous à contact@snu.gouv.fr.
-            </HowReset>
-          </AuthWrapper>
-        ) : (
-          <AuthWrapper>
-            <div style={{ marginBottom: 60 }}>
-              <img src={require("../../assets/logo-snu.png")} width={100} />
+    <div style={{ display: "flex", flexDirection: "column" }}>
+      <Header />
+      <AuthWrapper>
+        <Thumb />
+        <div>
+          <LoginBox>
+            <div>
+              <Formik
+                initialValues={{ email: "" }}
+                onSubmit={async (values, actions) => {
+                  try {
+                    await api.post("/referent/forgot_password", values);
+                    setMail(values.email);
+                  } catch (e) {
+                    toastr.error("Erreur !", translate(e.code));
+                  }
+                  actions.setSubmitting(false);
+                }}
+              >
+                {({ values, errors, isSubmitting, handleChange, handleSubmit }) => {
+                  return (
+                    <form onSubmit={handleSubmit}>
+                      {mail ? (
+                        <>
+                          <Title>Email envoyé à : {mail}</Title>
+                          <Subtitle>
+                            Si vous possedez un compte chez nous, un email contenant les instructions pour réinitialiser votre mot de passe vient de vous être envoyé.
+                          </Subtitle>
+                          <Subtitle>
+                            Si vous ne vous souvenez plus de votre email de connexion, écrivez-nous à <a href="mailto:contact@snu.gouv.fr">contact@snu.gouv.fr</a>.
+                          </Subtitle>
+                        </>
+                      ) : (
+                        <>
+                          <Title>Réinitialisation du mot de passe</Title>
+                          <Subtitle>Pour réinitialiser votre mot de passe, entrez l'adresse mail que vous avez utilisée pour vous connecter à la plateforme</Subtitle>
+                          <StyledFormGroup>
+                            <div>
+                              <label>ADRESSE EMAIL</label>
+                              <InputField
+                                validate={(v) => !validator.isEmail(v) && "Veuillez renseigner votre email"}
+                                name="email"
+                                type="email"
+                                value={values.email}
+                                placeholder="Email"
+                                onChange={handleChange}
+                                hasError={errors.email}
+                              />
+                            </div>
+                            <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.email}</p>
+                          </StyledFormGroup>
+                          <Submit type="submit" color="success" loading={isSubmitting}>
+                            Obtenir le lien de réinitialisation par email
+                          </Submit>
+                        </>
+                      )}
+                    </form>
+                  );
+                }}
+              </Formik>
             </div>
-            <Title>Réinitialisation du mot de passe</Title>
-            <HowReset>Pour réinitialiser votre mot de passe, entrez l'adresse mail que vous avez utilisée pour vous connecter à la plateforme</HowReset>
-            <Formik
-              initialValues={{ email: "" }}
-              onSubmit={async (values, actions) => {
-                try {
-                  await api.post("/referent/forgot_password", values);
-                  setDone(true);
-                } catch (e) {
-                  toastr.error("Erreur !", translate(e.code));
-                }
-                actions.setSubmitting(false);
-              }}
-            >
-              {({ values, errors, isSubmitting, handleChange, handleSubmit }) => {
-                return (
-                  <form onSubmit={handleSubmit}>
-                    <StyledFormGroup>
-                      <label>ADRESSE EMAIL</label>
-                      <InputField
-                        validate={(v) => !validator.isEmail(v) && "Veuillez renseigner votre email"}
-                        name="email"
-                        type="email"
-                        value={values.email}
-                        placeholder="Email"
-                        onChange={handleChange}
-                        hasError={errors.email}
-                      />
-                      <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.email}</p>
-                    </StyledFormGroup>
-                    <Submit type="submit" color="success" loading={isSubmitting}>
-                      Obtenir le lien de réinitialisation par email
-                    </Submit>
-                    <Account>
-                      Vous avez déjà un compte ? <Link to="/auth">Connectez vous</Link>
-                    </Account>
-                  </form>
-                );
-              }}
-            </Formik>
-          </AuthWrapper>
-        )}
-      </Col>
-
-      <Col sm={6} style={{ background: "rgb(245, 249, 252)" }}>
-        <Thumb>
-          <h1>Plateforme du Service National Universel</h1>
-          <img src={require("../../assets/auth.png")} />
-        </Thumb>
-      </Col>
-    </Wrapper>
+            <div>
+              <hr />
+              <Register>
+                Vous avez déjà un compte ? <Link to="/auth">Connectez vous</Link>
+              </Register>
+            </div>
+          </LoginBox>
+        </div>
+      </AuthWrapper>
+    </div>
   );
 };
 
-const Wrapper = styled(Row)`
-  height: 100vh;
-  overflow: hidden;
+const Thumb = styled.div`
+  min-height: 400px;
+  background: url(${require("../../assets/computer.jpeg")}) no-repeat center;
+  background-size: cover;
+  flex: 1;
+  @media (max-width: 768px) {
+    display: none;
+  }
 `;
 
 const AuthWrapper = styled.div`
-  padding: 20px;
-  max-width: 380px;
+  display: flex;
   width: 100%;
-  margin: 0 auto;
-  overflow-y: auto;
+  > * {
+    flex: 1;
+  }
 `;
 
-const Title = styled.div`
-  color: rgb(38, 42, 62);
-  font-size: 24px;
+const Title = styled.h1`
+  position: relative;
+  font-size: 2rem;
+  @media (max-width: 768px) {
+    font-size: 1.2rem;
+  }
   font-weight: 700;
-  margin-bottom: 15px;
+  margin-bottom: 14px;
+`;
+
+const Subtitle = styled.h2`
+  position: relative;
+  font-size: 1rem;
+  color: #6e757c;
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+  }
+  font-weight: 400;
+  margin-bottom: 20px;
+`;
+
+const Register = styled.h3`
+  position: relative;
+  font-size: 1rem;
+  text-align: center;
+  color: #6e757c;
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+  }
+  font-weight: 400;
+  margin-bottom: 20px;
+  a {
+    color: #32267f;
+    font-weight: 500;
+  }
+`;
+
+const LoginBox = styled.div`
+  padding: 4rem;
+  background-color: #f6f6f6;
+  @media (max-width: 768px) {
+    border-radius: 0;
+    margin: 0;
+  }
 `;
 
 const StyledFormGroup = styled(FormGroup)`
@@ -113,75 +162,50 @@ const StyledFormGroup = styled(FormGroup)`
     font-weight: 700;
   }
 `;
-
 const InputField = styled(Field)`
+  background-color: #fff;
+  outline: 0;
   display: block;
   width: 100%;
-  margin-bottom: 0.375rem;
-  background-color: #fff;
-  color: #606266;
-  outline: 0;
-  padding: 9px 20px;
-  border-radius: 4px;
-  border: 1px solid;
-  border-color: ${({ hasError }) => (hasError ? "red" : "#dcdfe6")};
+  padding: 12px 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 5px;
+  color: #798fb0;
+  -webkit-transition: border 0.2s ease;
+  transition: border 0.2s ease;
+  line-height: 1.2;
   ::placeholder {
-    color: #d6d6e1;
+    color: #798fb0;
   }
-  :focus {
-    border: 1px solid #aaa;
+  &:focus {
+    outline: none;
+    border: 1px solid rgba(66, 153, 225, 0.5);
+    & + label {
+      color: #434190;
+    }
+    ::placeholder {
+      color: #ccd5e0;
+    }
   }
 `;
 
 const Submit = styled(LoadingButton)`
-  background-color: #3182ce;
-  outline: 0;
+  display: block;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: 0;
+  padding: 0.5rem 3rem;
   border: 0;
-  color: #fff;
-  border-radius: 4px;
-  padding: 10px 20px;
-  font-size: 14px;
+  background-color: #5145cd;
+  margin-top: 30px;
+  margin-bottom: 30px;
+  border-radius: 10px;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
   cursor: pointer;
   :hover {
-    background-color: #5a9bd8;
+    background-color: #42389d;
   }
-  :disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-`;
-
-const Account = styled.div`
-  border-top: 1px solid #cbd5e0;
-  padding-top: 25px;
-  margin-top: 100px;
-  font-size: 14px;
-  color: #6a6f88;
-  a {
-    color: #262a3e;
-    font-weight: 600;
-    margin-left: 5px;
-  }
-`;
-
-const HowReset = styled.div`
-  font-size: 14px;
-  margin-bottom: 30px;
-  color: #333;
-`;
-
-const Thumb = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-  height: 100%;
-  h1 {
-    color: rgb(49, 130, 206);
-    margin-bottom: 60px;
-    font-size: 24px;
-  }
-  img {
-    max-width: 280px;
+  :focus {
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
   }
 `;
