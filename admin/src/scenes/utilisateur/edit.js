@@ -50,6 +50,19 @@ export default (props) => {
     return Object.keys(subRole).map((e) => ({ value: e, label: translate(subRole[e]) }));
   };
 
+  function canModify(user, value) {
+    if (user.role === "admin") return true;
+    // https://trello.com/c/Wv2TrQnQ/383-admin-ajouter-onglet-utilisateurs-pour-les-r%C3%A9f%C3%A9rents
+    if (user.role === "referent_region") {
+      if (["referent_department", "referent_region"].includes(value.role) && user.region === value.region) return true;
+      return false;
+    }
+    if (user.role === "referent_department") {
+      if (user.role === value.role && user.department === value.department) return true;
+      return false;
+    }
+  }
+
   return (
     //@todo fix the depart and region
     <Wrapper>
@@ -98,13 +111,14 @@ export default (props) => {
                   </BoxContent>
                 </Box>
               </Col>
-              {currentUser.role === "admin" && (
+              {canModify(currentUser, values) && (
                 <Col md={6} style={{ marginBottom: "20px" }}>
                   <Box>
                     <BoxTitle>Information</BoxTitle>
                     <BoxContent direction="column">
                       <Select
                         name="role"
+                        disabled={currentUser.role !== "admin"}
                         values={values}
                         onChange={(e) => {
                           const value = e.target.value;
@@ -125,6 +139,7 @@ export default (props) => {
                       ) : null}
                       {values.role === REFERENT_ROLES.REFERENT_DEPARTMENT ? (
                         <Select
+                          disabled={currentUser.role !== "admin"}
                           name="department"
                           values={values}
                           onChange={(e) => {
