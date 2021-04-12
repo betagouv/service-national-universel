@@ -31,7 +31,7 @@ export default () => {
           </TabItem>
         </TabNavigationList>
         <div style={{ display: "flex" }}>
-          {user.role === "admin" ? <ExportAll /> : null}
+          {user.role === "admin" && currentTab === "inscriptions" ? <ExportAll /> : null}
           <VioletHeaderButton onClick={() => print()}>
             <p>Exporter les statistiques</p>
           </VioletHeaderButton>
