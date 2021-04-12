@@ -19,7 +19,7 @@ const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_P
 
 export default ({ setYoung }) => {
   const [volontaire, setVolontaire] = useState(null);
-  const DEFAULT_QUERY = () => ({ query: { bool: { filter: { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } } } } });
+  const DEFAULT_QUERY = () => ({ query: { bool: { filter: { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } } } }, size: 10000 });
   return (
     <div>
       <ReactiveBase url={`${apiURL}/es`} app="young" headers={{ Authorization: `JWT ${api.getToken()}` }}>
@@ -33,6 +33,7 @@ export default ({ setYoung }) => {
                 title="Exporter les volontaires"
                 collection="volontaire"
                 react={{ and: FILTERS }}
+                defaultQuery={DEFAULT_QUERY}
                 transform={(data) => {
                   return {
                     _id: data._id,
