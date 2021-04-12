@@ -15,7 +15,7 @@ import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS_COLORS } 
 import { Link } from "react-router-dom";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 
-const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_PHASE_1", "STATUS_PHASE_2", "STATUS_PHASE_3", "STATUS_APPLICATION"];
+const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_PHASE_1", "STATUS_PHASE_2", "STATUS_PHASE_3", "STATUS_APPLICATION", "LOCATION"];
 
 export default ({ setYoung }) => {
   const [volontaire, setVolontaire] = useState(null);
@@ -117,6 +117,18 @@ export default ({ setYoung }) => {
                 queryFormat="and"
               />
               <FilterRow>
+                <DataSearch
+                  defaultQuery={DEFAULT_QUERY}
+                  showIcon={false}
+                  placeholder="Ville ou code postal"
+                  componentId="LOCATION"
+                  dataField={["city", "zip"]}
+                  react={{ and: FILTERS.filter((e) => e !== "LOCATION") }}
+                  style={{ flex: 2 }}
+                  innerClass={{ input: "searchbox" }}
+                  className="searchbox-city"
+                  autosuggest={false}
+                />
                 <MultiDropdownList
                   defaultQuery={DEFAULT_QUERY}
                   className="dropdown-filter"
@@ -375,6 +387,15 @@ const FilterRow = styled.div`
   .dropdown-filter {
     margin-right: 15px;
     margin-bottom: 15px;
+  }
+  .searchbox-city {
+    min-width: 165px;
+    max-width: 165px;
+    margin-right: 15px;
+    margin-bottom: 15px;
+    input {
+      padding: 10.5px 12px;
+    }
   }
   button {
     background-color: #fff;

@@ -82,7 +82,6 @@ export default () => {
                   componentId="LOCATION"
                   dataField={["city", "zip"]}
                   react={{ and: FILTERS.filter((e) => e !== "LOCATION") }}
-                  fuzziness={1}
                   style={{ flex: 2 }}
                   innerClass={{ input: "searchbox" }}
                   className="searchbox-city"

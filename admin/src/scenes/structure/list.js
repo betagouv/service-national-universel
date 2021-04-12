@@ -12,7 +12,7 @@ import { translate, corpsEnUniforme } from "../../utils";
 import VioletHeaderButton from "../../components/buttons/VioletHeaderButton";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 
-const FILTERS = ["SEARCH", "LEGAL_STATUS", "DEPARTMENT", "REGION", "CORPS", "WITH_NETWORK"];
+const FILTERS = ["SEARCH", "LEGAL_STATUS", "DEPARTMENT", "REGION", "CORPS", "WITH_NETWORK", "LOCATION"];
 const formatLongDate = (date) => {
   if (!date) return "-";
   const d = new Date(date);
@@ -62,6 +62,18 @@ export default () => {
                 autosuggest={false}
               />
               <FilterRow>
+                <DataSearch
+                  defaultQuery={DEFAULT_QUERY}
+                  showIcon={false}
+                  placeholder="Ville ou code postal"
+                  componentId="LOCATION"
+                  dataField={["city", "zip"]}
+                  react={{ and: FILTERS.filter((e) => e !== "LOCATION") }}
+                  style={{ flex: 2 }}
+                  innerClass={{ input: "searchbox" }}
+                  className="searchbox-city"
+                  autosuggest={false}
+                />
                 <MultiDropdownList
                   defaultQuery={DEFAULT_QUERY}
                   className="dropdown-filter"
@@ -253,6 +265,15 @@ const FilterRow = styled.div`
   .dropdown-filter {
     margin-right: 15px;
     margin-bottom: 15px;
+  }
+  .searchbox-city {
+    min-width: 165px;
+    max-width: 165px;
+    margin-right: 15px;
+    margin-bottom: 15px;
+    input {
+      padding: 10.5px 12px;
+    }
   }
   button {
     background-color: #fff;
