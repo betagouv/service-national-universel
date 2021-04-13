@@ -231,14 +231,7 @@ export default () => {
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="consentment1" />
                 <RadioLabel>
-                  <Field
-                    validate={(v) => (!v && requiredMessage) || (!clickedRules && "Vous devez consulter le règlement intérieur avant de donner votre consentement")}
-                    value="true"
-                    checked={values.consentment2}
-                    type="checkbox"
-                    name="consentment2"
-                    onChange={handleChange}
-                  />
+                  <Field validate={(v) => !v && requiredMessage} value="true" checked={values.consentment2} type="checkbox" name="consentment2" onChange={handleChange} />
                   <div>
                     atteste avoir pris connaissance du règlement intérieur{" "}
                     <a
