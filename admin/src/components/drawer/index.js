@@ -82,10 +82,10 @@ export default (props) => {
   return (
     <Sidebar open={open} id="drawer">
       <Logo>
-        <Link to="/">
+        <HeaderSideBar to="/">
           <img src={require("../../assets/logo-snu.png")} height={38} />
           {getName()}
-        </Link>
+        </HeaderSideBar>
       </Logo>
       <ul>
         <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />
@@ -108,6 +108,13 @@ export default (props) => {
     </Sidebar>
   );
 };
+
+const HeaderSideBar = styled(Link)`
+  display: flex;
+  @media (max-width: 1550px) {
+    flex-direction: column;
+  }
+`;
 
 const Logo = styled.h1`
   background: #372f78;
