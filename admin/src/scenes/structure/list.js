@@ -22,8 +22,7 @@ const formatLongDate = (date) => {
 export default () => {
   const [structure, setStructure] = useState(null);
   const user = useSelector((state) => state.Auth.user);
-  const DEFAULT_QUERY = () =>
-    user.role === "supervisor" ? { query: { bool: { filter: { term: { "networkId.keyword": user.structureId } } } }, size: 10000 } : { query: { match_all: {} }, size: 10000 };
+  const DEFAULT_QUERY = () => (user.role === "supervisor" ? { query: { bool: { filter: { term: { "networkId.keyword": user.structureId } } } } } : { query: { match_all: {} } });
   return (
     <div>
       <ReactiveBase url={`${apiURL}/es`} app="structure" headers={{ Authorization: `JWT ${api.getToken()}` }}>
@@ -42,7 +41,6 @@ export default () => {
                 <ExportComponent
                   title="Exporter les structures"
                   collection="structure"
-                  defaultQuery={DEFAULT_QUERY}
                   transform={(e) => {
                     return e;
                   }}

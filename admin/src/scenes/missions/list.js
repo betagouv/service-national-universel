@@ -21,8 +21,8 @@ export default () => {
   const [structureIds, setStructureIds] = useState();
   const user = useSelector((state) => state.Auth.user);
   const DEFAULT_QUERY = () => {
-    if (user.role === "supervisor") return { query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } }, size: 10000 };
-    return { query: { match_all: {} }, size: 10000 };
+    if (user.role === "supervisor") return { query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } } };
+    return { query: { match_all: {} } };
   };
 
   useEffect(() => {
@@ -56,7 +56,6 @@ export default () => {
               <ExportComponent
                 title="Exporter les missions"
                 collection="mission"
-                defaultQuery={DEFAULT_QUERY}
                 transform={(e) => {
                   return e;
                 }}

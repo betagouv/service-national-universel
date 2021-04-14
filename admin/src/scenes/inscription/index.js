@@ -20,7 +20,7 @@ const FILTERS = ["SEARCH", "STATUS", "REGION", "DEPARTMENT", "SCHOOL"];
 
 export default () => {
   const [young, setYoung] = useState(null);
-  const DEFAULT_QUERY = () => ({ query: { bool: { filter: { term: { "phase.keyword": "INSCRIPTION" } } } }, size: 10000 });
+  const DEFAULT_QUERY = () => ({ query: { bool: { filter: { term: { "phase.keyword": "INSCRIPTION" } } } } });
 
   return (
     <div>
@@ -39,7 +39,6 @@ export default () => {
                   title="Exporter les inscriptions"
                   collection="candidature"
                   react={{ and: FILTERS }}
-                  defaultQuery={DEFAULT_QUERY}
                   transform={(data) => {
                     return {
                       _id: data._id,

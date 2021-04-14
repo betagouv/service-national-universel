@@ -18,8 +18,7 @@ export default () => {
   const [responsable, setResponsable] = useState(null);
   const user = useSelector((state) => state.Auth.user);
   const [structureIds, setStructureIds] = useState();
-  const DEFAULT_QUERY = () =>
-    user.role === "supervisor" ? { query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } }, size: 10000 } : { query: { match_all: {} }, size: 10000 };
+  const DEFAULT_QUERY = () => (user.role === "supervisor" ? { query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } } } : { query: { match_all: {} } });
 
   useEffect(() => {
     if (user.role !== "supervisor") return;
@@ -47,7 +46,6 @@ export default () => {
                 <ExportComponent
                   title="Exporter les tuteurs"
                   collection="user"
-                  defaultQuery={DEFAULT_QUERY}
                   transform={(e) => {
                     return e;
                   }}
