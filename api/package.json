@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "engines": {
+    "node": "^14.14",
+    "npm": "^7.6"
+  },
   "scripts": {
     "dev": "nodemon ./src/index.js",
     "start": "npm run install:gm && node ./src/index.js",
