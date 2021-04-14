@@ -18,7 +18,7 @@ export default () => {
   const user = useSelector((state) => state.Auth.user);
   const [missions, setMissions] = useState([]);
   const [panel, setPanel] = useState(null);
-  const DEFAULT_QUERY = () => ({ query: { bool: { filter: { terms: { "missionId.keyword": missions } } } }, size: 10000 });
+  const getDefaultQuery = () => ({ query: { bool: { filter: { terms: { "missionId.keyword": missions } } } }, size: 10000 });
 
   async function appendMissions(structure) {
     const missionsResponse = await api.get(`/mission/structure/${structure}`);
@@ -67,7 +67,8 @@ export default () => {
                 <Title>Volontaires</Title>
               </div>
               <ExportComponent
-                defaultQuery={DEFAULT_QUERY}
+                defaultQuery={getDefaultQuery}
+                defaultQuery={getExportQuery}
                 title="Exporter les volontaires"
                 collection="volontaire"
                 react={{ and: FILTERS }}
@@ -107,7 +108,7 @@ export default () => {
               />
               <FilterRow>
                 <MultiDropdownList
-                  defaultQuery={DEFAULT_QUERY}
+                  defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
                   componentId="STATUS"
                   dataField="status.keyword"
@@ -121,7 +122,7 @@ export default () => {
                   renderLabel={(items) => getFilterLabel(items, "Statut")}
                 />
                 <MultiDropdownList
-                  defaultQuery={DEFAULT_QUERY}
+                  defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
                   placeholder="Tuteur"
                   componentId="TUTOR"
@@ -137,7 +138,7 @@ export default () => {
               <ReactiveList
                 componentId="result"
                 react={{ and: FILTERS }}
-                defaultQuery={DEFAULT_QUERY}
+                defaultQuery={getDefaultQuery}
                 pagination={true}
                 paginationAt="both"
                 innerClass={{ pagination: "pagination" }}

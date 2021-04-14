@@ -20,10 +20,11 @@ export default () => {
   const [mission, setMission] = useState(null);
   const [structureIds, setStructureIds] = useState();
   const user = useSelector((state) => state.Auth.user);
-  const DEFAULT_QUERY = () => {
+  const getDefaultQuery = () => {
     if (user.role === "supervisor") return { query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } } };
     return { query: { match_all: {} } };
   };
+  const getExportQuery = () => ({ ...getDefaultQuery(), size: 10000 });
 
   useEffect(() => {
     if (user.role !== "supervisor") return;
@@ -55,6 +56,7 @@ export default () => {
               )}
               <ExportComponent
                 title="Exporter les missions"
+                defaultQuery={getExportQuery}
                 collection="mission"
                 transform={(e) => {
                   return e;
@@ -75,7 +77,7 @@ export default () => {
               />
               <FilterRow>
                 <DataSearch
-                  defaultQuery={DEFAULT_QUERY}
+                  defaultQuery={getDefaultQuery}
                   showIcon={false}
                   placeholder="Ville ou code postal"
                   componentId="LOCATION"
@@ -87,7 +89,7 @@ export default () => {
                   autosuggest={false}
                 />
                 <MultiDropdownList
-                  defaultQuery={DEFAULT_QUERY}
+                  defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
                   componentId="STATUS"
                   dataField="status.keyword"
@@ -100,10 +102,10 @@ export default () => {
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Statut")}
                 />
-                <RegionFilter defaultQuery={DEFAULT_QUERY} filters={FILTERS} defaultValue={user.role === "referent_region" ? [user.region] : []} />
-                <DepartmentFilter defaultQuery={DEFAULT_QUERY} filters={FILTERS} defaultValue={user.role === "referent_department" ? [user.department] : []} />
+                <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === "referent_region" ? [user.region] : []} />
+                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === "referent_department" ? [user.department] : []} />
                 <MultiDropdownList
-                  defaultQuery={DEFAULT_QUERY}
+                  defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
                   placeholder="Domaine"
                   componentId="DOMAIN"
@@ -118,7 +120,7 @@ export default () => {
                   renderLabel={(items) => getFilterLabel(items, "Domaine")}
                 />
                 <MultiDropdownList
-                  defaultQuery={DEFAULT_QUERY}
+                  defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
                   placeholder="Places restantes"
                   componentId="PLACES"
@@ -129,7 +131,7 @@ export default () => {
                   showSearch={false}
                 />
                 <MultiDropdownList
-                  defaultQuery={DEFAULT_QUERY}
+                  defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
                   placeholder="Tuteur"
                   componentId="TUTOR"
@@ -142,7 +144,7 @@ export default () => {
                 />
                 {user.role === "supervisor" ? (
                   <MultiDropdownList
-                    defaultQuery={DEFAULT_QUERY}
+                    defaultQuery={getDefaultQuery}
                     className="dropdown-filter"
                     placeholder="Structure"
                     componentId="STRUCTURE"
@@ -158,7 +160,7 @@ export default () => {
             </Filter>
             <ResultTable>
               <ReactiveList
-                defaultQuery={DEFAULT_QUERY}
+                defaultQuery={getDefaultQuery}
                 componentId="result"
                 react={{ and: FILTERS }}
                 pagination={true}

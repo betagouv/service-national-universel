@@ -20,7 +20,8 @@ const FILTERS = ["SEARCH", "STATUS", "REGION", "DEPARTMENT", "SCHOOL"];
 
 export default () => {
   const [young, setYoung] = useState(null);
-  const DEFAULT_QUERY = () => ({ query: { bool: { filter: { term: { "phase.keyword": "INSCRIPTION" } } } } });
+  const getDefaultQuery = () => ({ query: { bool: { filter: { term: { "phase.keyword": "INSCRIPTION" } } } } });
+  const getExportQuery = () => ({ ...getDefaultQuery(), size: 10000 });
 
   return (
     <div>
@@ -37,6 +38,7 @@ export default () => {
                 </Link>
                 <ExportComponent
                   title="Exporter les inscriptions"
+                  defaultQuery={getExportQuery}
                   collection="candidature"
                   react={{ and: FILTERS }}
                   transform={(data) => {
@@ -124,14 +126,14 @@ export default () => {
               <FilterRow>
                 <MultiDropdownList
                   style={{ display: "none" }}
-                  defaultQuery={DEFAULT_QUERY}
+                  defaultQuery={getDefaultQuery}
                   componentId="SCHOOL"
                   dataField="schoolName.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "SCHOOL") }}
                   URLParams={true}
                 />
                 <MultiDropdownList
-                  defaultQuery={DEFAULT_QUERY}
+                  defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
                   componentId="STATUS"
                   dataField="status.keyword"
@@ -144,13 +146,13 @@ export default () => {
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Statut")}
                 />
-                <RegionFilter defaultQuery={DEFAULT_QUERY} filters={FILTERS} />
-                <DepartmentFilter defaultQuery={DEFAULT_QUERY} filters={FILTERS} />
+                <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
+                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
               </FilterRow>
             </Filter>
             <ResultTable>
               <ReactiveList
-                defaultQuery={DEFAULT_QUERY}
+                defaultQuery={getDefaultQuery}
                 componentId="result"
                 react={{ and: FILTERS }}
                 pagination={true}

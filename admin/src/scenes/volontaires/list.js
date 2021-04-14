@@ -19,7 +19,8 @@ const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_P
 
 export default ({ setYoung }) => {
   const [volontaire, setVolontaire] = useState(null);
-  const DEFAULT_QUERY = () => ({ query: { bool: { filter: { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } } } } });
+  const getDefaultQuery = () => ({ query: { bool: { filter: { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } } } } });
+  const getExportQuery = () => ({ ...getDefaultQuery(), size: 10000 });
   return (
     <div>
       <ReactiveBase url={`${apiURL}/es`} app="young" headers={{ Authorization: `JWT ${api.getToken()}` }}>
@@ -31,6 +32,7 @@ export default ({ setYoung }) => {
               </div>
               <ExportComponent
                 title="Exporter les volontaires"
+                defaultQuery={getExportQuery}
                 collection="volontaire"
                 react={{ and: FILTERS }}
                 transform={(data) => {
@@ -120,7 +122,7 @@ export default ({ setYoung }) => {
               />
               <FilterRow>
                 <DataSearch
-                  defaultQuery={DEFAULT_QUERY}
+                  defaultQuery={getDefaultQuery}
                   showIcon={false}
                   placeholder="Ville ou code postal"
                   componentId="LOCATION"
@@ -132,7 +134,7 @@ export default ({ setYoung }) => {
                   autosuggest={false}
                 />
                 <MultiDropdownList
-                  defaultQuery={DEFAULT_QUERY}
+                  defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
                   componentId="STATUS"
                   dataField="status.keyword"
@@ -145,10 +147,10 @@ export default ({ setYoung }) => {
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Statut")}
                 />
-                <RegionFilter defaultQuery={DEFAULT_QUERY} filters={FILTERS} />
-                <DepartmentFilter defaultQuery={DEFAULT_QUERY} filters={FILTERS} />
+                <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
+                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
                 <MultiDropdownList
-                  defaultQuery={DEFAULT_QUERY}
+                  defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
                   placeholder="Cohorte"
                   componentId="COHORT"
@@ -162,7 +164,7 @@ export default ({ setYoung }) => {
                   showSearch={false}
                 />
                 <MultiDropdownList
-                  defaultQuery={DEFAULT_QUERY}
+                  defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
                   componentId="STATUS_PHASE_1"
                   dataField="statusPhase1.keyword"
@@ -176,7 +178,7 @@ export default ({ setYoung }) => {
                   renderLabel={(items) => getFilterLabel(items, "Statut phase 1")}
                 />
                 <MultiDropdownList
-                  defaultQuery={DEFAULT_QUERY}
+                  defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
                   componentId="STATUS_PHASE_2"
                   dataField="statusPhase2.keyword"
@@ -190,7 +192,7 @@ export default ({ setYoung }) => {
                   renderLabel={(items) => getFilterLabel(items, "Statut phase 2")}
                 />
                 <MultiDropdownList
-                  defaultQuery={DEFAULT_QUERY}
+                  defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
                   componentId="STATUS_PHASE_3"
                   dataField="statusPhase3.keyword"
@@ -204,7 +206,7 @@ export default ({ setYoung }) => {
                   renderLabel={(items) => getFilterLabel(items, "Statut phase 3")}
                 />
                 <MultiDropdownList
-                  defaultQuery={DEFAULT_QUERY}
+                  defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
                   componentId="STATUS_APPLICATION"
                   dataField="phase2ApplicationStatus.keyword"
@@ -221,7 +223,7 @@ export default ({ setYoung }) => {
             </Filter>
             <ResultTable>
               <ReactiveList
-                defaultQuery={DEFAULT_QUERY}
+                defaultQuery={getDefaultQuery}
                 componentId="result"
                 react={{ and: FILTERS }}
                 pagination={true}

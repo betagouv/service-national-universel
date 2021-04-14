@@ -19,7 +19,7 @@ export default () => {
   const [targetLocation, setTargetLocation] = useState("");
   const [showAlert, setShowAlert] = useState(true);
   const [applications, setApplications] = useState();
-  const DEFAULT_QUERY = () => {
+  const getDefaultQuery = () => {
     let query = {
       query: {
         bool: {
@@ -108,7 +108,7 @@ export default () => {
             </Col>
             <DomainsFilter md={6}>
               <SingleDropdownList
-                defaultQuery={DEFAULT_QUERY}
+                defaultQuery={getDefaultQuery}
                 selectAllLabel="Tous les domaines"
                 URLParams={true}
                 componentId="DOMAIN"
@@ -123,7 +123,7 @@ export default () => {
             </DomainsFilter>
             <DomainsFilter md={6}>
               <SingleDropdownList
-                defaultQuery={DEFAULT_QUERY}
+                defaultQuery={getDefaultQuery}
                 selectAllLabel="Toutes les périodes"
                 URLParams={true}
                 componentId="PERIOD"
@@ -141,7 +141,7 @@ export default () => {
         <Missions>
           <ReactiveFilter componentId="STATUS" query={{ query: { bool: { filter: { term: { "status.keyword": "VALIDATED" } } } }, value: "" }} />
           <ReactiveList
-            defaultQuery={DEFAULT_QUERY}
+            defaultQuery={getDefaultQuery}
             componentId="result"
             react={{ and: FILTERS }}
             pagination={true}

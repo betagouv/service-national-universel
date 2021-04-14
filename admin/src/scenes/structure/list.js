@@ -22,7 +22,8 @@ const formatLongDate = (date) => {
 export default () => {
   const [structure, setStructure] = useState(null);
   const user = useSelector((state) => state.Auth.user);
-  const DEFAULT_QUERY = () => (user.role === "supervisor" ? { query: { bool: { filter: { term: { "networkId.keyword": user.structureId } } } } } : { query: { match_all: {} } });
+  const getDefaultQuery = () => (user.role === "supervisor" ? { query: { bool: { filter: { term: { "networkId.keyword": user.structureId } } } } } : { query: { match_all: {} } });
+  const getExportQuery = () => ({ ...getDefaultQuery(), size: 10000 });
   return (
     <div>
       <ReactiveBase url={`${apiURL}/es`} app="structure" headers={{ Authorization: `JWT ${api.getToken()}` }}>
@@ -40,6 +41,7 @@ export default () => {
                 </Link>
                 <ExportComponent
                   title="Exporter les structures"
+                  defaultQuery={getExportQuery}
                   collection="structure"
                   transform={(e) => {
                     return e;
@@ -61,7 +63,7 @@ export default () => {
               />
               <FilterRow>
                 <DataSearch
-                  defaultQuery={DEFAULT_QUERY}
+                  defaultQuery={getDefaultQuery}
                   showIcon={false}
                   placeholder="Ville ou code postal"
                   componentId="LOCATION"
@@ -73,7 +75,7 @@ export default () => {
                   autosuggest={false}
                 />
                 <MultiDropdownList
-                  defaultQuery={DEFAULT_QUERY}
+                  defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
                   placeholder="Statut juridique"
                   componentId="LEGAL_STATUS"
@@ -87,7 +89,7 @@ export default () => {
                   showSearch={false}
                 />
                 <MultiDropdownList
-                  defaultQuery={DEFAULT_QUERY}
+                  defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
                   placeholder="Corps en uniforme"
                   componentId="CORPS"
@@ -103,8 +105,8 @@ export default () => {
                   URLParams={true}
                   showSearch={false}
                 />
-                <RegionFilter defaultQuery={DEFAULT_QUERY} filters={FILTERS} defaultValue={user.role === "referent_region" ? [user.region] : []} />
-                <DepartmentFilter defaultQuery={DEFAULT_QUERY} filters={FILTERS} defaultValue={user.role === "referent_department" ? [user.department] : []} />
+                <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === "referent_region" ? [user.region] : []} />
+                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === "referent_department" ? [user.department] : []} />
                 <MultiDropdownList
                   className="dropdown-filter"
                   placeholder="Affiliation à un réseau national"
@@ -121,7 +123,7 @@ export default () => {
             </Filter>
             <ResultTable>
               <ReactiveList
-                defaultQuery={DEFAULT_QUERY}
+                defaultQuery={getDefaultQuery}
                 componentId="result"
                 react={{ and: FILTERS }}
                 pagination={true}

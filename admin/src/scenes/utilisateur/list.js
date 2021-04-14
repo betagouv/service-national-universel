@@ -18,8 +18,8 @@ export default () => {
   const [responsable, setResponsable] = useState(null);
   const user = useSelector((state) => state.Auth.user);
   const [structureIds, setStructureIds] = useState();
-  const DEFAULT_QUERY = () => (user.role === "supervisor" ? { query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } } } : { query: { match_all: {} } });
-
+  const getDefaultQuery = () => (user.role === "supervisor" ? { query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } } } : { query: { match_all: {} } });
+  const getExportQuery = () => ({ ...getDefaultQuery(), size: 10000 });
   useEffect(() => {
     if (user.role !== "supervisor") return;
     (async () => {
@@ -67,7 +67,7 @@ export default () => {
               />
               <FilterRow>
                 <MultiDropdownList
-                  defaultQuery={DEFAULT_QUERY}
+                  defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
                   componentId="ROLE"
                   dataField="role.keyword"
@@ -81,7 +81,7 @@ export default () => {
                   renderLabel={(items) => getFilterLabel(items, "Rôle")}
                 />
                 <MultiDropdownList
-                  defaultQuery={DEFAULT_QUERY}
+                  defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
                   componentId="SUBROLE"
                   dataField="subRole.keyword"
@@ -94,13 +94,13 @@ export default () => {
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Fonction")}
                 />
-                <RegionFilter defaultQuery={DEFAULT_QUERY} filters={FILTERS} />
-                <DepartmentFilter defaultQuery={DEFAULT_QUERY} filters={FILTERS} />
+                <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
+                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
               </FilterRow>
             </Filter>
             <ResultTable>
               <ReactiveList
-                defaultQuery={DEFAULT_QUERY}
+                defaultQuery={getDefaultQuery}
                 componentId="result"
                 react={{ and: FILTERS }}
                 pagination={true}

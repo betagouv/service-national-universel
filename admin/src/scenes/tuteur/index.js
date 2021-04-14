@@ -3,7 +3,6 @@ import { Col, DropdownItem, DropdownMenu, DropdownToggle, Label, Pagination, Pag
 import { ReactiveBase, ReactiveList, SingleList, MultiDropdownList, MultiList, DataSearch } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
 
-import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
