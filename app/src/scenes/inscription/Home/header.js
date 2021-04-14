@@ -17,7 +17,7 @@ export default () => {
         <h1>
           Inscriptions <span>au Service National Universel</span>
         </h1>
-        <h3>Ouvertes jusqu'au 20 avril 2021</h3>
+        <h3>Ouvertes jusqu'au 30 avril 2021</h3>
       </Title>
       <AvatarContainer to="/auth/login">
         <Avatar src={require("../../../assets/avatar.jpg")} />
