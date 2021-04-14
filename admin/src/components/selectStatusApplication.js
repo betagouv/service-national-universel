@@ -7,6 +7,7 @@ import api from "../services/api";
 
 import { translate, APPLICATION_STATUS_COLORS, APPLICATION_STATUS } from "../utils";
 import { toastr } from "react-redux-toastr";
+import Chevron from "./Chevron";
 
 export default ({ hit, options = [], callback }) => {
   const [application, setApplication] = useState(null);
@@ -66,11 +67,7 @@ export default ({ hit, options = [], callback }) => {
         <UncontrolledDropdown setActiveFromChild>
           <DropdownToggle tag="button">
             {translate(application.status)}
-            <div className="down-icon">
-              <svg viewBox="0 0 407.437 407.437">
-                <polygon points="386.258,91.567 203.718,273.512 21.179,91.567 0,112.815 203.718,315.87 407.437,112.815 " />
-              </svg>
-            </div>
+            <Chevron color={APPLICATION_STATUS_COLORS[application.status]} />
           </DropdownToggle>
           <DropdownMenu>
             {options.map((status) => {

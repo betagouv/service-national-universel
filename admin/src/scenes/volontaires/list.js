@@ -14,6 +14,7 @@ import Badge from "../../components/Badge";
 import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS_COLORS } from "../../utils";
 import { Link } from "react-router-dom";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
+import Chevron from "../../components/Chevron";
 
 const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_PHASE_1", "STATUS_PHASE_2", "STATUS_PHASE_3", "STATUS_APPLICATION", "LOCATION"];
 
@@ -322,11 +323,7 @@ const Action = ({ hit, color }) => {
       <UncontrolledDropdown setActiveFromChild>
         <DropdownToggle tag="button">
           Choisissez&nbsp;une&nbsp;action
-          <div className="down-icon">
-            <svg viewBox="0 0 407.437 407.437">
-              <polygon points="386.258,91.567 203.718,273.512 21.179,91.567 0,112.815 203.718,315.87 407.437,112.815 " />
-            </svg>
-          </div>
+          <Chevron color="#444" />
         </DropdownToggle>
         <DropdownMenu>
           <Link to={`/volontaire/${hit._id}`}>

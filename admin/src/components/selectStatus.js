@@ -12,6 +12,7 @@ import matomo from "../services/matomo";
 import ModalCorrection from "./modals/ModalCorrection";
 import ModalRefused from "./modals/ModalRefused";
 import ModalWithdrawn from "./modals/ModalWithdrawn";
+import Chevron from "./Chevron";
 
 export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status", phase = YOUNG_PHASE.INSCRIPTION }) => {
   const [modal, setModal] = useState(null);
@@ -107,11 +108,7 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
         <UncontrolledDropdown setActiveFromChild>
           <DropdownToggle tag="button">
             {translate(young[statusName])}
-            <div className="down-icon">
-              <svg viewBox="0 0 407.437 407.437">
-                <polygon points="386.258,91.567 203.718,273.512 21.179,91.567 0,112.815 203.718,315.87 407.437,112.815 " />
-              </svg>
-            </div>
+            <Chevron color={YOUNG_STATUS_COLORS[young[statusName]]} />
           </DropdownToggle>
           <DropdownMenu>
             {options.map((status) => {

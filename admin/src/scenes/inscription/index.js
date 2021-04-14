@@ -16,6 +16,7 @@ import { apiURL, appURL } from "../../config";
 import Panel from "./panel";
 import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS, getDepartmentNumber } from "../../utils";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
+import Chevron from "../../components/Chevron";
 const FILTERS = ["SEARCH", "STATUS", "REGION", "DEPARTMENT", "SCHOOL"];
 
 export default () => {
@@ -251,11 +252,7 @@ const Action = ({ hit }) => {
       <UncontrolledDropdown setActiveFromChild>
         <DropdownToggle tag="button">
           Choisissez une action
-          <div className="down-icon">
-            <svg viewBox="0 0 407.437 407.437">
-              <polygon points="386.258,91.567 203.718,273.512 21.179,91.567 0,112.815 203.718,315.87 407.437,112.815 " />
-            </svg>
-          </div>
+          <Chevron color="#444" />
         </DropdownToggle>
         <DropdownMenu>
           <DropdownItem className="dropdown-item">

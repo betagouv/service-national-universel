@@ -13,6 +13,7 @@ import Panel from "./panel";
 import Loader from "../../components/Loader";
 const FILTERS = ["SEARCH", "ROLE", "SUBROLE", "REGION", "DEPARTMENT"];
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
+import Chevron from "../../components/Chevron";
 
 export default () => {
   const [responsable, setResponsable] = useState(null);
@@ -197,11 +198,7 @@ const Action = ({ hit, color }) => {
       <UncontrolledDropdown setActiveFromChild>
         <DropdownToggle tag="button">
           Choisissez une action
-          <div className="down-icon">
-            <svg viewBox="0 0 407.437 407.437">
-              <polygon points="386.258,91.567 203.718,273.512 21.179,91.567 0,112.815 203.718,315.87 407.437,112.815 " />
-            </svg>
-          </div>
+          <Chevron color="#444" />
         </DropdownToggle>
         <DropdownMenu>
           <DropdownItem className="dropdown-item" onClick={handleImpersonate}>
