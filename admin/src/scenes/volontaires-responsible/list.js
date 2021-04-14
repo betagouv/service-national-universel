@@ -18,7 +18,8 @@ export default () => {
   const user = useSelector((state) => state.Auth.user);
   const [missions, setMissions] = useState([]);
   const [panel, setPanel] = useState(null);
-  const getDefaultQuery = () => ({ query: { bool: { filter: { terms: { "missionId.keyword": missions } } } }, size: 10000 });
+  const getDefaultQuery = () => ({ query: { bool: { filter: { terms: { "missionId.keyword": missions } } } } });
+  const getExportQuery = () => ({ ...getDefaultQuery(), size: 10000 });
 
   async function appendMissions(structure) {
     const missionsResponse = await api.get(`/mission/structure/${structure}`);
@@ -67,7 +68,6 @@ export default () => {
                 <Title>Volontaires</Title>
               </div>
               <ExportComponent
-                defaultQuery={getDefaultQuery}
                 defaultQuery={getExportQuery}
                 title="Exporter les volontaires"
                 collection="volontaire"
