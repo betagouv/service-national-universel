@@ -44,9 +44,11 @@ export default ({ program, image, enableToggle = true }) => {
       </a>
       <h4>{program.name}</h4>
       <div className="desc">{renderText()}</div>
-      <SeeMore href={program.url} target="_blank">
-        DÉCOUVRIR
-      </SeeMore>
+      <div style={{ marginTop: "1rem" }}>
+        <SeeMore href={program.url} target="_blank">
+          DÉCOUVRIR
+        </SeeMore>
+      </div>
     </Card>
   );
 };
