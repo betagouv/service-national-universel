@@ -43,13 +43,8 @@ export default () => {
   useEffect(() => {
     const params = queryString.parse(location.search);
     const { utm_source, utm_medium, utm_campaign } = params;
+    window.lumiere("setSessionProperties", { utm_source, utm_medium, utm_campaign });
     window.lumiere("sendEvent", "initialization", "page-loaded"); // cat, action, props
-    window._lumiere.sessionProperties = {
-      ...window._lumiere.sessionProperties,
-      utm_source,
-      utm_medium,
-      utm_campaign,
-    };
     matomo.logEvent("start", "open_app");
     async function fetchData() {
       try {
