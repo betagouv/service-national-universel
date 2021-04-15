@@ -6,11 +6,13 @@ import { translate as t } from "../../../utils";
 import YoungView from "./wrapper";
 import api from "../../../services/api";
 import DownloadButton from "../../../components/buttons/DownloadButton";
+import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
 
 export default ({ young }) => {
   function isFromFranceConnect() {
     return young.parent1FromFranceConnect === "true" && (!young.parent2Status || young.parent2FromFranceConnect === "true");
   }
+
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <YoungView young={young} tab="details">
@@ -133,6 +135,11 @@ export default ({ young }) => {
             </Col>
           </Row>
         </Box>
+        {young.statusPhase1 === "DONE" && young.statusPhase2 === "VALIDATED" ? (
+          <DownloadAttestationButton young={young} uri="snu">
+            Télécharger l'attestation de réalisation du SNU
+          </DownloadAttestationButton>
+        ) : null}
       </YoungView>
     </div>
   );

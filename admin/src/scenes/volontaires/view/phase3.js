@@ -5,12 +5,14 @@ import styled from "styled-components";
 import { YOUNG_PHASE, YOUNG_STATUS_PHASE3 } from "../../../utils";
 import WrapperPhase3 from "./wrapper";
 import SelectStatus from "../../../components/selectStatus";
+import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
 
 export default ({ young }) => {
   const getText = () => {
     if (young.statusPhase3 === YOUNG_STATUS_PHASE3.WAITING_VALIDATION) return "Le tuteur n'a pas encore validé la mission";
     if (young.statusPhase3 === YOUNG_STATUS_PHASE3.VALIDATED) return "Le tuteur a validé la mission";
   };
+
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <WrapperPhase3 young={young} tab="phase3">
@@ -42,6 +44,11 @@ export default ({ young }) => {
               </Col>
             </Row>
           </Box>
+        ) : null}
+        {young.statusPhase3 === "VALIDATED" ? (
+          <DownloadAttestationButton young={young} uri="3">
+            Télécharger l'attestation de réalisation de la phase 3
+          </DownloadAttestationButton>
         ) : null}
       </WrapperPhase3>
     </div>

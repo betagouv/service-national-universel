@@ -7,6 +7,7 @@ import { translate as t, YOUNG_PHASE } from "../../../utils";
 import WrapperPhase1 from "./wrapper";
 import api from "../../../services/api";
 import ToggleSwitch from "../../../components/ToogleSwitch";
+import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
 
 export default ({ young }) => {
   const disabled = young.phase !== YOUNG_PHASE.COHESION_STAY;
@@ -30,6 +31,7 @@ export default ({ young }) => {
       <p>Le volontaire est en attente d'affectation à un centre de cohésion</p>
     );
   };
+
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <WrapperPhase1 young={young} tab="phase1">
@@ -82,6 +84,11 @@ export default ({ young }) => {
             </Col>
           </Row>
         </Box>
+        {young.statusPhase1 === "DONE" && young.cohesionCenterName ? (
+          <DownloadAttestationButton young={young} uri="1">
+            Télécharger l'attestation de réalisation de la phase 1
+          </DownloadAttestationButton>
+        ) : null}
       </WrapperPhase1>
     </div>
   );

@@ -82,7 +82,8 @@ const Item = styled.li`
     color: #b4c6fc;
     font-size: 12px;
     font-weight: 400;
-    text-transform: capitalize;
+    text-transform: none;
+    text-align: left;
   }
   /* vertical line between */
   :not(:last-child) {

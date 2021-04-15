@@ -1,0 +1,29 @@
+img.bg {
+  min-height: 100%;
+
+  /* Set up proportionate scaling */
+  width: 100%;
+  height: auto;
+
+  /* Set up positioning */
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: -1;
+}
+
+.container {
+  z-index: 1;
+}
+
+.text-center {
+  position: fixed;
+  top: 265px;
+  left: 180px;
+  color: #444;
+  font-size: 14px;
+}
+
+.text-date {
+  margin-top: 20px;
+}

@@ -1,25 +1,20 @@
 import React, { useState } from "react";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
-import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
 
 import { translate as t, YOUNG_PHASE, YOUNG_STATUS_PHASE2 } from "../../../utils";
 import WrapperPhase2 from "./wrapper";
 import ApplicationList from "./applicationList.js";
-import ProposalMission from "./proposalMission";
-import CreateMission from "./createMission";
 import SelectStatus from "../../../components/selectStatus";
-import PlusSVG from "../../../assets/plus.svg";
-import CrossSVG from "../../../assets/cross.svg";
 import Badge from "../../../components/Badge";
+import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
 
 export default ({ young, onChange }) => {
-  const user = useSelector((state) => state.Auth.user);
   const getDate = () => {
     if (young.cohort === "2019") return "31 mars 2021";
     return "31 décembre 2021";
   };
+
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <WrapperPhase2 young={young} tab="phase2">
@@ -96,6 +91,11 @@ export default ({ young, onChange }) => {
         <Box>
           <ApplicationList young={young} onChangeApplication={onChange} />
         </Box>
+        {young.statusPhase2 === "VALIDATED" ? (
+          <DownloadAttestationButton young={young} uri="2">
+            Télécharger l'attestation de réalisation de la phase 2
+          </DownloadAttestationButton>
+        ) : null}
       </WrapperPhase2>
     </div>
   );

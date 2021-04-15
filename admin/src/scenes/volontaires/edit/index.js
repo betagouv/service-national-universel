@@ -29,6 +29,7 @@ import Consentement from "./consentement";
 import ConsentementImage from "./consentement-image";
 import InformationsSupplementaires from "./informations-supplementaires";
 import JDC from "./JDC";
+import InformationsPhase1 from "./informations-phase1";
 
 export default (props) => {
   const [young, setYoung] = useState();
@@ -104,6 +105,7 @@ export default (props) => {
               <ConsentementImage values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
               {user.role === "admin" ? <InformationsSupplementaires values={values} handleChange={handleChange} /> : null}
               {values.cohort === "2020" ? <JDC values={values} handleChange={handleChange} /> : null}
+              <InformationsPhase1 values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
             </Row>
           </>
         )}
