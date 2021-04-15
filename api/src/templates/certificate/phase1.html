@@ -3,17 +3,18 @@
   <head>
     <meta charset="UTF-8" />
     <title>Attestation phase 1 - SNU</title>
-    <link rel="stylesheet" href="/css/style.css" />
+    <link rel="stylesheet" href="{{BASE_URL}}/css/style.css" />
   </head>
 
   <body>
-    <img class="bg" src="/images/{{GENERAL_BG}}" id="bg" alt="bg" />
+    <img class="bg" src="{{BASE_URL}}/images/{{GENERAL_BG}}" id="bg" alt="bg" />
     <div class="container">
-      <div class="text-center">
-        <p>félicitent {{FIRST_NAME}} {{LAST_NAME}}, volontaire à l'édition {{COHORT}},</p>
-        <p>pour la réalisation de son séjour de cohésion au centre de :</p>
+      <div class="text-center l4">
+        <p>félicitent <strong>{{FIRST_NAME}} {{LAST_NAME}}</strong>, volontaire à l'édition <strong>{{COHORT}}</strong>,</p>
+        <p>pour la réalisation de son <strong>séjour de cohésion</strong> au centre de :</p>
         <p>{{COHESION_CENTER_NAME}} {{COHESION_CENTER_LOCATION}},</p>
-        <p>validant la phase 1 du Service National Universel.</p>
+        <p>validant la <strong>phase 1</strong> du Service National Universel.</p>
+        <br />
         <p class="text-date">Fait le {{DATE}}</p>
       </div>
     </div>

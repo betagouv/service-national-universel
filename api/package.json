@@ -32,7 +32,6 @@
     "faker": "^5.1.0",
     "file-type": "^16.2.0",
     "gm": "^1.23.1",
-    "html-pdf": "^2.2.0",
     "http-aws-es": "^6.0.0",
     "jsonwebtoken": "^8.5.1",
     "mime-types": "^2.1.28",
@@ -44,6 +43,7 @@
     "passport": "^0.4.1",
     "passport-jwt": "^4.0.0",
     "password-validator": "^5.1.0",
+    "puppeteer": "^8.0.0",
     "sequelize": "^6.3.5",
     "validator": "^13.5.2"
   },
