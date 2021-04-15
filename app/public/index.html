@@ -87,7 +87,7 @@ Place this snippet between the <head> and </head> tags on every page of your sit
     <!-- Lumiere init -->
     <script type="text/javascript">
       var isProduction = window.location.href.indexOf("inscription.snu.gouv.fr") !== -1;
-      (function (l, u, m, i, E, r, e, s) {
+      (function (l, u, m, i, E, r, e) {
         l[m] = function () {
           (l[m].q = l[m].q || []).push(arguments);
         };
@@ -95,9 +95,15 @@ Place this snippet between the <head> and </head> tags on every page of your sit
           h = u.getElementsByTagName("head")[0];
         c.type = "text/javascript";
         c.async = true;
-        c.src = "https://lumiere.cleverapps.io/lib.js?a=" + i + "&n=" + E + "&e=" + r + "&d=" + e + "&b=" + s + "&t=" + Date.now();
+        c.src = "https://lumiere.cleverapps.io/lib.js?a=" + i + "&n=" + E + "&c=" + JSON.stringify(r) + "&t=" + Date.now();
         h.appendChild(c);
-      })(window, document, "lumiere", isProduction ? "app_H5r43S8PsANNpWwd9yoJH" : "app_1i-pkr9c9sY-6k1ML5o8_", "app", isProduction, !isProduction, !isProduction);
+      })(window, document, "lumiere", isProduction ? "app_H5r43S8PsANNpWwd9yoJH" : "app_1i-pkr9c9sY-6k1ML5o8_", "app", {
+        env: isProduction ? "production" : "dev",
+        debug: !isProduction,
+        disable: !isProduction,
+        recordNavigation: false,
+        recordUX: false,
+      });
     </script>
     <!-- End Lumiere Code -->
   </head>
