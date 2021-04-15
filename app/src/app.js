@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { BrowserRouter as Router, Route, Switch, Redirect, useLocation } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import * as Sentry from "@sentry/browser";
+import queryString from "query-string";
 
 import styled from "styled-components";
 
@@ -40,7 +41,15 @@ export default () => {
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
   useEffect(() => {
+    const params = queryString.parse(location.search);
+    const { utm_source, utm_medium, utm_campaign } = params;
     window.lumiere("sendEvent", "initialization", "page-loaded"); // cat, action, props
+    window._lumiere.sessionProperties = {
+      ...window._lumiere.sessionProperties,
+      utm_source,
+      utm_medium,
+      utm_campaign,
+    };
     matomo.logEvent("start", "open_app");
     async function fetchData() {
       try {
