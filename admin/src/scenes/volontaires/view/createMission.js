@@ -69,6 +69,7 @@ export default ({ young, onSend }) => {
       validateOnChange={false}
       validateOnBlur={false}
       initialValues={{
+        status: "VALIDATED",
         placesTotal: 1,
         format: "CONTINUOUS",
         structureId: "",
@@ -465,14 +466,7 @@ export default ({ young, onSend }) => {
             {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas proposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
             <Header style={{ justifyContent: "flex-end" }}>
               <ButtonContainer>
-                <button
-                  onClick={() => {
-                    handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
-                    handleSubmit();
-                  }}
-                >
-                  Enregistrer et proposer la mission
-                </button>
+                <button onClick={handleSubmit}>Enregistrer et proposer la mission</button>
               </ButtonContainer>
             </Header>
           </Wrapper>
