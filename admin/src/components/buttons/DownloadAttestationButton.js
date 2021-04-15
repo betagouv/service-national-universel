@@ -2,11 +2,12 @@ import React, { useEffect, useState } from "react";
 import { Spinner } from "reactstrap";
 import styled from "styled-components";
 import api from "../../services/api";
-import { apiURL } from "../../config";
+import { apiURL, environment } from "../../config";
 import LoadingButton from "./LoadingButton";
 
 export default ({ young, children, disabled, uri, ...rest }) => {
   const [loading, setLoading] = useState();
+  if (environment === "production") return <div />;
 
   const viewAttestation = async (a) => {
     setLoading(true);
