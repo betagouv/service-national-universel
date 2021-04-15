@@ -87,6 +87,9 @@ const Heading = styled(Container)`
     color: #161e2e;
     font-size: 2rem;
     font-weight: 700;
+    @media (max-width: 768px) {
+      font-size: 1.2rem;
+    }
   }
   p {
     color: #42389d;

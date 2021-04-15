@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { Draggable } from "react-beautiful-dnd";
+import { Col, Row } from "reactstrap";
 
 import api from "../../../services/api";
 import { translate, APPLICATION_STATUS_COLORS, APPLICATION_STATUS } from "../../../utils";
@@ -24,24 +25,28 @@ export default ({ application, index }) => {
         <Container ref={provided.innerRef} {...provided.draggableProps}>
           <Header {...provided.dragHandleProps}>{value.status === APPLICATION_STATUS.WAITING_ACCEPTATION ? "PROPOSITION" : `CHOIX N°${index + 1}`}</Header>
           <Separator />
-          <Card to={`/mission/${value.mission._id}`}>
-            <div className="info">
-              <div className="inner">
-                <div className="thumb">
-                  <img src={require("../../../assets/observe.svg")} />
+          <Card>
+            <Col md={9}>
+              <Link to={`/mission/${value.mission._id}`}>
+                <div className="info">
+                  <div className="inner">
+                    <div className="thumb">
+                      <img src={require("../../../assets/observe.svg")} />
+                    </div>
+                    <div>
+                      <h4>{value.mission.structureName}</h4>
+                      <p>{value.mission.name}</p>
+                      <Tags>{getTags(value.mission).map((e, i) => e && <div key={i}>{translate(e)}</div>)}</Tags>
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <h4>{value.mission.structureName}</h4>
-                  <p>{value.mission.name}</p>
-                  <Tags>
-                    {getTags(value.mission).map((e, i) => (
-                      <div key={i}>{e}</div>
-                    ))}
-                  </Tags>
-                </div>
-              </div>
-            </div>
-            <Tag color={APPLICATION_STATUS_COLORS[value.status]}>{translate(value.status)}</Tag>
+              </Link>
+            </Col>
+            <Col md={3}>
+              <TagContainer>
+                <Tag color={APPLICATION_STATUS_COLORS[value.status]}>{translate(value.status)}</Tag>
+              </TagContainer>
+            </Col>
           </Card>
           <Footer
             application={value}
@@ -137,6 +142,7 @@ const Tag = styled.span`
   border-radius: 99999px;
   font-size: 0.85rem;
   @media (max-width: 768px) {
+    margin-top: 1rem;
     font-size: 0.7rem;
     padding: 0.1rem 0.5rem;
   }
@@ -169,7 +175,7 @@ const Container = styled.div`
   margin: 1rem 0;
 `;
 
-const Card = styled(Link)`
+const Card = styled(Row)`
   padding: 1.5rem 1.5rem;
   display: flex;
   align-items: center;
@@ -215,7 +221,15 @@ const Card = styled(Link)`
   }
 `;
 
-const Tags = styled.div`
+const TagContainer = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  @media (max-width: 768px) {
+    justify-content: center;
+  }
+`;
+
+const Tags = styled(Row)`
   display: flex;
   align-items: center;
   margin-top: 0.8rem;
@@ -226,6 +240,7 @@ const Tags = styled.div`
     border-radius: 30px;
     padding: 5px 15px;
     margin-right: 15px;
+    margin-bottom: 5px;
     font-size: 12px;
     font-weight: 500;
   }
