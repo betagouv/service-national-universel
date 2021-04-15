@@ -7,6 +7,7 @@ const router = express.Router();
 const jwt = require("jsonwebtoken");
 const fs = require("fs");
 const path = require("path");
+const pdf = require("html-pdf");
 
 const config = require("../config");
 const { capture } = require("../sentry");
@@ -17,6 +18,7 @@ const YoungObject = require("../models/young");
 const AuthObject = require("../auth");
 const { uploadFile, validatePassword, ERRORS } = require("../utils");
 const { sendEmail } = require("../sendinblue");
+const certificate = require("../templates/certificate");
 
 const YoungAuth = new AuthObject(YoungObject);
 
@@ -270,6 +272,34 @@ router.delete("/:id", passport.authenticate("referent", { session: false }), asy
     capture(error);
     res.status(500).send({ ok: false, error, code: ERRORS.SERVER_ERROR });
   }
+});
+
+router.post("/:id/certificate/:template", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
+  const young = await YoungObject.findById(req.params.id);
+  if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+  const options = req.body.options || { format: "A4", margin: 0 };
+
+  //create html
+  let newhtml = "";
+  if (req.params.template === "1") {
+    newhtml = certificate.phase1(young);
+  } else if (req.params.template === "2") {
+    newhtml = certificate.phase2(young);
+  } else if (req.params.template === "3") {
+    newhtml = certificate.phase3(young);
+  } else if (req.params.template === "snu") {
+    newhtml = certificate.snu(young);
+  }
+
+  if (!newhtml) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+  pdf.create(newhtml, options).toBuffer(function (err, buffer) {
+    res.contentType("application/pdf");
+    res.setHeader("Content-Dispositon", 'inline; filename="test.pdf"');
+    res.set("Cache-Control", "public, max-age=1");
+    res.send(buffer);
+  });
 });
 
 module.exports = router;
