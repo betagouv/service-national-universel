@@ -214,12 +214,16 @@ const AlertBox = ({ onClose }) => {
 };
 
 const Missions = styled(Container)`
-  padding: 20px 0;
+  padding: 20px 40px;
   border-radius: 6px;
   margin-bottom: 2rem;
   background: #fff;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   position: relative;
+  @media (max-width: 768px) {
+    font-size: 1.5rem;
+    padding: 10px 15px;
+  }
   .info {
     flex: 1;
     text-align: center;
@@ -268,6 +272,9 @@ const Heading = styled(Container)`
     color: #161e2e;
     font-size: 3rem;
     font-weight: 700;
+    @media (max-width: 768px) {
+      font-size: 1.3rem;
+    }
   }
   p {
     color: #42389d;
@@ -310,6 +317,9 @@ const DomainsFilter = styled(Col)`
 
 const Alert = styled(Container)`
   border-radius: 8px;
+  @media (max-width: 768px) {
+    border-radius: 0;
+  }
   display: flex;
   align-items: center;
   background-color: #5949d0;

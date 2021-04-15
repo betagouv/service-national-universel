@@ -107,6 +107,46 @@ const Missions = styled(Container)`
     font-size: 1.5rem;
     padding: 10px 15px;
   }
+  .info {
+    flex: 1;
+    text-align: center;
+    font-size: 0.8rem;
+    color: #767a83;
+  }
+  .pagination {
+    display: flex;
+    justify-content: flex-end;
+    padding: 10px 25px;
+    margin: 0;
+    background: #fff;
+    a {
+      background: #f7fafc;
+      color: #242526;
+      padding: 3px 10px;
+      font-size: 12px;
+      margin: 0 5px;
+    }
+    a.active {
+      font-weight: 700;
+      /* background: #5245cc;
+      color: #fff; */
+    }
+    a:first-child {
+      background-image: url(${require("../../assets/left.svg")});
+    }
+    a:last-child {
+      background-image: url(${require("../../assets/right.svg")});
+    }
+    a:first-child,
+    a:last-child {
+      font-size: 0;
+      height: 24px;
+      width: 30px;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: 8px;
+    }
+  }
 `;
 
 const Heading = styled.div`
@@ -117,7 +157,7 @@ const Heading = styled.div`
     font-size: 2.5rem;
     font-weight: 700;
     @media (max-width: 768px) {
-      font-size: 1.5rem;
+      font-size: 1.3rem;
     }
   }
   p {

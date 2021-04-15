@@ -1,36 +1,44 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
+import { Col, Row } from "reactstrap";
 
 export default ({ id, title, image, subtitle, tags = [], places, location, onClick, applied }) => {
   return (
     <>
-      <Separator />
-      <Card to={`/mission/${id}`}>
-        <div>
-          <div className="inner">
-            <div className="thumb">
-              <img src={image} />
-            </div>
+      <Card>
+        <Col md={8}>
+          <Link to={`/mission/${id}`}>
             <div>
-              <h4>{title}</h4>
-              <p>{subtitle}</p>
-              <Tags>
-                {tags.map((e, i) => (
-                  <div key={i}>{e}</div>
-                ))}
-              </Tags>
+              <div className="inner">
+                <div className="thumb">
+                  <img src={image} />
+                </div>
+                <div>
+                  <h4>{title}</h4>
+                  <p>{subtitle}</p>
+                  <Tags>
+                    {tags.map((e, i) => (
+                      <div key={i}>{e}</div>
+                    ))}
+                  </Tags>
+                </div>
+              </div>
+              {location && <Location>{location}</Location>}
             </div>
-          </div>
-          {location && <Location>{location}</Location>}
-        </div>
-        {applied ? (
-          <Button to={`/candidature`}>Voir la candidature</Button>
-        ) : (
-          <Button to={`/mission/${id}`}>
-            {places} volontaire{places > 1 && "s"} recherché{places > 1 && "s"}
-          </Button>
-        )}
+          </Link>
+        </Col>
+        <Col md={4}>
+          <ButtonContainer>
+            {applied ? (
+              <Button to={`/candidature`}>Voir la candidature</Button>
+            ) : (
+              <Button to={`/mission/${id}`}>
+                {places} volontaire{places > 1 && "s"} recherché{places > 1 && "s"}
+              </Button>
+            )}
+          </ButtonContainer>
+        </Col>
       </Card>
     </>
   );
@@ -43,29 +51,42 @@ const Separator = styled.hr`
   background-color: #e5e7eb;
 `;
 
-const Card = styled(Link)`
+const Card = styled(Row)`
+  margin-bottom: 30px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 3rem 3rem;
-  :hover {
-    background-color: #f7f7f7;
-  }
+  padding-bottom: 30px;
+  border-bottom: 1px solid #e5e7eb;
   .inner {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
+    margin-bottom: 15px;
     .thumb {
       margin-right: 20px;
       background-color: #42389d;
       height: 50px;
-      width: 48px;
+      width: 50px;
       border-radius: 4px;
       padding: 10px;
       text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      @media (max-width: 768px) {
+        height: 30px;
+        width: 30px;
+        margin-right: 10px;
+      }
       img {
         border-radius: 6px;
-        max-width: 100%;
+        /* max-width: 100%; */
         height: 30px;
+        width: 30px;
+        @media (max-width: 768px) {
+          height: 18px;
+          width: 18px;
+        }
         object-fit: cover;
         box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
       }
@@ -86,6 +107,14 @@ const Card = styled(Link)`
   }
 `;
 
+const ButtonContainer = styled.div`
+  display: flex;
+  justify-content: flex-end;
+  @media (max-width: 768px) {
+    justify-content: center;
+  }
+`;
+
 const Button = styled(Link)`
   background-color: #31c48d;
   border-radius: 30px;
@@ -93,7 +122,6 @@ const Button = styled(Link)`
   color: #fff;
   font-size: 13px;
   padding: 10px 15px 8px;
-  margin-left: 10px;
   white-space: nowrap;
   :hover {
     color: #fff;
@@ -101,7 +129,7 @@ const Button = styled(Link)`
   }
 `;
 
-const Tags = styled.div`
+const Tags = styled(Row)`
   display: flex;
   align-items: center;
   margin-top: 0.8rem;
@@ -112,6 +140,7 @@ const Tags = styled.div`
     border-radius: 30px;
     padding: 5px 15px;
     margin-right: 15px;
+    margin-bottom: 5px;
     font-size: 12px;
     font-weight: 500;
   }

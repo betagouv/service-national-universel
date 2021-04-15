@@ -116,16 +116,18 @@ const Button = styled.a`
   }
 `;
 
-const Tags = styled.div`
+const Tags = styled(Row)`
   display: flex;
   align-items: center;
   white-space: nowrap;
+  padding: 0 15px;
   div {
     color: #6b7280;
     border: 1px solid #e5e7eb;
     border-radius: 30px;
     padding: 5px 15px;
     margin-right: 15px;
+    margin-bottom: 5px;
     font-size: 12px;
   }
 `;

@@ -163,10 +163,17 @@ const CardText = styled.div`
   font-size: 1.5rem;
   text-align: left;
   font-weight: 700;
+  @media (max-width: 767px) {
+    font-size: 1.2rem;
+  }
 `;
 
 const CardDownText = styled.div`
+  text-align: left;
   font-size: 1rem;
+  @media (max-width: 767px) {
+    font-size: 0.85rem;
+  }
   color: #6e757c;
 `;
 
