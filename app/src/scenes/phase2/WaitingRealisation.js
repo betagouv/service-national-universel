@@ -1,45 +1,56 @@
 import React from "react";
 import styled from "styled-components";
 import NextStep from "./nextStep";
-import { YOUNG_STATUS_PHASE2 } from "../../utils";
-import { useSelector } from "react-redux";
-import WaitingRealisation from "./WaitingRealisation";
-import InProgress from "./InProgress";
-import Validated from "./Validated";
+import { Link } from "react-router-dom";
 
 export default () => {
-  const young = useSelector((state) => state.Auth.young) || {};
-
   const renderStep = () => {
-    if (young.statusPhase2 === YOUNG_STATUS_PHASE2.WAITING_REALISATION) return <WaitingRealisation />;
-    if (young.statusPhase2 === YOUNG_STATUS_PHASE2.IN_PROGRESS) return <InProgress />;
-    if (young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED) return <Validated />;
     return (
       <>
         <Hero>
           <div className="content">
             <h1>
-              Réalisez votre <strong>mission d'intérêt général</strong>
+              Réalisez vos <strong>84 heures de mission d'intérêt général</strong>
             </h1>
             <p>
               Partez à la découverte de l'engagement en réalisant 84 heures de mission d'intérêt général, au sein d'une ou plusieurs structures, en contribuant à leurs activités
               concrètes !
             </p>
             <p>A vous de jouez : candidatez directement sur des missions parmi celles proposées dans cet espace !</p>
+            <Separator />
+            <p>
+              <strong>Préférences de missions</strong>
+              <br />
+              Ces choix permettront à l'administration de vous proposer des missions en cohérence avec vos motivations.
+              <br />
+              <Link to="/preferences">Renseigner mes préférences de missions {">"}</Link>
+            </p>
+            <p>
+              <strong>Vos missions d'intérêt général</strong>
+              <br />
+              Consulter des milliers de missions disponibles pour la réalisation de votre phase 2, candidatez-y, <strong>classez vos choix</strong> et
+              <strong>suivez vos candidatures</strong>
+              <br />
+              <Link to="/mission">Trouver une mission {">"}</Link>
+            </p>
           </div>
           <div className="thumb" />
         </Hero>
-        <NextStep />
       </>
     );
   };
 
   return renderStep();
 };
-
+const Separator = styled.hr`
+  margin: 2.5rem 0;
+  height: 1px;
+  border-style: none;
+  background-color: #e5e7eb;
+`;
 const Hero = styled.div`
   border-radius: 0.5rem;
-  margin: 0 auto;
+  margin: 1rem auto;
   max-width: 80rem;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   position: relative;
@@ -77,9 +88,14 @@ const Hero = styled.div`
     }
     font-weight: 400;
     display: -webkit-box;
-    -webkit-line-clamp: 5;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    a {
+      color: #5949d0;
+      :hover {
+        text-decoration: underline;
+      }
+    }
   }
   .thumb {
     min-height: 400px;
