@@ -25,7 +25,11 @@ export default ({ young, children, disabled, uri, ...rest }) => {
     }
     setLoading(false);
   };
-  return <DownloadButton onClick={() => viewAttestation(uri)}>{loading ? <Spinner size="sm" style={{ borderWidth: "0.1em" }} /> : children}</DownloadButton>;
+  return (
+    <DownloadButton {...rest} onClick={() => viewAttestation(uri)}>
+      {loading ? <Spinner size="sm" style={{ borderWidth: "0.1em" }} /> : children}
+    </DownloadButton>
+  );
 };
 
 const DownloadButton = styled.span`
