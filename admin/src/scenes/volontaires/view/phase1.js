@@ -12,20 +12,24 @@ import DownloadAttestationButton from "../../../components/buttons/DownloadAttes
 export default ({ young }) => {
   const disabled = young.phase !== YOUNG_PHASE.COHESION_STAY;
   const getCohesionStay = (young) => {
-    if (young.statusPhase1 === "DONE") return <p>Le volontaire a réalisé son séjour de cohésion.</p>;
+    if (young.statusPhase1 === "DONE")
+      return (
+        <>
+          <p>Le volontaire a réalisé son séjour de cohésion.</p>
+          <Details title="Centre" value={young.cohesionCenterName} />
+          <Details title="Ville" value={young.cohesionCenterCity} />
+          <Details title="Code Postal" value={young.cohesionCenterZip} />
+        </>
+      );
     if (young.statusPhase1 === "CANCEL" && young.cohesion2020Step !== "DONE") return <p>Le séjour de cohésion a été annulé.</p>;
     return young.cohesionCity ? (
       <>
         <p>
           Le volontaire a été affecté au centre de {young.cohesionCity}({young.cohesionDepartment})
         </p>
-        <Details title="Région" value={null} />
-        <Details title="Dép." value={null} />
-        <Details title="Ville" value={null} />
-        <Details title="Adresse" value={null} />
-        <Details title="Chef de centre" value={null} />
-        <Details title="E-mail" value={null} />
-        <Details title="Tel." value={null} />
+        <Details title="Centre" value={young.cohesionCenterName} />
+        <Details title="Ville" value={young.cohesionCenterCity} />
+        <Details title="Code Postal" value={young.cohesionCenterZip} />
       </>
     ) : (
       <p>Le volontaire est en attente d'affectation à un centre de cohésion</p>
