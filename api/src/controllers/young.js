@@ -7,10 +7,10 @@ const router = express.Router();
 const jwt = require("jsonwebtoken");
 const fs = require("fs");
 const path = require("path");
-const pdf = require("html-pdf");
 
 const config = require("../config");
 const { capture } = require("../sentry");
+const renderFromHtml = require("../htmlToPdf");
 
 const { encrypt } = require("../cryptoUtils");
 const { getQPV } = require("../qpv");
@@ -294,12 +294,11 @@ router.post("/:id/certificate/:template", passport.authenticate(["young", "refer
 
   if (!newhtml) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-  pdf.create(newhtml, options).toBuffer(function (err, buffer) {
-    res.contentType("application/pdf");
-    res.setHeader("Content-Dispositon", 'inline; filename="test.pdf"');
-    res.set("Cache-Control", "public, max-age=1");
-    res.send(buffer);
-  });
+  const buffer = await renderFromHtml(newhtml, options);
+  res.contentType("application/pdf");
+  res.setHeader("Content-Dispositon", 'inline; filename="test.pdf"');
+  res.set("Cache-Control", "public, max-age=1");
+  res.send(buffer);
 });
 
 module.exports = router;

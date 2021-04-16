@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Spinner } from "reactstrap";
 import styled from "styled-components";
 import api from "../../services/api";
-import { apiURL, environment } from "../../config";
+import { environment } from "../../config";
 import LoadingButton from "./LoadingButton";
 
 export default ({ young, children, disabled, uri, ...rest }) => {
@@ -11,7 +11,7 @@ export default ({ young, children, disabled, uri, ...rest }) => {
 
   const viewAttestation = async (a) => {
     setLoading(true);
-    const file = await api.openpdf(`/young/${young._id}/certificate/${a}`, { options: { format: "A4", margin: 0, orientation: "landscape", base: apiURL } });
+    const file = await api.openpdf(`/young/${young._id}/certificate/${a}`, { options: { landscape: true } });
     const fileName = `${young.firstName} ${young.lastName} - attestation ${a}.pdf`;
     if (window.navigator.msSaveOrOpenBlob) {
       //IE11 & Edge

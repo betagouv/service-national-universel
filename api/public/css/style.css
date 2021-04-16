@@ -1,3 +1,7 @@
+* {
+  font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande", "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+}
+
 img.bg {
   min-height: 100%;
 
@@ -17,11 +21,24 @@ img.bg {
 }
 
 .text-center {
-  position: fixed;
-  top: 265px;
-  left: 180px;
   color: #444;
-  font-size: 14px;
+  font-size: 18px;
+}
+
+.l2 {
+  position: fixed;
+  top: 390px;
+  left: 200px;
+}
+.l3 {
+  position: fixed;
+  top: 370px;
+  left: 200px;
+}
+.l4 {
+  position: fixed;
+  top: 340px;
+  left: 200px;
 }
 
 .text-date {
