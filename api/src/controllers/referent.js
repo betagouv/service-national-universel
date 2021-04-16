@@ -313,6 +313,12 @@ router.post("/email/:template/:youngId", passport.authenticate("referent", { ses
       htmlContent = htmlContent.replace(/{{lastName}}/g, young.lastName);
       htmlContent = htmlContent.replace(/\n/g, "<br/>");
       subject = "Votre candidature au SNU a été refusée";
+    } else if (template === "waiting_list") {
+      htmlContent = fs.readFileSync(path.resolve(__dirname, "../templates/waitingList.html")).toString();
+      htmlContent = htmlContent.replace(/{{firstName}}/g, young.firstName);
+      htmlContent = htmlContent.replace(/{{lastName}}/g, young.lastName);
+      htmlContent = htmlContent.replace(/\n/g, "<br/>");
+      subject = "Votre candidature au SNU a été mise sur liste complémentaire";
     } else if (template === "apply") {
       htmlContent = fs.readFileSync(path.resolve(__dirname, "../templates/apply.html")).toString();
       htmlContent = htmlContent.replace(/{{cta}}/g, "https://inscription.snu.gouv.fr/auth");

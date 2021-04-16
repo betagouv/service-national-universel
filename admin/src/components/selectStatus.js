@@ -64,6 +64,11 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
         matomo.logEvent("status_update", YOUNG_STATUS.REFUSED);
         window.lumiere("sendEvent", "status_update", YOUNG_STATUS.REFUSED, { prevStatus, status: YOUNG_STATUS.REFUSED }); // cat, action, props
       }
+      if (status === YOUNG_STATUS.WAITING_LIST) {
+        matomo.logEvent("status_update", YOUNG_STATUS.WAITING_LIST);
+        window.lumiere("sendEvent", "status_update", YOUNG_STATUS.WAITING_LIST, { prevStatus, status: YOUNG_STATUS.WAITING_LIST }); // cat, action, props
+        await api.post(`/referent/email/waiting_list/${young._id}`);
+      }
       setYoung(newYoung);
       toastr.success("Mis à jour!");
     } catch (e) {
@@ -128,8 +133,8 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
 
 const ActionBox = styled.div`
   .dropdown-menu {
-    min-width: 0;
-    width: 200px;
+    max-width: 250px;
+    min-width: 250px;
     a,
     div {
       white-space: nowrap;

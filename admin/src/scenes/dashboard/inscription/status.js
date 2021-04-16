@@ -67,16 +67,6 @@ export default ({ filter }) => {
           </Card>
         </Link>
       </Col>
-      {/* <Col md={6} xl={2}>
-        <Card borderBottomColor={CARD_BOTTOM_RED}>
-          <CardTitle>En attente de validation</CardTitle>
-          <CardSubtitle>depuis plus de 15 jours</CardSubtitle>
-          <CardValueWrapper>
-            <CardValue>0</CardValue>
-            <CardArrow />
-          </CardValueWrapper>
-        </Card>
-      </Col> */}
       <Col md={6} xl={2}>
         <Link to={getLink('/inscription/?STATUS=%5B"WAITING_CORRECTION"%5D')}>
           <Card borderBottomColor={YOUNG_STATUS_COLORS.WAITING_CORRECTION}>
@@ -105,6 +95,17 @@ export default ({ filter }) => {
             <CardTitle>Refusées</CardTitle>
             <CardValueWrapper>
               <CardValue>{status.REFUSED || 0}</CardValue>
+              <CardArrow />
+            </CardValueWrapper>
+          </Card>
+        </Link>
+      </Col>
+      <Col md={6} xl={2}>
+        <Link to={getLink('/inscription/?STATUS=%5B"WAITING_LIST"%5D')}>
+          <Card borderBottomColor={YOUNG_STATUS_COLORS.WAITING_LIST}>
+            <CardTitle>Liste complémentaire</CardTitle>
+            <CardValueWrapper>
+              <CardValue>{status.WAITING_LIST || 0}</CardValue>
               <CardArrow />
             </CardValueWrapper>
           </Card>
