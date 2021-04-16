@@ -224,7 +224,7 @@ const Hit = ({ hit, index, onClick, selected }) => {
   const diff = dayjs(new Date(hit.lastStatusAt)).fromNow();
   const user = useSelector((state) => state.Auth.user);
 
-  let STATUS = [YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.VALIDATED, YOUNG_STATUS.REFUSED];
+  let STATUS = [YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.VALIDATED, YOUNG_STATUS.REFUSED, YOUNG_STATUS.WAITING_LIST];
   if (user.role === "admin") STATUS.push(YOUNG_STATUS.WAITING_VALIDATION);
 
   return (

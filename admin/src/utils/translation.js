@@ -18,6 +18,8 @@ export const translate = (value) => {
       return "Validée";
     case "DELETED":
       return "Supprimée";
+    case "WAITING_LIST":
+      return "Sur liste complémentaire";
     case "CONTINUOUS":
       return "Mission regroupée sur des journées";
     case "DISCONTINUOUS":

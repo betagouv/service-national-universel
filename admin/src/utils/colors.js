@@ -11,6 +11,7 @@ export const YOUNG_STATUS_COLORS = {
   CANCEL: "#FE7B52",
   DONE: "#6CC763",
   NOT_DONE: "#EF4036",
+  WAITING_LIST: "#FFCBA4",
 };
 
 export const MISSION_STATUS_COLORS = {
