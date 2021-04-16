@@ -182,15 +182,7 @@ export default (props) => {
             </ul>
           </Item>
         </MainNav>
-        <ul className="subNav">
-          {young.statusPhase1 === "DONE" && young.statusPhase2 === "VALIDATED" ? (
-            <li>
-              <DownloadAttestationButton young={young} uri="snu">
-                Télécharger mon attestation
-              </DownloadAttestationButton>
-            </li>
-          ) : null}
-        </ul>
+        <ul className="subNav"></ul>
         <MyNav>
           {/* <li>
           <NavLink to="/documents">
@@ -202,6 +194,13 @@ export default (props) => {
             Mes documents
           </NavLink>
         </li> */}
+          {young.statusPhase1 === "DONE" && young.statusPhase2 === "VALIDATED" ? (
+            <DrawerButton>
+              <DownloadAttestationButton young={young} uri="snu">
+                Télécharger mon attestation
+              </DownloadAttestationButton>
+            </DrawerButton>
+          ) : null}
           <DrawerButton>
             <a href="https://www.snu.gouv.fr/foire-aux-questions-11" target="blank">
               <div className="icon">
