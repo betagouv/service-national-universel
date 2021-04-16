@@ -95,11 +95,9 @@ const Toggle = styled.div`
     color: #fff;
   }
   .toggle-switch-disabled {
-    background-color: #ddd;
     cursor: not-allowed;
   }
   .toggle-switch-disabled:before {
-    background-color: #ddd;
     cursor: not-allowed;
   }
   .toggle-switch-inner:after {
