@@ -102,7 +102,7 @@ export default (props) => {
             open={activeTab === DRAWER_TABS.PHASE1}
           >
             <ul className="subNav">
-              {young.statusPhase1 === "DONE" && young.cohesionCenter ? (
+              {young.statusPhase1 === "DONE" && young.cohesionCenterName ? (
                 <li>
                   <DownloadAttestationButton young={young} uri="1">
                     Télécharger mon attestation
