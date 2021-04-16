@@ -12,7 +12,7 @@ import VioletHeaderButton from "../../components/buttons/VioletHeaderButton";
 import ExportComponent from "../../components/ExportXlsx";
 import SelectStatus from "../../components/selectStatus";
 import api from "../../services/api";
-import { apiURL, appURL } from "../../config";
+import { apiURL, appURL, environment } from "../../config";
 import Panel from "./panel";
 import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS, getDepartmentNumber } from "../../utils";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
@@ -224,7 +224,8 @@ const Hit = ({ hit, index, onClick, selected }) => {
   const diff = dayjs(new Date(hit.lastStatusAt)).fromNow();
   const user = useSelector((state) => state.Auth.user);
 
-  let STATUS = [YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.VALIDATED, YOUNG_STATUS.REFUSED, YOUNG_STATUS.WAITING_LIST];
+  let STATUS = [YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.VALIDATED, YOUNG_STATUS.REFUSED];
+  if (environment !== "production") STATUS.push(YOUNG_STATUS.WAITING_LIST);
   if (user.role === "admin") STATUS.push(YOUNG_STATUS.WAITING_VALIDATION);
 
   return (
