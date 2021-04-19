@@ -40,6 +40,14 @@ const getFile = (name) => {
   return p;
 };
 
+function getSignedUrl(path) {
+  const s3bucket = new AWS.S3({ endpoint: CELLAR_ENDPOINT, accessKeyId: CELLAR_KEYID, secretAccessKey: CELLAR_KEYSECRET });
+  return s3bucket.getSignedUrl("getObject", {
+    Bucket: BUCKET_NAME,
+    Key: path,
+  });
+}
+
 function fileExist(url) {
   return new Promise((resolve, reject) => {
     getReq(url, (resp) => {
@@ -81,4 +89,5 @@ module.exports = {
   fileExist,
   validatePassword,
   ERRORS,
+  getSignedUrl,
 };

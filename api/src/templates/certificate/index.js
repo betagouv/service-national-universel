@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const config = require("../../config");
+const { getSignedUrl } = require("../../utils");
 
 const getLocationCohesionCenter = (y) => {
   let t = "";
@@ -19,10 +20,18 @@ const getBaseUrl = () => {
   return "http://localhost:8080";
 };
 
+function getBgUrl() {
+  return getSignedUrl("certificates/certificateTemplate.png");
+}
+
+function getBgUrl2019() {
+  return getSignedUrl("certificates/certificateTemplate-2019.png");
+}
+
 const phase1 = (young) => {
   const d = new Date();
   const html = fs.readFileSync(path.resolve(__dirname, "./phase1.html"), "utf8");
-  const template = young.cohort === "2019" ? "certificateTemplate-2019.png" : "certificateTemplate.png";
+  const template = young.cohort === "2019" ? getBgUrl() : getBgUrl2019();
   const COHESION_CENTER_LOCATION = getLocationCohesionCenter(young);
   return html
     .replace(/{{FIRST_NAME}}/g, young.firstName)
@@ -43,7 +52,7 @@ const phase2 = (young) => {
     .replace(/{{LAST_NAME}}/g, young.lastName)
     .replace(/{{COHORT}}/g, young.cohort)
     .replace(/{{BASE_URL}}/g, getBaseUrl())
-    .replace(/{{GENERAL_BG}}/g, "certificateTemplate.png")
+    .replace(/{{GENERAL_BG}}/g, getBgUrl())
     .replace(/{{DATE}}/g, d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" }));
 };
 
@@ -55,7 +64,7 @@ const phase3 = (young) => {
     .replace(/{{LAST_NAME}}/g, young.lastName)
     .replace(/{{COHORT}}/g, young.cohort)
     .replace(/{{BASE_URL}}/g, getBaseUrl())
-    .replace(/{{GENERAL_BG}}/g, "certificateTemplate.png")
+    .replace(/{{GENERAL_BG}}/g, getBgUrl())
     .replace(/{{DATE}}/g, d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" }));
 };
 
@@ -67,7 +76,7 @@ const snu = (young) => {
     .replace(/{{LAST_NAME}}/g, young.lastName)
     .replace(/{{COHORT}}/g, young.cohort)
     .replace(/{{BASE_URL}}/g, getBaseUrl())
-    .replace(/{{GENERAL_BG}}/g, "certificateTemplate.png")
+    .replace(/{{GENERAL_BG}}/g, getBgUrl())
     .replace(/{{DATE}}/g, d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" }));
 };
 
