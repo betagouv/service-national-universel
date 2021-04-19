@@ -13,10 +13,10 @@
           Suite au grand nombre de dossier reçu, votre candidature a été placée en liste complémentaire.
         </mj-text>
         <mj-text line-height="1.5" font-size="18px" color="#000">
-          Vous serez averti par email si une place venait à se libérer vous permettant ainsi de participer au SNU.
+          Vous serez averti(e) par email dans le mois précédent le séjour de cohésion si une place venait à se libérer vous permettant ainsi de
+          participer au SNU.
         </mj-text>
         <mj-text font-size="18px" color="#000">Cordialement,</mj-text>
-
         <mj-text font-size="18px" color="#000">Les équipes du Service National Universel</mj-text>
       </mj-column>
     </mj-section>
