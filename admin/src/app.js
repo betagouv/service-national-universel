@@ -24,6 +24,7 @@ import VolontairesResponsible from "./scenes/volontaires-responsible";
 import Tuteur from "./scenes/tuteur";
 import Utilisateur from "./scenes/utilisateur";
 import Content from "./scenes/content";
+import Goal from "./scenes/goal";
 
 import Inscription from "./scenes/inscription";
 
@@ -113,6 +114,7 @@ const Home = () => {
           <RestrictedRoute path="/inscription" component={Inscription} />
           <RestrictedRoute path="/user" component={Utilisateur} />
           <RestrictedRoute path="/contenu" component={Content} />
+          <RestrictedRoute path="/objectifs" component={Goal} />
           <RestrictedRoute path="/" component={["supervisor", "responsible"].includes(user?.role) ? DashboardResponsible : Dashboard} />
         </Switch>
       </ContentContainer>
