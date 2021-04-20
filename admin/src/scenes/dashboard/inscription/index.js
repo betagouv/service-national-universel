@@ -9,7 +9,10 @@ import FilterRegion from "../components/FilterRegion";
 import FilterDepartment from "../components/FilterDepartment";
 import Schools from "./schools";
 import Gender from "./gender";
+
 import Status from "./status";
+import Goals from "./goals";
+
 import BirthDate from "./birthdate";
 import ScholarshopSituation from "./scolarshipSituation";
 import ParticularSituation from "./particularSituation";
@@ -51,8 +54,24 @@ export default () => {
               <YearPicker options={["2019", "2020", "2021"]} onChange={(cohort) => updateFilter({ cohort })} value={filter.cohort} />
             </FilterWrapper>
           </FiltersList>
+          {user.role === "admin" && (
+            <>
+              <Row>
+                <Col md={12}>
+                  <SubTitle>Pilotage</SubTitle>
+                </Col>
+              </Row>
+              <Goals filter={filter} />
+            </>
+          )}
+
+          <Row>
+            <Col md={12}>
+              <SubTitle>Statut des inscriptions</SubTitle>
+            </Col>
+          </Row>
           <Status filter={filter} />
-          <Title>Dans le détails</Title>
+          <SubTitle>Dans le détails</SubTitle>
           <FiltersList>
             <FilterStatus value={filter.status} onChange={(status) => updateFilter({ status })} />
           </FiltersList>
@@ -114,6 +133,13 @@ const Title = styled.h2`
   font-weight: bold;
   font-size: 28px;
   margin-bottom: 10px;
+`;
+const SubTitle = styled.h3`
+  color: #242526;
+  font-size: 24px;
+  margin-bottom: 1rem;
+  margin-top: 1.5rem;
+  font-weight: normal;
 `;
 const FiltersList = styled.div`
   display: flex;

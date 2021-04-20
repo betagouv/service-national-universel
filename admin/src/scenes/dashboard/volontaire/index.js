@@ -34,7 +34,6 @@ export default () => {
       <Row style={{}}>
         <Col md={12}>
           <Title>Volontaires</Title>
-          <SubTitle>En quelques chiffres</SubTitle>
         </Col>
       </Row>
       <FiltersList>
@@ -44,6 +43,7 @@ export default () => {
           <YearPicker options={["2019", "2020", "2021"]} onChange={(cohort) => updateFilter({ cohort })} value={filter.cohort} />
         </FilterWrapper>
       </FiltersList>
+      <SubTitle>En quelques chiffres</SubTitle>
       <Status filter={filter} />
     </>
   );
@@ -57,10 +57,11 @@ const Title = styled.h2`
   margin-bottom: 10px;
 `;
 
-const SubTitle = styled.h2`
+const SubTitle = styled.h3`
   color: #242526;
-  font-size: 26px;
-  margin-bottom: 10px;
+  font-size: 24px;
+  margin-bottom: 1rem;
+  margin-top: 1.5rem;
   font-weight: normal;
 `;
 const FiltersList = styled.div`
