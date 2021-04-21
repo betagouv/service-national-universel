@@ -20,6 +20,8 @@ export default () => {
             <p>
               <strong>Vos missions d'intérêt général</strong>
               <br />
+              <Link to="/mission">Trouver une mission {">"}</Link>
+              <br />
               <Link to="/candidature">Suivez vos candidatures {">"}</Link>
             </p>
           </div>
@@ -80,6 +82,7 @@ const Hero = styled.div`
     -webkit-box-orient: vertical;
     overflow: hidden;
     a {
+      font-size: 1rem;
       color: #5949d0;
       :hover {
         text-decoration: underline;
