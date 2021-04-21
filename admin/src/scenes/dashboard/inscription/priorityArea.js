@@ -38,10 +38,10 @@ export default ({ filter }) => {
     const yesPercent = ((yes * 100) / (no + yes)).toFixed(1);
 
     return (
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+      <Content>
         <CircularProgress circleProgressColor="#1B7BBF" percentage={noPercent} title={no} subtitle="Non" />
         <CircularProgress circleProgressColor="#1B7BBF" percentage={yesPercent} title={yes} subtitle="Oui" />
-      </div>
+      </Content>
     );
   }
 
@@ -70,7 +70,19 @@ const BoxContent = styled.div`
   padding: 30px;
   display: flex;
   flex-direction: ${(props) => props.direction};
-  & > * {
-    ${(props) => props.direction === "column" && ` margin-bottom: 25px;`}
+`;
+
+const Content = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  @media (max-width: 1550px) and (min-width: 992px) {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+  }
+  > * {
+    margin-bottom: 1rem;
   }
 `;

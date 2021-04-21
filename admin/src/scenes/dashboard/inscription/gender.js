@@ -38,10 +38,10 @@ export default ({ filter }) => {
     const femalePercent = ((female * 100) / (male + female)).toFixed(1);
 
     return (
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+      <Content>
         <CircularProgress circleProgressColor="#1B7BBF" percentage={malePercent} title={male} subtitle="Garçons" />
         <CircularProgress circleProgressColor="#1B7BBF" percentage={femalePercent} title={female} subtitle="Filles" />
-      </div>
+      </Content>
     );
   }
 
@@ -70,7 +70,19 @@ const BoxContent = styled.div`
   padding: 30px;
   display: flex;
   flex-direction: ${(props) => props.direction};
-  & > * {
-    ${(props) => props.direction === "column" && ` margin-bottom: 25px;`}
+`;
+
+const Content = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex: 1;
+  @media (max-width: 1550px) and (min-width: 992px) {
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+  }
+  > * {
+    margin-bottom: 1rem;
   }
 `;
