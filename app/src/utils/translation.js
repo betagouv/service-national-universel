@@ -2,6 +2,8 @@ export const translate = (value) => {
   switch (value) {
     case "AFFECTED":
       return "Affectée";
+    case "WITHDRAWN":
+      return "Désistée";
     case "NOT_DONE":
       return "Non réalisée";
     case "IN_COMING":

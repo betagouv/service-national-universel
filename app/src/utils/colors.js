@@ -3,6 +3,7 @@ export const PHASE_STATUS_COLOR = {
   DONE: "#6CC763",
   CANCEL: "#FE7B52",
   IN_PROGRESS: "#5145cd",
+  WITHDRAWN: "#BE3B12",
 };
 
 export const APPLICATION_STATUS_COLORS = {

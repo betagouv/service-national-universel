@@ -23,6 +23,13 @@ export default (props) => {
 
   useEffect(() => {
     // if the young is not validated yet
+
+    if (young.status === YOUNG_STATUS.WITHDRAWN) {
+      setStatus1(young.status);
+      setStatus2(young.status);
+      setStatus3(young.status);
+    }
+
     if (young.status !== YOUNG_STATUS.VALIDATED) return;
 
     young.statusPhase1 && setStatus1(young.statusPhase1);
@@ -37,7 +44,7 @@ export default (props) => {
   const getDisabled = (tab) => {
     // return false;
     if (tab === DRAWER_TABS.HOME) return false;
-    if (young.status === YOUNG_STATUS.REFUSED) return true;
+    if (young.status === YOUNG_STATUS.REFUSED || young.status === YOUNG_STATUS.WITHDRAWN) return true;
     if (tab === DRAWER_TABS.PHASE1) {
       return [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_LIST].includes(young.status);
     }
