@@ -64,7 +64,7 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
   const getInscriptionGoalReached = async (departement) => {
     const { data, ok, code } = await api.get(`/inscription-goal/departement/${departement}`);
     if (!ok) return toastr.error("nope");
-    return (await getInscriptions()) >= data.max;
+    return data.max > 0 && (await getInscriptions()) >= data.max;
   };
 
   useEffect(() => {
