@@ -38,6 +38,7 @@ function admin({ onClick }) {
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
       <DrawerTab to="/inscription" title="Inscriptions" onClick={onClick} />
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
+      <DrawerTab to="/objectifs" title="Objectifs" onClick={onClick} />
     </>
   );
 }
@@ -94,17 +95,6 @@ export default (props) => {
         {user.role === "admin" && admin({ onClick: handleClick })}
         {["referent_department", "referent_region"].includes(user.role) && referent({ onClick: handleClick })}
       </ul>
-      {/*   <li>
-          <NavLink to="/tuteur">Tuteurs</NavLink>
-        </li> */}
-      {/* <Version>
-        <a href="#" className="info help">
-          Centre d’aide
-        </a>
-        <a href="#" className="info new">
-          Nouveautés
-        </a>
-      </Version> */}
     </Sidebar>
   );
 };

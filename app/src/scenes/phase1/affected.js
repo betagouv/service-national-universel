@@ -1,47 +1,45 @@
 import React from "react";
 import styled from "styled-components";
+import { useSelector } from "react-redux";
+
 import NextStep from "./nextStep";
-import { Link } from "react-router-dom";
 
 export default () => {
-  const renderStep = () => {
-    return (
-      <>
-        <Hero>
-          <div className="content">
-            <h1>
-              Réalisez vos <strong>84 heures de mission d'intérêt général</strong>
-            </h1>
-            <p>
-              Partez à la découverte de l'engagement en réalisant 84 heures de mission d'intérêt général, au sein d'une ou plusieurs structures, en contribuant à leurs activités
-              concrètes !
-            </p>
-            <Separator />
-            <p>
-              <strong>Vos missions d'intérêt général</strong>
-              <br />
-              <Link to="/mission">Trouver une mission {">"}</Link>
-              <br />
-              <Link to="/candidature">Suivez vos candidatures {">"}</Link>
-            </p>
-          </div>
-          <div className="thumb" />
-        </Hero>
-      </>
-    );
-  };
-
-  return renderStep();
+  return (
+    <>
+      <Hero>
+        <div className="content">
+          <h1>
+            <strong>Mon séjour de cohésion</strong>
+          </h1>
+          <p>
+            Le SNU vous donne l'opportunité de découvrir la vie collective au sein d'un centre accueillant environ 200 jeunes de votre région pour créer ainsi des liens nouveaux et
+            développer votre culture de l’engagement et ainsi affirmer votre place dans la société.
+          </p>
+          <Separator />
+          <p>
+            <strong>Votre convocation</strong>
+            <br />
+            Vous êtes actuellement affecté(e) à un centre de cohésion.
+          </p>
+        </div>
+        <div className="thumb" />
+      </Hero>
+      <NextStep />
+    </>
+  );
 };
+
 const Separator = styled.hr`
   margin: 2.5rem 0;
   height: 1px;
   border-style: none;
   background-color: #e5e7eb;
 `;
+
 const Hero = styled.div`
   border-radius: 0.5rem;
-  margin: 1rem auto;
+  margin: 0 auto;
   max-width: 80rem;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   position: relative;
@@ -79,15 +77,9 @@ const Hero = styled.div`
     }
     font-weight: 400;
     display: -webkit-box;
+    -webkit-line-clamp: 5;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    a {
-      font-size: 1rem;
-      color: #5949d0;
-      :hover {
-        text-decoration: underline;
-      }
-    }
   }
   .thumb {
     min-height: 400px;

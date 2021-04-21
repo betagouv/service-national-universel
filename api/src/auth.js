@@ -9,6 +9,7 @@ const { capture } = require("./sentry");
 const config = require("./config");
 const { validatePassword } = require("./utils");
 const { sendEmail } = require("./sendinblue");
+const { COOKIE_MAX_AGE, JWT_MAX_AGE, cookieOptions, logoutCookieOptions } = require("./cookie-options");
 
 const EMAIL_OR_PASSWORD_INVALID = "EMAIL_OR_PASSWORD_INVALID";
 const PASSWORD_INVALID = "PASSWORD_INVALID";
@@ -22,25 +23,6 @@ const PASSWORD_NOT_VALIDATED = "PASSWORD_NOT_VALIDATED";
 const ACOUNT_NOT_ACTIVATED = "ACOUNT_NOT_ACTIVATED";
 const USER_NOT_EXISTS = "USER_NOT_EXISTS";
 const OPERATION_UNAUTHORIZED = "OPERATION_UNAUTHORIZED";
-
-const COOKIE_MAX_AGE = 60 * 60 * 2 * 1000; // 2h
-const JWT_MAX_AGE = 60 * 60 * 2; // 2h
-
-function cookieOptions() {
-  if (config.ENVIRONMENT === "development") {
-    return { maxAge: COOKIE_MAX_AGE, httpOnly: true, secure: false };
-  } else {
-    return { maxAge: COOKIE_MAX_AGE, httpOnly: true, secure: true, sameSite: "none" };
-  }
-}
-
-function logoutCookieOptions() {
-  if (config.ENVIRONMENT === "development") {
-    return { httpOnly: true, secure: false };
-  } else {
-    return { httpOnly: true, secure: true, sameSite: "none" };
-  }
-}
 class Auth {
   constructor(model) {
     this.model = model;
@@ -55,7 +37,7 @@ class Auth {
     try {
       const user = await this.model.findOne({ email });
       if (!user) return res.status(401).send({ ok: false, code: USER_NOT_EXISTS });
-      if (user.status === "WITHDRAWN" || user.status === "DELETED") return res.status(401).send({ ok: false, code: OPERATION_UNAUTHORIZED });
+      if (user.status === "DELETED") return res.status(401).send({ ok: false, code: OPERATION_UNAUTHORIZED });
       // simplify
       let match = await user.comparePassword(password);
       if (config.ENVIRONMENT === "development") {

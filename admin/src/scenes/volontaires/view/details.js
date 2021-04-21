@@ -2,7 +2,7 @@ import React from "react";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 
-import { translate as t } from "../../../utils";
+import { translate as t, isInRuralArea } from "../../../utils";
 import YoungView from "./wrapper";
 import api from "../../../services/api";
 import DownloadButton from "../../../components/buttons/DownloadButton";
@@ -20,6 +20,7 @@ export default ({ young }) => {
           <Row>
             <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
               <Bloc title="Informations générales">
+                <Details title="Sexe" value={t(young.gender)} />
                 <Details title="E-mail" value={young.email} />
                 <Details title="Tel" value={young.phone} />
                 <Details title="Région" value={young.region} />
@@ -36,6 +37,7 @@ export default ({ young }) => {
               </Bloc>
               <Bloc title="Situations particulières">
                 <Details title="Quartier Prioritaire de la Ville" value={t(young.qpv)} />
+                <Details title="Zone Rurale" value={t(isInRuralArea(young))} />
                 <Details title="Handicap" value={t(young.handicap)} />
                 <Details title="PPS" value={t(young.ppsBeneficiary)} />
                 <Details title="PAI" value={t(young.paiBeneficiary)} />

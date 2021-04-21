@@ -342,6 +342,13 @@ const Schema = new mongoose.Schema({
       description: "Le volontaire est dans un Quarier Prioritaire",
     },
   },
+  populationDensity: {
+    type: String,
+    default: "",
+    documentation: {
+      description: "Densité de population du domicile du volontaire (ZRR - zone rurale)",
+    },
+  },
 
   // * School informations
   situation: {

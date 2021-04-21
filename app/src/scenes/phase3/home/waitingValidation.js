@@ -1,28 +1,28 @@
 import React from "react";
 import styled from "styled-components";
-import NextStep from "./nextStep";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
 
 export default () => {
+  const young = useSelector((state) => state.Auth.young) || {};
+
   const renderStep = () => {
     return (
       <>
         <Hero>
           <div className="content">
             <h1>
-              Réalisez vos <strong>84 heures de mission d'intérêt général</strong>
+              <strong>{young.firstName}</strong>, votre Phase 3 est en attente de validation !
             </h1>
-            <p>
-              Partez à la découverte de l'engagement en réalisant 84 heures de mission d'intérêt général, au sein d'une ou plusieurs structures, en contribuant à leurs activités
-              concrètes !
-            </p>
+            <p>Votre tuteur de mission doit examiner le formulaire de validation que vous avez déposé puis le confirmer.</p>
             <Separator />
             <p>
-              <strong>Vos missions d'intérêt général</strong>
+              <strong>Suivre la validation de mon engagement prolongé</strong>
               <br />
-              <Link to="/mission">Trouver une mission {">"}</Link>
+              Vous pouvez suivre l'avancement de la validation de votre mission par votre tuteur.
               <br />
-              <Link to="/candidature">Suivez vos candidatures {">"}</Link>
+              <Link to="/phase3/valider">Suivre l'avancement {">"}</Link>
             </p>
           </div>
           <div className="thumb" />
@@ -91,7 +91,7 @@ const Hero = styled.div`
   }
   .thumb {
     min-height: 400px;
-    background: url(${require("../../assets/phase3.jpg")}) no-repeat center;
+    background: url(${require("../../../assets/phase3.jpg")}) no-repeat center;
     background-size: cover;
     flex: 1;
   }

@@ -34,7 +34,7 @@ const Dropdown = ({ prelabel = "", onChange, options, selectedOption }) => {
         <div>
           {prelabel}:<StyledLabel>{!!selectedOption && selectedOption}</StyledLabel>
         </div>
-        <IconContainer>{!!selectedOption ? <Close onClick={onHandleSelect("")} /> : <StyledArrow isOpen={isOpen} />}</IconContainer>
+        <IconContainer onClick={!!selectedOption && onHandleSelect("")}>{!!selectedOption ? <Close /> : <StyledArrow isOpen={isOpen} />}</IconContainer>
       </DropdownHeading>
       {isOpen && (
         <DropdownList>

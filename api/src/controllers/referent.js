@@ -24,16 +24,7 @@ const { uploadFile, validatePassword, ERRORS } = require("../utils");
 const { encrypt } = require("../cryptoUtils");
 const ReferentAuth = new AuthObject(ReferentObject);
 
-const COOKIE_MAX_AGE = 60 * 60 * 2 * 1000; // 2h
-const JWT_MAX_AGE = 60 * 60 * 2; // 2h
-
-function cookieOptions() {
-  if (config.ENVIRONMENT === "development") {
-    return { maxAge: COOKIE_MAX_AGE, httpOnly: true, secure: false };
-  } else {
-    return { maxAge: COOKIE_MAX_AGE, httpOnly: true, secure: true, sameSite: "none" };
-  }
-}
+const { cookieOptions, JWT_MAX_AGE } = require("../cookie-options");
 
 async function updateTutorNameInMissionsAndApplications(tutor) {
   if (!tutor || !tutor.firstName || !tutor.lastName) return;

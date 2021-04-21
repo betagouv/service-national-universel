@@ -1,28 +1,37 @@
 import React from "react";
 import styled from "styled-components";
-import NextStep from "./nextStep";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
 
 export default () => {
+  const young = useSelector((state) => state.Auth.young) || {};
+
   const renderStep = () => {
     return (
       <>
         <Hero>
           <div className="content">
             <h1>
-              Réalisez vos <strong>84 heures de mission d'intérêt général</strong>
+              <strong>{young.firstName}</strong>, vous avez validé votre Phase 3 !
             </h1>
-            <p>
-              Partez à la découverte de l'engagement en réalisant 84 heures de mission d'intérêt général, au sein d'une ou plusieurs structures, en contribuant à leurs activités
-              concrètes !
-            </p>
+            <p>Félicitations, vous êtes allé(e) au bout de votre parcours SNU ! L’équipe du Service Nationale Univerel vous souhaite une belle continuation !</p>
             <Separator />
             <p>
-              <strong>Vos missions d'intérêt général</strong>
+              <strong>Mon engagement prolongé</strong>
               <br />
-              <Link to="/mission">Trouver une mission {">"}</Link>
+              Retrouver l'historique de votre mission de phase 3
               <br />
-              <Link to="/candidature">Suivez vos candidatures {">"}</Link>
+              <Link to="/phase3/valider">Consulter ma mission {">"}</Link>
+            </p>
+            <p>
+              <strong>Attestation de réalisation de Phase 3</strong>
+              <br />
+              Télécharger votre attestation de réalisation de votre phase 3
+              <br />
+              <DownloadAttestationButton style={{ color: "#5949d0", textAlign: "left", fontSize: "1rem" }} young={young} uri="3">
+                Télécharger mon attestation {">"}
+              </DownloadAttestationButton>
             </p>
           </div>
           <div className="thumb" />
@@ -91,7 +100,7 @@ const Hero = styled.div`
   }
   .thumb {
     min-height: 400px;
-    background: url(${require("../../assets/phase3.jpg")}) no-repeat center;
+    background: url(${require("../../../assets/phase3.jpg")}) no-repeat center;
     background-size: cover;
     flex: 1;
   }

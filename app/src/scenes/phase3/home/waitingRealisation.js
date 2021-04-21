@@ -5,10 +5,10 @@ import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { ReactiveBase, ReactiveList } from "@appbaseio/reactivesearch";
 
-import ProgramCard from "./components/programCard";
-import MissionCard from "./components/missionCard";
-import api from "../../services/api";
-import { apiURL } from "../../config";
+import ProgramCard from "../components/programCard";
+import MissionCard from "../components/missionCard";
+import api from "../../../services/api";
+import { apiURL } from "../../../config";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young) || {};
@@ -27,7 +27,7 @@ export default () => {
       <Hero>
         <div className="content">
           <h1>
-            <strong>{young.firstName},</strong> poursuivez votre engagement !
+            <strong>{young.firstName},</strong> poursuivez votre engagement ! <span>Facultatif</span>
           </h1>
           <p>
             A l’issue de la mission d’intérêt général, chaque volontaire peut poursuivre son engagement et sa participation à la création d’une société fraternelle, notamment en
@@ -44,7 +44,7 @@ export default () => {
         <Row>
           {programs.slice(0, 3).map((p, i) => (
             <Col key={i}>
-              <ProgramCard program={p} image={p.imageFile ? p.imageFile : require(`../../assets/programmes-engagement/${p.imageString}`)} />
+              <ProgramCard program={p} image={p.imageFile ? p.imageFile : require(`../../../assets/programmes-engagement/${p.imageString}`)} />
             </Col>
           ))}
         </Row>
@@ -68,7 +68,7 @@ export default () => {
               dataField="created_at"
               renderResultStats={() => <div />}
               render={({ data }) => {
-                return data.map((e, i) => <MissionCard mission={e} key={i} image={require("../../assets/observe.svg")} />);
+                return data.map((e, i) => <MissionCard mission={e} key={i} image={require("../../../assets/observe.svg")} />);
               }}
             />
           </ReactiveBase>
@@ -110,6 +110,9 @@ const Hero = styled.div`
     margin-bottom: 20px;
     font-weight: 500;
     line-height: 1;
+    span {
+      font-size: 1rem;
+    }
   }
   p {
     color: #6b7280;
@@ -125,7 +128,7 @@ const Hero = styled.div`
   }
   .thumb {
     min-height: 400px;
-    background: url(${require("../../assets/phase3.jpg")}) no-repeat center;
+    background: url(${require("../../../assets/phase3.jpg")}) no-repeat center;
     background-size: cover;
     flex: 1;
   }

@@ -14,7 +14,7 @@ import SelectStatus from "../../components/selectStatus";
 import api from "../../services/api";
 import { apiURL, appURL, environment } from "../../config";
 import Panel from "./panel";
-import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS, getDepartmentNumber } from "../../utils";
+import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS, getDepartmentNumber, isInRuralArea } from "../../utils";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
 const FILTERS = ["SEARCH", "STATUS", "REGION", "DEPARTMENT", "SCHOOL"];
@@ -64,6 +64,8 @@ export default () => {
                       "Code postal de l'établissement": data.schoolZip,
                       "Ville de l'établissement": data.schoolCity,
                       "Département de l'établissement": data.schoolDepartment,
+                      "Quartier Prioritaire de la ville": data.qpv,
+                      "Zone Rurale": isInRuralArea(data),
                       Handicap: translate(data.handicap),
                       "Bénéficiaire d'un PPS": translate(data.ppsBeneficiary),
                       "Bénéficiaire d'un PAI": translate(data.paiBeneficiary),
