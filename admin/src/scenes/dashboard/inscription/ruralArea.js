@@ -15,7 +15,7 @@ export default ({ filter }) => {
       queries.push({ index: "young", type: "_doc" });
       queries.push({
         query: { bool: { must: { match_all: {} }, filter: [{ term: { "cohort.keyword": filter.cohort } }] } },
-        aggs: { status: { terms: { field: "qpv.keyword" } } },
+        aggs: { status: { terms: { field: "populationDensity.keyword" } } },
         size: 0,
       });
 
@@ -31,9 +31,8 @@ export default ({ filter }) => {
 
   function render() {
     if (!value) return <Loader />;
-
-    const no = value.false || 0;
-    const yes = value.true || 0;
+    const no = value["DENSE"] + value["INTERMEDIAIRE"] || 0;
+    const yes = value["PEU DENSE"] + value["TRES PEU DENSE"] || 0;
     const noPercent = ((no * 100) / (no + yes)).toFixed(1);
     const yesPercent = ((yes * 100) / (no + yes)).toFixed(1);
 
@@ -47,7 +46,7 @@ export default ({ filter }) => {
 
   return (
     <Box>
-      <BoxTitle>Issus d'un Quartier Prioritaire de la Ville</BoxTitle>
+      <BoxTitle>Issus d'une Zone Rurale</BoxTitle>
       <BoxContent direction="column">{render()}</BoxContent>
     </Box>
   );

@@ -1,9 +1,10 @@
 import React from "react";
-import { Col } from "reactstrap";
+import { Row, Col } from "reactstrap";
 import { toastr } from "react-redux-toastr";
+import { Field } from "formik";
 
 import api from "../../../services/api";
-import { departmentList, regionList } from "../../../utils";
+import { departmentList, regionList, isInRuralArea, translate } from "../../../utils";
 import Box from "../components/Box";
 import BoxContent from "../components/BoxContent";
 import BoxTitle from "../components/BoxTitle";
@@ -18,6 +19,14 @@ export default ({ values, handleChange, handleSubmit }) => (
       <BoxTitle>Situations particulières</BoxTitle>
       <BoxContent direction="column">
         <Item disabled title="Quartier Prioritaire de la Ville" values={values} name="qpv" />
+        <Row className="detail">
+          <Col md={4}>
+            <label>Zone Rurale</label>
+          </Col>
+          <Col md={8}>
+            <Field disabled className="form-control" value={translate(isInRuralArea(values))} />
+          </Col>
+        </Row>
         <Select
           name="handicap"
           values={values}

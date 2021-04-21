@@ -17,6 +17,7 @@ import BirthDate from "./birthdate";
 import ScholarshopSituation from "./scolarshipSituation";
 import ParticularSituation from "./particularSituation";
 import PriorityArea from "./priorityArea";
+import RuralArea from "./ruralArea";
 import { YOUNG_STATUS, translate, REFERENT_ROLES } from "../../../utils";
 
 export default () => {
@@ -85,11 +86,14 @@ export default () => {
             <Col md={12}>
               <ScholarshopSituation filter={filter} />
             </Col>
-            <Col md={12} lg={6}>
+            <Col md={12} lg={4}>
               <Gender filter={filter} />
             </Col>
-            <Col md={12} lg={6}>
+            <Col md={12} lg={4}>
               <PriorityArea filter={filter} />
+            </Col>
+            <Col md={12} lg={4}>
+              <RuralArea filter={filter} />
             </Col>
             <Col md={12}>
               <Schools filter={filter} />

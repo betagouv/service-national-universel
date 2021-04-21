@@ -19,10 +19,9 @@ const AuthObject = require("../auth");
 const { uploadFile, validatePassword, ERRORS } = require("../utils");
 const { sendEmail } = require("../sendinblue");
 const certificate = require("../templates/certificate");
+const { cookieOptions } = require("../cookie-options");
 
 const YoungAuth = new AuthObject(YoungObject);
-
-const COOKIE_MAX_AGE = 60 * 60 * 2 * 1000; // 2h
 
 router.post("/signin", (req, res) => YoungAuth.signin(req, res));
 router.post("/logout", (req, res) => YoungAuth.logout(req, res));
@@ -32,14 +31,6 @@ router.get("/signin_token", passport.authenticate("young", { session: false }), 
 router.post("/forgot_password", async (req, res) => YoungAuth.forgotPassword(req, res, `${config.APP_URL}/auth/reset`));
 router.post("/forgot_password_reset", async (req, res) => YoungAuth.forgotPasswordReset(req, res));
 router.post("/reset_password", passport.authenticate("young", { session: false }), async (req, res) => YoungAuth.resetPassword(req, res));
-
-function cookieOptions() {
-  if (config.ENVIRONMENT === "development") {
-    return { maxAge: COOKIE_MAX_AGE, httpOnly: true, secure: false };
-  } else {
-    return { maxAge: COOKIE_MAX_AGE, httpOnly: true, secure: true, sameSite: "none" };
-  }
-}
 
 router.post("/file/:key", passport.authenticate("young", { session: false }), async (req, res) => {
   try {
