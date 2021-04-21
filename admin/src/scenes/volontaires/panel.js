@@ -118,6 +118,7 @@ export default ({ onChange, value }) => {
       </Info>
       <Info title="Situations particulières" id={young._id}>
         <Details title="Quartier Prioritaire de la Ville" value={t(young.qpv)} />
+        <Details title="Zone Rurale" value={t(["PEU DENSE", "TRES PEU DENSE"].includes(young.populationDensity) ? "true" : "false")} />
         <Details title="Handicap" value={t(young.handicap)} />
         <Details title="PPS" value={t(young.ppsBeneficiary)} />
         <Details title="PAI" value={t(young.paiBeneficiary)} />

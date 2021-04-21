@@ -36,6 +36,7 @@ export default ({ young }) => {
               </Bloc>
               <Bloc title="Situations particulières">
                 <Details title="Quartier Prioritaire de la Ville" value={t(young.qpv)} />
+                <Details title="Zone Rurale" value={t(["PEU DENSE", "TRES PEU DENSE"].includes(young.populationDensity) ? "true" : "false")} />
                 <Details title="Handicap" value={t(young.handicap)} />
                 <Details title="PPS" value={t(young.ppsBeneficiary)} />
                 <Details title="PAI" value={t(young.paiBeneficiary)} />
