@@ -106,6 +106,7 @@ export default ({ setYoung }) => {
                     "Statut Phase 2": data.statusPhase2,
                     "Statut Phase 3": data.statusPhase3,
                     "Dernier statut le": data.lastStatusAt,
+                    "Message de desistement": data.withdrawnMessage,
                   };
                 }}
               />
