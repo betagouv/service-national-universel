@@ -1,5 +1,4 @@
 export * from "snu-lib";
-export * from "./region-and-departments";
 export * from "./translation";
 export * from "./colors";
 

@@ -8,7 +8,7 @@ import LoadingButton from "../../components/buttons/LoadingButton";
 import Loader from "../../components/Loader";
 import PlusSVG from "../../assets/plus.svg";
 import CrossSVG from "../../assets/cross.svg";
-import { region2department, departmentList, department2region } from "../../utils/region-and-departments";
+import { region2department, departmentList, department2region } from "../../utils";
 
 export default () => {
   const [inscriptionGoals, setInscriptionGoals] = useState();
