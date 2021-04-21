@@ -39,7 +39,6 @@ export default (props) => {
     if (tab === DRAWER_TABS.HOME) return false;
     if (young.status === YOUNG_STATUS.REFUSED) return true;
     if (tab === DRAWER_TABS.PHASE1) {
-      if (young.cohort && young.cohort !== "2021") return [YOUNG_STATUS_PHASE1.CANCEL].includes(young.statusPhase1);
       return [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_LIST].includes(young.status);
     }
     if (tab === DRAWER_TABS.PHASE2) {

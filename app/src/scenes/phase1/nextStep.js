@@ -9,6 +9,7 @@ import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../redux/auth/actions";
 import { translate } from "../../utils";
+import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib/constants";
 
 const AuthorizationIntro = () => (
   <div>
@@ -54,10 +55,14 @@ export default () => {
     <Hero style={{ flexDirection: "column" }}>
       <Content style={{ width: "100%" }}>
         <h1>Prochaine étape</h1>
-        <p>
-          Vous êtes actuellement <Tag>en&nbsp;attente&nbsp;d'affectation à un centre de cohésion.</Tag>
-        </p>
-        <p>Au mois de mai, vous serez informé par e-mail du lieu et des modalités de votre séjour.</p>
+        {young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION ? (
+          <>
+            <p>
+              Vous êtes actuellement <Tag>en&nbsp;attente&nbsp;d'affectation à un centre de cohésion.</Tag>
+            </p>
+            <p>Au mois de mai, vous serez informé par e-mail du lieu et des modalités de votre séjour.</p>
+          </>
+        ) : null}
       </Content>
       <ContentHorizontal style={{ width: "100%" }} id="sanitaire">
         <div className="icon">
@@ -72,9 +77,10 @@ export default () => {
         </div>
         <div>
           <h2>Transmission de la fiche sanitaire</h2>
+          <p>Téléchargez la fiche sanitaire.</p>
           <p>
-            En attente de votre affectation, vous pouvez d’ores et déjà télécharger la fiche sanitaire ici. Vous devrez la renvoyer complétée et signée par votre représentant légal{" "}
-            <b>au plus tard le 4 juin 2021</b>. L'adresse de destination vous sera communiqué sur cette page, une fois votre lieu d'affectation connue.
+            Vous devez renvoyer votre fiche sanitaire complétée et signée par voie postale sous pli confidentiel au plus tard le 4 juin 2021. L'adresse de destination vous sera
+            communiqué sur cette page, une fois votre lieu d'affectation connue.
           </p>
           <a href="https://apicivique.s3.eu-west-3.amazonaws.com/Note_relative_aux_informations_d_ordre_sanitaire.pdf" target="blank" className="link">
             Note relative aux informations d'ordre sanitaire{" >"}
@@ -100,7 +106,10 @@ export default () => {
           </div>
           <div>
             <h2>Consentement de droit à l'image</h2>
-            <p>Votre représentant légal peut dès-à-présent renseigner le formulaire relatif au droit à l'image. Cette étape est un pré-requis au séjour de cohésion.</p>
+            <p>
+              Votre représentant légal peut dès-à-présent renseigner le formulaire relatif au droit à l'image <b>avant le 4 juin 2021</b>. Cette étape est un pré-requis au séjour
+              de cohésion.
+            </p>
           </div>
         </div>
         {young.imageRightFiles && young.imageRightFiles.length ? (
