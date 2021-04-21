@@ -20,6 +20,7 @@ export default ({ young }) => {
           <Row>
             <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
               <Bloc title="Informations générales">
+                <Details title="Sexe" value={t(young.gender)} />
                 <Details title="E-mail" value={young.email} />
                 <Details title="Tel" value={young.phone} />
                 <Details title="Région" value={young.region} />
