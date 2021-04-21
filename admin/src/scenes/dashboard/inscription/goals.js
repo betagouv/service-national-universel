@@ -2,8 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import { Col, Row } from "reactstrap";
 import { useSelector } from "react-redux";
-import { YOUNG_STATUS_COLORS } from "../../../utils";
-import { departmentList, department2region } from "../../../utils/region-and-departments";
+import { YOUNG_STATUS_COLORS, departmentList, department2region } from "../../../utils";
 
 import api from "../../../services/api";
 
