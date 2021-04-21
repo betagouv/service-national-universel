@@ -305,6 +305,19 @@ const Schema = new mongoose.Schema({
       description: "Ville du volontaire",
     },
   },
+  cityCode: {
+    type: String,
+    documentation: {
+      description: "Code insee de la ville",
+    },
+  },
+  populationDensity: {
+    type: String,
+    enum :["TRES PEU DENSE","PEU DENSE", "INTERMEDIAIRE", "DENSE"],
+    documentation: {
+      description: "tres peu dense, peu dense, intermediaire, tres dense",
+    },
+  },
   department: {
     type: String,
     documentation: {
