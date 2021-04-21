@@ -4,7 +4,7 @@ import { toastr } from "react-redux-toastr";
 import { Field } from "formik";
 
 import api from "../../../services/api";
-import { departmentList, regionList } from "../../../utils";
+import { departmentList, regionList, isInRuralArea, translate } from "../../../utils";
 import Box from "../components/Box";
 import BoxContent from "../components/BoxContent";
 import BoxTitle from "../components/BoxTitle";
@@ -24,7 +24,7 @@ export default ({ values, handleChange, handleSubmit }) => (
             <label>Zone Rurale</label>
           </Col>
           <Col md={8}>
-            <Field disabled className="form-control" value={["PEU DENSE", "TRES PEU DENSE"].includes(values.populationDensity) ? "Oui" : "Non"} />
+            <Field disabled className="form-control" value={translate(isInRuralArea(values))} />
           </Col>
         </Row>
         <Select

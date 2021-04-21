@@ -11,7 +11,7 @@ import api from "../../services/api";
 import { apiURL, appURL } from "../../config";
 import Panel from "./panel";
 import Badge from "../../components/Badge";
-import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS_COLORS } from "../../utils";
+import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS_COLORS, isInRuralArea } from "../../utils";
 import { Link } from "react-router-dom";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
@@ -58,6 +58,8 @@ export default ({ setYoung }) => {
                     "Code postal de l'établissement": data.schoolZip,
                     "Ville de l'établissement": data.schoolCity,
                     "Département de l'établissement": data.schoolDepartment,
+                    "Quartier Prioritaire de la ville": data.qpv,
+                    "Zone Rurale": isInRuralArea(data),
                     Handicap: data.handicap,
                     "Bénéficiaire d'un PPS": data.ppsBeneficiary,
                     "Bénéficiaire d'un PAI": data.paiBeneficiary,

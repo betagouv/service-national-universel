@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 
-import { YOUNG_SITUATIONS, YOUNG_PHASE, translate as t, YOUNG_STATUS } from "../../utils";
+import { YOUNG_SITUATIONS, YOUNG_PHASE, translate as t, YOUNG_STATUS, isInRuralArea } from "../../utils";
 import { appURL } from "../../config";
 import api from "../../services/api";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
@@ -118,7 +118,7 @@ export default ({ onChange, value }) => {
       </Info>
       <Info title="Situations particulières" id={young._id}>
         <Details title="Quartier Prioritaire de la Ville" value={t(young.qpv)} />
-        <Details title="Zone Rurale" value={t(["PEU DENSE", "TRES PEU DENSE"].includes(young.populationDensity) ? "true" : "false")} />
+        <Details title="Zone Rurale" value={t(isInRuralArea(young))} />
         <Details title="Handicap" value={t(young.handicap)} />
         <Details title="PPS" value={t(young.ppsBeneficiary)} />
         <Details title="PAI" value={t(young.paiBeneficiary)} />

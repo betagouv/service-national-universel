@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 
-import { translate as t } from "../../utils";
+import { translate as t, isInRuralArea } from "../../utils";
 import DownloadButton from "../../components/buttons/DownloadButton";
 import Historic from "../../components/historic";
 import api from "../../services/api";
@@ -106,6 +106,7 @@ export default ({ onChange, value }) => {
       </Info>
       <Info title="Situations particulières" id={value._id}>
         <Details title="Quartier Prioritaire de la Ville" value={t(value.qpv)} />
+        <Details title="Zone Rurale" value={t(isInRuralArea(value))} />
         <Details title="Handicap" value={t(value.handicap)} />
         <Details title="PPS" value={t(value.ppsBeneficiary)} />
         <Details title="PAI" value={t(value.paiBeneficiary)} />
