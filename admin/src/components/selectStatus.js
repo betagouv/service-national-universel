@@ -12,12 +12,60 @@ import matomo from "../services/matomo";
 import ModalCorrection from "./modals/ModalCorrection";
 import ModalRefused from "./modals/ModalRefused";
 import ModalWithdrawn from "./modals/ModalWithdrawn";
+import ModalGoal from "./modals/ModalGoal";
 import Chevron from "./Chevron";
 
 export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status", phase = YOUNG_PHASE.INSCRIPTION }) => {
   const [modal, setModal] = useState(null);
   const [young, setYoung] = useState(null);
   const user = useSelector((state) => state.Auth.user);
+
+  // todo: refacto ! duplicated functions /scenes/dashboard/inscription/goals
+  async function fetch2020WaitingAffectation() {
+    const queries = [];
+    queries.push({ index: "young", type: "_doc" });
+    queries.push({
+      query: { bool: { must: { match_all: {} }, filter: [{ term: { "cohort.keyword": "2020" } }, { term: { "statusPhase1.keyword": "WAITING_AFFECTATION" } }] } },
+      aggs: { status: { terms: { field: "statusPhase1.keyword" } } },
+      size: 0,
+    });
+
+    if (young.region) queries[1].query.bool.filter.push({ term: { "region.keyword": young.region } });
+    if (young.department) queries[1].query.bool.filter.push({ term: { "department.keyword": young.department } });
+
+    const { responses } = await api.esQuery(queries);
+    const m = api.getAggregations(responses[0]);
+    return m.WAITING_AFFECTATION || 0;
+  }
+
+  async function fetch2021Validated() {
+    const queries = [];
+    queries.push({ index: "young", type: "_doc" });
+    queries.push({
+      query: { bool: { must: { match_all: {} }, filter: [{ term: { "cohort.keyword": "2021" } }, { term: { "status.keyword": "VALIDATED" } }] } },
+      aggs: { status: { terms: { field: "status.keyword" } } },
+      size: 0,
+    });
+
+    if (young.region) queries[1].query.bool.filter.push({ term: { "region.keyword": young.region } });
+    if (young.department) queries[1].query.bool.filter.push({ term: { "department.keyword": young.department } });
+
+    const { responses } = await api.esQuery(queries);
+    const m = api.getAggregations(responses[0]);
+    return m.VALIDATED || 0;
+  }
+
+  const getInscriptions = async () => {
+    const a = await fetch2020WaitingAffectation();
+    const b = await fetch2021Validated();
+    return a + b;
+  };
+
+  const getInscriptionGoalReached = async (departement) => {
+    const { data, ok, code } = await api.get(`/inscription-goal/departement/${departement}`);
+    if (!ok) return toastr.error("nope");
+    return (await getInscriptions()) >= data.max;
+  };
 
   useEffect(() => {
     (async () => {
@@ -30,9 +78,13 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
 
   if (!young) return <div />;
 
-  const handleClickStatus = (status) => {
+  const handleClickStatus = async (status) => {
     if (!confirm("Êtes-vous sûr(e) de vouloir modifier le statut de ce profil?\nUn email sera automatiquement envoyé à l'utlisateur.")) return;
     if ([YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.REFUSED, YOUNG_STATUS.WITHDRAWN].includes(status)) return setModal(status);
+    if (status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INSCRIPTION) {
+      const goalReached = await getInscriptionGoalReached(young.department);
+      if (goalReached) return setModal("goal");
+    }
     setStatus(status);
   };
 
@@ -105,6 +157,19 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
           onChange={() => setModal(false)}
           onSend={(msg) => {
             setStatus(YOUNG_STATUS.WITHDRAWN, msg);
+            setModal(null);
+          }}
+        />
+      )}
+      {modal === "goal" && (
+        <ModalGoal
+          onChange={() => setModal(false)}
+          onValidate={() => {
+            setStatus(YOUNG_STATUS.VALIDATED);
+            setModal(null);
+          }}
+          callback={() => {
+            setStatus(YOUNG_STATUS.WAITING_LIST);
             setModal(null);
           }}
         />
