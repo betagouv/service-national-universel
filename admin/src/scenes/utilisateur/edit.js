@@ -17,6 +17,7 @@ import Loader from "../../components/Loader";
 
 export default (props) => {
   const [user, setUser] = useState();
+  const [service, setService] = useState();
   const currentUser = useSelector((state) => state.Auth.user);
   const history = useHistory();
 
@@ -26,6 +27,8 @@ export default (props) => {
       if (!id) return setUser(null);
       const { data } = await api.get(`/referent/${id}`);
       setUser(data);
+      const { data: d } = await api.get(`/department-service/referent/${id}`);
+      setService(d);
     })();
   }, []);
 
@@ -63,6 +66,21 @@ export default (props) => {
     }
   }
 
+  const updateUser = async (v) => {
+    const { ok, code, data } = await api.put(`/referent/${v._id}`, v);
+    if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
+    setUser(data);
+    toastr.success("Utilisateur mis à jour !");
+  };
+
+  const updateService = async (v) => {
+    const s = { department: v.department, directionName: v.serviceDirectionName };
+    const { ok, code, data } = await api.post(`/department-service/`, s);
+    if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
+    setService(data);
+    toastr.success("Service departemental mis à jour !");
+  };
+
   return (
     //@todo fix the depart and region
     <Wrapper>
@@ -70,10 +88,9 @@ export default (props) => {
         initialValues={user}
         onSubmit={async (values) => {
           try {
-            const { ok, code, data: user } = await api.put(`/referent/${values._id}`, values);
-            if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
-            setUser(user);
-            toastr.success("Mis à jour !");
+            // return console.log(values);
+            await updateUser(values);
+            await updateService(values);
           } catch (e) {
             console.log(e);
             toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
@@ -166,6 +183,16 @@ export default (props) => {
                           options={regionList.map((r) => ({ value: r, label: r }))}
                         />
                       ) : null}
+                    </BoxContent>
+                  </Box>
+                </Col>
+              )}
+              {values.role === REFERENT_ROLES.REFERENT_DEPARTMENT && service && (
+                <Col md={6} style={{ marginBottom: "20px" }}>
+                  <Box>
+                    <BoxTitle>{`Service Départemental (${service.department})`}</BoxTitle>
+                    <BoxContent direction="column">
+                      <Item title="Nom de la direction" values={values} name="serviceDirectionName" handleChange={handleChange} />
                     </BoxContent>
                   </Box>
                 </Col>
