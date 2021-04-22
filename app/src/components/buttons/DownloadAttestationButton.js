@@ -6,7 +6,6 @@ import { environment } from "../../config";
 
 export default ({ young, children, disabled, uri, ...rest }) => {
   const [loading, setLoading] = useState();
-  if (environment === "production") return <div />;
 
   const viewAttestation = async (a) => {
     setLoading(true);
