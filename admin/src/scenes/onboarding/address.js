@@ -58,7 +58,7 @@ export default ({ onChange }) => {
                   onSelect={(suggestion) => {
                     values.city = suggestion.properties.city;
                     values.zip = suggestion.properties.postcode;
-                    values.address = suggestion.properties.label;
+                    values.address = suggestion.properties.name;
                     values.location = { lon: suggestion.geometry.coordinates[0], lat: suggestion.geometry.coordinates[1] };
                     const depart = suggestion.properties.postcode.substr(0, 2);
                     values.department = departmentList[depart];
