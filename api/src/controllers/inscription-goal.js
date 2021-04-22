@@ -19,10 +19,11 @@ router.post("/", passport.authenticate("referent", { session: false }), async (r
   }
 });
 
-router.get("/", passport.authenticate(["referent"], { session: false }), async (req, res) => {
+router.get("/", async (req, res) => {
   try {
     let data = [];
-    if (req.user.role === "admin") data = await InscriptionGoalModel.find({});
+    // if (req.user.role === "admin") data = await InscriptionGoalModel.find({});
+    data = await InscriptionGoalModel.find({});
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);

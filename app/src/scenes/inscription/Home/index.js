@@ -1,16 +1,32 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet";
+import { useHistory } from "react-router-dom";
+
 import Header from "./header";
 import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
 import { Carousel } from "react-responsive-carousel";
 import MobileView from "./MobileView";
 import DesktopView from "./DesktopView";
+import ModalZip from "../../../components/modals/modalZip";
 
 export default ({}) => {
+  const [modal, setModal] = useState(null);
+  const history = useHistory();
+
   return (
     <div>
+      {modal === "zip" && (
+        <ModalZip
+          onChange={() => setModal(false)}
+          cb={(z) => {
+            console.log(z);
+            setModal(null);
+            // history.push("/inscription/profil");
+          }}
+        />
+      )}
       <Helmet>
         <script>{`
             gtag('event', 'conversion', {
@@ -52,14 +68,14 @@ export default ({}) => {
             <CardPhase upText="phase 3 - facultative" title="L'engagement" downText="Mission facultative de 3 mois minimum" />
           </Carousel>
           <StartButtonContainer className="desktop">
-            <StartButton to="/inscription/profil">Commencer&nbsp;l'inscription</StartButton>
+            <StartButton onClick={() => setModal("zip")}>Commencer&nbsp;l'inscription</StartButton>
           </StartButtonContainer>
         </CardsContainer>
         <MobileView />
         <DesktopView />
       </Wrapper>
       <StartButtonContainer className="mobile">
-        <StartButton to="/inscription/profil">Commencer&nbsp;l'inscription</StartButton>
+        <StartButton onClick={() => setModal("zip")}>Commencer&nbsp;l'inscription</StartButton>
       </StartButtonContainer>
     </div>
   );
