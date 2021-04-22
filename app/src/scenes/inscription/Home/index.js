@@ -10,6 +10,8 @@ import { Carousel } from "react-responsive-carousel";
 import MobileView from "./MobileView";
 import DesktopView from "./DesktopView";
 import ModalZip from "../../../components/modals/modalZip";
+import ModalGoalReached from "../../../components/modals/modalGoalReached";
+import ModalWaitingList from "../../../components/modals/modalWaitingList";
 
 export default ({}) => {
   const [modal, setModal] = useState(null);
@@ -21,12 +23,20 @@ export default ({}) => {
         <ModalZip
           onChange={() => setModal(false)}
           cb={(z) => {
-            console.log(z);
-            setModal(null);
-            // history.push("/inscription/profil");
+            if (z >= 1.3) {
+              return setModal("ModalGoalReached");
+            }
+            if (z >= 1) {
+              return setModal("ModalWaitingList");
+            }
+            if (z < 1) {
+              return history.push("/inscription/profil");
+            }
           }}
         />
       )}
+      {modal === "ModalGoalReached" && <ModalGoalReached onChange={() => setModal(false)} />}
+      {modal === "ModalWaitingList" && <ModalWaitingList onChange={() => setModal(false)} cb={() => history.push("/inscription/profil")} />}
       <Helmet>
         <script>{`
             gtag('event', 'conversion', {

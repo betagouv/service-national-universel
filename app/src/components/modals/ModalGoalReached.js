@@ -1,68 +1,38 @@
 import React, { useState } from "react";
 import { Modal } from "reactstrap";
 import styled from "styled-components";
-import { toastr } from "react-redux-toastr";
 
-import { departmentLookUp, translate } from "../../utils";
 import ModalButton from "../buttons/ModalButton";
-import api from "../../services/api";
 
 export default ({ onChange, cb }) => {
-  const [zip, setZip] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  const getInscriptions = async (department) => {
-    const { data, ok, code } = await api.post(`/inscription-goal/current`, { department });
-    return data;
-  };
-
-  const getInscriptionGoalReachedNormalized = async (departement) => {
-    setLoading(true);
-    const { data, ok, code } = await api.get("/inscription-goal");
-    let max = 0;
-    if (data) max = data.filter((d) => d.department === departement)[0].max;
-    if (!ok) return toastr.error("Oups, une erreur s'eset produite", translate(code));
-    console.log({ max });
-    const current = await getInscriptions(departement);
-    console.log({ current });
-    setLoading(false);
-    return max > 0 && current / max;
-  };
+  const [mail, setMail] = useState("");
 
   const handleClick = async () => {
-    let n = zip.substr(0, 2);
-    if (["97", "98"].includes(n)) {
-      n = zip.substr(0, 3);
-    }
-    if (n === "20") {
-      n = zip.substr(0, 2);
-      if (!["2A", "2B"].includes(n)) n = "2B";
-    }
-
-    const depart = departmentLookUp[n];
-    console.log(depart);
-    return cb(await getInscriptionGoalReachedNormalized(depart));
+    return cb(mail);
   };
 
   return (
     <Modal isOpen={true} toggle={onChange}>
       <ModalContainer>
         <img src={require("../../assets/close.svg")} height={10} onClick={onChange} />
-        <Header>première étape</Header>
+        <Header>avertissement</Header>
         <Content>
-          <h1>Renseignez votre code postal</h1>
+          <h1>Le SNU est victime de son succès dans votre département</h1>
+          <p>
+            Vous ne pouvez plus vous inscrire. Toutefois, n'hésitez pas à nous laisser votre adresse e-mail pour être recontacté par nos services dans le cadre de promotions
+            d’offres d’engagement des jeunes.
+          </p>
         </Content>
         <Footer>
           <input
             type="text"
             onInput={(e) => {
-              e.target.value = e.target.value.replace(/[^0-9.]/g, "").replace(/(\..*?)\..*/g, "$1");
-              setZip(e.target.value);
+              setMail(e.target.value);
             }}
-            placeholder="Code Postal"
+            placeholder="Votre e-mail"
           ></input>
-          <ModalButton loading={loading} color="#5245cc" onClick={handleClick}>
-            Continuer
+          <ModalButton color="#5245cc" onClick={handleClick}>
+            Être alerté
           </ModalButton>
           <p onClick={onChange}>Annuler</p>
         </Footer>
