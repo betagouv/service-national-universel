@@ -22,7 +22,7 @@ router.post("/", passport.authenticate("referent", { session: false }), async (r
 
 router.get("/", async (req, res) => {
   try {
-    let data = await InscriptionGoalModel.find({});
+    const data = await InscriptionGoalModel.find({});
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);

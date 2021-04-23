@@ -71,11 +71,9 @@ const Item = styled.li`
     @media (max-width: 1400px) {
       padding: 15px 10px 15px 20px;
     }
-    height: 70px;
     font-weight: 600;
     position: relative;
     display: flex;
-    align-items: center;
   }
   span {
     display: block;
@@ -91,7 +89,7 @@ const Item = styled.li`
     ::after {
       content: "";
       display: block;
-      height: 100%;
+      height: 110%;
       width: 2px;
       background-color: ${({ color }) => color || "#8da2fb"};
       position: absolute;

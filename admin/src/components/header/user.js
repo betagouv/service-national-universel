@@ -30,9 +30,16 @@ export default () => {
         </div>
         <Menu open={open}>
           <Close onClick={() => setOpen(false)}>&times;</Close>
-          <Item>
-            <InviteReferent role={user.role} />
-          </Item>
+          {["admin", "referent_department", "referent_region"].includes(user.role) ? (
+            <Item>
+              <InviteReferent role={user.role} />
+            </Item>
+          ) : null}
+          {["responsible", "supervisor"].includes(user.role) && user.structureId ? (
+            <Item>
+              <NavLink to={`/structure/${user.structureId}`}>Inviter un utilisateur</NavLink>
+            </Item>
+          ) : null}
           <Item>
             <NavLink to="/profil">Profil</NavLink>
           </Item>

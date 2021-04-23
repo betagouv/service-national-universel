@@ -13,7 +13,7 @@
 
         <mj-divider border-color="#F6F7F8"></mj-divider>
         <mj-text>
-          Si vous ne parvenez pas à cliquer sur le bouton "Modifier mes informations", copiez-collez l'URL ci-dessous dans votre navigateur: {{cta}}
+          Si vous ne parvenez pas à cliquer sur le bouton "Se connecter à mon espace", copiez-collez l'URL ci-dessous dans votre navigateur: {{cta}}
         </mj-text>
       </mj-column>
     </mj-section>

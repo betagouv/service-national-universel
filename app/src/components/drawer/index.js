@@ -8,6 +8,8 @@ import Item from "./item";
 import { DRAWER_TABS } from "../utils";
 import WithdrawnModal from "../WithdrawnModal";
 import DownloadAttestationButton from "../buttons/DownloadAttestationButton";
+import SubMenuPhase2 from "./SubMenuPhase2";
+import SubMenuPhase3 from "./SubMenuPhase3";
 
 export default (props) => {
   const [open, setOpen] = useState();
@@ -110,7 +112,7 @@ export default (props) => {
             <ul className="subNav">
               {young.statusPhase1 === "DONE" && young.cohesionCenterName ? (
                 <li>
-                  <DownloadAttestationButton young={young} uri="1">
+                  <DownloadAttestationButton class="subNav-item" young={young} uri="1">
                     Télécharger mon attestation
                   </DownloadAttestationButton>
                 </li>
@@ -127,30 +129,7 @@ export default (props) => {
             handleClick={(event) => handleClick(event, DRAWER_TABS.PHASE2)}
             open={activeTab === DRAWER_TABS.PHASE2}
           >
-            <ul className="subNav">
-              <li>
-                <NavLink to="/preferences" onClick={(event) => handleClick(event, DRAWER_TABS.PHASE2, "preferences")}>
-                  Renseigner mes préférences
-                </NavLink>
-              </li>
-              <li>
-                <NavLink to="/mission" onClick={(event) => handleClick(event, DRAWER_TABS.PHASE2, "mission")}>
-                  Trouver une mission
-                </NavLink>
-              </li>
-              <li>
-                <NavLink to="/candidature" onClick={(event) => handleClick(event, DRAWER_TABS.PHASE2, "candidature")}>
-                  Suivre mes candidatures
-                </NavLink>
-              </li>
-              {young.statusPhase2 === "VALIDATED" ? (
-                <li>
-                  <DownloadAttestationButton young={young} uri="2">
-                    Télécharger mon attestation
-                  </DownloadAttestationButton>
-                </li>
-              ) : null}
-            </ul>
+            <SubMenuPhase2 young={young} handleClick={handleClick} />
           </Item>
           <Item
             title="poursuivre mon snu"
@@ -162,30 +141,7 @@ export default (props) => {
             handleClick={(event) => handleClick(event, DRAWER_TABS.PHASE3)}
             open={activeTab === DRAWER_TABS.PHASE3}
           >
-            <ul className="subNav">
-              <li>
-                <NavLink to="/phase3/les-programmes" onClick={(event) => handleClick(event, DRAWER_TABS.PHASE3, "les-programmes")}>
-                  Les programmes d'engagement
-                </NavLink>
-              </li>
-              <li>
-                <NavLink to="/phase3/mission" onClick={(event) => handleClick(event, DRAWER_TABS.PHASE3, "mission")}>
-                  Trouver une mission
-                </NavLink>
-              </li>
-              <li>
-                <NavLink to="/phase3/valider" onClick={(event) => handleClick(event, DRAWER_TABS.PHASE3, "valider")}>
-                  Valider ma phase 3
-                </NavLink>
-              </li>
-              {young.statusPhase3 === "VALIDATED" ? (
-                <li>
-                  <DownloadAttestationButton young={young} uri="3">
-                    Télécharger mon attestation
-                  </DownloadAttestationButton>
-                </li>
-              ) : null}
-            </ul>
+            <SubMenuPhase3 young={young} handleClick={handleClick} />
           </Item>
         </MainNav>
         <ul className="subNav"></ul>
@@ -203,7 +159,7 @@ export default (props) => {
           {young.statusPhase1 === "DONE" && young.statusPhase2 === "VALIDATED" ? (
             <DrawerButton>
               <DownloadAttestationButton young={young} uri="snu">
-                Télécharger mon attestation
+                Télécharger mon attestation SNU
               </DownloadAttestationButton>
             </DrawerButton>
           ) : null}
@@ -333,12 +289,37 @@ const MainNav = styled.ul`
   .subNav {
     padding-left: 70px;
     margin-top: 10px;
-    a {
+    a,
+    .subNav-item {
+      cursor: pointer;
       font-weight: 400;
       padding: 5px 15px;
       display: inline-block;
       border-radius: 6px;
       margin-bottom: 10px;
+      font-size: 13px;
+      color: #fff;
+      align-items: center;
+      &.active,
+      :hover {
+        background-color: #5145cd;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      }
+      &.disabled {
+        cursor: default;
+      }
+      &.disabled:hover {
+        background-color: transparent;
+        box-shadow: none;
+      }
+      .icon {
+        height: 24px;
+        width: 24px;
+        margin-right: 20px;
+        svg {
+          stroke: #8da2fb;
+        }
+      }
     }
   }
 `;

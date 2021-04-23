@@ -1,12 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Spinner } from "reactstrap";
-import styled from "styled-components";
 import api from "../../services/api";
-import { environment } from "../../config";
 
 export default ({ young, children, disabled, uri, ...rest }) => {
   const [loading, setLoading] = useState();
-  if (environment === "production") return <div />;
 
   const viewAttestation = async (a) => {
     setLoading(true);
@@ -26,21 +23,8 @@ export default ({ young, children, disabled, uri, ...rest }) => {
     setLoading(false);
   };
   return (
-    <DownloadButton {...rest} onClick={() => viewAttestation(uri)}>
+    <div {...rest} onClick={() => viewAttestation(uri)}>
       {loading ? <Spinner size="sm" style={{ borderWidth: "0.1em" }} /> : children}
-    </DownloadButton>
+    </div>
   );
 };
-
-const DownloadButton = styled.span`
-  display: block;
-  color: #b4c6fc;
-  font-size: 12px;
-  font-weight: 400;
-  cursor: pointer;
-  text-align: center;
-  :hover {
-    text-decoration: underline;
-    color: #fff;
-  }
-`;

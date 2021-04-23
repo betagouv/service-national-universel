@@ -107,10 +107,23 @@ export default (props) => {
               {values.cohort === "2020" ? <JDC values={values} handleChange={handleChange} /> : null}
               <InformationsPhase1 values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
             </Row>
+            <TitleWrapper>
+              <DeleteButton young={young} />
+              <div style={{ display: "flex" }}>
+                <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`}>
+                  <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
+                </a>
+                <Link to={`/volontaire/${young._id}`}>
+                  <PanelActionButton icon="eye" title="Consulter" />
+                </Link>
+                <LoadingButton loading={isSubmitting} onClick={handleSubmit}>
+                  Enregistrer
+                </LoadingButton>
+              </div>
+            </TitleWrapper>
           </>
         )}
       </Formik>
-      <DeleteButton young={young} />
     </Wrapper>
   );
 };
