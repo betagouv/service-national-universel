@@ -28,7 +28,7 @@ export default ({ onChange, cb }) => {
       }
       max = f?.max;
     }
-    if (!ok) return toastr.error("Oups, une erreur s'eset produite", translate(code));
+    if (!ok) return toastr.error("Oups, une erreur s'est produite", translate(code));
     const nbYoungs = await getInscriptions(departement);
     setLoading(false);
     return max > 0 && { ...nbYoungs, max };
