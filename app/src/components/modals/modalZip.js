@@ -61,7 +61,7 @@ export default ({ onChange, cb }) => {
               e.target.value = e.target.value.replace(/[^0-9.]/g, "").replace(/(\..*?)\..*/g, "$1");
               setZip(e.target.value);
             }}
-            placeholder="Code Postal"
+            placeholder="Code Postal (ex : 44000)"
           ></input>
           <ModalButton loading={loading} color="#5245cc" onClick={handleClick}>
             Continuer
