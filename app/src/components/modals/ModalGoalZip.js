@@ -31,6 +31,7 @@ export default ({ onChange, cb }) => {
     if (!ok) return toastr.error("Oups, une erreur s'est produite", translate(code));
     const nbYoungs = await getInscriptions(departement);
     setLoading(false);
+
     return max > 0 && { ...nbYoungs, max };
   };
 

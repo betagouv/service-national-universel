@@ -9,7 +9,7 @@ import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a lo
 import { Carousel } from "react-responsive-carousel";
 import MobileView from "./MobileView";
 import DesktopView from "./DesktopView";
-import ModalZip from "../../../components/modals/ModalZip";
+import ModalGoalZip from "../../../components/modals/ModalGoalZip";
 import ModalGoalReached from "../../../components/modals/ModalGoalReached";
 import ModalWaitingList from "../../../components/modals/ModalWaitingList";
 import api from "../../../services/api";
@@ -24,7 +24,7 @@ export default ({}) => {
   return (
     <div>
       {modal === "zip" && (
-        <ModalZip
+        <ModalGoalZip
           onChange={() => setModal(false)}
           cb={(zip, e) => {
             setZip(zip);
