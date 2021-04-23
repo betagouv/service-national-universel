@@ -24,7 +24,7 @@ export default ({ onChange, cb }) => {
       const f = data.filter((d) => d.department === departement)[0];
       if (!f || f.length === 0) {
         setLoading(false);
-        return toastr.error("Oups, une erreur s'est produite", "Il semblerait que le format soit invalide. Merci de ressayer");
+        return toastr.error("Oups, une erreur s'est produite", "Il semblerait que le format soit invalide. Merci de réessayer");
       }
       max = f?.max;
     }

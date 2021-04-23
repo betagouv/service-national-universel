@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Modal } from "reactstrap";
 import styled from "styled-components";
+import validator from "validator";
+import { toastr } from "react-redux-toastr";
 
 import ModalButton from "../buttons/ModalButton";
 
@@ -9,6 +11,8 @@ export default ({ onChange, cb }) => {
 
   const handleClick = async () => {
     if (!mail) return onChange();
+    if (!validator.isEmail(mail))
+      return toastr.error("Oups, une erreur s'est produite", "Il semblerait que le format de votre mail soit invalide. Merci de réessayer", { timeOut: 3000 });
     return cb(mail);
   };
 
