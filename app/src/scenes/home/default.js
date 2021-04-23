@@ -1,9 +1,8 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
-import NextStep from "../phase1/nextStep";
-import { COHESION_STAY_LIMIT_DATE, INTEREST_MISSION_LIMIT_DATE, translate, PHASE_STATUS_COLOR } from "../../utils";
+import { translate, PHASE_STATUS_COLOR } from "../../utils";
+import Hero from "../../components/Hero";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
@@ -40,34 +39,16 @@ export default () => {
             <div className="title">
               1. Un séjour de cohésion <Tag color={PHASE_STATUS_COLOR[young.statusPhase1]}>{translate(young.statusPhase1)}</Tag>
             </div>
-            {/* <div className="info">
-              <div className="subtitle">{COHESION_STAY_LIMIT_DATE[young.cohort]}</div>
-              <div className="link">
-                Renseignez votre <span onClick={() => goTo("sanitaire")}>fiche sanitaire</span> et votre{" "}
-                <span onClick={() => goTo("imageRight")}>consentement de droit à l'image</span>
-              </div>
-            </div> */}
           </WrapperItem>
           <WrapperItem>
             <div className="title">
               2. Une première mission d'intérêt général <Tag color={PHASE_STATUS_COLOR[young.statusPhase2]}>{translate(young.statusPhase2)}</Tag>
             </div>
-            {/* <div className="info">
-              <div className="subtitle">À réaliser dans l’année, jusqu’au {INTEREST_MISSION_LIMIT_DATE[young.cohort]}</div>
-              <div className="link">
-                <Link to="/preferences">
-                  <span>Indiquez vos préférences de mission</span>
-                </Link>
-              </div>
-            </div> */}
           </WrapperItem>
           <WrapperItem>
             <div className="title">
               3. Un engagement vers une société plus solidaire <Tag color={PHASE_STATUS_COLOR[young.statusPhase3]}>{translate(young.statusPhase3)}</Tag>
             </div>
-            {/* <div className="info">
-              <div className="subtitle">À réaliser avant vos 25 ans</div>
-            </div> */}
           </WrapperItem>
         </Content>
         <div className="thumb" />
@@ -122,51 +103,6 @@ const Content = styled.div`
       width: 1.5rem;
       stroke: #5145cd;
     }
-  }
-`;
-
-const Hero = styled.div`
-  border-radius: 0.5rem;
-  @media (max-width: 768px) {
-    border-radius: 0;
-  }
-  max-width: 80rem;
-  margin: 1rem auto;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  justify-content: space-between;
-  background-color: #fff;
-  h1 {
-    font-size: 3rem;
-    @media (max-width: 768px) {
-      font-size: 1.8rem;
-    }
-    color: #161e2e;
-    margin-bottom: 20px;
-    font-weight: 500;
-    line-height: 1;
-  }
-  p {
-    color: #6b7280;
-    font-size: 1.25rem;
-    @media (max-width: 768px) {
-      font-size: 1rem;
-    }
-    font-weight: 400;
-    display: -webkit-box;
-    -webkit-line-clamp: 5;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-  .thumb {
-    min-height: 400px;
-    background: url(${require("../../assets/phase3.jpg")}) no-repeat center;
-    background-size: cover;
-    flex: 1;
-    -webkit-clip-path: polygon(15% 0, 0 100%, 100% 100%, 100% 0);
-    clip-path: polygon(15% 0, 0 100%, 100% 100%, 100% 0);
   }
 `;
 

@@ -13,6 +13,7 @@ import MobilityCard from "./mobilityCard";
 import TransportCard from "./transportCard";
 import ErrorMessage, { requiredMessage } from "./errorMessage";
 import { translate, MISSION_DOMAINS, PERIOD, PROFESSIONNAL_PROJECT, PROFESSIONNAL_PROJECT_PRECISION } from "../../utils";
+import Hero from "../../components/Hero";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
@@ -371,66 +372,6 @@ const Title = styled.div`
     padding: 0 10px;
     background-color: #fff;
     color: rgb(22, 30, 46);
-  }
-`;
-
-const Hero = styled.div`
-  textarea {
-    width: 90%;
-    padding: 20px 15px;
-    font-size: 18px;
-    ::placeholder {
-      font-size: 18px;
-    }
-  }
-  input {
-    width: 90%;
-    padding: 20px 15px;
-    font-size: 18px;
-    ::placeholder {
-      font-size: 18px;
-    }
-  }
-  border-radius: 0.5rem;
-  @media (max-width: 768px) {
-    border-radius: 0;
-  }
-  max-width: 80rem;
-  margin: 0 auto 3rem auto;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  justify-content: space-between;
-  background-color: #fff;
-  h1 {
-    font-size: 2rem;
-    @media (max-width: 768px) {
-      font-size: 1.8rem;
-    }
-    color: #161e2e;
-    margin-bottom: 20px;
-    font-weight: 500;
-    line-height: 1;
-  }
-  p {
-    color: #6b7280;
-    font-size: 1.25rem;
-    @media (max-width: 768px) {
-      font-size: 1rem;
-    }
-    font-weight: 400;
-    display: -webkit-box;
-    -webkit-line-clamp: 5;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-  .thumb {
-    background: url(${require("../../assets/rang.jpeg")}) no-repeat center;
-    background-size: cover;
-    flex: 1;
-    -webkit-clip-path: polygon(15% 0, 0 100%, 100% 100%, 100% 0);
-    clip-path: polygon(15% 0, 0 100%, 100% 100%, 100% 0);
   }
 `;
 
