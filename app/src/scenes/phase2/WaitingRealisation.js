@@ -28,8 +28,7 @@ export default () => {
             <p>
               <strong>Vos missions d'intérêt général</strong>
               <br />
-              Consulter des milliers de missions disponibles pour la réalisation de votre phase 2, candidatez-y, <strong>classez vos choix</strong> et
-              <strong>suivez vos candidatures</strong>
+              Consulter des milliers de missions disponibles pour la réalisation de votre phase 2, candidatez-y, classez vos choix et suivez vos candidatures
               <br />
               <Link to="/mission">Trouver une mission {">"}</Link>
             </p>

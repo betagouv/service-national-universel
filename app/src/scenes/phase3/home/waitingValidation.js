@@ -2,7 +2,6 @@ import React from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
-import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young) || {};

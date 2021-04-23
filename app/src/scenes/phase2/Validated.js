@@ -30,7 +30,16 @@ export default () => {
               <br />
               Télécharger votre attestation de réalisation de votre phase 2
               <br />
-              <DownloadAttestationButton style={{ color: "#5949d0", textAlign: "left", fontSize: "1rem" }} young={young} uri="2">
+              <DownloadAttestationButton
+                style={{
+                  color: "#5949d0",
+                  textAlign: "left",
+                  fontSize: "1rem",
+                  cursor: "pointer",
+                }}
+                young={young}
+                uri="2"
+              >
                 Télécharger mon attestation {">"}
               </DownloadAttestationButton>
             </p>
@@ -42,7 +51,16 @@ export default () => {
                   <br />
                   Télécharger votre attestation de réalisation du SNU
                   <br />
-                  <DownloadAttestationButton style={{ color: "#5949d0", textAlign: "left", fontSize: "1rem" }} young={young} uri="snu">
+                  <DownloadAttestationButton
+                    style={{
+                      color: "#5949d0",
+                      textAlign: "left",
+                      fontSize: "1rem",
+                      cursor: "pointer",
+                    }}
+                    young={young}
+                    uri="snu"
+                  >
                     Télécharger mon attestation {">"}
                   </DownloadAttestationButton>
                 </p>

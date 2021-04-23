@@ -31,7 +31,7 @@ function getBgUrl2019() {
 const phase1 = (young) => {
   const d = new Date();
   const html = fs.readFileSync(path.resolve(__dirname, "./phase1.html"), "utf8");
-  const template = young.cohort === "2019" ? getBgUrl() : getBgUrl2019();
+  const template = young.cohort === "2019" ? getBgUrl2019() : getBgUrl();
   const COHESION_CENTER_LOCATION = getLocationCohesionCenter(young);
   return html
     .replace(/{{FIRST_NAME}}/g, young.firstName)
