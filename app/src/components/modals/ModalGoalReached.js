@@ -8,6 +8,7 @@ export default ({ onChange, cb }) => {
   const [mail, setMail] = useState("");
 
   const handleClick = async () => {
+    if (!mail) return onChange();
     return cb(mail);
   };
 
@@ -25,12 +26,12 @@ export default ({ onChange, cb }) => {
         </Content>
         <Footer>
           <input
-            type="text"
+            type="email"
             onInput={(e) => {
               setMail(e.target.value);
             }}
             placeholder="Votre e-mail"
-          ></input>
+          />
           <ModalButton color="#5245cc" onClick={handleClick}>
             Être alerté
           </ModalButton>

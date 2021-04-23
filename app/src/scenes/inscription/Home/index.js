@@ -12,30 +12,48 @@ import DesktopView from "./DesktopView";
 import ModalZip from "../../../components/modals/modalZip";
 import ModalGoalReached from "../../../components/modals/modalGoalReached";
 import ModalWaitingList from "../../../components/modals/modalWaitingList";
+import api from "../../../services/api";
+import { toastr } from "react-redux-toastr";
+import { translate } from "../../../utils";
 
 export default ({}) => {
   const [modal, setModal] = useState(null);
   const history = useHistory();
+  const [zip, setZip] = useState();
 
   return (
     <div>
       {modal === "zip" && (
         <ModalZip
           onChange={() => setModal(false)}
-          cb={(z) => {
-            // no goal specified for this department
-            if (!z) return history.push("/inscription/profil");
+          cb={(zip, e) => {
+            setZip(zip);
+            // if no goal specified for this department ...
+            if (!e) return history.push("/inscription/profil");
 
-            const ratioRegistered = z.registered / z.max;
-            const ratioWaitingList = z.waitingList / z.max;
+            // ... else get the ratio and display the modal if needed
+            const ratioRegistered = e.registered / e.max;
+            const ratioWaitingList = e.waitingList / e.max;
 
-            if (ratioRegistered >= 1 && ratioWaitingList >= 0.65) return setModal("ModalGoalReached");
+            if (ratioRegistered >= 1 && ratioWaitingList >= 0.15) return setModal("ModalGoalReached");
             if (ratioRegistered >= 1) return setModal("ModalWaitingList");
             if (ratioRegistered < 1) return history.push("/inscription/profil");
           }}
         />
       )}
-      {modal === "ModalGoalReached" && <ModalGoalReached onChange={() => setModal(false)} />}
+      {modal === "ModalGoalReached" && (
+        <ModalGoalReached
+          onChange={() => setModal(false)}
+          cb={async (mail) => {
+            const { ok, code } = await api.post("/waiting-list", { mail, zip });
+            if (!ok) toastr.error("Oups, une erreur s'est produite", translate(code));
+            else {
+              toastr.success("Nous avons bien pris en compte votre intérêt");
+            }
+            setModal(false);
+          }}
+        />
+      )}
       {modal === "ModalWaitingList" && <ModalWaitingList onChange={() => setModal(false)} cb={() => history.push("/inscription/profil")} />}
       <Helmet>
         <script>{`

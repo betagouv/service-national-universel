@@ -36,10 +36,8 @@ export default ({ onChange, cb }) => {
       n = zip.substr(0, 2);
       if (!["2A", "2B"].includes(n)) n = "2B";
     }
-
     const depart = departmentLookUp[n];
-    console.log(depart);
-    return cb(await getInscriptionGoalReachedNormalized(depart));
+    return cb(zip, await getInscriptionGoalReachedNormalized(depart));
   };
 
   return (
