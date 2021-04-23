@@ -12,12 +12,27 @@ import matomo from "../services/matomo";
 import ModalCorrection from "./modals/ModalCorrection";
 import ModalRefused from "./modals/ModalRefused";
 import ModalWithdrawn from "./modals/ModalWithdrawn";
+import ModalGoal from "./modals/ModalGoal";
 import Chevron from "./Chevron";
 
 export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status", phase = YOUNG_PHASE.INSCRIPTION }) => {
   const [modal, setModal] = useState(null);
   const [young, setYoung] = useState(null);
   const user = useSelector((state) => state.Auth.user);
+
+  const getInscriptions = async (department) => {
+    const { data, ok, code } = await api.post(`/inscription-goal/current`, { department });
+    return data;
+  };
+
+  const getInscriptionGoalReachedNormalized = async (departement) => {
+    const { data, ok, code } = await api.get("/inscription-goal");
+    let max = 0;
+    if (data) max = data.filter((d) => d.department === departement)[0]?.max;
+    if (!ok) return toastr.error("Oups, une erreur s'est produite", translate(code));
+    const nbYoungs = await getInscriptions(departement);
+    return max > 0 && { ...nbYoungs, max };
+  };
 
   useEffect(() => {
     (async () => {
@@ -30,9 +45,14 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
 
   if (!young) return <div />;
 
-  const handleClickStatus = (status) => {
+  const handleClickStatus = async (status) => {
     if (!confirm("Êtes-vous sûr(e) de vouloir modifier le statut de ce profil?\nUn email sera automatiquement envoyé à l'utlisateur.")) return;
     if ([YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.REFUSED, YOUNG_STATUS.WITHDRAWN].includes(status)) return setModal(status);
+    if (status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INSCRIPTION) {
+      const youngs = await getInscriptionGoalReachedNormalized(young.department);
+      const ratioRegistered = youngs.registered / youngs.max;
+      if (ratioRegistered >= 1) return setModal("goal");
+    }
     setStatus(status);
   };
 
@@ -105,6 +125,19 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
           onChange={() => setModal(false)}
           onSend={(msg) => {
             setStatus(YOUNG_STATUS.WITHDRAWN, msg);
+            setModal(null);
+          }}
+        />
+      )}
+      {modal === "goal" && (
+        <ModalGoal
+          onChange={() => setModal(false)}
+          onValidate={() => {
+            setStatus(YOUNG_STATUS.VALIDATED);
+            setModal(null);
+          }}
+          callback={() => {
+            setStatus(YOUNG_STATUS.WAITING_LIST);
             setModal(null);
           }}
         />
