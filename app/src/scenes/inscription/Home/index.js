@@ -239,7 +239,7 @@ const StartButtonContainer = styled.div`
   }
 `;
 
-const StartButton = styled(Link)`
+const StartButton = styled.div`
   padding: 1rem 1.5rem;
   text-transform: uppercase;
   color: #fff;
