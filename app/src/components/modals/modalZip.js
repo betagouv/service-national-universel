@@ -50,7 +50,7 @@ export default ({ onChange, cb }) => {
         </Content>
         <Footer>
           <input
-            type="text"
+            type="tel"
             onInput={(e) => {
               e.target.value = e.target.value.replace(/[^0-9.]/g, "").replace(/(\..*?)\..*/g, "$1");
               setZip(e.target.value);
