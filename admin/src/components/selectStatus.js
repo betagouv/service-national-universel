@@ -20,51 +20,18 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
   const [young, setYoung] = useState(null);
   const user = useSelector((state) => state.Auth.user);
 
-  // todo: refacto ! duplicated functions /scenes/dashboard/inscription/goals
-  async function fetch2020WaitingAffectation() {
-    const queries = [];
-    queries.push({ index: "young", type: "_doc" });
-    queries.push({
-      query: { bool: { must: { match_all: {} }, filter: [{ term: { "cohort.keyword": "2020" } }, { term: { "statusPhase1.keyword": "WAITING_AFFECTATION" } }] } },
-      aggs: { status: { terms: { field: "statusPhase1.keyword" } } },
-      size: 0,
-    });
-
-    if (young.region) queries[1].query.bool.filter.push({ term: { "region.keyword": young.region } });
-    if (young.department) queries[1].query.bool.filter.push({ term: { "department.keyword": young.department } });
-
-    const { responses } = await api.esQuery(queries);
-    const m = api.getAggregations(responses[0]);
-    return m.WAITING_AFFECTATION || 0;
-  }
-
-  async function fetch2021Validated() {
-    const queries = [];
-    queries.push({ index: "young", type: "_doc" });
-    queries.push({
-      query: { bool: { must: { match_all: {} }, filter: [{ term: { "cohort.keyword": "2021" } }, { term: { "status.keyword": "VALIDATED" } }] } },
-      aggs: { status: { terms: { field: "status.keyword" } } },
-      size: 0,
-    });
-
-    if (young.region) queries[1].query.bool.filter.push({ term: { "region.keyword": young.region } });
-    if (young.department) queries[1].query.bool.filter.push({ term: { "department.keyword": young.department } });
-
-    const { responses } = await api.esQuery(queries);
-    const m = api.getAggregations(responses[0]);
-    return m.VALIDATED || 0;
-  }
-
-  const getInscriptions = async () => {
-    const a = await fetch2020WaitingAffectation();
-    const b = await fetch2021Validated();
-    return a + b;
+  const getInscriptions = async (department) => {
+    const { data, ok, code } = await api.post(`/inscription-goal/current`, { department });
+    return data;
   };
 
-  const getInscriptionGoalReached = async (departement) => {
-    const { data, ok, code } = await api.get(`/inscription-goal/departement/${departement}`);
-    if (!ok) return toastr.error("nope");
-    return data.max > 0 && (await getInscriptions()) >= data.max;
+  const getInscriptionGoalReachedNormalized = async (departement) => {
+    const { data, ok, code } = await api.get("/inscription-goal");
+    let max = 0;
+    if (data) max = data.filter((d) => d.department === departement)[0]?.max;
+    if (!ok) return toastr.error("Oups, une erreur s'est produite", translate(code));
+    const nbYoungs = await getInscriptions(departement);
+    return max > 0 && { ...nbYoungs, max };
   };
 
   useEffect(() => {
@@ -82,8 +49,9 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
     if (!confirm("Êtes-vous sûr(e) de vouloir modifier le statut de ce profil?\nUn email sera automatiquement envoyé à l'utlisateur.")) return;
     if ([YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.REFUSED, YOUNG_STATUS.WITHDRAWN].includes(status)) return setModal(status);
     if (status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INSCRIPTION) {
-      const goalReached = await getInscriptionGoalReached(young.department);
-      if (goalReached) return setModal("goal");
+      const youngs = await getInscriptionGoalReachedNormalized(young.department);
+      const ratioRegistered = youngs.registered / youngs.max;
+      if (ratioRegistered >= 1) return setModal("goal");
     }
     setStatus(status);
   };
