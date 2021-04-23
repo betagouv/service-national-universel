@@ -36,7 +36,8 @@ router.post("/current", async (req, res) => {
   try {
     const y2020 = await YoungModel.find({ cohort: "2020", statusPhase1: "WAITING_AFFECTATION", department: req.body.department }).count();
     const y2021 = await YoungModel.find({ cohort: "2021", status: "VALIDATED", department: req.body.department }).count();
-    const data = y2020 + y2021;
+    const yWL = await YoungModel.find({ status: "WAITING_LIST", department: req.body.department }).count();
+    const data = { registered: y2020 + y2021, waitingList: yWL };
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);

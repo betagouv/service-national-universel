@@ -23,15 +23,15 @@ export default ({}) => {
         <ModalZip
           onChange={() => setModal(false)}
           cb={(z) => {
-            if (z >= 1.3) {
-              return setModal("ModalGoalReached");
-            }
-            if (z >= 1) {
-              return setModal("ModalWaitingList");
-            }
-            if (z < 1) {
-              return history.push("/inscription/profil");
-            }
+            // no goal specified for this department
+            if (!z) return history.push("/inscription/profil");
+
+            const ratioRegistered = z.registered / z.max;
+            const ratioWaitingList = z.waitingList / z.max;
+
+            if (ratioRegistered >= 1 && ratioWaitingList >= 0.65) return setModal("ModalGoalReached");
+            if (ratioRegistered >= 1) return setModal("ModalWaitingList");
+            if (ratioRegistered < 1) return history.push("/inscription/profil");
           }}
         />
       )}

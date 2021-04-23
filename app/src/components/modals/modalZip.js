@@ -22,11 +22,9 @@ export default ({ onChange, cb }) => {
     let max = 0;
     if (data) max = data.filter((d) => d.department === departement)[0].max;
     if (!ok) return toastr.error("Oups, une erreur s'eset produite", translate(code));
-    console.log({ max });
-    const current = await getInscriptions(departement);
-    console.log({ current });
+    const nbYoungs = await getInscriptions(departement);
     setLoading(false);
-    return max > 0 && current / max;
+    return max > 0 && { ...nbYoungs, max };
   };
 
   const handleClick = async () => {
