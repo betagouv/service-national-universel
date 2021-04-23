@@ -9,9 +9,9 @@ import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a lo
 import { Carousel } from "react-responsive-carousel";
 import MobileView from "./MobileView";
 import DesktopView from "./DesktopView";
-import ModalZip from "../../../components/modals/modalZip";
-import ModalGoalReached from "../../../components/modals/modalGoalReached";
-import ModalWaitingList from "../../../components/modals/modalWaitingList";
+import ModalZip from "../../../components/modals/ModalZip";
+import ModalGoalReached from "../../../components/modals/ModalGoalReached";
+import ModalWaitingList from "../../../components/modals/ModalWaitingList";
 import api from "../../../services/api";
 import { toastr } from "react-redux-toastr";
 import { translate } from "../../../utils";
