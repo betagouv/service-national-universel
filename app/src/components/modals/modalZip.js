@@ -33,7 +33,6 @@ export default ({ onChange, cb }) => {
       n = zip.substr(0, 3);
     }
     if (n === "20") {
-      n = zip.substr(0, 2);
       if (!["2A", "2B"].includes(n)) n = "2B";
     }
     const depart = departmentLookUp[n];
