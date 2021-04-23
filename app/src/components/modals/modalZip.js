@@ -20,7 +20,14 @@ export default ({ onChange, cb }) => {
     setLoading(true);
     const { data, ok, code } = await api.get("/inscription-goal");
     let max = 0;
-    if (data) max = data.filter((d) => d.department === departement)[0].max;
+    if (data) {
+      const f = data.filter((d) => d.department === departement)[0];
+      if (!f || f.length === 0) {
+        setLoading(false);
+        return toastr.error("Oups, une erreur s'est produite", "Il semblerait que le format soit invalide. Merci de ressayer");
+      }
+      max = f?.max;
+    }
     if (!ok) return toastr.error("Oups, une erreur s'eset produite", translate(code));
     const nbYoungs = await getInscriptions(departement);
     setLoading(false);
