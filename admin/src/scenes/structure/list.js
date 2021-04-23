@@ -43,8 +43,34 @@ export default () => {
                   title="Exporter les structures"
                   defaultQuery={getExportQuery}
                   collection="structure"
-                  transform={(e) => {
-                    return e;
+                  react={{ and: FILTERS }}
+                  transform={(data) => {
+                    return {
+                      _id: data._id,
+                      "Nom de la structure": data.name,
+                      "Numéro de SIRET": data.siret,
+                      Description: data.description,
+                      "Site internet": data.website,
+                      Facebook: data.facebook,
+                      Twitter: data.twitter,
+                      Instagram: data.instagram,
+                      Statut: data.status,
+                      "Est une tête de réseau": data.isNetwork,
+                      "Nom de la tête de réseau": data.networkName,
+                      "Statut juridique": data.legalStatus,
+                      "Type d'association": data.associationTypes,
+                      "Type de structure publique": data.structurePubliqueType,
+                      "Type de service de l'état": data.structurePubliqueEtatType,
+                      "Type de structure privée": data.structurePriveeType,
+                      "Adresse de la structure": data.address,
+                      "Code postal de la structure": data.zip,
+                      "Ville de la structure": data.city,
+                      "Département de la structure": data.department,
+                      "Région de la structure": data.region,
+                      "Pays de la structure": data.country,
+                      "Créé lé": data.createdAt,
+                      "Mis à jour le": data.updatedAt,
+                    };
                   }}
                 />
               </div>
