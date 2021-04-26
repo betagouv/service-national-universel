@@ -30,7 +30,9 @@ class Auth {
     const { error, value } = Joi.object({
       email: Joi.string().lowercase().trim().email().required(),
       password: Joi.string().required(),
-    }).validate(req.body);
+    })
+      .unknown()
+      .validate(req.body);
 
     if (error) return res.status(400).send({ ok: false, code: EMAIL_AND_PASSWORD_REQUIRED });
 
@@ -123,7 +125,9 @@ class Auth {
       password: Joi.string().min(8).required(),
       newPassword: Joi.string().min(8).required(),
       verifyPassword: Joi.string().min(8).required(),
-    }).validate(req.body);
+    })
+      .unknown()
+      .validate(req.body);
 
     if (error) res.status(400).send({ ok: false, code: PASSWORD_NOT_VALIDATED });
 
@@ -152,7 +156,9 @@ class Auth {
   async forgotPassword(req, res, cta) {
     const { error, value } = Joi.object({
       email: Joi.string().lowercase().trim().email().required(),
-    }).validate(req.body);
+    })
+      .unknown()
+      .validate(req.body);
 
     if (error) return res.status(404).send({ ok: false, code: USER_NOT_EXISTS });
 
@@ -183,7 +189,9 @@ class Auth {
     const { error, value } = Joi.object({
       password: Joi.string().min(8).required(),
       token: Joi.string().required(),
-    }).validate(req.body);
+    })
+      .unknown()
+      .validate(req.body);
 
     if (error) {
       if (error.details.find((e) => e.path === "password")) return res.status(400).send({ ok: false, code: PASSWORD_NOT_VALIDATED });
