@@ -100,14 +100,14 @@ export default ({}) => {
             <CardPhase upText="phase 3 - facultative" title="L'engagement" downText="Mission facultative de 3 mois minimum" />
           </Carousel>
           <StartButtonContainer className="desktop">
-            <StartButton onClick={() => setModal("zip")}>Commencer&nbsp;l'inscription</StartButton>
+            <StartButton to="/inscription/profil">Commencer&nbsp;l'inscription</StartButton>
           </StartButtonContainer>
         </CardsContainer>
         <MobileView />
         <DesktopView />
       </Wrapper>
       <StartButtonContainer className="mobile">
-        <StartButton onClick={() => setModal("zip")}>Commencer&nbsp;l'inscription</StartButton>
+        <StartButton to="/inscription/profil">Commencer&nbsp;l'inscription</StartButton>
       </StartButtonContainer>
     </div>
   );
@@ -243,7 +243,7 @@ const StartButtonContainer = styled.div`
   }
 `;
 
-const StartButton = styled.div`
+const StartButton = styled(Link)`
   padding: 1rem 1.5rem;
   text-transform: uppercase;
   color: #fff;
