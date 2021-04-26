@@ -313,7 +313,7 @@ const Schema = new mongoose.Schema({
   },
   populationDensity: {
     type: String,
-    enum :["TRES PEU DENSE","PEU DENSE", "INTERMEDIAIRE", "DENSE"],
+    enum: ["TRES PEU DENSE", "PEU DENSE", "INTERMEDIAIRE", "DENSE"],
     documentation: {
       description: "tres peu dense, peu dense, intermediaire, tres dense",
     },
@@ -613,6 +613,7 @@ const Schema = new mongoose.Schema({
   handicap: {
     type: String,
     enum: ["true", "false"],
+    default: "false",
     documentation: {
       description: "Le volontaire a un handicap",
     },
@@ -620,6 +621,7 @@ const Schema = new mongoose.Schema({
   ppsBeneficiary: {
     type: String,
     enum: ["true", "false"],
+    default: "false",
     documentation: {
       description: "le volontaire bénéficie d'un PPS (projet personnalisé de scolarisation)",
     },
@@ -627,6 +629,7 @@ const Schema = new mongoose.Schema({
   paiBeneficiary: {
     type: String,
     enum: ["true", "false"],
+    default: "false",
     documentation: {
       description: "Le volontaire bénéficie d'un PAI (projet d'accueil individualisé)",
     },
@@ -695,6 +698,7 @@ const Schema = new mongoose.Schema({
   specificAmenagment: {
     type: String,
     enum: ["true", "false"],
+    default: "false",
     documentation: {
       description: "Le volontaire a besoin d'aménagements spécifiques",
     },
