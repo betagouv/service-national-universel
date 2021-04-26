@@ -36,8 +36,7 @@ export default ({}) => {
             const ratioWaitingList = e.waitingList / e.max;
 
             if (ratioRegistered >= 1 && ratioWaitingList >= 0.15) return setModal("ModalGoalReached");
-            if (ratioRegistered >= 1) return setModal("ModalWaitingList");
-            if (ratioRegistered < 1) return history.push("/inscription/profil");
+            return history.push("/inscription/profil");
           }}
         />
       )}
