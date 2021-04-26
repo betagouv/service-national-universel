@@ -28,48 +28,6 @@ export default () => {
         </Content>
         <div className="thumb" />
       </Hero>
-      <div style={{ maxWidth: "80rem", margin: "0 auto" }}>
-        <Heading>
-          <h2>Parmi les grands programmes d'engagement</h2>
-          <p>Rejoignez plus 100 000 jeunes français déjà engagés dans de grandes causes</p>
-        </Heading>
-        <Row>
-          <Col>
-            <ProgramCard
-              title="Le Service Civique"
-              image={require("../../assets/programmes-engagement/service-civique.jpg")}
-              details="Un engagement volontaire au service de l’intérêt général, en France ou à l’étranger, auprès d’organisations à but non lucratif ou publiques."
-              href="https://www.service-civique.gouv.fr/"
-            />
-          </Col>
-          <Col>
-            <ProgramCard
-              title="Les Sapeurs-Pompiers de France"
-              image={require("../../assets/programmes-engagement/sapeur-pompier-2.jpg")}
-              details="Si vous souhaitez vous engager pour aider votre prochain tout en ayant une autre activité professionnelle, le statut de sapeur-pompier volontaire peut vous permettre d’y parvenir."
-              href="https://www.pompiers.fr/grand-public/devenir-sapeur-pompier"
-            />
-          </Col>
-        </Row>
-        <Row>
-          <Col>
-            <ProgramCard
-              title="Plan Mercredi"
-              image={require("../../assets/programmes-engagement/plan-mercredi.png")}
-              details="Le Plan mercredi met en place un cadre de confiance pour les communes et les parents afin d’offrir au plus grand nombre d’enfants un accueil de loisirs éducatifs de grande qualité le mercredi."
-              href="http://planmercredi.education.gouv.fr/"
-            />
-          </Col>
-          <Col>
-            <ProgramCard
-              title="JeVeuxAider"
-              image={require("../../assets/jva.png")}
-              details="Devenez bénévole et trouvez des missions en quelques clics près de chez vous ou à distance. Plus de 330 000 bénévoles soutiennent des milliers d'associations et d'organisations publiques."
-              href="https://jeveuxaider.gouv.fr/"
-            />
-          </Col>
-        </Row>
-      </div>
     </div>
   );
 };
