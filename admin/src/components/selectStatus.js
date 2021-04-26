@@ -87,7 +87,7 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
       if (status === YOUNG_STATUS.WAITING_LIST) {
         matomo.logEvent("status_update", YOUNG_STATUS.WAITING_LIST);
         window.lumiere("sendEvent", "status_update", YOUNG_STATUS.WAITING_LIST, { prevStatus, status: YOUNG_STATUS.WAITING_LIST }); // cat, action, props
-        await api.post(`/referent/email/waiting_list/${young._id}`);
+        // await api.post(`/referent/email/waiting_list/${young._id}`);
       }
       setYoung(newYoung);
       toastr.success("Mis à jour!");
