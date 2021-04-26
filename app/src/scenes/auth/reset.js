@@ -31,10 +31,10 @@ export default () => {
           initialValues={{ password: "" }}
           validateOnChange={false}
           validateOnBlur={false}
-          onSubmit={async (values, actions) => {
+          onSubmit={async ({ password }, actions) => {
             try {
               const { token } = queryString.parse(location.search);
-              const res = await api.post("/young/forgot_password_reset", { ...values, token });
+              const res = await api.post("/young/forgot_password_reset", { password, token });
               if (!res.ok) throw res;
               toastr.success("Mot de passe changé avec succès");
               setRedirect(true);

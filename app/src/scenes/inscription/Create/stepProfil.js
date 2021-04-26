@@ -57,7 +57,8 @@ export default () => {
         validateOnBlur={false}
         onSubmit={async (values) => {
           try {
-            const { user, token, code, ok } = await api.post(`/young/signup`, values);
+            const { firstName, lastName, email, password } = values;
+            const { user, token, code, ok } = await api.post(`/young/signup`, { firstName, lastName, email, password });
             if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             if (token) api.setToken(token);
 
