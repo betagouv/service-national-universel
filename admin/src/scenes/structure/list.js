@@ -8,7 +8,7 @@ import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
-import { translate, corpsEnUniforme } from "../../utils";
+import { translate, corpsEnUniforme, formatLongDateFR } from "../../utils";
 import VioletHeaderButton from "../../components/buttons/VioletHeaderButton";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 
@@ -68,8 +68,8 @@ export default () => {
                       "Département de la structure": data.department,
                       "Région de la structure": data.region,
                       "Pays de la structure": data.country,
-                      "Créé lé": data.createdAt,
-                      "Mis à jour le": data.updatedAt,
+                      "Créé lé": formatLongDateFR(data.createdAt),
+                      "Mis à jour le": formatLongDateFR(data.updatedAt),
                     };
                   }}
                 />

@@ -14,7 +14,7 @@ import SelectStatus from "../../components/selectStatus";
 import api from "../../services/api";
 import { apiURL, appURL, environment } from "../../config";
 import Panel from "./panel";
-import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS, getDepartmentNumber, isInRuralArea } from "../../utils";
+import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS, getDepartmentNumber, isInRuralArea, formatDateFR, formatLongDateFR } from "../../utils";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
 const FILTERS = ["SEARCH", "STATUS", "REGION", "DEPARTMENT", "SCHOOL"];
@@ -48,7 +48,7 @@ export default () => {
                       Cohorte: data.cohort,
                       Prénom: data.firstName,
                       Nom: data.lastName,
-                      "Date de naissance": data.birthdateAt,
+                      "Date de naissance": formatDateFR(data.birthdateAt),
                       Sexe: translate(data.gender),
                       Email: data.email,
                       Téléphone: data.phone,
@@ -104,11 +104,11 @@ export default () => {
                       "Région représentant légal 2": data.parent2Region,
                       Motivation: data.motivations,
                       Phase: translate(data.phase),
-                      "Créé lé": data.createdAt,
-                      "Mis à jour le": data.updatedAt,
-                      "Dernière connexion le": data.lastLoginAt,
+                      "Créé lé": formatLongDateFR(data.createdAt),
+                      "Mis à jour le": formatLongDateFR(data.updatedAt),
+                      "Dernière connexion le": formatLongDateFR(data.lastLoginAt),
                       Statut: translate(data.status),
-                      "Dernier statut le": data.lastStatusAt,
+                      "Dernier statut le": formatLongDateFR(data.lastStatusAt),
                     };
                   }}
                 />
