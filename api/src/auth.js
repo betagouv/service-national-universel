@@ -65,7 +65,9 @@ class Auth {
         firstName: Joi.string().lowercase().trim().required(),
         lastName: Joi.string().uppercase().trim().required(),
         password: Joi.string().min(8).required(),
-      }).validate(req.body);
+      })
+        .unknown()
+        .validate(req.body);
 
       if (error) {
         if (error.details.find((e) => e.path === "email")) return res.status(400).send({ ok: false, user: null, code: EMAIL_INVALID });
