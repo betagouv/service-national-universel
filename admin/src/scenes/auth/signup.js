@@ -44,7 +44,8 @@ export default () => {
                 initialValues={{ firstName: "", lastName: "", email: "", password: "", role: "responsible" }}
                 onSubmit={async (values, actions) => {
                   try {
-                    const { user, token, code, ok } = await api.post(`/referent/signup`, values);
+                    const { firstName, lastName, email, password } = values;
+                    const { user, token, code, ok } = await api.post(`/referent/signup`, { firstName, lastName, email, password });
                     actions.setSubmitting(false);
                     if (!ok) {
                       if (code === "PASSWORD_NOT_VALIDATED")

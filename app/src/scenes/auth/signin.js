@@ -35,9 +35,9 @@ export default () => {
         </Title>
         <Formik
           initialValues={{ email: "", password: "" }}
-          onSubmit={async (values, actions) => {
+          onSubmit={async ({ email, password }, actions) => {
             try {
-              const { user: young, token } = await api.post(`/young/signin`, values);
+              const { user: young, token } = await api.post(`/young/signin`, { email, password });
               if (token) api.setToken(token);
               if (young) {
                 dispatch(setYoung(young));
