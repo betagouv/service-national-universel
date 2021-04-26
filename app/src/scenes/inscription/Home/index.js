@@ -28,8 +28,13 @@ export default ({}) => {
           onChange={() => setModal(false)}
           cb={(zip, e) => {
             setZip(zip);
-            // if no goal specified for this department ...
-            if (!e) return history.push("/inscription/profil");
+
+            // valid for date > 30 april 2021 (month = 04 because 0 = jan, 4 = may)
+            if (new Date() > new Date("2021", "04", "01") && zip.substr(0, 2) !== "13") return setModal("ModalGoalReached");
+
+            if (!e)
+              // if no goal specified for this department ...
+              return history.push("/inscription/profil");
 
             // ... else get the ratio and display the modal if needed
             const ratioRegistered = e.registered / e.max;
