@@ -36,6 +36,8 @@ export default ({ filter }) => {
 
       const queries2 = [...queries];
       queries2[1].query.bool.filter = [{ term: { "cohort.keyword": filter.cohort } }, { terms: { "status.keyword": ["WITHDRAWN"] } }];
+      if (filter.region) queries2[1].query.bool.filter.push({ term: { "region.keyword": filter.region } });
+      if (filter.department) queries2[1].query.bool.filter.push({ term: { "department.keyword": filter.department } });
       const { responses: responses2 } = await api.esQuery(queries2);
 
       setStatus({
