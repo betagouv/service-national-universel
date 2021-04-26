@@ -28,7 +28,7 @@ class Auth {
 
   async signin(req, res) {
     const { error, value } = Joi.object({
-      email: Joi.email().lowercase().trim().required(),
+      email: Joi.string().lowercase().trim().email().required(),
       password: Joi.string().required(),
     }).validate(req.body);
 
@@ -61,7 +61,7 @@ class Auth {
   async signup(req, res) {
     try {
       const { error, value } = Joi.object({
-        email: Joi.email().lowercase().trim().required(),
+        email: Joi.string().lowercase().trim().email().required(),
         firstName: Joi.string().lowercase().trim().required(),
         lastName: Joi.string().uppercase().trim().required(),
         password: Joi.string().min(8).required(),
@@ -70,7 +70,7 @@ class Auth {
       if (error) {
         if (error.details.find((e) => e.path === "email")) return res.status(400).send({ ok: false, user: null, code: EMAIL_INVALID });
         if (error.details.find((e) => e.path === "password")) return res.status(400).send({ ok: false, user: null, code: PASSWORD_NOT_VALIDATED });
-        return res.status(400).send({ ok: false, code: error });
+        return res.status(400).send({ ok: false, code: error.toString() });
       }
 
       const { password, email, lastName } = value;
@@ -149,7 +149,7 @@ class Auth {
 
   async forgotPassword(req, res, cta) {
     const { error, value } = Joi.object({
-      email: Joi.email().lowercase().trim().required(),
+      email: Joi.string().lowercase().trim().email().required(),
     }).validate(req.body);
 
     if (error) return res.status(404).send({ ok: false, code: USER_NOT_EXISTS });
