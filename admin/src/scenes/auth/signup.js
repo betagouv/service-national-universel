@@ -42,7 +42,7 @@ export default () => {
                 validateOnChange={false}
                 validateOnBlur={false}
                 initialValues={{ firstName: "", lastName: "", email: "", password: "" }}
-                onSubmit={async (values, actions) => {
+                onSubmit={async ({ firstName, lastName, email, password }, actions) => {
                   try {
                     const { user, token, code, ok } = await api.post(`/referent/signup`, { firstName, lastName, email, password });
                     actions.setSubmitting(false);
