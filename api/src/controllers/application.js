@@ -156,52 +156,62 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
     let to = {};
 
     if (template === "waiting_validation") {
-      htmlContent = fs.readFileSync(path.resolve(__dirname, "../templates/application/waitingValidation.html")).toString();
-      htmlContent = htmlContent.replace(/{{firstName}}/g, referent.firstName);
-      htmlContent = htmlContent.replace(/{{lastName}}/g, referent.lastName);
-      htmlContent = htmlContent.replace(/{{youngFirstName}}/g, application.youngFirstName);
-      htmlContent = htmlContent.replace(/{{youngLastName}}/g, application.youngLastName);
-      htmlContent = htmlContent.replace(/{{missionName}}/g, mission.name);
-      htmlContent = htmlContent.replace(/{{cta}}/g, "https://admin.snu.gouv.fr/volontaire");
+      htmlContent = fs
+        .readFileSync(path.resolve(__dirname, "../templates/application/waitingValidation.html"))
+        .toString()
+        .replace(/{{firstName}}/g, referent.firstName)
+        .replace(/{{lastName}}/g, referent.lastName)
+        .replace(/{{youngFirstName}}/g, application.youngFirstName)
+        .replace(/{{youngLastName}}/g, application.youngLastName)
+        .replace(/{{missionName}}/g, mission.name)
+        .replace(/{{cta}}/g, "https://admin.snu.gouv.fr/volontaire");
       subject = `${application.youngFirstName} ${application.youngLastName} a candidaté sur votre mission d'intérêt général ${mission.name}`;
       to = { name: `${referent.firstName} ${referent.lastName}`, email: referent.email };
     } else if (template === "validated_responsible") {
-      htmlContent = fs.readFileSync(path.resolve(__dirname, "../templates/application/validatedResponsible.html")).toString();
-      htmlContent = htmlContent.replace(/{{firstName}}/g, referent.firstName);
-      htmlContent = htmlContent.replace(/{{lastName}}/g, referent.lastName);
-      htmlContent = htmlContent.replace(/{{youngFirstName}}/g, application.youngFirstName);
-      htmlContent = htmlContent.replace(/{{youngLastName}}/g, application.youngLastName);
-      htmlContent = htmlContent.replace(/{{missionName}}/g, mission.name);
-      htmlContent = htmlContent.replace(/{{cta}}/g, "https://admin.snu.gouv.fr/volontaire");
+      htmlContent = fs
+        .readFileSync(path.resolve(__dirname, "../templates/application/validatedResponsible.html"))
+        .toString()
+        .replace(/{{firstName}}/g, referent.firstName)
+        .replace(/{{lastName}}/g, referent.lastName)
+        .replace(/{{youngFirstName}}/g, application.youngFirstName)
+        .replace(/{{youngLastName}}/g, application.youngLastName)
+        .replace(/{{missionName}}/g, mission.name)
+        .replace(/{{cta}}/g, "https://admin.snu.gouv.fr/volontaire");
       subject = `${application.youngFirstName} ${application.youngLastName} est validée sur votre mission d'intérêt général ${mission.name}`;
       to = { name: `${referent.firstName} ${referent.lastName}`, email: referent.email };
     } else if (template === "validated_young") {
-      htmlContent = fs.readFileSync(path.resolve(__dirname, "../templates/application/validatedYoung.html")).toString();
-      htmlContent = htmlContent.replace(/{{firstName}}/g, application.youngFirstName);
-      htmlContent = htmlContent.replace(/{{lastName}}/g, application.youngLastName);
-      htmlContent = htmlContent.replace(/{{structureName}}/g, mission.structureName);
-      htmlContent = htmlContent.replace(/{{youngFirstName}}/g, application.youngFirstName);
-      htmlContent = htmlContent.replace(/{{youngLastName}}/g, application.youngLastName);
-      htmlContent = htmlContent.replace(/{{missionName}}/g, mission.name);
-      htmlContent = htmlContent.replace(/{{cta}}/g, "https://inscription.snu.gouv.fr");
+      htmlContent = fs
+        .readFileSync(path.resolve(__dirname, "../templates/application/validatedYoung.html"))
+        .toString()
+        .replace(/{{firstName}}/g, application.youngFirstName)
+        .replace(/{{lastName}}/g, application.youngLastName)
+        .replace(/{{structureName}}/g, mission.structureName)
+        .replace(/{{youngFirstName}}/g, application.youngFirstName)
+        .replace(/{{youngLastName}}/g, application.youngLastName)
+        .replace(/{{missionName}}/g, mission.name)
+        .replace(/{{cta}}/g, "https://inscription.snu.gouv.fr");
       subject = `Votre candidature sur la mission d'intérêt général ${mission.name} a été validée`;
       to = { name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail };
     } else if (template === "cancel") {
-      htmlContent = fs.readFileSync(path.resolve(__dirname, "../templates/application/cancel.html")).toString();
-      htmlContent = htmlContent.replace(/{{firstName}}/g, referent.firstName);
-      htmlContent = htmlContent.replace(/{{lastName}}/g, referent.lastName);
-      htmlContent = htmlContent.replace(/{{youngFirstName}}/g, application.youngFirstName);
-      htmlContent = htmlContent.replace(/{{youngLastName}}/g, application.youngLastName);
-      htmlContent = htmlContent.replace(/{{missionName}}/g, mission.name);
+      htmlContent = fs
+        .readFileSync(path.resolve(__dirname, "../templates/application/cancel.html"))
+        .toString()
+        .replace(/{{firstName}}/g, referent.firstName)
+        .replace(/{{lastName}}/g, referent.lastName)
+        .replace(/{{youngFirstName}}/g, application.youngFirstName)
+        .replace(/{{youngLastName}}/g, application.youngLastName)
+        .replace(/{{missionName}}/g, mission.name);
       subject = `${application.youngFirstName} ${application.youngLastName} a annulé sa candidature sur votre mission d'intérêt général ${mission.name}`;
       to = { name: `${referent.firstName} ${referent.lastName}`, email: referent.email };
     } else if (template === "refused") {
-      htmlContent = fs.readFileSync(path.resolve(__dirname, "../templates/application/refused.html")).toString();
-      htmlContent = htmlContent.replace(/{{firstName}}/g, application.youngFirstName);
-      htmlContent = htmlContent.replace(/{{lastName}}/g, application.youngLastName);
-      htmlContent = htmlContent.replace(/{{structureName}}/g, mission.structureName);
-      htmlContent = htmlContent.replace(/{{missionName}}/g, mission.name);
-      htmlContent = htmlContent.replace(/{{cta}}/g, "https://inscription.snu.gouv.fr/mission");
+      htmlContent = fs
+        .readFileSync(path.resolve(__dirname, "../templates/application/refused.html"))
+        .toString()
+        .replace(/{{firstName}}/g, application.youngFirstName)
+        .replace(/{{lastName}}/g, application.youngLastName)
+        .replace(/{{structureName}}/g, mission.structureName)
+        .replace(/{{missionName}}/g, mission.name)
+        .replace(/{{cta}}/g, "https://inscription.snu.gouv.fr/mission");
       subject = `Votre candidature sur la mission d'intérêt général ${mission.name} a été refusée.`;
       to = { name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail };
     } else {
