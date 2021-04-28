@@ -20,7 +20,7 @@ Il nous manque les éléments suivants pour compléter votre dossier :
 -
 -
 
-Merci de vous reconnecter à votre compte pour apporter les modifications demandées.`);
+Merci de vous reconnecter à votre compte pour apporter les modifications demandées avant le 5 mai au soir. Passé cette date, plus aucune modification ne pourra être apportée et votre candidature ne pourra être retenue.`);
   }, [value]);
 
   if (!value) return <div />;

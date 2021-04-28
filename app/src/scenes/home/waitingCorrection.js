@@ -26,7 +26,7 @@ export default () => {
         <p>
           Vous avez reçu des instructions sur votre adresse mail <span style={{ color: "#5145cd" }}>{young.email}</span>.
         </p>
-        <p>Vous pouvez effectuer les corrections indiquées en cliquant sur ce bouton.</p>
+        <p>Vous pouvez effectuer les corrections indiquées en cliquant sur ce bouton jusqu'au 5 mai au soir.</p>
         <Link to="/inscription/coordonnees">
           <BackButton>Editer mes informations d'inscription</BackButton>
         </Link>
