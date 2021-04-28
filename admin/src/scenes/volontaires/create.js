@@ -66,9 +66,22 @@ export default (props) => {
               </SaveBtn>
             </TitleWrapper>
             <Row>
-              <Identite values={values} handleChange={handleChange} handleSubmit={handleSubmit} required={{ firstName: true, lastName: true }} errors={errors} touched={touched} />
-              <Coordonnees values={values} handleChange={handleChange} required={{ email: true }} errors={errors} touched={touched} />
-              <Situation values={values} handleChange={handleChange} />
+              <Identite
+                values={values}
+                handleChange={handleChange}
+                handleSubmit={handleSubmit}
+                required={{ firstName: true, lastName: true, birthdateAt: true, gender: true }}
+                errors={errors}
+                touched={touched}
+              />
+              <Coordonnees
+                values={values}
+                handleChange={handleChange}
+                required={{ email: true, phone: true, address: true, city: true, zip: true, department: true, region: true }}
+                errors={errors}
+                touched={touched}
+              />
+              <Situation values={values} handleChange={handleChange} required={{ situation: true }} errors={errors} touched={touched} />
               <SituationsParticulieres values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
             </Row>
             <Row>

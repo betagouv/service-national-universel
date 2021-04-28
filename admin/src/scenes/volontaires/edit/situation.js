@@ -9,7 +9,7 @@ import BoxTitle from "../components/BoxTitle";
 import Item from "../components/Item";
 import Select from "../components/Select";
 
-export default ({ values, handleChange }) => {
+export default ({ values, handleChange, required = {}, errors, touched }) => {
   const user = useSelector((state) => state.Auth.user);
 
   return (
@@ -18,12 +18,15 @@ export default ({ values, handleChange }) => {
         <BoxTitle>Situation</BoxTitle>
         <BoxContent direction="column">
           <Select
-            disabled={user.role !== "admin"}
+            disabled={user.role !== "admin" && values._id}
             title="Statut"
             values={values}
             name="situation"
             handleChange={handleChange}
             options={Object.keys(YOUNG_SITUATIONS).map((s) => ({ value: s, label: translate(s) }))}
+            required={required.situation}
+            errors={errors}
+            touched={touched}
           />
           <Select
             title="Classe"

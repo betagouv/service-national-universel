@@ -18,7 +18,16 @@ export default ({ values, handleChange, handleSubmit, required = {}, errors, tou
       <BoxContent direction="column">
         <Item title="Nom" values={values} name={"lastName"} handleChange={handleChange} required={required.lastName} errors={errors} touched={touched} />
         <Item title="Prénom" values={values} name="firstName" handleChange={handleChange} required={required.firstName} errors={errors} touched={touched} />
-        <Item title="Date de naissance" type="date" values={values} name="birthdateAt" handleChange={handleChange} />
+        <Item
+          title="Date de naissance"
+          type="date"
+          values={values}
+          name="birthdateAt"
+          handleChange={handleChange}
+          required={required.birthdateAt}
+          errors={errors}
+          touched={touched}
+        />
         <Select
           title="Sexe"
           values={values}
@@ -28,6 +37,9 @@ export default ({ values, handleChange, handleSubmit, required = {}, errors, tou
             { value: "male", label: "Homme" },
             { value: "female", label: "Femme" },
           ]}
+          required={required.gender}
+          errors={errors}
+          touched={touched}
         />
         <Documents>
           <h4>Pièces d'identité</h4>

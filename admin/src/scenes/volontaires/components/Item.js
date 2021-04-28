@@ -17,6 +17,7 @@ export default ({ title, values, name, handleChange, type = "text", disabled = f
               handleChange({ target: { value: date, name: "birthdateAt" } });
             }}
           />
+          {errors && touched && <Error errors={errors} touched={touched} name={name} />}
         </>
       );
     }

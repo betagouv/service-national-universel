@@ -1,14 +1,19 @@
 import React from "react";
 import { Col, Row } from "reactstrap";
+import { Field } from "formik";
 
-export default ({ title, name, values, handleChange, disabled, errors, touched, validate, options }) => {
+import Error, { requiredMessage } from "../../../components/errorMessage";
+import { translate } from "../../../utils";
+
+export default ({ title, name, values, handleChange, disabled, options, required = false, errors, touched }) => {
   return (
     <Row className="detail">
       <Col md={4}>
         <label>{title}</label>
       </Col>
       <Col md={8}>
-        <select disabled={disabled} className="form-control" name={name} value={values[name]} onChange={handleChange}>
+        <Field hidden value={values[name]} name={name} onChange={handleChange} validate={(v) => required && !v && requiredMessage} />
+        <select disabled={disabled} className="form-control" name={name} value={values[name]} onChange={handleChange} validate={(v) => required && !v && requiredMessage}>
           <option key={-1} value="" label=""></option>
           {options.map((o, i) => (
             <option key={i} value={o.value} label={o.label}>
@@ -16,6 +21,7 @@ export default ({ title, name, values, handleChange, disabled, errors, touched, 
             </option>
           ))}
         </select>
+        {errors && touched && <Error errors={errors} touched={touched} name={name} />}
       </Col>
     </Row>
   );
