@@ -9,6 +9,7 @@ import api from "../../../services/api";
 export default () => {
   const [loading, setLoading] = useState(false);
   async function run() {
+    const { data: inscriptionGoal } = await api.get("/inscription-goal");
     setLoading(true);
     const lines = [];
 
@@ -52,7 +53,8 @@ export default () => {
       });
       const { responses } = await api.esQuery(queries);
       const val = responses[0].aggregations.range.buckets.map((e) => e.doc_count);
-      const line = [region, dptCode, dptName, "", ...val];
+      const goal = inscriptionGoal.find((g) => g.department === dptName);
+      const line = [region, dptCode, dptName, goal?.max, ...val];
       lines.push(line);
     }
     const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
