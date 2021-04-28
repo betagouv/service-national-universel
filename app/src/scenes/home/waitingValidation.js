@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 import Hero from "../../components/Hero";
+import { YOUNG_STATUS } from "../../utils";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
@@ -26,10 +27,14 @@ export default () => {
           Votre inscription a bien été enregistrée et est <b style={{ color: "#5145cd" }}>en cours de validation</b> par l'administration. Vous serez prochainement informé(e) par
           e-mail de l'avancement de votre candidature.
         </p>
-        <p>Vous pouvez cependant continuer à éditer les informations renseignées lors de votre inscription.</p>
-        <Link to="/inscription/coordonnees">
-          <BackButton>Editer mes informations d'inscription</BackButton>
-        </Link>
+        {young.status === YOUNG_STATUS.WAITING_VALIDATION ? (
+          <>
+            <p>Vous pouvez cependant continuer à éditer les informations renseignées lors de votre inscription.</p>
+            <Link to="/inscription/coordonnees">
+              <BackButton>Editer mes informations d'inscription</BackButton>
+            </Link>
+          </>
+        ) : null}
         <Separator />
         <p style={{ fontSize: "1.125rem" }}>
           Si vous avez la moindre question, trouvez toutes les réponses à vos questions en consultant la{" "}
