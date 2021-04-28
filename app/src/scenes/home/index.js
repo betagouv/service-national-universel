@@ -20,7 +20,7 @@ export default () => {
     if (young.status === YOUNG_STATUS.WITHDRAWN) return <Withdrawn />;
     if (young.status === YOUNG_STATUS.WAITING_CORRECTION) return <WaitingCorrection />;
     if (young.status === YOUNG_STATUS.WAITING_VALIDATION) return <WaitingValidation />;
-    if (young.status === YOUNG_STATUS.WAITING_LIST) return <WaitingList />;
+    if (young.status === YOUNG_STATUS.WAITING_LIST) return <WaitingValidation />;
     if (young.status === YOUNG_STATUS.REFUSED) return <Refused />;
     return <Default />;
     if (young.cohort === "2019") return <Cohort2019 />;
