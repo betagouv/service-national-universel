@@ -16,5 +16,5 @@ export function getPasswordErrorMessage(v, matomo) {
 }
 
 export function isInscription2021Closed() {
-  return new Date() > new Date("2021", "03", "01");
+  return new Date() > new Date("2021", "04", "01");
 }
