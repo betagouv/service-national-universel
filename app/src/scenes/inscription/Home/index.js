@@ -14,7 +14,7 @@ import ModalGoalReached from "../../../components/modals/ModalGoalReached";
 import ModalWaitingList from "../../../components/modals/ModalWaitingList";
 import api from "../../../services/api";
 import { toastr } from "react-redux-toastr";
-import { translate } from "../../../utils";
+import { isInscription2021Closed, translate } from "../../../utils";
 
 export default ({}) => {
   const [modal, setModal] = useState(null);
@@ -29,9 +29,14 @@ export default ({}) => {
           cb={(zip, e) => {
             setZip(zip);
 
-            // valid for date > 30 april 2021 (month = 04 because 0 = jan, 4 = may)
-            if (new Date() > new Date("2021", "04", "01") && zip.substr(0, 2) !== "13") return setModal("ModalGoalReached");
+            // Source: https://trello.com/c/RbrZZsgf/575-inscription-impact-fermeture-du-30-avril
+            // > "Réactiver pop up de collecte du code postal (2 canaux : go pour les 13, no go pour les autres)"
+            if (zip.substr(0, 2) !== "13") return setModal("ModalGoalReached");
+            // > Gabrielle  12 h 12
+            // > "c'est go complètement pour le 13, pas de message de liste complémentaire !"
+            return history.push("/inscription/profil");
 
+            /*
             if (!e)
               // if no goal specified for this department ...
               return history.push("/inscription/profil");
@@ -40,8 +45,8 @@ export default ({}) => {
             const ratioRegistered = e.registered / e.max;
             const ratioWaitingList = e.waitingList / e.max;
 
-            if (ratioRegistered >= 1 && ratioWaitingList >= 0.15) return setModal("ModalGoalReached");
-            return history.push("/inscription/profil");
+            if (ratioRegistered >= 1 && ratioWaitingList >= 0.15) return setModal("ModalGoalReached")
+            */
           }}
         />
       )}
@@ -100,14 +105,14 @@ export default ({}) => {
             <CardPhase upText="phase 3 - facultative" title="L'engagement" downText="Mission facultative de 3 mois minimum" />
           </Carousel>
           <StartButtonContainer className="desktop">
-            <StartButton to="/inscription/profil">Commencer&nbsp;l'inscription</StartButton>
+            <StartButton onClick={() => (isInscription2021Closed() ? setModal("zip") : history.push("/inscription/profil"))}>Commencer&nbsp;l'inscription</StartButton>
           </StartButtonContainer>
         </CardsContainer>
         <MobileView />
         <DesktopView />
       </Wrapper>
       <StartButtonContainer className="mobile">
-        <StartButton to="/inscription/profil">Commencer&nbsp;l'inscription</StartButton>
+        <StartButton onClick={() => (isInscription2021Closed() ? setModal("zip") : history.push("/inscription/profil"))}>Commencer&nbsp;l'inscription</StartButton>
       </StartButtonContainer>
     </div>
   );
@@ -243,7 +248,7 @@ const StartButtonContainer = styled.div`
   }
 `;
 
-const StartButton = styled(Link)`
+const StartButton = styled.div`
   padding: 1rem 1.5rem;
   text-transform: uppercase;
   color: #fff;

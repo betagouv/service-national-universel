@@ -16,8 +16,11 @@ import Forgot from "./components/Forgot";
 import Submit from "./components/Submit";
 import Register from "./components/Register";
 import ErrorLogin from "./components/ErrorLogin";
+import ModalInProgress from "../../components/modals/ModalInProgress";
+import { isInscription2021Closed } from "../../utils";
 
 export default () => {
+  const [modal, setModal] = useState(null);
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
   const [userIsValid, setUserIsValid] = useState(true);
@@ -28,6 +31,14 @@ export default () => {
 
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+      {modal === "inProgress" && (
+        <ModalInProgress
+          onChange={() => setModal(false)}
+          cb={() => {
+            setModal(false);
+          }}
+        />
+      )}
       <Header />
       <LoginBox>
         <Title>
@@ -38,11 +49,15 @@ export default () => {
           onSubmit={async ({ email, password }, actions) => {
             try {
               const { user: young, token } = await api.post(`/young/signin`, { email, password });
-              if (token) api.setToken(token);
               if (young) {
-                dispatch(setYoung(young));
-                matomo.setUserId(young._id);
-                window.lumiere("registerUser", young._id);
+                if (young.status === "IN_PROGRESS" && isInscription2021Closed()) {
+                  setModal("inProgress");
+                } else {
+                  if (token) api.setToken(token);
+                  dispatch(setYoung(young));
+                  matomo.setUserId(young._id);
+                  window.lumiere("registerUser", young._id);
+                }
               }
             } catch (e) {
               console.log("e", e);
@@ -100,10 +115,14 @@ export default () => {
             );
           }}
         </Formik>
-        <Title>
-          <span>Vous n'êtes pas encore inscrit ?</span>
-        </Title>
-        <Register to="/inscription/profil">Commencer l'inscription</Register>
+        {!isInscription2021Closed() && (
+          <>
+            <Title>
+              <span>Vous n'êtes pas encore inscrit ?</span>
+            </Title>
+            <Register to="/inscription/profil">Commencer l'inscription</Register>
+          </>
+        )}
       </LoginBox>
     </div>
   );
