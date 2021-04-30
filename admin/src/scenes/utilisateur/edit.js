@@ -73,7 +73,7 @@ export default (props) => {
         initialValues={user}
         onSubmit={async (values) => {
           try {
-            const { ok, code, data } = await api.put(`/referent/${v._id}`, v);
+            const { ok, code, data } = await api.put(`/referent/${values._id}`, values);
             if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
             setUser(data);
             toastr.success("Utilisateur mis à jour !");
