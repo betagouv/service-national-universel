@@ -68,7 +68,7 @@ export default () => {
 
 const Wrapper = styled.div`
   display: flex;
-  margin-top: -1.5rem;
+  margin-top: -2rem;
   @media (max-width: 767px) {
     display: none;
   }

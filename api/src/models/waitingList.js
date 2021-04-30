@@ -17,6 +17,12 @@ const Schema = new mongoose.Schema({
       description: "Mail du jeune",
     },
   },
+  birthdateAt: {
+    type: String,
+    documentation: {
+      description: "date de naissance",
+    },
+  },
 
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
