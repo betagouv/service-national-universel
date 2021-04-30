@@ -107,7 +107,15 @@ const Schema = new mongoose.Schema({
   },
   subRole: {
     type: String,
-    enum: ["manager_department", "assistant_manager_department", "manager_department_phase2", "secretariat", "coordinator", "assistant_coordinator"],
+    enum: [
+      "manager_department",
+      "assistant_manager_department",
+      "manager_department_phase2",
+      "secretariat",
+      "coordinator",
+      "assistant_coordinator",
+      "",
+    ],
   },
 
   phone: {
