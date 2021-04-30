@@ -196,7 +196,7 @@ export default (props) => {
           {`Supprimer le compte de ${user.firstName} ${user.lastName}`}
         </DeleteBtn>
       ) : null}
-      {user.role === "referent_department" && (
+      {canModify(currentUser, user) && user.role === "referent_department" && (
         <Formik
           initialValues={service || { department: user.department }}
           onSubmit={async (values) => {
