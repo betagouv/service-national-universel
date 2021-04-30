@@ -41,6 +41,12 @@ const Schema = new mongoose.Schema({
       description: "Adresse",
     },
   },
+  complementAddress: {
+    type: String,
+    documentation: {
+      description: "Adresse",
+    },
+  },
   zip: {
     type: String,
     documentation: {
