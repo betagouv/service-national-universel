@@ -33,7 +33,7 @@ router.post("/", passport.authenticate("referent", { session: false }), async (r
   }
 });
 
-router.get("/", async (req, res) => {
+router.get("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const data = await InscriptionGoalModel.find({});
     return res.status(200).send({ ok: true, data });
@@ -43,7 +43,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-router.post("/current", async (req, res) => {
+router.post("/current", passport.authenticate("referent", { session: false }), async (req, res) => {
   const { error, value } = Joi.object({ department: Joi.string().required() }).unknown().validate(req.body);
 
   if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
