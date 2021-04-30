@@ -42,11 +42,11 @@ export default () => {
 
             <Formik
               initialValues={{ email: "" }}
-              onSubmit={async (values, actions) => {
+              onSubmit={async ({ email }, actions) => {
                 try {
-                  await api.post("/young/forgot_password", values);
+                  await api.post("/young/forgot_password", { email });
                   toastr.success("E-mail envoyé !");
-                  setMail(values.email);
+                  setMail(email);
                   setDone(true);
                 } catch (e) {
                   toastr.error("Erreur !", translate(e.code));

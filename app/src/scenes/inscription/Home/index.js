@@ -1,16 +1,69 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { Helmet } from "react-helmet";
+import { useHistory } from "react-router-dom";
+
 import Header from "./header";
 import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
 import { Carousel } from "react-responsive-carousel";
 import MobileView from "./MobileView";
 import DesktopView from "./DesktopView";
+import ModalGoalZip from "../../../components/modals/ModalGoalZip";
+import ModalGoalReached from "../../../components/modals/ModalGoalReached";
+import ModalWaitingList from "../../../components/modals/ModalWaitingList";
+import api from "../../../services/api";
+import { toastr } from "react-redux-toastr";
+import { isInscription2021Closed, translate } from "../../../utils";
 
 export default ({}) => {
+  const [modal, setModal] = useState(null);
+  const history = useHistory();
+  const [zip, setZip] = useState();
+
   return (
     <div>
+      {modal === "zip" && (
+        <ModalGoalZip
+          onChange={() => setModal(false)}
+          cb={(zip, e) => {
+            setZip(zip);
+
+            // Source: https://trello.com/c/RbrZZsgf/575-inscription-impact-fermeture-du-30-avril
+            // > "Réactiver pop up de collecte du code postal (2 canaux : go pour les 13, no go pour les autres)"
+            if (zip.substr(0, 2) !== "13") return setModal("ModalGoalReached");
+            // > Gabrielle  12 h 12
+            // > "c'est go complètement pour le 13, pas de message de liste complémentaire !"
+            return history.push("/inscription/profil");
+
+            /*
+            if (!e)
+              // if no goal specified for this department ...
+              return history.push("/inscription/profil");
+
+            // ... else get the ratio and display the modal if needed
+            const ratioRegistered = e.registered / e.max;
+            const ratioWaitingList = e.waitingList / e.max;
+
+            if (ratioRegistered >= 1 && ratioWaitingList >= 0.15) return setModal("ModalGoalReached")
+            */
+          }}
+        />
+      )}
+      {modal === "ModalGoalReached" && (
+        <ModalGoalReached
+          onChange={() => setModal(false)}
+          cb={async (mail) => {
+            const { ok, code } = await api.post("/waiting-list", { mail, zip });
+            if (!ok) toastr.error("Oups, une erreur s'est produite", translate(code));
+            else {
+              toastr.success("Nous avons bien pris en compte votre intérêt");
+            }
+            setModal(false);
+          }}
+        />
+      )}
+      {modal === "ModalWaitingList" && <ModalWaitingList onChange={() => setModal(false)} cb={() => history.push("/inscription/profil")} />}
       <Helmet>
         <script>{`
             gtag('event', 'conversion', {
@@ -52,14 +105,14 @@ export default ({}) => {
             <CardPhase upText="phase 3 - facultative" title="L'engagement" downText="Mission facultative de 3 mois minimum" />
           </Carousel>
           <StartButtonContainer className="desktop">
-            <StartButton to="/inscription/profil">Commencer&nbsp;l'inscription</StartButton>
+            <StartButton onClick={() => (isInscription2021Closed() ? setModal("zip") : history.push("/inscription/profil"))}>Commencer&nbsp;l'inscription</StartButton>
           </StartButtonContainer>
         </CardsContainer>
         <MobileView />
         <DesktopView />
       </Wrapper>
       <StartButtonContainer className="mobile">
-        <StartButton to="/inscription/profil">Commencer&nbsp;l'inscription</StartButton>
+        <StartButton onClick={() => (isInscription2021Closed() ? setModal("zip") : history.push("/inscription/profil"))}>Commencer&nbsp;l'inscription</StartButton>
       </StartButtonContainer>
     </div>
   );
@@ -195,7 +248,7 @@ const StartButtonContainer = styled.div`
   }
 `;
 
-const StartButton = styled(Link)`
+const StartButton = styled.div`
   padding: 1rem 1.5rem;
   text-transform: uppercase;
   color: #fff;

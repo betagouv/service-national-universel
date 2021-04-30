@@ -55,17 +55,12 @@ export default () => {
               <YearPicker options={["2019", "2020", "2021"]} onChange={(cohort) => updateFilter({ cohort })} value={filter.cohort} />
             </FilterWrapper>
           </FiltersList>
-          {user.role === "admin" && (
-            <>
-              <Row>
-                <Col md={12}>
-                  <SubTitle>Pilotage</SubTitle>
-                </Col>
-              </Row>
-              <Goals filter={filter} />
-            </>
-          )}
-
+          <Row>
+            <Col md={12}>
+              <SubTitle>Pilotage</SubTitle>
+            </Col>
+          </Row>
+          <Goals filter={filter} />
           <Row>
             <Col md={12}>
               <SubTitle>Statut des inscriptions</SubTitle>

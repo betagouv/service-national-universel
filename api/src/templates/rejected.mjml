@@ -71,17 +71,23 @@
             padding="20px"
             height="160px"
             border-radius="10px"
-            src="http://planmercredi.education.gouv.fr/sites/default/files/styles/home_intro/public/bloc_image/072_duw0436934_0.png?itok=HmL6_lQ4"
-            target="http://planmercredi.education.gouv.fr/"
+            src="https://inscription.snu.gouv.fr/65b13fdf90db568d1667f2597261d71d.jpg"
+            target="https://www.reservistes.defense.gouv.fr/"
           />
           <mj-text align="center">
-            <h2>Plan Mercredi</h2>
+            <h2>Réserve des Armées</h2>
             <p>
-              Le Plan mercredi met en place un cadre de confiance pour les communes et les parents afin d’offrir au plus grand nombre d’enfants un
-              accueil de loisirs éducatifs de grande qualité le mercredi.
+              Un engagement permettant de contribuer à la sécurité du pays en consacrant une partie de son temps à la défense de la France, notamment
+              en participant à des missions de protection de la population.
             </p>
           </mj-text>
-          <mj-button href="http://planmercredi.education.gouv.fr/" font-family="Helvetica" font-weight="700" background-color="white" color="#5145cd">
+          <mj-button
+            href="https://www.reservistes.defense.gouv.fr/"
+            font-family="Helvetica"
+            font-weight="700"
+            background-color="white"
+            color="#5145cd"
+          >
             DÉCOUVRIR
           </mj-button>
         </mj-column>

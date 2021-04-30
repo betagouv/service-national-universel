@@ -14,3 +14,7 @@ export function getPasswordErrorMessage(v, matomo) {
     return "Votre mot de passe doit contenir au moins 8 caractères";
   }
 }
+
+export function isInscription2021Closed() {
+  return new Date() > new Date("2021", "04", "01");
+}

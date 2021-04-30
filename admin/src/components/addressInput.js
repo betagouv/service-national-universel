@@ -43,7 +43,7 @@ export default ({ keys, values, handleChange, errors, touched }) => {
     }
     handleChange({ target: { name: keys.city, value: suggestion.properties.city } });
     handleChange({ target: { name: keys.zip, value: suggestion.properties.postcode } });
-    handleChange({ target: { name: keys.address, value: suggestion.properties.label } });
+    handleChange({ target: { name: keys.address, value: suggestion.properties.name } });
     handleChange({ target: { name: keys.location, value: { lon: suggestion.geometry.coordinates[0], lat: suggestion.geometry.coordinates[1] } } });
     handleChange({ target: { name: keys.department, value: departmentLookUp[depart] } });
     handleChange({ target: { name: keys.region, value: department2region[departmentLookUp[depart]] } });

@@ -31,9 +31,9 @@ export default () => {
               <Subtitle>A destination des référents et des structures d’accueil</Subtitle>
               <Formik
                 initialValues={{ email: "", password: "" }}
-                onSubmit={async (values, actions) => {
+                onSubmit={async ({ email, password }, actions) => {
                   try {
-                    const { user, token } = await api.post(`/referent/signin`, values);
+                    const { user, token } = await api.post(`/referent/signin`, { email, password });
                     if (token) api.setToken(token);
                     if (user) {
                       dispatch(setUser(user));

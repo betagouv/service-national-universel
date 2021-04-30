@@ -5,6 +5,7 @@ const cors = require("cors");
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const fileUpload = require("express-fileupload");
+const helmet = require("helmet");
 require("./mongo");
 
 const { PORT, APP_URL, ADMIN_URL, MONGO_URL } = require("./config.js");
@@ -13,6 +14,7 @@ console.log("MONGO_URL", MONGO_URL);
 console.log("APP_URL, ADMIN_URL", APP_URL, ADMIN_URL);
 
 const app = express();
+app.use(helmet());
 
 const origin = [APP_URL, ADMIN_URL];
 app.use(cors({ credentials: true, origin }));
@@ -36,6 +38,7 @@ app.use("/application", require("./controllers/application"));
 app.use("/program", require("./controllers/program"));
 app.use("/inscription-goal", require("./controllers/inscription-goal"));
 app.use("/department-service", require("./controllers/department-service"));
+app.use("/waiting-list", require("./controllers/waiting-list"));
 
 app.get("/", async (req, res) => {
   const d = new Date();

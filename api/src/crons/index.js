@@ -11,22 +11,22 @@ const { capture } = require("../sentry");
 
 if (ENVIRONMENT === "production") {
   // every monday at 0800
-  cron.schedule("0 8 * * 1", function () {
-    capture("START CRON RECAP REGION");
-    sendRecapRegion();
-  });
+  // cron.schedule("0 8 * * 1", function () {
+  //   capture("START CRON RECAP REGION");
+  //   sendRecapRegion();
+  // });
 
   // every tuesday at 0800
-  cron.schedule("0 8 * * 2", function () {
-    capture("START CRON RECAP DEPARTEMENT");
-    sendRecapDepartmentTuesday();
-  });
+  // cron.schedule("0 8 * * 2", function () {
+  //   capture("START CRON RECAP DEPARTEMENT");
+  //   sendRecapDepartmentTuesday();
+  // });
 
   // every thursday at 0800
-  cron.schedule("0 8 * * 4", function () {
-    capture("START CRON RECAP DEPARTEMENT");
-    sendRecapDepartmentThursday();
-  });
+  // cron.schedule("0 8 * * 4", function () {
+  //   capture("START CRON RECAP DEPARTEMENT");
+  //   sendRecapDepartmentThursday();
+  // });
 
   // everyday at 0200
   cron.schedule("0 13 * * *", () => {

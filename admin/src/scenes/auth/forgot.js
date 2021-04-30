@@ -24,10 +24,10 @@ export default () => {
             <div>
               <Formik
                 initialValues={{ email: "" }}
-                onSubmit={async (values, actions) => {
+                onSubmit={async ({ email }, actions) => {
                   try {
-                    await api.post("/referent/forgot_password", values);
-                    setMail(values.email);
+                    await api.post("/referent/forgot_password", { email });
+                    setMail(email);
                   } catch (e) {
                     toastr.error("Erreur !", translate(e.code));
                   }

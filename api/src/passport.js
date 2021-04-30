@@ -3,6 +3,7 @@ const JwtStrategy = require("passport-jwt").Strategy;
 const ExtractJwt = require("passport-jwt").ExtractJwt;
 const { secret } = require("./config");
 const { capture } = require("./sentry");
+const Joi = require("joi");
 
 const Young = require("./models/young");
 const Referent = require("./models/referent");
@@ -22,7 +23,10 @@ module.exports = function (app) {
     "young",
     new JwtStrategy(opts, async function (jwtPayload, done) {
       try {
-        const young = await Young.findOne({ _id: jwtPayload._id });
+        const { error, value } = Joi.object({ _id: Joi.string().required() }).validate({ _id: jwtPayload._id });
+        if (error) return done(null, false);
+
+        const young = await Young.findOne({ _id: value._id });
         if (young) return done(null, young);
       } catch (error) {
         capture(error);
@@ -31,12 +35,14 @@ module.exports = function (app) {
     })
   );
 
-  //TODO : change admin & user => referent
   passport.use(
     "referent",
     new JwtStrategy(opts, async function (jwtPayload, done) {
       try {
-        const referent = await Referent.findOne({ _id: jwtPayload._id });
+        const { error, value } = Joi.object({ _id: Joi.string().required() }).validate({ _id: jwtPayload._id });
+        if (error) return done(null, false);
+
+        const referent = await Referent.findOne({ _id: value._id });
         if (referent) return done(null, referent);
       } catch (error) {
         capture(error);
@@ -44,20 +50,6 @@ module.exports = function (app) {
       return done(null, false);
     })
   );
-
-  // passport.use(
-  //   "admin",
-  //   new JwtStrategy(opts, async function (jwtPayload, done) {
-  //     try {
-  //       const referent = await Referent.findOne({ _id: jwtPayload._id });
-  //       if (referent.role === "admin") return done(null, referent);
-  //       return done(null, false);
-  //     } catch (error) {
-  //       capture(error);
-  //     }
-  //     return done(null, false);
-  //   })
-  // );
 
   app.use(passport.initialize());
 };

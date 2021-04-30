@@ -62,9 +62,9 @@ export default () => {
         initialValues={young}
         validateOnChange={false}
         validateOnBlur={false}
-        onSubmit={async (values) => {
+        onSubmit={async ({ password, verifyPassword, newPassword }) => {
           try {
-            const { ok, code, data: young } = await api.post("/young/reset_password", values);
+            const { ok, code, data: young } = await api.post("/young/reset_password", { password, verifyPassword, newPassword });
             if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
             dispatch(setYoung(young));
             toastr.success("Mis à jour!");
