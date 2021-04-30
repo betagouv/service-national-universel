@@ -13,6 +13,7 @@ import Drawer from "./Create/drawer";
 
 import Home from "./Home/index.js";
 import { STEPS } from "./utils";
+import { isInscription2021Closed } from "../../utils";
 
 const Step = ({ step }) => {
   function renderStep(step) {
@@ -35,6 +36,13 @@ const Step = ({ step }) => {
 };
 
 export default () => {
+  if (isInscription2021Closed()) {
+    return (
+      <Switch>
+        <Route path="/inscription" component={Home} />
+      </Switch>
+    );
+  }
   return (
     <Switch>
       <Route path="/inscription/profil" component={() => <Step step={STEPS.PROFIL} />} />
