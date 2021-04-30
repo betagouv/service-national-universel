@@ -16,8 +16,6 @@ export default ({}) => {
   const [birthdateAt, setBirthdateAt] = useState();
 
   const handleClick = async () => {
-    console.log(mail);
-    console.log(birthdateAt);
     if (!mail) return;
     if (!birthdateAt) return;
     if (!validator.isEmail(mail))
