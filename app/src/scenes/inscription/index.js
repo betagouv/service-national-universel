@@ -10,6 +10,7 @@ import Particulieres from "./Create/stepParticulieres";
 import Consentements from "./Create/stepConsentements";
 import Done from "./Create/stepDone";
 import Drawer from "./Create/drawer";
+import HomeClosed from "./Home/closed";
 
 import Home from "./Home/index.js";
 import { STEPS } from "./utils";
@@ -39,7 +40,7 @@ export default () => {
   if (isInscription2021Closed()) {
     return (
       <Switch>
-        <Route path="/inscription" component={Home} />
+        <Route path="/inscription" component={HomeClosed} />
       </Switch>
     );
   }
