@@ -15,8 +15,8 @@ export default ({}) => {
   const [birthdateAt, setBirthdateAt] = useState();
 
   const handleClick = async () => {
-    if (!mail) return;
-    if (!birthdateAt) return;
+    if (!mail) return toastr.error("Formulaire incorrect", 'Le champs "e-mail" est obligatoire', { timeOut: 3000 });
+    if (!birthdateAt) return toastr.error("Formulaire incorrect", 'Le champs "date de naissance" est obligatoire', { timeOut: 3000 });
     if (!validator.isEmail(mail))
       return toastr.error("Oups, une erreur s'est produite", "Il semblerait que le format de votre mail soit invalide. Merci de réessayer", { timeOut: 3000 });
     if (!/\d{2}\/\d{2}\/(\d{4}|\d{2})/.test(birthdateAt))
@@ -86,6 +86,8 @@ export default ({}) => {
             }}
             placeholder="Votre date de naissance"
             value={birthdateAt}
+            onFocus={(e) => (e.target.placeholder = "jj/mm/aaaa")}
+            onBlur={(e) => (e.target.placeholder = "Votre date de naissance")}
           />
           <ModalButton color="#5245cc" onClick={handleClick} style={{ margin: "1rem 0", minWidth: "300px", maxWidth: "300px" }}>
             Être alerté
