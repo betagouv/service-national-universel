@@ -11,6 +11,7 @@ import Consentements from "./Create/stepConsentements";
 import Done from "./Create/stepDone";
 import Drawer from "./Create/drawer";
 import HomeClosed from "./Home/closed";
+import { useSelector } from "react-redux";
 
 import Home from "./Home/index.js";
 import { STEPS } from "./utils";
@@ -37,7 +38,9 @@ const Step = ({ step }) => {
 };
 
 export default () => {
-  if (isInscription2021Closed()) {
+  const young = useSelector((state) => state.Auth.young);
+
+  if (isInscription2021Closed() && (!young || young?.status === "IN_PROGRESS")) {
     return (
       <Switch>
         <Route path="/inscription" component={HomeClosed} />
