@@ -1,3 +1,4 @@
+import { translate } from "./translation";
 export * from "snu-lib";
 export * from "./translation";
 export * from "./colors";
@@ -29,7 +30,6 @@ export const publicEtatTypes = [
 
 export const corpsEnUniforme = ["SDIS (Service départemental d'Incendie et de Secours)", "Gendarmerie", "Police", "Armées"];
 
-import { translate } from "./translation";
 export const getFilterLabel = (selected, placeholder = "Choisissez un filtre") => {
   if (Object.keys(selected).length === 0) return placeholder;
   const translated = Object.keys(selected).map((item) => {
@@ -37,3 +37,8 @@ export const getFilterLabel = (selected, placeholder = "Choisissez un filtre") =
   });
   return translated.join(", ");
 };
+
+// See: https://trello.com/c/JBS3Jn8I/576-inscription-impact-fin-instruction-dossiers-au-6-mai
+export function isEndOfInscriptionManagement2021() {
+  return new Date() > new Date(2021, 4, 6); // greater than 6 mai 2021 morning
+}
