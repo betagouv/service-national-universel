@@ -1,10 +1,8 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
-import { ReactiveBase, ReactiveList, SingleList, MultiDropdownList, MultiList, DataSearch } from "@appbaseio/reactivesearch";
-import { Col, Row } from "reactstrap";
+import { Row } from "reactstrap";
 
-import { apiURL } from "../../../config";
 import api from "../../../services/api";
 import SelectStatusApplication from "../../../components/selectStatusApplication";
 import { APPLICATION_STATUS, formatStringDate } from "../../../utils";
