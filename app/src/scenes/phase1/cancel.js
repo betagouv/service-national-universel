@@ -17,24 +17,10 @@ export default () => {
           <h1>
             <strong>{young.firstName},</strong> votre séjour a été annulé suite à la crise sanitaire !
           </h1>
-          {isBornBefore20030702 ? (
-            <p>
-              Malheureusement, vous aurez 18 ans révolus au moment du séjour de cohésion, vous ne pouvez vous y inscrire. Si vous n'avez pas réalisé votre JDC, nous vous invitons à
-              vous inscrire sur{" "}
-              <a href="http://majdc.fr" target="_blank">
-                majdc.fr
-              </a>{" "}
-              et à demander à être convoqué pour une session en ligne.
-            </p>
-          ) : null}
           {needsToRegisterToCohesion ? (
             <>
-              <p>Vous pouvez cependant demander à participer à la session 2021, sous réserve de votre disponibilité du 21 juin au 2 juillet 2021.</p>{" "}
-              <Link to="/cohesion/consentements">
-                <Button>Je confirme ma participation au séjour de cohésion</Button>
-              </Link>
               <div style={{ marginTop: "1rem", fontStyle: "italic" }}>
-                Si vous n'êtes pas disponible sur ces dates et que vous n'avez pas réalisé votre JDC, nous vous invitons à vous inscrire sur{" "}
+                Si vous n'avez pas réalisé votre JDC, nous vous invitons à vous inscrire sur{" "}
                 <a href="http://majdc.fr" target="_blank">
                   majdc.fr
                 </a>{" "}
