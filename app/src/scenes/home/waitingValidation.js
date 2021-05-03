@@ -4,6 +4,7 @@ import styled from "styled-components";
 import { useSelector } from "react-redux";
 import Hero from "../../components/Hero";
 import { YOUNG_STATUS } from "../../utils";
+import { isEndOfInscriptionManagement2021 } from "snu-lib";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
@@ -27,7 +28,7 @@ export default () => {
           Votre inscription a bien été enregistrée et est <b style={{ color: "#5145cd" }}>en cours de validation</b> par l'administration. Vous serez prochainement informé(e) par
           e-mail de l'avancement de votre candidature.
         </p>
-        {young.status === YOUNG_STATUS.WAITING_VALIDATION ? (
+        {young.status === YOUNG_STATUS.WAITING_VALIDATION && !isEndOfInscriptionManagement2021() ? (
           <>
             <p>Vous pouvez cependant continuer à éditer les informations renseignées lors de votre inscription.</p>
             <Link to="/inscription/coordonnees">

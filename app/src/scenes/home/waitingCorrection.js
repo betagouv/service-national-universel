@@ -22,14 +22,19 @@ export default () => {
         <h1>
           <strong>{young.firstName},</strong> bienvenue dans votre espace personnel.
         </h1>
-        <p>Une action de votre part est nécessaire afin de valider votre inscription au SNU.</p>
-        <p>
-          Vous avez reçu des instructions sur votre adresse mail <span style={{ color: "#5145cd" }}>{young.email}</span>.
-        </p>
-        <p>Vous pouvez effectuer les corrections indiquées en cliquant sur ce bouton jusqu'au 5 mai au soir.</p>
-        <Link to="/inscription/coordonnees">
-          <BackButton>Editer mes informations d'inscription</BackButton>
-        </Link>
+        {!isEndOfInscriptionManagement2021() && (
+          <>
+            <p>Une action de votre part est nécessaire afin de valider votre inscription au SNU.</p>
+            <p>
+              Vous avez reçu des instructions sur votre adresse mail <span style={{ color: "#5145cd" }}>{young.email}</span>.
+            </p>
+
+            <p>Vous pouvez effectuer les corrections indiquées en cliquant sur ce bouton jusqu'au 5 mai au soir.</p>
+            <Link to="/inscription/coordonnees">
+              <BackButton>Editer mes informations d'inscription</BackButton>
+            </Link>
+          </>
+        )}
         <Separator />
         <p style={{ fontSize: "1.125rem" }}>
           Si vous avez la moindre question, trouvez toutes les réponses à vos questions en consultant la{" "}
