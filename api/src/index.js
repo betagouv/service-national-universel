@@ -37,6 +37,7 @@ app.use("/referent", require("./controllers/referent"));
 app.use("/application", require("./controllers/application"));
 app.use("/program", require("./controllers/program"));
 app.use("/inscription-goal", require("./controllers/inscription-goal"));
+app.use("/department-service", require("./controllers/department-service"));
 app.use("/waiting-list", require("./controllers/waiting-list"));
 
 app.get("/", async (req, res) => {
