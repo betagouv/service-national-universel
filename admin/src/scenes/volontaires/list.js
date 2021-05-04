@@ -256,7 +256,7 @@ export default ({ setYoung }) => {
                   <Table>
                     <thead>
                       <tr>
-                        <th width="40%">Email</th>
+                        <th width="40%">Volontaire</th>
                         <th width="40%">Contextes</th>
                         <th width="40%">Dernière connexion</th>
                         <th>Actions</th>
