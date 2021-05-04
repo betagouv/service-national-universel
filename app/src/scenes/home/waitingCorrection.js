@@ -2,7 +2,9 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
+
 import Hero from "../../components/Hero";
+import { isEndOfInscriptionManagement2021 } from "../../utils";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
