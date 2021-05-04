@@ -138,7 +138,7 @@ export const Table = styled.table`
   tbody tr {
     border-bottom: 1px solid #f4f5f7;
     :hover {
-      background-color: #e6ebfa;
+      background-color: #f1f1f1;
     }
   }
 `;

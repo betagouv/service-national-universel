@@ -162,7 +162,7 @@ export default () => {
 
 const Hit = ({ hit, onClick, user, selected }) => {
   return (
-    <tr style={{ backgroundColor: selected ? "#f1f1f1" : "transparent" }} onClick={onClick}>
+    <tr style={{ backgroundColor: selected && "#e6ebfa" }} onClick={onClick}>
       <td>
         <MultiLine>
           <h2>{`${hit.firstName} ${hit.lastName}`}</h2>

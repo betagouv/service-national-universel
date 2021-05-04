@@ -222,7 +222,7 @@ const Hit = ({ hit, onClick, selected }) => {
     })();
   }, [hit]);
   return (
-    <tr style={{ backgroundColor: selected ? "#f1f1f1" : "transparent" }} onClick={onClick}>
+    <tr style={{ backgroundColor: selected && "#e6ebfa" }} onClick={onClick}>
       <td>
         <MultiLine>
           <h2>{hit.name}</h2>
