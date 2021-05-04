@@ -116,6 +116,7 @@ export default (props) => {
                   <Box>
                     <BoxTitle>Information</BoxTitle>
                     <BoxContent direction="column">
+                      <Item title="Centre" values={values} name="cohesionCenterId" handleChange={handleChange} />
                       <Select
                         name="role"
                         disabled={currentUser.role !== "admin"}

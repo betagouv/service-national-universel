@@ -1,27 +1,27 @@
-import React, { useState } from "react";
-import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
+import React, { useEffect, useState } from "react";
 import { ReactiveBase, ReactiveList, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
-import VioletHeaderButton from "../../components/buttons/VioletHeaderButton";
-
-import ExportComponent from "../../components/ExportXlsx";
 
 import api from "../../services/api";
-import { apiURL, appURL } from "../../config";
+import { apiURL } from "../../config";
 import Panel from "./panel";
-import Badge from "../../components/Badge";
-import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS_COLORS, isInRuralArea, formatDateFR, formatLongDateFR } from "../../utils";
-import { Link } from "react-router-dom";
+import ExportComponent from "../../components/ExportXlsx";
+import { translate, getFilterLabel, YOUNG_STATUS_COLORS } from "../../utils";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
-import Chevron from "../../components/Chevron";
+import Badge from "../../components/Badge";
+import { ResultTable, Filter, Table, FilterRow, TopResultStats, BottomResultStats } from "../../components/list";
+import ToggleSwitch from "../../components/ToogleSwitch";
+import { toastr } from "react-redux-toastr";
 
-const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_PHASE_1", "STATUS_PHASE_2", "STATUS_PHASE_3", "STATUS_APPLICATION", "LOCATION"];
+const FILTERS = ["SEARCH", "STATUS", "PHASE", "COHORT", "MISSIONS", "TUTOR"];
 
-export default ({ setYoung }) => {
+export default () => {
+  const user = useSelector((state) => state.Auth.user);
   const [volontaire, setVolontaire] = useState(null);
-  const getDefaultQuery = () => ({ query: { bool: { filter: { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } } } } });
+  const getDefaultQuery = () => ({ query: { bool: { filter: { term: { "cohesionCenterName.keyword": user.cohesionCenterId } } } } });
   const getExportQuery = () => ({ ...getDefaultQuery(), size: 10000 });
+
   return (
     <div>
       <ReactiveBase url={`${apiURL}/es`} app="young" headers={{ Authorization: `JWT ${api.getToken()}` }}>
@@ -32,8 +32,8 @@ export default ({ setYoung }) => {
                 <Title>Volontaires</Title>
               </div>
               <ExportComponent
-                title="Exporter les volontaires"
                 defaultQuery={getExportQuery}
+                title="Exporter les volontaires"
                 collection="volontaire"
                 react={{ and: FILTERS }}
                 transform={(data) => {
@@ -256,21 +256,29 @@ export default ({ setYoung }) => {
                   <Table>
                     <thead>
                       <tr>
-                        <th width="40%">Email</th>
-                        <th width="40%">Contextes</th>
-                        <th width="40%">Dernière connexion</th>
-                        <th>Actions</th>
+                        <th width="30%">Volontaire</th>
+                        <th width="30%">Contextes</th>
+                        <th width="20%">Présence au séjour</th>
+                        <th width="20%">Fiche sanitaire</th>
                       </tr>
                     </thead>
                     <tbody>
                       {data.map((hit, i) => (
-                        <Hit key={i} hit={hit} onClick={() => setVolontaire(hit)} selected={volontaire?._id === hit._id} />
+                        <Hit
+                          key={i}
+                          hit={hit}
+                          callback={(e) => {
+                            if (e._id === volontaire._id) setVolontaire(e);
+                          }}
+                          onClick={() => setVolontaire(hit)}
+                          selected={volontaire?._id === hit._id}
+                        />
                       ))}
                     </tbody>
                   </Table>
                 )}
               />
-            </ResultTable>
+            </ResultTable>{" "}
           </div>
           <Panel
             value={volontaire}
@@ -284,7 +292,15 @@ export default ({ setYoung }) => {
   );
 };
 
-const Hit = ({ hit, onClick, selected }) => {
+const Hit = ({ hit, onClick, selected, callback }) => {
+  const [cohesionStayPresenceChecked, setCohesionStayPresenceChecked] = useState();
+  const [cohesionStayMedicalFileReceivedChecked, setCohesionStayMedicalFileReceivedChecked] = useState();
+
+  useEffect(() => {
+    !cohesionStayPresenceChecked && setCohesionStayPresenceChecked(hit.cohesionStayPresence);
+    !cohesionStayMedicalFileReceivedChecked && setCohesionStayMedicalFileReceivedChecked(hit.cohesionStayMedicalFileReceived);
+  }, [hit]);
+
   const getAge = (d) => {
     const now = new Date();
     const date = new Date(d);
@@ -294,54 +310,50 @@ const Hit = ({ hit, onClick, selected }) => {
     return age;
   };
 
+  const updateYoung = async (v) => {
+    const { data, ok, code } = await api.put(`/referent/young/${hit._id}`, v);
+    if (!ok) return toastr.error("Oups, une erreur s'est produite", translate(code));
+    data.cohesionStayPresence !== cohesionStayPresenceChecked && setCohesionStayPresenceChecked(data.cohesionStayPresence);
+    data.cohesionStayMedicalFileReceived !== cohesionStayMedicalFileReceivedChecked && setCohesionStayMedicalFileReceivedChecked(data.cohesionStayMedicalFileReceived);
+    callback(data);
+  };
+
   return (
-    <tr style={{ backgroundColor: selected ? "#f1f1f1" : "transparent" }} onClick={onClick}>
-      <td>
+    <tr style={{ backgroundColor: selected ? "#f1f1f1" : "transparent" }}>
+      <td onClick={onClick}>
         <div className="name">{`${hit.firstName} ${hit.lastName}`}</div>
         <div className="email">
           {hit.birthdateAt ? `${getAge(hit.birthdateAt)} ans` : null} {`• ${hit.city || ""} (${hit.department || ""})`}
         </div>
       </td>
-      <td>
+      <td onClick={onClick}>
         <Badge text={`Cohorte ${hit.cohort}`} />
         <Badge text="Phase 1" tooltipText={translate(hit.statusPhase1)} color={YOUNG_STATUS_COLORS[hit.statusPhase1]} />
         <Badge text="Phase 2" tooltipText={translate(hit.statusPhase2)} color={YOUNG_STATUS_COLORS[hit.statusPhase2]} />
         <Badge text="Phase 3" tooltipText={translate(hit.statusPhase3)} color={YOUNG_STATUS_COLORS[hit.statusPhase3]} />
         {hit.status === "WITHDRAWN" ? <Badge text="Désisté" color={YOUNG_STATUS_COLORS.WITHDRAWN} /> : null}
       </td>
-      <td>{formatStringLongDate(hit.lastLoginAt)}</td>
-      <td onClick={(e) => e.stopPropagation()}>
-        <Action hit={hit} />
+      <td>
+        <ToggleSwitch
+          id={`cohesionStayPresence${hit._id}`}
+          optionLabels={["Présent", "Absent"]}
+          checked={cohesionStayPresenceChecked === "true"}
+          onChange={(checked) => {
+            updateYoung({ cohesionStayPresence: checked });
+          }}
+        />
+      </td>
+      <td>
+        <ToggleSwitch
+          id={`cohesionStayMedicalFileReceived${hit._id}`}
+          optionLabels={["Réceptionné", "Non réceptionné"]}
+          checked={cohesionStayMedicalFileReceivedChecked === "true"}
+          onChange={(checked) => {
+            updateYoung({ cohesionStayMedicalFileReceived: checked });
+          }}
+        />
       </td>
     </tr>
-  );
-};
-
-const Action = ({ hit, color }) => {
-  const user = useSelector((state) => state.Auth.user);
-
-  return (
-    <ActionBox color={"#444"}>
-      <UncontrolledDropdown setActiveFromChild>
-        <DropdownToggle tag="button">
-          Choisissez&nbsp;une&nbsp;action
-          <Chevron color="#444" />
-        </DropdownToggle>
-        <DropdownMenu>
-          <Link to={`/volontaire/${hit._id}`}>
-            <DropdownItem className="dropdown-item">Consulter le profil</DropdownItem>
-          </Link>
-          <Link to={`/volontaire/${hit._id}/edit`}>
-            <DropdownItem className="dropdown-item">Modifier le profil</DropdownItem>
-          </Link>
-          {["admin", "referent_department", "referent_region"].includes(user.role) ? (
-            <DropdownItem className="dropdown-item">
-              <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${hit._id}`}>Prendre sa place</a>
-            </DropdownItem>
-          ) : null}
-        </DropdownMenu>
-      </UncontrolledDropdown>
-    </ActionBox>
   );
 };
 
@@ -358,227 +370,4 @@ const Title = styled.div`
   font-weight: 700;
   font-size: 24px;
   margin-bottom: 30px;
-`;
-
-const Filter = styled.div`
-  padding: 0 25px;
-  margin-bottom: 20px;
-
-  .searchbox {
-    display: block;
-    width: 100%;
-    background-color: #fff;
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
-    color: #767676;
-    border: 0;
-    outline: 0;
-    padding: 15px 20px;
-    height: auto;
-    border-radius: 6px;
-    margin-right: 15px;
-    ::placeholder {
-      color: #767676;
-    }
-  }
-`;
-
-const FilterRow = styled.div`
-  padding: 15px 0 0;
-  display: flex;
-  align-items: flex-start;
-  flex-wrap: wrap;
-  .dropdown-filter {
-    margin-right: 15px;
-    margin-bottom: 15px;
-  }
-  .searchbox-city {
-    min-width: 165px;
-    max-width: 165px;
-    margin-right: 15px;
-    margin-bottom: 15px;
-    input {
-      padding: 10.5px 12px;
-    }
-  }
-  button {
-    background-color: #fff;
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
-    border: 0;
-    border-radius: 6px;
-    padding: 10px 20px;
-    font-size: 14px;
-    color: #242526;
-    min-width: 150px;
-    margin-right: 15px;
-    cursor: pointer;
-    div {
-      width: 100%;
-      overflow: visible;
-    }
-  }
-`;
-
-const ResultTable = styled.div`
-  background-color: #fff;
-  position: relative;
-  margin: 20px 0;
-  padding-bottom: 10px;
-  .pagination {
-    display: flex;
-    justify-content: flex-end;
-    padding: 10px 25px;
-    background: #fff;
-    a {
-      background: #f7fafc;
-      color: #242526;
-      padding: 3px 10px;
-      font-size: 12px;
-      margin: 0 5px;
-    }
-    a.active {
-      font-weight: 700;
-      /* background: #5245cc;
-      color: #fff; */
-    }
-    a:first-child {
-      background-image: url(${require("../../assets/left.svg")});
-    }
-    a:last-child {
-      background-image: url(${require("../../assets/right.svg")});
-    }
-    a:first-child,
-    a:last-child {
-      font-size: 0;
-      height: 24px;
-      width: 30px;
-      background-position: center;
-      background-repeat: no-repeat;
-      background-size: 8px;
-    }
-  }
-`;
-
-const ResultStats = styled.div`
-  color: #242526;
-  font-size: 12px;
-  padding-left: 25px;
-`;
-
-const TopResultStats = styled(ResultStats)`
-  position: absolute;
-  top: 25px;
-  left: 0;
-`;
-const BottomResultStats = styled(ResultStats)`
-  position: absolute;
-  top: calc(100% - 50px);
-  left: 0;
-`;
-
-const Table = styled.table`
-  width: 100%;
-  color: #242526;
-  margin-top: 10px;
-  th {
-    border-top: 1px solid #f4f5f7;
-    border-bottom: 1px solid #f4f5f7;
-    padding: 15px;
-    font-weight: 400;
-    font-size: 14px;
-    text-transform: uppercase;
-  }
-  td {
-    padding: 15px;
-    font-size: 14px;
-    font-weight: 300;
-    strong {
-      font-weight: 700;
-      margin-bottom: 5px;
-      display: block;
-    }
-  }
-  td:first-child,
-  th:first-child {
-    padding-left: 25px;
-  }
-  tbody tr {
-    border-bottom: 1px solid #f4f5f7;
-    :hover {
-      background-color: #e6ebfa;
-    }
-    .name {
-      color: black;
-      font-weight: 600;
-    }
-    .email {
-      font-size: 0.8rem;
-    }
-  }
-`;
-
-const ActionBox = styled.div`
-  .dropdown-menu {
-    min-width: 0;
-    width: 200px;
-    a,
-    div {
-      white-space: nowrap;
-      font-size: 14px;
-      :hover {
-        color: inherit;
-      }
-    }
-  }
-  button {
-    ${({ color }) => `
-      background-color: ${color}15;
-      border: 1px solid ${color};
-      color: ${color};
-    `}
-    display: inline-flex;
-    flex: 1;
-    justify-content: space-between;
-    align-items: center;
-    text-align: left;
-    border-radius: 0.5rem;
-    padding: 0 0 0 12px;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    outline: 0;
-    width: 100%;
-    max-width: 250px;
-    .edit-icon {
-      height: 17px;
-      margin-right: 10px;
-      path {
-        fill: ${({ color }) => `${color}`};
-      }
-    }
-    .down-icon {
-      margin-left: auto;
-      padding: 7px 15px;
-      /* border-left: 1px solid ${({ color }) => `${color}`}; */
-      margin-left: 15px;
-      svg {
-        height: 10px;
-      }
-      svg polygon {
-        fill: ${({ color }) => `${color}`};
-      }
-    }
-  }
-  .dropdown-item {
-    border-radius: 0;
-    background-color: transparent;
-    border: none;
-    color: #767676;
-    white-space: nowrap;
-    font-size: 14px;
-    padding: 5px 15px;
-    font-weight: 400;
-    :hover {
-      background-color: #f3f3f3;
-    }
-  }
 `;

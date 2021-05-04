@@ -19,7 +19,11 @@ export default () => {
   const [responsable, setResponsable] = useState(null);
   const user = useSelector((state) => state.Auth.user);
   const [structureIds, setStructureIds] = useState();
-  const getDefaultQuery = () => (user.role === "supervisor" ? { query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } } } : { query: { match_all: {} } });
+  const getDefaultQuery = () => {
+    if (user.role === "supervisor") return { query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } } };
+    else if (user.role === "head_center") return { query: { bool: { filter: { term: { "role.keyword": "head_center" } } } } };
+    else return { query: { match_all: {} } };
+  };
   const getExportQuery = () => ({ ...getDefaultQuery(), size: 10000 });
   useEffect(() => {
     if (user.role !== "supervisor") return;
