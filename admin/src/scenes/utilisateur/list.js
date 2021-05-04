@@ -5,6 +5,8 @@ import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
+import { Link } from "react-router-dom";
+
 import { setUser } from "../../redux/auth/actions";
 import { translate, getFilterLabel, formatStringLongDate } from "../../utils";
 import api from "../../services/api";
@@ -201,6 +203,9 @@ const Action = ({ hit, color }) => {
           <Chevron color="#444" />
         </DropdownToggle>
         <DropdownMenu>
+          <Link to={`/user/${hit._id}`}>
+            <DropdownItem className="dropdown-item">Consulter le profil</DropdownItem>
+          </Link>
           <DropdownItem className="dropdown-item" onClick={handleImpersonate}>
             Prendre sa place
           </DropdownItem>
