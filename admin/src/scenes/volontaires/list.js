@@ -114,11 +114,12 @@ export default ({ setYoung }) => {
             </Header>
             <Filter>
               <DataSearch
+                defaultQuery={getDefaultQuery}
                 showIcon={false}
-                placeholder="Rechercher par prénom, nom, email..."
+                placeholder="Rechercher par prénom, nom, email, ville, code postal..."
                 componentId="SEARCH"
-                dataField={["email.keyword", "firstName", "lastName"]}
-                react={{ and: FILTERS }}
+                dataField={["email.keyword", "firstName", "lastName", "city", "zip"]}
+                react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
                 // fuzziness={2}
                 style={{ flex: 2 }}
                 innerClass={{ input: "searchbox" }}
@@ -126,18 +127,6 @@ export default ({ setYoung }) => {
                 queryFormat="and"
               />
               <FilterRow>
-                <DataSearch
-                  defaultQuery={getDefaultQuery}
-                  showIcon={false}
-                  placeholder="Ville ou code postal"
-                  componentId="LOCATION"
-                  dataField={["city", "zip"]}
-                  react={{ and: FILTERS.filter((e) => e !== "LOCATION") }}
-                  style={{ flex: 2 }}
-                  innerClass={{ input: "searchbox" }}
-                  className="searchbox-city"
-                  autosuggest={false}
-                />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"

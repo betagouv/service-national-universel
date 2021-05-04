@@ -79,29 +79,18 @@ export default () => {
             </Header>
             <Filter>
               <DataSearch
+                defaultQuery={getDefaultQuery}
                 showIcon={false}
-                placeholder="Rechercher par mots clés, mission ou structure..."
+                placeholder="Rechercher par mots clés, ville, code postal..."
                 componentId="SEARCH"
-                dataField={["name"]}
-                react={{ and: FILTERS }}
+                dataField={["name", "city", "zip"]}
+                react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
                 // fuzziness={2}
                 style={{ flex: 2 }}
                 innerClass={{ input: "searchbox" }}
                 autosuggest={false}
               />
               <FilterRow>
-                <DataSearch
-                  defaultQuery={getDefaultQuery}
-                  showIcon={false}
-                  placeholder="Ville ou code postal"
-                  componentId="LOCATION"
-                  dataField={["city", "zip"]}
-                  react={{ and: FILTERS.filter((e) => e !== "LOCATION") }}
-                  style={{ flex: 2 }}
-                  innerClass={{ input: "searchbox" }}
-                  className="searchbox-city"
-                  autosuggest={false}
-                />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
