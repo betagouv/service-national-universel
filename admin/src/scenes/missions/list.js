@@ -8,7 +8,7 @@ import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
-import { formatStringDate, translate, getFilterLabel } from "../../utils";
+import { formatStringDate, translate, getFilterLabel, formatLongDateFR, formatDateFR } from "../../utils";
 import SelectStatusMission from "../../components/selectStatusMission";
 import VioletHeaderButton from "../../components/buttons/VioletHeaderButton";
 import Loader from "../../components/Loader";
@@ -58,8 +58,34 @@ export default () => {
                 title="Exporter les missions"
                 defaultQuery={getExportQuery}
                 collection="mission"
-                transform={(e) => {
-                  return e;
+                react={{ and: FILTERS }}
+                transform={(data) => {
+                  return {
+                    _id: data._id,
+                    "Titre de la mission": data.name,
+                    Description: data.description,
+                    "Id de la structure": data.structureId,
+                    "Nom de la structure": data.structureName,
+                    Tuteur: data.tutorName,
+                    "Liste des domaines de la mission": data.domains,
+                    "Date du début": formatDateFR(data.startAt),
+                    "Date de fin": formatDateFR(data.endAt),
+                    Format: data.format,
+                    Fréquence: data.frequence,
+                    Période: data.period,
+                    "Places total": data.placesTotal,
+                    "Places disponibles": data.placesLeft,
+                    "Actions concrètes confiées au(x) volontaire(s)": data.actions,
+                    "Contraintes spécifiques": data.contraintes,
+                    Adresse: data.address,
+                    "Code postal": data.zip,
+                    Ville: data.city,
+                    Département: data.department,
+                    Région: data.region,
+                    Statut: data.status,
+                    "Créé lé": formatLongDateFR(data.createdAt),
+                    "Mis à jour le": formatLongDateFR(data.updatedAt),
+                  };
                 }}
               />
             </Header>
