@@ -16,6 +16,8 @@ import Loader from "../../components/Loader";
 const FILTERS = ["SEARCH", "ROLE", "SUBROLE", "REGION", "DEPARTMENT"];
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
+import { Filter, FilterRow, ResultTable, Table, TopResultStats, BottomResultStats, ActionBox, Header, Title, MultiLine } from "../../components/list";
+import Badge from "../../components/Badge";
 
 export default () => {
   const [responsable, setResponsable] = useState(null);
@@ -43,7 +45,7 @@ export default () => {
             <Header>
               <div>
                 {/* <Subtitle>RESPONSABLE</Subtitle> */}
-                <Title>Utilisateur</Title>
+                <Title>Utilisateurs</Title>
               </div>
               {/* <Export>
                 <ExportComponent
@@ -162,12 +164,12 @@ const Hit = ({ hit, onClick, user, selected }) => {
   return (
     <tr style={{ backgroundColor: selected ? "#f1f1f1" : "transparent" }} onClick={onClick}>
       <td>
-        <div style={{ color: "#1e242f", fontSize: 15, textTransform: "capitalize" }}>{`${hit.firstName} ${hit.lastName}`}</div>
-        {hit.email}
+        <MultiLine>
+          <h2>{`${hit.firstName} ${hit.lastName}`}</h2>
+          <p>{hit.email}</p>
+        </MultiLine>
       </td>
-      <td>
-        <Tag>{translate(hit.role)}</Tag>
-      </td>
+      <td>{hit.role && <Badge text={translate(hit.role)} />}</td>
       <td>{formatStringLongDate(hit.createdAt)}</td>
       <td>{formatStringLongDate(hit.lastLoginAt)}</td>
       {!["referent_department", "referent_region"].includes(user.role) && (
@@ -214,239 +216,3 @@ const Action = ({ hit, color }) => {
     </ActionBox>
   );
 };
-
-const Header = styled.div`
-  padding: 0 25px 0;
-  display: flex;
-  align-items: flex-start;
-  margin-top: 25px;
-  justify-content: space-between;
-`;
-
-const Title = styled.div`
-  color: rgb(38, 42, 62);
-  font-weight: 700;
-  font-size: 24px;
-  margin-bottom: 30px;
-`;
-
-const Filter = styled.div`
-  padding: 0 25px;
-  margin-bottom: 20px;
-
-  .searchbox {
-    display: block;
-    width: 100%;
-    background-color: #fff;
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
-    color: #767676;
-    border: 0;
-    outline: 0;
-    padding: 15px 20px;
-    height: auto;
-    border-radius: 6px;
-    margin-right: 15px;
-    ::placeholder {
-      color: #767676;
-    }
-  }
-`;
-
-const FilterRow = styled.div`
-  padding: 15px 0 0;
-  display: flex;
-  align-items: flex-start;
-  flex-wrap: wrap;
-  .dropdown-filter {
-    margin-right: 15px;
-    margin-bottom: 15px;
-    button {
-      background-color: #fff;
-      box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
-      border: 0;
-      border-radius: 6px;
-      padding: 10px 20px;
-      font-size: 14px;
-      color: #242526;
-      min-width: 150px;
-      margin-right: 15px;
-      cursor: pointer;
-      div {
-        width: 100%;
-        overflow: visible;
-      }
-    }
-  }
-`;
-
-const ResultTable = styled.div`
-  background-color: #fff;
-  position: relative;
-  margin: 20px 0;
-  padding-bottom: 10px;
-  .pagination {
-    display: flex;
-    justify-content: flex-end;
-    padding: 10px 25px;
-    background: #fff;
-    a {
-      background: #f7fafc;
-      color: #242526;
-      padding: 3px 10px;
-      font-size: 12px;
-      margin: 0 5px;
-    }
-    a.active {
-      font-weight: 700;
-      /* background: #5245cc;
-      color: #fff; */
-    }
-    a:first-child {
-      background-image: url(${require("../../assets/left.svg")});
-    }
-    a:last-child {
-      background-image: url(${require("../../assets/right.svg")});
-    }
-    a:first-child,
-    a:last-child {
-      font-size: 0;
-      height: 24px;
-      width: 30px;
-      background-position: center;
-      background-repeat: no-repeat;
-      background-size: 8px;
-    }
-  }
-`;
-
-const ResultStats = styled.div`
-  color: #242526;
-  font-size: 12px;
-  padding-left: 25px;
-`;
-
-const TopResultStats = styled(ResultStats)`
-  position: absolute;
-  top: 25px;
-  left: 0;
-`;
-const BottomResultStats = styled(ResultStats)`
-  position: absolute;
-  top: calc(100% - 50px);
-  left: 0;
-`;
-
-const Table = styled.table`
-  width: 100%;
-  color: #242526;
-  margin-top: 10px;
-  th {
-    border-top: 1px solid #f4f5f7;
-    border-bottom: 1px solid #f4f5f7;
-    padding: 15px;
-    font-weight: 400;
-    font-size: 14px;
-    text-transform: uppercase;
-  }
-  td {
-    padding: 15px;
-    font-size: 14px;
-    font-weight: 300;
-    strong {
-      font-weight: 700;
-      margin-bottom: 5px;
-      display: block;
-    }
-  }
-  td:first-child,
-  th:first-child {
-    padding-left: 25px;
-  }
-  tbody tr {
-    border-bottom: 1px solid #f4f5f7;
-    :hover {
-      background-color: #e6ebfa;
-    }
-  }
-`;
-
-const Tag = styled.span`
-  background-color: rgb(244, 244, 245);
-  border: 1px solid rgb(233, 233, 235);
-  color: rgb(144, 147, 153);
-  border-radius: 4px;
-  padding: 8px 15px;
-  font-size: 13px;
-  white-space: nowrap;
-  font-weight: 400;
-  cursor: pointer;
-  margin-right: 5px;
-  text-transform: capitalize;
-`;
-
-const ActionBox = styled.div`
-  .dropdown-menu {
-    min-width: 0;
-    width: 200px;
-    a,
-    div {
-      white-space: nowrap;
-      font-size: 14px;
-      :hover {
-        color: inherit;
-      }
-    }
-  }
-  button {
-    ${({ color }) => `
-      background-color: ${color}15;
-      border: 1px solid ${color};
-      color: ${color};
-    `}
-    display: inline-flex;
-    flex: 1;
-    justify-content: space-between;
-    align-items: center;
-    text-align: left;
-    border-radius: 0.5rem;
-    padding: 0 0 0 12px;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
-    outline: 0;
-    width: 100%;
-    max-width: 250px;
-    .edit-icon {
-      height: 17px;
-      margin-right: 10px;
-      path {
-        fill: ${({ color }) => `${color}`};
-      }
-    }
-    .down-icon {
-      margin-left: auto;
-      padding: 7px 15px;
-      /* border-left: 1px solid ${({ color }) => `${color}`}; */
-      margin-left: 15px;
-      svg {
-        height: 10px;
-      }
-      svg polygon {
-        fill: ${({ color }) => `${color}`};
-      }
-    }
-  }
-  .dropdown-item {
-    border-radius: 0;
-    background-color: transparent;
-    border: none;
-    color: #767676;
-    white-space: nowrap;
-    font-size: 14px;
-    padding: 5px 15px;
-    font-weight: 400;
-    :hover {
-      background-color: #f3f3f3;
-    }
-  }
-`;

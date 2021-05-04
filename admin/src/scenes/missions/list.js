@@ -13,6 +13,7 @@ import SelectStatusMission from "../../components/selectStatusMission";
 import VioletHeaderButton from "../../components/buttons/VioletHeaderButton";
 import Loader from "../../components/Loader";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
+import { Filter, FilterRow, ResultTable, Table, TopResultStats, BottomResultStats, Header, Title, MultiLine } from "../../components/list";
 
 const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "TUTOR", "REGION", "DEPARTMENT", "STRUCTURE"];
 
@@ -242,14 +243,12 @@ const Hit = ({ hit, onClick, selected }) => {
   return (
     <tr style={{ backgroundColor: selected ? "#f1f1f1" : "transparent" }} onClick={onClick}>
       <td>
-        <TeamMember>
-          <div>
-            <h2>{hit.name}</h2>
-            <p>
-              {hit.structureName} {`• ${hit.city} (${hit.department})`}
-            </p>
-          </div>
-        </TeamMember>
+        <MultiLine>
+          <h2>{hit.name}</h2>
+          <p>
+            {hit.structureName} {`• ${hit.city} (${hit.department})`}
+          </p>
+        </MultiLine>
       </td>
       <td>
         <div>
@@ -271,182 +270,3 @@ const Hit = ({ hit, onClick, selected }) => {
     </tr>
   );
 };
-
-const Header = styled.div`
-  padding: 0 25px 0;
-  display: flex;
-  margin-top: 25px;
-  align-items: flex-start;
-  /* justify-content: space-between; */
-`;
-
-const Title = styled.div`
-  color: rgb(38, 42, 62);
-  font-weight: 700;
-  font-size: 24px;
-  margin-bottom: 30px;
-`;
-
-const Filter = styled.div`
-  padding: 0 25px;
-  margin-bottom: 20px;
-
-  .searchbox {
-    display: block;
-    width: 100%;
-    background-color: #fff;
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
-    color: #767676;
-    border: 0;
-    outline: 0;
-    padding: 15px 20px;
-    height: auto;
-    border-radius: 6px;
-    margin-right: 15px;
-    ::placeholder {
-      color: #767676;
-    }
-  }
-`;
-
-const FilterRow = styled.div`
-  padding: 15px 0 0;
-  display: flex;
-  align-items: flex-start;
-  flex-wrap: wrap;
-
-  .dropdown-filter {
-    margin-right: 15px;
-    margin-bottom: 15px;
-  }
-  .searchbox-city {
-    min-width: 165px;
-    max-width: 165px;
-    margin-right: 15px;
-    margin-bottom: 15px;
-    input {
-      padding: 10.5px 12px;
-    }
-  }
-  button {
-    background-color: #fff;
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
-    border: 0;
-    border-radius: 6px;
-    padding: 10px 20px;
-    font-size: 14px;
-    color: #242526;
-    min-width: 150px;
-    margin-right: 15px;
-    cursor: pointer;
-    div {
-      width: 100%;
-      overflow: visible;
-    }
-  }
-`;
-
-const TeamMember = styled.div`
-  h2 {
-    color: #333;
-    font-size: 14px;
-    font-weight: 400;
-    margin-bottom: 5px;
-  }
-  p {
-    color: #606266;
-    font-size: 12px;
-    margin: 0;
-  }
-`;
-
-const ResultTable = styled.div`
-  background-color: #fff;
-  position: relative;
-  margin: 20px 0;
-  padding-bottom: 10px;
-  .pagination {
-    display: flex;
-    justify-content: flex-end;
-    padding: 10px 25px;
-    background: #fff;
-    a {
-      background: #f7fafc;
-      color: #242526;
-      padding: 3px 10px;
-      font-size: 12px;
-      margin: 0 5px;
-    }
-    a.active {
-      font-weight: 700;
-      /* background: #5245cc;
-      color: #fff; */
-    }
-    a:first-child {
-      background-image: url(${require("../../assets/left.svg")});
-    }
-    a:last-child {
-      background-image: url(${require("../../assets/right.svg")});
-    }
-    a:first-child,
-    a:last-child {
-      font-size: 0;
-      height: 24px;
-      width: 30px;
-      background-position: center;
-      background-repeat: no-repeat;
-      background-size: 8px;
-    }
-  }
-`;
-
-const ResultStats = styled.div`
-  color: #242526;
-  font-size: 12px;
-  padding-left: 25px;
-`;
-
-const TopResultStats = styled(ResultStats)`
-  position: absolute;
-  top: 25px;
-  left: 0;
-`;
-const BottomResultStats = styled(ResultStats)`
-  position: absolute;
-  top: calc(100% - 50px);
-  left: 0;
-`;
-
-const Table = styled.table`
-  width: 100%;
-  color: #242526;
-  margin-top: 10px;
-  th {
-    border-top: 1px solid #f4f5f7;
-    border-bottom: 1px solid #f4f5f7;
-    padding: 15px;
-    font-weight: 400;
-    font-size: 14px;
-    text-transform: uppercase;
-  }
-  td {
-    padding: 15px;
-    font-size: 14px;
-    font-weight: 300;
-    strong {
-      font-weight: 700;
-      margin-bottom: 5px;
-      display: block;
-    }
-  }
-  td:first-child,
-  th:first-child {
-    padding-left: 25px;
-  }
-  tbody tr {
-    border-bottom: 1px solid #f4f5f7;
-    :hover {
-      background-color: #e6ebfa;
-    }
-  }
-`;
