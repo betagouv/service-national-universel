@@ -263,20 +263,24 @@ const Logos = styled.div`
     box-shadow: none;
   }
   img {
+    margin: 0 1rem;
     vertical-align: top;
     height: 4rem;
     @media (max-width: 1400px) {
       height: 2.5rem;
+      .mobileHide {
+        height: 80px;
+      }
     }
   }
 `;
 
 const Header = styled.div`
-  padding: 1rem 3rem;
+  padding: 1rem;
   margin-bottom: 2rem;
   background-color: #fff;
-  @media (max-width: 767px) {
-    padding: 0.5rem 0.5rem;
+  @media (max-width: 1400px) {
+    padding: 0.5rem;
   }
 `;
 

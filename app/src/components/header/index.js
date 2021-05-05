@@ -35,6 +35,9 @@ const HeaderNav = styled.div`
     font-weight: 500;
     margin-bottom: 0;
   }
+  @media (max-width: 1400px) {
+    height: 3.5rem;
+  }
   @media (max-width: 768px) {
     h1 {
       color: #6b7280;
