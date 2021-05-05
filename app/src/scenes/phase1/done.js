@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { useSelector } from "react-redux";
 
 import DownloadAttestationButton from "../../components/buttons/DownloadAttestationButton";
-import { HeroContainer, Hero } from "../../components/Hero";
+import { HeroContainer, Hero } from "../../components/Content";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young) || {};

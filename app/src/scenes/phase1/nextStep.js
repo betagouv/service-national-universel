@@ -10,7 +10,7 @@ import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../redux/auth/actions";
 import { translate } from "../../utils";
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib/constants";
-import { HeroContainer, Hero } from "../../components/Hero";
+import { HeroContainer, Hero } from "../../components/Content";
 
 const AuthorizationIntro = () => (
   <div>

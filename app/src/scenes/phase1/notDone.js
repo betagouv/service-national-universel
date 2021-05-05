@@ -1,6 +1,6 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import { HeroContainer, Hero } from "../../components/Hero";
+import { HeroContainer, Hero } from "../../components/Content";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young) || {};

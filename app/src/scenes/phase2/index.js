@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import WaitingRealisation from "./WaitingRealisation";
 import InProgress from "./InProgress";
 import Validated from "./Validated";
-import { HeroContainer, Hero } from "../../components/Hero";
+import { HeroContainer, Hero } from "../../components/Content";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young) || {};

@@ -9,7 +9,7 @@ import ProgramCard from "../components/programCard";
 import MissionCard from "../components/missionCard";
 import api from "../../../services/api";
 import { apiURL } from "../../../config";
-import { HeroContainer, Hero } from "../../../components/Hero";
+import { HeroContainer, Hero } from "../../../components/Content";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young) || {};

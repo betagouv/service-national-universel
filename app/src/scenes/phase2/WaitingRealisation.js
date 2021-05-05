@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
-import { HeroContainer, Hero } from "../../components/Hero";
+import { HeroContainer, Hero } from "../../components/Content";
 
 export default () => {
   const renderStep = () => {

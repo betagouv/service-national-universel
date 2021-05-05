@@ -7,7 +7,7 @@ import Affected from "./affected.js";
 import Cancel from "./cancel.js";
 import NotDone from "./notDone.js";
 import { YOUNG_STATUS_PHASE1 } from "../../utils";
-import { HeroContainer, Hero } from "../../components/Hero";
+import { HeroContainer, Hero } from "../../components/Content";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young) || {};

@@ -13,7 +13,7 @@ import MobilityCard from "./mobilityCard";
 import TransportCard from "./transportCard";
 import ErrorMessage, { requiredMessage } from "./errorMessage";
 import { translate, MISSION_DOMAINS, PERIOD, PROFESSIONNAL_PROJECT, PROFESSIONNAL_PROJECT_PRECISION } from "../../utils";
-import { HeroContainer, Hero } from "../../components/Hero";
+import { HeroContainer, Hero, Content } from "../../components/Content";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
@@ -376,29 +376,6 @@ const Title = styled.div`
     padding: 0 10px;
     background-color: #fff;
     color: rgb(22, 30, 46);
-  }
-`;
-
-const Content = styled.div`
-  margin-top: ${({ showAlert }) => (showAlert ? "2rem" : "")};
-  width: 50%;
-  padding: 60px 30px 60px 50px;
-  @media (max-width: 768px) {
-    width: 100%;
-    padding: 30px 15px 30px 15px;
-  }
-  position: relative;
-  background-color: #fff;
-  > * {
-    position: relative;
-    z-index: 2;
-  }
-  .icon {
-    margin-right: 1rem;
-    svg {
-      width: 1.5rem;
-      stroke: #5145cd;
-    }
   }
 `;
 

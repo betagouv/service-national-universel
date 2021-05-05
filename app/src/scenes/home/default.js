@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { translate, PHASE_STATUS_COLOR } from "../../utils";
-import { HeroContainer, Hero } from "../../components/Hero";
+import { HeroContainer, Hero, Content, Alert } from "../../components/Content";
+import Badge from "../../components/Badge";
 import { Link } from "react-router-dom";
 
 export default () => {
@@ -23,7 +24,7 @@ export default () => {
     <HeroContainer>
       <Hero>
         {showAlert && (
-          <Alert>
+          <Alert color="#31c48d">
             <div className="text">
               <strong>INSCRIPTION VALIDÉE</strong>
             </div>
@@ -38,18 +39,18 @@ export default () => {
           <p style={{ color: "#161e2e", fontSize: "1.5rem", fontWeight: 700 }}>Votre parcours</p>
           <WrapperItem to="/phase1">
             <div className="title">
-              <span className="link">1. Un séjour de cohésion</span> <Tag color={PHASE_STATUS_COLOR[young.statusPhase1]}>{translate(young.statusPhase1)}</Tag>
+              <span className="link">1. Un séjour de cohésion</span> <Badge text={translate(young.statusPhase1)} color={PHASE_STATUS_COLOR[young.statusPhase1]} />
             </div>
           </WrapperItem>
           <WrapperItem to="/phase2">
             <div className="title">
-              <span className="link">2. Une première mission d'intérêt général</span> <Tag color={PHASE_STATUS_COLOR[young.statusPhase2]}>{translate(young.statusPhase2)}</Tag>
+              <span className="link">2. Une première mission d'intérêt général</span> <Badge text={translate(young.statusPhase2)} color={PHASE_STATUS_COLOR[young.statusPhase2]} />
             </div>
           </WrapperItem>
           <WrapperItem to="/phase3">
             <div className="title">
               <span className="link">3. Un engagement vers une société plus solidaire</span>
-              <Tag color={PHASE_STATUS_COLOR[young.statusPhase3]}>{translate(young.statusPhase3)}</Tag>
+              <Badge text={translate(young.statusPhase3)} color={PHASE_STATUS_COLOR[young.statusPhase3]} />
             </div>
           </WrapperItem>
         </Content>
@@ -70,84 +71,16 @@ const WrapperItem = styled(Link)`
     }
   }
   .title {
+    display: flex;
+    align-items: center;
     color: #161e2e;
     font-size: 1.25rem !important;
     font-weight: 500;
     .link {
+      margin-right: 0.5rem;
       :hover {
         text-decoration: underline;
       }
     }
-  }
-`;
-
-const Content = styled.div`
-  margin-top: ${({ showAlert }) => (showAlert ? "2rem" : "")};
-  width: 50%;
-  padding: 60px 30px 60px 50px;
-  @media (max-width: 768px) {
-    width: 100%;
-    padding: 30px 15px 30px 15px;
-  }
-  position: relative;
-  background-color: #fff;
-  > * {
-    position: relative;
-    z-index: 2;
-  }
-  .icon {
-    margin-right: 1rem;
-    svg {
-      width: 1.5rem;
-      stroke: #5145cd;
-    }
-  }
-`;
-
-const Alert = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #31c48d;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  margin-bottom: 20px;
-  padding: 10px 20px;
-  position: absolute;
-  z-index: 10;
-  width: 100%;
-  .text {
-    margin: 0 20px;
-    color: #fff;
-    strong {
-      font-size: 15px;
-      font-weight: 700;
-      margin-bottom: 3px;
-    }
-  }
-  img {
-    position: absolute;
-    right: 0;
-    margin-right: 1rem;
-    cursor: pointer;
-  }
-`;
-
-const Tag = styled.span`
-  color: ${({ color }) => color || "#42389d"};
-  background-color: ${({ color }) => (color && `${color}11`) || "#42389d22"};
-  padding: 0.25rem 0.75rem;
-  margin: 0 0.25rem;
-  border-radius: 99999px;
-  font-size: 0.85rem;
-  white-space: nowrap;
-  @media (max-width: 768px) {
-    font-size: 0.7rem;
-    padding: 0.1rem 0.5rem;
-  }
-  svg {
-    height: 1rem;
-    margin: 0;
-    margin-right: 0.2rem;
-    padding: 0;
   }
 `;

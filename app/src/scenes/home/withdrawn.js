@@ -1,8 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import styled from "styled-components";
 import { useSelector } from "react-redux";
-import { HeroContainer, Hero } from "../../components/Hero";
+import { HeroContainer, Hero, Content, Separator, VioletButton } from "../../components/Content";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
@@ -22,7 +21,7 @@ export default () => {
           </p>
           <Separator />
           <Link to="/phase3/les-programmes">
-            <Button>Consulter les autres possibilités d'engagement</Button>
+            <VioletButton>Consulter les autres possibilités d'engagement</VioletButton>
           </Link>
         </Content>
         <div className="thumb" />
@@ -30,47 +29,3 @@ export default () => {
     </HeroContainer>
   );
 };
-
-const Separator = styled.hr`
-  margin: 2.5rem 0;
-  height: 1px;
-  border-style: none;
-  background-color: #e5e7eb;
-`;
-
-const Button = styled.button`
-  display: inline-block;
-  padding: 10px 40px;
-  background-color: #5145cd;
-  color: #fff;
-  font-size: 16px;
-  text-align: center;
-  font-weight: 700;
-  margin: 25px auto 10px;
-  border-radius: 30px;
-  border: none;
-  box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
-`;
-
-const Content = styled.div`
-  margin-top: ${({ showAlert }) => (showAlert ? "2rem" : "")};
-  width: 50%;
-  padding: 60px 30px 60px 50px;
-  @media (max-width: 768px) {
-    width: 100%;
-    padding: 30px 15px 30px 15px;
-  }
-  position: relative;
-  background-color: #fff;
-  > * {
-    position: relative;
-    z-index: 2;
-  }
-  .icon {
-    margin-right: 1rem;
-    svg {
-      width: 1.5rem;
-      stroke: #5145cd;
-    }
-  }
-`;

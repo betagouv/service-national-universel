@@ -1,6 +1,6 @@
 import React from "react";
 import styled from "styled-components";
-import { HeroContainer, Hero } from "../../components/Hero";
+import { HeroContainer, Hero } from "../../components/Content";
 import NextStep from "./nextStep";
 
 export default () => {
