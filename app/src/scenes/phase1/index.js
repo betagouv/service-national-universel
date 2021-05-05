@@ -7,7 +7,7 @@ import Affected from "./affected.js";
 import Cancel from "./cancel.js";
 import NotDone from "./notDone.js";
 import { YOUNG_STATUS_PHASE1 } from "../../utils";
-import Hero from "../../components/Hero";
+import { HeroContainer, Hero } from "../../components/Hero";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young) || {};
@@ -19,18 +19,20 @@ export default () => {
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) return <NotDone />;
     return (
       <>
-        <Hero>
-          <div className="content">
-            <h1>
-              <strong>Mon séjour de cohésion</strong>
-            </h1>
-            <p>
-              Le SNU vous donne l'opportunité de découvrir la vie collective au sein d'un centre accueillant environ 200 jeunes de votre région pour créer ainsi des liens nouveaux
-              et développer votre culture de l’engagement et ainsi affirmer votre place dans la société.
-            </p>
-          </div>
-          <div className="thumb" />
-        </Hero>
+        <HeroContainer>
+          <Hero>
+            <div className="content">
+              <h1>
+                <strong>Mon séjour de cohésion</strong>
+              </h1>
+              <p>
+                Le SNU vous donne l'opportunité de découvrir la vie collective au sein d'un centre accueillant environ 200 jeunes de votre région pour créer ainsi des liens
+                nouveaux et développer votre culture de l’engagement et ainsi affirmer votre place dans la société.
+              </p>
+            </div>
+            <div className="thumb" />
+          </Hero>
+        </HeroContainer>
         <NextStep />
       </>
     );

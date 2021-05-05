@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { translate, PHASE_STATUS_COLOR } from "../../utils";
-import Hero from "../../components/Hero";
+import { HeroContainer, Hero } from "../../components/Hero";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
@@ -19,7 +19,7 @@ export default () => {
   };
 
   return (
-    <>
+    <HeroContainer>
       <Hero>
         {showAlert && (
           <Alert>
@@ -53,7 +53,7 @@ export default () => {
         </Content>
         <div className="thumb" />
       </Hero>
-    </>
+    </HeroContainer>
   );
 };
 

@@ -13,7 +13,7 @@ import MobilityCard from "./mobilityCard";
 import TransportCard from "./transportCard";
 import ErrorMessage, { requiredMessage } from "./errorMessage";
 import { translate, MISSION_DOMAINS, PERIOD, PROFESSIONNAL_PROJECT, PROFESSIONNAL_PROJECT_PRECISION } from "../../utils";
-import Hero from "../../components/Hero";
+import { HeroContainer, Hero } from "../../components/Hero";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
@@ -21,16 +21,18 @@ export default () => {
 
   return (
     <>
-      <Hero>
-        <Content>
-          <h1>Préférences de missions</h1>
-          <p>
-            En vue de la mission d'intérêt général de la Phase 2, renseignez ci-dessous vos préférences. Ces choix permettront à l'administration de vous proposer des missions en
-            cohérence avec vos motivations.
-          </p>
-        </Content>
-        <div className="thumb" />
-      </Hero>
+      <HeroContainer>
+        <Hero>
+          <Content>
+            <h1>Préférences de missions</h1>
+            <p>
+              En vue de la mission d'intérêt général de la Phase 2, renseignez ci-dessous vos préférences. Ces choix permettront à l'administration de vous proposer des missions en
+              cohérence avec vos motivations.
+            </p>
+          </Content>
+          <div className="thumb" />
+        </Hero>
+      </HeroContainer>
       <Formik
         initialValues={{ ...young, firstName1: young.parent1FirstName, lastName1: young.parent1LastName, firstName2: young.parent2FirstName, lastName2: young.parent2LastName }}
         validateOnChange={false}
@@ -303,15 +305,17 @@ const Infos = styled.div`
 
 const PreferenceItem = ({ title, children, subtitle }) => {
   return (
-    <Hero>
-      <PreferenceContent style={{ width: "100%" }}>
-        <Title>
-          <span>{title}</span>
-          <Infos>{subtitle}</Infos>
-        </Title>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>{children}</div>
-      </PreferenceContent>
-    </Hero>
+    <HeroContainer>
+      <Hero>
+        <PreferenceContent style={{ width: "100%" }}>
+          <Title>
+            <span>{title}</span>
+            <Infos>{subtitle}</Infos>
+          </Title>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>{children}</div>
+        </PreferenceContent>
+      </Hero>
+    </HeroContainer>
   );
 };
 

@@ -1,12 +1,12 @@
 import React from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
-import Hero from "../../components/Hero";
+import { HeroContainer, Hero } from "../../components/Hero";
 
 export default () => {
   const renderStep = () => {
     return (
-      <>
+      <HeroContainer>
         <Hero>
           <div className="content">
             <h1>
@@ -35,7 +35,7 @@ export default () => {
           </div>
           <div className="thumb" />
         </Hero>
-      </>
+      </HeroContainer>
     );
   };
 

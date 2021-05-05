@@ -1,11 +1,11 @@
 import React from "react";
 import styled from "styled-components";
-import Hero from "../../components/Hero";
+import { HeroContainer, Hero } from "../../components/Hero";
 import NextStep from "./nextStep";
 
 export default () => {
   return (
-    <>
+    <HeroContainer>
       <Hero>
         <div className="content">
           <h1>
@@ -25,7 +25,7 @@ export default () => {
         <div className="thumb" />
       </Hero>
       <NextStep />
-    </>
+    </HeroContainer>
   );
 };
 

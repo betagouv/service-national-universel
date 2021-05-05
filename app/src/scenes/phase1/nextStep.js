@@ -10,6 +10,7 @@ import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../redux/auth/actions";
 import { translate } from "../../utils";
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib/constants";
+import { HeroContainer, Hero } from "../../components/Hero";
 
 const AuthorizationIntro = () => (
   <div>
@@ -52,284 +53,286 @@ export default () => {
   const toggleInfo = () => setExpandInfo(!expandInfo);
 
   return (
-    <Hero style={{ flexDirection: "column" }}>
-      <Content style={{ width: "100%" }}>
-        <h1>Prochaine étape</h1>
-        {young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION ? (
-          <>
-            <p>
-              Vous êtes actuellement <Tag>en&nbsp;attente&nbsp;d'affectation à un centre de cohésion.</Tag>
-            </p>
-            <p>Vous serez informé(e) par e-mail du lieu et des modalités de votre séjour fin mai.</p>
-          </>
-        ) : null}
-      </Content>
-      <ContentHorizontal style={{ width: "100%" }} id="sanitaire">
-        <div className="icon">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-            ></path>
-          </svg>
-        </div>
-        <div>
-          <h2>Transmission de la fiche sanitaire</h2>
-          <p>Téléchargez la fiche sanitaire.</p>
-          <p>
-            Vous devez renvoyer votre fiche sanitaire complétée et signée par voie postale sous pli confidentiel au plus tard le 4 juin 2021. L'adresse de destination vous sera
-            communiqué sur cette page, une fois votre lieu d'affectation connue.
-          </p>
-          <a href="https://apicivique.s3.eu-west-3.amazonaws.com/Note_relative_aux_informations_d_ordre_sanitaire.pdf" target="blank" className="link">
-            Note relative aux informations d'ordre sanitaire{" >"}
-          </a>
-        </div>
-        <div style={{ minWidth: "30%", display: "flex", justifyContent: "flex-end", alignItems: "center", marginLeft: "1.5rem" }}>
-          <a target="blank" href="https://apicivique.s3.eu-west-3.amazonaws.com/Fiche_sanitaire.pdf">
-            <ContinueButton>Télécharger la fiche sanitaire</ContinueButton>
-          </a>
-        </div>
-      </ContentHorizontal>
-      <Content style={{ width: "100%" }} id="imageRight">
-        <div style={{ display: "flex" }}>
+    <HeroContainer>
+      <Hero style={{ flexDirection: "column" }}>
+        <Content style={{ width: "100%" }}>
+          <h1>Prochaine étape</h1>
+          {young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION ? (
+            <>
+              <p>
+                Vous êtes actuellement <Tag>en&nbsp;attente&nbsp;d'affectation à un centre de cohésion.</Tag>
+              </p>
+              <p>Vous serez informé(e) par e-mail du lieu et des modalités de votre séjour fin mai.</p>
+            </>
+          ) : null}
+        </Content>
+        <ContentHorizontal style={{ width: "100%" }} id="sanitaire">
           <div className="icon">
-            <svg className="h-6 w-6 text-indigo-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth="2"
-                d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"
+                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
               ></path>
             </svg>
           </div>
           <div>
-            <h2>Consentement de droit à l'image</h2>
+            <h2>Transmission de la fiche sanitaire</h2>
+            <p>Téléchargez la fiche sanitaire.</p>
             <p>
-              Votre représentant légal peut dès-à-présent renseigner le formulaire relatif au droit à l'image <b>avant le 4 juin 2021</b>. Cette étape est un pré-requis au séjour
-              de cohésion.
+              Vous devez renvoyer votre fiche sanitaire complétée et signée par voie postale sous pli confidentiel au plus tard le 4 juin 2021. L'adresse de destination vous sera
+              communiqué sur cette page, une fois votre lieu d'affectation connue.
             </p>
+            <a href="https://apicivique.s3.eu-west-3.amazonaws.com/Note_relative_aux_informations_d_ordre_sanitaire.pdf" target="blank" className="link">
+              Note relative aux informations d'ordre sanitaire{" >"}
+            </a>
           </div>
-        </div>
-        {young.imageRightFiles && young.imageRightFiles.length ? (
-          <SuccessMessage>
-            <Logo>
-              <svg height={64} width={64} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#057a55" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+          <div style={{ minWidth: "30%", display: "flex", justifyContent: "flex-end", alignItems: "center", marginLeft: "1.5rem" }}>
+            <a target="blank" href="https://apicivique.s3.eu-west-3.amazonaws.com/Fiche_sanitaire.pdf">
+              <ContinueButton>Télécharger la fiche sanitaire</ContinueButton>
+            </a>
+          </div>
+        </ContentHorizontal>
+        <Content style={{ width: "100%" }} id="imageRight">
+          <div style={{ display: "flex" }}>
+            <div className="icon">
+              <svg className="h-6 w-6 text-indigo-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"
+                ></path>
               </svg>
-            </Logo>
-            Vous avez bien renseigné le document
-          </SuccessMessage>
-        ) : (
-          <ConsentementBox id="printArea">
-            <Formik
-              initialValues={{
-                ...young,
-                firstName1: young.parent1FirstName,
-                lastName1: young.parent1LastName,
-                firstName2: young.parent2FirstName,
-                lastName2: young.parent2LastName,
-              }}
-              validateOnChange={false}
-              validateOnBlur={false}
-              onSubmit={async (values) => {
-                try {
-                  const { ok, code, data: young } = await api.put("/young", values);
-                  if (!ok) return toastr.error("Une erreur s'est produite", translate(code));
-                  dispatch(setYoung(young));
-                  toastr.success("Mis à jour !");
-                } catch (e) {
-                  console.log(e);
-                  toastr.error("Erreur !");
-                }
-              }}
-            >
-              {({ values, handleChange, handleSubmit, errors, touched, isSubmitting, submitForm }) => (
-                <>
-                  <Title>
-                    <span>Seuls les représentants légaux sont habilités à valider ce consentement</span>
-                  </Title>
-                  <FormGroup>
-                    <label>REPRÉSENTANT LÉGAL N°1</label>
-                    <Row>
-                      <Col md={6}>
-                        <Field
-                          validate={(v) => !v && requiredMessage}
-                          placeholder="Prénom du représentants légal n°1"
-                          name="firstName1"
-                          value={values.firstName1}
-                          onChange={handleChange}
-                          className="form-control"
-                        />
-                        <ErrorMessage errors={errors} touched={touched} name="firstName1" />
-                      </Col>
-                      <Col md={6}>
-                        <Field
-                          validate={(v) => !v && requiredMessage}
-                          placeholder="Nom du représentants légal n°1"
-                          name="lastName1"
-                          value={values.lastName1}
-                          onChange={handleChange}
-                          className="form-control"
-                        />
-                        <ErrorMessage errors={errors} touched={touched} name="lastName1" />
-                      </Col>
-                    </Row>
-                  </FormGroup>
-                  {values.firstName2 ? (
+            </div>
+            <div>
+              <h2>Consentement de droit à l'image</h2>
+              <p>
+                Votre représentant légal peut dès-à-présent renseigner le formulaire relatif au droit à l'image <b>avant le 4 juin 2021</b>. Cette étape est un pré-requis au séjour
+                de cohésion.
+              </p>
+            </div>
+          </div>
+          {young.imageRightFiles && young.imageRightFiles.length ? (
+            <SuccessMessage>
+              <Logo>
+                <svg height={64} width={64} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#057a55" aria-hidden="true">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                </svg>
+              </Logo>
+              Vous avez bien renseigné le document
+            </SuccessMessage>
+          ) : (
+            <ConsentementBox id="printArea">
+              <Formik
+                initialValues={{
+                  ...young,
+                  firstName1: young.parent1FirstName,
+                  lastName1: young.parent1LastName,
+                  firstName2: young.parent2FirstName,
+                  lastName2: young.parent2LastName,
+                }}
+                validateOnChange={false}
+                validateOnBlur={false}
+                onSubmit={async (values) => {
+                  try {
+                    const { ok, code, data: young } = await api.put("/young", values);
+                    if (!ok) return toastr.error("Une erreur s'est produite", translate(code));
+                    dispatch(setYoung(young));
+                    toastr.success("Mis à jour !");
+                  } catch (e) {
+                    console.log(e);
+                    toastr.error("Erreur !");
+                  }
+                }}
+              >
+                {({ values, handleChange, handleSubmit, errors, touched, isSubmitting, submitForm }) => (
+                  <>
+                    <Title>
+                      <span>Seuls les représentants légaux sont habilités à valider ce consentement</span>
+                    </Title>
                     <FormGroup>
-                      <label>REPRÉSENTANT LÉGAL N°2</label>
+                      <label>REPRÉSENTANT LÉGAL N°1</label>
                       <Row>
                         <Col md={6}>
                           <Field
                             validate={(v) => !v && requiredMessage}
-                            placeholder="Prénom du représentants légal n°2"
-                            name="firstName2"
-                            value={values.firstName2}
+                            placeholder="Prénom du représentants légal n°1"
+                            name="firstName1"
+                            value={values.firstName1}
                             onChange={handleChange}
                             className="form-control"
                           />
-                          <ErrorMessage errors={errors} touched={touched} name="firstName2" />
+                          <ErrorMessage errors={errors} touched={touched} name="firstName1" />
                         </Col>
                         <Col md={6}>
                           <Field
                             validate={(v) => !v && requiredMessage}
-                            placeholder="Nom du représentants légal n°2"
-                            name="lastName2"
-                            value={values.lastName2}
+                            placeholder="Nom du représentants légal n°1"
+                            name="lastName1"
+                            value={values.lastName1}
                             onChange={handleChange}
                             className="form-control"
                           />
-                          <ErrorMessage errors={errors} touched={touched} name="lastName2" />
+                          <ErrorMessage errors={errors} touched={touched} name="lastName1" />
                         </Col>
                       </Row>
                     </FormGroup>
-                  ) : null}
-                  <Title>
-                    <span>Autorisez ou non le droit à l'image</span>
-                  </Title>
-                  <FormRow>
-                    <Col>
-                      <RadioLabel>
-                        <Field
-                          id="true"
-                          validate={(v) => !v && requiredMessage}
-                          type="radio"
-                          name="imageRight"
-                          value="true"
-                          checked={values.imageRight === "true"}
-                          onChange={handleChange}
-                        />
-                        <label htmlFor="true">
-                          Nous autorisons l'Administration à reproduire et exploiter l'image et la voix de{" "}
-                          <b>
-                            {young.firstName} {young.lastName}
-                          </b>{" "}
-                          que nous représentons légalement, sur les supports visés ci-après à des fins de promotion du Service Nationnel Universel
-                        </label>
-                      </RadioLabel>
-                      <RadioLabel>
-                        <Field
-                          id="false"
-                          validate={(v) => !v && requiredMessage}
-                          type="radio"
-                          name="imageRight"
-                          value="false"
-                          checked={values.imageRight === "false"}
-                          onChange={handleChange}
-                        />
-                        <label htmlFor="false">
-                          Nous n'autorisons pas l'Administration à reproduire et exploiter l'image et la voix de{" "}
-                          <b>
-                            {young.firstName} {young.lastName}
-                          </b>{" "}
-                          que nous représentons légalement, sur les supports visés ci-après à des fins de promotion du Service Nationnel Universel
-                        </label>
-                      </RadioLabel>
-                      <ErrorMessage errors={errors} touched={touched} name="imageRight" />
-                    </Col>
-                  </FormRow>
-                  <Info className="noPrint">
-                    <AuthorizationIntro />
-                    {expandInfo ? <AuthorizationDetails /> : "..."}
-                    <span onClick={toggleInfo}>{expandInfo ? "  VOIR MOINS" : "  VOIR PLUS"}</span>
-                  </Info>
-                  <Info className="onlyPrint">
-                    <AuthorizationIntro />
-                    <AuthorizationDetails />
-                  </Info>
-                  <div className="noPrint">
-                    {/* @todo add with france connect */}
-                    {/* <Title>
+                    {values.firstName2 ? (
+                      <FormGroup>
+                        <label>REPRÉSENTANT LÉGAL N°2</label>
+                        <Row>
+                          <Col md={6}>
+                            <Field
+                              validate={(v) => !v && requiredMessage}
+                              placeholder="Prénom du représentants légal n°2"
+                              name="firstName2"
+                              value={values.firstName2}
+                              onChange={handleChange}
+                              className="form-control"
+                            />
+                            <ErrorMessage errors={errors} touched={touched} name="firstName2" />
+                          </Col>
+                          <Col md={6}>
+                            <Field
+                              validate={(v) => !v && requiredMessage}
+                              placeholder="Nom du représentants légal n°2"
+                              name="lastName2"
+                              value={values.lastName2}
+                              onChange={handleChange}
+                              className="form-control"
+                            />
+                            <ErrorMessage errors={errors} touched={touched} name="lastName2" />
+                          </Col>
+                        </Row>
+                      </FormGroup>
+                    ) : null}
+                    <Title>
+                      <span>Autorisez ou non le droit à l'image</span>
+                    </Title>
+                    <FormRow>
+                      <Col>
+                        <RadioLabel>
+                          <Field
+                            id="true"
+                            validate={(v) => !v && requiredMessage}
+                            type="radio"
+                            name="imageRight"
+                            value="true"
+                            checked={values.imageRight === "true"}
+                            onChange={handleChange}
+                          />
+                          <label htmlFor="true">
+                            Nous autorisons l'Administration à reproduire et exploiter l'image et la voix de{" "}
+                            <b>
+                              {young.firstName} {young.lastName}
+                            </b>{" "}
+                            que nous représentons légalement, sur les supports visés ci-après à des fins de promotion du Service Nationnel Universel
+                          </label>
+                        </RadioLabel>
+                        <RadioLabel>
+                          <Field
+                            id="false"
+                            validate={(v) => !v && requiredMessage}
+                            type="radio"
+                            name="imageRight"
+                            value="false"
+                            checked={values.imageRight === "false"}
+                            onChange={handleChange}
+                          />
+                          <label htmlFor="false">
+                            Nous n'autorisons pas l'Administration à reproduire et exploiter l'image et la voix de{" "}
+                            <b>
+                              {young.firstName} {young.lastName}
+                            </b>{" "}
+                            que nous représentons légalement, sur les supports visés ci-après à des fins de promotion du Service Nationnel Universel
+                          </label>
+                        </RadioLabel>
+                        <ErrorMessage errors={errors} touched={touched} name="imageRight" />
+                      </Col>
+                    </FormRow>
+                    <Info className="noPrint">
+                      <AuthorizationIntro />
+                      {expandInfo ? <AuthorizationDetails /> : "..."}
+                      <span onClick={toggleInfo}>{expandInfo ? "  VOIR MOINS" : "  VOIR PLUS"}</span>
+                    </Info>
+                    <Info className="onlyPrint">
+                      <AuthorizationIntro />
+                      <AuthorizationDetails />
+                    </Info>
+                    <div className="noPrint">
+                      {/* @todo add with france connect */}
+                      {/* <Title>
                     <span>Vous pouvez signer le formulaire de deux façons</span>
                   </Title> */}
-                    <div style={{ display: "flex", justifyContent: "center" }}>
-                      <div>
-                        <BackButton onClick={() => print()}>Imprimer le formulaire pré-rempli</BackButton>
-                        <DownloadText>
-                          Ou{" "}
-                          <a href="https://apicivique.s3.eu-west-3.amazonaws.com/consentement_droit_image.pdf" target="_blank">
-                            télécharger le modèle à remplir
-                          </a>
-                        </DownloadText>
-                        <DndFileInput
-                          placeholder="le formulaire"
-                          errorMessage="Vous devez téléverser le formulaire"
-                          value={values.imageRightFiles}
-                          name="imageRightFiles"
-                          onChange={async (e) => {
-                            const res = await api.uploadFile("/young/file/imageRightFiles", e.target.files);
-                            if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
-                            // We update it instant ( because the bucket is updated instant )
-                            toastr.success("Fichier téléversé");
-                            handleChange({ target: { value: res.data, name: "imageRightFiles" } });
-                          }}
-                        />
-                        <ErrorMessage errors={errors} touched={touched} name="imageRightFiles" />
-                      </div>
-                      {/* <div>OU</div>
+                      <div style={{ display: "flex", justifyContent: "center" }}>
+                        <div>
+                          <BackButton onClick={() => print()}>Imprimer le formulaire pré-rempli</BackButton>
+                          <DownloadText>
+                            Ou{" "}
+                            <a href="https://apicivique.s3.eu-west-3.amazonaws.com/consentement_droit_image.pdf" target="_blank">
+                              télécharger le modèle à remplir
+                            </a>
+                          </DownloadText>
+                          <DndFileInput
+                            placeholder="le formulaire"
+                            errorMessage="Vous devez téléverser le formulaire"
+                            value={values.imageRightFiles}
+                            name="imageRightFiles"
+                            onChange={async (e) => {
+                              const res = await api.uploadFile("/young/file/imageRightFiles", e.target.files);
+                              if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
+                              // We update it instant ( because the bucket is updated instant )
+                              toastr.success("Fichier téléversé");
+                              handleChange({ target: { value: res.data, name: "imageRightFiles" } });
+                            }}
+                          />
+                          <ErrorMessage errors={errors} touched={touched} name="imageRightFiles" />
+                        </div>
+                        {/* <div>OU</div>
                     <div>FRANCE CONNECT</div> */}
+                      </div>
                     </div>
-                  </div>
-                  <SignBox className="onlyPrint">
-                    <Row>
-                      <Col md={6}>
-                        <div>Sous réserve du respect de l’ensemble de ces conditions, le consentement délivré est libre et éclairé.</div>
-                        <div>Fait à :</div>
-                        <div>Le :</div>
-                        <div>
-                          Signature du représentant légal n°1
-                          <br />
-                          Précédée(s) de la mention « lu et approuvé – bon pour accord »
-                        </div>
-                      </Col>
-                      <Col md={6}>
-                        <div>Sous réserve du respect de l’ensemble de ces conditions, le consentement délivré est libre et éclairé.</div>
-                        <div>Fait à :</div>
-                        <div>Le :</div>
-                        <div>
-                          Signature du représentant légal n°2
-                          <br />
-                          Précédée(s) de la mention « lu et approuvé – bon pour accord »
-                        </div>
-                      </Col>
-                    </Row>
-                  </SignBox>
-                  <Footer className="noPrint">
-                    <Title />
-                    <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                      <ContinueButton onClick={handleSubmit}>Valider le consentement</ContinueButton>
-                    </div>
-                    {Object.keys(errors).length ? <h3>Vous ne pouvez pas valider le formulaire car tous les champs ne sont pas correctement renseignés.</h3> : null}
-                  </Footer>
-                </>
-              )}
-            </Formik>
-          </ConsentementBox>
-        )}
-      </Content>
-    </Hero>
+                    <SignBox className="onlyPrint">
+                      <Row>
+                        <Col md={6}>
+                          <div>Sous réserve du respect de l’ensemble de ces conditions, le consentement délivré est libre et éclairé.</div>
+                          <div>Fait à :</div>
+                          <div>Le :</div>
+                          <div>
+                            Signature du représentant légal n°1
+                            <br />
+                            Précédée(s) de la mention « lu et approuvé – bon pour accord »
+                          </div>
+                        </Col>
+                        <Col md={6}>
+                          <div>Sous réserve du respect de l’ensemble de ces conditions, le consentement délivré est libre et éclairé.</div>
+                          <div>Fait à :</div>
+                          <div>Le :</div>
+                          <div>
+                            Signature du représentant légal n°2
+                            <br />
+                            Précédée(s) de la mention « lu et approuvé – bon pour accord »
+                          </div>
+                        </Col>
+                      </Row>
+                    </SignBox>
+                    <Footer className="noPrint">
+                      <Title />
+                      <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                        <ContinueButton onClick={handleSubmit}>Valider le consentement</ContinueButton>
+                      </div>
+                      {Object.keys(errors).length ? <h3>Vous ne pouvez pas valider le formulaire car tous les champs ne sont pas correctement renseignés.</h3> : null}
+                    </Footer>
+                  </>
+                )}
+              </Formik>
+            </ConsentementBox>
+          )}
+        </Content>
+      </Hero>
+    </HeroContainer>
   );
 };
 
@@ -383,77 +386,6 @@ const Tag = styled.span`
   }
 `;
 
-const Hero = styled.div`
-  border-radius: 0.5rem;
-  @media (max-width: 768px) {
-    border-radius: 0;
-  }
-  max-width: 80rem;
-  margin: 1rem auto;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  position: relative;
-  overflow: hidden;
-  display: flex;
-  justify-content: space-between;
-  .content {
-    width: 65%;
-    padding: 60px 30px 60px 50px;
-    @media (max-width: 768px) {
-      width: 100%;
-      padding: 30px 10px 30px 20px;
-    }
-    position: relative;
-    background-color: #fff;
-    > * {
-      position: relative;
-      z-index: 2;
-    }
-  }
-  h1 {
-    font-size: 3rem;
-    @media (max-width: 768px) {
-      font-size: 1.8rem;
-    }
-    color: #161e2e;
-    margin-bottom: 20px;
-    font-weight: 500;
-    line-height: 1;
-  }
-  h1 {
-    font-size: 3rem;
-    @media (max-width: 768px) {
-      font-size: 1.8rem;
-    }
-    color: #161e2e;
-    margin-bottom: 20px;
-    font-weight: 500;
-    line-height: 1;
-  }
-  h2 {
-    font-size: 1.5rem;
-    color: #161e2e;
-    margin-bottom: 20px;
-    font-weight: 700;
-    line-height: 1;
-  }
-  p {
-    color: #6b7280;
-    font-size: 1.25rem;
-    @media (max-width: 768px) {
-      font-size: 1rem;
-    }
-    font-weight: 400;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-  }
-  .thumb {
-    min-height: 400px;
-    background: url(${require("../../assets/phase3.jpg")}) no-repeat center;
-    background-size: cover;
-    flex: 1;
-  }
-`;
-
 const BackButton = styled.a`
   cursor: pointer;
   color: #374151;
@@ -491,7 +423,6 @@ const Content = styled.div`
     padding: 30px 15px 30px 15px;
   }
   position: relative;
-  background-color: #f9fafb;
   > * {
     position: relative;
     z-index: 2;

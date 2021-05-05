@@ -1,15 +1,14 @@
 import React from "react";
 import styled from "styled-components";
 
-const Hero = ({ children, ...props }) => <HeroStyle {...props}>{children}</HeroStyle>;
+export const Hero = ({ children, ...props }) => <HeroStyle {...props}>{children}</HeroStyle>;
 
 const HeroStyle = styled.div`
   border-radius: 0.5rem;
   @media (max-width: 768px) {
     border-radius: 0;
   }
-
-  margin: 1rem auto;
+  margin: 0 auto;
   max-width: 80rem;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   position: relative;
@@ -69,4 +68,11 @@ const HeroStyle = styled.div`
     clip-path: polygon(15% 0, 0 100%, 100% 100%, 100% 0);
   }
 `;
-export default Hero;
+
+export const HeroContainer = styled.div`
+  flex: 1;
+  padding: 1rem;
+  @media (max-width: 768px) {
+    padding: 1rem 0;
+  }
+`;
