@@ -9,7 +9,10 @@ export default ({ step, onClickBurger }) => {
     <>
       <HeaderNav>
         <Burger onClick={onClickBurger} src={require("../../assets/burger.svg")} />
-        <Link to="/">
+        <HomeButtonLink to="/">
+          <HomeButton src={require("../../assets/home.svg")} />
+        </HomeButtonLink>
+        <Link className="mobileHide" to="/">
           <h1>Mon espace volontaire</h1>
         </Link>
         <User />
@@ -48,6 +51,28 @@ const HeaderNav = styled.div`
 `;
 
 const Burger = styled.img`
+  display: none;
+  @media (max-width: 768px) {
+    display: block;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    object-fit: contain;
+    cursor: pointer;
+    svg {
+      color: #f00;
+    }
+  }
+`;
+
+const HomeButtonLink = styled(Link)`
+  @media (min-width: 768px) {
+    display: none;
+  }
+`;
+
+const HomeButton = styled.img`
   display: none;
   @media (max-width: 768px) {
     display: block;
