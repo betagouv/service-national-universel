@@ -37,7 +37,7 @@ export default () => {
 
   return (
     <Wrapper>
-      <Subtitle>Mon profil</Subtitle>
+      <TopTitle>Mon profil</TopTitle>
       <Row>
         <Col md={6}>
           <Formik
@@ -65,7 +65,10 @@ export default () => {
                   </Title>
                 </TitleWrapper>
                 <Box>
-                  <BoxTitle>Informations générales</BoxTitle>
+                  <BoxTitle>
+                    <h3>Informations générales</h3>
+                    <p>Données personnelles</p>
+                  </BoxTitle>
                   <BoxContent direction="column">
                     <Item required title="E-mail" values={values} name="email" handleChange={handleChange} errors={errors} touched={touched} />
                     {user.role === REFERENT_ROLES.REFERENT_DEPARTMENT ? <Item title="Département" disabled values={values} name="department" handleChange={handleChange} /> : null}
@@ -122,7 +125,10 @@ export default () => {
                     </div>
                   </TitleWrapper>
                   <Box>
-                    <BoxTitle>{`Service Départemental`}</BoxTitle>
+                    <BoxTitle>
+                      <h3>Service Départemental</h3>
+                      <p>Données partagées par tous les référents de votre département</p>
+                    </BoxTitle>
                     <BoxContent direction="column">
                       <Item title="Nom de la direction" values={values} name="directionName" handleChange={handleChange} />
                       <Item title="Adresse" values={values} name="address" handleChange={handleChange} />
@@ -224,7 +230,7 @@ const FormGroup = styled.div`
   }
 `;
 
-const Subtitle = styled.div`
+const TopTitle = styled.div`
   color: rgb(113, 128, 150);
   font-weight: 400;
   text-transform: uppercase;
@@ -283,16 +289,27 @@ const Box = styled.div`
   margin-bottom: 33px;
   border-radius: 8px;
 `;
-const BoxTitle = styled.h3`
+const BoxTitle = styled.div`
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 22px;
-  color: #171725;
-  font-size: 16px;
-  font-weight: bold;
+  flex-direction: column;
+  align-items: flex-start;
   border-bottom: 1px solid #f2f1f1;
   min-height: 5rem;
+  padding: 22px;
+  h3 {
+    color: #171725;
+    font-size: 16px;
+    font-weight: bold;
+  }
+  p {
+    color: #aaa;
+    font-size: 14px;
+    font-weight: 300;
+    display: flex;
+    align-items: center;
+    font-style: italic;
+    margin: 0;
+  }
 `;
 const BoxContent = styled.div`
   label {
