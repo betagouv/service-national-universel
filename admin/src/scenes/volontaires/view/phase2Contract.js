@@ -11,6 +11,7 @@ import { dateForDatePicker } from "snu-lib/date";
 
 import VioletHeaderButton from "../../../components/buttons/VioletHeaderButton";
 import WhiteHeaderButton from "../../../components/buttons/WhiteHeaderButton";
+import { toastr } from "react-redux-toastr";
 
 export default ({ young }) => {
   // We load the first application that has VALIDATED status.
@@ -101,7 +102,7 @@ export default ({ young }) => {
             missionAddress: mission.address,
             missionCity: mission.city,
             missionZip: mission.zip,
-            missionName: mission.name,
+            missionDuration: mission.duration,
             missionFrequence: mission.frequence,
             date: dateForDatePicker(new Date()),
             projectManagerFirstName: "",
@@ -113,15 +114,24 @@ export default ({ young }) => {
             structureManagerRole: "Tuteur de mission",
             structureManagerEmail: tutor.email,
             structureSiret: structure.siret || "",
+            structureName: structure.name || "",
+            sendMessage: false,
           }}
           onSubmit={async (values, actions) => {
-            alert("Submit");
+            try {
+              const { ok, code } = await api.post(`/contract`, values);
+              if (!ok) return toastr.error("Erreur !", translate(code));
+              toastr.success("Contrat sauvegardé.");
+            } catch (e) {
+              toastr.error("Erreur !", translate(e.code));
+            }
+            actions.setSubmitting(false);
           }}
         >
-          {({ values, errors, touched, isSubmitting, handleChange, handleSubmit }) => {
+          {({ values, errors, touched, isSubmitting, handleChange, handleSubmit, setFieldValue, validateForm }) => {
+            const context = { values, errors, touched, handleChange };
             return (
               <>
-                {" "}
                 <Box>
                   <Bloc title="">
                     <ContractContainer>
@@ -148,39 +158,13 @@ export default ({ young }) => {
                         <div>
                           <h3> L’Etat, représenté par</h3>
                           <div>
-                            <Field
-                              validate={(v) => !v && requiredMessage}
-                              value={values.projectManagerFirstName}
-                              onChange={handleChange}
-                              name="projectManagerFirstName"
-                              placeholder="Nom"
-                            />
-                            <Field
-                              validate={(v) => !v && requiredMessage}
-                              value={values.projectManagerLastName}
-                              onChange={handleChange}
-                              name="projectManagerLastName"
-                              placeholder="Prénom"
-                            />{" "}
-                            agissant en qualité de{" "}
-                            <Field
-                              className="md"
-                              validate={(v) => !v && requiredMessage}
-                              value={values.projectManagerRole}
-                              onChange={handleChange}
-                              name="projectManagerRole"
-                              placeholder="Rôle"
-                            />
+                            <ContractField name="projectManagerFirstName" placeholder="Prénom" context={context} />
+                            <ContractField name="projectManagerLastName" placeholder="Nom" context={context} />
+                            agissant en qualité de
+                            <ContractField name="projectManagerRole" placeholder="Rôle" className="md" context={context} />
                             <div>
                               Email :
-                              <Field
-                                className="md"
-                                validate={(v) => !v && requiredMessage}
-                                value={values.projectManagerEmail}
-                                onChange={handleChange}
-                                name="projectManagerEmail"
-                                placeholder="alix@example.org"
-                              />
+                              <ContractField name="projectManagerEmail" placeholder="Email" className="md" context={context} />
                             </div>
                           </div>
                         </div>
@@ -188,43 +172,17 @@ export default ({ young }) => {
                         <div>
                           <h3> La structure d’accueil représentée par</h3>
                           <div>
-                            <Field
-                              validate={(v) => !v && requiredMessage}
-                              value={values.structureManagerFirstName}
-                              onChange={handleChange}
-                              name="structureManagerFirstName"
-                              placeholder="Nom"
-                            />
-                            <Field
-                              validate={(v) => !v && requiredMessage}
-                              value={values.structureManagerLastName}
-                              onChange={handleChange}
-                              name="structureManagerLastName"
-                              placeholder="Prénom"
-                            />
+                            <ContractField name="structureManagerFirstName" placeholder="Prénom" context={context} />
+                            <ContractField name="structureManagerLastName" placeholder="Nom" context={context} />
                             agissant en qualité de
-                            <Field
-                              className="md"
-                              validate={(v) => !v && requiredMessage}
-                              value={values.structureManagerRole}
-                              onChange={handleChange}
-                              name="structureManagerRole"
-                              placeholder="Rôle"
-                            />{" "}
+                            <ContractField name="structureManagerRole" placeholder="Rôle" className="md" context={context} />
                             <div>
                               Email :
-                              <Field
-                                className="md"
-                                validate={(v) => !v && requiredMessage}
-                                value={values.structureManagerEmail}
-                                onChange={handleChange}
-                                name="structureManagerEmail"
-                                placeholder="alix@example.org"
-                              />
+                              <ContractField name="structureManagerEmail" placeholder="Email" className="md" context={context} />
                             </div>
                             <div>
                               Siret (optionnel) :
-                              <Field className="md" value={values.structureSiret} onChange={handleChange} name="structureSiret" placeholder="12345678901234" />
+                              <ContractField name="structureSiret" placeholder="12345678901234" className="md" context={context} optional={true} />
                             </div>
                           </div>
                         </div>
@@ -232,95 +190,52 @@ export default ({ young }) => {
                         <div>
                           <h3> Le volontaire</h3>
                           <div>
-                            <Field validate={(v) => !v && requiredMessage} value={values.youngFirstName} onChange={handleChange} name="youngFirstName" placeholder="Nom" />
-                            <Field validate={(v) => !v && requiredMessage} value={values.youngLastName} onChange={handleChange} name="youngLastName" placeholder="Prénom" />
+                            <ContractField name="youngFirstName" placeholder="Prénom" context={context} />
+                            <ContractField name="youngLastName" placeholder="Nom" context={context} />
                             <div>
                               né le :
-                              <Field
-                                validate={(v) => !v && requiredMessage}
-                                value={values.youngBirthdate}
-                                onChange={handleChange}
-                                name="youngBirthdate"
-                                type="date"
-                                placeholder="jj/mm/yyyy"
-                              />
+                              <ContractField name="youngBirthdate" context={context} type="date" placeholder="jj/mm/yyyy" />
                             </div>
                             <div>
                               demeurant :
-                              <Field
-                                className="md"
-                                validate={(v) => !v && requiredMessage}
-                                value={values.youngAddress}
-                                onChange={handleChange}
-                                name="youngAddress"
-                                placeholder="ooo"
-                              />
-                              <Field validate={(v) => !v && requiredMessage} value={values.youngCity} onChange={handleChange} name="youngCity" placeholder="Toulouse" />
-                              <Field validate={(v) => !v && requiredMessage} value={values.youngDepartment} onChange={handleChange} name="youngDepartment" placeholder="Vendée" />
+                              <ContractField name="youngAddress" placeholder="Adresse" className="md" context={context} />
+                              <ContractField name="youngCity" placeholder="Ville" context={context} />
+                              <ContractField name="youngDepartment" placeholder="Département" context={context} />
                             </div>
-                            Email :{" "}
-                            <Field
-                              className="md"
-                              validate={(v) => !v && requiredMessage}
-                              value={values.youngEmail}
-                              onChange={handleChange}
-                              name="youngEmail"
-                              placeholder="camille@example.org"
-                            />
+                            Email : <ContractField name="youngEmail" placeholder="Email" className="md" type="email" context={context} />
                             Téléphone :
-                            <Field
-                              className="md"
-                              validate={(v) => !v && requiredMessage}
-                              value={values.youngPhone}
-                              onChange={handleChange}
-                              name="youngPhone"
-                              placeholder="0123456789"
-                            />
+                            <ContractField name="youngPhone" placeholder="0123456789" className="md" context={context} />
                           </div>
                         </div>
                         <hr />
                         <h2>Représenté par ses représentant légaux</h2>
                         <div>
                           1) Le représentant légal du volontaire n°1 :
-                          <Field validate={(v) => !v && requiredMessage} value={values.parent1FirstName} onChange={handleChange} name="parent1FirstName" placeholder="Prénom" />
-                          <Field validate={(v) => !v && requiredMessage} value={values.parent1LastName} onChange={handleChange} name="parent1LastName" placeholder="Nom" />,
+                          <ContractField name="parent1FirstName" placeholder="Prénom" context={context} />
+                          <ContractField name="parent1LastName" placeholder="Nom" context={context} />
                           disposant de l’autorité parentale,
                           <div>
                             demeurant à
-                            <Field
-                              className="md"
-                              validate={(v) => !v && requiredMessage}
-                              value={values.parent1Address}
-                              onChange={handleChange}
-                              name="parent1Address"
-                              placeholder="1 rue du moulin"
-                            />
-                            <Field validate={(v) => !v && requiredMessage} value={values.parent1City} onChange={handleChange} name="parent1City" placeholder="Paris" />
-                            <Field validate={(v) => !v && requiredMessage} value={values.parent1Department} onChange={handleChange} name="parent1Department" placeholder="75" />
+                            <ContractField name="parent1Address" placeholder="Adresse" className="md" context={context} />
+                            <ContractField name="parent1City" placeholder="Ville" context={context} />
+                            <ContractField name="parent1Department" placeholder="Département" context={context} />
                           </div>
                           Téléphone :
-                          <Field validate={(v) => !v && requiredMessage} value={values.parent1Phone} onChange={handleChange} name="parent1Phone" placeholder="0123456789" />
+                          <ContractField name="parent1Phone" placeholder="0123456789" className="md" context={context} />
                         </div>
                         <div>
                           2) Le représentant légal du volontaire n°2 :
-                          <Field validate={(v) => !v && requiredMessage} value={values.parent2FirstName} onChange={handleChange} name="parent2FirstName" placeholder="Prénom" />
-                          <Field validate={(v) => !v && requiredMessage} value={values.parent2LastName} onChange={handleChange} name="parent2LastName" placeholder="Nom" />,
+                          <ContractField name="parent2FirstName" placeholder="Prénom" context={context} optional={true} />
+                          <ContractField name="parent2LastName" placeholder="Nom" context={context} optional={true} />
                           disposant de l’autorité parentale,
                           <div>
                             demeurant à
-                            <Field
-                              className="md"
-                              validate={(v) => !v && requiredMessage}
-                              value={values.parent2Address}
-                              onChange={handleChange}
-                              name="parent2Address"
-                              placeholder="2 rue du moulin"
-                            />
-                            <Field validate={(v) => !v && requiredMessage} value={values.parent2City} onChange={handleChange} name="parent2City" placeholder="Paris" />
-                            <Field validate={(v) => !v && requiredMessage} value={values.parent2Department} onChange={handleChange} name="parent2Department" placeholder="75" />
+                            <ContractField name="parent2Address" placeholder="Adresse" className="md" context={context} optional={true} />
+                            <ContractField name="parent2City" placeholder="Ville" context={context} optional={true} />
+                            <ContractField name="parent2Department" placeholder="Département" context={context} optional={true} />
                           </div>
                           Téléphone :
-                          <Field validate={(v) => !v && requiredMessage} value={values.parent2Phone} onChange={handleChange} name="parent2Phone" placeholder="0123456789" />
+                          <ContractField name="parent2Phone" placeholder="0123456789" className="md" context={context} optional={true} />
                         </div>
                         <div>
                           <br />
@@ -328,35 +243,21 @@ export default ({ young }) => {
                         </div>
                         <h3>a) Objet</h3>
                         <div>
-                          <Field validate={(v) => !v && requiredMessage} value={values.youngFirstName} onChange={handleChange} name="youngFirstName" placeholder="Nom" />
-                          <Field validate={(v) => !v && requiredMessage} value={values.youngLastName} onChange={handleChange} name="youngLastName" placeholder="Prénom" />
+                          <ContractField name="youngFirstName" placeholder="Prénom" context={context} />
+                          <ContractField name="youngLastName" placeholder="Nom" context={context} />
                           s’engage à réaliser une mission d’intérêt général validée par l’autorité territoriale en charge du SNU.
                           <div>
                             La mission
-                            <Field className="lg" validate={(v) => !v && requiredMessage} value={values.missionName} onChange={handleChange} name="missionName" placeholder="ooo" />
+                            <ContractField className="lg" name="missionName" placeholder="Nom de la mission" context={context} />
                             <br />
                           </div>
                           <div>
                             Les objectifs de la missions sont les suivants :
-                            <Field
-                              as="textarea"
-                              validate={(v) => !v && requiredMessage}
-                              value={values.missionObjective}
-                              onChange={handleChange}
-                              name="missionObjective"
-                              placeholder="ooo"
-                            />
+                            <ContractField name="missionObjective" placeholder="Objectifs" as="textarea" context={context} />
                           </div>
                           <div>
                             A ce titre, le volontaire exercera les activités suivantes :
-                            <Field
-                              as="textarea"
-                              validate={(v) => !v && requiredMessage}
-                              value={values.missionAction}
-                              onChange={handleChange}
-                              name="missionAction"
-                              placeholder="ooo"
-                            />
+                            <ContractField name="missionAction" placeholder="Actions" as="textarea" context={context} />
                           </div>
                           <p>
                             La nature ou l’exercice des missions ne peuvent porter sur les activités relevant des articles D. 4153-15 à D. 4153-40 du code du travail c’est-à-dire
@@ -369,42 +270,22 @@ export default ({ young }) => {
                           Le présent contrat, pour la réalisation de la mission indiquée ci-dessus, prend effet à la date de signature du présent contrat par les trois parties
                           prenantes. <br />
                           La mission d’intérêt général débute le
-                          <Field
-                            validate={(v) => !v && requiredMessage}
-                            type="date"
-                            value={values.missionStartAt}
-                            onChange={handleChange}
-                            name="missionStartAt"
-                            placeholder="jj/mm/yyyy"
-                          />
+                          <ContractField name="missionStartAt" placeholder="jj/mm/yyyy" as="date" context={context} />
                           jusqu’au
-                          <Field
-                            validate={(v) => !v && requiredMessage}
-                            type="date"
-                            value={values.missionEndAt}
-                            onChange={handleChange}
-                            name="missionEndAt"
-                            placeholder="jj/mm/yyyy"
-                          />
+                          <ContractField name="missionEndAt" placeholder="jj/mm/yyyy" as="date" context={context} />
                           <br /> Le volontaire effectuera un total de
-                          <Field validate={(v) => !v && requiredMessage} value={values.missionDuration} onChange={handleChange} name="name" placeholder="84" />
+                          <ContractField name="missionDuration" placeholder="nombre d'heure" context={context} />
                           heures de MIG.
                         </div>
                         <h3>c) Conditions d’exercice des missions</h3>
                         <div>
                           La mission s’effectue à
-                          <Field
-                            validate={(v) => !v && requiredMessage}
-                            value={values.missionAddress}
-                            onChange={handleChange}
-                            name="missionAddress"
-                            placeholder="1 rue des oiseaux"
-                          />
-                          <Field validate={(v) => !v && requiredMessage} value={values.missionCity} onChange={handleChange} name="missionCity" placeholder="Dijon" />
-                          <Field validate={(v) => !v && requiredMessage} value={values.missionZip} onChange={handleChange} name="missionZip" placeholder="75013" />
+                          <ContractField className="md" name="missionAddress" placeholder="adresse" context={context} />
+                          <ContractField name="missionCity" placeholder="Ville" context={context} />
+                          <ContractField name="missionZip" placeholder="Code postal" context={context} />
                           <br />
                           au sein de la structure d’accueil retenue par l’administration :
-                          <Field className="lg" validate={(v) => !v && requiredMessage} value={values.missionName} onChange={handleChange} name="missionName" placeholder="" />
+                          <ContractField className="lg" name="structureName" placeholder="Nom de la structure" context={context} />
                           <p>
                             La durée quotidienne de la mission est égale à sept heures au maximum. Une pause de trente minutes doit être appliquée pour toute période de mission
                             ininterrompue atteignant quatre heures et demie.
@@ -419,29 +300,10 @@ export default ({ young }) => {
                             et 35 heures par semaine.
                           </p>
                           <p>Les horaires du volontaire pour la présente mission sont :</p>
-                          <Field
-                            validate={(v) => !v && requiredMessage}
-                            as="textarea"
-                            value={values.missionFrequence}
-                            onChange={handleChange}
-                            name="missionFrequence"
-                            placeholder="Du lundi au vendredi"
-                          />
+                          <ContractField name="missionFrequence" placeholder="Du lundi au vendredi" as="textarea" context={context} />
                           Le volontaire bénéficie, pour assurer l’accomplissement de sa mission, de l’accompagnement d’un tuteur de mission
-                          <Field
-                            validate={(v) => !v && requiredMessage}
-                            value={values.structureManagerFirstName}
-                            onChange={handleChange}
-                            name="structureManagerFirstName"
-                            placeholder="Nom"
-                          />
-                          <Field
-                            validate={(v) => !v && requiredMessage}
-                            value={values.structureManagerLastName}
-                            onChange={handleChange}
-                            name="structureManagerLastName"
-                            placeholder="Prénom"
-                          />
+                          <ContractField name="structureManagerFirstName" placeholder="Prénom" context={context} />
+                          <ContractField name="structureManagerLastName" placeholder="Nom" context={context} />
                           de la structure d’accueil. Le volontaire bénéficie, par son tuteur, d’entretiens réguliers permettant un suivi de la réalisation des missions ainsi que,
                           le cas échéant, d’un accompagnement renforcé.
                         </div>
@@ -505,14 +367,14 @@ export default ({ young }) => {
                           la procédure de fin de mission sur la plateforme.
                           <br />
                           La validation est conditionnée à la réalisation de
-                          <Field validate={(v) => !v && requiredMessage} value={values.name} onChange={handleChange} name="name" placeholder="84" /> heures de mission au minimum au
-                          sein de la structure.
+                          <ContractField name="missionDuration" placeholder="nombre d'heure" context={context} />
+                          heures de mission au minimum au sein de la structure.
                           <br />
                           La mission est accomplie de manière continue, ou dans la limite de la période d’une année, de manière discontinue.
                         </div>
                         <div>
                           Le
-                          <Field type="date" validate={(v) => !v && requiredMessage} value={values.date} onChange={handleChange} name="name" placeholder="ooo" />
+                          <ContractField name="date" placeholder="date" type="date" context={context} />
                         </div>
                         <div>
                           <p>Représentant de l’Etat</p>
@@ -521,9 +383,8 @@ export default ({ young }) => {
                           <p>Représentant de la structure d’accueil</p>
                         </div>
                         <div>
-                          Le volontaire,{" "}
-                          <Field validate={(v) => !v && requiredMessage} value={values.youngFirstName} onChange={handleChange} name="youngFirstName" placeholder="Prénom" />
-                          <Field validate={(v) => !v && requiredMessage} value={values.youngLastName} onChange={handleChange} name="youngLastName" placeholder="Nom" />
+                          Le volontaire, <ContractField name="youngFirstName" placeholder="Prénom" context={context} />
+                          <ContractField name="youngLastName" placeholder="Nom" context={context} />
                           représenté par ses représentant légaux :
                         </div>
                         <div>
@@ -623,10 +484,25 @@ export default ({ young }) => {
                   </Bloc>
                 </Box>
                 <div style={{ display: "flex", justifyContent: "center" }}>
-                  <WhiteHeaderButton>
+                  <WhiteHeaderButton
+                    onClick={async () => {
+                      const erroredFields = await validateForm();
+                      if (Object.keys(erroredFields).length) toastr.error("Il y a des erreurs dans le formulaire");
+                      setFieldValue("sendMessage", false, false);
+                      handleSubmit();
+                    }}
+                    type="submit"
+                  >
                     <p>Enregistrer les modifications</p>
                   </WhiteHeaderButton>
-                  <VioletHeaderButton>
+                  <VioletHeaderButton
+                    onClick={async () => {
+                      const erroredFields = await validateForm();
+                      if (Object.keys(erroredFields).length) toastr.error("Il y a des erreurs dans le formulaire");
+                      setFieldValue("sendMessage", true, false);
+                      handleSubmit();
+                    }}
+                  >
                     <p>Envoyer une demande de validation aux 3 parties prenantes</p>
                   </VioletHeaderButton>
                 </div>
@@ -644,6 +520,25 @@ export default ({ young }) => {
     </div>
   );
 };
+
+const ContractField = ({ name, placeholder, optional, context: { values, errors, touched, handleChange }, ...rest }) => {
+  const content = (
+    <>
+      {errors[name] && touched[name] && <ErrorInContractField>Ce champ est obligatoire</ErrorInContractField>}
+      <Field validate={(v) => (optional ? undefined : !v)} value={values[name]} onChange={handleChange} name={name} placeholder={placeholder} {...rest} />
+    </>
+  );
+
+  if (rest.as === "textarea") return <div>{content}</div>;
+  return <span>{content}</span>;
+};
+
+const ErrorInContractField = styled.span`
+  position: absolute;
+  font-size: 0.75rem;
+  margin-left: 0.5rem;
+  color: red;
+`;
 
 const Bloc = ({ children, title, borderBottom, borderRight, borderLeft, disabled }) => {
   return (
