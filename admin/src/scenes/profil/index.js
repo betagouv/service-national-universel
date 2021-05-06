@@ -110,7 +110,7 @@ export default () => {
                   const { ok, code, data } = await api.post(`/department-service`, values);
                   if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
                   setService(data);
-                  toastr.success("Service departemental mis à jour !");
+                  toastr.success("Service départemental mis à jour !");
                 } catch (e) {
                   console.log(e);
                   toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
