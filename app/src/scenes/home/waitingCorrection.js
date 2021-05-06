@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import { HeroContainer, Hero, Content, Alert, Separator, WhiteButton } from "../../components/Content";
 import { isEndOfInscriptionManagement2021 } from "../../utils";
 
+
 export default () => {
   const young = useSelector((state) => state.Auth.young);
   const [showAlert, setShowAlert] = useState(true);
