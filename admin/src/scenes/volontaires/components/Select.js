@@ -17,7 +17,7 @@ export default ({ title, name, values, handleChange, disabled, options, required
           <option key={-1} value="" label=""></option>
           {options.map((o, i) => (
             <option key={i} value={o.value} label={o.label}>
-              {o.value}
+              {o.label}
             </option>
           ))}
         </select>
