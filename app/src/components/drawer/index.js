@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
-import { YOUNG_PHASE, YOUNG_STATUS, PHASE_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3 } from "../../utils";
+import { YOUNG_PHASE, YOUNG_STATUS, PHASE_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, permissionPhase1, permissionPhase2, permissionPhase3 } from "../../utils";
 import Item from "./item";
 import { DRAWER_TABS } from "../utils";
 import WithdrawnModal from "../WithdrawnModal";
@@ -46,16 +46,9 @@ export default (props) => {
   const getDisabled = (tab) => {
     // return false;
     if (tab === DRAWER_TABS.HOME) return false;
-    if (young.status === YOUNG_STATUS.REFUSED || young.status === YOUNG_STATUS.WITHDRAWN) return true;
-    if (tab === DRAWER_TABS.PHASE1) {
-      return [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_LIST].includes(young.status);
-    }
-    if (tab === DRAWER_TABS.PHASE2) {
-      return [YOUNG_PHASE.INSCRIPTION, YOUNG_PHASE.COHESION_STAY].includes(young.phase);
-    }
-    if (tab === DRAWER_TABS.PHASE3) {
-      return !(young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED);
-    }
+    if (tab === DRAWER_TABS.PHASE1) return !permissionPhase1(young);
+    if (tab === DRAWER_TABS.PHASE2) return !permissionPhase2(young);
+    if (tab === DRAWER_TABS.PHASE3) return !permissionPhase3(young);
     return true;
   };
 

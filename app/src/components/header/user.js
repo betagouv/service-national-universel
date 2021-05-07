@@ -27,6 +27,9 @@ export default () => {
     if (tab === TABS_USER.PREFERENCES) {
       return [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.REFUSED, YOUNG_STATUS.WAITING_CORRECTION].includes(young.status);
     }
+    if (tab === TABS_USER.PROFILE) {
+      return [YOUNG_STATUS.REFUSED].includes(young.status);
+    }
   };
 
   return (
@@ -36,9 +39,11 @@ export default () => {
         <Avatar onClick={() => setOpen(!open)} src={require("../../assets/avatar.jpg")} />
         <Menu open={open}>
           <Close onClick={() => setOpen(false)}>&times;</Close>
-          <Item onClick={() => setOpen(false)}>
-            <Link to="/account">Mon profil</Link>
-          </Item>
+          {!getDisabled(TABS_USER.PROFILE) && (
+            <Item onClick={() => setOpen(false)}>
+              <Link to="/account">Mon profil</Link>
+            </Item>
+          )}
           {!getDisabled(TABS_USER.PREFERENCES) && (
             <Item onClick={() => setOpen(false)}>
               <Link to="/preferences">Mes préférences de missions</Link>
