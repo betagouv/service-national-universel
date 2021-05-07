@@ -14,6 +14,8 @@ import WhiteHeaderButton from "../../../components/buttons/WhiteHeaderButton";
 import { toastr } from "react-redux-toastr";
 
 export default ({ young }) => {
+  // manager_department
+
   // We load the first application that has VALIDATED status.
   // Then we load associated mission, tutor and structure (because we need all this mess).
   const [application, setApplication] = useState(null);
@@ -88,12 +90,14 @@ export default ({ young }) => {
             parent1City: young.parent1OwnAddress === "true" ? young.parent1City : young.city,
             parent1Department: young.parent1OwnAddress === "true" ? young.parent1Department : young.department,
             parent1Phone: young.parent1Phone,
+            parent1Email: young.parent1Email,
             parent2FirstName: young.parent2FirstName,
             parent2LastName: young.parent2LastName,
             parent2Address: young.parent2Email && young.parent2OwnAddress === "true" ? young.parent2Address : young.address,
             parent2City: young.parent2Email && young.parent2OwnAddress === "true" ? young.parent2City : young.city,
             parent2Department: young.parent2Email && young.parent2OwnAddress === "true" ? young.parent2Department : young.department,
             parent2Phone: young.parent2Phone,
+            parent2Email: young.parent2Email,
             missionName: mission.name,
             missionObjective: mission.description,
             missionAction: mission.actions,
@@ -119,9 +123,20 @@ export default ({ young }) => {
           }}
           onSubmit={async (values, actions) => {
             try {
-              const { ok, code } = await api.post(`/contract`, values);
+              const { ok, code } = await api.post(`/contract`, {
+                ...values,
+                youngId: young.id,
+                structureId: structure.id,
+                applicationId: application.id,
+                missionId: mission.id,
+                tutorId: tutor.id,
+              });
               if (!ok) return toastr.error("Erreur !", translate(code));
-              toastr.success("Contrat sauvegardé.");
+              if (values.sendMessage) {
+                toastr.success("Le message a été envoyé");
+              } else {
+                toastr.success("Contrat sauvegardé");
+              }
             } catch (e) {
               toastr.error("Erreur !", translate(e.code));
             }
@@ -220,6 +235,7 @@ export default ({ young }) => {
                             <ContractField name="parent1City" placeholder="Ville" context={context} />
                             <ContractField name="parent1Department" placeholder="Département" context={context} />
                           </div>
+                          Email : <ContractField name="parent1Email" placeholder="Email" className="md" type="email" context={context} />
                           Téléphone :
                           <ContractField name="parent1Phone" placeholder="0123456789" className="md" context={context} />
                         </div>
@@ -234,6 +250,7 @@ export default ({ young }) => {
                             <ContractField name="parent2City" placeholder="Ville" context={context} optional={true} />
                             <ContractField name="parent2Department" placeholder="Département" context={context} optional={true} />
                           </div>
+                          Email : <ContractField name="parent2Email" placeholder="Email" className="md" type="email" context={context} />
                           Téléphone :
                           <ContractField name="parent2Phone" placeholder="0123456789" className="md" context={context} optional={true} />
                         </div>
