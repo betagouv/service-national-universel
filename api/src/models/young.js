@@ -231,6 +231,12 @@ const Schema = new mongoose.Schema({
       description: "La fiche sanitaire a été reçu par le SNU",
     },
   },
+  cohesionCenterId: {
+    type: String,
+    documentation: {
+      description: "Id du centre de cohésion d'accueil pour la phase 1",
+    },
+  },
   cohesionCenterName: {
     type: String,
     documentation: {

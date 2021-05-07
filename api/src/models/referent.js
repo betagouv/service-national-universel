@@ -86,7 +86,16 @@ const Schema = new mongoose.Schema({
 
   role: {
     type: String,
-    enum: ["admin", "referent_region", "referent_department", "structure_responsible", "structure_member", "responsible", "supervisor"],
+    enum: [
+      "admin",
+      "referent_region",
+      "referent_department",
+      "structure_responsible",
+      "structure_member",
+      "responsible",
+      "supervisor",
+      "head_center",
+    ],
     documentation: {
       description: "Rôle de l'utilisateur sur l'app",
     },
@@ -117,7 +126,12 @@ const Schema = new mongoose.Schema({
       "",
     ],
   },
-
+  cohesionCenterId: {
+    type: String,
+    documentation: {
+      description: "Id du centre de cohésion d'accueil pour la phase 1",
+    },
+  },
   phone: {
     type: String,
     documentation: {

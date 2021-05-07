@@ -40,6 +40,7 @@ app.use("/program", require("./controllers/program"));
 app.use("/inscription-goal", require("./controllers/inscription-goal"));
 app.use("/department-service", require("./controllers/department-service"));
 app.use("/waiting-list", require("./controllers/waiting-list"));
+app.use("/cohesion-center", require("./controllers/cohesion-center"));
 
 app.get("/", async (req, res) => {
   const d = new Date();
