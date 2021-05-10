@@ -90,7 +90,7 @@ export default ({ setOpen, open, label = "Inviter un référent", role = "" }) =
                     </Col>
                   </Row>
                   <br />
-                  <LoadingButton loading={isSubmitting} color="info" onClick={handleSubmit}>
+                  <LoadingButton loading={isSubmitting} onClick={handleSubmit}>
                     Envoyer l'invitation
                   </LoadingButton>
                   {Object.keys(errors).length ? <h3>Merci de remplir tous les champs avant d'envoyer une invitation.</h3> : null}
