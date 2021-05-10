@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "webpack-dev-server --port 8082 --mode development --config webpack.dev.config.js --open --hot --inline",
-    "start": "npm run build && node server/index.js",
-    "build": "node --max-old-space-size=2048 node_modules/webpack/bin/webpack.js --env.production --env.NODE_ENV=production"
+    "start": "node server/index.js",
+    "install": "node src/build-only-on-clevercloud.js",
+    "build": "node --max-old-space-size=3000 node_modules/webpack/bin/webpack.js --env.production --env.NODE_ENV=production"
   },
   "prettier": {
     "printWidth": 180
