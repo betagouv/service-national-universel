@@ -16,11 +16,13 @@ import Settings from "./scenes/settings";
 
 import Dashboard from "./scenes/dashboard";
 import DashboardResponsible from "./scenes/dashboard-responsible";
+import DashboardHeadCenter from "./scenes/dashboard-head-center";
 
 import Structure from "./scenes/structure";
 import Missions from "./scenes/missions";
 import Volontaires from "./scenes/volontaires";
 import VolontairesResponsible from "./scenes/volontaires-responsible";
+import VolontairesHeadCenter from "./scenes/volontaires-head-center";
 import Tuteur from "./scenes/tuteur";
 import Utilisateur from "./scenes/utilisateur";
 import Content from "./scenes/content";
@@ -91,6 +93,18 @@ const Home = () => {
   const user = useSelector((state) => state.Auth.user);
   const [menuVisible, setMenuVisible] = useState(false);
 
+  const renderDashboard = () => {
+    if (["supervisor", "responsible"].includes(user?.role)) return <DashboardResponsible />;
+    if (user?.role === "head_center") return <DashboardHeadCenter />;
+    return <Dashboard />;
+  };
+
+  const renderVolontaire = () => {
+    if (["supervisor", "responsible"].includes(user?.role)) return <VolontairesResponsible />;
+    if (user?.role === "head_center") return <VolontairesHeadCenter />;
+    return <Volontaires />;
+  };
+
   // if (user && !user.structureId) return <Onboarding />;
   return (
     <div style={{ display: "flex" }}>
@@ -108,7 +122,7 @@ const Home = () => {
           <RestrictedRoute path="/settings" component={Settings} />
           <RestrictedRoute path="/profil" component={Profil} />
           <RestrictedRoute path="/team" component={Team} />
-          <RestrictedRoute path="/volontaire" component={["supervisor", "responsible"].includes(user?.role) ? VolontairesResponsible : Volontaires} />
+          <RestrictedRoute path="/volontaire" component={renderVolontaire} />
           <RestrictedRoute path="/tuteur" component={Tuteur} />
           <RestrictedRoute path="/mission" component={Missions} />
           <RestrictedRoute path="/inscription" component={Inscription} />
@@ -116,7 +130,7 @@ const Home = () => {
           <RestrictedRoute path="/contenu" component={Content} />
           <RestrictedRoute path="/objectifs" component={Goal} />
           <RestrictedRoute path="/centre" component={Center} />
-          <RestrictedRoute path="/" component={["supervisor", "responsible"].includes(user?.role) ? DashboardResponsible : Dashboard} />
+          <RestrictedRoute path="/" component={renderDashboard} />
         </Switch>
       </ContentContainer>
     </div>

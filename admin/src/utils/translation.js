@@ -88,6 +88,8 @@ export const translate = (value) => {
       return "Référent régional";
     case "responsible":
       return "Responsable";
+    case "head_center":
+      return "Chef de centre";
     case "supervisor":
       return "Superviseur";
     case "manager_department":

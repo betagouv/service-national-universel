@@ -7,6 +7,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/fr";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
+import ReactSelect from "react-select";
 
 import LoadingButton from "../../components/buttons/LoadingButton";
 import DateInput from "../../components/dateInput";
@@ -18,6 +19,7 @@ import Loader from "../../components/Loader";
 export default (props) => {
   const [user, setUser] = useState();
   const [service, setService] = useState();
+  const [centers, setCenters] = useState();
   const currentUser = useSelector((state) => state.Auth.user);
   const history = useHistory();
 
@@ -29,10 +31,13 @@ export default (props) => {
       setUser(data);
       const { data: d } = await api.get(`/department-service/referent/${id}`);
       setService(d);
+      const responseCenter = await api.get(`/cohesion-center`);
+      const c = responseCenter.data.map((e) => ({ label: e.name, value: e.name, _id: e._id }));
+      setCenters(c);
     })();
   }, []);
 
-  if (user === undefined || service === undefined) return <Loader />;
+  if (user === undefined || service === undefined || centers === undefined) return <Loader />;
 
   const getSubtitle = () => {
     const createdAt = new Date(user.createdAt);
@@ -135,8 +140,13 @@ export default (props) => {
                           REFERENT_ROLES.ADMIN,
                           REFERENT_ROLES.RESPONSIBLE,
                           REFERENT_ROLES.SUPERVISOR,
+                          REFERENT_ROLES.HEAD_CENTER,
                         ].map((key) => ({ value: key, label: translate(key) }))}
                       />
+
+                      {values.role === REFERENT_ROLES.HEAD_CENTER && centers ? (
+                        <AutocompleteSelectCenter title="Centre" values={values} handleChange={handleChange} placeholder="Choisir un centre" options={centers} />
+                      ) : null}
                       {[REFERENT_ROLES.REFERENT_DEPARTMENT, REFERENT_ROLES.REFERENT_REGION].includes(values.role) ? (
                         <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRole(values.role)} />
                       ) : null}
@@ -297,6 +307,29 @@ const Select = ({ title, name, values, onChange, disabled, errors, touched, vali
             </option>
           ))}
         </select>
+      </Col>
+    </Row>
+  );
+};
+
+const AutocompleteSelectCenter = ({ title, values, handleChange, placeholder, options, onSelect }) => {
+  return (
+    <Row className="detail">
+      <Col md={4}>
+        <label>{title}</label>
+      </Col>
+      <Col md={8}>
+        <ReactSelect
+          defaultValue={{ label: values.cohesionCenterName, value: values.cohesionCenterName, _id: values.cohesionCenterId }}
+          options={options}
+          placeholder={placeholder}
+          noOptionsMessage={() => "Aucun centre ne correspond à cette recherche."}
+          onChange={(e) => {
+            handleChange({ target: { value: e._id, name: "cohesionCenterId" } });
+            handleChange({ target: { value: e.value, name: "cohesionCenterName" } });
+            onSelect?.(e);
+          }}
+        />
       </Col>
     </Row>
   );

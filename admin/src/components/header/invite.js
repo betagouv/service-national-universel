@@ -162,6 +162,7 @@ const ChooseRole = ({ value, onChange }) => {
   return (
     <Input type="select" name="role" value={value} onChange={onChange}>
       <option value=""></option>
+      <option value={REFERENT_ROLES.HEAD_CENTER}>{translate(REFERENT_ROLES.HEAD_CENTER)}</option>
       <option value={REFERENT_ROLES.REFERENT_DEPARTMENT}>{translate(REFERENT_ROLES.REFERENT_DEPARTMENT)}</option>
       {user.role === REFERENT_ROLES.ADMIN || user.role === REFERENT_ROLES.REFERENT_REGION ? (
         <option value={REFERENT_ROLES.REFERENT_REGION}>{translate(REFERENT_ROLES.REFERENT_REGION)}</option>

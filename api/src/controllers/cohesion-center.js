@@ -108,6 +108,16 @@ router.get("/:id/head", passport.authenticate("referent", { session: false }), a
   }
 });
 
+router.get("/", passport.authenticate("referent", { session: false }), async (req, res) => {
+  try {
+    const data = await CohesionCenterModel.find({});
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
 router.put("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     if (req.user.role !== "admin") return res.status(404).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -118,23 +128,6 @@ router.put("/", passport.authenticate("referent", { session: false }), async (re
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
-
-// router.post("/current", passport.authenticate("referent", { session: false }), async (req, res) => {
-//   const { error, value } = Joi.object({ department: Joi.string().required() }).unknown().validate(req.body);
-
-//   if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
-
-//   try {
-//     const y2020 = await YoungModel.find({ cohort: "2020", statusPhase1: "WAITING_AFFECTATION", department: value.department }).count();
-//     const y2021 = await YoungModel.find({ cohort: "2021", status: "VALIDATED", department: value.department }).count();
-//     const yWL = await YoungModel.find({ status: "WAITING_LIST", department: value.department }).count();
-//     const data = { registered: y2020 + y2021, waitingList: yWL };
-//     return res.status(200).send({ ok: true, data });
-//   } catch (error) {
-//     capture(error);
-//     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
-//   }
-// });
 
 router.delete("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {

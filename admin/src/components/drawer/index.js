@@ -57,6 +57,16 @@ function referent({ onClick }) {
   );
 }
 
+function headCenter({ user, onClick }) {
+  return (
+    <>
+      <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
+      <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
+      <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
+    </>
+  );
+}
+
 export default (props) => {
   const user = useSelector((state) => state.Auth.user);
   const [open, setOpen] = useState();
@@ -78,6 +88,7 @@ export default (props) => {
     if (user.role === "referent_region") return "ESPACE RÉFÉRENT REGIONAL";
     if (user.role === "responsible") return "Espace responsable";
     if (user.role === "supervisor") return "Espace superviseur";
+    if (user.role === "head_center") return "espace chef de centre";
     return "";
   }
 
@@ -91,6 +102,7 @@ export default (props) => {
       </Logo>
       <ul>
         <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />
+        {user.role === "head_center" && headCenter({ user, onClick: handleClick })}
         {user.role === "supervisor" && supervisor({ user, onClick: handleClick })}
         {user.role === "responsible" && responsible({ user, onClick: handleClick })}
         {user.role === "admin" && admin({ onClick: handleClick })}

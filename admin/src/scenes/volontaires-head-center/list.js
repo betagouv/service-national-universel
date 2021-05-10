@@ -1,28 +1,27 @@
-import React, { useState } from "react";
-import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
+import React, { useEffect, useState } from "react";
 import { ReactiveBase, ReactiveList, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
-import VioletHeaderButton from "../../components/buttons/VioletHeaderButton";
-
-import ExportComponent from "../../components/ExportXlsx";
 
 import api from "../../services/api";
-import { apiURL, appURL } from "../../config";
+import { apiURL } from "../../config";
 import Panel from "./panel";
-import Badge from "../../components/Badge";
-import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS_COLORS, isInRuralArea, formatDateFR, formatLongDateFR } from "../../utils";
-import { Link } from "react-router-dom";
+import ExportComponent from "../../components/ExportXlsx";
+import { translate, getFilterLabel, YOUNG_STATUS_COLORS } from "../../utils";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
-import Chevron from "../../components/Chevron";
-import { Filter, FilterRow, ResultTable, Table, TopResultStats, BottomResultStats, ActionBox, Header, Title, MultiLine } from "../../components/list";
+import Badge from "../../components/Badge";
+import { ResultTable, Filter, Table, FilterRow, TopResultStats, BottomResultStats } from "../../components/list";
+import ToggleSwitch from "../../components/ToogleSwitch";
+import { toastr } from "react-redux-toastr";
 
-const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_PHASE_1", "STATUS_PHASE_2", "STATUS_PHASE_3", "STATUS_APPLICATION", "LOCATION"];
+const FILTERS = ["SEARCH", "STATUS", "PHASE", "COHORT", "MISSIONS", "TUTOR"];
 
-export default ({ setYoung }) => {
+export default () => {
+  const user = useSelector((state) => state.Auth.user);
   const [volontaire, setVolontaire] = useState(null);
-  const getDefaultQuery = () => ({ query: { bool: { filter: { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } } } } });
+  const getDefaultQuery = () => ({ query: { bool: { filter: { term: { "cohesionCenterId.keyword": user.cohesionCenterId } } } } });
   const getExportQuery = () => ({ ...getDefaultQuery(), size: 10000 });
+
   return (
     <div>
       <ReactiveBase url={`${apiURL}/es`} app="young" headers={{ Authorization: `JWT ${api.getToken()}` }}>
@@ -33,8 +32,8 @@ export default ({ setYoung }) => {
                 <Title>Volontaires</Title>
               </div>
               <ExportComponent
-                title="Exporter les volontaires"
                 defaultQuery={getExportQuery}
+                title="Exporter les volontaires"
                 collection="volontaire"
                 react={{ and: FILTERS }}
                 transform={(data) => {
@@ -114,12 +113,11 @@ export default ({ setYoung }) => {
             </Header>
             <Filter>
               <DataSearch
-                defaultQuery={getDefaultQuery}
                 showIcon={false}
                 placeholder="Rechercher par prénom, nom, email, ville, code postal..."
                 componentId="SEARCH"
                 dataField={["email.keyword", "firstName", "lastName", "city", "zip"]}
-                react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
+                react={{ and: FILTERS }}
                 // fuzziness={2}
                 style={{ flex: 2 }}
                 innerClass={{ input: "searchbox" }}
@@ -246,21 +244,29 @@ export default ({ setYoung }) => {
                   <Table>
                     <thead>
                       <tr>
-                        <th width="40%">Volontaire</th>
-                        <th width="40%">Contextes</th>
-                        <th width="40%">Dernière connexion</th>
-                        <th>Actions</th>
+                        <th width="30%">Volontaire</th>
+                        <th width="30%">Contextes</th>
+                        <th width="20%">Présence au séjour</th>
+                        <th width="20%">Fiche sanitaire</th>
                       </tr>
                     </thead>
                     <tbody>
                       {data.map((hit, i) => (
-                        <Hit key={i} hit={hit} onClick={() => setVolontaire(hit)} selected={volontaire?._id === hit._id} />
+                        <Hit
+                          key={i}
+                          hit={hit}
+                          callback={(e) => {
+                            if (e._id === volontaire._id) setVolontaire(e);
+                          }}
+                          onClick={() => setVolontaire(hit)}
+                          selected={volontaire?._id === hit._id}
+                        />
                       ))}
                     </tbody>
                   </Table>
                 )}
               />
-            </ResultTable>
+            </ResultTable>{" "}
           </div>
           <Panel
             value={volontaire}
@@ -274,7 +280,15 @@ export default ({ setYoung }) => {
   );
 };
 
-const Hit = ({ hit, onClick, selected }) => {
+const Hit = ({ hit, onClick, selected, callback }) => {
+  const [cohesionStayPresenceChecked, setCohesionStayPresenceChecked] = useState();
+  const [cohesionStayMedicalFileReceivedChecked, setCohesionStayMedicalFileReceivedChecked] = useState();
+
+  useEffect(() => {
+    !cohesionStayPresenceChecked && setCohesionStayPresenceChecked(hit.cohesionStayPresence);
+    !cohesionStayMedicalFileReceivedChecked && setCohesionStayMedicalFileReceivedChecked(hit.cohesionStayMedicalFileReceived);
+  }, [hit]);
+
   const getAge = (d) => {
     const now = new Date();
     const date = new Date(d);
@@ -284,55 +298,61 @@ const Hit = ({ hit, onClick, selected }) => {
     return age;
   };
 
+  const updateYoung = async (v) => {
+    const { data, ok, code } = await api.put(`/referent/young/${hit._id}`, v);
+    if (!ok) return toastr.error("Oups, une erreur s'est produite", translate(code));
+    data.cohesionStayPresence !== cohesionStayPresenceChecked && setCohesionStayPresenceChecked(data.cohesionStayPresence);
+    data.cohesionStayMedicalFileReceived !== cohesionStayMedicalFileReceivedChecked && setCohesionStayMedicalFileReceivedChecked(data.cohesionStayMedicalFileReceived);
+    callback(data);
+  };
+
   return (
-    <tr style={{ backgroundColor: selected && "#e6ebfa" }} onClick={onClick}>
-      <td>
-        <MultiLine>
-          <h2>{`${hit.firstName} ${hit.lastName}`}</h2>
-          <p>
-            {hit.birthdateAt ? `${getAge(hit.birthdateAt)} ans` : null} {`• ${hit.city || ""} (${hit.department || ""})`}
-          </p>
-        </MultiLine>
+    <tr style={{ backgroundColor: selected && "#e6ebfa" }}>
+      <td onClick={onClick}>
+        <div className="name">{`${hit.firstName} ${hit.lastName}`}</div>
+        <div className="email">
+          {hit.birthdateAt ? `${getAge(hit.birthdateAt)} ans` : null} {`• ${hit.city || ""} (${hit.department || ""})`}
+        </div>
       </td>
-      <td>
+      <td onClick={onClick}>
         <Badge text={`Cohorte ${hit.cohort}`} />
-        <Badge text="Phase 1" tooltipText={translate(hit.statusPhase1)} color={YOUNG_STATUS_COLORS[hit.statusPhase1]} />
-        <Badge text="Phase 2" tooltipText={translate(hit.statusPhase2)} color={YOUNG_STATUS_COLORS[hit.statusPhase2]} />
-        <Badge text="Phase 3" tooltipText={translate(hit.statusPhase3)} color={YOUNG_STATUS_COLORS[hit.statusPhase3]} />
         {hit.status === "WITHDRAWN" ? <Badge text="Désisté" color={YOUNG_STATUS_COLORS.WITHDRAWN} /> : null}
       </td>
-      <td>{formatStringLongDate(hit.lastLoginAt)}</td>
-      <td onClick={(e) => e.stopPropagation()}>
-        <Action hit={hit} />
+      <td>
+        <ToggleSwitch
+          id={`cohesionStayPresence${hit._id}`}
+          optionLabels={["Présent", "Absent"]}
+          checked={cohesionStayPresenceChecked === "true"}
+          onChange={(checked) => {
+            updateYoung({ cohesionStayPresence: checked });
+          }}
+        />
+      </td>
+      <td>
+        <ToggleSwitch
+          id={`cohesionStayMedicalFileReceived${hit._id}`}
+          optionLabels={["Réceptionné", "Non réceptionné"]}
+          checked={cohesionStayMedicalFileReceivedChecked === "true"}
+          onChange={(checked) => {
+            updateYoung({ cohesionStayMedicalFileReceived: checked });
+          }}
+        />
       </td>
     </tr>
   );
 };
 
-const Action = ({ hit, color }) => {
-  const user = useSelector((state) => state.Auth.user);
+const Header = styled.div`
+  padding: 0 40px 0;
+  display: flex;
+  align-items: flex-start;
+  margin-top: 20px;
+  justify-content: space-between;
+`;
 
-  return (
-    <ActionBox color={"#444"}>
-      <UncontrolledDropdown setActiveFromChild>
-        <DropdownToggle tag="button">
-          Choisissez&nbsp;une&nbsp;action
-          <Chevron color="#444" />
-        </DropdownToggle>
-        <DropdownMenu>
-          <Link to={`/volontaire/${hit._id}`}>
-            <DropdownItem className="dropdown-item">Consulter le profil</DropdownItem>
-          </Link>
-          <Link to={`/volontaire/${hit._id}/edit`}>
-            <DropdownItem className="dropdown-item">Modifier le profil</DropdownItem>
-          </Link>
-          {["admin", "referent_department", "referent_region"].includes(user.role) ? (
-            <DropdownItem className="dropdown-item">
-              <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${hit._id}`}>Prendre sa place</a>
-            </DropdownItem>
-          ) : null}
-        </DropdownMenu>
-      </UncontrolledDropdown>
-    </ActionBox>
-  );
-};
+const Title = styled.div`
+  color: rgb(38, 42, 62);
+  font-weight: 700;
+  font-size: 24px;
+  margin-bottom: 30px;
+`;
