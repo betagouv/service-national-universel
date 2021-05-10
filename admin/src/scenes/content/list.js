@@ -52,7 +52,13 @@ export default () => {
           })
           .map((p, i) => (
             <Col key={i} md={3} sm={12} style={{ marginBottom: "1.5rem" }}>
-              <ProgramCard onDelete={getPrograms} program={p} image={p.imageFile ? p.imageFile : require(`../../assets/programmes-engagement/${p.imageString || "default.png"}`)} />
+              <ProgramCard
+                onDelete={getPrograms}
+                program={p}
+                image={
+                  p.imageFile ? p.imageFile : require(`../../assets/programmes-engagement/${(p.imageString || "default.png").replace("je-veux-aider.jpg", "je-veux-aider.png")}`)
+                }
+              />
             </Col>
           ))}
       </Wrapper>
