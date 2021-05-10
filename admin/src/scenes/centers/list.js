@@ -34,21 +34,37 @@ export default () => {
               <div style={{ flex: 1 }}>
                 <Title>Centres</Title>
               </div>
-              <Link to={`/centre/create`}>
-                <VioletHeaderButton>
-                  <p>Nouveau centre</p>
-                </VioletHeaderButton>
-              </Link>
-              {/* <ExportComponent
-                title="Exporter les missions"
+              <ExportComponent
+                title="Exporter les centres"
                 defaultQuery={getExportQuery}
-                collection="mission"
+                collection="cohesioncenter"
                 react={{ and: FILTERS }}
                 transform={(data) => {
                   return {
+                    Nom: data.name,
+                    Code: data.code,
+                    Pays: data.country,
+                    COR: data.COR,
+                    Adresse: data.address,
+                    Ville: data.city,
+                    "Code Postal": data.zip,
+                    "N˚ Département": data.departmentCode,
+                    Département: data.department,
+                    Région: data.region,
+                    "Places total": data.placesTotal,
+                    "Places disponibles": data.placesLeft,
+                    "Tenues livrées": data.outfitDelivered,
+                    Observations: data.observations,
+                    "Créé lé": formatLongDateFR(data.createdAt),
+                    "Mis à jour le": formatLongDateFR(data.updatedAt),
                   };
                 }}
-              /> */}
+              />
+              <Link to={`/centre/create`}>
+                <VioletHeaderButton>
+                  <p>Créer un nouveau centre</p>
+                </VioletHeaderButton>
+              </Link>
             </Header>
             <Filter>
               <DataSearch

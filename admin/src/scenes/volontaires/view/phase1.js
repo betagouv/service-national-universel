@@ -3,6 +3,7 @@ import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 import { Formik } from "formik";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 import { translate as t, YOUNG_PHASE } from "../../../utils";
 import WrapperPhase1 from "./wrapper";
@@ -13,6 +14,8 @@ import AssignCenter from "./AssignCenter";
 
 export default ({ young, getYoung }) => {
   const disabled = young.phase !== YOUNG_PHASE.COHESION_STAY;
+  const user = useSelector((state) => state.Auth.user);
+
   const getCohesionStay = (young) => {
     if (young.statusPhase1 === "DONE")
       return (
@@ -39,7 +42,7 @@ export default ({ young, getYoung }) => {
       return (
         <>
           <p>Le volontaire est en attente d'affectation à un centre de cohésion</p>
-          <AssignCenter young={young} onAffect={getYoung} />
+          {user.role === "admin" ? <AssignCenter young={young} onAffect={getYoung} /> : null}
         </>
       );
   };
