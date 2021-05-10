@@ -106,6 +106,7 @@ const BoxPlaces = styled(Box)`
   padding: 0 1rem;
   display: flex;
   align-items: center;
+  min-height: 5rem;
   h1 {
     font-size: 3rem;
     margin: 0;

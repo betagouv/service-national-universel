@@ -11,7 +11,7 @@ export default ({ center, updateCenter }) => {
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <CenterView center={center} tab="affectation">
-        <Box>
+        <Box style={{ minHeight: 0 }}>
           <BoxTitle>Affectez un volontaire au centre</BoxTitle>
           <BoxContent>
             <ComboBoxYoungs center={center} onAffect={updateCenter} onClick={setYoung} />

@@ -160,7 +160,6 @@ const Hit = ({ hit, onClick, selected }) => {
           <h2>{hit.placesLeft} places disponibles</h2>
           <p>sur {hit.placesTotal} places proposées</p>
         </MultiLine>
-        {hit.places}
         {/* {hit.placesTotal <= 1 ? `${hit.placesTotal} place` : `${hit.placesTotal} places`}
         <div style={{ fontSize: 12, color: "rgb(113,128,150)" }}>
           {hit.placesTotal - hit.placesLeft} / {hit.placesTotal}

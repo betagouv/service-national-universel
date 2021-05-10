@@ -15,17 +15,8 @@ export default ({ center, onAffect, onClick }) => {
   const [searchedValue, setSearchedValue] = useState("");
 
   const handleAffectation = async (young) => {
-    young.statusPhase1 = YOUNG_STATUS_PHASE1.AFFECTED;
-    young.cohesionCenterId = center._id;
-    young.cohesionCenterName = center.name;
-    young.cohesionCenterZip = center.zip;
-    young.cohesionCenterCity = center.city;
-
-    const responseYoung = await api.put(`/referent/young/${young._id}`, young);
-    if (!responseYoung.ok) return toastr.error("Oups, une erreur est survenue lors de l'affectation du jeune", responseYoung.code);
-    const responseCenter = await api.put(`/cohesion-center`, { ...center, placesLeft: Math.max(center.placesLeft - 1, 0) });
-    if (!responseCenter.ok) return toastr.error("Oups, une erreur est survenue lors de l'affectation au centre", responseCenter.code);
-
+    const { data, ok, code } = await api.post(`/cohesion-center/${center._id}/assign-young/${young._id}`);
+    if (!ok) return toastr.error("Oups, une erreur est survenue lors de l'affectation du jeune", code);
     toastr.success(`${young.firstName} a été affecté(e) au centre ${center.name} !`);
 
     return onAffect?.();

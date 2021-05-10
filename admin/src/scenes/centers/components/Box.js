@@ -1,4 +1,7 @@
+import React from "react";
 import styled from "styled-components";
+
+export default ({ children, ...rest }) => <Box {...rest}>{children}</Box>;
 
 const Box = styled.div`
   width: ${(props) => props.width || 100}%;
@@ -9,5 +12,3 @@ const Box = styled.div`
   margin-bottom: 33px;
   border-radius: 8px;
 `;
-
-export default Box;
