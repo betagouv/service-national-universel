@@ -56,7 +56,7 @@ export default () => {
                 onDelete={getPrograms}
                 program={p}
                 image={
-                  p.imageFile ? p.imageFile : require(`../../assets/programmes-engagement/${(p.imageString || "default.png").replace("je-veux-aider.jpg", "je-veux-aider.png")}`)
+                  p.imageFile ? p.imageFile : require(`../../assets/programmes-engagement/${(p.imageString || "default.png").replace("je-veux-aider.png", "je-veux-aider.jpg")}`)
                 }
               />
             </Col>
