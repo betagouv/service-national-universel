@@ -132,6 +132,12 @@ const Schema = new mongoose.Schema({
       description: "Id du centre de cohésion d'accueil pour la phase 1",
     },
   },
+  cohesionCenterName: {
+    type: String,
+    documentation: {
+      description: "Nom du centre de cohésion d'accueil pour la phase 1",
+    },
+  },
   phone: {
     type: String,
     documentation: {
