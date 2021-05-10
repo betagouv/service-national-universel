@@ -30,6 +30,7 @@ export const MultiLine = styled.div`
 `;
 
 export const ResultTable = styled.div`
+  ${({ hide }) => (hide ? "display: none;" : "")}
   background-color: #fff;
   position: relative;
   margin: 20px 0;
@@ -39,6 +40,7 @@ export const ResultTable = styled.div`
     justify-content: flex-end;
     padding: 10px 25px;
     background: #fff;
+    margin: 0;
     a {
       background: #f7fafc;
       color: #242526;

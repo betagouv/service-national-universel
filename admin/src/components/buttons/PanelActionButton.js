@@ -5,7 +5,7 @@ import LoadingButton from "./LoadingButton";
 
 export default function DownloadButton({ icon, title, ...rest }) {
   return (
-    <Button icon={require(`../../assets/${icon}.svg`)} color="#fff" {...rest}>
+    <Button icon={icon ? require(`../../assets/${icon}.svg`) : null} color="#fff" {...rest}>
       {title}
     </Button>
   );
@@ -13,7 +13,7 @@ export default function DownloadButton({ icon, title, ...rest }) {
 
 const Button = styled(LoadingButton)`
   color: #555;
-  background: ${({ icon }) => `url(${icon})`};
+  background: ${({ icon }) => icon && `url(${icon})`};
   background-repeat: no-repeat;
   background-position: left 15px center;
   background-size: 15px 15px;
@@ -25,7 +25,7 @@ const Button = styled(LoadingButton)`
   outline: 0;
   border-radius: 5px;
   padding: 0.2rem 1rem;
-  padding-left: 2.5rem;
+  padding-left: ${({ icon }) => icon && `2.5rem`};
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;

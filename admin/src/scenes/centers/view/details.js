@@ -2,10 +2,12 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
+import { toastr } from "react-redux-toastr";
+
 import { translate, formatStringDate } from "../../../utils";
 import CenterView from "./wrapper";
 import api from "../../../services/api";
-import { toastr } from "react-redux-toastr";
+import PanelActionButton from "../../../components/buttons/PanelActionButton";
 
 export default ({ center }) => {
   const [headCenter, setHeadCenter] = useState();
@@ -65,15 +67,15 @@ export default ({ center }) => {
               <Wrapper>
                 <Legend>{`${center.placesTotal - center.placesLeft} volontaire(s) affecté(s)`}</Legend>
                 {center.placesTotal - center.placesLeft > 0 ? (
-                  <Link to={`/centre/${center._id}`}>
-                    <PanelActionButton icon="eye" title="Consulter tous les volontaires affectés" />
+                  <Link to={`/centre/${center._id}/volontaires`}>
+                    <PanelActionButton style={{ marginBottom: "1rem" }} icon="eye" title="Consulter tous les volontaires affectés" />
                   </Link>
                 ) : null}
                 <Row>
                   <Col md={6}>
                     <div>
                       <DetailCardTitle>Taux d'occupation</DetailCardTitle>
-                      <DetailCardContent>{`${center.placesTotal ? ((center.placesTotal - center.placesLeft) * 100) / center.placesTotal : 0} %`}</DetailCardContent>
+                      <DetailCardContent>{`${center.placesTotal ? (((center.placesTotal - center.placesLeft) * 100) / center.placesTotal).toFixed(2) : 0} %`}</DetailCardContent>
                     </div>
                   </Col>
                   <Col md={6}>
@@ -86,7 +88,7 @@ export default ({ center }) => {
               </Wrapper>
             </Col>
             {headCenter ? (
-              <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
+              <Col md={6}>
                 <Wrapper>
                   <Legend>Chef de centre </Legend>
                   <div className="detail">

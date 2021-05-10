@@ -1,60 +1,140 @@
 import React, { useState } from "react";
-import styled from "styled-components";
+import { ReactiveBase, ReactiveList, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 
-import SelectStatusApplication from "../../../components/selectStatusApplication";
+import { apiURL } from "../../../config";
+import SelectStatus from "../../../components/selectStatus";
 import api from "../../../services/api";
-import MissionView from "./wrapper";
+import CenterView from "./wrapper";
 import Panel from "../../volontaires/panel";
-import { formatStringLongDate } from "../../../utils";
+import { getFilterLabel, YOUNG_STATUS_PHASE1, translate } from "../../../utils";
 import Loader from "../../../components/Loader";
+import { Filter, FilterRow, ResultTable, Table, TopResultStats, BottomResultStats, MultiLine } from "../../../components/list";
+const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_PHASE_1", "STATUS_PHASE_2", "STATUS_PHASE_3", "STATUS_APPLICATION", "LOCATION"];
 
-export default ({ mission, applications }) => {
-  const [missionTemp, setMissionTemp] = useState(mission);
-  const data = applications;
+export default ({ center, updateCenter }) => {
   const [young, setYoung] = useState();
-  const handleClick = async (application) => {
-    const { ok, data } = await api.get(`/referent/young/${application.youngId}`);
+
+  const getDefaultQuery = () => ({ query: { bool: { filter: [{ terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } }, { term: { cohesionCenterId: center._id } }] } } });
+
+  const handleClick = async (young) => {
+    const { ok, data } = await api.get(`/referent/young/${young._id}`);
     if (ok) setYoung(data);
   };
 
-  const updateMission = async () => {
-    const { data, ok } = await api.get(`/mission/${mission._id}`);
-    if (ok) setMissionTemp(data);
-  };
-
-  if (!data) return <Loader />;
+  if (!center) return <Loader />;
 
   return (
-    <div>
-      <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-        <MissionView mission={missionTemp} tab="youngs">
-          <Table>
-            <thead>
-              <tr>
-                <th width="40%">Volontaire</th>
-                <th>Date</th>
-                <th width="20%">Statut pour la mission</th>
-              </tr>
-            </thead>
-            <tbody>
-              {data.map((hit, i) => (
-                <Hit key={i} hit={hit} onClick={() => handleClick(hit)} onChangeApplication={updateMission} />
-              ))}
-            </tbody>
-          </Table>
-        </MissionView>
-        <Panel
-          value={young}
-          onChange={() => {
-            setYoung(null);
-          }}
-        />
-      </div>
+    <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
+      <CenterView center={center} tab="volontaires">
+        <div>
+          <ReactiveBase url={`${apiURL}/es`} app="young" headers={{ Authorization: `JWT ${api.getToken()}` }}>
+            <div style={{ display: "flex", alignItems: "flex-start", width: "100%", height: "100%" }}>
+              <div style={{ flex: 1, position: "relative" }}>
+                <Filter>
+                  <DataSearch
+                    defaultQuery={getDefaultQuery}
+                    showIcon={false}
+                    placeholder="Rechercher par prénom, nom, email, ville, code postal..."
+                    componentId="SEARCH"
+                    dataField={["email.keyword", "firstName", "lastName", "city", "zip"]}
+                    react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
+                    // fuzziness={2}
+                    style={{ flex: 2 }}
+                    innerClass={{ input: "searchbox" }}
+                    autosuggest={false}
+                    queryFormat="and"
+                  />
+                  <FilterRow>
+                    <MultiDropdownList
+                      defaultQuery={getDefaultQuery}
+                      className="dropdown-filter"
+                      componentId="STATUS"
+                      dataField="status.keyword"
+                      react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
+                      renderItem={(e, count) => {
+                        return `${translate(e)} (${count})`;
+                      }}
+                      title=""
+                      URLParams={true}
+                      showSearch={false}
+                      renderLabel={(items) => getFilterLabel(items, "Statut")}
+                    />
+                    <MultiDropdownList
+                      defaultQuery={getDefaultQuery}
+                      className="dropdown-filter"
+                      componentId="STATUS_PHASE_1"
+                      dataField="statusPhase1.keyword"
+                      react={{ and: FILTERS.filter((e) => e !== "STATUS_PHASE_1") }}
+                      renderItem={(e, count) => {
+                        return `${translate(e)} (${count})`;
+                      }}
+                      title=""
+                      URLParams={true}
+                      showSearch={false}
+                      renderLabel={(items) => getFilterLabel(items, "Statut phase 1")}
+                    />
+                  </FilterRow>
+                </Filter>
+                <ResultTable>
+                  <ReactiveList
+                    defaultQuery={getDefaultQuery}
+                    componentId="result"
+                    react={{ and: FILTERS }}
+                    pagination={true}
+                    paginationAt="both"
+                    innerClass={{ pagination: "pagination" }}
+                    size={30}
+                    showLoader={true}
+                    dataField="lastName.keyword"
+                    sortBy="asc"
+                    loader={<div style={{ padding: "0 20px" }}>Chargement...</div>}
+                    innerClass={{ pagination: "pagination" }}
+                    renderNoResults={() => <div style={{ padding: "10px 25px" }}>Aucun résultat.</div>}
+                    renderResultStats={(e) => {
+                      return (
+                        <>
+                          <TopResultStats>
+                            Affiche {e.displayedResults * e.currentPage + 1} à {e.displayedResults * (e.currentPage + 1)} résultats sur {e.numberOfResults} résultats
+                          </TopResultStats>
+                          <BottomResultStats>
+                            Affiche {e.displayedResults * e.currentPage + 1} à {e.displayedResults * (e.currentPage + 1)} résultats sur {e.numberOfResults} résultats
+                          </BottomResultStats>
+                        </>
+                      );
+                    }}
+                    render={({ data }) => (
+                      <Table>
+                        <thead>
+                          <tr>
+                            <th width="70%">Volontaire</th>
+                            <th>Affectation</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {data.map((hit, i) => (
+                            <Hit key={i} hit={hit} onClick={() => handleClick(hit)} selected={young?._id === hit._id} onChangeYoung={updateCenter} />
+                          ))}
+                        </tbody>
+                      </Table>
+                    )}
+                  />
+                </ResultTable>
+              </div>
+            </div>
+          </ReactiveBase>
+        </div>
+      </CenterView>
+      <Panel
+        value={young}
+        onChange={() => {
+          setYoung(null);
+        }}
+      />
     </div>
   );
 };
 
-const Hit = ({ hit, onClick, onChangeApplication }) => {
+const Hit = ({ hit, onClick, selected, onChangeYoung }) => {
   const getAge = (d) => {
     const now = new Date();
     const date = new Date(d);
@@ -62,72 +142,18 @@ const Hit = ({ hit, onClick, onChangeApplication }) => {
     return Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
   };
   return (
-    <tr onClick={onClick}>
+    <tr style={{ backgroundColor: selected && "#e6ebfa" }} onClick={onClick}>
       <td>
-        <TeamMember>
-          <div>
-            <h2>{`${hit.youngFirstName} ${hit.youngLastName}`}</h2>
-            <p>
-              {hit.youngBirthdateAt ? `${getAge(hit.youngBirthdateAt)} ans` : null} {`• ${hit.youngCity || ""} (${hit.youngDepartment || ""})`}
-            </p>
-          </div>
-        </TeamMember>
-      </td>
-      <td>
-        <div>{formatStringLongDate(hit.createdAt)}</div>
+        <MultiLine>
+          <h2>{`${hit.firstName} ${hit.lastName}`}</h2>
+          <p>
+            {hit.birthdateAt ? `${getAge(hit.birthdateAt)} ans` : null} {`• ${hit.city || ""} (${hit.department || ""})`}
+          </p>
+        </MultiLine>
       </td>
       <td onClick={(e) => e.stopPropagation()}>
-        <SelectStatusApplication hit={hit} callback={onChangeApplication} />
+        <SelectStatus hit={hit} callback={onChangeYoung} options={Object.keys(YOUNG_STATUS_PHASE1)} statusName="statusPhase1" phase="COHESION_STAY" />
       </td>
     </tr>
   );
 };
-
-const TeamMember = styled.div`
-  h2 {
-    color: #333;
-    font-size: 14px;
-    font-weight: 400;
-    margin-bottom: 5px;
-  }
-  p {
-    color: #606266;
-    font-size: 12px;
-    margin: 0;
-  }
-`;
-
-const Table = styled.table`
-  width: 100%;
-  color: #242526;
-  margin-top: 10px;
-  background-color: #fff;
-  th {
-    border-top: 1px solid #f4f5f7;
-    border-bottom: 1px solid #f4f5f7;
-    padding: 15px;
-    font-weight: 400;
-    font-size: 14px;
-    text-transform: uppercase;
-  }
-  td {
-    padding: 15px;
-    font-size: 14px;
-    font-weight: 300;
-    strong {
-      font-weight: 700;
-      margin-bottom: 5px;
-      display: block;
-    }
-  }
-  td:first-child,
-  th:first-child {
-    padding-left: 25px;
-  }
-  tbody tr {
-    border-bottom: 1px solid #f4f5f7;
-    :hover {
-      background-color: #e6ebfa;
-    }
-  }
-`;

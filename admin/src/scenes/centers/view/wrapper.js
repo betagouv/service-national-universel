@@ -41,13 +41,16 @@ export default ({ center, tab, children }) => {
             <Tab isActive={tab === "details"} onClick={() => history.push(`/centre/${center._id}`)}>
               Détails
             </Tab>
-            <Tab isActive={tab === "youngs"} onClick={() => history.push(`/centre/${center._id}/youngs`)}>
+            <Tab isActive={tab === "volontaires"} onClick={() => history.push(`/centre/${center._id}/volontaires`)}>
               Volontaires
+            </Tab>
+            <Tab isActive={tab === "affectation"} onClick={() => history.push(`/centre/${center._id}/affectation`)}>
+              Affectation manuelle
             </Tab>
           </TabList>
         </div>
-        <Row style={{ minWidth: "30%" }}>
-          <Col md={6}>
+        <Row style={{ minWidth: "20%" }}>
+          <Col>
             <BoxPlaces>
               <table>
                 <tbody>
@@ -65,13 +68,10 @@ export default ({ center, tab, children }) => {
               </table>
             </BoxPlaces>
           </Col>
-          <Col md={6}>
-            <div style={{ display: "flex", alignItems: "flex-end", flexDirection: "column" }}>
-              <Link to={`/centre/${center._id}/edit`}>
-                <PanelActionButton title="Modifier" icon="pencil" />
-              </Link>
-              <PanelActionButton onClick={handleDelete} title="Supprimer" icon="bin" />
-            </div>
+          <Col>
+            <Link to={`/centre/${center._id}/edit`}>
+              <PanelActionButton title="Modifier" icon="pencil" style={{ margin: 0 }} />
+            </Link>
           </Col>
         </Row>
       </Header>

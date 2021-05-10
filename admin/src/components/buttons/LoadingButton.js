@@ -4,7 +4,6 @@ import styled from "styled-components";
 
 export default ({ loading, children, disabled, ...rest }) => (
   <VioletButtonHeader
-    {...rest}
     disabled={loading || disabled}
     style={{
       display: "flex",
@@ -13,6 +12,7 @@ export default ({ loading, children, disabled, ...rest }) => (
       opacity: loading ? 0.7 : 1,
       cursor: loading || disabled ? "not-allowed" : "pointer",
     }}
+    {...rest}
   >
     {loading && <Spinner size="sm" style={{ borderWidth: "0.1em" }} />}
     {!loading && children}

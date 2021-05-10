@@ -59,8 +59,8 @@ export default ({ onChange, center }) => {
       <hr />
       <div className="title">{`${center.placesTotal - center.placesLeft} volontaire(s) affecté(s)`}</div>
       {center.placesTotal - center.placesLeft > 0 ? (
-        <Link to={`/centre/${center._id}`}>
-          <PanelActionButton icon="eye" title="Consulter tous les volontaires affectés" />
+        <Link to={`/centre/${center._id}/volontaires`}>
+          <PanelActionButton style={{ marginBottom: "1rem" }} icon="eye" title="Consulter tous les volontaires affectés" />
         </Link>
       ) : null}
 
@@ -68,7 +68,7 @@ export default ({ onChange, center }) => {
         <Col md={6}>
           <div>
             <DetailCardTitle>Taux d'occupation</DetailCardTitle>
-            <DetailCardContent>{`${center.placesTotal ? ((center.placesTotal - center.placesLeft) * 100) / center.placesTotal : 0} %`}</DetailCardContent>
+            <DetailCardContent>{`${center.placesTotal ? (((center.placesTotal - center.placesLeft) * 100) / center.placesTotal).toFixed(2) : 0} %`}</DetailCardContent>
           </div>
         </Col>
         <Col md={6}>

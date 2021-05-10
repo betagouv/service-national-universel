@@ -22,18 +22,16 @@ export default ({ young }) => {
         </>
       );
     if (young.statusPhase1 === "CANCEL" && young.cohesion2020Step !== "DONE") return <p>Le séjour de cohésion a été annulé.</p>;
-    return young.cohesionCity ? (
-      <>
-        <p>
-          Le volontaire a été affecté au centre de {young.cohesionCity}({young.cohesionDepartment})
-        </p>
-        <Details title="Centre" value={young.cohesionCenterName} />
-        <Details title="Ville" value={young.cohesionCenterCity} />
-        <Details title="Code Postal" value={young.cohesionCenterZip} />
-      </>
-    ) : (
-      <p>Le volontaire est en attente d'affectation à un centre de cohésion</p>
-    );
+    if (young.statusPhase1 === "AFFECTED")
+      return (
+        <>
+          <p>Le volontaire a été affecté au centre :</p>
+          <Details title="Centre" value={young.cohesionCenterName} />
+          <Details title="Ville" value={young.cohesionCenterCity} />
+          <Details title="Code Postal" value={young.cohesionCenterZip} />
+        </>
+      );
+    if (young.statusPhase1 === "WAITING_AFFECTATION") return <p>Le volontaire est en attente d'affectation à un centre de cohésion</p>;
   };
 
   return (

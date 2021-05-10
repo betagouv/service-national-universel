@@ -4,7 +4,7 @@ import { Switch, Route, useHistory } from "react-router-dom";
 import api from "../../../services/api";
 import Details from "./details";
 import Youngs from "./youngs";
-import Historic from "./historic";
+import Affectation from "./affectation";
 import { toastr } from "react-redux-toastr";
 import { translate } from "../../../utils";
 
@@ -26,11 +26,16 @@ export default ({ ...props }) => {
     })();
   }, [props.match.params.id]);
 
+  const updateCenter = async () => {
+    const { data, ok } = await api.get(`/cohesion-center/${center._id}`);
+    if (ok) setCenter(data);
+  };
+
   if (!center) return <div />;
   return (
     <Switch>
-      {/* <Route path="/mission/:id/youngs" component={() => <Youngs center={center} applications={applications} />} /> */}
-      {/* <Route path="/mission/:id/historic" component={() => <Historic mission={mission} />} /> */}
+      <Route path="/centre/:id/volontaires" component={() => <Youngs center={center} updateCenter={updateCenter} />} />
+      <Route path="/centre/:id/affectation" component={() => <Affectation center={center} updateCenter={updateCenter} />} />
       <Route path="/centre/:id" component={() => <Details center={center} />} />
     </Switch>
   );
