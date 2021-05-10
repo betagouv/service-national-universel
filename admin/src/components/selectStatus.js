@@ -48,17 +48,17 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
   const handleClickStatus = async (status) => {
     // Gabrielle says: (https://trello.com/c/JBS3Jn8I/576-inscription-impact-fin-instruction-dossiers-au-6-mai)
     // > Bloquer tous les changements de statuts (sauf désistement)
-    if (phase === YOUNG_PHASE.INSCRIPTION && status !== YOUNG_STATUS.WITHDRAWN && isEndOfInscriptionManagement2021()) {
+    if (user.role !== "admin" && phase === YOUNG_PHASE.INSCRIPTION && status !== YOUNG_STATUS.WITHDRAWN && isEndOfInscriptionManagement2021()) {
       return alert("Les inscriptions sont closes, vous ne pouvez plus faire de changement de statut.");
     }
 
     if (!confirm("Êtes-vous sûr(e) de vouloir modifier le statut de ce profil?\nUn email sera automatiquement envoyé à l'utlisateur.")) return;
     if ([YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.REFUSED, YOUNG_STATUS.WITHDRAWN].includes(status)) return setModal(status);
-    if (status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INSCRIPTION) {
-      const youngs = await getInscriptionGoalReachedNormalized(young.department);
-      const ratioRegistered = youngs.registered / youngs.max;
-      if (ratioRegistered >= 1) return setModal("goal");
-    }
+    // if (status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INSCRIPTION) {
+    //   const youngs = await getInscriptionGoalReachedNormalized(young.department);
+    //   const ratioRegistered = youngs.registered / youngs.max;
+    //   if (ratioRegistered >= 1) return setModal("goal");
+    // }
     setStatus(status);
   };
 
