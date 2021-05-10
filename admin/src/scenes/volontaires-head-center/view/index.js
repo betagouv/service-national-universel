@@ -3,6 +3,7 @@ import { Switch, Route } from "react-router-dom";
 
 import api from "../../../services/api";
 import Details from "./details";
+import Phase1 from "./phase1";
 
 export default ({ ...props }) => {
   const [young, setYoung] = useState();
@@ -19,6 +20,7 @@ export default ({ ...props }) => {
   if (!young) return <div />;
   return (
     <Switch>
+      <Route path="/volontaire/:id/phase1" component={() => <Phase1 young={young} />} />
       <Route path="/volontaire/:id" component={() => <Details young={young} />} />
     </Switch>
   );

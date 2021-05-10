@@ -19,7 +19,7 @@ const FILTERS = ["SEARCH", "STATUS", "PHASE", "COHORT", "MISSIONS", "TUTOR"];
 export default () => {
   const user = useSelector((state) => state.Auth.user);
   const [volontaire, setVolontaire] = useState(null);
-  const getDefaultQuery = () => ({ query: { bool: { filter: { term: { "cohesionCenterName.keyword": user.cohesionCenterId } } } } });
+  const getDefaultQuery = () => ({ query: { bool: { filter: { term: { "cohesionCenterId.keyword": user.cohesionCenterId } } } } });
   const getExportQuery = () => ({ ...getDefaultQuery(), size: 10000 });
 
   return (
@@ -114,9 +114,9 @@ export default () => {
             <Filter>
               <DataSearch
                 showIcon={false}
-                placeholder="Rechercher par prénom, nom, email..."
+                placeholder="Rechercher par prénom, nom, email, ville, code postal..."
                 componentId="SEARCH"
-                dataField={["email.keyword", "firstName", "lastName"]}
+                dataField={["email.keyword", "firstName", "lastName", "city", "zip"]}
                 react={{ and: FILTERS }}
                 // fuzziness={2}
                 style={{ flex: 2 }}
@@ -125,18 +125,6 @@ export default () => {
                 queryFormat="and"
               />
               <FilterRow>
-                <DataSearch
-                  defaultQuery={getDefaultQuery}
-                  showIcon={false}
-                  placeholder="Ville ou code postal"
-                  componentId="LOCATION"
-                  dataField={["city", "zip"]}
-                  react={{ and: FILTERS.filter((e) => e !== "LOCATION") }}
-                  style={{ flex: 2 }}
-                  innerClass={{ input: "searchbox" }}
-                  className="searchbox-city"
-                  autosuggest={false}
-                />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -319,7 +307,7 @@ const Hit = ({ hit, onClick, selected, callback }) => {
   };
 
   return (
-    <tr style={{ backgroundColor: selected ? "#f1f1f1" : "transparent" }}>
+    <tr style={{ backgroundColor: selected && "#e6ebfa" }}>
       <td onClick={onClick}>
         <div className="name">{`${hit.firstName} ${hit.lastName}`}</div>
         <div className="email">
@@ -328,9 +316,6 @@ const Hit = ({ hit, onClick, selected, callback }) => {
       </td>
       <td onClick={onClick}>
         <Badge text={`Cohorte ${hit.cohort}`} />
-        <Badge text="Phase 1" tooltipText={translate(hit.statusPhase1)} color={YOUNG_STATUS_COLORS[hit.statusPhase1]} />
-        <Badge text="Phase 2" tooltipText={translate(hit.statusPhase2)} color={YOUNG_STATUS_COLORS[hit.statusPhase2]} />
-        <Badge text="Phase 3" tooltipText={translate(hit.statusPhase3)} color={YOUNG_STATUS_COLORS[hit.statusPhase3]} />
         {hit.status === "WITHDRAWN" ? <Badge text="Désisté" color={YOUNG_STATUS_COLORS.WITHDRAWN} /> : null}
       </td>
       <td>

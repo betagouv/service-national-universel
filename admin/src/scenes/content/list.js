@@ -3,37 +3,44 @@ import { Col, Container, Row } from "reactstrap";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 import ProgramCard from "./components/programCard";
 import api from "../../services/api";
 import VioletHeaderButton from "../../components/buttons/VioletHeaderButton";
 import Loader from "../../components/Loader";
+import { translate } from "../../utils";
 
 export default () => {
   const [programs, setPrograms] = useState();
+  const user = useSelector((state) => state.Auth.user);
 
   const getPrograms = async () => {
     const { data, ok, code } = await api.get("/program");
-    if (!ok) return toastr.error("nope");
+    if (!ok) return toastr.error("Une erreur est survenue.", translate(code));
     setPrograms(data);
   };
   useEffect(() => {
     getPrograms();
   }, []);
 
+  const getTitle = () => {
+    if (user.role === "head_center") return <Title>Outils pour les professionnels d'État</Title>;
+    return <Title>Les grands programmes d'engagement</Title>;
+  };
+
   if (!programs) return <Loader />;
   return (
     <>
       <Header>
-        <div style={{ flex: 1 }}>
-          <Title>Les grands programmes d'engagement</Title>
-          <Subtitle>Rejoignez plus 100 000 jeunes français déjà engagés dans de grandes causes</Subtitle>
-        </div>
-        <Link to="/contenu/create">
-          <VioletHeaderButton>
-            <p>Ajouter un nouveau dispositif</p>
-          </VioletHeaderButton>
-        </Link>
+        <div style={{ flex: 1 }}>{getTitle()}</div>
+        {["referent_department", "referent_region", "admin"].includes(user.role) ? (
+          <Link to="/contenu/create">
+            <VioletHeaderButton>
+              <p>Ajouter un nouveau dispositif</p>
+            </VioletHeaderButton>
+          </Link>
+        ) : null}
       </Header>
       <Wrapper>
         {programs

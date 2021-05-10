@@ -38,9 +38,11 @@ export default ({ program, image, enableToggle = true, onDelete }) => {
   };
 
   const renderVisibility = () => {
-    if (program.visibility === "NATIONAL") return `Visibilité Nationale`;
-    if (program.visibility === "DEPARTMENT") return `Visibilité Département : ${program.department}`;
-    if (program.visibility === "REGION") return `Visibilité Région : ${program.region}`;
+    let base = "Visibilité : ";
+    if (program.visibility === "NATIONAL") return (base += "Nationale");
+    if (program.visibility === "DEPARTMENT") return (base += `Départementale (${program.department})`);
+    if (program.visibility === "REGION") return (base += `Régionale (${program.region})`);
+    if (program.visibility === "HEAD_CENTER") return (base += "Chef de centre");
   };
 
   const Detail = ({ title, value }) => {
@@ -54,7 +56,7 @@ export default ({ program, image, enableToggle = true, onDelete }) => {
 
   return (
     <Card>
-      <a href={program.href} className="thumb">
+      <a href={program.url} target="_blank" className="thumb">
         <img src={image} />
         <Badge>{program.type}</Badge>
       </a>
@@ -73,6 +75,7 @@ const Actions = ({ program, onDelete }) => {
   const id = program._id;
 
   const handleUserAccess = () =>
+    (program.visibility === "HEAD_CENTER" && user.role === "admin") ||
     (program.visibility === "NATIONAL" && user.role === "admin") ||
     (program.visibility === "REGION" && ["admin", "referent_region"].includes(user.role)) ||
     (program.visibility === "DEPARTMENT" && ["admin", "referent_region", "referent_department"].includes(user.role));

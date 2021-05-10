@@ -55,6 +55,7 @@ router.get("/", passport.authenticate(["referent", "young"], { session: false })
   try {
     let data = [];
     if (req.user.role === "admin") data = await ProgramObject.find({});
+    else if (req.user.role === "head_center") data = await ProgramObject.find({ visibility: "HEAD_CENTER" });
     else data = await ProgramObject.find({ $or: [{ visibility: "NATIONAL" }, { department: req.user.department }, { region: req.user.region }] });
     return res.status(200).send({ ok: true, data });
   } catch (error) {

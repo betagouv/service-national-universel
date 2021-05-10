@@ -37,6 +37,9 @@ export default ({ children, young, tab }) => {
             <Tab isActive={tab === "details"} onClick={() => history.push(`/volontaire/${young._id}`)}>
               Détails
             </Tab>
+            <Tab isActive={tab === "phase1"} onClick={() => history.push(`/volontaire/${young._id}/phase1`)}>
+              Phase 1
+            </Tab>
           </TabList>
         </div>
       </Header>

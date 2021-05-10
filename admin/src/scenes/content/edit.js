@@ -112,6 +112,10 @@ export default (props) => {
                       <Field validate={(v) => !v && requiredMessage} value={values.url} onChange={handleChange} name="url" placeholder="www.site.com" />
                       <ErrorMessage errors={errors} touched={touched} name="url" />
                     </FormGroup>
+                    <FormGroup>
+                      <label>URL de l'image</label>
+                      <Field value={values.imageFile} onChange={handleChange} name="imageFile" placeholder="www.site.com/ma-super-image.jpg" />
+                    </FormGroup>
                   </Wrapper>
                 </Col>
                 <Col md={6}>
@@ -179,10 +183,25 @@ const ChooseVisibility = ({ value, onChange, validate }) => {
 
   return (
     <Field validate={validate} component="select" name="visibility" value={value} onChange={onChange}>
-      <option value=""></option>
-      <option value="DEPARTMENT">{translate("DEPARTMENT")}</option>
-      {user.role === REFERENT_ROLES.ADMIN || user.role === REFERENT_ROLES.REFERENT_REGION ? <option value="REGION">{translate("REGION")}</option> : null}
-      {user.role === REFERENT_ROLES.ADMIN ? <option value="NATIONAL">{translate("NATIONAL")}</option> : null}
+      <option value="" disabled label="Choisir une visibilité">
+        Choisir une visibilité
+      </option>
+      <option value="DEPARTMENT" label="Départementale">
+        Départementale
+      </option>
+      <option value="HEAD_CENTER" label={translate("head_center")}>
+        {translate("head_center")}
+      </option>
+      {user.role === REFERENT_ROLES.ADMIN || user.role === REFERENT_ROLES.REFERENT_REGION ? (
+        <option value="REGION" label="Régionale">
+          Régionale
+        </option>
+      ) : null}
+      {user.role === REFERENT_ROLES.ADMIN ? (
+        <option value="NATIONAL" label="Nationale">
+          Nationale
+        </option>
+      ) : null}
     </Field>
   );
 };
