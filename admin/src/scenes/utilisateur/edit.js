@@ -144,7 +144,7 @@ export default (props) => {
                         ].map((key) => ({ value: key, label: translate(key) }))}
                       />
 
-                      {values.role === "head_center" && centers ? (
+                      {values.role === REFERENT_ROLES.HEAD_CENTER && centers ? (
                         <AutocompleteSelectCenter title="Centre" values={values} handleChange={handleChange} placeholder="Choisir un centre" options={centers} />
                       ) : null}
                       {[REFERENT_ROLES.REFERENT_DEPARTMENT, REFERENT_ROLES.REFERENT_REGION].includes(values.role) ? (
