@@ -82,7 +82,7 @@ const LoginBox = styled.div`
 
 const Thumb = styled.div`
   min-height: 400px;
-  background: url(${require("../../assets/rang.jpeg")}) no-repeat center;
+  background: url(${require("../../assets/rang.jpg")}) no-repeat center;
   background-size: cover;
   flex: 1;
   @media (max-width: 768px) {
