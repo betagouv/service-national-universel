@@ -45,5 +45,6 @@ const LoginBox = styled.div`
   @media (max-width: 768px) {
     border-radius: 0;
     margin: 0;
+    max-width: 100%;
   }
 `;

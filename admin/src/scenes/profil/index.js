@@ -1,17 +1,22 @@
-import React from "react";
-import { Col, Row, Input } from "reactstrap";
+import React, { useEffect, useState } from "react";
+import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 import { useDispatch, useSelector } from "react-redux";
-import { Formik } from "formik";
+import { Formik, Field } from "formik";
 import { toastr } from "react-redux-toastr";
 
 import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
+import LoadingButton from "../../components/buttons/LoadingButton";
+import Loader from "../../components/Loader";
+import Badge from "../../components/Badge";
+import Error, { requiredMessage } from "../../components/errorMessage";
 
 import { translate, REFERENT_ROLES, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE } from "../../utils";
 
 export default () => {
   const user = useSelector((state) => state.Auth.user);
+  const [service, setService] = useState();
   const dispatch = useDispatch();
 
   const getSubRole = (role) => {
@@ -21,93 +26,126 @@ export default () => {
     return Object.keys(subRole).map((e) => ({ value: e, label: translate(subRole[e]) }));
   };
 
+  useEffect(() => {
+    (async () => {
+      const { data: d } = await api.get(`/department-service/referent/${user._id}`);
+      setService(d);
+    })();
+  }, []);
+
+  if (user === undefined || service === undefined) return <Loader />;
+
   return (
     <Wrapper>
-      <Subtitle>PROFIL</Subtitle>
-      <Formik
-        initialValues={user}
-        onSubmit={async (values, actions) => {
-          try {
-            const { data, ok } = await api.put("/referent", values);
-            if (ok) {
-              dispatch(setUser(data));
-              return toastr.success("Profil mis à jour !");
-            }
-          } catch (e) {
-            console.log(e);
-          }
-          toastr.error("Erreur");
-          actions.setSubmitting(false);
-        }}
-      >
-        {({ values, errors, isSubmitting, handleChange, handleSubmit }) => {
-          return (
-            <form onSubmit={handleSubmit}>
-              <Title>
-                {`${user.firstName} ${user.lastName}`}
-                <Tag>{translate(user.role)}</Tag>
-              </Title>
-              <Legend>Informations générales</Legend>
-              <FormGroup>
-                <label>
-                  <span>*</span>EMAIL
-                </label>
-                <Input placeholder="Email" name="email" value={values.email} onChange={handleChange} />
-              </FormGroup>
-              {user.role === REFERENT_ROLES.REFERENT_DEPARTMENT ? (
-                <FormGroup>
-                  <label>Département</label>
-                  <Input disabled name="department" value={values.department} onChange={handleChange} />
-                </FormGroup>
-              ) : null}
-              {user.role === REFERENT_ROLES.REFERENT_REGION ? (
-                <FormGroup>
-                  <label>Région</label>
-                  <Input disabled name="region" value={values.region} onChange={handleChange} />
-                </FormGroup>
-              ) : null}
-              <Row>
-                <Col>
-                  <FormGroup>
-                    <label>
-                      <span>*</span>PRÉNOM
-                    </label>
-                    <Input placeholder="Prénom" name="firstName" value={values.firstName} onChange={handleChange} />
-                  </FormGroup>
-                </Col>
-                <Col>
-                  <FormGroup>
-                    <label>
-                      <span>*</span>NOM
-                    </label>
-                    <Input placeholder="Nom de famille" name="lastName" value={values.lastName} onChange={handleChange} />
-                  </FormGroup>
-                </Col>
-              </Row>
-              <Row>
-                <Col>
-                  <FormGroup>
-                    <label>TÉLÉPHONE MOBILE</label>
-                    <Input placeholder="Téléphone mobile" name="mobile" value={values.mobile} onChange={handleChange} />
-                  </FormGroup>
-                </Col>
-                <Col>
-                  <FormGroup>
-                    <label>TÉLÉPHONE FIXE</label>
-                    <Input placeholder="Téléphone fixe" name="phone" value={values.phone} onChange={handleChange} />
-                  </FormGroup>
-                </Col>
-              </Row>
-              {["referent_department", "referent_region"].includes(values.role) ? (
-                <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRole(values.role)} />
-              ) : null}
-              <Button type="submit" onClick={handleSubmit}>
-                Enregistrer
-              </Button>
-            </form>
-          );
-        }}
-      </Formik>
+      <TopTitle>Mon profil</TopTitle>
+      <Row>
+        <Col md={6}>
+          <Formik
+            initialValues={user}
+            onSubmit={async (values, actions) => {
+              try {
+                const { data, ok } = await api.put("/referent", values);
+                if (ok) {
+                  dispatch(setUser(data));
+                  return toastr.success("Profil mis à jour !");
+                }
+              } catch (e) {
+                console.log(e);
+              }
+              toastr.error("Erreur");
+              actions.setSubmitting(false);
+            }}
+          >
+            {({ values, errors, touched, isSubmitting, handleChange, handleSubmit }) => (
+              <>
+                <TitleWrapper>
+                  <Title>
+                    <span>{`${user.firstName} ${user.lastName}`}</span>
+                    <Badge text={translate(user.role)} />
+                  </Title>
+                </TitleWrapper>
+                <Box>
+                  <BoxTitle>
+                    <h3>Informations générales</h3>
+                    <p>Données personnelles</p>
+                  </BoxTitle>
+                  <BoxContent direction="column">
+                    <Item required title="E-mail" values={values} name="email" handleChange={handleChange} errors={errors} touched={touched} />
+                    {user.role === REFERENT_ROLES.REFERENT_DEPARTMENT ? <Item title="Département" disabled values={values} name="department" handleChange={handleChange} /> : null}
+                    {user.role === REFERENT_ROLES.REFERENT_REGION ? <Item title="Région" disabled values={values} name="region" handleChange={handleChange} /> : null}
+                    <Row>
+                      <Col md={6}>
+                        <Item required title="Prénom" values={values} name="firstName" handleChange={handleChange} errors={errors} touched={touched} />
+                      </Col>
+                      <Col md={6}>
+                        <Item required title="Nom" values={values} name="lastName" handleChange={handleChange} errors={errors} touched={touched} />
+                      </Col>
+                    </Row>
+                    <Row>
+                      <Col md={6}>
+                        <Item title="Téléphone mobile" values={values} name="mobile" handleChange={handleChange} />
+                      </Col>
+                      <Col md={6}>
+                        <Item title="Téléphone fixe" values={values} name="phone" handleChange={handleChange} />
+                      </Col>
+                    </Row>
+                    {["referent_department", "referent_region"].includes(values.role) ? (
+                      <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRole(values.role)} />
+                    ) : null}
+                  </BoxContent>
+                </Box>
+                <SaveBtn loading={isSubmitting} onClick={handleSubmit}>
+                  Enregistrer
+                </SaveBtn>
+              </>
+            )}
+          </Formik>
+        </Col>
+        {user.role === "referent_department" && (
+          <Col md={6}>
+            <Formik
+              initialValues={service || { department: user.department }}
+              onSubmit={async (values) => {
+                try {
+                  const { ok, code, data } = await api.post(`/department-service`, values);
+                  if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
+                  setService(data);
+                  toastr.success("Service départemental mis à jour !");
+                } catch (e) {
+                  console.log(e);
+                  toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
+                }
+              }}
+            >
+              {({ values, handleChange, handleSubmit, isSubmitting, submitForm }) => (
+                <>
+                  <TitleWrapper>
+                    <div>
+                      <Title>Information du service départemental {values.department && `(${values.department})`}</Title>
+                    </div>
+                  </TitleWrapper>
+                  <Box>
+                    <BoxTitle>
+                      <h3>Service Départemental</h3>
+                      <p>Données partagées par tous les référents de votre département</p>
+                    </BoxTitle>
+                    <BoxContent direction="column">
+                      <Item title="Nom de la direction" values={values} name="directionName" handleChange={handleChange} />
+                      <Item title="Adresse" values={values} name="address" handleChange={handleChange} />
+                      <Item title="Complément d'adresse" values={values} name="complementAddress" handleChange={handleChange} />
+                      <Item title="Code postal" values={values} name="zip" handleChange={handleChange} />
+                      <Item title="Ville" values={values} name="city" handleChange={handleChange} />
+                    </BoxContent>
+                  </Box>
+                  <SaveBtn loading={isSubmitting} onClick={handleSubmit}>
+                    Enregistrer
+                  </SaveBtn>
+                </>
+              )}
+            </Formik>
+          </Col>
+        )}
+      </Row>
     </Wrapper>
   );
 };
@@ -132,11 +170,29 @@ const Select = ({ title, name, values, onChange, disabled, errors, touched, vali
   );
 };
 
+const Item = ({ title, values, name, handleChange, disabled, required, errors, touched }) => {
+  return (
+    <FormGroup>
+      <label>
+        {required && <span>*</span>}
+        {title}
+      </label>
+      <Field
+        disabled={disabled}
+        className="form-control"
+        value={translate(values[name])}
+        name={name}
+        onChange={handleChange}
+        type="text"
+        validate={(v) => required && !v && requiredMessage}
+      />
+      {errors && touched && <Error errors={errors} touched={touched} name={name} />}
+    </FormGroup>
+  );
+};
+
 const Wrapper = styled.div`
-  padding: 40px;
-  ${FormGroup} {
-    max-width: 750px;
-  }
+  padding: 20px 40px;
 `;
 
 const FormGroup = styled.div`
@@ -174,52 +230,132 @@ const FormGroup = styled.div`
   }
 `;
 
-const Subtitle = styled.div`
+const TopTitle = styled.div`
   color: rgb(113, 128, 150);
   font-weight: 400;
   text-transform: uppercase;
   font-size: 18px;
 `;
-const Title = styled.div`
-  color: rgb(38, 42, 62);
-  font-weight: 700;
-  font-size: 24px;
-  margin-bottom: 10px;
-  display: flex;
-  align-items: center;
-`;
 
-const Legend = styled.div`
-  color: rgb(38, 42, 62);
-  margin-top: 30px;
-  margin-bottom: 20px;
-  font-size: 20px;
-`;
-
-const Button = styled.button`
-  background-color: #3182ce;
-  outline: 0;
-  border: 0;
-  color: #fff;
-  border-radius: 4px;
-  padding: 10px 20px;
+const SaveBtn = styled(LoadingButton)`
+  background-color: #5245cc;
+  border: none;
+  border-radius: 5px;
+  padding: 7px 30px;
   font-size: 14px;
+  font-weight: 700;
+  color: #fff;
   cursor: pointer;
   :hover {
-    background-color: #5a9bd8;
+    background: #372f78;
+  }
+  &.outlined {
+    :hover {
+      background: #fff;
+    }
+    background-color: transparent;
+    border: solid 1px #5245cc;
+    color: #5245cc;
+    font-size: 13px;
+    padding: 4px 20px;
   }
 `;
 
-const Tag = styled.span`
-  background-color: rgb(244, 244, 245);
-  border: 1px solid rgb(233, 233, 235);
-  color: rgb(144, 147, 153);
-  align-self: flex-start;
-  border-radius: 4px;
-  padding: 6px 15px;
-  font-size: 12px;
-  font-weight: 400;
-  cursor: pointer;
-  margin-left: 15px;
-  align-self: flex-start;
+const TitleWrapper = styled.div`
+  margin: 32px 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 4rem;
+`;
+
+const Title = styled.h2`
+  color: #242526;
+  font-weight: bold;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  span {
+    margin-right: 1rem;
+  }
+`;
+
+const Box = styled.div`
+  width: ${(props) => props.width || 100}%;
+  /* min-height: 200px; */
+  /* height: 100%; */
+  background-color: #fff;
+  filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.05));
+  margin-bottom: 33px;
+  border-radius: 8px;
+`;
+const BoxTitle = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  border-bottom: 1px solid #f2f1f1;
+  min-height: 5rem;
+  padding: 22px;
+  h3 {
+    color: #171725;
+    font-size: 16px;
+    font-weight: bold;
+  }
+  p {
+    color: #aaa;
+    font-size: 14px;
+    font-weight: 300;
+    display: flex;
+    align-items: center;
+    font-style: italic;
+    margin: 0;
+  }
+`;
+const BoxContent = styled.div`
+  label {
+    font-weight: 500;
+    color: #6a6f85;
+    display: block;
+    margin-bottom: 0;
+  }
+
+  .detail {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 5px 20px;
+    font-size: 14px;
+    text-align: left;
+    &-title {
+      min-width: 100px;
+      width: 100px;
+      margin-right: 5px;
+    }
+  }
+
+  .muted {
+    color: #666;
+  }
+  .history-detail {
+    font-size: 0.8rem;
+    margin-top: 5px;
+    margin-left: 10px;
+  }
+
+  .quote {
+    font-size: 18px;
+    font-weight: 400;
+    font-style: italic;
+  }
+
+  padding: 1rem;
+  display: flex;
+  flex-direction: ${(props) => props.direction};
+
+  & > * {
+    ${(props) =>
+      props.direction === "column" &&
+      `
+    `}
+  }
 `;

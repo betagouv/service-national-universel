@@ -1,12 +1,11 @@
 import React from "react";
-import styled from "styled-components";
 import { useSelector } from "react-redux";
-import Hero from "../../components/Hero";
+import { HeroContainer, Hero, Content } from "../../components/Content";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
   return (
-    <>
+    <HeroContainer>
       <Hero>
         <Content>
           <h1>
@@ -22,28 +21,6 @@ export default () => {
         </Content>
         <div className="thumb" />
       </Hero>
-    </>
+    </HeroContainer>
   );
 };
-
-const Content = styled.div`
-  width: 50%;
-  padding: 60px 30px 60px 50px;
-  @media (max-width: 768px) {
-    width: 100%;
-    padding: 30px 15px 30px 15px;
-  }
-  position: relative;
-  background-color: #fff;
-  > * {
-    position: relative;
-    z-index: 2;
-  }
-  .icon {
-    margin-right: 1rem;
-    svg {
-      width: 1.5rem;
-      stroke: #5145cd;
-    }
-  }
-`;

@@ -86,22 +86,21 @@ export default ({ onChange, value }) => {
       </div>
       <Info title="La structure">
         <div>{value.description}</div>
-        <Details title="Statut" value={translate(value.legalStatus) || "--"} />
-        {value.legalStatus === "ASSOCIATION" ? <Details title="Agréments" value={value.associationTypes ? value.associationTypes.join(",") : "--"} /> : null}
+        <Details title="Statut" value={translate(value.legalStatus)} />
+        {value.legalStatus === "ASSOCIATION" ? <Details title="Agréments" value={value.associationTypes?.length > 0 && value.associationTypes.join(",")} /> : null}
         {value.legalStatus === "PUBLIC" ? (
           <div>
-            <Details title="Type" value={value.structurePubliqueType || "--"} />
-            {["Service de l'Etat", "Etablissement public"].includes(value.structurePubliqueType) ? (
-              <Details title="Service" value={value.structurePubliqueEtatType || "--"} />
-            ) : null}
+            <Details title="Type" value={value.structurePubliqueType} />
+            {["Service de l'Etat", "Etablissement public"].includes(value.structurePubliqueType) ? <Details title="Service" value={value.structurePubliqueEtatType} /> : null}
           </div>
         ) : null}
-        {value.legalStatus === "PRIVATE" ? <Details title="Type" value={value.structurePriveeType || "--"} /> : null}
-        <Details title="Région" value={value.region || "--"} />
-        <Details title="Dép." value={value.department || "--"} />
-        <Details title="Ville" value={value.city || "--"} />
-        <Details title="Adresse" value={value.address || "--"} />
-        <Details title="Siret" value={value.siret || "--"} />
+        {value.legalStatus === "PRIVATE" ? <Details title="Type" value={value.structurePriveeType} /> : null}
+        <Details title="Région" value={value.region} />
+        <Details title="Dép." value={value.department} />
+        <Details title="Ville" value={value.city} />
+        <Details title="Code postal" value={value.zip} />
+        <Details title="Adresse" value={value.address} />
+        <Details title="Siret" value={value.siret} />
         <Details title="Vitrine" value={<SocialIcons value={value} />} />
       </Info>
       <Info title={`Missions (${missionsInfo.count})`}>
@@ -154,11 +153,10 @@ const Info = ({ children, title }) => {
 };
 
 const Details = ({ title, value }) => {
-  if (!value) return <div />;
   return (
     <div className="detail">
       <div className="detail-title">{`${title} :`}</div>
-      <div className="detail-text">{value}</div>
+      <div className="detail-text">{value || "--"}</div>
     </div>
   );
 };

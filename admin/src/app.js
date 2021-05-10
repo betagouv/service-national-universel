@@ -27,7 +27,7 @@ import Tuteur from "./scenes/tuteur";
 import Utilisateur from "./scenes/utilisateur";
 import Content from "./scenes/content";
 import Goal from "./scenes/goal";
-
+import Center from "./scenes/centers";
 import Inscription from "./scenes/inscription";
 
 import Team from "./scenes/team";
@@ -129,6 +129,7 @@ const Home = () => {
           <RestrictedRoute path="/user" component={Utilisateur} />
           <RestrictedRoute path="/contenu" component={Content} />
           <RestrictedRoute path="/objectifs" component={Goal} />
+          <RestrictedRoute path="/centre" component={Center} />
           <RestrictedRoute path="/" component={renderDashboard} />
         </Switch>
       </ContentContainer>

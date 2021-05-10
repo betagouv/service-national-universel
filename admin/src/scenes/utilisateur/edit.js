@@ -17,6 +17,7 @@ import Loader from "../../components/Loader";
 
 export default (props) => {
   const [user, setUser] = useState();
+  const [service, setService] = useState();
   const currentUser = useSelector((state) => state.Auth.user);
   const history = useHistory();
 
@@ -26,10 +27,12 @@ export default (props) => {
       if (!id) return setUser(null);
       const { data } = await api.get(`/referent/${id}`);
       setUser(data);
+      const { data: d } = await api.get(`/department-service/referent/${id}`);
+      setService(d);
     })();
   }, []);
 
-  if (user === undefined) return <Loader />;
+  if (user === undefined || service === undefined) return <Loader />;
 
   const getSubtitle = () => {
     const createdAt = new Date(user.createdAt);
@@ -70,10 +73,10 @@ export default (props) => {
         initialValues={user}
         onSubmit={async (values) => {
           try {
-            const { ok, code, data: user } = await api.put(`/referent/${values._id}`, values);
+            const { ok, code, data } = await api.put(`/referent/${values._id}`, values);
             if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
-            setUser(user);
-            toastr.success("Mis à jour !");
+            setUser(data);
+            toastr.success("Utilisateur mis à jour !");
           } catch (e) {
             console.log(e);
             toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
@@ -191,9 +194,52 @@ export default (props) => {
             }
           }}
         >
-          Supprimer
+          {`Supprimer le compte de ${user.firstName} ${user.lastName}`}
         </DeleteBtn>
       ) : null}
+      {canModify(currentUser, user) && user.role === "referent_department" && (
+        <Formik
+          initialValues={service || { department: user.department }}
+          onSubmit={async (values) => {
+            try {
+              const { ok, code, data } = await api.post(`/department-service`, values);
+              if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
+              setService(data);
+              toastr.success("Service departemental mis à jour !");
+            } catch (e) {
+              console.log(e);
+              toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
+            }
+          }}
+        >
+          {({ values, handleChange, handleSubmit, isSubmitting, submitForm }) => (
+            <>
+              <TitleWrapper>
+                <div>
+                  <Title>Information du service départemental {values.department && `(${values.department})`}</Title>
+                </div>
+                <SaveBtn loading={isSubmitting} onClick={handleSubmit}>
+                  Enregistrer
+                </SaveBtn>
+              </TitleWrapper>
+              <Row>
+                <Col md={6} style={{ marginBottom: "20px" }}>
+                  <Box>
+                    <BoxTitle>{`Service Départemental`}</BoxTitle>
+                    <BoxContent direction="column">
+                      <Item title="Nom de la direction" values={values} name="directionName" handleChange={handleChange} />
+                      <Item title="Adresse" values={values} name="address" handleChange={handleChange} />
+                      <Item title="Complément d'adresse" values={values} name="complementAddress" handleChange={handleChange} />
+                      <Item title="Code postal" values={values} name="zip" handleChange={handleChange} />
+                      <Item title="Ville" values={values} name="city" handleChange={handleChange} />
+                    </BoxContent>
+                  </Box>
+                </Col>
+              </Row>
+            </>
+          )}
+        </Formik>
+      )}
     </Wrapper>
   );
 };

@@ -9,7 +9,7 @@ import ProgramCard from "../components/programCard";
 import MissionCard from "../components/missionCard";
 import api from "../../../services/api";
 import { apiURL } from "../../../config";
-import Hero from "../../../components/Hero";
+import { HeroContainer, Hero } from "../../../components/Content";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young) || {};
@@ -24,7 +24,7 @@ export default () => {
   }, []);
 
   return (
-    <>
+    <HeroContainer>
       <Hero>
         <div className="content">
           <h1>
@@ -76,7 +76,7 @@ export default () => {
           <SeeMore to="/phase3/mission">Toutes les missions →</SeeMore>
         </Missions>
       </TransparentHero>
-    </>
+    </HeroContainer>
   );
 };
 

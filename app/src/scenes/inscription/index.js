@@ -15,7 +15,7 @@ import { useSelector } from "react-redux";
 
 import Home from "./Home/index.js";
 import { STEPS } from "./utils";
-import { isInscription2021Closed } from "../../utils";
+import { isInscription2021Closed, isEndOfInscriptionManagement2021 } from "../../utils";
 
 const Step = ({ step }) => {
   function renderStep(step) {
@@ -40,7 +40,10 @@ const Step = ({ step }) => {
 export default () => {
   const young = useSelector((state) => state.Auth.young);
 
-  if (isInscription2021Closed() && (!young || young?.status === "IN_PROGRESS")) {
+  if (
+    (isInscription2021Closed() && (!young || young?.status === "IN_PROGRESS")) ||
+    (isEndOfInscriptionManagement2021() && (!young || ["IN_PROGRESS", "WAITING_CORRECTION", "WAITING_VALIDATION"].includes(young?.status)))
+  ) {
     return (
       <Switch>
         <Route path="/inscription" component={HomeClosed} />

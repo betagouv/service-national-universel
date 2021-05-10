@@ -77,9 +77,13 @@ const Logos = styled.div`
   align-items: center;
   img {
     vertical-align: top;
+    margin-right: 40px;
     height: 80px;
     @media (max-width: 768px) {
       height: 40px;
+      .mobileHide {
+        height: 80px;
+      }
     }
   }
 `;

@@ -2,14 +2,14 @@ import React from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
-import Hero from "../../../components/Hero";
+import { HeroContainer, Hero } from "../../../components/Content";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young) || {};
 
   const renderStep = () => {
     return (
-      <>
+      <HeroContainer>
         <Hero>
           <div className="content">
             <h1>
@@ -27,7 +27,7 @@ export default () => {
           </div>
           <div className="thumb" />
         </Hero>
-      </>
+      </HeroContainer>
     );
   };
 

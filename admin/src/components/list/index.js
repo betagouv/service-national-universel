@@ -1,6 +1,36 @@
 import styled from "styled-components";
 
+export const Header = styled.div`
+  padding: 0 25px 0;
+  display: flex;
+  margin-top: 25px;
+  align-items: flex-start;
+  justify-content: space-between;
+`;
+
+export const Title = styled.div`
+  color: rgb(38, 42, 62);
+  font-weight: 700;
+  font-size: 24px;
+  margin-bottom: 30px;
+`;
+
+export const MultiLine = styled.div`
+  h2 {
+    color: #333;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+  }
+  p {
+    color: #718096;
+    font-size: 0.75rem;
+    margin: 0;
+  }
+`;
+
 export const ResultTable = styled.div`
+  ${({ hide }) => (hide ? "display: none;" : "")}
   background-color: #fff;
   position: relative;
   margin: 20px 0;
@@ -10,6 +40,7 @@ export const ResultTable = styled.div`
     justify-content: flex-end;
     padding: 10px 25px;
     background: #fff;
+    margin: 0;
     a {
       background: #f7fafc;
       color: #242526;
@@ -43,7 +74,6 @@ export const ResultTable = styled.div`
 export const Filter = styled.div`
   padding: 0 25px;
   margin-bottom: 20px;
-
   .searchbox {
     display: block;
     width: 100%;
@@ -60,7 +90,6 @@ export const Filter = styled.div`
       color: #767676;
     }
   }
-
   .dropdown-filter {
     button {
       background-color: #fff;
@@ -111,7 +140,7 @@ export const Table = styled.table`
   tbody tr {
     border-bottom: 1px solid #f4f5f7;
     :hover {
-      background-color: #e6ebfa;
+      background-color: #f1f1f1;
     }
   }
 `;
@@ -159,4 +188,71 @@ export const BottomResultStats = styled(ResultStats)`
   position: absolute;
   top: calc(100% - 50px);
   left: 0;
+`;
+
+export const ActionBox = styled.div`
+  .dropdown-menu {
+    min-width: 0;
+    width: 200px;
+    a,
+    div {
+      white-space: nowrap;
+      font-size: 14px;
+      :hover {
+        color: inherit;
+      }
+    }
+  }
+  button {
+    ${({ color }) => `
+      background-color: ${color}15;
+      border: 1px solid ${color};
+      color: ${color};
+    `}
+    display: inline-flex;
+    flex: 1;
+    justify-content: space-between;
+    align-items: center;
+    text-align: left;
+    border-radius: 0.5rem;
+    padding: 0 0 0 12px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    outline: 0;
+    width: 100%;
+    max-width: 250px;
+    .edit-icon {
+      height: 17px;
+      margin-right: 10px;
+      path {
+        fill: ${({ color }) => `${color}`};
+      }
+    }
+    .down-icon {
+      margin-left: auto;
+      padding: 7px 15px;
+      /* border-left: 1px solid ${({ color }) => `${color}`}; */
+      margin-left: 15px;
+      svg {
+        height: 10px;
+      }
+      svg polygon {
+        fill: ${({ color }) => `${color}`};
+      }
+    }
+  }
+  .dropdown-item {
+    border-radius: 0;
+    background-color: transparent;
+    border: none;
+    color: #767676;
+    white-space: nowrap;
+    font-size: 14px;
+    padding: 5px 15px;
+    font-weight: 400;
+    :hover {
+      background-color: #f3f3f3;
+    }
+  }
 `;

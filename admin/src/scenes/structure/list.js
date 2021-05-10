@@ -11,6 +11,8 @@ import Panel from "./panel";
 import { translate, corpsEnUniforme, formatLongDateFR } from "../../utils";
 import VioletHeaderButton from "../../components/buttons/VioletHeaderButton";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
+import { Filter, FilterRow, ResultTable, Table, TopResultStats, BottomResultStats, Header, Title, MultiLine } from "../../components/list";
+import Badge from "../../components/Badge";
 
 const FILTERS = ["SEARCH", "LEGAL_STATUS", "DEPARTMENT", "REGION", "CORPS", "WITH_NETWORK", "LOCATION"];
 const formatLongDate = (date) => {
@@ -77,29 +79,18 @@ export default () => {
             </Header>
             <Filter>
               <DataSearch
+                defaultQuery={getDefaultQuery}
                 showIcon={false}
-                placeholder="Rechercher par mots clés, mission ou structure..."
+                placeholder="Rechercher par mots clés, ville, code postal..."
                 componentId="SEARCH"
-                dataField={["name"]}
-                react={{ and: FILTERS }}
+                dataField={["name", "city", "zip"]}
+                react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
                 // fuzziness={2}
                 style={{ flex: 2 }}
                 innerClass={{ input: "searchbox" }}
                 autosuggest={false}
               />
               <FilterRow>
-                <DataSearch
-                  defaultQuery={getDefaultQuery}
-                  showIcon={false}
-                  placeholder="Ville ou code postal"
-                  componentId="LOCATION"
-                  dataField={["city", "zip"]}
-                  react={{ and: FILTERS.filter((e) => e !== "LOCATION") }}
-                  style={{ flex: 2 }}
-                  innerClass={{ input: "searchbox" }}
-                  className="searchbox-city"
-                  autosuggest={false}
-                />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -220,227 +211,30 @@ const Hit = ({ hit, onClick, selected }) => {
     })();
   }, [hit]);
   return (
-    <tr style={{ backgroundColor: selected ? "#f1f1f1" : "transparent" }} onClick={onClick}>
+    <tr style={{ backgroundColor: selected && "#e6ebfa" }} onClick={onClick}>
       <td>
-        <div style={{ fontWeight: "bold" }}>{hit.name}</div>
-        <div style={{ color: "#718096" }}>
-          {translate(hit.legalStatus)} • Créée le {formatLongDate(hit.createdAt)}
-        </div>
+        <MultiLine>
+          <h2>{hit.name}</h2>
+          <p>
+            {translate(hit.legalStatus)} • Créée le {formatLongDate(hit.createdAt)}
+          </p>
+        </MultiLine>
       </td>
       <td>
         <div style={{ fontWeight: "bold" }}>{missionsInfo.count} missions</div>
         <div>{missionsInfo.placesTotal} places</div>
       </td>
       <td>
-        {hit.status === "DRAFT" ? <TagStatus>{translate(hit.status)}</TagStatus> : null}
-        {hit.isNetwork === "true" ? <TagNetwork>Tête de réseau</TagNetwork> : null}
+        {hit.status === "DRAFT" ? <Badge text={translate(hit.status)} color="#d9bb71" /> : null}
+        {hit.isNetwork === "true" ? <Badge text="Tête de réseau" color="#00f" /> : null}
         {hit.networkName ? (
           <Link to={`structure/${hit.networkId}`}>
-            <TagParent>{hit.networkName}</TagParent>
+            <Badge text={hit.networkName} color="#5245cc" />
           </Link>
         ) : null}
-        {hit.department ? <TagDepartment>{translate(hit.department)}</TagDepartment> : null}
-        {corpsEnUniforme.includes(hit.structurePubliqueEtatType) ? <TagDepartment>Corps en uniforme</TagDepartment> : null}
+        {hit.department ? <Badge text={translate(hit.department)} /> : null}
+        {corpsEnUniforme.includes(hit.structurePubliqueEtatType) ? <Badge text="Corps en uniforme" /> : null}
       </td>
     </tr>
   );
 };
-
-const Header = styled.div`
-  padding: 0 40px 0;
-  display: flex;
-  align-items: flex-start;
-  margin-top: 20px;
-  justify-content: space-between;
-`;
-
-const Title = styled.div`
-  color: rgb(38, 42, 62);
-  font-weight: 700;
-  font-size: 24px;
-  margin-bottom: 30px;
-`;
-
-const Filter = styled.div`
-  padding: 0 25px;
-  margin-bottom: 20px;
-
-  .searchbox {
-    display: block;
-    width: 100%;
-    background-color: #fff;
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
-    color: #767676;
-    border: 0;
-    outline: 0;
-    padding: 15px 20px;
-    height: auto;
-    border-radius: 6px;
-    margin-right: 15px;
-    ::placeholder {
-      color: #767676;
-    }
-  }
-`;
-
-const FilterRow = styled.div`
-  padding: 15px 0 0;
-  display: flex;
-  align-items: flex-start;
-  flex-wrap: wrap;
-  .dropdown-filter {
-    margin-right: 15px;
-    margin-bottom: 15px;
-  }
-  .searchbox-city {
-    min-width: 165px;
-    max-width: 165px;
-    margin-right: 15px;
-    margin-bottom: 15px;
-    input {
-      padding: 10.5px 12px;
-    }
-  }
-  button {
-    background-color: #fff;
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
-    border: 0;
-    border-radius: 6px;
-    padding: 10px 20px;
-    font-size: 14px;
-    color: #242526;
-    min-width: 150px;
-    margin-right: 15px;
-    cursor: pointer;
-    div {
-      width: 100%;
-      overflow: visible;
-    }
-  }
-`;
-
-const ResultTable = styled.div`
-  background-color: #fff;
-  position: relative;
-  margin: 20px 0;
-  padding-bottom: 10px;
-  .pagination {
-    display: flex;
-    justify-content: flex-end;
-    padding: 10px 25px;
-    background: #fff;
-    a {
-      background: #f7fafc;
-      color: #242526;
-      padding: 3px 10px;
-      font-size: 12px;
-      margin: 0 5px;
-    }
-    a.active {
-      font-weight: 700;
-      /* background: #5245cc;
-      color: #fff; */
-    }
-    a:first-child {
-      background-image: url(${require("../../assets/left.svg")});
-    }
-    a:last-child {
-      background-image: url(${require("../../assets/right.svg")});
-    }
-    a:first-child,
-    a:last-child {
-      font-size: 0;
-      height: 24px;
-      width: 30px;
-      background-position: center;
-      background-repeat: no-repeat;
-      background-size: 8px;
-    }
-  }
-`;
-
-const ResultStats = styled.div`
-  color: #242526;
-  font-size: 12px;
-  padding-left: 25px;
-`;
-
-const TopResultStats = styled(ResultStats)`
-  position: absolute;
-  top: 25px;
-  left: 0;
-`;
-const BottomResultStats = styled(ResultStats)`
-  position: absolute;
-  top: calc(100% - 50px);
-  left: 0;
-`;
-
-const Table = styled.table`
-  width: 100%;
-  color: #242526;
-  margin-top: 10px;
-  th {
-    border-top: 1px solid #f4f5f7;
-    border-bottom: 1px solid #f4f5f7;
-    padding: 15px;
-    font-weight: 400;
-    font-size: 14px;
-    text-transform: uppercase;
-  }
-  td {
-    padding: 15px;
-    font-size: 14px;
-    font-weight: 300;
-    strong {
-      font-weight: 700;
-      margin-bottom: 5px;
-      display: block;
-    }
-  }
-  td:first-child,
-  th:first-child {
-    padding-left: 25px;
-  }
-  tbody tr {
-    border-bottom: 1px solid #f4f5f7;
-    :hover {
-      background-color: #e6ebfa;
-    }
-  }
-`;
-
-const Tag = styled.span`
-  align-self: flex-start;
-  border-radius: 4px;
-  padding: 0.25rem 0.5rem;
-  font-size: 13px;
-  white-space: nowrap;
-  font-weight: 400;
-  cursor: pointer;
-  margin-right: 5px;
-`;
-
-const TagDepartment = styled(Tag)`
-  background: #f7f7f7;
-  color: #9a9a9a;
-  border: 0.5px solid #cecece;
-`;
-
-const TagParent = styled(Tag)`
-  color: #5245cc;
-  background: rgba(82, 69, 204, 0.1);
-  border: 0.5px solid #5245cc;
-`;
-
-const TagNetwork = styled(Tag)`
-  color: #00f;
-  background: rgba(82, 69, 204, 0.1);
-  border: 0.5px solid #00f;
-`;
-
-const TagStatus = styled(Tag)`
-  color: #d9bb71;
-  background: #d9bb7133;
-  border: 0.5px solid #d9bb71;
-`;

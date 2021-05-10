@@ -2,15 +2,20 @@ import React from "react";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 import { Formik } from "formik";
+import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 import { translate as t, YOUNG_PHASE } from "../../../utils";
 import WrapperPhase1 from "./wrapper";
 import api from "../../../services/api";
 import ToggleSwitch from "../../../components/ToogleSwitch";
 import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
+import AssignCenter from "./AssignCenter";
 
-export default ({ young }) => {
+export default ({ young, getYoung }) => {
   const disabled = young.phase !== YOUNG_PHASE.COHESION_STAY;
+  const user = useSelector((state) => state.Auth.user);
+
   const getCohesionStay = (young) => {
     if (young.statusPhase1 === "DONE")
       return (
@@ -22,18 +27,24 @@ export default ({ young }) => {
         </>
       );
     if (young.statusPhase1 === "CANCEL" && young.cohesion2020Step !== "DONE") return <p>Le séjour de cohésion a été annulé.</p>;
-    return young.cohesionCity ? (
-      <>
-        <p>
-          Le volontaire a été affecté au centre de {young.cohesionCity}({young.cohesionDepartment})
-        </p>
-        <Details title="Centre" value={young.cohesionCenterName} />
-        <Details title="Ville" value={young.cohesionCenterCity} />
-        <Details title="Code Postal" value={young.cohesionCenterZip} />
-      </>
-    ) : (
-      <p>Le volontaire est en attente d'affectation à un centre de cohésion</p>
-    );
+    if (young.statusPhase1 === "AFFECTED")
+      return (
+        <>
+          <p>Le volontaire a été affecté au centre :</p>
+          <Link to={`/centre/${young.cohesionCenterId}`}>
+            <Details title="Centre" value={young.cohesionCenterName} />
+          </Link>
+          <Details title="Ville" value={young.cohesionCenterCity} />
+          <Details title="Code Postal" value={young.cohesionCenterZip} />
+        </>
+      );
+    if (young.statusPhase1 === "WAITING_AFFECTATION")
+      return (
+        <>
+          <p>Le volontaire est en attente d'affectation à un centre de cohésion</p>
+          {user.role === "admin" ? <AssignCenter young={young} onAffect={getYoung} /> : null}
+        </>
+      );
   };
 
   return (
@@ -164,6 +175,12 @@ const Wrapper = styled.div`
     }
     &-text {
       color: rgba(26, 32, 44);
+      a {
+        color: #5245cc;
+        :hover {
+          text-decoration: underline;
+        }
+      }
     }
   }
   p {

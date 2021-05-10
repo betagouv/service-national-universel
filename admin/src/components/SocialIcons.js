@@ -63,6 +63,7 @@ export default function SocialIcons({ value }) {
       </a>
     ) : null,
   ].filter((b) => b);
+  if (a.length === 0) return "--";
   return <SocialWrapper>{a}</SocialWrapper>;
 }
 
