@@ -109,7 +109,7 @@ export default () => {
             <div>
               <h2>Consentement de droit à l'image</h2>
               <p>
-                Votre représentant légal peut dès-à-présent renseigner le formulaire relatif au droit à l'image <b>avant le 4 juin 2021</b>. Cette étape est un pré-requis au séjour
+                Votre représentant légal peut dès à présent renseigner le formulaire relatif au droit à l'image <b>avant le 4 juin 2021</b>. Cette étape est un pré-requis au séjour
                 de cohésion.
               </p>
             </div>

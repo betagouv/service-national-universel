@@ -10,7 +10,7 @@
           Félicitations, votre inscription au Service National Universel édition 2021 a été validée !
         </mj-text>
         <mj-text line-height="1.5" font-size="18px" color="#000">
-          Vous pouvez dès-à-présent vous connecter à votre espace personnel pour enrichir votre profil et prendre connaissance des documents à
+          Vous pouvez dès à présent vous connecter à votre espace personnel pour enrichir votre profil et prendre connaissance des documents à
           renseigner d'ici votre séjour de cohésion en juin prochain.
         </mj-text>
         <mj-button font-size="20px" background-color="#3490DC" href="{{cta}}"> Se connecter à mon espace </mj-button>
