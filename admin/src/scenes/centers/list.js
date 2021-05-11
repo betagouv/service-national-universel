@@ -105,6 +105,7 @@ export default () => {
                   react={{ and: FILTERS.filter((e) => e !== "PLACES") }}
                   title=""
                   URLParams={true}
+                  sortBy="asc"
                   showSearch={false}
                 />
               </FilterRow>

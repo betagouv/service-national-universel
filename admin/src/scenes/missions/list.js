@@ -145,6 +145,7 @@ export default () => {
                   title=""
                   URLParams={true}
                   showSearch={false}
+                  sortBy="asc"
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}

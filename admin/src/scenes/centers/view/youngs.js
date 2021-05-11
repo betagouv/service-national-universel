@@ -14,7 +14,7 @@ const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_P
 export default ({ center, updateCenter }) => {
   const [young, setYoung] = useState();
 
-  const getDefaultQuery = () => ({ query: { bool: { filter: [{ terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } }, { term: { cohesionCenterId: center._id } }] } } });
+  const getDefaultQuery = () => ({ query: { bool: { filter: [{ terms: { "status.keyword": ["VALIDATED"] } }, { term: { cohesionCenterId: center._id } }] } } });
 
   const handleClick = async (young) => {
     const { ok, data } = await api.get(`/referent/young/${young._id}`);

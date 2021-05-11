@@ -4,22 +4,43 @@ import { ReactiveBase, ReactiveList, DataSearch } from "@appbaseio/reactivesearc
 
 import { apiURL } from "../../../config";
 import api from "../../../services/api";
-import { YOUNG_STATUS_PHASE1 } from "../../../utils";
+import { translate } from "../../../utils";
 import { Filter, ResultTable, BottomResultStats, Table, MultiLine } from "../../../components/list";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
 
 export default ({ center, onAffect, onClick }) => {
-  const getDefaultQuery = () => ({ query: { bool: { filter: { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } } } } });
+  const getDefaultQuery = () => ({
+    query: {
+      bool: {
+        filter: [{ term: { "status.keyword": "VALIDATED" } }, { terms: { "statusPhase1.keyword": ["WAITING_AFFECTATION"] } }],
+        must_not: [
+          {
+            exists: {
+              field: "cohesionCenterId",
+            },
+          },
+        ],
+      },
+    },
+  });
 
   const FILTERS = ["SEARCH"];
   const [searchedValue, setSearchedValue] = useState("");
 
   const handleAffectation = async (young) => {
-    const { data, ok, code } = await api.post(`/cohesion-center/${center._id}/assign-young/${young._id}`);
-    if (!ok) return toastr.error("Oups, une erreur est survenue lors de l'affectation du jeune", code);
-    toastr.success(`${young.firstName} a été affecté(e) au centre ${center.name} !`);
+    try {
+      const { ok, code } = await api.post(`/cohesion-center/${center._id}/assign-young/${young._id}`);
+      if (!ok) return toastr.error("Oups, une erreur est survenue lors de l'affectation du jeune", translate(code));
+      toastr.success(`${young.firstName} a été affecté(e) au centre ${center.name} !`);
 
-    return onAffect?.();
+      return onAffect?.();
+    } catch (error) {
+      if (error.code === "OPERATION_NOT_ALLOWED")
+        return toastr.error("Oups, une erreur est survenue lors de l'affectation du jeune. Il semblerait que ce centre soit déjà complet", translate(error?.code), {
+          timeOut: 5000,
+        });
+      return toastr.error("Oups, une erreur est survenue lors du traitement de l'affectation du jeune", translate(error?.code));
+    }
   };
 
   return (

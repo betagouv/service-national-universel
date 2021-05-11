@@ -12,7 +12,7 @@ const { ERRORS } = require("../utils");
 const updatePlacesCenter = async (center) => {
   try {
     const youngs = await YoungModel.find({ cohesionCenterId: center._id });
-    const placesTaken = youngs.filter((young) => young.statusPhase1 === "AFFECTED").length;
+    const placesTaken = youngs.filter((young) => young.statusPhase1 === "AFFECTED" && young.status === "VALIDATED").length;
     const placesLeft = Math.max(0, center.placesTotal - placesTaken);
     if (center.placesLeft !== placesLeft) {
       console.log(`Center ${center.id}: total ${center.placesTotal}, left from ${center.placesLeft} to ${placesLeft}`);
@@ -64,6 +64,7 @@ router.post("/:centerId/assign-young/:youngId", passport.authenticate("referent"
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const center = await CohesionCenterModel.findById(req.params.centerId);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (center.placesLeft <= 0) return res.status(404).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     // update youngs infos
     young.set({

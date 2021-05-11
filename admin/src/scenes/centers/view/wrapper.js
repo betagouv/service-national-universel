@@ -55,12 +55,12 @@ export default ({ center, tab, children }) => {
               <table>
                 <tbody>
                   <tr>
-                    <td style={{ fontSize: "2.5rem", paddingRight: "10px" }}>{center.placesLeft || center.placesTotal}</td>
+                    <td style={{ fontSize: "2.5rem", paddingRight: "10px" }}>{Math.max(0, center.placesLeft)}</td>
                     <td>
                       <b>Places restantes</b>
                       <br />
                       <span style={{ color: "#999" }}>
-                        {center.placesLeft ? center.placesTotal - center.placesLeft : 0} / {center.placesTotal}
+                        {center.placesTotal - center.placesLeft} / {center.placesTotal}
                       </span>
                     </td>
                   </tr>

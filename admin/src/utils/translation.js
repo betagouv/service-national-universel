@@ -197,6 +197,8 @@ export const translate = (value) => {
       return "Ce fichier est corrompu";
     case "YOUNG_ALREADY_REGISTERED":
       return "Utilisateur déjà inscrit";
+    case "OPERATION_NOT_ALLOWED":
+      return "Opération non autorisée";
     case "PUBLIC_TRANSPORT":
       return "Transport en commun";
     case "BIKE":
