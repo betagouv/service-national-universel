@@ -9,6 +9,8 @@ import api from "../../../services/api";
 import Avatar from "../../../components/Avatar";
 import SocialIcons from "../../../components/SocialIcons";
 import Invite from "../components/invite";
+import { Box } from "../../../components/box";
+import Badge from "../../../components/Badge";
 
 export default ({ structure }) => {
   const [referents, setReferents] = useState([]);
@@ -90,7 +92,7 @@ export default ({ structure }) => {
                   <div className="detail">
                     <div className="detail-title">Réseau national</div>
                     <div className="detail-text">
-                      <TagParent>{parentStructure.name}</TagParent>
+                      <Badge text={parentStructure.name} color="#5245cc" />
                     </div>
                   </div>
                 ) : null}
@@ -149,30 +151,4 @@ const Legend = styled.div`
   margin-bottom: 20px;
   font-size: 1.3rem;
   font-weight: 500;
-`;
-
-const Box = styled.div`
-  width: ${(props) => props.width || 100}%;
-  height: 100%;
-  background-color: #fff;
-  filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.05));
-  margin-bottom: 33px;
-  border-radius: 8px;
-`;
-
-const Tag = styled.span`
-  align-self: flex-start;
-  border-radius: 4px;
-  padding: 0.25rem 0.5rem;
-  font-size: 13px;
-  white-space: nowrap;
-  font-weight: 400;
-  cursor: pointer;
-  margin-right: 5px;
-`;
-
-const TagParent = styled(Tag)`
-  color: #5245cc;
-  background: rgba(82, 69, 204, 0.1);
-  border: 0.5px solid #5245cc;
 `;

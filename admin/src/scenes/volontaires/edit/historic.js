@@ -2,9 +2,7 @@ import React from "react";
 import { Col } from "reactstrap";
 
 import { translate } from "../../../utils";
-import Box from "../components/Box";
-import BoxContent from "../components/BoxContent";
-import BoxTitle from "../components/BoxTitle";
+import { Box, BoxContent, BoxTitle } from "../../../components/box";
 import Historic from "../../../components/historic";
 
 export default ({ young }) => (

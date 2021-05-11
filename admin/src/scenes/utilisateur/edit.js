@@ -5,10 +5,10 @@ import { Field, Formik } from "formik";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/fr";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import ReactSelect from "react-select";
-
+import { Box, BoxContent, BoxTitle } from "../../components/box";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import DateInput from "../../components/dateInput";
 import { departmentList, regionList, department2region, translate, REFERENT_ROLES, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE } from "../../utils";
@@ -355,75 +355,6 @@ const SubTitle = styled.h2`
   color: #242526;
   font-size: 1rem;
   font-weight: 300;
-`;
-
-const Box = styled.div`
-  width: ${(props) => props.width || 100}%;
-  min-height: 200px;
-  height: 100%;
-  background-color: #fff;
-  filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.05));
-  margin-bottom: 33px;
-  border-radius: 8px;
-`;
-const BoxTitle = styled.h3`
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 22px;
-  color: #171725;
-  font-size: 16px;
-  font-weight: bold;
-  border-bottom: 1px solid #f2f1f1;
-  min-height: 5rem;
-`;
-const BoxContent = styled.div`
-  label {
-    font-weight: 500;
-    color: #6a6f85;
-    display: block;
-    margin-bottom: 0;
-  }
-
-  .detail {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 5px 20px;
-    font-size: 14px;
-    text-align: left;
-    &-title {
-      min-width: 100px;
-      width: 100px;
-      margin-right: 5px;
-    }
-  }
-
-  .muted {
-    color: #666;
-  }
-  .history-detail {
-    font-size: 0.8rem;
-    margin-top: 5px;
-    margin-left: 10px;
-  }
-
-  .quote {
-    font-size: 18px;
-    font-weight: 400;
-    font-style: italic;
-  }
-
-  padding: 1rem;
-  display: flex;
-  flex-direction: ${(props) => props.direction};
-
-  & > * {
-    ${(props) =>
-      props.direction === "column" &&
-      `
-    `}
-  }
 `;
 
 const DeleteBtn = styled.button`

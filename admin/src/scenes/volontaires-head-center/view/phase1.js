@@ -8,6 +8,7 @@ import { translate as t, YOUNG_PHASE } from "../../../utils";
 import WrapperPhase1 from "./wrapper";
 import api from "../../../services/api";
 import ToggleSwitch from "../../../components/ToogleSwitch";
+import { Box } from "../../../components/box";
 
 export default ({ young }) => {
   const disabled = young.phase !== YOUNG_PHASE.COHESION_STAY;
@@ -139,15 +140,6 @@ const DetailsToogle = ({ title, name, values, handleChange, disabled, optionLabe
     </div>
   );
 };
-
-const Box = styled.div`
-  width: ${(props) => props.width || 100}%;
-  height: 100%;
-  background-color: #fff;
-  filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.05));
-  margin-bottom: 33px;
-  border-radius: 8px;
-`;
 
 const Wrapper = styled.div`
   padding: 3rem;

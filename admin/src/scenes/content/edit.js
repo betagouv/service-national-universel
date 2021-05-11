@@ -10,6 +10,7 @@ import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
 import { translate, REFERENT_ROLES, departmentList, regionList, region2department, department2region } from "../../utils";
 import api from "../../services/api";
 import Loader from "../../components/Loader";
+import { Box } from "../../components/box";
 
 export default (props) => {
   const [defaultValue, setDefaultValue] = useState(null);
@@ -358,14 +359,4 @@ const ButtonContainer = styled.div`
       background: #372f78;
     }
   }
-`;
-
-const Box = styled.div`
-  width: ${(props) => props.width || 100}%;
-  min-height: 400px;
-  height: 100%;
-  background-color: #fff;
-  filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.05));
-  margin-bottom: 33px;
-  border-radius: 8px;
 `;

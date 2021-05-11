@@ -1,10 +1,7 @@
 import React from "react";
 import { Col } from "reactstrap";
 
-import { translate, YOUNG_PHASE, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3 } from "../../../utils";
-import Box from "../components/Box";
-import BoxContent from "../components/BoxContent";
-import BoxTitle from "../components/BoxTitle";
+import { Box, BoxContent, BoxTitle } from "../../../components/box";
 import Item from "../components/Item";
 
 export default ({ values, handleChange }) => (

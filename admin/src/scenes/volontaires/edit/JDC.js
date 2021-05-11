@@ -1,9 +1,7 @@
 import React from "react";
 import { Col } from "reactstrap";
 
-import Box from "../components/Box";
-import BoxContent from "../components/BoxContent";
-import BoxTitle from "../components/BoxTitle";
+import { Box, BoxContent, BoxTitle } from "../../../components/box";
 import Select from "../components/Select";
 
 export default ({ values, handleChange }) => (

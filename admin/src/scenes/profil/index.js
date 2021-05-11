@@ -11,7 +11,7 @@ import LoadingButton from "../../components/buttons/LoadingButton";
 import Loader from "../../components/Loader";
 import Badge from "../../components/Badge";
 import Error, { requiredMessage } from "../../components/errorMessage";
-
+import { Box, BoxContent } from "../../components/box";
 import { translate, REFERENT_ROLES, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE } from "../../utils";
 
 export default () => {
@@ -280,15 +280,6 @@ const Title = styled.h2`
   }
 `;
 
-const Box = styled.div`
-  width: ${(props) => props.width || 100}%;
-  /* min-height: 200px; */
-  /* height: 100%; */
-  background-color: #fff;
-  filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.05));
-  margin-bottom: 33px;
-  border-radius: 8px;
-`;
 const BoxTitle = styled.div`
   display: flex;
   flex-direction: column;
@@ -309,53 +300,5 @@ const BoxTitle = styled.div`
     align-items: center;
     font-style: italic;
     margin: 0;
-  }
-`;
-const BoxContent = styled.div`
-  label {
-    font-weight: 500;
-    color: #6a6f85;
-    display: block;
-    margin-bottom: 0;
-  }
-
-  .detail {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 5px 20px;
-    font-size: 14px;
-    text-align: left;
-    &-title {
-      min-width: 100px;
-      width: 100px;
-      margin-right: 5px;
-    }
-  }
-
-  .muted {
-    color: #666;
-  }
-  .history-detail {
-    font-size: 0.8rem;
-    margin-top: 5px;
-    margin-left: 10px;
-  }
-
-  .quote {
-    font-size: 18px;
-    font-weight: 400;
-    font-style: italic;
-  }
-
-  padding: 1rem;
-  display: flex;
-  flex-direction: ${(props) => props.direction};
-
-  & > * {
-    ${(props) =>
-      props.direction === "column" &&
-      `
-    `}
   }
 `;

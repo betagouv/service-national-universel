@@ -1,44 +1,20 @@
 import React, { useEffect, useState } from "react";
-import { Col, Row, Input } from "reactstrap";
+import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
-import { useSelector } from "react-redux";
-import { Formik, Field } from "formik";
+import { Formik } from "formik";
 import { useHistory } from "react-router-dom";
 
-import MultiSelect from "../../components/Multiselect";
-import AddressInput from "../../components/addressInput";
-import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
-import {
-  translate,
-  MISSION_PERIOD_DURING_HOLIDAYS,
-  MISSION_PERIOD_DURING_SCHOOL,
-  MISSION_DOMAINS,
-  PERIOD,
-  departmentList,
-  regionList,
-  department2region,
-  REFERENT_ROLES,
-  REFERENT_DEPARTMENT_SUBROLE,
-  REFERENT_REGION_SUBROLE,
-} from "../../utils";
+import { translate, departmentList, regionList, department2region } from "../../utils";
 import api from "../../services/api";
-import Invite from "../structure/components/invite";
 import Loader from "../../components/Loader";
-import Box from "./components/Box";
+import { Box, BoxContent, BoxTitle } from "../../components/box";
 import Item from "./components/Item";
-import BoxContent from "./components/BoxContent";
-import BoxTitle from "./components/BoxTitle";
-import Documents from "./components/Documents";
 import Select from "./components/Select";
 
 export default (props) => {
   const [defaultValue, setDefaultValue] = useState(null);
-  const [structure, setStructure] = useState();
-  const [referents, setReferents] = useState([]);
-  const [showTutor, setShowTutor] = useState();
   const history = useHistory();
-  const user = useSelector((state) => state.Auth.user);
   const isNew = !props?.match?.params?.id;
 
   async function initCenter() {
@@ -46,10 +22,6 @@ export default (props) => {
     const id = props.match && props.match.params && props.match.params.id;
     const { data } = await api.get(`/cohesion-center/${id}`);
     setDefaultValue(data);
-  }
-
-  function dateForDatePicker(d) {
-    return new Date(d).toISOString().split("T")[0];
   }
 
   useEffect(() => {
@@ -65,9 +37,7 @@ export default (props) => {
       initialValues={defaultValue || {}}
       onSubmit={async (values) => {
         try {
-          //if new mission, init placesLeft to placesTotal
           if (isNew) values.placesLeft = values.placesTotal;
-          //if edit mission, add modified delta to placesLeft
           else values.placesLeft += values.placesTotal - defaultValue.placesTotal;
 
           const { ok, code, data } = await api[values._id ? "put" : "post"]("/cohesion-center", values);
@@ -195,43 +165,6 @@ const Header = styled.div`
   display: flex;
   margin-top: 25px;
   align-items: center;
-`;
-
-const FormGroup = styled.div`
-  margin-bottom: 25px;
-  > label {
-    font-size: 11px;
-    font-weight: 500;
-    text-transform: uppercase;
-    color: #6a6f85;
-    display: block;
-    margin-bottom: 10px;
-    > span {
-      color: red;
-      font-size: 10px;
-      margin-right: 5px;
-    }
-  }
-  select,
-  textarea,
-  input {
-    display: block;
-    width: 100%;
-    background-color: #fff;
-    color: #606266;
-    border: 0;
-    outline: 0;
-    padding: 11px 20px;
-    border-radius: 6px;
-    margin-right: 15px;
-    border: 1px solid #dcdfe6;
-    ::placeholder {
-      color: #d6d6e1;
-    }
-    :focus {
-      border: 1px solid #aaa;
-    }
-  }
 `;
 
 const Title = styled.div`

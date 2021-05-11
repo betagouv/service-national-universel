@@ -3,9 +3,7 @@ import { Col } from "reactstrap";
 import { useSelector } from "react-redux";
 
 import { departmentList, regionList, YOUNG_SITUATIONS, translate } from "../../../utils";
-import Box from "../components/Box";
-import BoxContent from "../components/BoxContent";
-import BoxTitle from "../components/BoxTitle";
+import { Box, BoxContent, BoxTitle } from "../../../components/box";
 import Item from "../components/Item";
 import Select from "../components/Select";
 

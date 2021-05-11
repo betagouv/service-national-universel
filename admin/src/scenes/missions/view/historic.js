@@ -1,6 +1,6 @@
 import React from "react";
-import styled from "styled-components";
 import MissionView from "./wrapper";
+import { Box } from "../../../components/box";
 
 const formatLongDate = (date) => {
   if (!date) return "-";
@@ -19,12 +19,3 @@ export default ({ mission }) => {
     </div>
   );
 };
-
-const Box = styled.div`
-  width: ${(props) => props.width || 100}%;
-  height: 100%;
-  background-color: #fff;
-  filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.05));
-  margin-bottom: 33px;
-  border-radius: 8px;
-`;

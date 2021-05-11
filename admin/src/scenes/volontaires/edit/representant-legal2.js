@@ -2,9 +2,7 @@ import React from "react";
 import { Col } from "reactstrap";
 
 import { departmentList, regionList } from "../../../utils";
-import Box from "../components/Box";
-import BoxContent from "../components/BoxContent";
-import BoxTitle from "../components/BoxTitle";
+import { Box, BoxContent, BoxTitle } from "../../../components/box";
 import Item from "../components/Item";
 import Select from "../components/Select";
 

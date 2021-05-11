@@ -7,6 +7,7 @@ import YoungView from "./wrapper";
 import api from "../../../services/api";
 import DownloadButton from "../../../components/buttons/DownloadButton";
 import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
+import { Box } from "../../../components/box";
 
 export default ({ young }) => {
   function isFromFranceConnect() {
@@ -196,24 +197,4 @@ const Legend = styled.div`
   margin-bottom: 20px;
   font-size: 1.3rem;
   font-weight: 500;
-`;
-
-const Box = styled.div`
-  width: ${(props) => props.width || 100}%;
-  height: 100%;
-  background-color: #fff;
-  filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.05));
-  margin-bottom: 33px;
-  border-radius: 8px;
-`;
-
-const Tag = styled.span`
-  align-self: flex-start;
-  border-radius: 4px;
-  padding: 0.25rem 0.5rem;
-  font-size: 13px;
-  white-space: nowrap;
-  font-weight: 400;
-  cursor: pointer;
-  margin-right: 5px;
 `;

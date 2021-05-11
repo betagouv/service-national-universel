@@ -4,10 +4,8 @@ import { toastr } from "react-redux-toastr";
 
 import api from "../../../services/api";
 import DndFileInput from "../../../components/dndFileInput";
-import Box from "../components/Box";
+import { Box, BoxContent, BoxTitle } from "../../../components/box";
 import Item from "../components/Item";
-import BoxContent from "../components/BoxContent";
-import BoxTitle from "../components/BoxTitle";
 import Documents from "../components/Documents";
 import Select from "../components/Select";
 

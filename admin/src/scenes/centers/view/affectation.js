@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import CenterView from "./wrapper";
-import Box from "../components/Box";
-import BoxContent from "../components/BoxContent";
-import BoxTitle from "../components/BoxTitle";
+import { Box, BoxContent, BoxTitle } from "../../../components/box";
 import ComboBoxYoungs from "../components/ComboBoxYoungs";
 import Panel from "../../volontaires/panel";
 

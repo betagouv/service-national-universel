@@ -8,7 +8,7 @@ import WrapperPhase2 from "./wrapper";
 import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
 import Loader from "../../../components/Loader";
 import { dateForDatePicker } from "snu-lib/date";
-
+import { Box } from "../../../components/box";
 import VioletHeaderButton from "../../../components/buttons/VioletHeaderButton";
 import WhiteHeaderButton from "../../../components/buttons/WhiteHeaderButton";
 import { toastr } from "react-redux-toastr";
@@ -576,17 +576,6 @@ const Bloc = ({ children, title, borderBottom, borderRight, borderLeft, disabled
     </Row>
   );
 };
-
-const Box = styled.div`
-  width: ${(props) => props.width || 100}%;
-  height: 100%;
-  max-height: ${({ hide }) => (hide ? "20rem" : "none")};
-  ${({ hide }) => (hide ? "overflow: hidden;" : "")};
-  background-color: #fff;
-  filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.05));
-  margin-bottom: 33px;
-  border-radius: 8px;
-`;
 
 const Wrapper = styled.div`
   padding: 3rem;

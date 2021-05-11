@@ -14,6 +14,7 @@ import Invite from "./components/invite";
 import Loader from "../../components/Loader";
 import { associationTypes, privateTypes, publicTypes, publicEtatTypes, translate } from "../../utils";
 import api from "../../services/api";
+import { Box } from "../../components/box";
 
 export default (props) => {
   const [defaultValue, setDefaultValue] = useState();
@@ -449,14 +450,4 @@ const ButtonContainer = styled.div`
       background: #372f78;
     }
   }
-`;
-
-const Box = styled.div`
-  width: ${(props) => props.width || 100}%;
-  min-height: 400px;
-  height: 100%;
-  background-color: #fff;
-  filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.05));
-  margin-bottom: 33px;
-  border-radius: 8px;
 `;
