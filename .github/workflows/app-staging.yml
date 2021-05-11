@@ -16,8 +16,10 @@ on:
   push:
     branches:
       - main
+      - refactor(app)--webpack-5
     paths:
       - app/**
+  workflow_dispatch:
 
 jobs:
   build:
