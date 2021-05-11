@@ -8,7 +8,7 @@ import { useHistory } from "react-router-dom";
 import { translate, departmentList, regionList, department2region } from "../../utils";
 import api from "../../services/api";
 import Loader from "../../components/Loader";
-import { Box, BoxContent, BoxTitle } from "../../components/box";
+import { Box, BoxContent, BoxHeadTitle } from "../../components/box";
 import Item from "./components/Item";
 import Select from "./components/Select";
 
@@ -62,7 +62,7 @@ export default (props) => {
             <Row>
               <Col md={6} style={{ marginBottom: "20px" }}>
                 <Box>
-                  <BoxTitle>Informations générales</BoxTitle>
+                  <BoxHeadTitle>Informations générales</BoxHeadTitle>
                   <BoxContent direction="column">
                     <Item title="Nom du centre" values={values} name={"name"} handleChange={handleChange} required errors={errors} touched={touched} />
                     <Item title="Code" values={values} name={"code"} handleChange={handleChange} required errors={errors} touched={touched} />
@@ -73,7 +73,7 @@ export default (props) => {
               </Col>
               <Col md={6} style={{ marginBottom: "20px" }}>
                 <Box>
-                  <BoxTitle>Coordonnées</BoxTitle>
+                  <BoxHeadTitle>Coordonnées</BoxHeadTitle>
                   <BoxContent direction="column">
                     <Item title="Adresse" values={values} name={"address"} handleChange={handleChange} required errors={errors} touched={touched} />
                     <Item title="Ville" values={values} name={"city"} handleChange={handleChange} required errors={errors} touched={touched} />
@@ -114,7 +114,7 @@ export default (props) => {
               </Col>
               <Col md={6} style={{ marginBottom: "20px" }}>
                 <Box>
-                  <BoxTitle>Informations complémentaires</BoxTitle>
+                  <BoxHeadTitle>Informations complémentaires</BoxHeadTitle>
                   <BoxContent direction="column">
                     <Select
                       name="outfitDelivered"

@@ -5,7 +5,7 @@ import { Field } from "formik";
 
 import api from "../../../services/api";
 import { departmentList, regionList, isInRuralArea, translate } from "../../../utils";
-import { Box, BoxContent, BoxTitle } from "../../../components/box";
+import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import Item from "../components/Item";
 import Select from "../components/Select";
 import Documents from "../components/Documents";
@@ -14,7 +14,7 @@ import DndFileInput from "../../../components/dndFileInput";
 export default ({ values, handleChange, handleSubmit }) => (
   <Col md={6} style={{ marginBottom: "20px" }}>
     <Box>
-      <BoxTitle>Situations particulières</BoxTitle>
+      <BoxHeadTitle>Situations particulières</BoxHeadTitle>
       <BoxContent direction="column">
         <Item disabled title="Quartier Prioritaire de la Ville" values={values} name="qpv" />
         <Row className="detail">

@@ -64,7 +64,7 @@ export default () => {
                     <Badge text={translate(user.role)} />
                   </Title>
                 </TitleWrapper>
-                <Box>
+                <Box style={{ height: "fit-content" }}>
                   <BoxTitle>
                     <h3>Informations générales</h3>
                     <p>Données personnelles</p>
@@ -124,7 +124,7 @@ export default () => {
                       <Title>Information du service départemental {values.department && `(${values.department})`}</Title>
                     </div>
                   </TitleWrapper>
-                  <Box>
+                  <Box style={{ height: "fit-content" }}>
                     <BoxTitle>
                       <h3>Service Départemental</h3>
                       <p>Données partagées par tous les référents de votre département</p>

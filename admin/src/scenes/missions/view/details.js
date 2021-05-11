@@ -4,7 +4,7 @@ import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 import { translate, formatStringDate } from "../../../utils";
 import MissionView from "./wrapper";
-import { Box } from "../../../components/box";
+import { Box, BoxTitle } from "../../../components/box";
 
 export default ({ mission, structure, tutor }) => {
   return (
@@ -14,9 +14,9 @@ export default ({ mission, structure, tutor }) => {
           <Row>
             <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
               <Wrapper>
-                <Legend>
+                <BoxTitle>
                   La mission<Subtitle>{translate(mission.format)}</Subtitle>
-                </Legend>
+                </BoxTitle>
 
                 <div className="detail">
                   <div className="detail-title">Domaines</div>
@@ -68,12 +68,12 @@ export default ({ mission, structure, tutor }) => {
               <Row style={{ borderBottom: "2px solid #f4f5f7" }}>
                 {tutor ? (
                   <Wrapper>
-                    <Legend>
+                    <BoxTitle>
                       Le tuteur
                       <Link to={`/user/${tutor._id}`}>
                         <SubtitleLink>{`${tutor.firstName} ${tutor.lastName} >`}</SubtitleLink>
                       </Link>
-                    </Legend>
+                    </BoxTitle>
                     <div className="detail">
                       <div className="detail-title">E-mail</div>
                       <div className="detail-text">{tutor.email}</div>
@@ -92,12 +92,12 @@ export default ({ mission, structure, tutor }) => {
               <Row>
                 {structure ? (
                   <Wrapper>
-                    <Legend>
+                    <BoxTitle>
                       Le structure
                       <Link to={`/structure/${structure._id}`}>
                         <SubtitleLink>{`${structure.name} >`}</SubtitleLink>
                       </Link>
-                    </Legend>
+                    </BoxTitle>
                     <div className="detail">
                       <div className="detail-title">Statut</div>
                       <div className="detail-text">{translate(structure.legalStatus)}</div>
@@ -161,11 +161,4 @@ const Subtitle = styled.div`
 
 const SubtitleLink = styled(Subtitle)`
   color: #5245cc;
-`;
-
-const Legend = styled.div`
-  color: rgb(38, 42, 62);
-  margin-bottom: 20px;
-  font-size: 1.3rem;
-  font-weight: 500;
 `;

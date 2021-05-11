@@ -10,7 +10,7 @@ import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
 import { translate, REFERENT_ROLES, departmentList, regionList, region2department, department2region } from "../../utils";
 import api from "../../services/api";
 import Loader from "../../components/Loader";
-import { Box } from "../../components/box";
+import { Box, BoxTitle } from "../../components/box";
 
 export default (props) => {
   const [defaultValue, setDefaultValue] = useState(null);
@@ -71,7 +71,7 @@ export default (props) => {
               <Row style={{ borderBottom: "2px solid #f4f5f7" }}>
                 <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
                   <Wrapper>
-                    <Legend>Détails</Legend>
+                    <BoxTitle>Détails</BoxTitle>
                     <FormGroup>
                       <label>
                         <span>*</span>Le dispositif
@@ -329,12 +329,6 @@ const Title = styled.div`
   font-size: 24px;
   margin-bottom: 10px;
   flex: 1;
-`;
-
-const Legend = styled.div`
-  color: rgb(38, 42, 62);
-  margin-bottom: 20px;
-  font-size: 20px;
 `;
 
 const ButtonContainer = styled.div`

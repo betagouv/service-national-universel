@@ -9,7 +9,7 @@ import { useSelector } from "react-redux";
 import MultiSelect from "../../components/Multiselect";
 import AddressInput from "../../components/addressInput";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
-import { Box } from "../../components/box";
+import { Box, BoxTitle } from "../../components/box";
 import { associationTypes, privateTypes, publicTypes, publicEtatTypes, translate } from "../../utils";
 import api from "../../services/api";
 
@@ -86,7 +86,7 @@ export default (props) => {
               <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
                 <Wrapper>
                   {/*<pre>{JSON.stringify(values, null, 2)}</pre>*/}
-                  <Legend>Informations sur la structure d'accueil</Legend>
+                  <BoxTitle>Informations sur la structure d'accueil</BoxTitle>
                   <FormGroup>
                     <label>
                       <span>*</span>NOM DE LA STRUCTURE
@@ -263,7 +263,7 @@ export default (props) => {
               </Col>
               <Col md={6}>
                 <Wrapper>
-                  <Legend>Responsable de la structure</Legend>
+                  <BoxTitle>Responsable de la structure</BoxTitle>
                   <Row>
                     <Col>
                       <FormGroup>
@@ -300,7 +300,7 @@ export default (props) => {
             <Row>
               <Col md={12}>
                 <Wrapper>
-                  <Legend>Lieu de la structure</Legend>
+                  <BoxTitle>Lieu de la structure</BoxTitle>
                   <AddressInput
                     keys={{ city: "city", zip: "zip", address: "address", location: "location", department: "department", region: "region" }}
                     values={values}
@@ -404,12 +404,6 @@ const Title = styled.div`
   font-size: 24px;
   margin-bottom: 10px;
   flex: 1;
-`;
-
-const Legend = styled.div`
-  color: rgb(38, 42, 62);
-  margin-bottom: 20px;
-  font-size: 20px;
 `;
 
 const ButtonContainer = styled.div`

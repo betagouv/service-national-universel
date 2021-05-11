@@ -1,13 +1,13 @@
 import React from "react";
 import { Col } from "reactstrap";
 
-import { Box, BoxContent, BoxTitle } from "../../../components/box";
+import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import Select from "../components/Select";
 
 export default ({ values, handleChange }) => (
   <Col md={6} style={{ marginBottom: "20px" }}>
     <Box>
-      <BoxTitle>Journée de Défense et Citoyenneté (cohorte 2020)</BoxTitle>
+      <BoxHeadTitle>Journée de Défense et Citoyenneté (cohorte 2020)</BoxHeadTitle>
       <BoxContent direction="column">
         <Select
           name="jdc"

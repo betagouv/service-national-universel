@@ -8,7 +8,7 @@ import { translate } from "../../../utils";
 import CenterView from "./wrapper";
 import api from "../../../services/api";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
-import { Box } from "../../../components/box";
+import { Box, BoxTitle } from "../../../components/box";
 
 export default ({ center }) => {
   const [headCenter, setHeadCenter] = useState();
@@ -30,7 +30,7 @@ export default ({ center }) => {
             <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
               <Row style={{ borderBottom: "2px solid #f4f5f7" }}>
                 <Wrapper>
-                  <Legend>Centre de Cohésion</Legend>
+                  <BoxTitle>Centre de Cohésion</BoxTitle>
                   <div className="detail">
                     <div className="detail-title">Code</div>
                     <div className="detail-text">{center.code}</div>
@@ -66,7 +66,7 @@ export default ({ center }) => {
                 </Wrapper>
               </Row>
               <Wrapper>
-                <Legend>{`${center.placesTotal - center.placesLeft} volontaire(s) affecté(s)`}</Legend>
+                <BoxTitle>{`${center.placesTotal - center.placesLeft} volontaire(s) affecté(s)`}</BoxTitle>
                 {center.placesTotal - center.placesLeft > 0 ? (
                   <Link to={`/centre/${center._id}/volontaires`}>
                     <PanelActionButton style={{ marginBottom: "1rem" }} icon="eye" title="Consulter tous les volontaires affectés" />
@@ -91,7 +91,7 @@ export default ({ center }) => {
             {headCenter ? (
               <Col md={6}>
                 <Wrapper>
-                  <Legend>Chef de centre </Legend>
+                  <BoxTitle>Chef de centre </BoxTitle>
                   <div className="detail">
                     <div className="detail-title">Nom</div>
                     <div className="detail-text">
@@ -155,21 +155,4 @@ const Wrapper = styled.div`
       }
     }
   }
-`;
-
-const Subtitle = styled.div`
-  color: rgb(113, 128, 150);
-  font-weight: 300;
-  font-size: 1rem;
-`;
-
-const SubtitleLink = styled(Subtitle)`
-  color: #5245cc;
-`;
-
-const Legend = styled.div`
-  color: rgb(38, 42, 62);
-  margin-bottom: 20px;
-  font-size: 1.3rem;
-  font-weight: 500;
 `;

@@ -9,7 +9,7 @@ import api from "../../../services/api";
 import Avatar from "../../../components/Avatar";
 import SocialIcons from "../../../components/SocialIcons";
 import Invite from "../components/invite";
-import { Box } from "../../../components/box";
+import { Box, BoxTitle } from "../../../components/box";
 import Badge from "../../../components/Badge";
 
 export default ({ structure }) => {
@@ -54,7 +54,7 @@ export default ({ structure }) => {
             <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
               <Wrapper>
                 <div style={{ display: "flex" }}>
-                  <Legend>La structure</Legend>
+                  <BoxTitle>La structure</BoxTitle>
                   <div style={{ marginLeft: "auto" }}>
                     <SocialIcons value={structure} />
                   </div>
@@ -105,7 +105,7 @@ export default ({ structure }) => {
             <Col md={6}>
               <Row style={{ borderBottom: "2px solid #f4f5f7" }}>
                 <Wrapper>
-                  <Legend>{`Équipe (${referents.length})`}</Legend>
+                  <BoxTitle>{`Équipe (${referents.length})`}</BoxTitle>
                   {referents.length ? null : <i>Aucun compte n'est associé à cette structure.</i>}
                   {referents.map((referent, k) => (
                     <Link to={`/user/${referent._id}`} key={k}>
@@ -144,11 +144,4 @@ const Wrapper = styled.div`
       color: rgba(26, 32, 44);
     }
   }
-`;
-
-const Legend = styled.div`
-  color: rgb(38, 42, 62);
-  margin-bottom: 20px;
-  font-size: 1.3rem;
-  font-weight: 500;
 `;

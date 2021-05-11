@@ -8,7 +8,7 @@ import { translate as t, YOUNG_PHASE } from "../../../utils";
 import WrapperPhase1 from "./wrapper";
 import api from "../../../services/api";
 import ToggleSwitch from "../../../components/ToogleSwitch";
-import { Box } from "../../../components/box";
+import { Box, BoxTitle } from "../../../components/box";
 
 export default ({ young }) => {
   const disabled = young.phase !== YOUNG_PHASE.COHESION_STAY;
@@ -107,7 +107,7 @@ const Bloc = ({ children, title, borderBottom, borderRight, disabled }) => {
     >
       <Wrapper>
         <div style={{ display: "flex" }}>
-          <Legend>{title}</Legend>
+          <BoxTitle>{title}</BoxTitle>
         </div>
         {children}
       </Wrapper>
@@ -169,11 +169,4 @@ const Wrapper = styled.div`
     font-size: 13px;
     color: #798399;
   }
-`;
-
-const Legend = styled.div`
-  color: rgb(38, 42, 62);
-  margin-bottom: 20px;
-  font-size: 1.3rem;
-  font-weight: 500;
 `;

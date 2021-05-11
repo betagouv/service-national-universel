@@ -2,13 +2,13 @@ import React from "react";
 import { Col } from "reactstrap";
 
 import { translate, YOUNG_PHASE, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3 } from "../../../utils";
-import { Box, BoxContent, BoxTitle } from "../../../components/box";
+import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import Select from "../components/Select";
 
 export default ({ values, handleChange }) => (
   <Col md={6} style={{ marginBottom: "20px" }}>
     <Box>
-      <BoxTitle>Informations supplémentaire (admin)</BoxTitle>
+      <BoxHeadTitle>Informations supplémentaire (admin)</BoxHeadTitle>
       <BoxContent direction="column">
         <Select
           name="cohort"

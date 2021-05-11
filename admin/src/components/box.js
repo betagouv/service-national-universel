@@ -41,19 +41,15 @@ export const BoxContent = styled.div`
     font-style: italic;
   }
 
-  padding: 1rem;
+  padding: 2rem;
   display: flex;
   flex-direction: ${(props) => props.direction};
-
   & > * {
-    ${(props) =>
-      props.direction === "column" &&
-      `
-    `}
+    ${(props) => props.direction === "column" && ` margin-bottom: 25px;`}
   }
 `;
 
-export const BoxTitle = styled.h3`
+export const BoxHeadTitle = styled.h3`
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -63,4 +59,11 @@ export const BoxTitle = styled.h3`
   font-weight: bold;
   border-bottom: 1px solid #f2f1f1;
   min-height: 5rem;
+`;
+
+export const BoxTitle = styled.div`
+  color: rgb(38, 42, 62);
+  margin-bottom: 20px;
+  font-size: 1.3rem;
+  font-weight: 400;
 `;
