@@ -19,6 +19,7 @@ on:
       - refactor--webpack-5-for-admin
     paths:
       - admin/**
+  workflow_dispatch:
 
 jobs:
   build:
