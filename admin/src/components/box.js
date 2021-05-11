@@ -44,9 +44,9 @@ export const BoxContent = styled.div`
   padding: 2rem;
   display: flex;
   flex-direction: ${(props) => props.direction};
-  & > * {
+  /* & > * {
     ${(props) => props.direction === "column" && ` margin-bottom: 25px;`}
-  }
+  } */
 `;
 
 export const BoxHeadTitle = styled.h3`
