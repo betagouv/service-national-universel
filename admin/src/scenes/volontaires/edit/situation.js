@@ -3,7 +3,7 @@ import { Col } from "reactstrap";
 import { useSelector } from "react-redux";
 
 import { departmentList, regionList, YOUNG_SITUATIONS, translate } from "../../../utils";
-import { Box, BoxContent, BoxTitle } from "../../../components/box";
+import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import Item from "../components/Item";
 import Select from "../components/Select";
 
@@ -13,7 +13,7 @@ export default ({ values, handleChange, required = {}, errors, touched }) => {
   return (
     <Col md={6} style={{ marginBottom: "20px" }}>
       <Box>
-        <BoxTitle>Situation</BoxTitle>
+        <BoxHeadTitle>Situation</BoxHeadTitle>
         <BoxContent direction="column">
           <Select
             disabled={user.role !== "admin" && values._id}

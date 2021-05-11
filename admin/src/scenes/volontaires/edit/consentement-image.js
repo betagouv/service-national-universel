@@ -4,7 +4,7 @@ import { toastr } from "react-redux-toastr";
 
 import api from "../../../services/api";
 
-import { Box, BoxContent, BoxTitle } from "../../../components/box";
+import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import Select from "../components/Select";
 import Documents from "../components/Documents";
 import DndFileInput from "../../../components/dndFileInput";
@@ -12,7 +12,7 @@ import DndFileInput from "../../../components/dndFileInput";
 export default ({ values, handleChange, handleSubmit }) => (
   <Col md={6} style={{ marginBottom: "20px" }}>
     <Box>
-      <BoxTitle>Consentement de droit à l'image</BoxTitle>
+      <BoxHeadTitle>Consentement de droit à l'image</BoxHeadTitle>
       <BoxContent direction="column">
         <Select
           name="imageRight"

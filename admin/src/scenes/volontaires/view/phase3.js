@@ -6,7 +6,7 @@ import { YOUNG_PHASE, YOUNG_STATUS_PHASE3 } from "../../../utils";
 import WrapperPhase3 from "./wrapper";
 import SelectStatus from "../../../components/selectStatus";
 import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
-import { Box } from "../../../components/box";
+import { Box, BoxTitle } from "../../../components/box";
 
 export default ({ young }) => {
   const getText = () => {
@@ -79,7 +79,7 @@ const Bloc = ({ children, title, borderBottom, borderRight, borderLeft, disabled
     >
       <Wrapper>
         <div style={{ display: "flex" }}>
-          <Legend>{title}</Legend>
+          <BoxTitle>{title}</BoxTitle>
         </div>
         {children}
       </Wrapper>
@@ -108,10 +108,4 @@ const Wrapper = styled.div`
     color: #798399;
     margin-top: 1rem;
   }
-`;
-
-const Legend = styled.div`
-  color: rgb(38, 42, 62);
-  font-size: 1.3rem;
-  font-weight: 500;
 `;

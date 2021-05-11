@@ -2,14 +2,14 @@ import React from "react";
 import { Col } from "reactstrap";
 
 import { departmentList, regionList } from "../../../utils";
-import { Box, BoxContent, BoxTitle } from "../../../components/box";
+import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import Item from "../components/Item";
 import Select from "../components/Select";
 
 export default ({ values, handleChange }) => (
   <Col md={6} style={{ marginBottom: "20px" }}>
     <Box>
-      <BoxTitle>Représentant Légal n°2</BoxTitle>
+      <BoxHeadTitle>Représentant Légal n°2</BoxHeadTitle>
       <BoxContent direction="column">
         <Select
           name="parent2Status"

@@ -3,7 +3,7 @@ import { Col } from "reactstrap";
 import { toastr } from "react-redux-toastr";
 
 import api from "../../../services/api";
-import { Box, BoxContent, BoxTitle } from "../../../components/box";
+import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import Checkbox from "../components/Checkbox";
 import Select from "../components/Select";
 import Documents from "../components/Documents";
@@ -17,7 +17,7 @@ export default ({ values, handleChange, handleSubmit }) => {
   return (
     <Col md={6} style={{ marginBottom: "20px" }}>
       <Box>
-        <BoxTitle>Consentement des représentants légaux</BoxTitle>
+        <BoxHeadTitle>Consentement des représentants légaux</BoxHeadTitle>
         <BoxContent direction="column">
           <Select
             disabled={!values.parentConsentmentFiles.length}

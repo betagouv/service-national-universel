@@ -4,7 +4,7 @@ import { toastr } from "react-redux-toastr";
 
 import api from "../../../services/api";
 import DndFileInput from "../../../components/dndFileInput";
-import { Box, BoxContent, BoxTitle } from "../../../components/box";
+import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import Item from "../components/Item";
 import Documents from "../components/Documents";
 import Select from "../components/Select";
@@ -12,7 +12,7 @@ import Select from "../components/Select";
 export default ({ values, handleChange, handleSubmit, required = {}, errors, touched }) => (
   <Col md={6} style={{ marginBottom: "20px" }}>
     <Box>
-      <BoxTitle>Identité</BoxTitle>
+      <BoxHeadTitle>Identité</BoxHeadTitle>
       <BoxContent direction="column">
         <Item title="Nom" values={values} name={"lastName"} handleChange={handleChange} required={required.lastName} errors={errors} touched={touched} />
         <Item title="Prénom" values={values} name="firstName" handleChange={handleChange} required={required.firstName} errors={errors} touched={touched} />

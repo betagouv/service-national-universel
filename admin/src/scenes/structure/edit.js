@@ -14,7 +14,7 @@ import Invite from "./components/invite";
 import Loader from "../../components/Loader";
 import { associationTypes, privateTypes, publicTypes, publicEtatTypes, translate } from "../../utils";
 import api from "../../services/api";
-import { Box } from "../../components/box";
+import { Box, BoxTitle } from "../../components/box";
 
 export default (props) => {
   const [defaultValue, setDefaultValue] = useState();
@@ -119,7 +119,7 @@ export default (props) => {
               <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
                 <Wrapper>
                   {/*<pre>{JSON.stringify(values, null, 2)}</pre>*/}
-                  <Legend>Informations sur la structure d'accueil</Legend>
+                  <BoxTitle>Informations sur la structure d'accueil</BoxTitle>
                   <FormGroup>
                     <label>
                       <span>*</span>NOM DE LA STRUCTURE
@@ -297,7 +297,7 @@ export default (props) => {
               <Col md={6}>
                 <Row style={{ borderBottom: "2px solid #f4f5f7" }}>
                   <Wrapper>
-                    <Legend>{`Équipe (${referents.length})`}</Legend>
+                    <BoxTitle>{`Équipe (${referents.length})`}</BoxTitle>
                     {referents.length ? null : <i>Aucun compte n'est associé à cette structure.</i>}
                     {referents.map((referent, k) => (
                       <Link to={`/user/${referent._id}`} key={k}>
@@ -315,7 +315,7 @@ export default (props) => {
             <Row>
               <Col md={12}>
                 <Wrapper>
-                  <Legend>Lieu de la structure</Legend>
+                  <BoxTitle>Lieu de la structure</BoxTitle>
                   <AddressInput
                     keys={{ city: "city", zip: "zip", address: "address", location: "location", department: "department", region: "region" }}
                     values={values}
@@ -420,12 +420,6 @@ const Title = styled.div`
   font-size: 24px;
   margin-bottom: 10px;
   flex: 1;
-`;
-
-const Legend = styled.div`
-  color: rgb(38, 42, 62);
-  margin-bottom: 20px;
-  font-size: 20px;
 `;
 
 const ButtonContainer = styled.div`

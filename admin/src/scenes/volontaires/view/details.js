@@ -7,7 +7,7 @@ import YoungView from "./wrapper";
 import api from "../../../services/api";
 import DownloadButton from "../../../components/buttons/DownloadButton";
 import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
-import { Box } from "../../../components/box";
+import { Box, BoxTitle } from "../../../components/box";
 
 export default ({ young }) => {
   function isFromFranceConnect() {
@@ -153,7 +153,7 @@ const Bloc = ({ children, title, last }) => {
     <Row style={{ borderBottom: last ? 0 : "2px solid #f4f5f7" }}>
       <Wrapper>
         <div style={{ display: "flex" }}>
-          <Legend>{title}</Legend>
+          <BoxTitle>{title}</BoxTitle>
         </div>
         {children}
       </Wrapper>
@@ -190,11 +190,4 @@ const Wrapper = styled.div`
       color: rgba(26, 32, 44);
     }
   }
-`;
-
-const Legend = styled.div`
-  color: rgb(38, 42, 62);
-  margin-bottom: 20px;
-  font-size: 1.3rem;
-  font-weight: 500;
 `;

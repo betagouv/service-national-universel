@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import styled from "styled-components";
-import { Col, Row, Input } from "reactstrap";
+import { Col, Row } from "reactstrap";
 
 import CircularProgress from "../components/CircularProgress";
 
 import api from "../../../services/api";
 import Loader from "../../../components/Loader";
+import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 
 export default ({ filter }) => {
   const [handicap, setHandicap] = useState(null);
@@ -77,31 +77,9 @@ export default ({ filter }) => {
   }
 
   return (
-    <Box>
-      <BoxTitle>Situations particulières</BoxTitle>
+    <Box style={{ height: "fit-content" }}>
+      <BoxHeadTitle>Situations particulières</BoxHeadTitle>
       <BoxContent direction="column">{render()}</BoxContent>
     </Box>
   );
 };
-
-const Box = styled.div`
-  background-color: #fff;
-  filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.05));
-  margin-bottom: 33px;
-  border-radius: 8px;
-`;
-const BoxTitle = styled.h3`
-  padding: 22px;
-  color: #171725;
-  font-size: 16px;
-  font-weight: bold;
-  border-bottom: 1px solid #f2f1f1;
-`;
-const BoxContent = styled.div`
-  padding: 30px;
-  display: flex;
-  flex-direction: ${(props) => props.direction};
-  & > * {
-    ${(props) => props.direction === "column" && ` margin-bottom: 25px;`}
-  }
-`;

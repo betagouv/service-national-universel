@@ -2,14 +2,14 @@ import React from "react";
 import { Col } from "reactstrap";
 
 import { departmentList, regionList } from "../../../utils";
-import { Box, BoxContent, BoxTitle } from "../../../components/box";
+import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import Item from "../components/Item";
 import Select from "../components/Select";
 
 export default ({ values, handleChange, required = {}, errors, touched }) => (
   <Col md={6} style={{ marginBottom: "20px" }}>
     <Box>
-      <BoxTitle>Coordonnées</BoxTitle>
+      <BoxHeadTitle>Coordonnées</BoxHeadTitle>
       <BoxContent direction="column">
         <Item title="E-mail" values={values} name="email" handleChange={handleChange} required={required.email} errors={errors} touched={touched} />
         <Item title="Tél." values={values} name="phone" handleChange={handleChange} required={required.phone} errors={errors} touched={touched} />

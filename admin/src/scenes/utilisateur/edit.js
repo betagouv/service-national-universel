@@ -8,7 +8,7 @@ import "dayjs/locale/fr";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import ReactSelect from "react-select";
-import { Box, BoxContent, BoxTitle } from "../../components/box";
+import { Box, BoxContent, BoxHeadTitle } from "../../components/box";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import DateInput from "../../components/dateInput";
 import { departmentList, regionList, department2region, translate, REFERENT_ROLES, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE } from "../../utils";
@@ -102,7 +102,7 @@ export default (props) => {
             <Row>
               <Col md={6} style={{ marginBottom: "20px" }}>
                 <Box>
-                  <BoxTitle>Identité</BoxTitle>
+                  <BoxHeadTitle>Identité</BoxHeadTitle>
                   <BoxContent direction="column">
                     <Item title="Nom" values={values} name={"lastName"} handleChange={handleChange} />
                     <Item title="Prénom" values={values} name="firstName" handleChange={handleChange} />
@@ -111,7 +111,7 @@ export default (props) => {
               </Col>
               <Col md={6} style={{ marginBottom: "20px" }}>
                 <Box>
-                  <BoxTitle>Coordonnées</BoxTitle>
+                  <BoxHeadTitle>Coordonnées</BoxHeadTitle>
                   <BoxContent direction="column">
                     <Item title="E-mail" values={values} name="email" handleChange={handleChange} />
                     <Item title="Tel. fixe" values={values} name="phone" handleChange={handleChange} />
@@ -122,7 +122,7 @@ export default (props) => {
               {canModify(currentUser, values) && (
                 <Col md={6} style={{ marginBottom: "20px" }}>
                   <Box>
-                    <BoxTitle>Information</BoxTitle>
+                    <BoxHeadTitle>Information</BoxHeadTitle>
                     <BoxContent direction="column">
                       <Select
                         name="role"
@@ -234,7 +234,7 @@ export default (props) => {
               <Row>
                 <Col md={6} style={{ marginBottom: "20px" }}>
                   <Box>
-                    <BoxTitle>{`Service Départemental`}</BoxTitle>
+                    <BoxHeadTitle>{`Service Départemental`}</BoxHeadTitle>
                     <BoxContent direction="column">
                       <Item title="Nom de la direction" values={values} name="directionName" handleChange={handleChange} />
                       <Item title="Adresse" values={values} name="address" handleChange={handleChange} />

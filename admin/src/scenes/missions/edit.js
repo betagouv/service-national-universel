@@ -13,7 +13,7 @@ import { translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL
 import api from "../../services/api";
 import Invite from "../structure/components/invite";
 import Loader from "../../components/Loader";
-import { Box } from "../../components/box";
+import { Box, BoxTitle } from "../../components/box";
 
 export default (props) => {
   const [defaultValue, setDefaultValue] = useState(null);
@@ -157,7 +157,7 @@ export default (props) => {
               <Row style={{ borderBottom: "2px solid #f4f5f7" }}>
                 <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
                   <Wrapper>
-                    <Legend>Détails de la mission</Legend>
+                    <BoxTitle>Détails de la mission</BoxTitle>
                     <FormGroup>
                       <label>
                         <span>*</span>NOM DE LA MISSION
@@ -249,7 +249,7 @@ export default (props) => {
                 <Col md={6}>
                   <Row style={{ borderBottom: "2px solid #f4f5f7" }}>
                     <Wrapper style={{ maxWidth: "100%" }}>
-                      <Legend>Date et places disponibles</Legend>
+                      <BoxTitle>Date et places disponibles</BoxTitle>
                       <FormGroup>
                         <label>
                           <span>*</span>DATES DE LA MISSION
@@ -319,7 +319,7 @@ export default (props) => {
                     </Wrapper>
                   </Row>
                   <Wrapper>
-                    <Legend>Tuteur de la mission</Legend>
+                    <BoxTitle>Tuteur de la mission</BoxTitle>
                     <FormGroup>
                       <label>
                         <span>*</span>TUTEUR
@@ -359,7 +359,7 @@ export default (props) => {
               <Row>
                 <Col md={12}>
                   <Wrapper>
-                    <Legend>Lieu où se déroule la mission</Legend>
+                    <BoxTitle>Lieu où se déroule la mission</BoxTitle>
                     <AddressInput
                       keys={{ city: "city", zip: "zip", address: "address", location: "location", department: "department", region: "region" }}
                       values={values}
@@ -472,12 +472,6 @@ const Title = styled.div`
   font-size: 24px;
   margin-bottom: 10px;
   flex: 1;
-`;
-
-const Legend = styled.div`
-  color: rgb(38, 42, 62);
-  margin-bottom: 20px;
-  font-size: 20px;
 `;
 
 const ButtonContainer = styled.div`
