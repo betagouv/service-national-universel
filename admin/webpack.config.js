@@ -29,7 +29,7 @@ module.exports = () => {
 
   return {
     mode,
-    entry: ["babel-polyfill", "./src/index.js"],
+    entry: ["./src/index.js"],
     devtool: false,
     output: {
       path: path.resolve("build"),
