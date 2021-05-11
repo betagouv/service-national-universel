@@ -46,7 +46,6 @@
     "passport-jwt": "^4.0.0",
     "password-validator": "^5.1.0",
     "puppeteer": "^8.0.0",
-    "sequelize": "^6.3.5",
     "validator": "^13.5.2"
   },
   "devDependencies": {
