@@ -112,7 +112,7 @@ export default (props) => {
                   </BoxContent>
                 </Box>
               </Col>
-              <Col md={6} style={{ marginBottom: "20px" }}>
+              {/* <Col md={6} style={{ marginBottom: "20px" }}>
                 <Box>
                   <BoxHeadTitle>Informations complémentaires</BoxHeadTitle>
                   <BoxContent direction="column">
@@ -128,7 +128,7 @@ export default (props) => {
                     />
                   </BoxContent>
                 </Box>
-              </Col>
+              </Col> */}
             </Row>
             {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas proposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
             <Header style={{ justifyContent: "flex-end" }}>

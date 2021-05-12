@@ -36,10 +36,6 @@ export default ({ center }) => {
                     <div className="detail-text">{center.code}</div>
                   </div>
                   <div className="detail">
-                    <div className="detail-title">COR</div>
-                    <div className="detail-text">{center.COR}</div>
-                  </div>
-                  <div className="detail">
                     <div className="detail-title">Adresse</div>
                     <div className="detail-text">{center.address}</div>
                   </div>

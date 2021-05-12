@@ -92,10 +92,6 @@ export default ({ onChange, center }) => {
         <div className="detail-text">{center.code}</div>
       </div>
       <div className="detail">
-        <div className="detail-title">COR</div>
-        <div className="detail-text">{center.COR}</div>
-      </div>
-      <div className="detail">
         <div className="detail-title">Adresse</div>
         <div className="detail-text">{center.address}</div>
       </div>
@@ -120,9 +116,7 @@ export default ({ onChange, center }) => {
           <div className="detail">
             <div className="detail-title">Chef</div>
             <div className="detail-text">
-              <Link to={`/user/${headCenter._id}`}>
-                {headCenter.firstName} {headCenter.lastName}
-              </Link>
+              <Link to={`/user/${headCenter._id}`}>{`${headCenter.firstName} ${headCenter.lastName}`}</Link>
             </div>
           </div>
           <div className="detail">
@@ -142,10 +136,10 @@ export default ({ onChange, center }) => {
         </>
       ) : null}
 
-      <div className="detail">
+      {/* <div className="detail">
         <div className="detail-title">Tenue livrées</div>
         <div className="detail-text">{translate(center.outfitDelivered)}</div>
-      </div>
+      </div> */}
     </Panel>
   );
 };
