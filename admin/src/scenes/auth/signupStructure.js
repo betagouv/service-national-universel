@@ -123,6 +123,9 @@ export default () => {
                           <span>*</span>STATUT JURIDIQUE
                         </label>
                         <Field validate={(v) => !v && requiredMessage} component="select" name="legalStatus" value={values.legalStatus} onChange={handleChange}>
+                          <option key="" value="" disabled>
+                            Statut juridique
+                          </option>
                           <option key="PUBLIC" value="PUBLIC">
                             {translate("PUBLIC")}
                           </option>
@@ -152,9 +155,13 @@ export default () => {
                       )}
                       {values.legalStatus === "PRIVATE" && (
                         <FormGroup2>
-                          <label>TYPE DE STRUCTURE PRIVÉE</label>
+                          <label>
+                            <span>*</span>TYPE DE STRUCTURE PRIVÉE
+                          </label>
                           <Field validate={(v) => !v && requiredMessage} component="select" name="structurePriveeType" value={values.structurePriveeType} onChange={handleChange}>
-                            <option key="" value="" />
+                            <option key="" value="" disabled>
+                              Type de structure privée
+                            </option>
                             {privateTypes.map((e) => {
                               return (
                                 <option key={e} value={e}>
@@ -163,12 +170,15 @@ export default () => {
                               );
                             })}
                           </Field>
+                          <ErrorMessage errors={errors} touched={touched} name="structurePriveeType" />
                         </FormGroup2>
                       )}
                       {values.legalStatus === "PUBLIC" && (
                         <div>
                           <FormGroup2>
-                            <label>TYPE DE STRUCTURE PUBLIQUE</label>
+                            <label>
+                              <span>*</span>TYPE DE STRUCTURE PUBLIQUE
+                            </label>
                             <Field
                               validate={(v) => !v && requiredMessage}
                               component="select"
@@ -176,7 +186,9 @@ export default () => {
                               value={values.structurePubliqueType}
                               onChange={handleChange}
                             >
-                              <option key="" value="" />
+                              <option key="" value="" disabled>
+                                Type de structure publique
+                              </option>
                               {publicTypes.map((e) => {
                                 return (
                                   <option key={e} value={e}>
@@ -185,10 +197,13 @@ export default () => {
                                 );
                               })}
                             </Field>
+                            <ErrorMessage errors={errors} touched={touched} name="structurePubliqueType" />
                           </FormGroup2>
                           {["Service de l'Etat", "Etablissement public"].includes(values.structurePubliqueType) && (
                             <FormGroup2>
-                              <label>TYPE DE SERVICE DE L'ETAT</label>
+                              <label>
+                                <span>*</span>TYPE DE SERVICE DE L'ETAT
+                              </label>
                               <Field
                                 validate={(v) => !v && requiredMessage}
                                 component="select"
@@ -196,7 +211,9 @@ export default () => {
                                 value={values.structurePubliqueEtatType}
                                 onChange={handleChange}
                               >
-                                <option key="" value="" />
+                                <option key="" value="" disabled>
+                                  Type de service de l'état
+                                </option>
                                 {publicEtatTypes.map((e) => {
                                   return (
                                     <option key={e} value={e}>
@@ -205,6 +222,7 @@ export default () => {
                                   );
                                 })}
                               </Field>
+                              <ErrorMessage errors={errors} touched={touched} name="structurePubliqueEtatType" />
                             </FormGroup2>
                           )}
                         </div>

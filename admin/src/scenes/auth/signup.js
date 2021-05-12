@@ -66,6 +66,7 @@ export default () => {
                     history.push("/auth/signup/structure");
                   } catch (e) {
                     if (e && e.code === "USER_ALREADY_REGISTERED") return toastr.error("Le compte existe déja. Veuillez vous connecter");
+                    toastr.error("Oups, une erreur est survenue", translate(e?.code), { timeOut: 3000 });
                     actions.setSubmitting(false);
                     console.log("e", e);
                   }
