@@ -4,6 +4,7 @@ import styled from "styled-components";
 import { Col, Row } from "reactstrap";
 import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
+import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
 import SelectStatusMission from "../../../components/selectStatusMission";
@@ -14,21 +15,7 @@ import PanelActionButton from "../../../components/buttons/PanelActionButton";
 
 export default ({ center, tab, children }) => {
   const history = useHistory();
-
-  const handleDelete = async () => {
-    if (!confirm("Êtes-vous sûr(e) de vouloir supprimer ce centre ?")) return;
-    try {
-      const { ok, code } = await api.remove(`/cohesion-center/${center._id}`);
-      if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
-      // if (!ok && code === "LINKED_OBJECT") return toastr.error("Vous ne pouvez pas supprimer ce centre car des candidatures sont encore liées à cette mission.", { timeOut: 5000 });
-      if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
-      toastr.success("Ce centre a été supprimé.");
-      return history.push(`/centre`);
-    } catch (e) {
-      console.log(e);
-      return toastr.error("Oups, une erreur est survenue pendant la supression du centre :", translate(e.code));
-    }
-  };
+  const user = useSelector((state) => state.Auth.user);
 
   if (!center) return null;
   return (
@@ -68,11 +55,13 @@ export default ({ center, tab, children }) => {
               </table>
             </BoxPlaces>
           </Col>
-          <Col>
-            <Link to={`/centre/${center._id}/edit`}>
-              <PanelActionButton title="Modifier" icon="pencil" style={{ margin: 0 }} />
-            </Link>
-          </Col>
+          {user.role === "admin" ? (
+            <Col>
+              <Link to={`/centre/${center._id}/edit`}>
+                <PanelActionButton title="Modifier" icon="pencil" style={{ margin: 0 }} />
+              </Link>
+            </Col>
+          ) : null}
         </Row>
       </Header>
       {children}

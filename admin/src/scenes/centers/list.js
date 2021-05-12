@@ -60,11 +60,13 @@ export default () => {
                   };
                 }}
               />
-              <Link to={`/centre/create`}>
-                <VioletHeaderButton>
-                  <p>Créer un nouveau centre</p>
-                </VioletHeaderButton>
-              </Link>
+              {user.role === "admin" ? (
+                <Link to={`/centre/create`}>
+                  <VioletHeaderButton>
+                    <p>Créer un nouveau centre</p>
+                  </VioletHeaderButton>
+                </Link>
+              ) : null}
             </Header>
             <Filter>
               <DataSearch

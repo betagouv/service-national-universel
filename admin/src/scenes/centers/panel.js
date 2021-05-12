@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import { Col, Row } from "reactstrap";
+import { useSelector } from "react-redux";
 
 import { translate } from "../../utils";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
@@ -12,6 +13,7 @@ import api from "../../services/api";
 export default ({ onChange, center }) => {
   const history = useHistory();
   const [headCenter, setHeadCenter] = useState();
+  const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
     (async () => {
@@ -49,13 +51,17 @@ export default ({ onChange, center }) => {
         <Link to={`/centre/${center._id}`}>
           <PanelActionButton icon="eye" title="Consulter" />
         </Link>
-        <Link to={`/centre/${center._id}/edit`}>
-          <PanelActionButton icon="pencil" title="Modifier" />
-        </Link>
+        {user.role === "admin" ? (
+          <Link to={`/centre/${center._id}/edit`}>
+            <PanelActionButton icon="pencil" title="Modifier" />
+          </Link>
+        ) : null}
       </div>
-      <div style={{ display: "flex" }}>
-        <PanelActionButton onClick={handleDelete} icon="bin" title="Supprimer" />
-      </div>
+      {user.role === "admin" ? (
+        <div style={{ display: "flex" }}>
+          <PanelActionButton onClick={handleDelete} icon="bin" title="Supprimer" />
+        </div>
+      ) : null}
       <hr />
       <div className="title">{`${center.placesTotal - center.placesLeft} volontaire(s) affecté(s)`}</div>
       {center.placesTotal - center.placesLeft > 0 ? (
