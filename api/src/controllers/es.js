@@ -83,6 +83,11 @@ function filter(body, user, index) {
     if (user.role === "responsible") filter.push({ terms: { "structureId.keyword": [user.structureId] } });
   }
 
+  if (index === "cohesioncenter") {
+    if (user.role === "referent_region") filter.push({ term: { "region.keyword": user.region } });
+    if (user.role === "referent_department") filter.push({ term: { "department.keyword": user.department } });
+  }
+
   const arr = body.split(`\n`);
   const newArr = [];
   for (let i = 0; i < arr.length - 1; i++) {
