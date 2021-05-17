@@ -12,7 +12,7 @@ export default () => {
         {showAlert && (
           <Alert>
             <div className="text">
-              <strong>INSCRIPTION SUR LISTE COMPLÉMENTAIRE</strong>
+              <strong>EN ATTENTE DE CONFIRMATION</strong>
             </div>
             <img src={require("../../assets/close.svg")} height={15} onClick={() => setShowAlert(false)} />
           </Alert>
@@ -22,17 +22,9 @@ export default () => {
             <strong>{young.firstName},</strong> bienvenue dans votre espace personnel.
           </h1>
           <p>
-            Votre candidature a été placée <b style={{ color: "#5145cd" }}>en liste complémentaire</b> par l'administration. Vous serez informé(e) par e-mail si une place venait à
-            se libérer vous permettant ainsi de participer au SNU.
+            <b>Les inscriptions au SNU édition 2021 sont victimes de leur succès et nous tentons de trouver des places pour tous les candidats.</b>
           </p>
-          <Separator />
-          <p style={{ fontSize: "1.125rem" }}>
-            Si vous avez la moindre question, trouvez toutes les réponses à vos questions en consultant la{" "}
-            <a href="https://www.snu.gouv.fr/foire-aux-questions-11" target="blank" style={{ color: "#5145cd" }}>
-              FAQ
-            </a>{" "}
-            du SNU.
-          </p>
+          <p>L’administration du SNU vous recontactera au plus vite pour vous informer de votre participation au séjour du 21 juin au 2 juillet 2021 .</p>
         </Content>
         <div className="thumb" />
       </Hero>
