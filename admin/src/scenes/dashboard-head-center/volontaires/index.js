@@ -5,8 +5,6 @@ import { useSelector } from "react-redux";
 
 import YearPicker from "../../dashboard/components/YearPicker";
 import Checkbox from "../../dashboard/components/Checkbox";
-import FilterRegion from "../../dashboard/components/FilterRegion";
-import FilterDepartment from "../../dashboard/components/FilterDepartment";
 
 import Status from "./status";
 

@@ -256,7 +256,7 @@ export default () => {
                           key={i}
                           hit={hit}
                           callback={(e) => {
-                            if (e._id === volontaire._id) setVolontaire(e);
+                            if (e._id === volontaire?._id) setVolontaire(e);
                           }}
                           onClick={() => setVolontaire(hit)}
                           selected={volontaire?._id === hit._id}
