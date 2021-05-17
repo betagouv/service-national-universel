@@ -63,6 +63,16 @@ export default ({ young }) => {
                   />
                 ))}
               </Bloc>
+              <Bloc title="Autotest PCR">
+                <Details title="Autorisation" value={t(young.autoTestPCR)} />
+                {(young.autoTestPCRFiles || []).map((e, i) => (
+                  <DownloadButton
+                    key={i}
+                    source={() => api.get(`/referent/youngFile/${young._id}/autoTestPCRFiles/${e}`)}
+                    title={`Télécharger le formulaire (${i + 1}/${young.autoTestPCRFiles.length})`}
+                  />
+                ))}
+              </Bloc>
               {young.motivations && (
                 <Bloc title="Motivations">
                   <div className="quote">{`« ${young.motivations} »`}</div>
