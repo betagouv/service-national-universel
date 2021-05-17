@@ -785,6 +785,20 @@ const Schema = new mongoose.Schema({
       description: "Fichier : Formulaire de consentement de droit à l'image",
     },
   },
+  autoTestPCR: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le representant légal a fourni son consentement d'autotest PCR ",
+    },
+  },
+  autoTestPCRFiles: {
+    type: [String],
+    default: [],
+    documentation: {
+      description: "Fichier : Formulaire de consentement d'autotest PCR",
+    },
+  },
 
   // * JDC
   jdc: {
