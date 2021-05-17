@@ -76,6 +76,7 @@ export default ({ setYoung }) => {
                     "Document activité de haut-niveau ": data.highSkilledActivityProofFiles,
                     "Consentement des représentants légaux": data.parentConsentment,
                     "Droit à l'image": translate(data.imageRight),
+                    "Autotest PCR": translate(data.autoTestPCR),
                     "fiche sanitaire réceptionnée": translate(data.cohesionStayMedicalFileReceived || "false"),
                     "Statut représentant légal 1": data.parent1Status,
                     "Prénom représentant légal 1": data.parent1FirstName,
