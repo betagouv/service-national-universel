@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { ReactiveBase, ReactiveList, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
+import { useSelector } from "react-redux";
 
 import { apiURL } from "../../../config";
 import SelectStatus from "../../../components/selectStatus";
@@ -14,7 +15,7 @@ const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_P
 export default ({ center, updateCenter }) => {
   const [young, setYoung] = useState();
 
-  const getDefaultQuery = () => ({ query: { bool: { filter: [{ terms: { "status.keyword": ["VALIDATED"] } }, { term: { cohesionCenterId: center._id } }] } } });
+  const getDefaultQuery = () => ({ query: { bool: { filter: [{ terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } }, { term: { cohesionCenterId: center._id } }] } } });
 
   const handleClick = async (young) => {
     const { ok, data } = await api.get(`/referent/young/${young._id}`);
@@ -135,6 +136,8 @@ export default ({ center, updateCenter }) => {
 };
 
 const Hit = ({ hit, onClick, selected, onChangeYoung }) => {
+  const user = useSelector((state) => state.Auth.user);
+
   const getAge = (d) => {
     const now = new Date();
     const date = new Date(d);
@@ -152,7 +155,14 @@ const Hit = ({ hit, onClick, selected, onChangeYoung }) => {
         </MultiLine>
       </td>
       <td onClick={(e) => e.stopPropagation()}>
-        <SelectStatus hit={hit} callback={onChangeYoung} options={Object.keys(YOUNG_STATUS_PHASE1)} statusName="statusPhase1" phase="COHESION_STAY" />
+        <SelectStatus
+          disabled={user.role !== "admin"}
+          hit={hit}
+          callback={onChangeYoung}
+          options={Object.keys(YOUNG_STATUS_PHASE1)}
+          statusName="statusPhase1"
+          phase="COHESION_STAY"
+        />
       </td>
     </tr>
   );

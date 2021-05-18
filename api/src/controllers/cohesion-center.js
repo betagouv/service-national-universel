@@ -12,7 +12,9 @@ const { ERRORS } = require("../utils");
 const updatePlacesCenter = async (center) => {
   try {
     const youngs = await YoungModel.find({ cohesionCenterId: center._id });
-    const placesTaken = youngs.filter((young) => young.statusPhase1 === "AFFECTED" && young.status === "VALIDATED").length;
+    const placesTaken = youngs.filter(
+      (young) => ["AFFECTED", "WAITING_ACCEPTATION"].includes(young.statusPhase1) && young.status === "VALIDATED"
+    ).length;
     const placesLeft = Math.max(0, center.placesTotal - placesTaken);
     if (center.placesLeft !== placesLeft) {
       console.log(`Center ${center.id}: total ${center.placesTotal}, left from ${center.placesLeft} to ${placesLeft}`);
@@ -123,7 +125,8 @@ router.put("/", passport.authenticate("referent", { session: false }), async (re
   try {
     if (req.user.role !== "admin") return res.status(404).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const center = await CohesionCenterModel.findByIdAndUpdate(req.body._id, req.body, { new: true });
-    res.status(200).send({ ok: true, data: center });
+    const data = await updatePlacesCenter(center);
+    res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });

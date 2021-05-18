@@ -15,7 +15,7 @@ import ModalWithdrawn from "./modals/ModalWithdrawn";
 import ModalGoal from "./modals/ModalGoal";
 import Chevron from "./Chevron";
 
-export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status", phase = YOUNG_PHASE.INSCRIPTION }) => {
+export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status", phase = YOUNG_PHASE.INSCRIPTION, disabled }) => {
   const [modal, setModal] = useState(null);
   const [young, setYoung] = useState(null);
   const user = useSelector((state) => state.Auth.user);
@@ -150,9 +150,9 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
       )}
       <ActionBox color={YOUNG_STATUS_COLORS[young[statusName]]}>
         <UncontrolledDropdown setActiveFromChild>
-          <DropdownToggle tag="button">
+          <DropdownToggle tag="button" disabled={disabled}>
             {translate(young[statusName])}
-            <Chevron color={YOUNG_STATUS_COLORS[young[statusName]]} />
+            {!disabled && <Chevron color={YOUNG_STATUS_COLORS[young[statusName]]} />}
           </DropdownToggle>
           <DropdownMenu>
             {options.map((status) => {
@@ -203,6 +203,7 @@ const ActionBox = styled.div`
     width: 100%;
     max-width: 250px;
     min-width: 250px;
+    min-height: 34px;
     .edit-icon {
       height: 17px;
       margin-right: 10px;

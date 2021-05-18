@@ -31,9 +31,11 @@ export default ({ center, tab, children }) => {
             <Tab isActive={tab === "volontaires"} onClick={() => history.push(`/centre/${center._id}/volontaires`)}>
               Volontaires
             </Tab>
-            <Tab isActive={tab === "affectation"} onClick={() => history.push(`/centre/${center._id}/affectation`)}>
-              Affectation manuelle
-            </Tab>
+            {user.role === "admin" ? (
+              <Tab isActive={tab === "affectation"} onClick={() => history.push(`/centre/${center._id}/affectation`)}>
+                Affectation manuelle
+              </Tab>
+            ) : null}
           </TabList>
         </div>
         <Row style={{ minWidth: "20%" }}>
