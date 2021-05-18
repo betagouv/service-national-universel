@@ -201,6 +201,12 @@ router.put("/", passport.authenticate("young", { session: false }), async (req, 
       }
       await young.save();
     }
+
+    //check if withdrawn
+    if (req.user.status !== "WITHDRAWN" && young.status === "WITHDRAWN") {
+      young.set({ statusPhase1: "WITHDRAWN", statusPhase2: "WITHDRAWN", statusPhase3: "WITHDRAWN" });
+      await young.save();
+    }
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });

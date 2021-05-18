@@ -210,7 +210,13 @@ router.post("/signup_invite", async (req, res) => {
 router.put("/young/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const { id } = req.params;
-    const young = await YoungObject.findByIdAndUpdate(id, req.body, { new: true });
+    const young = await YoungObject.findById(id);
+    if (young.status !== "WITHDRAWN" && req.body.status === "WITHDRAWN") {
+      req.body = { ...req.body, statusPhase1: "WITHDRAWN", statusPhase2: "WITHDRAWN", statusPhase3: "WITHDRAWN" };
+    }
+    young.set(req.body);
+    await young.save();
+
     res.status(200).send({ ok: true, data: young });
   } catch (error) {
     capture(error);
