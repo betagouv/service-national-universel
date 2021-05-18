@@ -120,6 +120,18 @@ router.get("/", passport.authenticate("referent", { session: false }), async (re
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
+router.get("/young/:youngId", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
+  try {
+    const young = await YoungModel.findById(req.params.youngId);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const data = await CohesionCenterModel.findById(young.cohesionCenterId);
+    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
 
 router.put("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
