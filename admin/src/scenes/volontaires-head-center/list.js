@@ -169,48 +169,6 @@ export default () => {
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Statut phase 1")}
                 />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  componentId="STATUS_PHASE_2"
-                  dataField="statusPhase2.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "STATUS_PHASE_2") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Statut phase 2")}
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  componentId="STATUS_PHASE_3"
-                  dataField="statusPhase3.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "STATUS_PHASE_3") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Statut phase 3")}
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  componentId="STATUS_APPLICATION"
-                  dataField="phase2ApplicationStatus.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "STATUS_APPLICATION") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Statut mission")}
-                />
               </FilterRow>
             </Filter>
             <ResultTable>

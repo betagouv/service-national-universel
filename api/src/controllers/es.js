@@ -64,15 +64,35 @@ function filter(body, user, index) {
     // See: https://trello.com/c/Wv2TrQnQ/383-admin-ajouter-onglet-utilisateurs-pour-les-r%C3%A9f%C3%A9rents
     // a `referent_region` sees only other referent_region and `referent_department` from their region.
     if (user.role === "referent_department") {
-      filter.push({ terms: { "role.keyword": ["referent_region", "referent_department"] } });
+      filter.push({
+        bool: {
+          should: [
+            { terms: { "role.keyword": ["referent_department"] } },
+            { bool: { must: [{ term: { "role.keyword": "referent_region" } }, { term: { "region.keyword": user.region } }] } },
+            { bool: { must: [{ term: { "role.keyword": "head_center" } }, { term: { "department.keyword": user.department } }] } },
+          ],
+        },
+      });
     }
     // a `referent_region` sees only other referent_region and `referent_department` from their region.
     if (user.role === "referent_region") {
       filter.push({
         bool: {
           should: [
-            { term: { "role.keyword": "referent_region" } },
+            { terms: { "role.keyword": ["referent_region"] } },
             { bool: { must: [{ term: { "role.keyword": "referent_department" } }, { term: { "region.keyword": user.region } }] } },
+            { bool: { must: [{ term: { "role.keyword": "head_center" } }, { term: { "region.keyword": user.region } }] } },
+          ],
+        },
+      });
+    }
+    if (user.role === "head_center") {
+      filter.push({
+        bool: {
+          should: [
+            { terms: { "role.keyword": ["head_center"] } },
+            { bool: { must: [{ term: { "role.keyword": "referent_department" } }, { term: { "department.keyword": user.department } }] } },
+            { bool: { must: [{ term: { "role.keyword": "referent_region" } }, { term: { "region.keyword": user.region } }] } },
           ],
         },
       });

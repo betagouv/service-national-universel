@@ -25,7 +25,6 @@ export default () => {
   const [structureIds, setStructureIds] = useState();
   const getDefaultQuery = () => {
     if (user.role === "supervisor") return { query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } } };
-    else if (user.role === "head_center") return { query: { bool: { filter: { term: { "role.keyword": "head_center" } } } } };
     else return { query: { match_all: {} } };
   };
   const getExportQuery = () => ({ ...getDefaultQuery(), size: 10000 });
@@ -144,7 +143,7 @@ export default () => {
                         <th>Rôle</th>
                         <th>Crée le</th>
                         <th>Dernière connexion le</th>
-                        {!["referent_department", "referent_region"].includes(user.role) && <th>Actions</th>}
+                        {["admin", "supervisor"].includes(user.role) && <th>Actions</th>}
                       </tr>
                     </thead>
                     <tbody>
@@ -176,7 +175,7 @@ const Hit = ({ hit, onClick, user, selected }) => {
       <td>{hit.role && <Badge text={translate(hit.role)} />}</td>
       <td>{formatStringLongDate(hit.createdAt)}</td>
       <td>{formatStringLongDate(hit.lastLoginAt)}</td>
-      {!["referent_department", "referent_region"].includes(user.role) && (
+      {["admin", "supervisor"].includes(user.role) && (
         <td onClick={(e) => e.stopPropagation()}>
           <Action hit={hit} />
         </td>
