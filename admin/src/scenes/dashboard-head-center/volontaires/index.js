@@ -4,12 +4,10 @@ import { Col, Row } from "reactstrap";
 import { useSelector } from "react-redux";
 
 import YearPicker from "../../dashboard/components/YearPicker";
-import Checkbox from "../../dashboard/components/Checkbox";
 
 import Status from "./status";
-import Center from "./center";
 
-import { YOUNG_STATUS, translate, REFERENT_ROLES } from "../../../utils";
+import { YOUNG_STATUS, REFERENT_ROLES } from "../../../utils";
 
 export default () => {
   const [filter, setFilter] = useState();
@@ -45,36 +43,9 @@ export default () => {
             </FilterWrapper>
           </FiltersList>
           <Status filter={filter} />
-          <Center filter={filter} />
         </>
       )}
     </>
-  );
-};
-
-const FilterStatus = ({ value = [], onChange }) => {
-  const user = useSelector((state) => state.Auth.user);
-
-  function updateStatus(e) {
-    const i = value.indexOf(e);
-    if (i == -1) return onChange([...value, e]);
-    const newArr = [...value];
-    newArr.splice(i, 1);
-    return onChange(newArr);
-  }
-
-  let STATUS = Object.keys(YOUNG_STATUS);
-  if (user.role !== REFERENT_ROLES.ADMIN) STATUS = STATUS.filter((e) => e !== "IN_PROGRESS");
-  return (
-    <div style={{ display: "flex", flexWrap: "wrap" }}>
-      {STATUS.map((e, i) => {
-        return (
-          <FilterWrapper key={i}>
-            <Checkbox isChecked={value.includes(YOUNG_STATUS[e])} onChange={(status) => updateStatus(status)} name={e} label={translate(YOUNG_STATUS[e])} />
-          </FilterWrapper>
-        );
-      })}
-    </div>
   );
 };
 
@@ -85,13 +56,7 @@ const Title = styled.h2`
   font-size: 28px;
   margin-bottom: 10px;
 `;
-const SubTitle = styled.h3`
-  color: #242526;
-  font-size: 24px;
-  margin-bottom: 1rem;
-  margin-top: 1.5rem;
-  font-weight: normal;
-`;
+
 const FiltersList = styled.div`
   display: flex;
   justify-content: flex-end;

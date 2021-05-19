@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Col, Row } from "reactstrap";
-import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { YOUNG_STATUS_COLORS } from "../../../utils";
 
 import api from "../../../services/api";
 
-export default ({ filter }) => {
+export default () => {
   const [placesTotal, setPlacesTotal] = useState(0);
   const [placesLeft, setPlacesLeft] = useState(0);
   const user = useSelector((state) => state.Auth.user);
@@ -19,15 +18,7 @@ export default ({ filter }) => {
       setPlacesTotal(data.placesTotal);
       setPlacesLeft(data.placesLeft);
     })();
-  }, [JSON.stringify(filter)]);
-
-  const replaceSpaces = (v) => v.replace(/\s+/g, "+");
-
-  const getLink = (link) => {
-    if (filter.region) link += `REGION=%5B"${replaceSpaces(filter.region)}"%5D`;
-    if (filter.department) link += `&DEPARTMENT=%5B"${replaceSpaces(filter.department)}"%5D`;
-    return link;
-  };
+  }, []);
 
   return (
     <Row>
@@ -81,13 +72,4 @@ const CardValueWrapper = styled.div`
 `;
 const CardValue = styled.span`
   font-size: 28px;
-`;
-const CardArrow = styled.span`
-  position: absolute;
-  top: 50%;
-  right: 0;
-  transform: translateY(-50%);
-  width: 15px;
-  height: 15px;
-  background-image: url(${require("../../../assets/arrow.png")});
 `;
