@@ -3,6 +3,7 @@ const https = require("https");
 const http = require("http");
 const passwordValidator = require("password-validator");
 const YoungModel = require("./models/young");
+const CohesionCenterModel = require("./models/cohesionCenter");
 
 const { CELLAR_ENDPOINT, CELLAR_KEYID, CELLAR_KEYSECRET, BUCKET_NAME } = require("./config");
 
@@ -87,14 +88,44 @@ const updatePlacesCenter = async (center) => {
   return center;
 };
 
-const spliceYoungFromWaitingList = async (center, gender, department) => {
-  try {
-    const youngId = center.waitingList.find((e) => e.gender === gender && e.department === department);
-    if (!youngId) {
-      // send email referent region + admin
-      return console.log("not found");
+const assignNextYoungFromWaitingList = async (young) => {
+  const nextYoung = await getYoungFromWaitingList(young);
+  if (!nextYoung) {
+    //notify referents & admin
+    console.log("no young found");
+    //todo : send mail to ref region & admin
+  } else {
+    //notify young & modify statusPhase1
+    console.log("young found", nextYoung._id);
+    nextYoung.set({ statusPhase1: "WAITING_ACCEPTATION" });
+    await nextYoung.save();
+
+    //remove the young from the waiting list
+    const center = await CohesionCenterModel.findById(nextYoung.cohesionCenterId);
+    if (center?.waitingList?.indexOf(nextYoung._id) !== -1) {
+      const i = center.waitingList.indexOf(nextYoung._id);
+      center.waitingList.splice(i, 1);
+      await center.save();
     }
-    const young = await YoungModel.findById(youngId);
+
+    //todo : send mail to young
+  }
+};
+
+const getYoungFromWaitingList = async (young) => {
+  try {
+    if (!young || !young.cohesionCenterId) return null;
+    const center = await CohesionCenterModel.findById(young.cohesionCenterId);
+    if (!center) return null;
+    let res = null;
+    for (let i = 0; i < center.waitingList?.length; i++) {
+      const tempYoung = await YoungModel.findById(center.waitingList[i]);
+      if (tempYoung.department === young.department) {
+        res = tempYoung;
+        break;
+      }
+    }
+    return res;
   } catch (e) {
     console.log(e);
   }
@@ -126,4 +157,5 @@ module.exports = {
   ERRORS,
   getSignedUrl,
   updatePlacesCenter,
+  assignNextYoungFromWaitingList,
 };

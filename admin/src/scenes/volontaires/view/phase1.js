@@ -46,6 +46,17 @@ export default ({ young, getYoung }) => {
           {user.role === "admin" ? <AssignCenter young={young} onAffect={getYoung} /> : null}
         </>
       );
+    if (young.statusPhase1 === "WAITING_LIST")
+      return (
+        <>
+          <p>Le volontaire est sur liste d'attente au centre :</p>
+          <Link to={`/centre/${young.cohesionCenterId}`}>
+            <Details title="Centre" value={young.cohesionCenterName} />
+          </Link>
+          <Details title="Ville" value={young.cohesionCenterCity} />
+          <Details title="Code Postal" value={young.cohesionCenterZip} />
+        </>
+      );
   };
 
   return (

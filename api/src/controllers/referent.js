@@ -21,7 +21,7 @@ const AuthObject = require("../auth");
 
 const { decrypt } = require("../cryptoUtils");
 const { sendEmail } = require("../sendinblue");
-const { uploadFile, validatePassword, updatePlacesCenter, ERRORS } = require("../utils");
+const { uploadFile, validatePassword, updatePlacesCenter, assignNextYoungFromWaitingList, ERRORS } = require("../utils");
 const { encrypt } = require("../cryptoUtils");
 const ReferentAuth = new AuthObject(ReferentObject);
 
@@ -212,15 +212,22 @@ router.put("/young/:id", passport.authenticate("referent", { session: false }), 
   try {
     const { id } = req.params;
     const young = await YoungObject.findById(id);
+    let newYoung = req.body;
 
     // if withdrawn, cascade withdrawn on every status
     if (
       req.body.status === "WITHDRAWN" &&
       (young.statusPhase1 !== "WITHDRAWN" || young.statusPhase2 !== "WITHDRAWN" || young.statusPhase3 !== "WITHDRAWN")
     ) {
-      req.body = { ...req.body, statusPhase1: "WITHDRAWN", statusPhase2: "WITHDRAWN", statusPhase3: "WITHDRAWN" };
+      newYoung = { ...req.body, statusPhase1: "WITHDRAWN", statusPhase2: "WITHDRAWN", statusPhase3: "WITHDRAWN" };
     }
-    young.set(req.body);
+
+    // if withdrawn from phase1 -> run the script that find a replacement for this young
+    if (req.body.statusPhase1 === "WITHDRAWN" && young.statusPhase1 !== "WITHDRAWN") {
+      await assignNextYoungFromWaitingList(young);
+    }
+
+    young.set(newYoung);
     await young.save();
 
     // if they had a cohesion center, we check if we need to update the places taken / left

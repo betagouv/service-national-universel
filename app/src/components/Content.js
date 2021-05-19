@@ -40,6 +40,16 @@ const HeroStyle = styled.div`
     font-weight: 500;
     line-height: 1;
   }
+  h2 {
+    font-size: 1.5rem;
+    @media (max-width: 768px) {
+      font-size: 1rem;
+    }
+    color: #161e2e;
+    margin-bottom: 20px;
+    font-weight: 500;
+    line-height: 1;
+  }
   p {
     color: #6b7280;
     font-size: 1.25rem;
@@ -48,8 +58,6 @@ const HeroStyle = styled.div`
     }
     font-weight: 400;
     display: -webkit-box;
-    -webkit-line-clamp: 5;
-    -webkit-box-orient: vertical;
     overflow: hidden;
     a {
       font-size: 1rem;
@@ -147,7 +155,7 @@ export const WhiteButton = styled.button`
   border-radius: 15px;
   font-weight: 500;
   font-size: 1rem;
-  display: block;
+  display: inline-block;
   outline: 0;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   position: relative;
@@ -172,4 +180,11 @@ export const VioletButton = styled.button`
   :hover {
     opacity: 0.9;
   }
+`;
+
+export const InterTitle = styled.div`
+  font-size: 2rem;
+  color: #9d9e9f;
+  width: 100%;
+  text-align: center;
 `;

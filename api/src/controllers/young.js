@@ -17,7 +17,7 @@ const { getQPV } = require("../qpv");
 const YoungObject = require("../models/young");
 const CohesionCenterObject = require("../models/cohesionCenter");
 const AuthObject = require("../auth");
-const { uploadFile, validatePassword, updatePlacesCenter, ERRORS } = require("../utils");
+const { uploadFile, validatePassword, updatePlacesCenter, assignNextYoungFromWaitingList, ERRORS } = require("../utils");
 const { sendEmail } = require("../sendinblue");
 const certificate = require("../templates/certificate");
 const { cookieOptions } = require("../cookie-options");
@@ -210,6 +210,11 @@ router.put("/", passport.authenticate("young", { session: false }), async (req, 
     ) {
       young.set({ statusPhase1: "WITHDRAWN", statusPhase2: "WITHDRAWN", statusPhase3: "WITHDRAWN" });
       await young.save();
+    }
+
+    // if withdrawn from phase1 -> run the script that find a replacement for this young
+    if (req.body.statusPhase1 === "WITHDRAWN" && req.user.statusPhase1 !== "WITHDRAWN") {
+      await assignNextYoungFromWaitingList(young);
     }
 
     // if they had a cohesion center, we check if we need to update the places taken / left

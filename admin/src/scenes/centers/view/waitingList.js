@@ -18,6 +18,7 @@ import PanelActionButton from "../../../components/buttons/PanelActionButton";
 export default ({ center, updateCenter }) => {
   const [young, setYoung] = useState();
   const [list, setList] = useState([]);
+  const user = useSelector((state) => state.Auth.user);
 
   const handleClick = async (young) => {
     const { ok, data } = await api.get(`/referent/young/${young._id}`);
