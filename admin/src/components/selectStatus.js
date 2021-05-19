@@ -15,7 +15,7 @@ import ModalWithdrawn from "./modals/ModalWithdrawn";
 import ModalGoal from "./modals/ModalGoal";
 import Chevron from "./Chevron";
 
-export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status", phase = YOUNG_PHASE.INSCRIPTION, disabled }) => {
+export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status", phase = YOUNG_PHASE.INSCRIPTION, disabled, callback = () => {} }) => {
   const [modal, setModal] = useState(null);
   const [young, setYoung] = useState(null);
   const user = useSelector((state) => state.Auth.user);
@@ -97,6 +97,7 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
       }
       setYoung(newYoung);
       toastr.success("Mis à jour!");
+      callback();
     } catch (e) {
       console.log(e);
       toastr.error("Oups, une erreur est survenue :", translate(e.code));

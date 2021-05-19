@@ -22,7 +22,11 @@ export default ({ filter }) => {
         query: {
           bool: {
             must: { match_all: {} },
-            filter: [{ term: { "cohort.keyword": filter.cohort } }, { term: { "status.keyword": "VALIDATED" } }, { term: { "cohesionCenterId.keyword": user.cohesionCenterId } }],
+            filter: [
+              { term: { "cohort.keyword": filter.cohort } },
+              { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } },
+              { term: { "cohesionCenterId.keyword": user.cohesionCenterId } },
+            ],
           },
         },
         aggs: {
@@ -63,6 +67,7 @@ export default ({ filter }) => {
 };
 
 const Phase1 = ({ data, getLink }) => {
+  console.log(data);
   return (
     <>
       <Row>
@@ -111,6 +116,28 @@ const Phase1 = ({ data, getLink }) => {
               <CardTitle>Non réalisée</CardTitle>
               <CardValueWrapper>
                 <CardValue>{data.NOT_DONE || 0}</CardValue>
+                <CardArrow />
+              </CardValueWrapper>
+            </Card>
+          </Link>
+        </Col>
+        <Col md={6} xl={2}>
+          <Link to={getLink('/volontaire?STATUS_PHASE_1=%5B"WAITING_LIST"%5D')}>
+            <Card borderBottomColor={YOUNG_STATUS_COLORS.WAITING_LIST}>
+              <CardTitle>Sur liste complémentaire</CardTitle>
+              <CardValueWrapper>
+                <CardValue>{data.WAITING_LIST || 0}</CardValue>
+                <CardArrow />
+              </CardValueWrapper>
+            </Card>
+          </Link>
+        </Col>
+        <Col md={6} xl={2}>
+          <Link to={getLink('/volontaire?STATUS_PHASE_1=%5B"WITHDRAWN"%5D')}>
+            <Card borderBottomColor={YOUNG_STATUS_COLORS.WITHDRAWN}>
+              <CardTitle>Désistée</CardTitle>
+              <CardValueWrapper>
+                <CardValue>{data.WITHDRAWN || 0}</CardValue>
                 <CardArrow />
               </CardValueWrapper>
             </Card>

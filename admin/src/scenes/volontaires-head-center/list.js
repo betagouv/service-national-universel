@@ -14,7 +14,7 @@ import { ResultTable, Filter, Table, FilterRow, TopResultStats, BottomResultStat
 import ToggleSwitch from "../../components/ToogleSwitch";
 import { toastr } from "react-redux-toastr";
 
-const FILTERS = ["SEARCH", "STATUS", "PHASE", "COHORT", "MISSIONS", "TUTOR"];
+const FILTERS = ["SEARCH", "STATUS", "PHASE", "COHORT", "MISSIONS", "TUTOR", "STATUS_PHASE_1"];
 
 export default () => {
   const user = useSelector((state) => state.Auth.user);

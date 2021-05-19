@@ -7,6 +7,7 @@ import YearPicker from "../../dashboard/components/YearPicker";
 import Checkbox from "../../dashboard/components/Checkbox";
 
 import Status from "./status";
+import Center from "./center";
 
 import { YOUNG_STATUS, translate, REFERENT_ROLES } from "../../../utils";
 
@@ -44,6 +45,7 @@ export default () => {
             </FilterWrapper>
           </FiltersList>
           <Status filter={filter} />
+          <Center filter={filter} />
         </>
       )}
     </>
