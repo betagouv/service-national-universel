@@ -15,8 +15,9 @@ const renderFromHtml = require("../htmlToPdf");
 const { encrypt } = require("../cryptoUtils");
 const { getQPV } = require("../qpv");
 const YoungObject = require("../models/young");
+const CohesionCenterObject = require("../models/cohesionCenter");
 const AuthObject = require("../auth");
-const { uploadFile, validatePassword, ERRORS } = require("../utils");
+const { uploadFile, validatePassword, updatePlacesCenter, ERRORS } = require("../utils");
 const { sendEmail } = require("../sendinblue");
 const certificate = require("../templates/certificate");
 const { cookieOptions } = require("../cookie-options");
@@ -202,10 +203,20 @@ router.put("/", passport.authenticate("young", { session: false }), async (req, 
       await young.save();
     }
 
-    //check if withdrawn
-    if (req.user.status !== "WITHDRAWN" && young.status === "WITHDRAWN") {
+    // if withdrawn, cascade withdrawn on every status
+    if (
+      young.status === "WITHDRAWN" &&
+      (young.statusPhase1 !== "WITHDRAWN" || young.statusPhase2 !== "WITHDRAWN" || young.statusPhase3 !== "WITHDRAWN")
+    ) {
       young.set({ statusPhase1: "WITHDRAWN", statusPhase2: "WITHDRAWN", statusPhase3: "WITHDRAWN" });
       await young.save();
+    }
+
+    // if they had a cohesion center, we check if we need to update the places taken / left
+    if (req.user.statusPhase1 !== young.statusPhase1 && young.cohesionCenterId) {
+      console.log("update center", young.cohesionCenterId);
+      const center = await CohesionCenterObject.findById(young.cohesionCenterId);
+      if (center) await updatePlacesCenter(center);
     }
   } catch (error) {
     capture(error);

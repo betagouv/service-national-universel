@@ -89,6 +89,12 @@ const Schema = new mongoose.Schema({
       description: "Livraison de tenue",
     },
   },
+  waitingList: {
+    type: [String],
+    documentation: {
+      description: "Liste ordonnée des jeunes en liste d'attente sur ce cente de cohésion",
+    },
+  },
 
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },

@@ -31,7 +31,10 @@ export default ({ center, tab, children }) => {
             <Tab isActive={tab === "volontaires"} onClick={() => history.push(`/centre/${center._id}/volontaires`)}>
               Volontaires
             </Tab>
-            {user.role === "admin" ? (
+            <Tab isActive={tab === "waiting_list"} onClick={() => history.push(`/centre/${center._id}/liste-attente`)}>
+              Liste d'attente
+            </Tab>
+            {["admin", "referent_region"].includes(user.role) ? (
               <Tab isActive={tab === "affectation"} onClick={() => history.push(`/centre/${center._id}/affectation`)}>
                 Affectation manuelle
               </Tab>

@@ -16,11 +16,12 @@ const ReferentObject = require("../models/referent");
 const YoungObject = require("../models/young");
 const MissionObject = require("../models/mission");
 const ApplicationObject = require("../models/application");
+const CohesionCenterObject = require("../models/cohesionCenter");
 const AuthObject = require("../auth");
 
 const { decrypt } = require("../cryptoUtils");
 const { sendEmail } = require("../sendinblue");
-const { uploadFile, validatePassword, ERRORS } = require("../utils");
+const { uploadFile, validatePassword, updatePlacesCenter, ERRORS } = require("../utils");
 const { encrypt } = require("../cryptoUtils");
 const ReferentAuth = new AuthObject(ReferentObject);
 
@@ -211,12 +212,23 @@ router.put("/young/:id", passport.authenticate("referent", { session: false }), 
   try {
     const { id } = req.params;
     const young = await YoungObject.findById(id);
-    if (young.status !== "WITHDRAWN" && req.body.status === "WITHDRAWN") {
+
+    // if withdrawn, cascade withdrawn on every status
+    if (
+      req.body.status === "WITHDRAWN" &&
+      (young.statusPhase1 !== "WITHDRAWN" || young.statusPhase2 !== "WITHDRAWN" || young.statusPhase3 !== "WITHDRAWN")
+    ) {
       req.body = { ...req.body, statusPhase1: "WITHDRAWN", statusPhase2: "WITHDRAWN", statusPhase3: "WITHDRAWN" };
     }
     young.set(req.body);
     await young.save();
 
+    // if they had a cohesion center, we check if we need to update the places taken / left
+    if (young.cohesionCenterId) {
+      console.log("update center", young.cohesionCenterId);
+      const center = await CohesionCenterObject.findById(young.cohesionCenterId);
+      if (center) await updatePlacesCenter(center);
+    }
     res.status(200).send({ ok: true, data: young });
   } catch (error) {
     capture(error);

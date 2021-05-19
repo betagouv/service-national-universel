@@ -15,7 +15,14 @@ const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_P
 export default ({ center, updateCenter }) => {
   const [young, setYoung] = useState();
 
-  const getDefaultQuery = () => ({ query: { bool: { filter: [{ terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } }, { term: { cohesionCenterId: center._id } }] } } });
+  const getDefaultQuery = () => ({
+    query: {
+      bool: {
+        filter: [{ terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } }, { term: { cohesionCenterId: center._id } }],
+        must_not: [{ term: { "statusPhase1.keyword": "WAITING_LIST" } }],
+      },
+    },
+  });
 
   const handleClick = async (young) => {
     const { ok, data } = await api.get(`/referent/young/${young._id}`);
@@ -159,7 +166,7 @@ const Hit = ({ hit, onClick, selected, onChangeYoung }) => {
           disabled={user.role !== "admin"}
           hit={hit}
           callback={onChangeYoung}
-          options={Object.keys(YOUNG_STATUS_PHASE1)}
+          options={Object.keys(YOUNG_STATUS_PHASE1).filter((e) => e !== "WAITING_LIST")}
           statusName="statusPhase1"
           phase="COHESION_STAY"
         />

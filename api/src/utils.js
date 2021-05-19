@@ -2,6 +2,7 @@ const AWS = require("aws-sdk");
 const https = require("https");
 const http = require("http");
 const passwordValidator = require("password-validator");
+const YoungModel = require("./models/young");
 
 const { CELLAR_ENDPOINT, CELLAR_KEYID, CELLAR_KEYSECRET, BUCKET_NAME } = require("./config");
 
@@ -67,6 +68,38 @@ function validatePassword(password) {
   return schema.validate(password);
 }
 
+const updatePlacesCenter = async (center) => {
+  try {
+    const youngs = await YoungModel.find({ cohesionCenterId: center._id });
+    const placesTaken = youngs.filter(
+      (young) => ["AFFECTED", "WAITING_ACCEPTATION"].includes(young.statusPhase1) && young.status === "VALIDATED"
+    ).length;
+    const placesLeft = Math.max(0, center.placesTotal - placesTaken);
+    if (center.placesLeft !== placesLeft) {
+      console.log(`Center ${center.id}: total ${center.placesTotal}, left from ${center.placesLeft} to ${placesLeft}`);
+      center.set({ placesLeft });
+      await center.save();
+      await center.index();
+    }
+  } catch (e) {
+    console.log(e);
+  }
+  return center;
+};
+
+const spliceYoungFromWaitingList = async (center, gender, department) => {
+  try {
+    const youngId = center.waitingList.find((e) => e.gender === gender && e.department === department);
+    if (!youngId) {
+      // send email referent region + admin
+      return console.log("not found");
+    }
+    const young = await YoungModel.findById(youngId);
+  } catch (e) {
+    console.log(e);
+  }
+};
+
 const ERRORS = {
   SERVER_ERROR: "SERVER_ERROR",
   NOT_FOUND: "NOT_FOUND",
@@ -92,4 +125,5 @@ module.exports = {
   validatePassword,
   ERRORS,
   getSignedUrl,
+  updatePlacesCenter,
 };

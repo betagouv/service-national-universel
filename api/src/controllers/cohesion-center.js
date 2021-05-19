@@ -7,26 +7,7 @@ const Joi = require("joi");
 const CohesionCenterModel = require("../models/cohesionCenter");
 const ReferentModel = require("../models/referent");
 const YoungModel = require("../models/young");
-const { ERRORS } = require("../utils");
-
-const updatePlacesCenter = async (center) => {
-  try {
-    const youngs = await YoungModel.find({ cohesionCenterId: center._id });
-    const placesTaken = youngs.filter(
-      (young) => ["AFFECTED", "WAITING_ACCEPTATION"].includes(young.statusPhase1) && young.status === "VALIDATED"
-    ).length;
-    const placesLeft = Math.max(0, center.placesTotal - placesTaken);
-    if (center.placesLeft !== placesLeft) {
-      console.log(`Center ${center.id}: total ${center.placesTotal}, left from ${center.placesLeft} to ${placesLeft}`);
-      center.set({ placesLeft });
-      await center.save();
-      await center.index();
-    }
-  } catch (e) {
-    console.log(e);
-  }
-  return center;
-};
+const { ERRORS, updatePlacesCenter } = require("../utils");
 
 router.post("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   // Validate params.
@@ -79,6 +60,13 @@ router.post("/:centerId/assign-young/:youngId", passport.authenticate("referent"
     await young.save();
     await young.index();
 
+    //if young is in waitingList of the center
+    // todo check if the young is in antoher center's waiting list
+    if (center.waitingList.indexOf(young._id) !== -1) {
+      const i = center.waitingList.indexOf(young._id);
+      center.waitingList.splice(i, 1);
+      await center.save();
+    }
     // update center infos
     const data = await updatePlacesCenter(center);
 
