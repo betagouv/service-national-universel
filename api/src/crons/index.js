@@ -34,10 +34,6 @@ if (ENVIRONMENT === "production") {
     apiEngagement.handler();
   });
 
-  cron.schedule("*/60 * * * * *", () => {
-    autoAffectationCohesionCenter.test();
-  });
-
   //every hour
   // cron.schedule("0 * * * *", () => {
   //   autoAffectationCohesionCenter.handler();
