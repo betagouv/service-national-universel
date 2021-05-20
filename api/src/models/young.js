@@ -256,6 +256,13 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  autoAffectationPhase1ExpiresAt: {
+    type: Date,
+    documentation: {
+      description: "Date limite de réponse a la participation à la phase 1",
+    },
+  },
+
   // * phase 2 application infos
   phase2ApplicationStatus: {
     type: [String],

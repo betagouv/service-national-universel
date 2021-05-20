@@ -98,7 +98,7 @@ const assignNextYoungFromWaitingList = async (young) => {
   } else {
     //notify young & modify statusPhase1
     console.log("young found", nextYoung._id);
-    nextYoung.set({ statusPhase1: "WAITING_ACCEPTATION" });
+    nextYoung.set({ statusPhase1: "WAITING_ACCEPTATION", autoAffectationPhase1ExpiresAt: Date.now() + 60 * 1000 * 60 * 24 });
     await nextYoung.save();
 
     //remove the young from the waiting list
