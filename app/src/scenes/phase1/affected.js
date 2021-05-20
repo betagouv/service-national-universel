@@ -31,14 +31,14 @@ export default () => {
             Le SNU vous donne l'opportunité de découvrir la vie collective au sein d'un centre accueillant environ 200 jeunes de votre région pour créer ainsi des liens nouveaux et
             développer votre culture de l’engagement et ainsi affirmer votre place dans la société.
           </p>
-          <Separator />
+          {/* <Separator />
           <p>
             <strong>Votre convocation</strong>
             <br />
             Vous êtes actuellement affecté(e) à un centre de cohésion.
             <br />
             <span style={{ color: "#5145cd" }}>{`${center?.name}, ${center?.address} ${center?.zip} ${center?.city}, ${center?.department}, ${center?.region}`}</span>
-          </p>
+          </p> */}
         </div>
         <div className="thumb" />
       </Hero>

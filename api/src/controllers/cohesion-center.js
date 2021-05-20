@@ -51,7 +51,8 @@ router.post("/:centerId/assign-young/:youngId", passport.authenticate("referent"
 
     // update youngs infos
     young.set({
-      statusPhase1: "WAITING_ACCEPTATION",
+      // todo : WAITING_ACCEPTATION when all the communication is done
+      statusPhase1: "AFFECTED",
       cohesionCenterId: center._id,
       cohesionCenterName: center.name,
       cohesionCenterCity: center.city,

@@ -10,6 +10,8 @@ export const translate = (value) => {
       return "À venir";
     case "WAITING_AFFECTATION":
       return "En attente d'affectation";
+    case "WAITING_LIST":
+      return "En attente d'affectation";
     case "WAITING_REALISATION":
       return "En attente de réalisation";
     case "WAITING_VALIDATION":

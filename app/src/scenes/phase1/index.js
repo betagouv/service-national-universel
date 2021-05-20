@@ -7,6 +7,7 @@ import Cancel from "./cancel.js";
 import NotDone from "./notDone.js";
 import WaitingAcceptation from "./waitingAcceptation.js";
 import WaitingAffectation from "./waitingAffectation.js";
+import WaitingList from "./waitingList.js";
 import { YOUNG_STATUS_PHASE1, permissionPhase1 } from "../../utils";
 import { HeroContainer, Hero } from "../../components/Content";
 import { useHistory } from "react-router-dom";
@@ -24,6 +25,7 @@ export default () => {
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) return <NotDone />;
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_ACCEPTATION) return <WaitingAcceptation />;
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION) return <WaitingAffectation />;
+    if (young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_LIST) return <WaitingList />;
     return (
       <>
         <HeroContainer>

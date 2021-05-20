@@ -89,16 +89,18 @@ const updatePlacesCenter = async (center) => {
 };
 
 const assignNextYoungFromWaitingList = async (young) => {
-  if (ENVIRONMENT === "production") return;
   const nextYoung = await getYoungFromWaitingList(young);
   if (!nextYoung) {
     //notify referents & admin
     console.log("no young found");
-    //todo : send mail to ref region & admin
+    //todo 25/05 : send mail to ref region & admin
   } else {
     //notify young & modify statusPhase1
     console.log("young found", nextYoung._id);
-    nextYoung.set({ statusPhase1: "WAITING_ACCEPTATION", autoAffectationPhase1ExpiresAt: Date.now() + 60 * 1000 * 60 * 24 });
+
+    //todo 25/05 : activate waiting accepation and 24h cron
+    // nextYoung.set({ statusPhase1: "WAITING_ACCEPTATION", autoAffectationPhase1ExpiresAt: Date.now() + 60 * 1000 * 60 * 24 });
+    nextYoung.set({ statusPhase1: "AFFECTED" });
     await nextYoung.save();
 
     //remove the young from the waiting list
