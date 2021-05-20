@@ -35,7 +35,7 @@ export default ({ center, updateCenter }) => {
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <CenterView center={center} tab="volontaires">
         <div>
-          <ReactiveBase url={`${apiURL}/es`} app="young" headers={{ Authorization: `JWT ${api.getToken()}` }}>
+          <ReactiveBase url={`${apiURL}/es`} app="cohesionyoung" headers={{ Authorization: `JWT ${api.getToken()}` }}>
             <div style={{ display: "flex", alignItems: "flex-start", width: "100%", height: "100%" }}>
               <div style={{ flex: 1, position: "relative" }}>
                 <Filter>

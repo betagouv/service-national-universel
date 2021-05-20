@@ -10,6 +10,7 @@ router.post("/_msearch", passport.authenticate(["young", "referent"], { session:
 
 router.post("/mission/_msearch", passport.authenticate(["young", "referent"], { session: false }), (req, res) => exec(req, res, "mission"));
 router.post("/young/_msearch", passport.authenticate(["referent"], { session: false }), (req, res) => exec(req, res, "young"));
+router.post("/cohesionyoung/_msearch", passport.authenticate(["referent"], { session: false }), (req, res) => exec(req, res, "cohesionyoung"));
 router.post("/structure/_msearch", passport.authenticate(["referent"], { session: false }), (req, res) => exec(req, res, "structure"));
 router.post("/referent/_msearch", passport.authenticate(["referent"], { session: false }), (req, res) => exec(req, res, "referent"));
 router.post("/application/_msearch", passport.authenticate(["referent"], { session: false }), (req, res) => exec(req, res, "application"));
@@ -28,6 +29,7 @@ async function exec(req, res, index = "") {
     }
 
     const bodyFiltered = await filter(body, user, index);
+    if (index === "cohesionyoung") index = "young";
     let i = index ? [index] : [];
     const d = await esClient.msearch({ index: i, body: bodyFiltered });
     return res.status(200).send(d.body);
@@ -56,6 +58,10 @@ function filter(body, user, index) {
 
     if (user.role === "referent_region") filter.push({ term: { "region.keyword": user.region } });
     if (user.role === "referent_department") filter.push({ term: { "department.keyword": user.department } });
+  }
+
+  if (index === "cohesionyoung") {
+    filter.push({ terms: { "status.keyword": ["WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "VALIDATED", "WITHDRAWN", "WAITING_LIST"] } });
   }
 
   if (index === "referent") {
