@@ -5,7 +5,7 @@ const passwordValidator = require("password-validator");
 const YoungModel = require("./models/young");
 const CohesionCenterModel = require("./models/cohesionCenter");
 
-const { CELLAR_ENDPOINT, CELLAR_KEYID, CELLAR_KEYSECRET, BUCKET_NAME } = require("./config");
+const { CELLAR_ENDPOINT, CELLAR_KEYID, CELLAR_KEYSECRET, BUCKET_NAME, ENVIRONMENT } = require("./config");
 
 function getReq(url, cb) {
   if (url.toString().indexOf("https") === 0) return https.get(url, cb);
@@ -89,6 +89,7 @@ const updatePlacesCenter = async (center) => {
 };
 
 const assignNextYoungFromWaitingList = async (young) => {
+  if (ENVIRONMENT === "production") return;
   const nextYoung = await getYoungFromWaitingList(young);
   if (!nextYoung) {
     //notify referents & admin
@@ -120,7 +121,7 @@ const getYoungFromWaitingList = async (young) => {
     let res = null;
     for (let i = 0; i < center.waitingList?.length; i++) {
       const tempYoung = await YoungModel.findById(center.waitingList[i]);
-      if (tempYoung.department === young.department) {
+      if (tempYoung.department === young.department && tempYoung.gender === young.gender) {
         res = tempYoung;
         break;
       }

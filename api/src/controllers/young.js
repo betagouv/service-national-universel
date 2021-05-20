@@ -213,7 +213,7 @@ router.put("/", passport.authenticate("young", { session: false }), async (req, 
     }
 
     // if withdrawn from phase1 -> run the script that find a replacement for this young
-    if (req.body.statusPhase1 === "WITHDRAWN" && req.user.statusPhase1 !== "WITHDRAWN") {
+    if (young.statusPhase1 === "WITHDRAWN" && ["AFFECTED", "WAITING_ACCEPTATION"].includes(req.user.statusPhase1) && req.user.cohesionCenterId) {
       await assignNextYoungFromWaitingList(young);
     }
 

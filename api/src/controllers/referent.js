@@ -216,14 +216,14 @@ router.put("/young/:id", passport.authenticate("referent", { session: false }), 
 
     // if withdrawn, cascade withdrawn on every status
     if (
-      req.body.status === "WITHDRAWN" &&
+      newYoung.status === "WITHDRAWN" &&
       (young.statusPhase1 !== "WITHDRAWN" || young.statusPhase2 !== "WITHDRAWN" || young.statusPhase3 !== "WITHDRAWN")
     ) {
-      newYoung = { ...req.body, statusPhase1: "WITHDRAWN", statusPhase2: "WITHDRAWN", statusPhase3: "WITHDRAWN" };
+      newYoung = { ...newYoung, statusPhase1: "WITHDRAWN", statusPhase2: "WITHDRAWN", statusPhase3: "WITHDRAWN" };
     }
 
     // if withdrawn from phase1 -> run the script that find a replacement for this young
-    if (req.body.statusPhase1 === "WITHDRAWN" && young.statusPhase1 !== "WITHDRAWN") {
+    if (newYoung.statusPhase1 === "WITHDRAWN" && ["AFFECTED", "WAITING_ACCEPTATION"].includes(young.statusPhase1) && young.cohesionCenterId) {
       await assignNextYoungFromWaitingList(young);
     }
 
