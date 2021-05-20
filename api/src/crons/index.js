@@ -5,6 +5,7 @@ const { sendRecapRegion } = require("./mailRecap/cron_hebdo_region");
 const { sendRecapDepartmentTuesday, sendRecapDepartmentThursday } = require("./mailRecap/cron_hebdo_department");
 const apiEngagement = require("./syncApiEngagement");
 const { capture } = require("../sentry");
+const autoAffectationCohesionCenter = require("./autoAffectationCohesionCenter");
 
 // dev : */5 * * * * * (every 5 secs)
 // prod : 0 8 * * 1 (every monday at 0800)
@@ -31,5 +32,9 @@ if (ENVIRONMENT === "production") {
   // everyday at 0200
   cron.schedule("0 13 * * *", () => {
     apiEngagement.handler();
+  });
+
+  cron.schedule("*/60 * * * * *", () => {
+    autoAffectationCohesionCenter.test();
   });
 }
