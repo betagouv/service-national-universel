@@ -141,6 +141,7 @@ export default ({ center, updateCenter }) => {
                     "ID centre": center._id || "",
                     "Code centre": center.code || "",
                     "Nom du centre": center.name || "",
+                    Adresse: center.address || "",
                     "Ville du centre": data.cohesionCenterCity || "",
                     "Département du centre": center.department || "",
                     "Région du centre": center.region || "",
