@@ -96,6 +96,20 @@ export default () => {
             <a href="https://apicivique.s3.eu-west-3.amazonaws.com/Note_relative_aux_informations_d_ordre_sanitaire.pdf" target="blank" className="link">
               Note relative aux informations d'ordre sanitaire{" >"}
             </a>
+
+            <div style={{ marginTop: "2rem" }}>
+              <div style={{ color: "#777" }}>
+                <b> Rappel : </b>Vous devez réaliser un bilan de santé obligatoire auprès de votre médecin traitant. Il est fortement recommandé de le faire avant votre séjour de
+                cohésion
+              </div>
+              <a
+                href="https://www.ameli.fr/assure/sante/themes/suivi-medical-de-lenfant-et-de-ladolescent/examen-medical-propose-ladolescent-entre-15-et-16-ans"
+                className="link"
+                target="_blank"
+              >
+                Plus d’informations sur le bilan de santé obligatoire ›
+              </a>
+            </div>
           </div>
           <div style={{ minWidth: "30%", display: "flex", justifyContent: "flex-end", alignItems: "center", marginLeft: "1.5rem" }}>
             <a target="blank" href="https://apicivique.s3.eu-west-3.amazonaws.com/Fiche_sanitaire.pdf">
@@ -103,6 +117,7 @@ export default () => {
             </a>
           </div>
         </ContentHorizontal>
+        <ContentHorizontal></ContentHorizontal>
         <Content style={{ width: "100%" }} id="imageRight">
           <div style={{ display: "flex" }}>
             <div className="icon">
