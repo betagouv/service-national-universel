@@ -152,7 +152,7 @@ const Hit = ({ hit, onClick, selected, onChangeYoung }) => {
     return Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
   };
   return (
-    <tr style={{ backgroundColor: selected && "#e6ebfa" }} onClick={onClick}>
+    <tr style={{ backgroundColor: (selected && "#e6ebfa") || (hit.status === "WITHDRAWN" && "#BE3B1211") }} onClick={onClick}>
       <td>
         <MultiLine>
           <h2>{`${hit.firstName} ${hit.lastName}`}</h2>

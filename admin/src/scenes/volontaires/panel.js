@@ -58,8 +58,8 @@ export default ({ onChange, value }) => {
         </a>
       </div>
       {young.status === YOUNG_STATUS.WITHDRAWN ? (
-        <Info title="Désistement">
-          <div className="quote">{`« ${young.withdrawnMessage} »`}</div>
+        <Info title="Motif du désistement">
+          <div className="quote">{young.withdrawnMessage ? `« ${young.withdrawnMessage} »` : "Non renseigné"}</div>
         </Info>
       ) : null}
       {young && young.historic && young.historic.length !== 0 && <Historic value={young.historic} />}
