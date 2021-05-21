@@ -21,7 +21,7 @@ const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_P
 
 export default ({ setYoung }) => {
   const [volontaire, setVolontaire] = useState(null);
-  const getDefaultQuery = () => ({ query: { bool: { filter: { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } } } } });
+  const getDefaultQuery = () => ({ query: { bool: { filter: { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN", "WAITING_LIST"] } } } } });
   const getExportQuery = () => ({ ...getDefaultQuery(), size: 10000 });
   return (
     <div>

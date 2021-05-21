@@ -92,20 +92,21 @@ const assignNextYoungFromWaitingList = async (young) => {
   const nextYoung = await getYoungFromWaitingList(young);
   if (!nextYoung) {
     //notify referents & admin
-    console.log("no young found");
+    console.log(`no replacement found for young ${young._id} in center ${young.cohesionCenterId}`);
     //todo 25/05 : send mail to ref region & admin
   } else {
     //notify young & modify statusPhase1
-    console.log("young found", nextYoung._id);
+    console.log("replacement found", nextYoung._id);
 
     //todo 25/05 : activate waiting accepation and 24h cron
     // nextYoung.set({ statusPhase1: "WAITING_ACCEPTATION", autoAffectationPhase1ExpiresAt: Date.now() + 60 * 1000 * 60 * 24 });
-    nextYoung.set({ statusPhase1: "AFFECTED" });
+    nextYoung.set({ status: "VALIDATED", statusPhase1: "AFFECTED" });
     await nextYoung.save();
 
     //remove the young from the waiting list
     const center = await CohesionCenterModel.findById(nextYoung.cohesionCenterId);
     if (center?.waitingList?.indexOf(nextYoung._id) !== -1) {
+      console.log(`remove young ${nextYoung._id} from waiting_list of ${nextYoung.cohesionCenterId}`);
       const i = center.waitingList.indexOf(nextYoung._id);
       center.waitingList.splice(i, 1);
       await center.save();
