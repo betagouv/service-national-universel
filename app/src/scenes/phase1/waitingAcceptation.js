@@ -41,7 +41,7 @@ export default () => {
     try {
       if (!confirm("Êtes vous certain(e) de vouloir valider votre participation au séjour de cohésion ?")) return;
       console.log("Accept");
-      const { data, ok, code } = await api.put("/young", { ...young, statusPhase1: "AFFECTED" });
+      const { data, ok, code } = await api.put("/young", { ...young, status: "VALIDATED", statusPhase1: "AFFECTED" });
       if (!ok) return toastr.error("Oups, une erreur est survenue", translate(code));
       toastr.success("Votre participation a bien été pris en compte");
       if (data) dispatch(setYoung(data));
