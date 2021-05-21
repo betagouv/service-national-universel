@@ -31,14 +31,6 @@ router.post("/", passport.authenticate("referent", { session: false }), async (r
 });
 
 router.post("/:centerId/assign-young/:youngId", passport.authenticate("referent", { session: false }), async (req, res) => {
-  // Validate params.
-  // const { error, value: inscriptionsGoals } = Joi.array()
-  //   .items({
-  //     department: Joi.string().required(),
-  //     region: Joi.string(),
-  //     max: Joi.number().allow(null),
-  //   })
-  //   .validate(req.body, { stripUnknown: true });
   const error = false;
   if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
 
