@@ -41,9 +41,11 @@ router.post("/:centerId/assign-young/:youngId", passport.authenticate("referent"
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (center.placesLeft <= 0) return res.status(404).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
+    // todo : WAITING_ACCEPTATION when all the communication is done
+
     // update youngs infos
     young.set({
-      // todo : WAITING_ACCEPTATION when all the communication is done
+      status: "VALIDATED",
       statusPhase1: "AFFECTED",
       cohesionCenterId: center._id,
       cohesionCenterName: center.name,
