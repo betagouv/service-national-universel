@@ -22,49 +22,12 @@ import {
   BackButton,
   Content,
   SignBox,
-  Info,
   ContinueButton,
 } from "./components/printable";
 
-const AuthorizationIntro = () => (
-  <div>
-    Cette autorisation emporte la possibilité pour l’Administration ainsi que ses ayants droit éventuels ou toute personne accréditée ou autorisée par elle à enregistrer, à
-    reproduire et à représenter l’image et la voix du volontaire représenté légalement, en partie ou en intégralité, ensemble ou séparément, sur les médias / supports détaillés
-    ci-dessous.
-  </div>
-);
-
-const AuthorizationDetails = () => (
-  <div>
-    <b>Cette autorisation est valable pour une utilisation :</b>
-    <ul>
-      <li>
-        <b>• Pour une durée de :</b> 5 ans à compter de la signature de la présente
-      </li>
-      <li>
-        <b>• Sur tous les territoires :</b> monde, tous pays
-      </li>
-      <li>
-        • Sur tous les supports matériels et immatériels, en tous formats connus ou inconnus à ce jour, et notamment, sans que cette liste ne soit exhaustive : support papier
-        (tirages des photographies), catalogues et éditions diverses, CDROM / DVDROM et autres supports numériques connus et inconnus à ce jour, tout support audiovisuel, notamment
-        cinéma, TV et par tous moyens inhérents à ce mode de communication, internet (incluant Intranet, Extranet, Blogs, réseaux sociaux), tous vecteurs de réception confondus
-        (smartphones, tablettes, etc.), médias presse (spots publicitaires télévisuels, spots publicitaires cinématographiques), supports de communication interne, supports
-        promotionnels (PLV, ILV, campagnes d’affichage en tous lieux, toutes dimensions et sur tous supports (urbain, aéroports, gares, transports en commun, etc.), supports
-        destinés à la vente (produits de merchandising : cartes postales, posters, tee-shirt, produits dérivés, etc.) • De l’image du volontaire représenté légalement en tant que
-        telle, modifiée ou non, et/ou intégrée dans une œuvre papier, numérique ou audiovisuelle, telle qu’une émission, un reportage, un documentaire, une bande annonce
-        promotionnelle, etc.
-      </li>
-    </ul>
-    <b>La présente autorisation est consentie à titre gratuit.</b>
-  </div>
-);
-
 export default () => {
   const young = useSelector((state) => state.Auth.young);
-  const [expandInfo, setExpandInfo] = useState(false);
   const dispatch = useDispatch();
-
-  const toggleInfo = () => setExpandInfo(!expandInfo);
 
   return (
     <Content style={{ width: "100%" }} id="autoTest">
@@ -80,11 +43,16 @@ export default () => {
           </svg>
         </div>
         <div>
-          <h2>Consentement autotest PCR</h2>
-          {/* <p>
-            Votre représentant légal peut dès à présent renseigner le formulaire relatif au droit à l'image <b>avant le 4 juin 2021</b>. Cette étape est un pré-requis au séjour de
-            cohésion.
-          </p> */}
+          <h2>Consentement à l’utilisation d’autotest COVID</h2>
+          <p>
+            Votre représentant légal doit renseigner le formulaire relatif à l’utilisation d’autotest COVID pendant le séjour de cohésion avant le <b>4&nbsp;juin&nbsp;2021</b>.
+            <br />
+            <i>Cette étape est un pré-requis au séjour de cohésion.</i>
+            <br />
+            <a href="https://apicivique.s3.eu-west-3.amazonaws.com/Note_relative_a%CC%80_l_utilisation_d_autotest_COVID.pdf" target="blank" className="link">
+              Note relative à l’utilisation d’autotest antingénique COVID{" >"}
+            </a>
+          </p>
         </div>
       </div>
       {young.autoTestPCRFiles && young.autoTestPCRFiles.length ? (
@@ -181,9 +149,6 @@ export default () => {
                     </Row>
                   </FormGroup>
                 ) : null}
-                <Title>
-                  <span>Autorisez l'autotest PCR</span>
-                </Title>
                 <FormRow>
                   <Col>
                     <RadioLabel>
@@ -196,20 +161,33 @@ export default () => {
                         checked={values.autoTestPCR === "true"}
                         onChange={handleChange}
                       />
-                      <label htmlFor="true">TEST DANS LE NEZ</label>
+                      <label htmlFor="autoTestPCR_true">
+                        J'autorise la <b>réalisation d’autotests antigéniques</b> sur prélèvement nasal par l’enfant dont je suis titulaire de l’autorité parentale, et, en cas de
+                        résultat positif, à la communication de celui-ci au directeur académiques des services académiques, à l’ARS, au chef de centre et aux personnes habilitées
+                        par ce dernier.
+                      </label>
+                    </RadioLabel>
+                  </Col>
+                </FormRow>
+                <FormRow>
+                  <Col>
+                    <RadioLabel>
+                      <Field
+                        id="autoTestPCR_false"
+                        validate={(v) => !v && requiredMessage}
+                        type="radio"
+                        name="autoTestPCR"
+                        value="false"
+                        checked={values.autoTestPCR === "false"}
+                        onChange={handleChange}
+                      />
+                      <label htmlFor="autoTestPCR_false">
+                        Je n'autorise pas la <b>réalisation d'autotests antinégiques</b>
+                      </label>
                     </RadioLabel>
                     <ErrorMessage errors={errors} touched={touched} name="autoTestPCR" />
                   </Col>
                 </FormRow>
-                <Info className="noPrint">
-                  <AuthorizationIntro />
-                  {expandInfo ? <AuthorizationDetails /> : "..."}
-                  <span onClick={toggleInfo}>{expandInfo ? "  VOIR MOINS" : "  VOIR PLUS"}</span>
-                </Info>
-                <Info className="onlyPrint">
-                  <AuthorizationIntro />
-                  <AuthorizationDetails />
-                </Info>
                 <div className="noPrint">
                   {/* @todo add with france connect */}
                   {/* <Title>
@@ -217,10 +195,14 @@ export default () => {
                   </Title> */}
                   <div style={{ display: "flex", justifyContent: "center" }}>
                     <div>
-                      <BackButton onClick={() => print()}>Imprimer le formulaire pré-rempli</BackButton>
+                      {/* <BackButton onClick={() => print()}>Imprimer le formulaire pré-rempli</BackButton> */}
                       <DownloadText>
-                        Ou {/* todo : upload version du formialire autotestPCR */}
-                        <a href="https://apicivique.s3.eu-west-3.amazonaws.com/consentement_droit_image.pdf" target="_blank">
+                        {/* Ou todo : upload version du formialire autotestPCR */}
+                        <a
+                          href="https://apicivique.s3.eu-west-3.amazonaws.com/Consentement_a%CC%80_l_utilisation_d_autotest_COVID.pdf"
+                          target="_blank"
+                          style={{ fontSize: "1rem" }}
+                        >
                           télécharger le modèle à remplir
                         </a>
                       </DownloadText>
