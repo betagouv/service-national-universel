@@ -27,15 +27,18 @@ const {
   validatePassword, 
   updatePlacesCenter, 
   assignNextYoungFromWaitingList, 
-  ERRORS, 
-  validateYoung,
-  validateReferent,
-  validateMission,
-  validateString,
+  ERRORS,
   validateEmail,
-  validateToken,
-  validateId
-} = require("../utils");
+  validateId,
+  validateString,
+  validateToken 
+} = require("../utils/index");
+
+const {
+  validateYoungFromRef,
+  validateReferentFromRef
+} = require('../utils/referent')
+
 const { encrypt } = require("../cryptoUtils");
 const ReferentAuth = new AuthObject(ReferentObject);
 
@@ -44,7 +47,7 @@ const { valid } = require("joi");
 
 async function updateTutorNameInMissionsAndApplications(tutor) {
   if (!tutor || !tutor.firstName || !tutor.lastName) return;
-  const { error, checkedId } = validateId(tutor._id);
+  const { error, value : checkedId } = validateId(tutor._id);
   if(error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_URI, error });
   const missions = await MissionObject.find({ tutorId: checkedId });
   // Update missions
@@ -249,7 +252,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false }), 
   try {
     const { id } = req.params;
     const { errorId, value : checkedId } = validateId(id);
-    const { errorYoung, value : checkedYoung } = validateYoung(req.body);
+    const { errorYoung, value : checkedYoung } = validateYoungFromRef(req.body);
     if (errorId || errorYoung) return res.status(400).send({ ok: false, code: ERRORS.INVALID, error });
     const young = await YoungObject.findById(checkedId);
 
@@ -285,7 +288,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false }), 
 router.post("/young", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const obj = { ...req.body };
-    const { error, value : checkedYoung } = validateYoung(obj);
+    const { error, value : checkedYoung } = validateYoungFromRef(obj);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
     const invitation_token = crypto.randomBytes(20).toString("hex");
     obj.invitationToken = invitation_token;
@@ -524,7 +527,7 @@ router.get("/structure/:id", passport.authenticate("referent", { session: false 
 router.put("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const { errorId, value : checkedId } = validateId(req.params.id);
-    const { errorReferent, value : checkedReferent } = validateReferent(req.body);
+    const { errorReferent, value : checkedReferent } = validateReferentFromRef(req.body);
     if(errorId || errorReferent) return res.status(400).send({ ok: false, code: ERRORS.INVALID, error });
     const data = await ReferentObject.findOne({ _id: checkedId });
     const isAdmin = req.user.role === "admin";
@@ -576,7 +579,7 @@ router.put("/:id", passport.authenticate("referent", { session: false }), async 
 router.put("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const { errorId, value : checkedId } = validateId(req.user._id);
-    const { errorReferent, value : checkedReferent } = validateReferent(req.body);
+    const { errorReferent, value : checkedReferent } = validateReferentFromRef(req.body);
     if(errorId || errorReferent) return res.status(400).send({ ok: false, code: ERRORS.INVALID, error });
     const obj = checkedReferent;
     obj.email = checkedReferent.email && req.body.email.trim().toLowerCase();
