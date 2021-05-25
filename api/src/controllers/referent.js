@@ -76,7 +76,6 @@ router.post("/forgot_password_reset", async (req, res) => ReferentAuth.forgotPas
 router.post("/signin_as/:type/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const { type, id } = req.params;
-    // OK
     const { errorType, value : checkedType } = validateString(type);
     const { errorId, value : checkedId } = validateId(id);
     if(errorType || errorId ) return res.status(400).send({ ok: false, code: ERRORS.INVALID_URI, error });
@@ -98,7 +97,7 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
 
 router.post("/signup_invite/:template", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    // Pas Joi pour l'instant : pas de connaissances de template
+    /// Need to be tested
     const obj = {};
     const reqTemplate = req.params.template;
     if (req.body.hasOwnProperty(`email`)) obj.email = req.body.email.trim().toLowerCase();
@@ -160,7 +159,7 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
 router.post("/signup_retry", async (req, res) => {
   try {
     const email = (req.body.email || "").trim().toLowerCase();
-    // Pas tester
+    /// Need to be tested
     const { error, value : checkedEmail } = validateEmail(email);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_MAIL, error });
     const referent = await ReferentObject.findOne({ checkedEmail });
@@ -191,7 +190,7 @@ router.post("/signup_retry", async (req, res) => {
 
 router.post("/signup_verify", async (req, res) => {
   try {
-    // Pas tester
+    /// Need to be tested
     const { error, value : checkedInvitationToken } = validateToken(req.body.invitationToken)
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID, error });
     const referent = await ReferentObject.findOne({ invitationToken: checkedInvitationToken, invitationExpires: { $gt: Date.now() } });
@@ -206,7 +205,7 @@ router.post("/signup_verify", async (req, res) => {
 router.post("/signup_invite", async (req, res) => {
   try {
     const email = (req.body.email || "").trim().toLowerCase();
-    // Pas tester
+    // Need to be tested
     const { error, value : checkedEmail } = validateEmail(email);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_MAIL, error });
     const referent = await ReferentObject.findOne({ checkedEmail });
@@ -249,7 +248,6 @@ router.post("/signup_invite", async (req, res) => {
 router.put("/young/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const { id } = req.params;
-    // OK
     const { errorId, value : checkedId } = validateId(id);
     const { errorYoung, value : checkedYoung } = validateYoung(req.body);
     if (errorId || errorYoung) return res.status(400).send({ ok: false, code: ERRORS.INVALID, error });
@@ -287,7 +285,6 @@ router.put("/young/:id", passport.authenticate("referent", { session: false }), 
 router.post("/young", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const obj = { ...req.body };
-    // OK
     const { error, value : checkedYoung } = validateYoung(obj);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
     const invitation_token = crypto.randomBytes(20).toString("hex");
@@ -313,7 +310,7 @@ router.post("/young", passport.authenticate("referent", { session: false }), asy
 
 router.post("/email-tutor/:template/:tutorId", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    // Pas Joi pour l'instant : pas de connaissances de template
+    // Need to be tested
     const { tutorId, template } = req.params;
     const { error, value : checkedTutorId } = validateString(tutorId);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID, error });
@@ -348,7 +345,7 @@ router.post("/email-tutor/:template/:tutorId", passport.authenticate("referent",
 
 router.post("/email/:template/:youngId", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    // Pas tester
+    // Need to be tested
     const { youngId, template } = req.params;
     const { error, value : checkedYoungId } = validateString(youngId);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID, error });

@@ -314,15 +314,6 @@ function validateYoung(young){
       sportInterest: Joi.string().allow(null,''),
       environmentInterest: Joi.string().allow(null,''),
       citizenshipInterest: Joi.string().allow(null,''),
-      // createdAt: Joi.string().allow(null,''),
-      // updatedAt: Joi.string().allow(null,''),
-      // _id: Joi.string().allow(null, ''),
-      // __v : Joi.number(),
-      // Attention aux attributs récupérés, ceux voulus ou non
-      // Qu'est-ce qu'on veut concretement ecrire
-      // Ce qu'on doit passer dans le truc update c'est exclusivement ce qu'on PEUT modifier
-      // Le front ne doit envoyer qu'exclusivement l'objet avec ses attributs définis
-      // Par exemple ici _id et __v ne devrait pas etre accessible ou modifiable par le front
       applications : Joi.array().items(Joi.object()
       .keys({
         sqlId: Joi.string().allow(null,''),
@@ -343,8 +334,6 @@ function validateYoung(young){
         tutorName: Joi.string().allow(null,''),
         priority: Joi.string().allow(null,''),
         status: Joi.string().allow(null,''),
-        // createdAt: Joi.string().allow(null,''),
-        // updatedAt: Joi.string().allow(null,''),
       })),
     })
     .validate(young, { stripUnknown: true });
@@ -400,16 +389,8 @@ function validateMission(mission){
       structureId: Joi.string().allow(null,''),
       structureName: Joi.string().allow(null,''),
       status: Joi.string().allow(null,''),
-      // structure_id: { type: String, required: true },
-      // referent_id: { type: String, required: true },
       tutorId: Joi.string().allow(null,''),
       tutorName: Joi.string().allow(null,''),
-      //
-    
-      // dates_infos: { type: String },
-      // periodes: { type: String },
-      // frequence: { type: String },
-      // planning: { type: String },
       address: Joi.string().allow(null,''),
       zip: Joi.string().allow(null,''),
       city: Joi.string().allow(null,''),
@@ -421,10 +402,6 @@ function validateMission(mission){
         lon : Joi.number(),
       }),
       remote: Joi.string().allow(null,''),
-      //
-      //
-      //
-      // state: { type: String },
     })
     .validate(mission, {stripUnknown : true})
 }
