@@ -5,12 +5,12 @@ const { capture, captureMessage } = require("../sentry");
 const YoungModel = require("../models/young");
 const { assignNextYoungFromWaitingList } = require("../utils");
 
-const delay = 24; // delay in hour
+const delay = 48; // delay in hour
 const delayDate = new Date(Date.now() - 60 * 60 * 1000 * delay);
 
 const clean = async () => {
   const youngsLimit = await YoungModel.find({ autoAffectationPhase1ExpiresAt: { $lte: delayDate } });
-  console.log(`${youngsLimit.length} youngs has autoAffectationPhase1ExpiresAt > 24h`);
+  console.log(`${youngsLimit.length} youngs has autoAffectationPhase1ExpiresAt > 48h`);
   for (let i = 0; i < youngsLimit.length; i++) {
     const young = youngsLimit[i];
     if (young.statusPhase1 === "WAITING_ACCEPTATION") {
