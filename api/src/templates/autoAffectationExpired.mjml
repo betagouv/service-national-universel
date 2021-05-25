@@ -1,0 +1,22 @@
+<mjml>
+  <mj-body>
+    <mj-section>
+      <mj-column>
+        <mj-text>
+          <h1 font-size="20px">La place proposée en séjour de cohésion n'est plus disponible</h1>
+        </mj-text>
+        <mj-text font-size="18px" color="#3D4852">Bonjour {{firstName}} {{lastName}},</mj-text>
+
+        <mj-text font-size="18px" color="#3D4852">
+          Suite à la proposition de place qui vous est parvenue il y a 48 heures et en l'absence de votre confirmation, la place vacante a été proposé à quelqu'un d'autre.
+        </mj-text>
+        <mj-text font-size="18px" color="#3D4852">Bonne continuation,</mj-text>
+        <mj-text font-size="18px" color="#3D4852">
+          Les équipes du Service National Universel</mj-text>
+
+        <mj-divider border-color="#F6F7F8"></mj-divider>
+
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

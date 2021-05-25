@@ -6,6 +6,7 @@ import Inscription from "./inscription";
 import Volontaire from "./volontaire";
 import Structure from "./structure";
 import Mission from "./missions";
+import Center from "./centers";
 import VioletHeaderButton from "../../components/buttons/VioletHeaderButton";
 import ExportAll from "./inscription/ExportAll";
 
@@ -29,6 +30,9 @@ export default () => {
           <TabItem onClick={() => setCurrentTab("missions")} isActive={currentTab === "missions"}>
             Missions
           </TabItem>
+          <TabItem onClick={() => setCurrentTab("centers")} isActive={currentTab === "centers"}>
+            Centres
+          </TabItem>
         </TabNavigationList>
         <div style={{ display: "flex" }}>
           {user.role === "admin" && currentTab === "inscriptions" ? <ExportAll /> : null}
@@ -42,6 +46,7 @@ export default () => {
         {currentTab === "volontaires" && <Volontaire />}
         {currentTab === "structures" && <Structure />}
         {currentTab === "missions" && <Mission />}
+        {currentTab === "centers" && <Center />}
       </Wrapper>
     </>
   );

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { toastr } from "react-redux-toastr";
 import { ReactiveBase, ReactiveList, DataSearch } from "@appbaseio/reactivesearch";
+import { useSelector } from "react-redux";
 
 import { apiURL } from "../../../config";
 import api from "../../../services/api";
@@ -12,14 +13,14 @@ export default ({ center, onAffect, onClick }) => {
   const getDefaultQuery = () => ({
     query: {
       bool: {
-        filter: [{ term: { "status.keyword": "VALIDATED" } }, { terms: { "statusPhase1.keyword": ["WAITING_AFFECTATION"] } }],
-        must_not: [
-          {
-            exists: {
-              field: "cohesionCenterId",
-            },
-          },
-        ],
+        filter: [{ terms: { "status.keyword": ["VALIDATED", "WAITING_LIST"] } }, { terms: { "statusPhase1.keyword": ["WAITING_AFFECTATION"] } }],
+        // must_not: [
+        //   {
+        //     exists: {
+        //       field: "cohesionCenterId",
+        //     },
+        //   },
+        // ],
       },
     },
   });
@@ -39,6 +40,18 @@ export default ({ center, onAffect, onClick }) => {
         return toastr.error("Oups, une erreur est survenue lors de l'affectation du jeune. Il semblerait que ce centre soit déjà complet", translate(error?.code), {
           timeOut: 5000,
         });
+      return toastr.error("Oups, une erreur est survenue lors du traitement de l'affectation du jeune", translate(error?.code));
+    }
+  };
+
+  const handleWaitingList = async (young) => {
+    try {
+      const { ok, code } = await api.post(`/cohesion-center/${center._id}/assign-young-waiting-list/${young._id}`);
+      if (!ok) return toastr.error("Oups, une erreur est survenue lors de l'affectation du jeune", translate(code));
+      toastr.success(`${young.firstName} a été placé(e) en liste d'attente sur le centre ${center.name} !`);
+
+      return onAffect?.();
+    } catch (error) {
       return toastr.error("Oups, une erreur est survenue lors du traitement de l'affectation du jeune", translate(error?.code));
     }
   };
@@ -98,7 +111,7 @@ export default ({ center, onAffect, onClick }) => {
                     </thead>
                     <tbody>
                       {data.map((hit, i) => (
-                        <HitYoung key={i} hit={hit} onSend={() => handleAffectation(hit)} onClick={() => onClick(hit)} />
+                        <HitYoung key={i} hit={hit} handleAffect={() => handleAffectation(hit)} handleWaitingList={() => handleWaitingList(hit)} onClick={() => onClick(hit)} />
                       ))}
                     </tbody>
                   </Table>
@@ -112,7 +125,9 @@ export default ({ center, onAffect, onClick }) => {
   );
 };
 
-const HitYoung = ({ hit, onSend, onClick }) => {
+const HitYoung = ({ hit, handleAffect, handleWaitingList, onClick }) => {
+  const user = useSelector((state) => state.Auth.user);
+
   const getAge = (d) => {
     const now = new Date();
     const date = new Date(d);
@@ -132,7 +147,10 @@ const HitYoung = ({ hit, onSend, onClick }) => {
         </MultiLine>
       </td>
       <td onClick={(e) => e.stopPropagation()}>
-        <PanelActionButton onClick={onSend} title="Affecter à ce centre" />
+        <div style={{ display: "flex" }}>
+          <PanelActionButton onClick={handleAffect} title="Affecter à ce centre" />
+          {user.role === "admin" ? <PanelActionButton onClick={handleWaitingList} title="Placer en liste d'attente" /> : null}
+        </div>
       </td>
     </tr>
   );

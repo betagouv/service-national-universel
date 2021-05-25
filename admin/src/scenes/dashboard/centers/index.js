@@ -3,28 +3,28 @@ import styled from "styled-components";
 import { Col, Row } from "reactstrap";
 import { useSelector } from "react-redux";
 
-import YearPicker from "../../dashboard/components/YearPicker";
+import FilterRegion from "../components/FilterRegion";
+import FilterDepartment from "../components/FilterDepartment";
 
 import Status from "./status";
 
-import { YOUNG_STATUS, REFERENT_ROLES } from "../../../utils";
+import { REFERENT_ROLES } from "../../../utils";
 
 export default () => {
   const [filter, setFilter] = useState();
   const user = useSelector((state) => state.Auth.user);
 
   function updateFilter(n) {
-    setFilter({ ...(filter || { status: Object.keys(YOUNG_STATUS), region: "", department: "", cohort: "2021" }), ...n });
+    setFilter({ ...filter, ...n });
   }
 
   useEffect(() => {
-    const status = Object.keys(YOUNG_STATUS).filter((e) => e !== "IN_PROGRESS");
     if (user.role === REFERENT_ROLES.REFERENT_DEPARTMENT) {
-      updateFilter({ department: user.department, status });
+      updateFilter({ department: user.department });
     } else if (user.role === REFERENT_ROLES.REFERENT_REGION) {
-      updateFilter({ region: user.region, status });
+      updateFilter({ region: user.region });
     } else {
-      updateFilter();
+      updateFilter({ region: "", department: "", cohort: "2021" });
     }
   }, []);
 
@@ -32,15 +32,14 @@ export default () => {
     <>
       <Row style={{}}>
         <Col md={12}>
-          <Title>Volontaires</Title>
+          <Title>Centres</Title>
         </Col>
       </Row>
       {filter && (
         <>
           <FiltersList>
-            <FilterWrapper>
-              <YearPicker options={["2019", "2020", "2021"]} onChange={(cohort) => updateFilter({ cohort })} value={filter.cohort} />
-            </FilterWrapper>
+            <FilterRegion updateFilter={updateFilter} filter={filter} />
+            <FilterDepartment updateFilter={updateFilter} filter={filter} />
           </FiltersList>
           <Status filter={filter} />
         </>
@@ -56,13 +55,9 @@ const Title = styled.h2`
   font-size: 28px;
   margin-bottom: 10px;
 `;
-
 const FiltersList = styled.div`
   display: flex;
   justify-content: flex-end;
   flex-wrap: wrap;
   margin-bottom: 10px;
-`;
-const FilterWrapper = styled.div`
-  margin: 0 5px 10px;
 `;

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 
 import Volontaires from "./volontaires";
+import Center from "./center";
 
 export default () => {
   const [currentTab, setCurrentTab] = useState("volontaires");
@@ -13,9 +14,13 @@ export default () => {
           <TabItem onClick={() => setCurrentTab("volontaires")} isActive={currentTab === "volontaires"}>
             Volontaires
           </TabItem>
+          <TabItem onClick={() => setCurrentTab("center")} isActive={currentTab === "center"}>
+            Centre
+          </TabItem>
         </TabNavigationList>
       </TabNavigation>
       <Wrapper>{currentTab === "volontaires" && <Volontaires />}</Wrapper>
+      <Wrapper>{currentTab === "center" && <Center />}</Wrapper>
     </>
   );
 };

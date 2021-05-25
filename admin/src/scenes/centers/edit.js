@@ -66,7 +66,6 @@ export default (props) => {
                   <BoxContent direction="column">
                     <Item title="Nom du centre" values={values} name={"name"} handleChange={handleChange} required errors={errors} touched={touched} />
                     <Item title="Code" values={values} name={"code"} handleChange={handleChange} required errors={errors} touched={touched} />
-                    <Item title="COR" values={values} name={"COR"} handleChange={handleChange} required errors={errors} touched={touched} />
                     <Item title="Capacité d'accueil" values={values} name={"placesTotal"} handleChange={handleChange} required errors={errors} touched={touched} />
                   </BoxContent>
                 </Box>

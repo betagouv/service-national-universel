@@ -38,7 +38,7 @@ export default ({ mission, applications }) => {
             </thead>
             <tbody>
               {data.map((hit, i) => (
-                <Hit key={i} hit={hit} onClick={() => handleClick(hit)} onChangeApplication={updateMission} />
+                <Hit key={i} hit={hit} onClick={() => handleClick(hit)} selected={young?._id === hit._id} onChangeApplication={updateMission} />
               ))}
             </tbody>
           </Table>
@@ -54,7 +54,7 @@ export default ({ mission, applications }) => {
   );
 };
 
-const Hit = ({ hit, onClick, onChangeApplication }) => {
+const Hit = ({ hit, onClick, onChangeApplication, selected }) => {
   const getAge = (d) => {
     const now = new Date();
     const date = new Date(d);
@@ -62,7 +62,7 @@ const Hit = ({ hit, onClick, onChangeApplication }) => {
     return Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
   };
   return (
-    <tr onClick={onClick}>
+    <tr style={{ backgroundColor: (selected && "#e6ebfa") || (hit.status === "WITHDRAWN" && "#BE3B1211") }} onClick={onClick}>
       <td>
         <TeamMember>
           <div>

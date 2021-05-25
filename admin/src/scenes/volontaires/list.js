@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import { ReactiveBase, ReactiveList, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
@@ -21,7 +21,15 @@ const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_P
 
 export default ({ setYoung }) => {
   const [volontaire, setVolontaire] = useState(null);
-  const getDefaultQuery = () => ({ query: { bool: { filter: { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } } } } });
+  const [centers, setCenters] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await api.get("/cohesion-center");
+      setCenters(data);
+    })();
+  }, []);
+  const getDefaultQuery = () => ({ query: { bool: { filter: { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN", "WAITING_LIST"] } } } } });
   const getExportQuery = () => ({ ...getDefaultQuery(), size: 10000 });
   return (
     <div>
@@ -38,6 +46,11 @@ export default ({ setYoung }) => {
                 collection="volontaire"
                 react={{ and: FILTERS }}
                 transform={(data) => {
+                  let center = {};
+                  if (data.cohesionCenterId && centers) {
+                    center = centers.find((c) => c._id === data.cohesionCenterId);
+                    if (!center) center = {};
+                  }
                   return {
                     _id: data._id,
                     Cohorte: data.cohort,
@@ -131,6 +144,12 @@ export default ({ setYoung }) => {
                     "Statut Phase 3": data.statusPhase3,
                     "Dernier statut le": formatLongDateFR(data.lastStatusAt),
                     "Message de desistement": data.withdrawnMessage,
+                    "ID centre": center._id || "",
+                    "Code centre": center.code || "",
+                    "Nom du centre": center.name || "",
+                    "Ville du centre": data.cohesionCenterCity || "",
+                    "Département du centre": center.department || "",
+                    "Région du centre": center.region || "",
                   };
                 }}
               />
@@ -308,7 +327,7 @@ const Hit = ({ hit, onClick, selected }) => {
   };
 
   return (
-    <tr style={{ backgroundColor: selected && "#e6ebfa" }} onClick={onClick}>
+    <tr style={{ backgroundColor: (selected && "#e6ebfa") || (hit.status === "WITHDRAWN" && "#BE3B1211") }} onClick={onClick}>
       <td>
         <MultiLine>
           <h2>{`${hit.firstName} ${hit.lastName}`}</h2>

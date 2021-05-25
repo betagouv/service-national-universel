@@ -7,14 +7,14 @@ import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
 import ExportComponent from "../../components/ExportXlsx";
-import { translate, getFilterLabel, YOUNG_STATUS_COLORS } from "../../utils";
+import { translate, getFilterLabel, YOUNG_STATUS_COLORS, formatDateFR, formatLongDateFR, isInRuralArea } from "../../utils";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Badge from "../../components/Badge";
 import { ResultTable, Filter, Table, FilterRow, TopResultStats, BottomResultStats } from "../../components/list";
 import ToggleSwitch from "../../components/ToogleSwitch";
 import { toastr } from "react-redux-toastr";
 
-const FILTERS = ["SEARCH", "STATUS", "PHASE", "COHORT", "MISSIONS", "TUTOR"];
+const FILTERS = ["SEARCH", "STATUS", "PHASE", "COHORT", "MISSIONS", "TUTOR", "STATUS_PHASE_1"];
 
 export default () => {
   const user = useSelector((state) => state.Auth.user);
@@ -169,48 +169,6 @@ export default () => {
                   URLParams={true}
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Statut phase 1")}
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  componentId="STATUS_PHASE_2"
-                  dataField="statusPhase2.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "STATUS_PHASE_2") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Statut phase 2")}
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  componentId="STATUS_PHASE_3"
-                  dataField="statusPhase3.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "STATUS_PHASE_3") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Statut phase 3")}
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  componentId="STATUS_APPLICATION"
-                  dataField="phase2ApplicationStatus.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "STATUS_APPLICATION") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Statut mission")}
                 />
               </FilterRow>
             </Filter>

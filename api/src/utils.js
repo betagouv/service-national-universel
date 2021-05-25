@@ -2,8 +2,10 @@ const AWS = require("aws-sdk");
 const https = require("https");
 const http = require("http");
 const passwordValidator = require("password-validator");
-
-const { CELLAR_ENDPOINT, CELLAR_KEYID, CELLAR_KEYSECRET, BUCKET_NAME } = require("./config");
+const YoungModel = require("./models/young");
+const CohesionCenterModel = require("./models/cohesionCenter");
+const sendinblue = require("./sendinblue");
+const { CELLAR_ENDPOINT, CELLAR_KEYID, CELLAR_KEYSECRET, BUCKET_NAME, ENVIRONMENT } = require("./config");
 
 function getReq(url, cb) {
   if (url.toString().indexOf("https") === 0) return https.get(url, cb);
@@ -67,6 +69,73 @@ function validatePassword(password) {
   return schema.validate(password);
 }
 
+const updatePlacesCenter = async (center) => {
+  try {
+    const youngs = await YoungModel.find({ cohesionCenterId: center._id });
+    const placesTaken = youngs.filter(
+      (young) => ["AFFECTED", "WAITING_ACCEPTATION"].includes(young.statusPhase1) && young.status === "VALIDATED"
+    ).length;
+    const placesLeft = Math.max(0, center.placesTotal - placesTaken);
+    if (center.placesLeft !== placesLeft) {
+      console.log(`Center ${center.id}: total ${center.placesTotal}, left from ${center.placesLeft} to ${placesLeft}`);
+      center.set({ placesLeft });
+      await center.save();
+      await center.index();
+    }
+  } catch (e) {
+    console.log(e);
+  }
+  return center;
+};
+
+const assignNextYoungFromWaitingList = async (young) => {
+  const nextYoung = await getYoungFromWaitingList(young);
+  if (!nextYoung) {
+    //notify referents & admin
+    console.log(`no replacement found for young ${young._id} in center ${young.cohesionCenterId}`);
+    //todo 25/05 : send mail to ref region & admin
+  } else {
+    //notify young & modify statusPhase1
+    console.log("replacement found", nextYoung._id);
+
+    //todo 25/05 : activate waiting accepation and 24h cron
+    // nextYoung.set({ statusPhase1: "WAITING_ACCEPTATION", autoAffectationPhase1ExpiresAt: Date.now() + 60 * 1000 * 60 * 24 });
+    nextYoung.set({ status: "VALIDATED", statusPhase1: "AFFECTED" });
+    await nextYoung.save();
+    await sendinblue.sync(nextYoung, "young");
+
+    //remove the young from the waiting list
+    const center = await CohesionCenterModel.findById(nextYoung.cohesionCenterId);
+    if (center?.waitingList?.indexOf(nextYoung._id) !== -1) {
+      console.log(`remove young ${nextYoung._id} from waiting_list of ${nextYoung.cohesionCenterId}`);
+      const i = center.waitingList.indexOf(nextYoung._id);
+      center.waitingList.splice(i, 1);
+      await center.save();
+    }
+
+    //todo : send mail to young
+  }
+};
+
+const getYoungFromWaitingList = async (young) => {
+  try {
+    if (!young || !young.cohesionCenterId) return null;
+    const center = await CohesionCenterModel.findById(young.cohesionCenterId);
+    if (!center) return null;
+    let res = null;
+    for (let i = 0; i < center.waitingList?.length; i++) {
+      const tempYoung = await YoungModel.findById(center.waitingList[i]);
+      if (tempYoung.department === young.department && tempYoung.gender === young.gender) {
+        res = tempYoung;
+        break;
+      }
+    }
+    return res;
+  } catch (e) {
+    console.log(e);
+  }
+};
+
 const ERRORS = {
   SERVER_ERROR: "SERVER_ERROR",
   NOT_FOUND: "NOT_FOUND",
@@ -92,4 +161,6 @@ module.exports = {
   validatePassword,
   ERRORS,
   getSignedUrl,
+  updatePlacesCenter,
+  assignNextYoungFromWaitingList,
 };

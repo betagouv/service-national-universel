@@ -10,6 +10,7 @@ router.post("/_msearch", passport.authenticate(["young", "referent"], { session:
 
 router.post("/mission/_msearch", passport.authenticate(["young", "referent"], { session: false }), (req, res) => exec(req, res, "mission"));
 router.post("/young/_msearch", passport.authenticate(["referent"], { session: false }), (req, res) => exec(req, res, "young"));
+router.post("/cohesionyoung/_msearch", passport.authenticate(["referent"], { session: false }), (req, res) => exec(req, res, "cohesionyoung"));
 router.post("/structure/_msearch", passport.authenticate(["referent"], { session: false }), (req, res) => exec(req, res, "structure"));
 router.post("/referent/_msearch", passport.authenticate(["referent"], { session: false }), (req, res) => exec(req, res, "referent"));
 router.post("/application/_msearch", passport.authenticate(["referent"], { session: false }), (req, res) => exec(req, res, "application"));
@@ -28,6 +29,7 @@ async function exec(req, res, index = "") {
     }
 
     const bodyFiltered = await filter(body, user, index);
+    if (index === "cohesionyoung") index = "young";
     let i = index ? [index] : [];
     const d = await esClient.msearch({ index: i, body: bodyFiltered });
     return res.status(200).send(d.body);
@@ -58,21 +60,45 @@ function filter(body, user, index) {
     if (user.role === "referent_department") filter.push({ term: { "department.keyword": user.department } });
   }
 
+  if (index === "cohesionyoung") {
+    filter.push({ terms: { "status.keyword": ["WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "VALIDATED", "WITHDRAWN", "WAITING_LIST"] } });
+  }
+
   if (index === "referent") {
     if (user.role === "responsible") filter.push({ terms: { "role.keyword": ["responsible", "supervisor"] } });
 
     // See: https://trello.com/c/Wv2TrQnQ/383-admin-ajouter-onglet-utilisateurs-pour-les-r%C3%A9f%C3%A9rents
     // a `referent_region` sees only other referent_region and `referent_department` from their region.
     if (user.role === "referent_department") {
-      filter.push({ terms: { "role.keyword": ["referent_region", "referent_department"] } });
+      filter.push({
+        bool: {
+          should: [
+            { terms: { "role.keyword": ["referent_department"] } },
+            { bool: { must: [{ term: { "role.keyword": "referent_region" } }, { term: { "region.keyword": user.region } }] } },
+            { bool: { must: [{ term: { "role.keyword": "head_center" } }, { term: { "department.keyword": user.department } }] } },
+          ],
+        },
+      });
     }
     // a `referent_region` sees only other referent_region and `referent_department` from their region.
     if (user.role === "referent_region") {
       filter.push({
         bool: {
           should: [
-            { term: { "role.keyword": "referent_region" } },
+            { terms: { "role.keyword": ["referent_region"] } },
             { bool: { must: [{ term: { "role.keyword": "referent_department" } }, { term: { "region.keyword": user.region } }] } },
+            { bool: { must: [{ term: { "role.keyword": "head_center" } }, { term: { "region.keyword": user.region } }] } },
+          ],
+        },
+      });
+    }
+    if (user.role === "head_center") {
+      filter.push({
+        bool: {
+          should: [
+            { terms: { "role.keyword": ["head_center"] } },
+            { bool: { must: [{ term: { "role.keyword": "referent_department" } }, { term: { "department.keyword": user.department } }] } },
+            { bool: { must: [{ term: { "role.keyword": "referent_region" } }, { term: { "region.keyword": user.region } }] } },
           ],
         },
       });
@@ -81,6 +107,11 @@ function filter(body, user, index) {
 
   if (index === "mission") {
     if (user.role === "responsible") filter.push({ terms: { "structureId.keyword": [user.structureId] } });
+  }
+
+  if (index === "cohesioncenter") {
+    if (user.role === "referent_region") filter.push({ term: { "region.keyword": user.region } });
+    if (user.role === "referent_department") filter.push({ term: { "department.keyword": user.department } });
   }
 
   const arr = body.split(`\n`);

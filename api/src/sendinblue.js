@@ -144,6 +144,7 @@ async function sync(obj, type) {
     attributes.REGISTRED = !!attributes.REGISTRED_AT;
 
     let listIds = attributes.TYPE === "YOUNG" ? [46] : [47];
+    user.statusPhase1 === "WAITING_ACCEPTATION" && listIds.push(106);
 
     delete attributes.EMAIL;
     delete attributes.PASSWORD;

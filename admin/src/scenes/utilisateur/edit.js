@@ -5,7 +5,7 @@ import { Field, Formik } from "formik";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/fr";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import ReactSelect from "react-select";
 import { Box, BoxContent, BoxHeadTitle } from "../../components/box";
@@ -15,6 +15,8 @@ import { departmentList, regionList, department2region, translate, REFERENT_ROLE
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 import Loader from "../../components/Loader";
+import PanelActionButton from "../../components/buttons/PanelActionButton";
+import { setUser as ReduxSetUser } from "../../redux/auth/actions";
 
 export default (props) => {
   const [user, setUser] = useState();
@@ -22,6 +24,7 @@ export default (props) => {
   const [centers, setCenters] = useState();
   const currentUser = useSelector((state) => state.Auth.user);
   const history = useHistory();
+  const dispatch = useDispatch();
 
   useEffect(() => {
     (async () => {
@@ -69,7 +72,21 @@ export default (props) => {
       if (user.role === value.role && user.department === value.department) return true;
       return false;
     }
+    return false;
   }
+
+  const handleImpersonate = async () => {
+    try {
+      const { ok, data, token } = await api.post(`/referent/signin_as/referent/${user._id}`);
+      if (!ok) return toastr.error("Oops, une erreur est survenu lors de la masquarade !", translate(e.code));
+      if (token) api.setToken(token);
+      if (data) dispatch(ReduxSetUser(data));
+      history.push("/dashboard");
+    } catch (e) {
+      console.log(e);
+      toastr.error("Oops, une erreur est survenu lors de la masquarade !", translate(e.code));
+    }
+  };
 
   return (
     //@todo fix the depart and region
@@ -95,9 +112,12 @@ export default (props) => {
                 <Title>{`Profil Utilisateur de ${values.firstName} ${values.lastName}`}</Title>
                 <SubTitle>{getSubtitle()}</SubTitle>
               </div>
-              <SaveBtn loading={isSubmitting} onClick={handleSubmit}>
-                Enregistrer
-              </SaveBtn>
+              <div style={{ display: "flex" }}>
+                {currentUser.role === "admin" ? <PanelActionButton onClick={handleImpersonate} icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" /> : null}
+                <SaveBtn loading={isSubmitting} onClick={handleSubmit}>
+                  Enregistrer
+                </SaveBtn>
+              </div>
             </TitleWrapper>
             <Row>
               <Col md={6} style={{ marginBottom: "20px" }}>

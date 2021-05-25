@@ -22,6 +22,7 @@ function canModify(user, value) {
     if (user.role === value.role && user.department === value.department) return true;
     return false;
   }
+  return false;
 }
 
 export default ({ onChange, value }) => {

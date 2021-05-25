@@ -16,11 +16,12 @@ const ReferentObject = require("../models/referent");
 const YoungObject = require("../models/young");
 const MissionObject = require("../models/mission");
 const ApplicationObject = require("../models/application");
+const CohesionCenterObject = require("../models/cohesionCenter");
 const AuthObject = require("../auth");
 
 const { decrypt } = require("../cryptoUtils");
 const { sendEmail } = require("../sendinblue");
-const { uploadFile, validatePassword, ERRORS } = require("../utils");
+const { uploadFile, validatePassword, updatePlacesCenter, assignNextYoungFromWaitingList, ERRORS } = require("../utils");
 const { encrypt } = require("../cryptoUtils");
 const ReferentAuth = new AuthObject(ReferentObject);
 
@@ -210,7 +211,31 @@ router.post("/signup_invite", async (req, res) => {
 router.put("/young/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const { id } = req.params;
-    const young = await YoungObject.findByIdAndUpdate(id, req.body, { new: true });
+    const young = await YoungObject.findById(id);
+    let newYoung = req.body;
+
+    // if withdrawn, cascade withdrawn on every status
+    if (
+      newYoung.status === "WITHDRAWN" &&
+      (young.statusPhase1 !== "WITHDRAWN" || young.statusPhase2 !== "WITHDRAWN" || young.statusPhase3 !== "WITHDRAWN")
+    ) {
+      newYoung = { ...newYoung, statusPhase1: "WITHDRAWN", statusPhase2: "WITHDRAWN", statusPhase3: "WITHDRAWN" };
+    }
+
+    // if withdrawn from phase1 -> run the script that find a replacement for this young
+    if (newYoung.statusPhase1 === "WITHDRAWN" && ["AFFECTED", "WAITING_ACCEPTATION"].includes(young.statusPhase1) && young.cohesionCenterId) {
+      await assignNextYoungFromWaitingList(young);
+    }
+
+    young.set(newYoung);
+    await young.save();
+
+    // if they had a cohesion center, we check if we need to update the places taken / left
+    if (young.cohesionCenterId) {
+      console.log("update center", young.cohesionCenterId);
+      const center = await CohesionCenterObject.findById(young.cohesionCenterId);
+      if (center) await updatePlacesCenter(center);
+    }
     res.status(200).send({ ok: true, data: young });
   } catch (error) {
     capture(error);

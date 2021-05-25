@@ -94,7 +94,7 @@ const Schema = new mongoose.Schema({
   statusPhase1: {
     type: String,
     default: "WAITING_AFFECTATION",
-    enum: ["AFFECTED", "WAITING_AFFECTATION", "CANCEL", "DONE", "NOT_DONE", "WAITING_LIST", "WAITING_ACCEPTATION"],
+    enum: ["AFFECTED", "WAITING_AFFECTATION", "WAITING_ACCEPTATION", "CANCEL", "DONE", "NOT_DONE", "WITHDRAWN", "WAITING_LIST"],
     documentation: {
       description: "Statut du volontaire lié à la première phase",
     },
@@ -102,7 +102,7 @@ const Schema = new mongoose.Schema({
   statusPhase2: {
     type: String,
     default: "WAITING_REALISATION",
-    enum: ["WAITING_REALISATION", "IN_PROGRESS", "VALIDATED"],
+    enum: ["WAITING_REALISATION", "IN_PROGRESS", "VALIDATED", "WITHDRAWN"],
     documentation: {
       description: "Statut du volontaire lié à la seconde phase",
     },
@@ -110,7 +110,7 @@ const Schema = new mongoose.Schema({
   statusPhase3: {
     type: String,
     default: "WAITING_REALISATION",
-    enum: ["WAITING_REALISATION", "WAITING_VALIDATION", "VALIDATED"],
+    enum: ["WAITING_REALISATION", "WAITING_VALIDATION", "VALIDATED", "WITHDRAWN"],
     documentation: {
       description: "Statut du volontaire lié à la troisième phase",
     },
@@ -253,6 +253,13 @@ const Schema = new mongoose.Schema({
     type: String,
     documentation: {
       description: "Nom du centre de cohésion d'accueil pour la phase 1",
+    },
+  },
+
+  autoAffectationPhase1ExpiresAt: {
+    type: Date,
+    documentation: {
+      description: "Date limite de réponse a la participation à la phase 1",
     },
   },
 

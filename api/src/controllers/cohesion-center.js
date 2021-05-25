@@ -7,24 +7,7 @@ const Joi = require("joi");
 const CohesionCenterModel = require("../models/cohesionCenter");
 const ReferentModel = require("../models/referent");
 const YoungModel = require("../models/young");
-const { ERRORS } = require("../utils");
-
-const updatePlacesCenter = async (center) => {
-  try {
-    const youngs = await YoungModel.find({ cohesionCenterId: center._id });
-    const placesTaken = youngs.filter((young) => young.statusPhase1 === "AFFECTED" && young.status === "VALIDATED").length;
-    const placesLeft = Math.max(0, center.placesTotal - placesTaken);
-    if (center.placesLeft !== placesLeft) {
-      console.log(`Center ${center.id}: total ${center.placesTotal}, left from ${center.placesLeft} to ${placesLeft}`);
-      center.set({ placesLeft });
-      await center.save();
-      await center.index();
-    }
-  } catch (e) {
-    console.log(e);
-  }
-  return center;
-};
+const { ERRORS, updatePlacesCenter } = require("../utils");
 
 router.post("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   // Validate params.
@@ -48,6 +31,51 @@ router.post("/", passport.authenticate("referent", { session: false }), async (r
 });
 
 router.post("/:centerId/assign-young/:youngId", passport.authenticate("referent", { session: false }), async (req, res) => {
+  const error = false;
+  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+
+  try {
+    const young = await YoungModel.findById(req.params.youngId);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const center = await CohesionCenterModel.findById(req.params.centerId);
+    if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (center.placesLeft <= 0) return res.status(404).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+
+    // todo : WAITING_ACCEPTATION when all the communication is done
+
+    // update youngs infos
+    young.set({
+      status: "VALIDATED",
+
+      // todo : WAITING_ACCEPTATION when all the communication is done
+      // statusPhase1: "WAITING_ACCEPTATION",
+
+      statusPhase1: "AFFECTED",
+      cohesionCenterId: center._id,
+      cohesionCenterName: center.name,
+      cohesionCenterCity: center.city,
+      cohesionCenterZip: center.zip,
+    });
+    await young.save();
+    await young.index();
+
+    //if young is in waitingList of the center
+    // todo check if the young is in antoher center's waiting list
+    if (center.waitingList.indexOf(young._id) !== -1) {
+      const i = center.waitingList.indexOf(young._id);
+      center.waitingList.splice(i, 1);
+      await center.save();
+    }
+    // update center infos
+    const data = await updatePlacesCenter(center);
+
+    return res.status(200).send({ data, ok: true });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+router.post("/:centerId/assign-young-waiting-list/:youngId", passport.authenticate("referent", { session: false }), async (req, res) => {
   // Validate params.
   // const { error, value: inscriptionsGoals } = Joi.array()
   //   .items({
@@ -64,11 +92,10 @@ router.post("/:centerId/assign-young/:youngId", passport.authenticate("referent"
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const center = await CohesionCenterModel.findById(req.params.centerId);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    if (center.placesLeft <= 0) return res.status(404).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     // update youngs infos
     young.set({
-      statusPhase1: "AFFECTED",
+      statusPhase1: "WAITING_LIST",
       cohesionCenterId: center._id,
       cohesionCenterName: center.name,
       cohesionCenterCity: center.city,
@@ -77,10 +104,10 @@ router.post("/:centerId/assign-young/:youngId", passport.authenticate("referent"
     await young.save();
     await young.index();
 
-    // update center infos
-    const data = await updatePlacesCenter(center);
+    center.waitingList.push(young._id);
+    await center.save();
 
-    return res.status(200).send({ data, ok: true });
+    return res.status(200).send({ data: center, ok: true });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
@@ -118,12 +145,25 @@ router.get("/", passport.authenticate("referent", { session: false }), async (re
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
+router.get("/young/:youngId", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
+  try {
+    const young = await YoungModel.findById(req.params.youngId);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const data = await CohesionCenterModel.findById(young.cohesionCenterId);
+    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
 
 router.put("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     if (req.user.role !== "admin") return res.status(404).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const center = await CohesionCenterModel.findByIdAndUpdate(req.body._id, req.body, { new: true });
-    res.status(200).send({ ok: true, data: center });
+    const data = await updatePlacesCenter(center);
+    res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });

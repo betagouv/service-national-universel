@@ -231,7 +231,7 @@ const Hit = ({ hit, index, onClick, selected }) => {
   if (user.role === "admin") STATUS.push(YOUNG_STATUS.WAITING_VALIDATION);
 
   return (
-    <tr style={{ backgroundColor: selected && "#e6ebfa" }} onClick={onClick} key={hit._id}>
+    <tr style={{ backgroundColor: (selected && "#e6ebfa") || (hit.status === "WITHDRAWN" && "#BE3B1211") }} onClick={onClick} key={hit._id}>
       <td>{index + 1}</td>
       <td>
         <MultiLine>

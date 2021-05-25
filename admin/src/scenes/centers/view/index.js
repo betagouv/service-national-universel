@@ -5,6 +5,7 @@ import api from "../../../services/api";
 import Details from "./details";
 import Youngs from "./youngs";
 import Affectation from "./affectation";
+import WaitingList from "./waitingList";
 import { toastr } from "react-redux-toastr";
 import { translate } from "../../../utils";
 
@@ -34,6 +35,7 @@ export default ({ ...props }) => {
   if (!center) return <div />;
   return (
     <Switch>
+      <Route path="/centre/:id/liste-attente" component={() => <WaitingList center={center} updateCenter={updateCenter} />} />
       <Route path="/centre/:id/volontaires" component={() => <Youngs center={center} updateCenter={updateCenter} />} />
       <Route path="/centre/:id/affectation" component={() => <Affectation center={center} updateCenter={updateCenter} />} />
       <Route path="/centre/:id" component={() => <Details center={center} />} />
