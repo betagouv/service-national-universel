@@ -123,9 +123,9 @@ const assignNextYoungFromWaitingList = async (young) => {
         .replace(/{{centerName}}/, center.name)
         .replace(/{{centerAddress}}/, center.address + " " + center.zip + " " + center.city)
         .replace(/{{centerDepartement}}/, center.department)
-        .replace(/{{ctaAccept}}/, "https://inscription.snu.gouv.fr")
-        .replace(/{{ctaDocuments}}/, "https://inscription.snu.gouv.fr")
-        .replace(/{{ctaWithdraw}}/, "https://inscription.snu.gouv.fr")
+        .replace(/{{ctaAccept}}/, "https://inscription.snu.gouv.fr?redirect=/phase1")
+        .replace(/{{ctaDocuments}}/, "https://inscription.snu.gouv.fr?redirect=/phase1")
+        .replace(/{{ctaWithdraw}}/, "https://inscription.snu.gouv.fr?redirect=/phase1")
     );
 
     //remove the young from the waiting list
