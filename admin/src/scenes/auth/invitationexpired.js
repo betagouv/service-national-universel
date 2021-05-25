@@ -22,7 +22,7 @@ export default () => {
         <Thumb />
         <div>
           <LoginBox>
-            <Title>Votre lien d'invitation à expiré</Title>
+            <Title>Votre lien d'invitation a expiré</Title>
             <Formik
               initialValues={{ email: urlParams.get("email") || "" }}
               onSubmit={async (values, actions) => {
