@@ -7,6 +7,7 @@ const CohesionCenterModel = require("./models/cohesionCenter");
 const { sendEmail } = require("./sendinblue");
 const path = require("path");
 const fs = require("fs");
+const sendinblue = require("./sendinblue");
 
 const { CELLAR_ENDPOINT, CELLAR_KEYID, CELLAR_KEYSECRET, BUCKET_NAME, ENVIRONMENT } = require("./config");
 
@@ -126,6 +127,7 @@ const assignNextYoungFromWaitingList = async (young) => {
     // Activate waiting accepation and 48h cron
     nextYoung.set({ status: "VALIDATED", statusPhase1: "WAITING_ACCEPTATION", autoAffectationPhase1ExpiresAt: Date.now() + 60 * 1000 * 60 * 48 });
     await nextYoung.save();
+    await sendinblue.sync(nextYoung, "young");
 
     const center = await CohesionCenterModel.findById(nextYoung.cohesionCenterId);
     await sendAutoAffectationMail(nextYoung, center);
