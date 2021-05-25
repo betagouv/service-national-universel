@@ -117,7 +117,6 @@ export default () => {
             </a>
           </div>
         </ContentHorizontal>
-        <ContentHorizontal></ContentHorizontal>
         <Content style={{ width: "100%" }} id="imageRight">
           <div style={{ display: "flex" }}>
             <div className="icon">
