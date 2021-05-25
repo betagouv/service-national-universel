@@ -32,6 +32,7 @@ export default () => {
             Le SNU vous donne l'opportunité de découvrir la vie collective au sein d'un centre accueillant environ 200 jeunes de votre région pour créer ainsi des liens nouveaux et
             développer votre culture de l’engagement et ainsi affirmer votre place dans la société.
           </p>
+          <p>Cette année, il se déroule du 21 juin au 2 juillet 2021. </p>
           <Separator />
           <p>
             <strong>Votre convocation</strong>
