@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { HeroContainer, Hero, Separator } from "../../components/Content";
+import styled from "styled-components";
+import { HeroContainer, Hero, Content } from "../../components/Content";
 import NextStep from "./nextStep";
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
@@ -43,6 +44,52 @@ export default () => {
         <div className="thumb" />
       </Hero>
       <NextStep />
+      <Hero>
+        <ContentHorizontal>
+          <div>
+            <h2>Comment bien préparer votre séjour de cohésion</h2>
+            <p>Consultez le trousseau indicatif pour être sûr(e) de ne rien oublier</p>
+          </div>
+          <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", marginLeft: "auto" }}>
+            <a target="blank" href="https://apicivique.s3.eu-west-3.amazonaws.com/Trousseau_indicatif.pdf">
+              <ContinueButton>Consulter</ContinueButton>
+            </a>
+          </div>
+        </ContentHorizontal>
+      </Hero>
     </HeroContainer>
   );
 };
+
+const ContentHorizontal = styled(Content)`
+  display: flex;
+  width: 100%;
+
+  .link {
+    color: #5145cd;
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    font-weight: 400;
+    cursor: pointer;
+  }
+`;
+
+const ContinueButton = styled.button`
+  color: #fff;
+  background-color: #5145cd;
+  padding: 9px 20px;
+  border: 0;
+  outline: 0;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 1rem;
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+  }
+  display: block;
+  outline: 0;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  :hover {
+    opacity: 0.9;
+  }
+`;
