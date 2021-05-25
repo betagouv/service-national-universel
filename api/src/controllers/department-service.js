@@ -5,6 +5,7 @@ const { capture } = require("../sentry");
 
 const DepartmentServiceModel = require("../models/departmentService");
 const ReferentModel = require("../models/referent");
+const CohesionCenterModel = require("../models/cohesionCenter");
 const { ERRORS } = require("../utils");
 
 router.post("/", passport.authenticate("referent", { session: false }), async (req, res) => {
@@ -33,11 +34,11 @@ router.get("/referent/:id", passport.authenticate(["referent"], { session: false
   }
 });
 
-router.get("/", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
+router.get("/", passport.authenticate(["young"], { session: false }), async (req, res) => {
   try {
-    let data = [];
-    if (req.user.department) data = await DepartmentServiceModel.findOne({ department: req.user.department });
-    else data = await DepartmentServiceModel.find({});
+    const center = await CohesionCenterModel.findById(req.user.cohesionCenterId);
+    if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const data = await DepartmentServiceModel.findOne({ department: center.department });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
