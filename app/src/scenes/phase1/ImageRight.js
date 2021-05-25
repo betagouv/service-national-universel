@@ -197,7 +197,7 @@ export default () => {
                         checked={values.imageRight === "true"}
                         onChange={handleChange}
                       />
-                      <label htmlFor="true">
+                      <label htmlFor="imageRight_true">
                         Nous autorisons l'Administration à reproduire et exploiter l'image et la voix de{" "}
                         <b>
                           {young.firstName} {young.lastName}
@@ -215,7 +215,7 @@ export default () => {
                         checked={values.imageRight === "false"}
                         onChange={handleChange}
                       />
-                      <label htmlFor="false">
+                      <label htmlFor="imageRight_false">
                         Nous n'autorisons pas l'Administration à reproduire et exploiter l'image et la voix de{" "}
                         <b>
                           {young.firstName} {young.lastName}
@@ -242,10 +242,10 @@ export default () => {
                   </Title> */}
                   <div style={{ display: "flex", justifyContent: "center" }}>
                     <div>
-                      <BackButton onClick={() => print()}>Imprimer le formulaire pré-rempli</BackButton>
+                      {/* <BackButton onClick={() => print()}>Imprimer le formulaire pré-rempli</BackButton> */}
                       <DownloadText>
-                        Ou{" "}
-                        <a href="https://apicivique.s3.eu-west-3.amazonaws.com/consentement_droit_image.pdf" target="_blank">
+                        {/* Ou{" "} */}
+                        <a style={{ fontSize: "1rem" }} href="https://apicivique.s3.eu-west-3.amazonaws.com/consentement_droit_image.pdf" target="_blank">
                           télécharger le modèle à remplir
                         </a>
                       </DownloadText>
