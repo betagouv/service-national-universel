@@ -1,0 +1,40 @@
+<mjml>
+  <mj-body>
+    <mj-section>
+      <mj-column>
+        <mj-text>
+          <h1 font-size="20px">Une place dans le séjour de cohésion SNU 2021 s’est libérée !</h1>
+        </mj-text>
+        <mj-text font-size="18px" color="#000"> Bonjour {{firstName}} {{lastName}}, </mj-text>
+        <mj-text line-height="1.5" font-size="18px" color="#000">
+          Nous avons le plaisir de vous indiquer qu'une place vous est proposée pour participer au séjour de cohésion du Service National Universel du
+          21 juin au 2 juillet 2021 ! Votre séjour se déroulera au :
+          {{centerName}} {{centerAddress}} {{centerDepartement}}.
+        </mj-text>
+        <mj-text line-height="1.5" font-size="18px" font-weight="bold" color="#000">
+          Merci de confirmer depuis votre compte volontaire sous 48 heures votre inscription au SNU pour valider votre participation.
+        </mj-text>
+        <mj-text line-height="1.5" font-size="18px" color="#000">
+          En l’absence de cette confirmation, vous ne pourrez pas participer au séjour de cohésion.
+        </mj-text>
+        <mj-button font-size="20px" background-color="#3490DC" href="{{ctaAccept}}"> Oui, je participe au séjour de cohésion et j’effectue les modalités de départ </mj-button>
+        <mj-text line-height="1.5" font-size="18px" color="#000">
+          Je confirme et je vérifie bien l’étape suivante : transmettre les documents requis pour ma participation au séjour de cohésion d’ici le 4 juin au plus tard :
+        </mj-text>
+        <mj-text line-height="1.5" font-size="18px" color="#000">
+          - le consentement relatif au droit à l'image (à renseigner depuis votre compte SNU)
+        </mj-text>
+        <mj-text line-height="1.5" font-size="18px" color="#000">
+          - le consentement relatif à l’utilisation d’autotest COVID
+        </mj-text>
+        <mj-text line-height="1.5" font-size="18px" color="#000">
+          - la fiche sanitaire (à télécharger depuis votre compte SNU puis à envoyer par voie postale sous pli confidentiel à l'adresse indiquée sur votre compte)
+        </mj-text>
+        <mj-button font-size="20px" background-color="#3490DC" href="{{ctaDocuments}}">Accéder à mes documents</mj-button>
+        <mj-button font-size="20px" background-color="#3490DC" href="{{ctaWithdraw}}">Non, je laisse ma place à un autre volontaire</mj-button>
+        <mj-text font-size="18px" color="#000">Nous sommes impatients de vous retrouver au séjour de cohésion,</mj-text>
+        <mj-text font-size="18px" color="#000">Les équipes du Service National Universel</mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>
