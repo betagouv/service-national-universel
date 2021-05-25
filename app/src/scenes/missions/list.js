@@ -43,6 +43,15 @@ export default () => {
         },
       },
     };
+    if (young.cohort === "2021") {
+      query.query.bool.filter.push({
+        range: {
+          startAt: {
+            gt: "2021-07-02",
+          },
+        },
+      });
+    }
     if (young.location && !targetLocation)
       query.sort = [
         {
