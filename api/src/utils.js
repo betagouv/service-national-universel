@@ -4,7 +4,7 @@ const http = require("http");
 const passwordValidator = require("password-validator");
 const YoungModel = require("./models/young");
 const CohesionCenterModel = require("./models/cohesionCenter");
-
+const sendinblue = require("./sendinblue");
 const { CELLAR_ENDPOINT, CELLAR_KEYID, CELLAR_KEYSECRET, BUCKET_NAME, ENVIRONMENT } = require("./config");
 
 function getReq(url, cb) {
@@ -102,6 +102,7 @@ const assignNextYoungFromWaitingList = async (young) => {
     // nextYoung.set({ statusPhase1: "WAITING_ACCEPTATION", autoAffectationPhase1ExpiresAt: Date.now() + 60 * 1000 * 60 * 24 });
     nextYoung.set({ status: "VALIDATED", statusPhase1: "AFFECTED" });
     await nextYoung.save();
+    await sendinblue.sync(nextYoung, "young");
 
     //remove the young from the waiting list
     const center = await CohesionCenterModel.findById(nextYoung.cohesionCenterId);
