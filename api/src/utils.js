@@ -91,6 +91,28 @@ const updatePlacesCenter = async (center) => {
   return center;
 };
 
+const sendAutoAffectationMail = async (nextYoung, center) => {
+  // Send mail.
+  await sendEmail(
+    {
+      name: `${nextYoung.firstName} ${nextYoung.lastName}`,
+      email: nextYoung.email,
+    },
+    "Une place dans le séjour de cohésion SNU 2021 s’est libérée !",
+    fs
+      .readFileSync(path.resolve(__dirname, "./templates/autoAffectation.html"))
+      .toString()
+      .replace(/{{firstName}}/, nextYoung.firstName)
+      .replace(/{{lastName}}/, nextYoung.lastName)
+      .replace(/{{centerName}}/, center.name)
+      .replace(/{{centerAddress}}/, center.address + " " + center.zip + " " + center.city)
+      .replace(/{{centerDepartement}}/, center.department)
+      .replace(/{{ctaAccept}}/, "https://inscription.snu.gouv.fr/auth/login?redirect=phase1")
+      .replace(/{{ctaDocuments}}/, "https://inscription.snu.gouv.fr/auth/login?redirect=phase1")
+      .replace(/{{ctaWithdraw}}/, "https://inscription.snu.gouv.fr/auth/login?redirect=phase1")
+  );
+};
+
 const assignNextYoungFromWaitingList = async (young) => {
   const nextYoung = await getYoungFromWaitingList(young);
   if (!nextYoung) {
@@ -102,31 +124,11 @@ const assignNextYoungFromWaitingList = async (young) => {
     console.log("replacement found", nextYoung._id);
 
     // Activate waiting accepation and 48h cron
-    nextYoung.set({ statusPhase1: "WAITING_ACCEPTATION", autoAffectationPhase1ExpiresAt: Date.now() + 60 * 1000 * 60 * 48 });
-    nextYoung.set({ status: "VALIDATED", statusPhase1: "AFFECTED" });
+    nextYoung.set({ status: "VALIDATED", statusPhase1: "WAITING_ACCEPTATION", autoAffectationPhase1ExpiresAt: Date.now() + 60 * 1000 * 60 * 48 });
     await nextYoung.save();
 
     const center = await CohesionCenterModel.findById(nextYoung.cohesionCenterId);
-
-    // Send mail.
-    await sendEmail(
-      {
-        name: `${nextYoung.firstName} ${nextYoung.lastName}`,
-        email: nextYoung.email,
-      },
-      "Une place dans le séjour de cohésion SNU 2021 s’est libérée !",
-      fs
-        .readFileSync(path.resolve(__dirname, "./templates/autoAffectation.html"))
-        .toString()
-        .replace(/{{firstName}}/, nextYoung.firstName)
-        .replace(/{{lastName}}/, nextYoung.lastName)
-        .replace(/{{centerName}}/, center.name)
-        .replace(/{{centerAddress}}/, center.address + " " + center.zip + " " + center.city)
-        .replace(/{{centerDepartement}}/, center.department)
-        .replace(/{{ctaAccept}}/, "https://inscription.snu.gouv.fr/auth/login?redirect=phase1")
-        .replace(/{{ctaDocuments}}/, "https://inscription.snu.gouv.fr/auth/login?redirect=phase1")
-        .replace(/{{ctaWithdraw}}/, "https://inscription.snu.gouv.fr/auth/login?redirect=phase1")
-    );
+    await sendAutoAffectationMail(nextYoung, center);
 
     //remove the young from the waiting list
     if (center?.waitingList?.indexOf(nextYoung._id) !== -1) {
@@ -135,8 +137,6 @@ const assignNextYoungFromWaitingList = async (young) => {
       center.waitingList.splice(i, 1);
       await center.save();
     }
-
-    //todo : send mail to young
   }
 };
 
@@ -186,4 +186,5 @@ module.exports = {
   getSignedUrl,
   updatePlacesCenter,
   assignNextYoungFromWaitingList,
+  sendAutoAffectationMail,
 };

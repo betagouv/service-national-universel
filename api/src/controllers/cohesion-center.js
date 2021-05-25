@@ -7,7 +7,7 @@ const Joi = require("joi");
 const CohesionCenterModel = require("../models/cohesionCenter");
 const ReferentModel = require("../models/referent");
 const YoungModel = require("../models/young");
-const { ERRORS, updatePlacesCenter } = require("../utils");
+const { ERRORS, updatePlacesCenter, sendAutoAffectationMail } = require("../utils");
 
 router.post("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   // Validate params.
@@ -41,23 +41,21 @@ router.post("/:centerId/assign-young/:youngId", passport.authenticate("referent"
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (center.placesLeft <= 0) return res.status(404).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
-    // todo : WAITING_ACCEPTATION when all the communication is done
-
     // update youngs infos
     young.set({
       status: "VALIDATED",
-
-      // todo : WAITING_ACCEPTATION when all the communication is done
-      // statusPhase1: "WAITING_ACCEPTATION",
-
-      statusPhase1: "AFFECTED",
+      statusPhase1: "WAITING_ACCEPTATION",
       cohesionCenterId: center._id,
       cohesionCenterName: center.name,
       cohesionCenterCity: center.city,
       cohesionCenterZip: center.zip,
+      autoAffectationPhase1ExpiresAt: Date.now() + 60 * 1000 * 60 * 48,
     });
     await young.save();
     await young.index();
+
+    const center = await CohesionCenterModel.findById(young.cohesionCenterId);
+    await sendAutoAffectationMail(young, center);
 
     //if young is in waitingList of the center
     // todo check if the young is in antoher center's waiting list
