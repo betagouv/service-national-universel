@@ -54,7 +54,6 @@ router.post("/:centerId/assign-young/:youngId", passport.authenticate("referent"
     await young.save();
     await young.index();
 
-    const center = await CohesionCenterModel.findById(young.cohesionCenterId);
     await sendAutoAffectationMail(young, center);
 
     //if young is in waitingList of the center
