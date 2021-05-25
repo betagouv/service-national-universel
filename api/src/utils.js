@@ -4,6 +4,9 @@ const http = require("http");
 const passwordValidator = require("password-validator");
 const YoungModel = require("./models/young");
 const CohesionCenterModel = require("./models/cohesionCenter");
+const { sendEmail } = require("./sendinblue");
+const path = require("path");
+const fs = require("fs");
 
 const { CELLAR_ENDPOINT, CELLAR_KEYID, CELLAR_KEYSECRET, BUCKET_NAME, ENVIRONMENT } = require("./config");
 
@@ -113,7 +116,7 @@ const assignNextYoungFromWaitingList = async (young) => {
       },
       "Une place dans le séjour de cohésion SNU 2021 s’est libérée !",
       fs
-        .readFileSync(path.resolve(__dirname, "../templates/autoAffectation.html"))
+        .readFileSync(path.resolve(__dirname, "./templates/autoAffectation.html"))
         .toString()
         .replace(/{{firstName}}/, nextYoung.firstName)
         .replace(/{{lastName}}/, nextYoung.lastName)
