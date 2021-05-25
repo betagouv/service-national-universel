@@ -60,13 +60,13 @@ export default () => {
             <h2>Transmission de la fiche sanitaire</h2>
             <p>Téléchargez la fiche sanitaire.</p>
             <p>Vous devez renvoyer votre fiche sanitaire complétée et signée par voie postale sous pli confidentiel au plus tard le 4 juin 2021.</p>
-            {service ? (
+            {/* {service ? (
               <p>
                 L'adresse de destination est la suivante :
                 <br />
                 {service?.directionName}, {service?.address} {service?.zip} {service?.city}
               </p>
-            ) : null}
+            ) : null} */}
             <a href="https://apicivique.s3.eu-west-3.amazonaws.com/Note_relative_aux_informations_d_ordre_sanitaire.pdf" target="blank" className="link">
               Note relative aux informations d'ordre sanitaire{" >"}
             </a>
