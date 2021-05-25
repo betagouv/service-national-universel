@@ -5,16 +5,17 @@ import { Formik } from "formik";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-import { translate as t, YOUNG_PHASE } from "../../../utils";
+import { translate, YOUNG_PHASE } from "../../../utils";
 import WrapperPhase1 from "./wrapper";
 import api from "../../../services/api";
 import ToggleSwitch from "../../../components/ToogleSwitch";
 import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
 import AssignCenter from "./AssignCenter";
 import { Box, BoxTitle } from "../../../components/box";
+import { toastr } from "react-redux-toastr";
 
 export default ({ young, getYoung }) => {
-  const disabled = young.phase !== YOUNG_PHASE.COHESION_STAY;
+  const disabled = false; //young.phase !== YOUNG_PHASE.COHESION_STAY;
   const user = useSelector((state) => state.Auth.user);
 
   const getCohesionStay = (young) => {
@@ -57,6 +58,23 @@ export default ({ young, getYoung }) => {
           <Details title="Code Postal" value={young.cohesionCenterZip} />
         </>
       );
+    if (young.statusPhase1 === "WITHDRAWN")
+      return (
+        <>
+          <p>Le volontaire s'est désisté du séjour de cohésion.</p>
+          <Link to={`/centre/${young.cohesionCenterId}`}>
+            <Details title="Centre" value={young.cohesionCenterName} />
+          </Link>
+          <Details title="Ville" value={young.cohesionCenterCity} />
+          <Details title="Code Postal" value={young.cohesionCenterZip} />
+        </>
+      );
+  };
+
+  const updateYoung = async (v) => {
+    const { ok, code } = await api.put(`/referent/young/${young._id}`, v);
+    if (!ok) return toastr.error("Oups, une erreur s'est produite", translate(code));
+    toastr.success("Mis à jour !");
   };
 
   return (
@@ -91,6 +109,7 @@ export default ({ young, getYoung }) => {
                         optionLabels={["Présent", "Absent"]}
                         values={values}
                         name={"cohesionStayPresence"}
+                        updateYoung={updateYoung}
                         handleChange={handleChange}
                         disabled={disabled}
                       />
@@ -101,6 +120,7 @@ export default ({ young, getYoung }) => {
                         optionLabels={["Réceptionné", "Non réceptionné"]}
                         values={values}
                         name={"cohesionStayMedicalFileReceived"}
+                        updateYoung={updateYoung}
                         handleChange={handleChange}
                         disabled={disabled}
                       />
@@ -147,7 +167,7 @@ const Details = ({ title, value }) => {
   );
 };
 
-const DetailsToogle = ({ title, name, values, handleChange, disabled, optionLabels }) => {
+const DetailsToogle = ({ title, name, values, handleChange, updateYoung, disabled, optionLabels }) => {
   return (
     <div className="detail">
       <div className="detail-title">{`${title} :`}</div>
@@ -155,7 +175,10 @@ const DetailsToogle = ({ title, name, values, handleChange, disabled, optionLabe
         optionLabels={optionLabels}
         id={name}
         checked={values[name] === "true"}
-        onChange={(checked) => handleChange({ target: { value: checked ? "true" : "false", name } })}
+        onChange={(checked) => {
+          handleChange({ target: { value: checked ? "true" : "false", name } });
+          updateYoung({ [name]: checked });
+        }}
         disabled={disabled}
       />
     </div>

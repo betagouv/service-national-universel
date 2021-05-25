@@ -4,14 +4,21 @@ import styled from "styled-components";
 import { Formik } from "formik";
 import { Link } from "react-router-dom";
 
-import { translate as t, YOUNG_PHASE } from "../../../utils";
+import { translate, YOUNG_PHASE } from "../../../utils";
 import WrapperPhase1 from "./wrapper";
 import api from "../../../services/api";
 import ToggleSwitch from "../../../components/ToogleSwitch";
 import { Box, BoxTitle } from "../../../components/box";
+import { toastr } from "react-redux-toastr";
 
 export default ({ young }) => {
-  const disabled = young.phase !== YOUNG_PHASE.COHESION_STAY;
+  const disabled = false; //young.phase !== YOUNG_PHASE.COHESION_STAY;
+
+  const updateYoung = async (v) => {
+    const { ok, code } = await api.put(`/referent/young/${young._id}`, v);
+    if (!ok) return toastr.error("Oups, une erreur s'est produite", translate(code));
+    toastr.success("Mis à jour !");
+  };
 
   const getCohesionStay = (young) => {
     if (young.statusPhase1 === "DONE")
@@ -39,6 +46,28 @@ export default ({ young }) => {
       return (
         <>
           <p>Le volontaire est en attente d'affectation à un centre de cohésion</p>
+        </>
+      );
+    if (young.statusPhase1 === "WAITING_LIST")
+      return (
+        <>
+          <p>Le volontaire est sur liste d'attente au centre :</p>
+          <Link to={`/centre/${young.cohesionCenterId}`}>
+            <Details title="Centre" value={young.cohesionCenterName} />
+          </Link>
+          <Details title="Ville" value={young.cohesionCenterCity} />
+          <Details title="Code Postal" value={young.cohesionCenterZip} />
+        </>
+      );
+    if (young.statusPhase1 === "WITHDRAWN")
+      return (
+        <>
+          <p>Le volontaire s'est désisté du séjour de cohésion.</p>
+          <Link to={`/centre/${young.cohesionCenterId}`}>
+            <Details title="Centre" value={young.cohesionCenterName} />
+          </Link>
+          <Details title="Ville" value={young.cohesionCenterCity} />
+          <Details title="Code Postal" value={young.cohesionCenterZip} />
         </>
       );
   };
@@ -76,6 +105,7 @@ export default ({ young }) => {
                         values={values}
                         name={"cohesionStayPresence"}
                         handleChange={handleChange}
+                        updateYoung={updateYoung}
                         disabled={disabled}
                       />
                     </Bloc>
@@ -86,6 +116,7 @@ export default ({ young }) => {
                         values={values}
                         name={"cohesionStayMedicalFileReceived"}
                         handleChange={handleChange}
+                        updateYoung={updateYoung}
                         disabled={disabled}
                       />
                     </Bloc>
@@ -126,7 +157,7 @@ const Details = ({ title, value }) => {
   );
 };
 
-const DetailsToogle = ({ title, name, values, handleChange, disabled, optionLabels }) => {
+const DetailsToogle = ({ title, name, values, handleChange, updateYoung, disabled, optionLabels }) => {
   return (
     <div className="detail">
       <div className="detail-title">{`${title} :`}</div>
@@ -134,7 +165,10 @@ const DetailsToogle = ({ title, name, values, handleChange, disabled, optionLabe
         optionLabels={optionLabels}
         id={name}
         checked={values[name] === "true"}
-        onChange={(checked) => handleChange({ target: { value: checked ? "true" : "false", name } })}
+        onChange={(checked) => {
+          handleChange({ target: { value: checked ? "true" : "false", name } });
+          updateYoung({ [name]: checked });
+        }}
         disabled={disabled}
       />
     </div>
