@@ -95,16 +95,37 @@ const assignNextYoungFromWaitingList = async (young) => {
     console.log(`no replacement found for young ${young._id} in center ${young.cohesionCenterId}`);
     //todo 25/05 : send mail to ref region & admin
   } else {
-    //notify young & modify statusPhase1
+    // Notify young & modify statusPhase1
     console.log("replacement found", nextYoung._id);
 
-    //todo 25/05 : activate waiting accepation and 24h cron
-    // nextYoung.set({ statusPhase1: "WAITING_ACCEPTATION", autoAffectationPhase1ExpiresAt: Date.now() + 60 * 1000 * 60 * 24 });
+    // Activate waiting accepation and 48h cron
+    nextYoung.set({ statusPhase1: "WAITING_ACCEPTATION", autoAffectationPhase1ExpiresAt: Date.now() + 60 * 1000 * 60 * 48 });
     nextYoung.set({ status: "VALIDATED", statusPhase1: "AFFECTED" });
     await nextYoung.save();
 
-    //remove the young from the waiting list
     const center = await CohesionCenterModel.findById(nextYoung.cohesionCenterId);
+
+    // Send mail.
+    await sendEmail(
+      {
+        name: `${nextYoung.firstName} ${nextYoung.lastName}`,
+        email: nextYoung.email,
+      },
+      "Une place dans le séjour de cohésion SNU 2021 s’est libérée !",
+      fs
+        .readFileSync(path.resolve(__dirname, "../templates/autoAffectation.html"))
+        .toString()
+        .replace(/{{firstName}}/, nextYoung.firstName)
+        .replace(/{{lastName}}/, nextYoung.lastName)
+        .replace(/{{centerName}}/, center.name)
+        .replace(/{{centerAddress}}/, center.address + " " + center.zip + " " + center.city)
+        .replace(/{{centerDepartement}}/, center.department)
+        .replace(/{{ctaAccept}}/, "https://inscription.snu.gouv.fr")
+        .replace(/{{ctaDocuments}}/, "https://inscription.snu.gouv.fr")
+        .replace(/{{ctaWithdraw}}/, "https://inscription.snu.gouv.fr")
+    );
+
+    //remove the young from the waiting list
     if (center?.waitingList?.indexOf(nextYoung._id) !== -1) {
       console.log(`remove young ${nextYoung._id} from waiting_list of ${nextYoung.cohesionCenterId}`);
       const i = center.waitingList.indexOf(nextYoung._id);
