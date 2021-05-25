@@ -18,6 +18,13 @@ const YoungObject = require("../models/young");
 const CohesionCenterObject = require("../models/cohesionCenter");
 const AuthObject = require("../auth");
 const { uploadFile, validatePassword, updatePlacesCenter, assignNextYoungFromWaitingList, ERRORS } = require("../utils");
+const { 
+  validateId,
+  validateString,
+  validateEmail,
+  validateToken
+} = require("../utils/defaultValidate");
+const validateFromYoung = require("../utils/young");
 const { sendEmail } = require("../sendinblue");
 const certificate = require("../templates/certificate");
 const { cookieOptions } = require("../cookie-options");
@@ -50,7 +57,9 @@ router.post("/file/:key", passport.authenticate("young", { session: false }), as
 
       const encryptedBuffer = encrypt(data);
       const resultingFile = { mimetype: "image/png", encoding: "7bit", data: encryptedBuffer };
-      await uploadFile(`app/young/${req.user._id}/${key}/${name}`, resultingFile);
+      const { error, value : checkedId } = validateId(req.user._id);
+      if(error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_URI, error });
+      await uploadFile(`app/young/${checkedId}/${key}/${name}`, resultingFile);
     }
     req.user.set({ [key]: names });
     await req.user.save();
@@ -64,7 +73,9 @@ router.post("/file/:key", passport.authenticate("young", { session: false }), as
 
 router.post("/signup_verify", async (req, res) => {
   try {
-    const young = await YoungObject.findOne({ invitationToken: req.body.invitationToken, invitationExpires: { $gt: Date.now() } });
+    const { error, value : checkedInvitationToken } = validateString(req.body.invitationToken);
+    if(error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    const young = await YoungObject.findOne({ invitationToken: checkedInvitationToken, invitationExpires: { $gt: Date.now() } });
     if (!young) return res.status(200).send({ ok: false, code: ERRORS.INVITATION_TOKEN_EXPIRED_OR_INVALID });
     const token = jwt.sign({ _id: young._id }, config.secret, { expiresIn: "30d" });
     return res.status(200).send({ ok: true, token, data: young });
@@ -76,7 +87,9 @@ router.post("/signup_verify", async (req, res) => {
 
 router.post("/signup_invite", async (req, res) => {
   try {
-    const email = (req.body.email || "").trim().toLowerCase();
+    const { errorEmail, value : checkedEmail } = validateEmail(req.body.email);
+    if(errorEmail) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    const email = (checkedEmail || "").trim().toLowerCase();
 
     const young = await YoungObject.findOne({ email });
     if (!young) return res.status(200).send({ ok: false, data: null, code: ERRORS.USER_NOT_FOUND });
@@ -84,7 +97,6 @@ router.post("/signup_invite", async (req, res) => {
     if (young.registredAt) return res.status(200).send({ ok: false, data: null, code: ERRORS.YOUNG_ALREADY_REGISTERED });
 
     if (!validatePassword(req.body.password)) return res.status(200).send({ ok: false, prescriber: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
-
     young.set({ password: req.body.password });
     young.set({ registredAt: Date.now() });
     young.set({ lastLoginAt: Date.now() });
@@ -107,7 +119,9 @@ router.post("/signup_invite", async (req, res) => {
 
 router.post("/", async (req, res) => {
   try {
-    const young = await YoungObject.create(req.body);
+    const { error, value : checkedYoung } = validateFromYoung.validateYoung(req.body);
+    if(error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    const young = await YoungObject.create(checkedYoung);
     return res.status(200).send({ young, ok: true });
   } catch (error) {
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.YOUNG_ALREADY_REGISTERED });
@@ -118,7 +132,10 @@ router.post("/", async (req, res) => {
 
 router.get("/validate_phase3/:young/:token", async (req, res) => {
   try {
-    const data = await YoungObject.findOne({ _id: req.params.young, phase3Token: req.params.token });
+    const { errorToken, value : checkedToken } = validateToken(req.params.token);
+    const { errorId, value : checkedId } = validateId(req.params.young);
+    if(errorToken || errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_URI, error });
+    const data = await YoungObject.findOne({ _id: checkedId, phase3Token: checkedToken });
     if (!data) {
       capture(`Young not found ${req.params.id}`);
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -132,12 +149,17 @@ router.get("/validate_phase3/:young/:token", async (req, res) => {
 
 router.put("/validate_phase3/:young/:token", async (req, res) => {
   try {
-    const data = await YoungObject.findOne({ _id: req.params.young, phase3Token: req.params.token });
+    const { errorToken, value : checkedToken } = validateToken(req.params.token);
+    const { errorId, value : checkedId } = validateId(req.params.young);
+    if(errorToken || errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_URI, error });
+    const data = await YoungObject.findOne({ _id: checkedId, phase3Token: checkedToken });
     if (!data) {
       capture(`Young not found ${req.params.id}`);
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
-    data.set({ statusPhase3: "VALIDATED", phase3TutorNote: req.body.phase3TutorNote });
+    const { errorNote, value : checkedTutorNote } = validateString(req.body.phase3TutorNote);
+    if(errorNote) return res.status(400).send({ ok: false, code: ERRORS.INVALID_URI, error });
+    data.set({ statusPhase3: "VALIDATED", phase3TutorNote: checkedTutorNote });
     await data.save();
     await data.index();
     return res.status(200).send({ ok: true, data });
@@ -149,7 +171,9 @@ router.put("/validate_phase3/:young/:token", async (req, res) => {
 
 router.get("/", passport.authenticate("young", { session: false }), async (req, res) => {
   try {
-    const young = await YoungObject.findOne({ user_id: req.user._id });
+    const { error, value : checkedId } = validateId(req.user._id);
+    if(error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_URI, error });
+    const young = await YoungObject.findOne({ user_id: checkedId });
     return res.status(200).send({ ok: true, young });
   } catch (error) {
     capture(error);
@@ -159,9 +183,12 @@ router.get("/", passport.authenticate("young", { session: false }), async (req, 
 
 router.put("/validate_mission", passport.authenticate("young", { session: false }), async (req, res) => {
   try {
-    const obj = req.body;
+    const { errorYoung, value : checkedYoung } = validateFromYoung.validateYoung(req.body);
+    const { errorId, value : checkedId } = validateId(req.user._id);
+    if(errorYoung || errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    const obj = checkedYoung;
     obj.phase3Token = crypto.randomBytes(20).toString("hex");
-    const young = await YoungObject.findByIdAndUpdate(req.user._id, obj, { new: true });
+    const young = await YoungObject.findByIdAndUpdate(checkedId, obj, { new: true });
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     // todo send mail to tutor
     let htmlContent = fs.readFileSync(path.resolve(__dirname, "../templates/validatePhase3.html")).toString();
@@ -185,9 +212,12 @@ router.put("/validate_mission", passport.authenticate("young", { session: false 
 //@check
 router.put("/", passport.authenticate("young", { session: false }), async (req, res) => {
   try {
-    const obj = req.body;
+    const { errorId, value : checkedId } = validateId(req.user._id);
+    const { errorYoung, value : checkedYoung } = validateFromYoung.validateYoung(req.body);
+    if(errorId || errorYoung) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    const obj = checkedYoung;
 
-    const young = await YoungObject.findByIdAndUpdate(req.user._id, obj, { new: true });
+    const young = await YoungObject.findByIdAndUpdate(checkedId, obj, { new: true });
     res.status(200).send({ ok: true, data: young });
 
     //Check quartier prioritaires.
@@ -277,7 +307,9 @@ router.post("/france-connect/user-info", async (req, res) => {
 // Delete one user (only admin can delete user)
 router.delete("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const young = await YoungObject.findOne({ _id: req.params.id });
+    const { error, value : checkedId } = validateId(req.params.id)
+    if(error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_URI, error });
+    const young = await YoungObject.findOne({ _id: checkedId });
     await young.remove();
     console.log(`Young ${req.params.id} has been deleted`);
     res.status(200).send({ ok: true });
@@ -288,7 +320,9 @@ router.delete("/:id", passport.authenticate("referent", { session: false }), asy
 });
 
 router.post("/:id/certificate/:template", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
-  const young = await YoungObject.findById(req.params.id);
+  const {error, value : checkedYoung } = validateId(req.params.id);
+  if(error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_URI, error });
+  const young = await YoungObject.findById(checkedYoung);
   if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
   const options = req.body.options || { format: "A4", margin: 0 };

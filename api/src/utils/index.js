@@ -4,7 +4,6 @@ const http = require("http");
 const passwordValidator = require("password-validator");
 const YoungModel = require("../models/young");
 const CohesionCenterModel = require("../models/cohesionCenter");
-const Joi = require("joi");
 
 const { CELLAR_ENDPOINT, CELLAR_KEYID, CELLAR_KEYSECRET, BUCKET_NAME, ENVIRONMENT } = require("../config");
 

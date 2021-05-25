@@ -6,12 +6,13 @@ const { capture } = require("../sentry");
 const StructureObject = require("../models/structure");
 const { 
   ERRORS,
-  validateId,
 } = require("../utils");
 
 const {
-  validateStructureFromRef,
-} = require ("../utils/referent")
+  validateId
+} = require("../utils/defaultValidate");
+
+const validateFromReferent = require ("../utils/referent")
 
 
 // Update "network name" to ease search ("Affilié à un réseau national" filter).
@@ -21,7 +22,7 @@ async function updateNetworkName(structure) {
     // When the structure is a child (part of a network).
     // Get network for the structure, then update networkName thanks to its name.
     const { error, value : checkedNetworkId } = validateId(structure.networkId)
-    if(error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_URI, error });
+    if(error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
     const network = await StructureObject.findOne({ _id: checkedNetworkId });
     if (network) {
       structure.set({ networkName: `${network.name}` });
@@ -32,7 +33,7 @@ async function updateNetworkName(structure) {
     // When the structure is a partent (is a network).
     // Update the structure itself (a parent belongs to her own structure).
     const { error, value : checkedStructureName } = validateId(structure.name)
-    if(error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_URI, error });
+    if(error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
     structure.set({ networkName: `${checkedStructureName}` });
     await structure.save();
     await structure.index();
@@ -48,8 +49,8 @@ async function updateNetworkName(structure) {
 
 router.post("/", async (req, res) => {
   try {
-    const { error, value : checkedStructure } = validateStructureFromRef(req.body);
-    if(error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_URI, error });
+    const { error, value : checkedStructure } = validateFromReferent.validateStructure(req.body);
+    if(error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
     const data = await StructureObject.create(checkedStructure);
     await updateNetworkName(data);
     return res.status(200).send({ ok: true, data });
@@ -62,8 +63,8 @@ router.post("/", async (req, res) => {
 router.put("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const { errorId, value : checkedId } = validateId(req.user.structureId);
-    const { errorStructure, value : checkedStructure } = validateStructureFromRef(req.body);
-    if(errorId || errorStructure) return res.status(400).send({ ok: false, code: ERRORS.INVALID_URI, error });
+    const { errorStructure, value : checkedStructure } = validateFromReferent.validateStructure(req.body);
+    if(errorId || errorStructure) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
     let obj = checkedStructure;
     const data = await StructureObject.findByIdAndUpdate(checkedId, obj, { new: true });
     await updateNetworkName(data);
@@ -77,9 +78,9 @@ router.put("/", passport.authenticate("referent", { session: false }), async (re
 
 router.put("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const { errorId, value : checkedId } = valdiateId(req.params.id);
-    const { errorStructure, value : checkedStructure } = validateStructure(req.body);
-    if(errorId || errorStructure) return res.status(400).send({ ok: false, code: ERRORS.INVALID_URI, error });
+    const { errorId, value : checkedId } = validateId(req.params.id);
+    const { errorStructure, value : checkedStructure } = validateFromReferent.validateStructure(req.body);
+    if(errorId || errorStructure) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
     let obj = checkedStructure;
     const data = await StructureObject.findByIdAndUpdate(checkedId, obj, { new: true });
     await updateNetworkName(data);
@@ -125,7 +126,9 @@ router.get("/all", passport.authenticate("referent", { session: false }), async 
 
 router.get("/:id", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
-    const data = await StructureObject.findOne({ _id: req.params.id });
+    const { error, value : checkedId } = validateId(req.params.id);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_URI, error });
+    const data = await StructureObject.findOne({ _id: checkedId });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
@@ -136,7 +139,9 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
 
 router.get("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const data = await StructureObject.findById(req.user.structureId);
+    const { error, value : checkedId } = validateId(req.params.id);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    const data = await StructureObject.findById(checkedId);
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
@@ -146,7 +151,9 @@ router.get("/", passport.authenticate("referent", { session: false }), async (re
 
 router.delete("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const structure = await StructureObject.findOne({ _id: req.params.id });
+    const { error, value : checkedId } = validateId(req.params.id);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_URI, error });
+    const structure = await StructureObject.findOne({ _id: checkedId });
     await structure.remove();
     console.log(`Structure ${req.params.id} has been deleted`);
     res.status(200).send({ ok: true });

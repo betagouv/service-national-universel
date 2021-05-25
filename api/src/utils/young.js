@@ -1,6 +1,6 @@
 const Joi = require("joi");
 
-function validateYoungFromYoung(young){
+function validateYoung(young){
   return Joi.object()
     .keys({
       cohort: Joi.string().allow(null,''),
@@ -206,7 +206,7 @@ function validateYoungFromYoung(young){
     .validate(young, { stripUnknown: true });
 }
 
-function validateReferentFromYoung(referent){
+function validateReferent(referent){
   return Joi.object()
     .keys({
       sqlId: Joi.string().allow(null,''),
@@ -233,7 +233,7 @@ function validateReferentFromYoung(referent){
     .validate(referent, { stripUnknown: true });
 }
 
-function validateMissionFromYoung(mission){
+function validateMission(mission){
   return Joi.object()
     .keys({
       sqlId: Joi.string().allow(null,''),
@@ -310,8 +310,40 @@ function validateStructure(structure){
     .validate(structure, {stripUnknown : true})
   }
 
+function validateWaitingList(waitingList){
+    return Joi.object()
+      .keys({
+        zip: Joi.string().allow(null,''),
+        mail: Joi.string().allow(null,''),
+        birthdateAt: Joi.string().allow(null,''),
+        })
+        .validate(waitingList, {stripUnknown : true})
+}
+
+function validateProgram(program){
+  return Joi.object()
+    .keys({
+      name: Joi.string().allow(null,''),
+      description: Joi.string().allow(null,''),
+      descriptionFor: Joi.string().allow(null,''),
+      descriptionMoney: Joi.string().allow(null,''),
+      descriptionDuration: Joi.string().allow(null,''),
+      url: Joi.string().allow(null,''),
+      imageFile: Joi.string().allow(null,''),
+      imageString: Joi.string().allow(null,''),
+      type: Joi.string().allow(null,''),
+      department: Joi.string().allow(null,''),
+      region: Joi.string().allow(null,''),
+      visibility: Joi.string().allow(null,''),
+      })
+      .validate(program, {stripUnknown : true})
+}
+
 module.exports = {
-    validateYoungFromYoung,
-    validateReferentFromYoung,
-    validateMissionFromYoung
+    validateYoung,
+    validateReferent,
+    validateMission,
+    validateStructure,
+    validateWaitingList,
+    validateProgram
 }

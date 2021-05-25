@@ -5,10 +5,13 @@ const { capture } = require("../sentry");
 
 const WaitingListModel = require("../models/waitingList");
 const { ERRORS } = require("../utils");
+const validateFromReferent  = require("../utils/referent");
 
 router.post("/", async (req, res) => {
   try {
-    const data = await WaitingListModel.create(req.body);
+    const { error, value : checkedWaitingList } = validateFromReferent.validateWaitingList(req.body);
+    if(error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    const data = await WaitingListModel.create(checkedWaitingList);
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
