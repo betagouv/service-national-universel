@@ -27,6 +27,7 @@ import Representant1 from "./representant-legal1";
 import Representant2 from "./representant-legal2";
 import Consentement from "./consentement";
 import ConsentementImage from "./consentement-image";
+import ConsentementPCR from "./consentement-pcr";
 import InformationsSupplementaires from "./informations-supplementaires";
 import JDC from "./JDC";
 import InformationsPhase1 from "./informations-phase1";
@@ -103,6 +104,7 @@ export default (props) => {
             <Row>
               <Consentement values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
               <ConsentementImage values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
+              <ConsentementPCR values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
               {user.role === "admin" ? <InformationsSupplementaires values={values} handleChange={handleChange} /> : null}
               {values.cohort === "2020" ? <JDC values={values} handleChange={handleChange} /> : null}
               <InformationsPhase1 values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
