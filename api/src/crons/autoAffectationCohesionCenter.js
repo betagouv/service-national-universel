@@ -5,8 +5,7 @@ const { capture, captureMessage } = require("../sentry");
 const YoungModel = require("../models/young");
 const { assignNextYoungFromWaitingList } = require("../utils");
 
-const delay = 48; // delay in hour
-const delayDate = new Date(Date.now() - 60 * 60 * 1000 * delay);
+const delayDate = new Date(Date.now());
 
 const clean = async () => {
   const youngsLimit = await YoungModel.find({ autoAffectationPhase1ExpiresAt: { $lte: delayDate } });
@@ -18,12 +17,12 @@ const clean = async () => {
 
       // withdrawn young
       young.set({ statusPhase1: "WITHDRAWN" });
-      // await young.save();
+      await young.save();
 
       // todo send mail saying it is too late :(
 
       // assign next one from the waiting list
-      // await assignNextYoungFromWaitingList(young);
+      await assignNextYoungFromWaitingList(young);
     } else {
       console.log(`${young._id} ${young.firstName} ${young.lastName} is not quick enough. but its statusPhase1 is '${young.statusPhase1}'`);
     }
