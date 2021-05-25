@@ -33,9 +33,11 @@ router.get("/referent/:id", passport.authenticate(["referent"], { session: false
   }
 });
 
-router.get("/", passport.authenticate(["referent"], { session: false }), async (req, res) => {
+router.get("/", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
-    const data = await DepartmentServiceModel.find({});
+    let data = [];
+    if (req.user.department) data = await DepartmentServiceModel.findOne({ department: req.user.department });
+    else data = await DepartmentServiceModel.find({});
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
