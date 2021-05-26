@@ -25,7 +25,7 @@ export default ({ values, handleChange, handleSubmit }) => (
           ]}
         />
         <Documents>
-          <h4>Formulaire de consentement d'autotest PCR'</h4>
+          <h4>Formulaire de consentement d'autotest PCR</h4>
           <DndFileInput
             placeholder="un document justificatif"
             errorMessage="Vous devez téléverser un document justificatif"
