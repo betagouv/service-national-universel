@@ -35,7 +35,7 @@ export default () => {
           <p>Cette année, il se déroule du 21 juin au 2 juillet 2021. </p>
           <Separator />
           <p>
-            <strong>Votre convocation</strong>
+            <strong>Votre lieu d'affectation</strong>
             <br />
             Vous êtes actuellement affecté(e) à un centre de cohésion.
             <br />
