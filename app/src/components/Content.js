@@ -57,8 +57,6 @@ const HeroStyle = styled.div`
       font-size: 1rem;
     }
     font-weight: 400;
-    display: -webkit-box;
-    overflow: hidden;
     a {
       font-size: 1rem;
       color: #5949d0;
