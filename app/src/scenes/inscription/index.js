@@ -40,28 +40,24 @@ const Step = ({ step }) => {
 export default () => {
   const young = useSelector((state) => state.Auth.young);
 
-  if (
-    (isInscription2021Closed() && (!young || young?.status === "IN_PROGRESS")) ||
-    (isEndOfInscriptionManagement2021() && (!young || ["IN_PROGRESS", "WAITING_CORRECTION", "WAITING_VALIDATION"].includes(young?.status)))
-  ) {
-    return (
-      <Switch>
-        <Route path="/inscription" component={HomeClosed} />
-      </Switch>
-    );
-  }
   return (
     <Switch>
-      <Route path="/inscription/profil" component={() => <Step step={STEPS.PROFIL} />} />
-      <Route path="/inscription/coordonnees" component={() => <Step step={STEPS.COORDONNEES} />} />
-      <Route path="/inscription/particulieres" component={() => <Step step={STEPS.PARTICULIERES} />} />
-      <Route path="/inscription/representants" component={() => <Step step={STEPS.REPRESENTANTS} />} />
-      <Route path="/inscription/consentements" component={() => <Step step={STEPS.CONSENTEMENTS} />} />
-      <Route path="/inscription/done" component={() => <Step step={STEPS.DONE} />} />
-      <Route path="/inscription/france-connect-callback" component={() => <FranceConnectCallback />} />
-      <Route path="/inscription" component={Home} />
+      <Route path="/inscription" component={HomeClosed} />
     </Switch>
   );
+
+  // return (
+  //   <Switch>
+  //     <Route path="/inscription/profil" component={() => <Step step={STEPS.PROFIL} />} />
+  //     <Route path="/inscription/coordonnees" component={() => <Step step={STEPS.COORDONNEES} />} />
+  //     <Route path="/inscription/particulieres" component={() => <Step step={STEPS.PARTICULIERES} />} />
+  //     <Route path="/inscription/representants" component={() => <Step step={STEPS.REPRESENTANTS} />} />
+  //     <Route path="/inscription/consentements" component={() => <Step step={STEPS.CONSENTEMENTS} />} />
+  //     <Route path="/inscription/done" component={() => <Step step={STEPS.DONE} />} />
+  //     <Route path="/inscription/france-connect-callback" component={() => <FranceConnectCallback />} />
+  //     <Route path="/inscription" component={Home} />
+  //   </Switch>
+  // );
 };
 
 const Content = styled.div`
