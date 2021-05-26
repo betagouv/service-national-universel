@@ -143,7 +143,7 @@ const assignNextYoungFromWaitingList = async (young) => {
 
     const center = await CohesionCenterModel.findById(young.cohesionCenterId);
     if (!center) return null;
-    let to = await ReferentModel.find({ role: "admin" });
+    let to = await ReferentModel.find({ role: "admin", email: { $in: ["youssef.tahiri@education.gouv.fr", "nicolas.roy@recherche.gouv.fr"] } });
     to = to.concat(await ReferentModel.find({ role: "referent_region", region: center.region }));
     for (let i = 0; i < to.length; i++) {
       console.log(`send autoAffectationNotFound to ${to[i].email}`);
