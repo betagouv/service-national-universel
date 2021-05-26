@@ -24,14 +24,15 @@ const imageRight = (young) => {
   return html
     .replace(/{{FIRST_NAME}}/g, young.firstName)
     .replace(/{{LAST_NAME}}/g, young.lastName)
-    .replace(/{{REPRESENTANT_1_FIRST_NAME}}/g, young.firstName1)
-    .replace(/{{REPRESENTANT_1_LAST_NAME}}/g, young.lastName1)
-    .replace(/{{REPRESENTANT_2_FIRST_NAME}}/g, young.firstName2)
-    .replace(/{{REPRESENTANT_2_LAST_NAME}}/g, young.lastName2)
+    .replace(/{{REPRESENTANT_1_FIRST_NAME}}/g, young.firstName1 || "")
+    .replace(/{{REPRESENTANT_1_LAST_NAME}}/g, young.lastName1 || "")
+    .replace(/{{REPRESENTANT_2_FIRST_NAME}}/g, young.firstName2 || "")
+    .replace(/{{REPRESENTANT_2_LAST_NAME}}/g, young.lastName2 || "")
     .replace(/{{CONSENTMENT_TRUE}}/g, young.imageRight === "true" ? "x" : "")
     .replace(/{{CONSENTMENT_FALSE}}/g, young.imageRight === "false" ? "x" : "")
     .replace(/{{BASE_URL}}/g, getBaseUrl())
-    .replace(/{{GENERAL_BG}}/g, getBgImageRight(1));
+    .replace(/{{GENERAL_BG_RECTO}}/g, getBgImageRight(1))
+    .replace(/{{GENERAL_BG_VERSO}}/g, getBgImageRight(2));
 };
 
 const autotestPCR = (young) => {
@@ -40,8 +41,8 @@ const autotestPCR = (young) => {
     html
       .replace(/{{FIRST_NAME}}/g, young.firstName)
       .replace(/{{LAST_NAME}}/g, young.lastName)
-      .replace(/{{REPRESENTANT_1_FIRST_NAME}}/g, young.firstName1)
-      .replace(/{{REPRESENTANT_1_LAST_NAME}}/g, young.lastName1)
+      .replace(/{{REPRESENTANT_1_FIRST_NAME}}/g, young.firstName1 || "")
+      .replace(/{{REPRESENTANT_1_LAST_NAME}}/g, young.lastName1 || "")
       .replace(/{{REPRESENTANT_2_FIRST_NAME}}/g, young.firstName2 || "")
       .replace(/{{REPRESENTANT_2_LAST_NAME}}/g, young.lastName2 || "")
       .replace(/{{CONSENTMENT_TRUE}}/g, young.autoTestPCR === "true" ? "x" : "")

@@ -10,9 +10,7 @@ img.bg {
   height: auto;
 
   /* Set up positioning */
-  position: fixed;
-  top: 0;
-  left: 0;
+  position: relative;
   z-index: -1;
 }
 
@@ -26,17 +24,17 @@ img.bg {
 }
 
 .l2 {
-  position: fixed;
+  position: absolute;
   top: 390px;
   left: 200px;
 }
 .l3 {
-  position: fixed;
+  position: absolute;
   top: 370px;
   left: 200px;
 }
 .l4 {
-  position: fixed;
+  position: absolute;
   top: 340px;
   left: 200px;
 }
@@ -46,74 +44,74 @@ img.bg {
 }
 
 #autotestPCR > .name {
-  position: fixed;
+  position: absolute;
   left: 105px;
   top: 560px;
 }
 
 #autotestPCR > .parent1FirstName {
-  position: fixed;
+  position: absolute;
   left: 165px;
   top: 283px;
 }
 #autotestPCR > .parent1LastName {
-  position: fixed;
+  position: absolute;
   left: 165px;
   top: 318px;
 }
 #autotestPCR > .parent2FirstName {
-  position: fixed;
+  position: absolute;
   left: 165px;
   top: 450px;
 }
 #autotestPCR > .parent2LastName {
-  position: fixed;
+  position: absolute;
   left: 165px;
   top: 485px;
 }
 #autotestPCR > .consentment-true {
-  position: fixed;
+  position: absolute;
   left: 119px;
   top: 596px;
 }
 #autotestPCR > .consentment-false {
-  position: fixed;
+  position: absolute;
   left: 119px;
   top: 771px;
 }
 
 #imageRight > .name {
-  position: fixed;
+  position: absolute;
   left: 490px;
   top: 478px;
 }
 #imageRight > .parent1FirstName {
-  position: fixed;
-  left: 165px;
-  top: 263px;
+  position: absolute;
+  left: 170px;
+  top: 265px;
 }
 #imageRight > .parent1LastName {
-  position: fixed;
-  left: 165px;
-  top: 298px;
+  position: absolute;
+  left: 170px;
+  top: 300px;
 }
 #imageRight > .parent2FirstName {
-  position: fixed;
-  left: 165px;
+  position: absolute;
+  left: 170px;
   top: 393px;
 }
 #imageRight > .parent2LastName {
-  position: fixed;
-  left: 165px;
+  position: absolute;
+  left: 170px;
   top: 428px;
 }
 #imageRight > .consentment-true {
-  position: fixed;
-  left: 119px;
-  top: 516px;
+  position: absolute;
+  left: 124px;
+  top: 513px;
 }
 #imageRight > .consentment-false {
-  position: fixed;
-  left: 119px;
-  top: 581px;
+  position: absolute;
+  left: 124px;
+  top: 577px;
 }
