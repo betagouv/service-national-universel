@@ -10,7 +10,7 @@ import WrapperPhase1 from "./wrapper";
 import api from "../../../services/api";
 import ToggleSwitch from "../../../components/ToogleSwitch";
 import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
-import AssignCenter from "./AssignCenter";
+import AssignCenter from "../components/AssignCenter";
 import { Box, BoxTitle } from "../../../components/box";
 import { toastr } from "react-redux-toastr";
 import Badge from "../../../components/Badge";

@@ -16,7 +16,7 @@ export default ({ young, onAffect, onClick }) => {
     if (!ok) return toastr.error("Oups, une erreur est survenue lors de l'affectation du jeune", code);
     toastr.success(`${young.firstName} a été affecté(e) au centre ${center.name} !`);
     setSearchedValue("");
-    return onAffect?.();
+    return onAffect?.(data);
   };
 
   return (
