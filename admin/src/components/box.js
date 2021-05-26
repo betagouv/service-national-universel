@@ -66,4 +66,6 @@ export const BoxTitle = styled.div`
   margin-bottom: 20px;
   font-size: 1.3rem;
   font-weight: 400;
+  display: flex;
+  flex: 1;
 `;

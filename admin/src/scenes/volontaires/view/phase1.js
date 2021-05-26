@@ -5,7 +5,7 @@ import { Formik } from "formik";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-import { translate, YOUNG_PHASE } from "../../../utils";
+import { translate, YOUNG_STATUS_COLORS, formatStringLongDate } from "../../../utils";
 import WrapperPhase1 from "./wrapper";
 import api from "../../../services/api";
 import ToggleSwitch from "../../../components/ToogleSwitch";
@@ -13,6 +13,7 @@ import DownloadAttestationButton from "../../../components/buttons/DownloadAttes
 import AssignCenter from "./AssignCenter";
 import { Box, BoxTitle } from "../../../components/box";
 import { toastr } from "react-redux-toastr";
+import Badge from "../../../components/Badge";
 
 export default ({ young, getYoung }) => {
   const disabled = false; //young.phase !== YOUNG_PHASE.COHESION_STAY;
@@ -58,6 +59,19 @@ export default ({ young, getYoung }) => {
           <Details title="Code Postal" value={young.cohesionCenterZip} />
         </>
       );
+    if (young.statusPhase1 === "WAITING_ACCEPTATION")
+      return (
+        <>
+          <p>
+            Le volontaire doit confirmer sa participation au séjour de cohésion avant le <b>{formatStringLongDate(young.autoAffectationPhase1ExpiresAt)}</b>.
+          </p>
+          <Link to={`/centre/${young.cohesionCenterId}`}>
+            <Details title="Centre" value={young.cohesionCenterName} />
+          </Link>
+          <Details title="Ville" value={young.cohesionCenterCity} />
+          <Details title="Code Postal" value={young.cohesionCenterZip} />
+        </>
+      );
     if (young.statusPhase1 === "WITHDRAWN")
       return (
         <>
@@ -83,7 +97,9 @@ export default ({ young, getYoung }) => {
         <Box>
           <Row>
             <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
-              <Bloc title="Séjour de cohésion">{getCohesionStay(young)}</Bloc>
+              <Bloc title="Séjour de cohésion" titleRight={<Badge text={translate(young.statusPhase1)} color={YOUNG_STATUS_COLORS[young.statusPhase1]} />}>
+                {getCohesionStay(young)}
+              </Bloc>
             </Col>
             <Col md={6}>
               <Formik
@@ -141,14 +157,22 @@ export default ({ young, getYoung }) => {
   );
 };
 
-const Bloc = ({ children, title, borderBottom, borderRight, disabled }) => {
+const Bloc = ({ children, title, titleRight, borderBottom, borderRight, disabled }) => {
   return (
     <Row
-      style={{ borderBottom: borderBottom ? "2px solid #f4f5f7" : 0, borderRight: borderRight ? "2px solid #f4f5f7" : 0, backgroundColor: disabled ? "#f9f9f9" : "transparent" }}
+      style={{
+        width: "100%",
+        borderBottom: borderBottom ? "2px solid #f4f5f7" : 0,
+        borderRight: borderRight ? "2px solid #f4f5f7" : 0,
+        backgroundColor: disabled ? "#f9f9f9" : "transparent",
+      }}
     >
       <Wrapper>
         <div style={{ display: "flex" }}>
-          <BoxTitle>{title}</BoxTitle>
+          <BoxTitle>
+            <div>{title}</div>
+            <div>{titleRight}</div>
+          </BoxTitle>
         </div>
         {children}
       </Wrapper>
