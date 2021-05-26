@@ -179,7 +179,12 @@ const getYoungFromWaitingList = async (young) => {
     let res = null;
     for (let i = 0; i < center.waitingList?.length; i++) {
       const tempYoung = await YoungModel.findById(center.waitingList[i]);
-      if (tempYoung.department === young.department && tempYoung.gender === young.gender) {
+      if (
+        tempYoung.status === "VALIDATED" &&
+        tempYoung.statusPhase1 === "WAITING_LIST" &&
+        tempYoung.department === young.department &&
+        tempYoung.gender === young.gender
+      ) {
         res = tempYoung;
         break;
       }
