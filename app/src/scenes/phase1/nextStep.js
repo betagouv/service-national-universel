@@ -66,7 +66,7 @@ export default () => {
                 {service?.directionName}, {service?.address} {service?.zip} {service?.city}
               </p>
             ) : null}
-            <a href="https://apicivique.s3.eu-west-3.amazonaws.com/Note_relative_aux_informations_d_ordre_sanitaire.pdf" target="blank" className="link">
+            <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Note_relative_aux_informations_d_ordre_sanitaire.pdf" target="blank" className="link">
               Note relative aux informations d'ordre sanitaire{" >"}
             </a>
 
@@ -85,7 +85,7 @@ export default () => {
             </div>
           </div>
           <div style={{ minWidth: "30%", display: "flex", justifyContent: "flex-end", alignItems: "center", marginLeft: "1.5rem" }}>
-            <a target="blank" href="https://apicivique.s3.eu-west-3.amazonaws.com/Fiche_sanitaire.pdf">
+            <a target="blank" href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Fiche_sanitaire.pdf">
               <ContinueButton>Télécharger la fiche sanitaire</ContinueButton>
             </a>
           </div>

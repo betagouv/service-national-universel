@@ -49,7 +49,7 @@ export default () => {
             <br />
             <i>Cette étape est un pré-requis au séjour de cohésion.</i>
             <br />
-            <a href="https://apicivique.s3.eu-west-3.amazonaws.com/Note_relative_a%CC%80_l_utilisation_d_autotest_COVID.pdf" target="blank" className="link">
+            <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Note_relative_a_l_utilisation_d_autotest_COVID.pdf" target="blank" className="link">
               Note relative à l’utilisation d’autotest antingénique COVID{" >"}
             </a>
           </p>
@@ -199,7 +199,7 @@ export default () => {
                       <DownloadText>
                         {/* Ou todo : upload version du formialire autotestPCR */}
                         <a
-                          href="https://apicivique.s3.eu-west-3.amazonaws.com/Consentement_a%CC%80_l_utilisation_d_autotest_COVID.pdf"
+                          href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Consentement_a_l_utilisation_d_autotest_COVID.pdf"
                           target="_blank"
                           style={{ fontSize: "1rem" }}
                         >

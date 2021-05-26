@@ -52,7 +52,7 @@ export default () => {
             <p>Consultez le trousseau indicatif pour être sûr(e) de ne rien oublier</p>
           </div>
           <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", marginLeft: "auto" }}>
-            <a target="blank" href="https://apicivique.s3.eu-west-3.amazonaws.com/Trousseau_indicatif.pdf">
+            <a target="blank" href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/trousseauIndicatif.pdf">
               <ContinueButton>Consulter</ContinueButton>
             </a>
           </div>

@@ -245,7 +245,7 @@ export default () => {
                       {/* <BackButton onClick={() => print()}>Imprimer le formulaire pré-rempli</BackButton> */}
                       <DownloadText>
                         {/* Ou{" "} */}
-                        <a style={{ fontSize: "1rem" }} href="https://apicivique.s3.eu-west-3.amazonaws.com/consentement_droit_image.pdf" target="_blank">
+                        <a style={{ fontSize: "1rem" }} href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Droit_a_l_image.pdf" target="_blank">
                           télécharger le modèle à remplir
                         </a>
                       </DownloadText>
