@@ -5,6 +5,7 @@ import { Link, Redirect } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
+import queryString from "query-string";
 
 import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
@@ -16,8 +17,10 @@ export default () => {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.Auth.user);
   const [userIsValid, setUserIsValid] = useState(true);
+  const params = queryString.parse(location.search);
+  const { redirect } = params;
 
-  if (user) return <Redirect to="/" />;
+  if (user) return <Redirect to={"/" + (redirect || "")} />;
 
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
