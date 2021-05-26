@@ -1,8 +1,7 @@
 import React from "react";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 
 import { HeroContainer, Hero } from "../../components/Content";
-import NextStep from "./nextStep";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
