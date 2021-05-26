@@ -131,7 +131,7 @@ const sendAutoAffectationNotFoundMails = async (to, young, center) => {
       .replace(/{{youngFirstName}}/, young.firstName)
       .replace(/{{youngLastName}}/, young.lastName)
       .replace(/{{centerName}}/, center.name)
-      .replace(/{{cta}}/, `${ADMIN_URL}/centre/${center._id}/affectation`)
+      .replace(/{{cta}}/, `${ADMIN_URL}/auth?redirect=centre/${center._id}/affectation`)
   );
 };
 
