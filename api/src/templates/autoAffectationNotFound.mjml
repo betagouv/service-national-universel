@@ -1,0 +1,20 @@
+<mjml>
+  <mj-body>
+    <mj-section>
+      <mj-column>
+        <mj-text> </mj-text>
+        <mj-text font-size="18px" color="#000"> Bonjour {{firstName}} {{lastName}}, </mj-text>
+        <mj-text line-height="1.5" font-size="18px" color="#000">
+          Suite au désistement de {{youngFirstName}} {{youngLastName}}, sa place dans le centre de {{centerName}} n'a pu être proposée automatiquement
+          car aucun volontaire de la liste complémentaire du centre ne correspond aux critères de replacement.
+        </mj-text>
+        <mj-text line-height="1.5" font-size="18px" font-weight="bold" color="#000">
+          Ainsi, nous vous invitons à reproposer la place disponible via une affectation manuelle.
+        </mj-text>
+        <mj-button font-size="20px" background-color="#5145cd" href="{{cta}}"> Affecter manuellement un volontaire au centre </mj-button>
+        <mj-text font-size="18px" color="#000">Cordialement,</mj-text>
+        <mj-text font-size="18px" color="#000">Les équipes du Service National Universel</mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

@@ -4,11 +4,12 @@ const http = require("http");
 const passwordValidator = require("password-validator");
 const YoungModel = require("./models/young");
 const CohesionCenterModel = require("./models/cohesionCenter");
+const ReferentModel = require("./models/referent");
 const { sendEmail } = require("./sendinblue");
 const path = require("path");
 const fs = require("fs");
 const sendinblue = require("./sendinblue");
-
+const { ADMIN_URL } = require("./config");
 const { CELLAR_ENDPOINT, CELLAR_KEYID, CELLAR_KEYSECRET, BUCKET_NAME, ENVIRONMENT } = require("./config");
 
 function getReq(url, cb) {
@@ -114,12 +115,40 @@ const sendAutoAffectationMail = async (nextYoung, center) => {
   );
 };
 
+const sendAutoAffectationNotFoundMails = async (to, young, center) => {
+  // Send mail.
+  await sendEmail(
+    {
+      name: `${to.firstName} ${to.lastName}`,
+      email: to.email,
+    },
+    "Une place s'est libérée dans l'un de vos centres de séjour SNU",
+    fs
+      .readFileSync(path.resolve(__dirname, "./templates/autoAffectationNotFound.html"))
+      .toString()
+      .replace(/{{firstName}}/, to.firstName)
+      .replace(/{{lastName}}/, to.lastName)
+      .replace(/{{youngFirstName}}/, young.firstName)
+      .replace(/{{youngLastName}}/, young.lastName)
+      .replace(/{{centerName}}/, center.name)
+      .replace(/{{cta}}/, `${ADMIN_URL}/centre/${center._id}/affectation`)
+  );
+};
+
 const assignNextYoungFromWaitingList = async (young) => {
   const nextYoung = await getYoungFromWaitingList(young);
   if (!nextYoung) {
     //notify referents & admin
     console.log(`no replacement found for young ${young._id} in center ${young.cohesionCenterId}`);
-    //todo 25/05 : send mail to ref region & admin
+
+    const center = await CohesionCenterModel.findById(young.cohesionCenterId);
+    if (!center) return null;
+    let to = await ReferentModel.find({ role: "admin" });
+    to = to.concat(await ReferentModel.find({ role: "referent_region", region: center.region }));
+    for (let i = 0; i < to.length; i++) {
+      console.log(`send autoAffectationNotFound to ${to[i].email}`);
+      await sendAutoAffectationNotFoundMails(to[i], young, center);
+    }
   } else {
     // Notify young & modify statusPhase1
     console.log("replacement found", nextYoung._id);
