@@ -1,0 +1,16 @@
+<mjml>
+  <mj-body>
+    <mj-section>
+      <mj-column>
+        <mj-text> </mj-text>
+        <mj-text font-size="18px" color="#000"> Bonjour {{firstName}} {{lastName}}, </mj-text>
+        <mj-text line-height="1.5" font-size="18px" color="#000">
+          Suite à la proposition de place qui vous est parvenue il y a 48 heures et en l'absence de votre confirmation, la place vacante a été
+          proposée à quelqu'un d'autre.
+        </mj-text>
+        <mj-text font-size="18px" color="#000">Bonne continuation,</mj-text>
+        <mj-text font-size="18px" color="#000">Les équipes du Service National Universel</mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>

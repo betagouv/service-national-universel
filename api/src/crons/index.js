@@ -35,7 +35,7 @@ if (ENVIRONMENT === "production") {
   });
 
   //every hour
-  // cron.schedule("0 * * * *", () => {
-  //   autoAffectationCohesionCenter.handler();
-  // });
+  cron.schedule("0 * * * *", () => {
+    autoAffectationCohesionCenter.handler();
+  });
 }
