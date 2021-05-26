@@ -20,6 +20,7 @@ const AuthObject = require("../auth");
 const { uploadFile, validatePassword, updatePlacesCenter, assignNextYoungFromWaitingList, ERRORS } = require("../utils");
 const { sendEmail } = require("../sendinblue");
 const certificate = require("../templates/certificate");
+const form = require("../templates/form");
 const { cookieOptions } = require("../cookie-options");
 
 const YoungAuth = new AuthObject(YoungObject);
@@ -303,6 +304,28 @@ router.post("/:id/certificate/:template", passport.authenticate(["young", "refer
     newhtml = certificate.phase3(young);
   } else if (req.params.template === "snu") {
     newhtml = certificate.snu(young);
+  }
+
+  if (!newhtml) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+  const buffer = await renderFromHtml(newhtml, options);
+  res.contentType("application/pdf");
+  res.setHeader("Content-Dispositon", 'inline; filename="test.pdf"');
+  res.set("Cache-Control", "public, max-age=1");
+  res.send(buffer);
+});
+
+router.post("/:id/form/:template", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
+  const young = await YoungObject.findById(req.params.id);
+  if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+  const options = req.body.options || { format: "A4", margin: 0 };
+  //create html
+  let newhtml = "";
+  if (req.params.template === "imageRight") {
+    newhtml = form.imageRight(req.body.young);
+  } else if (req.params.template === "autotestPCR") {
+    newhtml = form.autotestPCR(req.body.young);
   }
 
   if (!newhtml) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });

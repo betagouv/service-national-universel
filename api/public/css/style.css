@@ -44,3 +44,82 @@ img.bg {
 .text-date {
   margin-top: 20px;
 }
+
+#autotestPCR > .name {
+  position: fixed;
+  left: 105px;
+  top: 560px;
+}
+
+#autotestPCR > .parent1FirstName {
+  position: fixed;
+  left: 165px;
+  top: 283px;
+}
+#autotestPCR > .parent1LastName {
+  position: fixed;
+  left: 165px;
+  top: 318px;
+}
+#autotestPCR > .parent2FirstName {
+  position: fixed;
+  left: 165px;
+  top: 450px;
+}
+#autotestPCR > .parent2LastName {
+  position: fixed;
+  left: 165px;
+  top: 485px;
+}
+#autotestPCR > .consentment-true {
+  position: fixed;
+  left: 119px;
+  top: 596px;
+}
+#autotestPCR > .consentment-false {
+  position: fixed;
+  left: 119px;
+  top: 771px;
+}
+
+#imageRight > .name.true {
+  position: fixed;
+  left: 480px;
+  top: 265px;
+}
+#imageRight > .name.false {
+  position: fixed;
+  left: 510px;
+  top: 315px;
+}
+
+#imageRight > .parent1FirstName {
+  position: fixed;
+  left: 65px;
+  top: 117px;
+}
+#imageRight > .parent1LastName {
+  position: fixed;
+  left: 420px;
+  top: 117px;
+}
+#imageRight > .parent2FirstName {
+  position: fixed;
+  left: 65px;
+  top: 188px;
+}
+#imageRight > .parent2LastName {
+  position: fixed;
+  left: 420px;
+  top: 188px;
+}
+#imageRight > .consentment-true {
+  position: fixed;
+  left: 50px;
+  top: 279px;
+}
+#imageRight > .consentment-false {
+  position: fixed;
+  left: 50px;
+  top: 329px;
+}
