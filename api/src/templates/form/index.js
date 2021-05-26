@@ -9,21 +9,17 @@ const getBaseUrl = () => {
   return "http://localhost:8080";
 };
 
-function getBgAutotestPCR() {
+function getBgAutotestPCR(page) {
+  if (page) return getSignedUrl(`form/formAutotestPCR-${page}.png`);
   return getSignedUrl("form/formAutotestPCR.png");
 }
-function getBgAutotestPCR1() {
-  return getSignedUrl("form/formAutotestPCR-1.png");
-}
-function getBgAutotestPCR2() {
-  return getSignedUrl("form/formAutotestPCR-2.png");
-}
-function getBgImageRight() {
+
+function getBgImageRight(page) {
+  if (page) return getSignedUrl(`form/formImageRight-${page}.png`);
   return getSignedUrl("form/formImageRight.png");
 }
 
 const imageRight = (young) => {
-  console.log(young);
   const html = fs.readFileSync(path.resolve(__dirname, "./imageRight.html"), "utf8");
   return html
     .replace(/{{FIRST_NAME}}/g, young.firstName)
@@ -35,11 +31,10 @@ const imageRight = (young) => {
     .replace(/{{CONSENTMENT_TRUE}}/g, young.imageRight === "true" ? "x" : "")
     .replace(/{{CONSENTMENT_FALSE}}/g, young.imageRight === "false" ? "x" : "")
     .replace(/{{BASE_URL}}/g, getBaseUrl())
-    .replace(/{{GENERAL_BG}}/g, getBgImageRight());
+    .replace(/{{GENERAL_BG}}/g, getBgImageRight(1));
 };
 
 const autotestPCR = (young) => {
-  console.log(young);
   const html = fs.readFileSync(path.resolve(__dirname, "./autotestPCR.html"), "utf8");
   return (
     html

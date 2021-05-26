@@ -82,44 +82,38 @@ img.bg {
   top: 771px;
 }
 
-#imageRight > .name.true {
+#imageRight > .name {
   position: fixed;
-  left: 480px;
-  top: 265px;
+  left: 490px;
+  top: 478px;
 }
-#imageRight > .name.false {
-  position: fixed;
-  left: 510px;
-  top: 315px;
-}
-
 #imageRight > .parent1FirstName {
   position: fixed;
-  left: 65px;
-  top: 117px;
+  left: 165px;
+  top: 263px;
 }
 #imageRight > .parent1LastName {
   position: fixed;
-  left: 420px;
-  top: 117px;
+  left: 165px;
+  top: 298px;
 }
 #imageRight > .parent2FirstName {
   position: fixed;
-  left: 65px;
-  top: 188px;
+  left: 165px;
+  top: 393px;
 }
 #imageRight > .parent2LastName {
   position: fixed;
-  left: 420px;
-  top: 188px;
+  left: 165px;
+  top: 428px;
 }
 #imageRight > .consentment-true {
   position: fixed;
-  left: 50px;
-  top: 279px;
+  left: 119px;
+  top: 516px;
 }
 #imageRight > .consentment-false {
   position: fixed;
-  left: 50px;
-  top: 329px;
+  left: 119px;
+  top: 581px;
 }
