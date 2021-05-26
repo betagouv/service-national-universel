@@ -12,7 +12,7 @@ const delayDate = Date.now();
 
 const clean = async () => {
   const youngsLimit = await YoungModel.find({ autoAffectationPhase1ExpiresAt: { $lte: delayDate } });
-  captureMessage(`${youngsLimit.length} youngs has autoAffectationPhase1ExpiresAt reached`);
+  captureMessage(`${Date.now()} - ${youngsLimit.length} youngs has autoAffectationPhase1ExpiresAt reached`);
   for (let i = 0; i < youngsLimit.length; i++) {
     const young = youngsLimit[i];
     if (young.statusPhase1 === "WAITING_ACCEPTATION") {
