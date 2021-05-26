@@ -24,6 +24,7 @@ import {
   SignBox,
   ContinueButton,
 } from "./components/printable";
+import DownloadFormButton from "../../components/buttons/DownloadFormButton";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
@@ -195,14 +196,15 @@ export default () => {
                   </Title> */}
                   <div style={{ display: "flex", justifyContent: "center" }}>
                     <div>
-                      {/* <BackButton onClick={() => print()}>Imprimer le formulaire pré-rempli</BackButton> */}
+                      <BackButton>
+                        <DownloadFormButton young={values} uri="autotestPCR">
+                          Télécharger le formulaire pré-rempli
+                        </DownloadFormButton>
+                      </BackButton>
                       <DownloadText>
                         {/* Ou todo : upload version du formialire autotestPCR */}
-                        <a
-                          href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Consentement_a_l_utilisation_d_autotest_COVID.pdf"
-                          target="_blank"
-                          style={{ fontSize: "1rem" }}
-                        >
+                        Ou{" "}
+                        <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Consentement_a_l_utilisation_d_autotest_COVID.pdf" target="_blank">
                           télécharger le modèle à remplir
                         </a>
                       </DownloadText>

@@ -46,38 +46,38 @@ img.bg {
 #autotestPCR > .name {
   position: absolute;
   left: 105px;
-  top: 560px;
+  top: 557px;
 }
 
 #autotestPCR > .parent1FirstName {
   position: absolute;
-  left: 165px;
+  left: 170px;
   top: 283px;
 }
 #autotestPCR > .parent1LastName {
   position: absolute;
-  left: 165px;
+  left: 170px;
   top: 318px;
 }
 #autotestPCR > .parent2FirstName {
   position: absolute;
-  left: 165px;
-  top: 450px;
+  left: 170px;
+  top: 449px;
 }
 #autotestPCR > .parent2LastName {
   position: absolute;
-  left: 165px;
-  top: 485px;
+  left: 170px;
+  top: 484px;
 }
 #autotestPCR > .consentment-true {
   position: absolute;
-  left: 119px;
-  top: 596px;
+  left: 124px;
+  top: 591px;
 }
 #autotestPCR > .consentment-false {
   position: absolute;
-  left: 119px;
-  top: 771px;
+  left: 124px;
+  top: 764px;
 }
 
 #imageRight > .name {

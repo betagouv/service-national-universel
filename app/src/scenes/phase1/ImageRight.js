@@ -25,6 +25,7 @@ import {
   Info,
   ContinueButton,
 } from "./components/printable";
+import DownloadFormButton from "../../components/buttons/DownloadFormButton";
 
 const AuthorizationIntro = () => (
   <div>
@@ -242,10 +243,14 @@ export default () => {
                   </Title> */}
                   <div style={{ display: "flex", justifyContent: "center" }}>
                     <div>
-                      {/* <BackButton onClick={() => print()}>Imprimer le formulaire pré-rempli</BackButton> */}
+                      <BackButton>
+                        <DownloadFormButton young={values} uri="imageRight">
+                          Télécharger le formulaire pré-rempli
+                        </DownloadFormButton>
+                      </BackButton>
                       <DownloadText>
-                        {/* Ou{" "} */}
-                        <a style={{ fontSize: "1rem" }} href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Droit_a_l_image.pdf" target="_blank">
+                        Ou{" "}
+                        <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Droit_a_l_image.pdf" target="_blank">
                           télécharger le modèle à remplir
                         </a>
                       </DownloadText>
