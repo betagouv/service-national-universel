@@ -149,7 +149,7 @@ const HitYoung = ({ hit, handleAffect, handleWaitingList, onClick }) => {
       <td onClick={(e) => e.stopPropagation()}>
         <div style={{ display: "flex" }}>
           <PanelActionButton onClick={handleAffect} title="Affecter à ce centre" />
-          {user.role === "admin" ? <PanelActionButton onClick={handleWaitingList} title="Placer en liste d'attente" /> : null}
+          {["admin", "referent_region"].includes(user.role) ? <PanelActionButton onClick={handleWaitingList} title="Placer en liste d'attente" /> : null}
         </div>
       </td>
     </tr>
