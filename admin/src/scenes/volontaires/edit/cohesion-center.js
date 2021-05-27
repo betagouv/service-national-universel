@@ -8,7 +8,7 @@ import AssignCenter from "../components/AssignCenter";
 export default ({ values, handleChange }) => (
   <Col md={6} style={{ marginBottom: "20px" }}>
     <Box>
-      <BoxHeadTitle>Informations Phase 1</BoxHeadTitle>
+      <BoxHeadTitle>Centre de cohésion</BoxHeadTitle>
       <BoxContent direction="column">
         <AssignCenter
           young={values}

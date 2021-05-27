@@ -4,6 +4,7 @@ const http = require("http");
 const passwordValidator = require("password-validator");
 const YoungModel = require("./models/young");
 const CohesionCenterModel = require("./models/cohesionCenter");
+const MeetingPointModel = require("./models/meetingPoint");
 const ReferentModel = require("./models/referent");
 const { sendEmail } = require("./sendinblue");
 const path = require("path");
@@ -94,6 +95,34 @@ const updatePlacesCenter = async (center) => {
     console.log(e);
   }
   return center;
+};
+
+const updatePlacesBus = async (bus) => {
+  console.log(`update bus ${bus.id}`);
+  try {
+    const meetingPoints = await MeetingPointModel.find({ busId: bus.id });
+    if (!meetingPoints?.length) return console.log("meetingPoints not found");
+    const idsMeetingPoints = meetingPoints.map((e) => e._id);
+    console.log(`idsMeetingPoints for bus ${bus.id}`, idsMeetingPoints);
+    const youngs = await YoungModel.find({
+      meetingPointId: {
+        $in: idsMeetingPoints,
+      },
+    });
+    const placesTaken = youngs.length;
+    const placesLeft = Math.max(0, bus.capacity - placesTaken);
+    if (bus.placesLeft !== placesLeft) {
+      console.log(`Bus ${bus.id}: total ${bus.capacity}, left from ${bus.placesLeft} to ${placesLeft}`);
+      bus.set({ placesLeft });
+      await bus.save();
+      await bus.index();
+    } else {
+      console.log(`Bus ${bus.id}: total ${bus.capacity}, left not changed ${placesLeft}`);
+    }
+  } catch (e) {
+    console.log(e);
+  }
+  return bus;
 };
 
 const sendAutoAffectationMail = async (nextYoung, center) => {
@@ -220,4 +249,5 @@ module.exports = {
   updatePlacesCenter,
   assignNextYoungFromWaitingList,
   sendAutoAffectationMail,
+  updatePlacesBus,
 };
