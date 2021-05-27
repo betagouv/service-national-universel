@@ -8,10 +8,8 @@ const { capture, captureMessage } = require("../sentry");
 const YoungModel = require("../models/young");
 const { assignNextYoungFromWaitingList } = require("../utils");
 
-const delayDate = Date.now();
-
 const clean = async () => {
-  const youngsLimit = await YoungModel.find({ autoAffectationPhase1ExpiresAt: { $lte: delayDate } });
+  const youngsLimit = await YoungModel.find({ autoAffectationPhase1ExpiresAt: { $lte: Date.now() } });
   captureMessage(`${Date.now()} - ${youngsLimit.length} youngs has autoAffectationPhase1ExpiresAt reached`);
   for (let i = 0; i < youngsLimit.length; i++) {
     const { __v, ...young } = youngsLimit[i];
