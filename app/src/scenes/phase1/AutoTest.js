@@ -74,6 +74,7 @@ export default () => {
               lastName1: young.parent1LastName,
               firstName2: young.parent2FirstName,
               lastName2: young.parent2LastName,
+              parentPhone: young.parent1Phone,
             }}
             validateOnChange={false}
             validateOnBlur={false}
@@ -150,6 +151,27 @@ export default () => {
                     </Row>
                   </FormGroup>
                 ) : null}
+                <FormGroup>
+                  <label>
+                    Numéro de téléphone
+                    <br />
+                    <i style={{ fontSize: ".8rem", color: "#777" }}>Pour être prevenu en cas de résultat positif</i>
+                  </label>
+
+                  <Row>
+                    <Col md={6}>
+                      <Field
+                        validate={(v) => !v && requiredMessage}
+                        placeholder="Numéro de téléphone"
+                        name="parentPhone"
+                        value={values.parentPhone}
+                        onChange={handleChange}
+                        className="form-control"
+                      />
+                      <ErrorMessage errors={errors} touched={touched} name="parentPhone" />
+                    </Col>
+                  </Row>
+                </FormGroup>
                 <FormRow>
                   <Col>
                     <RadioLabel>

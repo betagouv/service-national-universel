@@ -45,6 +45,7 @@ const autotestPCR = (young) => {
       .replace(/{{REPRESENTANT_1_LAST_NAME}}/g, young.lastName1 || "")
       .replace(/{{REPRESENTANT_2_FIRST_NAME}}/g, young.firstName2 || "")
       .replace(/{{REPRESENTANT_2_LAST_NAME}}/g, young.lastName2 || "")
+      .replace(/{{REPRESENTANT_PHONE}}/g, young.parentPhone || "")
       .replace(/{{CONSENTMENT_TRUE}}/g, young.autoTestPCR === "true" ? "x" : "")
       .replace(/{{CONSENTMENT_FALSE}}/g, young.autoTestPCR === "false" ? "x" : "")
 
