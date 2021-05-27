@@ -41,7 +41,7 @@ async function sendEmail(to, subject, htmlContent, { params, attachment, bcc } =
     if (params) body.params = params;
     if (attachment) body.attachment = attachment;
     const a = await api("/smtp/email", { method: "POST", body: JSON.stringify(body) });
-    console.log("e", a);
+    console.log("sendEmail", a, to);
   } catch (e) {
     console.log("Erreur in sendEmail", e);
     capture(e);
