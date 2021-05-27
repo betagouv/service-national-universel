@@ -12,7 +12,7 @@ const clean = async () => {
   const youngsLimit = await YoungModel.find({ autoAffectationPhase1ExpiresAt: { $lte: Date.now() } });
   captureMessage(`${Date.now()} - ${youngsLimit.length} youngs has autoAffectationPhase1ExpiresAt reached`);
   for (let i = 0; i < youngsLimit.length; i++) {
-    const { __v, ...young } = youngsLimit[i];
+    const young = youngsLimit[i];
     if (young.statusPhase1 === "WAITING_ACCEPTATION") {
       captureMessage(`${young._id} ${young.firstName} ${young.lastName} is not quick enough.`);
       // withdrawn young
