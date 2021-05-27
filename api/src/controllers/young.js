@@ -220,7 +220,6 @@ router.put("/", passport.authenticate("young", { session: false }), async (req, 
 
     // if they had a cohesion center, we check if we need to update the places taken / left
     if (req.user.statusPhase1 !== young.statusPhase1 && young.cohesionCenterId) {
-      console.log("update center", young.cohesionCenterId);
       const center = await CohesionCenterObject.findById(young.cohesionCenterId);
       if (center) await updatePlacesCenter(center);
     }

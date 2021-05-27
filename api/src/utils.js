@@ -75,6 +75,7 @@ function validatePassword(password) {
 }
 
 const updatePlacesCenter = async (center) => {
+  console.log(`update place center ${center?._id} ${center?.name}`);
   try {
     const youngs = await YoungModel.find({ cohesionCenterId: center._id });
     const placesTaken = youngs.filter(
@@ -86,6 +87,8 @@ const updatePlacesCenter = async (center) => {
       center.set({ placesLeft });
       await center.save();
       await center.index();
+    } else {
+      console.log(`Center ${center.id}: total ${center.placesTotal} left not changed ${center.placesLeft}`);
     }
   } catch (e) {
     console.log(e);
@@ -179,12 +182,7 @@ const getYoungFromWaitingList = async (young) => {
     let res = null;
     for (let i = 0; i < center.waitingList?.length; i++) {
       const tempYoung = await YoungModel.findById(center.waitingList[i]);
-      if (
-        tempYoung.status === "VALIDATED" &&
-        tempYoung.statusPhase1 === "WAITING_LIST" &&
-        tempYoung.department === young.department &&
-        tempYoung.gender === young.gender
-      ) {
+      if (tempYoung.statusPhase1 === "WAITING_LIST" && tempYoung.department === young.department && tempYoung.gender === young.gender) {
         res = tempYoung;
         break;
       }

@@ -6,7 +6,8 @@ const path = require("path");
 const fs = require("fs");
 const { capture, captureMessage } = require("../sentry");
 const YoungModel = require("../models/young");
-const { assignNextYoungFromWaitingList } = require("../utils");
+const CohesionCenterObject = require("../models/cohesionCenter");
+const { assignNextYoungFromWaitingList, updatePlacesCenter } = require("../utils");
 
 const clean = async () => {
   const youngsLimit = await YoungModel.find({ autoAffectationPhase1ExpiresAt: { $lte: Date.now() } });
@@ -21,6 +22,11 @@ const clean = async () => {
       await sendNoResponseAffectationMail(young);
       // assign next one from the waiting list
       await assignNextYoungFromWaitingList(young);
+
+      if (young.cohesionCenterId) {
+        const center = await CohesionCenterObject.findById(young.cohesionCenterId);
+        if (center) await updatePlacesCenter(center);
+      }
     } else {
       captureMessage(`${young._id} ${young.firstName} ${young.lastName} is not quick enough. but its statusPhase1 is '${young.statusPhase1}'`);
     }

@@ -232,7 +232,6 @@ router.put("/young/:id", passport.authenticate("referent", { session: false }), 
 
     // if they had a cohesion center, we check if we need to update the places taken / left
     if (young.cohesionCenterId) {
-      console.log("update center", young.cohesionCenterId);
       const center = await CohesionCenterObject.findById(young.cohesionCenterId);
       if (center) await updatePlacesCenter(center);
     }
