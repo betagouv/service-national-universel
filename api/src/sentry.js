@@ -16,7 +16,6 @@ function capture(err) {
 }
 function captureMessage(mess) {
   console.log("captureMessage", mess);
-  console.log("env", ENVIRONMENT);
   if (Sentry && mess) {
     Sentry.captureMessage(mess);
   }
