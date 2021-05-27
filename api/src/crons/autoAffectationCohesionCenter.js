@@ -30,6 +30,7 @@ const clean = async () => {
 };
 
 const sendNoResponseAffectationMail = async (young) => {
+  captureMessage(`send email noResponseAffectation to ${young._id}`);
   await sendEmail(
     {
       name: `${young.firstName} ${young.lastName}`,
