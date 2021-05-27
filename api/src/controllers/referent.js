@@ -212,7 +212,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false }), 
   try {
     const { id } = req.params;
     const young = await YoungObject.findById(id);
-    let newYoung = req.body;
+    let { __v, ...newYoung } = req.body;
 
     // if withdrawn, cascade withdrawn on every status
     if (
