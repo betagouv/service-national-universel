@@ -59,6 +59,11 @@ img.bg {
   left: 170px;
   top: 318px;
 }
+#autotestPCR > .parentPhone {
+  position: absolute;
+  left: 550px;
+  top: 353px;
+}
 #autotestPCR > .parent2FirstName {
   position: absolute;
   left: 170px;
