@@ -63,7 +63,9 @@ export default () => {
               <p>
                 L'adresse de destination est la suivante :
                 <br />
-                {service?.directionName}, {service?.address} {service?.zip} {service?.city}
+                {service?.directionName}
+                <br /> {service?.address}, {service?.complementAddress}
+                <br /> {service?.zip} {service?.city}
               </p>
             ) : null}
             <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Note_relative_aux_informations_d_ordre_sanitaire.pdf" target="blank" className="link">
