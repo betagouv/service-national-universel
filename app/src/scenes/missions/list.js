@@ -70,7 +70,7 @@ export default () => {
     (async () => {
       if (!young) return setApplications(null);
       const { data } = await api.get(`/application/young/${young._id}`);
-      const app = data.reduce((acc, a) => {
+      const app = data?.reduce((acc, a) => {
         acc.push(a.missionId);
         return acc;
       }, []);

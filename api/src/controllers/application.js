@@ -103,7 +103,7 @@ router.get("/young/:id", passport.authenticate(["referent", "young"], { session:
       const application = data[i]._doc;
       const mission = await MissionObject.findById(application.missionId);
       let tutor = {};
-      if (mission) tutor = await ReferentObject.findById(mission.tutorId);
+      if (mission?.tutorId) tutor = await ReferentObject.findById(mission.tutorId);
       data[i] = { ...application, mission, tutor };
     }
     return res.status(200).send({ ok: true, data });
