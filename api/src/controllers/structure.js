@@ -63,8 +63,9 @@ router.post("/", async (req, res) => {
 router.put("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const { errorId, value : checkedId } = validateId(req.user.structureId);
+    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_URI, error });
     const { errorStructure, value : checkedStructure } = validateFromReferent.validateStructure(req.body);
-    if(errorId || errorStructure) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    if(errorStructure) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
     let obj = checkedStructure;
     const data = await StructureObject.findByIdAndUpdate(checkedId, obj, { new: true });
     await updateNetworkName(data);
@@ -79,8 +80,9 @@ router.put("/", passport.authenticate("referent", { session: false }), async (re
 router.put("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const { errorId, value : checkedId } = validateId(req.params.id);
+    if(errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_URI, error });
     const { errorStructure, value : checkedStructure } = validateFromReferent.validateStructure(req.body);
-    if(errorId || errorStructure) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    if(errorStructure) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
     let obj = checkedStructure;
     const data = await StructureObject.findByIdAndUpdate(checkedId, obj, { new: true });
     await updateNetworkName(data);

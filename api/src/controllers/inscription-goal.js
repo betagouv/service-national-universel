@@ -7,6 +7,7 @@ const Joi = require("joi");
 const InscriptionGoalModel = require("../models/inscriptionGoal");
 const YoungModel = require("../models/young");
 const { ERRORS } = require("../utils");
+const validateFromReferent = require("../utils/referent");
 
 // Update all inscription goals
 router.post("/", passport.authenticate("referent", { session: false }), async (req, res) => {

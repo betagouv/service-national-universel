@@ -252,8 +252,9 @@ router.put("/young/:id", passport.authenticate("referent", { session: false }), 
   try {
     const { id } = req.params;
     const { errorId, value : checkedId } = validateId(id);
+    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_URI, error });
     const { errorYoung, value : checkedYoung } = validateFromReferent.validateYoung(req.body);
-    if (errorId || errorYoung) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    if (errorYoung) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
     const young = await YoungObject.findById(checkedId);
 
     // if withdrawn, cascade withdrawn on every status
@@ -527,8 +528,9 @@ router.get("/structure/:id", passport.authenticate("referent", { session: false 
 router.put("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const { errorId, value : checkedId } = validateId(req.params.id);
+    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_URI, error });
     const { errorReferent, value : checkedReferent } = validateFromReferent.validateReferent(req.body);
-    if(errorId || errorReferent) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    if (errorReferent) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
     const data = await ReferentObject.findOne({ _id: checkedId });
     const isAdmin = req.user.role === "admin";
     const isResponsibleModifyingResponsibleWithoutChangingRole =
@@ -579,8 +581,9 @@ router.put("/:id", passport.authenticate("referent", { session: false }), async 
 router.put("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const { errorId, value : checkedId } = validateId(req.user._id);
+    if(errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_URI, error });
     const { errorReferent, value : checkedReferent } = validateFromReferent.validateReferent(req.body);
-    if(errorId || errorReferent) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    if(errorReferent) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
     const obj = checkedReferent;
     obj.email = checkedReferent.email && req.body.email.trim().toLowerCase();
     obj.firstName = checkedReferent.firstName && checkedReferent.firstName.charAt(0).toUpperCase() + (checkedReferent.firstName || "").toLowerCase().slice(1);

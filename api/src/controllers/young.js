@@ -184,8 +184,9 @@ router.get("/", passport.authenticate("young", { session: false }), async (req, 
 router.put("/validate_mission", passport.authenticate("young", { session: false }), async (req, res) => {
   try {
     const { errorYoung, value : checkedYoung } = validateFromYoung.validateYoung(req.body);
+    if(errorYoung) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
     const { errorId, value : checkedId } = validateId(req.user._id);
-    if(errorYoung || errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    if(errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_URI, error });
     const obj = checkedYoung;
     obj.phase3Token = crypto.randomBytes(20).toString("hex");
     const young = await YoungObject.findByIdAndUpdate(checkedId, obj, { new: true });
@@ -213,8 +214,9 @@ router.put("/validate_mission", passport.authenticate("young", { session: false 
 router.put("/", passport.authenticate("young", { session: false }), async (req, res) => {
   try {
     const { errorId, value : checkedId } = validateId(req.user._id);
+    if(errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_URI, error });
     const { errorYoung, value : checkedYoung } = validateFromYoung.validateYoung(req.body);
-    if(errorId || errorYoung) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    if(errorYoung) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
     const obj = checkedYoung;
 
     const young = await YoungObject.findByIdAndUpdate(checkedId, obj, { new: true });

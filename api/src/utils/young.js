@@ -65,8 +65,8 @@ function validateYoung(young){
       department: Joi.string().allow(null,''),
       region: Joi.string().allow(null,''),
       location: Joi.object().keys({
-        lat : Joi.number(),
-        lon : Joi.number(),
+        lat : JJoi.number().allow(null),
+        lon : Joi.number().allow(null),
       }),
       qpv: Joi.string().allow(null,''),
       populationDensity: Joi.string().allow(null,''),
@@ -83,8 +83,8 @@ function validateYoung(young){
       schoolDepartment: Joi.string().allow(null,''),
       schoolRegion: Joi.string().allow(null,''),
       schoolLocation: Joi.object().keys({
-        lat : Joi.number(),
-        lon : Joi.number(),
+        lat : Joi.number().allow(null),
+        lon : Joi.number().allow(null),
       }),
       schoolId: Joi.string().allow(null,''),
       parent1Status: Joi.string().allow(null,''),
@@ -100,8 +100,8 @@ function validateYoung(young){
       parent1Department: Joi.string().allow(null,''),
       parent1Region: Joi.string().allow(null,''),
       parent1Location: Joi.object().keys({
-        lat : Joi.number(),
-        lon : Joi.number(),
+        lat : Joi.number().allow(null),
+        lon : Joi.number().allow(null),
       }),
       parent1FromFranceConnect: Joi.string().allow(null,''),
       parent2Status: Joi.string().allow(null,''),
@@ -117,8 +117,8 @@ function validateYoung(young){
       parent2Department: Joi.string().allow(null,''),
       parent2Region: Joi.string().allow(null,''),
       parent2Location: Joi.object().keys({
-        lat : Joi.number(),
-        lon : Joi.number(),
+        lat : Joi.number().allow(null),
+        lon : Joi.number().allow(null),
       }),
       parent2FromFranceConnect: Joi.string().allow(null,''),
       handicap: Joi.string().allow(null,''),
@@ -133,8 +133,8 @@ function validateYoung(young){
       medicosocialStructureDepartment: Joi.string().allow(null,''),
       medicosocialStructureRegion: Joi.string().allow(null,''),
       medicosocialStructureLocation: Joi.object().keys({
-        lat : Joi.number(),
-        lon : Joi.number(),
+        lat : Joi.number().allow(null),
+        lon : Joi.number().allow(null),
       }),
       engagedStructure: Joi.string().allow(null,''),
       specificAmenagment: Joi.string().allow(null,''),
@@ -247,8 +247,8 @@ function validateMission(mission){
       frequence: Joi.string().allow(null,''),
       period: Joi.array().items(Joi.string().allow(null,'')),
       subPeriod: Joi.array().items(Joi.string().allow(null,'')),
-      placesTotal: Joi.number(),
-      placesLeft: Joi.number(),
+      placesTotal: Joi.number().allow(null),
+      placesLeft: Joi.number().allow(null),
       actions: Joi.string().allow(null,''),
       description: Joi.string().allow(null,''),
       justifications: Joi.string().allow(null,''),
@@ -265,8 +265,8 @@ function validateMission(mission){
       region: Joi.string().allow(null,''),
       country: Joi.string().allow(null,''),
       location: Joi.object().keys({
-        lat : Joi.number(),
-        lon : Joi.number(),
+        lat : JJoi.number().allow(null),
+        lon : Joi.number().allow(null),
       }),
       remote: Joi.string().allow(null,''),
     })
@@ -302,8 +302,8 @@ function validateStructure(structure){
         region: Joi.string().allow(null,''),
         country: Joi.string().allow(null,''),
         location: Joi.object().keys({
-            lat : Joi.number(),
-            lon : Joi.number(),
+            lat : Joi.number().allow(null),
+            lon : Joi.number().allow(null),
         }),
         state: Joi.string().allow(null,''),
     })
@@ -339,11 +339,141 @@ function validateProgram(program){
       .validate(program, {stripUnknown : true})
 }
 
+function validateDepartementService(departementService){
+  return Joi.object()
+    .keys({
+      department: Joi.string().allow(null,''),
+      region: Joi.string().allow(null,''),
+      directionName: Joi.string().allow(null,''),
+      serviceName: Joi.string().allow(null,''),
+      serviceNumber: Joi.string().allow(null,''),
+      address: Joi.string().allow(null,''),
+      complementAddress: Joi.string().allow(null,''),
+      zip: Joi.string().allow(null,''),
+      city: Joi.string().allow(null,''),
+      description: Joi.string().allow(null,''),
+      })
+      .validate(departementService, {stripUnknown : true})
+}
+
+function validateContract(contract){
+  return Joi.object()
+    .keys({
+      youngId: Joi.string().allow(null,''),
+      structureId: Joi.string().allow(null,''),
+      applicationId: Joi.string().allow(null,''),
+      missionId: Joi.string().allow(null,''),
+      tutorId: Joi.string().allow(null,''),
+      parent1Token: Joi.string().allow(null,''),
+      projectManagerToken: Joi.string().allow(null,''),
+      structureManagerToken: Joi.string().allow(null,''),
+      parent2Token: Joi.string().allow(null,''),
+      parent1Status: Joi.string().allow(null,''),
+      projectManagerStatus: Joi.string().allow(null,''),
+      structureManagerStatus: Joi.string().allow(null,''),
+      parent2Status: Joi.string().allow(null,''),
+      youngFirstName: Joi.string().allow(null,''),
+      youngLastName: Joi.string().allow(null,''),
+      youngBirthdate: Joi.string().allow(null,''),
+      youngAddress: Joi.string().allow(null,''),
+      youngCity: Joi.string().allow(null,''),
+      youngDepartment: Joi.string().allow(null,''),
+      youngEmail: Joi.string().allow(null,''),
+      youngPhone: Joi.string().allow(null,''),
+      parent1FirstName: Joi.string().allow(null,''),
+      parent1LastName: Joi.string().allow(null,''),
+      parent1Address: Joi.string().allow(null,''),
+      parent1City: Joi.string().allow(null,''),
+      parent1Department: Joi.string().allow(null,''),
+      parent1Phone: Joi.string().allow(null,''),
+      parent1Email: Joi.string().allow(null,''),
+      parent2FirstName: Joi.string().allow(null,''),
+      parent2LastName: Joi.string().allow(null,''),
+      parent2Address: Joi.string().allow(null,''),
+      parent2City: Joi.string().allow(null,''),
+      parent2Department: Joi.string().allow(null,''),
+      parent2Phone: Joi.string().allow(null,''),
+      parent2Email: Joi.string().allow(null,''),
+      missionName: Joi.string().allow(null,''),
+      missionObjective: Joi.string().allow(null,''),
+      missionAction: Joi.string().allow(null,''),
+      missionStartAt: Joi.string().allow(null,''),
+      missionEndAt: Joi.string().allow(null,''),
+      missionAddress: Joi.string().allow(null,''),
+      missionCity: Joi.string().allow(null,''),
+      missionZip: Joi.string().allow(null,''),
+      missionDuration: Joi.string().allow(null,''),
+      missionFrequence: Joi.string().allow(null,''),
+      date: Joi.string().allow(null,''),
+      projectManagerFirstName: Joi.string().allow(null,''),
+      projectManagerLastName: Joi.string().allow(null,''),
+      projectManagerRole: Joi.string().allow(null,''),
+      projectManagerEmail: Joi.string().allow(null,''),
+      structureManagerFirstName: Joi.string().allow(null,''),
+      structureManagerLastName: Joi.string().allow(null,''),
+      structureManagerRole: Joi.string().allow(null,''),
+      structureManagerEmail: Joi.string().allow(null,''),
+      structureSiret: Joi.string().allow(null,''),
+      structureName: Joi.string().allow(null,''),
+      })
+      .validate(contract, {stripUnknown : true})
+}
+
+function validateCohesionCenter(cohesionCenter){
+  return Joi.object()
+    .keys({
+      name: Joi.string().allow(null,''),
+      code: Joi.string().allow(null,''),
+      country: Joi.string().allow(null,''),
+      COR: Joi.string().allow(null,''),
+      departmentCode: Joi.string().allow(null,''),
+      address: Joi.string().allow(null,''),
+      city: Joi.string().allow(null,''),
+      zip: Joi.string().allow(null,''),
+      department: Joi.string().allow(null,''),
+      region: Joi.string().allow(null,''),
+      placesTotal: Joi.number().allow(null),
+      placesLeft: Joi.number().allow(null),
+      outfitDelivered: Joi.string().allow(null,''),
+      observations: Joi.string().allow(null,''),
+      waitingList: Joi.array().items(Joi.string().allow(null,'')),
+      })
+      .validate(cohesionCenter, {stripUnknown : true})
+}
+
+function validateApplication(application){
+  return Joi.object()
+    .keys({
+      youngId: Joi.string().allow(null,''),
+      youngFirstName: Joi.string().allow(null,''),
+      youngLastName: Joi.string().allow(null,''),
+      youngEmail: Joi.string().allow(null,''),
+      youngBirthdateAt: Joi.string().allow(null,''),
+      youngCity: Joi.string().allow(null,''),
+      youngDepartment: Joi.string().allow(null,''),
+      youngCohort: Joi.string().allow(null,''),
+      missionId: Joi.string().allow(null,''),
+      missionName: Joi.string().allow(null,''),
+      missionDepartment: Joi.string().allow(null,''),
+      missionRegion: Joi.string().allow(null,''),
+      structureId: Joi.string().allow(null,''),
+      tutorId: Joi.string().allow(null,''),
+      tutorName: Joi.string().allow(null,''),
+      priority: Joi.string().allow(null,''),
+      status: Joi.string().allow(null,''),
+        })
+        .validate(application, {stripUnknown : true})
+}
+
 module.exports = {
     validateYoung,
     validateReferent,
     validateMission,
     validateStructure,
     validateWaitingList,
-    validateProgram
+    validateProgram,
+    validateDepartementService,
+    validateContract,
+    validateCohesionCenter,
+    validateApplication
 }

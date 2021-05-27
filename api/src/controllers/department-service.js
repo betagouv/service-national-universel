@@ -5,11 +5,14 @@ const { capture } = require("../sentry");
 
 const DepartmentServiceModel = require("../models/departmentService");
 const ReferentModel = require("../models/referent");
-const { ERRORS } = require("../utils");
+const { ERRORS, validateId } = require("../utils");
+const validateFromReferent = require("../utils/referent")
 
 router.post("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const data = await DepartmentServiceModel.findOneAndUpdate({ department: req.body.department }, req.body, {
+    const { error, value : checkedDepartementService } = validateFromReferent.validateDepartementService(req.body);
+    if(error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    const data = await DepartmentServiceModel.findOneAndUpdate({ department: checkedDepartementService.department}, checkedDepartementService, {
       new: true,
       upsert: true,
       useFindAndModify: false,
@@ -23,7 +26,9 @@ router.post("/", passport.authenticate("referent", { session: false }), async (r
 
 router.get("/referent/:id", passport.authenticate(["referent"], { session: false }), async (req, res) => {
   try {
-    const r = await ReferentModel.findById(req.params.id);
+    const { error, value : checkedId } = validateId(req.params.id);
+    if(error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_URI, error });
+    const r = await ReferentModel.findById(checkedId);
     if (!r) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const data = await DepartmentServiceModel.findOne({ department: r.department });
     return res.status(200).send({ ok: true, data });

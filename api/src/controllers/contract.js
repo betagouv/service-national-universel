@@ -9,10 +9,13 @@ const { capture } = require("../sentry");
 const ContractObject = require("../models/contract");
 const { ERRORS } = require("../utils");
 const { sendEmail } = require("../sendinblue");
+const validateFromReferent = require("../utils/referent");
 
 router.post("/", passport.authenticate(["referent"], { session: false }), async (req, res) => {
   try {
-    const contract = req.body;
+    const { error, value : checkedContract } = validateFromReferent.validateContract(req.body);
+    if(error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    const contract = checkedContract;
     // Create the tokens
     contract.parent1Token = crypto.randomBytes(20).toString("hex");
     contract.projectManagerToken = crypto.randomBytes(20).toString("hex");
