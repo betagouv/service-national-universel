@@ -6,17 +6,26 @@ import { apiURL } from "../../../config";
 import api from "../../../services/api";
 import { Filter, ResultTable, BottomResultStats, Table, MultiLine } from "../../../components/list";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
+import { translate } from "../../../utils";
 
 export default ({ young, onAffect, onClick }) => {
   const FILTERS = ["SEARCH"];
   const [searchedValue, setSearchedValue] = useState("");
 
   const handleAffectation = async (center) => {
-    const { data, ok, code } = await api.post(`/cohesion-center/${center._id}/assign-young/${young._id}`);
-    if (!ok) return toastr.error("Oups, une erreur est survenue lors de l'affectation du jeune", code);
-    toastr.success(`${young.firstName} a été affecté(e) au centre ${center.name} !`);
-    setSearchedValue("");
-    return onAffect?.(data);
+    try {
+      const { data, ok, code } = await api.post(`/cohesion-center/${center._id}/assign-young/${young._id}`);
+      if (!ok) return toastr.error("Oups, une erreur est survenue lors de l'affectation du jeune", code);
+      toastr.success(`${young.firstName} a été affecté(e) au centre ${center.name} !`);
+      setSearchedValue("");
+      return onAffect?.(data);
+    } catch (error) {
+      if (error.code === "OPERATION_NOT_ALLOWED")
+        return toastr.error("Oups, une erreur est survenue lors de l'affectation du jeune. Il semblerait que ce centre soit déjà complet", translate(error?.code), {
+          timeOut: 5000,
+        });
+      return toastr.error("Oups, une erreur est survenue lors du traitement de l'affectation du jeune", translate(error?.code));
+    }
   };
 
   return (

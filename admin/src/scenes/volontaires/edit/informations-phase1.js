@@ -13,6 +13,7 @@ export default ({ values, handleChange }) => (
         <AssignCenter
           young={values}
           onAffect={(e) => {
+            handleChange({ target: { name: "cohesionCenterId", value: e._id } });
             handleChange({ target: { name: "cohesionCenterName", value: e.name } });
             handleChange({ target: { name: "cohesionCenterZip", value: e.zip } });
             handleChange({ target: { name: "cohesionCenterCity", value: e.city } });
