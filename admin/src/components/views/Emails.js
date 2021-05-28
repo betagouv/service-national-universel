@@ -8,7 +8,16 @@ import { Box } from "../../components/box";
 
 export default ({ email }) => {
   const [emails, setEmails] = useState();
+  const [emailsVisible, setEmailsVisible] = useState();
   const user = useSelector((state) => state.Auth.user);
+  const [page, setPage] = useState(1);
+  const SIZE = 10;
+
+  const loadMore = () => {
+    const newPage = page + 1;
+    setPage(newPage);
+    setEmailsVisible(emails.slice(0, newPage * SIZE));
+  };
 
   if (
     ![
@@ -29,8 +38,10 @@ export default ({ email }) => {
     if (!email) return;
     const { ok, data, code } = await api.get(`/email?email=${encodeURIComponent(email)}`);
     if (!ok) return toastr.error("Oups, une erreur est survenue", code);
+    setEmailsVisible(data.slice(0, page * SIZE));
     return setEmails(data);
   };
+
   useEffect(() => {
     getEmails();
   }, []);
@@ -39,24 +50,27 @@ export default ({ email }) => {
     <Box>
       <div style={{ fontSize: ".9rem", padding: "1rem", color: "#382F79" }}>Emails Sendinblue</div>
       {emails?.length ? (
-        <Table>
-          <thead>
-            <tr>
-              <th>id</th>
-              <th style={{ width: "40%" }}>Objet</th>
-              <th>Evenement</th>
-              <th>Date</th>
-              <th>Message id</th>
-            </tr>
-          </thead>
-          <tbody>
-            <>
-              {emails?.map((hit, i) => (
-                <Hit key={i} hit={hit} />
-              ))}
-            </>
-          </tbody>
-        </Table>
+        <>
+          <Table>
+            <thead>
+              <tr>
+                <th>id</th>
+                <th style={{ width: "40%" }}>Objet</th>
+                <th>Evenement</th>
+                <th>Date</th>
+                <th>Message id</th>
+              </tr>
+            </thead>
+            <tbody>
+              <>
+                {emailsVisible?.map((hit, i) => (
+                  <Hit key={i} hit={hit} />
+                ))}
+              </>
+            </tbody>
+          </Table>
+          {emails.length !== emailsVisible.length ? <LoadMore onClick={loadMore}>Voir plus</LoadMore> : null}
+        </>
       ) : (
         <NoResult>
           <b>{email}</b> n'a reçu aucun mail.
@@ -115,6 +129,17 @@ const Hit = ({ hit }) => {
     </tr>
   );
 };
+
+const LoadMore = styled.div`
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 1rem;
+  color: #382f79;
+  cursor: pointer;
+  :hover {
+    font-weight: 500;
+  }
+`;
 
 const NoResult = styled.div`
   font-style: italic;
