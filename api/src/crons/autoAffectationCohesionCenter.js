@@ -16,7 +16,7 @@ const clean = async () => {
   for (let i = 0; i < youngsLimit.length; i++) {
     const young = youngsLimit[i];
     if (young.statusPhase1 === "WAITING_ACCEPTATION") {
-      captureMessage(`${young._id} ${young.firstName} ${young.lastName} is not quick enough.`);
+      captureMessage(`${young._id} ${young.firstName} ${young.lastName} auto withdrawn.`);
       // withdrawn young
       young.set({ statusPhase1: "WITHDRAWN" });
       countAutoWithdrawn++;
@@ -24,16 +24,15 @@ const clean = async () => {
       await sendNoResponseAffectationMail(young);
       // assign next one from the waiting list
       await assignNextYoungFromWaitingList(young);
-
-      if (young.cohesionCenterId) {
-        const center = await CohesionCenterObject.findById(young.cohesionCenterId);
-        if (center) await updatePlacesCenter(center);
-      }
     } else {
       captureMessage(`${young._id} ${young.firstName} ${young.lastName} is not quick enough. but its statusPhase1 is '${young.statusPhase1}'`);
     }
     young.set({ autoAffectationPhase1ExpiresAt: undefined });
     await young.save();
+    if (young.cohesionCenterId) {
+      const center = await CohesionCenterObject.findById(young.cohesionCenterId);
+      if (center) await updatePlacesCenter(center);
+    }
   }
   captureMessage(`${countAutoWithdrawn} youngs has been auto withdrawn (48h w/out response)`);
 };
@@ -62,8 +61,4 @@ exports.handler = async () => {
     capture(`ERROR`, JSON.stringify(e));
     capture(e);
   }
-};
-
-exports.test = async () => {
-  captureMessage("test message every 60 secs");
 };
