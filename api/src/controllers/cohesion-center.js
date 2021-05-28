@@ -9,6 +9,18 @@ const ReferentModel = require("../models/referent");
 const YoungModel = require("../models/young");
 const { ERRORS, updatePlacesCenter, sendAutoAffectationMail } = require("../utils");
 
+router.post("/refresh/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
+  try {
+    const data = await CohesionCenterModel.findById(req.params.id);
+    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    await updatePlacesCenter(data);
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
 router.post("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   // Validate params.
   // const { error, value: inscriptionsGoals } = Joi.array()

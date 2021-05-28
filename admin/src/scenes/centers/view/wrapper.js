@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { Col, Row } from "reactstrap";
@@ -13,9 +13,17 @@ import TabList from "../../../components/views/TabList";
 import Tab from "../../../components/views/Tab";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
 
-export default ({ center, tab, children }) => {
+export default ({ center: centerDefault, tab, children }) => {
   const history = useHistory();
+  const [center, setCenter] = useState(centerDefault);
   const user = useSelector((state) => state.Auth.user);
+
+  const up = async () => {
+    if (!center) return;
+    const centerResponse = await api.post(`/cohesion-center/refresh/${center._id}`);
+    if (!centerResponse.ok) return toastr.error("Oups, une erreur est survenue lors de la mise a jour des places", translate(centerResponse.code));
+    setCenter(centerResponse.data);
+  };
 
   if (!center) return null;
   return (
@@ -43,7 +51,7 @@ export default ({ center, tab, children }) => {
         </div>
         <Row style={{ minWidth: "20%" }}>
           <Col>
-            <BoxPlaces>
+            <BoxPlaces onClick={up}>
               <table>
                 <tbody>
                   <tr>

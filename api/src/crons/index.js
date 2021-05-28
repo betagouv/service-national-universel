@@ -9,13 +9,12 @@ const autoAffectationCohesionCenter = require("./autoAffectationCohesionCenter")
 
 // dev : */5 * * * * * (every 5 secs)
 // prod : 0 8 * * 1 (every monday at 0800)
+const EVERY_MINUTE = "* * * * *";
+const EVERY_HOUR = "0 * * * *";
+const everySeconds = (x) => `*/${x} * * * * *`;
 
 // See: https://www.clever-cloud.com/doc/administrate/cron/#deduplicating-crons (INSTANCE_NUMBER)
 if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
-  cron.schedule("* * * * *", function () {
-    console.log("CRON TEST: " + Date.now() + " - " + process.env.INSTANCE_NUMBER);
-  });
-
   // every monday at 0800
   // cron.schedule("0 8 * * 1", function () {
   //   capture("START CRON RECAP REGION");
@@ -40,7 +39,7 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
   });
 
   //every hour
-  // cron.schedule("0 * * * *", () => {
+  // cron.schedule(EVERY_HOUR, () => {
   //   autoAffectationCohesionCenter.handler();
   // });
 }
