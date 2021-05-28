@@ -17,6 +17,7 @@ import { toastr } from "react-redux-toastr";
 import Loader from "../../components/Loader";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
 import { setUser as ReduxSetUser } from "../../redux/auth/actions";
+import Emails from "../../components/views/Emails";
 
 export default (props) => {
   const [user, setUser] = useState();
@@ -207,6 +208,7 @@ export default (props) => {
           </>
         )}
       </Formik>
+      <Emails email={user.email} />
       {currentUser.role === "admin" || (["referent_department", "referent_region"].includes(currentUser.role) && ["responsible", "supervisor"].includes(user.role)) ? (
         <DeleteBtn
           onClick={async () => {
