@@ -34,7 +34,7 @@ const clean = async () => {
       if (center) await updatePlacesCenter(center);
     }
   }
-  captureMessage(`${Date.now()} - {countAutoWithdrawn} youngs has been auto withdrawn (48h w/out response)`);
+  captureMessage(`${Date.now()} - ${countAutoWithdrawn} youngs has been auto withdrawn (48h w/out response)`);
 };
 
 const sendNoResponseAffectationMail = async (young) => {
