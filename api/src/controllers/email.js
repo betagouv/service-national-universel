@@ -9,7 +9,7 @@ const EmailObject = require("../models/email");
 //https://developers.sendinblue.com/docs/how-to-use-webhooks
 
 router.post("/", async (req, res) => {
-  console.log("EMAIL POST WEKBOOK", req.body);
+  // console.log("EMAIL POST WEKBOOK", req.body);
   try {
     await EmailObject.create({
       event: req.body.event,
