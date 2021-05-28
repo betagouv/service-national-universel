@@ -16,7 +16,7 @@ const clean = async () => {
   for (let i = 0; i < youngsLimit.length; i++) {
     const young = youngsLimit[i];
     if (young.statusPhase1 === "WAITING_ACCEPTATION") {
-      captureMessage(`${young._id} ${young.firstName} ${young.lastName} auto withdrawn.`);
+      console.log(`${young._id} ${young.firstName} ${young.lastName} auto withdrawn.`);
       // withdrawn young
       young.set({ statusPhase1: "WITHDRAWN" });
       countAutoWithdrawn++;
@@ -25,7 +25,7 @@ const clean = async () => {
       // assign next one from the waiting list
       await assignNextYoungFromWaitingList(young);
     } else {
-      captureMessage(`${young._id} ${young.firstName} ${young.lastName} is not quick enough. but its statusPhase1 is '${young.statusPhase1}'`);
+      console.log(`${young._id} ${young.firstName} ${young.lastName} is not quick enough. but its statusPhase1 is '${young.statusPhase1}'`);
     }
     young.set({ autoAffectationPhase1ExpiresAt: undefined });
     await young.save();
