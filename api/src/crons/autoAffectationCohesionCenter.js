@@ -10,6 +10,7 @@ const CohesionCenterObject = require("../models/cohesionCenter");
 const { assignNextYoungFromWaitingList, updatePlacesCenter } = require("../utils");
 
 const clean = async () => {
+  let countAutoWithdrawn = 0;
   const youngsLimit = await YoungModel.find({ autoAffectationPhase1ExpiresAt: { $lte: Date.now() } });
   captureMessage(`${Date.now()} - ${youngsLimit.length} youngs has autoAffectationPhase1ExpiresAt reached`);
   for (let i = 0; i < youngsLimit.length; i++) {
@@ -18,6 +19,7 @@ const clean = async () => {
       captureMessage(`${young._id} ${young.firstName} ${young.lastName} is not quick enough.`);
       // withdrawn young
       young.set({ statusPhase1: "WITHDRAWN" });
+      countAutoWithdrawn++;
       // send mail saying it is too late :(
       await sendNoResponseAffectationMail(young);
       // assign next one from the waiting list
@@ -33,10 +35,10 @@ const clean = async () => {
     young.set({ autoAffectationPhase1ExpiresAt: undefined });
     await young.save();
   }
+  captureMessage(`${countAutoWithdrawn} youngs has been auto withdrawn (48h w/out response)`);
 };
 
 const sendNoResponseAffectationMail = async (young) => {
-  captureMessage(`send email noResponseAffectation to ${young._id}`);
   await sendEmail(
     {
       name: `${young.firstName} ${young.lastName}`,

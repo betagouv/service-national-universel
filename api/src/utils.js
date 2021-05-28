@@ -149,7 +149,6 @@ const assignNextYoungFromWaitingList = async (young) => {
     let to = await ReferentModel.find({ role: "admin", email: { $in: ["youssef.tahiri@education.gouv.fr", "nicolas.roy@recherche.gouv.fr"] } });
     to = to.concat(await ReferentModel.find({ role: "referent_region", region: center.region }));
     for (let i = 0; i < to.length; i++) {
-      console.log(`send autoAffectationNotFound to ${to[i].email}`);
       await sendAutoAffectationNotFoundMails(to[i], young, center);
     }
   } else {
