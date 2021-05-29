@@ -48,8 +48,7 @@ const sendNoResponseAffectationMail = async (young) => {
       .readFileSync(path.resolve(__dirname, "../templates/noResponseAffectation.html"))
       .toString()
       .replace(/{{firstName}}/, young.firstName)
-      .replace(/{{lastName}}/, young.lastName),
-    { bcc: [{ email: "tangi.mendes@selego.co" }] }
+      .replace(/{{lastName}}/, young.lastName)
   );
 };
 
