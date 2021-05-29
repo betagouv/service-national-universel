@@ -34,9 +34,7 @@ export default ({ young, getYoung }) => {
       return (
         <>
           <p>Le volontaire a été affecté au centre :</p>
-          <Link to={`/centre/${young.cohesionCenterId}`}>
-            <Details title="Centre" value={young.cohesionCenterName} />
-          </Link>
+          <Details title="Centre" to={`/centre/${young.cohesionCenterId}`} value={young.cohesionCenterName} />
           <Details title="Ville" value={young.cohesionCenterCity} />
           <Details title="Code Postal" value={young.cohesionCenterZip} />
         </>
@@ -180,13 +178,13 @@ const Bloc = ({ children, title, titleRight, borderBottom, borderRight, disabled
   );
 };
 
-const Details = ({ title, value }) => {
+const Details = ({ title, value, to }) => {
   if (!value) return <div />;
   if (typeof value === "function") value = value();
   return (
     <div className="detail">
       <div className="detail-title">{`${title} :`}</div>
-      <div className="detail-text">{value}</div>
+      <div className="detail-text">{to ? <Link to={to}>{value}</Link> : value}</div>
     </div>
   );
 };
