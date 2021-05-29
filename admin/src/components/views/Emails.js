@@ -2,21 +2,18 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
-import { formatLongDateFR } from "../../utils";
+import { formatLongDateUTC } from "../../utils";
 import api from "../../services/api";
 import { Box } from "../../components/box";
 
 export default ({ email }) => {
   const [emails, setEmails] = useState();
-  const [emailsVisible, setEmailsVisible] = useState();
   const user = useSelector((state) => state.Auth.user);
-  const [page, setPage] = useState(1);
+  const [minify, setMinify] = useState(true);
   const SIZE = 10;
 
-  const loadMore = () => {
-    const newPage = page + 1;
-    setPage(newPage);
-    setEmailsVisible(emails.slice(0, newPage * SIZE));
+  const handleMinify = () => {
+    setMinify(!minify);
   };
 
   if (
@@ -38,7 +35,6 @@ export default ({ email }) => {
     if (!email) return;
     const { ok, data, code } = await api.get(`/email?email=${encodeURIComponent(email)}`);
     if (!ok) return toastr.error("Oups, une erreur est survenue", code);
-    setEmailsVisible(data.slice(0, page * SIZE));
     return setEmails(data);
   };
 
@@ -63,13 +59,13 @@ export default ({ email }) => {
             </thead>
             <tbody>
               <>
-                {emailsVisible?.map((hit, i) => (
+                {emails?.slice(0, minify ? SIZE : emails.length).map((hit, i) => (
                   <Hit key={i} hit={hit} />
                 ))}
               </>
             </tbody>
           </Table>
-          {emails.length !== emailsVisible.length ? <LoadMore onClick={loadMore}>Voir plus</LoadMore> : null}
+          <LoadMore onClick={handleMinify}>{minify ? "Voir plus" : "Réduire"}</LoadMore>
         </>
       ) : (
         <NoResult>
@@ -124,7 +120,7 @@ const Hit = ({ hit }) => {
       <td>{hit._id}</td>
       <td>{hit.subject}</td>
       <td>{translate(hit.event)}</td>
-      <td>{formatLongDateFR(hit.date)}</td>
+      <td>{formatLongDateUTC(hit.date)}</td>
       <td>{hit.messageId.match(/[\d\.]+/g)[0]}</td>
     </tr>
   );
