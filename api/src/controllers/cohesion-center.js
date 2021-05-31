@@ -79,6 +79,11 @@ router.post("/:centerId/assign-young/:youngId", passport.authenticate("referent"
       center.waitingList.splice(i, 1);
       await center.save();
     }
+    if (oldCenter && oldCenter.waitingList.indexOf(young._id) !== -1) {
+      const i = oldCenter.waitingList.indexOf(young._id);
+      oldCenter.waitingList.splice(i, 1);
+      await oldCenter.save();
+    }
     // update center infos
     const data = await updatePlacesCenter(center);
     if (oldCenter) await updatePlacesCenter(oldCenter);
