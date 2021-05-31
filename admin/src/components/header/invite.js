@@ -5,11 +5,17 @@ import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
-import { translate, departmentList, regionList, region2department, department2region, REFERENT_ROLES } from "../../utils";
+import { translate, departmentList, regionList, region2department, department2region, REFERENT_ROLES, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE } from "../../utils";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import api from "../../services/api";
 
 export default ({ setOpen, open, label = "Inviter un référent", role = "" }) => {
+  const getSubRole = (role) => {
+    let subRole = [];
+    if (role === "referent_department") subRole = REFERENT_DEPARTMENT_SUBROLE;
+    if (role === "referent_region") subRole = REFERENT_REGION_SUBROLE;
+    return Object.keys(subRole).map((e) => ({ value: e, label: translate(subRole[e]) }));
+  };
   return (
     <Invitation style={{ marginBottom: 10, textAlign: "right" }}>
       <Modal isOpen={open} toggle={() => setOpen(false)} size="lg">
@@ -23,6 +29,7 @@ export default ({ setOpen, open, label = "Inviter un référent", role = "" }) =
                 firstName: "",
                 lastName: "",
                 role: "",
+                subRole: "",
                 email: "",
                 region: "",
                 department: "",
@@ -72,23 +79,33 @@ export default ({ setOpen, open, label = "Inviter un référent", role = "" }) =
                         <ChooseRole validate={(v) => !v} value={values.role} onChange={handleChange} />
                       </FormGroup>
                     </Col>
-                    <Col md={6}>
-                      <FormGroup>
-                        {values.role === REFERENT_ROLES.REFERENT_DEPARTMENT ? (
-                          <>
-                            <div>Département</div>
-                            <ChooseDepartment validate={(v) => !v} value={values.department} onChange={handleChange} />
-                          </>
-                        ) : null}
-                        {values.role === REFERENT_ROLES.REFERENT_REGION ? (
-                          <>
-                            <div>Région</div>
-                            <ChooseRegion validate={(v) => !v} value={values.region} onChange={handleChange} />
-                          </>
-                        ) : null}
-                      </FormGroup>
-                    </Col>
                   </Row>
+                  {[REFERENT_ROLES.REFERENT_DEPARTMENT, REFERENT_ROLES.REFERENT_REGION].includes(values.role) ? (
+                    <Row>
+                      <>
+                        <Col md={6}>
+                          {values.role === REFERENT_ROLES.REFERENT_DEPARTMENT ? (
+                            <FormGroup>
+                              <div>Département</div>
+                              <ChooseDepartment validate={(v) => !v} value={values.department} onChange={handleChange} />
+                            </FormGroup>
+                          ) : null}
+                          {values.role === REFERENT_ROLES.REFERENT_REGION ? (
+                            <FormGroup>
+                              <div>Région</div>
+                              <ChooseRegion validate={(v) => !v} value={values.region} onChange={handleChange} />
+                            </FormGroup>
+                          ) : null}
+                        </Col>
+                        <Col md={6}>
+                          <FormGroup>
+                            <div>Fonction</div>
+                            <ChooseSubRole validate={(v) => !v} value={values.subRole} onChange={handleChange} options={getSubRole(values.role)} />
+                          </FormGroup>
+                        </Col>
+                      </>
+                    </Row>
+                  ) : null}
                   <br />
                   <LoadingButton loading={isSubmitting} onClick={handleSubmit}>
                     Envoyer l'invitation
@@ -168,6 +185,17 @@ const ChooseRole = ({ value, onChange }) => {
         <option value={REFERENT_ROLES.REFERENT_REGION}>{translate(REFERENT_ROLES.REFERENT_REGION)}</option>
       ) : null}{" "}
       {user.role === REFERENT_ROLES.ADMIN ? <option value={REFERENT_ROLES.ADMIN}>{translate(REFERENT_ROLES.ADMIN)}</option> : null}
+    </Input>
+  );
+};
+const ChooseSubRole = ({ value, onChange, options }) => {
+  return (
+    <Input type="select" name="subRole" value={value} onChange={onChange}>
+      {options.map((o, i) => (
+        <option key={i} value={o.value} label={o.label}>
+          {o.value}
+        </option>
+      ))}
     </Input>
   );
 };
