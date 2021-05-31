@@ -183,7 +183,7 @@ const ChooseRole = ({ value, onChange }) => {
       <option value={REFERENT_ROLES.REFERENT_DEPARTMENT}>{translate(REFERENT_ROLES.REFERENT_DEPARTMENT)}</option>
       {user.role === REFERENT_ROLES.ADMIN || user.role === REFERENT_ROLES.REFERENT_REGION ? (
         <option value={REFERENT_ROLES.REFERENT_REGION}>{translate(REFERENT_ROLES.REFERENT_REGION)}</option>
-      ) : null}{" "}
+      ) : null}
       {user.role === REFERENT_ROLES.ADMIN ? <option value={REFERENT_ROLES.ADMIN}>{translate(REFERENT_ROLES.ADMIN)}</option> : null}
     </Input>
   );
@@ -193,7 +193,7 @@ const ChooseSubRole = ({ value, onChange, options }) => {
     <Input type="select" name="subRole" value={value} onChange={onChange}>
       {options.map((o, i) => (
         <option key={i} value={o.value} label={o.label}>
-          {o.value}
+          {o.label}
         </option>
       ))}
     </Input>

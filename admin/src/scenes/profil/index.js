@@ -160,7 +160,7 @@ const Select = ({ title, name, values, onChange, disabled, errors, touched, vali
             <option key={-1} value="" label=""></option>
             {options.map((o, i) => (
               <option key={i} value={o.value} label={o.label}>
-                {o.value}
+                {o.label}
               </option>
             ))}
           </select>

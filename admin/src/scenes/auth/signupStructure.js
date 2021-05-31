@@ -165,7 +165,7 @@ export default () => {
                             {privateTypes.map((e) => {
                               return (
                                 <option key={e} value={e}>
-                                  {e}
+                                  {translate(e)}
                                 </option>
                               );
                             })}
@@ -192,7 +192,7 @@ export default () => {
                               {publicTypes.map((e) => {
                                 return (
                                   <option key={e} value={e}>
-                                    {e}
+                                    {translate(e)}
                                   </option>
                                 );
                               })}
@@ -217,7 +217,7 @@ export default () => {
                                 {publicEtatTypes.map((e) => {
                                   return (
                                     <option key={e} value={e}>
-                                      {e}
+                                      {translate(e)}
                                     </option>
                                   );
                                 })}
