@@ -1,31 +1,31 @@
 import React, { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import { Col, Row } from "reactstrap";
-import { useSelector } from "react-redux";
 import { YOUNG_STATUS_COLORS, departmentList, department2region } from "../../../utils";
 
 import api from "../../../services/api";
 
 export default ({ filter }) => {
-  const [total2020WaitingAffection, setTotal2020WaitingAffection] = useState();
+  const [total2020Affected, setTotal2020Affected] = useState();
   const [total2021Validated, setTotal2021Validated] = useState();
   const [inscriptionGoals, setInscriptionGoals] = useState();
-  const goal = useMemo(() => inscriptionGoals && inscriptionGoals.reduce((acc, current) => acc + (current.max && !isNaN(Number(current.max)) ? Number(current.max) : 0), 0), [
-    inscriptionGoals,
-  ]);
+  const goal = useMemo(
+    () => inscriptionGoals && inscriptionGoals.reduce((acc, current) => acc + (current.max && !isNaN(Number(current.max)) ? Number(current.max) : 0), 0),
+    [inscriptionGoals]
+  );
   const totalInscription = useMemo(() => {
-    return Number(total2020WaitingAffection || 0) + Number(total2021Validated || 0);
-  }, [total2020WaitingAffection, total2021Validated]);
+    return Number(total2020Affected || 0) + Number(total2021Validated || 0);
+  }, [total2020Affected, total2021Validated]);
   const percent = useMemo(() => {
     if (!goal || !totalInscription) return 0;
     return Math.round((totalInscription / (goal || 1)) * 100);
   }, [goal, totalInscription]);
 
-  async function fetch2020WaitingAffectation() {
+  async function fetch2020Affected() {
     const queries = [];
     queries.push({ index: "young", type: "_doc" });
     queries.push({
-      query: { bool: { must: { match_all: {} }, filter: [{ term: { "cohort.keyword": "2020" } }, { term: { "statusPhase1.keyword": "WAITING_AFFECTATION" } }] } },
+      query: { bool: { must: { match_all: {} }, filter: [{ term: { "cohort.keyword": "2020" } }, { term: { "statusPhase1.keyword": "AFFECTED" } }] } },
       aggs: { status: { terms: { field: "statusPhase1.keyword" } } },
       size: 0,
     });
@@ -35,7 +35,7 @@ export default ({ filter }) => {
 
     const { responses } = await api.esQuery(queries);
     const m = api.getAggregations(responses[0]);
-    setTotal2020WaitingAffection(m.WAITING_AFFECTATION || 0);
+    setTotal2020Affected(m.AFFECTED || 0);
   }
 
   async function fetch2021Validated() {
@@ -57,7 +57,7 @@ export default ({ filter }) => {
 
   useEffect(() => {
     (async () => {
-      fetch2020WaitingAffectation();
+      fetch2020Affected();
       fetch2021Validated();
       getInscriptionGoals(filter.region, filter.department);
     })();
@@ -95,7 +95,7 @@ export default ({ filter }) => {
               <CardValue>{totalInscription || "0"}</CardValue>
               <CardArrow />
             </CardValueWrapper>
-            <div style={{ fontSize: "10px", color: "#888" }}>* 2021 validés et 2020 en attente d'affectation</div>
+            <div style={{ fontSize: "10px", color: "#888" }}>* 2021 validés et 2020 affectés</div>
           </Card>
         </Col>
         <Col md={4}>
