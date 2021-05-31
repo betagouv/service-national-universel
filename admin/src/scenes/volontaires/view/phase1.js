@@ -50,9 +50,7 @@ export default ({ young, getYoung }) => {
       return (
         <>
           <p>Le volontaire est sur liste d'attente au centre :</p>
-          <Link to={`/centre/${young.cohesionCenterId}`}>
-            <Details title="Centre" value={young.cohesionCenterName} />
-          </Link>
+          <Details title="Centre" to={`/centre/${young.cohesionCenterId}`} value={young.cohesionCenterName} />
           <Details title="Ville" value={young.cohesionCenterCity} />
           <Details title="Code Postal" value={young.cohesionCenterZip} />
         </>
@@ -63,9 +61,7 @@ export default ({ young, getYoung }) => {
           <p>
             Le volontaire doit confirmer sa participation au séjour de cohésion avant le <b>{formatStringLongDate(young.autoAffectationPhase1ExpiresAt)}</b>.
           </p>
-          <Link to={`/centre/${young.cohesionCenterId}`}>
-            <Details title="Centre" value={young.cohesionCenterName} />
-          </Link>
+          <Details title="Centre" to={`/centre/${young.cohesionCenterId}`} value={young.cohesionCenterName} />
           <Details title="Ville" value={young.cohesionCenterCity} />
           <Details title="Code Postal" value={young.cohesionCenterZip} />
         </>
@@ -74,9 +70,7 @@ export default ({ young, getYoung }) => {
       return (
         <>
           <p>Le volontaire s'est désisté du séjour de cohésion.</p>
-          <Link to={`/centre/${young.cohesionCenterId}`}>
-            <Details title="Centre" value={young.cohesionCenterName} />
-          </Link>
+          <Details title="Centre" to={`/centre/${young.cohesionCenterId}`} value={young.cohesionCenterName} />
           <Details title="Ville" value={young.cohesionCenterCity} />
           <Details title="Code Postal" value={young.cohesionCenterZip} />
         </>
