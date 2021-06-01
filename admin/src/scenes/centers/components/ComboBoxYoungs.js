@@ -13,7 +13,7 @@ export default ({ center, onAffect, onClick }) => {
   const getDefaultQuery = () => ({
     query: {
       bool: {
-        filter: [{ terms: { "status.keyword": ["VALIDATED", "WAITING_LIST"] } }, { terms: { "statusPhase1.keyword": ["WAITING_AFFECTATION"] } }],
+        filter: [{ terms: { "status.keyword": ["VALIDATED", "WAITING_LIST"] } }, { terms: { "statusPhase1.keyword": ["WAITING_AFFECTATION", "WAITING_LIST"] } }],
         // must_not: [
         //   {
         //     exists: {
