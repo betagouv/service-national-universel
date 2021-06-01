@@ -25,25 +25,19 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        node-version: [14.x]
-        mongodb-version: ['4.0']
-
     steps:
       - name: Git checkout
         uses: actions/checkout@v1
 
-      - name: Node ${{ matrix.node-version }}
+      - name: Node 14.x
         uses: actions/setup-node@v1
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 14.x
       
-      - name: Start MongoDB
+      - name: Start MongoDB 4.0
         uses: supercharge/mongodb-github-action@1.6.0
         with:
-          mongodb-version: ${{ matrix.mongodb-version}}
+          mongodb-version: '4.0'
       
       - name: Install packages
         working-directory: ${{ env.SUBFOLDER_NAME }}
@@ -60,18 +54,15 @@ jobs:
     needs: [test]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [14.x]
 
     steps:
       - name: Git checkout
         uses: actions/checkout@v1
 
-      - name: Node ${{ matrix.node-version }}
+      - name: Node 14.x
         uses: actions/setup-node@v1
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 14.x
 
       - name: Create SSH key
         run: |
