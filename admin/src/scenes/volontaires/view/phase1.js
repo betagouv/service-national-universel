@@ -222,7 +222,7 @@ const Details = ({ title, value, to }) => {
   return (
     <div className="detail">
       <div className="detail-title">{title}&nbsp;:</div>
-      <div className="detail-text">{value}</div>
+      <div className="detail-text">{to ? <Link to={to}>{value}</Link> : value}</div>
     </div>
   );
 };
