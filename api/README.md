@@ -6,7 +6,7 @@ L'API de la [Plateforme du SNU](https://snu.gouv.fr). Elle fournit un accès aux
 
 MongoDB et NodeJS 12+ doivent être installés pour faire fonctionner l'application. Elasticsearch n'est pas nécessaire sur l'environnement de développement.
 
-```
+```bash
 git clone https://github.com/betagouv/service-national-universel.git
 cd service-national-universel/api
 npm install
