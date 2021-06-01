@@ -1,11 +1,18 @@
 import React, { useState } from "react";
 import CenterView from "./wrapper";
+import { useSelector } from "react-redux";
+import { Redirect } from "react-router-dom";
+
 import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import ComboBoxYoungs from "../components/ComboBoxYoungs";
 import Panel from "../../volontaires/panel";
 
 export default ({ center, updateCenter }) => {
   const [young, setYoung] = useState(null);
+  const user = useSelector((state) => state.Auth.user);
+
+  if (!["admin", "referent_region"].includes(user.role)) return <Redirect to="/" />;
+
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <CenterView center={center} tab="affectation">
