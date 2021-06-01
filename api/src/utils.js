@@ -127,6 +127,9 @@ const updatePlacesBus = async (bus) => {
 
 const sendAutoAffectationMail = async (nextYoung, center) => {
   // Send mail.
+  const cc = [];
+  if (nextYoung.parent1Email) cc.push({ email: nextYoung.parent1Email });
+  if (nextYoung.parent2Email) cc.push({ email: nextYoung.parent2Email });
   await sendEmail(
     {
       name: `${nextYoung.firstName} ${nextYoung.lastName}`,
@@ -143,7 +146,8 @@ const sendAutoAffectationMail = async (nextYoung, center) => {
       .replace(/{{centerDepartement}}/, center.department)
       .replace(/{{ctaAccept}}/, "https://inscription.snu.gouv.fr/auth/login?redirect=phase1")
       .replace(/{{ctaDocuments}}/, "https://inscription.snu.gouv.fr/auth/login?redirect=phase1")
-      .replace(/{{ctaWithdraw}}/, "https://inscription.snu.gouv.fr/auth/login?redirect=phase1")
+      .replace(/{{ctaWithdraw}}/, "https://inscription.snu.gouv.fr/auth/login?redirect=phase1"),
+    { cc }
   );
 };
 

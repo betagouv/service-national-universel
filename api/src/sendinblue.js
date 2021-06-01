@@ -25,11 +25,12 @@ const api = async (path, options = {}) => {
 };
 
 // https://developers.sendinblue.com/reference#sendtransacemail
-async function sendEmail(to, subject, htmlContent, { params, attachment, bcc } = {}) {
+async function sendEmail(to, subject, htmlContent, { params, attachment, cc, bcc } = {}) {
   try {
     const body = {};
 
     body.to = [to];
+    body.cc = cc;
     body.bcc = bcc;
     if (ENVIRONMENT !== "production") {
       body.to = body.to.filter((e) => e.email.match(/(selego\.co|beta\.gouv\.fr)/));
@@ -41,7 +42,7 @@ async function sendEmail(to, subject, htmlContent, { params, attachment, bcc } =
     if (params) body.params = params;
     if (attachment) body.attachment = attachment;
     const mail = await api("/smtp/email", { method: "POST", body: JSON.stringify(body) });
-    console.log({ mail, to, subject });
+    console.log({ mail, to, cc, subject });
   } catch (e) {
     console.log("Erreur in sendEmail", e);
     capture(e);
