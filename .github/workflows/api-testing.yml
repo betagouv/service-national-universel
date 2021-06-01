@@ -3,14 +3,7 @@ env:
   APP_NAME: snu-stag-api
   ENVIRONMENT_NAME: snu-api-staging
 
-  SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-  SLACK_COLOR: '#3278BD'
-  SLACK_ICON_EMOJI: ':package:'
-  SLACK_USERNAME: Github
-  MSG_MINIMAL: true
-  SLACK_FOOTER: ''
-
-  MONGO_URL: mongodb+srv://hmartine:test@cluster0.2ycfg.mongodb.net/myFirstDatabase?retryWrites=true&w=majority
+  MONGO_URL: mongodb://localhost:27017/SampleDB
 
 name: Testing api
 
@@ -27,7 +20,7 @@ jobs:
     strategy:
       matrix:
         node-version: [14.x]
-        mongodb-version: ['4.0', '4.2', '4.4']
+        mongodb-version: ['4.0']
 
     steps:
       - name: Git checkout
@@ -44,9 +37,11 @@ jobs:
           mongodb-version: ${{ matrix.mongodb-version}}
       
       - name: Install packages
-        run: cd api && npm install
+        working-directory: ${{ env.SUBFOLDER_NAME }}
+        run: npm install
 
       - name: Run tests
-        run: cd api && npm run test
+        working-directory: ${{ env.SUBFOLDER_NAME }}
+        run: npm run test
         env:
           CI: true
