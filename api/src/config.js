@@ -54,5 +54,6 @@ console.log("ENVIRONMENT", ENVIRONMENT);
 function getEnvironment() {
   if (process.env.STAGING === "true") return "staging";
   else if (process.env.PRODUCTION === "true") return "production";
+  else if (process.env.TESTING === "true") return "testing";
   return "development";
 }

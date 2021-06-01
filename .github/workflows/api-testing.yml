@@ -1,0 +1,52 @@
+env:
+  SUBFOLDER_NAME: api
+  APP_NAME: snu-stag-api
+  ENVIRONMENT_NAME: snu-api-staging
+
+  SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+  SLACK_COLOR: '#3278BD'
+  SLACK_ICON_EMOJI: ':package:'
+  SLACK_USERNAME: Github
+  MSG_MINIMAL: true
+  SLACK_FOOTER: ''
+
+  MONGO_URL: mongodb+srv://hmartine:test@cluster0.2ycfg.mongodb.net/myFirstDatabase?retryWrites=true&w=majority
+
+name: Testing api
+
+on: 
+  push:
+    branches:
+      - feat--test-e2e
+    path:
+      api/**
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [14.x]
+        mongodb-version: ['4.0', '4.2', '4.4']
+
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v1
+
+      - name: Node ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.6.0
+        with:
+          mongodb-version: ${{ matrix.mongodb-version}}
+      
+      - name: Install packages
+        run: cd api && npm install
+
+      - name: Run tests
+        run: cd api && npm run test
+        env:
+          CI: true
