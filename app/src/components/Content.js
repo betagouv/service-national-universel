@@ -178,6 +178,10 @@ export const VioletButton = styled.button`
   :hover {
     opacity: 0.9;
   }
+  :disabled {
+    background-color: #aaa;
+    cursor: not-allowed;
+  }
 `;
 
 export const InterTitle = styled.div`

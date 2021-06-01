@@ -16,11 +16,14 @@ const { encrypt } = require("../cryptoUtils");
 const { getQPV } = require("../qpv");
 const YoungObject = require("../models/young");
 const CohesionCenterObject = require("../models/cohesionCenter");
+const MeetingPointObject = require("../models/meetingPoint");
+const BusObject = require("../models/bus");
 const AuthObject = require("../auth");
-const { uploadFile, validatePassword, updatePlacesCenter, assignNextYoungFromWaitingList, ERRORS } = require("../utils");
+const { uploadFile, validatePassword, updatePlacesCenter, updatePlacesBus, assignNextYoungFromWaitingList, ERRORS } = require("../utils");
 const { sendEmail } = require("../sendinblue");
 const certificate = require("../templates/certificate");
 const form = require("../templates/form");
+const convocation = require("../templates/convocation");
 const { cookieOptions } = require("../cookie-options");
 
 const YoungAuth = new AuthObject(YoungObject);
@@ -184,6 +187,52 @@ router.put("/validate_mission", passport.authenticate("young", { session: false 
 });
 
 //@check
+router.put("/:id/meeting-point", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
+  try {
+    const young = await YoungObject.findById(req.params.id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const { __v, meetingPointId, deplacementPhase1Autonomous } = req.body;
+    let bus = null;
+
+    //choosing a meetingPoint
+    if (meetingPointId) {
+      const meetingPoint = await MeetingPointObject.findById(meetingPointId);
+      if (!meetingPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      bus = await BusObject.findById(meetingPoint.busId);
+      if (!bus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      if (bus.placesLeft <= 0) return res.status(404).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+    const oldMeetingPoint = await MeetingPointObject.findById(young.meetingPointId);
+    const oldBus = await BusObject.findById(oldMeetingPoint?.busId);
+
+    young.set({ meetingPointId, deplacementPhase1Autonomous });
+    await young.save();
+    if (bus) await updatePlacesBus(bus);
+    if (oldBus) await updatePlacesBus(oldBus);
+    res.status(200).send({ ok: true, data: young });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+router.put("/:id/cancel-meeting-point", passport.authenticate(["referent"], { session: false }), async (req, res) => {
+  try {
+    const young = await YoungObject.findById(req.params.id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const oldMeetingPoint = await MeetingPointObject.findById(young.meetingPointId);
+    const oldBus = await BusObject.findById(oldMeetingPoint?.busId);
+    young.set({ meetingPointId: undefined, deplacementPhase1Autonomous: undefined });
+    await young.save();
+    if (oldBus) await updatePlacesBus(oldBus);
+    res.status(200).send({ ok: true, data: young });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+//@check
 router.put("/", passport.authenticate("young", { session: false }), async (req, res) => {
   try {
     const obj = req.body;
@@ -325,6 +374,26 @@ router.post("/:id/form/:template", passport.authenticate(["young", "referent"], 
     newhtml = form.imageRight(req.body.young);
   } else if (req.params.template === "autotestPCR") {
     newhtml = form.autotestPCR(req.body.young);
+  }
+
+  if (!newhtml) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+  const buffer = await renderFromHtml(newhtml, options);
+  res.contentType("application/pdf");
+  res.setHeader("Content-Dispositon", 'inline; filename="test.pdf"');
+  res.set("Cache-Control", "public, max-age=1");
+  res.send(buffer);
+});
+
+router.post("/:id/convocation/:template", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
+  const young = await YoungObject.findById(req.params.id);
+  if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+  const options = req.body.options || { format: "A4", margin: 0 };
+  //create html
+  let newhtml = "";
+  if (req.params.template === "cohesion") {
+    newhtml = await convocation.cohesion(req.body.young);
   }
 
   if (!newhtml) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });

@@ -13,7 +13,7 @@ import LoadingButton from "../../../components/buttons/LoadingButton";
 import { translate } from "../../../utils";
 import api from "../../../services/api";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
-import { appURL } from "../../../config";
+import { appURL, environment } from "../../../config";
 import Loader from "../../../components/Loader";
 
 import DeleteButton from "../components/DeleteButton";
@@ -30,7 +30,8 @@ import ConsentementImage from "./consentement-image";
 import ConsentementPCR from "./consentement-pcr";
 import InformationsSupplementaires from "./informations-supplementaires";
 import JDC from "./JDC";
-import InformationsPhase1 from "./informations-phase1";
+import CohesionCenter from "./cohesion-center";
+import MeetingPoint from "./meeting-point";
 
 export default (props) => {
   const [young, setYoung] = useState();
@@ -102,12 +103,23 @@ export default (props) => {
               <Representant2 values={values} handleChange={handleChange} />
             </Row>
             <Row>
+              <InterTitle>Consentements</InterTitle>
+            </Row>
+            <Row>
               <Consentement values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
               <ConsentementImage values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
               <ConsentementPCR values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
-              {user.role === "admin" ? <InformationsSupplementaires values={values} handleChange={handleChange} /> : null}
+            </Row>
+            <Row>
+              <InterTitle>Séjour de cohésion</InterTitle>
+            </Row>
+            <Row>
+              <CohesionCenter values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
+              {environment !== "production" ? <MeetingPoint values={values} handleChange={handleChange} handleSubmit={handleSubmit} /> : null}
+            </Row>
+            <Row>
               {values.cohort === "2020" ? <JDC values={values} handleChange={handleChange} /> : null}
-              <InformationsPhase1 values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
+              {user.role === "admin" ? <InformationsSupplementaires values={values} handleChange={handleChange} /> : null}
             </Row>
             <TitleWrapper>
               <DeleteButton young={young} />
@@ -139,6 +151,14 @@ const TitleWrapper = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+`;
+
+const InterTitle = styled.h2`
+  color: #888;
+  margin: 1rem;
+  font-weight: 450;
+  font-size: 0.9rem;
+  text-transform: uppercase;
 `;
 
 const Title = styled.h2`

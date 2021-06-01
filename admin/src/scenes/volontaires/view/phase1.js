@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 import { Formik } from "formik";
@@ -14,10 +14,44 @@ import AssignCenter from "../components/AssignCenter";
 import { Box, BoxTitle } from "../../../components/box";
 import { toastr } from "react-redux-toastr";
 import Badge from "../../../components/Badge";
+import { environment } from "../../../config";
 
 export default ({ young, getYoung }) => {
   const disabled = false; //young.phase !== YOUNG_PHASE.COHESION_STAY;
   const user = useSelector((state) => state.Auth.user);
+  const [meetingPoint, setMeetingPoint] = useState();
+
+  useEffect(() => {
+    if (!young.meetingPointId) return;
+    (async () => {
+      const { data, code, ok } = await api.get(`/meeting-point/${young?.meetingPointId}`);
+      if (!ok) return toastr.error("error", translate(code));
+      setMeetingPoint(data);
+    })();
+  }, []);
+
+  const getMeetingPoint = (young) => {
+    if (young.meetingPointId)
+      return (
+        <>
+          <Details title="Adresse" value={meetingPoint?.departureAddress} />
+          <Details title="Heure&nbsp;de&nbsp;départ" value={formatStringLongDate(meetingPoint?.departureAt)} />
+          <Details title="Heure&nbsp;de&nbsp;retour" value={formatStringLongDate(meetingPoint?.returnAt)} />
+          <Details title="N˚&nbsp;transport" value={meetingPoint?.busExcelId} />
+        </>
+      );
+    if (young.deplacementPhase1Autonomous === "true")
+      return (
+        <>
+          <i>{`${young.firstName} se rend au centre par ses propres moyens.`}</i>
+        </>
+      );
+    return (
+      <div>
+        <i>{`Aucun point de rassemblement n'a été confirmé par ${young.firstName}`}</i>
+      </div>
+    );
+  };
 
   const getCohesionStay = (young) => {
     if (young.statusPhase1 === "DONE")
@@ -26,7 +60,7 @@ export default ({ young, getYoung }) => {
           <p>Le volontaire a réalisé son séjour de cohésion.</p>
           <Details title="Centre" value={young.cohesionCenterName} />
           <Details title="Ville" value={young.cohesionCenterCity} />
-          <Details title="Code Postal" value={young.cohesionCenterZip} />
+          <Details title="Code&nbsp;Postal" value={young.cohesionCenterZip} />
         </>
       );
     if (young.statusPhase1 === "CANCEL" && young.cohesion2020Step !== "DONE") return <p>Le séjour de cohésion a été annulé.</p>;
@@ -36,7 +70,7 @@ export default ({ young, getYoung }) => {
           <p>Le volontaire a été affecté au centre :</p>
           <Details title="Centre" to={`/centre/${young.cohesionCenterId}`} value={young.cohesionCenterName} />
           <Details title="Ville" value={young.cohesionCenterCity} />
-          <Details title="Code Postal" value={young.cohesionCenterZip} />
+          <Details title="Code&nbsp;Postal" value={young.cohesionCenterZip} />
         </>
       );
     if (young.statusPhase1 === "WAITING_AFFECTATION")
@@ -52,7 +86,7 @@ export default ({ young, getYoung }) => {
           <p>Le volontaire est sur liste d'attente au centre :</p>
           <Details title="Centre" to={`/centre/${young.cohesionCenterId}`} value={young.cohesionCenterName} />
           <Details title="Ville" value={young.cohesionCenterCity} />
-          <Details title="Code Postal" value={young.cohesionCenterZip} />
+          <Details title="Code&nbsp;Postal" value={young.cohesionCenterZip} />
         </>
       );
     if (young.statusPhase1 === "WAITING_ACCEPTATION")
@@ -63,7 +97,7 @@ export default ({ young, getYoung }) => {
           </p>
           <Details title="Centre" to={`/centre/${young.cohesionCenterId}`} value={young.cohesionCenterName} />
           <Details title="Ville" value={young.cohesionCenterCity} />
-          <Details title="Code Postal" value={young.cohesionCenterZip} />
+          <Details title="Code&nbsp;Postal" value={young.cohesionCenterZip} />
         </>
       );
     if (young.statusPhase1 === "WITHDRAWN")
@@ -72,7 +106,7 @@ export default ({ young, getYoung }) => {
           <p>Le volontaire s'est désisté du séjour de cohésion.</p>
           <Details title="Centre" to={`/centre/${young.cohesionCenterId}`} value={young.cohesionCenterName} />
           <Details title="Ville" value={young.cohesionCenterCity} />
-          <Details title="Code Postal" value={young.cohesionCenterZip} />
+          <Details title="Code&nbsp;Postal" value={young.cohesionCenterZip} />
         </>
       );
   };
@@ -92,6 +126,11 @@ export default ({ young, getYoung }) => {
               <Bloc title="Séjour de cohésion" titleRight={<Badge text={translate(young.statusPhase1)} color={YOUNG_STATUS_COLORS[young.statusPhase1]} />}>
                 {getCohesionStay(young)}
               </Bloc>
+              {environment !== "production" && young.statusPhase1 === "AFFECTED" ? (
+                <Bloc title="Point de rassemblement" borderTop>
+                  {getMeetingPoint(young)}
+                </Bloc>
+              ) : null}
             </Col>
             <Col md={6}>
               <Formik
@@ -149,18 +188,23 @@ export default ({ young, getYoung }) => {
   );
 };
 
-const Bloc = ({ children, title, titleRight, borderBottom, borderRight, disabled }) => {
+const Bloc = ({ children, title, titleRight, borderBottom, borderRight, borderTop, disabled }) => {
   return (
     <Row
       style={{
         width: "100%",
+        borderTop: borderTop ? "2px solid #f4f5f7" : 0,
         borderBottom: borderBottom ? "2px solid #f4f5f7" : 0,
         borderRight: borderRight ? "2px solid #f4f5f7" : 0,
         backgroundColor: disabled ? "#f9f9f9" : "transparent",
       }}
     >
-      <Wrapper>
-        <div style={{ display: "flex" }}>
+      <Wrapper
+        style={{
+          width: "100%",
+        }}
+      >
+        <div style={{ display: "flex", width: "100%" }}>
           <BoxTitle>
             <div>{title}</div>
             <div>{titleRight}</div>
@@ -177,7 +221,7 @@ const Details = ({ title, value, to }) => {
   if (typeof value === "function") value = value();
   return (
     <div className="detail">
-      <div className="detail-title">{`${title} :`}</div>
+      <div className="detail-title">{title}&nbsp;:</div>
       <div className="detail-text">{to ? <Link to={to}>{value}</Link> : value}</div>
     </div>
   );
@@ -186,7 +230,7 @@ const Details = ({ title, value, to }) => {
 const DetailsToogle = ({ title, name, values, handleChange, updateYoung, disabled, optionLabels }) => {
   return (
     <div className="detail">
-      <div className="detail-title">{`${title} :`}</div>
+      <div className="detail-title">{title}&nbsp;:</div>
       <ToggleSwitch
         optionLabels={optionLabels}
         id={name}
@@ -211,7 +255,7 @@ const Wrapper = styled.div`
     margin-top: 1rem;
     &-title {
       min-width: 90px;
-      width: 90px;
+      width: 30%;
       margin-right: 1rem;
       color: #798399;
     }

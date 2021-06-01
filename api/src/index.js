@@ -42,6 +42,7 @@ app.use("/department-service", require("./controllers/department-service"));
 app.use("/waiting-list", require("./controllers/waiting-list"));
 app.use("/cohesion-center", require("./controllers/cohesion-center"));
 app.use("/email", require("./controllers/email"));
+app.use("/meeting-point", require("./controllers/meeting-point"));
 
 app.get("/", async (req, res) => {
   const d = new Date();

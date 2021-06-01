@@ -263,6 +263,20 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  meetingPointId: {
+    type: String,
+    documentation: {
+      description: "Identifiant du point de rassemblement pour le sejour de cohesion",
+    },
+  },
+  deplacementPhase1Autonomous: {
+    type: String,
+    enum: ["true", "false", ""],
+    documentation: {
+      description: "Le volontaire se rend au centre de cohésion par ses propres moyens ",
+    },
+  },
+
   // * phase 2 application infos
   phase2ApplicationStatus: {
     type: [String],

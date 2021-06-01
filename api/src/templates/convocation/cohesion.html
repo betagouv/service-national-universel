@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Formulaire Autotest PCR - SNU</title>
+    <link rel="stylesheet" href="{{BASE_URL}}/css/style.css" />
+  </head>
+
+  <body id="convocation-cohesion">
+    <img class="bg" src="{{GENERAL_BG}}" id="bg" alt="recto" />
+    <div class="date">Paris, le {{DATE}}</div>
+    <div class="infos-young">
+      {{FIRST_NAME}} {{LAST_NAME}}<br />
+      Né(e) le {{BIRTHDATE}}<br />
+      {{ADDRESS}}<br />
+      {{ZIP}} {{CITY}}
+    </div>
+    <div class="center">{{COHESION_CENTER_NAME}}, {{COHESION_CENTER_ADDRESS}} {{COHESION_CENTER_ZIP}} {{COHESION_CENTER_CITY}}</div>
+    <div class="meeting-point-date"><b>Le</b> {{MEETING_DATE}}</div>
+    <div class="meeting-point-bus-id"><b>Numéro de transport : </b>{{BUS}}</div>
+    <div class="meeting-point-address"><b>Lieu de rassemblement prévu : </b>{{MEETING_ADDRESS}}</div>
+    <div class="meeting-point-date-return">
+      Le RDV de fin de séjour se déroule selon les mêmes modalités que le départ. Il est prévu le {{MEETING_DATE_RETURN}}
+    </div>
+  </body>
+</html>
