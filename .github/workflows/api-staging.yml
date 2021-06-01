@@ -27,7 +27,8 @@ jobs:
         node-version: [14.x]
 
     steps:
-      - uses: actions/checkout@v1
+      - name: Git checkout
+        uses: actions/checkout@v1
 
       - name: Node ${{ matrix.node-version }}
         uses: actions/setup-node@v1
