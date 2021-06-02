@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import { ReactiveBase, ReactiveList, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
-import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { Link } from "react-router-dom";
 
 import { setUser } from "../../redux/auth/actions";
-import { translate, getFilterLabel, formatStringLongDate } from "../../utils";
+import { translate, getFilterLabel, formatLongDateFR, formatStringLongDate } from "../../utils";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
@@ -18,6 +17,7 @@ import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
 import { Filter, FilterRow, ResultTable, Table, TopResultStats, BottomResultStats, ActionBox, Header, Title, MultiLine } from "../../components/list";
 import Badge from "../../components/Badge";
+import ExportComponent from "../../components/ExportXlsx";
 
 export default () => {
   const [responsable, setResponsable] = useState(null);
@@ -47,18 +47,32 @@ export default () => {
           <div style={{ flex: 1, position: "relative" }}>
             <Header>
               <div>
-                {/* <Subtitle>RESPONSABLE</Subtitle> */}
                 <Title>Utilisateurs</Title>
               </div>
-              {/* <Export>
-                <ExportComponent
-                  title="Exporter les tuteurs"
-                  collection="user"
-                  transform={(e) => {
-                    return e;
-                  }}
-                />
-              </Export> */}
+              <ExportComponent
+                title="Exporter les utilisateurs"
+                collection="user"
+                defaultQuery={getExportQuery}
+                react={{ and: FILTERS }}
+                transform={(data) => {
+                  return {
+                    _id: data._id,
+                    Prénom: data.firstName,
+                    Nom: data.lastName,
+                    Email: data.email,
+                    Rôle: data.role,
+                    Fonction: data.subRole,
+                    Téléphone: data.phone,
+                    Portable: data.mobile,
+                    Département: data.department,
+                    Région: data.region,
+                    "Id structure": data.structureId,
+                    "Créé lé": formatLongDateFR(data.createdAt),
+                    "Mis à jour le": formatLongDateFR(data.updatedAt),
+                    "Dernière connexion le": formatLongDateFR(data.lastLoginAt),
+                  };
+                }}
+              />
             </Header>
             <Filter>
               <DataSearch
