@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ReactiveBase, ReactiveList, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import { useSelector } from "react-redux";
 
@@ -16,7 +16,14 @@ const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_P
 
 export default ({ center, updateCenter }) => {
   const [young, setYoung] = useState();
+  const [meetingPoints, setMeetingPoints] = useState(null);
 
+  useEffect(() => {
+    (async () => {
+      const { data } = await api.get("/meeting-point/all");
+      setMeetingPoints(data);
+    })();
+  }, []);
   const getDefaultQuery = () => ({
     query: {
       bool: {
@@ -46,6 +53,11 @@ export default ({ center, updateCenter }) => {
                 collection="volontaire"
                 react={{ and: FILTERS }}
                 transform={(data) => {
+                  let meetingPoint = {};
+                  if (data.meetingPointId && meetingPoints) {
+                    meetingPoint = meetingPoints.find((mp) => mp._id === data.meetingPointId);
+                    if (!meetingPoint) meetingPoint = {};
+                  }
                   return {
                     _id: data._id,
                     Cohorte: data.cohort,
@@ -145,6 +157,12 @@ export default ({ center, updateCenter }) => {
                     "Ville du centre": data.cohesionCenterCity || "",
                     "Département du centre": center.department || "",
                     "Région du centre": center.region || "",
+                    "Confirmation point de rassemblement": data.meetingPointId || data.deplacementPhase1Autonomous === "true" ? "Oui" : "Non",
+                    "se rend au centre par ses propres moyens": data.deplacementPhase1Autonomous,
+                    "Bus n˚": meetingPoint?.busExcelId,
+                    "Adresse point de rassemblement": meetingPoint?.departureAddress,
+                    "Date aller": formatLongDateFR(meetingPoint?.departureAt),
+                    "Date retour": formatLongDateFR(meetingPoint?.returnAt),
                   };
                 }}
               />
