@@ -8,7 +8,7 @@
         </mj-text>
         <mj-text line-height="1.5" font-size="18px" color="#000">
           Nous vous inviter à vous rapprocher du volontaire pour compléter ensemble et signer le contrat d’engagement ci-joint
-          <a href="https://drive.google.com/file/d/1R3eKLsJYsLD9V-UWxMmZzJ8YVSomQDZd/view">ci-joint</a>
+          <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/contrat-engagement.pdf">ci-joint</a>
           à renvoyer à son référent départemental SNU.
         </mj-text>
         <mj-button font-size="20px" background-color="#3490DC" href="{{cta}}"> Accéder à mon compte pour voir le volontaire </mj-button>
