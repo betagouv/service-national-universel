@@ -22,11 +22,16 @@ const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_P
 export default ({ setYoung }) => {
   const [volontaire, setVolontaire] = useState(null);
   const [centers, setCenters] = useState(null);
+  const [meetingPoints, setMeetingPoints] = useState(null);
 
   useEffect(() => {
     (async () => {
       const { data } = await api.get("/cohesion-center");
       setCenters(data);
+    })();
+    (async () => {
+      const { data } = await api.get("/meeting-point/all");
+      setMeetingPoints(data);
     })();
   }, []);
   const getDefaultQuery = () => ({ query: { bool: { filter: { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN", "WAITING_LIST"] } } } } });
@@ -50,6 +55,11 @@ export default ({ setYoung }) => {
                   if (data.cohesionCenterId && centers) {
                     center = centers.find((c) => c._id === data.cohesionCenterId);
                     if (!center) center = {};
+                  }
+                  let meetingPoint = {};
+                  if (data.meetingPointId && meetingPoints) {
+                    meetingPoint = meetingPoints.find((mp) => mp._id === data.meetingPointId);
+                    if (!meetingPoint) meetingPoint = {};
                   }
                   return {
                     _id: data._id,
@@ -150,6 +160,12 @@ export default ({ setYoung }) => {
                     "Ville du centre": data.cohesionCenterCity || "",
                     "Département du centre": center.department || "",
                     "Région du centre": center.region || "",
+                    "Confirmation point de rassemblement": data.meetingPointId || data.deplacementPhase1Autonomous === "true" ? "Oui" : "Non",
+                    "se rend au centre par ses propres moyens": data.deplacementPhase1Autonomous,
+                    "Bus n˚": meetingPoint?.busExcelId,
+                    "Adresse point de rassemblement": meetingPoint?.departureAddress,
+                    "Date aller": formatLongDateFR(meetingPoint?.departureAt),
+                    "Date retour": formatLongDateFR(meetingPoint?.returnAt),
                   };
                 }}
               />

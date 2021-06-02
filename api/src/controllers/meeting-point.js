@@ -10,9 +10,11 @@ const CohesionCenterModel = require("../models/cohesionCenter");
 const BusModel = require("../models/bus");
 const { ERRORS } = require("../utils");
 
-router.get("/:id", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
+router.get("/young/:id", passport.authenticate(["referent"], { session: false }), async (req, res) => {
   try {
-    const data = await MeetingPointModel.findById(req.params.id);
+    const young = await YoungModel.findById(req.params.id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const data = await MeetingPointModel.findById(young.meetingPointId);
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
@@ -20,11 +22,19 @@ router.get("/:id", passport.authenticate(["young", "referent"], { session: false
   }
 });
 
-router.get("/young/:id", passport.authenticate(["referent"], { session: false }), async (req, res) => {
+router.get("/all", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const young = await YoungModel.findById(req.params.id);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const data = await MeetingPointModel.findById(young.meetingPointId);
+    const data = await MeetingPointModel.find({});
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+router.get("/:id", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
+  try {
+    const data = await MeetingPointModel.findById(req.params.id);
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
