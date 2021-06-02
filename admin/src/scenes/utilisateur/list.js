@@ -23,20 +23,30 @@ export default () => {
   const [responsable, setResponsable] = useState(null);
   const user = useSelector((state) => state.Auth.user);
   const [structureIds, setStructureIds] = useState();
+  const [structures, setStructures] = useState();
+  const [services, setServices] = useState();
   const getDefaultQuery = () => {
     if (user.role === "supervisor") return { query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } } };
     else return { query: { match_all: {} } };
   };
   const getExportQuery = () => ({ ...getDefaultQuery(), size: 10000 });
   useEffect(() => {
+    (async () => {
+      const { data, ok } = await api.get(`/structure/all`);
+      if (!ok) return;
+      setStructures(data);
+    })();
+    (async () => {
+      const { data, ok } = await api.get(`/department-service/all`);
+      if (!ok) return;
+      setServices(data);
+    })();
     if (user.role !== "supervisor") return;
     (async () => {
       const { data } = await api.get(`/structure/network/${user.structureId}`);
       const ids = data.map((s) => s._id);
-      console.log(ids);
       setStructureIds(ids);
     })();
-    return;
   }, []);
   if (user.role === "supervisor" && !structureIds) return <Loader />;
 
@@ -55,6 +65,16 @@ export default () => {
                 defaultQuery={getExportQuery}
                 react={{ and: FILTERS }}
                 transform={(data) => {
+                  let structure = {};
+                  if (data.structureId && structures) {
+                    structure = structures.find((s) => s._id === data.structureId);
+                    if (!structure) structure = {};
+                  }
+                  let service = {};
+                  if (data.role === "referent_department" && services) {
+                    service = services.find((s) => s.department === data.department);
+                    if (!service) service = {};
+                  }
                   return {
                     _id: data._id,
                     Prénom: data.firstName,
@@ -66,7 +86,11 @@ export default () => {
                     Portable: data.mobile,
                     Département: data.department,
                     Région: data.region,
-                    "Id structure": data.structureId,
+                    Structure: structure?.name,
+                    "Nom de la direction du service départemental": service?.directionName,
+                    "Adresse du service départemental": service?.address + service?.complementAddress,
+                    "Code Postal du service départemental": service?.zip,
+                    "Ville du service départemental": service?.city,
                     "Créé lé": formatLongDateFR(data.createdAt),
                     "Mis à jour le": formatLongDateFR(data.updatedAt),
                     "Dernière connexion le": formatLongDateFR(data.lastLoginAt),
