@@ -13,26 +13,31 @@ const { sendEmail } = require("../sendinblue");
 
 router.post("/", passport.authenticate(["referent"], { session: false }), async (req, res) => {
   try {
-    const contract = req.body;
-    // Create the tokens
-    contract.parent1Token = crypto.randomBytes(20).toString("hex");
-    contract.projectManagerToken = crypto.randomBytes(20).toString("hex");
-    contract.structureManagerToken = crypto.randomBytes(20).toString("hex");
-    if (contract.parent2Email) contract.parent2Token = crypto.randomBytes(20).toString("hex");
+    let contract = req.body;
 
-    contract.parent1Status = "WAITING_VALIDATION";
-    contract.projectManagerStatus = "WAITING_VALIDATION";
-    contract.structureManagerStatus = "WAITING_VALIDATION";
-    if (contract.parent2Email) contract.parent2Status = "WAITING_VALIDATION";
+    if (!contract._id) {
+      // Create the tokens
+      contract.parent1Token = crypto.randomBytes(20).toString("hex");
+      contract.projectManagerToken = crypto.randomBytes(20).toString("hex");
+      contract.structureManagerToken = crypto.randomBytes(20).toString("hex");
+      if (contract.parent2Email) contract.parent2Token = crypto.randomBytes(20).toString("hex");
 
-    const data = await ContractObject.create(contract);
+      contract.parent1Status = "WAITING_VALIDATION";
+      contract.projectManagerStatus = "WAITING_VALIDATION";
+      contract.structureManagerStatus = "WAITING_VALIDATION";
+      if (contract.parent2Email) contract.parent2Status = "WAITING_VALIDATION";
+
+      contract = await ContractObject.create(contract);
+    } else {
+      contract = await ContractObject.findById(contract._id);
+    }
 
     // Update the application
     const application = await ApplicationObject.findById(contract.applicationId);
-    application.contractId = data._id;
+    application.contractId = contract._id;
     await application.save();
 
-    if (contract.sendMessage) {
+    if (req.body.sendMessage) {
       // We send 4 messages if required.
       const recipients = [
         { email: contract.parent1Email, name: `${contract.parent1FirstName} ${contract.parent1LastName}`, token: contract.parent1Token },
@@ -60,7 +65,7 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
           .toString()
           .replace(/{{toName}}/g, recipient.name)
           .replace(/{{youngName}}/g, `${contract.youngFirstName} ${contract.youngLastName}`)
-          .replace(/{{cta}}/g, `https://inscription.snu.gouv.fr/validate-contract?token=${recipient.token}&contract=${data._id}`);
+          .replace(/{{cta}}/g, `https://inscription.snu.gouv.fr/validate-contract?token=${recipient.token}&contract=${contract._id}`);
         const subject = `Valider le contrat d'engagement de ${contract.youngFirstName} ${contract.youngLastName} sur la mission ${contract.missionName}`;
         const to = { name: recipient.name, email: recipient.email };
         await sendEmail(to, subject, htmlContent);
@@ -68,7 +73,7 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
       contract.invitationSent = "true";
       await contract.save();
     }
-    return res.status(200).send({ ok: true, data });
+    return res.status(200).send({ ok: true, data: contract });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });

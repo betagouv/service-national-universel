@@ -85,7 +85,7 @@ export default ({ young }) => {
 
   let initialValues = null;
   if (contract) {
-    initialValues = contract;
+    initialValues = { ...contract, sendMessage: false };
   } else {
     initialValues = {
       youngFirstName: young.firstName,
@@ -219,7 +219,7 @@ export default ({ young }) => {
               });
               if (!ok) return toastr.error("Erreur !", translate(code));
               if (values.sendMessage) {
-                toastr.success("Le message a été envoyé");
+                toastr.success("Le message a été envoyé aux parties prenantes");
               } else {
                 toastr.success("Contrat sauvegardé");
               }
@@ -295,7 +295,7 @@ export default ({ young }) => {
                             <ContractField name="youngLastName" placeholder="Nom" context={context} />
                             <div>
                               né le :
-                              <ContractField name="youngBirthdate" context={context} as="date" placeholder="jj/mm/yyyy" />
+                              <ContractField name="youngBirthdate" context={context} type="date" placeholder="jj/mm/yyyy" />
                             </div>
                             <div>
                               demeurant :
@@ -373,9 +373,9 @@ export default ({ young }) => {
                           Le présent contrat, pour la réalisation de la mission indiquée ci-dessus, prend effet à la date de signature du présent contrat par les trois parties
                           prenantes. <br />
                           La mission d’intérêt général débute le
-                          <ContractField name="missionStartAt" placeholder="jj/mm/yyyy" as="date" context={context} />
+                          <ContractField name="missionStartAt" placeholder="jj/mm/yyyy" type="date" context={context} />
                           jusqu’au
-                          <ContractField name="missionEndAt" placeholder="jj/mm/yyyy" as="date" context={context} />
+                          <ContractField name="missionEndAt" placeholder="jj/mm/yyyy" type="date" context={context} />
                           <br /> Le volontaire effectuera un total de
                           <ContractField name="missionDuration" placeholder="nombre d'heure" context={context} />
                           heures de MIG.
