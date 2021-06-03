@@ -17,10 +17,10 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
 
     if (!contract._id) {
       // Create the tokens
-      contract.parent1Token = crypto.randomBytes(20).toString("hex");
-      contract.projectManagerToken = crypto.randomBytes(20).toString("hex");
-      contract.structureManagerToken = crypto.randomBytes(20).toString("hex");
-      if (contract.parent2Email) contract.parent2Token = crypto.randomBytes(20).toString("hex");
+      contract.parent1Token = crypto.randomBytes(40).toString("hex");
+      contract.projectManagerToken = crypto.randomBytes(40).toString("hex");
+      contract.structureManagerToken = crypto.randomBytes(40).toString("hex");
+      if (contract.parent2Email) contract.parent2Token = crypto.randomBytes(40).toString("hex");
 
       contract.parent1Status = "WAITING_VALIDATION";
       contract.projectManagerStatus = "WAITING_VALIDATION";
@@ -85,6 +85,23 @@ router.get("/:id", passport.authenticate("referent", { session: false }), async 
     const data = await ContractObject.findOne({ _id: req.params.id });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+router.get("/token/:token", async (req, res) => {
+  try {
+    const token = String(req.params.token);
+    if (!token) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const data = await ContractObject.findOne({
+      $or: [{ parent1Token: token }, { projectManagerToken: token }, { structureManagerToken: token }, { parent2Token: token }],
+    });
+
+    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const { parent1Token, projectManagerToken, structureManagerToken, parent2Token, ...rest } = data.toObject();
+    return res.status(200).send({ ok: true, data: rest });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });

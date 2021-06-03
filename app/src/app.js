@@ -21,6 +21,8 @@ import Preferences from "./scenes/preferences";
 import Missions from "./scenes/missions";
 import Applications from "./scenes/applications";
 import Cohesion from "./scenes/cohesion-2020/";
+import Contract from "./scenes/contract";
+
 import Loader from "./components/Loader";
 
 import Header from "./components/header";
@@ -74,6 +76,7 @@ export default () => {
       <ScrollToTop />
       <div className="main">
         <Switch>
+          <Route path="/validate-contract" component={Contract} />
           <Route path="/inscription" component={Inscription} />
           <Route path="/auth" component={Auth} />
           <Route path="/" component={Espace} />
