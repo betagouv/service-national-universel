@@ -34,6 +34,7 @@ const Schema = new mongoose.Schema({
     default: "WAITING_VALIDATION",
     enum: ["WAITING_VALIDATION", "VALIDATED"],
   },
+  invitationSent: { type: String },
   youngFirstName: { type: String },
   youngLastName: { type: String },
   youngBirthdate: { type: String },

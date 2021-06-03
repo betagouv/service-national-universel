@@ -20,6 +20,11 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
     contract.structureManagerToken = crypto.randomBytes(20).toString("hex");
     if (contract.parent2Email) contract.parent2Token = crypto.randomBytes(20).toString("hex");
 
+    contract.parent1Status = "WAITING_VALIDATION";
+    contract.projectManagerStatus = "WAITING_VALIDATION";
+    contract.structureManagerStatus = "WAITING_VALIDATION";
+    if (contract.parent2Email) contract.parent2Status = "WAITING_VALIDATION";
+
     const data = await ContractObject.create(contract);
 
     // Update the application
@@ -60,6 +65,8 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
         const to = { name: recipient.name, email: recipient.email };
         await sendEmail(to, subject, htmlContent);
       }
+      contract.invitationSent = "true";
+      await contract.save();
     }
     return res.status(200).send({ ok: true, data });
   } catch (error) {

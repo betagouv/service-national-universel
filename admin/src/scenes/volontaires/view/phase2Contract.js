@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 import { Formik, Field } from "formik";
-import { translate as t, YOUNG_PHASE, YOUNG_STATUS_PHASE2, APPLICATION_STATUS } from "../../../utils";
+import { translate as t, YOUNG_PHASE, YOUNG_STATUS_PHASE2, APPLICATION_STATUS, APPLICATION_STATUS_COLORS } from "../../../utils";
 import api from "../../../services/api";
 import WrapperPhase2 from "./wrapper";
 import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
@@ -13,6 +13,7 @@ import VioletHeaderButton from "../../../components/buttons/VioletHeaderButton";
 import WhiteHeaderButton from "../../../components/buttons/WhiteHeaderButton";
 import { toastr } from "react-redux-toastr";
 import { useParams } from "react-router";
+import Badge from "../../../components/Badge";
 
 export default ({ young }) => {
   let { applicationId } = useParams();
@@ -133,14 +134,71 @@ export default ({ young }) => {
       sendMessage: false,
     };
   }
+  console.log(contract);
 
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <WrapperPhase2 young={young} tab="phase2">
         <Box>
           <Bloc title="Contrat d’engagement en mission d’intérêt général">
-            <div style={{ display: "flex" }}>
-              <p style={{ flex: 1 }}>Ce contrat doit être validé par le(s) représentant(s) légal(aux) du volontaire, le tuteur de mission et le référent départemental.</p>
+            <div style={{ display: "grid", gridAutoColumns: "1fr", gridAutoFlow: "column" }}>
+              <div style={{ display: "flex" }}>
+                <p style={{ flex: 1 }}>Ce contrat doit être validé par le(s) représentant(s) légal(aux) du volontaire, le tuteur de mission et le référent départemental.</p>
+              </div>
+              <div style={{ textAlign: "right" }}>
+                {contract?.invitationSent === "true" ? (
+                  <Badge text="Contrat envoyé" style={{ verticalAlign: "top" }} />
+                ) : (
+                  <Badge text="Contrat pas encore envoyé" style={{ verticalAlign: "top" }} />
+                )}
+              </div>
+            </div>
+            <hr />
+            <div style={{ display: "grid", gridAutoColumns: "1fr", gridAutoFlow: "column" }}>
+              <div style={{ textAlign: "center" }}>
+                <div>Référent départemental</div>
+                {contract?.invitationSent === "true" ? (
+                  <Badge
+                    text={contract.projectManagerStatus === "VALIDATED" ? "Validé" : "En attente de validation"}
+                    color={contract.projectManagerStatus === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
+                  />
+                ) : (
+                  <Badge text="Pas encore envoyé" />
+                )}
+              </div>
+              <div style={{ textAlign: "center" }}>
+                Tuteur de mission{" "}
+                {contract?.invitationSent === "true" ? (
+                  <Badge
+                    text={contract.structureManagerStatus === "VALIDATED" ? "Validé" : "En attente de validation"}
+                    color={contract.structureManagerStatus === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
+                  />
+                ) : (
+                  <Badge text="Pas encore envoyé" />
+                )}
+              </div>
+              <div style={{ textAlign: "center" }}>
+                Représentant légal 1{" "}
+                {contract?.invitationSent === "true" ? (
+                  <Badge
+                    text={contract.parent1Status === "VALIDATED" ? "Validé" : "En attente de validation"}
+                    color={contract.parent1Status === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
+                  />
+                ) : (
+                  <Badge text="Pas encore envoyé" />
+                )}
+              </div>
+              <div style={{ textAlign: "center" }}>
+                Représentant légal 2{" "}
+                {contract?.invitationSent === "true" ? (
+                  <Badge
+                    text={contract.parent2Status === "VALIDATED" ? "Validé" : "En attente de validation"}
+                    color={contract.parent2Status === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
+                  />
+                ) : (
+                  <Badge text="Pas encore envoyé" />
+                )}
+              </div>
             </div>
           </Bloc>
         </Box>
@@ -237,7 +295,7 @@ export default ({ young }) => {
                             <ContractField name="youngLastName" placeholder="Nom" context={context} />
                             <div>
                               né le :
-                              <ContractField name="youngBirthdate" context={context} type="date" placeholder="jj/mm/yyyy" />
+                              <ContractField name="youngBirthdate" context={context} as="date" placeholder="jj/mm/yyyy" />
                             </div>
                             <div>
                               demeurant :
@@ -548,7 +606,7 @@ export default ({ young }) => {
                       handleSubmit();
                     }}
                   >
-                    <p>Envoyer une demande de validation aux 3 parties prenantes</p>
+                    <p>Envoyer une demande de validation aux {values.parent2Email ? "4" : "3"} parties prenantes</p>
                   </VioletHeaderButton>
                 </div>
               </>
@@ -606,7 +664,7 @@ const Bloc = ({ children, title, borderBottom, borderRight, borderLeft, disabled
 };
 
 const Wrapper = styled.div`
-  padding: 3rem;
+  padding: 2rem 3rem;
   width: 100%;
 `;
 
