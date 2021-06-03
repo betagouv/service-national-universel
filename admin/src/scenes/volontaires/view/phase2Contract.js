@@ -12,22 +12,33 @@ import { Box } from "../../../components/box";
 import VioletHeaderButton from "../../../components/buttons/VioletHeaderButton";
 import WhiteHeaderButton from "../../../components/buttons/WhiteHeaderButton";
 import { toastr } from "react-redux-toastr";
+import { useParams } from "react-router";
 
 export default ({ young }) => {
+  let { applicationId } = useParams();
   // manager_department
 
   // We load the first application that has VALIDATED status.
   // Then we load associated mission, tutor and structure (because we need all this mess).
   const [application, setApplication] = useState(null);
+  const [contract, setContract] = useState(null);
   const [mission, setMission] = useState(null);
   const [tutor, setTutor] = useState(null);
+  const [managerDepartment, setManagerDepartment] = useState(null);
   const [structure, setStructure] = useState(null);
   useEffect(() => {
     const getApplication = async () => {
       if (!young) return;
-      const { ok, data, code } = await api.get(`/application/young/${young._id}`);
+      let { ok, data, code } = await api.get(`/application/young/${young._id}`);
       if (!ok) return toastr.error("Oups, une erreur est survenue", code);
-      return setApplication(data.find((e) => e.status === APPLICATION_STATUS.VALIDATED));
+      const currentApplication = data.find((e) => e._id === applicationId);
+
+      if (currentApplication.contractId) {
+        ({ ok, data, code } = await api.get(`/contract/${currentApplication.contractId}`));
+        if (!ok) return toastr.error("Oups, une erreur est survenue", code);
+        setContract(data);
+      }
+      setApplication(currentApplication);
     };
     getApplication();
   }, []);
@@ -43,12 +54,22 @@ export default ({ young }) => {
   useEffect(() => {
     const getTutor = async () => {
       if (!application) return;
-      const { ok, data, code } = await api.get(`/referent/${application.tutorId}`);
+      const { ok, data, code } = await api.get(`/referent/${application.tutorId || application.tutor?._id}`);
       if (!ok) return toastr.error("Oups, une erreur est survenue", code);
       return setTutor(data);
     };
     getTutor();
   }, [application]);
+  useEffect(() => {
+    const getManagerDepartment = async () => {
+      if (!young) return;
+      const { ok, data, code } = await api.get(`/referent/subrole/manager_department`);
+      if (!ok) return toastr.error("Oups, une erreur est survenue", code);
+      const md = data.find((e) => e.department === young.department);
+      return setManagerDepartment(md);
+    };
+    getManagerDepartment();
+  }, [young]);
   useEffect(() => {
     const getStructure = async () => {
       if (!application) return;
@@ -60,6 +81,58 @@ export default ({ young }) => {
   }, [application]);
 
   if (!application || !mission || !tutor) return <Loader />;
+
+  let initialValues = null;
+  if (contract) {
+    initialValues = contract;
+  } else {
+    initialValues = {
+      youngFirstName: young.firstName,
+      youngLastName: young.lastName,
+      youngBirthdate: dateForDatePicker(young.birthdateAt),
+      youngAddress: young.address,
+      youngCity: young.city,
+      youngDepartment: young.department,
+      youngEmail: young.email,
+      youngPhone: young.phone,
+      parent1FirstName: young.parent1FirstName,
+      parent1LastName: young.parent1LastName,
+      parent1Address: young.parent1OwnAddress === "true" ? young.parent1Address : young.address,
+      parent1City: young.parent1OwnAddress === "true" ? young.parent1City : young.city,
+      parent1Department: young.parent1OwnAddress === "true" ? young.parent1Department : young.department,
+      parent1Phone: young.parent1Phone,
+      parent1Email: young.parent1Email,
+      parent2FirstName: young.parent2FirstName,
+      parent2LastName: young.parent2LastName,
+      parent2Address: young.parent2Email && young.parent2OwnAddress === "true" ? young.parent2Address : young.address,
+      parent2City: young.parent2Email && young.parent2OwnAddress === "true" ? young.parent2City : young.city,
+      parent2Department: young.parent2Email && young.parent2OwnAddress === "true" ? young.parent2Department : young.department,
+      parent2Phone: young.parent2Phone,
+      parent2Email: young.parent2Email,
+      missionName: mission.name,
+      missionObjective: mission.description,
+      missionAction: mission.actions,
+      missionStartAt: dateForDatePicker(mission.startAt),
+      missionEndAt: dateForDatePicker(mission.endAt),
+      missionAddress: mission.address,
+      missionCity: mission.city,
+      missionZip: mission.zip,
+      missionDuration: mission.duration,
+      missionFrequence: mission.frequence,
+      date: dateForDatePicker(new Date()),
+      projectManagerFirstName: managerDepartment.firstName || "",
+      projectManagerLastName: managerDepartment.lastName || "",
+      projectManagerRole: "Chef de Projet départemental",
+      projectManagerEmail: managerDepartment.email,
+      structureManagerFirstName: tutor.firstName,
+      structureManagerLastName: tutor.lastName,
+      structureManagerRole: "Tuteur de mission",
+      structureManagerEmail: tutor.email,
+      structureSiret: structure.siret || "",
+      structureName: structure.name || "",
+      sendMessage: false,
+    };
+  }
 
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
@@ -75,61 +148,16 @@ export default ({ young }) => {
         <Formik
           validateOnChange={false}
           validateOnBlur={false}
-          initialValues={{
-            youngFirstName: young.firstName,
-            youngLastName: young.lastName,
-            youngBirthdate: dateForDatePicker(young.birthdateAt),
-            youngAddress: young.address,
-            youngCity: young.city,
-            youngDepartment: young.department,
-            youngEmail: young.email,
-            youngPhone: young.phone,
-            parent1FirstName: young.parent1FirstName,
-            parent1LastName: young.parent1LastName,
-            parent1Address: young.parent1OwnAddress === "true" ? young.parent1Address : young.address,
-            parent1City: young.parent1OwnAddress === "true" ? young.parent1City : young.city,
-            parent1Department: young.parent1OwnAddress === "true" ? young.parent1Department : young.department,
-            parent1Phone: young.parent1Phone,
-            parent1Email: young.parent1Email,
-            parent2FirstName: young.parent2FirstName,
-            parent2LastName: young.parent2LastName,
-            parent2Address: young.parent2Email && young.parent2OwnAddress === "true" ? young.parent2Address : young.address,
-            parent2City: young.parent2Email && young.parent2OwnAddress === "true" ? young.parent2City : young.city,
-            parent2Department: young.parent2Email && young.parent2OwnAddress === "true" ? young.parent2Department : young.department,
-            parent2Phone: young.parent2Phone,
-            parent2Email: young.parent2Email,
-            missionName: mission.name,
-            missionObjective: mission.description,
-            missionAction: mission.actions,
-            missionStartAt: dateForDatePicker(mission.startAt),
-            missionEndAt: dateForDatePicker(mission.endAt),
-            missionAddress: mission.address,
-            missionCity: mission.city,
-            missionZip: mission.zip,
-            missionDuration: mission.duration,
-            missionFrequence: mission.frequence,
-            date: dateForDatePicker(new Date()),
-            projectManagerFirstName: "",
-            projectManagerLastName: "",
-            projectManagerRole: "Chef de Projet départemental",
-            projectManagerEmail: "",
-            structureManagerFirstName: tutor.firstName,
-            structureManagerLastName: tutor.lastName,
-            structureManagerRole: "Tuteur de mission",
-            structureManagerEmail: tutor.email,
-            structureSiret: structure.siret || "",
-            structureName: structure.name || "",
-            sendMessage: false,
-          }}
+          initialValues={initialValues}
           onSubmit={async (values, actions) => {
             try {
               const { ok, code } = await api.post(`/contract`, {
                 ...values,
-                youngId: young.id,
-                structureId: structure.id,
-                applicationId: application.id,
-                missionId: mission.id,
-                tutorId: tutor.id,
+                youngId: young._id,
+                structureId: structure._id,
+                applicationId: application._id,
+                missionId: mission._id,
+                tutorId: tutor._id,
               });
               if (!ok) return toastr.error("Erreur !", translate(code));
               if (values.sendMessage) {

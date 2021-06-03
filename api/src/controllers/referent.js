@@ -448,6 +448,16 @@ router.get("/:id", passport.authenticate("referent", { session: false }), async 
   }
 });
 
+router.get("/subrole/:subRole", passport.authenticate("referent", { session: false }), async (req, res) => {
+  try {
+    const data = await ReferentObject.find({ subRole: String(req.params.subRole) });
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
 router.get("/structure/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const data = await ReferentObject.find({ structureId: req.params.id });

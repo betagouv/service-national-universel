@@ -7,6 +7,7 @@ const path = require("path");
 
 const { capture } = require("../sentry");
 const ContractObject = require("../models/contract");
+const ApplicationObject = require("../models/application");
 const { ERRORS } = require("../utils");
 const { sendEmail } = require("../sendinblue");
 
@@ -20,6 +21,12 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
     if (contract.parent2Email) contract.parent2Token = crypto.randomBytes(20).toString("hex");
 
     const data = await ContractObject.create(contract);
+
+    // Update the application
+    const application = await ApplicationObject.findById(contract.applicationId);
+    application.contractId = data._id;
+    await application.save();
+
     if (contract.sendMessage) {
       // We send 4 messages if required.
       const recipients = [
@@ -54,6 +61,17 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
         await sendEmail(to, subject, htmlContent);
       }
     }
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+router.get("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
+  try {
+    const data = await ContractObject.findOne({ _id: req.params.id });
+    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);

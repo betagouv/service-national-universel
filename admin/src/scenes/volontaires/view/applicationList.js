@@ -6,7 +6,7 @@ import { Row } from "reactstrap";
 import api from "../../../services/api";
 import SelectStatusApplication from "../../../components/selectStatusApplication";
 import { APPLICATION_STATUS, formatStringDate } from "../../../utils";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import ProposalMission from "./proposalMission";
 import CreateMission from "./createMission";
 import PlusSVG from "../../../assets/plus.svg";
@@ -45,7 +45,7 @@ export default ({ young, onChangeApplication }) => {
         <tbody>
           <>
             {applications.map((hit, i) => (
-              <Hit key={i} hit={hit} index={i} onChangeApplication={onChangeApplication} />
+              <Hit key={i} young={young} hit={hit} index={i} onChangeApplication={onChangeApplication} />
             ))}
           </>
         </tbody>
@@ -74,8 +74,9 @@ export default ({ young, onChangeApplication }) => {
   );
 };
 
-const Hit = ({ hit, index, onChangeApplication }) => {
+const Hit = ({ hit, index, young, onChangeApplication }) => {
   const [mission, setMission] = useState();
+  const history = useHistory();
   useEffect(() => {
     (async () => {
       if (!hit.missionId) return;
@@ -84,6 +85,7 @@ const Hit = ({ hit, index, onChangeApplication }) => {
       return setMission(data);
     })();
   }, []);
+
   if (!mission) return null;
   return (
     <tr>
@@ -113,7 +115,25 @@ const Hit = ({ hit, index, onChangeApplication }) => {
         </div>
       </td>
       <td onClick={(e) => e.stopPropagation()}>
-        <SelectStatusApplication hit={hit} callback={onChangeApplication} />
+        <SelectStatusApplication
+          hit={hit}
+          callback={(status) => {
+            if (status === "VALIDATED") {
+              history.push(`/volontaire/${young._id}/phase2/application/${hit._id}/contrat`);
+            }
+            onChangeApplication();
+          }}
+        />
+        {hit.status === "VALIDATED" ? (
+          <div
+            style={{ fontWeight: 500, textAlign: "center", marginTop: "0.5rem" }}
+            onClick={() => {
+              history.push(`/volontaire/${young._id}/phase2/application/${hit._id}/contrat`);
+            }}
+          >
+            Contrat d'engagement &gt;
+          </div>
+        ) : null}
       </td>
     </tr>
   );
