@@ -14,11 +14,11 @@ export default ({ young, onAffect, onClick }) => {
 
   const handleAffectation = async (center) => {
     try {
-      const { data, ok, code } = await api.post(`/cohesion-center/${center._id}/assign-young/${young._id}`);
-      if (!ok) return toastr.error("Oups, une erreur est survenue lors de l'affectation du jeune", code);
-      toastr.success(`${young.firstName} a été affecté(e) au centre ${center.name} !`);
+      const response = await api.post(`/cohesion-center/${center._id}/assign-young/${young._id}`);
+      if (!response.ok) return toastr.error("Oups, une erreur est survenue lors de l'affectation du jeune", translate(response.code));
+      toastr.success(`${response.young.firstName} a été affecté(e) au centre ${response.data.name} !`);
       setSearchedValue("");
-      return onAffect?.(data);
+      return onAffect?.(response.data, response.young);
     } catch (error) {
       if (error.code === "OPERATION_NOT_ALLOWED")
         return toastr.error("Oups, une erreur est survenue lors de l'affectation du jeune. Il semblerait que ce centre soit déjà complet", translate(error?.code), {

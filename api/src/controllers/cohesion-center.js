@@ -68,7 +68,6 @@ router.post("/:centerId/assign-young/:youngId", passport.authenticate("referent"
       autoAffectationPhase1ExpiresAt: Date.now() + 60 * 1000 * 60 * 48,
     });
     await young.save();
-    await young.index();
 
     await sendAutoAffectationMail(young, center);
 
@@ -88,7 +87,7 @@ router.post("/:centerId/assign-young/:youngId", passport.authenticate("referent"
     const data = await updatePlacesCenter(center);
     if (oldCenter) await updatePlacesCenter(oldCenter);
 
-    return res.status(200).send({ data, ok: true });
+    return res.status(200).send({ data, young, ok: true });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });

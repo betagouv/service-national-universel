@@ -12,11 +12,14 @@ export default ({ values, handleChange }) => (
       <BoxContent direction="column">
         <AssignCenter
           young={values}
-          onAffect={(e) => {
-            handleChange({ target: { name: "cohesionCenterId", value: e._id } });
-            handleChange({ target: { name: "cohesionCenterName", value: e.name } });
-            handleChange({ target: { name: "cohesionCenterZip", value: e.zip } });
-            handleChange({ target: { name: "cohesionCenterCity", value: e.city } });
+          onAffect={(center, young) => {
+            handleChange({ target: { name: "cohesionCenterId", value: center._id } });
+            handleChange({ target: { name: "cohesionCenterName", value: center.name } });
+            handleChange({ target: { name: "cohesionCenterZip", value: center.zip } });
+            handleChange({ target: { name: "cohesionCenterCity", value: center.city } });
+            handleChange({ target: { name: "status", value: young.status } });
+            handleChange({ target: { name: "statusPhase1", value: young.statusPhase1 } });
+            handleChange({ target: { name: "autoAffectationPhase1ExpiresAt", value: young.autoAffectationPhase1ExpiresAt } });
           }}
         />
         <Item disabled title="Centre de cohésion" values={values} name="cohesionCenterName" handleChange={handleChange} />
