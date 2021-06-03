@@ -4,6 +4,7 @@ const passport = require("passport");
 const { capture } = require("../sentry");
 
 const StructureObject = require("../models/structure");
+const MissionObject = require("../models/mission");
 const { ERRORS } = require("../utils");
 
 // Update "network name" to ease search ("Affilié à un réseau national" filter).
@@ -33,6 +34,18 @@ async function updateNetworkName(structure) {
     }
   }
 }
+async function updateMissionStructureName(structure) {
+  try {
+    const missions = await MissionObject.find({ structureId: structure._id });
+    if (!missions?.length) return console.log(`no missions edited for structure ${structure._id}`);
+    for (const mission of missions) {
+      mission.set({ structureName: structure.name });
+      await mission.save();
+    }
+  } catch (error) {
+    capture(error);
+  }
+}
 
 router.post("/", async (req, res) => {
   try {
@@ -49,8 +62,9 @@ router.put("/", passport.authenticate("referent", { session: false }), async (re
   try {
     let obj = req.body;
     const data = await StructureObject.findByIdAndUpdate(req.user.structureId, obj, { new: true });
-    await updateNetworkName(data);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    await updateNetworkName(data);
+    await updateMissionStructureName(data);
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
@@ -62,8 +76,9 @@ router.put("/:id", passport.authenticate("referent", { session: false }), async 
   try {
     let obj = req.body;
     const data = await StructureObject.findByIdAndUpdate(req.params.id, obj, { new: true });
-    await updateNetworkName(data);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    await updateNetworkName(data);
+    await updateMissionStructureName(data);
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
