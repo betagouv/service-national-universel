@@ -46,12 +46,12 @@ export default () => {
         <div>
           <h2>Consentement à l’utilisation d’autotest COVID</h2>
           <p>
-            Votre représentant légal doit renseigner le formulaire relatif à l’utilisation d’autotest COVID pendant le séjour de cohésion avant le <b>4&nbsp;juin&nbsp;2021</b>.
+            Votre représentant légal doit renseigner le formulaire relatif à l’utilisation d’autotest COVID pendant le séjour de cohésion <b>avant votre départ</b>.
             <br />
-            <i>Cette étape est un pré-requis au séjour de cohésion.</i>
+            <i>Cette étape est un pré-requis pour partir.</i>
             <br />
             <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Note_relative_a_l_utilisation_d_autotest_COVID.pdf" target="blank" className="link">
-              Note relative à l’utilisation d’autotest antingénique COVID{" >"}
+              Note relative à l’utilisation d’autotest antingénique COVID ›
             </a>
           </p>
         </div>

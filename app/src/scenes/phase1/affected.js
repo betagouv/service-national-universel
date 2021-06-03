@@ -71,7 +71,7 @@ export default () => {
           <div className="thumb" />
         </Hero>
       </HeroContainer>
-      {environment !== "production" ? <SelectMeetingPoint /> : null}
+      <SelectMeetingPoint />
       <NextStep />
       <HeroContainer>
         <Hero>
@@ -94,7 +94,10 @@ export default () => {
             <ContentHorizontal>
               <div>
                 <h2>Votre convocation</h2>
-                <p>Votre convocation sera à présenter à votre arrivée muni d'une pièce d'identité valide et de votre test PCR ou antigénique négatif de moins de 72 heures.</p>
+                <p>
+                  Votre convocation sera à présenter à votre arrivée muni d'une pièce d'identité valide et de votre test PCR ou antigénique négatif de moins de 72 heures
+                  (recommandé)
+                </p>
               </div>
               <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", marginLeft: "auto", padding: "1rem" }}>
                 <ContinueButton>

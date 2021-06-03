@@ -126,7 +126,7 @@ export default ({ young, getYoung }) => {
               <Bloc title="Séjour de cohésion" titleRight={<Badge text={translate(young.statusPhase1)} color={YOUNG_STATUS_COLORS[young.statusPhase1]} />}>
                 {getCohesionStay(young)}
               </Bloc>
-              {environment !== "production" && young.statusPhase1 === "AFFECTED" ? (
+              {young.statusPhase1 === "AFFECTED" ? (
                 <Bloc title="Point de rassemblement" borderTop>
                   {getMeetingPoint(young)}
                 </Bloc>
