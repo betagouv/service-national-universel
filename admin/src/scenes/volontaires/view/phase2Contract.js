@@ -150,7 +150,8 @@ export default ({ young }) => {
     (contract.parent1Status === "VALIDATED" ||
       contract.projectManagerStatus === "VALIDATED" ||
       contract.structureManagerStatus === "VALIDATED" ||
-      contract.parent2Status === "VALIDATED");
+      contract.parent2Status === "VALIDATED" ||
+      contract.youngContractStatus === "VALIDATED");
 
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
@@ -719,7 +720,7 @@ export default ({ young }) => {
                   >
                     <p>Enregistrer les modifications</p>
                   </WhiteHeaderButton>
-                  {!hasAtLeastOneValidationDone && (
+                  {contract?.invitationSent !== "true" && (
                     <VioletHeaderButton
                       onClick={async () => {
                         const erroredFields = await validateForm();

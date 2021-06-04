@@ -42,7 +42,7 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
 
       contract = await ContractObject.create(contract);
     } else {
-      contract = await ContractObject.findById(contract._id);
+      contract = await ContractObject.findByIdAndUpdate(contract._id, contract);
       // When we update, we have to send mail again to validated.
       if (contract.parent1Status === "VALIDATED") {
         contract.parent1Status = "WAITING_VALIDATION";
@@ -181,12 +181,10 @@ router.get("/token/:token", async (req, res) => {
 
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const { parent1Token, projectManagerToken, structureManagerToken, parent2Token, youngContractToken, ...rest } = data.toObject();
-    return res
-      .status(200)
-      .send({
-        ok: true,
-        data: { ...rest, isParentToken: token === parent1Token || token === parent2Token, isYoungContractToken: token === youngContractToken },
-      });
+    return res.status(200).send({
+      ok: true,
+      data: { ...rest, isParentToken: token === parent1Token || token === parent2Token, isYoungContractToken: token === youngContractToken },
+    });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
