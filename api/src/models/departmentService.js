@@ -65,6 +65,18 @@ const Schema = new mongoose.Schema({
       description: "Information comlpémentaire",
     },
   },
+  contactName: {
+    type: String,
+    documentation: {
+      description: "Nom du contact au sein du service",
+    },
+  },
+  contactPhone: {
+    type: String,
+    documentation: {
+      description: "Téléphone du contact au sein du service",
+    },
+  },
 
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },

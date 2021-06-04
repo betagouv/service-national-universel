@@ -121,7 +121,7 @@ async function updateContact(id, { attributes, emailBlacklisted, smsBlacklisted,
 }
 
 async function sync(obj, type) {
-  // if (process.env.NODE_ENV !== "production") return;
+  if (ENVIRONMENT !== "production") return console.log("no sync sendinblue");
   try {
     const user = JSON.parse(JSON.stringify(obj));
     if (!user) return console.log("ERROR WITH ", obj);

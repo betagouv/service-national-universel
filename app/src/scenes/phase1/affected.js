@@ -16,7 +16,7 @@ export default () => {
   const young = useSelector((state) => state.Auth.young);
   const [center, setCenter] = useState();
   const showConvocation = () => {
-    return young.meetingPointId || young.deplacementPhase1Autonomous === "true";
+    return environment !== "production" && (young.meetingPointId || young.deplacementPhase1Autonomous === "true");
   };
 
   const goToConvocation = () => {

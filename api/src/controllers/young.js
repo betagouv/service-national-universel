@@ -386,23 +386,28 @@ router.post("/:id/form/:template", passport.authenticate(["young", "referent"], 
 });
 
 router.post("/:id/convocation/:template", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
-  const young = await YoungObject.findById(req.params.id);
-  if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+  try {
+    const young = await YoungObject.findById(req.params.id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-  const options = req.body.options || { format: "A4", margin: 0 };
-  //create html
-  let newhtml = "";
-  if (req.params.template === "cohesion") {
-    newhtml = await convocation.cohesion(req.body.young);
+    const options = req.body.options || { format: "A4", margin: 0 };
+    //create html
+    let newhtml = "";
+    if (req.params.template === "cohesion") {
+      newhtml = await convocation.cohesion(req.body.young);
+    }
+
+    if (!newhtml) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const buffer = await renderFromHtml(newhtml, options);
+    res.contentType("application/pdf");
+    res.setHeader("Content-Dispositon", 'inline; filename="test.pdf"');
+    res.set("Cache-Control", "public, max-age=1");
+    res.send(buffer);
+  } catch (e) {
+    capture(e);
+    res.status(500).send({ ok: false, e, code: ERRORS.SERVER_ERROR });
   }
-
-  if (!newhtml) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-  const buffer = await renderFromHtml(newhtml, options);
-  res.contentType("application/pdf");
-  res.setHeader("Content-Dispositon", 'inline; filename="test.pdf"');
-  res.set("Cache-Control", "public, max-age=1");
-  res.send(buffer);
 });
 
 module.exports = router;
