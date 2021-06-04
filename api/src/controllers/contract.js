@@ -11,7 +11,7 @@ const ApplicationObject = require("../models/application");
 const { ERRORS } = require("../utils");
 const { sendEmail } = require("../sendinblue");
 
-// Create or update token.
+// Create or update contract.
 router.post("/", passport.authenticate(["referent"], { session: false }), async (req, res) => {
   try {
     let contract = req.body;
@@ -19,18 +19,26 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
     let isValidateAgainMail = false;
 
     if (!contract._id) {
+      mailsToSend = ["projectManager", "structureManager"];
       // Create the tokens
-      contract.parent1Token = crypto.randomBytes(40).toString("hex");
       contract.projectManagerToken = crypto.randomBytes(40).toString("hex");
       contract.structureManagerToken = crypto.randomBytes(40).toString("hex");
-      if (contract.parent2Email) contract.parent2Token = crypto.randomBytes(40).toString("hex");
-
-      contract.parent1Status = "WAITING_VALIDATION";
       contract.projectManagerStatus = "WAITING_VALIDATION";
       contract.structureManagerStatus = "WAITING_VALIDATION";
-      if (contract.parent2Email) contract.parent2Status = "WAITING_VALIDATION";
-
-      mailsToSend = ["parent1", "parent2", "projectManager", "structureManager"];
+      if (!contract.isYoungAdult) {
+        contract.parent1Token = crypto.randomBytes(40).toString("hex");
+        contract.parent1Status = "WAITING_VALIDATION";
+        mailsToSend.push("parent1");
+        if (contract.parent2Email) {
+          contract.parent2Token = crypto.randomBytes(40).toString("hex");
+          contract.parent2Status = "WAITING_VALIDATION";
+          mailsToSend.push("parent2");
+        }
+      } else {
+        contract.youngContractToken = crypto.randomBytes(40).toString("hex");
+        contract.youngContractStatus = "WAITING_VALIDATION";
+        mailsToSend.push("young");
+      }
 
       contract = await ContractObject.create(contract);
     } else {
@@ -56,6 +64,11 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
         mailsToSend.push("parent2");
         contract.parent2Token = crypto.randomBytes(40).toString("hex");
       }
+      if (contract.youngContractStatus === "VALIDATED") {
+        contract.youngContractStatus = "WAITING_VALIDATION";
+        mailsToSend.push("young");
+        contract.youngContractToken = crypto.randomBytes(40).toString("hex");
+      }
       isValidateAgainMail = true;
     }
 
@@ -65,15 +78,8 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
     await application.save();
 
     if (req.body.sendMessage) {
-      // We send 4 messages if required.
+      // We send 2, 3 or 4 messages if required.
       const recipients = [];
-      if (mailsToSend.includes("parent1")) {
-        recipients.push({
-          email: contract.parent1Email,
-          name: `${contract.parent1FirstName} ${contract.parent1LastName}`,
-          token: contract.parent1Token,
-        });
-      }
       if (mailsToSend.includes("projectManager")) {
         recipients.push({
           email: contract.projectManagerEmail,
@@ -88,11 +94,25 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
           token: contract.structureManagerToken,
         });
       }
+      if (mailsToSend.includes("parent1")) {
+        recipients.push({
+          email: contract.parent1Email,
+          name: `${contract.parent1FirstName} ${contract.parent1LastName}`,
+          token: contract.parent1Token,
+        });
+      }
       if (contract.parent2Email && mailsToSend.includes("parent2")) {
         recipients.push({
           email: contract.parent2Email,
           name: `${contract.parent2FirstName} ${contract.parent2LastName}`,
           token: contract.parent2Token,
+        });
+      }
+      if (mailsToSend.includes("young")) {
+        recipients.push({
+          email: contract.youngEmail,
+          name: `${contract.youngFirstName} ${contract.youngLastName}`,
+          token: contract.youngContractToken,
         });
       }
       for (const recipient of recipients) {

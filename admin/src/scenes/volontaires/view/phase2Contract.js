@@ -83,11 +83,22 @@ export default ({ young }) => {
 
   if (!application || !mission || !tutor) return <Loader />;
 
+  const getAge = (d) => {
+    const now = new Date();
+    const date = new Date(d);
+    const diffTime = Math.abs(date - now);
+    const age = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
+    if (!age || isNaN(age)) return "?";
+    return age;
+  };
+  const isYoungAdult = getAge(young.birthdateAt) < 18;
+
   let initialValues = null;
   if (contract) {
-    initialValues = { ...contract, sendMessage: false };
+    initialValues = { ...contract, sendMessage: false, isYoungAdult: isYoungAdult };
   } else {
     initialValues = {
+      isYoungAdult: isYoungAdult,
       youngFirstName: young.firstName,
       youngLastName: young.lastName,
       youngBirthdate: dateForDatePicker(young.birthdateAt),
@@ -183,24 +194,40 @@ export default ({ young }) => {
                   <Badge text="Pas encore envoyé" />
                 )}
               </div>
-              <div style={{ textAlign: "center" }}>
-                <div> Représentant légal 1 </div>
-                {contract?.invitationSent === "true" ? (
-                  <Badge
-                    text={contract.parent1Status === "VALIDATED" ? "Validé" : "En attente de validation"}
-                    color={contract.parent1Status === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
-                  />
-                ) : (
-                  <Badge text="Pas encore envoyé" />
-                )}
-              </div>
-              {young.parent2Email && (
+              {isYoungAdult ? (
+                <>
+                  <div style={{ textAlign: "center" }}>
+                    <div> Représentant légal 1 </div>
+                    {contract?.invitationSent === "true" ? (
+                      <Badge
+                        text={contract.parent1Status === "VALIDATED" ? "Validé" : "En attente de validation"}
+                        color={contract.parent1Status === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
+                      />
+                    ) : (
+                      <Badge text="Pas encore envoyé" />
+                    )}
+                  </div>
+                  {young.parent2Email && (
+                    <div style={{ textAlign: "center" }}>
+                      <div> Représentant légal 2 </div>
+                      {contract?.invitationSent === "true" ? (
+                        <Badge
+                          text={contract.parent2Status === "VALIDATED" ? "Validé" : "En attente de validation"}
+                          color={contract.parent2Status === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
+                        />
+                      ) : (
+                        <Badge text="Pas encore envoyé" />
+                      )}
+                    </div>
+                  )}
+                </>
+              ) : (
                 <div style={{ textAlign: "center" }}>
-                  <div> Représentant légal 2 </div>
+                  <div> Volontaire </div>
                   {contract?.invitationSent === "true" ? (
                     <Badge
-                      text={contract.parent2Status === "VALIDATED" ? "Validé" : "En attente de validation"}
-                      color={contract.parent2Status === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
+                      text={contract.youngContractStatus === "VALIDATED" ? "Validé" : "En attente de validation"}
+                      color={contract.youngContractStatus === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
                     />
                   ) : (
                     <Badge text="Pas encore envoyé" />
@@ -319,38 +346,42 @@ export default ({ young }) => {
                           </div>
                         </div>
                         <hr />
-                        <h2>Représenté par ses représentant légaux</h2>
-                        <div>
-                          1) Le représentant légal du volontaire n°1 :
-                          <ContractField name="parent1FirstName" placeholder="Prénom" context={context} />
-                          <ContractField name="parent1LastName" placeholder="Nom" context={context} />
-                          disposant de l’autorité parentale,
-                          <div>
-                            demeurant à
-                            <ContractField name="parent1Address" placeholder="Adresse" className="md" context={context} />
-                            <ContractField name="parent1City" placeholder="Ville" context={context} />
-                            <ContractField name="parent1Department" placeholder="Département" context={context} />
-                          </div>
-                          Email : <ContractField name="parent1Email" placeholder="Email" className="md" type="email" context={context} />
-                          Téléphone :
-                          <ContractField name="parent1Phone" placeholder="0123456789" className="md" context={context} />
-                        </div>
-                        {young.parent2Email && (
-                          <div>
-                            2) Le représentant légal du volontaire n°2 :
-                            <ContractField name="parent2FirstName" placeholder="Prénom" context={context} optional={true} />
-                            <ContractField name="parent2LastName" placeholder="Nom" context={context} optional={true} />
-                            disposant de l’autorité parentale,
+                        {isYoungAdult && (
+                          <>
+                            <h2>Représenté par ses représentant légaux</h2>
                             <div>
-                              demeurant à
-                              <ContractField name="parent2Address" placeholder="Adresse" className="md" context={context} optional={true} />
-                              <ContractField name="parent2City" placeholder="Ville" context={context} optional={true} />
-                              <ContractField name="parent2Department" placeholder="Département" context={context} optional={true} />
+                              1) Le représentant légal du volontaire n°1 :
+                              <ContractField name="parent1FirstName" placeholder="Prénom" context={context} />
+                              <ContractField name="parent1LastName" placeholder="Nom" context={context} />
+                              disposant de l’autorité parentale,
+                              <div>
+                                demeurant à
+                                <ContractField name="parent1Address" placeholder="Adresse" className="md" context={context} />
+                                <ContractField name="parent1City" placeholder="Ville" context={context} />
+                                <ContractField name="parent1Department" placeholder="Département" context={context} />
+                              </div>
+                              Email : <ContractField name="parent1Email" placeholder="Email" className="md" type="email" context={context} />
+                              Téléphone :
+                              <ContractField name="parent1Phone" placeholder="0123456789" className="md" context={context} />
                             </div>
-                            Email : <ContractField name="parent2Email" placeholder="Email" className="md" type="email" context={context} optional={true} />
-                            Téléphone :
-                            <ContractField name="parent2Phone" placeholder="0123456789" className="md" context={context} optional={true} />
-                          </div>
+                            {young.parent2Email && (
+                              <div>
+                                2) Le représentant légal du volontaire n°2 :
+                                <ContractField name="parent2FirstName" placeholder="Prénom" context={context} optional={true} />
+                                <ContractField name="parent2LastName" placeholder="Nom" context={context} optional={true} />
+                                disposant de l’autorité parentale,
+                                <div>
+                                  demeurant à
+                                  <ContractField name="parent2Address" placeholder="Adresse" className="md" context={context} optional={true} />
+                                  <ContractField name="parent2City" placeholder="Ville" context={context} optional={true} />
+                                  <ContractField name="parent2Department" placeholder="Département" context={context} optional={true} />
+                                </div>
+                                Email : <ContractField name="parent2Email" placeholder="Email" className="md" type="email" context={context} optional={true} />
+                                Téléphone :
+                                <ContractField name="parent2Phone" placeholder="0123456789" className="md" context={context} optional={true} />
+                              </div>
+                            )}
+                          </>
                         )}
                         <div>
                           <br />
@@ -518,39 +549,64 @@ export default ({ young }) => {
                             )}
                           </div>
                         </div>
-                        <div>
-                          Le volontaire, <ContractField name="youngFirstName" placeholder="Prénom" context={context} />
-                          <ContractField name="youngLastName" placeholder="Nom" context={context} />
-                          représenté par ses représentant légaux :
-                        </div>
-                        <div>
-                          <br />
-                          <div>
-                            Représentant légal du volontaire (1){" "}
-                            {contract?.invitationSent === "true" ? (
-                              <Badge
-                                text={contract.parent1Status === "VALIDATED" ? "Validé" : "En attente de validation"}
-                                color={contract.parent1Status === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
-                              />
-                            ) : (
-                              <Badge text="Pas encore envoyé" />
-                            )}
-                          </div>
-                        </div>
-                        {values.parent2Email && (
-                          <div>
+                        {isYoungAdult ? (
+                          <>
                             <div>
-                              Représentant légal du volontaire (2){" "}
-                              {contract?.invitationSent === "true" ? (
-                                <Badge
-                                  text={contract.parent2Status === "VALIDATED" ? "Validé" : "En attente de validation"}
-                                  color={contract.parent2Status === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
-                                />
-                              ) : (
-                                <Badge text="Pas encore envoyé" />
-                              )}
+                              Le volontaire, <ContractField name="youngFirstName" placeholder="Prénom" context={context} />
+                              <ContractField name="youngLastName" placeholder="Nom" context={context} />
+                              représenté par ses représentant légaux :
                             </div>
-                          </div>
+                            <div>
+                              <br />
+                              <div>
+                                Représentant légal du volontaire (1){" "}
+                                {contract?.invitationSent === "true" ? (
+                                  <Badge
+                                    text={contract.parent1Status === "VALIDATED" ? "Validé" : "En attente de validation"}
+                                    color={contract.parent1Status === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
+                                  />
+                                ) : (
+                                  <Badge text="Pas encore envoyé" />
+                                )}
+                              </div>
+                            </div>
+                            {values.parent2Email && (
+                              <div>
+                                <div>
+                                  Représentant légal du volontaire (2){" "}
+                                  {contract?.invitationSent === "true" ? (
+                                    <Badge
+                                      text={contract.parent2Status === "VALIDATED" ? "Validé" : "En attente de validation"}
+                                      color={contract.parent2Status === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
+                                    />
+                                  ) : (
+                                    <Badge text="Pas encore envoyé" />
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            <div>
+                              Le volontaire, <ContractField name="youngFirstName" placeholder="Prénom" context={context} />
+                              <ContractField name="youngLastName" placeholder="Nom" context={context} />
+                            </div>
+                            <div>
+                              <br />
+                              <div>
+                                Le volontaire{" "}
+                                {contract?.invitationSent === "true" ? (
+                                  <Badge
+                                    text={contract.youngContractStatus === "VALIDATED" ? "Validé" : "En attente de validation"}
+                                    color={contract.youngContractStatus === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
+                                  />
+                                ) : (
+                                  <Badge text="Pas encore envoyé" />
+                                )}
+                              </div>
+                            </div>
+                          </>
                         )}
                       </div>
                       <div>
