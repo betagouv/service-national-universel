@@ -25,7 +25,7 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
       contract.structureManagerToken = crypto.randomBytes(40).toString("hex");
       contract.projectManagerStatus = "WAITING_VALIDATION";
       contract.structureManagerStatus = "WAITING_VALIDATION";
-      if (!contract.isYoungAdult) {
+      if (contract.isYoungAdult !== "true") {
         contract.parent1Token = crypto.randomBytes(40).toString("hex");
         contract.parent1Status = "WAITING_VALIDATION";
         mailsToSend.push("parent1");
@@ -154,7 +154,7 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (req.user.statusPhase2) {
       //         ^-- Quick and dirty way to check if it's a young.
-      const { parent1Token, projectManagerToken, structureManagerToken, parent2Token, ...rest } = data.toObject();
+      const { parent1Token, projectManagerToken, structureManagerToken, parent2Token, youngContractToken, ...rest } = data.toObject();
       return res.status(200).send({ ok: true, data: { ...rest } });
     }
     return res.status(200).send({ ok: true, data });
@@ -170,12 +170,23 @@ router.get("/token/:token", async (req, res) => {
     const token = String(req.params.token);
     if (!token) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const data = await ContractObject.findOne({
-      $or: [{ parent1Token: token }, { projectManagerToken: token }, { structureManagerToken: token }, { parent2Token: token }],
+      $or: [
+        { youngContractToken: token },
+        { parent1Token: token },
+        { projectManagerToken: token },
+        { structureManagerToken: token },
+        { parent2Token: token },
+      ],
     });
 
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const { parent1Token, projectManagerToken, structureManagerToken, parent2Token, ...rest } = data.toObject();
-    return res.status(200).send({ ok: true, data: { ...rest, isParentToken: token === parent1Token || token === parent2Token } });
+    const { parent1Token, projectManagerToken, structureManagerToken, parent2Token, youngContractToken, ...rest } = data.toObject();
+    return res
+      .status(200)
+      .send({
+        ok: true,
+        data: { ...rest, isParentToken: token === parent1Token || token === parent2Token, isYoungContractToken: token === youngContractToken },
+      });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
@@ -188,7 +199,13 @@ router.post("/token/:token", async (req, res) => {
     const token = String(req.params.token);
     if (!token) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const data = await ContractObject.findOne({
-      $or: [{ parent1Token: token }, { projectManagerToken: token }, { structureManagerToken: token }, { parent2Token: token }],
+      $or: [
+        { youngContractToken: token },
+        { parent1Token: token },
+        { projectManagerToken: token },
+        { structureManagerToken: token },
+        { parent2Token: token },
+      ],
     });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
@@ -196,6 +213,7 @@ router.post("/token/:token", async (req, res) => {
     if (token === data.parent2Token) data.parent2Status = "VALIDATED";
     if (token === data.projectManagerToken) data.projectManagerStatus = "VALIDATED";
     if (token === data.structureManagerToken) data.structureManagerStatus = "VALIDATED";
+    if (token === data.youngContractToken) data.youngContractStatus = "VALIDATED";
 
     await data.save();
 

@@ -12,7 +12,7 @@ import Loader from "../../components/Loader";
 import { Box } from "../../components/box";
 import { VioletButton } from "../../components/Content";
 import Badge from "../../components/Badge";
-import { APPLICATION_STATUS_COLORS } from "../../utils";
+import { APPLICATION_STATUS_COLORS, formatDateFR } from "../../utils";
 
 export default () => {
   const [context, setContext] = useState(null);
@@ -112,39 +112,43 @@ export default () => {
                 </div>
               </div>
               <hr />
-              <h2>Représenté par ses représentant légaux</h2>
-              <div>
-                1) Le représentant légal du volontaire n°1 :
-                <ContractField name="parent1FirstName" placeholder="Prénom" context={context} />
-                <ContractField name="parent1LastName" placeholder="Nom" context={context} />
-                disposant de l’autorité parentale,
-                <div>
-                  demeurant à
-                  <ContractField name="parent1Address" placeholder="Adresse" className="md" context={context} />
-                  <ContractField name="parent1City" placeholder="Ville" context={context} />
-                  <ContractField name="parent1Department" placeholder="Département" context={context} />
-                </div>
-                Email : <ContractField name="parent1Email" placeholder="Email" className="md" type="email" context={context} />
-                Téléphone :
-                <ContractField name="parent1Phone" placeholder="0123456789" className="md" context={context} />
-              </div>
-              {context["parent2Email"] && (
-                <div>
-                  2) Le représentant légal du volontaire n°2 :
-                  <ContractField name="parent2FirstName" placeholder="Prénom" context={context} optional={true} />
-                  <ContractField name="parent2LastName" placeholder="Nom" context={context} optional={true} />
-                  disposant de l’autorité parentale,
+              {context.isYoungAdult !== "true" ? (
+                <>
+                  <h2>Représenté par ses représentant légaux</h2>
                   <div>
-                    demeurant à
-                    <ContractField name="parent2Address" placeholder="Adresse" className="md" context={context} optional={true} />
-                    <ContractField name="parent2City" placeholder="Ville" context={context} optional={true} />
-                    <ContractField name="parent2Department" placeholder="Département" context={context} optional={true} />
+                    1) Le représentant légal du volontaire n°1 :
+                    <ContractField name="parent1FirstName" placeholder="Prénom" context={context} />
+                    <ContractField name="parent1LastName" placeholder="Nom" context={context} />
+                    disposant de l’autorité parentale,
+                    <div>
+                      demeurant à
+                      <ContractField name="parent1Address" placeholder="Adresse" className="md" context={context} />
+                      <ContractField name="parent1City" placeholder="Ville" context={context} />
+                      <ContractField name="parent1Department" placeholder="Département" context={context} />
+                    </div>
+                    Email : <ContractField name="parent1Email" placeholder="Email" className="md" type="email" context={context} />
+                    Téléphone :
+                    <ContractField name="parent1Phone" placeholder="0123456789" className="md" context={context} />
                   </div>
-                  Email : <ContractField name="parent2Email" placeholder="Email" className="md" type="email" context={context} />
-                  Téléphone :
-                  <ContractField name="parent2Phone" placeholder="0123456789" className="md" context={context} optional={true} />
-                </div>
-              )}
+                  {context["parent2Email"] && (
+                    <div>
+                      2) Le représentant légal du volontaire n°2 :
+                      <ContractField name="parent2FirstName" placeholder="Prénom" context={context} optional={true} />
+                      <ContractField name="parent2LastName" placeholder="Nom" context={context} optional={true} />
+                      disposant de l’autorité parentale,
+                      <div>
+                        demeurant à
+                        <ContractField name="parent2Address" placeholder="Adresse" className="md" context={context} optional={true} />
+                        <ContractField name="parent2City" placeholder="Ville" context={context} optional={true} />
+                        <ContractField name="parent2Department" placeholder="Département" context={context} optional={true} />
+                      </div>
+                      Email : <ContractField name="parent2Email" placeholder="Email" className="md" type="email" context={context} />
+                      Téléphone :
+                      <ContractField name="parent2Phone" placeholder="0123456789" className="md" context={context} optional={true} />
+                    </div>
+                  )}
+                </>
+              ) : null}
               <div>
                 <br />
                 <p>Il a été convenu ce qui suit :</p>
@@ -311,39 +315,64 @@ export default () => {
                   )}
                 </div>
               </div>
-              <div>
-                Le volontaire, <ContractField name="youngFirstName" placeholder="Prénom" context={context} />
-                <ContractField name="youngLastName" placeholder="Nom" context={context} />
-                représenté par ses représentant légaux :
-              </div>
-              <div>
-                <br />
-                <div>
-                  Représentant légal du volontaire (1){" "}
-                  {context?.invitationSent === "true" ? (
-                    <Badge
-                      text={context.parent1Status === "VALIDATED" ? "Validé" : "En attente de validation"}
-                      color={context.parent1Status === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
-                    />
-                  ) : (
-                    <Badge text="Pas encore envoyé" />
-                  )}
-                </div>
-              </div>
-              {context.parent2Email && (
-                <div>
+              {context.isYoungAdult !== "true" ? (
+                <>
                   <div>
-                    Représentant légal du volontaire (2){" "}
-                    {context?.invitationSent === "true" ? (
-                      <Badge
-                        text={context.parent2Status === "VALIDATED" ? "Validé" : "En attente de validation"}
-                        color={context.parent2Status === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
-                      />
-                    ) : (
-                      <Badge text="Pas encore envoyé" />
-                    )}
+                    Le volontaire, <ContractField name="youngFirstName" placeholder="Prénom" context={context} />
+                    <ContractField name="youngLastName" placeholder="Nom" context={context} />
+                    représenté par ses représentant légaux :
                   </div>
-                </div>
+                  <div>
+                    <br />
+                    <div>
+                      Représentant légal du volontaire (1){" "}
+                      {context?.invitationSent === "true" ? (
+                        <Badge
+                          text={context.parent1Status === "VALIDATED" ? "Validé" : "En attente de validation"}
+                          color={context.parent1Status === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
+                        />
+                      ) : (
+                        <Badge text="Pas encore envoyé" />
+                      )}
+                    </div>
+                  </div>
+                  {context.parent2Email && (
+                    <div>
+                      <div>
+                        Représentant légal du volontaire (2){" "}
+                        {context?.invitationSent === "true" ? (
+                          <Badge
+                            text={context.parent2Status === "VALIDATED" ? "Validé" : "En attente de validation"}
+                            color={context.parent2Status === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
+                          />
+                        ) : (
+                          <Badge text="Pas encore envoyé" />
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  <div>
+                    Le volontaire, <ContractField name="youngFirstName" placeholder="Prénom" context={context} />
+                    <ContractField name="youngLastName" placeholder="Nom" context={context} />
+                  </div>
+                  <div>
+                    <br />
+                    <div>
+                      Le volontaire{" "}
+                      {context?.invitationSent === "true" ? (
+                        <Badge
+                          text={context.youngContractStatus === "VALIDATED" ? "Validé" : "En attente de validation"}
+                          color={context.youngContractStatus === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
+                        />
+                      ) : (
+                        <Badge text="Pas encore envoyé" />
+                      )}
+                    </div>
+                  </div>
+                </>
               )}
             </div>
             <div>
@@ -439,8 +468,9 @@ export default () => {
             } catch (e) {
               return toastr.error("Impossible de mettre à jour le contrat d'engagement");
             }
-            if (!context.isParentToken) return history.push("/validate-contract/done?t=referent");
-            else return history.push("/validate-contract/done?t=referent");
+            debugger;
+            if (!(context.isParentToken || context.isYoungContractToken)) return history.push("/validate-contract/done?t=referent");
+            else return history.push("/validate-contract/done");
           }}
         >
           Je valide le contrat d'engagement
@@ -494,7 +524,8 @@ const ContractContainer = styled.div`
   }
 `;
 
-const ContractField = ({ name, context }) => {
+const ContractField = ({ name, context, type }) => {
+  if (type === "date" && context[name]) return <SuperSpan> {formatDateFR(context[name]) || "…"} </SuperSpan>;
   return <SuperSpan> {context[name] || "…"} </SuperSpan>;
 };
 

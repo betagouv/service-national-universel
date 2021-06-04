@@ -91,14 +91,13 @@ export default ({ young }) => {
     if (!age || isNaN(age)) return "?";
     return age;
   };
-  const isYoungAdult = getAge(young.birthdateAt) < 18;
+  const isYoungAdult = getAge(young.birthdateAt) >= 18;
 
   let initialValues = null;
   if (contract) {
-    initialValues = { ...contract, sendMessage: false, isYoungAdult: isYoungAdult };
+    initialValues = { ...contract, sendMessage: false };
   } else {
     initialValues = {
-      isYoungAdult: isYoungAdult,
       youngFirstName: young.firstName,
       youngLastName: young.lastName,
       youngBirthdate: dateForDatePicker(young.birthdateAt),
@@ -194,7 +193,7 @@ export default ({ young }) => {
                   <Badge text="Pas encore envoyé" />
                 )}
               </div>
-              {isYoungAdult ? (
+              {!isYoungAdult ? (
                 <>
                   <div style={{ textAlign: "center" }}>
                     <div> Représentant légal 1 </div>
@@ -251,6 +250,7 @@ export default ({ young }) => {
                 applicationId: application._id,
                 missionId: mission._id,
                 tutorId: tutor._id,
+                isYoungAdult: isYoungAdult ? "true" : "false",
               });
               if (!ok) return toastr.error("Erreur !", translate(code));
               if (values.sendMessage) {
@@ -346,7 +346,7 @@ export default ({ young }) => {
                           </div>
                         </div>
                         <hr />
-                        {isYoungAdult && (
+                        {!isYoungAdult && (
                           <>
                             <h2>Représenté par ses représentant légaux</h2>
                             <div>
@@ -549,7 +549,7 @@ export default ({ young }) => {
                             )}
                           </div>
                         </div>
-                        {isYoungAdult ? (
+                        {!isYoungAdult ? (
                           <>
                             <div>
                               Le volontaire, <ContractField name="youngFirstName" placeholder="Prénom" context={context} />
