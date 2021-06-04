@@ -4,8 +4,6 @@ import { toastr } from "react-redux-toastr";
 
 import api from "../../../services/api";
 import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
-import Checkbox from "../components/Checkbox";
-import Select from "../components/Select";
 import Documents from "../components/Documents";
 import DndFileInput from "../../../components/dndFileInput";
 
@@ -19,36 +17,6 @@ export default ({ values, handleChange, handleSubmit }) => {
       <Box>
         <BoxHeadTitle>Consentement des représentants légaux</BoxHeadTitle>
         <BoxContent direction="column">
-          <Select
-            disabled={!values.parentConsentmentFiles.length}
-            name="parentConsentmentFilesCompliant"
-            values={values}
-            handleChange={handleChange}
-            title="Consentement"
-            options={[
-              { value: "true", label: "Conforme" },
-              { value: "false", label: "Non conforme" },
-            ]}
-          />
-          {values.parentConsentmentFilesCompliant === "false" ? (
-            <>
-              <Checkbox
-                name="parentConsentmentFilesCompliantInfo"
-                value="signature"
-                values={values}
-                handleChange={handleChange}
-                description="Manque de la signature d'un des représentants"
-              />
-              <Checkbox
-                name="parentConsentmentFilesCompliantInfo"
-                value="proof"
-                values={values}
-                handleChange={handleChange}
-                description="Manque d'un justificatif d'autorité parentale non partagée"
-              />
-              <Checkbox name="parentConsentmentFilesCompliantInfo" value="other" values={values} handleChange={handleChange} description="Autre" />
-            </>
-          ) : null}
           <Documents>
             <h4>Attestations des représentants légaux</h4>
             {isFromFranceConnect(values) ? (
