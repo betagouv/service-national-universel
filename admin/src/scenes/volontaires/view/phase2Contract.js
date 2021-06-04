@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 import { Formik, Field } from "formik";
+import { useHistory } from "react-router-dom";
+
 import { translate as t, YOUNG_PHASE, YOUNG_STATUS_PHASE2, APPLICATION_STATUS, APPLICATION_STATUS_COLORS } from "../../../utils";
 import api from "../../../services/api";
 import WrapperPhase2 from "./wrapper";
@@ -16,6 +18,8 @@ import { useParams } from "react-router";
 import Badge from "../../../components/Badge";
 
 export default ({ young }) => {
+  const history = useHistory();
+
   let { applicationId } = useParams();
   // manager_department
 
@@ -156,6 +160,13 @@ export default ({ young }) => {
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <WrapperPhase2 young={young} tab="phase2">
+        <BackLink
+          onClick={() => {
+            history.push(`/volontaire/${young._id}/phase2`);
+          }}
+        >
+          {"<"} Revenir à la fiche volontaire
+        </BackLink>
         <Box>
           <Bloc title="Contrat d’engagement en mission d’intérêt général">
             <div style={{ display: "grid", gridAutoColumns: "1fr", gridAutoFlow: "column" }}>
@@ -237,7 +248,6 @@ export default ({ young }) => {
             </div>
           </Bloc>
         </Box>
-
         <Formik
           validateOnChange={false}
           validateOnBlur={false}
@@ -733,11 +743,16 @@ export default ({ young }) => {
                     </VioletHeaderButton>
                   )}
                 </div>
+                {Object.keys(errors).length ? (
+                  <ErrorMessage>
+                    Le contrat contient des erreurs <br />
+                    <i>champ(s) manquant(s) ou invalide(s)</i>
+                  </ErrorMessage>
+                ) : null}
               </>
             );
           }}
         </Formik>
-
         {young.statusPhase2 === "VALIDATED" ? (
           <DownloadAttestationButton young={young} uri="2">
             Télécharger l'attestation de réalisation de la phase 2
@@ -786,6 +801,18 @@ const Bloc = ({ children, title, borderBottom, borderRight, borderLeft, disabled
     </Row>
   );
 };
+
+const ErrorMessage = styled.div`
+  border: 1px solid #fc8181;
+  border-radius: 0.25em;
+  margin-top: 1em;
+  background-color: #fff5f5;
+  color: #c53030;
+  font-weight: 400;
+  font-size: 12px;
+  padding: 1em;
+  text-align: center;
+`;
 
 const Wrapper = styled.div`
   padding: 2rem 3rem;
@@ -840,4 +867,13 @@ const Legend = styled.div`
   color: rgb(38, 42, 62);
   font-size: 1.3rem;
   font-weight: 500;
+`;
+
+const BackLink = styled.div`
+  color: #888;
+  margin-bottom: 0.5rem;
+  :hover {
+    cursor: pointer;
+    text-decoration: underline;
+  }
 `;
