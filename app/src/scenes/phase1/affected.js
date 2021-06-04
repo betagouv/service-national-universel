@@ -65,6 +65,10 @@ export default () => {
                     Voir votre convocation
                   </strong>
                 </a>
+                <br />
+                <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/SNU_-_Réglement_intérieur.pdf" target="blank">
+                  <strong style={{ textDecoration: "underline", cursor: "pointer", color: "#6b7280" }}>Voir règlement intérieur</strong>
+                </a>
               </p>
             ) : null}
           </div>

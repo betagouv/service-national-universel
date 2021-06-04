@@ -60,18 +60,14 @@ const cohesion = async (young) => {
     if (young.deplacementPhase1Autonomous === "true" || !meetingPoint) return `${center.address} ${center.zip} ${center.city}`;
     return meetingPoint.departureAddress;
   };
-  const getReturnMeetingAddress = () => {
-    if (young.deplacementPhase1Autonomous === "true") return "";
-    return "au lieu";
-  };
   try {
     if (!young.cohesionCenterId && young.deplacementPhase1Autonomous !== "true") throw `unauthorized`;
     const center = await CohesionCenterModel.findById(young.cohesionCenterId);
     if (!center) throw `center ${young.cohesionCenterId} not found for young ${young._id}`;
     const meetingPoint = await MeetingPointModel.findById(young.meetingPointId);
     const bus = await BusModel.findById(meetingPoint?.busId);
-    const service = await DepartmentServiceModel.findOne({ department: center?.department });
-    if (!service) throw `service not found for young ${young._id}, center ${center?._id} in department ${center?.department}`;
+    const service = await DepartmentServiceModel.findOne({ department: young?.department });
+    if (!service) throw `service not found for young ${young._id}, center ${center?._id} in department ${young?.department}`;
 
     const html = fs.readFileSync(path.resolve(__dirname, "./cohesion.html"), "utf8");
     return html
@@ -91,7 +87,7 @@ const cohesion = async (young) => {
       .replace(/{{MEETING_DATE}}/g, formatStringLongDate(getDepartureMeetingDate(meetingPoint)))
       .replace(/{{MEETING_ADDRESS}}/g, getMeetingAddress(meetingPoint, center))
       .replace(/{{MEETING_DATE_RETURN}}/g, formatStringLongDate(getReturnMeetingDate(meetingPoint)))
-      .replace(/{{MEETING_ADDRESS_RETURN}}/g, getReturnMeetingAddress())
+      .replace(/{{MEETING_ADDRESS_RETURN}}/g, "au même lieu de rassemblement qu'à l'aller")
       .replace(/{{TRANPORT}}/g, bus ? `<b>Numéro de transport</b> : ${bus.idExcel}` : "")
       .replace(/{{BASE_URL}}/g, getBaseUrl())
       .replace(/{{GENERAL_BG}}/g, getBg());
