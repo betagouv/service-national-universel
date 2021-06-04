@@ -11,6 +11,7 @@ const ApplicationObject = require("../models/application");
 const { ERRORS } = require("../utils");
 const { sendEmail } = require("../sendinblue");
 
+// Create or update token.
 router.post("/", passport.authenticate(["referent"], { session: false }), async (req, res) => {
   try {
     let contract = req.body;
@@ -91,6 +92,7 @@ router.get("/:id", passport.authenticate("referent", { session: false }), async 
   }
 });
 
+// Get a contract by its token.
 router.get("/token/:token", async (req, res) => {
   try {
     const token = String(req.params.token);
@@ -101,7 +103,31 @@ router.get("/token/:token", async (req, res) => {
 
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const { parent1Token, projectManagerToken, structureManagerToken, parent2Token, ...rest } = data.toObject();
-    return res.status(200).send({ ok: true, data: rest });
+    return res.status(200).send({ ok: true, data: { ...rest, isParentToken: token === parent1Token || token === parent2Token } });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+// Validate token.
+router.post("/token/:token", async (req, res) => {
+  try {
+    const token = String(req.params.token);
+    if (!token) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const data = await ContractObject.findOne({
+      $or: [{ parent1Token: token }, { projectManagerToken: token }, { structureManagerToken: token }, { parent2Token: token }],
+    });
+    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (token === "parent1Token") data.parent1Status = "VALIDATED";
+    if (token === "parent2Token") data.parent2Status = "VALIDATED";
+    if (token === "projectManagerToken") data.projectManagerStatus = "VALIDATED";
+    if (token === "structureManagerToken") data.structureManagerStatus = "VALIDATED";
+
+    await data.save();
+
+    return res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
