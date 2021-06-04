@@ -65,7 +65,7 @@ const cohesion = async (young) => {
     return "au lieu";
   };
   try {
-    if (!young.cohesionCenterId || young.deplacementPhase1Autonomous !== "true") throw `unauthorized`;
+    if (!young.cohesionCenterId && young.deplacementPhase1Autonomous !== "true") throw `unauthorized`;
     const center = await CohesionCenterModel.findById(young.cohesionCenterId);
     if (!center) throw `center ${young.cohesionCenterId} not found for young ${young._id}`;
     const meetingPoint = await MeetingPointModel.findById(young.meetingPointId);
