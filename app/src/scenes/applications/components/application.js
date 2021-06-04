@@ -3,12 +3,15 @@ import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { Draggable } from "react-beautiful-dnd";
 import { Col, Row } from "reactstrap";
+import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
 import { translate, APPLICATION_STATUS_COLORS, APPLICATION_STATUS } from "../../../utils";
+import Badge from "../../../components/Badge";
 
 export default ({ application, index }) => {
   const [value, setValue] = useState(application);
+  const [contract, setContract] = useState(null);
   const getTags = (mission) => {
     if (!mission) return [];
     const tags = [];
@@ -16,6 +19,17 @@ export default ({ application, index }) => {
     mission.domains && mission.domains.forEach((d) => tags.push(d));
     return tags;
   };
+
+  useEffect(() => {
+    const getContract = async () => {
+      if (application.contractId) {
+        const { ok, data, code } = await api.get(`/contract/${application.contractId}`);
+        if (!ok) return toastr.error("Oups, une erreur est survenue", code);
+        setContract(data);
+      }
+    };
+    getContract();
+  }, [application]);
 
   if (!value || !value.mission) return <div />;
 
@@ -48,6 +62,7 @@ export default ({ application, index }) => {
               </TagContainer>
             </Col>
           </Card>
+          {contract && <ContractInfo contract={contract} />}
           <Footer
             application={value}
             tutor={value.tutor}
@@ -60,6 +75,63 @@ export default ({ application, index }) => {
     </Draggable>
   );
 };
+
+function ContractInfo({ contract }) {
+  const young = useSelector((state) => state.Auth.young);
+  return (
+    <>
+      <hr />
+      <div style={{ display: "grid", gridAutoColumns: "1fr", gridAutoFlow: "column" }}>
+        <div style={{ textAlign: "center" }}>
+          <div>Représentant de l'Etat</div>
+          {contract?.invitationSent === "true" ? (
+            <Badge
+              text={contract.projectManagerStatus === "VALIDATED" ? "Validé" : "En attente de validation"}
+              color={contract.projectManagerStatus === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
+            />
+          ) : (
+            <Badge text="Pas encore envoyé" />
+          )}
+        </div>
+        <div style={{ textAlign: "center" }}>
+          <div>Représentant structure</div>
+          {contract?.invitationSent === "true" ? (
+            <Badge
+              text={contract.structureManagerStatus === "VALIDATED" ? "Validé" : "En attente de validation"}
+              color={contract.structureManagerStatus === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
+            />
+          ) : (
+            <Badge text="Pas encore envoyé" />
+          )}
+        </div>
+        <div style={{ textAlign: "center" }}>
+          <div> Représentant légal 1 </div>
+          {contract?.invitationSent === "true" ? (
+            <Badge
+              text={contract.parent1Status === "VALIDATED" ? "Validé" : "En attente de validation"}
+              color={contract.parent1Status === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
+            />
+          ) : (
+            <Badge text="Pas encore envoyé" />
+          )}
+        </div>
+        {young.parent2Email && (
+          <div style={{ textAlign: "center" }}>
+            <div> Représentant légal 2 </div>
+            {contract?.invitationSent === "true" ? (
+              <Badge
+                text={contract.parent2Status === "VALIDATED" ? "Validé" : "En attente de validation"}
+                color={contract.parent2Status === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
+              />
+            ) : (
+              <Badge text="Pas encore envoyé" />
+            )}
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
 
 const Footer = ({ application, tutor, onChange }) => {
   const setStatus = async (status) => {

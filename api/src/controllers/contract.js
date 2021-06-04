@@ -128,10 +128,15 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
   }
 });
 
-router.get("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.get("/:id", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
     const data = await ContractObject.findOne({ _id: req.params.id });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (req.user.statusPhase2) {
+      //         ^-- Quick and dirty way to check if it's a young.
+      const { parent1Token, projectManagerToken, structureManagerToken, parent2Token, ...rest } = data.toObject();
+      return res.status(200).send({ ok: true, data: { ...rest } });
+    }
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
