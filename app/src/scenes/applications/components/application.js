@@ -7,7 +7,6 @@ import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
 import { translate, APPLICATION_STATUS_COLORS, APPLICATION_STATUS } from "../../../utils";
-import Badge from "../../../components/Badge";
 
 export default ({ application, index }) => {
   const [value, setValue] = useState(application);
@@ -62,7 +61,7 @@ export default ({ application, index }) => {
               </TagContainer>
             </Col>
           </Card>
-          {contract && <ContractInfo contract={contract} />}
+          {contract && contract?.invitationSent && <ContractInfo contract={contract} />}
           <Footer
             application={value}
             tutor={value.tutor}
@@ -78,60 +77,50 @@ export default ({ application, index }) => {
 
 function ContractInfo({ contract }) {
   const young = useSelector((state) => state.Auth.young);
+  const getAge = (d) => {
+    const now = new Date();
+    const date = new Date(d);
+    const diffTime = Math.abs(date - now);
+    const age = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
+    if (!age || isNaN(age)) return "?";
+    return age;
+  };
+  const isYoungAdult = getAge(young.birthdateAt) >= 18;
+
   return (
     <>
       <hr />
-      <div style={{ display: "grid", gridAutoColumns: "1fr", gridAutoFlow: "column" }}>
-        <div style={{ textAlign: "center" }}>
-          <div>Représentant de l'Etat</div>
-          {contract?.invitationSent === "true" ? (
-            <Badge
-              text={contract.projectManagerStatus === "VALIDATED" ? "Validé" : "En attente de validation"}
-              color={contract.projectManagerStatus === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
-            />
+      <div>
+        <span style={{ marginLeft: "1rem", fontSize: "0.9rem", fontWeight: "500" }}>Signatures du contrat d'engagement de la mission d'intérêt général</span>
+        <div style={{ display: "flex" }}>
+          <ContractStatus contract={contract} property="projectManagerStatus" name="Représentant de l'Etat" />
+          <ContractStatus contract={contract} property="structureManagerStatus" name="Représentant structure" />
+          {isYoungAdult ? (
+            <ContractStatus contract={contract} property="youngContractStatus" name="Volontaire" />
           ) : (
-            <Badge text="Pas encore envoyé" />
+            <>
+              <ContractStatus contract={contract} property="parent1Status" name="Représentant légal 1" />
+              {young.parent2Email && <ContractStatus contract={contract} property="parent2Status" name="Représentant légal 2" />}
+            </>
           )}
         </div>
-        <div style={{ textAlign: "center" }}>
-          <div>Représentant structure</div>
-          {contract?.invitationSent === "true" ? (
-            <Badge
-              text={contract.structureManagerStatus === "VALIDATED" ? "Validé" : "En attente de validation"}
-              color={contract.structureManagerStatus === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
-            />
-          ) : (
-            <Badge text="Pas encore envoyé" />
-          )}
-        </div>
-        <div style={{ textAlign: "center" }}>
-          <div> Représentant légal 1 </div>
-          {contract?.invitationSent === "true" ? (
-            <Badge
-              text={contract.parent1Status === "VALIDATED" ? "Validé" : "En attente de validation"}
-              color={contract.parent1Status === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
-            />
-          ) : (
-            <Badge text="Pas encore envoyé" />
-          )}
-        </div>
-        {young.parent2Email && (
-          <div style={{ textAlign: "center" }}>
-            <div> Représentant légal 2 </div>
-            {contract?.invitationSent === "true" ? (
-              <Badge
-                text={contract.parent2Status === "VALIDATED" ? "Validé" : "En attente de validation"}
-                color={contract.parent2Status === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
-              />
-            ) : (
-              <Badge text="Pas encore envoyé" />
-            )}
-          </div>
-        )}
       </div>
     </>
   );
 }
+
+const ContractStatus = ({ contract, property, name }) => (
+  <ContainerFooter>
+    <div style={{ display: "flex" }}>
+      {contract?.invitationSent === "true" ? (
+        <MinBadge color={contract[property] === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION} />
+      ) : (
+        <MinBadge />
+      )}
+      <span> {name} </span>
+    </div>
+  </ContainerFooter>
+);
 
 const Footer = ({ application, tutor, onChange }) => {
   const setStatus = async (status) => {
@@ -190,6 +179,14 @@ const Footer = ({ application, tutor, onChange }) => {
 
   return getFooter(application.status);
 };
+
+const MinBadge = styled.span`
+  margin-right: 0.5rem;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+  background-color: ${({ color }) => color || "#777"};
+`;
 
 const ContainerFooter = styled.div`
   display: flex;
