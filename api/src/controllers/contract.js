@@ -15,6 +15,7 @@ const { sendEmail } = require("../sendinblue");
 router.post("/", passport.authenticate(["referent"], { session: false }), async (req, res) => {
   try {
     let contract = req.body;
+    let mailsToSend = [];
 
     if (!contract._id) {
       // Create the tokens
@@ -28,8 +29,27 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
       contract.structureManagerStatus = "WAITING_VALIDATION";
       if (contract.parent2Email) contract.parent2Status = "WAITING_VALIDATION";
 
+      mailsToSend = ["parent1", "parent2", "projectManager", "structureManager"];
+
       contract = await ContractObject.create(contract);
     } else {
+      // When we update, we have to send mail again to validated.
+      if (contract.parent1Status === "VALIDATED") {
+        contract.parent1Status = "WAITING_VALIDATION";
+        mailsToSend.push("parent1");
+      }
+      if (contract.projectManagerStatus === "VALIDATED") {
+        contract.projectManagerStatus = "WAITING_VALIDATION";
+        mailsToSend.push("projectManager");
+      }
+      if (contract.structureManagerStatus === "VALIDATED") {
+        contract.structureManagerStatus = "WAITING_VALIDATION";
+        mailsToSend.push("structureManager");
+      }
+      if (contract.parent2Status === "VALIDATED") {
+        contract.parent2Status = "WAITING_VALIDATION";
+        mailsToSend.push("parent2");
+      }
       contract = await ContractObject.findById(contract._id);
     }
 
@@ -40,26 +60,35 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
 
     if (req.body.sendMessage) {
       // We send 4 messages if required.
-      const recipients = [
-        { email: contract.parent1Email, name: `${contract.parent1FirstName} ${contract.parent1LastName}`, token: contract.parent1Token },
-        {
+      const recipients = [];
+      if (mailsToSend.includes("parent1")) {
+        recipients.push({
+          email: contract.parent1Email,
+          name: `${contract.parent1FirstName} ${contract.parent1LastName}`,
+          token: contract.parent1Token,
+        });
+      }
+      if (mailsToSend.includes("projectManager")) {
+        recipients.push({
           email: contract.projectManagerEmail,
           name: `${contract.projectManagerFirstName} ${contract.projectManagerLastName}`,
           token: contract.projectManagerToken,
-        },
-        {
+        });
+      }
+      if (mailsToSend.includes("structureManager")) {
+        recipients.push({
           email: contract.structureManagerEmail,
           name: `${contract.structureManagerFirstName} ${contract.structureManagerLastName}`,
           token: contract.structureManagerToken,
-        },
-      ];
-      if (contract.parent2Email)
+        });
+      }
+      if (contract.parent2Email && mailsToSend.includes("parent2")) {
         recipients.push({
           email: contract.parent2Email,
           name: `${contract.parent2FirstName} ${contract.parent2LastName}`,
           token: contract.parent2Token,
         });
-
+      }
       for (const recipient of recipients) {
         const htmlContent = fs
           .readFileSync(path.resolve(__dirname, "../templates/contract.html"))

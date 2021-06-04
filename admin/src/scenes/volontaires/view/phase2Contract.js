@@ -105,9 +105,9 @@ export default ({ young }) => {
       parent1Email: young.parent1Email,
       parent2FirstName: young.parent2FirstName,
       parent2LastName: young.parent2LastName,
-      parent2Address: young.parent2Email && young.parent2OwnAddress === "true" ? young.parent2Address : young.address,
-      parent2City: young.parent2Email && young.parent2OwnAddress === "true" ? young.parent2City : young.city,
-      parent2Department: young.parent2Email && young.parent2OwnAddress === "true" ? young.parent2Department : young.department,
+      parent2Address: young.parent2Email ? (young.parent2OwnAddress === "true" ? young.parent2Address : young.address) : "",
+      parent2City: young.parent2Email ? (young.parent2OwnAddress === "true" ? young.parent2City : young.city) : "",
+      parent2Department: young.parent2Email ? (young.parent2OwnAddress === "true" ? young.parent2Department : young.department) : "",
       parent2Phone: young.parent2Phone,
       parent2Email: young.parent2Email,
       missionName: mission.name,
@@ -121,25 +121,26 @@ export default ({ young }) => {
       missionDuration: mission.duration,
       missionFrequence: mission.frequence,
       date: dateForDatePicker(new Date()),
-      projectManagerFirstName: managerDepartment.firstName || "",
-      projectManagerLastName: managerDepartment.lastName || "",
+      projectManagerFirstName: managerDepartment?.firstName || "",
+      projectManagerLastName: managerDepartment?.lastName || "",
       projectManagerRole: "Chef de Projet départemental",
-      projectManagerEmail: managerDepartment.email,
-      structureManagerFirstName: tutor.firstName,
-      structureManagerLastName: tutor.lastName,
+      projectManagerEmail: managerDepartment?.email,
+      structureManagerFirstName: tutor?.firstName,
+      structureManagerLastName: tutor?.lastName,
       structureManagerRole: "Tuteur de mission",
-      structureManagerEmail: tutor.email,
-      structureSiret: structure.siret || "",
-      structureName: structure.name || "",
+      structureManagerEmail: tutor?.email,
+      structureSiret: structure?.siret || "",
+      structureName: structure?.name || "",
       sendMessage: false,
     };
   }
 
   const hasAtLeastOneValidationDone =
-    contract.parent1Status === "VALIDATED" ||
-    contract.projectManagerStatus === "VALIDATED" ||
-    contract.structureManagerStatus === "VALIDATED" ||
-    contract.parent2Status === "VALIDATED";
+    contract &&
+    (contract.parent1Status === "VALIDATED" ||
+      contract.projectManagerStatus === "VALIDATED" ||
+      contract.structureManagerStatus === "VALIDATED" ||
+      contract.parent2Status === "VALIDATED");
 
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
@@ -193,17 +194,19 @@ export default ({ young }) => {
                   <Badge text="Pas encore envoyé" />
                 )}
               </div>
-              <div style={{ textAlign: "center" }}>
-                <div> Représentant légal 2 </div>
-                {contract?.invitationSent === "true" ? (
-                  <Badge
-                    text={contract.parent2Status === "VALIDATED" ? "Validé" : "En attente de validation"}
-                    color={contract.parent2Status === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
-                  />
-                ) : (
-                  <Badge text="Pas encore envoyé" />
-                )}
-              </div>
+              {young.parent2Email && (
+                <div style={{ textAlign: "center" }}>
+                  <div> Représentant légal 2 </div>
+                  {contract?.invitationSent === "true" ? (
+                    <Badge
+                      text={contract.parent2Status === "VALIDATED" ? "Validé" : "En attente de validation"}
+                      color={contract.parent2Status === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
+                    />
+                  ) : (
+                    <Badge text="Pas encore envoyé" />
+                  )}
+                </div>
+              )}
             </div>
           </Bloc>
         </Box>
@@ -332,21 +335,23 @@ export default ({ young }) => {
                           Téléphone :
                           <ContractField name="parent1Phone" placeholder="0123456789" className="md" context={context} />
                         </div>
-                        <div>
-                          2) Le représentant légal du volontaire n°2 :
-                          <ContractField name="parent2FirstName" placeholder="Prénom" context={context} optional={true} />
-                          <ContractField name="parent2LastName" placeholder="Nom" context={context} optional={true} />
-                          disposant de l’autorité parentale,
+                        {young.parent2Email && (
                           <div>
-                            demeurant à
-                            <ContractField name="parent2Address" placeholder="Adresse" className="md" context={context} optional={true} />
-                            <ContractField name="parent2City" placeholder="Ville" context={context} optional={true} />
-                            <ContractField name="parent2Department" placeholder="Département" context={context} optional={true} />
+                            2) Le représentant légal du volontaire n°2 :
+                            <ContractField name="parent2FirstName" placeholder="Prénom" context={context} optional={true} />
+                            <ContractField name="parent2LastName" placeholder="Nom" context={context} optional={true} />
+                            disposant de l’autorité parentale,
+                            <div>
+                              demeurant à
+                              <ContractField name="parent2Address" placeholder="Adresse" className="md" context={context} optional={true} />
+                              <ContractField name="parent2City" placeholder="Ville" context={context} optional={true} />
+                              <ContractField name="parent2Department" placeholder="Département" context={context} optional={true} />
+                            </div>
+                            Email : <ContractField name="parent2Email" placeholder="Email" className="md" type="email" context={context} optional={true} />
+                            Téléphone :
+                            <ContractField name="parent2Phone" placeholder="0123456789" className="md" context={context} optional={true} />
                           </div>
-                          Email : <ContractField name="parent2Email" placeholder="Email" className="md" type="email" context={context} />
-                          Téléphone :
-                          <ContractField name="parent2Phone" placeholder="0123456789" className="md" context={context} optional={true} />
-                        </div>
+                        )}
                         <div>
                           <br />
                           <p>Il a été convenu ce qui suit :</p>
@@ -521,7 +526,7 @@ export default ({ young }) => {
                         <div>
                           <br />
                           <p>
-                            Représentant légal du volontaire{" "}
+                            Représentant légal du volontaire (1){" "}
                             {contract?.invitationSent === "true" ? (
                               <Badge
                                 text={contract.parent1Status === "VALIDATED" ? "Validé" : "En attente de validation"}
@@ -532,19 +537,21 @@ export default ({ young }) => {
                             )}
                           </p>
                         </div>
-                        <div>
-                          <p>
-                            Représentant légal du volontaire{" "}
-                            {contract?.invitationSent === "true" ? (
-                              <Badge
-                                text={contract.parent2Status === "VALIDATED" ? "Validé" : "En attente de validation"}
-                                color={contract.parent2Status === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
-                              />
-                            ) : (
-                              <Badge text="Pas encore envoyé" />
-                            )}
-                          </p>
-                        </div>
+                        {values.parent2Email && (
+                          <div>
+                            <p>
+                              Représentant légal du volontaire (2){" "}
+                              {contract?.invitationSent === "true" ? (
+                                <Badge
+                                  text={contract.parent2Status === "VALIDATED" ? "Validé" : "En attente de validation"}
+                                  color={contract.parent2Status === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
+                                />
+                              ) : (
+                                <Badge text="Pas encore envoyé" />
+                              )}
+                            </p>
+                          </div>
+                        )}
                       </div>
                       <div>
                         <h2>CHARTE DE LA RÉSERVE CIVIQUE</h2>
@@ -644,10 +651,12 @@ export default ({ young }) => {
                         const confirmText =
                           "Si vous enregistrez les modifications, les parties prenantes ayant validé recevront une notification et devront à nouveau valider le contrat d'engagment";
                         if (confirm(confirmText)) {
-                          setFieldValue("sendMessage", false, false);
-
+                          setFieldValue("sendMessage", true, false);
                           handleSubmit();
                         }
+                      } else {
+                        setFieldValue("sendMessage", false, false);
+                        handleSubmit();
                       }
                     }}
                     type="submit"

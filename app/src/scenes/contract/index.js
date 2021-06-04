@@ -319,7 +319,7 @@ export default () => {
               <div>
                 <br />
                 <p>
-                  Représentant légal du volontaire{" "}
+                  Représentant légal du volontaire (1){" "}
                   {context?.invitationSent === "true" ? (
                     <Badge
                       text={context.parent1Status === "VALIDATED" ? "Validé" : "En attente de validation"}
@@ -330,19 +330,21 @@ export default () => {
                   )}
                 </p>
               </div>
-              <div>
-                <p>
-                  Représentant légal du volontaire{" "}
-                  {context?.invitationSent === "true" ? (
-                    <Badge
-                      text={context.parent2Status === "VALIDATED" ? "Validé" : "En attente de validation"}
-                      color={context.parent2Status === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
-                    />
-                  ) : (
-                    <Badge text="Pas encore envoyé" />
-                  )}
-                </p>
-              </div>
+              {context.parent2Email && (
+                <div>
+                  <p>
+                    Représentant légal du volontaire (2){" "}
+                    {context?.invitationSent === "true" ? (
+                      <Badge
+                        text={context.parent2Status === "VALIDATED" ? "Validé" : "En attente de validation"}
+                        color={context.parent2Status === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
+                      />
+                    ) : (
+                      <Badge text="Pas encore envoyé" />
+                    )}
+                  </p>
+                </div>
+              )}
             </div>
             <div>
               <h2>CHARTE DE LA RÉSERVE CIVIQUE</h2>
