@@ -30,7 +30,7 @@ export default () => {
               {params.t === "referent" && (
                 <VioletButton
                   onClick={() => {
-                    history.push("/auth/login");
+                    history.push("https://admin.snu.gouv.fr/");
                   }}
                 >
                   Accéder à mon espace

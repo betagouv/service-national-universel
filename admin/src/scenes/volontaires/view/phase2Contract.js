@@ -134,7 +134,12 @@ export default ({ young }) => {
       sendMessage: false,
     };
   }
-  console.log(contract);
+
+  const hasAtLeastOneValidationDone =
+    contract.parent1Status === "VALIDATED" ||
+    contract.projectManagerStatus === "VALIDATED" ||
+    contract.structureManagerStatus === "VALIDATED" ||
+    contract.parent2Status === "VALIDATED";
 
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
@@ -156,7 +161,7 @@ export default ({ young }) => {
             <hr />
             <div style={{ display: "grid", gridAutoColumns: "1fr", gridAutoFlow: "column" }}>
               <div style={{ textAlign: "center" }}>
-                <div>Référent départemental</div>
+                <div>Représentant de l'Etat</div>
                 {contract?.invitationSent === "true" ? (
                   <Badge
                     text={contract.projectManagerStatus === "VALIDATED" ? "Validé" : "En attente de validation"}
@@ -167,7 +172,7 @@ export default ({ young }) => {
                 )}
               </div>
               <div style={{ textAlign: "center" }}>
-                Tuteur de mission{" "}
+                <div>Représentant structure</div>
                 {contract?.invitationSent === "true" ? (
                   <Badge
                     text={contract.structureManagerStatus === "VALIDATED" ? "Validé" : "En attente de validation"}
@@ -178,7 +183,7 @@ export default ({ young }) => {
                 )}
               </div>
               <div style={{ textAlign: "center" }}>
-                Représentant légal 1{" "}
+                <div> Représentant légal 1 </div>
                 {contract?.invitationSent === "true" ? (
                   <Badge
                     text={contract.parent1Status === "VALIDATED" ? "Validé" : "En attente de validation"}
@@ -189,7 +194,7 @@ export default ({ young }) => {
                 )}
               </div>
               <div style={{ textAlign: "center" }}>
-                Représentant légal 2{" "}
+                <div> Représentant légal 2 </div>
                 {contract?.invitationSent === "true" ? (
                   <Badge
                     text={contract.parent2Status === "VALIDATED" ? "Validé" : "En attente de validation"}
@@ -223,6 +228,8 @@ export default ({ young }) => {
               } else {
                 toastr.success("Contrat sauvegardé");
               }
+              // Refresh
+              history.go(0);
             } catch (e) {
               toastr.error("Erreur !", translate(e.code));
             }
@@ -480,10 +487,31 @@ export default ({ young }) => {
                           <ContractField name="date" placeholder="date" type="date" context={context} />
                         </div>
                         <div>
-                          <p>Représentant de l’Etat</p>
+                          <br />
+                          <p>
+                            Représentant de l’Etat{" "}
+                            {contract?.invitationSent === "true" ? (
+                              <Badge
+                                text={contract.projectManagerStatus === "VALIDATED" ? "Validé" : "En attente de validation"}
+                                color={contract.projectManagerStatus === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
+                              />
+                            ) : (
+                              <Badge text="Pas encore envoyé" />
+                            )}
+                          </p>
                         </div>
                         <div>
-                          <p>Représentant de la structure d’accueil</p>
+                          <p>
+                            Représentant de la structure d’accueil{" "}
+                            {contract?.invitationSent === "true" ? (
+                              <Badge
+                                text={contract.structureManagerStatus === "VALIDATED" ? "Validé" : "En attente de validation"}
+                                color={contract.structureManagerStatus === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
+                              />
+                            ) : (
+                              <Badge text="Pas encore envoyé" />
+                            )}
+                          </p>
                         </div>
                         <div>
                           Le volontaire, <ContractField name="youngFirstName" placeholder="Prénom" context={context} />
@@ -491,10 +519,31 @@ export default ({ young }) => {
                           représenté par ses représentant légaux :
                         </div>
                         <div>
-                          <p>Représentant légal du volontaire</p>
+                          <br />
+                          <p>
+                            Représentant légal du volontaire{" "}
+                            {contract?.invitationSent === "true" ? (
+                              <Badge
+                                text={contract.parent1Status === "VALIDATED" ? "Validé" : "En attente de validation"}
+                                color={contract.parent1Status === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
+                              />
+                            ) : (
+                              <Badge text="Pas encore envoyé" />
+                            )}
+                          </p>
                         </div>
                         <div>
-                          <p>Représentant légal du volontaire</p>
+                          <p>
+                            Représentant légal du volontaire{" "}
+                            {contract?.invitationSent === "true" ? (
+                              <Badge
+                                text={contract.parent2Status === "VALIDATED" ? "Validé" : "En attente de validation"}
+                                color={contract.parent2Status === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
+                              />
+                            ) : (
+                              <Badge text="Pas encore envoyé" />
+                            )}
+                          </p>
                         </div>
                       </div>
                       <div>
@@ -591,23 +640,32 @@ export default ({ young }) => {
                     onClick={async () => {
                       const erroredFields = await validateForm();
                       if (Object.keys(erroredFields).length) toastr.error("Il y a des erreurs dans le formulaire");
-                      setFieldValue("sendMessage", false, false);
-                      handleSubmit();
+                      if (hasAtLeastOneValidationDone) {
+                        const confirmText =
+                          "Si vous enregistrez les modifications, les parties prenantes ayant validé recevront une notification et devront à nouveau valider le contrat d'engagment";
+                        if (confirm(confirmText)) {
+                          setFieldValue("sendMessage", false, false);
+
+                          handleSubmit();
+                        }
+                      }
                     }}
                     type="submit"
                   >
                     <p>Enregistrer les modifications</p>
                   </WhiteHeaderButton>
-                  <VioletHeaderButton
-                    onClick={async () => {
-                      const erroredFields = await validateForm();
-                      if (Object.keys(erroredFields).length) toastr.error("Il y a des erreurs dans le formulaire");
-                      setFieldValue("sendMessage", true, false);
-                      handleSubmit();
-                    }}
-                  >
-                    <p>Envoyer une demande de validation aux {values.parent2Email ? "4" : "3"} parties prenantes</p>
-                  </VioletHeaderButton>
+                  {!hasAtLeastOneValidationDone && (
+                    <VioletHeaderButton
+                      onClick={async () => {
+                        const erroredFields = await validateForm();
+                        if (Object.keys(erroredFields).length) toastr.error("Il y a des erreurs dans le formulaire");
+                        setFieldValue("sendMessage", true, false);
+                        handleSubmit();
+                      }}
+                    >
+                      <p>Envoyer une demande de validation aux {values.parent2Email ? "4" : "3"} parties prenantes</p>
+                    </VioletHeaderButton>
+                  )}
                 </div>
               </>
             );

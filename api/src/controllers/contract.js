@@ -120,10 +120,10 @@ router.post("/token/:token", async (req, res) => {
     });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (token === "parent1Token") data.parent1Status = "VALIDATED";
-    if (token === "parent2Token") data.parent2Status = "VALIDATED";
-    if (token === "projectManagerToken") data.projectManagerStatus = "VALIDATED";
-    if (token === "structureManagerToken") data.structureManagerStatus = "VALIDATED";
+    if (token === data.parent1Token) data.parent1Status = "VALIDATED";
+    if (token === data.parent2Token) data.parent2Status = "VALIDATED";
+    if (token === data.projectManagerToken) data.projectManagerStatus = "VALIDATED";
+    if (token === data.structureManagerToken) data.structureManagerStatus = "VALIDATED";
 
     await data.save();
 

@@ -11,6 +11,8 @@ import LoadingButton from "../../components/buttons/LoadingButton";
 import Loader from "../../components/Loader";
 import { Box } from "../../components/box";
 import { VioletButton } from "../../components/Content";
+import Badge from "../../components/Badge";
+import { APPLICATION_STATUS_COLORS } from "../../utils";
 
 export default () => {
   const [context, setContext] = useState(null);
@@ -281,11 +283,33 @@ export default () => {
                 Le
                 <ContractField name="date" placeholder="date" type="date" context={context} />
               </div>
+
               <div>
-                <p>Représentant de l’Etat</p>
+                <br />
+                <p>
+                  Représentant de l’Etat{" "}
+                  {context?.invitationSent === "true" ? (
+                    <Badge
+                      text={context.projectManagerStatus === "VALIDATED" ? "Validé" : "En attente de validation"}
+                      color={context.projectManagerStatus === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
+                    />
+                  ) : (
+                    <Badge text="Pas encore envoyé" />
+                  )}
+                </p>
               </div>
               <div>
-                <p>Représentant de la structure d’accueil</p>
+                <p>
+                  Représentant de la structure d’accueil{" "}
+                  {context?.invitationSent === "true" ? (
+                    <Badge
+                      text={context.structureManagerStatus === "VALIDATED" ? "Validé" : "En attente de validation"}
+                      color={context.structureManagerStatus === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
+                    />
+                  ) : (
+                    <Badge text="Pas encore envoyé" />
+                  )}
+                </p>
               </div>
               <div>
                 Le volontaire, <ContractField name="youngFirstName" placeholder="Prénom" context={context} />
@@ -293,10 +317,31 @@ export default () => {
                 représenté par ses représentant légaux :
               </div>
               <div>
-                <p>Représentant légal du volontaire</p>
+                <br />
+                <p>
+                  Représentant légal du volontaire{" "}
+                  {context?.invitationSent === "true" ? (
+                    <Badge
+                      text={context.parent1Status === "VALIDATED" ? "Validé" : "En attente de validation"}
+                      color={context.parent1Status === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
+                    />
+                  ) : (
+                    <Badge text="Pas encore envoyé" />
+                  )}
+                </p>
               </div>
               <div>
-                <p>Représentant légal du volontaire</p>
+                <p>
+                  Représentant légal du volontaire{" "}
+                  {context?.invitationSent === "true" ? (
+                    <Badge
+                      text={context.parent2Status === "VALIDATED" ? "Validé" : "En attente de validation"}
+                      color={context.parent2Status === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
+                    />
+                  ) : (
+                    <Badge text="Pas encore envoyé" />
+                  )}
+                </p>
               </div>
             </div>
             <div>
@@ -392,7 +437,7 @@ export default () => {
             } catch (e) {
               return toastr.error("Impossible de mettre à jour le contrat d'engagement");
             }
-            if (context.isParentToken) return history.push("/validate-contract/done?t=referent");
+            if (!context.isParentToken) return history.push("/validate-contract/done?t=referent");
             else return history.push("/validate-contract/done?t=referent");
           }}
         >
