@@ -286,7 +286,7 @@ export default () => {
 
               <div>
                 <br />
-                <p>
+                <div>
                   Représentant de l’Etat{" "}
                   {context?.invitationSent === "true" ? (
                     <Badge
@@ -296,10 +296,10 @@ export default () => {
                   ) : (
                     <Badge text="Pas encore envoyé" />
                   )}
-                </p>
+                </div>
               </div>
               <div>
-                <p>
+                <div>
                   Représentant de la structure d’accueil{" "}
                   {context?.invitationSent === "true" ? (
                     <Badge
@@ -309,7 +309,7 @@ export default () => {
                   ) : (
                     <Badge text="Pas encore envoyé" />
                   )}
-                </p>
+                </div>
               </div>
               <div>
                 Le volontaire, <ContractField name="youngFirstName" placeholder="Prénom" context={context} />
@@ -318,7 +318,7 @@ export default () => {
               </div>
               <div>
                 <br />
-                <p>
+                <div>
                   Représentant légal du volontaire (1){" "}
                   {context?.invitationSent === "true" ? (
                     <Badge
@@ -328,11 +328,11 @@ export default () => {
                   ) : (
                     <Badge text="Pas encore envoyé" />
                   )}
-                </p>
+                </div>
               </div>
               {context.parent2Email && (
                 <div>
-                  <p>
+                  <div>
                     Représentant légal du volontaire (2){" "}
                     {context?.invitationSent === "true" ? (
                       <Badge
@@ -342,7 +342,7 @@ export default () => {
                     ) : (
                       <Badge text="Pas encore envoyé" />
                     )}
-                  </p>
+                  </div>
                 </div>
               )}
             </div>

@@ -33,24 +33,28 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
 
       contract = await ContractObject.create(contract);
     } else {
+      contract = await ContractObject.findById(contract._id);
       // When we update, we have to send mail again to validated.
       if (contract.parent1Status === "VALIDATED") {
         contract.parent1Status = "WAITING_VALIDATION";
         mailsToSend.push("parent1");
+        contract.parent1Token = crypto.randomBytes(40).toString("hex");
       }
       if (contract.projectManagerStatus === "VALIDATED") {
         contract.projectManagerStatus = "WAITING_VALIDATION";
         mailsToSend.push("projectManager");
+        contract.projectManagerToken = crypto.randomBytes(40).toString("hex");
       }
       if (contract.structureManagerStatus === "VALIDATED") {
         contract.structureManagerStatus = "WAITING_VALIDATION";
         mailsToSend.push("structureManager");
+        contract.structureManagerToken = crypto.randomBytes(40).toString("hex");
       }
       if (contract.parent2Status === "VALIDATED") {
         contract.parent2Status = "WAITING_VALIDATION";
         mailsToSend.push("parent2");
+        contract.parent2Token = crypto.randomBytes(40).toString("hex");
       }
-      contract = await ContractObject.findById(contract._id);
     }
 
     // Update the application

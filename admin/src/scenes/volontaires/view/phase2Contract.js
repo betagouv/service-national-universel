@@ -493,7 +493,7 @@ export default ({ young }) => {
                         </div>
                         <div>
                           <br />
-                          <p>
+                          <div>
                             Représentant de l’Etat{" "}
                             {contract?.invitationSent === "true" ? (
                               <Badge
@@ -503,10 +503,10 @@ export default ({ young }) => {
                             ) : (
                               <Badge text="Pas encore envoyé" />
                             )}
-                          </p>
+                          </div>
                         </div>
                         <div>
-                          <p>
+                          <div>
                             Représentant de la structure d’accueil{" "}
                             {contract?.invitationSent === "true" ? (
                               <Badge
@@ -516,7 +516,7 @@ export default ({ young }) => {
                             ) : (
                               <Badge text="Pas encore envoyé" />
                             )}
-                          </p>
+                          </div>
                         </div>
                         <div>
                           Le volontaire, <ContractField name="youngFirstName" placeholder="Prénom" context={context} />
@@ -525,7 +525,7 @@ export default ({ young }) => {
                         </div>
                         <div>
                           <br />
-                          <p>
+                          <div>
                             Représentant légal du volontaire (1){" "}
                             {contract?.invitationSent === "true" ? (
                               <Badge
@@ -535,11 +535,11 @@ export default ({ young }) => {
                             ) : (
                               <Badge text="Pas encore envoyé" />
                             )}
-                          </p>
+                          </div>
                         </div>
                         {values.parent2Email && (
                           <div>
-                            <p>
+                            <div>
                               Représentant légal du volontaire (2){" "}
                               {contract?.invitationSent === "true" ? (
                                 <Badge
@@ -549,7 +549,7 @@ export default ({ young }) => {
                               ) : (
                                 <Badge text="Pas encore envoyé" />
                               )}
-                            </p>
+                            </div>
                           </div>
                         )}
                       </div>

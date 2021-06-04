@@ -191,7 +191,7 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
         .replace(/{{youngFirstName}}/g, application.youngFirstName)
         .replace(/{{youngLastName}}/g, application.youngLastName)
         .replace(/{{missionName}}/g, mission.name)
-        .replace(/{{cta}}/g, "https://inscription.snu.gouv.fr");
+        .replace(/{{cta}}/g, "https://inscription.snu.gouv.fr/auth/login?redirect=candidature");
       subject = `Votre candidature sur la mission d'intérêt général ${mission.name} a été validée`;
       to = { name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail };
     } else if (template === "cancel") {
