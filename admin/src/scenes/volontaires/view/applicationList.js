@@ -125,14 +125,13 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
           }}
         />
         {hit.status === "VALIDATED" ? (
-          <div
-            style={{ fontWeight: 500, textAlign: "center", marginTop: "0.5rem" }}
+          <ContractLink
             onClick={() => {
               history.push(`/volontaire/${young._id}/phase2/application/${hit._id}/contrat`);
             }}
           >
             Contrat d'engagement &gt;
-          </div>
+          </ContractLink>
         ) : null}
       </td>
     </tr>
@@ -161,6 +160,16 @@ const ToggleBloc = ({ children, title, borderBottom, borderRight, borderLeft, di
     </Row>
   );
 };
+
+const ContractLink = styled.div`
+  font-weight: 500;
+  font-size: 0.8rem;
+  text-align: center;
+  margin-top: 0.5rem;
+  :hover {
+    text-decoration: underline;
+  }
+`;
 
 const Icon = styled.img`
   height: 18px;
