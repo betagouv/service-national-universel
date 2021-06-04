@@ -16,6 +16,7 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
   try {
     let contract = req.body;
     let mailsToSend = [];
+    let isValidateAgainMail = false;
 
     if (!contract._id) {
       // Create the tokens
@@ -55,6 +56,7 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
         mailsToSend.push("parent2");
         contract.parent2Token = crypto.randomBytes(40).toString("hex");
       }
+      isValidateAgainMail = true;
     }
 
     // Update the application
@@ -94,15 +96,27 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
         });
       }
       for (const recipient of recipients) {
-        const htmlContent = fs
-          .readFileSync(path.resolve(__dirname, "../templates/contract.html"))
-          .toString()
-          .replace(/{{toName}}/g, recipient.name)
-          .replace(/{{youngName}}/g, `${contract.youngFirstName} ${contract.youngLastName}`)
-          .replace(/{{cta}}/g, `https://inscription.snu.gouv.fr/validate-contract?token=${recipient.token}&contract=${contract._id}`);
-        const subject = `Valider le contrat d'engagement de ${contract.youngFirstName} ${contract.youngLastName} sur la mission ${contract.missionName}`;
-        const to = { name: recipient.name, email: recipient.email };
-        await sendEmail(to, subject, htmlContent);
+        if (isValidateAgainMail) {
+          const htmlContent = fs
+            .readFileSync(path.resolve(__dirname, "../templates/contract-revalidate.html"))
+            .toString()
+            .replace(/{{toName}}/g, recipient.name)
+            .replace(/{{youngName}}/g, `${contract.youngFirstName} ${contract.youngLastName}`)
+            .replace(/{{cta}}/g, `https://inscription.snu.gouv.fr/validate-contract?token=${recipient.token}&contract=${contract._id}`);
+          const subject = `(RE)Valider le contrat d'engagement de ${contract.youngFirstName} ${contract.youngLastName} sur la mission ${contract.missionName} suite à modifications effectuées`;
+          const to = { name: recipient.name, email: recipient.email };
+          await sendEmail(to, subject, htmlContent);
+        } else {
+          const htmlContent = fs
+            .readFileSync(path.resolve(__dirname, "../templates/contract.html"))
+            .toString()
+            .replace(/{{toName}}/g, recipient.name)
+            .replace(/{{youngName}}/g, `${contract.youngFirstName} ${contract.youngLastName}`)
+            .replace(/{{cta}}/g, `https://inscription.snu.gouv.fr/validate-contract?token=${recipient.token}&contract=${contract._id}`);
+          const subject = `Valider le contrat d'engagement de ${contract.youngFirstName} ${contract.youngLastName} sur la mission ${contract.missionName}`;
+          const to = { name: recipient.name, email: recipient.email };
+          await sendEmail(to, subject, htmlContent);
+        }
       }
       contract.invitationSent = "true";
       await contract.save();
