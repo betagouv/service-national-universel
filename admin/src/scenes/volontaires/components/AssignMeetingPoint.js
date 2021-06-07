@@ -12,6 +12,14 @@ export default ({ young, onAffect, onClick }) => {
   const FILTERS = ["SEARCH"];
   const [searchedValue, setSearchedValue] = useState("");
 
+  const getDefaultQuery = () => ({
+    query: {
+      bool: {
+        filter: [{ term: { "centerId.keyword": young.cohesionCenterId } }, { term: { "departureDepartment.keyword": young.department } }],
+      },
+    },
+  });
+
   const handleAffectation = async (meetingPoint) => {
     const { data, ok, code } = await api.put(`/young/${young._id}/meeting-point`, { meetingPointId: meetingPoint._id });
     if (!ok) return toastr.error("Oups, une erreur est survenue lors de la sélection du point de rassemblement", code);
@@ -42,6 +50,7 @@ export default ({ young, onAffect, onClick }) => {
           </Filter>
           <ResultTable hide={!searchedValue}>
             <ReactiveList
+              defaultQuery={getDefaultQuery}
               componentId="result"
               scrollOnChange={false}
               react={{ and: FILTERS }}
@@ -67,10 +76,10 @@ export default ({ young, onAffect, onClick }) => {
                 <Table>
                   <thead>
                     <tr>
-                      <th>Bus</th>
-                      <th>Centre</th>
-                      <th>Depart</th>
-                      <th>Action</th>
+                      <th style={{ width: "16,66%" }}>Bus</th>
+                      <th style={{ width: "16,67%" }}>Centre</th>
+                      <th style={{ width: "50%" }}>Depart</th>
+                      <th style={{ width: "16,67%" }}>Action</th>
                     </tr>
                   </thead>
                   <tbody>

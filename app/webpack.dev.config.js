@@ -1,29 +1,28 @@
 const path = require("path");
 const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const ManifestPlugin = require("webpack-manifest-plugin");
+const ReactRefreshWebpackPlugin = require("@pmmmwh/react-refresh-webpack-plugin");
 
 module.exports = (env) => {
   const plugins = [
-    //  for th time
-    // new ManifestPlugin({
-    //   seed: require('./public/manifest.json')
-    // }),
     new HtmlWebpackPlugin({
       template: "./public/index.html",
       filename: "index.html",
       inject: "body",
       favicon: path.join("public/favicon.ico"),
     }),
-  ];
+    new webpack.HotModuleReplacementPlugin(),
+    new ReactRefreshWebpackPlugin(),
+  ].filter(Boolean);
 
   return {
     mode: "development",
+    target: "web",
     entry: ["./src/index.js"],
     devtool: "source-map",
     output: {
       path: path.resolve("build"),
-      filename: "[hash].index.js",
+      filename: "[contenthash].index.js",
       publicPath: "/",
     },
     devServer: {
@@ -32,9 +31,7 @@ module.exports = (env) => {
       inline: true,
       hot: true,
     },
-    node: {
-      fs: "empty",
-    },
+    resolve: { fallback: { fs: false } },
     module: {
       rules: [
         {
@@ -46,8 +43,9 @@ module.exports = (env) => {
           loader: "babel-loader",
           include: path.resolve("src"),
           exclude: /node_modules(?!\/snu-lib)/,
-          query: {
+          options: {
             babelrc: true,
+            plugins: [require.resolve("react-refresh/babel")].filter(Boolean),
           },
         },
         {

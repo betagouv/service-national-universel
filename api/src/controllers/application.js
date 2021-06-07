@@ -104,6 +104,8 @@ router.get("/young/:id", passport.authenticate(["referent", "young"], { session:
       const mission = await MissionObject.findById(application.missionId);
       let tutor = {};
       if (mission?.tutorId) tutor = await ReferentObject.findById(mission.tutorId);
+      if (mission?.tutorId && !application.tutorId) application.tutorId = mission.tutorId;
+      if (mission?.structureId && !application.structureId) application.structureId = mission.structureId;
       data[i] = { ...application, mission, tutor };
     }
     return res.status(200).send({ ok: true, data });
@@ -189,7 +191,7 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
         .replace(/{{youngFirstName}}/g, application.youngFirstName)
         .replace(/{{youngLastName}}/g, application.youngLastName)
         .replace(/{{missionName}}/g, mission.name)
-        .replace(/{{cta}}/g, "https://inscription.snu.gouv.fr");
+        .replace(/{{cta}}/g, "https://inscription.snu.gouv.fr/auth/login?redirect=candidature");
       subject = `Votre candidature sur la mission d'intérêt général ${mission.name} a été validée`;
       to = { name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail };
     } else if (template === "cancel") {

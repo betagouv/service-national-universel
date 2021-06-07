@@ -98,6 +98,14 @@ const Schema = new mongoose.Schema({
       description: "Identifiant de l'utilisateur tuteur de la mission",
     },
   },
+
+  contractId: {
+    type: String,
+    documentation: {
+      description: "Identifiant du contract d'engagement",
+    },
+  },
+
   tutorName: {
     type: String,
     documentation: {

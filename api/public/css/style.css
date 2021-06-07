@@ -121,47 +121,43 @@ img.bg {
   top: 577px;
 }
 
-#convocation-cohesion > .date {
+#convocation-cohesion > .referent {
   font-size: 0.8rem;
   position: absolute;
-  left: 90px;
+  left: 130px;
   top: 180px;
+  font-weight: bold;
+  text-decoration: underline;
+  text-align: right;
 }
+
 #convocation-cohesion > .infos-young {
   font-size: 0.8rem;
   position: absolute;
   text-align: right;
-  right: 90px;
-  top: 150px;
+  right: 60px;
+  top: 180px;
 }
 #convocation-cohesion > .center {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   position: absolute;
-  left: 92px;
-  top: 362px;
+  left: 295px;
+  top: 380px;
+  width: 450px;
+  background-color: #f00;
 }
 
-#convocation-cohesion > .meeting-point-date {
+#convocation-cohesion > .meeting-point {
   font-size: 0.8rem;
   position: absolute;
   left: 82px;
-  top: 470px;
+  top: 437px;
 }
-#convocation-cohesion > .meeting-point-bus-id {
-  font-size: 0.8rem;
-  position: absolute;
-  left: 82px;
-  top: 515px;
-}
-#convocation-cohesion > .meeting-point-address {
-  font-size: 0.8rem;
-  position: absolute;
-  left: 82px;
-  top: 535px;
-}
+
 #convocation-cohesion > .meeting-point-date-return {
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   position: absolute;
-  left: 82px;
-  top: 560px;
+  left: 70px;
+  top: 580px;
+  width: 85%;
 }

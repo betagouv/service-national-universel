@@ -264,6 +264,12 @@ export default (props) => {
                       <Item title="Code postal" values={values} name="zip" handleChange={handleChange} />
                       <Item title="Ville" values={values} name="city" handleChange={handleChange} />
                     </BoxContent>
+                    <BoxHeadTitle>Contact convocation</BoxHeadTitle>
+                    <BoxContent direction="column">
+                      <Item title="Nom du Contact" values={values} name="contactName" handleChange={handleChange} />
+                      <Item title="Tel." values={values} name="contactPhone" handleChange={handleChange} />
+                      <Item title="Email" values={values} name="contactMail" handleChange={handleChange} />
+                    </BoxContent>
                   </Box>
                 </Col>
               </Row>

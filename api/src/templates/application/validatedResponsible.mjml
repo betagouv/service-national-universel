@@ -7,11 +7,10 @@
           {{youngFirstName}} {{youngLastName}} est validée sur votre mission {{missionName}}.
         </mj-text>
         <mj-text line-height="1.5" font-size="18px" color="#000">
-          Nous vous inviter à vous rapprocher du volontaire pour compléter ensemble et signer le contrat d’engagement ci-joint
-          <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/contrat-engagement.pdf">ci-joint</a>
-          à renvoyer à son référent départemental SNU.
+          Avant le début de la mission, le contrat d'engagement devra être validé numériquement par vous, le volontaire ou ses représentants légaux (s'il est mineur) et l'équipe départementale SNU.
+Vous pouvez éditer le contrat et suivre l'avancement de sa validation.
         </mj-text>
-        <mj-button font-size="20px" background-color="#3490DC" href="{{cta}}"> Accéder à mon compte pour voir le volontaire </mj-button>
+        <mj-button font-size="20px" background-color="#3490DC" href="{{cta}}"> Accéder à la fiche volontaire pour suivi </mj-button>
 
         <mj-text font-size="18px" color="#000">Cordialement,</mj-text>
         <mj-text font-size="18px" color="#000">Les équipes du Service National Universel</mj-text>

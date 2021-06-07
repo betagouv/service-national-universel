@@ -2,7 +2,9 @@ import React, { useEffect, useState } from "react";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 import { Formik, Field } from "formik";
-import { translate as t, YOUNG_PHASE, YOUNG_STATUS_PHASE2, APPLICATION_STATUS } from "../../../utils";
+import { useHistory } from "react-router-dom";
+
+import { translate as t, YOUNG_PHASE, YOUNG_STATUS_PHASE2, APPLICATION_STATUS, APPLICATION_STATUS_COLORS } from "../../../utils";
 import api from "../../../services/api";
 import WrapperPhase2 from "./wrapper";
 import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
@@ -12,22 +14,36 @@ import { Box } from "../../../components/box";
 import VioletHeaderButton from "../../../components/buttons/VioletHeaderButton";
 import WhiteHeaderButton from "../../../components/buttons/WhiteHeaderButton";
 import { toastr } from "react-redux-toastr";
+import { useParams } from "react-router";
+import Badge from "../../../components/Badge";
 
 export default ({ young }) => {
+  const history = useHistory();
+
+  let { applicationId } = useParams();
   // manager_department
 
   // We load the first application that has VALIDATED status.
   // Then we load associated mission, tutor and structure (because we need all this mess).
   const [application, setApplication] = useState(null);
+  const [contract, setContract] = useState(null);
   const [mission, setMission] = useState(null);
   const [tutor, setTutor] = useState(null);
+  const [managerDepartment, setManagerDepartment] = useState(null);
   const [structure, setStructure] = useState(null);
   useEffect(() => {
     const getApplication = async () => {
       if (!young) return;
-      const { ok, data, code } = await api.get(`/application/young/${young._id}`);
+      let { ok, data, code } = await api.get(`/application/young/${young._id}`);
       if (!ok) return toastr.error("Oups, une erreur est survenue", code);
-      return setApplication(data.find((e) => e.status === APPLICATION_STATUS.VALIDATED));
+      const currentApplication = data.find((e) => e._id === applicationId);
+
+      if (currentApplication.contractId) {
+        ({ ok, data, code } = await api.get(`/contract/${currentApplication.contractId}`));
+        if (!ok) return toastr.error("Oups, une erreur est survenue", code);
+        setContract(data);
+      }
+      setApplication(currentApplication);
     };
     getApplication();
   }, []);
@@ -43,12 +59,22 @@ export default ({ young }) => {
   useEffect(() => {
     const getTutor = async () => {
       if (!application) return;
-      const { ok, data, code } = await api.get(`/referent/${application.tutorId}`);
+      const { ok, data, code } = await api.get(`/referent/${application.tutorId || application.tutor?._id}`);
       if (!ok) return toastr.error("Oups, une erreur est survenue", code);
       return setTutor(data);
     };
     getTutor();
   }, [application]);
+  useEffect(() => {
+    const getManagerDepartment = async () => {
+      if (!young) return;
+      const { ok, data, code } = await api.get(`/referent/subrole/manager_department`);
+      if (!ok) return toastr.error("Oups, une erreur est survenue", code);
+      const md = data.find((e) => e.department === young.department);
+      return setManagerDepartment(md);
+    };
+    getManagerDepartment();
+  }, [young]);
   useEffect(() => {
     const getStructure = async () => {
       if (!application) return;
@@ -61,82 +87,190 @@ export default ({ young }) => {
 
   if (!application || !mission || !tutor) return <Loader />;
 
+  const getAge = (d) => {
+    const now = new Date();
+    const date = new Date(d);
+    const diffTime = Math.abs(date - now);
+    const age = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
+    if (!age || isNaN(age)) return "?";
+    return age;
+  };
+  const isYoungAdult = getAge(young.birthdateAt) >= 18;
+
+  let initialValues = null;
+  if (contract) {
+    initialValues = { ...contract, sendMessage: false };
+  } else {
+    initialValues = {
+      youngFirstName: young.firstName,
+      youngLastName: young.lastName,
+      youngBirthdate: young.birthdateAt ? dateForDatePicker(young.birthdateAt) : "",
+      youngAddress: young.address,
+      youngCity: young.city,
+      youngDepartment: young.department,
+      youngEmail: young.email,
+      youngPhone: young.phone,
+      parent1FirstName: young.parent1FirstName,
+      parent1LastName: young.parent1LastName,
+      parent1Address: young.parent1OwnAddress === "true" ? young.parent1Address : young.address,
+      parent1City: young.parent1OwnAddress === "true" ? young.parent1City : young.city,
+      parent1Department: young.parent1OwnAddress === "true" ? young.parent1Department : young.department,
+      parent1Phone: young.parent1Phone,
+      parent1Email: young.parent1Email,
+      parent2FirstName: young.parent2FirstName,
+      parent2LastName: young.parent2LastName,
+      parent2Address: young.parent2Email ? (young.parent2OwnAddress === "true" ? young.parent2Address : young.address) : "",
+      parent2City: young.parent2Email ? (young.parent2OwnAddress === "true" ? young.parent2City : young.city) : "",
+      parent2Department: young.parent2Email ? (young.parent2OwnAddress === "true" ? young.parent2Department : young.department) : "",
+      parent2Phone: young.parent2Phone,
+      parent2Email: young.parent2Email,
+      missionName: mission.name,
+      missionObjective: mission.description,
+      missionAction: mission.actions,
+      missionStartAt: mission.startAt ? dateForDatePicker(mission.startAt) : "",
+      missionEndAt: mission.endAt ? dateForDatePicker(mission.endAt) : "",
+      missionAddress: mission.address || "",
+      missionCity: mission.city || "",
+      missionZip: mission.zip || "",
+      missionDuration: mission.duration || "",
+      missionFrequence: mission.frequence || "",
+      date: dateForDatePicker(new Date()),
+      projectManagerFirstName: managerDepartment?.firstName || "",
+      projectManagerLastName: managerDepartment?.lastName || "",
+      projectManagerRole: "Chef de Projet départemental",
+      projectManagerEmail: managerDepartment?.email || "",
+      structureManagerFirstName: tutor?.firstName || "",
+      structureManagerLastName: tutor?.lastName || "",
+      structureManagerRole: "Tuteur de mission",
+      structureManagerEmail: tutor?.email || "",
+      structureSiret: structure?.siret || "",
+      structureName: structure?.name || "",
+      sendMessage: false,
+    };
+  }
+
+  const hasAtLeastOneValidationDone =
+    contract &&
+    (contract.parent1Status === "VALIDATED" ||
+      contract.projectManagerStatus === "VALIDATED" ||
+      contract.structureManagerStatus === "VALIDATED" ||
+      contract.parent2Status === "VALIDATED" ||
+      contract.youngContractStatus === "VALIDATED");
+
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <WrapperPhase2 young={young} tab="phase2">
+        <BackLink
+          onClick={() => {
+            history.push(`/volontaire/${young._id}/phase2`);
+          }}
+        >
+          {"<"} Revenir à la fiche volontaire
+        </BackLink>
         <Box>
           <Bloc title="Contrat d’engagement en mission d’intérêt général">
-            <div style={{ display: "flex" }}>
-              <p style={{ flex: 1 }}>Ce contrat doit être validé par le(s) représentant(s) légal(aux) du volontaire, le tuteur de mission et le référent départemental.</p>
+            <div style={{ display: "grid", gridAutoColumns: "1fr", gridAutoFlow: "column" }}>
+              <div style={{ display: "flex" }}>
+                <p style={{ flex: 1 }}>Ce contrat doit être validé par le(s) représentant(s) légal(aux) du volontaire, le tuteur de mission et le référent départemental.</p>
+              </div>
+              <div style={{ textAlign: "right" }}>
+                {contract?.invitationSent === "true" ? (
+                  <Badge text="Contrat envoyé" style={{ verticalAlign: "top" }} />
+                ) : (
+                  <Badge text="Contrat pas encore envoyé" style={{ verticalAlign: "top" }} />
+                )}
+              </div>
+            </div>
+            <hr />
+            <div style={{ display: "grid", gridAutoColumns: "1fr", gridAutoFlow: "column" }}>
+              <div style={{ textAlign: "center" }}>
+                <div>Représentant de l'Etat</div>
+                {contract?.invitationSent === "true" ? (
+                  <Badge
+                    text={contract.projectManagerStatus === "VALIDATED" ? "Validé" : "En attente de validation"}
+                    color={contract.projectManagerStatus === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
+                  />
+                ) : (
+                  <Badge text="Pas encore envoyé" />
+                )}
+              </div>
+              <div style={{ textAlign: "center" }}>
+                <div>Représentant structure</div>
+                {contract?.invitationSent === "true" ? (
+                  <Badge
+                    text={contract.structureManagerStatus === "VALIDATED" ? "Validé" : "En attente de validation"}
+                    color={contract.structureManagerStatus === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
+                  />
+                ) : (
+                  <Badge text="Pas encore envoyé" />
+                )}
+              </div>
+              {!isYoungAdult ? (
+                <>
+                  <div style={{ textAlign: "center" }}>
+                    <div> Représentant légal 1 </div>
+                    {contract?.invitationSent === "true" ? (
+                      <Badge
+                        text={contract.parent1Status === "VALIDATED" ? "Validé" : "En attente de validation"}
+                        color={contract.parent1Status === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
+                      />
+                    ) : (
+                      <Badge text="Pas encore envoyé" />
+                    )}
+                  </div>
+                  {young.parent2Email && (
+                    <div style={{ textAlign: "center" }}>
+                      <div> Représentant légal 2 </div>
+                      {contract?.invitationSent === "true" ? (
+                        <Badge
+                          text={contract.parent2Status === "VALIDATED" ? "Validé" : "En attente de validation"}
+                          color={contract.parent2Status === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
+                        />
+                      ) : (
+                        <Badge text="Pas encore envoyé" />
+                      )}
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div style={{ textAlign: "center" }}>
+                  <div> Volontaire </div>
+                  {contract?.invitationSent === "true" ? (
+                    <Badge
+                      text={contract.youngContractStatus === "VALIDATED" ? "Validé" : "En attente de validation"}
+                      color={contract.youngContractStatus === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
+                    />
+                  ) : (
+                    <Badge text="Pas encore envoyé" />
+                  )}
+                </div>
+              )}
             </div>
           </Bloc>
         </Box>
-
         <Formik
           validateOnChange={false}
           validateOnBlur={false}
-          initialValues={{
-            youngFirstName: young.firstName,
-            youngLastName: young.lastName,
-            youngBirthdate: dateForDatePicker(young.birthdateAt),
-            youngAddress: young.address,
-            youngCity: young.city,
-            youngDepartment: young.department,
-            youngEmail: young.email,
-            youngPhone: young.phone,
-            parent1FirstName: young.parent1FirstName,
-            parent1LastName: young.parent1LastName,
-            parent1Address: young.parent1OwnAddress === "true" ? young.parent1Address : young.address,
-            parent1City: young.parent1OwnAddress === "true" ? young.parent1City : young.city,
-            parent1Department: young.parent1OwnAddress === "true" ? young.parent1Department : young.department,
-            parent1Phone: young.parent1Phone,
-            parent1Email: young.parent1Email,
-            parent2FirstName: young.parent2FirstName,
-            parent2LastName: young.parent2LastName,
-            parent2Address: young.parent2Email && young.parent2OwnAddress === "true" ? young.parent2Address : young.address,
-            parent2City: young.parent2Email && young.parent2OwnAddress === "true" ? young.parent2City : young.city,
-            parent2Department: young.parent2Email && young.parent2OwnAddress === "true" ? young.parent2Department : young.department,
-            parent2Phone: young.parent2Phone,
-            parent2Email: young.parent2Email,
-            missionName: mission.name,
-            missionObjective: mission.description,
-            missionAction: mission.actions,
-            missionStartAt: dateForDatePicker(mission.startAt),
-            missionEndAt: dateForDatePicker(mission.endAt),
-            missionAddress: mission.address,
-            missionCity: mission.city,
-            missionZip: mission.zip,
-            missionDuration: mission.duration,
-            missionFrequence: mission.frequence,
-            date: dateForDatePicker(new Date()),
-            projectManagerFirstName: "",
-            projectManagerLastName: "",
-            projectManagerRole: "Chef de Projet départemental",
-            projectManagerEmail: "",
-            structureManagerFirstName: tutor.firstName,
-            structureManagerLastName: tutor.lastName,
-            structureManagerRole: "Tuteur de mission",
-            structureManagerEmail: tutor.email,
-            structureSiret: structure.siret || "",
-            structureName: structure.name || "",
-            sendMessage: false,
-          }}
+          initialValues={initialValues}
           onSubmit={async (values, actions) => {
             try {
               const { ok, code } = await api.post(`/contract`, {
                 ...values,
-                youngId: young.id,
-                structureId: structure.id,
-                applicationId: application.id,
-                missionId: mission.id,
-                tutorId: tutor.id,
+                youngId: young._id,
+                structureId: structure._id,
+                applicationId: application._id,
+                missionId: mission._id,
+                tutorId: tutor._id,
+                isYoungAdult: isYoungAdult ? "true" : "false",
               });
               if (!ok) return toastr.error("Erreur !", translate(code));
               if (values.sendMessage) {
-                toastr.success("Le message a été envoyé");
+                toastr.success("Le message a été envoyé aux parties prenantes");
               } else {
                 toastr.success("Contrat sauvegardé");
               }
+              // Refresh
+              history.go(0);
             } catch (e) {
               toastr.error("Erreur !", translate(e.code));
             }
@@ -223,37 +357,43 @@ export default ({ young }) => {
                           </div>
                         </div>
                         <hr />
-                        <h2>Représenté par ses représentant légaux</h2>
-                        <div>
-                          1) Le représentant légal du volontaire n°1 :
-                          <ContractField name="parent1FirstName" placeholder="Prénom" context={context} />
-                          <ContractField name="parent1LastName" placeholder="Nom" context={context} />
-                          disposant de l’autorité parentale,
-                          <div>
-                            demeurant à
-                            <ContractField name="parent1Address" placeholder="Adresse" className="md" context={context} />
-                            <ContractField name="parent1City" placeholder="Ville" context={context} />
-                            <ContractField name="parent1Department" placeholder="Département" context={context} />
-                          </div>
-                          Email : <ContractField name="parent1Email" placeholder="Email" className="md" type="email" context={context} />
-                          Téléphone :
-                          <ContractField name="parent1Phone" placeholder="0123456789" className="md" context={context} />
-                        </div>
-                        <div>
-                          2) Le représentant légal du volontaire n°2 :
-                          <ContractField name="parent2FirstName" placeholder="Prénom" context={context} optional={true} />
-                          <ContractField name="parent2LastName" placeholder="Nom" context={context} optional={true} />
-                          disposant de l’autorité parentale,
-                          <div>
-                            demeurant à
-                            <ContractField name="parent2Address" placeholder="Adresse" className="md" context={context} optional={true} />
-                            <ContractField name="parent2City" placeholder="Ville" context={context} optional={true} />
-                            <ContractField name="parent2Department" placeholder="Département" context={context} optional={true} />
-                          </div>
-                          Email : <ContractField name="parent2Email" placeholder="Email" className="md" type="email" context={context} />
-                          Téléphone :
-                          <ContractField name="parent2Phone" placeholder="0123456789" className="md" context={context} optional={true} />
-                        </div>
+                        {!isYoungAdult && (
+                          <>
+                            <h2>Représenté par ses représentant légaux</h2>
+                            <div>
+                              1) Le représentant légal du volontaire n°1 :
+                              <ContractField name="parent1FirstName" placeholder="Prénom" context={context} />
+                              <ContractField name="parent1LastName" placeholder="Nom" context={context} />
+                              disposant de l’autorité parentale,
+                              <div>
+                                demeurant à
+                                <ContractField name="parent1Address" placeholder="Adresse" className="md" context={context} />
+                                <ContractField name="parent1City" placeholder="Ville" context={context} />
+                                <ContractField name="parent1Department" placeholder="Département" context={context} />
+                              </div>
+                              Email : <ContractField name="parent1Email" placeholder="Email" className="md" type="email" context={context} />
+                              Téléphone :
+                              <ContractField name="parent1Phone" placeholder="0123456789" className="md" context={context} />
+                            </div>
+                            {young.parent2Email && (
+                              <div>
+                                2) Le représentant légal du volontaire n°2 :
+                                <ContractField name="parent2FirstName" placeholder="Prénom" context={context} optional={true} />
+                                <ContractField name="parent2LastName" placeholder="Nom" context={context} optional={true} />
+                                disposant de l’autorité parentale,
+                                <div>
+                                  demeurant à
+                                  <ContractField name="parent2Address" placeholder="Adresse" className="md" context={context} optional={true} />
+                                  <ContractField name="parent2City" placeholder="Ville" context={context} optional={true} />
+                                  <ContractField name="parent2Department" placeholder="Département" context={context} optional={true} />
+                                </div>
+                                Email : <ContractField name="parent2Email" placeholder="Email" className="md" type="email" context={context} optional={true} />
+                                Téléphone :
+                                <ContractField name="parent2Phone" placeholder="0123456789" className="md" context={context} optional={true} />
+                              </div>
+                            )}
+                          </>
+                        )}
                         <div>
                           <br />
                           <p>Il a été convenu ce qui suit :</p>
@@ -287,9 +427,9 @@ export default ({ young }) => {
                           Le présent contrat, pour la réalisation de la mission indiquée ci-dessus, prend effet à la date de signature du présent contrat par les trois parties
                           prenantes. <br />
                           La mission d’intérêt général débute le
-                          <ContractField name="missionStartAt" placeholder="jj/mm/yyyy" as="date" context={context} />
+                          <ContractField name="missionStartAt" placeholder="jj/mm/yyyy" type="date" context={context} />
                           jusqu’au
-                          <ContractField name="missionEndAt" placeholder="jj/mm/yyyy" as="date" context={context} />
+                          <ContractField name="missionEndAt" placeholder="jj/mm/yyyy" type="date" context={context} />
                           <br /> Le volontaire effectuera un total de
                           <ContractField name="missionDuration" placeholder="nombre d'heure" context={context} />
                           heures de MIG.
@@ -394,22 +534,91 @@ export default ({ young }) => {
                           <ContractField name="date" placeholder="date" type="date" context={context} />
                         </div>
                         <div>
-                          <p>Représentant de l’Etat</p>
+                          <br />
+                          <div>
+                            Représentant de l’Etat{" "}
+                            {contract?.invitationSent === "true" ? (
+                              <Badge
+                                text={contract.projectManagerStatus === "VALIDATED" ? "Validé" : "En attente de validation"}
+                                color={contract.projectManagerStatus === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
+                              />
+                            ) : (
+                              <Badge text="Pas encore envoyé" />
+                            )}
+                          </div>
                         </div>
                         <div>
-                          <p>Représentant de la structure d’accueil</p>
+                          <div>
+                            Représentant de la structure d’accueil{" "}
+                            {contract?.invitationSent === "true" ? (
+                              <Badge
+                                text={contract.structureManagerStatus === "VALIDATED" ? "Validé" : "En attente de validation"}
+                                color={contract.structureManagerStatus === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
+                              />
+                            ) : (
+                              <Badge text="Pas encore envoyé" />
+                            )}
+                          </div>
                         </div>
-                        <div>
-                          Le volontaire, <ContractField name="youngFirstName" placeholder="Prénom" context={context} />
-                          <ContractField name="youngLastName" placeholder="Nom" context={context} />
-                          représenté par ses représentant légaux :
-                        </div>
-                        <div>
-                          <p>Représentant légal du volontaire</p>
-                        </div>
-                        <div>
-                          <p>Représentant légal du volontaire</p>
-                        </div>
+                        {!isYoungAdult ? (
+                          <>
+                            <div>
+                              Le volontaire, <ContractField name="youngFirstName" placeholder="Prénom" context={context} />
+                              <ContractField name="youngLastName" placeholder="Nom" context={context} />
+                              représenté par ses représentant légaux :
+                            </div>
+                            <div>
+                              <br />
+                              <div>
+                                Représentant légal du volontaire (1){" "}
+                                {contract?.invitationSent === "true" ? (
+                                  <Badge
+                                    text={contract.parent1Status === "VALIDATED" ? "Validé" : "En attente de validation"}
+                                    color={contract.parent1Status === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
+                                  />
+                                ) : (
+                                  <Badge text="Pas encore envoyé" />
+                                )}
+                              </div>
+                            </div>
+                            {values.parent2Email && (
+                              <div>
+                                <div>
+                                  Représentant légal du volontaire (2){" "}
+                                  {contract?.invitationSent === "true" ? (
+                                    <Badge
+                                      text={contract.parent2Status === "VALIDATED" ? "Validé" : "En attente de validation"}
+                                      color={contract.parent2Status === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
+                                    />
+                                  ) : (
+                                    <Badge text="Pas encore envoyé" />
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            <div>
+                              Le volontaire, <ContractField name="youngFirstName" placeholder="Prénom" context={context} />
+                              <ContractField name="youngLastName" placeholder="Nom" context={context} />
+                            </div>
+                            <div>
+                              <br />
+                              <div>
+                                Le volontaire{" "}
+                                {contract?.invitationSent === "true" ? (
+                                  <Badge
+                                    text={contract.youngContractStatus === "VALIDATED" ? "Validé" : "En attente de validation"}
+                                    color={contract.youngContractStatus === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
+                                  />
+                                ) : (
+                                  <Badge text="Pas encore envoyé" />
+                                )}
+                              </div>
+                            </div>
+                          </>
+                        )}
                       </div>
                       <div>
                         <h2>CHARTE DE LA RÉSERVE CIVIQUE</h2>
@@ -505,29 +714,45 @@ export default ({ young }) => {
                     onClick={async () => {
                       const erroredFields = await validateForm();
                       if (Object.keys(erroredFields).length) toastr.error("Il y a des erreurs dans le formulaire");
-                      setFieldValue("sendMessage", false, false);
-                      handleSubmit();
+                      if (hasAtLeastOneValidationDone) {
+                        const confirmText =
+                          "Si vous enregistrez les modifications, les parties prenantes ayant validé recevront une notification et devront à nouveau valider le contrat d'engagment";
+                        if (confirm(confirmText)) {
+                          setFieldValue("sendMessage", true, false);
+                          handleSubmit();
+                        }
+                      } else {
+                        setFieldValue("sendMessage", false, false);
+                        handleSubmit();
+                      }
                     }}
                     type="submit"
                   >
                     <p>Enregistrer les modifications</p>
                   </WhiteHeaderButton>
-                  <VioletHeaderButton
-                    onClick={async () => {
-                      const erroredFields = await validateForm();
-                      if (Object.keys(erroredFields).length) toastr.error("Il y a des erreurs dans le formulaire");
-                      setFieldValue("sendMessage", true, false);
-                      handleSubmit();
-                    }}
-                  >
-                    <p>Envoyer une demande de validation aux 3 parties prenantes</p>
-                  </VioletHeaderButton>
+                  {contract?.invitationSent !== "true" && (
+                    <VioletHeaderButton
+                      onClick={async () => {
+                        const erroredFields = await validateForm();
+                        if (Object.keys(erroredFields).length) toastr.error("Il y a des erreurs dans le formulaire");
+                        setFieldValue("sendMessage", true, false);
+                        handleSubmit();
+                      }}
+                    >
+                      <p>Envoyer une demande de validation aux {values.parent2Email ? "4" : "3"} parties prenantes</p>
+                    </VioletHeaderButton>
+                  )}
                 </div>
+                {Object.keys(errors).length ? (
+                  <ErrorMessage>
+                    Le contrat contient des erreurs <br />
+                    <i>champ(s) manquant(s) ou invalide(s)</i>
+                  </ErrorMessage>
+                ) : null}
               </>
             );
           }}
         </Formik>
-
         {young.statusPhase2 === "VALIDATED" ? (
           <DownloadAttestationButton young={young} uri="2">
             Télécharger l'attestation de réalisation de la phase 2
@@ -577,8 +802,20 @@ const Bloc = ({ children, title, borderBottom, borderRight, borderLeft, disabled
   );
 };
 
+const ErrorMessage = styled.div`
+  border: 1px solid #fc8181;
+  border-radius: 0.25em;
+  margin-top: 1em;
+  background-color: #fff5f5;
+  color: #c53030;
+  font-weight: 400;
+  font-size: 12px;
+  padding: 1em;
+  text-align: center;
+`;
+
 const Wrapper = styled.div`
-  padding: 3rem;
+  padding: 2rem 3rem;
   width: 100%;
 `;
 
@@ -630,4 +867,13 @@ const Legend = styled.div`
   color: rgb(38, 42, 62);
   font-size: 1.3rem;
   font-weight: 500;
+`;
+
+const BackLink = styled.div`
+  color: #888;
+  margin-bottom: 0.5rem;
+  :hover {
+    cursor: pointer;
+    text-decoration: underline;
+  }
 `;
