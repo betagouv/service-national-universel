@@ -153,6 +153,13 @@ img.bg {
   left: 82px;
   top: 437px;
 }
+#convocation-cohesion > .meeting-point-domtom {
+  font-size: 0.8rem;
+  position: absolute;
+  left: 70px;
+  top: 437px;
+  width: 85%;
+}
 
 #convocation-cohesion > .meeting-point-date-return {
   font-size: 0.75rem;

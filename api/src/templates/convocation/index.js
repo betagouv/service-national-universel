@@ -8,13 +8,28 @@ const BusModel = require("../../models/bus");
 const DepartmentServiceModel = require("../../models/departmentService");
 const { capture } = require("../../sentry");
 
+const isFromDOMTOM = (young) => {
+  return [
+    "Guadeloupe",
+    "Martinique",
+    "Guyane",
+    "La Réunion",
+    "Saint-Pierre-et-Miquelon",
+    "Mayotte",
+    "Saint-Martin",
+    "Polynésie française",
+    "Nouvelle-Calédonie",
+  ].includes(young.department);
+};
+
 const getBaseUrl = () => {
   if (config.ENVIRONMENT === "staging") return "https://app-a29a266c-556d-4f95-bc0e-9583a27f3f85.cleverapps.io";
   if (config.ENVIRONMENT === "production") return "https://app-5a3e097d-fdf1-44fa-9172-88ad9d7b2b20.cleverapps.io";
   return "http://localhost:8080";
 };
 
-function getBg() {
+function getBg(template = "default") {
+  if (template === "domtom") return getSignedUrl("convocation/convocationCohesionTemplate-DOMTOM.png");
   return getSignedUrl("convocation/convocationCohesionTemplate.png");
 }
 
@@ -47,7 +62,7 @@ const minusHour = (date, h) => {
   return d;
 };
 
-const cohesion = async (young) => {
+const render = async (young) => {
   const getDepartureMeetingDate = (meetingPoint) => {
     if (young.deplacementPhase1Autonomous === "true" || !meetingPoint) return new Date("2021-06-20T14:30:00.000+00:00");
     return minusHour(meetingPoint.departureAt, 2);
@@ -94,6 +109,45 @@ const cohesion = async (young) => {
   } catch (e) {
     throw e;
   }
+};
+
+const renderDOMTOM = async (young) => {
+  try {
+    if (!young.cohesionCenterId && young.deplacementPhase1Autonomous !== "true") throw `unauthorized`;
+    const center = await CohesionCenterModel.findById(young.cohesionCenterId);
+    if (!center) throw `center ${young.cohesionCenterId} not found for young ${young._id}`;
+    const service = await DepartmentServiceModel.findOne({ department: young?.department });
+    if (!service) throw `service not found for young ${young._id}, center ${center?._id} in department ${young?.department}`;
+
+    const html = fs.readFileSync(path.resolve(__dirname, "./cohesionDOMTOM.html"), "utf8");
+    return html
+      .replace(/{{REFERENT_NAME}}/g, service?.contactName)
+      .replace(/{{REFERENT_PHONE}}/g, service?.contactPhone)
+      .replace(/{{DATE}}/g, formatDateFR(Date.now()))
+      .replace(/{{FIRST_NAME}}/g, young.firstName)
+      .replace(/{{LAST_NAME}}/g, young.lastName)
+      .replace(/{{BIRTHDATE}}/g, formatDateFR(young.birthdateAt))
+      .replace(/{{ADDRESS}}/g, young.address)
+      .replace(/{{ZIP}}/g, young.zip)
+      .replace(/{{CITY}}/g, young.city)
+      .replace(/{{COHESION_CENTER_NAME}}/g, center.name)
+      .replace(/{{COHESION_CENTER_ADDRESS}}/g, center.address)
+      .replace(/{{COHESION_CENTER_ZIP}}/g, center.zip)
+      .replace(/{{COHESION_CENTER_CITY}}/g, center.city)
+      .replace(
+        /{{MEETING_ADDRESS_DOMTOM}}/g,
+        "Merci de vous présenter impérativement à la date, à l'heure et au lieu qui vous auront été indiqués par votre service régional."
+      )
+      .replace(/{{BASE_URL}}/g, getBaseUrl())
+      .replace(/{{GENERAL_BG}}/g, getBg("domtom"));
+  } catch (e) {
+    throw e;
+  }
+};
+
+const cohesion = async (young) => {
+  if (isFromDOMTOM(young)) return renderDOMTOM(young);
+  return render(young);
 };
 
 module.exports = { cohesion };
