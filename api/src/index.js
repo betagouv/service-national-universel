@@ -41,6 +41,7 @@ app.use("/waiting-list", require("./controllers/waiting-list"));
 app.use("/cohesion-center", require("./controllers/cohesion-center"));
 app.use("/email", require("./controllers/email"));
 app.use("/meeting-point", require("./controllers/meeting-point"));
+app.use("/diagoriente", require("./controllers/diagoriente"));
 
 app.get("/", async (req, res) => {
   const d = new Date();

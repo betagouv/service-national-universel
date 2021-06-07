@@ -149,6 +149,12 @@ export default (props) => {
             Mes documents
           </NavLink>
         </li> */}
+          <DiagorienteButton>
+            <NavLink to="/diagoriente" onClick={(event) => handleClick(event, DRAWER_TABS.HOME)}>
+              <img src={require("../../assets/logo-diagoriente-white.png")} />
+              Outil d'aide à l'orientation
+            </NavLink>
+          </DiagorienteButton>
           {young.statusPhase1 === "DONE" && young.statusPhase2 === "VALIDATED" ? (
             <DrawerButton>
               <DownloadAttestationButton young={young} uri="snu">
@@ -382,6 +388,37 @@ const DrawerButton = styled.li`
       svg {
         stroke: #8da2fb;
       }
+    }
+  }
+`;
+
+const DiagorienteButton = styled.li`
+  margin-bottom: 0.5rem;
+  padding: 2px 20px;
+  > * {
+    cursor: pointer;
+    font-size: 0.75rem;
+    padding: 12px 15px;
+    border-radius: 6px;
+    border: solid;
+    border-width: thin;
+    flex-direction: column;
+    color: ${({ color }) => (color ? color : "#fff")};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    &.active,
+    :hover {
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      background-color: ${({ color }) => (color ? "transparent" : "#5145cd")};
+    }
+    &.disabled {
+      cursor: default;
+    }
+    &.disabled:hover {
+      background-color: transparent;
+      box-shadow: none;
     }
   }
 `;
