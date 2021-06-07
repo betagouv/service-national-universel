@@ -54,7 +54,7 @@ export default ({ hit, options = [], callback }) => {
       } else {
         await api.post(`/application/${data._id}/notify/${status.toLowerCase()}`);
       }
-      callback && callback();
+      callback && callback(status);
     } catch (e) {
       console.log(e);
       if (e.code !== "NO_TEMPLATE_FOUND") toastr.error("Oups, une erreur est survenue :", translate(e.code));

@@ -4,15 +4,16 @@
       <mj-column>
         <mj-text font-size="18px" color="#000"> Bonjour {{firstName}} {{lastName}}, </mj-text>
         <mj-text line-height="1.5" font-size="18px" color="#000">
-          Votre candidature sur la mission {{missionName}} proposée par {{structureName}} a été validée. Rapprochez-vous du référent de votre mission
-          pour compléter ensemble la convention d'engagement SNU
-          <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/contrat-engagement.pdf"> ci-joint</a>
+          Votre candidature sur la mission {{missionName}} proposée par {{structureName}} a été validée. 
+          Avant de commencer votre mission, un contrat d'engagement devra être validé par vos représentants 
+          légaux, votre tuteur de mission et l'équipe départementale SNU. Vos représentants légaux recevront 
+          un email pour le consulter et le valider.
         </mj-text>
         <mj-text line-height="1.5" font-size="18px" color="#000">
           La signature de votre représentant légal et de votre responsable de mission est nécessaire avant de renvoyer le document à votre référent
           départemental SNU.
         </mj-text>
-        <mj-button font-size="20px" background-color="#3490DC" href="{{cta}}"> accéder à mon compte personnel SNU </mj-button>
+        <mj-button font-size="20px" background-color="#3490DC" href="{{cta}}"> Suivre l'avancement de la validation du contrat </mj-button>
 
         <mj-text font-size="18px" color="#000">Cordialement,</mj-text>
         <mj-text font-size="18px" color="#000">Les équipes du Service National Universel</mj-text>

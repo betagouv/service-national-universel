@@ -10,10 +10,14 @@ const Schema = new mongoose.Schema({
   applicationId: { type: String },
   missionId: { type: String },
   tutorId: { type: String },
+  isYoungAdult: { type: String, default: "false" },
+
   parent1Token: { type: String },
   projectManagerToken: { type: String },
   structureManagerToken: { type: String },
   parent2Token: { type: String },
+  youngContractToken: { type: String },
+
   parent1Status: {
     type: String,
     default: "WAITING_VALIDATION",
@@ -34,6 +38,13 @@ const Schema = new mongoose.Schema({
     default: "WAITING_VALIDATION",
     enum: ["WAITING_VALIDATION", "VALIDATED"],
   },
+  youngContractStatus: {
+    type: String,
+    default: "WAITING_VALIDATION",
+    enum: ["WAITING_VALIDATION", "VALIDATED"],
+  },
+
+  invitationSent: { type: String },
   youngFirstName: { type: String },
   youngLastName: { type: String },
   youngBirthdate: { type: String },
