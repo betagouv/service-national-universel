@@ -15,13 +15,13 @@ import SelectMeetingPoint from "./SelectMeetingPoint";
 export default () => {
   const young = useSelector((state) => state.Auth.young);
   const [center, setCenter] = useState();
-  const showMeetingPoint = () => {
-    return !["Guadeloupe", "Martinique", "Guyane", "La Réunion", "Saint-Pierre-et-Miquelon", "Mayotte", "Saint-Martin", "Polynésie française", "Nouvelle-Calédonie"].includes(
+  const isFromDOMTOM = () => {
+    return ["Guadeloupe", "Martinique", "Guyane", "La Réunion", "Saint-Pierre-et-Miquelon", "Mayotte", "Saint-Martin", "Polynésie française", "Nouvelle-Calédonie"].includes(
       young.department
     );
   };
   const showConvocation = () => {
-    return showMeetingPoint() && environment !== "production" && (young.meetingPointId || young.deplacementPhase1Autonomous === "true");
+    return isFromDOMTOM() || (environment !== "production" && (young.meetingPointId || young.deplacementPhase1Autonomous === "true"));
   };
 
   const goToConvocation = () => {
@@ -80,7 +80,23 @@ export default () => {
           <div className="thumb" />
         </Hero>
       </HeroContainer>
-      {showMeetingPoint() ? <SelectMeetingPoint /> : null}
+      {environment !== "production" ? (
+        isFromDOMTOM() ? (
+          <HeroContainer>
+            <Hero>
+              <ContentHorizontal>
+                <div>
+                  <h2>Point de rassemblement</h2>
+                  <p>Votre point de rassemblement vous sera communiqué par votre service régional</p>
+                </div>
+              </ContentHorizontal>
+            </Hero>
+          </HeroContainer>
+        ) : (
+          <SelectMeetingPoint />
+        )
+      ) : null}
+
       <NextStep />
       <HeroContainer>
         <Hero>
