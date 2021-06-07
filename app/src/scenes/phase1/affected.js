@@ -15,8 +15,13 @@ import SelectMeetingPoint from "./SelectMeetingPoint";
 export default () => {
   const young = useSelector((state) => state.Auth.young);
   const [center, setCenter] = useState();
+  const showMeetingPoint = () => {
+    return !["Guadeloupe", "Martinique", "Guyane", "La Réunion", "Saint-Pierre-et-Miquelon", "Mayotte", "Saint-Martin", "Polynésie française", "Nouvelle-Calédonie"].includes(
+      young.department
+    );
+  };
   const showConvocation = () => {
-    return environment !== "production" && (young.meetingPointId || young.deplacementPhase1Autonomous === "true");
+    return showMeetingPoint() && environment !== "production" && (young.meetingPointId || young.deplacementPhase1Autonomous === "true");
   };
 
   const goToConvocation = () => {
@@ -75,7 +80,7 @@ export default () => {
           <div className="thumb" />
         </Hero>
       </HeroContainer>
-      {environment !== "production" ? <SelectMeetingPoint /> : null}
+      {environment !== "production" && showMeetingPoint() ? <SelectMeetingPoint /> : null}
       <NextStep />
       <HeroContainer>
         <Hero>
