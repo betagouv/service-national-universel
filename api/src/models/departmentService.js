@@ -77,6 +77,12 @@ const Schema = new mongoose.Schema({
       description: "Téléphone du contact au sein du service",
     },
   },
+  contactMail: {
+    type: String,
+    documentation: {
+      description: "Mail du contact au sein du service",
+    },
+  },
 
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
