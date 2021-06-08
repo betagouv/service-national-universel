@@ -146,19 +146,20 @@ img.bg {
   width: 450px;
   background-color: #f00;
 }
+#convocation-cohesion > .center-domtom {
+  font-size: 0.75rem;
+  position: absolute;
+  left: 295px;
+  top: 436px;
+  width: 450px;
+  background-color: #f00;
+}
 
 #convocation-cohesion > .meeting-point {
   font-size: 0.8rem;
   position: absolute;
   left: 82px;
   top: 437px;
-}
-#convocation-cohesion > .meeting-point-domtom {
-  font-size: 0.8rem;
-  position: absolute;
-  left: 70px;
-  top: 437px;
-  width: 85%;
 }
 
 #convocation-cohesion > .meeting-point-date-return {
