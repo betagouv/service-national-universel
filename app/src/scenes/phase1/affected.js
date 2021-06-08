@@ -15,13 +15,13 @@ import SelectMeetingPoint from "./SelectMeetingPoint";
 export default () => {
   const young = useSelector((state) => state.Auth.young);
   const [center, setCenter] = useState();
-  const showMeetingPoint = () => {
-    return !["Guadeloupe", "Martinique", "Guyane", "La Réunion", "Saint-Pierre-et-Miquelon", "Mayotte", "Saint-Martin", "Polynésie française", "Nouvelle-Calédonie"].includes(
+  const isFromDOMTOM = () => {
+    return ["Guadeloupe", "Martinique", "Guyane", "La Réunion", "Saint-Pierre-et-Miquelon", "Mayotte", "Saint-Martin", "Polynésie française", "Nouvelle-Calédonie"].includes(
       young.department
     );
   };
   const showConvocation = () => {
-    return showMeetingPoint() && environment !== "production" && (young.meetingPointId || young.deplacementPhase1Autonomous === "true");
+    return !isFromDOMTOM() && (young.meetingPointId || young.deplacementPhase1Autonomous === "true");
   };
 
   const goToConvocation = () => {
@@ -80,7 +80,20 @@ export default () => {
           <div className="thumb" />
         </Hero>
       </HeroContainer>
-      {environment !== "production" && showMeetingPoint() ? <SelectMeetingPoint /> : null}
+      {isFromDOMTOM() ? (
+        <HeroContainer>
+          <Hero>
+            <ContentHorizontal>
+              <div>
+                <h2>Point de rassemblement</h2>
+                <p>Votre point de rassemblement vous sera communiqué par votre service régional</p>
+              </div>
+            </ContentHorizontal>
+          </Hero>
+        </HeroContainer>
+      ) : (
+        <SelectMeetingPoint />
+      )}
       <NextStep />
       <HeroContainer>
         <Hero>
@@ -103,7 +116,10 @@ export default () => {
             <ContentHorizontal>
               <div>
                 <h2>Votre convocation</h2>
-                <p>Votre convocation sera à présenter à votre arrivée muni d'une pièce d'identité valide et de votre test PCR ou antigénique négatif de moins de 72 heures.</p>
+                <p>
+                  Votre convocation sera à présenter à votre arrivée muni d'une pièce d'identité valide et de votre test PCR ou antigénique négatif de moins de 72 heures
+                  (recommandé)
+                </p>
               </div>
               <div style={{ display: "flex", justifyContent: "flex-end", alignItems: "center", marginLeft: "auto", padding: "1rem" }}>
                 <ContinueButton>

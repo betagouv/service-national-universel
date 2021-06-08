@@ -57,32 +57,25 @@ export default () => {
           </div>
           <div>
             <h2>Transmission de la fiche sanitaire</h2>
-            <p>Téléchargez la fiche sanitaire.</p>
-            <p>Vous devez renvoyer votre fiche sanitaire complétée et signée par voie postale sous pli confidentiel au plus tard le 4 juin 2021.</p>
-            {service ? (
-              <p>
-                L'adresse de destination est la suivante :
-                <br />
-                {service?.directionName}
-                <br /> {service?.address}, {service?.complementAddress}
-                <br /> {service?.zip} {service?.city}
-              </p>
-            ) : null}
+            <p>
+              Vous devez renseigner votre fiche sanitaire, joindre les photocopies des documents requis et mettre le tout dans une envelope fermée portant la mention “A l’attention de
+              l’infirmier, Pli Confidentiel”. <br />
+              <b>Vous la remettrez en main propre à votre arrivée au centre de séjour à l’équipe d’encadrement.</b>
+            </p>
             <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Note_relative_aux_informations_d_ordre_sanitaire.pdf" target="blank" className="link">
-              Note relative aux informations d'ordre sanitaire{" >"}
+              Note relative aux informations d'ordre sanitaire ›
             </a>
-
             <div style={{ marginTop: "2rem" }}>
               <div style={{ color: "#777" }}>
-                <b> Rappel : </b>Vous devez réaliser un bilan de santé obligatoire auprès de votre médecin traitant. Il est fortement recommandé de le faire avant votre séjour de
-                cohésion
+                <b> Rappel : </b>Vous devez réaliser un bilan de santé obligatoire auprès de votre médecin traitant entre 15 et 16 ans. Il est recommandé de le faire avant votre
+                séjour de cohésion, mais non obligatoire pour y participer.
               </div>
               <a
                 href="https://www.ameli.fr/assure/sante/themes/suivi-medical-de-lenfant-et-de-ladolescent/examen-medical-propose-ladolescent-entre-15-et-16-ans"
                 className="link"
                 target="_blank"
               >
-                Plus d’informations sur le bilan de santé obligatoire ›
+                Plus d’informations sur le bilan de santé obligatoire entre 15 et 16 ans ›
               </a>
             </div>
           </div>
