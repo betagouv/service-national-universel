@@ -387,6 +387,7 @@ router.post("/:id/form/:template", passport.authenticate(["young", "referent"], 
 
 router.post("/:id/convocation/:template", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
   try {
+    console.log(`${req.params.id} download convocation`);
     const young = await YoungObject.findById(req.params.id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
