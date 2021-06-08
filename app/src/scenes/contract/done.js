@@ -1,21 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { FormGroup } from "reactstrap";
-import { Formik, Field } from "formik";
-import { Redirect, useHistory } from "react-router-dom";
-import { toastr } from "react-redux-toastr";
+import React from "react";
 import styled from "styled-components";
-import queryString from "query-string";
 
-import api from "../../services/api";
-import LoadingButton from "../../components/buttons/LoadingButton";
-import Loader from "../../components/Loader";
 import { Box } from "../../components/box";
-import { VioletButton } from "../../components/Content";
 
 export default () => {
-  const history = useHistory();
-  const params = queryString.parse(location.search);
-
   return (
     <div>
       <div style={{ display: "flex" }}>
@@ -27,15 +15,6 @@ export default () => {
             <div style={{ textAlign: "center", marginTop: "-1rem" }}>
               <h2>Contrat d'engagement validé</h2>
               <p>Merci d'avoir pris le temps de valider le contrat d'engagement en mission d'intérêt général du volontaire.</p>
-              {params.t === "referent" && (
-                <VioletButton
-                  onClick={() => {
-                    history.push("https://admin.snu.gouv.fr/");
-                  }}
-                >
-                  Accéder à mon espace
-                </VioletButton>
-              )}
             </div>
           </ContractContainer>
         </Box>
@@ -43,10 +22,6 @@ export default () => {
     </div>
   );
 };
-const Wrapper = styled.div`
-  padding: 2rem 3rem;
-  width: 100%;
-`;
 
 const ContractContainer = styled.div`
   font-size: 1rem;
