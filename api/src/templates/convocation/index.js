@@ -65,7 +65,7 @@ const minusHour = (date, h) => {
 const render = async (young) => {
   const getDepartureMeetingDate = (meetingPoint) => {
     if (young.deplacementPhase1Autonomous === "true" || !meetingPoint) return new Date("2021-06-20T14:30:00.000+00:00");
-    return minusHour(meetingPoint.departureAt, 2);
+    return meetingPoint.departureAt;
   };
   const getReturnMeetingDate = (meetingPoint) => {
     if (young.deplacementPhase1Autonomous === "true" || !meetingPoint) return new Date("2021-07-02T12:00:00.000+00:00");
