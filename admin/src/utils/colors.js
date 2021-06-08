@@ -42,3 +42,9 @@ export const STRUCTURE_STATUS_COLORS = {
   VALIDATED: "#6CC763",
   DRAFT: "#d9bb71",
 };
+
+export const CONTRACT_STATUS_COLORS = {
+  DRAFT: "#FEB951",
+  SENT: "#FE7B52",
+  VALIDATED: "#6CC763",
+};

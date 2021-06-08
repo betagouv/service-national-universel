@@ -1,5 +1,7 @@
 export const translate = (value) => {
   switch (value) {
+    case "NONE":
+      return "Aucun";
     case "AFFECTED":
       return "Affectée";
     case "NOT_DONE":
@@ -209,6 +211,8 @@ export const translate = (value) => {
       return "Covoiturage";
     case "WAITING_REALISATION":
       return "En attente de réalisation";
+    case "SENT":
+      return "Envoyée";
     default:
       return value;
   }
