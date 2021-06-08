@@ -10,6 +10,7 @@ const ContractObject = require("../models/contract");
 const ApplicationObject = require("../models/application");
 const { ERRORS } = require("../utils");
 const { sendEmail } = require("../sendinblue");
+const { APP_URL } = require("../config");
 
 // Create or update contract.
 router.post("/", passport.authenticate(["referent"], { session: false }), async (req, res) => {
@@ -122,7 +123,7 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
             .toString()
             .replace(/{{toName}}/g, recipient.name)
             .replace(/{{youngName}}/g, `${contract.youngFirstName} ${contract.youngLastName}`)
-            .replace(/{{cta}}/g, `https://inscription.snu.gouv.fr/validate-contract?token=${recipient.token}&contract=${contract._id}`);
+            .replace(/{{cta}}/g, `${APP_URL}/validate-contract?token=${recipient.token}&contract=${contract._id}`);
           const subject = `(RE)Valider le contrat d'engagement de ${contract.youngFirstName} ${contract.youngLastName} sur la mission ${contract.missionName} suite à modifications effectuées`;
           const to = { name: recipient.name, email: recipient.email };
           await sendEmail(to, subject, htmlContent);
@@ -132,7 +133,7 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
             .toString()
             .replace(/{{toName}}/g, recipient.name)
             .replace(/{{youngName}}/g, `${contract.youngFirstName} ${contract.youngLastName}`)
-            .replace(/{{cta}}/g, `https://inscription.snu.gouv.fr/validate-contract?token=${recipient.token}&contract=${contract._id}`);
+            .replace(/{{cta}}/g, `${APP_URL}/validate-contract?token=${recipient.token}&contract=${contract._id}`);
           const subject = `Valider le contrat d'engagement de ${contract.youngFirstName} ${contract.youngLastName} sur la mission ${contract.missionName}`;
           const to = { name: recipient.name, email: recipient.email };
           await sendEmail(to, subject, htmlContent);
