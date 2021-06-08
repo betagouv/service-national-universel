@@ -58,12 +58,12 @@ const formatStringLongDate = (date) => {
 
 const render = async (young) => {
   const getDepartureMeetingDate = (meetingPoint) => {
-    if (young.deplacementPhase1Autonomous === "true" || !meetingPoint) return new Date("2021-06-20T14:30:00.000+00:00");
-    return meetingPoint.departureAt;
+    if (young.deplacementPhase1Autonomous === "true" || !meetingPoint) return "dimanche 20 juin, 16:30"; //new Date("2021-06-20T14:30:00.000+00:00");
+    return meetingPoint.departureAtString;
   };
   const getReturnMeetingDate = (meetingPoint) => {
-    if (young.deplacementPhase1Autonomous === "true" || !meetingPoint) return new Date("2021-07-02T12:00:00.000+00:00");
-    return meetingPoint.returnAt;
+    if (young.deplacementPhase1Autonomous === "true" || !meetingPoint) return "vendredi 2 juillet, 14:00"; // new Date("2021-07-02T12:00:00.000+00:00");
+    return meetingPoint.returnAtString;
   };
   const getMeetingAddress = (meetingPoint, center) => {
     if (young.deplacementPhase1Autonomous === "true" || !meetingPoint) return `${center.address} ${center.zip} ${center.city}`;
@@ -93,9 +93,9 @@ const render = async (young) => {
       .replace(/{{COHESION_CENTER_ADDRESS}}/g, center.address)
       .replace(/{{COHESION_CENTER_ZIP}}/g, center.zip)
       .replace(/{{COHESION_CENTER_CITY}}/g, center.city)
-      .replace(/{{MEETING_DATE}}/g, formatStringLongDate(getDepartureMeetingDate(meetingPoint)))
+      .replace(/{{MEETING_DATE}}/g, getDepartureMeetingDate(meetingPoint))
       .replace(/{{MEETING_ADDRESS}}/g, getMeetingAddress(meetingPoint, center))
-      .replace(/{{MEETING_DATE_RETURN}}/g, formatStringLongDate(getReturnMeetingDate(meetingPoint)))
+      .replace(/{{MEETING_DATE_RETURN}}/g, getReturnMeetingDate(meetingPoint))
       .replace(/{{MEETING_ADDRESS_RETURN}}/g, "au même lieu de rassemblement qu'à l'aller")
       .replace(/{{TRANPORT}}/g, bus ? `<b>Numéro de transport</b> : ${bus.idExcel}` : "")
       .replace(/{{BASE_URL}}/g, getBaseUrl())

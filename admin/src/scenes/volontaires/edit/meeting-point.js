@@ -71,8 +71,8 @@ const MeetingPoint = ({ value }) => {
   return (
     <>
       <StaticItem title="Adresse" value={value?.departureAddress} />
-      <StaticItem title="Heure&nbsp;de&nbsp;départ" value={formatStringLongDate(value?.departureAt)} />
-      <StaticItem title="Heure&nbsp;de&nbsp;retour" value={formatStringLongDate(value?.returnAt)} />
+      <StaticItem title="Heure&nbsp;de&nbsp;départ" value={value?.departureAtString} />
+      <StaticItem title="Heure&nbsp;de&nbsp;retour" value={value?.returnAtString} />
       <StaticItem title="N˚&nbsp;transport" value={value?.busExcelId} />
     </>
   );

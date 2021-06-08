@@ -161,8 +161,8 @@ export default ({ center, updateCenter }) => {
                     "se rend au centre par ses propres moyens": data.deplacementPhase1Autonomous,
                     "Bus n˚": meetingPoint?.busExcelId,
                     "Adresse point de rassemblement": meetingPoint?.departureAddress,
-                    "Date aller": formatLongDateFR(meetingPoint?.departureAt),
-                    "Date retour": formatLongDateFR(meetingPoint?.returnAt),
+                    "Date aller": meetingPoint?.departureAtString,
+                    "Date retour": meetingPoint?.returnAtString,
                   };
                 }}
               />

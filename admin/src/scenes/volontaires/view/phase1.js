@@ -35,8 +35,8 @@ export default ({ young, getYoung }) => {
       return (
         <>
           <Details title="Adresse" value={meetingPoint?.departureAddress} />
-          <Details title="Heure&nbsp;de&nbsp;départ" value={formatStringLongDate(meetingPoint?.departureAt)} />
-          <Details title="Heure&nbsp;de&nbsp;retour" value={formatStringLongDate(meetingPoint?.returnAt)} />
+          <Details title="Heure&nbsp;de&nbsp;départ" value={meetingPoint?.departureAtString} />
+          <Details title="Heure&nbsp;de&nbsp;retour" value={meetingPoint?.returnAtString} />
           <Details title="N˚&nbsp;transport" value={meetingPoint?.busExcelId} />
         </>
       );

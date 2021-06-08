@@ -36,8 +36,8 @@ export default ({ onClick, selected, ...props }) => {
         <br /> {center?.address} {center?.zip} {center?.city}
       </Address>
       <Separator />
-      <Time>aller : </Time>
-      <Time>retour : </Time>
+      <Time>aller : dimanche 20 juin, 16:30</Time>
+      <Time>retour : vendredi 2 juillet, 14:00</Time>
     </HeroStyle>
   );
 };

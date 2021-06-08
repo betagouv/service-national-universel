@@ -40,8 +40,8 @@ export default ({ meetingPoint, meetingPointId, onClick, selected, ...props }) =
       <Title>Je choisis le point de rassemblement</Title>
       <Address> {data?.departureAddress} </Address>
       <Separator />
-      <Time>aller : {formatStringLongDate(data?.departureAt)}</Time>
-      <Time>retour : {formatStringLongDate(data?.returnAt)}</Time>
+      <Time>aller : {data?.departureAtString}</Time>
+      <Time>retour : {data?.returnAtString}</Time>
     </HeroStyle>
   );
 };

@@ -23,9 +23,7 @@ export default ({ young, onAffect, onClick }) => {
   const handleAffectation = async (meetingPoint) => {
     const { data, ok, code } = await api.put(`/young/${young._id}/meeting-point`, { meetingPointId: meetingPoint._id });
     if (!ok) return toastr.error("Oups, une erreur est survenue lors de la sélection du point de rassemblement", code);
-    toastr.success(
-      `${young.firstName} a choisi le point de rassemblement affecté(e) au centre ${meetingPoint.departureAddress} à ${formatStringLongDate(meetingPoint.departureAt)}`
-    );
+    toastr.success(`${young.firstName} a choisi le point de rassemblement affecté(e) au centre ${meetingPoint.departureAddress}, ${meetingPoint.departureAtString}`);
     setSearchedValue("");
     return onAffect?.();
   };
@@ -109,7 +107,7 @@ const HitMeetingPoint = ({ hit, onSend, onClick }) => {
       <td>
         <MultiLine>
           <h2>{hit.departureAddress}</h2>
-          <p>{formatStringLongDate(hit.departureAt)}</p>
+          <p>{hit.departureAtString}</p>
         </MultiLine>
       </td>
       <td onClick={(e) => e.stopPropagation()}>
