@@ -115,7 +115,7 @@ export default (props) => {
             </Row>
             <Row>
               <CohesionCenter values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
-              <MeetingPoint values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
+              {values.statusPhase1 === "AFFECTED" ? <MeetingPoint values={values} handleChange={handleChange} handleSubmit={handleSubmit} /> : null}
             </Row>
             <Row>
               {values.cohort === "2020" ? <JDC values={values} handleChange={handleChange} /> : null}

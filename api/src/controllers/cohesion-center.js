@@ -60,16 +60,16 @@ router.post("/:centerId/assign-young/:youngId", passport.authenticate("referent"
     // update youngs infos
     young.set({
       status: "VALIDATED",
-      statusPhase1: "WAITING_ACCEPTATION",
+      statusPhase1: "AFFECTED",
       cohesionCenterId: center._id,
       cohesionCenterName: center.name,
       cohesionCenterCity: center.city,
       cohesionCenterZip: center.zip,
-      autoAffectationPhase1ExpiresAt: Date.now() + 60 * 1000 * 60 * 48,
+      // autoAffectationPhase1ExpiresAt: Date.now() + 60 * 1000 * 60 * 48,
     });
     await young.save();
 
-    await sendAutoAffectationMail(young, center);
+    // await sendAutoAffectationMail(young, center);
 
     //if young is in waitingList of the center
     // todo check if the young is in antoher center's waiting list
