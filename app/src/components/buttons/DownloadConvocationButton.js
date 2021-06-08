@@ -9,6 +9,7 @@ export default ({ young, children, disabled, uri, ...rest }) => {
 
   const viewFile = async (a) => {
     try {
+      window.lumiere("sendEvent", "click", "view_convocation_phase1");
       setLoading(true);
       const file = await api.openpdf(`/young/${young._id}/convocation/${a}`, { young });
       const fileName = `${young.firstName} ${young.lastName} - convocation - ${a}.pdf`;
