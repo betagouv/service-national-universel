@@ -98,7 +98,6 @@ const Home = () => {
     if (user?.role === "head_center") return <DashboardHeadCenter />;
     return <Dashboard />;
   };
-
   const renderVolontaire = () => {
     if (["supervisor", "responsible"].includes(user?.role)) return <VolontairesResponsible />;
     if (user?.role === "head_center") return <VolontairesHeadCenter />;

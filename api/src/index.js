@@ -24,9 +24,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 require("./crons");
 
 app.use(cookieParser());
-
 app.use(fileUpload({ limits: { fileSize: 10 * 1024 * 1024 } })); // 10 Mo
-
 app.use(express.static(__dirname + "/../public"));
 
 app.use("/es", require("./controllers/es"));
