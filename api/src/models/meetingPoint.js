@@ -47,9 +47,15 @@ const Schema = new mongoose.Schema({
   departureAt: {
     type: Date,
   },
+  departureAtString: {
+    type: String,
+  },
   // date de retour
   returnAt: {
     type: Date,
+  },
+  returnAtString: {
+    type: String,
   },
 
   createdAt: { type: Date, default: Date.now },
