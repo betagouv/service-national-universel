@@ -224,7 +224,8 @@ router.put("/young/:id", passport.authenticate("referent", { session: false }), 
 
     // if withdrawn from phase1 -> run the script that find a replacement for this young
     if (newYoung.statusPhase1 === "WITHDRAWN" && ["AFFECTED", "WAITING_ACCEPTATION"].includes(young.statusPhase1) && young.cohesionCenterId) {
-      await assignNextYoungFromWaitingList(young);
+      // disable the 08 jun 21
+      // await assignNextYoungFromWaitingList(young);
     }
 
     young.set(newYoung);

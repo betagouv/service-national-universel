@@ -22,8 +22,10 @@ const clean = async () => {
       countAutoWithdrawn++;
       // send mail saying it is too late :(
       await sendNoResponseAffectationMail(young);
+
       // assign next one from the waiting list
-      await assignNextYoungFromWaitingList(young);
+      // disable the 08 jun 21
+      // await assignNextYoungFromWaitingList(young);
     } else {
       console.log(`${young._id} ${young.firstName} ${young.lastName} is not quick enough. but its statusPhase1 is '${young.statusPhase1}'`);
     }
