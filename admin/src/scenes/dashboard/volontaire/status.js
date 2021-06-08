@@ -2,13 +2,24 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Col, Row } from "reactstrap";
 import { Link } from "react-router-dom";
-import { translate, YOUNG_STATUS_COLORS, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE1, APPLICATION_STATUS, APPLICATION_STATUS_COLORS, YOUNG_STATUS_PHASE3 } from "../../../utils";
+import {
+  translate,
+  YOUNG_STATUS_COLORS,
+  YOUNG_STATUS_PHASE2,
+  CONTRACT_STATUS,
+  CONTRACT_STATUS_COLORS,
+  YOUNG_STATUS_PHASE1,
+  APPLICATION_STATUS,
+  APPLICATION_STATUS_COLORS,
+  YOUNG_STATUS_PHASE3,
+} from "../../../utils";
 import api from "../../../services/api";
 
 export default ({ filter }) => {
   const [status, setStatus] = useState({});
   const [statusPhase1, setStatusPhase1] = useState({});
   const [statusPhase2, setStatusPhase2] = useState({});
+  const [statusPhase2Contract, setStatusPhase2Contract] = useState({});
   const [statusPhase3, setStatusPhase3] = useState({});
   const [cohesionStayPresence, setCohesionStayPresence] = useState({});
   const [statusApplication, setStatusApplication] = useState({});
@@ -23,6 +34,7 @@ export default ({ filter }) => {
           status: { terms: { field: "status.keyword" } },
           statusPhase1: { terms: { field: "statusPhase1.keyword" } },
           statusPhase2: { terms: { field: "statusPhase2.keyword" } },
+          statusPhase2Contract: { terms: { field: "statusPhase2Contract.keyword" } },
           statusPhase3: { terms: { field: "statusPhase3.keyword" } },
           cohesionStayPresence: { terms: { field: "cohesionStayPresence.keyword" } },
         },
@@ -46,6 +58,7 @@ export default ({ filter }) => {
       });
       setStatusPhase1(responses[0].aggregations.statusPhase1.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
       setStatusPhase2(responses[0].aggregations.statusPhase2.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+      setStatusPhase2Contract(responses[0].aggregations.statusPhase2Contract.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
       setStatusPhase3(responses[0].aggregations.statusPhase3.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
       setCohesionStayPresence(responses[0].aggregations.cohesionStayPresence.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
     })();
@@ -85,6 +98,7 @@ export default ({ filter }) => {
       <Participation data={cohesionStayPresence} getLink={getLink} />
       <hr />
       <Phase2 data={statusPhase2} getLink={getLink} />
+      <Contract data={statusPhase2Contract} getLink={getLink} />
       <Application data={statusApplication} getLink={getLink} />
       <hr />
       <Phase3 data={statusPhase3} getLink={getLink} />
@@ -224,6 +238,38 @@ const Phase2 = ({ data, getLink }) => {
             <Col md={6} xl={4} key={e}>
               <Link to={getLink(`/volontaire?STATUS_PHASE_2=%5B"${e}"%5D`)}>
                 <Card borderBottomColor={YOUNG_STATUS_COLORS[e]}>
+                  <CardTitle>{translate(e)}</CardTitle>
+                  <CardValueWrapper>
+                    <CardValue>{data[e] || 0}</CardValue>
+                    <CardPercentage>
+                      {total ? `${(((data[e] || 0) * 100) / total).toFixed(0)}%` : `0%`}
+                      <CardArrow />
+                    </CardPercentage>
+                  </CardValueWrapper>
+                </Card>
+              </Link>
+            </Col>
+          );
+        })}
+      </Row>
+    </React.Fragment>
+  );
+};
+const Contract = ({ data, getLink }) => {
+  const total = Object.keys(data).reduce((acc, a) => acc + data[a], 0);
+  return (
+    <React.Fragment>
+      <Row>
+        <Col md={12}>
+          <CardSubtitle>Statut sur des contrats d'engagement</CardSubtitle>
+        </Col>
+      </Row>
+      <Row>
+        {Object.values(CONTRACT_STATUS).map((e) => {
+          return (
+            <Col md={6} xl={4} key={e}>
+              <Link to={getLink(`/volontaire?CONTRACT_STATUS=%5B"${e}"%5D`)}>
+                <Card borderBottomColor={CONTRACT_STATUS_COLORS[e]}>
                   <CardTitle>{translate(e)}</CardTitle>
                   <CardValueWrapper>
                     <CardValue>{data[e] || 0}</CardValue>
