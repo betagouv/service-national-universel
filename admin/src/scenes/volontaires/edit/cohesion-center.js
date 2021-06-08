@@ -14,7 +14,7 @@ export default ({ values, handleChange }) => {
       <Box>
         <BoxHeadTitle>Centre de cohésion</BoxHeadTitle>
         <BoxContent direction="column">
-          {user.role === "admin" ? (
+          {["admin", "referent_region"].includes(user.role) ? (
             <AssignCenter
               young={values}
               onAffect={(center, young) => {

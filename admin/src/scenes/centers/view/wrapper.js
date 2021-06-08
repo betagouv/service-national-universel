@@ -42,7 +42,7 @@ export default ({ center: centerDefault, tab, children }) => {
             <Tab isActive={tab === "waiting_list"} onClick={() => history.push(`/centre/${center._id}/liste-attente`)}>
               Liste d'attente
             </Tab>
-            {user.role === "admin" ? (
+            {["admin", "referent_region"].includes(user.role) ? (
               <Tab isActive={tab === "affectation"} onClick={() => history.push(`/centre/${center._id}/affectation`)}>
                 Affectation manuelle
               </Tab>

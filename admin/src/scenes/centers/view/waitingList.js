@@ -79,7 +79,7 @@ export default ({ center, updateCenter }) => {
                       <tr>
                         <th>#</th>
                         <th width="70%">Volontaire</th>
-                        {user.role === "admin" ? <th>Affectation</th> : null}
+                        {["admin", "referent_region"].includes(user.role) ? <th>Affectation</th> : null}
                       </tr>
                     </thead>
                     <tbody>
@@ -131,7 +131,7 @@ const Hit = ({ index, hit, onSend, onClick, selected, onChangeYoung }) => {
           </p>
         </MultiLine>
       </td>
-      {user.role === "admin" ? (
+      {["admin", "referent_region"].includes(user.role) ? (
         <td onClick={(e) => e.stopPropagation()}>
           <PanelActionButton onClick={onSend} title="Affecter à ce centre" />
         </td>

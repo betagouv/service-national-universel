@@ -11,7 +11,7 @@ export default ({ center, updateCenter }) => {
   const [young, setYoung] = useState(null);
   const user = useSelector((state) => state.Auth.user);
 
-  if (user.role !== "admin") return <Redirect to="/" />;
+  if (!["admin", "referent_region"].includes(user.role)) return <Redirect to="/" />;
 
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
