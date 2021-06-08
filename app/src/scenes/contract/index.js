@@ -468,9 +468,7 @@ export default () => {
             } catch (e) {
               return toastr.error("Impossible de mettre à jour le contrat d'engagement");
             }
-            debugger;
-            if (!(context.isParentToken || context.isYoungContractToken)) return history.push("/validate-contract/done?t=referent");
-            else return history.push("/validate-contract/done");
+            return history.push("/validate-contract/done");
           }}
         >
           Je valide le contrat d'engagement
