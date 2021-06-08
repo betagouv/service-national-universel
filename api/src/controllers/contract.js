@@ -7,6 +7,7 @@ const path = require("path");
 
 const { capture } = require("../sentry");
 const ContractObject = require("../models/contract");
+const YoungObject = require("../models/young");
 const ApplicationObject = require("../models/application");
 const { ERRORS } = require("../utils");
 const { sendEmail } = require("../sendinblue");
@@ -72,6 +73,15 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
       }
       isValidateAgainMail = true;
     }
+
+    // Update Young Contract status.
+    const young = await YoungObject.findById(contract.youngId);
+    // If we save a draft for the first time:
+    if ((!young.statusPhase2Contract || young.statusPhase2Contract === "NONE") && !req.body.sendMessage) young.statusPhase2Contract = "DRAFT";
+    // Else, it seems we already sent a mail.
+    else young.statusPhase2Contract = "SENT";
+    // Then save
+    await young.save();
 
     // Update the application
     const application = await ApplicationObject.findById(contract.applicationId);
@@ -215,6 +225,20 @@ router.post("/token/:token", async (req, res) => {
     if (token === data.youngContractToken) data.youngContractStatus = "VALIDATED";
 
     await data.save();
+
+    // To find if everybody has validated we count actual tokens and number of validated. It should be improved later.
+    const tokenKeys = ["parent1Token", "parent2Token", "projectManagerToken", "structureManagerToken", "youngContractToken"];
+    const tokenCount = tokenKeys.reduce((acc, current) => (Boolean(data[current]) ? acc + 1 : acc), 0);
+    const validateKeys = ["parent1Status", "parent2Status", "projectManagerStatus", "structureManagerStatus", "youngContractStatus"];
+    const validatedCount = validateKeys.reduce((acc, current) => (data[current] === "VALIDATED" ? acc + 1 : acc), 0);
+    // Update Young Contract status.
+    const young = await YoungObject.findById(data.youngId);
+    if (validatedCount >= tokenCount) {
+      young.statusPhase2Contract = "VALIDATED";
+    } else {
+      young.statusPhase2Contract = "SENT";
+    }
+    await young.save();
 
     return res.status(200).send({ ok: true });
   } catch (error) {

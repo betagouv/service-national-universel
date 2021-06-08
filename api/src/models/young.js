@@ -107,6 +107,14 @@ const Schema = new mongoose.Schema({
       description: "Statut du volontaire lié à la seconde phase",
     },
   },
+  statusPhase2Contract: {
+    type: String,
+    default: "NONE",
+    enum: ["NONE", "DRAFT", "SENT", "VALIDATED"],
+    documentation: {
+      description: "Statut du contrat d'engagement du volontaire (cf: modèle contrat)",
+    },
+  },
   statusPhase3: {
     type: String,
     default: "WAITING_REALISATION",
