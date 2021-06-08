@@ -58,7 +58,7 @@ export default () => {
           <div>
             <h2>Transmission de la fiche sanitaire</h2>
             <p>
-              Vous devez renseigner votre fiche sanitaire, joindre les photocopies des documents requis et mettre le tout dans envelope fermée portant la mention “A l’attention de
+              Vous devez renseigner votre fiche sanitaire, joindre les photocopies des documents requis et mettre le tout dans une envelope fermée portant la mention “A l’attention de
               l’infirmier, Pli Confidentiel”. <br />
               <b>Vous la remettrez en main propre à votre arrivée au centre de séjour à l’équipe d’encadrement.</b>
             </p>

@@ -21,7 +21,7 @@ export default () => {
     );
   };
   const showConvocation = () => {
-    return isFromDOMTOM() || (environment !== "production" && (young.meetingPointId || young.deplacementPhase1Autonomous === "true"));
+    return !isFromDOMTOM() && (young.meetingPointId || young.deplacementPhase1Autonomous === "true");
   };
 
   const goToConvocation = () => {
@@ -80,23 +80,20 @@ export default () => {
           <div className="thumb" />
         </Hero>
       </HeroContainer>
-      {environment !== "production" ? (
-        isFromDOMTOM() ? (
-          <HeroContainer>
-            <Hero>
-              <ContentHorizontal>
-                <div>
-                  <h2>Point de rassemblement</h2>
-                  <p>Votre point de rassemblement vous sera communiqué par votre service régional</p>
-                </div>
-              </ContentHorizontal>
-            </Hero>
-          </HeroContainer>
-        ) : (
-          <SelectMeetingPoint />
-        )
-      ) : null}
-
+      {isFromDOMTOM() ? (
+        <HeroContainer>
+          <Hero>
+            <ContentHorizontal>
+              <div>
+                <h2>Point de rassemblement</h2>
+                <p>Votre point de rassemblement vous sera communiqué par votre service régional</p>
+              </div>
+            </ContentHorizontal>
+          </Hero>
+        </HeroContainer>
+      ) : (
+        <SelectMeetingPoint />
+      )}
       <NextStep />
       <HeroContainer>
         <Hero>
