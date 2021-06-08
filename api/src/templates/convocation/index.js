@@ -47,19 +47,13 @@ const formatStringLongDate = (date) => {
   if (!date) return "-";
   const d = new Date(date);
   return d.toLocaleDateString("fr-FR", {
+    timeZone: "Europe/Paris",
     year: "numeric",
     month: "long",
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
   });
-};
-
-const minusHour = (date, h) => {
-  if (!date) return "-";
-  const d = new Date(date);
-  d.setHours(d.getHours() - h);
-  return d;
 };
 
 const render = async (young) => {
