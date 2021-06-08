@@ -43,19 +43,6 @@ const formatDateFR = (date) => {
   });
 };
 
-const formatStringLongDate = (date) => {
-  if (!date) return "-";
-  const d = new Date(date);
-  return d.toLocaleDateString("fr-FR", {
-    timeZone: "Europe/Paris",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
-
 const render = async (young) => {
   const getDepartureMeetingDate = (meetingPoint) => {
     if (young.deplacementPhase1Autonomous === "true" || !meetingPoint) return "dimanche 20 juin, 16:30"; //new Date("2021-06-20T14:30:00.000+00:00");
