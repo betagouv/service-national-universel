@@ -21,7 +21,8 @@ export default () => {
     );
   };
   const showConvocation = () => {
-    return !isFromDOMTOM() && (young.meetingPointId || young.deplacementPhase1Autonomous === "true");
+    return false;
+    !isFromDOMTOM() && (young.meetingPointId || young.deplacementPhase1Autonomous === "true");
   };
 
   const goToConvocation = () => {
