@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { Col, Row, Input } from "reactstrap";
+import { Col, Row } from "reactstrap";
 import { useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import { MISSION_STATUS_COLORS, MISSION_STATUS, translate } from "../../../utils";
 
 import api from "../../../services/api";
+import { CardArrow, Card, CardTitle, CardValueWrapper, CardValue } from "../../../components/dashboard";
 
 export default ({ filter }) => {
   const user = useSelector((state) => state.Auth.user);
@@ -59,43 +60,6 @@ export default ({ filter }) => {
     </Row>
   );
 };
-
-const Card = styled.div`
-  /* max-width: 325px; */
-  min-height: 100px;
-  padding: 22px 15px;
-  border-bottom: 7px solid ${(props) => props.borderBottomColor};
-  border-radius: 8px;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
-  background-color: #fff;
-  margin-bottom: 33px;
-`;
-const CardTitle = styled.h3`
-  color: #171725;
-  font-size: 16px;
-  font-weight: bold;
-`;
-const CardSubtitle = styled.h3`
-  font-size: 14px;
-  font-weight: 100;
-  color: #696974;
-`;
-const CardValueWrapper = styled.div`
-  position: relative;
-`;
-const CardValue = styled.span`
-  font-size: 28px;
-`;
-const CardArrow = styled.span`
-  position: absolute;
-  top: 50%;
-  right: 0;
-  transform: translateY(-50%);
-  width: 15px;
-  height: 15px;
-  background-image: url(${require("../../../assets/arrow.png")});
-`;
-// Title line with filters
 const Title = styled.h2`
   color: #242526;
   font-weight: bold;

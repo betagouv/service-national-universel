@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import styled from "styled-components";
 import { Col, Row } from "reactstrap";
 import { useSelector } from "react-redux";
 import { YOUNG_STATUS_COLORS } from "../../../utils";
+import { Card, CardTitle, CardValueWrapper, CardValue } from "../../../components/dashboard";
 
 import api from "../../../services/api";
 
@@ -49,27 +49,3 @@ export default () => {
     </Row>
   );
 };
-
-const Card = styled.div`
-  /* max-width: 325px; */
-  padding: 22px 15px;
-  border-bottom: 7px solid ${(props) => props.borderBottomColor};
-  border-radius: 8px;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
-  background-color: #fff;
-  margin-bottom: 33px;
-`;
-const CardTitle = styled.h3`
-  color: #171725;
-  font-size: 16px;
-  font-weight: bold;
-`;
-
-const CardValueWrapper = styled.div`
-  position: relative;
-  display: flex;
-  justify-content: space-between;
-`;
-const CardValue = styled.span`
-  font-size: 28px;
-`;

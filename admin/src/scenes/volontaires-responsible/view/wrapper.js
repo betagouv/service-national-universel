@@ -8,7 +8,7 @@ import { translate } from "../../../utils";
 import Badge from "../../../components/Badge";
 import TabList from "../../../components/views/TabList";
 import Tab from "../../../components/views/Tab";
-import VolontaireTitle from "../../../components/VolontaireTitle";
+import Title from "../../../components/views/Title";
 
 export default ({ children, young, tab }) => {
   const history = useHistory();
@@ -31,9 +31,9 @@ export default ({ children, young, tab }) => {
     <div style={{ flex: tab === "missions" ? "0%" : 2, position: "relative", padding: "3rem" }}>
       <Header>
         <div style={{ flex: 1 }}>
-          <VolontaireTitle>
+          <Title>
             {young.firstName} {young.lastName} <Badge text={`Cohorte ${young.cohort}`} />
-          </VolontaireTitle>
+          </Title>
           <TabList>
             <Tab isActive={tab === "details"} onClick={() => history.push(`/volontaire/${young._id}`)}>
               Détails
