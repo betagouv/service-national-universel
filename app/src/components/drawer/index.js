@@ -216,6 +216,7 @@ const Sidebar = styled.div`
   left: 0;
   z-index: 1;
   height: 100vh;
+  min-width: 250px;
   overflow-y: auto;
   transition: 0.2s;
   a {

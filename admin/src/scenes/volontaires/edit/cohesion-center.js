@@ -25,6 +25,10 @@ export default ({ values, handleChange }) => {
                 handleChange({ target: { name: "status", value: young.status } });
                 handleChange({ target: { name: "statusPhase1", value: young.statusPhase1 } });
                 handleChange({ target: { name: "autoAffectationPhase1ExpiresAt", value: young.autoAffectationPhase1ExpiresAt } });
+
+                // handle if the meeting point has been canceled
+                handleChange({ target: { name: "meetingPointId", value: young.meetingPointId } });
+                handleChange({ target: { name: "deplacementPhase1Autonomous", value: young.deplacementPhase1Autonomous } });
               }}
             />
           ) : null}

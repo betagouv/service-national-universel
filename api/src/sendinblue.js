@@ -30,10 +30,11 @@ async function sendEmail(to, subject, htmlContent, { params, attachment, cc, bcc
     const body = {};
 
     body.to = [to];
-    body.cc = cc;
+    if (cc?.length) body.cc = cc;
     body.bcc = bcc;
     if (ENVIRONMENT !== "production") {
       body.to = body.to.filter((e) => e.email.match(/(selego\.co|beta\.gouv\.fr)/));
+      body.cc = body.cc.filter((e) => e.email.match(/(selego\.co|beta\.gouv\.fr)/));
     }
     body.htmlContent = htmlContent;
     body.sender = { name: SENDER_NAME, email: SENDER_EMAIL };

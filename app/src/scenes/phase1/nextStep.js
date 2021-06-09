@@ -5,6 +5,7 @@ import { YOUNG_STATUS_PHASE1 } from "snu-lib/constants";
 import { HeroContainer, Hero } from "../../components/Content";
 import ImageRight from "./ImageRight";
 import AutoTest from "./AutoTest";
+import MedicalFile from "./MedicalFile";
 import { toastr } from "react-redux-toastr";
 import api from "../../services/api";
 import { translate } from "../../utils";
@@ -44,47 +45,7 @@ export default () => {
             </>
           ) : null}
         </Content>
-        <ContentHorizontal style={{ width: "100%" }} id="sanitaire">
-          <div className="icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-              ></path>
-            </svg>
-          </div>
-          <div>
-            <h2>Transmission de la fiche sanitaire</h2>
-            <p>
-              Vous devez renseigner votre fiche sanitaire, joindre les photocopies des documents requis et mettre le tout dans une envelope fermée portant la mention “A l’attention de
-              l’infirmier, Pli Confidentiel”. <br />
-              <b>Vous la remettrez en main propre à votre arrivée au centre de séjour à l’équipe d’encadrement.</b>
-            </p>
-            <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Note_relative_aux_informations_d_ordre_sanitaire.pdf" target="blank" className="link">
-              Note relative aux informations d'ordre sanitaire ›
-            </a>
-            <div style={{ marginTop: "2rem" }}>
-              <div style={{ color: "#777" }}>
-                <b> Rappel : </b>Vous devez réaliser un bilan de santé obligatoire auprès de votre médecin traitant entre 15 et 16 ans. Il est recommandé de le faire avant votre
-                séjour de cohésion, mais non obligatoire pour y participer.
-              </div>
-              <a
-                href="https://www.ameli.fr/assure/sante/themes/suivi-medical-de-lenfant-et-de-ladolescent/examen-medical-propose-ladolescent-entre-15-et-16-ans"
-                className="link"
-                target="_blank"
-              >
-                Plus d’informations sur le bilan de santé obligatoire entre 15 et 16 ans ›
-              </a>
-            </div>
-          </div>
-          <div style={{ minWidth: "30%", display: "flex", justifyContent: "flex-end", alignItems: "center", marginLeft: "1.5rem" }}>
-            <a target="blank" href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Fiche_sanitaire.pdf">
-              <ContinueButton>Télécharger la fiche sanitaire</ContinueButton>
-            </a>
-          </div>
-        </ContentHorizontal>
+        <MedicalFile />
         <ImageRight />
         <AutoTest />
       </Hero>

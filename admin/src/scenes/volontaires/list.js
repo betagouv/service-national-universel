@@ -34,7 +34,10 @@ export default ({ setYoung }) => {
       setMeetingPoints(data);
     })();
   }, []);
-  const getDefaultQuery = () => ({ query: { bool: { filter: { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN", "WAITING_LIST"] } } } } });
+  const getDefaultQuery = () => ({
+    query: { bool: { filter: { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN", "WAITING_LIST"] } } } },
+    sort: [{ "lastName.keyword": "asc" }],
+  });
   const getExportQuery = () => ({ ...getDefaultQuery(), size: 10000 });
   return (
     <div>

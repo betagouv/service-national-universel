@@ -1,0 +1,22 @@
+<mjml>
+  <mj-body>
+    <mj-section>
+      <mj-column>
+        <mj-text font-size="18px" color="#000"> Bonjour {{firstName}} {{lastName}}, </mj-text>
+        <mj-text line-height="1.5" font-size="18px" color="#000">
+          Suite à un changement intervenu dans votre centre d'affectation, vous devez de nouveau confirmer votre point de rassemblement. Pour cela,
+          merci de vous reconnecter à votre espace volontaire et de sélectionner le point de rassemblement souhaité d'ici jeudi 10 juin à 18h. Cette
+          action est obligatoire pour que vous puissiez télécharger votre nouvelle convocation.
+        </mj-text>
+        <mj-button font-size="20px" background-color="#5145cd" href="{{cta}}"> Se connecter à mon espace </mj-button>
+        <mj-text font-size="18px" color="#000">Nous sommes désolée pour ce changement,</mj-text>
+        <mj-text font-size="18px" color="#000">A bientôt au séjour de cohésion.</mj-text>
+        <mj-text font-size="18px" color="#000">Les équipes du Service National Universel</mj-text>
+        <mj-divider border-color="#F6F7F8"></mj-divider>
+        <mj-text>
+          Si vous ne parvenez pas à cliquer sur le bouton "Se connecter à mon espace", copiez-collez l'URL ci-dessous dans votre navigateur: {{cta}}
+        </mj-text>
+      </mj-column>
+    </mj-section>
+  </mj-body>
+</mjml>
