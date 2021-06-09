@@ -76,7 +76,7 @@ export default () => {
                 </a>
                 <br />
                 <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Protocole_sanitaire_ACM_avec_hebergement_post_CIC_070621.pdf" target="blank">
-                  <strong style={{ textDecoration: "underline", cursor: "pointer", color: "#6b7280" }}>voir protocole sanitaire des centres de séjour</strong>
+                  <strong style={{ textDecoration: "underline", cursor: "pointer", color: "#6b7280" }}>Voir protocole sanitaire des centres de séjour</strong>
                 </a>
               </p>
             ) : null}
