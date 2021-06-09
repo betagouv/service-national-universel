@@ -12,6 +12,7 @@ import Badge from "../../../components/Badge";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
 import TabList from "../../../components/views/TabList";
 import Tab from "../../../components/views/Tab";
+import VolontaireTitle from "../../../components/VolontaireTitle";
 import { appURL } from "../../../config";
 
 export default ({ children, young, tab }) => {
@@ -35,9 +36,9 @@ export default ({ children, young, tab }) => {
     <div style={{ flex: tab === "missions" ? "0%" : 2, position: "relative", padding: "3rem" }}>
       <Header>
         <div style={{ flex: 1 }}>
-          <Title>
+          <VolontaireTitle>
             {young.firstName} {young.lastName} <Badge text={`Cohorte ${young.cohort}`} />
-          </Title>
+          </VolontaireTitle>
           <TabList>
             <Tab isActive={tab === "details"} onClick={() => history.push(`/volontaire/${young._id}`)}>
               Détails
@@ -76,15 +77,6 @@ export default ({ children, young, tab }) => {
     </div>
   );
 };
-
-const Title = styled.div`
-  display: flex;
-  color: rgb(38, 42, 62);
-  font-weight: 700;
-  font-size: 24px;
-  margin-bottom: 10px;
-  align-items: center;
-`;
 
 const Header = styled.div`
   padding: 0 25px 0;
