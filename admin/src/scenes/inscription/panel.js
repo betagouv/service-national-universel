@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 
-import { translate as t, isInRuralArea } from "../../utils";
+import { translate as t, isInRuralArea, getAge } from "../../utils";
 import DownloadButton from "../../components/buttons/DownloadButton";
 import Historic from "../../components/historic";
 import api from "../../services/api";
@@ -26,13 +26,6 @@ export default ({ onChange, value }) => {
   const formatDate = (d) => {
     const date = new Date(d);
     return date.toLocaleDateString();
-  };
-
-  const getAge = (d) => {
-    const now = new Date();
-    const date = new Date(d);
-    const diffTime = Math.abs(date - now);
-    return Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
   };
 
   function isFromFranceConnect() {

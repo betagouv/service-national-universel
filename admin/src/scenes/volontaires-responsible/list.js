@@ -10,7 +10,7 @@ import Panel from "./panel";
 import VioletHeaderButton from "../../components/buttons/VioletHeaderButton";
 import ExportComponent from "../../components/ExportXlsx";
 import Loader from "../../components/Loader";
-import { translate, getFilterLabel, formatStringLongDate, formatStringDate } from "../../utils";
+import { translate, getFilterLabel, formatStringLongDate, formatStringDate, getAge } from "../../utils";
 
 const FILTERS = ["SEARCH", "STATUS", "PHASE", "COHORT", "MISSIONS", "TUTOR"];
 
@@ -205,13 +205,6 @@ const Hit = ({ hit, onClick, selected }) => {
       return setMission(data);
     })();
   }, []);
-
-  const getAge = (d) => {
-    const now = new Date();
-    const date = new Date(d);
-    const diffTime = Math.abs(date - now);
-    return Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
-  };
 
   if (!mission) return <Loader />;
   return (

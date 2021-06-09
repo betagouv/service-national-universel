@@ -11,7 +11,7 @@ import api from "../../services/api";
 import { apiURL, appURL } from "../../config";
 import Panel from "./panel";
 import Badge from "../../components/Badge";
-import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS_COLORS, isInRuralArea, formatDateFR, formatLongDateFR } from "../../utils";
+import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS_COLORS, isInRuralArea, formatDateFR, formatLongDateFR, getAge } from "../../utils";
 import { Link } from "react-router-dom";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
@@ -350,15 +350,6 @@ export default ({ setYoung }) => {
 };
 
 const Hit = ({ hit, onClick, selected }) => {
-  const getAge = (d) => {
-    const now = new Date();
-    const date = new Date(d);
-    const diffTime = Math.abs(date - now);
-    const age = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
-    if (!age || isNaN(age)) return "?";
-    return age;
-  };
-
   return (
     <tr style={{ backgroundColor: (selected && "#e6ebfa") || (hit.status === "WITHDRAWN" && "#BE3B1211") }} onClick={onClick}>
       <td>

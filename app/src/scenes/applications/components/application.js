@@ -6,7 +6,7 @@ import { Col, Row } from "reactstrap";
 import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
-import { translate, APPLICATION_STATUS_COLORS, APPLICATION_STATUS } from "../../../utils";
+import { translate, APPLICATION_STATUS_COLORS, APPLICATION_STATUS, getAge } from "../../../utils";
 
 export default ({ application, index }) => {
   const [value, setValue] = useState(application);
@@ -77,14 +77,6 @@ export default ({ application, index }) => {
 
 function ContractInfo({ contract }) {
   const young = useSelector((state) => state.Auth.young);
-  const getAge = (d) => {
-    const now = new Date();
-    const date = new Date(d);
-    const diffTime = Math.abs(date - now);
-    const age = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
-    if (!age || isNaN(age)) return "?";
-    return age;
-  };
   const isYoungAdult = getAge(young.birthdateAt) >= 18;
 
   return (

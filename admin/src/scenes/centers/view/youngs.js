@@ -8,7 +8,7 @@ import api from "../../../services/api";
 import CenterView from "./wrapper";
 import Panel from "../../volontaires/panel";
 
-import { getFilterLabel, YOUNG_STATUS_PHASE1, translate, formatDateFR, isInRuralArea, formatLongDateFR } from "../../../utils";
+import { getFilterLabel, YOUNG_STATUS_PHASE1, translate, formatDateFR, isInRuralArea, formatLongDateFR, getAge } from "../../../utils";
 import Loader from "../../../components/Loader";
 import ExportComponent from "../../../components/ExportXlsx";
 import { Filter, FilterRow, ResultTable, Table, TopResultStats, BottomResultStats, MultiLine } from "../../../components/list";
@@ -275,13 +275,6 @@ export default ({ center, updateCenter }) => {
 
 const Hit = ({ hit, onClick, selected, onChangeYoung }) => {
   const user = useSelector((state) => state.Auth.user);
-
-  const getAge = (d) => {
-    const now = new Date();
-    const date = new Date(d);
-    const diffTime = Math.abs(date - now);
-    return Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
-  };
   return (
     <tr style={{ backgroundColor: (selected && "#e6ebfa") || (hit.status === "WITHDRAWN" && "#BE3B1211") }} onClick={onClick}>
       <td>

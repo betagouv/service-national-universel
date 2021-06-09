@@ -113,7 +113,7 @@ export default () => {
     (async () => {
       const { data, code, ok } = await api.get(`/meeting-point`);
       if (!ok) return toastr.error("error", translate(code));
-      setMeetingPoints(data.filter((mp) => mp.bus?.placesLeft >= 0));
+      setMeetingPoints(data.filter((mp) => mp.bus?.placesLeft > 0));
     })();
   }, []);
 

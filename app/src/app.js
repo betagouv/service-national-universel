@@ -140,9 +140,11 @@ function ScrollToTop() {
 const Content = styled.div`
   margin-left: auto;
   width: 85%;
+  max-width: calc(100% - 250px);
   @media (max-width: 768px) {
     width: 100%;
     padding: 0;
     overflow-x: hidden;
+    max-width: 100%;
   }
 `;
