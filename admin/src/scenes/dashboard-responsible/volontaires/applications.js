@@ -7,6 +7,7 @@ import { Link, useHistory } from "react-router-dom";
 import { APPLICATION_STATUS_COLORS } from "../../../utils";
 import Badge from "../../../components/Badge";
 import api from "../../../services/api";
+import { CardArrow, Card, CardTitle, CardValueWrapper, CardValue, CardContainer, Title } from "../../../components/dashboard";
 
 export default () => {
   const user = useSelector((state) => state.Auth.user);
@@ -174,38 +175,3 @@ export default () => {
     </>
   );
 };
-
-const CardContainer = styled.div`
-  margin-bottom: 33px;
-`;
-
-const Card = styled.div`
-  /* max-width: 325px; */
-  min-height: 100px;
-  padding: 22px 15px;
-  border-bottom: 7px solid ${(props) => props.borderBottomColor};
-  border-radius: 8px;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
-  background-color: #fff;
-`;
-const CardTitle = styled.h3`
-  color: #171725;
-  font-size: 16px;
-  font-weight: bold;
-`;
-
-const CardValueWrapper = styled.div`
-  position: relative;
-`;
-const CardValue = styled.span`
-  font-size: 28px;
-`;
-const CardArrow = styled.span`
-  position: absolute;
-  top: 50%;
-  right: 0;
-  transform: translateY(-50%);
-  width: 15px;
-  height: 15px;
-  background-image: url(${require("../../../assets/arrow.png")});
-`;

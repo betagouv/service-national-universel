@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import styled from "styled-components";
 import { Col, Row } from "reactstrap";
 import { Link } from "react-router-dom";
 import {
@@ -14,6 +13,7 @@ import {
   YOUNG_STATUS_PHASE3,
 } from "../../../utils";
 import api from "../../../services/api";
+import { CardArrow, Card, CardTitle, CardValueWrapper, CardValue, CardPercentage, CardSection, Subtitle } from "../../../components/dashboard";
 
 export default ({ filter }) => {
   const [status, setStatus] = useState({});
@@ -196,7 +196,7 @@ const Phase3 = ({ data, getLink }) => {
       <Row>
         <Col md={12}>
           <CardSection>Phase 3</CardSection>
-          <CardSubtitle>Statut</CardSubtitle>
+          <Subtitle>Statut</Subtitle>
         </Col>
       </Row>
       <Row>
@@ -229,7 +229,7 @@ const Phase2 = ({ data, getLink }) => {
       <Row>
         <Col md={12}>
           <CardSection>Phase 2</CardSection>
-          <CardSubtitle>Statut</CardSubtitle>
+          <Subtitle>Statut</Subtitle>
         </Col>
       </Row>
       <Row>
@@ -261,7 +261,7 @@ const Contract = ({ data, getLink }) => {
     <React.Fragment>
       <Row>
         <Col md={12}>
-          <CardSubtitle>Statut sur des contrats d'engagement</CardSubtitle>
+          <Subtitle>Statut sur des contrats d'engagement</Subtitle>
         </Col>
       </Row>
       <Row>
@@ -293,7 +293,7 @@ const Application = ({ data, getLink }) => {
     <React.Fragment>
       <Row>
         <Col md={12}>
-          <CardSubtitle>Statut sur une mission de phase 2</CardSubtitle>
+          <Subtitle>Statut sur une mission de phase 2</Subtitle>
         </Col>
       </Row>
       <Row>
@@ -328,7 +328,7 @@ const Phase1 = ({ data, getLink }) => {
       <Row>
         <Col md={12}>
           <CardSection>Phase 1</CardSection>
-          <CardSubtitle>Statut</CardSubtitle>
+          <Subtitle>Statut</Subtitle>
         </Col>
       </Row>
       <Row>
@@ -359,7 +359,7 @@ const Participation = ({ data, getLink }) => {
   const total = Object.keys(data).reduce((acc, a) => acc + data[a], 0);
   return (
     <React.Fragment>
-      <CardSubtitle>Participations au séjour de cohésion</CardSubtitle>
+      <Subtitle>Participations au séjour de cohésion</Subtitle>
       <Row>
         <Col md={6} xl={3} k="cohesionStayPresence_true">
           <Link to={getLink(`/volontaire`)}>
@@ -393,57 +393,3 @@ const Participation = ({ data, getLink }) => {
     </React.Fragment>
   );
 };
-
-const Card = styled.div`
-  /* max-width: 325px; */
-  padding: 22px 15px;
-  border-bottom: 7px solid ${(props) => props.borderBottomColor};
-  border-radius: 8px;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
-  background-color: #fff;
-  margin-bottom: 33px;
-`;
-const CardTitle = styled.h3`
-  color: #171725;
-  font-size: 16px;
-  font-weight: bold;
-`;
-
-const CardSection = styled.div`
-  font-family: Ubuntu;
-  font-style: normal;
-  font-weight: bold;
-  font-size: 16px;
-  line-height: 18px;
-  text-transform: uppercase;
-  color: #372f78;
-`;
-const CardSubtitle = styled.h3`
-  color: #242526;
-  font-size: 26px;
-  margin-bottom: 10px;
-  font-weight: normal;
-`;
-
-const CardValueWrapper = styled.div`
-  position: relative;
-  display: flex;
-  justify-content: space-between;
-`;
-const CardValue = styled.span`
-  font-size: 28px;
-`;
-
-const CardPercentage = styled.span`
-  font-size: 22px;
-  color: #a8a8b1;
-  display: flex;
-  align-items: center;
-  font-weight: 100;
-`;
-
-const CardArrow = styled.span`
-  width: 15px;
-  height: 15px;
-  background-image: url(${require("../../../assets/arrow.png")});
-`;

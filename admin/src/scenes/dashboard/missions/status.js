@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { Col, Row } from "reactstrap";
 import { Link } from "react-router-dom";
 import CircularProgress from "../components/CircularProgress";
+import { CardArrow, Card, CardTitle, CardValueWrapper, CardValue, CardPercentage, Subtitle } from "../../../components/dashboard";
 import {
   translate,
   MISSION_STATUS,
@@ -125,7 +126,7 @@ export default ({ filter }) => {
 const ProposedPlaces = ({ missionPlaceLeft, missionPlaceTotal, getLink }) => {
   return (
     <React.Fragment>
-      <CardSubtitle>Places proposées par les structures</CardSubtitle>
+      <Subtitle>Places proposées par les structures</Subtitle>
       <Row>
         <Col md={6} xl={4} key="total">
           <Link to={getLink(`/mission`)}>
@@ -179,7 +180,7 @@ const Status = ({ data, getLink }) => {
 
   return (
     <React.Fragment>
-      <CardSubtitle>Statut des missions proposées par les structures</CardSubtitle>
+      <Subtitle>Statut des missions proposées par les structures</Subtitle>
       <Row>
         {Object.values(MISSION_STATUS).map((l, k) => {
           return (
@@ -210,7 +211,7 @@ const MissionDetail = ({ youngsDomains, missionsDomains, getLink }) => {
 
   return (
     <React.Fragment>
-      <CardSubtitle>Dans le détail des missions</CardSubtitle>
+      <Subtitle>Dans le détail des missions</Subtitle>
       <Box>
         <Row>
           <Col md={6} xl={6} key="1">
@@ -539,28 +540,6 @@ const Volonteer = ({ youngsEngaged }) => {
   );
 };
 
-const CardSubtitle = styled.h3`
-  color: #242526;
-  font-size: 26px;
-  margin-bottom: 20px;
-  font-weight: normal;
-`;
-
-const Card = styled.div`
-  /* max-width: 325px; */
-  padding: 22px 15px;
-  border-bottom: 7px solid ${(props) => props.borderBottomColor};
-  border-radius: 8px;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
-  background-color: #fff;
-  margin-bottom: 33px;
-`;
-const CardTitle = styled.h3`
-  color: #171725;
-  font-size: 16px;
-  font-weight: bold;
-`;
-
 const CircularLine = styled.div`
   margin-bottom: 20px;
   display: flex;
@@ -587,30 +566,4 @@ const BoxTitle = styled.h2`
   letter-spacing: 0.1px;
 
   color: #171725;
-`;
-
-const CardValueWrapper = styled.div`
-  position: relative;
-  display: flex;
-  justify-content: space-between;
-`;
-const CardValue = styled.span`
-  font-size: 28px;
-`;
-const CardPercentage = styled.span`
-  font-size: 22px;
-  color: #a8a8b1;
-  display: flex;
-  align-items: center;
-  font-weight: 100;
-`;
-
-const CardArrow = styled.span`
-  position: absolute;
-  top: 50%;
-  right: 0;
-  transform: translateY(-50%);
-  width: 15px;
-  height: 15px;
-  background-image: url(${require("../../../assets/arrow.png")});
 `;

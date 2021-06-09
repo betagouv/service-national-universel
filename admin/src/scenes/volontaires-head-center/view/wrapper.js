@@ -8,6 +8,7 @@ import { translate } from "../../../utils";
 import Badge from "../../../components/Badge";
 import TabList from "../../../components/views/TabList";
 import Tab from "../../../components/views/Tab";
+import Title from "../../../components/views/Title";
 
 export default ({ children, young, tab }) => {
   const history = useHistory();
@@ -47,15 +48,6 @@ export default ({ children, young, tab }) => {
     </div>
   );
 };
-
-const Title = styled.div`
-  display: flex;
-  color: rgb(38, 42, 62);
-  font-weight: 700;
-  font-size: 24px;
-  margin-bottom: 10px;
-  align-items: center;
-`;
 
 const Header = styled.div`
   padding: 0 25px 0;
