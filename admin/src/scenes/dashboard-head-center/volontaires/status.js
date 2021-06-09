@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
-import styled from "styled-components";
 import { Col, Row } from "reactstrap";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { YOUNG_STATUS_COLORS } from "../../../utils";
 
 import api from "../../../services/api";
-import CardArrowDashboard from "../../../components/CardArrowDashboard";
+import { CardArrow, Card, CardTitle, CardValueWrapper, CardValue, CardPercentage, CardSection, Subtitle } from "../../../components/dashboard";
 
 export default ({ filter }) => {
   const [statusPhase1, setStatusPhase1] = useState({});
@@ -74,72 +73,72 @@ const Phase1 = ({ data, getLink }) => {
       <Row>
         <Col md={12}>
           <CardSection>Phase 1</CardSection>
-          <CardSubtitle>Statuts</CardSubtitle>
+          <Subtitle>Statuts</Subtitle>
         </Col>
       </Row>
       <Row>
         <Col md={6} xl={2}>
           <Link to={getLink('/volontaire?STATUS_PHASE_1=%5B"AFFECTED"%5D')}>
-            <Card borderBottomColor={YOUNG_STATUS_COLORS.AFFECTED}>
+            <Card borderBottomColor={YOUNG_STATUS_COLORS.AFFECTED} style={{ minHeight: "180px" }}>
               <CardTitle>Affectée</CardTitle>
               <CardValueWrapper>
                 <CardValue>{data.AFFECTED || 0}</CardValue>
-                <CardArrowDashboard />
+                <CardArrow />
               </CardValueWrapper>
             </Card>
           </Link>
         </Col>
         <Col md={6} xl={2}>
           <Link to={getLink('/volontaire?STATUS_PHASE_1=%5B"CANCEL"%5D')}>
-            <Card borderBottomColor={YOUNG_STATUS_COLORS.CANCEL}>
+            <Card borderBottomColor={YOUNG_STATUS_COLORS.CANCEL} style={{ minHeight: "180px" }}>
               <CardTitle>Annulée</CardTitle>
               <CardValueWrapper>
                 <CardValue>{data.CANCEL || 0}</CardValue>
-                <CardArrowDashboard />
+                <CardArrow />
               </CardValueWrapper>
             </Card>
           </Link>
         </Col>
         <Col md={6} xl={2}>
           <Link to={getLink('/volontaire?STATUS_PHASE_1=%5B"AFFECTED"%5D')}>
-            <Card borderBottomColor={YOUNG_STATUS_COLORS.DONE}>
+            <Card borderBottomColor={YOUNG_STATUS_COLORS.DONE} style={{ minHeight: "180px" }}>
               <CardTitle>Réalisée</CardTitle>
               <CardValueWrapper>
                 <CardValue>{data.DONE || 0}</CardValue>
-                <CardArrowDashboard />
+                <CardArrow />
               </CardValueWrapper>
             </Card>
           </Link>
         </Col>
         <Col md={6} xl={2}>
           <Link to={getLink('/volontaire?STATUS_PHASE_1=%5B"AFFECTED"%5D')}>
-            <Card borderBottomColor={YOUNG_STATUS_COLORS.NOT_DONE}>
+            <Card borderBottomColor={YOUNG_STATUS_COLORS.NOT_DONE} style={{ minHeight: "180px" }}>
               <CardTitle>Non réalisée</CardTitle>
               <CardValueWrapper>
                 <CardValue>{data.NOT_DONE || 0}</CardValue>
-                <CardArrowDashboard />
+                <CardArrow />
               </CardValueWrapper>
             </Card>
           </Link>
         </Col>
         <Col md={6} xl={2}>
           <Link to={getLink('/volontaire?STATUS_PHASE_1=%5B"WAITING_LIST"%5D')}>
-            <Card borderBottomColor={YOUNG_STATUS_COLORS.WAITING_LIST}>
+            <Card borderBottomColor={YOUNG_STATUS_COLORS.WAITING_LIST} style={{ minHeight: "180px" }}>
               <CardTitle>Sur liste complémentaire</CardTitle>
               <CardValueWrapper>
                 <CardValue>{data.WAITING_LIST || 0}</CardValue>
-                <CardArrowDashboard />
+                <CardArrow />
               </CardValueWrapper>
             </Card>
           </Link>
         </Col>
         <Col md={6} xl={2}>
           <Link to={getLink('/volontaire?STATUS_PHASE_1=%5B"WITHDRAWN"%5D')}>
-            <Card borderBottomColor={YOUNG_STATUS_COLORS.WITHDRAWN}>
+            <Card borderBottomColor={YOUNG_STATUS_COLORS.WITHDRAWN} style={{ minHeight: "180px" }}>
               <CardTitle>Désistée</CardTitle>
               <CardValueWrapper>
                 <CardValue>{data.WITHDRAWN || 0}</CardValue>
-                <CardArrowDashboard />
+                <CardArrow />
               </CardValueWrapper>
             </Card>
           </Link>
@@ -153,7 +152,7 @@ const CohesionStayMedicalFileReceived = ({ data, getLink }) => {
   const total = Object.keys(data).reduce((acc, a) => acc + data[a], 0);
   return (
     <React.Fragment>
-      <CardSubtitle>Fiches sanitaires</CardSubtitle>
+      <Subtitle>Fiches sanitaires</Subtitle>
       <Row>
         <Col md={6} xl={3} k="cohesionStayMedicalFileReceived_true">
           <Link to={getLink(`/volontaire`)}>
@@ -163,7 +162,7 @@ const CohesionStayMedicalFileReceived = ({ data, getLink }) => {
                 <CardValue>{data["true"] || 0}</CardValue>
                 <CardPercentage>
                   {total ? `${(((data["true"] || 0) * 100) / total).toFixed(0)}%` : `0%`}
-                  <CardArrowDashboard />
+                  <CardArrow />
                 </CardPercentage>
               </CardValueWrapper>
             </Card>
@@ -177,7 +176,7 @@ const CohesionStayMedicalFileReceived = ({ data, getLink }) => {
                 <CardValue>{data["false"] || 0}</CardValue>
                 <CardPercentage>
                   {total ? `${(((data["false"] || 0) * 100) / total).toFixed(0)}%` : `0%`}
-                  <CardArrowDashboard />
+                  <CardArrow />
                 </CardPercentage>
               </CardValueWrapper>
             </Card>
@@ -192,7 +191,7 @@ const CohesionStayPresence = ({ data, getLink }) => {
   const total = Object.keys(data).reduce((acc, a) => acc + data[a], 0);
   return (
     <React.Fragment>
-      <CardSubtitle>Participations au séjour de cohésion</CardSubtitle>
+      <Subtitle>Participations au séjour de cohésion</Subtitle>
       <Row>
         <Col md={6} xl={3} k="cohesionStayPresence_true">
           <Link to={getLink(`/volontaire`)}>
@@ -202,7 +201,7 @@ const CohesionStayPresence = ({ data, getLink }) => {
                 <CardValue>{data["true"] || 0}</CardValue>
                 <CardPercentage>
                   {total ? `${(((data["true"] || 0) * 100) / total).toFixed(0)}%` : `0%`}
-                  <CardArrowDashboard />
+                  <CardArrow />
                 </CardPercentage>
               </CardValueWrapper>
             </Card>
@@ -216,7 +215,7 @@ const CohesionStayPresence = ({ data, getLink }) => {
                 <CardValue>{data["false"] || 0}</CardValue>
                 <CardPercentage>
                   {total ? `${(((data["false"] || 0) * 100) / total).toFixed(0)}%` : `0%`}
-                  <CardArrowDashboard />
+                  <CardArrow />
                 </CardPercentage>
               </CardValueWrapper>
             </Card>
@@ -226,50 +225,3 @@ const CohesionStayPresence = ({ data, getLink }) => {
     </React.Fragment>
   );
 };
-
-const Card = styled.div`
-  /* max-width: 325px; */
-  min-height: 180px;
-  padding: 22px 15px;
-  border-bottom: 7px solid ${(props) => props.borderBottomColor};
-  border-radius: 8px;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
-  background-color: #fff;
-  margin-bottom: 33px;
-`;
-const CardTitle = styled.h3`
-  color: #171725;
-  font-size: 16px;
-  font-weight: bold;
-`;
-
-const CardValueWrapper = styled.div`
-  position: relative;
-`;
-const CardValue = styled.span`
-  font-size: 28px;
-`;
-
-const CardSection = styled.div`
-  font-family: Ubuntu;
-  font-style: normal;
-  font-weight: bold;
-  font-size: 16px;
-  line-height: 18px;
-  text-transform: uppercase;
-  color: #372f78;
-`;
-const CardSubtitle = styled.h3`
-  color: #242526;
-  font-size: 26px;
-  margin-bottom: 10px;
-  font-weight: normal;
-`;
-
-const CardPercentage = styled.span`
-  font-size: 22px;
-  color: #a8a8b1;
-  display: flex;
-  align-items: center;
-  font-weight: 100;
-`;

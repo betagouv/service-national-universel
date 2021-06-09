@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from "react";
-import styled from "styled-components";
-import { Col, Row, Input } from "reactstrap";
+import { Col, Row } from "reactstrap";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { translate, YOUNG_STATUS_COLORS } from "../../../utils";
 
 import api from "../../../services/api";
-import { access } from "fs";
-import CardArrowDashboard from "../../../components/CardArrowDashboard";
+import { CardArrow, Card, CardTitle, CardValueWrapper, CardValue, CardPercentage } from "../../../components/dashboard";
 
 const legalStatusTypes = ["ASSOCIATION", "PUBLIC", "PRIVATE", "OTHER"];
 
@@ -61,7 +59,7 @@ export default ({ filter }) => {
               <CardTitle>Structures</CardTitle>
               <CardValueWrapper>
                 <CardValue>{total || 0}</CardValue>
-                <CardArrowDashboard />
+                <CardArrow />
               </CardValueWrapper>
             </Card>
           </Link>
@@ -72,7 +70,7 @@ export default ({ filter }) => {
               <CardTitle>Affiliées à un réseau national</CardTitle>
               <CardValueWrapper>
                 <CardValue>{withNetworkId || 0}</CardValue>
-                <CardArrowDashboard />
+                <CardArrow />
               </CardValueWrapper>
             </Card>
           </Link>
@@ -89,7 +87,7 @@ export default ({ filter }) => {
                     <CardValue>{status[l] || 0}</CardValue>
                     <CardPercentage>
                       {total ? `${(((status[l] || 0) * 100) / total).toFixed(0)}%` : `0%`}
-                      <CardArrowDashboard />
+                      <CardArrow />
                     </CardPercentage>
                   </CardValueWrapper>
                 </Card>
@@ -101,40 +99,3 @@ export default ({ filter }) => {
     </>
   );
 };
-
-const Card = styled.div`
-  /* max-width: 325px; */
-  padding: 22px 15px;
-  border-bottom: 7px solid ${(props) => props.borderBottomColor};
-  border-radius: 8px;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
-  background-color: #fff;
-  margin-bottom: 33px;
-`;
-const CardTitle = styled.h3`
-  color: #171725;
-  font-size: 16px;
-  font-weight: bold;
-`;
-const CardSubtitle = styled.h3`
-  font-size: 14px;
-  font-weight: 100;
-  color: #696974;
-`;
-
-const CardPercentage = styled.span`
-  font-size: 22px;
-  color: #a8a8b1;
-  display: flex;
-  align-items: center;
-  font-weight: 100;
-`;
-
-const CardValueWrapper = styled.div`
-  position: relative;
-  display: flex;
-  justify-content: space-between;
-`;
-const CardValue = styled.span`
-  font-size: 28px;
-`;
