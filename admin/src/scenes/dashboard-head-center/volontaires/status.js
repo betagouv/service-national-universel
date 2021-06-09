@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import { YOUNG_STATUS_COLORS } from "../../../utils";
 
 import api from "../../../services/api";
+import CardArrowDashboard from "../../../components/CardArrowDashboard";
 
 export default ({ filter }) => {
   const [statusPhase1, setStatusPhase1] = useState({});
@@ -83,7 +84,7 @@ const Phase1 = ({ data, getLink }) => {
               <CardTitle>Affectée</CardTitle>
               <CardValueWrapper>
                 <CardValue>{data.AFFECTED || 0}</CardValue>
-                <CardArrow />
+                <CardArrowDashboard />
               </CardValueWrapper>
             </Card>
           </Link>
@@ -94,7 +95,7 @@ const Phase1 = ({ data, getLink }) => {
               <CardTitle>Annulée</CardTitle>
               <CardValueWrapper>
                 <CardValue>{data.CANCEL || 0}</CardValue>
-                <CardArrow />
+                <CardArrowDashboard />
               </CardValueWrapper>
             </Card>
           </Link>
@@ -105,7 +106,7 @@ const Phase1 = ({ data, getLink }) => {
               <CardTitle>Réalisée</CardTitle>
               <CardValueWrapper>
                 <CardValue>{data.DONE || 0}</CardValue>
-                <CardArrow />
+                <CardArrowDashboard />
               </CardValueWrapper>
             </Card>
           </Link>
@@ -116,7 +117,7 @@ const Phase1 = ({ data, getLink }) => {
               <CardTitle>Non réalisée</CardTitle>
               <CardValueWrapper>
                 <CardValue>{data.NOT_DONE || 0}</CardValue>
-                <CardArrow />
+                <CardArrowDashboard />
               </CardValueWrapper>
             </Card>
           </Link>
@@ -127,7 +128,7 @@ const Phase1 = ({ data, getLink }) => {
               <CardTitle>Sur liste complémentaire</CardTitle>
               <CardValueWrapper>
                 <CardValue>{data.WAITING_LIST || 0}</CardValue>
-                <CardArrow />
+                <CardArrowDashboard />
               </CardValueWrapper>
             </Card>
           </Link>
@@ -138,7 +139,7 @@ const Phase1 = ({ data, getLink }) => {
               <CardTitle>Désistée</CardTitle>
               <CardValueWrapper>
                 <CardValue>{data.WITHDRAWN || 0}</CardValue>
-                <CardArrow />
+                <CardArrowDashboard />
               </CardValueWrapper>
             </Card>
           </Link>
@@ -162,7 +163,7 @@ const CohesionStayMedicalFileReceived = ({ data, getLink }) => {
                 <CardValue>{data["true"] || 0}</CardValue>
                 <CardPercentage>
                   {total ? `${(((data["true"] || 0) * 100) / total).toFixed(0)}%` : `0%`}
-                  <CardArrow />
+                  <CardArrowDashboard />
                 </CardPercentage>
               </CardValueWrapper>
             </Card>
@@ -176,7 +177,7 @@ const CohesionStayMedicalFileReceived = ({ data, getLink }) => {
                 <CardValue>{data["false"] || 0}</CardValue>
                 <CardPercentage>
                   {total ? `${(((data["false"] || 0) * 100) / total).toFixed(0)}%` : `0%`}
-                  <CardArrow />
+                  <CardArrowDashboard />
                 </CardPercentage>
               </CardValueWrapper>
             </Card>
@@ -201,7 +202,7 @@ const CohesionStayPresence = ({ data, getLink }) => {
                 <CardValue>{data["true"] || 0}</CardValue>
                 <CardPercentage>
                   {total ? `${(((data["true"] || 0) * 100) / total).toFixed(0)}%` : `0%`}
-                  <CardArrow />
+                  <CardArrowDashboard />
                 </CardPercentage>
               </CardValueWrapper>
             </Card>
@@ -215,7 +216,7 @@ const CohesionStayPresence = ({ data, getLink }) => {
                 <CardValue>{data["false"] || 0}</CardValue>
                 <CardPercentage>
                   {total ? `${(((data["false"] || 0) * 100) / total).toFixed(0)}%` : `0%`}
-                  <CardArrow />
+                  <CardArrowDashboard />
                 </CardPercentage>
               </CardValueWrapper>
             </Card>
@@ -247,15 +248,6 @@ const CardValueWrapper = styled.div`
 `;
 const CardValue = styled.span`
   font-size: 28px;
-`;
-const CardArrow = styled.span`
-  position: absolute;
-  top: 50%;
-  right: 0;
-  transform: translateY(-50%);
-  width: 15px;
-  height: 15px;
-  background-image: url(${require("../../../assets/arrow.png")});
 `;
 
 const CardSection = styled.div`

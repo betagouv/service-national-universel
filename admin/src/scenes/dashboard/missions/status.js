@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { Col, Row } from "reactstrap";
 import { Link } from "react-router-dom";
 import CircularProgress from "../components/CircularProgress";
+import CardArrowDashboard from "../../../components/CardArrowDashboard";
 import {
   translate,
   MISSION_STATUS,
@@ -135,7 +136,7 @@ const ProposedPlaces = ({ missionPlaceLeft, missionPlaceTotal, getLink }) => {
                 <CardValue>{missionPlaceTotal}</CardValue>
                 {/* <CardPercentage>
                   100%
-                  <CardArrow />
+                  <CardArrowDashboard />
                 </CardPercentage> */}
               </CardValueWrapper>
             </Card>
@@ -149,7 +150,7 @@ const ProposedPlaces = ({ missionPlaceLeft, missionPlaceTotal, getLink }) => {
                 <CardValue>{missionPlaceTotal - missionPlaceLeft}</CardValue>
                 {/* <CardPercentage>
                   {`${missionPlaceTotal ? (((missionPlaceTotal - missionPlaceLeft) * 100) / missionPlaceTotal).toFixed(0) : `0`}%`}
-                  <CardArrow />
+                  <CardArrowDashboard />
                 </CardPercentage> */}
               </CardValueWrapper>
             </Card>
@@ -163,7 +164,7 @@ const ProposedPlaces = ({ missionPlaceLeft, missionPlaceTotal, getLink }) => {
                 <CardValue>{missionPlaceLeft}</CardValue>
                 {/* <CardPercentage>
                   {`${missionPlaceTotal ? ((missionPlaceLeft * 100) / missionPlaceTotal).toFixed(0) : `0`}%`}
-                  <CardArrow />
+                  <CardArrowDashboard />
                 </CardPercentage> */}
               </CardValueWrapper>
             </Card>
@@ -191,7 +192,7 @@ const Status = ({ data, getLink }) => {
                     <CardValue>{data[l] || 0}</CardValue>
                     <CardPercentage>
                       {total ? `${(((data[l] || 0) * 100) / total).toFixed(0)}%` : `0%`}
-                      <CardArrow />
+                      <CardArrowDashboard />
                     </CardPercentage>
                   </CardValueWrapper>
                 </Card>
@@ -603,14 +604,4 @@ const CardPercentage = styled.span`
   display: flex;
   align-items: center;
   font-weight: 100;
-`;
-
-const CardArrow = styled.span`
-  position: absolute;
-  top: 50%;
-  right: 0;
-  transform: translateY(-50%);
-  width: 15px;
-  height: 15px;
-  background-image: url(${require("../../../assets/arrow.png")});
 `;

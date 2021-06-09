@@ -4,6 +4,7 @@ import { Col, Row } from "reactstrap";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { YOUNG_STATUS_COLORS } from "../../../utils";
+import CardArrowDashboard from "../../../components/CardArrowDashboard";
 
 import api from "../../../services/api";
 
@@ -54,7 +55,7 @@ export default ({ filter }) => {
               <CardTitle>Centres</CardTitle>
               <CardValueWrapper>
                 <CardValue>{total}</CardValue>
-                <CardArrow />
+                <CardArrowDashboard />
               </CardValueWrapper>
             </Card>
           </Link>
@@ -112,13 +113,4 @@ const CardValueWrapper = styled.div`
 `;
 const CardValue = styled.span`
   font-size: 28px;
-`;
-const CardArrow = styled.span`
-  position: absolute;
-  top: 50%;
-  right: 0;
-  transform: translateY(-50%);
-  width: 15px;
-  height: 15px;
-  background-image: url(${require("../../../assets/arrow.png")});
 `;

@@ -7,6 +7,7 @@ import { Link, useHistory } from "react-router-dom";
 import { APPLICATION_STATUS_COLORS } from "../../../utils";
 import Badge from "../../../components/Badge";
 import api from "../../../services/api";
+import CardArrowDashboard from "../../../components/CardArrowDashboard";
 
 export default () => {
   const user = useSelector((state) => state.Auth.user);
@@ -69,7 +70,7 @@ export default () => {
                 <CardTitle>En attente de validation</CardTitle>
                 <CardValueWrapper>
                   <CardValue>{stats.WAITING_VALIDATION || "-"}</CardValue>
-                  <CardArrow />
+                  <CardArrowDashboard />
                 </CardValueWrapper>
               </Card>
               {stats.WAITING_VALIDATION ? (
@@ -87,7 +88,7 @@ export default () => {
                 <CardTitle>Validées</CardTitle>
                 <CardValueWrapper>
                   <CardValue>{stats.VALIDATED || "-"}</CardValue>
-                  <CardArrow />
+                  <CardArrowDashboard />
                 </CardValueWrapper>
               </Card>
               {stats.VALIDATED ? (
@@ -105,7 +106,7 @@ export default () => {
                 <CardTitle>Refusées</CardTitle>
                 <CardValueWrapper>
                   <CardValue>{stats.REFUSED || "-"}</CardValue>
-                  <CardArrow />
+                  <CardArrowDashboard />
                 </CardValueWrapper>
               </Card>
             </CardContainer>
@@ -118,7 +119,7 @@ export default () => {
                 <CardTitle>Annulés</CardTitle>
                 <CardValueWrapper>
                   <CardValue>{stats.CANCEL || "-"}</CardValue>
-                  <CardArrow />
+                  <CardArrowDashboard />
                 </CardValueWrapper>
               </Card>
             </CardContainer>
@@ -138,7 +139,7 @@ export default () => {
                 <CardTitle>En cours sur une MIG</CardTitle>
                 <CardValueWrapper>
                   <CardValue>{stats.IN_PROGRESS || "-"}</CardValue>
-                  <CardArrow />
+                  <CardArrowDashboard />
                 </CardValueWrapper>
               </Card>
             </CardContainer>
@@ -151,7 +152,7 @@ export default () => {
                 <CardTitle>Ayant effectué leur MIG</CardTitle>
                 <CardValueWrapper>
                   <CardValue>{stats.DONE || "-"}</CardValue>
-                  <CardArrow />
+                  <CardArrowDashboard />
                 </CardValueWrapper>
               </Card>
             </CardContainer>
@@ -164,7 +165,7 @@ export default () => {
                 <CardTitle>Ayant abandonné leur MIG</CardTitle>
                 <CardValueWrapper>
                   <CardValue>{stats.NOT_COMPLETED || "-"}</CardValue>
-                  <CardArrow />
+                  <CardArrowDashboard />
                 </CardValueWrapper>
               </Card>
             </CardContainer>
@@ -199,13 +200,4 @@ const CardValueWrapper = styled.div`
 `;
 const CardValue = styled.span`
   font-size: 28px;
-`;
-const CardArrow = styled.span`
-  position: absolute;
-  top: 50%;
-  right: 0;
-  transform: translateY(-50%);
-  width: 15px;
-  height: 15px;
-  background-image: url(${require("../../../assets/arrow.png")});
 `;

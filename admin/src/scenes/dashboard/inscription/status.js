@@ -4,6 +4,7 @@ import { Col, Row, Input } from "reactstrap";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { YOUNG_STATUS_COLORS } from "../../../utils";
+import CardArrowDashboard from "../../../components/CardArrowDashboard";
 
 import api from "../../../services/api";
 
@@ -50,7 +51,7 @@ export default ({ filter }) => {
               <CardSubtitle>Inscriptions en cours</CardSubtitle>
               <CardValueWrapper>
                 <CardValue>{status.IN_PROGRESS || 0}</CardValue>
-                <CardArrow />
+                <CardArrowDashboard />
               </CardValueWrapper>
             </Card>
           </Link>
@@ -62,7 +63,7 @@ export default ({ filter }) => {
             <CardTitle>En attente de validation</CardTitle>
             <CardValueWrapper>
               <CardValue>{status.WAITING_VALIDATION || 0}</CardValue>
-              <CardArrow />
+              <CardArrowDashboard />
             </CardValueWrapper>
           </Card>
         </Link>
@@ -73,7 +74,7 @@ export default ({ filter }) => {
             <CardTitle>En attente de correction</CardTitle>
             <CardValueWrapper>
               <CardValue>{status.WAITING_CORRECTION || 0}</CardValue>
-              <CardArrow />
+              <CardArrowDashboard />
             </CardValueWrapper>
           </Card>
         </Link>
@@ -84,7 +85,7 @@ export default ({ filter }) => {
             <CardTitle>Validées</CardTitle>
             <CardValueWrapper>
               <CardValue>{status.VALIDATED || 0}</CardValue>
-              <CardArrow />
+              <CardArrowDashboard />
             </CardValueWrapper>
           </Card>
         </Link>
@@ -95,7 +96,7 @@ export default ({ filter }) => {
             <CardTitle>Refusées</CardTitle>
             <CardValueWrapper>
               <CardValue>{status.REFUSED || 0}</CardValue>
-              <CardArrow />
+              <CardArrowDashboard />
             </CardValueWrapper>
           </Card>
         </Link>
@@ -106,7 +107,7 @@ export default ({ filter }) => {
             <CardTitle>Liste complémentaire</CardTitle>
             <CardValueWrapper>
               <CardValue>{status.WAITING_LIST || 0}</CardValue>
-              <CardArrow />
+              <CardArrowDashboard />
             </CardValueWrapper>
           </Card>
         </Link>
@@ -140,13 +141,4 @@ const CardValueWrapper = styled.div`
 `;
 const CardValue = styled.span`
   font-size: 28px;
-`;
-const CardArrow = styled.span`
-  position: absolute;
-  top: 50%;
-  right: 0;
-  transform: translateY(-50%);
-  width: 15px;
-  height: 15px;
-  background-image: url(${require("../../../assets/arrow.png")});
 `;

@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import { Col, Row } from "reactstrap";
 import { YOUNG_STATUS_COLORS, departmentList, department2region } from "../../../utils";
+import CardArrowDashboard from "../../../components/CardArrowDashboard";
 
 import api from "../../../services/api";
 
@@ -84,7 +85,7 @@ export default ({ filter }) => {
             <CardTitle>Objectif d'inscriptions</CardTitle>
             <CardValueWrapper>
               <CardValue>{goal || "-"}</CardValue>
-              <CardArrow />
+              <CardArrowDashboard />
             </CardValueWrapper>
           </Card>
         </Col>
@@ -93,7 +94,7 @@ export default ({ filter }) => {
             <CardTitle>Nombre d'inscrits *</CardTitle>
             <CardValueWrapper>
               <CardValue>{totalInscription || "0"}</CardValue>
-              <CardArrow />
+              <CardArrowDashboard />
             </CardValueWrapper>
             <div style={{ fontSize: "10px", color: "#888" }}>* 2021 validés et 2020 affectés</div>
           </Card>
@@ -103,7 +104,7 @@ export default ({ filter }) => {
             <CardTitle>Taux de remplissage</CardTitle>
             <CardValueWrapper>
               <CardValue style={goal && percent >= 100 ? { color: "firebrick" } : {}}>{goal ? `${percent} %` : "-"}</CardValue>
-              <CardArrow />
+              <CardArrowDashboard />
             </CardValueWrapper>
           </Card>
         </Col>
@@ -146,13 +147,4 @@ const CardValueWrapper = styled.div`
 `;
 const CardValue = styled.span`
   font-size: 28px;
-`;
-const CardArrow = styled.span`
-  position: absolute;
-  top: 50%;
-  right: 0;
-  transform: translateY(-50%);
-  width: 15px;
-  height: 15px;
-  background-image: url(${require("../../../assets/arrow.png")});
 `;

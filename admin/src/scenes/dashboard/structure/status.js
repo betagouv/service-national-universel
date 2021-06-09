@@ -7,6 +7,7 @@ import { translate, YOUNG_STATUS_COLORS } from "../../../utils";
 
 import api from "../../../services/api";
 import { access } from "fs";
+import CardArrowDashboard from "../../../components/CardArrowDashboard";
 
 const legalStatusTypes = ["ASSOCIATION", "PUBLIC", "PRIVATE", "OTHER"];
 
@@ -60,7 +61,7 @@ export default ({ filter }) => {
               <CardTitle>Structures</CardTitle>
               <CardValueWrapper>
                 <CardValue>{total || 0}</CardValue>
-                <CardArrow />
+                <CardArrowDashboard />
               </CardValueWrapper>
             </Card>
           </Link>
@@ -71,7 +72,7 @@ export default ({ filter }) => {
               <CardTitle>Affiliées à un réseau national</CardTitle>
               <CardValueWrapper>
                 <CardValue>{withNetworkId || 0}</CardValue>
-                <CardArrow />
+                <CardArrowDashboard />
               </CardValueWrapper>
             </Card>
           </Link>
@@ -88,7 +89,7 @@ export default ({ filter }) => {
                     <CardValue>{status[l] || 0}</CardValue>
                     <CardPercentage>
                       {total ? `${(((status[l] || 0) * 100) / total).toFixed(0)}%` : `0%`}
-                      <CardArrow />
+                      <CardArrowDashboard />
                     </CardPercentage>
                   </CardValueWrapper>
                 </Card>
@@ -136,13 +137,4 @@ const CardValueWrapper = styled.div`
 `;
 const CardValue = styled.span`
   font-size: 28px;
-`;
-const CardArrow = styled.span`
-  position: absolute;
-  top: 50%;
-  right: 0;
-  transform: translateY(-50%);
-  width: 15px;
-  height: 15px;
-  background-image: url(${require("../../../assets/arrow.png")});
 `;

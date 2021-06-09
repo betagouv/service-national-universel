@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import { MISSION_STATUS_COLORS, MISSION_STATUS, translate } from "../../../utils";
 
 import api from "../../../services/api";
+import CardArrowDashboard from "../../../components/CardArrowDashboard";
 
 export default ({ filter }) => {
   const user = useSelector((state) => state.Auth.user);
@@ -49,7 +50,7 @@ export default ({ filter }) => {
                 <CardTitle>{translate(MISSION_STATUS[key])}</CardTitle>
                 <CardValueWrapper>
                   <CardValue>{val}</CardValue>
-                  <CardArrow />
+                  <CardArrowDashboard />
                 </CardValueWrapper>
               </Card>
             </Link>
@@ -85,15 +86,6 @@ const CardValueWrapper = styled.div`
 `;
 const CardValue = styled.span`
   font-size: 28px;
-`;
-const CardArrow = styled.span`
-  position: absolute;
-  top: 50%;
-  right: 0;
-  transform: translateY(-50%);
-  width: 15px;
-  height: 15px;
-  background-image: url(${require("../../../assets/arrow.png")});
 `;
 // Title line with filters
 const Title = styled.h2`
