@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 
-import { YOUNG_SITUATIONS, YOUNG_PHASE, translate as t, YOUNG_STATUS, isInRuralArea } from "../../utils";
+import { YOUNG_SITUATIONS, YOUNG_PHASE, translate as t, YOUNG_STATUS, isInRuralArea, formatDateFR } from "../../utils";
 import { appURL } from "../../config";
 import api from "../../services/api";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
@@ -22,11 +22,6 @@ export default ({ onChange, value }) => {
 
   if (!value || !young) return <div />;
 
-  const formatDate = (d) => {
-    const date = new Date(d);
-    return date.toLocaleDateString();
-  };
-
   const getAge = (d) => {
     const now = new Date();
     const date = new Date(d);
@@ -42,7 +37,7 @@ export default ({ onChange, value }) => {
         <div>{t(young.gender)}</div>
         {young.birthdateAt && (
           <div>
-            Né(e) le {formatDate(young.birthdateAt)} • {getAge(young.birthdateAt)} ans
+            Né(e) le {formatDateFR(young.birthdateAt)} • {getAge(young.birthdateAt)} ans
           </div>
         )}
         <div style={{ display: "flex" }}>
