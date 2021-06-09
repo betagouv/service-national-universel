@@ -2,11 +2,10 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 
-import { YOUNG_SITUATIONS, translate as t } from "../../utils";
+import { YOUNG_SITUATIONS, translate as t, formatDateFR } from "../../utils";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import api from "../../services/api";
 import SelectStatusApplication from "../../components/selectStatusApplication";
-import { formatDateFR } from "snu-lib/date";
 
 export default ({ onChange, value, application }) => {
   const [young, setYoung] = useState(null);
