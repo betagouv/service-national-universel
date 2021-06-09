@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { YOUNG_SITUATIONS, translate as t, YOUNG_STATUS, isInRuralArea } from "../../utils";
 import api from "../../services/api";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
+import { formatDateFR } from "snu-lib/date";
 
 export default ({ onChange, value }) => {
   const [young, setYoung] = useState(null);
@@ -19,11 +20,6 @@ export default ({ onChange, value }) => {
   }, [value]);
 
   if (!value || !young) return <div />;
-
-  const formatDate = (d) => {
-    const date = new Date(d);
-    return date.toLocaleDateString();
-  };
 
   const getAge = (d) => {
     const now = new Date();
@@ -40,7 +36,7 @@ export default ({ onChange, value }) => {
         <div>{t(young.gender)}</div>
         {young.birthdateAt && (
           <div>
-            Né(e) le {formatDate(young.birthdateAt)} • {getAge(young.birthdateAt)} ans
+            Né(e) le {formatDateFR(young.birthdateAt)} • {getAge(young.birthdateAt)} ans
           </div>
         )}
         <div style={{ display: "flex" }}>
