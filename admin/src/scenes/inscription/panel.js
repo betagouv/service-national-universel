@@ -8,6 +8,7 @@ import Historic from "../../components/historic";
 import api from "../../services/api";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
 import { appURL } from "../../config";
+import { getAge } from "snu-lib/date";
 
 export default ({ onChange, value }) => {
   const [young, setYoung] = useState(null);
@@ -26,13 +27,6 @@ export default ({ onChange, value }) => {
   const formatDate = (d) => {
     const date = new Date(d);
     return date.toLocaleDateString();
-  };
-
-  const getAge = (d) => {
-    const now = new Date();
-    const date = new Date(d);
-    const diffTime = Math.abs(date - now);
-    return Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
   };
 
   function isFromFranceConnect() {

@@ -13,6 +13,7 @@ import Loader from "../../../components/Loader";
 import ExportComponent from "../../../components/ExportXlsx";
 import { Filter, FilterRow, ResultTable, Table, TopResultStats, BottomResultStats, MultiLine } from "../../../components/list";
 const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_PHASE_1", "STATUS_PHASE_2", "STATUS_PHASE_3", "STATUS_APPLICATION", "LOCATION"];
+import { getAge } from "snu-lib/date";
 
 export default ({ center, updateCenter }) => {
   const [young, setYoung] = useState();
@@ -275,13 +276,6 @@ export default ({ center, updateCenter }) => {
 
 const Hit = ({ hit, onClick, selected, onChangeYoung }) => {
   const user = useSelector((state) => state.Auth.user);
-
-  const getAge = (d) => {
-    const now = new Date();
-    const date = new Date(d);
-    const diffTime = Math.abs(date - now);
-    return Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
-  };
   return (
     <tr style={{ backgroundColor: (selected && "#e6ebfa") || (hit.status === "WITHDRAWN" && "#BE3B1211") }} onClick={onClick}>
       <td>

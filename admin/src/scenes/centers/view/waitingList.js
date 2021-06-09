@@ -14,6 +14,7 @@ import { Filter, FilterRow, ResultTable, Table, TopResultStats, BottomResultStat
 import { toastr } from "react-redux-toastr";
 const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_PHASE_1", "STATUS_PHASE_2", "STATUS_PHASE_3", "STATUS_APPLICATION", "LOCATION"];
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
+import { getAge } from "../../../../../lib/date";
 
 export default ({ center, updateCenter }) => {
   const [young, setYoung] = useState();
@@ -114,12 +115,6 @@ export default ({ center, updateCenter }) => {
 
 const Hit = ({ index, hit, onSend, onClick, selected, onChangeYoung }) => {
   const user = useSelector((state) => state.Auth.user);
-  const getAge = (d) => {
-    const now = new Date();
-    const date = new Date(d);
-    const diffTime = Math.abs(date - now);
-    return Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
-  };
   return (
     <tr style={{ backgroundColor: selected && "#e6ebfa" }} onClick={onClick}>
       <td>{index + 1}</td>

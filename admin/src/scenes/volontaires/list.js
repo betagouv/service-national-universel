@@ -16,6 +16,7 @@ import { Link } from "react-router-dom";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
 import { Filter, FilterRow, ResultTable, Table, TopResultStats, BottomResultStats, ActionBox, Header, Title, MultiLine } from "../../components/list";
+import { getAge } from "snu-lib/date";
 
 const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_PHASE_1", "STATUS_PHASE_2", "STATUS_PHASE_3", "STATUS_APPLICATION", "LOCATION", "CONTRACT_STATUS"];
 
@@ -350,15 +351,6 @@ export default ({ setYoung }) => {
 };
 
 const Hit = ({ hit, onClick, selected }) => {
-  const getAge = (d) => {
-    const now = new Date();
-    const date = new Date(d);
-    const diffTime = Math.abs(date - now);
-    const age = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
-    if (!age || isNaN(age)) return "?";
-    return age;
-  };
-
   return (
     <tr style={{ backgroundColor: (selected && "#e6ebfa") || (hit.status === "WITHDRAWN" && "#BE3B1211") }} onClick={onClick}>
       <td>

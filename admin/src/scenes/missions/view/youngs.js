@@ -7,6 +7,7 @@ import MissionView from "./wrapper";
 import Panel from "../../volontaires/panel";
 import { formatStringLongDate } from "../../../utils";
 import Loader from "../../../components/Loader";
+import { getAge } from "snu-lib/date";
 
 export default ({ mission, applications }) => {
   const [missionTemp, setMissionTemp] = useState(mission);
@@ -55,12 +56,6 @@ export default ({ mission, applications }) => {
 };
 
 const Hit = ({ hit, onClick, onChangeApplication, selected }) => {
-  const getAge = (d) => {
-    const now = new Date();
-    const date = new Date(d);
-    const diffTime = Math.abs(date - now);
-    return Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
-  };
   return (
     <tr style={{ backgroundColor: (selected && "#e6ebfa") || (hit.status === "WITHDRAWN" && "#BE3B1211") }} onClick={onClick}>
       <td>

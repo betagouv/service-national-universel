@@ -8,6 +8,7 @@ import api from "../../../services/api";
 import { translate } from "../../../utils";
 import { Filter, ResultTable, BottomResultStats, Table, MultiLine } from "../../../components/list";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
+import { getAge } from "../../../../../lib/date";
 
 export default ({ center, onAffect, onClick }) => {
   const getDefaultQuery = () => ({
@@ -127,15 +128,6 @@ export default ({ center, onAffect, onClick }) => {
 
 const HitYoung = ({ hit, handleAffect, handleWaitingList, onClick }) => {
   const user = useSelector((state) => state.Auth.user);
-
-  const getAge = (d) => {
-    const now = new Date();
-    const date = new Date(d);
-    const diffTime = Math.abs(date - now);
-    const age = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
-    if (!age || isNaN(age)) return "?";
-    return age;
-  };
   return (
     <tr>
       <td>
