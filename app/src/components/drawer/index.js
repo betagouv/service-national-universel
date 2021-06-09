@@ -209,12 +209,12 @@ const Sidebar = styled.div`
   }
   background-color: #362f78;
   width: 15%;
-  position: fixed;
+  position: sticky;
   top: 0;
   bottom: 0;
   left: 0;
   z-index: 1;
-  min-height: 100vh;
+  height: 100vh;
   overflow-y: auto;
   transition: 0.2s;
   a {
