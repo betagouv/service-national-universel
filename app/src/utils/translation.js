@@ -163,6 +163,8 @@ export const translate = (value) => {
       return "L'utilisateur n'existe pas";
     case "OPERATION_UNAUTHORIZED":
       return "Opération non autorisée";
+    case "OPERATION_NOT_ALLOWED":
+      return "Opération non autorisée";
     case "FILE_CORRUPTED":
       return "Ce fichier est corrompu";
     case "YOUNG_ALREADY_REGISTERED":
