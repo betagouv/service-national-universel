@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 
-import { YOUNG_SITUATIONS, translate as t, YOUNG_STATUS, isInRuralArea, formatDateFR } from "../../utils";
+import { YOUNG_SITUATIONS, translate as t, YOUNG_STATUS, isInRuralArea, formatDateFR, getAge} from "../../utils";
 import api from "../../services/api";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
 
@@ -19,13 +19,6 @@ export default ({ onChange, value }) => {
   }, [value]);
 
   if (!value || !young) return <div />;
-
-  const getAge = (d) => {
-    const now = new Date();
-    const date = new Date(d);
-    const diffTime = Math.abs(date - now);
-    return Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
-  };
 
   return (
     <Panel>

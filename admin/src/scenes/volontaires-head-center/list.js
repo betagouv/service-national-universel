@@ -7,7 +7,7 @@ import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
 import ExportComponent from "../../components/ExportXlsx";
-import { translate, getFilterLabel, YOUNG_STATUS_COLORS, formatDateFR, formatLongDateFR, isInRuralArea } from "../../utils";
+import { translate, getFilterLabel, YOUNG_STATUS_COLORS, formatDateFR, formatLongDateFR, isInRuralArea, getAge } from "../../utils";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Badge from "../../components/Badge";
 import { ResultTable, Filter, Table, FilterRow, TopResultStats, BottomResultStats } from "../../components/list";
@@ -265,15 +265,6 @@ const Hit = ({ hit, onClick, selected, callback }) => {
     !cohesionStayPresenceChecked && setCohesionStayPresenceChecked(hit.cohesionStayPresence);
     !cohesionStayMedicalFileReceivedChecked && setCohesionStayMedicalFileReceivedChecked(hit.cohesionStayMedicalFileReceived);
   }, [hit]);
-
-  const getAge = (d) => {
-    const now = new Date();
-    const date = new Date(d);
-    const diffTime = Math.abs(date - now);
-    const age = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
-    if (!age || isNaN(age)) return "?";
-    return age;
-  };
 
   const updateYoung = async (v) => {
     const { data, ok, code } = await api.put(`/referent/young/${hit._id}`, v);

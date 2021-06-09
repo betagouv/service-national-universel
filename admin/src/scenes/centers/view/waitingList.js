@@ -8,7 +8,7 @@ import SelectStatus from "../../../components/selectStatus";
 import api from "../../../services/api";
 import CenterView from "./wrapper";
 import Panel from "../../volontaires/panel";
-import { getFilterLabel, YOUNG_STATUS_PHASE1, translate } from "../../../utils";
+import { getFilterLabel, YOUNG_STATUS_PHASE1, translate, getAge } from "../../../utils";
 import Loader from "../../../components/Loader";
 import { Filter, FilterRow, ResultTable, Table, TopResultStats, BottomResultStats, MultiLine } from "../../../components/list";
 import { toastr } from "react-redux-toastr";
@@ -114,12 +114,6 @@ export default ({ center, updateCenter }) => {
 
 const Hit = ({ index, hit, onSend, onClick, selected, onChangeYoung }) => {
   const user = useSelector((state) => state.Auth.user);
-  const getAge = (d) => {
-    const now = new Date();
-    const date = new Date(d);
-    const diffTime = Math.abs(date - now);
-    return Math.floor(diffTime / (1000 * 60 * 60 * 24 * 365));
-  };
   return (
     <tr style={{ backgroundColor: selected && "#e6ebfa" }} onClick={onClick}>
       <td>{index + 1}</td>
