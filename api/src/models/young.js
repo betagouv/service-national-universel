@@ -108,8 +108,8 @@ const Schema = new mongoose.Schema({
     },
   },
   statusPhase2Contract: {
-    type: String,
-    default: "NONE",
+    type: [String],
+    default: [],
     enum: ["NONE", "DRAFT", "SENT", "VALIDATED"],
     documentation: {
       description: "Statut du contrat d'engagement du volontaire (cf: modèle contrat)",
