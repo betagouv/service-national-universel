@@ -10,7 +10,7 @@ const { sendEmail } = require("./sendinblue");
 const path = require("path");
 const fs = require("fs");
 const sendinblue = require("./sendinblue");
-const { ADMIN_URL } = require("./config");
+const { ADMIN_URL, APP_URL } = require("./config");
 const { CELLAR_ENDPOINT, CELLAR_KEYID, CELLAR_KEYSECRET, BUCKET_NAME, ENVIRONMENT } = require("./config");
 
 function getReq(url, cb) {
@@ -151,6 +151,26 @@ const sendAutoAffectationMail = async (nextYoung, center) => {
   );
 };
 
+const sendAutoCancelMeetingPoint = async (young) => {
+  const cc = [];
+  if (young.parent1Email) cc.push({ email: young.parent1Email });
+  if (young.parent2Email) cc.push({ email: young.parent2Email });
+  await sendEmail(
+    {
+      name: `${young.firstName} ${young.lastName}`,
+      email: young.email,
+    },
+    "Sélection de votre point de rassemblement - Action à faire",
+    fs
+      .readFileSync(path.resolve(__dirname, "./templates/autoCancelMeetingPoint.html"))
+      .toString()
+      .replace(/{{firstName}}/, young.firstName)
+      .replace(/{{lastName}}/, young.lastName)
+      .replace(/{{cta}}/g, `${APP_URL}/auth/login?redirect=phase1`),
+    { cc }
+  );
+};
+
 const sendAutoAffectationNotFoundMails = async (to, young, center) => {
   // Send mail.
   await sendEmail(
@@ -254,4 +274,5 @@ module.exports = {
   assignNextYoungFromWaitingList,
   sendAutoAffectationMail,
   updatePlacesBus,
+  sendAutoCancelMeetingPoint,
 };

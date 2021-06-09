@@ -8,7 +8,7 @@ import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import Loader from "../../../components/Loader";
 import api from "../../../services/api";
 import AssignMeetingPoint from "../components/AssignMeetingPoint";
-import { translate, formatStringLongDate } from "../../../utils";
+import { translate } from "../../../utils";
 
 export default ({ values, handleChange, handleSubmit }) => {
   const [meetingPoint, setMeetingPoint] = useState();
@@ -30,7 +30,7 @@ export default ({ values, handleChange, handleSubmit }) => {
 
   useEffect(() => {
     getData();
-  }, []);
+  }, [values]);
 
   return (
     <Col md={6} style={{ marginBottom: "20px" }}>

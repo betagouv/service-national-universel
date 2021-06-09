@@ -7,7 +7,9 @@ const Joi = require("joi");
 const CohesionCenterModel = require("../models/cohesionCenter");
 const ReferentModel = require("../models/referent");
 const YoungModel = require("../models/young");
-const { ERRORS, updatePlacesCenter, sendAutoAffectationMail } = require("../utils");
+const MeetingPointObject = require("../models/meetingPoint");
+const BusObject = require("../models/bus");
+const { ERRORS, updatePlacesCenter, updatePlacesBus, sendAutoAffectationMail, sendAutoCancelMeetingPoint } = require("../utils");
 
 router.post("/refresh/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
@@ -67,6 +69,24 @@ router.post("/:centerId/assign-young/:youngId", passport.authenticate("referent"
       cohesionCenterZip: center.zip,
       // autoAffectationPhase1ExpiresAt: Date.now() + 60 * 1000 * 60 * 48,
     });
+
+    //if the young has already a meetingPoint and therefore a place taken in a bus
+    let bus = null;
+    if (young.meetingPointId) {
+      console.log(`affect ${young.id} but is already in meetingPoint ${young.meetingPointId}`);
+      const meetingPoint = await MeetingPointObject.findById(young.meetingPointId);
+      if (!meetingPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      bus = await BusObject.findById(meetingPoint.busId);
+      if (!bus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      console.log(`${young.id} is in bus ${bus.idExcel}`);
+    }
+
+    // if young has confirmed their meetingPoint, as we will cancel it, we notify them
+    if (young.meetingPointId || young.deplacementPhase1Autonomous === "true") {
+      young.set({ meetingPointId: undefined, deplacementPhase1Autonomous: undefined });
+      await sendAutoCancelMeetingPoint(young);
+    }
+
     await young.save();
 
     // await sendAutoAffectationMail(young, center);
@@ -86,6 +106,7 @@ router.post("/:centerId/assign-young/:youngId", passport.authenticate("referent"
     // update center infos
     const data = await updatePlacesCenter(center);
     if (oldCenter) await updatePlacesCenter(oldCenter);
+    if (bus) await updatePlacesBus(bus);
 
     return res.status(200).send({ data, young, ok: true });
   } catch (error) {
