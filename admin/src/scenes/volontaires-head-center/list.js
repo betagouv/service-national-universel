@@ -26,7 +26,7 @@ export default () => {
       setMeetingPoints(data);
     })();
   }, []);
-  const getDefaultQuery = () => ({ query: { bool: { filter: { term: { "cohesionCenterId.keyword": user.cohesionCenterId } } } } });
+  const getDefaultQuery = () => ({ query: { bool: { filter: { term: { "cohesionCenterId.keyword": user.cohesionCenterId } } } }, sort: [{ "lastName.keyword": "asc" }] });
   const getExportQuery = () => ({ ...getDefaultQuery(), size: 10000 });
 
   return (
