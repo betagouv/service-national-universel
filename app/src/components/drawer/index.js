@@ -206,6 +206,7 @@ const Sidebar = styled.div`
     height: 100vh;
     width: 100vw;
     z-index: 11;
+    position: fixed;
   }
   background-color: #362f78;
   width: 15%;
