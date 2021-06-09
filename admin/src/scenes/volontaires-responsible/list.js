@@ -10,8 +10,7 @@ import Panel from "./panel";
 import VioletHeaderButton from "../../components/buttons/VioletHeaderButton";
 import ExportComponent from "../../components/ExportXlsx";
 import Loader from "../../components/Loader";
-import { translate, getFilterLabel, formatStringLongDate, formatStringDate } from "../../utils";
-import { getAge } from "snu-lib/date";
+import { translate, getFilterLabel, formatStringLongDate, formatStringDate, getAge } from "../../utils";
 
 const FILTERS = ["SEARCH", "STATUS", "PHASE", "COHORT", "MISSIONS", "TUTOR"];
 

@@ -4,12 +4,11 @@ import styled from "styled-components";
 import { Formik, Field } from "formik";
 import { useHistory } from "react-router-dom";
 
-import { translate as t, YOUNG_PHASE, YOUNG_STATUS_PHASE2, APPLICATION_STATUS, APPLICATION_STATUS_COLORS } from "../../../utils";
+import { translate as t, YOUNG_PHASE, YOUNG_STATUS_PHASE2, APPLICATION_STATUS, APPLICATION_STATUS_COLORS, dateForDatePicker, getAge } from "../../../utils";
 import api from "../../../services/api";
 import WrapperPhase2 from "./wrapper";
 import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
 import Loader from "../../../components/Loader";
-import { dateForDatePicker, getAge } from "snu-lib/date";
 import { Box } from "../../../components/box";
 import VioletHeaderButton from "../../../components/buttons/VioletHeaderButton";
 import WhiteHeaderButton from "../../../components/buttons/WhiteHeaderButton";

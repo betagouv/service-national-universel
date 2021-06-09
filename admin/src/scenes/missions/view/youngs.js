@@ -5,9 +5,8 @@ import SelectStatusApplication from "../../../components/selectStatusApplication
 import api from "../../../services/api";
 import MissionView from "./wrapper";
 import Panel from "../../volontaires/panel";
-import { formatStringLongDate } from "../../../utils";
+import { formatStringLongDate, getAge } from "../../../utils";
 import Loader from "../../../components/Loader";
-import { getAge } from "snu-lib/date";
 
 export default ({ mission, applications }) => {
   const [missionTemp, setMissionTemp] = useState(mission);

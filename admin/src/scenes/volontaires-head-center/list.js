@@ -7,13 +7,12 @@ import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
 import ExportComponent from "../../components/ExportXlsx";
-import { translate, getFilterLabel, YOUNG_STATUS_COLORS, formatDateFR, formatLongDateFR, isInRuralArea } from "../../utils";
+import { translate, getFilterLabel, YOUNG_STATUS_COLORS, formatDateFR, formatLongDateFR, isInRuralArea, getAge } from "../../utils";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Badge from "../../components/Badge";
 import { ResultTable, Filter, Table, FilterRow, TopResultStats, BottomResultStats } from "../../components/list";
 import ToggleSwitch from "../../components/ToogleSwitch";
 import { toastr } from "react-redux-toastr";
-import { getAge } from "snu-lib/date";
 
 const FILTERS = ["SEARCH", "STATUS", "PHASE", "COHORT", "MISSIONS", "TUTOR", "STATUS_PHASE_1"];
 

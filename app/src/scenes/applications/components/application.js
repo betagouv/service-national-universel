@@ -6,8 +6,7 @@ import { Col, Row } from "reactstrap";
 import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
-import { translate, APPLICATION_STATUS_COLORS, APPLICATION_STATUS } from "../../../utils";
-import { getAge } from "snu-lib/date";
+import { translate, APPLICATION_STATUS_COLORS, APPLICATION_STATUS, getAge } from "../../../utils";
 
 export default ({ application, index }) => {
   const [value, setValue] = useState(application);

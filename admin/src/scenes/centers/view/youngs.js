@@ -8,12 +8,11 @@ import api from "../../../services/api";
 import CenterView from "./wrapper";
 import Panel from "../../volontaires/panel";
 
-import { getFilterLabel, YOUNG_STATUS_PHASE1, translate, formatDateFR, isInRuralArea, formatLongDateFR } from "../../../utils";
+import { getFilterLabel, YOUNG_STATUS_PHASE1, translate, formatDateFR, isInRuralArea, formatLongDateFR, getAge } from "../../../utils";
 import Loader from "../../../components/Loader";
 import ExportComponent from "../../../components/ExportXlsx";
 import { Filter, FilterRow, ResultTable, Table, TopResultStats, BottomResultStats, MultiLine } from "../../../components/list";
 const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_PHASE_1", "STATUS_PHASE_2", "STATUS_PHASE_3", "STATUS_APPLICATION", "LOCATION"];
-import { getAge } from "snu-lib/date";
 
 export default ({ center, updateCenter }) => {
   const [young, setYoung] = useState();

@@ -5,10 +5,9 @@ import { useSelector } from "react-redux";
 
 import { apiURL } from "../../../config";
 import api from "../../../services/api";
-import { translate } from "../../../utils";
+import { translate, getAge } from "../../../utils";
 import { Filter, ResultTable, BottomResultStats, Table, MultiLine } from "../../../components/list";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
-import { getAge } from "../../../../../lib/date";
 
 export default ({ center, onAffect, onClick }) => {
   const getDefaultQuery = () => ({

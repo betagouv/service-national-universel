@@ -2,13 +2,12 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 
-import { translate as t, isInRuralArea } from "../../utils";
+import { translate as t, isInRuralArea, getAge } from "../../utils";
 import DownloadButton from "../../components/buttons/DownloadButton";
 import Historic from "../../components/historic";
 import api from "../../services/api";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
 import { appURL } from "../../config";
-import { getAge } from "snu-lib/date";
 
 export default ({ onChange, value }) => {
   const [young, setYoung] = useState(null);
