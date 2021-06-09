@@ -58,10 +58,15 @@ export default () => {
           <div>
             <h2>Transmission de la fiche sanitaire</h2>
             <p>
-              Vous devez renseigner votre fiche sanitaire, joindre les photocopies des documents requis et mettre le tout dans une envelope fermée portant la mention “A l’attention de
-              l’infirmier, Pli Confidentiel”. <br />
+              Vous devez renseigner votre fiche sanitaire, joindre les photocopies des documents requis et mettre le tout dans une envelope fermée portant la mention “A l’attention
+              de l’infirmier, Pli Confidentiel”. <br />
               <b>Vous la remettrez en main propre à votre arrivée au centre de séjour à l’équipe d’encadrement.</b>
             </p>
+            <div style={{ color: "#777" }}>
+              <i>
+                <b>A noter</b> : si vous avez déjà envoyé votre fiche sanitaire par voie postale, vous n'avez rien à faire.
+              </i>
+            </div>
             <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Note_relative_aux_informations_d_ordre_sanitaire.pdf" target="blank" className="link">
               Note relative aux informations d'ordre sanitaire ›
             </a>
