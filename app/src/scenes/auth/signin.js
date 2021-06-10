@@ -18,6 +18,7 @@ import Register from "./components/Register";
 import ErrorLogin from "./components/ErrorLogin";
 import ModalInProgress from "../../components/modals/ModalInProgress";
 import { isInscription2021Closed } from "../../utils";
+import { toastr } from "react-redux-toastr";
 
 export default () => {
   const [modal, setModal] = useState(null);
@@ -25,9 +26,10 @@ export default () => {
   const young = useSelector((state) => state.Auth.young);
   const [userIsValid, setUserIsValid] = useState(true);
   const params = queryString.parse(location.search);
-  const { redirect } = params;
+  const { redirect, disconnected } = params;
 
   if (young) return <Redirect to={"/" + (redirect || "")} />;
+  if (disconnected === "1") toastr.error("Votre session a expiré", "Merci de vous reconnecter.", { timeOut: 10000 });
 
   return (
     <div style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>

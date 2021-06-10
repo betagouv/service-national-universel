@@ -70,12 +70,13 @@ class api {
           headers: { "Content-Type": "application/json", Authorization: this.token },
           body: typeof body === "string" ? body : JSON.stringify(body),
         });
-        if (response.status !== 200) return reject({});
+        if (response.status === 401) return reject(new Error("unauthorized"));
+        if (response.status !== 200) return reject();
         const file = await response.blob();
         resolve(file);
       } catch (e) {
         console.log(e);
-        reject();
+        reject(e);
       }
     });
   }

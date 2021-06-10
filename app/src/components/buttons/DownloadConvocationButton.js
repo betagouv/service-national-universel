@@ -27,8 +27,11 @@ export default ({ young, children, disabled, uri, ...rest }) => {
       }
       setLoading(false);
     } catch (e) {
-      toastr.error("Une erreur est survenu lors de l'édition de votre convocation", e, { timeOut: 10000 });
+      if (e?.message === "unauthorized") {
+        return (window.location.href = "/auth/login?disconnected=1&redirect=phase1");
+      }
       Sentry.captureException(e);
+      toastr.error("Une erreur est survenue lors de l'édition de votre convocation", e?.message, { timeOut: 10000 });
       setLoading(false);
     }
   };
