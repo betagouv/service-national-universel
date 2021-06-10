@@ -10,6 +10,7 @@ import WithdrawnModal from "../WithdrawnModal";
 import DownloadAttestationButton from "../buttons/DownloadAttestationButton";
 import SubMenuPhase2 from "./SubMenuPhase2";
 import SubMenuPhase3 from "./SubMenuPhase3";
+import { environment } from "../../config";
 
 export default (props) => {
   const [open, setOpen] = useState();
@@ -63,6 +64,10 @@ export default (props) => {
       props.onOpen(false);
     }
   };
+
+  function isDiagorienteReady() {
+    return environment !== "production" || new Date() > new Date("2021-06-21");
+  }
 
   return (
     <>
@@ -149,12 +154,14 @@ export default (props) => {
             Mes documents
           </NavLink>
         </li> */}
-          <DiagorienteButton>
-            <NavLink to="/diagoriente" onClick={(event) => handleClick(event, DRAWER_TABS.HOME)}>
-              <img src={require("../../assets/logo-diagoriente-white.png")} />
-              Outil d'aide à l'orientation
-            </NavLink>
-          </DiagorienteButton>
+          {isDiagorienteReady() && (
+            <DiagorienteButton>
+              <NavLink to="/diagoriente" onClick={(event) => handleClick(event, DRAWER_TABS.HOME)}>
+                <img src={require("../../assets/logo-diagoriente-white.png")} />
+                Outil d'aide à l'orientation
+              </NavLink>
+            </DiagorienteButton>
+          )}
           {young.statusPhase1 === "DONE" && young.statusPhase2 === "VALIDATED" ? (
             <DrawerButton>
               <DownloadAttestationButton young={young} uri="snu">

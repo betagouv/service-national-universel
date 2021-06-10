@@ -9,8 +9,6 @@ import api from "../../services/api";
 import { translate, formatStringDate } from "../../utils";
 
 export default () => {
-  const young = useSelector((state) => state.Auth.young);
-  const history = useHistory();
   const [diagorienteUrl, setDiagorienteUrl] = useState();
   const [diagorienteCardData, setDiagorienteCardData] = useState();
   const [skills, setSkills] = useState([]);
@@ -232,15 +230,11 @@ const Card = styled(Row)`
 const CardContainer = styled.div`
   display: flex;
   justify-self: center;
-  max-width: 80rem;
   margin: 0 1rem;
   flex-direction: column;
   padding: 0rem 0rem 1rem 0rem;
   @media (max-width: px) {
     padding: 1rem 0;
-  }
-  .col {
-    margin: 20px 0px 0px 0px;
   }
 `;
 
