@@ -20,7 +20,7 @@ export default () => {
           <div style={{ flex: 2, position: "relative" }}>
             <Header>
               <div style={{ flex: 1 }}>
-                <Title>Centres</Title>
+                <Title>Points de rassemblement</Title>
               </div>
             </Header>
             <Filter>
@@ -47,6 +47,7 @@ export default () => {
                   URLParams={true}
                   sortBy="asc"
                   showSearch={true}
+                  searchPlaceholder="Rechercher..."
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
@@ -59,6 +60,7 @@ export default () => {
                   URLParams={true}
                   sortBy="asc"
                   showSearch={true}
+                  searchPlaceholder="Rechercher..."
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
@@ -71,6 +73,7 @@ export default () => {
                   URLParams={true}
                   sortBy="asc"
                   showSearch={true}
+                  searchPlaceholder="Rechercher..."
                 />
               </FilterRow>
             </Filter>
