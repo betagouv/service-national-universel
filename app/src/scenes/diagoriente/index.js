@@ -69,7 +69,7 @@ export default () => {
           <div className="content">
             <img src={require("../../assets/logo-diagoriente-blue.png")} />
             <h1>Identifiez vos compétences et explorez vos intérêts</h1>
-            <p>Complète tes expériences, qu'elles soient professionnelles ou personnelles, puis évalue tes compétences.</p>
+            <p>Complètez vos expériences, qu'elles soient professionnelles ou personnelles, puis évaluez vos compétences.</p>
             <VioletButton>
               <a href={diagorienteUrl} target="_blank">
                 Accéder à Diagoriente
@@ -137,7 +137,7 @@ export default () => {
 
 const MiddleContainer = styled.div`
   font-size: 1rem;
-  padding: 3rem;
+  padding: 1.5rem;
   margin: auto;
   textarea {
     width: 100%;
