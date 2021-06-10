@@ -17,6 +17,7 @@ const { getQPV } = require("../qpv");
 const YoungObject = require("../models/young");
 const CohesionCenterObject = require("../models/cohesionCenter");
 const MeetingPointObject = require("../models/meetingPoint");
+const DepartmentServiceModel = require("../models/departmentService");
 const BusObject = require("../models/bus");
 const AuthObject = require("../auth");
 const { uploadFile, validatePassword, updatePlacesCenter, updatePlacesBus, assignNextYoungFromWaitingList, ERRORS } = require("../utils");
@@ -144,6 +145,17 @@ router.put("/validate_phase3/:young/:token", async (req, res) => {
     data.set({ statusPhase3: "VALIDATED", phase3TutorNote: req.body.phase3TutorNote });
     await data.save();
     await data.index();
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+router.get("/department-service", passport.authenticate(["young"], { session: false }), async (req, res) => {
+  try {
+    const data = await DepartmentServiceModel.findOne({ department: req.user.department });
+    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);

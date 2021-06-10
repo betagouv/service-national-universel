@@ -8,9 +8,9 @@ import NextStep from "./nextStep";
 import api from "../../services/api";
 import { translate } from "../../utils";
 import DownloadConvocationButton from "../../components/buttons/DownloadConvocationButton";
-import { environment } from "../../config";
 
 import SelectMeetingPoint from "./SelectMeetingPoint";
+import Convocation from "./components/Convocation";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
@@ -134,6 +134,7 @@ export default () => {
               </div>
             </ContentHorizontal>
           </Hero>
+          <Convocation />
         </HeroContainer>
       ) : null}
     </>
