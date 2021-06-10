@@ -4,7 +4,6 @@ import { BrowserRouter as Router, Route, Switch, Redirect, useLocation } from "r
 import "bootstrap/dist/css/bootstrap.min.css";
 import * as Sentry from "@sentry/browser";
 import queryString from "query-string";
-
 import styled from "styled-components";
 
 import { setYoung } from "./redux/auth/actions";
@@ -23,9 +22,7 @@ import Applications from "./scenes/applications";
 import Cohesion from "./scenes/cohesion-2020/";
 import Contract from "./scenes/contract";
 import ContractDone from "./scenes/contract/done";
-
 import Loader from "./components/Loader";
-
 import Header from "./components/header";
 import Drawer from "./components/drawer";
 import Footer from "./components/footer";
