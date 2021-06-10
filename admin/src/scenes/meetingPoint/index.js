@@ -15,7 +15,7 @@ export default () => {
 
   return (
     <div>
-      <ReactiveBase url={`${apiURL}/es`} app="meetingPoint" headers={{ Authorization: `JWT ${api.getToken()}` }}>
+      <ReactiveBase url={`${apiURL}/es`} app="meetingpoint" headers={{ Authorization: `JWT ${api.getToken()}` }}>
         <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
           <div style={{ flex: 2, position: "relative" }}>
             <Header>
@@ -48,6 +48,7 @@ export default () => {
                   sortBy="asc"
                   showSearch={true}
                   searchPlaceholder="Rechercher..."
+                  size={1000}
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
@@ -61,6 +62,7 @@ export default () => {
                   sortBy="asc"
                   showSearch={true}
                   searchPlaceholder="Rechercher..."
+                  size={1000}
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
@@ -74,6 +76,7 @@ export default () => {
                   sortBy="asc"
                   showSearch={true}
                   searchPlaceholder="Rechercher..."
+                  size={1000}
                 />
               </FilterRow>
             </Filter>
