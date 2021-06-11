@@ -36,7 +36,7 @@ router.post("/", async (req, res) => {
 router.put("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const { errorId, value: checkedId } = validateId(req.body._id);
-    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_URI, error });
+    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
     const m = await MissionObject.findById(checkedId);
     if (!canModify(req.user, m)) return res.status(404).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const { errorMission, value: checkedMission } = validateFromReferent.validateMission(req.body);

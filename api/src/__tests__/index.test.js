@@ -114,6 +114,7 @@ describe("Mission", () => {
     const missionsBefore = await getMissionsHelper();
     const res = await request(getAppHelper()).post("/mission").send(missionFixture);
     expect(res.statusCode).toEqual(200);
+    expectMissionToEqual(missionFixture, res.body.data);
     const missionsAfter = await getMissionsHelper();
     expect(missionsAfter.length).toEqual(missionsBefore.length + 1);
     await deleteMissionByNameHelper(missionFixture.name);
