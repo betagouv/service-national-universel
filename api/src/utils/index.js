@@ -9,9 +9,9 @@ const ReferentModel = require("../models/referent");
 const { sendEmail } = require("../sendinblue");
 const path = require("path");
 const fs = require("fs");
-const sendinblue = require("./sendinblue");
-const { ADMIN_URL, APP_URL } = require("./config");
-const { CELLAR_ENDPOINT, CELLAR_KEYID, CELLAR_KEYSECRET, BUCKET_NAME, ENVIRONMENT } = require("./config");
+const sendinblue = require("../sendinblue");
+const { ADMIN_URL, APP_URL } = require("../config");
+const { CELLAR_ENDPOINT, CELLAR_KEYID, CELLAR_KEYSECRET, BUCKET_NAME, ENVIRONMENT } = require("../config");
 
 function getReq(url, cb) {
   if (url.toString().indexOf("https") === 0) return https.get(url, cb);
