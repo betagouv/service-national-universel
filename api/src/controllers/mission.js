@@ -7,7 +7,10 @@ const { capture } = require("../sentry");
 const MissionObject = require("../models/mission");
 const UserObject = require("../models/referent");
 const ApplicationObject = require("../models/application");
-const { ERRORS } = require("../utils");
+const { ERRORS } = require("../utils/index.js");
+const { validateId } = require("../utils/defaultValidate");
+const validateFromYoung = require("../utils/young");
+const validateFromReferent = require("../utils/referent");
 
 const canModify = (user, mission) => {
   return !(
@@ -20,7 +23,9 @@ router.post("/", async (req, res) => {
   try {
     const obj = {};
     // if (req.body.hasOwnProperty(`jobboard_indeed_status`)) obj.jobboard_indeed_status = req.body.jobboard_indeed_status;
-    const data = await MissionObject.create(req.body);
+    const { error, value: checkedMission } = validateFromYoung.validateMission(req.body);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_URI, error });
+    const data = await MissionObject.create(checkedMission);
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
@@ -30,9 +35,13 @@ router.post("/", async (req, res) => {
 
 router.put("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const m = await MissionObject.findById(req.body._id);
+    const { errorId, value: checkedId } = validateId(req.body._id);
+    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_URI, error });
+    const m = await MissionObject.findById(checkedId);
     if (!canModify(req.user, m)) return res.status(404).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    const mission = await MissionObject.findByIdAndUpdate(req.body._id, req.body, { new: true });
+    const { errorMission, value: checkedMission } = validateFromReferent.validateMission(req.body);
+    if (errorMission) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    const mission = await MissionObject.findByIdAndUpdate(checkedId, checkedMission, { new: true });
     res.status(200).send({ ok: true, data: mission });
   } catch (error) {
     capture(error);
@@ -42,9 +51,13 @@ router.put("/", passport.authenticate("referent", { session: false }), async (re
 
 router.put("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const m = await MissionObject.findById(req.params.id);
+    const { errorId, value: checkedId } = validateId(req.params.id);
+    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_URI, error });
+    const m = await MissionObject.findById(checkedId);
     if (!canModify(req.user, m)) return res.status(404).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    const mission = await MissionObject.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const { errorMission, value: checkedMission } = validateFromReferent.validateMission(req.body);
+    if (errorMission) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    const mission = await MissionObject.findByIdAndUpdate(checkedId, checkedMission, { new: true });
     res.status(200).send({ ok: true, data: mission });
   } catch (error) {
     capture(error);
@@ -54,7 +67,9 @@ router.put("/:id", passport.authenticate("referent", { session: false }), async 
 
 router.get("/:id", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
-    const data = await MissionObject.findOne({ _id: req.params.id });
+    const { error, value: checkedId } = validateId(req.params.id);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_URI, error });
+    const data = await MissionObject.findOne({ _id: checkedId });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const mission = data.toJSON();
@@ -75,7 +90,9 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
 
 router.get("/structure/:structureId", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const data = await MissionObject.find({ structureId: req.params.structureId });
+    const { error, value: checkedId } = validateId(req.params.structureId);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_URI, error });
+    const data = await MissionObject.find({ structureId: checkedId });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
@@ -97,7 +114,9 @@ router.get("/structure/:structureId", passport.authenticate("referent", { sessio
 //@check
 router.delete("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const mission = await MissionObject.findOne({ _id: req.params.id });
+    const { error, value: checkedId } = validateId(req.params.id);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_URI, error });
+    const mission = await MissionObject.findOne({ _id: checkedId });
     const applications = await ApplicationObject.find({ missionId: mission._id });
     if (applications && applications.length) return res.status(500).send({ ok: false, code: ERRORS.LINKED_OBJECT });
     await mission.remove();
