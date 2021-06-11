@@ -18,6 +18,7 @@ export const DepartmentFilter = ({ defaultQuery, filters, ...rest }) => (
     renderItem={(e, count) => {
       return `${getDepartmentNumber(e)} - ${e} (${count})`;
     }}
+    size={150}
     {...rest}
   />
 );
