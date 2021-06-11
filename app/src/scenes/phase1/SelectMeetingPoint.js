@@ -57,7 +57,9 @@ export default () => {
         <div>
           <h2>Confirmez votre point de rassemblement</h2>
           <p>
-            Merci de confirmer votre point de rassemblement <b>d'ici le 10 juin à 18h.</b>
+            Un délai supplémentaire vous est accordé pour confirmer votre point de rassemblement.
+            <br />
+            Vous avez jusqu'au <b>dimanche 13 juin</b> !
           </p>
         </div>
         <Row style={{ justifyContent: "center" }}>
