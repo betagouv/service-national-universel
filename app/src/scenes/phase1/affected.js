@@ -8,9 +8,9 @@ import NextStep from "./nextStep";
 import api from "../../services/api";
 import { translate } from "../../utils";
 import DownloadConvocationButton from "../../components/buttons/DownloadConvocationButton";
-import { environment } from "../../config";
 
 import SelectMeetingPoint from "./SelectMeetingPoint";
+import Convocation from "./components/Convocation";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
@@ -64,21 +64,25 @@ export default () => {
               <span style={{ color: "#5145cd" }}>{`${center?.name}, ${center?.address} ${center?.zip} ${center?.city}, ${center?.department}, ${center?.region}`}</span>
             </p>
             {showConvocation() ? (
-              <p>
-                <a>
-                  <strong style={{ textDecoration: "underline", cursor: "pointer" }} onClick={goToConvocation}>
-                    Voir votre convocation
-                  </strong>
-                </a>
-                <br />
-                <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/SNU_-_Réglement_intérieur.pdf" target="blank">
-                  <strong style={{ textDecoration: "underline", cursor: "pointer", color: "#6b7280" }}>Voir règlement intérieur</strong>
-                </a>
-                <br />
-                <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Protocole_sanitaire_ACM_avec_hebergement_post_CIC_070621.pdf" target="blank">
-                  <strong style={{ textDecoration: "underline", cursor: "pointer", color: "#6b7280" }}>Voir protocole sanitaire des centres de séjour</strong>
-                </a>
-              </p>
+              <>
+                <p>
+                  <a>
+                    <strong style={{ textDecoration: "underline", cursor: "pointer" }} onClick={goToConvocation}>
+                      Voir votre convocation
+                    </strong>
+                  </a>
+                </p>
+                <p>
+                  <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/SNU_-_Réglement_intérieur.pdf" target="blank">
+                    <strong style={{ textDecoration: "underline", cursor: "pointer", color: "#6b7280" }}>Voir règlement intérieur</strong>
+                  </a>
+                </p>
+                <p>
+                  <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Protocole_sanitaire_ACM_avec_hebergement_post_CIC_070621.pdf" target="blank">
+                    <strong style={{ textDecoration: "underline", cursor: "pointer", color: "#6b7280" }}>Voir protocole sanitaire des centres de séjour</strong>
+                  </a>
+                </p>
+              </>
             ) : null}
           </div>
           <div className="thumb" />
@@ -134,6 +138,7 @@ export default () => {
               </div>
             </ContentHorizontal>
           </Hero>
+          <Convocation />
         </HeroContainer>
       ) : null}
     </>

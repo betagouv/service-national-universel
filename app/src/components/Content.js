@@ -73,6 +73,15 @@ const HeroStyle = styled.div`
     -webkit-clip-path: polygon(15% 0, 0 100%, 100% 100%, 100% 0);
     clip-path: polygon(15% 0, 0 100%, 100% 100%, 100% 0);
   }
+
+  .diagorente {
+    min-height: 400px;
+    background: url(${require("../assets/image-diagorente.png")}) no-repeat center;
+    background-size: cover;
+    flex: 1;
+    -webkit-clip-path: polygon(15% 0, 0 100%, 100% 100%, 100% 0);
+    clip-path: polygon(15% 0, 0 100%, 100% 100%, 100% 0);
+  }
 `;
 
 export const HeroContainer = styled.div`

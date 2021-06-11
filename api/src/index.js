@@ -21,6 +21,7 @@ app.use(cors({ credentials: true, origin }));
 app.use(bodyParser.json());
 app.use(bodyParser.text({ type: "application/x-ndjson" }));
 app.use(bodyParser.urlencoded({ extended: true }));
+
 require("./crons");
 app.use(cookieParser());
 app.use(fileUpload({ limits: { fileSize: 10 * 1024 * 1024 } })); // 10 Mo
@@ -40,6 +41,8 @@ app.use("/waiting-list", require("./controllers/waiting-list"));
 app.use("/cohesion-center", require("./controllers/cohesion-center"));
 app.use("/email", require("./controllers/email"));
 app.use("/meeting-point", require("./controllers/meeting-point"));
+app.use("/diagoriente", require("./controllers/diagoriente"));
+app.use("/bus", require("./controllers/bus"));
 
 app.get("/", async (req, res) => {
   const d = new Date();

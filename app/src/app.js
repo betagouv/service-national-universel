@@ -4,7 +4,6 @@ import { BrowserRouter as Router, Route, Switch, Redirect, useLocation } from "r
 import "bootstrap/dist/css/bootstrap.min.css";
 import * as Sentry from "@sentry/browser";
 import queryString from "query-string";
-
 import styled from "styled-components";
 
 import { setYoung } from "./redux/auth/actions";
@@ -16,6 +15,7 @@ import Inscription from "./scenes/inscription";
 import Phase1 from "./scenes/phase1";
 import Phase2 from "./scenes/phase2";
 import Phase3 from "./scenes/phase3";
+import Diagoriente from "./scenes/diagoriente";
 import Documents from "./scenes/documents";
 import Preferences from "./scenes/preferences";
 import Missions from "./scenes/missions";
@@ -23,9 +23,7 @@ import Applications from "./scenes/applications";
 import Cohesion from "./scenes/cohesion-2020/";
 import Contract from "./scenes/contract";
 import ContractDone from "./scenes/contract/done";
-
 import Loader from "./components/Loader";
-
 import Header from "./components/header";
 import Drawer from "./components/drawer";
 import Footer from "./components/footer";
@@ -116,6 +114,7 @@ const Espace = () => {
             <Route path="/mission" component={Missions} />
             <Route path="/candidature" component={Applications} />
             <Route path="/cohesion" component={Cohesion} />
+            <Route path="/diagoriente" component={Diagoriente} />
             <Route path="/" component={Home} />
           </Switch>
         </Content>

@@ -35,7 +35,9 @@ router.get("/all", passport.authenticate("referent", { session: false }), async 
 router.get("/:id", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
   try {
     const data = await MeetingPointModel.findById(req.params.id);
-    return res.status(200).send({ ok: true, data });
+    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const bus = await BusModel.findById(data.busId);
+    return res.status(200).send({ ok: true, data: { ...data._doc, bus } });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
