@@ -252,7 +252,6 @@ const Hit = ({ hit, onClick, selected }) => {
             if (status === "VALIDATED") {
               history.push(`/volontaire/${hit.youngId}/phase2/application/${hit._id}/contrat`);
             }
-            // onChangeApplication();
           }}
         />
         {hit.status === "VALIDATED" || hit.status === "IN_PROGRESS" || hit.status === "DONE" ? (
