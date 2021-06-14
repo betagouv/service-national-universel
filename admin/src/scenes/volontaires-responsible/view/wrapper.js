@@ -34,11 +34,13 @@ export default ({ children, young, tab }) => {
           <Title>
             {young.firstName} {young.lastName} <Badge text={`Cohorte ${young.cohort}`} />
           </Title>
-          <TabList>
-            <Tab isActive={tab === "details"} onClick={() => history.push(`/volontaire/${young._id}`)}>
-              Détails
-            </Tab>
-          </TabList>
+          {tab !== "contract" ? (
+            <TabList>
+              <Tab isActive={tab === "details"} onClick={() => history.push(`/volontaire/${young._id}`)}>
+                Détails
+              </Tab>
+            </TabList>
+          ) : null}
         </div>
       </Header>
       {children}
