@@ -38,4 +38,5 @@ export const getFilterLabel = (selected, placeholder = "Choisissez un filtre") =
   return translated.join(", ");
 };
 
-export const SHOW_ASSIGN_CENTER = false;
+export const ENABLE_ASSIGN_CENTER = false;
+export const ENABLE_ASSIGN_MEETING_POINT = false;

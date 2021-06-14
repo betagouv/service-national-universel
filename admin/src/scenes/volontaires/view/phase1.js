@@ -5,7 +5,7 @@ import { Formik } from "formik";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-import { translate, YOUNG_STATUS_COLORS, formatStringLongDate, SHOW_ASSIGN_CENTER } from "../../../utils";
+import { translate, YOUNG_STATUS_COLORS, formatStringLongDate, ENABLE_ASSIGN_CENTER } from "../../../utils";
 import WrapperPhase1 from "./wrapper";
 import api from "../../../services/api";
 import ToggleSwitch from "../../../components/ToogleSwitch";
@@ -77,7 +77,7 @@ export default ({ young, getYoung }) => {
       return (
         <>
           <p>Le volontaire est en attente d'affectation à un centre de cohésion</p>
-          {SHOW_ASSIGN_CENTER && user.role === "admin" ? <AssignCenter young={young} onAffect={getYoung} /> : null}
+          {ENABLE_ASSIGN_CENTER && user.role === "admin" ? <AssignCenter young={young} onAffect={getYoung} /> : null}
         </>
       );
     if (young.statusPhase1 === "WAITING_LIST")
