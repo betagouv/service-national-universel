@@ -43,6 +43,13 @@ export default ({ onChange, value, application }) => {
               Prendre&nbsp;sa&nbsp;place
             </Button>
           </a> */}
+          {application.status === "VALIDATED" || application.status === "IN_PROGRESS" || application.status === "DONE" ? (
+            <Link to={`/volontaire/${application.youngId}/phase2/application/${application._id}/contrat`}>
+              <Button icon={require("../../assets/eye.svg")} color="white">
+                Contrat
+              </Button>
+            </Link>
+          ) : null}
         </div>
       </div>
       <Info title="Mission">

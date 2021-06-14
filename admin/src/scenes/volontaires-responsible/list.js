@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { ReactiveBase, ReactiveList, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
+import { useHistory } from "react-router-dom";
 
 import SelectStatusApplication from "../../components/selectStatusApplication";
 import api from "../../services/api";
@@ -196,6 +197,7 @@ export default () => {
 };
 
 const Hit = ({ hit, onClick, selected }) => {
+  const history = useHistory();
   const [mission, setMission] = useState();
   useEffect(() => {
     (async () => {
@@ -244,7 +246,23 @@ const Hit = ({ hit, onClick, selected }) => {
         </div>
       </td>
       <td onClick={(e) => e.stopPropagation()}>
-        <SelectStatusApplication hit={hit} />
+        <SelectStatusApplication
+          hit={hit}
+          callback={(status) => {
+            if (status === "VALIDATED") {
+              history.push(`/volontaire/${hit.youngId}/phase2/application/${hit._id}/contrat`);
+            }
+          }}
+        />
+        {hit.status === "VALIDATED" || hit.status === "IN_PROGRESS" || hit.status === "DONE" ? (
+          <ContractLink
+            onClick={() => {
+              history.push(`/volontaire/${hit.youngId}/phase2/application/${hit._id}/contrat`);
+            }}
+          >
+            Contrat d'engagement &gt;
+          </ContractLink>
+        ) : null}
       </td>
     </tr>
   );
@@ -440,4 +458,14 @@ const BottomResultStats = styled(ResultStats)`
   position: absolute;
   top: calc(100% - 50px);
   left: 0;
+`;
+
+const ContractLink = styled.div`
+  font-weight: 500;
+  font-size: 0.8rem;
+  text-align: center;
+  margin-top: 0.5rem;
+  :hover {
+    text-decoration: underline;
+  }
 `;

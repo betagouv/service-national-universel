@@ -5,8 +5,8 @@ import Wrapper from "./wrapper";
 export default ({ young }) => {
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-      <Wrapper young={young} tab="phase2">
-        <Contract young={young} admin={true} />;
+      <Wrapper young={young} tab="contract">
+        <Contract young={young} admin={false} />;
       </Wrapper>
     </div>
   );
