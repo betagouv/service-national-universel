@@ -28,7 +28,6 @@ const api = async (path, options = {}) => {
 async function sendEmail(to, subject, htmlContent, { params, attachment, cc, bcc } = {}) {
   try {
     const body = {};
-
     body.to = [to];
     if (cc?.length) body.cc = cc;
     body.bcc = bcc;

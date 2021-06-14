@@ -123,6 +123,8 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
           email: contract.parent1Email,
           name: `${contract.parent1FirstName} ${contract.parent1LastName}`,
           token: contract.parent1Token,
+          cc: contract.youngEmail,
+          youngName: `${contract.youngFirstName} ${contract.youngLastName}`
         });
       }
       if (contract.parent2Email && mailsToSend.includes("parent2")) {
@@ -130,6 +132,8 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
           email: contract.parent2Email,
           name: `${contract.parent2FirstName} ${contract.parent2LastName}`,
           token: contract.parent2Token,
+          cc: contract.youngEmail,
+          youngName: `${contract.youngFirstName} ${contract.youngLastName}`
         });
       }
       if (mailsToSend.includes("young")) {
@@ -149,7 +153,11 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
             .replace(/{{cta}}/g, `${APP_URL}/validate-contract?token=${recipient.token}&contract=${contract._id}`);
           const subject = `(RE)Valider le contrat d'engagement de ${contract.youngFirstName} ${contract.youngLastName} sur la mission ${contract.missionName} suite à modifications effectuées`;
           const to = { name: recipient.name, email: recipient.email };
-          await sendEmail(to, subject, htmlContent);
+          if (recipient.cc) {
+            await sendEmail(to, subject, htmlContent, { cc: [{ name: recipient.youngName, email: recipient.cc }] });
+          } else {
+            await sendEmail(to, subject, htmlContent);
+          }
         } else {
           const htmlContent = fs
             .readFileSync(path.resolve(__dirname, "../templates/contract.html"))
@@ -159,7 +167,11 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
             .replace(/{{cta}}/g, `${APP_URL}/validate-contract?token=${recipient.token}&contract=${contract._id}`);
           const subject = `Valider le contrat d'engagement de ${contract.youngFirstName} ${contract.youngLastName} sur la mission ${contract.missionName}`;
           const to = { name: recipient.name, email: recipient.email };
-          await sendEmail(to, subject, htmlContent);
+          if (recipient.cc) {
+            await sendEmail(to, subject, htmlContent, { cc: [{ name: recipient.youngName, email: recipient.cc }] });
+          } else {
+            await sendEmail(to, subject, htmlContent);
+          }
         }
       }
       contract.invitationSent = "true";
