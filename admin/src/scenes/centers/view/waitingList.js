@@ -8,7 +8,7 @@ import SelectStatus from "../../../components/selectStatus";
 import api from "../../../services/api";
 import CenterView from "./wrapper";
 import Panel from "../../volontaires/panel";
-import { getFilterLabel, YOUNG_STATUS_PHASE1, translate, getAge } from "../../../utils";
+import { getFilterLabel, YOUNG_STATUS_PHASE1, translate, getAge, ENABLE_ASSIGN_CENTER } from "../../../utils";
 import Loader from "../../../components/Loader";
 import { Filter, FilterRow, ResultTable, Table, TopResultStats, BottomResultStats, MultiLine } from "../../../components/list";
 import { toastr } from "react-redux-toastr";
@@ -79,7 +79,7 @@ export default ({ center, updateCenter }) => {
                       <tr>
                         <th>#</th>
                         <th width="70%">Volontaire</th>
-                        {["admin", "referent_region"].includes(user.role) ? <th>Affectation</th> : null}
+                        {ENABLE_ASSIGN_CENTER && ["admin", "referent_region"].includes(user.role) ? <th>Affectation</th> : null}
                       </tr>
                     </thead>
                     <tbody>
@@ -125,7 +125,7 @@ const Hit = ({ index, hit, onSend, onClick, selected, onChangeYoung }) => {
           </p>
         </MultiLine>
       </td>
-      {["admin", "referent_region"].includes(user.role) ? (
+      {ENABLE_ASSIGN_CENTER && ["admin", "referent_region"].includes(user.role) ? (
         <td onClick={(e) => e.stopPropagation()}>
           <PanelActionButton onClick={onSend} title="Affecter à ce centre" />
         </td>

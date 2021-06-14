@@ -8,7 +8,7 @@ import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import Loader from "../../../components/Loader";
 import api from "../../../services/api";
 import AssignMeetingPoint from "../components/AssignMeetingPoint";
-import { translate } from "../../../utils";
+import { translate, ENABLE_ASSIGN_MEETING_POINT } from "../../../utils";
 
 export default ({ values, handleChange, handleSubmit }) => {
   const [meetingPoint, setMeetingPoint] = useState();
@@ -41,14 +41,14 @@ export default ({ values, handleChange, handleSubmit }) => {
             <Loader />
           ) : (
             <>
-              <AssignMeetingPoint young={values} onAffect={getData} />
+              {ENABLE_ASSIGN_MEETING_POINT ? <AssignMeetingPoint young={values} onAffect={getData} /> : null}
               {values.deplacementPhase1Autonomous === "true" ? <i>{`${values.firstName} se rend au centre par ses propres moyens.`}</i> : <MeetingPoint value={meetingPoint} />}
-              {meetingPoint || values.deplacementPhase1Autonomous === "true" ? (
+              {ENABLE_ASSIGN_MEETING_POINT && (meetingPoint || values.deplacementPhase1Autonomous === "true") ? (
                 <CancelButton color="#be3b12" onClick={handleCancel}>
                   Annuler ce choix
                 </CancelButton>
               ) : null}
-              {!meetingPoint && values.deplacementPhase1Autonomous !== "true" ? (
+              {ENABLE_ASSIGN_MEETING_POINT && !meetingPoint && values.deplacementPhase1Autonomous !== "true" ? (
                 <CancelButton
                   color="#382F79"
                   onClick={() => {

@@ -127,7 +127,7 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
           name: `${contract.parent1FirstName} ${contract.parent1LastName}`,
           token: contract.parent1Token,
           cc: contract.youngEmail,
-          youngName: `${contract.youngFirstName} ${contract.youngLastName}`
+          youngName: `${contract.youngFirstName} ${contract.youngLastName}`,
         });
       }
       if (contract.parent2Email && mailsToSend.includes("parent2")) {
@@ -136,7 +136,7 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
           name: `${contract.parent2FirstName} ${contract.parent2LastName}`,
           token: contract.parent2Token,
           cc: contract.youngEmail,
-          youngName: `${contract.youngFirstName} ${contract.youngLastName}`
+          youngName: `${contract.youngFirstName} ${contract.youngLastName}`,
         });
       }
       if (mailsToSend.includes("young")) {
@@ -257,7 +257,7 @@ router.post("/token/:token", async (req, res) => {
 
     await data.save();
 
-    await updateYoungStatusPhase2Contract(contract.youngId);
+    await updateYoungStatusPhase2Contract(data.youngId);
 
     return res.status(200).send({ ok: true });
   } catch (error) {
