@@ -14,6 +14,7 @@ import WhiteHeaderButton from "./buttons/WhiteHeaderButton";
 import { toastr } from "react-redux-toastr";
 import { useParams } from "react-router";
 import Badge from "./Badge";
+import DownloadContractButton from "./buttons/DownloadContractButton";
 
 export default ({ young, admin }) => {
   const history = useHistory();
@@ -156,6 +157,11 @@ export default ({ young, admin }) => {
       >
         {"<"} Revenir à la fiche volontaire
       </BackLink>
+      {contract ? (
+        <DownloadContractButton young={young} uri={contract?._id}>
+          Télécharger le contrat
+        </DownloadContractButton>
+      ) : null}
       <Box>
         <Bloc title="Contrat d’engagement en mission d’intérêt général">
           <div style={{ display: "grid", gridAutoColumns: "1fr", gridAutoFlow: "column" }}>
