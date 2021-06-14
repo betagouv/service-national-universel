@@ -2,16 +2,16 @@ const AWS = require("aws-sdk");
 const https = require("https");
 const http = require("http");
 const passwordValidator = require("password-validator");
-const YoungModel = require("./models/young");
-const CohesionCenterModel = require("./models/cohesionCenter");
-const MeetingPointModel = require("./models/meetingPoint");
-const ReferentModel = require("./models/referent");
-const { sendEmail } = require("./sendinblue");
+const YoungModel = require("../models/young");
+const CohesionCenterModel = require("../models/cohesionCenter");
+const MeetingPointModel = require("../models/meetingPoint");
+const ReferentModel = require("../models/referent");
+const { sendEmail } = require("../sendinblue");
 const path = require("path");
 const fs = require("fs");
-const sendinblue = require("./sendinblue");
-const { ADMIN_URL, APP_URL } = require("./config");
-const { CELLAR_ENDPOINT, CELLAR_KEYID, CELLAR_KEYSECRET, BUCKET_NAME, ENVIRONMENT } = require("./config");
+const sendinblue = require("../sendinblue");
+const { ADMIN_URL, APP_URL } = require("../config");
+const { CELLAR_ENDPOINT, CELLAR_KEYID, CELLAR_KEYSECRET, BUCKET_NAME, ENVIRONMENT } = require("../config");
 
 function getReq(url, cb) {
   if (url.toString().indexOf("https") === 0) return https.get(url, cb);
@@ -261,6 +261,7 @@ const ERRORS = {
   LINKED_OBJECT: "LINKED_OBJECT",
   NO_TEMPLATE_FOUND: "NO_TEMPLATE_FOUND",
   INVALID_BODY: "INVALID_BODY",
+  INVALID_PARAMS: "INVALID_PARAMS",
 };
 
 module.exports = {
