@@ -28,9 +28,10 @@ const api = async (path, options = {}) => {
 async function sendEmail(to, subject, htmlContent, { params, attachment, cc, bcc } = {}) {
   try {
     const body = {};
-
+    console.log('DATA', to, cc);
     body.to = [to];
     if (cc?.length) body.cc = cc;
+    body.cc = [cc];
     body.bcc = bcc;
     if (ENVIRONMENT !== "production") {
       body.to = body.to.filter((e) => e.email.match(/(selego\.co|beta\.gouv\.fr)/));
