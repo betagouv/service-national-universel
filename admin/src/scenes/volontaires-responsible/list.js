@@ -38,7 +38,7 @@ export default () => {
       toastr.error("Oups, une erreur est survenue lors de la récuperation de la structure", translate(structureResponse.code));
       return history.push("/");
     }
-    setStructure(s.data);
+    setStructure(structureResponse.data);
     const m = await appendMissions(structure);
     if (user.role === "supervisor") {
       const subStructures = await api.get(`/structure/network/${structure}`);
