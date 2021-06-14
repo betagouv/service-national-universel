@@ -27,7 +27,6 @@ export default ({ children, young, tab }) => {
     }
   };
   if (!young) return null;
-  console.log(young.statusPhase2Contract);
   return (
     <div style={{ flex: tab === "missions" ? "0%" : 2, position: "relative", padding: "3rem" }}>
       <Header>
@@ -35,11 +34,13 @@ export default ({ children, young, tab }) => {
           <Title>
             {young.firstName} {young.lastName} <Badge text={`Cohorte ${young.cohort}`} />
           </Title>
-          <TabList>
-            <Tab isActive={tab === "details"} onClick={() => history.push(`/volontaire/${young._id}`)}>
-              Détails
-            </Tab>
-          </TabList>
+          {tab !== "contract" ? (
+            <TabList>
+              <Tab isActive={tab === "details"} onClick={() => history.push(`/volontaire/${young._id}`)}>
+                Détails
+              </Tab>
+            </TabList>
+          ) : null}
         </div>
       </Header>
       {children}

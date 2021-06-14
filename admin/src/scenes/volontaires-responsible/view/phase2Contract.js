@@ -150,10 +150,10 @@ export default ({ young }) => {
 
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-      <WrapperPhase2 young={young} tab="phase2">
+      <WrapperPhase2 young={young} tab="contract">
         <BackLink
           onClick={() => {
-            history.push(`/volontaire/${young._id}/phase2`);
+            history.push(`/volontaire/${young._id}/`);
           }}
         >
           {"<"} Revenir à la fiche volontaire
