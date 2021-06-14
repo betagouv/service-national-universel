@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Switch, Route } from "react-router-dom";
-import Phase2Contract from "../../volontaires/view/phase2Contract";
+import Phase2Contract from "./phase2Contract";
 
 import api from "../../../services/api";
 import Details from "./details";

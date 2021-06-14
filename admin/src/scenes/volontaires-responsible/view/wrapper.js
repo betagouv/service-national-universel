@@ -27,6 +27,7 @@ export default ({ children, young, tab }) => {
     }
   };
   if (!young) return null;
+  console.log(young.statusPhase2Contract);
   return (
     <div style={{ flex: tab === "missions" ? "0%" : 2, position: "relative", padding: "3rem" }}>
       <Header>
