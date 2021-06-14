@@ -12,6 +12,7 @@ import Loader from "../../../components/Loader";
 import { Box } from "../../../components/box";
 import VioletHeaderButton from "../../../components/buttons/VioletHeaderButton";
 import WhiteHeaderButton from "../../../components/buttons/WhiteHeaderButton";
+import DownloadContractButton from "../../../components/buttons/DownloadContractButton";
 import { toastr } from "react-redux-toastr";
 import { useParams } from "react-router";
 import Badge from "../../../components/Badge";
@@ -158,6 +159,11 @@ export default ({ young }) => {
         >
           {"<"} Revenir à la fiche volontaire
         </BackLink>
+        {contract ? (
+          <DownloadContractButton young={young} uri={contract?._id}>
+            Télécharger le contrat
+          </DownloadContractButton>
+        ) : null}
         <Box>
           <Bloc title="Contrat d’engagement en mission d’intérêt général">
             <div style={{ display: "grid", gridAutoColumns: "1fr", gridAutoFlow: "column" }}>

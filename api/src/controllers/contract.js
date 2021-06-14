@@ -5,6 +5,7 @@ const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
 
+const renderFromHtml = require("../htmlToPdf");
 const { capture } = require("../sentry");
 const ContractObject = require("../models/contract");
 const YoungObject = require("../models/young");
@@ -12,6 +13,7 @@ const ApplicationObject = require("../models/application");
 const { ERRORS } = require("../utils");
 const { sendEmail } = require("../sendinblue");
 const { APP_URL } = require("../config");
+const contractTemplate = require("../templates/contractPhase2");
 
 async function updateYoungStatusPhase2Contract(youngId) {
   const young = await YoungObject.findById(youngId);
@@ -260,6 +262,28 @@ router.post("/token/:token", async (req, res) => {
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+router.post("/:id/download", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
+  try {
+    console.log(`${req.user.id} download contract ${req.params.id}`);
+    const contract = await ContractObject.findById(req.params.id);
+    if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const options = req.body.options || { format: "A4", margin: 0 };
+    //create html
+    const newhtml = await contractTemplate.render(contract);
+    if (!newhtml) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const buffer = await renderFromHtml(newhtml, options);
+    res.contentType("application/pdf");
+    res.setHeader("Content-Dispositon", 'inline; filename="test.pdf"');
+    res.set("Cache-Control", "public, max-age=1");
+    res.send(buffer);
+  } catch (e) {
+    capture(e);
+    res.status(500).send({ ok: false, e, code: ERRORS.SERVER_ERROR });
   }
 });
 
