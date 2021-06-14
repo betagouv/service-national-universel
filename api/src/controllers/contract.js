@@ -9,6 +9,7 @@ const { capture } = require("../sentry");
 const ContractObject = require("../models/contract");
 const YoungObject = require("../models/young");
 const ApplicationObject = require("../models/application");
+const ReferentObject = require("../models/referent");
 const { ERRORS } = require("../utils");
 const { sendEmail } = require("../sendinblue");
 const { APP_URL } = require("../config");
@@ -100,6 +101,7 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
     const application = await ApplicationObject.findById(contract.applicationId);
     application.contractId = contract._id;
     await application.save();
+    const departmentReferentPhase2 = await ReferentObject.findOne({ department: contract.youngDepartment, subRole: "manager_department_phase2" });
 
     if (req.body.sendMessage) {
       // We send 2, 3 or 4 messages if required.
@@ -109,6 +111,7 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
           email: contract.projectManagerEmail,
           name: `${contract.projectManagerFirstName} ${contract.projectManagerLastName}`,
           token: contract.projectManagerToken,
+          cc: departmentReferentPhase2 ? departmentReferentPhase2 : null,
         });
       }
       if (mailsToSend.includes("structureManager")) {
