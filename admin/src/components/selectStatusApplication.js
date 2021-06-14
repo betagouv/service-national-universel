@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
+import ModalRefusedApplication from "./modals/ModalRefusedApplication";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
@@ -9,8 +10,9 @@ import { translate, APPLICATION_STATUS_COLORS, APPLICATION_STATUS } from "../uti
 import { toastr } from "react-redux-toastr";
 import Chevron from "./Chevron";
 
-export default ({ hit, options = [], callback }) => {
+export default ({ hit, options = [], callback, structure }) => {
   const [application, setApplication] = useState(null);
+  const [modal, setModal] = useState(false);
   const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
@@ -39,7 +41,8 @@ export default ({ hit, options = [], callback }) => {
 
   const handleClickStatus = (status) => {
     if (!confirm("Êtes-vous sûr(e) de vouloir modifier le statut de cette candidature?\nUn email sera automatiquement envoyé.")) return;
-    setStatus(status);
+    if (status === APPLICATION_STATUS.REFUSED) setModal(true);
+    else setStatus(status);
   };
 
   const setStatus = async (status) => {
@@ -81,6 +84,17 @@ export default ({ hit, options = [], callback }) => {
         </UncontrolledDropdown>
         {/* <div>{JSON.stringify(young)}</div> */}
       </ActionBox>
+      {modal && (
+        <ModalRefusedApplication
+          value={hit}
+          structure={structure}
+          onChange={() => setModal(false)}
+          onSend={(msg) => {
+            setStatus(APPLICATION_STATUS.REFUSED);
+            setModal(null);
+          }}
+        />
+      )}
     </>
   );
 };

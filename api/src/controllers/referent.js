@@ -326,6 +326,7 @@ router.post("/email/:template/:youngId", passport.authenticate("referent", { ses
       htmlContent = htmlContent.replace(/{{message}}/g, `${req.body.message}`);
       htmlContent = htmlContent.replace(/{{firstName}}/g, young.firstName);
       htmlContent = htmlContent.replace(/{{lastName}}/g, young.lastName);
+      htmlContent = htmlContent.replace(/{{cta}}/g, "https://inscription.snu.gouv.fr");
       htmlContent = htmlContent.replace(/\n/g, "<br/>");
       subject = "Votre candidature au SNU a été refusée";
     } else if (template === "waiting_list") {
