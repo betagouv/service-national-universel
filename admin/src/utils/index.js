@@ -37,3 +37,5 @@ export const getFilterLabel = (selected, placeholder = "Choisissez un filtre") =
   });
   return translated.join(", ");
 };
+
+export const SHOW_ASSIGN_CENTER = false;

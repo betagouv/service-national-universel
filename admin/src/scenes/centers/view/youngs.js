@@ -288,7 +288,7 @@ const Hit = ({ hit, onClick, selected, onChangeYoung }) => {
       </td>
       <td onClick={(e) => e.stopPropagation()}>
         <SelectStatus
-          disabled={user.role !== "admin"}
+          disabled
           hit={hit}
           callback={onChangeYoung}
           options={Object.keys(YOUNG_STATUS_PHASE1).filter((e) => e !== "WAITING_LIST")}

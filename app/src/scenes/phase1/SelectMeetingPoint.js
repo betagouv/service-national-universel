@@ -6,7 +6,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { setYoung } from "../../redux/auth/actions";
 import { HeroContainer, Hero, Content, VioletButton } from "../../components/Content";
 import api from "../../services/api";
-import { translate } from "../../utils";
+import { translate, ENABLE_CHOOSE_MEETING_POINT } from "../../utils";
 import MeetingPointCard from "./components/MeetingPointCard";
 import MeetingPointCardNotFound from "./components/MeetingPointCardNotFound";
 
@@ -57,29 +57,30 @@ export default () => {
         <div>
           <h2>Confirmez votre point de rassemblement</h2>
           <p>
-            Un délai supplémentaire vous est accordé pour confirmer votre point de rassemblement.
-            <br />
-            Vous avez jusqu'au <b>dimanche 13 juin</b> !
+            Il n'est plus possible de confirmer votre point de rassemblement. Si vous aviez plusieurs propositions, un point de rassemblement va vous être assigné d'office parmi
+            les choix ci-dessous.
           </p>
         </div>
         <Row style={{ justifyContent: "center" }}>
           {meetingPoints?.length ? (
             meetingPoints?.map((mp, i) => (
               <Col md={6} key={i}>
-                <MeetingPointCard meetingPoint={mp} onClick={() => handleClickMeetingPoint(mp._id)} selected={meetingPointId === mp._id} />
+                <MeetingPointCard meetingPoint={mp} onClick={() => handleClickMeetingPoint(mp._id)} selected={ENABLE_CHOOSE_MEETING_POINT && meetingPointId === mp._id} />
               </Col>
             ))
           ) : (
             <Col md={6}>
-              <MeetingPointCardNotFound onClick={handleClickMeetingPointNotFound} selected={meetingPointNotFoundSelected} />
+              <MeetingPointCardNotFound onClick={handleClickMeetingPointNotFound} selected={ENABLE_CHOOSE_MEETING_POINT && meetingPointNotFoundSelected} />
             </Col>
           )}
         </Row>
-        <div style={{ width: "100%", textAlign: "center" }}>
-          <VioletButton disabled={!meetingPointId && !meetingPointNotFoundSelected} onClick={submitMeetingPoint}>
-            J’ai pris connaissance de mon point de rassemblement
-          </VioletButton>
-        </div>
+        {ENABLE_CHOOSE_MEETING_POINT ? (
+          <div style={{ width: "100%", textAlign: "center" }}>
+            <VioletButton disabled={!meetingPointId && !meetingPointNotFoundSelected} onClick={submitMeetingPoint}>
+              J’ai pris connaissance de mon point de rassemblement
+            </VioletButton>
+          </div>
+        ) : null}
       </Content>
     );
   };
