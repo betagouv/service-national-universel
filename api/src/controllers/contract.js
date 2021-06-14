@@ -126,7 +126,6 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
           cc: contract.youngEmail,
           youngName: `${contract.youngFirstName} ${contract.youngLastName}`
         });
-        console.log('RECIPIENTS', recipients);
       }
       if (contract.parent2Email && mailsToSend.includes("parent2")) {
         recipients.push({
@@ -154,8 +153,11 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
             .replace(/{{cta}}/g, `${APP_URL}/validate-contract?token=${recipient.token}&contract=${contract._id}`);
           const subject = `(RE)Valider le contrat d'engagement de ${contract.youngFirstName} ${contract.youngLastName} sur la mission ${contract.missionName} suite à modifications effectuées`;
           const to = { name: recipient.name, email: recipient.email };
-          const cc = { name: recipient.youngName, email: recipient.cc };
-          await sendEmail(to, subject, htmlContent, { cc: cc ? cc : '' });
+          if (recipient.cc) {
+            await sendEmail(to, subject, htmlContent, { cc: [{ name: recipient.youngName, email: recipient.cc }] });
+          } else {
+            await sendEmail(to, subject, htmlContent);
+          }
         } else {
           const htmlContent = fs
             .readFileSync(path.resolve(__dirname, "../templates/contract.html"))
@@ -165,8 +167,11 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
             .replace(/{{cta}}/g, `${APP_URL}/validate-contract?token=${recipient.token}&contract=${contract._id}`);
           const subject = `Valider le contrat d'engagement de ${contract.youngFirstName} ${contract.youngLastName} sur la mission ${contract.missionName}`;
           const to = { name: recipient.name, email: recipient.email };
-          const cc = { name: recipient.youngName, email: recipient.cc };
-          await sendEmail(to, subject, htmlContent, { cc: cc ? cc : '' });
+          if (recipient.cc) {
+            await sendEmail(to, subject, htmlContent, { cc: [{ name: recipient.youngName, email: recipient.cc }] });
+          } else {
+            await sendEmail(to, subject, htmlContent);
+          }
         }
       }
       contract.invitationSent = "true";
