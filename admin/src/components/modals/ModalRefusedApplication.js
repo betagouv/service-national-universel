@@ -45,8 +45,6 @@ Les équipes du Service National Universel`);
 
   const send = async () => {
     setSending(true);
-    await api.post(`/referent/email/refuse/${value.youngId}`, { message });
-    toastr.success("Email envoyé !");
     onSend(message);
   };
 

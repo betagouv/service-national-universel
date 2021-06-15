@@ -45,7 +45,7 @@ export default ({ hit, options = [], callback }) => {
     else setStatus(status);
   };
 
-  const setStatus = async (status) => {
+  const setStatus = async (status, message) => {
     try {
       const { ok, code, data } = await api.put("/application", { _id: application._id, status });
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
@@ -55,7 +55,7 @@ export default ({ hit, options = [], callback }) => {
         await api.post(`/application/${data._id}/notify/validated_responsible`);
         await api.post(`/application/${data._id}/notify/validated_young`);
       } else {
-        await api.post(`/application/${data._id}/notify/${status.toLowerCase()}`);
+        await api.post(`/application/${data._id}/notify/${status.toLowerCase()}`, { message });
       }
       callback && callback(status);
     } catch (e) {
@@ -90,7 +90,7 @@ export default ({ hit, options = [], callback }) => {
           structureId={hit.structureId}
           onChange={() => setModal(false)}
           onSend={(msg) => {
-            setStatus(APPLICATION_STATUS.REFUSED);
+            setStatus(APPLICATION_STATUS.REFUSED, msg);
             setModal(null);
           }}
         />
