@@ -9,7 +9,6 @@ import { useHistory } from "react-router-dom";
 
 import AddressInput from "../../../components/addressInput";
 import api from "../../../services/api";
-import matomo from "../../../services/matomo";
 import { setYoung } from "../../../redux/auth/actions";
 import ErrorMessage, { requiredMessage } from "../components/errorMessage";
 import FranceConnectButton from "../components/FranceConnectButton";
@@ -222,7 +221,6 @@ const Parent = ({ id = 1, values, errors, touched, handleChange }) => {
 
 export default () => {
   useEffect(() => {
-    matomo.logEvent("inscription", "open_step", "step", 3);
     window.lumiere("sendEvent", "inscription", "open_step", { step: 3 });
   }, []);
 
