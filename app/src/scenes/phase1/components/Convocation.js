@@ -49,7 +49,6 @@ export default () => {
     return meetingPoint.departureAddress;
   };
   const getDepartureMeetingDate = () => {
-    console.log({ meetingPoint });
     if (young.deplacementPhase1Autonomous === "true" || !meetingPoint) return "dimanche 20 juin, 16:30"; //new Date("2021-06-20T14:30:00.000+00:00");
     return meetingPoint.departureAtString;
   };
