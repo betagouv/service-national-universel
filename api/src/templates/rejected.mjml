@@ -5,7 +5,6 @@
         <h1 font-size="20px">Candidature refusée</h1>
       </mj-text>
       <mj-text line-height="1.5" font-size="16px" color="#000">{{message}}</mj-text>
-      <mj-button font-size="20px" background-color="#3490DC" href="{{cta}}"> Se connecter à mon espace </mj-button>
       <mj-text font-size="18px" color="#3D4852"> Bien cordialement,</mj-text>
       <mj-text font-size="18px" color="#3D4852"> L’équipe SNU</mj-text>
 
