@@ -1,25 +1,44 @@
 const YoungObject = require("../../models/young");
 
-async function getYoungsHelper(){
+async function getYoungsHelper() {
   return await YoungObject.find({});
 }
 
-async function getYoungByEmailHelper(youngEmail){
-  return await YoungObject.findOne({email : youngEmail});
+async function getYoungByEmailHelper(youngEmail) {
+  return await YoungObject.findOne({ email: youngEmail });
 }
 
-async function deleteYoungByEmailHelper(youngEmail){
+async function deleteYoungByEmailHelper(youngEmail) {
   const young = await getYoungByEmailHelper(youngEmail);
-  young.remove();
+  await young.remove();
 }
 
-async function createYoungHelper(young){
+async function createYoungHelper(young) {
   return await YoungObject.create(young);
+}
+
+function expectYoungToEqual(young, expectedYoung) {
+  // Need to parse the objects because attributes types changed
+  // Deep equal failed on Date which became string
+  const youngParsed = JSON.parse(JSON.stringify(young));
+  const expectedYoungParsed = JSON.parse(JSON.stringify(expectedYoung));
+  expect(youngParsed.region).toEqual(expectedYoungParsed.region);
+  expect(youngParsed.department).toEqual(expectedYoungParsed.department);
+  expect(youngParsed.firstName).toEqual(expectedYoungParsed.firstName);
+  expect(youngParsed.lastName).toEqual(expectedYoungParsed.lastName);
+  expect(youngParsed.email).toEqual(expectedYoungParsed.email);
+  expect(youngParsed.phone).toEqual(expectedYoungParsed.phone);
+  expect(youngParsed.birthCountry).toEqual(expectedYoungParsed.birthCountry);
+  expect(youngParsed.zip).toEqual(expectedYoungParsed.zip);
+  expect(youngParsed.city).toEqual(expectedYoungParsed.city);
+  expect(youngParsed.cityCode).toEqual(expectedYoungParsed.cityCode);
+  expect(youngParsed.gender).toEqual(expectedYoungParsed.gender);
 }
 
 module.exports = {
   getYoungsHelper,
   getYoungByEmailHelper,
   deleteYoungByEmailHelper,
-  createYoungHelper
+  createYoungHelper,
+  expectYoungToEqual,
 };

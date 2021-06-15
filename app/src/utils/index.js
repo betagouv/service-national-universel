@@ -39,3 +39,5 @@ export function permissionPhase3(y) {
   if (!permissionApp(y)) return false;
   return y.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED;
 }
+
+export const ENABLE_CHOOSE_MEETING_POINT = false;
