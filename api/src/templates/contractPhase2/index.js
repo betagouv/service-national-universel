@@ -9,10 +9,12 @@ const getBaseUrl = () => {
 };
 
 const render = async (contract) => {
+  console.log(contract);
   try {
     let html = fs.readFileSync(path.resolve(__dirname, "./contract.html"), "utf8");
     html = html.replace(/{{CONTRACT_ID}}/g, contract._id).replace(/{{BASE_URL}}/g, getBaseUrl());
     html = addParents(html, contract, "isYoungAdult");
+    //html = addSignature(html, contract, "signature");
     html = replaceField(html, contract, "projectManagerFirstName");
     html = replaceField(html, contract, "projectManagerLastName");
     html = replaceField(html, contract, "projectManagerRole");
@@ -117,6 +119,11 @@ const addParents = (str, context, field) => {
 const replaceField = (str, context, field) => {
   const regex = new RegExp("{{" + field + "}}", "g");
   return str.replace(regex, context[field]);
+};
+
+const addSignature = (str, context, field) => {
+  const regex = new RegExp("{{" + field + "}}", "g");
+  let content = "";
 };
 
 const formatDateFR = (d) => {
