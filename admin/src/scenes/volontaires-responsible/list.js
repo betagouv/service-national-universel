@@ -17,7 +17,6 @@ const FILTERS = ["SEARCH", "STATUS", "PHASE", "COHORT", "MISSIONS", "TUTOR"];
 
 export default () => {
   const user = useSelector((state) => state.Auth.user);
-  const [structure, setStructure] = useState({});
   const [missions, setMissions] = useState([]);
   const [panel, setPanel] = useState(null);
   const getDefaultQuery = () => ({ query: { bool: { filter: { terms: { "missionId.keyword": missions } } } }, sort: [{ "youngLastName.keyword": "asc" }] });

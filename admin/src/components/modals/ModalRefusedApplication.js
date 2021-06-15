@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { Modal } from "reactstrap";
 import styled from "styled-components";
+import { toastr } from "react-redux-toastr";
 
 import api from "../../services/api";
 import LoadingButton from "../buttons/LoadingButton";
+import { translate } from "../../utils";
 
-import { toastr } from "react-redux-toastr";
-
-export default ({ value, onChange, onSend, structure }) => {
+export default ({ value, onChange, onSend, structureId }) => {
   const [message, setMessage] = useState();
   const [sending, setSending] = useState(false);
+  const [structure, setStructure] = useState(false);
 
   useEffect(() => {
     setMessage(`Bonjour ${value.youngFirstName} ${value.youngLastName},
@@ -23,9 +24,24 @@ Nous vous invitons à candidater sur d'autres missions.
 
 Cordialement
 Les équipes du Service National Universel`);
-  }, [value]);
+  }, [value, structure]);
 
-  if (!value) return <div />;
+  useEffect(() => {
+    (async () => {
+      const structureResponse = await api.get(`/structure/${structureId}`);
+      if (!structureResponse.ok) {
+        toastr.error("Oups, une erreur est survenue lors de la récuperation de la structure", translate(structureResponse.code));
+      }
+      setStructure(structureResponse.data);
+    })();
+  }, [structureId]);
+
+  if (!value || !structure)
+    return (
+      <div>
+        <i>Chargement</i>
+      </div>
+    );
 
   const send = async () => {
     setSending(true);
