@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
+import ModalRefusedApplication from "./modals/ModalRefusedApplication";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
@@ -11,6 +12,7 @@ import Chevron from "./Chevron";
 
 export default ({ hit, options = [], callback }) => {
   const [application, setApplication] = useState(null);
+  const [modal, setModal] = useState(false);
   const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
@@ -22,7 +24,7 @@ export default ({ hit, options = [], callback }) => {
     })();
   }, [hit]);
 
-  if (!application) return <div />;
+  if (!application) return <div>Chargement</div>;
 
   options = [APPLICATION_STATUS.IN_PROGRESS, APPLICATION_STATUS.DONE, APPLICATION_STATUS.ABANDON];
   if (application.status === APPLICATION_STATUS.WAITING_VALIDATION) options = [APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.REFUSED, APPLICATION_STATUS.CANCEL];
@@ -39,10 +41,11 @@ export default ({ hit, options = [], callback }) => {
 
   const handleClickStatus = (status) => {
     if (!confirm("Êtes-vous sûr(e) de vouloir modifier le statut de cette candidature?\nUn email sera automatiquement envoyé.")) return;
-    setStatus(status);
+    if (status === APPLICATION_STATUS.REFUSED) setModal(true);
+    else setStatus(status);
   };
 
-  const setStatus = async (status) => {
+  const setStatus = async (status, message) => {
     try {
       const { ok, code, data } = await api.put("/application", { _id: application._id, status });
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
@@ -52,7 +55,7 @@ export default ({ hit, options = [], callback }) => {
         await api.post(`/application/${data._id}/notify/validated_responsible`);
         await api.post(`/application/${data._id}/notify/validated_young`);
       } else {
-        await api.post(`/application/${data._id}/notify/${status.toLowerCase()}`);
+        await api.post(`/application/${data._id}/notify/${status.toLowerCase()}`, { message });
       }
       callback && callback(status);
     } catch (e) {
@@ -81,6 +84,17 @@ export default ({ hit, options = [], callback }) => {
         </UncontrolledDropdown>
         {/* <div>{JSON.stringify(young)}</div> */}
       </ActionBox>
+      {modal && (
+        <ModalRefusedApplication
+          value={hit}
+          structureId={hit.structureId}
+          onChange={() => setModal(false)}
+          onSend={(msg) => {
+            setStatus(APPLICATION_STATUS.REFUSED, msg);
+            setModal(null);
+          }}
+        />
+      )}
     </>
   );
 };

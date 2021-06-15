@@ -213,7 +213,9 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
         .replace(/{{lastName}}/g, application.youngLastName)
         .replace(/{{structureName}}/g, mission.structureName)
         .replace(/{{missionName}}/g, mission.name)
-        .replace(/{{cta}}/g, "https://inscription.snu.gouv.fr/mission");
+        .replace(/{{message}}/g, req.body.message)
+        .replace(/{{cta}}/g, "https://inscription.snu.gouv.fr/auth/login?redirect=mission")
+        .replace(/\n/g, "<br/>");
       subject = `Votre candidature sur la mission d'intérêt général ${mission.name} a été refusée.`;
       to = { name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail };
     } else {
