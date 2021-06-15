@@ -112,7 +112,7 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
           name: `${contract.projectManagerFirstName} ${contract.projectManagerLastName}`,
           token: contract.projectManagerToken,
           cc: departmentReferentPhase2 ? departmentReferentPhase2.email : null,
-          ccName: departmentReferentPhase2 ? `${departmentReferentPhase2.firstName} ${departmentReferentPhase2.lastName}` : null
+          ccName: departmentReferentPhase2 ? `${departmentReferentPhase2.firstName} ${departmentReferentPhase2.lastName}` : null,
         });
       }
       if (mailsToSend.includes("structureManager")) {
@@ -128,7 +128,7 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
           name: `${contract.parent1FirstName} ${contract.parent1LastName}`,
           token: contract.parent1Token,
           cc: contract.youngEmail,
-          youngName: `${contract.youngFirstName} ${contract.youngLastName}`,
+          ccName: `${contract.youngFirstName} ${contract.youngLastName}`,
         });
       }
       if (contract.parent2Email && mailsToSend.includes("parent2")) {
@@ -137,7 +137,7 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
           name: `${contract.parent2FirstName} ${contract.parent2LastName}`,
           token: contract.parent2Token,
           cc: contract.youngEmail,
-          ccName: `${contract.youngFirstName} ${contract.youngLastName}`
+          ccName: `${contract.youngFirstName} ${contract.youngLastName}`,
         });
       }
       if (mailsToSend.includes("young")) {
