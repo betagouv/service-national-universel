@@ -6,7 +6,6 @@ import { Formik } from "formik";
 import { toastr } from "react-redux-toastr";
 import { Input } from "reactstrap";
 
-import matomo from "../../../services/matomo";
 import { translate } from "../../../utils";
 import api from "../../../services/api";
 import { setYoung } from "../../../redux/auth/actions";
@@ -17,9 +16,7 @@ export default () => {
   const young = useSelector((state) => state.Auth.young);
 
   useEffect(() => {
-    matomo.logEvent("inscription", "open_step", "step", 6);
     window.lumiere("sendEvent", "inscription", "open_step", { step: 6 });
-    matomo.logEvent("inscription", "open_step", "step", 5);
     window.lumiere("sendEvent", "inscription", "open_step", { step: 5 });
   }, []);
 

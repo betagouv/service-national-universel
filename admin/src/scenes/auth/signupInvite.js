@@ -13,7 +13,6 @@ import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import Header from "./components/header";
 
-import matomo from "../../services/matomo";
 import { translate } from "../../utils";
 import Loader from "../../components/Loader";
 
@@ -76,7 +75,6 @@ export default () => {
                   if (token) api.setToken(token);
                   if (user) {
                     dispatch(setUser(user));
-                    matomo.setUserId(user._id);
                   }
                 } catch (e) {
                   if (e && e.code === "USER_ALREADY_REGISTERED") return toastr.error("Le compte existe déja. Veuillez vous connecter");

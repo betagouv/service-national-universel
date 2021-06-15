@@ -13,7 +13,6 @@ import { getPasswordErrorMessage, translate } from "../../../utils";
 import ErrorMessage, { requiredMessage } from "../components/errorMessage";
 import { setYoung } from "../../../redux/auth/actions";
 import FormRow from "../../../components/form/FormRow";
-import matomo from "../../../services/matomo";
 import api from "../../../services/api";
 import { YOUNG_STATUS, YOUNG_PHASE } from "../../../utils";
 import EyeOpen from "../../../assets/eye.svg";
@@ -22,7 +21,6 @@ import FormFooter from "../../../components/form/FormFooter";
 
 export default () => {
   useEffect(() => {
-    matomo.logEvent("inscription", "open_step", "step", 0);
     window.lumiere("sendEvent", "inscription", "open_step", { step: 0 });
   }, []);
   const [passwordText, setPasswordText] = useState(false);
@@ -61,7 +59,6 @@ export default () => {
             const { ok: okPut, code: codePut, data: young } = await api.put("/young", newValues);
             if (!okPut) return toastr.error("Une erreur s'est produite :", codePut);
             dispatch(setYoung(young));
-            matomo.setUserId(young._id);
             window.lumiere("registerUser", young._id);
             history.push("/inscription/coordonnees");
           } catch (e) {
@@ -168,7 +165,7 @@ export default () => {
                   <Field
                     placeholder="Tapez votre mot de passe"
                     className="form-control"
-                    validate={(v) => getPasswordErrorMessage(v, matomo)}
+                    validate={(v) => getPasswordErrorMessage(v)}
                     type={passwordText ? "text" : "password"}
                     name="password"
                     value={values.password}
