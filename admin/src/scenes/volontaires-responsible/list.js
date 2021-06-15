@@ -33,12 +33,6 @@ export default () => {
   }
 
   async function initMissions(structure) {
-    const structureResponse = await api.get(`/structure/${structure}`);
-    if (!structureResponse.ok) {
-      toastr.error("Oups, une erreur est survenue lors de la récuperation de la structure", translate(structureResponse.code));
-      return history.push("/");
-    }
-    setStructure(structureResponse.data);
     const m = await appendMissions(structure);
     if (user.role === "supervisor") {
       const subStructures = await api.get(`/structure/network/${structure}`);
@@ -182,7 +176,7 @@ export default () => {
                     </thead>
                     <tbody>
                       {data.map((hit, i) => (
-                        <Hit key={i} hit={hit} onClick={() => handleClick(hit)} selected={panel?.application?._id === hit._id} structure={structure} />
+                        <Hit key={i} hit={hit} onClick={() => handleClick(hit)} selected={panel?.application?._id === hit._id} />
                       ))}
                     </tbody>
                   </Table>
@@ -203,7 +197,7 @@ export default () => {
   );
 };
 
-const Hit = ({ hit, onClick, selected, structure }) => {
+const Hit = ({ hit, onClick, selected }) => {
   const history = useHistory();
   const [mission, setMission] = useState();
   useEffect(() => {
@@ -260,7 +254,6 @@ const Hit = ({ hit, onClick, selected, structure }) => {
               history.push(`/volontaire/${hit.youngId}/phase2/application/${hit._id}/contrat`);
             }
           }}
-          structure={structure}
         />
         {hit.status === "VALIDATED" || hit.status === "IN_PROGRESS" || hit.status === "DONE" ? (
           <ContractLink

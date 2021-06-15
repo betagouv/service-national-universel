@@ -5,7 +5,6 @@ import { ReactiveBase, ReactiveList, SingleList, MultiDropdownList, MultiList, D
 
 import { apiURL } from "../../../config";
 import api from "../../../services/api";
-import SelectStatusApplication from "../../../components/selectStatusApplication";
 import { APPLICATION_STATUS, formatStringDate } from "../../../utils";
 import { Link } from "react-router-dom";
 

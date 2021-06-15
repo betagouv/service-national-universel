@@ -9,9 +9,11 @@ import api from "../services/api";
 import { translate, APPLICATION_STATUS_COLORS, APPLICATION_STATUS } from "../utils";
 import { toastr } from "react-redux-toastr";
 import Chevron from "./Chevron";
+import Loader from "./Loader";
 
-export default ({ hit, options = [], callback, structure }) => {
+export default ({ hit, options = [], callback }) => {
   const [application, setApplication] = useState(null);
+  const [structure, setStructure] = useState(null);
   const [modal, setModal] = useState(false);
   const user = useSelector((state) => state.Auth.user);
 
@@ -19,12 +21,17 @@ export default ({ hit, options = [], callback, structure }) => {
     (async () => {
       const id = hit && hit._id;
       if (!id) return setApplication(null);
+      const structureResponse = await api.get(`/structure/${hit.structureId}`);
+      if (!structureResponse.ok) {
+        toastr.error("Oups, une erreur est survenue lors de la récuperation de la structure", translate(structureResponse.code));
+      }
+      setStructure(structureResponse.data);
       const { data } = await api.get(`/application/${id}`);
       setApplication(data);
     })();
   }, [hit]);
 
-  if (!application) return <div />;
+  if (!application || !structure) return <Loader />;
 
   options = [APPLICATION_STATUS.IN_PROGRESS, APPLICATION_STATUS.DONE, APPLICATION_STATUS.ABANDON];
   if (application.status === APPLICATION_STATUS.WAITING_VALIDATION) options = [APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.REFUSED, APPLICATION_STATUS.CANCEL];
