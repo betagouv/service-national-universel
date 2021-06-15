@@ -8,7 +8,6 @@ import { toastr } from "react-redux-toastr";
 
 import { setYoung } from "../../../redux/auth/actions";
 import api from "../../../services/api";
-import matomo from "../../../services/matomo";
 import ErrorMessage, { requiredMessage } from "../components/errorMessage";
 import AddressInput from "../../../components/addressInput";
 import DndFileInput from "../../../components/dndFileInput";
@@ -21,7 +20,6 @@ import FormRadioLabelTrueFalse from "../../../components/form/FormRadioLabelTrue
 
 export default () => {
   useEffect(() => {
-    matomo.logEvent("inscription", "open_step", "step", 2);
     window.lumiere("sendEvent", "inscription", "open_step", { step: 2 });
   }, []);
 

@@ -7,7 +7,6 @@ import { useHistory } from "react-router-dom";
 
 import { setYoung } from "../../redux/auth/actions";
 import api from "../../services/api";
-import matomo from "../../services/matomo";
 import ErrorMessage, { requiredMessage } from "../inscription/components/errorMessage";
 import AddressInput from "../../components/addressInput";
 import DndFileInput from "../../components/dndFileInput";

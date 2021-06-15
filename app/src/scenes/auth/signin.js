@@ -7,7 +7,6 @@ import queryString from "query-string";
 import { setYoung } from "../../redux/auth/actions";
 import LoginBox from "./components/LoginBox";
 import api from "../../services/api";
-import matomo from "../../services/matomo";
 import Header from "./components/header";
 import Title from "./components/Title";
 import InputField from "./components/InputField";
@@ -57,7 +56,6 @@ export default () => {
                 } else {
                   if (token) api.setToken(token);
                   dispatch(setYoung(young));
-                  matomo.setUserId(young._id);
                   window.lumiere("registerUser", young._id);
                 }
               }

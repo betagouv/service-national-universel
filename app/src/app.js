@@ -34,8 +34,6 @@ import { SENTRY_URL, environment } from "./config";
 import "./index.css";
 import { YOUNG_STATUS } from "./utils";
 
-import matomo from "./services/matomo";
-
 if (environment === "production") Sentry.init({ dsn: SENTRY_URL, environment: "app" });
 
 export default () => {
@@ -50,7 +48,6 @@ export default () => {
     if (utm_campaign) sessionProperties.utm_campaign = utm_campaign;
     window.lumiere("setSessionProperties", sessionProperties);
     window.lumiere("sendEvent", "initialization", "page-loaded"); // cat, action, props
-    matomo.logEvent("start", "open_app");
     async function fetchData() {
       try {
         const { ok, user, token } = await api.get("/young/signin_token");
@@ -58,7 +55,6 @@ export default () => {
         if (ok && user) {
           dispatch(setYoung(user));
           window.lumiere("registerUser", user._id);
-          matomo.setUserId(user._id);
         }
       } catch (e) {
         console.log(e);

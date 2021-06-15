@@ -13,13 +13,11 @@ import { STEPS } from "../utils";
 import FormRow from "../../../components/form/FormRow";
 import FormFooter from "../../../components/form/FormFooter";
 import api from "../../../services/api";
-import matomo from "../../../services/matomo";
 import { translate, YOUNG_PHASE, YOUNG_STATUS } from "../../../utils";
 
 export default () => {
   useEffect(() => {
     window.lumiere("sendEvent", "inscription", "open_step", { step: 4 });
-    matomo.logEvent("inscription", "open_step", "step", 4);
   }, []);
 
   const history = useHistory();

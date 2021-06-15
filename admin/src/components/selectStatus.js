@@ -7,7 +7,6 @@ import api from "../services/api";
 
 import { translate, YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_COLORS, isEndOfInscriptionManagement2021 } from "../utils";
 import { toastr } from "react-redux-toastr";
-import matomo from "../services/matomo";
 
 import ModalCorrection from "./modals/ModalCorrection";
 import ModalRefused from "./modals/ModalRefused";
@@ -82,16 +81,13 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
 
       if (status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INSCRIPTION) {
-        matomo.logEvent("status_update", YOUNG_STATUS.VALIDATED);
         window.lumiere("sendEvent", "status_update", YOUNG_STATUS.VALIDATED, { prevStatus, status: YOUNG_STATUS.VALIDATED }); // cat, action, props
         await api.post(`/referent/email/validate/${young._id}`, { subject: "Inscription validée", prevStatus });
       }
       if (status === YOUNG_STATUS.REFUSED) {
-        matomo.logEvent("status_update", YOUNG_STATUS.REFUSED);
         window.lumiere("sendEvent", "status_update", YOUNG_STATUS.REFUSED, { prevStatus, status: YOUNG_STATUS.REFUSED }); // cat, action, props
       }
       if (status === YOUNG_STATUS.WAITING_LIST) {
-        matomo.logEvent("status_update", YOUNG_STATUS.WAITING_LIST);
         window.lumiere("sendEvent", "status_update", YOUNG_STATUS.WAITING_LIST, { prevStatus, status: YOUNG_STATUS.WAITING_LIST }); // cat, action, props
         // await api.post(`/referent/email/waiting_list/${young._id}`);
       }

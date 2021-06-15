@@ -11,7 +11,6 @@ import DndFileInput from "../../../components/dndFileInput";
 import ErrorMessage, { requiredMessage } from "../components/errorMessage";
 import { setYoung } from "../../../redux/auth/actions";
 import api from "../../../services/api";
-import matomo from "../../../services/matomo";
 import { saveYoung, STEPS, YOUNG_SITUATIONS } from "../utils";
 import FormRow from "../../../components/form/FormRow";
 import AddressInput from "../../../components/addressInput";
@@ -21,7 +20,6 @@ import FormFooter from "../../../components/form/FormFooter";
 
 export default () => {
   useEffect(() => {
-    matomo.logEvent("inscription", "open_step", "step", 1);
     window.lumiere("sendEvent", "inscription", "open_step", { step: 1 });
   }, []);
 
