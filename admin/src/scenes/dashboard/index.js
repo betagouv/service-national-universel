@@ -54,9 +54,6 @@ export default () => {
 
 const Wrapper = styled.div`
   padding: 1.5rem;
-  @media screen and (min-width: 768px) {
-    margin-left: 3rem;
-  }
   @media print {
     background-color: #fff;
     position: absolute;
@@ -74,7 +71,6 @@ const TabNavigation = styled.nav`
   align-items: center;
   justify-content: space-between;
   flex-wrap: wrap;
-  margin-left: 1rem;
 `;
 const TabNavigationList = styled.ul`
   padding-left: 30px;

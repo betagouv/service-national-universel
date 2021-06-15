@@ -145,7 +145,7 @@ const RestrictedRoute = ({ component: Component, isLoggedIn, ...rest }) => {
 };
 
 const ContentContainer = styled.div`
-  margin-left: 10rem;
+  margin-left: 250px;
   width: 100%;
   @media (max-width: 768px) {
     width: 100%;

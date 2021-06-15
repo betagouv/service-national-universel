@@ -157,8 +157,7 @@ const Sidebar = styled.div`
     z-index: 11;
   }
   background-color: #362f78;
-  width: 15%;
-  min-width: 200px;
+  width: 250px;
   position: fixed;
   top: 0;
   bottom: 0;
