@@ -9,7 +9,6 @@ const getBaseUrl = () => {
 };
 
 const render = async (contract) => {
-  console.log(contract);
   try {
     let html = fs.readFileSync(path.resolve(__dirname, "./contract.html"), "utf8");
     html = html.replace(/{{CONTRACT_ID}}/g, contract._id).replace(/{{BASE_URL}}/g, getBaseUrl());
@@ -25,7 +24,7 @@ const render = async (contract) => {
     html = replaceField(html, contract, "structureSiret");
     html = replaceField(html, contract, "youngFirstName");
     html = replaceField(html, contract, "youngLastName");
-    html = replaceField(html, contract, "youngBirthdate");
+    html = replaceDate(html, contract, "youngBirthdate");
     html = replaceField(html, contract, "youngAddress");
     html = replaceField(html, contract, "youngCity");
     html = replaceField(html, contract, "youngDepartment");
@@ -34,8 +33,8 @@ const render = async (contract) => {
     html = replaceField(html, contract, "missionName");
     html = replaceField(html, contract, "missionObjective");
     html = replaceField(html, contract, "missionAction");
-    html = replaceField(html, contract, "missionStartAt");
-    html = replaceField(html, contract, "missionEndAt");
+    html = replaceDate(html, contract, "missionStartAt");
+    html = replaceDate(html, contract, "missionEndAt");
     html = replaceField(html, contract, "missionDuration");
     html = replaceField(html, contract, "missionAddress");
     html = replaceField(html, contract, "missionCity");
@@ -44,7 +43,7 @@ const render = async (contract) => {
     html = replaceField(html, contract, "structureName");
     html = replaceField(html, contract, "structureManagerFirstName");
     html = replaceField(html, contract, "structureManagerLastName");
-    html = replaceField(html, contract, "date");
+    html = replaceDate(html, contract, "date");
     html = replaceField(html, contract, "parent1FirstName");
     html = replaceField(html, contract, "parent1LastName");
     html = replaceField(html, contract, "parent1Address");
@@ -118,6 +117,17 @@ const addParents = (str, context, field) => {
 const replaceField = (str, context, field) => {
   const regex = new RegExp("{{" + field + "}}", "g");
   return str.replace(regex, context[field]);
+};
+
+const formatDateFR = (d) => {
+  if (!d) return "-";
+  const date = new Date(d);
+  return date.toLocaleDateString("fr-FR");
+};
+
+const replaceDate = (str, context, field) => {
+  const regex = new RegExp("{{" + field + "}}", "g");
+  return str.replace(regex, formatDateFR(context[field]));
 };
 
 module.exports = { render };
