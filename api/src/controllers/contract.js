@@ -111,7 +111,8 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
           email: contract.projectManagerEmail,
           name: `${contract.projectManagerFirstName} ${contract.projectManagerLastName}`,
           token: contract.projectManagerToken,
-          cc: departmentReferentPhase2 ? departmentReferentPhase2 : null,
+          cc: departmentReferentPhase2 ? departmentReferentPhase2.email : null,
+          ccName: departmentReferentPhase2 ? `${departmentReferentPhase2.firstName} ${departmentReferentPhase2.lastName}` : null
         });
       }
       if (mailsToSend.includes("structureManager")) {
@@ -136,7 +137,7 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
           name: `${contract.parent2FirstName} ${contract.parent2LastName}`,
           token: contract.parent2Token,
           cc: contract.youngEmail,
-          youngName: `${contract.youngFirstName} ${contract.youngLastName}`
+          ccName: `${contract.youngFirstName} ${contract.youngLastName}`
         });
       }
       if (mailsToSend.includes("young")) {
@@ -157,7 +158,7 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
           const subject = `(RE)Valider le contrat d'engagement de ${contract.youngFirstName} ${contract.youngLastName} sur la mission ${contract.missionName} suite à modifications effectuées`;
           const to = { name: recipient.name, email: recipient.email };
           if (recipient.cc) {
-            await sendEmail(to, subject, htmlContent, { cc: [{ name: recipient.youngName, email: recipient.cc }] });
+            await sendEmail(to, subject, htmlContent, { cc: [{ name: recipient.ccName, email: recipient.cc }] });
           } else {
             await sendEmail(to, subject, htmlContent);
           }
@@ -171,7 +172,7 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
           const subject = `Valider le contrat d'engagement de ${contract.youngFirstName} ${contract.youngLastName} sur la mission ${contract.missionName}`;
           const to = { name: recipient.name, email: recipient.email };
           if (recipient.cc) {
-            await sendEmail(to, subject, htmlContent, { cc: [{ name: recipient.youngName, email: recipient.cc }] });
+            await sendEmail(to, subject, htmlContent, { cc: [{ name: recipient.ccName, email: recipient.cc }] });
           } else {
             await sendEmail(to, subject, htmlContent);
           }
