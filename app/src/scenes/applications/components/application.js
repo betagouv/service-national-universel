@@ -83,8 +83,8 @@ function ContractInfo({ contract }) {
     <>
       <hr />
       <div>
-        <span style={{ marginLeft: "1rem", fontSize: "0.9rem", fontWeight: "500" }}>Signatures du contrat d'engagement de la mission d'intérêt général</span>
-        <div style={{ display: "flex" }}>
+        <div style={{ marginLeft: "1rem", fontSize: "0.9rem", fontWeight: "500" }}>Signatures du contrat d'engagement de la mission d'intérêt général</div>
+        <ContractInfoContainer>
           <ContractStatus contract={contract} property="projectManagerStatus" name="Représentant de l'Etat" />
           <ContractStatus contract={contract} property="structureManagerStatus" name="Représentant structure" />
           {isYoungAdult ? (
@@ -95,7 +95,7 @@ function ContractInfo({ contract }) {
               {young.parent2Email && <ContractStatus contract={contract} property="parent2Status" name="Représentant légal 2" />}
             </>
           )}
-        </div>
+        </ContractInfoContainer>
       </div>
     </>
   );
@@ -172,6 +172,14 @@ const Footer = ({ application, tutor, onChange }) => {
   return getFooter(application.status);
 };
 
+const ContractInfoContainer = styled.div`
+  display: flex;
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: center;
+  }
+`;
+
 const MinBadge = styled.span`
   margin-right: 0.5rem;
   width: 1rem;
@@ -183,15 +191,23 @@ const MinBadge = styled.span`
 const ContainerFooter = styled.div`
   display: flex;
   padding: 0.7rem;
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: center;
+    padding: 0;
+  }
   div {
     cursor: pointer;
     color: #6b7280;
     border: 1px solid #e5e7eb;
     border-radius: 0.2rem;
     padding: 5px 15px;
-    margin-right: 15px;
+    margin: 0 0.5rem;
     font-size: 12px;
     font-weight: 500;
+    @media (max-width: 768px) {
+      margin: 0.4rem;
+    }
   }
 `;
 
