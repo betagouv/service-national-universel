@@ -254,7 +254,7 @@ const Hit = ({ hit, onClick, selected }) => {
             }
           }}
         />
-        {hit.status === "VALIDATED" || hit.status === "IN_PROGRESS" || hit.status === "DONE" ? (
+        {hit.status === "VALIDATED" || hit.status === "IN_PROGRESS" || hit.status === "DONE" || hit.status === "ABANDON" ? (
           <ContractLink
             onClick={() => {
               history.push(`/volontaire/${hit.youngId}/phase2/application/${hit._id}/contrat`);

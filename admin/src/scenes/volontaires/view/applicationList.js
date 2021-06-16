@@ -75,6 +75,7 @@ export default ({ young, onChangeApplication }) => {
 };
 
 const Hit = ({ hit, index, young, onChangeApplication }) => {
+  console.log(hit.status);
   const [mission, setMission] = useState();
   const history = useHistory();
   useEffect(() => {
@@ -124,7 +125,7 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
             onChangeApplication();
           }}
         />
-        {hit.status === "VALIDATED" ? (
+        {hit.status === "VALIDATED" || hit.status === "IN_PROGRESS" || hit.status === "DONE" || hit.status === "ABANDON" ? (
           <ContractLink
             onClick={() => {
               history.push(`/volontaire/${young._id}/phase2/application/${hit._id}/contrat`);
