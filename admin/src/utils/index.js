@@ -37,11 +37,11 @@ export const getFilterLabel = (selected, placeholder = "Choisissez un filtre") =
   return translated.join(", ");
 };
 
-export const ENABLE_ASSIGN_CENTER = false;
+export const ENABLE_ASSIGN_CENTER = true;
 export const ENABLE_ASSIGN_CENTER_ROLES = [];
 export const ENABLE_ASSIGN_CENTER_EMAILS = ["tangi.mendes@beta.gouv.fr", "trouinard.baptiste@gmail.com", "youssef.tahiri@education.gouv.fr", "melissa.mephara@ac-guadeloupe.fr"];
 
-export const ENABLE_ASSIGN_MEETING_POINT = false;
+export const ENABLE_ASSIGN_MEETING_POINT = true;
 export const ENABLE_ASSIGN_MEETING_POINT_ROLES = [];
 export const ENABLE_ASSIGN_MEETING_POINT_EMAILS = [
   "tangi.mendes@beta.gouv.fr",
