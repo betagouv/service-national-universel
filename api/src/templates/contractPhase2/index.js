@@ -9,7 +9,6 @@ const getBaseUrl = () => {
 };
 
 const render = async (contract) => {
-  console.log(contract);
   try {
     let html = fs.readFileSync(path.resolve(__dirname, "./contract.html"), "utf8");
     html = html.replace(/{{CONTRACT_ID}}/g, contract._id).replace(/{{BASE_URL}}/g, getBaseUrl());
