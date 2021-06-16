@@ -2,7 +2,6 @@ import passwordValidator from "password-validator";
 import { YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_PHASE2 } from "snu-lib";
 export * from "snu-lib";
 export * from "./translation";
-export * from "./colors";
 
 export function getPasswordErrorMessage(v) {
   if (!v) return "Ce champ est obligatoire";
