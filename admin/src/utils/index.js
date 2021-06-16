@@ -1,7 +1,6 @@
 import { translate } from "./translation";
 export * from "snu-lib";
 export * from "./translation";
-export * from "./colors";
 
 export const domains = ["Défense et mémoire", "Sécurité", "Solidarité", "Santé", "Éducation", "Culture", "Sport", "Environnement et développement durable", "Citoyenneté"];
 export const status = ["Brouillon", "En attente de validation", "En attente de correction", "Validée", "Refusée", "Annulée", "Archivée"];
