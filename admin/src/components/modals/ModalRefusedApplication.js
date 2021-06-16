@@ -10,11 +10,12 @@ import { translate } from "../../utils";
 export default ({ value, onChange, onSend, structureId }) => {
   const [message, setMessage] = useState();
   const [sending, setSending] = useState(false);
-  const [structure, setStructure] = useState(false);
-
+  const [structure, setStructure] = useState();
   useEffect(() => {
     setMessage(`Bonjour ${value.youngFirstName} ${value.youngLastName},
-Suite à votre candidature sur la mission ${value.missionName} proposée par ${structure.name}, nous ne pouvons donner suite à votre demande en raison de :
+Suite à votre candidature sur la mission ${value.missionName} proposée par ${
+      structure?.name || "[nom de la structure]"
+    }, nous ne pouvons donner suite à votre demande en raison de :
 
 -
 -
@@ -27,6 +28,7 @@ Les équipes du Service National Universel`);
   }, [value, structure]);
 
   useEffect(() => {
+    if (!structureId) return setStructure(null);
     (async () => {
       const structureResponse = await api.get(`/structure/${structureId}`);
       if (!structureResponse.ok) {
@@ -36,7 +38,7 @@ Les équipes du Service National Universel`);
     })();
   }, [structureId]);
 
-  if (!value || !structure)
+  if (!value || structure === undefined)
     return (
       <div>
         <i>Chargement</i>

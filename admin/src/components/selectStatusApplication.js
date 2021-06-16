@@ -86,8 +86,8 @@ export default ({ hit, options = [], callback }) => {
       </ActionBox>
       {modal && (
         <ModalRefusedApplication
-          value={hit}
-          structureId={hit.structureId}
+          value={application}
+          structureId={application.structureId}
           onChange={() => setModal(false)}
           onSend={(msg) => {
             setStatus(APPLICATION_STATUS.REFUSED, msg);
