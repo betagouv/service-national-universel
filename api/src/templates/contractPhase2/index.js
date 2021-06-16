@@ -77,7 +77,6 @@ const addParents = (str, context, field) => {
 
 const replaceField = (str, context) => {
   Object.keys(context).forEach((key) => {
-    console.log(key);
     const regex = new RegExp("{{" + key + "}}", "g");
     str = str.replace(regex, context[key]);
   });
