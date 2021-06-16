@@ -3,15 +3,17 @@ import { Col, Row } from "reactstrap";
 import { Field } from "formik";
 import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
+import { useSelector } from "react-redux";
 
 import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import Loader from "../../../components/Loader";
 import api from "../../../services/api";
 import AssignMeetingPoint from "../components/AssignMeetingPoint";
-import { translate, ENABLE_ASSIGN_MEETING_POINT } from "../../../utils";
+import { translate, enableMeetingPoint } from "../../../utils";
 
 export default ({ values, handleChange, handleSubmit }) => {
   const [meetingPoint, setMeetingPoint] = useState();
+  const user = useSelector((state) => state.Auth.user);
 
   const getData = async () => {
     const { data, code, ok } = await api.get(`/meeting-point/young/${values._id}`);
@@ -42,14 +44,14 @@ export default ({ values, handleChange, handleSubmit }) => {
             <Loader />
           ) : (
             <>
-              {ENABLE_ASSIGN_MEETING_POINT ? <AssignMeetingPoint young={values} onAffect={getData} /> : null}
+              {enableMeetingPoint(user) ? <AssignMeetingPoint young={values} onAffect={getData} /> : null}
               {values.deplacementPhase1Autonomous === "true" ? <i>{`${values.firstName} se rend au centre par ses propres moyens.`}</i> : <MeetingPoint value={meetingPoint} />}
-              {ENABLE_ASSIGN_MEETING_POINT && (meetingPoint || values.deplacementPhase1Autonomous === "true") ? (
+              {enableMeetingPoint(user) && (meetingPoint || values.deplacementPhase1Autonomous === "true") ? (
                 <CancelButton color="#be3b12" onClick={handleCancel}>
                   Annuler ce choix
                 </CancelButton>
               ) : null}
-              {ENABLE_ASSIGN_MEETING_POINT && !meetingPoint && values.deplacementPhase1Autonomous !== "true" ? (
+              {enableMeetingPoint(user) && !meetingPoint && values.deplacementPhase1Autonomous !== "true" ? (
                 <CancelButton
                   color="#382F79"
                   onClick={() => {

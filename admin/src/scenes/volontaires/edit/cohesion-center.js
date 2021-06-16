@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import Item from "../components/Item";
 import AssignCenter from "../components/AssignCenter";
-import { ENABLE_ASSIGN_CENTER, ENABLE_ASSIGN_CENTER_ROLES } from "../../../utils";
+import { enableAssignCenter } from "../../../utils";
 
 export default ({ values, handleChange }) => {
   const user = useSelector((state) => state.Auth.user);
@@ -15,7 +15,7 @@ export default ({ values, handleChange }) => {
       <Box>
         <BoxHeadTitle>Centre de cohésion</BoxHeadTitle>
         <BoxContent direction="column">
-          {ENABLE_ASSIGN_CENTER && ENABLE_ASSIGN_CENTER_ROLES.includes(user.role) ? (
+          {enableAssignCenter(user) ? (
             <AssignCenter
               young={values}
               onAffect={(center, young) => {

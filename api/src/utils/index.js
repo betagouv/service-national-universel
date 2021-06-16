@@ -98,13 +98,15 @@ const updatePlacesCenter = async (center) => {
 };
 
 const updatePlacesBus = async (bus) => {
-  console.log(`update bus ${bus.id}`);
+  console.log(`update bus ${bus.id} - ${bus.idExcel}`);
   try {
     const meetingPoints = await MeetingPointModel.find({ busId: bus.id });
     if (!meetingPoints?.length) return console.log("meetingPoints not found");
     const idsMeetingPoints = meetingPoints.map((e) => e._id);
     console.log(`idsMeetingPoints for bus ${bus.id}`, idsMeetingPoints);
     const youngs = await YoungModel.find({
+      status: "VALIDATED",
+      statusPhase1: "AFFECTED",
       meetingPointId: {
         $in: idsMeetingPoints,
       },

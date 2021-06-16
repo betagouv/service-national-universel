@@ -37,7 +37,7 @@ export default ({ young, onAffect, onClick }) => {
               showIcon={false}
               placeholder="Rechercher par nom de centre..."
               componentId="SEARCH"
-              dataField={["name", "city", "zip"]}
+              dataField={["name", "city", "zip", "code"]}
               react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
               style={{ flex: 2 }}
               innerClass={{ input: "searchbox" }}
