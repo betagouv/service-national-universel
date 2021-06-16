@@ -34,7 +34,7 @@ export default () => {
             Centres
           </TabItem>
         </TabNavigationList>
-        <div style={{ display: "flex" }}>
+        <div style={{ display: "flex", marginTop: "1rem" }}>
           {user.role === "admin" && currentTab === "inscriptions" ? <ExportAll /> : null}
           <VioletHeaderButton onClick={() => print()}>
             <p>Exporter les statistiques</p>
@@ -70,6 +70,7 @@ const TabNavigation = styled.nav`
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
 `;
 const TabNavigationList = styled.ul`
   padding-left: 30px;

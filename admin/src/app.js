@@ -141,10 +141,11 @@ const RestrictedRoute = ({ component: Component, isLoggedIn, ...rest }) => {
 };
 
 const ContentContainer = styled.div`
-  margin-left: auto;
-  width: 85%;
+  margin-left: 250px;
+  width: 100%;
   @media (max-width: 768px) {
     width: 100%;
     padding: 0;
+    margin-left: auto;
   }
 `;

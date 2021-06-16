@@ -124,11 +124,11 @@ const HeaderSideBar = styled(Link)`
 const Logo = styled.h1`
   background: #372f78;
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.1);
-  width: 250px;
   margin-bottom: 0;
   padding: 15px 20px 5px;
   a {
-    display: inline-flex;
+    display: flex;
+    flex-direction: row;
     align-items: center;
     color: #161e2e;
     font-size: 13px;
@@ -157,12 +157,12 @@ const Sidebar = styled.div`
     z-index: 11;
   }
   background-color: #362f78;
-  width: 15%;
+  width: 250px;
   position: fixed;
   top: 0;
   bottom: 0;
   left: 0;
-  z-index: 1;
+  z-index: 90;
   min-height: 100vh;
   overflow-y: auto;
   transition: 0.2s;
