@@ -14,7 +14,7 @@ const render = async (contract) => {
     let html = fs.readFileSync(path.resolve(__dirname, "./contract.html"), "utf8");
     html = html.replace(/{{CONTRACT_ID}}/g, contract._id).replace(/{{BASE_URL}}/g, getBaseUrl());
     html = addParents(html, contract, "isYoungAdult");
-    //html = addSignature(html, contract, "signature");
+    html = addSignature(html, contract, "status");
     html = replaceField(html, contract, "projectManagerFirstName");
     html = replaceField(html, contract, "projectManagerLastName");
     html = replaceField(html, contract, "projectManagerRole");
@@ -60,6 +60,11 @@ const render = async (contract) => {
     html = replaceField(html, contract, "parent2Department");
     html = replaceField(html, contract, "parent2Email");
     html = replaceField(html, contract, "parent2Phone");
+    html = replaceField(html, contract, "projectManagerStatus");
+    html = replaceField(html, contract, "structureManagerStatus");
+    html = replaceField(html, contract, "youngContractStatus");
+    html = replaceField(html, contract, "parent1Status");
+    html = replaceField(html, contract, "parent2Status");
     return html;
   } catch (e) {
     throw e;
@@ -121,9 +126,61 @@ const replaceField = (str, context, field) => {
   return str.replace(regex, context[field]);
 };
 
+const badgeSignature = (status) => {
+  return `
+      <div style="position: relative;
+      display: inline-block;
+      padding: 0.25rem 1rem;
+      margin: 0.25rem 0.25rem;
+      border-radius: 99999px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: #9a9a9a;
+      background-color: #f6f6f6;
+      border: 1px solid #cecece;
+      color: ${status === "VALIDATED" ? `#6CC763` : `#FE7B52`};
+      background-color: ${status === "VALIDATED" ? `#6CC76333` : `#FE7B5233`};
+      border: 1px solid ${status === "VALIDATED" ? `#6CC763` : `#FE7B52`};;">${status === "VALIDATED" ? `Validé` : `En attente de validation`}</div>
+  `;
+};
+
 const addSignature = (str, context, field) => {
   const regex = new RegExp("{{" + field + "}}", "g");
-  let content = "";
+  let content = `
+    <div style="display: grid; grid-auto-columns: 1fr; grid-auto-flow: column;">
+      <div style="text-align: center;">
+        <div>Représentant de l'état</div>
+        ${badgeSignature(context.projectManagerStatus)}
+      </div>
+      <div style="text-align: center;">
+        <div>Représentant structure</div>
+        ${badgeSignature(context.structureManagerStatus)}
+      </div>
+      ${
+        context.isYoungAdult == "true"
+          ? `
+          <div style="text-align: center;">
+            <div>Volontaire</div>
+            ${badgeSignature(context.youngContractStatus)}
+          </div>
+      `
+          : `<div style="text-align: center;">
+              <div>Représentant légal 1</div>
+              ${badgeSignature(context.parent1Status)}
+            </div>
+      ${
+        context.parent2Email
+          ? `<div style="text-align: center;">
+              <div>Représentant légal 2</div>
+              ${badgeSignature(context.parent2Status)}
+            </div>`
+          : ``
+      }
+      `
+      }
+    </div>
+  `;
+  return str.replace(regex, content);
 };
 
 const formatDateFR = (d) => {
