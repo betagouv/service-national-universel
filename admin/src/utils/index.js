@@ -39,4 +39,5 @@ export const getFilterLabel = (selected, placeholder = "Choisissez un filtre") =
 };
 
 export const ENABLE_ASSIGN_CENTER = false;
+export const ENABLE_ASSIGN_CENTER_ROLES = ["admin"];
 export const ENABLE_ASSIGN_MEETING_POINT = false;

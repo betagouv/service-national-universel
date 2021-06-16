@@ -23,7 +23,8 @@ export default ({ values, handleChange, handleSubmit }) => {
     if (!confirm(`Êtes-vous sûr de vouloir supprimer ce choix de point de rassemblement ?`)) return;
     const { data, code, ok } = await api.put(`/young/${values._id}/cancel-meeting-point`);
     if (!ok) return toastr.error("error", translate(code));
-    handleChange({ target: { name: "deplacementPhase1Autonomous", value: "false" } });
+    handleChange({ target: { name: "deplacementPhase1Autonomous", value: undefined } });
+    handleChange({ target: { name: "meetingPointId", value: undefined } });
     toastr.success("Annulation du choix du point de rassemblement pris en compte");
     getData();
   };
@@ -52,6 +53,7 @@ export default ({ values, handleChange, handleSubmit }) => {
                 <CancelButton
                   color="#382F79"
                   onClick={() => {
+                    handleChange({ target: { name: "meetingPointId", value: undefined } });
                     handleChange({ target: { name: "deplacementPhase1Autonomous", value: "true" } });
                     handleSubmit();
                   }}
