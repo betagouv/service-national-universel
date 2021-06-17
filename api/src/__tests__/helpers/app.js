@@ -11,6 +11,7 @@ function getAppHelper() {
   app.use("/referent", require("../../controllers/referent"));
   app.use("/young", require("../../controllers/young"));
   app.use("/mission", require("../../controllers/mission"));
+  app.use("/program", require("../../controllers/program"));
   return app;
 }
 
