@@ -6,7 +6,7 @@ export default ({ young }) => {
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <Wrapper young={young} tab="phase2">
-        <Contract young={young} admin={true} />;
+        <Contract young={young} admin={true} />
       </Wrapper>
     </div>
   );

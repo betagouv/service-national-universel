@@ -169,3 +169,8 @@ img.bg {
   top: 580px;
   width: 85%;
 }
+
+p.attributes {
+  color: #372f78;
+  display: inline;
+}
