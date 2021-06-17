@@ -202,12 +202,13 @@ const Hit = ({ hit, onClick, selected }) => {
       queries.push({
         query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": hit._id } }] } },
       });
-
-      const { responses } = await api.esQuery(queries);
-      setMissionsInfo({
-        count: responses[0].hits.hits.length,
-        placesTotal: responses[0].hits.hits.reduce((acc, e) => acc + e._source.placesTotal, 0),
-      });
+      try {
+        const { responses } = await api.esQuery(queries);
+        setMissionsInfo({
+          count: responses[0].hits.hits.length,
+          placesTotal: responses[0].hits.hits.reduce((acc, e) => acc + e._source.placesTotal, 0),
+        });
+      } catch (e) {}
     })();
   }, [hit]);
   return (

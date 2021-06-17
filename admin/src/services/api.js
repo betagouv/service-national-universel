@@ -26,18 +26,21 @@ class api {
       query += `${JSON.stringify(queries[i])}\n`;
     }
 
-    return fetch(`${apiURL}/es/_msearch`, {
-      mode: "cors",
-      method: "POST",
-      redirect: "follow",
-      referrer: "no-referrer",
-      headers: { "Content-Type": "application/x-ndjson", Authorization: `JWT ${this.token}` },
-      body: query,
-    })
-      .then((r) => jsonOrRedirectToSignIn(r))
-      .catch((e) => {
-        console.error(e);
-      });
+    return new Promise(async (resolve, reject) => {
+      try {
+        const response = await fetch(`${apiURL}/es/_msearch`, {
+          mode: "cors",
+          method: "POST",
+          redirect: "follow",
+          referrer: "no-referrer",
+          headers: { "Content-Type": "application/x-ndjson", Authorization: `JWT ${this.token}` },
+          body: query,
+        });
+        resolve(jsonOrRedirectToSignIn(response));
+      } catch (e) {
+        reject(e);
+      }
+    });
   }
 
   getTotal(response) {
