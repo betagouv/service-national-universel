@@ -45,6 +45,8 @@ const {
   getProgramsHelper,
   getProgramByNameHelper,
   deleteProgramByNameHelper,
+  getProgramByIdHelper,
+  deleteProgramByIdHelper,
   createProgramHelper,
   expectProgramToEqual,
 } = require("./helpers/program");
@@ -198,7 +200,7 @@ describe("Program", () => {
     expectProgramToEqual(programFixture, res.body.data);
     const programsAfter = await getProgramsHelper();
     expect(programsAfter.length).toEqual(programsBefore.length + 1);
-    await deleteProgramByNameHelper(programFixture.name);
+    await deleteProgramByIdHelper(res.body.data._id);
   });
 
   it("PUT /program", async () => {
@@ -209,9 +211,9 @@ describe("Program", () => {
     modifiedProgram._id = program._id;
     const res = await request(getAppHelper()).put("/program").send(modifiedProgram);
     expect(res.statusCode).toEqual(200);
-    program = await getProgramByNameHelper(programFixture.name);
+    program = await getProgramByIdHelper(program._id);
     expectProgramToEqual(program, modifiedProgram);
-    await deleteProgramByNameHelper(programFixture.name);
+    await deleteProgramByIdHelper(program._id);
   });
 
   it("GET /program/:id", async () => {
@@ -220,51 +222,52 @@ describe("Program", () => {
     const res = await request(getAppHelper()).get(`/program/${program._id}`);
     expect(res.statusCode).toEqual(200);
     expectProgramToEqual(programFixture, res.body.data);
-    await deleteProgramByNameHelper(programFixture.name);
+    await deleteProgramByIdHelper(program._id);
   });
 
   it("GET /program/ AS ADMIN", async () => {
     const programFixture = getNewProgramFixture();
-    await createProgramHelper(programFixture);
+    const program = await createProgramHelper(programFixture);
     const res = await request(getAppHelper()).get(`/program/`);
     expect(res.statusCode).toEqual(200);
     expect(res.body.data.length).toEqual(1);
     expectProgramToEqual(programFixture, res.body.data[0]);
-    await deleteProgramByNameHelper(programFixture.name);
+    await deleteProgramByIdHelper(program._id);
   });
 
   it("GET /program/ AS HEAD_CENTER", async () => {
     let programFixtureHeadCenter = getNewProgramFixture();
     programFixtureHeadCenter.visibility = "HEAD_CENTER";
-    await createProgramHelper(programFixtureHeadCenter);
+    const programHeadCenter = await createProgramHelper(programFixtureHeadCenter);
     const programFixture = getNewProgramFixture();
-    await createProgramHelper(programFixture);
+    const program = await createProgramHelper(programFixture);
     passport.user.role = "head_center";
     const res = await request(getAppHelper()).get(`/program/`);
     passport.user.role = "admin";
     expect(res.statusCode).toEqual(200);
     expect(res.body.data.length).toEqual(1);
     expectProgramToEqual(programFixtureHeadCenter, res.body.data[0]);
-    await deleteProgramByNameHelper(programFixture.name);
-    await deleteProgramByNameHelper(programFixtureHeadCenter.name);
+    await deleteProgramByIdHelper(programHeadCenter._id);
+    await deleteProgramByIdHelper(program._id);
   });
 
   it("GET /program/ AS STRUCTURE_MEMBER", async () => {
     let programFixtureRegionDepartment = getNewProgramFixture();
     programFixtureRegionDepartment.region = passport.user.region;
     programFixtureRegionDepartment.department = passport.user.department;
-    await createProgramHelper(programFixtureRegionDepartment);
+    const programRegionDepartment = await createProgramHelper(programFixtureRegionDepartment);
     let programFixtureNoRegionAndDepartment = getNewProgramFixture();
     programFixtureNoRegionAndDepartment.region = "";
     programFixtureNoRegionAndDepartment.department = "";
-    await createProgramHelper(programFixtureNoRegionAndDepartment);
+    const programNoRegionAndDepartment = await createProgramHelper(programFixtureNoRegionAndDepartment);
     passport.user.role = "structure_member";
     const res = await request(getAppHelper()).get(`/program/`);
     passport.user.role = "admin";
     expect(res.statusCode).toEqual(200);
     expect(res.body.data.length).toEqual(1);
     expectProgramToEqual(programFixtureRegionDepartment, res.body.data[0]);
-    await deleteProgramByNameHelper(programFixtureRegionDepartment.name);
+    await deleteProgramByIdHelper(programRegionDepartment._id);
+    await deleteProgramByIdHelper(programNoRegionAndDepartment._id);
   });
 
   it("DELETE /program/:id", async () => {
