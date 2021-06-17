@@ -1007,7 +1007,7 @@ Schema.post("remove", function (doc) {
 
 Schema.plugin(patchHistory, {
   mongoose,
-  name: "patches",
+  name: `${MODELNAME}Patches`,
   trackOriginalValue: true,
   includes: {
     modelName: { type: String, required: true, default: MODELNAME },

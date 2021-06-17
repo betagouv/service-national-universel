@@ -8,7 +8,7 @@ import WrapperHistory from "./wrapper";
 import Loader from "../../../components/Loader";
 import api from "../../../services/api";
 
-export default ({ young }) => {
+export default ({ mission }) => {
   const [data, setData] = useState();
   const user = useSelector((state) => state.Auth.user);
 
@@ -16,7 +16,7 @@ export default ({ young }) => {
 
   const getPatches = async () => {
     try {
-      const { ok, data } = await api.get(`/young/${young._id}/patches`);
+      const { ok, data } = await api.get(`/mission/${mission._id}/patches`);
       if (!ok) return;
       setData(data);
     } catch (error) {
@@ -30,7 +30,7 @@ export default ({ young }) => {
 
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
-      <WrapperHistory young={young} tab="historique">
+      <WrapperHistory mission={mission} tab="historique">
         {!data ? (
           <Loader />
         ) : (

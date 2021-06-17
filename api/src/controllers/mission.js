@@ -88,6 +88,17 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
   }
 });
 
+router.get("/:id/patches", passport.authenticate("referent", { session: false }), async (req, res) => {
+  try {
+    const mission = await MissionObject.findById(req.params.id);
+    const data = await mission.patches.find({ ref: mission.id }).sort("-date");
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
 router.get("/structure/:structureId", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const { error, value: checkedId } = validateId(req.params.structureId);

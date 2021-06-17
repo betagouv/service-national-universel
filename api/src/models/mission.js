@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
+const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../es");
 const MODELNAME = "mission";
 
@@ -223,6 +224,23 @@ const Schema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
+Schema.plugin(patchHistory, {
+  mongoose,
+  name: `${MODELNAME}Patches`,
+  trackOriginalValue: true,
+  includes: {
+    modelName: { type: String, required: true, default: MODELNAME },
+  },
+  excludes: [
+    "/password",
+    "/lastLoginAt",
+    "/forgotPasswordResetToken",
+    "/forgotPasswordResetExpires",
+    "/invitationToken",
+    "/invitationExpires",
+    "/phase3Token",
+  ],
+});
 Schema.plugin(mongooseElastic(esClient), MODELNAME);
 
 const OBJ = mongoose.model(MODELNAME, Schema);
