@@ -51,11 +51,13 @@ export default () => {
         aggs: { range: { date_range: { field: "lastStatusAt", ranges: dates.map((e) => ({ to: e })) } } },
         size: 0,
       });
-      const { responses } = await api.esQuery(queries);
-      const val = responses[0].aggregations.range.buckets.map((e) => e.doc_count);
-      const goal = inscriptionGoal.find((g) => g.department === dptName);
-      const line = [region, dptCode, dptName, goal?.max, ...val];
-      lines.push(line);
+      try {
+        const { responses } = await api.esQuery(queries);
+        const val = responses[0].aggregations.range.buckets.map((e) => e.doc_count);
+        const goal = inscriptionGoal.find((g) => g.department === dptName);
+        const line = [region, dptCode, dptName, goal?.max, ...val];
+        lines.push(line);
+      } catch (e) {}
     }
     const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
     const ws = XLSX.utils.json_to_sheet(lines);

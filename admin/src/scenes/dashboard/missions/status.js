@@ -78,24 +78,26 @@ export default ({ filter }) => {
       if (filter.region) queries[3].query.bool.filter.push({ term: { "region.keyword": filter.region } });
       if (filter.department) queries[3].query.bool.filter.push({ term: { "department.keyword": filter.department } });
 
-      const { responses } = await api.esQuery(queries);
-      setMissionsStatus(responses[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-      setMissionsDomains(responses[0].aggregations.domains.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-      setMissionsPeriod(responses[0].aggregations.period.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-      setMissionsFormat(responses[0].aggregations.format.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-      setMissionPlaceTotal(responses[0].aggregations.placesTotal.value);
-      setMissionPlaceLeft(responses[0].aggregations.placesLeft.value);
+      try {
+        const { responses } = await api.esQuery(queries);
+        setMissionsStatus(responses[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+        setMissionsDomains(responses[0].aggregations.domains.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+        setMissionsPeriod(responses[0].aggregations.period.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+        setMissionsFormat(responses[0].aggregations.format.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+        setMissionPlaceTotal(responses[0].aggregations.placesTotal.value);
+        setMissionPlaceLeft(responses[0].aggregations.placesLeft.value);
 
-      setMobilityNearSchool(responses[1].aggregations.mobilityNearSchool.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-      setMobilityNearHome(responses[1].aggregations.mobilityNearHome.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-      setMobilityNearRelative(responses[1].aggregations.mobilityNearRelative.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-      setYoungsDomains(responses[1].aggregations.domains.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-      setYoungsPeriod(responses[1].aggregations.period.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-      setYoungsProfessionnalProject(responses[1].aggregations.professionnalProject.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-      setYoungsEngaged(responses[1].aggregations.engaged.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-      setYoungsProfessionnalProjectPrecision(responses[1].aggregations.professionnalProjectPrecision.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-      setYoungsFormat(responses[1].aggregations.format.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-      setMobilityTransport(responses[1].aggregations.mobilityTransport.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+        setMobilityNearSchool(responses[1].aggregations.mobilityNearSchool.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+        setMobilityNearHome(responses[1].aggregations.mobilityNearHome.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+        setMobilityNearRelative(responses[1].aggregations.mobilityNearRelative.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+        setYoungsDomains(responses[1].aggregations.domains.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+        setYoungsPeriod(responses[1].aggregations.period.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+        setYoungsProfessionnalProject(responses[1].aggregations.professionnalProject.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+        setYoungsEngaged(responses[1].aggregations.engaged.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+        setYoungsProfessionnalProjectPrecision(responses[1].aggregations.professionnalProjectPrecision.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+        setYoungsFormat(responses[1].aggregations.format.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+        setMobilityTransport(responses[1].aggregations.mobilityTransport.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+      } catch (e) {}
     }
     initStatus();
   }, [JSON.stringify(filter)]);

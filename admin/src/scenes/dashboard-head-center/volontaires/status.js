@@ -40,11 +40,13 @@ export default ({ filter }) => {
       if (filter.region) queries[1].query.bool.filter.push({ term: { "region.keyword": filter.region } });
       if (filter.department) queries[1].query.bool.filter.push({ term: { "department.keyword": filter.department } });
 
-      const { responses } = await api.esQuery(queries);
-      console.log(responses[0].aggregations);
-      setStatusPhase1(responses[0].aggregations.statusPhase1.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-      setCohesionStayMedicalFileReceived(responses[0].aggregations.cohesionStayMedicalFileReceived.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-      setCohesionStayPresence(responses[0].aggregations.cohesionStayPresence.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+      try {
+        const { responses } = await api.esQuery(queries);
+        console.log(responses[0].aggregations);
+        setStatusPhase1(responses[0].aggregations.statusPhase1.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+        setCohesionStayMedicalFileReceived(responses[0].aggregations.cohesionStayMedicalFileReceived.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+        setCohesionStayPresence(responses[0].aggregations.cohesionStayPresence.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+      } catch (e) {}
     })();
   }, [JSON.stringify(filter)]);
 

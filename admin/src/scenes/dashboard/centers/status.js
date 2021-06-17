@@ -28,10 +28,12 @@ export default ({ filter }) => {
       if (filter.region) queries[1].query.bool.filter.push({ term: { "region.keyword": filter.region } });
       if (filter.department) queries[1].query.bool.filter.push({ term: { "department.keyword": filter.department } });
 
-      const { responses } = await api.esQuery(queries);
-      setPlacesTotal(responses[0].aggregations.placesTotal.value);
-      setPlacesLeft(responses[0].aggregations.placesLeft.value);
-      setTotal(responses[0].hits.total.value);
+      try {
+        const { responses } = await api.esQuery(queries);
+        setPlacesTotal(responses[0].aggregations.placesTotal.value);
+        setPlacesLeft(responses[0].aggregations.placesLeft.value);
+        setTotal(responses[0].hits.total.value);
+      } catch (e) {}
     }
     initStatus();
   }, [JSON.stringify(filter)]);

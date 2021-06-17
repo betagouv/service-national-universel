@@ -32,8 +32,10 @@ export default ({ young, onSend }) => {
     (async () => {
       if (!structure) return;
       const queries = [{ index: "referent", type: "_doc" }, { query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": structure._id } }] } } }];
-      const { responses } = await api.esQuery(queries);
-      if (responses) setReferents(responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
+      try {
+        const { responses } = await api.esQuery(queries);
+        if (responses) setReferents(responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
+      } catch (e) {}
     })();
   }, [structure]);
 

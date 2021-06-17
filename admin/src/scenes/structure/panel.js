@@ -34,20 +34,22 @@ export default ({ onChange, value }) => {
         });
       }
 
-      const { responses } = await api.esQuery(queries);
+      try {
+        const { responses } = await api.esQuery(queries);
 
-      if (value.networkId) {
-        const structures = responses[2]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-        setParentStructure(structures.length ? structures[0] : null);
-      } else {
-        setParentStructure(null);
-      }
-      setMissionsInfo({
-        count: responses[0].hits.hits.length,
-        placesTotal: responses[0].hits.hits.reduce((acc, e) => acc + e._source.placesTotal, 0),
-        placesLeft: responses[0].hits.hits.reduce((acc, e) => acc + e._source.placesLeft, 0),
-      });
-      setReferents(responses[1]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
+        if (value.networkId) {
+          const structures = responses[2]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+          setParentStructure(structures.length ? structures[0] : null);
+        } else {
+          setParentStructure(null);
+        }
+        setMissionsInfo({
+          count: responses[0].hits.hits.length,
+          placesTotal: responses[0].hits.hits.reduce((acc, e) => acc + e._source.placesTotal, 0),
+          placesLeft: responses[0].hits.hits.reduce((acc, e) => acc + e._source.placesLeft, 0),
+        });
+        setReferents(responses[1]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
+      } catch (e) {}
     })();
   }, [value]);
 
@@ -134,9 +136,11 @@ export default ({ onChange, value }) => {
           <div style={{ marginTop: "1rem" }}>{parentStructure.name}</div>
         </Info>
       ) : null}
-      <div>{/*Object.keys(value).map((e, k) => {
+      <div>
+        {/*Object.keys(value).map((e, k) => {
           return <div key={k}>{`${e}:${value[e]}`}</div>;
-        }) */}</div>
+        }) */}
+      </div>
     </Panel>
   );
 };
