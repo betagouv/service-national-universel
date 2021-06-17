@@ -4,12 +4,12 @@ async function getMissionsHelper() {
   return await MissionObject.find({});
 }
 
-async function getMissionByNameHelper(missionName) {
-  return await MissionObject.findOne({ name: missionName });
+async function getMissionByIdHelper(missionId) {
+  return await MissionObject.findOne({ _id: missionId });
 }
 
-async function deleteMissionByNameHelper(missionName) {
-  const mission = await getMissionByNameHelper(missionName);
+async function deleteMissionByIdHelper(missionId) {
+  const mission = await getMissionByIdHelper(missionId);
   await mission.remove();
 }
 
@@ -45,8 +45,8 @@ function expectMissionToEqual(mission, expectedMission) {
 
 module.exports = {
   getMissionsHelper,
-  getMissionByNameHelper,
-  deleteMissionByNameHelper,
+  getMissionByIdHelper,
+  deleteMissionByIdHelper,
   createMissionHelper,
   expectMissionToEqual,
 };

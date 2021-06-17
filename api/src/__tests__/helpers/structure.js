@@ -4,12 +4,12 @@ async function getStructuresHelper() {
   return await StructureObject.find({});
 }
 
-async function getStructureByNameHelper(structureName) {
-  return await StructureObject.findOne({ name: structureName });
+async function getStructureByIdHelper(structureId) {
+  return await StructureObject.findOne({ _id: structureId });
 }
 
-async function deleteStructureByNameHelper(structureName) {
-  const structure = await getStructureByNameHelper(structureName);
+async function deleteStructureByIdHelper(structureId) {
+  const structure = await getStructureByIdHelper(structureId);
   await structure.remove();
 }
 
@@ -51,8 +51,8 @@ function expectStructureToEqual(structure, expectedStructure) {
 
 module.exports = {
   getStructuresHelper,
-  getStructureByNameHelper,
-  deleteStructureByNameHelper,
+  getStructureByIdHelper,
+  deleteStructureByIdHelper,
   createStructureHelper,
   expectStructureToEqual,
 };
