@@ -75,7 +75,6 @@ export default ({ young, onChangeApplication }) => {
 };
 
 const Hit = ({ hit, index, young, onChangeApplication }) => {
-  console.log(hit.status);
   const [mission, setMission] = useState();
   const history = useHistory();
   useEffect(() => {
