@@ -23,6 +23,24 @@ const formatLongDate = (date) => {
 
 export default () => {
   const [structure, setStructure] = useState(null);
+  // List of structure IDS currently displayed in results
+  const [structureIds, setStructureIds] = useState([]);
+  // List of missions associated to the structures
+  const [missions, setMissions] = useState([]);
+
+  useEffect(() => {
+    (async () => {
+      if (structureIds?.length) {
+        const queries = [
+          { index: "mission", type: "_doc" },
+          { size: 10_000 /* no limit */, query: { bool: { must: { match_all: {} }, filter: [{ terms: { "structureId.keyword": structureIds } }] } } },
+        ];
+        const { responses } = await api.esQuery(queries);
+        setMissions(responses[0]?.hits?.hits || []);
+      }
+    })();
+  }, [structureIds]);
+
   const user = useSelector((state) => state.Auth.user);
   const getDefaultQuery = () => (user.role === "supervisor" ? { query: { bool: { filter: { term: { "networkId.keyword": user.structureId } } } } } : { query: { match_all: {} } });
   const getExportQuery = () => ({ ...getDefaultQuery(), size: 10000 });
@@ -153,6 +171,9 @@ export default () => {
                 loader={<div style={{ padding: "0 20px" }}>Chargement...</div>}
                 innerClass={{ pagination: "pagination" }}
                 renderNoResults={() => <div style={{ padding: "10px 25px" }}>Aucun résultat.</div>}
+                onData={({ rawData }) => {
+                  if (rawData && rawData.hits.hits) setStructureIds(rawData.hits.hits.map((e) => e._id));
+                }}
                 renderResultStats={(e) => {
                   return (
                     <>
@@ -177,7 +198,13 @@ export default () => {
                       </thead>
                       <tbody>
                         {data.map((hit, k) => (
-                          <Hit hit={hit} key={k} onClick={() => setStructure(hit)} selected={structure?._id === hit._id} />
+                          <Hit
+                            hit={hit}
+                            key={k}
+                            missions={missions.filter((e) => e._source.structureId === hit._id)}
+                            onClick={() => setStructure(hit)}
+                            selected={structure?._id === hit._id}
+                          />
                         ))}
                       </tbody>
                     </Table>
@@ -193,23 +220,11 @@ export default () => {
   );
 };
 
-const Hit = ({ hit, onClick, selected }) => {
-  const [missionsInfo, setMissionsInfo] = useState({ count: "-", placesTotal: "-" });
-  useEffect(() => {
-    (async () => {
-      const queries = [];
-      queries.push({ index: "mission", type: "_doc" });
-      queries.push({
-        query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": hit._id } }] } },
-      });
-
-      const { responses } = await api.esQuery(queries);
-      setMissionsInfo({
-        count: responses[0].hits.hits.length,
-        placesTotal: responses[0].hits.hits.reduce((acc, e) => acc + e._source.placesTotal, 0),
-      });
-    })();
-  }, [hit]);
+const Hit = ({ hit, onClick, selected, missions }) => {
+  const missionsInfo = {
+    count: missions.length || "0",
+    placesTotal: missions.reduce((acc, e) => acc + e._source.placesTotal, 0),
+  };
   return (
     <tr style={{ backgroundColor: selected && "#e6ebfa" }} onClick={onClick}>
       <td>
