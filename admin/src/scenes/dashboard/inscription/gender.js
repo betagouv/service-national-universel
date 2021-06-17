@@ -24,11 +24,9 @@ export default ({ filter }) => {
       if (filter.region) queries[1].query.bool.filter.push({ term: { "region.keyword": filter.region } });
       if (filter.department) queries[1].query.bool.filter.push({ term: { "department.keyword": filter.department } });
 
-      try {
-        const { responses } = await api.esQuery(queries);
-        const m = api.getAggregations(responses[0]);
-        setGender(m);
-      } catch (e) {}
+      const { responses } = await api.esQuery(queries);
+      const m = api.getAggregations(responses[0]);
+      setGender(m);
     })();
   }, [JSON.stringify(filter)]);
 

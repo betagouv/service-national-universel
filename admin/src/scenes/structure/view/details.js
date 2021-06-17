@@ -30,16 +30,14 @@ export default ({ structure }) => {
       });
     }
 
-    try {
-      const { responses } = await api.esQuery(queries);
-      if (structure.networkId) {
-        const structures = responses[1]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-        setParentStructure(structures.length ? structures[0] : null);
-      } else {
-        setParentStructure(null);
-      }
-      setReferents(responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
-    } catch (e) {}
+    const { responses } = await api.esQuery(queries);
+    if (structure.networkId) {
+      const structures = responses[1]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+      setParentStructure(structures.length ? structures[0] : null);
+    } else {
+      setParentStructure(null);
+    }
+    setReferents(responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
   };
 
   useEffect(() => {

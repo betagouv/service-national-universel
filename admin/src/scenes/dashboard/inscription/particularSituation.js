@@ -31,18 +31,16 @@ export default ({ filter }) => {
       if (filter.department) queries[1].query.bool.filter.push({ term: { "department.keyword": filter.department } });
 
       //handicap
-      try {
-        const { responses } = await api.esQuery(queries);
+      const { responses } = await api.esQuery(queries);
 
-        function transform(arr) {
-          const t = arr.find((e) => e.key === "true");
-          const f = arr.find((e) => e.key === "false");
-          return { true: t ? t.doc_count : 0, false: f ? f.doc_count : 0 };
-        }
-        setHandicap(transform(responses[0].aggregations.handicap.buckets));
-        setPpsBeneficiary(transform(responses[0].aggregations.ppsBeneficiary.buckets));
-        setPaiBeneficiary(transform(responses[0].aggregations.paiBeneficiary.buckets));
-      } catch (e) {}
+      function transform(arr) {
+        const t = arr.find((e) => e.key === "true");
+        const f = arr.find((e) => e.key === "false");
+        return { true: t ? t.doc_count : 0, false: f ? f.doc_count : 0 };
+      }
+      setHandicap(transform(responses[0].aggregations.handicap.buckets));
+      setPpsBeneficiary(transform(responses[0].aggregations.ppsBeneficiary.buckets));
+      setPaiBeneficiary(transform(responses[0].aggregations.paiBeneficiary.buckets));
     })();
   }, [JSON.stringify(filter)]);
 

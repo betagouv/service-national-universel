@@ -44,25 +44,23 @@ export default ({ filter }) => {
       if (filter.region) queries[1].query.bool.filter.push({ term: { "region.keyword": filter.region } });
       if (filter.department) queries[1].query.bool.filter.push({ term: { "department.keyword": filter.department } });
 
-      try {
-        const { responses } = await api.esQuery(queries);
+      const { responses } = await api.esQuery(queries);
 
-        const queries2 = [...queries];
-        queries2[1].query.bool.filter = [{ term: { "cohort.keyword": filter.cohort } }, { terms: { "status.keyword": ["WITHDRAWN"] } }];
-        if (filter.region) queries2[1].query.bool.filter.push({ term: { "region.keyword": filter.region } });
-        if (filter.department) queries2[1].query.bool.filter.push({ term: { "department.keyword": filter.department } });
-        const { responses: responses2 } = await api.esQuery(queries2);
+      const queries2 = [...queries];
+      queries2[1].query.bool.filter = [{ term: { "cohort.keyword": filter.cohort } }, { terms: { "status.keyword": ["WITHDRAWN"] } }];
+      if (filter.region) queries2[1].query.bool.filter.push({ term: { "region.keyword": filter.region } });
+      if (filter.department) queries2[1].query.bool.filter.push({ term: { "department.keyword": filter.department } });
+      const { responses: responses2 } = await api.esQuery(queries2);
 
-        setStatus({
-          VALIDATED: responses[0].aggregations.status.buckets.reduce((acc, c) => acc + c.doc_count, 0),
-          WITHDRAWN: responses2[0].aggregations.status.buckets.reduce((acc, c) => acc + c.doc_count, 0),
-        });
-        setStatusPhase1(responses[0].aggregations.statusPhase1.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-        setStatusPhase2(responses[0].aggregations.statusPhase2.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-        setStatusPhase2Contract(responses[0].aggregations.statusPhase2Contract.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-        setStatusPhase3(responses[0].aggregations.statusPhase3.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-        setCohesionStayPresence(responses[0].aggregations.cohesionStayPresence.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-      } catch (e) {}
+      setStatus({
+        VALIDATED: responses[0].aggregations.status.buckets.reduce((acc, c) => acc + c.doc_count, 0),
+        WITHDRAWN: responses2[0].aggregations.status.buckets.reduce((acc, c) => acc + c.doc_count, 0),
+      });
+      setStatusPhase1(responses[0].aggregations.statusPhase1.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+      setStatusPhase2(responses[0].aggregations.statusPhase2.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+      setStatusPhase2Contract(responses[0].aggregations.statusPhase2Contract.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+      setStatusPhase3(responses[0].aggregations.statusPhase3.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+      setCohesionStayPresence(responses[0].aggregations.cohesionStayPresence.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
     })();
     (async () => {
       const queries = [];
@@ -78,10 +76,8 @@ export default ({ filter }) => {
       if (filter.region) queries[1].query.bool.filter.push({ term: { "youngRegion.keyword": filter.region } });
       if (filter.department) queries[1].query.bool.filter.push({ term: { "youngDepartment.keyword": filter.department } });
 
-      try {
-        const { responses } = await api.esQuery(queries);
-        setStatusApplication(responses[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-      } catch (e) {}
+      const { responses } = await api.esQuery(queries);
+      setStatusApplication(responses[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
     })();
   }, [JSON.stringify(filter)]);
 

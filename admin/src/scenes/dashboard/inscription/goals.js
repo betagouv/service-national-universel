@@ -33,11 +33,9 @@ export default ({ filter }) => {
     if (filter.region) queries[1].query.bool.filter.push({ term: { "region.keyword": filter.region } });
     if (filter.department) queries[1].query.bool.filter.push({ term: { "department.keyword": filter.department } });
 
-    try {
-      const { responses } = await api.esQuery(queries);
-      const m = api.getAggregations(responses[0]);
-      setTotal2020Affected(m.AFFECTED || 0);
-    } catch (e) {}
+    const { responses } = await api.esQuery(queries);
+    const m = api.getAggregations(responses[0]);
+    setTotal2020Affected(m.AFFECTED || 0);
   }
 
   async function fetch2021Validated() {
@@ -51,11 +49,10 @@ export default ({ filter }) => {
 
     if (filter.region) queries[1].query.bool.filter.push({ term: { "region.keyword": filter.region } });
     if (filter.department) queries[1].query.bool.filter.push({ term: { "department.keyword": filter.department } });
-    try {
-      const { responses } = await api.esQuery(queries);
-      const m = api.getAggregations(responses[0]);
-      setTotal2021Validated(m.VALIDATED || 0);
-    } catch (e) {}
+
+    const { responses } = await api.esQuery(queries);
+    const m = api.getAggregations(responses[0]);
+    setTotal2021Validated(m.VALIDATED || 0);
   }
 
   useEffect(() => {
