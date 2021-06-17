@@ -5,10 +5,15 @@ const { capture } = require("../sentry");
 
 const ProgramObject = require("../models/program");
 const { ERRORS } = require("../utils");
+const { validateId, validateString } = require("../utils/defaultValidate");
+const validateFromReferent = require("../utils/referent");
+const validateFromYoung = require("../utils/young");
 
 router.post("/", async (req, res) => {
   try {
-    const data = await ProgramObject.create(req.body);
+    const { error, value: checkedProgram } = validateFromYoung.validateProgram(req.body);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    const data = await ProgramObject.create(checkedProgram);
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
@@ -18,8 +23,11 @@ router.post("/", async (req, res) => {
 
 router.put("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    let obj = req.body;
-    const data = await ProgramObject.findByIdAndUpdate(req.body._id, obj, { new: true });
+    const { errorProgram, value: checkedProgram } = validateFromReferent.validateProgram(req.body);
+    const { errorId, value: checkedId } = validateId(req.body._id);
+    if (errorProgram || errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    let obj = checkedProgram;
+    const data = await ProgramObject.findByIdAndUpdate(checkedId, obj, { new: true });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
@@ -42,7 +50,9 @@ router.put("/", passport.authenticate("referent", { session: false }), async (re
 
 router.get("/:id", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
-    const data = await ProgramObject.findOne({ _id: req.params.id });
+    const { error, value: checkedId } = validateId(req.params.id);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error });
+    const data = await ProgramObject.findOne({ _id: checkedId });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
@@ -56,7 +66,12 @@ router.get("/", passport.authenticate(["referent", "young"], { session: false })
     let data = [];
     if (req.user.role === "admin") data = await ProgramObject.find({});
     else if (req.user.role === "head_center") data = await ProgramObject.find({ visibility: "HEAD_CENTER" });
-    else data = await ProgramObject.find({ $or: [{ visibility: "NATIONAL" }, { department: req.user.department }, { region: req.user.region }] });
+    else {
+      const { errorDepartement, value: checkedDepartement } = validateString(req.user.department);
+      const { errorRegion, value: checkedRegion } = validateString(req.user.region);
+      if (errorDepartement || errorRegion) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+      data = await ProgramObject.find({ $or: [{ visibility: "NATIONAL" }, { department: checkedDepartement }, { region: checkedRegion }] });
+    }
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
@@ -66,7 +81,9 @@ router.get("/", passport.authenticate(["referent", "young"], { session: false })
 
 router.delete("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const program = await ProgramObject.findOne({ _id: req.params.id });
+    const { error, value: checkedId } = validateId(req.params.id);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error });
+    const program = await ProgramObject.findOne({ _id: checkedId });
     await program.remove();
     console.log(`Program ${req.params.id} has been deleted`);
     res.status(200).send({ ok: true });
