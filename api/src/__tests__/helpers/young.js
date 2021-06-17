@@ -4,12 +4,12 @@ async function getYoungsHelper() {
   return await YoungObject.find({});
 }
 
-async function getYoungByEmailHelper(youngEmail) {
-  return await YoungObject.findOne({ email: youngEmail });
+async function getYoungByIdHelper(youngId) {
+  return await YoungObject.findOne({ _id: youngId });
 }
 
-async function deleteYoungByEmailHelper(youngEmail) {
-  const young = await getYoungByEmailHelper(youngEmail);
+async function deleteYoungByIdHelper(youngId) {
+  const young = await getYoungByIdHelper(youngId);
   await young.remove();
 }
 
@@ -37,8 +37,8 @@ function expectYoungToEqual(young, expectedYoung) {
 
 module.exports = {
   getYoungsHelper,
-  getYoungByEmailHelper,
-  deleteYoungByEmailHelper,
+  getYoungByIdHelper,
+  deleteYoungByIdHelper,
   createYoungHelper,
   expectYoungToEqual,
 };

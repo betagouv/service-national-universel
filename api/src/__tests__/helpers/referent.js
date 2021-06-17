@@ -4,12 +4,12 @@ async function getReferentsHelper() {
   return await ReferentObject.find({});
 }
 
-async function getReferentByEmailHelper(referentEmail) {
-  return await ReferentObject.findOne({ email: referentEmail });
+async function getReferentByIdHelper(referentId) {
+  return await ReferentObject.findOne({ _id: referentId });
 }
 
-async function deleteReferentByEmailHelper(referentEmail) {
-  const referent = await getReferentByEmailHelper(referentEmail);
+async function deleteReferentByIdHelper(referentId) {
+  const referent = await getReferentByIdHelper(referentId);
   await referent.remove();
 }
 
@@ -34,8 +34,8 @@ function expectReferentToEqual(referent, expectedReferent) {
 
 module.exports = {
   getReferentsHelper,
-  getReferentByEmailHelper,
-  deleteReferentByEmailHelper,
+  getReferentByIdHelper,
+  deleteReferentByIdHelper,
   createReferentHelper,
   expectReferentToEqual,
 };
