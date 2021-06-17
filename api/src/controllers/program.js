@@ -11,7 +11,7 @@ const validateFromYoung = require("../utils/young");
 
 router.post("/", async (req, res) => {
   try {
-    const { error: error, value: checkedProgram } = validateFromYoung.validateProgram(req.body);
+    const { error, value: checkedProgram } = validateFromYoung.validateProgram(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
     const data = await ProgramObject.create(checkedProgram);
     return res.status(200).send({ ok: true, data });
@@ -50,7 +50,7 @@ router.put("/", passport.authenticate("referent", { session: false }), async (re
 
 router.get("/:id", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
-    const { error: error, value: checkedId } = validateId(req.params.id);
+    const { error, value: checkedId } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error });
     const data = await ProgramObject.findOne({ _id: checkedId });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -81,7 +81,7 @@ router.get("/", passport.authenticate(["referent", "young"], { session: false })
 
 router.delete("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const { error: error, value: checkedId } = validateId(req.params.id);
+    const { error, value: checkedId } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error });
     const program = await ProgramObject.findOne({ _id: checkedId });
     await program.remove();
