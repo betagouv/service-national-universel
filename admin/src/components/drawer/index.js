@@ -139,7 +139,7 @@ const Logo = styled.h1`
     text-decoration: none;
   }
   img {
-    margin-right: 25px;
+    margin-right: 1rem;
     vertical-align: top;
   }
 `;
