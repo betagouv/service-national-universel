@@ -135,6 +135,7 @@ export default ({ mission, structure, tutor }) => {
 
 const Wrapper = styled.div`
   padding: 3rem;
+  flex: 1;
   .detail {
     display: flex;
     align-items: flex-start;
@@ -161,4 +162,7 @@ const Subtitle = styled.div`
 
 const SubtitleLink = styled(Subtitle)`
   color: #5245cc;
+  :hover {
+    text-decoration: underline;
+  }
 `;
