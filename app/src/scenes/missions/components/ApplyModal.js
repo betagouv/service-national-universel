@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Modal } from "reactstrap";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
+import Loader from "../../../components/Loader";
 
 import api from "../../../services/api";
 
@@ -44,10 +45,16 @@ export default ({ value, onChange, onSend }) => {
         <img src={require("../../../assets/close.svg")} height={10} onClick={onChange} />
         <h1>Je souhaite proposer ma candidature pour cette mission</h1>
         <h3>Votre profil sera proposé à la structure, elle disposera de vos coordonnées pour valider votre participation.</h3>
-        <Button disabled={sending} onClick={send}>
-          Confirmer ma candidature
-        </Button>
-        <CancelButton onClick={onChange}>Annuler</CancelButton>
+        {sending ? (
+          <Loader size="2rem" />
+        ) : (
+          <>
+            <Button disabled={sending} onClick={send}>
+              Confirmer ma candidature
+            </Button>
+            <CancelButton onClick={onChange}>Annuler</CancelButton>
+          </>
+        )}
       </ModalContainer>
     </Modal>
   );

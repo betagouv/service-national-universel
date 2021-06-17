@@ -15,13 +15,15 @@ import { toastr } from "react-redux-toastr";
 export default (props) => {
   const [mission, setMission] = useState();
   const [modal, setModal] = useState(null);
+
+  const getMission = async () => {
+    const id = props.match && props.match.params && props.match.params.id;
+    if (!id) return setMission(null);
+    const { data } = await api.get(`/mission/${id}`);
+    return setMission(data);
+  };
   useEffect(() => {
-    (async () => {
-      const id = props.match && props.match.params && props.match.params.id;
-      if (!id) return setMission(null);
-      const { data } = await api.get(`/mission/${id}`);
-      return setMission(data);
-    })();
+    getMission();
   }, []);
 
   const getTags = () => {
@@ -40,8 +42,8 @@ export default (props) => {
         <ApplyModal
           value={mission}
           onChange={() => setModal(null)}
-          onSend={() => {
-            console.log("send");
+          onSend={async () => {
+            await getMission();
             setModal("DONE");
           }}
         />
@@ -107,7 +109,7 @@ const ApplyButton = ({ applied, placesLeft, setModal }) => {
   return applied ? (
     <>
       <Link to="/candidature">
-        <Button>Voir la candidature</Button>
+        <Button>Voir&nbsp;la&nbsp;candidature</Button>
       </Link>
       <p className="button-subtitle">Vous avez déjà candidaté à cette mission</p>
     </>
