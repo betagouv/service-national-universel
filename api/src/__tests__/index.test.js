@@ -12,6 +12,8 @@ const getNewYoungFixture = require("./fixtures/young");
 const getNewReferentFixture = require("./fixtures/referent");
 const getNewMissionFixture = require("./fixtures/mission");
 const getNewStructureFixture = require("./fixtures/structure");
+const getNewProgramFixture = require("./fixtures/program");
+const passport = require("./__mocks__/passport");
 
 const { getMissionsHelper, getMissionByIdHelper, deleteMissionByIdHelper, createMissionHelper, expectMissionToEqual } = require("./helpers/mission");
 
@@ -20,6 +22,14 @@ const { getYoungsHelper, getYoungByIdHelper, deleteYoungByIdHelper, createYoungH
 const { getReferentsHelper, deleteReferentByIdHelper } = require("./helpers/referent");
 
 const { deleteStructureByIdHelper, createStructureHelper, expectStructureToEqual } = require("./helpers/structure");
+
+const {
+  getProgramsHelper,
+  getProgramByNameHelper,
+  deleteProgramByNameHelper,
+  createProgramHelper,
+  expectProgramToEqual,
+} = require("./helpers/program");
 
 let db;
 
@@ -155,5 +165,94 @@ describe("Mission", () => {
     expect(res.statusCode).toEqual(200);
     const missionsAfter = await getMissionsHelper();
     expect(missionsAfter.length).toEqual(missionsBefore.length - 1);
+  });
+});
+
+describe("Program", () => {
+  it("POST /program", async () => {
+    const programFixture = getNewProgramFixture();
+    const programsBefore = await getProgramsHelper();
+    const res = await request(getAppHelper()).post("/program").send(programFixture);
+    expect(res.statusCode).toEqual(200);
+    expectProgramToEqual(programFixture, res.body.data);
+    const programsAfter = await getProgramsHelper();
+    expect(programsAfter.length).toEqual(programsBefore.length + 1);
+    await deleteProgramByNameHelper(programFixture.name);
+  });
+
+  it("PUT /program", async () => {
+    const programFixture = getNewProgramFixture();
+    let program = await createProgramHelper(programFixture);
+    const modifiedProgram = { ...programFixture };
+    modifiedProgram.url = faker.internet.url();
+    modifiedProgram._id = program._id;
+    const res = await request(getAppHelper()).put("/program").send(modifiedProgram);
+    expect(res.statusCode).toEqual(200);
+    program = await getProgramByNameHelper(programFixture.name);
+    expectProgramToEqual(program, modifiedProgram);
+    await deleteProgramByNameHelper(programFixture.name);
+  });
+
+  it("GET /program/:id", async () => {
+    const programFixture = getNewProgramFixture();
+    const program = await createProgramHelper(programFixture);
+    const res = await request(getAppHelper()).get(`/program/${program._id}`);
+    expect(res.statusCode).toEqual(200);
+    expectProgramToEqual(programFixture, res.body.data);
+    await deleteProgramByNameHelper(programFixture.name);
+  });
+
+  it("GET /program/ AS ADMIN", async () => {
+    const programFixture = getNewProgramFixture();
+    await createProgramHelper(programFixture);
+    const res = await request(getAppHelper()).get(`/program/`);
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.data.length).toEqual(1);
+    expectProgramToEqual(programFixture, res.body.data[0]);
+    await deleteProgramByNameHelper(programFixture.name);
+  });
+
+  it("GET /program/ AS HEAD_CENTER", async () => {
+    let programFixtureHeadCenter = getNewProgramFixture();
+    programFixtureHeadCenter.visibility = "HEAD_CENTER";
+    await createProgramHelper(programFixtureHeadCenter);
+    const programFixture = getNewProgramFixture();
+    await createProgramHelper(programFixture);
+    passport.user.role = "head_center";
+    const res = await request(getAppHelper()).get(`/program/`);
+    passport.user.role = "admin";
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.data.length).toEqual(1);
+    expectProgramToEqual(programFixtureHeadCenter, res.body.data[0]);
+    await deleteProgramByNameHelper(programFixture.name);
+    await deleteProgramByNameHelper(programFixtureHeadCenter.name);
+  });
+
+  it("GET /program/ AS STRUCTURE_MEMBER", async () => {
+    let programFixtureRegionDepartment = getNewProgramFixture();
+    programFixtureRegionDepartment.region = passport.user.region;
+    programFixtureRegionDepartment.department = passport.user.department;
+    await createProgramHelper(programFixtureRegionDepartment);
+    let programFixtureNoRegionAndDepartment = getNewProgramFixture();
+    programFixtureNoRegionAndDepartment.region = "";
+    programFixtureNoRegionAndDepartment.department = "";
+    await createProgramHelper(programFixtureNoRegionAndDepartment);
+    passport.user.role = "structure_member";
+    const res = await request(getAppHelper()).get(`/program/`);
+    passport.user.role = "admin";
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.data.length).toEqual(1);
+    expectProgramToEqual(programFixtureRegionDepartment, res.body.data[0]);
+    await deleteProgramByNameHelper(programFixtureRegionDepartment.name);
+  });
+
+  it("DELETE /program/:id", async () => {
+    const programFixture = getNewProgramFixture();
+    const program = await createProgramHelper(programFixture);
+    const programsBefore = await getProgramsHelper();
+    const res = await request(getAppHelper()).delete(`/program/${program._id}`);
+    expect(res.statusCode).toEqual(200);
+    const programsAfter = await getProgramsHelper();
+    expect(programsAfter.length).toEqual(programsBefore.length - 1);
   });
 });
