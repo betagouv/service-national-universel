@@ -37,26 +37,6 @@ function validateMission(mission) {
     .validate(mission, { stripUnknown: true });
 }
 
-function validateProgram(program) {
-  return Joi.object()
-    .keys({
-      name: Joi.string().allow(null, ""),
-      description: Joi.string().allow(null, ""),
-      descriptionFor: Joi.string().allow(null, ""),
-      descriptionMoney: Joi.string().allow(null, ""),
-      descriptionDuration: Joi.string().allow(null, ""),
-      url: Joi.string().allow(null, ""),
-      imageFile: Joi.string().allow(null, ""),
-      imageString: Joi.string().allow(null, ""),
-      type: Joi.string().allow(null, ""),
-      department: Joi.string().allow(null, ""),
-      region: Joi.string().allow(null, ""),
-      visibility: Joi.string().allow(null, ""),
-    })
-    .validate(program, { stripUnknown: true });
-}
-
 module.exports = {
   validateMission,
-  validateProgram,
 };

@@ -12,7 +12,6 @@ const getNewYoungFixture = require("./fixtures/young");
 const getNewReferentFixture = require("./fixtures/referent");
 const getNewMissionFixture = require("./fixtures/mission");
 const getNewStructureFixture = require("./fixtures/structure");
-const getNewProgramFixture = require("./fixtures/program");
 
 const {
   getMissionsHelper,
@@ -21,14 +20,6 @@ const {
   createMissionHelper,
   expectMissionToEqual,
 } = require("./helpers/mission");
-
-const {
-  getProgramsHelper,
-  getProgramByNameHelper,
-  deleteProgramByNameHelper,
-  createProgramHelper,
-  expectProgramToEqual,
-} = require("./helpers/program");
 
 const { getYoungsHelper, getYoungByEmailHelper, deleteYoungByEmailHelper, createYoungHelper, expectYoungToEqual } = require("./helpers/young");
 
@@ -185,49 +176,5 @@ describe("Mission", () => {
     expect(res.statusCode).toEqual(200);
     const missionsAfter = await getMissionsHelper();
     expect(missionsAfter.length).toEqual(missionsBefore.length - 1);
-  });
-});
-
-describe("Program", () => {
-  it("POST /program", async () => {
-    const programFixture = getNewProgramFixture();
-    const programsBefore = await getProgramsHelper();
-    const res = await request(getAppHelper()).post("/program").send(programFixture);
-    expect(res.statusCode).toEqual(200);
-    const programsAfter = await getProgramsHelper();
-    expect(programsAfter.length).toEqual(programsBefore.length + 1);
-    await deleteProgramByNameHelper(programFixture.name);
-  });
-
-  it("PUT /program", async () => {
-    const programFixture = getNewProgramFixture();
-    let program = await createProgramHelper(programFixture);
-    const modifiedProgram = { ...programFixture };
-    modifiedProgram.url = faker.internet.url();
-    modifiedProgram._id = program._id;
-    const res = await request(getAppHelper()).put("/program").send(modifiedProgram);
-    expect(res.statusCode).toEqual(200);
-    program = await getProgramByNameHelper(programFixture.name);
-    expectProgramToEqual(program, modifiedProgram);
-    await deleteProgramByNameHelper(programFixture.name);
-  });
-
-  it("GET /program/:id", async () => {
-    const programFixture = getNewProgramFixture();
-    const program = await createProgramHelper(programFixture);
-    const res = await request(getAppHelper()).get(`/program/${program._id}`);
-    expect(res.statusCode).toEqual(200);
-    expectProgramToEqual(programFixture, res.body.data);
-    await deleteProgramByNameHelper(programFixture.name);
-  });
-
-  it("DELETE /program/:id", async () => {
-    const programFixture = getNewProgramFixture();
-    const program = await createProgramHelper(programFixture);
-    const programsBefore = await getProgramsHelper();
-    const res = await request(getAppHelper()).delete(`/program/${program._id}`);
-    expect(res.statusCode).toEqual(200);
-    const programsAfter = await getProgramsHelper();
-    expect(programsAfter.length).toEqual(programsBefore.length - 1);
   });
 });
