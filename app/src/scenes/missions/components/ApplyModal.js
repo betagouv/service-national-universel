@@ -28,6 +28,9 @@ export default ({ value, onChange, onSend }) => {
       missionName: value.name,
       missionDepartment: value.department,
       missionRegion: value.region,
+      structureId: value.structureId,
+      tutorId: value.tutorId,
+      tutorName: value.tutorName,
     };
     const { ok, data, code } = await api.post(`/application`, application);
     if (!ok) return toastr.error("Oups, une erreur est survenue lors de la candidature", code);
