@@ -172,7 +172,7 @@ export default () => {
                 innerClass={{ pagination: "pagination" }}
                 renderNoResults={() => <div style={{ padding: "10px 25px" }}>Aucun résultat.</div>}
                 onData={({ rawData }) => {
-                  if (rawData && rawData.hits.hits) setStructureIds(rawData.hits.hits.map((e) => e._id));
+                  if (rawData?.hits?.hits) setStructureIds(rawData.hits.hits.map((e) => e._id));
                 }}
                 renderResultStats={(e) => {
                   return (
