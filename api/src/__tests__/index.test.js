@@ -33,6 +33,16 @@ const {
   expectProgramToEqual,
 } = require("./helpers/program");
 
+const {
+  getProgramsHelper,
+  getProgramByNameHelper,
+  deleteProgramByNameHelper,
+  getProgramByIdHelper,
+  deleteProgramByIdHelper,
+  createProgramHelper,
+  expectProgramToEqual,
+} = require("./helpers/program");
+
 let db;
 
 beforeAll(async () => {
