@@ -4,15 +4,6 @@ async function getProgramsHelper() {
   return await ProgramObject.find({});
 }
 
-async function getProgramByNameHelper(programName) {
-  return await ProgramObject.findOne({ name: programName });
-}
-
-async function deleteProgramByNameHelper(programName) {
-  const program = await getProgramByNameHelper(programName);
-  await program.remove();
-}
-
 async function getProgramByIdHelper(programId) {
   return await ProgramObject.findOne({ _id: programId });
 }
@@ -39,8 +30,6 @@ function expectProgramToEqual(program, expectedProgram) {
 
 module.exports = {
   getProgramsHelper,
-  getProgramByNameHelper,
-  deleteProgramByNameHelper,
   getProgramByIdHelper,
   deleteProgramByIdHelper,
   createProgramHelper,

@@ -23,25 +23,7 @@ const { getReferentsHelper, deleteReferentByIdHelper } = require("./helpers/refe
 
 const { deleteStructureByIdHelper, createStructureHelper, expectStructureToEqual } = require("./helpers/structure");
 
-const {
-  getProgramsHelper,
-  getProgramByNameHelper,
-  deleteProgramByNameHelper,
-  getProgramByIdHelper,
-  deleteProgramByIdHelper,
-  createProgramHelper,
-  expectProgramToEqual,
-} = require("./helpers/program");
-
-const {
-  getProgramsHelper,
-  getProgramByNameHelper,
-  deleteProgramByNameHelper,
-  getProgramByIdHelper,
-  deleteProgramByIdHelper,
-  createProgramHelper,
-  expectProgramToEqual,
-} = require("./helpers/program");
+const { getProgramsHelper, getProgramByIdHelper, deleteProgramByIdHelper, createProgramHelper, expectProgramToEqual } = require("./helpers/program");
 
 let db;
 
