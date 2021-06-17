@@ -35,11 +35,11 @@ router.post("/", async (req, res) => {
 
 router.put("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const { errorId, value: checkedId } = validateId(req.body._id);
+    const { error: errorId, value: checkedId } = validateId(req.body._id);
     if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
     const m = await MissionObject.findById(checkedId);
     if (!canModify(req.user, m)) return res.status(404).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    const { errorMission, value: checkedMission } = validateFromReferent.validateMission(req.body);
+    const { error: errorMission, value: checkedMission } = validateFromReferent.validateMission(req.body);
     if (errorMission) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
     const mission = await MissionObject.findByIdAndUpdate(checkedId, checkedMission, { new: true });
     res.status(200).send({ ok: true, data: mission });
@@ -51,11 +51,11 @@ router.put("/", passport.authenticate("referent", { session: false }), async (re
 
 router.put("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const { errorId, value: checkedId } = validateId(req.params.id);
+    const { error: errorId, value: checkedId } = validateId(req.params.id);
     if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error });
     const m = await MissionObject.findById(checkedId);
     if (!canModify(req.user, m)) return res.status(404).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    const { errorMission, value: checkedMission } = validateFromReferent.validateMission(req.body);
+    const { error: errorMission, value: checkedMission } = validateFromReferent.validateMission(req.body);
     if (errorMission) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
     const mission = await MissionObject.findByIdAndUpdate(checkedId, checkedMission, { new: true });
     res.status(200).send({ ok: true, data: mission });
