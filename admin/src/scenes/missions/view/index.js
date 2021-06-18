@@ -4,7 +4,7 @@ import { Switch, Route, useHistory } from "react-router-dom";
 import api from "../../../services/api";
 import Details from "./details";
 import Youngs from "./youngs";
-import Historic from "./historic";
+import Historic from "./history";
 import { toastr } from "react-redux-toastr";
 import { translate } from "../../../utils";
 
@@ -57,7 +57,7 @@ export default ({ ...props }) => {
   return (
     <Switch>
       <Route path="/mission/:id/youngs" component={() => <Youngs mission={mission} applications={applications} />} />
-      <Route path="/mission/:id/historic" component={() => <Historic mission={mission} />} />
+      <Route path="/mission/:id/historique" component={() => <Historic mission={mission} />} />
       <Route path="/mission/:id" component={() => <Details mission={mission} structure={structure} tutor={tutor} />} />
     </Switch>
   );

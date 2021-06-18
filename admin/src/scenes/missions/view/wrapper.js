@@ -4,6 +4,7 @@ import styled from "styled-components";
 import { Col, Row } from "reactstrap";
 import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
+import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
 import SelectStatusMission from "../../../components/selectStatusMission";
@@ -14,6 +15,7 @@ import PanelActionButton from "../../../components/buttons/PanelActionButton";
 
 export default ({ mission, tab, children }) => {
   const history = useHistory();
+  const user = useSelector((state) => state.Auth.user);
 
   const handleDelete = async () => {
     if (!confirm("Êtes-vous sûr(e) de vouloir supprimer cette mission ?")) return;
@@ -54,9 +56,11 @@ export default ({ mission, tab, children }) => {
             <Tab isActive={tab === "youngs"} onClick={() => history.push(`/mission/${mission._id}/youngs`)}>
               Volontaires
             </Tab>
-            <Tab isActive={tab === "historic"} onClick={() => history.push(`/mission/${mission._id}/historic`)}>
-              Historique
-            </Tab>
+            {user.role === "admin" ? (
+              <Tab isActive={tab === "historique"} onClick={() => history.push(`/mission/${mission._id}/historique`)}>
+                Historique <i style={{ color: "#5145cd", fontWeight: "lighter", fontSize: ".85rem" }}>Bêta</i>
+              </Tab>
+            ) : null}
           </TabList>
         </div>
         <Row style={{ minWidth: "30%" }}>

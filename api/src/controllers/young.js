@@ -163,6 +163,17 @@ router.get("/department-service", passport.authenticate(["young"], { session: fa
   }
 });
 
+router.get("/:id/patches", passport.authenticate("referent", { session: false }), async (req, res) => {
+  try {
+    const young = await YoungObject.findById(req.params.id);
+    const data = await young.patches.find({ ref: young.id }).sort("-date");
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
 router.get("/", passport.authenticate("young", { session: false }), async (req, res) => {
   try {
     const young = await YoungObject.findOne({ user_id: req.user._id });

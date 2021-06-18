@@ -48,9 +48,11 @@ export default ({ children, structure, tab }) => {
                 <Tab isActive={tab === "missions"} onClick={() => history.push(`/structure/${structure._id}/missions`)}>
                   Missions
                 </Tab>
-                <Tab isActive={tab === "historic"} onClick={() => history.push(`/structure/${structure._id}/historic`)}>
-                  Historique
-                </Tab>
+                {user.role === "admin" ? (
+                  <Tab isActive={tab === "historique"} onClick={() => history.push(`/structure/${structure._id}/historique`)}>
+                    Historique <i style={{ color: "#5145cd", fontWeight: "lighter", fontSize: ".85rem" }}>Bêta</i>
+                  </Tab>
+                ) : null}
               </>
             )}
           </TabList>
