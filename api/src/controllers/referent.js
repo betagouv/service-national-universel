@@ -228,6 +228,13 @@ router.put("/young/:id", passport.authenticate("referent", { session: false }), 
       // await assignNextYoungFromWaitingList(young);
     }
 
+    // if a referent said that a young is present in the cohesion stay, we validate its phase1
+    if (newYoung.cohesionStayPresence === "true" && young.statusPhase1 !== "DONE") {
+      newYoung = { ...newYoung, statusPhase1: "DONE" };
+    } else if (newYoung.cohesionStayPresence === "false" && young.statusPhase1 !== "NOT_DONE") {
+      newYoung = { ...newYoung, statusPhase1: "NOT_DONE" };
+    }
+
     young.set(newYoung);
     await young.save();
 

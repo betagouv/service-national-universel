@@ -7,14 +7,15 @@ import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
 import ExportComponent from "../../components/ExportXlsx";
-import { translate, getFilterLabel, YOUNG_STATUS_COLORS, formatDateFR, formatLongDateFR, isInRuralArea, getAge } from "../../utils";
+import { translate, getFilterLabel, YOUNG_STATUS_COLORS, formatDateFR, formatLongDateFR, isInRuralArea, getAge, confirmMessageChangePhase1Presence } from "../../utils";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Badge from "../../components/Badge";
 import { ResultTable, Filter, Table, FilterRow, TopResultStats, BottomResultStats } from "../../components/list";
 import ToggleSwitch from "../../components/ToogleSwitch";
+import Select from "./components/Select";
 import { toastr } from "react-redux-toastr";
 
-const FILTERS = ["SEARCH", "STATUS", "PHASE", "COHORT", "MISSIONS", "TUTOR", "STATUS_PHASE_1"];
+const FILTERS = ["SEARCH", "STATUS", "PHASE", "COHORT", "MISSIONS", "TUTOR", "STATUS_PHASE_1", "DEPARTMENT", "REGION"];
 
 export default () => {
   const user = useSelector((state) => state.Auth.user);
@@ -258,19 +259,12 @@ export default () => {
 };
 
 const Hit = ({ hit, onClick, selected, callback }) => {
-  const [cohesionStayPresenceChecked, setCohesionStayPresenceChecked] = useState();
-  const [cohesionStayMedicalFileReceivedChecked, setCohesionStayMedicalFileReceivedChecked] = useState();
-
-  useEffect(() => {
-    !cohesionStayPresenceChecked && setCohesionStayPresenceChecked(hit.cohesionStayPresence);
-    !cohesionStayMedicalFileReceivedChecked && setCohesionStayMedicalFileReceivedChecked(hit.cohesionStayMedicalFileReceived);
-  }, [hit]);
+  const [value, setValue] = useState(hit);
 
   const updateYoung = async (v) => {
-    const { data, ok, code } = await api.put(`/referent/young/${hit._id}`, v);
+    const { data, ok, code } = await api.put(`/referent/young/${value._id}`, v);
     if (!ok) return toastr.error("Oups, une erreur s'est produite", translate(code));
-    data.cohesionStayPresence !== cohesionStayPresenceChecked && setCohesionStayPresenceChecked(data.cohesionStayPresence);
-    data.cohesionStayMedicalFileReceived !== cohesionStayMedicalFileReceivedChecked && setCohesionStayMedicalFileReceivedChecked(data.cohesionStayMedicalFileReceived);
+    setValue(data);
     callback(data);
   };
 
@@ -279,30 +273,44 @@ const Hit = ({ hit, onClick, selected, callback }) => {
       <td onClick={onClick}>
         <div className="name">{`${hit.firstName} ${hit.lastName}`}</div>
         <div className="email">
-          {hit.birthdateAt ? `${getAge(hit.birthdateAt)} ans` : null} {`• ${hit.city || ""} (${hit.department || ""})`}
+          {value.birthdateAt ? `${getAge(value.birthdateAt)} ans` : null} {`• ${value.city || ""} (${value.department || ""})`}
         </div>
       </td>
       <td onClick={onClick}>
-        <Badge text={`Cohorte ${hit.cohort}`} />
-        {hit.status === "WITHDRAWN" ? <Badge text="Désisté" color={YOUNG_STATUS_COLORS.WITHDRAWN} /> : null}
+        <Badge text={`Cohorte ${value.cohort}`} />
+        <Badge text="Phase 1" tooltipText={translate(value.statusPhase1)} color={YOUNG_STATUS_COLORS[value.statusPhase1]} />
+        {value.status === "WITHDRAWN" ? <Badge text="Désisté" color={YOUNG_STATUS_COLORS.WITHDRAWN} /> : null}
       </td>
       <td>
-        <ToggleSwitch
-          id={`cohesionStayPresence${hit._id}`}
-          optionLabels={["Présent", "Absent"]}
-          checked={cohesionStayPresenceChecked === "true"}
-          onChange={(checked) => {
-            updateYoung({ cohesionStayPresence: checked });
+        <Select
+          placeholder="Non renseigné"
+          options={[
+            { value: "true", label: "Présent" },
+            { value: "false", label: "Absent" },
+          ]}
+          value={value.cohesionStayPresence}
+          name="cohesionStayPresence"
+          handleChange={(e) => {
+            const value = e.target.value;
+            if (!value) return;
+            if (!confirmMessageChangePhase1Presence(value)) return;
+            updateYoung({ cohesionStayPresence: value });
           }}
         />
       </td>
       <td>
-        <ToggleSwitch
-          id={`cohesionStayMedicalFileReceived${hit._id}`}
-          optionLabels={["Réceptionné", "Non réceptionné"]}
-          checked={cohesionStayMedicalFileReceivedChecked === "true"}
-          onChange={(checked) => {
-            updateYoung({ cohesionStayMedicalFileReceived: checked });
+        <Select
+          placeholder="Non renseigné"
+          options={[
+            { value: "true", label: "Réceptionné" },
+            { value: "false", label: "Non réceptionné" },
+          ]}
+          value={value.cohesionStayMedicalFileReceived}
+          name="cohesionStayMedicalFileReceived"
+          handleChange={(e) => {
+            const value = e.target.value;
+            if (!value) return;
+            updateYoung({ cohesionStayMedicalFileReceived: value });
           }}
         />
       </td>
