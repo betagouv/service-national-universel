@@ -16,20 +16,7 @@ export default ({ email }) => {
     setMinify(!minify);
   };
 
-  if (
-    ![
-      "tangi.mendes@beta.gouv.fr",
-      "trouinard.baptiste@gmail.com",
-      "perdumaxim@gmail.com",
-      "raph@selego.co",
-      "sebastien@selego.co",
-      "sebastien.legoff@beta.gouv.fr",
-      "yoann@beta.gouv.fr",
-      "nicolas@canard.com",
-      "gabrielle.bouxin@beta.gouv.fr",
-    ].includes(user.email)
-  )
-    return null;
+  if (user.role !== "admin") return null;
 
   const getEmails = async () => {
     if (!email) return;
