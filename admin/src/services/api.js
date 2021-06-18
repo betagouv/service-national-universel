@@ -34,11 +34,9 @@ class api {
       headers: { "Content-Type": "application/x-ndjson", Authorization: `JWT ${this.token}` },
       body: query,
     })
-      .then((r) => {
-        return jsonOrRedirectToSignIn(r);
-      })
+      .then((r) => jsonOrRedirectToSignIn(r))
       .catch((e) => {
-        return e;
+        console.error(e);
       });
   }
 
