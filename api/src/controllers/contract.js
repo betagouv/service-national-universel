@@ -43,7 +43,7 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
   try {
     let contract = req.body;
     let mailsToSend = [];
-    let isValidateAgainMail = false;
+    let validateAgainMailList = [];
 
     if (!contract._id) {
       mailsToSend = ["projectManager", "structureManager"];
@@ -69,34 +69,59 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
 
       contract = await ContractObject.create(contract);
     } else {
-      contract = await ContractObject.findByIdAndUpdate(contract._id, contract);
+      // We have to check if mail has changed (because we have to re-send one)
+      const previous = await ContractObject.findById(contract._id);
+      contract = await ContractObject.findByIdAndUpdate(contract._id, contract, { new: true });
+
       // When we update, we have to send mail again to validated.
-      if (contract.parent1Status === "VALIDATED") {
+      if (
+        contract.isYoungAdult !== "true" &&
+        (previous.invitationSent !== "true" || previous.parent1Status === "VALIDATED" || previous.parent1Email !== contract.parent1Email)
+      ) {
+        if (previous.parent1Status === "VALIDATED") validateAgainMailList.push("parent1");
         contract.parent1Status = "WAITING_VALIDATION";
         mailsToSend.push("parent1");
         contract.parent1Token = crypto.randomBytes(40).toString("hex");
       }
-      if (contract.projectManagerStatus === "VALIDATED") {
+      if (
+        previous.invitationSent !== "true" ||
+        previous.projectManagerStatus === "VALIDATED" ||
+        previous.projectManagerEmail !== contract.projectManagerEmail
+      ) {
+        if (previous.projectManagerStatus === "VALIDATED") validateAgainMailList.push("projectManager");
         contract.projectManagerStatus = "WAITING_VALIDATION";
         mailsToSend.push("projectManager");
         contract.projectManagerToken = crypto.randomBytes(40).toString("hex");
       }
-      if (contract.structureManagerStatus === "VALIDATED") {
+      if (
+        previous.invitationSent !== "true" ||
+        previous.structureManagerStatus === "VALIDATED" ||
+        previous.structureManagerEmail !== contract.structureManagerEmail
+      ) {
+        if (previous.structureManagerStatus === "VALIDATED") validateAgainMailList.push("structureManager");
         contract.structureManagerStatus = "WAITING_VALIDATION";
         mailsToSend.push("structureManager");
         contract.structureManagerToken = crypto.randomBytes(40).toString("hex");
       }
-      if (contract.parent2Status === "VALIDATED") {
+      if (
+        contract.isYoungAdult !== "true" &&
+        contract.parent2Email &&
+        (previous.invitationSent !== "true" || previous.parent2Status === "VALIDATED" || previous.parent2Email !== contract.parent2Email)
+      ) {
+        if (previous.parent2Status === "VALIDATED") validateAgainMailList.push("parent2");
         contract.parent2Status = "WAITING_VALIDATION";
         mailsToSend.push("parent2");
         contract.parent2Token = crypto.randomBytes(40).toString("hex");
       }
-      if (contract.youngContractStatus === "VALIDATED") {
+      if (
+        contract.isYoungAdult === "true" &&
+        (previous.invitationSent !== "true" || previous.youngContractStatus === "VALIDATED" || previous.youngEmail !== contract.youngEmail)
+      ) {
+        if (previous.youngContractStatus === "VALIDATED") validateAgainMailList.push("young");
         contract.youngContractStatus = "WAITING_VALIDATION";
         mailsToSend.push("young");
         contract.youngContractToken = crypto.randomBytes(40).toString("hex");
       }
-      isValidateAgainMail = true;
     }
 
     // Update the application
@@ -115,6 +140,7 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
           token: contract.projectManagerToken,
           cc: departmentReferentPhase2 ? departmentReferentPhase2.email : null,
           ccName: departmentReferentPhase2 ? `${departmentReferentPhase2.firstName} ${departmentReferentPhase2.lastName}` : null,
+          isValidateAgainMail: validateAgainMailList.includes("projectManager"),
         });
       }
       if (mailsToSend.includes("structureManager")) {
@@ -122,6 +148,7 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
           email: contract.structureManagerEmail,
           name: `${contract.structureManagerFirstName} ${contract.structureManagerLastName}`,
           token: contract.structureManagerToken,
+          isValidateAgainMail: validateAgainMailList.includes("structureManager"),
         });
       }
       if (mailsToSend.includes("parent1")) {
@@ -131,6 +158,7 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
           token: contract.parent1Token,
           cc: contract.youngEmail,
           ccName: `${contract.youngFirstName} ${contract.youngLastName}`,
+          isValidateAgainMail: validateAgainMailList.includes("parent1"),
         });
       }
       if (contract.parent2Email && mailsToSend.includes("parent2")) {
@@ -140,6 +168,7 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
           token: contract.parent2Token,
           cc: contract.youngEmail,
           ccName: `${contract.youngFirstName} ${contract.youngLastName}`,
+          isValidateAgainMail: validateAgainMailList.includes("parent2"),
         });
       }
       if (mailsToSend.includes("young")) {
@@ -147,10 +176,12 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
           email: contract.youngEmail,
           name: `${contract.youngFirstName} ${contract.youngLastName}`,
           token: contract.youngContractToken,
+          isValidateAgainMail: validateAgainMailList.includes("young"),
         });
       }
       for (const recipient of recipients) {
-        if (isValidateAgainMail) {
+        if (recipient.isValidateAgainMail) {
+          console.log("send (re)validation mail to " + JSON.stringify({ to: recipient.email, cc: recipient.cc }));
           const htmlContent = fs
             .readFileSync(path.resolve(__dirname, "../templates/contract-revalidate.html"))
             .toString()
@@ -165,6 +196,7 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
             await sendEmail(to, subject, htmlContent);
           }
         } else {
+          console.log("send validation mail to " + JSON.stringify({ to: recipient.email, cc: recipient.cc }));
           const htmlContent = fs
             .readFileSync(path.resolve(__dirname, "../templates/contract.html"))
             .toString()
