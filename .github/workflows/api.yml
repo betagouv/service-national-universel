@@ -44,8 +44,8 @@ jobs:
         run: npm install
 
       - name: Test and Send coverage
-        working-directory: ${{ env.SUBFOLDER_NAME }}
         uses: paambaati/codeclimate-action@v2.7.4
+        working-directory: ${{ env.SUBFOLDER_NAME }}
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
           CI: true
