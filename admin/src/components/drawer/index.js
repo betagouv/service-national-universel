@@ -125,7 +125,7 @@ const Logo = styled.h1`
   background: #372f78;
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 0;
-  padding: 15px 20px 5px;
+  padding: 15px 20px 15px;
   a {
     display: flex;
     flex-direction: row;
