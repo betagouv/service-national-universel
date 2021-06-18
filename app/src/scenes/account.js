@@ -167,7 +167,7 @@ export default () => {
                 values={values}
                 handleChange={handleChange}
                 title="Téléphone"
-                validate={(v) => v && !validator.isMobilePhone(v) && "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX"}
+                validate={(v) => v && !validator.isMobilePhone(v, "fr-FR") && "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX"}
                 errors={errors}
               />
             </FormRow>
@@ -210,7 +210,7 @@ export default () => {
                 handleChange={handleChange}
                 title="Téléphone"
                 validate={(v) =>
-                  (!v && requiredMessage) || (!validator.isMobilePhone(v) && "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX")
+                  (!v && requiredMessage) || (!validator.isMobilePhone(v, "fr-FR") && "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX")
                 }
                 errors={errors}
               />
@@ -243,7 +243,7 @@ export default () => {
                 values={values}
                 handleChange={handleChange}
                 title="Téléphone"
-                validate={(v) => v && !validator.isMobilePhone(v) && "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX"}
+                validate={(v) => v && !validator.isMobilePhone(v, "fr-FR") && "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX"}
                 errors={errors}
               />
             </FormRow>
