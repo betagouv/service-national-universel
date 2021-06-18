@@ -49,6 +49,20 @@ export default ({ keys, values, handleChange, errors, touched }) => {
     handleChange({ target: { name: keys.region, value: department2region[departmentLookUp[depart]] } });
   };
 
+  const onChangeCityOrPostCode = async (city, zip) => {
+    if (city && validator.isPostalCode(zip, "FR") && city) {
+      const response = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(zip + " " + city)}&postcode=${zip}`, {
+        mode: "cors",
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      const res = await response.json();
+      if (res.features.length > 0) {
+        handleChange({ target: { name: keys.location, value: { lon: res.features[0].geometry.coordinates[0], lat: res.features[0].geometry.coordinates[1] } } });
+      }
+    }
+  };
+
   const renderSuggestion = (suggestion) => <div>{suggestion !== "noresult" ? suggestion.properties.label : NORESULTMESSAGE}</div>;
   const getSuggestionValue = (suggestion) => (suggestion !== "noresult" ? suggestion.properties.label : "");
 
@@ -174,6 +188,8 @@ export default ({ keys, values, handleChange, errors, touched }) => {
                 onChange={(e) => {
                   const value = e.target.value;
                   handleChange({ target: { name: keys.city, value } });
+                  // Waiting handleChange forces to take new CITY value here
+                  onChangeCityOrPostCode(value, values[keys.zip]);
                 }}
               />
               <ErrorMessage errors={errors} touched={touched} name={keys.city} />
@@ -190,6 +206,8 @@ export default ({ keys, values, handleChange, errors, touched }) => {
                 onChange={(e) => {
                   const value = e.target.value;
                   handleChange({ target: { name: keys.zip, value } });
+                  // Waiting handleChange forces to take new ZIP value here
+                  onChangeCityOrPostCode(values[keys.city], value);
                 }}
               />
               <ErrorMessage errors={errors} touched={touched} name={keys.zip} />

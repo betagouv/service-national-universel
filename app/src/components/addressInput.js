@@ -5,6 +5,7 @@ import Autosuggest from "react-autosuggest";
 import { Field } from "formik";
 import { department2region, departmentLookUp, departmentList, regionList, region2department } from "../utils";
 import ErrorMessage, { requiredMessage } from "../scenes/inscription/components/errorMessage";
+import validator from "validator";
 
 const NORESULTMESSAGE = "Rentrer manuellement l'adresse";
 
@@ -50,6 +51,20 @@ export default ({ keys, values, handleChange, errors, touched, departAndRegionVi
       handleChange({ target: { name: keys.region, value: department2region[departmentLookUp[depart]] } });
     }
     return;
+  };
+
+  const onChangeCityOrPostCode = async (city, zip) => {
+    if (city && validator.isPostalCode(zip, "FR") && city) {
+      const response = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(zip + " " + city)}&postcode=${zip}`, {
+        mode: "cors",
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      const res = await response.json();
+      if (res.features.length > 0) {
+        handleChange({ target: { name: keys.location, value: { lon: res.features[0].geometry.coordinates[0], lat: res.features[0].geometry.coordinates[1] } } });
+      }
+    }
   };
 
   const renderSuggestion = (suggestion) => <div>{suggestion !== "noresult" ? suggestion.properties.label : NORESULTMESSAGE}</div>;
@@ -118,6 +133,8 @@ export default ({ keys, values, handleChange, errors, touched, departAndRegionVi
             onChange={(e) => {
               const value = e.target.value;
               handleChange({ target: { name: keys.city, value } });
+              // Waiting handleChange forces to take new CITY value here
+              onChangeCityOrPostCode(value, values[keys.zip]);
             }}
           />
           <ErrorMessage errors={errors} touched={touched} name={keys.city} />
@@ -125,7 +142,7 @@ export default ({ keys, values, handleChange, errors, touched, departAndRegionVi
         <Col md={6} style={{ marginTop: 15 }}>
           <Label>Code postal</Label>
           <Field
-            validate={(v) => !v && requiredMessage}
+            validate={(v) => (!v && requiredMessage) || (!validator.isPostalCode(v, "FR") && "Ce champ est au mauvais format. Format attendu : XXXXX")}
             disabled={!noResultMode}
             className="form-control"
             placeholder="Code postal"
@@ -134,6 +151,8 @@ export default ({ keys, values, handleChange, errors, touched, departAndRegionVi
             onChange={(e) => {
               const value = e.target.value;
               handleChange({ target: { name: keys.zip, value } });
+              // Waiting handleChange forces to take new ZIP value here
+              onChangeCityOrPostCode(values[keys.city], value);
             }}
           />
           <ErrorMessage errors={errors} touched={touched} name={keys.zip} />
