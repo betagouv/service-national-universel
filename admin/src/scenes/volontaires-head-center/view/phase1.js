@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { Formik } from "formik";
 import { Link } from "react-router-dom";
 
-import { translate, YOUNG_PHASE, YOUNG_STATUS_COLORS, confirmMessageChangePhase1Presence } from "../../../utils";
+import { translate, YOUNG_PHASE, YOUNG_STATUS_COLORS, confirmMessageChangePhase1Presence, formatStringLongDate } from "../../../utils";
 import WrapperPhase1 from "./wrapper";
 import api from "../../../services/api";
 import { Box, BoxTitle } from "../../../components/box";
