@@ -124,6 +124,8 @@ export default () => {
 
       <Formik
         initialValues={young}
+        validateOnChange={false}
+        validateOnBlur={false}
         onSubmit={async (values) => {
           if (young.address !== values.address || young.city !== values.city || young.department !== values.department || young.region !== values.region) {
             if (
@@ -160,7 +162,14 @@ export default () => {
                   { value: "female", label: "Feminin" },
                 ]}
               />
-              <Item name="phone" values={values} handleChange={handleChange} title="Téléphone" />
+              <Item
+                name="phone"
+                values={values}
+                handleChange={handleChange}
+                title="Téléphone"
+                validate={(v) => v && !validator.isMobilePhone(v, "fr-FR") && "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX"}
+                errors={errors}
+              />
             </FormRow>
             <div style={{ marginBottom: "1.5rem" }}>
               <AddressInput
@@ -185,30 +194,59 @@ export default () => {
                   { value: "representant", label: "Représentant légal" },
                 ]}
               />
-              <Item name="parent1FirstName" values={values} handleChange={handleChange} title="Prénom" />
-              <Item name="parent1LastName" values={values} handleChange={handleChange} title="Nom" />
-              <Item name="parent1Email" values={values} handleChange={handleChange} title="E-mail" />
-              <Item name="parent1Phone" values={values} handleChange={handleChange} title="Téléphone" />
+              <Item name="parent1FirstName" values={values} handleChange={handleChange} title="Prénom" validate={(v) => !v && requiredMessage} errors={errors} />
+              <Item name="parent1LastName" values={values} handleChange={handleChange} title="Nom" validate={(v) => !v && requiredMessage} errors={errors} />
+              <Item
+                name="parent1Email"
+                values={values}
+                handleChange={handleChange}
+                title="E-mail"
+                validate={(v) => (!v && requiredMessage) || (!validator.isEmail(v) && "Ce champ est au mauvais format")}
+                errors={errors}
+              />
+              <Item
+                name="parent1Phone"
+                values={values}
+                handleChange={handleChange}
+                title="Téléphone"
+                validate={(v) =>
+                  (!v && requiredMessage) || (!validator.isMobilePhone(v, "fr-FR") && "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX")
+                }
+                errors={errors}
+              />
             </FormRow>
-            {values.parent2Status && (
-              <FormRow>
-                <Select
-                  name="parent2Status"
-                  values={values}
-                  handleChange={handleChange}
-                  title="Statut du représentant légal 2"
-                  options={[
-                    { value: "mother", label: "Mère" },
-                    { value: "father", label: "Père" },
-                    { value: "representant", label: "Représentant légal" },
-                  ]}
-                />
-                <Item name="parent2FirstName" values={values} handleChange={handleChange} title="Prénom" />
-                <Item name="parent2LastName" values={values} handleChange={handleChange} title="Nom" />
-                <Item name="parent2Email" values={values} handleChange={handleChange} title="E-mail" />
-                <Item name="parent2Phone" values={values} handleChange={handleChange} title="Téléphone" />
-              </FormRow>
-            )}
+            <FormRow>
+              <Select
+                name="parent2Status"
+                values={values}
+                handleChange={handleChange}
+                title="Statut du représentant légal 2 (facultatif)"
+                options={[
+                  { value: undefined, label: "Aucun" },
+                  { value: "mother", label: "Mère" },
+                  { value: "father", label: "Père" },
+                  { value: "representant", label: "Représentant légal" },
+                ]}
+              />
+              <Item name="parent2FirstName" values={values} handleChange={handleChange} title="Prénom" />
+              <Item name="parent2LastName" values={values} handleChange={handleChange} title="Nom" />
+              <Item
+                name="parent2Email"
+                values={values}
+                handleChange={handleChange}
+                title="E-mail"
+                validate={(v) => v && !validator.isEmail(v) && "Ce champ est au mauvais format"}
+                errors={errors}
+              />
+              <Item
+                name="parent2Phone"
+                values={values}
+                handleChange={handleChange}
+                title="Téléphone"
+                validate={(v) => v && !validator.isMobilePhone(v, "fr-FR") && "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX"}
+                errors={errors}
+              />
+            </FormRow>
             <ContinueButton onClick={handleSubmit} disabled={isSubmitting}>
               Enregistrer
             </ContinueButton>
