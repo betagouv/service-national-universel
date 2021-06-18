@@ -5,7 +5,7 @@ import * as XLSX from "xlsx";
 import { translate } from "../utils";
 import LoadingButton from "./buttons/LoadingButton";
 
-export default function ExportComponent({ title, collection, react, transform, defaultQuery = () => ({ query: { query: { match_all: {} } }, size: 10000 }) }) {
+export default function ExportComponent({ title, collection, react, transform, transformAll = null, defaultQuery = () => ({ query: { query: { match_all: {} } }, size: 10000 }) }) {
   const [exporting, setExporting] = useState(false);
 
   const handleExport = () => {
@@ -25,7 +25,17 @@ export default function ExportComponent({ title, collection, react, transform, d
         componentId="EXPORT"
         react={react}
         render={({ setQuery, data, loading }) => {
-          return <Loading setQuery={setQuery} data={data} loading={loading} onFinish={() => setExporting(false)} collection={collection} transform={transform} />;
+          return (
+            <Loading
+              setQuery={setQuery}
+              transformAll={transformAll}
+              data={data}
+              loading={loading}
+              onFinish={() => setExporting(false)}
+              collection={collection}
+              transform={transform}
+            />
+          );
         }}
       />
     );
@@ -34,7 +44,7 @@ export default function ExportComponent({ title, collection, react, transform, d
   return <LoadingButton onClick={handleExport}>{title}</LoadingButton>;
 }
 
-function Loading({ onFinish, collection, data, loading, transform }) {
+function Loading({ onFinish, collection, data, loading, transform, transformAll }) {
   const [run, setRun] = useState(false);
   useEffect(() => {
     if (loading === false) setRun(true);
@@ -51,7 +61,7 @@ function Loading({ onFinish, collection, data, loading, transform }) {
       const secondes = ("0" + d.getSeconds()).slice(-2);
       const fileName = `${collection}_${year}${month}${date}_${hours}h${minutes}m${secondes}s.xlsx`;
 
-      exportData(fileName, data, transform);
+      exportData(fileName, data, transform, transformAll);
       onFinish();
     }
   }, [run]);
@@ -59,17 +69,19 @@ function Loading({ onFinish, collection, data, loading, transform }) {
   return <LoadingButton loading={loading}></LoadingButton>;
 }
 
-async function exportData(fileName, entities, transform) {
+async function exportData(fileName, entities, transform, transformAll) {
   if (!entities.length) return;
 
-  let columns = Object.keys(objectWithMostFields(entities.map((e) => (transform ? transform(e) : e))));
+  const data = transformAll ? await transformAll(entities) : entities;
+
+  let columns = Object.keys(objectWithMostFields(data.map((e) => (transform ? transform(e) : e))));
   const csv = [];
 
   // Add a first line with query parameters.
   csv.push(columns);
 
-  for (let j = 0; j < entities.length; j++) {
-    const obj = transform ? transform(entities[j]) : entities[j];
+  for (let j = 0; j < data.length; j++) {
+    const obj = transform ? transform(data[j]) : data[j];
     const arr = columns.map((key) => `${translate(obj[key]) || ""}`);
     csv.push(arr);
   }
@@ -85,8 +97,8 @@ async function exportData(fileName, entities, transform) {
   const ws = XLSX.utils.json_to_sheet(csv);
   const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
   const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
-  const data = new Blob([excelBuffer], { type: fileType });
-  FileSaver.saveAs(data, fileName + fileExtension);
+  const resultData = new Blob([excelBuffer], { type: fileType });
+  FileSaver.saveAs(resultData, fileName + fileExtension);
 }
 
 function objectWithMostFields(objArr) {
