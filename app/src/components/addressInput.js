@@ -54,7 +54,7 @@ export default ({ keys, values, handleChange, errors, touched, departAndRegionVi
   };
 
   const onChangeCityOrPostCode = async (city, zip) => {
-    if (city && validator.isPostalCode(zip, "FR") && city) {
+    if (zip && validator.isPostalCode(zip, "FR") && city) {
       const response = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(zip + " " + city)}&postcode=${zip}`, {
         mode: "cors",
         method: "GET",
