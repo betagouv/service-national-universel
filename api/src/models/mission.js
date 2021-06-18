@@ -231,15 +231,6 @@ Schema.plugin(patchHistory, {
   includes: {
     modelName: { type: String, required: true, default: MODELNAME },
   },
-  excludes: [
-    "/password",
-    "/lastLoginAt",
-    "/forgotPasswordResetToken",
-    "/forgotPasswordResetExpires",
-    "/invitationToken",
-    "/invitationExpires",
-    "/phase3Token",
-  ],
 });
 Schema.plugin(mongooseElastic(esClient), MODELNAME);
 

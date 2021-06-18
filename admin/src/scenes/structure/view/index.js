@@ -4,7 +4,7 @@ import { Switch, Route } from "react-router-dom";
 import api from "../../../services/api";
 import Details from "./details";
 import Missions from "./missions";
-import Historic from "./historic";
+import Historic from "./history";
 
 export default ({ ...props }) => {
   const [structure, setStructure] = useState();
@@ -22,7 +22,7 @@ export default ({ ...props }) => {
   return (
     <Switch>
       <Route path="/structure/:id/missions" component={() => <Missions structure={structure} />} />
-      <Route path="/structure/:id/historic" component={() => <Historic structure={structure} />} />
+      <Route path="/structure/:id/historique" component={() => <Historic structure={structure} />} />
       <Route path="/structure/:id" component={() => <Details structure={structure} />} />
     </Switch>
   );
