@@ -113,7 +113,7 @@ export default (props) => {
     if (young.statusPhase1 === "WITHDRAWN")
       return (
         <>
-          <p>Details s'est désisté(e) du séjour de cohésion.</p>
+          <p>{young.firstName} s'est désisté(e) du séjour de cohésion.</p>
           <Details title="Centre" to={`/centre/${young.cohesionCenterId}`} value={young.cohesionCenterName} />
           <Details title="Ville" value={young.cohesionCenterCity} />
           <Details title="Code&nbsp;Postal" value={young.cohesionCenterZip} />
