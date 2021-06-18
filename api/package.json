@@ -11,7 +11,8 @@
     "dev": "nodemon ./src/index.js",
     "start": "npm run install:gm && node ./src/index.js",
     "install:gm": "cave resolve media-gfx/GraphicsMagick",
-    "test": "jest --silent"
+    "test": "jest --silent",
+    "coverage": "jest --runInBand --coverage"
   },
   "author": "SELEGO",
   "license": "ISC",

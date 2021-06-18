@@ -51,7 +51,7 @@ jobs:
           MONGO_URL: mongodb://localhost:27017/SampleDB
         with:
           workingDirectory: ${{ env.SUBFOLDER_NAME }}
-          coverageCommand: npm run test --coverage
+          coverageCommand: npm run coverage
 
   deloy:
     needs: [test]
