@@ -12,7 +12,7 @@
     "start": "npm run install:gm && node ./src/index.js",
     "install:gm": "cave resolve media-gfx/GraphicsMagick",
     "test": "jest --silent",
-    "coverage": "jest --runInBand --coverage"
+    "coverage": "jest --runInBand --coverage --silent"
   },
   "author": "SELEGO",
   "license": "ISC",
