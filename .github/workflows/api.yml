@@ -43,12 +43,15 @@ jobs:
         working-directory: ${{ env.SUBFOLDER_NAME }}
         run: npm install
 
-      - name: Run tests
+      - name: Test and Send coverage
         working-directory: ${{ env.SUBFOLDER_NAME }}
-        run: npm run test
+        uses: paambaati/codeclimate-action@v2.7.4
         env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
           CI: true
           MONGO_URL: mongodb://localhost:27017/SampleDB
+        with:
+          coverageCommand: npm run test --coverage
 
   deloy:
     needs: [test]

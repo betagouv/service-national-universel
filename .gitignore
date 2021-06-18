@@ -7,4 +7,5 @@ api/.env-staging
 api/scripts
 api/.env-testing
 api/.env*
+api/coverage
 .vscode
