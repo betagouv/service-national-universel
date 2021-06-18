@@ -5,7 +5,7 @@ import { Formik } from "formik";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-import { translate, YOUNG_STATUS_COLORS, formatStringLongDate, ENABLE_ASSIGN_CENTER } from "../../../utils";
+import { translate, YOUNG_STATUS_COLORS, formatStringLongDate, ENABLE_ASSIGN_CENTER, confirmMessageChangePhase1Presence } from "../../../utils";
 import WrapperPhase1 from "./wrapper";
 import api from "../../../services/api";
 import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
@@ -174,6 +174,7 @@ export default (props) => {
                         handleChange={(e) => {
                           const value = e.target.value;
                           if (!value) return;
+                          if (!confirmMessageChangePhase1Presence(value)) return;
                           handleChange({ target: { value, name: "cohesionStayPresence" } });
                           updateYoung({ cohesionStayPresence: value });
                         }}

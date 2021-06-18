@@ -7,7 +7,7 @@ import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
 import ExportComponent from "../../components/ExportXlsx";
-import { translate, getFilterLabel, YOUNG_STATUS_COLORS, formatDateFR, formatLongDateFR, isInRuralArea, getAge } from "../../utils";
+import { translate, getFilterLabel, YOUNG_STATUS_COLORS, formatDateFR, formatLongDateFR, isInRuralArea, getAge, confirmMessageChangePhase1Presence } from "../../utils";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Badge from "../../components/Badge";
 import { ResultTable, Filter, Table, FilterRow, TopResultStats, BottomResultStats } from "../../components/list";
@@ -293,6 +293,7 @@ const Hit = ({ hit, onClick, selected, callback }) => {
           handleChange={(e) => {
             const value = e.target.value;
             if (!value) return;
+            if (!confirmMessageChangePhase1Presence(value)) return;
             updateYoung({ cohesionStayPresence: value });
           }}
         />

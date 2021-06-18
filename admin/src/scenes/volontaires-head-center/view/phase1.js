@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { Formik } from "formik";
 import { Link } from "react-router-dom";
 
-import { translate, YOUNG_PHASE, YOUNG_STATUS_COLORS } from "../../../utils";
+import { translate, YOUNG_PHASE, YOUNG_STATUS_COLORS, confirmMessageChangePhase1Presence } from "../../../utils";
 import WrapperPhase1 from "./wrapper";
 import api from "../../../services/api";
 import { Box, BoxTitle } from "../../../components/box";
@@ -131,6 +131,7 @@ export default (props) => {
                         handleChange={(e) => {
                           const value = e.target.value;
                           if (!value) return;
+                          if (!confirmMessageChangePhase1Presence(value)) return;
                           handleChange({ target: { value, name: "cohesionStayPresence" } });
                           updateYoung({ cohesionStayPresence: value });
                         }}
