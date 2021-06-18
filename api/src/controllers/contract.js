@@ -70,42 +70,54 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
       contract = await ContractObject.create(contract);
     } else {
       // We have to check if mail has changed (because we have to re-send one)
-      const {
-        parent1Email: previousParent1Email,
-        parent2Email: previousParent2Email,
-        structureManagerEmail: previousStructureManagerEmail,
-        projectManagerEmail: previousProjectManagerEmail,
-        youngEmail: previousYoungEmail,
-      } = contract;
+      const previous = await ContractObject.findById(contract._id);
+      contract = await ContractObject.findByIdAndUpdate(contract._id, contract, { new: true });
 
-      contract = await ContractObject.findByIdAndUpdate(contract._id, contract);
       // When we update, we have to send mail again to validated.
-      if (contract.parent1Status === "VALIDATED" || previousParent1Email !== contract.parent1Email) {
-        if (contract.parent1Status === "VALIDATED") validateAgainMailList.push("parent1");
+      if (
+        contract.isYoungAdult !== "true" &&
+        (previous.invitationSent !== "true" || previous.parent1Status === "VALIDATED" || previous.parent1Email !== contract.parent1Email)
+      ) {
+        if (previous.parent1Status === "VALIDATED") validateAgainMailList.push("parent1");
         contract.parent1Status = "WAITING_VALIDATION";
         mailsToSend.push("parent1");
         contract.parent1Token = crypto.randomBytes(40).toString("hex");
       }
-      if (contract.projectManagerStatus === "VALIDATED" || previousProjectManagerEmail !== contract.projectManagerEmail) {
-        if (contract.projectManagerStatus === "VALIDATED") validateAgainMailList.push("projectManager");
+      if (
+        previous.invitationSent !== "true" ||
+        previous.projectManagerStatus === "VALIDATED" ||
+        previous.projectManagerEmail !== contract.projectManagerEmail
+      ) {
+        if (previous.projectManagerStatus === "VALIDATED") validateAgainMailList.push("projectManager");
         contract.projectManagerStatus = "WAITING_VALIDATION";
         mailsToSend.push("projectManager");
         contract.projectManagerToken = crypto.randomBytes(40).toString("hex");
       }
-      if (contract.structureManagerStatus === "VALIDATED" || previousStructureManagerEmail !== contract.structureManagerEmail) {
-        if (contract.structureManagerStatus === "VALIDATED") validateAgainMailList.push("structureManager");
+      if (
+        previous.invitationSent !== "true" ||
+        previous.structureManagerStatus === "VALIDATED" ||
+        previous.structureManagerEmail !== contract.structureManagerEmail
+      ) {
+        if (previous.structureManagerStatus === "VALIDATED") validateAgainMailList.push("structureManager");
         contract.structureManagerStatus = "WAITING_VALIDATION";
         mailsToSend.push("structureManager");
         contract.structureManagerToken = crypto.randomBytes(40).toString("hex");
       }
-      if (contract.parent2Status === "VALIDATED" || previousParent2Email !== contract.parent2Email) {
-        if (contract.parent2Status === "VALIDATED") validateAgainMailList.push("parent2");
+      if (
+        contract.isYoungAdult !== "true" &&
+        contract.parent2Email &&
+        (previous.invitationSent !== "true" || previous.parent2Status === "VALIDATED" || previous.parent2Email !== contract.parent2Email)
+      ) {
+        if (previous.parent2Status === "VALIDATED") validateAgainMailList.push("parent2");
         contract.parent2Status = "WAITING_VALIDATION";
         mailsToSend.push("parent2");
         contract.parent2Token = crypto.randomBytes(40).toString("hex");
       }
-      if (contract.youngContractStatus === "VALIDATED" || previousYoungEmail !== contract.youngEmail) {
-        if (contract.youngContractStatus === "VALIDATED") validateAgainMailList.push("young");
+      if (
+        contract.isYoungAdult === "true" &&
+        (previous.invitationSent !== "true" || previous.youngContractStatus === "VALIDATED" || previous.youngEmail !== contract.youngEmail)
+      ) {
+        if (previous.youngContractStatus === "VALIDATED") validateAgainMailList.push("young");
         contract.youngContractStatus = "WAITING_VALIDATION";
         mailsToSend.push("young");
         contract.youngContractToken = crypto.randomBytes(40).toString("hex");
@@ -169,7 +181,7 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
       }
       for (const recipient of recipients) {
         if (recipient.isValidateAgainMail) {
-          console.log("send (re)validation mail to " + JSON.stringify(recipient));
+          console.log("send (re)validation mail to " + JSON.stringify({ to: recipient.email, cc: recipient.cc }));
           const htmlContent = fs
             .readFileSync(path.resolve(__dirname, "../templates/contract-revalidate.html"))
             .toString()
@@ -184,7 +196,7 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
             await sendEmail(to, subject, htmlContent);
           }
         } else {
-          console.log("send validation mail to " + JSON.stringify(recipient));
+          console.log("send validation mail to " + JSON.stringify({ to: recipient.email, cc: recipient.cc }));
           const htmlContent = fs
             .readFileSync(path.resolve(__dirname, "../templates/contract.html"))
             .toString()
