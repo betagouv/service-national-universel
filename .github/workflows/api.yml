@@ -43,7 +43,7 @@ jobs:
         working-directory: ${{ env.SUBFOLDER_NAME }}
         run: npm install
 
-      - name: Send coverage
+      - name: Test and Send coverage
         working-directory: ${{ env.SUBFOLDER_NAME }}
         uses: paambaati/codeclimate-action@v2.7.4
         env:
