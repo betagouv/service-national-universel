@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import { ReactiveBase, ReactiveList, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
-import { useSelector } from "react-redux";
 
 import { apiURL } from "../../../config";
 import SelectStatus from "../../../components/selectStatus";
@@ -275,7 +274,6 @@ export default ({ center, updateCenter }) => {
 };
 
 const Hit = ({ hit, onClick, selected, onChangeYoung }) => {
-  const user = useSelector((state) => state.Auth.user);
   return (
     <tr style={{ backgroundColor: (selected && "#e6ebfa") || (hit.status === "WITHDRAWN" && "#BE3B1211") }} onClick={onClick}>
       <td>

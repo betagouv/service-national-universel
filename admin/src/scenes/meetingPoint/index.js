@@ -134,7 +134,6 @@ export default () => {
 };
 
 const Hit = ({ hit }) => {
-  console.log(hit);
   let mounted = useRef(true);
   const [bus, setBus] = useState();
   useEffect(() => {
@@ -155,7 +154,7 @@ const Hit = ({ hit }) => {
         </a>
       </td>
       <td>{hit.busExcelId}</td>
-      {bus ? (
+      {bus && mounted ? (
         <td>
           <MultiLine>
             {bus.placesLeft === 0 ? <Badge text="Complet" /> : <h2>{bus.placesLeft} places disponibles</h2>}

@@ -2,9 +2,9 @@ import React from "react";
 import ReactLoading from "react-loading";
 import styled from "styled-components";
 
-export default () => (
+export default ({ size = "3rem" }) => (
   <Container>
-    <ReactLoading type="spin" color="#5245cc" />
+    <ReactLoading type="spin" color="#5245cc" width={size} height={size} />
   </Container>
 );
 
@@ -16,6 +16,6 @@ const Container = styled.div`
   justify-content: center;
   align-items: center;
   > div {
-    margin: 50px;
+    margin: 1rem;
   }
 `;
