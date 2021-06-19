@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
@@ -18,6 +18,7 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
   const [modal, setModal] = useState(null);
   const [young, setYoung] = useState(null);
   const user = useSelector((state) => state.Auth.user);
+  let mounted = useRef(true);
 
   const getInscriptions = async (department) => {
     const { data, ok, code } = await api.post(`/inscription-goal/current`, { department });
@@ -38,11 +39,15 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
       const id = hit && hit._id;
       if (!id) return setYoung(null);
       const { data } = await api.get(`/referent/young/${id}`);
-      setYoung(data);
+      mounted && setYoung(data);
     })();
+    return () => {
+      setYoung(null);
+      mounted = false;
+    };
   }, [hit]);
 
-  if (!young) return <div />;
+  if (!young) return <i style={{ color: "#382F79" }}>Chargement...</i>;
 
   const handleClickStatus = async (status) => {
     // Gabrielle says: (https://trello.com/c/JBS3Jn8I/576-inscription-impact-fin-instruction-dossiers-au-6-mai)

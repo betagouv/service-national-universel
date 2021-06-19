@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
@@ -15,17 +15,22 @@ export default ({ hit, options = [] }) => {
   const [refusedModal, setRefusedModal] = useState(false);
   const [mission, setMission] = useState(hit);
   const user = useSelector((state) => state.Auth.user);
+  let mounted = useRef(true);
 
   useEffect(() => {
     (async () => {
       const id = hit && hit._id;
       if (!id) return setMission(null);
       const { data } = await api.get(`/mission/${id}`);
-      setMission(data);
+      mounted && setMission(data);
     })();
+    return () => {
+      setMission(null);
+      mounted = false;
+    };
   }, [hit]);
 
-  if (!mission) return <div />;
+  if (!mission) return <i style={{ color: "#382F79" }}>Chargement...</i>;
 
   if (user.role === "responsible" || user.role === "supervisor")
     options.push(MISSION_STATUS.WAITING_VALIDATION, MISSION_STATUS.DRAFT, MISSION_STATUS.CANCEL, MISSION_STATUS.ARCHIVED);

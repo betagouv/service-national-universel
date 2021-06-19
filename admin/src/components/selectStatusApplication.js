@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import ModalRefusedApplication from "./modals/ModalRefusedApplication";
 import styled from "styled-components";
@@ -14,17 +14,22 @@ export default ({ hit, options = [], callback }) => {
   const [application, setApplication] = useState(null);
   const [modal, setModal] = useState(false);
   const user = useSelector((state) => state.Auth.user);
+  let mounted = useRef(true);
 
   useEffect(() => {
     (async () => {
       const id = hit && hit._id;
       if (!id) return setApplication(null);
       const { data } = await api.get(`/application/${id}`);
-      setApplication(data);
+      mounted && setApplication(data);
     })();
+    return () => {
+      setApplication(null);
+      mounted = false;
+    };
   }, [hit]);
 
-  if (!application) return <div>Chargement</div>;
+  if (!application) return <i style={{ color: "#382F79" }}>Chargement...</i>;
 
   options = [APPLICATION_STATUS.IN_PROGRESS, APPLICATION_STATUS.DONE, APPLICATION_STATUS.ABANDON];
   if (application.status === APPLICATION_STATUS.WAITING_VALIDATION) options = [APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.REFUSED, APPLICATION_STATUS.CANCEL];
