@@ -45,9 +45,9 @@ export default ({ onChange, value }) => {
     try {
       const { ok, data, token } = await api.post(`/referent/signin_as/referent/${value._id}`);
       if (!ok) return toastr.error("Oops, une erreur est survenu lors de la masquarade !", translate(e.code));
+      history.push("/dashboard");
       if (token) api.setToken(token);
       if (data) dispatch(setUser(data));
-      history.push("/dashboard");
     } catch (e) {
       console.log(e);
       toastr.error("Oops, une erreur est survenu lors de la masquarade !", translate(e.code));
