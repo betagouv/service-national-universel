@@ -19,7 +19,7 @@ export default () => {
   const user = useSelector((state) => state.Auth.user);
   const [missions, setMissions] = useState([]);
   const [panel, setPanel] = useState(null);
-  const getDefaultQuery = () => ({ query: { bool: { filter: { terms: { "missionId.keyword": missions } } } }, sort: [{ "youngLastName.keyword": "asc" }] });
+  const getDefaultQuery = () => ({ query: { bool: { filter: { terms: { "missionId.keyword": missions.map((e) => e._id) } } } }, sort: [{ "youngLastName.keyword": "asc" }] });
   const getExportQuery = () => ({ ...getDefaultQuery(), size: 10000 });
 
   async function appendMissions(structure) {
@@ -45,7 +45,7 @@ export default () => {
         m.push(...tempMissions);
       }
     }
-    setMissions(m.map((e) => e._id));
+    setMissions(m);
   }
 
   // Get all missions from structure then get all applications int order to display the volontaires' list.
@@ -136,7 +136,7 @@ export default () => {
                   className="dropdown-filter"
                   componentId="STATUS"
                   dataField="status.keyword"
-                  react={{ and: FILTERS }}
+                  react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
                   renderItem={(e, count) => {
                     return `${translate(e)} (${count})`;
                   }}
@@ -198,7 +198,13 @@ export default () => {
                     </thead>
                     <tbody>
                       {data.map((hit, i) => (
-                        <Hit key={i} hit={hit} onClick={() => handleClick(hit)} selected={panel?.application?._id === hit._id} />
+                        <Hit
+                          key={i}
+                          hit={hit}
+                          onClick={() => handleClick(hit)}
+                          selected={panel?.application?._id === hit._id}
+                          mission={missions.find((m) => m._id === hit.missionId)}
+                        />
                       ))}
                     </tbody>
                   </Table>
@@ -219,19 +225,8 @@ export default () => {
   );
 };
 
-const Hit = ({ hit, onClick, selected }) => {
+const Hit = ({ hit, onClick, selected, mission }) => {
   const history = useHistory();
-  const [mission, setMission] = useState();
-  useEffect(() => {
-    (async () => {
-      if (!hit.missionId) return;
-      const { ok, data, code } = await api.get(`/mission/${hit.missionId}`);
-      if (!ok) return toastr.error("Oups, une erreur est survenue", code);
-      return setMission(data);
-    })();
-  }, []);
-
-  if (!mission) return <Loader />;
   return (
     <tr style={{ backgroundColor: selected ? "#f1f1f1" : "transparent" }} onClick={onClick}>
       <td>
