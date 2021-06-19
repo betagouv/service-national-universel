@@ -119,7 +119,7 @@ export default (props) => {
         }
       }}
     >
-      {({ values, handleChange, handleSubmit, isValid, errors, touched }) => (
+      {({ values, handleChange, handleSubmit, errors, touched }) => (
         <div>
           <Header>
             <Title>{defaultValue ? values.name : "Création d'une mission"}</Title>
@@ -127,7 +127,6 @@ export default (props) => {
               {!defaultValue ? (
                 <button
                   className="white-button"
-                  disabled={!isValid}
                   onClick={() => {
                     handleChange({ target: { value: "DRAFT", name: "status" } });
                     handleSubmit();
@@ -137,7 +136,6 @@ export default (props) => {
                 </button>
               ) : null}
               <button
-                disabled={!isValid}
                 onClick={() => {
                   handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
                   handleSubmit();
@@ -374,7 +372,6 @@ export default (props) => {
                 {!defaultValue ? (
                   <button
                     className="white-button"
-                    disabled={!isValid}
                     onClick={() => {
                       handleChange({ target: { value: "DRAFT", name: "status" } });
                       handleSubmit();
@@ -384,7 +381,6 @@ export default (props) => {
                   </button>
                 ) : null}
                 <button
-                  disabled={!isValid}
                   onClick={() => {
                     handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
                     handleSubmit();
