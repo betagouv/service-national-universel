@@ -8,7 +8,7 @@ import Select from "react-select";
 import MultiSelect from "../../../components/Multiselect";
 import AddressInput from "../../../components/addressInput";
 import ErrorMessage, { requiredMessage } from "../../../components/errorMessage";
-import { translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, MISSION_DOMAINS, APPLICATION_STATUS } from "../../../utils";
+import { translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, MISSION_DOMAINS, dateForDatePicker } from "../../../utils";
 import api from "../../../services/api";
 import PlusSVG from "../../../assets/plus.svg";
 import CrossSVG from "../../../assets/cross.svg";
@@ -36,10 +36,6 @@ export default ({ young, onSend }) => {
       if (responses) setReferents(responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
     })();
   }, [structure]);
-
-  function dateForDatePicker(d) {
-    return new Date(d).toISOString().split("T")[0];
-  }
 
   const handleProposal = async (mission, status) => {
     const application = {

@@ -1,22 +1,25 @@
-import React from "react";
+import React, { useState } from "react";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 import { Formik } from "formik";
 import { Link } from "react-router-dom";
 
-import { translate, YOUNG_PHASE } from "../../../utils";
+import { translate, YOUNG_PHASE, YOUNG_STATUS_COLORS, confirmMessageChangePhase1Presence, formatStringLongDate } from "../../../utils";
 import WrapperPhase1 from "./wrapper";
 import api from "../../../services/api";
-import ToggleSwitch from "../../../components/ToogleSwitch";
 import { Box, BoxTitle } from "../../../components/box";
 import { toastr } from "react-redux-toastr";
+import Badge from "../../../components/Badge";
+import Select from "../components/Select";
 
-export default ({ young }) => {
+export default (props) => {
   const disabled = false; //young.phase !== YOUNG_PHASE.COHESION_STAY;
+  const [young, setYoung] = useState(props.young);
 
   const updateYoung = async (v) => {
-    const { ok, code } = await api.put(`/referent/young/${young._id}`, v);
+    const { data, ok, code } = await api.put(`/referent/young/${young._id}`, v);
     if (!ok) return toastr.error("Oups, une erreur s'est produite", translate(code));
+    setYoung(data);
     toastr.success("Mis à jour !");
   };
 
@@ -24,50 +27,65 @@ export default ({ young }) => {
     if (young.statusPhase1 === "DONE")
       return (
         <>
-          <p>Le volontaire a réalisé son séjour de cohésion.</p>
+          <p>{young.firstName} a réalisé son séjour de cohésion.</p>
           <Details title="Centre" value={young.cohesionCenterName} />
           <Details title="Ville" value={young.cohesionCenterCity} />
-          <Details title="Code Postal" value={young.cohesionCenterZip} />
+          <Details title="Code&nbsp;Postal" value={young.cohesionCenterZip} />
+        </>
+      );
+    if (young.statusPhase1 === "NOT_DONE")
+      return (
+        <>
+          <p>{young.firstName} n'a pas réalisé son séjour de cohésion.</p>
+          <Details title="Centre" value={young.cohesionCenterName} />
+          <Details title="Ville" value={young.cohesionCenterCity} />
+          <Details title="Code&nbsp;Postal" value={young.cohesionCenterZip} />
         </>
       );
     if (young.statusPhase1 === "CANCEL" && young.cohesion2020Step !== "DONE") return <p>Le séjour de cohésion a été annulé.</p>;
     if (young.statusPhase1 === "AFFECTED")
       return (
         <>
-          <p>Le volontaire a été affecté au centre :</p>
-          <Link to={`/centre/${young.cohesionCenterId}`}>
-            <Details title="Centre" value={young.cohesionCenterName} />
-          </Link>
+          <p>{young.firstName} a été affecté(e) au centre :</p>
+          <Details title="Centre" value={young.cohesionCenterName} />
           <Details title="Ville" value={young.cohesionCenterCity} />
-          <Details title="Code Postal" value={young.cohesionCenterZip} />
+          <Details title="Code&nbsp;Postal" value={young.cohesionCenterZip} />
         </>
       );
     if (young.statusPhase1 === "WAITING_AFFECTATION")
       return (
         <>
-          <p>Le volontaire est en attente d'affectation à un centre de cohésion</p>
+          <p>{young.firstName} est en attente d'affectation à un centre de cohésion</p>
+          {ENABLE_ASSIGN_CENTER && user.role === "admin" ? <AssignCenter young={young} onAffect={getYoung} /> : null}
         </>
       );
     if (young.statusPhase1 === "WAITING_LIST")
       return (
         <>
-          <p>Le volontaire est sur liste d'attente au centre :</p>
-          <Link to={`/centre/${young.cohesionCenterId}`}>
-            <Details title="Centre" value={young.cohesionCenterName} />
-          </Link>
+          <p>{young.firstName} est sur liste d'attente au centre :</p>
+          <Details title="Centre" value={young.cohesionCenterName} />
           <Details title="Ville" value={young.cohesionCenterCity} />
-          <Details title="Code Postal" value={young.cohesionCenterZip} />
+          <Details title="Code&nbsp;Postal" value={young.cohesionCenterZip} />
+        </>
+      );
+    if (young.statusPhase1 === "WAITING_ACCEPTATION")
+      return (
+        <>
+          <p>
+            {young.firstName} doit confirmer sa participation au séjour de cohésion avant le <b>{formatStringLongDate(young.autoAffectationPhase1ExpiresAt)}</b>.
+          </p>
+          <Details title="Centre" value={young.cohesionCenterName} />
+          <Details title="Ville" value={young.cohesionCenterCity} />
+          <Details title="Code&nbsp;Postal" value={young.cohesionCenterZip} />
         </>
       );
     if (young.statusPhase1 === "WITHDRAWN")
       return (
         <>
-          <p>Le volontaire s'est désisté du séjour de cohésion.</p>
-          <Link to={`/centre/${young.cohesionCenterId}`}>
-            <Details title="Centre" value={young.cohesionCenterName} />
-          </Link>
+          <p>Details s'est désisté(e) du séjour de cohésion.</p>
+          <Details title="Centre" value={young.cohesionCenterName} />
           <Details title="Ville" value={young.cohesionCenterCity} />
-          <Details title="Code Postal" value={young.cohesionCenterZip} />
+          <Details title="Code&nbsp;Postal" value={young.cohesionCenterZip} />
         </>
       );
   };
@@ -78,7 +96,9 @@ export default ({ young }) => {
         <Box>
           <Row>
             <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
-              <Bloc title="Séjour de cohésion">{getCohesionStay(young)}</Bloc>
+              <Bloc title="Séjour de cohésion" titleRight={<Badge text={translate(young.statusPhase1)} color={YOUNG_STATUS_COLORS[young.statusPhase1]} />}>
+                {getCohesionStay(young)}
+              </Bloc>
             </Col>
             <Col md={6}>
               <Formik
@@ -99,24 +119,41 @@ export default ({ young }) => {
                     <Bloc title="Date de séjour" borderBottom disabled={disabled}>
                       <Details title="Début" value={young.cohesionStartAt} />
                       <Details title="Fin" value={young.cohesionEndAt} />
-                      <DetailsToogle
+                      <Select
+                        placeholder="Non renseigné"
                         title="Présence"
-                        optionLabels={["Présent", "Absent"]}
-                        values={values}
-                        name={"cohesionStayPresence"}
-                        handleChange={handleChange}
-                        updateYoung={updateYoung}
+                        options={[
+                          { value: "true", label: "Présent" },
+                          { value: "false", label: "Absent" },
+                        ]}
+                        value={young.cohesionStayPresence}
+                        name="cohesionStayPresence"
+                        handleChange={(e) => {
+                          const value = e.target.value;
+                          if (!value) return;
+                          if (!confirmMessageChangePhase1Presence(value)) return;
+                          handleChange({ target: { value, name: "cohesionStayPresence" } });
+                          updateYoung({ cohesionStayPresence: value });
+                        }}
                         disabled={disabled}
                       />
                     </Bloc>
                     <Bloc title="Fiche sanitaire" disabled={disabled}>
-                      <DetailsToogle
+                      <Select
+                        placeholder="Non renseigné"
                         title="Document"
-                        optionLabels={["Réceptionné", "Non réceptionné"]}
-                        values={values}
-                        name={"cohesionStayMedicalFileReceived"}
-                        handleChange={handleChange}
-                        updateYoung={updateYoung}
+                        options={[
+                          { value: "true", label: "Réceptionné" },
+                          { value: "false", label: "Non réceptionné" },
+                        ]}
+                        value={young.cohesionStayMedicalFileReceived}
+                        name="cohesionStayMedicalFileReceived"
+                        handleChange={(e) => {
+                          const value = e.target.value;
+                          if (!value) return;
+                          handleChange({ target: { value, name: "cohesionStayMedicalFileReceived" } });
+                          updateYoung({ cohesionStayMedicalFileReceived: value });
+                        }}
                         disabled={disabled}
                       />
                     </Bloc>
@@ -131,14 +168,27 @@ export default ({ young }) => {
   );
 };
 
-const Bloc = ({ children, title, borderBottom, borderRight, disabled }) => {
+const Bloc = ({ children, title, titleRight, borderBottom, borderRight, borderTop, disabled }) => {
   return (
     <Row
-      style={{ borderBottom: borderBottom ? "2px solid #f4f5f7" : 0, borderRight: borderRight ? "2px solid #f4f5f7" : 0, backgroundColor: disabled ? "#f9f9f9" : "transparent" }}
+      style={{
+        width: "100%",
+        borderTop: borderTop ? "2px solid #f4f5f7" : 0,
+        borderBottom: borderBottom ? "2px solid #f4f5f7" : 0,
+        borderRight: borderRight ? "2px solid #f4f5f7" : 0,
+        backgroundColor: disabled ? "#f9f9f9" : "transparent",
+      }}
     >
-      <Wrapper>
-        <div style={{ display: "flex" }}>
-          <BoxTitle>{title}</BoxTitle>
+      <Wrapper
+        style={{
+          width: "100%",
+        }}
+      >
+        <div style={{ display: "flex", width: "100%" }}>
+          <BoxTitle>
+            <div>{title}</div>
+            <div>{titleRight}</div>
+          </BoxTitle>
         </div>
         {children}
       </Wrapper>
@@ -153,24 +203,6 @@ const Details = ({ title, value }) => {
     <div className="detail">
       <div className="detail-title">{`${title} :`}</div>
       <div className="detail-text">{value}</div>
-    </div>
-  );
-};
-
-const DetailsToogle = ({ title, name, values, handleChange, updateYoung, disabled, optionLabels }) => {
-  return (
-    <div className="detail">
-      <div className="detail-title">{`${title} :`}</div>
-      <ToggleSwitch
-        optionLabels={optionLabels}
-        id={name}
-        checked={values[name] === "true"}
-        onChange={(checked) => {
-          handleChange({ target: { value: checked ? "true" : "false", name } });
-          updateYoung({ [name]: checked });
-        }}
-        disabled={disabled}
-      />
     </div>
   );
 };

@@ -107,7 +107,7 @@ export default (props) => {
             handleClick={(event) => handleClick(event, DRAWER_TABS.PHASE1)}
             open={activeTab === DRAWER_TABS.PHASE1}
           >
-            <ul className="subNav">
+            {/* <ul className="subNav">
               {young.statusPhase1 === "DONE" && young.cohesionCenterName ? (
                 <li>
                   <DownloadAttestationButton class="subNav-item" young={young} uri="1">
@@ -115,7 +115,7 @@ export default (props) => {
                   </DownloadAttestationButton>
                 </li>
               ) : null}
-            </ul>
+            </ul> */}
           </Item>
           <Item
             title="mission d'intérêt général"

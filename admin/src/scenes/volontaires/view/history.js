@@ -68,8 +68,8 @@ const Hit = ({ hit }) => {
           <tr key={i} style={{ borderBottom: i === hit.ops.length - 1 && "1px solid #ddd" }}>
             <td>{hit.user}</td>
             <td>{`${e.op} ${e.path}`}</td>
-            <td>{translate(e.originalValue) || "-"}</td>
-            <td>{translate(e.value) || "-"}</td>
+            <td>{JSON.stringify(e.originalValue) || "-"}</td>
+            <td>{JSON.stringify(e.value) || "-"}</td>
             <td>{formatStringLongDate(hit.date)}</td>
           </tr>
         );
