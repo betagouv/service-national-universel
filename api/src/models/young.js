@@ -1048,12 +1048,17 @@ Schema.post("remove", function (doc) {
   sendinblue.unsync(doc);
 });
 
+Schema.virtual("user").set(function (user) {
+  this._user = user;
+});
+
 Schema.plugin(patchHistory, {
   mongoose,
   name: `${MODELNAME}Patches`,
   trackOriginalValue: true,
   includes: {
     modelName: { type: String, required: true, default: MODELNAME },
+    user: { type: mongoose.Schema.Types.ObjectId, required: false, from: "_user" },
   },
   excludes: [
     "/password",
