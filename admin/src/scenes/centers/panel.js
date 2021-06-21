@@ -163,22 +163,16 @@ const DetailCardContent = styled.div`
 const Panel = styled.div`
   background: #ffffff;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-  position: relative;
   z-index: 1;
   flex: 1;
   max-width: 420px;
-  position: relative;
   min-height: 100vh;
   font-size: 14px;
   align-self: flex-start;
   position: sticky;
+  top: 68px;
   right: 0;
-  border: 1px solid rgb(235, 238, 245);
-  background-color: #fff;
-  position: relative;
-  border-radius: 4px;
   padding-bottom: 20px;
-  margin-bottom: 40px;
   padding: 20px;
   .close {
     color: #000;
