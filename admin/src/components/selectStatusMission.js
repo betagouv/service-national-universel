@@ -13,22 +13,17 @@ import Chevron from "./Chevron";
 export default ({ hit, options = [] }) => {
   const [waitingCorrectionModal, setWaitingCorrectionModal] = useState(false);
   const [refusedModal, setRefusedModal] = useState(false);
-  const [mission, setMission] = useState(hit);
+  const [mission, setMission] = useState(null);
   const user = useSelector((state) => state.Auth.user);
-  let mounted = useRef(true);
 
   useEffect(() => {
     (async () => {
       const id = hit && hit._id;
       if (!id) return setMission(null);
       const { data } = await api.get(`/mission/${id}`);
-      mounted && setMission(data);
+      setMission(data);
     })();
-    return () => {
-      setMission(null);
-      mounted = false;
-    };
-  }, [hit]);
+  }, [hit._id]);
 
   if (!mission) return <i style={{ color: "#382F79" }}>Chargement...</i>;
 

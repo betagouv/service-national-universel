@@ -18,7 +18,6 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
   const [modal, setModal] = useState(null);
   const [young, setYoung] = useState(null);
   const user = useSelector((state) => state.Auth.user);
-  let mounted = useRef(true);
 
   const getInscriptions = async (department) => {
     const { data, ok, code } = await api.post(`/inscription-goal/current`, { department });
@@ -39,13 +38,9 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
       const id = hit && hit._id;
       if (!id) return setYoung(null);
       const { data } = await api.get(`/referent/young/${id}`);
-      mounted && setYoung(data);
+      setYoung(data);
     })();
-    return () => {
-      setYoung(null);
-      mounted = false;
-    };
-  }, [hit]);
+  }, [hit._id]);
 
   if (!young) return <i style={{ color: "#382F79" }}>Chargement...</i>;
 

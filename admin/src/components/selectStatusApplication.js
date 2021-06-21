@@ -14,20 +14,15 @@ export default ({ hit, options = [], callback }) => {
   const [application, setApplication] = useState(null);
   const [modal, setModal] = useState(false);
   const user = useSelector((state) => state.Auth.user);
-  let mounted = useRef(true);
 
   useEffect(() => {
     (async () => {
       const id = hit && hit._id;
       if (!id) return setApplication(null);
       const { data } = await api.get(`/application/${id}`);
-      mounted && setApplication(data);
+      setApplication(data);
     })();
-    return () => {
-      setApplication(null);
-      mounted = false;
-    };
-  }, [hit]);
+  }, [hit._id]);
 
   if (!application) return <i style={{ color: "#382F79" }}>Chargement...</i>;
 
