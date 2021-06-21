@@ -7,7 +7,7 @@ import api from "../../../services/api";
 import CenterView from "./wrapper";
 import Panel from "../../volontaires/panel";
 
-import { getFilterLabel, YOUNG_STATUS_PHASE1, translate, formatDateFR, isInRuralArea, formatLongDateFR, getAge } from "../../../utils";
+import { getFilterLabel, YOUNG_STATUS_PHASE1, translate, formatDateFR, isInRuralArea, formatLongDateFR, getAge, ES_NO_LIMIT } from "../../../utils";
 import Loader from "../../../components/Loader";
 import ExportComponent from "../../../components/ExportXlsx";
 import { Filter, FilterRow, ResultTable, Table, TopResultStats, BottomResultStats, MultiLine } from "../../../components/list";
@@ -31,7 +31,7 @@ export default ({ center, updateCenter }) => {
       },
     },
   });
-  const getExportQuery = () => ({ ...getDefaultQuery(), size: 10000 });
+  const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
   const handleClick = async (young) => {
     const { ok, data } = await api.get(`/referent/young/${young._id}`);

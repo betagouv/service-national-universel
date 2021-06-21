@@ -2,10 +2,17 @@ import React, { useState, useEffect } from "react";
 import { ReactiveComponent } from "@appbaseio/reactivesearch";
 import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
-import { translate } from "../utils";
+import { translate, ES_NO_LIMIT } from "../utils";
 import LoadingButton from "./buttons/LoadingButton";
 
-export default function ExportComponent({ title, collection, react, transform, transformAll = null, defaultQuery = () => ({ query: { query: { match_all: {} } }, size: 10000 }) }) {
+export default function ExportComponent({
+  title,
+  collection,
+  react,
+  transform,
+  transformAll = null,
+  defaultQuery = () => ({ query: { query: { match_all: {} } }, size: ES_NO_LIMIT }),
+}) {
   const [exporting, setExporting] = useState(false);
 
   const handleExport = () => {

@@ -7,7 +7,17 @@ import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
 import ExportComponent from "../../components/ExportXlsx";
-import { translate, getFilterLabel, YOUNG_STATUS_COLORS, formatDateFR, formatLongDateFR, isInRuralArea, getAge, confirmMessageChangePhase1Presence } from "../../utils";
+import {
+  translate,
+  getFilterLabel,
+  YOUNG_STATUS_COLORS,
+  formatDateFR,
+  formatLongDateFR,
+  isInRuralArea,
+  getAge,
+  confirmMessageChangePhase1Presence,
+  ES_NO_LIMIT,
+} from "../../utils";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Badge from "../../components/Badge";
 import { ResultTable, Filter, Table, FilterRow, TopResultStats, BottomResultStats } from "../../components/list";
@@ -28,7 +38,7 @@ export default () => {
     })();
   }, []);
   const getDefaultQuery = () => ({ query: { bool: { filter: { term: { "cohesionCenterId.keyword": user.cohesionCenterId } } } }, sort: [{ "lastName.keyword": "asc" }] });
-  const getExportQuery = () => ({ ...getDefaultQuery(), size: 10000 });
+  const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
   return (
     <div>
