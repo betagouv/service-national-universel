@@ -9,6 +9,7 @@ import api from "../../services/api";
 import { translate } from "../../utils";
 import Team from "./components/Team";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
+import Panel from "../../components/Panel";
 
 export default ({ onChange, value }) => {
   const [missionsInfo, setMissionsInfo] = useState({ count: "-", placesTotal: "-" });
@@ -68,11 +69,11 @@ export default ({ onChange, value }) => {
   if (!value) return <div />;
   return (
     <Panel>
-      <div style={{ display: "flex" }}>
-        <Subtitle>structure</Subtitle>
-        <div className="close" onClick={onChange} />
-      </div>
       <div className="info">
+        <div style={{ display: "flex" }}>
+          <Subtitle>structure</Subtitle>
+          <div className="close" onClick={onChange} />
+        </div>
         <div className="title">{value.name}</div>
         <div style={{ display: "flex" }}>
           <Link to={`/structure/${value._id}`}>
@@ -134,9 +135,11 @@ export default ({ onChange, value }) => {
           <div style={{ marginTop: "1rem" }}>{parentStructure.name}</div>
         </Info>
       ) : null}
-      <div>{/*Object.keys(value).map((e, k) => {
+      <div>
+        {/*Object.keys(value).map((e, k) => {
           return <div key={k}>{`${e}:${value[e]}`}</div>;
-        }) */}</div>
+        }) */}
+      </div>
     </Panel>
   );
 };
@@ -166,67 +169,6 @@ const Subtitle = styled.div`
   font-weight: 400;
   text-transform: uppercase;
   font-size: 0.9rem;
-`;
-
-const Panel = styled.div`
-  background: #ffffff;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-  position: relative;
-  z-index: 1;
-  flex: 1;
-  max-width: 420px;
-  position: relative;
-  min-height: 100vh;
-  font-size: 14px;
-  align-self: flex-start;
-  position: sticky;
-  top: 68px;
-  right: 0;
-  padding: 20px;
-  .close {
-    color: #000;
-    font-weight: 400;
-    width: 45px;
-    height: 45px;
-    background: url(${require("../../assets/close_icon.png")}) center no-repeat;
-    background-size: 12px;
-    padding: 15px;
-    position: absolute;
-    right: 15px;
-    top: 15px;
-    cursor: pointer;
-  }
-  .title {
-    font-size: 24px;
-    font-weight: 800;
-    margin-bottom: 12px;
-  }
-  .info {
-    padding: 2rem 0;
-    border-bottom: 1px solid #f2f1f1;
-    &-title {
-      font-weight: 500;
-      font-size: 18px;
-      padding-right: 35px;
-    }
-  }
-  .detail {
-    display: flex;
-    font-size: 14px;
-    text-align: left;
-    margin-top: 10px;
-    &-title {
-      font-weight: bold;
-      min-width: 100px;
-      width: 100px;
-      margin-right: 5px;
-    }
-  }
-  .quote {
-    font-size: 18px;
-    font-weight: 400;
-    font-style: italic;
-  }
 `;
 
 const Button = styled.button`
