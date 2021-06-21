@@ -171,18 +171,16 @@ const Details = ({ title, value }) => {
 const Panel = styled.div`
   background: #ffffff;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-  position: relative;
   z-index: 1;
   flex: 1;
   max-width: 420px;
-  position: relative;
   min-height: 100vh;
   font-size: 14px;
   align-self: flex-start;
   position: sticky;
   top: 68px;
   right: 0;
-  /* overflow-y: auto; */
+  padding-bottom: 20px;
   .close {
     color: #000;
     font-weight: 400;
