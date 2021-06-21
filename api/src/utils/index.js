@@ -80,7 +80,7 @@ const updatePlacesCenter = async (center) => {
   try {
     const youngs = await YoungModel.find({ cohesionCenterId: center._id });
     const placesTaken = youngs.filter(
-      (young) => ["AFFECTED", "WAITING_ACCEPTATION"].includes(young.statusPhase1) && young.status === "VALIDATED"
+      (young) => ["AFFECTED", "WAITING_ACCEPTATION", "DONE"].includes(young.statusPhase1) && young.status === "VALIDATED"
     ).length;
     const placesLeft = Math.max(0, center.placesTotal - placesTaken);
     if (center.placesLeft !== placesLeft) {
