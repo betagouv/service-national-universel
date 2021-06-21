@@ -8,6 +8,7 @@ import { translate, formatStringDate } from "../../utils";
 import api from "../../services/api";
 import SelectStatusMission from "../../components/selectStatusMission";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
+import Panel from "../../components/Panel";
 
 export default ({ onChange, mission }) => {
   const [tutor, setTutor] = useState();
@@ -60,119 +61,123 @@ export default ({ onChange, mission }) => {
   if (!mission) return <div />;
   return (
     <Panel>
-      <div style={{ display: "flex", marginBottom: "15px" }}>
-        <Subtitle>MISSION</Subtitle>
-        <div className="close" onClick={onChange} />
+      <div className="info">
+        <div style={{ display: "flex", marginBottom: "15px" }}>
+          <Subtitle>MISSION</Subtitle>
+          <div className="close" onClick={onChange} />
+        </div>
+        <div className="title">{mission.name}</div>
+        <div style={{ display: "flex" }}>
+          <Link to={`/mission/${mission._id}`}>
+            <PanelActionButton icon="eye" title="Consulter" />
+          </Link>
+          <Link to={`/mission/${mission._id}/edit`}>
+            <PanelActionButton icon="pencil" title="Modifier" />
+          </Link>
+          <PanelActionButton onClick={duplicate} icon="duplicate" title="Dupliquer" />
+        </div>
+        <div style={{ display: "flex" }}>
+          <PanelActionButton onClick={handleDelete} icon="bin" title="Supprimer" />
+        </div>
       </div>
-      <div className="title">{mission.name}</div>
-      <div style={{ display: "flex" }}>
-        <Link to={`/mission/${mission._id}`}>
-          <PanelActionButton icon="eye" title="Consulter" />
-        </Link>
-        <Link to={`/mission/${mission._id}/edit`}>
-          <PanelActionButton icon="pencil" title="Modifier" />
-        </Link>
-        <PanelActionButton onClick={duplicate} icon="duplicate" title="Dupliquer" />
-      </div>
-      <div style={{ display: "flex" }}>
-        <PanelActionButton onClick={handleDelete} icon="bin" title="Supprimer" />
-      </div>
-      <hr />
-      <div>
+      <div className="info">
         <div className="title">Statut</div>
         <SelectStatusMission hit={mission} />
         <div className="description">A noter que des notifications emails seront envoyées</div>
       </div>
-      <hr />
-      <div className="title">{`Volontaire(s) (${mission.placesTotal - mission.placesLeft})`}</div>
-      <div className="detail">
-        <div className="description">{`Cette mission a reçu ${mission.placesTotal - mission.placesLeft} candidature(s)`}</div>
-      </div>
-      {/* <Link to={``}>
+      <div className="info">
+        <div className="title">{`Volontaire(s) (${mission.placesTotal - mission.placesLeft})`}</div>
+        <div className="detail">
+          <div className="description">{`Cette mission a reçu ${mission.placesTotal - mission.placesLeft} candidature(s)`}</div>
+        </div>
+        {/* <Link to={``}>
         <button>Consulter tous les volontaires</button>
       </Link> */}
-      <hr />
-      <div className="title">
-        La structure
-        <Link to={`/structure/${structure._id}`}>
-          <SubtitleLink>{`${structure.name} >`}</SubtitleLink>
-        </Link>
       </div>
+      <div className="info">
+        <div className="title">
+          La structure
+          <Link to={`/structure/${structure._id}`}>
+            <SubtitleLink>{`${structure.name} >`}</SubtitleLink>
+          </Link>
+        </div>
 
-      <div className="detail">
-        <div className="detail-title">Statut</div>
-        <div className="detail-text">{translate(structure.legalStatus)}</div>
-      </div>
-      <div className="detail">
-        <div className="detail-title">Dép.</div>
-        <div className="detail-text">{structure.department}</div>
-      </div>
+        <div className="detail">
+          <div className="detail-title">Statut</div>
+          <div className="detail-text">{translate(structure.legalStatus)}</div>
+        </div>
+        <div className="detail">
+          <div className="detail-title">Dép.</div>
+          <div className="detail-text">{structure.department}</div>
+        </div>
 
-      <div className="detail">
-        <div className="detail-title">Tuteur</div>
-        <div className="detail-text">{tutor ? `${tutor.firstName} ${tutor.lastName}` : ""}</div>
+        <div className="detail">
+          <div className="detail-title">Tuteur</div>
+          <div className="detail-text">{tutor ? `${tutor.firstName} ${tutor.lastName}` : ""}</div>
+        </div>
+        <div className="detail">
+          <div className="detail-title">E-mail</div>
+          <div className="detail-text">{tutor && tutor.email}</div>
+        </div>
+        <div className="detail">
+          <div className="detail-title">tel.</div>
+          <div className="detail-text">{tutor && tutor.phone}</div>
+        </div>
       </div>
-      <div className="detail">
-        <div className="detail-title">E-mail</div>
-        <div className="detail-text">{tutor && tutor.email}</div>
-      </div>
-      <div className="detail">
-        <div className="detail-title">tel.</div>
-        <div className="detail-text">{tutor && tutor.phone}</div>
-      </div>
-      <hr />
-      <div className="title">La mission</div>
-      <div className="detail">
-        <div className="detail-title">Domaines</div>
-        <div className="detail-text">{mission.domains.map((d) => translate(d)).join(", ")}</div>
-      </div>
-      <div className="detail">
-        <div className="detail-title">Début</div>
-        <div className="detail-text">{formatStringDate(mission.startAt)}</div>
-      </div>
-      <div className="detail">
-        <div className="detail-title">Fin</div>
-        <div className="detail-text">{formatStringDate(mission.endAt)}</div>
-      </div>
-      <div className="detail">
-        <div className="detail-title">Adresse</div>
-        <div className="detail-text">{mission.address}</div>
-      </div>
-      <div className="detail">
-        <div className="detail-title">Dép.</div>
-        <div className="detail-text">{mission.department}</div>
-      </div>
-      <div className="detail">
-        <div className="detail-title">Format</div>
-        <div className="detail-text">{translate(mission.format)}</div>
-      </div>
-      <div className="detail">
-        <div className="detail-title">Fréquence</div>
-        <div className="detail-text">{mission.frequence}</div>
-      </div>
-      <div className="detail">
-        <div className="detail-title">Périodes</div>
-        <div className="detail-text">{mission.period.map((p) => translate(p)).join(", ")}</div>
-      </div>
-      <div className="detail">
-        <div className="detail-title">Objectifs</div>
-        <div className="detail-text">{mission.description}</div>
-      </div>
-      <div className="detail">
-        <div className="detail-title">Actions</div>
-        <div className="detail-text">{mission.actions}</div>
-      </div>
-      <div className="detail">
-        <div className="detail-title">Contraintes</div>
-        <div className="detail-text">{mission.contraintes}</div>
-      </div>
-      {/* <div>
+      <div className="info">
+        <div className="title">La mission</div>
+        <div className="detail">
+          <div className="detail-title">Domaines</div>
+          <div className="detail-text">{mission.domains.map((d) => translate(d)).join(", ")}</div>
+        </div>
+        <div className="detail">
+          <div className="detail-title">Début</div>
+          <div className="detail-text">{formatStringDate(mission.startAt)}</div>
+        </div>
+        <div className="detail">
+          <div className="detail-title">Fin</div>
+          <div className="detail-text">{formatStringDate(mission.endAt)}</div>
+        </div>
+        <div className="detail">
+          <div className="detail-title">Adresse</div>
+          <div className="detail-text">{mission.address}</div>
+        </div>
+        <div className="detail">
+          <div className="detail-title">Dép.</div>
+          <div className="detail-text">{mission.department}</div>
+        </div>
+        <div className="detail">
+          <div className="detail-title">Format</div>
+          <div className="detail-text">{translate(mission.format)}</div>
+        </div>
+        <div className="detail">
+          <div className="detail-title">Fréquence</div>
+          <div className="detail-text">{mission.frequence}</div>
+        </div>
+        <div className="detail">
+          <div className="detail-title">Périodes</div>
+          <div className="detail-text">{mission.period.map((p) => translate(p)).join(", ")}</div>
+        </div>
+        <div className="detail">
+          <div className="detail-title">Objectifs</div>
+          <div className="detail-text">{mission.description}</div>
+        </div>
+        <div className="detail">
+          <div className="detail-title">Actions</div>
+          <div className="detail-text">{mission.actions}</div>
+        </div>
+        <div className="detail">
+          <div className="detail-title">Contraintes</div>
+          <div className="detail-text">{mission.contraintes}</div>
+        </div>
+        {/* <div>
         {Object.keys(mission).map((e) => {
           return <div>{`${e}:${mission[e]}`}</div>;
         })}
       </div> */}
-      {/* <div className="others-title">Volontaires (0)</div>
-      <div className="others-text">Aucun volontaire n'a encore été assigné. // TODO</div> */}
+        {/* <div>Volontaires (0)</div>
+      <div>Aucun volontaire n'a encore été assigné. // TODO</div> */}
+      </div>
     </Panel>
   );
 };
@@ -187,92 +192,4 @@ const Subtitle = styled.div`
 const SubtitleLink = styled(Subtitle)`
   color: #5245cc;
   text-transform: none;
-`;
-
-const Panel = styled.div`
-  background: #ffffff;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-  z-index: 1;
-  flex: 1;
-  max-width: 420px;
-  min-height: 100vh;
-  font-size: 14px;
-  align-self: flex-start;
-  position: sticky;
-  top: 68px;
-  right: 0;
-  padding-bottom: 20px;
-  padding: 20px;
-  .close {
-    color: #000;
-    font-weight: 400;
-    width: 45px;
-    height: 45px;
-    background: url(${require("../../assets/close_icon.png")}) center no-repeat;
-    background-size: 12px;
-    padding: 15px;
-    position: absolute;
-    right: 15px;
-    top: 15px;
-    cursor: pointer;
-  }
-  .name {
-    text-transform: uppercase;
-    color: #606266;
-    font-size: 12px;
-    margin: 50px;
-    text-align: center;
-    letter-spacing: 0.02em;
-  }
-  :hover {
-    box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 12px 0px;
-  }
-  img {
-    width: 45px;
-    height: 45px;
-    background-color: #aaa;
-    border-radius: 50%;
-    object-fit: cover;
-    transform: translateY(-50%);
-  }
-  .title {
-    margin-top: -15px;
-    margin-bottom: 15px;
-    font-weight: 500;
-    color: #000;
-    font-size: 18px;
-  }
-  .description {
-    font-weight: 400;
-    color: #aaa;
-    font-size: 0.8rem;
-  }
-  hr {
-    margin: 20px 0 30px;
-  }
-  .detail {
-    display: flex;
-    align-items: flex-start;
-    font-size: 12px;
-    text-align: left;
-    margin-top: 1rem;
-    &-title {
-      min-width: 90px;
-      width: 90px;
-      color: #798399;
-    }
-    &-text {
-      color: rgba(26, 32, 44);
-    }
-  }
-
-  .others-title {
-    font-size: 20px;
-    margin-bottom: 15px;
-  }
-  .others-text {
-    font-size: 12px;
-    color: #aeb7d6;
-    padding: 15px;
-  }
 `;
