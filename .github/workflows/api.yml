@@ -38,6 +38,11 @@ jobs:
         uses: supercharge/mongodb-github-action@1.6.0
         with:
           mongodb-version: '4.0'
+
+      - name: Add lib into current folder
+        run: |
+          cp -Rf ./lib ./api/snu-lib
+          sed -i 's/file:\.\.\/lib/file:.\/snu-lib/' ./api/package.json
       
       - name: Install packages
         working-directory: ${{ env.SUBFOLDER_NAME }}
@@ -85,6 +90,11 @@ jobs:
       - name: Remove git folder
         run: |
           rm -rf .git
+
+      - name: Add lib into current folder
+        run: |
+          cp -Rf ./lib ./api/snu-lib
+          sed -i 's/file:\.\.\/lib/file:.\/snu-lib/' ./api/package.json
 
       - name: Push
         working-directory: ${{ env.SUBFOLDER_NAME }}

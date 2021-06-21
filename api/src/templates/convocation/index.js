@@ -7,6 +7,7 @@ const MeetingPointModel = require("../../models/meetingPoint");
 const BusModel = require("../../models/bus");
 const DepartmentServiceModel = require("../../models/departmentService");
 const { capture } = require("../../sentry");
+const { formatStringDate } = require("snu-lib");
 
 const isFromDOMTOM = (young) => {
   return [
@@ -32,16 +33,6 @@ function getBg(template = "default") {
   if (template === "domtom") return getSignedUrl("convocation/convocationCohesionTemplate-DOMTOM.png");
   return getSignedUrl("convocation/convocationCohesionTemplate.png");
 }
-
-const formatDateFR = (date) => {
-  if (!date) return "-";
-  const d = new Date(date);
-  return d.toLocaleDateString("fr-FR", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-};
 
 const render = async (young) => {
   const getDepartureMeetingDate = (meetingPoint) => {
@@ -69,10 +60,10 @@ const render = async (young) => {
     return html
       .replace(/{{REFERENT_NAME}}/g, service?.contactName)
       .replace(/{{REFERENT_PHONE}}/g, service?.contactPhone)
-      .replace(/{{DATE}}/g, formatDateFR(Date.now()))
+      .replace(/{{DATE}}/g, formatStringDate(Date.now()))
       .replace(/{{FIRST_NAME}}/g, young.firstName)
       .replace(/{{LAST_NAME}}/g, young.lastName)
-      .replace(/{{BIRTHDATE}}/g, formatDateFR(young.birthdateAt))
+      .replace(/{{BIRTHDATE}}/g, formatStringDate(young.birthdateAt))
       .replace(/{{ADDRESS}}/g, young.address)
       .replace(/{{ZIP}}/g, young.zip)
       .replace(/{{CITY}}/g, young.city)
@@ -104,10 +95,10 @@ const renderDOMTOM = async (young) => {
     return html
       .replace(/{{REFERENT_NAME}}/g, service?.contactName)
       .replace(/{{REFERENT_PHONE}}/g, service?.contactPhone)
-      .replace(/{{DATE}}/g, formatDateFR(Date.now()))
+      .replace(/{{DATE}}/g, formatStringDate(Date.now()))
       .replace(/{{FIRST_NAME}}/g, young.firstName)
       .replace(/{{LAST_NAME}}/g, young.lastName)
-      .replace(/{{BIRTHDATE}}/g, formatDateFR(young.birthdateAt))
+      .replace(/{{BIRTHDATE}}/g, formatStringDate(young.birthdateAt))
       .replace(/{{ADDRESS}}/g, young.address)
       .replace(/{{ZIP}}/g, young.zip)
       .replace(/{{CITY}}/g, young.city)

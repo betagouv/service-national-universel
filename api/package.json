@@ -49,6 +49,7 @@
     "passport-jwt": "^4.0.0",
     "password-validator": "^5.1.0",
     "puppeteer": "^8.0.0",
+    "snu-lib": "file:../lib",
     "validator": "^13.5.2"
   },
   "devDependencies": {
