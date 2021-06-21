@@ -14,8 +14,8 @@ import Badge from "../../../components/Badge";
 import Select from "../components/Select";
 
 export default (props) => {
-  const disabled = false; //young.phase !== YOUNG_PHASE.COHESION_STAY;
   const [young, setYoung] = useState(props.young);
+  const disabled = young.statusPhase1 === "WITHDRAWN";
 
   const updateYoung = async (v) => {
     const { data, ok, code } = await api.put(`/referent/young/${young._id}`, v);

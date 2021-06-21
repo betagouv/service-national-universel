@@ -17,10 +17,10 @@ import { environment } from "../../../config";
 import Select from "../components/Select";
 
 export default (props) => {
-  const disabled = false; //young.phase !== YOUNG_PHASE.COHESION_STAY;
   const user = useSelector((state) => state.Auth.user);
   const [meetingPoint, setMeetingPoint] = useState();
   const [young, setYoung] = useState(props.young);
+  const disabled = young.statusPhase1 === "WITHDRAWN";
 
   useEffect(() => {
     if (!young.meetingPointId) return;
