@@ -173,7 +173,6 @@ export default (props) => {
                         name="cohesionStayPresence"
                         handleChange={(e) => {
                           const value = e.target.value;
-                          if (!value) return;
                           if (!confirmMessageChangePhase1Presence(value)) return;
                           handleChange({ target: { value, name: "cohesionStayPresence" } });
                           updateYoung({ cohesionStayPresence: value });
@@ -193,7 +192,6 @@ export default (props) => {
                         name="cohesionStayMedicalFileReceived"
                         handleChange={(e) => {
                           const value = e.target.value;
-                          if (!value) return;
                           handleChange({ target: { value, name: "cohesionStayMedicalFileReceived" } });
                           updateYoung({ cohesionStayMedicalFileReceived: value });
                         }}

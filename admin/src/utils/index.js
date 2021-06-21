@@ -38,11 +38,13 @@ export const getFilterLabel = (selected, placeholder = "Choisissez un filtre") =
 };
 
 export const confirmMessageChangePhase1Presence = (value) => {
-  if (!value) return;
+  if (!value) return true;
   const label = value === "true" ? "Présent" : "Absent";
   let message = `ATTENTION, vous allez passer ce volontaire "${label}" au séjour de cohésion. `;
-  if (value === "true") message += "L'attestation de réalisation de la phase 1 du SNU lui sera rendu disponible au téléchargement depuis son espace volontaire. Son statut de phase 1 au séjour de cohésion passera à \"Effectué\"";
-  else message += "Son statut de phase 1 au séjour de cohésion passera à \"Non réalisé\"";
+  if (value === "true")
+    message +=
+      'L\'attestation de réalisation de la phase 1 du SNU lui sera rendu disponible au téléchargement depuis son espace volontaire. Son statut de phase 1 au séjour de cohésion passera à "Effectué"';
+  else message += 'Son statut de phase 1 au séjour de cohésion passera à "Non réalisé"';
   return confirm(message);
 };
 

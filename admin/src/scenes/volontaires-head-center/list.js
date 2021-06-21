@@ -292,7 +292,6 @@ const Hit = ({ hit, onClick, selected, callback }) => {
           name="cohesionStayPresence"
           handleChange={(e) => {
             const value = e.target.value;
-            if (!value) return;
             if (!confirmMessageChangePhase1Presence(value)) return;
             updateYoung({ cohesionStayPresence: value });
           }}
@@ -309,7 +308,6 @@ const Hit = ({ hit, onClick, selected, callback }) => {
           name="cohesionStayMedicalFileReceived"
           handleChange={(e) => {
             const value = e.target.value;
-            if (!value) return;
             updateYoung({ cohesionStayMedicalFileReceived: value });
           }}
         />
