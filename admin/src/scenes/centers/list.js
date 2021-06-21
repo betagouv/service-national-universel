@@ -7,7 +7,7 @@ import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
-import { formatStringDate, translate, getFilterLabel, formatLongDateFR, formatDateFR, YOUNG_STATUS_COLORS } from "../../utils";
+import { formatStringDate, translate, getFilterLabel, formatLongDateFR, formatDateFR, YOUNG_STATUS_COLORS, ES_NO_LIMIT } from "../../utils";
 import SelectStatusMission from "../../components/selectStatusMission";
 import VioletHeaderButton from "../../components/buttons/VioletHeaderButton";
 import Loader from "../../components/Loader";
@@ -23,7 +23,7 @@ export default () => {
   const getDefaultQuery = () => {
     return { query: { match_all: {} } };
   };
-  const getExportQuery = () => ({ ...getDefaultQuery(), size: 10000 });
+  const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
   return (
     <div>

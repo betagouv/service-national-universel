@@ -11,7 +11,7 @@ import Panel from "./panel";
 import VioletHeaderButton from "../../components/buttons/VioletHeaderButton";
 import ExportComponent from "../../components/ExportXlsx";
 import Loader from "../../components/Loader";
-import { translate, getFilterLabel, formatStringLongDate, formatStringDate, getAge } from "../../utils";
+import { translate, getFilterLabel, formatStringLongDate, formatStringDate, getAge, ES_NO_LIMIT } from "../../utils";
 
 const FILTERS = ["SEARCH", "STATUS", "PHASE", "COHORT", "MISSIONS", "TUTOR"];
 
@@ -20,7 +20,7 @@ export default () => {
   const [missions, setMissions] = useState([]);
   const [panel, setPanel] = useState(null);
   const getDefaultQuery = () => ({ query: { bool: { filter: { terms: { "missionId.keyword": missions.map((e) => e._id) } } } }, sort: [{ "youngLastName.keyword": "asc" }] });
-  const getExportQuery = () => ({ ...getDefaultQuery(), size: 10000 });
+  const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
   async function appendMissions(structure) {
     const missionsResponse = await api.get(`/mission/structure/${structure}`);
@@ -78,7 +78,7 @@ export default () => {
                   if (youngIds?.length) {
                     const { responses } = await api.esQuery([
                       { index: "young", type: "_doc" },
-                      { size: 10_000 /* no limit */, query: { ids: { type: "_doc", values: youngIds } } },
+                      { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: youngIds } } },
                     ]);
                     const youngs = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
                     return data.map((item) => ({ ...item, young: youngs.find((e) => e._id === item.youngId) }));

@@ -8,7 +8,7 @@ import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
-import { translate, corpsEnUniforme, formatLongDateFR } from "../../utils";
+import { translate, corpsEnUniforme, formatLongDateFR, ES_NO_LIMIT } from "../../utils";
 import VioletHeaderButton from "../../components/buttons/VioletHeaderButton";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import { Filter, FilterRow, ResultTable, Table, TopResultStats, BottomResultStats, Header, Title, MultiLine } from "../../components/list";
@@ -33,7 +33,7 @@ export default () => {
       if (structureIds?.length) {
         const queries = [
           { index: "mission", type: "_doc" },
-          { size: 10_000 /* no limit */, query: { bool: { must: { match_all: {} }, filter: [{ terms: { "structureId.keyword": structureIds } }] } } },
+          { size: ES_NO_LIMIT, query: { bool: { must: { match_all: {} }, filter: [{ terms: { "structureId.keyword": structureIds } }] } } },
         ];
         const { responses } = await api.esQuery(queries);
         setMissions(responses[0]?.hits?.hits || []);
@@ -43,7 +43,7 @@ export default () => {
 
   const user = useSelector((state) => state.Auth.user);
   const getDefaultQuery = () => (user.role === "supervisor" ? { query: { bool: { filter: { term: { "networkId.keyword": user.structureId } } } } } : { query: { match_all: {} } });
-  const getExportQuery = () => ({ ...getDefaultQuery(), size: 10000 });
+  const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
   return (
     <div>
       <ReactiveBase url={`${apiURL}/es`} app="structure" headers={{ Authorization: `JWT ${api.getToken()}` }}>

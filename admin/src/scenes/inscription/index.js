@@ -14,7 +14,7 @@ import SelectStatus from "../../components/selectStatus";
 import api from "../../services/api";
 import { apiURL, appURL, environment } from "../../config";
 import Panel from "./panel";
-import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS, getDepartmentNumber, isInRuralArea, formatDateFR, formatLongDateFR } from "../../utils";
+import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS, getDepartmentNumber, isInRuralArea, formatDateFR, formatLongDateFR, ES_NO_LIMIT } from "../../utils";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
 const FILTERS = ["SEARCH", "STATUS", "REGION", "DEPARTMENT", "SCHOOL"];
@@ -23,7 +23,7 @@ import { Filter, FilterRow, ResultTable, Table, TopResultStats, BottomResultStat
 export default () => {
   const [young, setYoung] = useState(null);
   const getDefaultQuery = () => ({ query: { bool: { filter: { term: { "phase.keyword": "INSCRIPTION" } } } } });
-  const getExportQuery = () => ({ ...getDefaultQuery(), size: 10000 });
+  const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
   return (
     <div>

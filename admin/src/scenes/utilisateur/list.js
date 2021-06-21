@@ -7,7 +7,7 @@ import { useHistory } from "react-router-dom";
 import { Link } from "react-router-dom";
 
 import { setUser } from "../../redux/auth/actions";
-import { translate, getFilterLabel, formatLongDateFR, formatStringLongDate } from "../../utils";
+import { translate, getFilterLabel, formatLongDateFR, formatStringLongDate, ES_NO_LIMIT } from "../../utils";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
@@ -29,7 +29,7 @@ export default () => {
     if (user.role === "supervisor") return { query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } } };
     else return { query: { match_all: {} } };
   };
-  const getExportQuery = () => ({ ...getDefaultQuery(), size: 10000 });
+  const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
   useEffect(() => {
     (async () => {
       const { data, ok } = await api.get(`/structure/all`);
