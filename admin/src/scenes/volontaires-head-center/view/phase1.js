@@ -8,6 +8,7 @@ import { translate, YOUNG_PHASE, YOUNG_STATUS_COLORS, confirmMessageChangePhase1
 import WrapperPhase1 from "./wrapper";
 import api from "../../../services/api";
 import { Box, BoxTitle } from "../../../components/box";
+import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
 import { toastr } from "react-redux-toastr";
 import Badge from "../../../components/Badge";
 import Select from "../components/Select";
@@ -163,6 +164,11 @@ export default (props) => {
             </Col>
           </Row>
         </Box>
+        {young.statusPhase1 === "DONE" && young.cohesionCenterName ? (
+          <DownloadAttestationButton young={young} uri="1">
+            Télécharger l'attestation de réalisation de la phase 1
+          </DownloadAttestationButton>
+        ) : null}
       </WrapperPhase1>
     </div>
   );
