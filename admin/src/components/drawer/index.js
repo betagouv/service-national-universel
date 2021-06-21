@@ -155,15 +155,17 @@ const Sidebar = styled.div`
     height: 100vh;
     width: 100vw;
     z-index: 11;
+    position: fixed;
   }
   background-color: #362f78;
-  width: 250px;
-  position: fixed;
+  width: 15%;
+  position: sticky;
   top: 0;
   bottom: 0;
   left: 0;
-  z-index: 90;
-  min-height: 100vh;
+  z-index: 1;
+  height: 100vh;
+  min-width: 250px;
   overflow-y: auto;
   transition: 0.2s;
   ul {
