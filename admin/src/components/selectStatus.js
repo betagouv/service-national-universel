@@ -40,9 +40,9 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
       const { data } = await api.get(`/referent/young/${id}`);
       setYoung(data);
     })();
-  }, [hit]);
+  }, [hit._id]);
 
-  if (!young) return <div />;
+  if (!young) return <i style={{ color: "#382F79" }}>Chargement...</i>;
 
   const handleClickStatus = async (status) => {
     // Gabrielle says: (https://trello.com/c/JBS3Jn8I/576-inscription-impact-fin-instruction-dossiers-au-6-mai)

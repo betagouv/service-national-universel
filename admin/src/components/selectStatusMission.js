@@ -13,7 +13,7 @@ import Chevron from "./Chevron";
 export default ({ hit, options = [] }) => {
   const [waitingCorrectionModal, setWaitingCorrectionModal] = useState(false);
   const [refusedModal, setRefusedModal] = useState(false);
-  const [mission, setMission] = useState(hit);
+  const [mission, setMission] = useState(null);
   const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
@@ -23,9 +23,9 @@ export default ({ hit, options = [] }) => {
       const { data } = await api.get(`/mission/${id}`);
       setMission(data);
     })();
-  }, [hit]);
+  }, [hit._id]);
 
-  if (!mission) return <div />;
+  if (!mission) return <i style={{ color: "#382F79" }}>Chargement...</i>;
 
   if (user.role === "responsible" || user.role === "supervisor")
     options.push(MISSION_STATUS.WAITING_VALIDATION, MISSION_STATUS.DRAFT, MISSION_STATUS.CANCEL, MISSION_STATUS.ARCHIVED);

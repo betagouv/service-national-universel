@@ -22,9 +22,9 @@ export default ({ hit, options = [], callback }) => {
       const { data } = await api.get(`/application/${id}`);
       setApplication(data);
     })();
-  }, [hit]);
+  }, [hit._id]);
 
-  if (!application) return <div>Chargement</div>;
+  if (!application) return <i style={{ color: "#382F79" }}>Chargement...</i>;
 
   options = [APPLICATION_STATUS.IN_PROGRESS, APPLICATION_STATUS.DONE, APPLICATION_STATUS.ABANDON];
   if (application.status === APPLICATION_STATUS.WAITING_VALIDATION) options = [APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.REFUSED, APPLICATION_STATUS.CANCEL];
