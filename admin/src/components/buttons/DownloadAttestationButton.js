@@ -9,7 +9,7 @@ export default ({ young, children, disabled, uri, ...rest }) => {
     setLoading(true);
     await downloadPDF({
       url: `/young/${young._id}/certificate/${a}`,
-      fileName = `${young.firstName} ${young.lastName} - attestation ${a}.pdf`,
+      fileName: `${young.firstName} ${young.lastName} - attestation ${a}.pdf`,
     });
     setLoading(false);
   };
