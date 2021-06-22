@@ -1,6 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const config = require("../../config");
+const { formatDateFR } = require("snu-lib");
 
 const getBaseUrl = () => {
   if (config.ENVIRONMENT === "staging") return "https://app-a29a266c-556d-4f95-bc0e-9583a27f3f85.cleverapps.io";
@@ -138,12 +139,6 @@ const addSignature = (str, context, field) => {
     </div>
   `;
   return str.replace(regex, content);
-};
-
-const formatDateFR = (d) => {
-  if (!d) return "-";
-  const date = new Date(d);
-  return date.toLocaleDateString("fr-FR");
 };
 
 const replaceDate = (str, context, field) => {
