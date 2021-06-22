@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import api from "../../services/api";
+import downloadPDF from "../../utils/download-pdf";
 import LoadingButton from "./LoadingButton";
 
 export default ({ young, children, disabled, uri }) => {
@@ -7,19 +8,10 @@ export default ({ young, children, disabled, uri }) => {
 
   const viewContract = async (contractId) => {
     setLoading(true);
-    const file = await api.openpdf(`/contract/${contractId}/download`);
-    const fileName = `${young.firstName} ${young.lastName} - contrat ${contractId}.pdf`;
-    if (window.navigator.msSaveOrOpenBlob) {
-      //IE11 & Edge
-      window.navigator.msSaveOrOpenBlob(file, fileName);
-    } else {
-      //Other browsers
-      const a = document.createElement("a");
-      document.body.appendChild(a);
-      a.href = URL.createObjectURL(file);
-      a.download = fileName;
-      a.click();
-    }
+    await downloadPDF({
+      url = `/contract/${contractId}/download`,
+      fileName = `${young.firstName} ${young.lastName} - contrat ${contractId}.pdf`,
+    });
     setLoading(false);
   };
   return (
