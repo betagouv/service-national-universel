@@ -70,10 +70,9 @@ export default () => {
             <img src={require("../../assets/logo-diagoriente-blue.png")} />
             <h1>Identifiez vos compétences et explorez vos intérêts</h1>
             <p>Complètez vos expériences, qu'elles soient professionnelles ou personnelles, puis évaluez vos compétences.</p>
-            <VioletButton>
-              <a href={diagorienteUrl} target="_blank">
-                Accéder à Diagoriente
-              </a>
+
+            <VioletButton href={diagorienteUrl} target="_blank">
+              Accéder à Diagoriente
             </VioletButton>
           </div>
           <div className="diagorente" />
@@ -279,7 +278,7 @@ const Separator = styled.hr`
   background-color: #e5e7eb;
 `;
 
-const VioletButton = styled.button`
+const VioletButton = styled.a`
   display: inline-block;
   background-color: #5145cd;
   padding: 10px 40px;
@@ -293,12 +292,10 @@ const VioletButton = styled.button`
   box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
   :hover {
     opacity: 0.9;
+    color: #fff;
   }
   :disabled {
     background-color: #aaa;
     cursor: not-allowed;
-  }
-  a {
-    color: #fff;
   }
 `;
