@@ -1,9 +1,6 @@
-import React, { useEffect, useState } from "react";
-import { Spinner } from "reactstrap";
-import styled from "styled-components";
-import api from "../../services/api";
-import { environment } from "../../config";
+import React, { useState } from "react";
 import LoadingButton from "./LoadingButton";
+import downloadPDF from "../../utils/download-pdf";
 
 export default ({ young, children, disabled, uri, ...rest }) => {
   const [loading, setLoading] = useState();
@@ -11,7 +8,7 @@ export default ({ young, children, disabled, uri, ...rest }) => {
   const viewAttestation = async (a) => {
     setLoading(true);
     await downloadPDF({
-      url = `/young/${young._id}/certificate/${a}`,
+      url: `/young/${young._id}/certificate/${a}`,
       fileName = `${young.firstName} ${young.lastName} - attestation ${a}.pdf`,
     });
     setLoading(false);

@@ -1,9 +1,6 @@
 import React, { useState } from "react";
 import { Spinner } from "reactstrap";
-import { toastr } from "react-redux-toastr";
-import * as Sentry from "@sentry/browser";
-import { download } from "snu-lib";
-import api from "../../services/api";
+import downloadPDF from "../../utils/download-pdf";
 
 export default ({ young, children, disabled, uri, ...rest }) => {
   const [loading, setLoading] = useState();
