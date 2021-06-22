@@ -164,7 +164,7 @@ const sendAutoCancelMeetingPoint = async (young) => {
     },
     "Sélection de votre point de rassemblement - Action à faire",
     fs
-      .readFileSync(path.resolve(__dirname, "./templates/autoCancelMeetingPoint.html"))
+      .readFileSync(path.resolve(__dirname, "../templates/autoCancelMeetingPoint.html"))
       .toString()
       .replace(/{{firstName}}/, young.firstName)
       .replace(/{{lastName}}/, young.lastName)
