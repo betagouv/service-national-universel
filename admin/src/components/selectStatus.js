@@ -16,7 +16,7 @@ import Chevron from "./Chevron";
 
 export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status", phase = YOUNG_PHASE.INSCRIPTION, disabled, callback = () => {} }) => {
   const [modal, setModal] = useState(null);
-  const [young, setYoung] = useState(null);
+  const [young, setYoung] = useState(hit);
   const user = useSelector((state) => state.Auth.user);
 
   const getInscriptions = async (department) => {
@@ -32,15 +32,6 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
     const nbYoungs = await getInscriptions(departement);
     return max > 0 && { ...nbYoungs, max };
   };
-
-  useEffect(() => {
-    (async () => {
-      const id = hit && hit._id;
-      if (!id) return setYoung(null);
-      const { data } = await api.get(`/referent/young/${id}`);
-      setYoung(data);
-    })();
-  }, [hit._id]);
 
   if (!young) return <i style={{ color: "#382F79" }}>Chargement...</i>;
 

@@ -4,7 +4,6 @@ import { useSelector } from "react-redux";
 import styled from "styled-components";
 
 import { apiURL } from "../../../config";
-import SelectStatus from "../../../components/selectStatus";
 import api from "../../../services/api";
 import CenterView from "./wrapper";
 import Panel from "../../volontaires/panel";
