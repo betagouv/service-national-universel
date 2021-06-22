@@ -7,7 +7,6 @@ import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
-import SelectStatusMission from "../../../components/selectStatusMission";
 import { translate, enableAssignCenter } from "../../../utils";
 import TabList from "../../../components/views/TabList";
 import Tab from "../../../components/views/Tab";
