@@ -269,7 +269,7 @@ export default () => {
 };
 
 const Hit = ({ hit, onClick, selected, callback }) => {
-  const [value, setValue] = useState(hit);
+  const [value, setValue] = useState(null);
 
   const updateYoung = async (v) => {
     const { data, ok, code } = await api.put(`/referent/young/${value._id}`, v);
@@ -277,6 +277,12 @@ const Hit = ({ hit, onClick, selected, callback }) => {
     setValue(data);
     callback(data);
   };
+
+  useEffect(() => {
+    setValue(hit);
+  }, [hit._id]);
+
+  if (!value) return <></>;
 
   return (
     <tr style={{ backgroundColor: selected && "#e6ebfa" }}>
