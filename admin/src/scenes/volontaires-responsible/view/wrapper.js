@@ -1,4 +1,5 @@
 import React from "react";
+import { useSelector } from "react-redux";
 import styled from "styled-components";
 import api from "../../../services/api";
 import { useHistory } from "react-router-dom";
@@ -12,6 +13,7 @@ import Title from "../../../components/views/Title";
 
 export default ({ children, young, tab }) => {
   const history = useHistory();
+  const user = useSelector((state) => state.Auth.user);
 
   const handleDelete = async () => {
     if (!confirm("Êtes-vous sûr(e) de vouloir supprimer ce volontaire ?")) return;
@@ -34,13 +36,18 @@ export default ({ children, young, tab }) => {
           <Title>
             {young.firstName} {young.lastName} <Badge text={`Cohorte ${young.cohort}`} />
           </Title>
-          {tab !== "contract" ? (
-            <TabList>
+          <TabList>
+            {tab !== "contract" ? (
               <Tab isActive={tab === "details"} onClick={() => history.push(`/volontaire/${young._id}`)}>
                 Détails
               </Tab>
-            </TabList>
-          ) : null}
+            ) : null}
+            {user?.role === "head_center" ? (
+              <Tab isActive={tab === "phase1"} onClick={() => history.push(`/volontaire/${young._id}/phase1`)}>
+                Phase 1
+              </Tab>
+            ) : null}
+          </TabList>
         </div>
       </Header>
       {children}

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Switch, Route } from "react-router-dom";
 
 import api from "../../../services/api";
-import Details from "./details";
+import Details from "../../volontaires-responsible/view/details";
 import Phase1 from "./phase1";
 
 export default ({ ...props }) => {
