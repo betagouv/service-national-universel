@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import { Row, Col } from "reactstrap";
 import Autosuggest from "react-autosuggest";
@@ -17,6 +17,8 @@ export default ({ keys, values, handleChange, errors, touched, departAndRegionVi
 
   const [departmentListFiltered, setDepartmentListFiltered] = useState(departmentList);
   const [regionListFiltered, setRegionListFiltered] = useState(regionList);
+
+  const searchTimeOut = useRef(null);
 
   useEffect(() => {
     if (document.getElementsByTagName) {
@@ -74,16 +76,19 @@ export default ({ keys, values, handleChange, errors, touched, departAndRegionVi
   const getSuggestionValue = (suggestion) => (suggestion !== "noresult" ? suggestion.properties.label : "");
 
   const getSuggestions = async (item) => {
+    clearTimeout(searchTimeOut.current);
     const text = item;
-    const response = await fetch(`https://api-adresse.data.gouv.fr/search/?autocomplete=1&q=${text}`, {
-      mode: "cors",
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    });
-    const res = await response.json();
-    const arr = res.features.filter((e) => e.properties.type !== "municipality");
-    arr.push("noresult");
-    setSuggestions(arr);
+    searchTimeOut.current = setTimeout(async () => {
+      const response = await fetch(`https://api-adresse.data.gouv.fr/search/?autocomplete=1&q=${text}`, {
+        mode: "cors",
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      const res = await response.json();
+      const arr = res.features.filter((e) => e.properties.type !== "municipality");
+      arr.push("noresult");
+      setSuggestions(arr);
+    }, 300);
   };
 
   // keys is not defined at first load ??
