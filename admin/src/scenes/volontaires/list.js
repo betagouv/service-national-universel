@@ -244,7 +244,7 @@ export default ({ setYoung }) => {
                   title=""
                   URLParams={true}
                   showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Fiches sanitaires")}
+                  renderLabel={(items) => getFilterLabel(items, "Statut phase 1")}
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
@@ -272,7 +272,7 @@ export default ({ setYoung }) => {
                   title=""
                   URLParams={true}
                   showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Statut phase 1")}
+                  renderLabel={(items) => getFilterLabel(items, "Fiches sanitaires")}
                 />
 
                 <MultiDropdownList

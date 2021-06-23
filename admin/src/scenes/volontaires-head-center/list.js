@@ -225,7 +225,7 @@ export default () => {
                   title=""
                   URLParams={true}
                   showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Participations au séjour de cohésion")}
+                  renderLabel={(items) => getFilterLabel(items, "Fiches sanitaires")}
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
@@ -239,7 +239,7 @@ export default () => {
                   title=""
                   URLParams={true}
                   showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Statut phase 1")}
+                  renderLabel={(items) => getFilterLabel(items, "Participations au séjour de cohésion")}
                 />
               </FilterRow>
             </Filter>
