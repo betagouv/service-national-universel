@@ -260,7 +260,6 @@ export default ({ setYoung }) => {
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Participations au séjour de cohésion")}
                 />
-
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
