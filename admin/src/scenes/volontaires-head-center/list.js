@@ -25,7 +25,21 @@ import ToggleSwitch from "../../components/ToogleSwitch";
 import Select from "./components/Select";
 import { toastr } from "react-redux-toastr";
 
-const FILTERS = ["SEARCH", "STATUS", "PHASE", "COHORT", "MISSIONS", "TUTOR", "STATUS_PHASE_1", "DEPARTMENT", "REGION"];
+const FILTERS = [
+  "SEARCH",
+  "STATUS",
+  "COHORT",
+  "DEPARTMENT",
+  "REGION",
+  "STATUS_PHASE_1",
+  "STATUS_PHASE_2",
+  "STATUS_PHASE_3",
+  "STATUS_APPLICATION",
+  "LOCATION",
+  "CONTRACT_STATUS",
+  "MEDICAL_FILE_RECEIVED",
+  "COHESION_PRESENCE",
+];
 
 export default () => {
   const user = useSelector((state) => state.Auth.user);
@@ -191,6 +205,34 @@ export default () => {
                   componentId="STATUS_PHASE_1"
                   dataField="statusPhase1.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "STATUS_PHASE_1") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Statut phase 1")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  componentId="MEDICAL_FILE_RECEIVED"
+                  dataField="cohesionStayMedicalFileReceived.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "MEDICAL_FILE_RECEIVED") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Participations au séjour de cohésion")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  componentId="COHESION_PRESENCE"
+                  dataField="cohesionStayPresence.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "COHESION_PRESENCE") }}
                   renderItem={(e, count) => {
                     return `${translate(e)} (${count})`;
                   }}
