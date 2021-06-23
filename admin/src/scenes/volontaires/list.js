@@ -249,9 +249,9 @@ export default ({ setYoung }) => {
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
-                  componentId="MEDICAL_FILE_RECEIVED"
-                  dataField="cohesionStayMedicalFileReceived.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "MEDICAL_FILE_RECEIVED") }}
+                  componentId="COHESION_PRESENCE"
+                  dataField="cohesionStayPresence.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "COHESION_PRESENCE") }}
                   renderItem={(e, count) => {
                     return `${translate(e)} (${count})`;
                   }}
@@ -260,12 +260,13 @@ export default ({ setYoung }) => {
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Participations au séjour de cohésion")}
                 />
+
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
-                  componentId="COHESION_PRESENCE"
-                  dataField="cohesionStayPresence.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "COHESION_PRESENCE") }}
+                  componentId="MEDICAL_FILE_RECEIVED"
+                  dataField="cohesionStayMedicalFileReceived.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "MEDICAL_FILE_RECEIVED") }}
                   renderItem={(e, count) => {
                     return `${translate(e)} (${count})`;
                   }}

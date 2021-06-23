@@ -216,20 +216,6 @@ export default () => {
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
-                  componentId="MEDICAL_FILE_RECEIVED"
-                  dataField="cohesionStayMedicalFileReceived.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "MEDICAL_FILE_RECEIVED") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Fiches sanitaires")}
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
                   componentId="COHESION_PRESENCE"
                   dataField="cohesionStayPresence.keyword"
                   react={{ and: FILTERS.filter((e) => e !== "COHESION_PRESENCE") }}
@@ -240,6 +226,20 @@ export default () => {
                   URLParams={true}
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Participations au séjour de cohésion")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  componentId="MEDICAL_FILE_RECEIVED"
+                  dataField="cohesionStayMedicalFileReceived.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "MEDICAL_FILE_RECEIVED") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Fiches sanitaires")}
                 />
               </FilterRow>
             </Filter>
