@@ -19,6 +19,15 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
   const [young, setYoung] = useState(hit);
   const user = useSelector((state) => state.Auth.user);
 
+  useEffect(() => {
+    (async () => {
+      const id = hit && hit._id;
+      if (!id) return setYoung(null);
+      const { data } = await api.get(`/referent/young/${id}`);
+      setYoung(data);
+    })();
+  }, [hit._id]);
+
   const getInscriptions = async (department) => {
     const { data, ok, code } = await api.post(`/inscription-goal/current`, { department });
     return data;

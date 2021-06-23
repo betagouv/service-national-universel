@@ -16,6 +16,15 @@ export default ({ hit, options = [] }) => {
   const [mission, setMission] = useState(hit);
   const user = useSelector((state) => state.Auth.user);
 
+  useEffect(() => {
+    (async () => {
+      const id = hit && hit._id;
+      if (!id) return setMission(null);
+      const { data } = await api.get(`/mission/${id}`);
+      setMission(data);
+    })();
+  }, [hit._id]);
+
   if (!mission) return <i style={{ color: "#382F79" }}>Chargement...</i>;
 
   if (user.role === "responsible" || user.role === "supervisor")
