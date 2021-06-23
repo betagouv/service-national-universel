@@ -6,6 +6,7 @@ import { Field } from "formik";
 import { department2region, departmentLookUp, departmentList, regionList, region2department } from "../utils";
 import ErrorMessage, { requiredMessage } from "./errorMessage";
 import validator from "validator";
+import { toastr } from "react-redux-toastr";
 
 const NORESULTMESSAGE = "Rentrer manuellement l'adresse";
 
@@ -60,7 +61,9 @@ export default ({ keys, values, handleChange, errors, touched }) => {
       const res = await response.json();
       if (res.features.length > 0) {
         handleChange({ target: { name: keys.location, value: { lon: res.features[0].geometry.coordinates[0], lat: res.features[0].geometry.coordinates[1] } } });
+        return;
       }
+      toastr.error("Erreur lors de la recherche", "Ville introuvable");
     }
   };
 
