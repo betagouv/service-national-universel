@@ -155,7 +155,7 @@ const CohesionStayMedicalFileReceived = ({ data, getLink }) => {
       <Subtitle>Fiches sanitaires</Subtitle>
       <Row>
         <Col md={6} xl={3} k="cohesionStayMedicalFileReceived_true">
-          <Link to={getLink(`/volontaire`)}>
+          <Link to={getLink(`/volontaire?MEDICAL_FILE_RECEIVED=%5B"TRUE"%5D`)}>
             <Card borderBottomColor="#6BC663">
               <CardTitle>Receptionnée</CardTitle>
               <CardValueWrapper>
@@ -169,7 +169,7 @@ const CohesionStayMedicalFileReceived = ({ data, getLink }) => {
           </Link>
         </Col>
         <Col md={6} xl={3} k="cohesionStayMedicalFileReceived_false">
-          <Link to={getLink(`/volontaire`)}>
+          <Link to={getLink(`/volontaire?MEDICAL_FILE_RECEIVED=%5B"FALSE"%5D`)}>
             <Card borderBottomColor="#FEB951">
               <CardTitle>Non-receptionnée</CardTitle>
               <CardValueWrapper>
@@ -194,7 +194,7 @@ const CohesionStayPresence = ({ data, getLink }) => {
       <Subtitle>Participations au séjour de cohésion</Subtitle>
       <Row>
         <Col md={6} xl={3} k="cohesionStayPresence_true">
-          <Link to={getLink(`/volontaire`)}>
+          <Link to={getLink(`/volontaire?COHESION_PRESENCE=%5B"TRUE"%5D`)}>
             <Card borderBottomColor="#6BC663">
               <CardTitle>Présent au séjour de cohésion</CardTitle>
               <CardValueWrapper>
@@ -208,7 +208,7 @@ const CohesionStayPresence = ({ data, getLink }) => {
           </Link>
         </Col>
         <Col md={6} xl={3} k="cohesionStayPresence_false">
-          <Link to={getLink(`/volontaire`)}>
+          <Link to={getLink(`/volontaire?COHESION_PRESENCE=%5B"FALSE"%5D`)}>
             <Card borderBottomColor="#EF4036">
               <CardTitle>Absent au séjour de cohésion</CardTitle>
               <CardValueWrapper>
