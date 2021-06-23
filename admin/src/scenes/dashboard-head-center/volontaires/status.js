@@ -100,7 +100,7 @@ const Phase1 = ({ data, getLink }) => {
           </Link>
         </Col>
         <Col md={6} xl={2}>
-          <Link to={getLink('/volontaire?STATUS_PHASE_1=%5B"AFFECTED"%5D')}>
+          <Link to={getLink('/volontaire?STATUS_PHASE_1=%5B"DONE"%5D')}>
             <Card borderBottomColor={YOUNG_STATUS_COLORS.DONE} style={{ minHeight: "180px" }}>
               <CardTitle>Réalisée</CardTitle>
               <CardValueWrapper>
@@ -111,7 +111,7 @@ const Phase1 = ({ data, getLink }) => {
           </Link>
         </Col>
         <Col md={6} xl={2}>
-          <Link to={getLink('/volontaire?STATUS_PHASE_1=%5B"AFFECTED"%5D')}>
+          <Link to={getLink('/volontaire?STATUS_PHASE_1=%5B"NOT_DONE"%5D')}>
             <Card borderBottomColor={YOUNG_STATUS_COLORS.NOT_DONE} style={{ minHeight: "180px" }}>
               <CardTitle>Non réalisée</CardTitle>
               <CardValueWrapper>
