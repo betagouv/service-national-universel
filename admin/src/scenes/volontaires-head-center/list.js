@@ -66,97 +66,102 @@ export default () => {
               <div>
                 <Title>Volontaires</Title>
               </div>
-              <ExportComponent
-                defaultQuery={getExportQuery}
-                title="Exporter les volontaires"
-                collection="volontaire"
-                react={{ and: FILTERS }}
-                transform={(data) => {
-                  let meetingPoint = {};
-                  if (data.meetingPointId && meetingPoints) {
-                    meetingPoint = meetingPoints.find((mp) => mp._id === data.meetingPointId);
-                    if (!meetingPoint) meetingPoint = {};
-                  }
-                  return {
-                    _id: data._id,
-                    Cohorte: data.cohort,
-                    Prénom: data.firstName,
-                    Nom: data.lastName,
-                    "Date de naissance": formatDateFR(data.birthdateAt),
-                    Sexe: data.gender,
-                    Email: data.email,
-                    Téléphone: data.phone,
-                    "Adresse postale": data.address,
-                    "Code postal": data.zip,
-                    Ville: data.city,
-                    Département: data.department,
-                    Région: data.region,
-                    Situation: data.situation,
-                    Niveau: data.grade,
-                    "Type d'établissement": data.schoolType,
-                    "Nom de l'établissement": data.schoolName,
-                    "Code postal de l'établissement": data.schoolZip,
-                    "Ville de l'établissement": data.schoolCity,
-                    "Département de l'établissement": data.schoolDepartment,
-                    "Quartier Prioritaire de la ville": data.qpv,
-                    "Zone Rurale": isInRuralArea(data),
-                    Handicap: data.handicap,
-                    "Bénéficiaire d'un PPS": data.ppsBeneficiary,
-                    "Bénéficiaire d'un PAI": data.paiBeneficiary,
-                    "Structure médico-sociale": data.medicosocialStructure,
-                    "Nom de la structure médico-sociale": data.medicosocialStructureName,
-                    "Adresse de la structure médico-sociale": data.medicosocialStructureAddress,
-                    "Code postal de la structure médico-sociale": data.medicosocialStructureZip,
-                    "Ville de la structure médico-sociale": data.medicosocialStructureCity,
-                    "Aménagement spécifique": data.specificAmenagment,
-                    "Nature de l'aménagement spécifique": data.specificAmenagmentType,
-                    "Activité de haut-niveau": data.highSkilledActivity,
-                    "Nature de l'activité de haut-niveau": data.highSkilledActivityType,
-                    "Document activité de haut-niveau ": data.highSkilledActivityProofFiles,
-                    "Consentement des représentants légaux": data.parentConsentment,
-                    "Droit à l'image": translate(data.imageRight),
-                    "Autotest PCR": translate(data.autoTestPCR),
-                    "fiche sanitaire réceptionnée": translate(data.cohesionStayMedicalFileReceived || "false"),
-                    "Statut représentant légal 1": data.parent1Status,
-                    "Prénom représentant légal 1": data.parent1FirstName,
-                    "Nom représentant légal 1": data.parent1LastName,
-                    "Email représentant légal 1": data.parent1Email,
-                    "Téléphone représentant légal 1": data.parent1Phone,
-                    "Adresse représentant légal 1": data.parent1Address,
-                    "Code postal représentant légal 1": data.parent1Zip,
-                    "Ville représentant légal 1": data.parent1City,
-                    "Département représentant légal 1": data.parent1Department,
-                    "Région représentant légal 1": data.parent1Region,
-                    "Statut représentant légal 2": data.parent2Status,
-                    "Prénom représentant légal 2": data.parent2FirstName,
-                    "Nom représentant légal 2": data.parent2LastName,
-                    "Email représentant légal 2": data.parent2Email,
-                    "Téléphone représentant légal 2": data.parent2Phone,
-                    "Adresse représentant légal 2": data.parent2Address,
-                    "Code postal représentant légal 2": data.parent2Zip,
-                    "Ville représentant légal 2": data.parent2City,
-                    "Département représentant légal 2": data.parent2Department,
-                    "Région représentant légal 2": data.parent2Region,
-                    Motivation: data.motivations,
-                    Phase: data.phase,
-                    "Créé lé": formatLongDateFR(data.createdAt),
-                    "Mis à jour le": formatLongDateFR(data.updatedAt),
-                    "Dernière connexion le": formatLongDateFR(data.lastLoginAt),
-                    Statut: data.status,
-                    "Statut Phase 1": data.statusPhase1,
-                    "Statut Phase 2": data.statusPhase2,
-                    "Statut Phase 3": data.statusPhase3,
-                    "Dernier statut le": formatLongDateFR(data.lastStatusAt),
-                    "Message de desistement": data.withdrawnMessage,
-                    "Confirmation point de rassemblement": data.meetingPointId || data.deplacementPhase1Autonomous === "true" ? "Oui" : "Non",
-                    "se rend au centre par ses propres moyens": data.deplacementPhase1Autonomous,
-                    "Bus n˚": meetingPoint?.busExcelId,
-                    "Adresse point de rassemblement": meetingPoint?.departureAddress,
-                    "Date aller": meetingPoint?.departureAtString,
-                    "Date retour": meetingPoint?.returnAtString,
-                  };
-                }}
-              />
+              <div style={{ display: "flex" }}>
+                <ExportComponent
+                  defaultQuery={getExportQuery}
+                  title="Exporter les volontaires"
+                  collection="volontaire"
+                  react={{ and: FILTERS }}
+                  transform={(data) => {
+                    let meetingPoint = {};
+                    if (data.meetingPointId && meetingPoints) {
+                      meetingPoint = meetingPoints.find((mp) => mp._id === data.meetingPointId);
+                      if (!meetingPoint) meetingPoint = {};
+                    }
+                    return {
+                      _id: data._id,
+                      Cohorte: data.cohort,
+                      Prénom: data.firstName,
+                      Nom: data.lastName,
+                      "Date de naissance": formatDateFR(data.birthdateAt),
+                      Sexe: data.gender,
+                      Email: data.email,
+                      Téléphone: data.phone,
+                      "Adresse postale": data.address,
+                      "Code postal": data.zip,
+                      Ville: data.city,
+                      Département: data.department,
+                      Région: data.region,
+                      Situation: data.situation,
+                      Niveau: data.grade,
+                      "Type d'établissement": data.schoolType,
+                      "Nom de l'établissement": data.schoolName,
+                      "Code postal de l'établissement": data.schoolZip,
+                      "Ville de l'établissement": data.schoolCity,
+                      "Département de l'établissement": data.schoolDepartment,
+                      "Quartier Prioritaire de la ville": data.qpv,
+                      "Zone Rurale": isInRuralArea(data),
+                      Handicap: data.handicap,
+                      "Bénéficiaire d'un PPS": data.ppsBeneficiary,
+                      "Bénéficiaire d'un PAI": data.paiBeneficiary,
+                      "Structure médico-sociale": data.medicosocialStructure,
+                      "Nom de la structure médico-sociale": data.medicosocialStructureName,
+                      "Adresse de la structure médico-sociale": data.medicosocialStructureAddress,
+                      "Code postal de la structure médico-sociale": data.medicosocialStructureZip,
+                      "Ville de la structure médico-sociale": data.medicosocialStructureCity,
+                      "Aménagement spécifique": data.specificAmenagment,
+                      "Nature de l'aménagement spécifique": data.specificAmenagmentType,
+                      "Activité de haut-niveau": data.highSkilledActivity,
+                      "Nature de l'activité de haut-niveau": data.highSkilledActivityType,
+                      "Document activité de haut-niveau ": data.highSkilledActivityProofFiles,
+                      "Consentement des représentants légaux": data.parentConsentment,
+                      "Droit à l'image": translate(data.imageRight),
+                      "Autotest PCR": translate(data.autoTestPCR),
+                      "fiche sanitaire réceptionnée": translate(data.cohesionStayMedicalFileReceived || "false"),
+                      "Statut représentant légal 1": data.parent1Status,
+                      "Prénom représentant légal 1": data.parent1FirstName,
+                      "Nom représentant légal 1": data.parent1LastName,
+                      "Email représentant légal 1": data.parent1Email,
+                      "Téléphone représentant légal 1": data.parent1Phone,
+                      "Adresse représentant légal 1": data.parent1Address,
+                      "Code postal représentant légal 1": data.parent1Zip,
+                      "Ville représentant légal 1": data.parent1City,
+                      "Département représentant légal 1": data.parent1Department,
+                      "Région représentant légal 1": data.parent1Region,
+                      "Statut représentant légal 2": data.parent2Status,
+                      "Prénom représentant légal 2": data.parent2FirstName,
+                      "Nom représentant légal 2": data.parent2LastName,
+                      "Email représentant légal 2": data.parent2Email,
+                      "Téléphone représentant légal 2": data.parent2Phone,
+                      "Adresse représentant légal 2": data.parent2Address,
+                      "Code postal représentant légal 2": data.parent2Zip,
+                      "Ville représentant légal 2": data.parent2City,
+                      "Département représentant légal 2": data.parent2Department,
+                      "Région représentant légal 2": data.parent2Region,
+                      Motivation: data.motivations,
+                      Phase: data.phase,
+                      "Créé lé": formatLongDateFR(data.createdAt),
+                      "Mis à jour le": formatLongDateFR(data.updatedAt),
+                      "Dernière connexion le": formatLongDateFR(data.lastLoginAt),
+                      Statut: data.status,
+                      "Statut Phase 1": data.statusPhase1,
+                      "Statut Phase 2": data.statusPhase2,
+                      "Statut Phase 3": data.statusPhase3,
+                      "Dernier statut le": formatLongDateFR(data.lastStatusAt),
+                      "Message de desistement": data.withdrawnMessage,
+                      "Confirmation point de rassemblement": data.meetingPointId || data.deplacementPhase1Autonomous === "true" ? "Oui" : "Non",
+                      "se rend au centre par ses propres moyens": data.deplacementPhase1Autonomous,
+                      "Bus n˚": meetingPoint?.busExcelId,
+                      "Adresse point de rassemblement": meetingPoint?.departureAddress,
+                      "Date aller": meetingPoint?.departureAtString,
+                      "Date retour": meetingPoint?.returnAtString,
+                    };
+                  }}
+                />
+                <DownloadAllAttestation cohesionCenterId={center._id}>
+                  <div>Exporter les attestations</div>
+                </DownloadAllAttestation>
+              </div>
             </Header>
             <Filter>
               <DataSearch
