@@ -51,7 +51,10 @@ export default () => {
       setMeetingPoints(data);
     })();
   }, []);
-  const getDefaultQuery = () => ({ query: { bool: { filter: { term: { "cohesionCenterId.keyword": user.cohesionCenterId } } } }, sort: [{ "lastName.keyword": "asc" }] });
+  const getDefaultQuery = () => ({
+    query: { bool: { filter: [{ term: { "cohesionCenterId.keyword": user.cohesionCenterId } }, { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } }] } },
+    sort: [{ "lastName.keyword": "asc" }],
+  });
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
   return (
