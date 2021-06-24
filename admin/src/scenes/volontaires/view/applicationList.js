@@ -45,7 +45,7 @@ export default ({ young, onChangeApplication }) => {
         <tbody>
           <>
             {applications.map((hit, i) => (
-              <Hit key={i} young={young} hit={hit} index={i} onChangeApplication={onChangeApplication} />
+              <Hit key={hit._id} young={young} hit={hit} index={i} onChangeApplication={onChangeApplication} />
             ))}
           </>
         </tbody>

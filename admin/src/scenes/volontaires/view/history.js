@@ -46,8 +46,8 @@ export default ({ young }) => {
                   </tr>
                 </thead>
                 <tbody>
-                  {data.map((hit, i) => (
-                    <Hit key={i} hit={hit} />
+                  {data.map((hit) => (
+                    <Hit key={hit._id} hit={hit} />
                   ))}
                 </tbody>
               </Table>

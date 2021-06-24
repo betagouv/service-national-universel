@@ -85,7 +85,7 @@ export default ({ center, updateCenter }) => {
                     <tbody>
                       {list.map((hit, i) => (
                         <Hit
-                          key={i}
+                          key={hit._id}
                           index={i}
                           hit={hit}
                           onClick={() => handleClick(hit)}

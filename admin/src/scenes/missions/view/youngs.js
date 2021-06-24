@@ -37,8 +37,8 @@ export default ({ mission, applications }) => {
               </tr>
             </thead>
             <tbody>
-              {data.map((hit, i) => (
-                <Hit key={i} hit={hit} onClick={() => handleClick(hit)} selected={young?._id === hit._id} onChangeApplication={updateMission} />
+              {data.map((hit) => (
+                <Hit key={hit._id} hit={hit} onClick={() => handleClick(hit)} selected={young?._id === hit._id} onChangeApplication={updateMission} />
               ))}
             </tbody>
           </Table>
