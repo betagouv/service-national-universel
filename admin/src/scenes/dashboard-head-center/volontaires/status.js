@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import { YOUNG_STATUS_COLORS } from "../../../utils";
 
 import api from "../../../services/api";
-import { CardArrow, Card, CardTitle, CardValueWrapper, CardValue, CardPercentage, CardSection, Subtitle } from "../../../components/dashboard";
+import { CardArrow, Card, CardGrey, CardTitle, CardValueWrapper, CardValue, CardPercentage, CardSection, Subtitle } from "../../../components/dashboard";
 
 export default ({ filter }) => {
   const [statusPhase1, setStatusPhase1] = useState({});
@@ -41,9 +41,24 @@ export default ({ filter }) => {
       if (filter.department) queries[1].query.bool.filter.push({ term: { "department.keyword": filter.department } });
 
       const { responses } = await api.esQuery(queries);
-      console.log(responses[0].aggregations);
       setStatusPhase1(responses[0].aggregations.statusPhase1.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+      if (responses[0].aggregations.cohesionStayMedicalFileReceived.buckets.find((obj) => obj.key === "") !== undefined)
+        responses[0].aggregations.cohesionStayMedicalFileReceived.buckets.find((obj) => obj.key === "").doc_count =
+          responses[0].hits.total.value -
+          responses[0].aggregations.cohesionStayMedicalFileReceived.buckets
+            .filter((obj) => obj.key !== "")
+            .reduce(function (acc, c) {
+              return acc + c.doc_count;
+            }, 0);
       setCohesionStayMedicalFileReceived(responses[0].aggregations.cohesionStayMedicalFileReceived.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+      if (responses[0].aggregations.cohesionStayPresence.buckets.find((obj) => obj.key === "") !== undefined)
+        responses[0].aggregations.cohesionStayPresence.buckets.find((obj) => obj.key === "").doc_count =
+          responses[0].hits.total.value -
+          responses[0].aggregations.cohesionStayPresence.buckets
+            .filter((obj) => obj.key !== "")
+            .reduce(function (acc, c) {
+              return acc + c.doc_count;
+            }, 0);
       setCohesionStayPresence(responses[0].aggregations.cohesionStayPresence.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
     })();
   }, [JSON.stringify(filter)]);
@@ -67,7 +82,6 @@ export default ({ filter }) => {
 };
 
 const Phase1 = ({ data, getLink }) => {
-  console.log(data);
   return (
     <>
       <Row>
@@ -170,7 +184,7 @@ const CohesionStayMedicalFileReceived = ({ data, getLink }) => {
         </Col>
         <Col md={6} xl={3} k="cohesionStayMedicalFileReceived_false">
           <Link to={getLink(`/volontaire?MEDICAL_FILE_RECEIVED=%5B"false"%5D`)}>
-            <Card borderBottomColor="#FEB951">
+            <Card borderBottomColor="#EF4036">
               <CardTitle>Non-receptionnée</CardTitle>
               <CardValueWrapper>
                 <CardValue>{data["false"] || 0}</CardValue>
@@ -181,6 +195,18 @@ const CohesionStayMedicalFileReceived = ({ data, getLink }) => {
               </CardValueWrapper>
             </Card>
           </Link>
+        </Col>
+        <Col md={6} xl={3} k="cohesionStayMedicalFileReceived_unknown">
+          <CardGrey borderBottomColor="#FEB951">
+            <CardTitle>Non renseigné</CardTitle>
+            <CardValueWrapper>
+              <CardValue>{data[""] || 0}</CardValue>
+              <CardPercentage>
+                {total ? `${(((data[""] || 0) * 100) / total).toFixed(0)}%` : `0%`}
+                <CardArrow />
+              </CardPercentage>
+            </CardValueWrapper>
+          </CardGrey>
         </Col>
       </Row>
     </React.Fragment>
@@ -220,6 +246,18 @@ const CohesionStayPresence = ({ data, getLink }) => {
               </CardValueWrapper>
             </Card>
           </Link>
+        </Col>
+        <Col md={6} xl={3} k="cohesionStayPresence_unknown">
+          <CardGrey borderBottomColor="#FEB951">
+            <CardTitle>Non renseigné</CardTitle>
+            <CardValueWrapper>
+              <CardValue>{data[""] || 0}</CardValue>
+              <CardPercentage>
+                {total ? `${(((data[""] || 0) * 100) / total).toFixed(0)}%` : `0%`}
+                <CardArrow />
+              </CardPercentage>
+            </CardValueWrapper>
+          </CardGrey>
         </Col>
       </Row>
     </React.Fragment>
