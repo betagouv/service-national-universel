@@ -283,7 +283,7 @@ export default () => {
                     <tbody>
                       {data.map((hit, i) => (
                         <Hit
-                          key={i}
+                          key={hit._id}
                           hit={hit}
                           callback={(e) => {
                             if (e._id === volontaire?._id) setVolontaire(e);
