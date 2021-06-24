@@ -201,7 +201,7 @@ export default () => {
                       <tbody>
                         {data.map((hit, i) => (
                           <Hit
-                            key={i}
+                            key={hit._id}
                             hit={hit}
                             index={i + resultStats.currentPage * resultStats.displayedResults}
                             onClick={() => setYoung(hit)}

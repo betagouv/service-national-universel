@@ -372,7 +372,7 @@ export default ({ setYoung }) => {
                     </thead>
                     <tbody>
                       {data.map((hit, i) => (
-                        <Hit key={i} hit={hit} onClick={() => setVolontaire(hit)} selected={volontaire?._id === hit._id} />
+                        <Hit key={hit._id} hit={hit} onClick={() => setVolontaire(hit)} selected={volontaire?._id === hit._id} />
                       ))}
                     </tbody>
                   </Table>

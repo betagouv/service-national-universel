@@ -32,7 +32,6 @@ export default () => {
     (async () => {
       const { data } = await api.get(`/structure/network/${user.structureId}`);
       const ids = data.map((s) => s._id);
-      console.log(ids);
       setStructureIds(ids);
     })();
     return;
@@ -212,8 +211,8 @@ export default () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {data.map((hit, i) => (
-                        <Hit key={i} hit={hit} onClick={() => setMission(hit)} selected={mission?._id === hit._id} />
+                      {data.map((hit) => (
+                        <Hit key={hit._id} hit={hit} onClick={() => setMission(hit)} selected={mission?._id === hit._id} />
                       ))}
                     </tbody>
                   </Table>
