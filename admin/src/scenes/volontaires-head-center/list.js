@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
+import DownloadAllAttestation from "../../components/buttons/DownloadAllAttestation";
 import ExportComponent from "../../components/ExportXlsx";
 import {
   translate,
@@ -158,7 +159,7 @@ export default () => {
                     };
                   }}
                 />
-                <DownloadAllAttestation cohesionCenterId={center._id}>
+                <DownloadAllAttestation cohesionCenterId={user.cohesionCenterId}>
                   <div>Exporter les attestations</div>
                 </DownloadAllAttestation>
               </div>
