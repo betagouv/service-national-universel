@@ -226,7 +226,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false }), asy
 });
 
 router.post("/:id/certificate", passport.authenticate("referent", { session: false }), async (req, res) => {
-  const youngs = await YoungModel.find({ cohesionCenterId: req.params.id });
+  const youngs = await YoungModel.find({ cohesionCenterId: req.params.id, cohesionStayPresence: "true" });
 
   const getLocationCohesionCenter = (y) => {
     let t = "";
@@ -274,7 +274,7 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
 
   const template = getSignedUrl("certificates/certificateTemplate.png");
   const d = new Date();
-  const COHESION_CENTER_LOCATION = getLocationCohesionCenter(youngs[0]);
+  const COHESION_CENTER_LOCATION = youngs[0] ? getLocationCohesionCenter(youngs[0]) : "";
   const data = [];
   for (const young of youngs) {
     data.push(
@@ -288,8 +288,6 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
         .replace(/{{DATE}}/g, d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" }))
     );
   }
-
-  console.log(data.join(""));
 
   const newhtml = html.replace(/{{BASE_URL}}/g, getBaseUrl()).replace(/{{BODY}}/g, data.join(""));
 
