@@ -84,7 +84,7 @@ export default ({ young, admin }) => {
     getStructure();
   }, [application]);
 
-  if (!application || !mission || !tutor) return <Loader />;
+  if (!application || !mission) return <Loader />;
 
   const isYoungAdult = getAge(young.birthdateAt) >= 18;
 
