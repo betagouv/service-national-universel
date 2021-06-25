@@ -49,7 +49,7 @@ export const confirmMessageChangePhase1Presence = (value) => {
 };
 
 export const ENABLE_ASSIGN_CENTER = true;
-export const ENABLE_ASSIGN_CENTER_ROLES = [];
+export const ENABLE_ASSIGN_CENTER_ROLES = ["admin"];
 export const ENABLE_ASSIGN_CENTER_EMAILS = ["tangi.mendes@beta.gouv.fr", "trouinard.baptiste@gmail.com"];
 
 export const ENABLE_ASSIGN_MEETING_POINT = false;
