@@ -30,7 +30,7 @@ export function permissionPhase1(y) {
 
 export function permissionPhase2(y) {
   if (!permissionApp(y)) return false;
-  return ![YOUNG_PHASE.INSCRIPTION, YOUNG_PHASE.COHESION_STAY].includes(y.phase) || y.statusPhase1 === "AFFECTED";
+  return ![YOUNG_PHASE.INSCRIPTION, YOUNG_PHASE.COHESION_STAY].includes(y.phase) || y.statusPhase1 === "AFFECTED" || y.statusPhase1 === "DONE";
 }
 
 export function permissionPhase3(y) {
