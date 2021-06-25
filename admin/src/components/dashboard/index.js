@@ -17,19 +17,7 @@ const CardStyle = styled.div`
   margin-bottom: 33px;
 `;
 
-const CardStyleGrey = styled.div`
-  /* max-width: 325px; */
-  padding: 22px 15px;
-  border-bottom: 7px solid ${(props) => props.borderBottomColor};
-  border-radius: 8px;
-  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
-  background-color: #fcfcfc;
-  margin-bottom: 33px;
-`;
-
 export const Card = ({ children, ...p }) => <CardStyle {...p}>{children}</CardStyle>;
-
-export const CardGrey = ({ children, ...p }) => <CardStyleGrey {...p}>{children}</CardStyleGrey>;
 
 export const CardTitle = styled.h3`
   color: #171725;
