@@ -41,12 +41,24 @@ export default ({ filter }) => {
       if (filter.department) queries[1].query.bool.filter.push({ term: { "department.keyword": filter.department } });
 
       const { responses } = await api.esQuery(queries);
-      console.log(responses[0].aggregations);
       setStatusPhase1(responses[0].aggregations.statusPhase1.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+      addNullAttributes(responses[0].hits.total.value, responses[0].aggregations.cohesionStayMedicalFileReceived.buckets);
       setCohesionStayMedicalFileReceived(responses[0].aggregations.cohesionStayMedicalFileReceived.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+      addNullAttributes(responses[0].hits.total.value, responses[0].aggregations.cohesionStayPresence.buckets);
       setCohesionStayPresence(responses[0].aggregations.cohesionStayPresence.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
     })();
   }, [JSON.stringify(filter)]);
+
+  const addNullAttributes = (total, buckets) => {
+    if (buckets.find((obj) => obj.key === "")?.doc_count)
+      buckets.find((obj) => obj.key === "").doc_count =
+        total -
+        buckets
+          .filter((obj) => obj.key !== "")
+          .reduce(function (acc, c) {
+            return acc + c.doc_count;
+          }, 0);
+  };
 
   const replaceSpaces = (v) => v.replace(/\s+/g, "+");
 
@@ -67,7 +79,6 @@ export default ({ filter }) => {
 };
 
 const Phase1 = ({ data, getLink }) => {
-  console.log(data);
   return (
     <>
       <Row>
@@ -182,6 +193,18 @@ const CohesionStayMedicalFileReceived = ({ data, getLink }) => {
             </Card>
           </Link>
         </Col>
+        <Col md={6} xl={3} k="cohesionStayMedicalFileReceived_unknown">
+          <Card borderBottomColor="#EF4036" style={{ backgroundColor: "#cccccc" }}>
+            <CardTitle>Non renseigné</CardTitle>
+            <CardValueWrapper>
+              <CardValue>{data[""] || 0}</CardValue>
+              <CardPercentage style={{ color: "black" }}>
+                {total ? `${(((data[""] || 0) * 100) / total).toFixed(0)}%` : `0%`}
+                <CardArrow />
+              </CardPercentage>
+            </CardValueWrapper>
+          </Card>
+        </Col>
       </Row>
     </React.Fragment>
   );
@@ -209,7 +232,7 @@ const CohesionStayPresence = ({ data, getLink }) => {
         </Col>
         <Col md={6} xl={3} k="cohesionStayPresence_false">
           <Link to={getLink(`/volontaire?COHESION_PRESENCE=%5B"false"%5D`)}>
-            <Card borderBottomColor="#EF4036">
+            <Card borderBottomColor="#FEB951">
               <CardTitle>Absent au séjour de cohésion</CardTitle>
               <CardValueWrapper>
                 <CardValue>{data["false"] || 0}</CardValue>
@@ -220,6 +243,18 @@ const CohesionStayPresence = ({ data, getLink }) => {
               </CardValueWrapper>
             </Card>
           </Link>
+        </Col>
+        <Col md={6} xl={3} k="cohesionStayPresence_unknown">
+          <Card borderBottomColor="#EF4036" style={{ backgroundColor: "#cccccc" }}>
+            <CardTitle>Non renseigné</CardTitle>
+            <CardValueWrapper>
+              <CardValue>{data[""] || 0}</CardValue>
+              <CardPercentage style={{ color: "black" }}>
+                {total ? `${(((data[""] || 0) * 100) / total).toFixed(0)}%` : `0%`}
+                <CardArrow />
+              </CardPercentage>
+            </CardValueWrapper>
+          </Card>
         </Col>
       </Row>
     </React.Fragment>
