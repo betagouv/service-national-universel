@@ -36,6 +36,7 @@ export default ({ mission, tab, children }) => {
   const duplicate = async () => {
     mission.name += " (copie)";
     delete mission._id;
+    mission.placesLeft = mission.placesTotal;
     const { data, ok, code } = await api.post("/mission", mission);
     if (!ok) toastr.error("Oups, une erreur est survnue lors de la duplication de la mission", translate(code));
     toastr.success("Mission dupliquée !");
