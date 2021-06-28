@@ -56,7 +56,25 @@ function validateProgram(program) {
     .validate(program, { stripUnknown: true });
 }
 
+function validateDepartmentService(departmentService) {
+  return Joi.object()
+    .keys({
+      department: Joi.string().allow(null, ""),
+      region: Joi.string().allow(null, ""),
+      directionName: Joi.string().allow(null, ""),
+      serviceName: Joi.string().allow(null, ""),
+      serviceNumber: Joi.string().allow(null, ""),
+      address: Joi.string().allow(null, ""),
+      complementAddress: Joi.string().allow(null, ""),
+      zip: Joi.string().allow(null, ""),
+      city: Joi.string().allow(null, ""),
+      description: Joi.string().allow(null, ""),
+    })
+    .validate(departmentService, { stripUnknown: true });
+}
+
 module.exports = {
   validateMission,
   validateProgram,
+  validateDepartmentService,
 };
