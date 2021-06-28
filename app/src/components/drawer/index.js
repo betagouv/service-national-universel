@@ -57,7 +57,6 @@ export default (props) => {
     const blocked = getDisabled(tab);
     const p = { tab, blocked };
     subTab ? (p.subTab = subTab) : null;
-    window.lumiere("sendEvent", "click", "open_sidebar", p);
     if (blocked) return e.preventDefault();
     setActiveTab(tab);
     if (open) {

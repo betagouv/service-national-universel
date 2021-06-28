@@ -50,7 +50,6 @@ export default () => {
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
   useEffect(() => {
-    window.lumiere("sendEvent", "start", "open_app"); // cat, action, props
     async function fetchData() {
       try {
         if (window.location.href.indexOf("/auth") !== -1) return setLoading(false);
@@ -60,7 +59,6 @@ export default () => {
         if (res.token) api.setToken(res.token);
         // const { data: structure, ok } = await api.get(`/structure`);
         if (res.user) dispatch(setUser(res.user));
-        window.lumiere("registerUser", res.user._id);
         // if (structure) dispatch(setStructure(structure));
       } catch (e) {
         console.log(e);

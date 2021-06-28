@@ -16,10 +16,6 @@ import api from "../../../services/api";
 import { translate, YOUNG_PHASE, YOUNG_STATUS } from "../../../utils";
 
 export default () => {
-  useEffect(() => {
-    window.lumiere("sendEvent", "inscription", "open_step", { step: 4 });
-  }, []);
-
   const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
   const [clickedRules, setClickedRules] = useState(false);

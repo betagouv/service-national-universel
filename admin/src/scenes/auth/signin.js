@@ -39,7 +39,6 @@ export default () => {
                     if (token) api.setToken(token);
                     if (user) {
                       dispatch(setUser(user));
-                      window.lumiere("registerUser", user._id);
                     }
                   } catch (e) {
                     if (e && ["EMAIL_OR_PASSWORD_INVALID", "USER_NOT_EXISTS", "EMAIL_AND_PASSWORD_REQUIRED"].includes(e.code)) {

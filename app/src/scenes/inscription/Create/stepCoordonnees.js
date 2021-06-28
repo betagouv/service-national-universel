@@ -19,10 +19,6 @@ import { translate } from "../../../utils";
 import FormFooter from "../../../components/form/FormFooter";
 
 export default () => {
-  useEffect(() => {
-    window.lumiere("sendEvent", "inscription", "open_step", { step: 1 });
-  }, []);
-
   const history = useHistory();
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);

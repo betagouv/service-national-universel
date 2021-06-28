@@ -9,9 +9,7 @@ export default ({ mission, image }) => {
   tags.push(mission.remote ? "À distance" : "En présentiel");
   mission.city && tags.push(mission.city);
   tags.push(translate(mission.domain));
-  const handleClick = () => {
-    window.lumiere("sendEvent", "click", "open_mission_phase3", { publisherName: mission.publisherName, title: mission.title, organizationName: mission.organizationName });
-  };
+  const handleClick = () => {};
   return (
     <Card>
       <Col md={8}>

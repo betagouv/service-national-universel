@@ -32,9 +32,7 @@ export default ({ program, image, enableToggle = true }) => {
     );
   };
 
-  const handleClick = () => {
-    window.lumiere("sendEvent", "click", "programme_engagement", { program: program.name });
-  };
+  const handleClick = () => {};
 
   return (
     <Card onClick={handleClick}>

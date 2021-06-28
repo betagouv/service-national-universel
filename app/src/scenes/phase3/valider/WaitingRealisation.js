@@ -216,7 +216,6 @@ export default () => {
             </h2>
             <ContinueButton
               onClick={() => {
-                window.lumiere("sendEvent", "click", "validation_phase3");
                 handleSubmit();
               }}
             >
