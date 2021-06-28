@@ -118,6 +118,7 @@ export default ({ setYoung }) => {
                     "Droit à l'image": translate(data.imageRight),
                     "Autotest PCR": translate(data.autoTestPCR),
                     "fiche sanitaire réceptionnée": translate(data.cohesionStayMedicalFileReceived || "false"),
+                    Présent: translate(data.cohesionStayPresence),
                     "Statut représentant légal 1": data.parent1Status,
                     "Prénom représentant légal 1": data.parent1FirstName,
                     "Nom représentant légal 1": data.parent1LastName,
