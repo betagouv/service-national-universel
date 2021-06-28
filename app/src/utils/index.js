@@ -9,7 +9,6 @@ export function getPasswordErrorMessage(v) {
   schema.is().min(8); // Must have symbols
 
   if (!schema.validate(v)) {
-    window.lumiere("sendEvent", "inscription", "password_failed");
     return "Votre mot de passe doit contenir au moins 8 caractères";
   }
 }
