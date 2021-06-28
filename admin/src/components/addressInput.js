@@ -53,14 +53,26 @@ export default ({ keys, values, handleChange, errors, touched }) => {
 
   const onChangeCityOrPostCode = async (city, zip) => {
     if (zip && validator.isPostalCode(zip, "FR") && city) {
-      const response = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(zip + " " + city)}&postcode=${zip}`, {
+      const responseMunicipality = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(city + " " + zip)}&type=municipality`, {
         mode: "cors",
         method: "GET",
         headers: { "Content-Type": "application/json" },
       });
-      const res = await response.json();
-      if (res.features.length > 0) {
-        handleChange({ target: { name: keys.location, value: { lon: res.features[0].geometry.coordinates[0], lat: res.features[0].geometry.coordinates[1] } } });
+      const resMunicipality = await responseMunicipality.json();
+      if (resMunicipality.features.length > 0) {
+        handleChange({
+          target: { name: keys.location, value: { lon: resMunicipality.features[0].geometry.coordinates[0], lat: resMunicipality.features[0].geometry.coordinates[1] } },
+        });
+        return;
+      }
+      const responseLocality = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(city + " " + zip)}&type=locality`, {
+        mode: "cors",
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      const resLocality = await responseLocality.json();
+      if (resLocality.features.length > 0) {
+        handleChange({ target: { name: keys.location, value: { lon: resLocality.features[0].geometry.coordinates[0], lat: resLocality.features[0].geometry.coordinates[1] } } });
         return;
       }
       toastr.error("Erreur lors de la recherche", "Ville introuvable");
