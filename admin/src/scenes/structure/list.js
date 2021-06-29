@@ -197,10 +197,10 @@ export default () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {data.map((hit, k) => (
+                        {data.map((hit) => (
                           <Hit
                             hit={hit}
-                            key={k}
+                            key={hit._id}
                             missions={missions.filter((e) => e._source.structureId === hit._id)}
                             onClick={() => setStructure(hit)}
                             selected={structure?._id === hit._id}

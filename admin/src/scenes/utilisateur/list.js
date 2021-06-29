@@ -185,8 +185,8 @@ export default () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {data.map((hit, i) => (
-                        <Hit key={i} hit={hit} user={user} onClick={() => setResponsable(hit)} selected={responsable?._id === hit._id} />
+                      {data.map((hit) => (
+                        <Hit key={hit._id} hit={hit} user={user} onClick={() => setResponsable(hit)} selected={responsable?._id === hit._id} />
                       ))}
                     </tbody>
                   </Table>

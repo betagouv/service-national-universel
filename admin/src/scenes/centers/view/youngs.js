@@ -256,8 +256,8 @@ export default ({ center, updateCenter }) => {
                           </tr>
                         </thead>
                         <tbody>
-                          {data.map((hit, i) => (
-                            <Hit key={i} hit={hit} onClick={() => handleClick(hit)} selected={young?._id === hit._id} onChangeYoung={updateCenter} />
+                          {data.map((hit) => (
+                            <Hit key={hit._id} hit={hit} onClick={() => handleClick(hit)} selected={young?._id === hit._id} onChangeYoung={updateCenter} />
                           ))}
                         </tbody>
                       </Table>

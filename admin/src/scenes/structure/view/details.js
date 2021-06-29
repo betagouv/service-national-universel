@@ -107,9 +107,9 @@ export default ({ structure }) => {
                 <Wrapper>
                   <BoxTitle>{`Équipe (${referents.length})`}</BoxTitle>
                   {referents.length ? null : <i>Aucun compte n'est associé à cette structure.</i>}
-                  {referents.map((referent, k) => (
-                    <Link to={`/user/${referent._id}`} key={k}>
-                      <div style={{ display: "flex", alignItems: "center", marginTop: "1rem" }} key={k}>
+                  {referents.map((referent) => (
+                    <Link to={`/user/${referent._id}`} key={referent._id}>
+                      <div style={{ display: "flex", alignItems: "center", marginTop: "1rem" }} key={referent._id}>
                         <Avatar name={`${referent.firstName} ${referent.lastName}`} />
                         <div>{`${referent.firstName} ${referent.lastName}`}</div>
                       </div>

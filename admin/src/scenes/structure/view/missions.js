@@ -42,8 +42,8 @@ export default ({ structure }) => {
                 </tr>
               </thead>
               <tbody>
-                {data.map((hit, i) => (
-                  <Hit key={i} hit={hit} onClick={() => handleClick(hit)} />
+                {data.map((hit) => (
+                  <Hit key={hit._id} hit={hit} onClick={() => handleClick(hit)} />
                 ))}
               </tbody>
             </Table>

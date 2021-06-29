@@ -62,7 +62,7 @@ export default ({ onChange, value }) => {
                 young.applications
                   .sort((a, b) => (parseInt(a.priority) > parseInt(b.priority) ? 1 : parseInt(b.priority) > parseInt(a.priority) ? -1 : 0))
                   .slice(0, 3)
-                  .map((a, i) => <ApplicationDetails key={i} application={a} i={i + 1} />)}
+                  .map((a, i) => <ApplicationDetails key={a._id} application={a} i={i + 1} />)}
               <Link to={`/volontaire/${young._id}/phase2`}>
                 <div style={{ textAlign: "center", color: "#5245cc" }}>{"Toutes ses candidatures >"}</div>
               </Link>

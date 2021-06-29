@@ -26,7 +26,7 @@ export default ({ structure }) => {
 
   useEffect(() => {
     getPatches();
-  });
+  }, []);
 
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
@@ -47,7 +47,7 @@ export default ({ structure }) => {
                 </thead>
                 <tbody>
                   {data.map((hit, i) => (
-                    <Hit key={i} hit={hit} />
+                    <Hit key={hit._id} hit={hit} />
                   ))}
                 </tbody>
               </Table>

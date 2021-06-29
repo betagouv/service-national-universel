@@ -290,7 +290,7 @@ export default () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {data.map((hit, i) => (
+                      {data.map((hit) => (
                         <Hit
                           key={hit._id}
                           hit={hit}

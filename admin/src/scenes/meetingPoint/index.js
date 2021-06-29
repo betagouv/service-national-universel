@@ -118,8 +118,8 @@ export default () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {data.map((hit, i) => {
-                        return <Hit key={i} hit={hit} />;
+                      {data.map((hit) => {
+                        return <Hit key={hit._id} hit={hit} />;
                       })}
                     </tbody>
                   </Table>

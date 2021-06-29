@@ -197,9 +197,9 @@ export default () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {data.map((hit, i) => (
+                      {data.map((hit) => (
                         <Hit
-                          key={i}
+                          key={hit._id}
                           hit={hit}
                           onClick={() => handleClick(hit)}
                           selected={panel?.application?._id === hit._id}

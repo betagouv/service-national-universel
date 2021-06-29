@@ -299,8 +299,8 @@ export default (props) => {
                   <Wrapper>
                     <BoxTitle>{`Équipe (${referents.length})`}</BoxTitle>
                     {referents.length ? null : <i>Aucun compte n'est associé à cette structure.</i>}
-                    {referents.map((referent, k) => (
-                      <Link to={`/user/${referent._id}`} key={k}>
+                    {referents.map((referent) => (
+                      <Link to={`/user/${referent._id}`} key={referent._id}>
                         <div style={{ display: "flex", alignItems: "center", marginTop: "1rem" }}>
                           <Avatar name={`${referent.firstName} ${referent.lastName}`} />
                           <div>{`${referent.firstName} ${referent.lastName}`}</div>
