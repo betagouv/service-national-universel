@@ -58,17 +58,21 @@ export default ({ keys, values, handleChange, errors, touched, departAndRegionVi
 
   const onChangeCityOrPostCode = async (city, zip) => {
     if (zip && validator.isPostalCode(zip, "FR") && city) {
-      const response = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(zip + " " + city)}&postcode=${zip}`, {
-        mode: "cors",
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
-      const res = await response.json();
-      if (res.features.length > 0) {
-        handleChange({ target: { name: keys.location, value: { lon: res.features[0].geometry.coordinates[0], lat: res.features[0].geometry.coordinates[1] } } });
-        return;
-      }
-      toastr.error("Erreur lors de la recherche", "Ville introuvable");
+      clearTimeout(searchTimeOut.current);
+      searchTimeOut.current = setTimeout(async () => {
+        const response = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(zip + " " + city)}&postcode=${zip}`, {
+          mode: "cors",
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+        const res = await response.json();
+        console.log(res.features);
+        if (res.features.length > 0) {
+          handleChange({ target: { name: keys.location, value: { lon: res.features[0].geometry.coordinates[0], lat: res.features[0].geometry.coordinates[1] } } });
+          return;
+        }
+        toastr.error("Erreur lors de la recherche", "Ville introuvable");
+      }, 300);
     }
   };
 
