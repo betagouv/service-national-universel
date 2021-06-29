@@ -343,11 +343,19 @@ const Select = ({ title, name, values, onChange, disabled, errors, touched, vali
 const AutocompleteSelectCenter = ({ title, values, handleChange, placeholder, options, onSelect }) => {
   return (
     <Row className="detail">
-      <Col md={4}>
+      <Col md={4} style={{ alignSelf: "flex-start" }}>
         <label>{title}</label>
       </Col>
       <Col md={8}>
         <ReactSelect
+          styles={{
+            menu: () => ({
+              borderStyle: "solid",
+              borderWidth: 1,
+              borderRadius: 5,
+              borderColor: "#dedede",
+            }),
+          }}
           defaultValue={{ label: values.cohesionCenterName, value: values.cohesionCenterName, _id: values.cohesionCenterId }}
           options={options}
           placeholder={placeholder}
