@@ -123,21 +123,21 @@ const deleteCenterDependencies = async (center) => {
   const youngs = await YoungModel.find({ cohesionCenterId: center._id });
   youngs.forEach(async (young) => {
     young.set({
-      cohesionCenterId: null,
-      cohesionCenterName: null,
-      cohesionCenterZip: null,
-      cohesionCenterCity: null,
+      cohesionCenterId: undefined,
+      cohesionCenterName: undefined,
+      cohesionCenterZip: undefined,
+      cohesionCenterCity: undefined,
     });
     await young.save();
   });
   const referents = await ReferentModel.find({ cohesionCenterId: center._id });
   referents.forEach(async (referent) => {
-    referent.set({ cohesionCenterId: null, cohesionCenterName: null });
+    referent.set({ cohesionCenterId: undefined, cohesionCenterName: undefined });
     await referent.save();
   });
   const meetingPoints = await MeetingPointModel.find({ centerId: center._id });
   meetingPoints.forEach(async (meetingPoint) => {
-    meetingPoint.set({ centerId: null, centerCode: null });
+    meetingPoint.set({ centerId: undefined, centerCode: undefined });
     await meetingPoint.save();
   });
 };
