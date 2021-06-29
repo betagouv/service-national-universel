@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import { Row, Col } from "reactstrap";
 import Autosuggest from "react-autosuggest";
@@ -14,6 +14,8 @@ export default ({ keys, values, handleChange, errors, touched }) => {
   const [str, setStr] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [noResultMode, setNoResultMode] = useState(false);
+
+  const searchTimeOut = useRef(null);
 
   const [departmentListFiltered, setDepartmentListFiltered] = useState(departmentList);
   const [regionListFiltered, setRegionListFiltered] = useState(regionList);
@@ -53,29 +55,32 @@ export default ({ keys, values, handleChange, errors, touched }) => {
 
   const onChangeCityOrPostCode = async (city, zip) => {
     if (zip && validator.isPostalCode(zip, "FR") && city) {
-      const responseMunicipality = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(city + " " + zip)}&type=municipality`, {
-        mode: "cors",
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
-      const resMunicipality = await responseMunicipality.json();
-      if (resMunicipality.features.length > 0) {
-        handleChange({
-          target: { name: keys.location, value: { lon: resMunicipality.features[0].geometry.coordinates[0], lat: resMunicipality.features[0].geometry.coordinates[1] } },
+      clearTimeout(searchTimeOut.current);
+      searchTimeOut.current = setTimeout(async () => {
+        const responseMunicipality = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(city + " " + zip)}&type=municipality`, {
+          mode: "cors",
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
         });
-        return;
-      }
-      const responseLocality = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(city + " " + zip)}&type=locality`, {
-        mode: "cors",
-        method: "GET",
-        headers: { "Content-Type": "application/json" },
-      });
-      const resLocality = await responseLocality.json();
-      if (resLocality.features.length > 0) {
-        handleChange({ target: { name: keys.location, value: { lon: resLocality.features[0].geometry.coordinates[0], lat: resLocality.features[0].geometry.coordinates[1] } } });
-        return;
-      }
-      toastr.error("Erreur lors de la recherche", "Ville introuvable");
+        const resMunicipality = await responseMunicipality.json();
+        if (resMunicipality.features.length > 0) {
+          handleChange({
+            target: { name: keys.location, value: { lon: resMunicipality.features[0].geometry.coordinates[0], lat: resMunicipality.features[0].geometry.coordinates[1] } },
+          });
+          return;
+        }
+        const responseLocality = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(city + " " + zip)}&type=locality`, {
+          mode: "cors",
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+        });
+        const resLocality = await responseLocality.json();
+        if (resLocality.features.length > 0) {
+          handleChange({ target: { name: keys.location, value: { lon: resLocality.features[0].geometry.coordinates[0], lat: resLocality.features[0].geometry.coordinates[1] } } });
+          return;
+        }
+        toastr.error("Erreur lors de la recherche", "Ville introuvable");
+      }, 300);
     }
   };
 
@@ -83,16 +88,19 @@ export default ({ keys, values, handleChange, errors, touched }) => {
   const getSuggestionValue = (suggestion) => (suggestion !== "noresult" ? suggestion.properties.label : "");
 
   const getSuggestions = async (item) => {
+    clearTimeout(searchTimeOut.current);
     const text = item;
-    const response = await fetch(`https://api-adresse.data.gouv.fr/search/?autocomplete=1&q=${text}`, {
-      mode: "cors",
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    });
-    const res = await response.json();
-    const arr = res.features.filter((e) => e.properties.type !== "municipality");
-    arr.push("noresult");
-    setSuggestions(arr);
+    searchTimeOut.current = setTimeout(async () => {
+      const response = await fetch(`https://api-adresse.data.gouv.fr/search/?autocomplete=1&q=${text}`, {
+        mode: "cors",
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+      const res = await response.json();
+      const arr = res.features.filter((e) => e.properties.type !== "municipality");
+      arr.push("noresult");
+      setSuggestions(arr);
+    }, 300);
   };
 
   // keys is not defined at first load ??
