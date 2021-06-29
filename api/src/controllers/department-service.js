@@ -5,12 +5,15 @@ const { capture } = require("../sentry");
 
 const DepartmentServiceModel = require("../models/departmentService");
 const ReferentModel = require("../models/referent");
-const CohesionCenterModel = require("../models/cohesionCenter");
 const { ERRORS } = require("../utils");
+const { validateId } = require("../utils/defaultValidate");
+const validateFromReferent = require("../utils/referent");
 
 router.post("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const data = await DepartmentServiceModel.findOneAndUpdate({ department: req.body.department }, req.body, {
+    const { error, value: checkedDepartementService } = validateFromReferent.validateDepartmentService(req.body);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    const data = await DepartmentServiceModel.findOneAndUpdate({ department: checkedDepartementService.department }, checkedDepartementService, {
       new: true,
       upsert: true,
       useFindAndModify: false,
@@ -24,9 +27,21 @@ router.post("/", passport.authenticate("referent", { session: false }), async (r
 
 router.get("/referent/:id", passport.authenticate(["referent"], { session: false }), async (req, res) => {
   try {
-    const r = await ReferentModel.findById(req.params.id);
+    const { error, value: checkedId } = validateId(req.params.id);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error });
+    const r = await ReferentModel.findById(checkedId);
     if (!r) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const data = await DepartmentServiceModel.findOne({ department: r.department });
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+router.get("/", passport.authenticate(["referent"], { session: false }), async (req, res) => {
+  try {
+    const data = await DepartmentServiceModel.find({});
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
@@ -37,18 +52,6 @@ router.get("/referent/:id", passport.authenticate(["referent"], { session: false
 router.get("/all", passport.authenticate(["referent"], { session: false }), async (req, res) => {
   try {
     const data = await DepartmentServiceModel.find({});
-    return res.status(200).send({ ok: true, data });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
-  }
-});
-
-router.get("/", passport.authenticate(["young"], { session: false }), async (req, res) => {
-  try {
-    const center = await CohesionCenterModel.findById(req.user.cohesionCenterId);
-    if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const data = await DepartmentServiceModel.findOne({ department: center.department });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);

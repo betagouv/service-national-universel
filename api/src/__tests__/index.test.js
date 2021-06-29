@@ -14,16 +14,25 @@ const getNewReferentFixture = require("./fixtures/referent");
 const getNewMissionFixture = require("./fixtures/mission");
 const getNewStructureFixture = require("./fixtures/structure");
 const getNewProgramFixture = require("./fixtures/program");
+const getNewDepartmentServiceFixture = require("./fixtures/departmentService");
 
 const { getMissionsHelper, getMissionByIdHelper, deleteMissionByIdHelper, createMissionHelper, expectMissionToEqual } = require("./helpers/mission");
 
 const { getYoungsHelper, getYoungByIdHelper, deleteYoungByIdHelper, createYoungHelper, expectYoungToEqual } = require("./helpers/young");
 
-const { getReferentsHelper, deleteReferentByIdHelper } = require("./helpers/referent");
+const { getReferentsHelper, deleteReferentByIdHelper, createReferentHelper, getReferentByIdHelper } = require("./helpers/referent");
 
 const { deleteStructureByIdHelper, createStructureHelper, expectStructureToEqual } = require("./helpers/structure");
 
 const { getProgramsHelper, getProgramByIdHelper, deleteProgramByIdHelper, createProgramHelper, expectProgramToEqual } = require("./helpers/program");
+
+const {
+  getDepartmentServicesHelper,
+  getDepartmentServiceByIdHelper,
+  deleteDepartmentServiceByIdHelper,
+  createDepartmentServiceHelper,
+  expectDepartmentServiceToEqual,
+} = require("./helpers/departmentService");
 
 let db;
 
@@ -249,5 +258,41 @@ describe("Program", () => {
     expect(res.statusCode).toEqual(200);
     const programsAfter = await getProgramsHelper();
     expect(programsAfter.length).toEqual(programsBefore.length - 1);
+  });
+});
+
+describe("Department service", () => {
+  it("POST /department-service", async () => {
+    const departmentServiceFixture = getNewDepartmentServiceFixture();
+    const departmentServicesBefore = await getDepartmentServicesHelper();
+    const res = await request(getAppHelper()).post("/department-service").send(departmentServiceFixture);
+    expect(res.statusCode).toEqual(200);
+    expectDepartmentServiceToEqual(departmentServiceFixture, res.body.data);
+    const departmentServiceAfter = await getDepartmentServicesHelper();
+    expect(departmentServiceAfter.length).toEqual(departmentServicesBefore.length + 1);
+    await deleteDepartmentServiceByIdHelper(res.body.data._id);
+  });
+
+  it("GET /department-service/referent/:id", async () => {
+    const referentFixture = getNewReferentFixture();
+    const referent = await createReferentHelper(referentFixture);
+    let departmentServiceFixture = getDepartmentServicesHelper();
+    departmentServiceFixture.department = referentFixture.department;
+    const departmentService = await createDepartmentServiceHelper(departmentServiceFixture);
+    const res = await request(getAppHelper()).get(`/department-service/referent/${referent._id}`).send();
+    expect(res.statusCode).toEqual(200);
+    expectDepartmentServiceToEqual(departmentServiceFixture, res.body.data);
+    await deleteDepartmentServiceByIdHelper(departmentService._id);
+    await deleteReferentByIdHelper(referent._id);
+  });
+
+  it("GET /department-service", async () => {
+    const departmentServiceFixture = getNewDepartmentServiceFixture();
+    const departmentService = await createDepartmentServiceHelper(departmentServiceFixture);
+    const res = await request(getAppHelper()).get("/department-service").send();
+    expect(res.statusCode).toEqual(200);
+    expect(res.body.data.length).toEqual(1);
+    expectDepartmentServiceToEqual(res.body.data[0], departmentServiceFixture);
+    await deleteDepartmentServiceByIdHelper(departmentService._id);
   });
 });
