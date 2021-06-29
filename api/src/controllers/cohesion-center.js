@@ -18,6 +18,7 @@ const {
   sendAutoCancelMeetingPoint,
   getSignedUrl,
   updateCenterDependencies,
+  deleteCenterDependencies,
 } = require("../utils");
 const renderFromHtml = require("../htmlToPdf");
 
@@ -225,6 +226,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false }), asy
     const center = await CohesionCenterModel.findOne({ _id: req.params.id });
     if (req.user.role !== "admin") return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     await center.remove();
+    await deleteCenterDependencies({ _id: req.params.id });
     console.log(`Center ${req.params.id} has been deleted`);
     res.status(200).send({ ok: true });
   } catch (error) {

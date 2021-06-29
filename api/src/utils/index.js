@@ -102,7 +102,6 @@ const updateCenterDependencies = async (center) => {
     const youngs = await YoungModel.find({ cohesionCenterId: center._id });
     youngs.forEach(async (young) => {
       young.set({
-        cohesionCenterId: center._id,
         cohesionCenterName: center.name,
         cohesionCenterZip: center.zip,
         cohesionCenterCity: center.city,
@@ -117,6 +116,33 @@ const updateCenterDependencies = async (center) => {
     const meetingPoints = await MeetingPointModel.find({ centerId: center._id });
     meetingPoints.forEach(async (meetingPoint) => {
       meetingPoint.set({ centerCode: center.code });
+      await meetingPoint.save();
+    });
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+const deleteCenterDependencies = async (center) => {
+  try {
+    const youngs = await YoungModel.find({ cohesionCenterId: center._id });
+    youngs.forEach(async (young) => {
+      young.set({
+        cohesionCenterId: null,
+        cohesionCenterName: null,
+        cohesionCenterZip: null,
+        cohesionCenterCity: null,
+      });
+      await young.save();
+    });
+    const referents = await ReferentModel.find({ cohesionCenterId: center._id });
+    referents.forEach(async (referent) => {
+      referent.set({ cohesionCenterId: null, cohesionCenterName: null });
+      await referent.save();
+    });
+    const meetingPoints = await MeetingPointModel.find({ centerId: center._id });
+    meetingPoints.forEach(async (meetingPoint) => {
+      meetingPoint.set({ centerId: null, centerCode: null });
       await meetingPoint.save();
     });
   } catch (e) {
@@ -302,6 +328,7 @@ module.exports = {
   getSignedUrl,
   updatePlacesCenter,
   updateCenterDependencies,
+  deleteCenterDependencies,
   assignNextYoungFromWaitingList,
   sendAutoAffectationMail,
   updatePlacesBus,
