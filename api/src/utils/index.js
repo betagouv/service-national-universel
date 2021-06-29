@@ -97,6 +97,33 @@ const updatePlacesCenter = async (center) => {
   return center;
 };
 
+const updateCenterDependencies = async (center) => {
+  try {
+    const youngs = await YoungModel.find({ cohesionCenterId: center._id });
+    youngs.forEach(async (young) => {
+      young.set({
+        cohesionCenterId: center._id,
+        cohesionCenterName: center.name,
+        cohesionCenterZip: center.zip,
+        cohesionCenterCity: center.city,
+      });
+      await young.save();
+    });
+    const referents = await ReferentModel.find({ cohesionCenterId: center._id });
+    referents.forEach(async (referent) => {
+      referent.set({ cohesionCenterName: center.name });
+      await referent.save();
+    });
+    const meetingPoints = await MeetingPointModel.find({ centerId: center._id });
+    meetingPoints.forEach(async (meetingPoint) => {
+      meetingPoint.set({ centerCode: center.code });
+      await meetingPoint.save();
+    });
+  } catch (e) {
+    console.log(e);
+  }
+};
+
 const updatePlacesBus = async (bus) => {
   console.log(`update bus ${bus.id} - ${bus.idExcel}`);
   try {
@@ -274,6 +301,7 @@ module.exports = {
   ERRORS,
   getSignedUrl,
   updatePlacesCenter,
+  updateCenterDependencies,
   assignNextYoungFromWaitingList,
   sendAutoAffectationMail,
   updatePlacesBus,

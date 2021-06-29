@@ -10,8 +10,15 @@ const ReferentModel = require("../models/referent");
 const YoungModel = require("../models/young");
 const MeetingPointObject = require("../models/meetingPoint");
 const BusObject = require("../models/bus");
-const { getSignedUrl } = require("../utils");
-const { ERRORS, updatePlacesCenter, updatePlacesBus, sendAutoAffectationMail, sendAutoCancelMeetingPoint } = require("../utils");
+const {
+  ERRORS,
+  updatePlacesCenter,
+  updatePlacesBus,
+  sendAutoAffectationMail,
+  sendAutoCancelMeetingPoint,
+  getSignedUrl,
+  updateCenterDependencies,
+} = require("../utils");
 const renderFromHtml = require("../htmlToPdf");
 
 router.post("/refresh/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
@@ -205,6 +212,7 @@ router.put("/", passport.authenticate("referent", { session: false }), async (re
     if (req.user.role !== "admin") return res.status(404).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const center = await CohesionCenterModel.findByIdAndUpdate(req.body._id, req.body, { new: true });
     const data = await updatePlacesCenter(center);
+    await updateCenterDependencies(center);
     res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
