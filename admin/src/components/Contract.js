@@ -141,14 +141,6 @@ export default ({ young, admin }) => {
     };
   }
 
-  const hasAtLeastOneValidationDone =
-    contract &&
-    (contract.parent1Status === "VALIDATED" ||
-      contract.projectManagerStatus === "VALIDATED" ||
-      contract.structureManagerStatus === "VALIDATED" ||
-      contract.parent2Status === "VALIDATED" ||
-      contract.youngContractStatus === "VALIDATED");
-
   const hasAllValidation =
     contract &&
     contract.projectManagerStatus === "VALIDATED" &&
@@ -181,15 +173,15 @@ export default ({ young, admin }) => {
           </div>
           <hr />
           <div style={{ display: "grid", gridAutoColumns: "1fr", gridAutoFlow: "column" }}>
-            <ContractStatusBadge title="Représentant de l'Etat" contract={contract} status={contract.projectManagerStatus} token={contract.projectManagerStatus} />
-            <ContractStatusBadge title="Représentant structure" contract={contract} status={contract.structureManagerStatus} token={contract.structureManagerToken} />
+            <ContractStatusBadge title="Représentant de l'Etat" contract={contract} status={contract?.projectManagerStatus} token={contract?.projectManagerStatus} />
+            <ContractStatusBadge title="Représentant structure" contract={contract} status={contract?.structureManagerStatus} token={contract?.structureManagerToken} />
             {!isYoungAdult ? (
               <>
-                <ContractStatusBadge title="Représentant légal 1" contract={contract} status={contract.parent1Status} token={contract.parent1Token} />
-                {young.parent2Email && <ContractStatusBadge title="Représentant légal 2" contract={contract} status={contract.parent2Status} token={contract.parent2Token} />}
+                <ContractStatusBadge title="Représentant légal 1" contract={contract} status={contract?.parent1Status} token={contract?.parent1Token} />
+                {young.parent2Email && <ContractStatusBadge title="Représentant légal 2" contract={contract} status={contract?.parent2Status} token={contract?.parent2Token} />}
               </>
             ) : (
-              <ContractStatusBadge title="Volontaire" contract={contract} status={contract.youngContractStatus} token={contract.youngContractToken} />
+              <ContractStatusBadge title="Volontaire" contract={contract} status={contract?.youngContractStatus} token={contract?.youngContractToken} />
             )}
           </div>
         </Bloc>
