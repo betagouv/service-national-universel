@@ -17,9 +17,10 @@ export default () => {
   const user = useSelector((state) => state.Auth.user);
   const [userIsValid, setUserIsValid] = useState(true);
   const params = queryString.parse(location.search);
-  const { redirect } = params;
+  const { redirect, unauthorized } = params;
 
   if (user) return <Redirect to={"/" + (redirect || "")} />;
+  if (unauthorized === "1") toastr.error("Votre session a expiré", "Merci de vous reconnecter.", { timeOut: 10000 });
 
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>

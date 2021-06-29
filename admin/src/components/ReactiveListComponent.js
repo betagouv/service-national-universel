@@ -29,7 +29,10 @@ export default (props) => {
         );
       }}
       onError={() => {
-        window.location.href = "/auth?unauthorized=1";
+        // if there is an error in ES, we redirect the user to the login screen.
+        // we pass unauthorized=1 to specify that this is a redirection provoked by a expired session.
+        // we add the redirect uri so that the user can be back where it was. (by removing the domain and the first /, we have the full uri in the correct format)
+        window.location.href = `/auth?unauthorized=1&redirect=${encodeURIComponent(window.location.href.replace(window.location.origin, "").substring(1))}`;
       }}
       // props can be override
       // ex : defaultQuery, react, dataField, sortBy, render
