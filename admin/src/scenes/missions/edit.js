@@ -55,6 +55,37 @@ export default (props) => {
     }
   }
 
+  async function putLocation(city, zip) {
+    const responseMunicipality = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(city + " " + zip)}&type=municipality`, {
+      mode: "cors",
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
+    const resMunicipality = await responseMunicipality.json();
+    if (resMunicipality.features.length > 0) {
+      return {
+        lon: resMunicipality.features[0].geometry.coordinates[0],
+        lat: resMunicipality.features[0].geometry.coordinates[1],
+      };
+    }
+    const responseLocality = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(zip + " " + city)}&type=locality`, {
+      mode: "cors",
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    });
+    const resLocality = await responseLocality.json();
+    if (resLocality.features.length > 0) {
+      return {
+        lon: resLocality.features[0].geometry.coordinates[0],
+        lat: resLocality.features[0].geometry.coordinates[1],
+      };
+    }
+    return {
+      lon: 2.352222,
+      lat: 48.856613,
+    };
+  }
+
   useEffect(() => {
     initMission();
   }, []);
@@ -109,6 +140,11 @@ export default (props) => {
           if (MISSION_PERIOD_DURING_SCHOOL[p] && values.period.indexOf(PERIOD.DURING_SCHOOL) === -1) values.period.push(PERIOD.DURING_SCHOOL);
         });
 
+        //if mission doesn't have location, put one from city and zip code
+        //or put Paris location
+        if (!values.location || !values.location.lat || !values.location.lon) {
+          values.location = await putLocation(values.city, values.zip);
+        }
         try {
           const { ok, code, data: mission } = await api[values._id ? "put" : "post"]("/mission", values);
           if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", translate(code));
