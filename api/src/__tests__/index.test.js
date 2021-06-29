@@ -7,7 +7,7 @@ const { MONGO_URL } = require("../config");
 
 const getAppHelper = require("./helpers/app");
 const passport = require("./__mocks__/passport");
-jest.setTimeout(5_000);
+jest.setTimeout(10_000);
 
 const getNewYoungFixture = require("./fixtures/young");
 const getNewReferentFixture = require("./fixtures/referent");

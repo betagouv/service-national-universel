@@ -46,15 +46,12 @@ export default () => {
     if (utm_source) sessionProperties.utm_source = utm_source;
     if (utm_medium) sessionProperties.utm_medium = utm_medium;
     if (utm_campaign) sessionProperties.utm_campaign = utm_campaign;
-    window.lumiere("setSessionProperties", sessionProperties);
-    window.lumiere("sendEvent", "initialization", "page-loaded"); // cat, action, props
     async function fetchData() {
       try {
         const { ok, user, token } = await api.get("/young/signin_token");
         if (token) api.setToken(token);
         if (ok && user) {
           dispatch(setYoung(user));
-          window.lumiere("registerUser", user._id);
         }
       } catch (e) {
         console.log(e);

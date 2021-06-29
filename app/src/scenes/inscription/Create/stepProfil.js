@@ -20,9 +20,6 @@ import EyeClose from "../../../assets/eye-slash.svg";
 import FormFooter from "../../../components/form/FormFooter";
 
 export default () => {
-  useEffect(() => {
-    window.lumiere("sendEvent", "inscription", "open_step", { step: 0 });
-  }, []);
   const [passwordText, setPasswordText] = useState(false);
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young) || { frenchNationality: "", firstName: "", lastName: "", birthdateAt: "", email: "", password: "", repassword: "" };
@@ -59,7 +56,6 @@ export default () => {
             const { ok: okPut, code: codePut, data: young } = await api.put("/young", newValues);
             if (!okPut) return toastr.error("Une erreur s'est produite :", codePut);
             dispatch(setYoung(young));
-            window.lumiere("registerUser", young._id);
             history.push("/inscription/coordonnees");
           } catch (e) {
             console.log(e);

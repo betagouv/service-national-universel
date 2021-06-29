@@ -9,7 +9,6 @@ export function getPasswordErrorMessage(v) {
   schema.is().min(8); // Must have symbols
 
   if (!schema.validate(v)) {
-    window.lumiere("sendEvent", "inscription", "password_failed");
     return "Votre mot de passe doit contenir au moins 8 caractères";
   }
 }
@@ -30,7 +29,7 @@ export function permissionPhase1(y) {
 
 export function permissionPhase2(y) {
   if (!permissionApp(y)) return false;
-  return ![YOUNG_PHASE.INSCRIPTION, YOUNG_PHASE.COHESION_STAY].includes(y.phase) || y.statusPhase1 === "AFFECTED";
+  return ![YOUNG_PHASE.INSCRIPTION, YOUNG_PHASE.COHESION_STAY].includes(y.phase) || y.statusPhase1 === "AFFECTED" || y.statusPhase1 === "DONE";
 }
 
 export function permissionPhase3(y) {

@@ -56,7 +56,6 @@ export default () => {
                 } else {
                   if (token) api.setToken(token);
                   dispatch(setYoung(young));
-                  window.lumiere("registerUser", young._id);
                 }
               }
             } catch (e) {

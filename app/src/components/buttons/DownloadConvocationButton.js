@@ -6,7 +6,6 @@ export default ({ young, children, disabled, uri, ...rest }) => {
   const [loading, setLoading] = useState();
 
   const viewFile = async (a) => {
-    window.lumiere("sendEvent", "click", "view_convocation_phase1");
     setLoading(true);
     await downloadPDF({
       url: `/young/${young._id}/convocation/${a}`,

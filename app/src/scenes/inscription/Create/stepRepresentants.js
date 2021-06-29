@@ -220,10 +220,6 @@ const Parent = ({ id = 1, values, errors, touched, handleChange }) => {
 };
 
 export default () => {
-  useEffect(() => {
-    window.lumiere("sendEvent", "inscription", "open_step", { step: 3 });
-  }, []);
-
   const history = useHistory();
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);

@@ -57,7 +57,7 @@ export default ({ young, admin }) => {
   }, [application]);
   useEffect(() => {
     const getTutor = async () => {
-      if (!application) return;
+      if (!application || !(application.tutorId || application.tutor?._id)) return;
       const { ok, data, code } = await api.get(`/referent/${application.tutorId || application.tutor?._id}`);
       if (!ok) return toastr.error("Oups, une erreur est survenue", code);
       return setTutor(data);
@@ -84,7 +84,7 @@ export default ({ young, admin }) => {
     getStructure();
   }, [application]);
 
-  if (!application || !mission || !tutor) return <Loader />;
+  if (!application || !mission) return <Loader />;
 
   const isYoungAdult = getAge(young.birthdateAt) >= 18;
 

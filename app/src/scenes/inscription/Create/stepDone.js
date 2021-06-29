@@ -15,11 +15,6 @@ export default () => {
   const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
 
-  useEffect(() => {
-    window.lumiere("sendEvent", "inscription", "open_step", { step: 6 });
-    window.lumiere("sendEvent", "inscription", "open_step", { step: 5 });
-  }, []);
-
   if (!young) {
     history.push("/inscription/profil");
     return <div />;
