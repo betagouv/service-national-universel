@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ReactiveBase, ReactiveList, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
+import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
@@ -21,10 +21,11 @@ import {
 } from "../../utils";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Badge from "../../components/Badge";
-import { ResultTable, Filter, Table, FilterRow, TopResultStats, BottomResultStats } from "../../components/list";
+import { ResultTable, Filter, Table, FilterRow } from "../../components/list";
 import ToggleSwitch from "../../components/ToogleSwitch";
 import Select from "./components/Select";
 import { toastr } from "react-redux-toastr";
+import ReactiveListComponent from "../../components/ReactiveListComponent";
 
 const FILTERS = [
   "SEARCH",
@@ -253,32 +254,11 @@ export default () => {
               </FilterRow>
             </Filter>
             <ResultTable>
-              <ReactiveList
+              <ReactiveListComponent
                 defaultQuery={getDefaultQuery}
-                componentId="result"
                 react={{ and: FILTERS }}
-                pagination={true}
-                paginationAt="both"
-                innerClass={{ pagination: "pagination" }}
-                size={30}
-                showLoader={true}
                 dataField="lastName.keyword"
                 sortBy="asc"
-                loader={<div style={{ padding: "0 20px" }}>Chargement...</div>}
-                innerClass={{ pagination: "pagination" }}
-                renderNoResults={() => <div style={{ padding: "10px 25px" }}>Aucun résultat.</div>}
-                renderResultStats={(e) => {
-                  return (
-                    <>
-                      <TopResultStats>
-                        Affiche {e.displayedResults * e.currentPage + 1} à {e.displayedResults * (e.currentPage + 1)} résultats sur {e.numberOfResults} résultats
-                      </TopResultStats>
-                      <BottomResultStats>
-                        Affiche {e.displayedResults * e.currentPage + 1} à {e.displayedResults * (e.currentPage + 1)} résultats sur {e.numberOfResults} résultats
-                      </BottomResultStats>
-                    </>
-                  );
-                }}
                 render={({ data }) => (
                   <Table>
                     <thead>

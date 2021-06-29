@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ReactiveBase, ReactiveList, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
+import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
@@ -11,8 +11,9 @@ import Panel from "./panel";
 import { translate, corpsEnUniforme, formatLongDateFR, ES_NO_LIMIT } from "../../utils";
 import VioletHeaderButton from "../../components/buttons/VioletHeaderButton";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
-import { Filter, FilterRow, ResultTable, Table, TopResultStats, BottomResultStats, Header, Title, MultiLine } from "../../components/list";
+import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine } from "../../components/list";
 import Badge from "../../components/Badge";
+import ReactiveListComponent from "../../components/ReactiveListComponent";
 
 const FILTERS = ["SEARCH", "LEGAL_STATUS", "DEPARTMENT", "REGION", "CORPS", "WITH_NETWORK", "LOCATION"];
 const formatLongDate = (date) => {
@@ -157,34 +158,11 @@ export default () => {
               </FilterRow>
             </Filter>
             <ResultTable>
-              <ReactiveList
+              <ReactiveListComponent
                 defaultQuery={getDefaultQuery}
-                componentId="result"
                 react={{ and: FILTERS }}
-                pagination={true}
-                paginationAt="both"
-                innerClass={{ pagination: "pagination" }}
-                size={30}
-                showLoader={true}
-                dataField="createdAt"
-                sortBy="desc"
-                loader={<div style={{ padding: "0 20px" }}>Chargement...</div>}
-                innerClass={{ pagination: "pagination" }}
-                renderNoResults={() => <div style={{ padding: "10px 25px" }}>Aucun résultat.</div>}
                 onData={({ rawData }) => {
                   if (rawData?.hits?.hits) setStructureIds(rawData.hits.hits.map((e) => e._id));
-                }}
-                renderResultStats={(e) => {
-                  return (
-                    <>
-                      <TopResultStats>
-                        Affiche {e.displayedResults * e.currentPage + 1} à {e.displayedResults * (e.currentPage + 1)} résultats sur {e.numberOfResults} résultats
-                      </TopResultStats>
-                      <BottomResultStats>
-                        Affiche {e.displayedResults * e.currentPage + 1} à {e.displayedResults * (e.currentPage + 1)} résultats sur {e.numberOfResults} résultats
-                      </BottomResultStats>
-                    </>
-                  );
                 }}
                 render={({ data }) => {
                   return (

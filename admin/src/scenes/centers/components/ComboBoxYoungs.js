@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { toastr } from "react-redux-toastr";
-import { ReactiveBase, ReactiveList, DataSearch } from "@appbaseio/reactivesearch";
+import { ReactiveBase, DataSearch } from "@appbaseio/reactivesearch";
 import { useSelector } from "react-redux";
 
 import { apiURL } from "../../../config";
@@ -8,6 +8,7 @@ import api from "../../../services/api";
 import { translate, getAge } from "../../../utils";
 import { Filter, ResultTable, BottomResultStats, Table, MultiLine } from "../../../components/list";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
+import ReactiveListComponent from "../../../components/ReactiveListComponent";
 
 export default ({ center, onAffect, onClick }) => {
   const getDefaultQuery = () => ({
@@ -78,20 +79,12 @@ export default ({ center, onAffect, onClick }) => {
               />
             </Filter>
             <ResultTable hide={!searchedValue}>
-              <ReactiveList
+              <ReactiveListComponent
                 defaultQuery={getDefaultQuery}
-                componentId="result"
                 scrollOnChange={false}
                 react={{ and: FILTERS }}
-                pagination={true}
                 paginationAt="bottom"
-                innerClass={{ pagination: "pagination" }}
                 size={3}
-                showLoader={true}
-                dataField="createdAt"
-                sortBy="desc"
-                loader={<div style={{ padding: "0 20px" }}>Chargement...</div>}
-                renderNoResults={() => <div style={{ padding: "10px 25px" }}>Aucun Résultat.</div>}
                 renderResultStats={(e) => {
                   return (
                     <div>

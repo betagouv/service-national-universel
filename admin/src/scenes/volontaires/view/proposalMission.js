@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
-import { ReactiveBase, ReactiveList, SingleList, MultiDropdownList, MultiList, DataSearch } from "@appbaseio/reactivesearch";
+import { ReactiveBase, DataSearch } from "@appbaseio/reactivesearch";
+import ReactiveListComponent from "../../../components/ReactiveListComponent";
 
 import { apiURL } from "../../../config";
 import api from "../../../services/api";
@@ -61,19 +62,12 @@ export default ({ young, onSend }) => {
               />
             </Filter>
             <ResultTable hide={!searchedValue}>
-              <ReactiveList
-                componentId="result"
+              <ReactiveListComponent
                 scrollOnChange={false}
                 react={{ and: FILTERS }}
-                pagination={true}
                 paginationAt="bottom"
-                innerClass={{ pagination: "pagination" }}
                 size={3}
                 showLoader={true}
-                dataField="createdAt"
-                sortBy="desc"
-                loader={<div style={{ padding: "0 20px" }}>Chargement...</div>}
-                renderNoResults={() => <div style={{ padding: "10px 25px" }}>Aucun Résultat.</div>}
                 renderResultStats={(e) => {
                   return (
                     <div>
@@ -85,14 +79,6 @@ export default ({ young, onSend }) => {
                 }}
                 render={({ data }) => (
                   <Table>
-                    {/* <thead>
-                      <tr>
-                        <th>Mission</th>
-                        <th style={{ width: "200px" }}>Dates</th>
-                        <th style={{ width: "90px" }}>Places</th>
-                        <th style={{ width: "250px" }}>Statut</th>
-                      </tr>
-                    </thead> */}
                     <tbody>
                       {data.map((hit, i) => (
                         <HitMission key={i} hit={hit} onSend={() => handleProposal(hit)} />

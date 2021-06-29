@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
-import { ReactiveBase, ReactiveList, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
-import styled from "styled-components";
+import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import { useSelector } from "react-redux";
-import VioletHeaderButton from "../../components/buttons/VioletHeaderButton";
 
+import ReactiveListComponent from "../../components/ReactiveListComponent";
 import ExportComponent from "../../components/ExportXlsx";
 
 import api from "../../services/api";
@@ -335,32 +334,11 @@ export default ({ setYoung }) => {
               </FilterRow>
             </Filter>
             <ResultTable>
-              <ReactiveList
+              <ReactiveListComponent
                 defaultQuery={getDefaultQuery}
-                componentId="result"
                 react={{ and: FILTERS }}
-                pagination={true}
-                paginationAt="both"
-                innerClass={{ pagination: "pagination" }}
-                size={30}
-                showLoader={true}
                 dataField="lastName.keyword"
                 sortBy="asc"
-                loader={<div style={{ padding: "0 20px" }}>Chargement...</div>}
-                innerClass={{ pagination: "pagination" }}
-                renderNoResults={() => <div style={{ padding: "10px 25px" }}>Aucun résultat.</div>}
-                renderResultStats={(e) => {
-                  return (
-                    <>
-                      <TopResultStats>
-                        Affiche {e.displayedResults * e.currentPage + 1} à {e.displayedResults * (e.currentPage + 1)} résultats sur {e.numberOfResults} résultats
-                      </TopResultStats>
-                      <BottomResultStats>
-                        Affiche {e.displayedResults * e.currentPage + 1} à {e.displayedResults * (e.currentPage + 1)} résultats sur {e.numberOfResults} résultats
-                      </BottomResultStats>
-                    </>
-                  );
-                }}
                 render={({ data }) => (
                   <Table>
                     <thead>

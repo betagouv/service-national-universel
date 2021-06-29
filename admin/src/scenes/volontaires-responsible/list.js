@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ReactiveBase, ReactiveList, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
+import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
@@ -12,6 +12,7 @@ import VioletHeaderButton from "../../components/buttons/VioletHeaderButton";
 import ExportComponent from "../../components/ExportXlsx";
 import Loader from "../../components/Loader";
 import { translate, getFilterLabel, formatStringLongDate, formatStringDate, getAge, ES_NO_LIMIT } from "../../utils";
+import ReactiveListComponent from "../../components/ReactiveListComponent";
 
 const FILTERS = ["SEARCH", "STATUS", "PHASE", "COHORT", "MISSIONS", "TUTOR"];
 
@@ -159,32 +160,9 @@ export default () => {
               </FilterRow>
             </Filter>
             <ResultTable>
-              <ReactiveList
-                componentId="result"
+              <ReactiveListComponent
                 react={{ and: FILTERS }}
                 defaultQuery={getDefaultQuery}
-                pagination={true}
-                paginationAt="both"
-                innerClass={{ pagination: "pagination" }}
-                size={30}
-                showLoader={true}
-                dataField="createdAt"
-                sortBy="desc"
-                loader={<div style={{ padding: "0 20px" }}>Chargement...</div>}
-                innerClass={{ pagination: "pagination" }}
-                renderNoResults={() => <div style={{ padding: "10px 25px" }}>Aucun résultat.</div>}
-                renderResultStats={(e) => {
-                  return (
-                    <>
-                      <TopResultStats>
-                        Affiche {e.displayedResults * e.currentPage + 1} à {e.displayedResults * (e.currentPage + 1)} résultats sur {e.numberOfResults} résultats
-                      </TopResultStats>
-                      <BottomResultStats>
-                        Affiche {e.displayedResults * e.currentPage + 1} à {e.displayedResults * (e.currentPage + 1)} résultats sur {e.numberOfResults} résultats
-                      </BottomResultStats>
-                    </>
-                  );
-                }}
                 render={({ data }) => (
                   <Table>
                     <thead>
@@ -360,12 +338,6 @@ const TeamMember = styled.div`
   }
 `;
 
-const ResultStats = styled.div`
-  color: #242526;
-  font-size: 12px;
-  padding-left: 25px;
-`;
-
 const Table = styled.table`
   width: 100%;
   color: #242526;
@@ -466,16 +438,6 @@ const ResultTable = styled.div`
       background-size: 8px;
     }
   }
-`;
-const TopResultStats = styled(ResultStats)`
-  position: absolute;
-  top: 25px;
-  left: 0;
-`;
-const BottomResultStats = styled(ResultStats)`
-  position: absolute;
-  top: calc(100% - 50px);
-  left: 0;
 `;
 
 const ContractLink = styled.div`
