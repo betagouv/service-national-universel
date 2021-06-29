@@ -48,6 +48,37 @@ export const confirmMessageChangePhase1Presence = (value) => {
   return confirm(message);
 };
 
+export const putLocation = async (city, zip) => {
+  const responseMunicipality = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(city + " " + zip)}&type=municipality`, {
+    mode: "cors",
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  });
+  const resMunicipality = await responseMunicipality.json();
+  if (resMunicipality.features.length > 0) {
+    return {
+      lon: resMunicipality.features[0].geometry.coordinates[0],
+      lat: resMunicipality.features[0].geometry.coordinates[1],
+    };
+  }
+  const responseLocality = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(zip + " " + city)}&type=locality`, {
+    mode: "cors",
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  });
+  const resLocality = await responseLocality.json();
+  if (resLocality.features.length > 0) {
+    return {
+      lon: resLocality.features[0].geometry.coordinates[0],
+      lat: resLocality.features[0].geometry.coordinates[1],
+    };
+  }
+  return {
+    lon: 2.352222,
+    lat: 48.856613,
+  };
+};
+
 export const ENABLE_ASSIGN_CENTER = true;
 export const ENABLE_ASSIGN_CENTER_ROLES = ["admin"];
 export const ENABLE_ASSIGN_CENTER_EMAILS = ["tangi.mendes@beta.gouv.fr", "trouinard.baptiste@gmail.com"];

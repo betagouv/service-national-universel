@@ -5,6 +5,7 @@ import Autosuggest from "react-autosuggest";
 import { Field } from "formik";
 import { department2region, departmentLookUp, departmentList, regionList, region2department } from "../utils";
 import ErrorMessage, { requiredMessage } from "./errorMessage";
+import validator from "validator";
 
 const NORESULTMESSAGE = "Rentrer manuellement l'adresse";
 
@@ -181,7 +182,7 @@ export default ({ keys, values, handleChange, errors, touched }) => {
             <Col md={6}>
               <Label>Code postal</Label>
               <Field
-                validate={(v) => !v && requiredMessage}
+                validate={(v) => (!v && requiredMessage) || (!validator.isPostalCode(v, "FR") && "Ce champ est au mauvais format. Exemples de format attendu : 44000, 08300")}
                 disabled={!noResultMode}
                 className="form-control"
                 placeholder="Code postal"
