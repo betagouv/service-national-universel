@@ -26,7 +26,7 @@ export default ({ young }) => {
 
   useEffect(() => {
     getPatches();
-  });
+  }, []);
 
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
@@ -39,6 +39,7 @@ export default ({ young }) => {
               <Table>
                 <thead>
                   <tr>
+                    <th>Utilisateur</th>
                     <th>Opération</th>
                     <th>Ancienne valeur</th>
                     <th>Nouvelle valeur</th>
@@ -65,6 +66,7 @@ const Hit = ({ hit }) => {
       {hit.ops?.map((e, i) => {
         return (
           <tr key={i} style={{ borderBottom: i === hit.ops.length - 1 && "1px solid #ddd" }}>
+            <td>{hit.user}</td>
             <td>{`${e.op} ${e.path}`}</td>
             <td>{JSON.stringify(e.originalValue) || "-"}</td>
             <td>{JSON.stringify(e.value) || "-"}</td>

@@ -235,7 +235,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false }), 
       newYoung = { ...newYoung, statusPhase1: "NOT_DONE" };
     }
 
-    young.set(newYoung);
+    young.set({ ...newYoung, user: req.user._id });
     await young.save();
 
     // if they had a cohesion center, we check if we need to update the places taken / left
