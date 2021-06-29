@@ -770,6 +770,7 @@ function ContractStatusbadgeItem({ contract, status, token }) {
   return (
     <>
       <Badge text="En attente de validation" color={APPLICATION_STATUS_COLORS.WAITING_VALIDATION} />
+      <br />
       <CopyLink
         onClick={() => {
           navigator.clipboard.writeText(`${appURL}/validate-contract?token=${token}`);
