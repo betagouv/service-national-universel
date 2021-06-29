@@ -5,6 +5,7 @@ import Autosuggest from "react-autosuggest";
 import { Field } from "formik";
 import { department2region, departmentLookUp, departmentList, regionList, region2department } from "../utils";
 import ErrorMessage, { requiredMessage } from "./errorMessage";
+import validator from "validator";
 
 const NORESULTMESSAGE = "Rentrer manuellement l'adresse";
 
