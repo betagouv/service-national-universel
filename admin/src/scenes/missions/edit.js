@@ -9,7 +9,7 @@ import { useHistory } from "react-router-dom";
 import MultiSelect from "../../components/Multiselect";
 import AddressInput from "../../components/addressInput";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
-import { translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, MISSION_DOMAINS, PERIOD, dateForDatePicker } from "../../utils";
+import { translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, MISSION_DOMAINS, PERIOD, dateForDatePicker, putLocation } from "../../utils";
 import api from "../../services/api";
 import Invite from "../structure/components/invite";
 import Loader from "../../components/Loader";
@@ -53,37 +53,6 @@ export default (props) => {
       }
       return setStructure(ok ? data : null);
     }
-  }
-
-  async function putLocation(city, zip) {
-    const responseMunicipality = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(city + " " + zip)}&type=municipality`, {
-      mode: "cors",
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    });
-    const resMunicipality = await responseMunicipality.json();
-    if (resMunicipality.features.length > 0) {
-      return {
-        lon: resMunicipality.features[0].geometry.coordinates[0],
-        lat: resMunicipality.features[0].geometry.coordinates[1],
-      };
-    }
-    const responseLocality = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(zip + " " + city)}&type=locality`, {
-      mode: "cors",
-      method: "GET",
-      headers: { "Content-Type": "application/json" },
-    });
-    const resLocality = await responseLocality.json();
-    if (resLocality.features.length > 0) {
-      return {
-        lon: resLocality.features[0].geometry.coordinates[0],
-        lat: resLocality.features[0].geometry.coordinates[1],
-      };
-    }
-    return {
-      lon: 2.352222,
-      lat: 48.856613,
-    };
   }
 
   useEffect(() => {
