@@ -10,8 +10,16 @@ const ReferentModel = require("../models/referent");
 const YoungModel = require("../models/young");
 const MeetingPointObject = require("../models/meetingPoint");
 const BusObject = require("../models/bus");
-const { getSignedUrl } = require("../utils");
-const { ERRORS, updatePlacesCenter, updatePlacesBus, sendAutoAffectationMail, sendAutoCancelMeetingPoint } = require("../utils");
+const {
+  ERRORS,
+  updatePlacesCenter,
+  updatePlacesBus,
+  sendAutoAffectationMail,
+  sendAutoCancelMeetingPoint,
+  getSignedUrl,
+  updateCenterDependencies,
+  deleteCenterDependencies,
+} = require("../utils");
 const renderFromHtml = require("../htmlToPdf");
 
 router.post("/refresh/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
@@ -205,6 +213,7 @@ router.put("/", passport.authenticate("referent", { session: false }), async (re
     if (req.user.role !== "admin") return res.status(404).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const center = await CohesionCenterModel.findByIdAndUpdate(req.body._id, req.body, { new: true });
     const data = await updatePlacesCenter(center);
+    await updateCenterDependencies(center);
     res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
@@ -217,6 +226,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false }), asy
     const center = await CohesionCenterModel.findOne({ _id: req.params.id });
     if (req.user.role !== "admin") return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     await center.remove();
+    await deleteCenterDependencies({ _id: req.params.id });
     console.log(`Center ${req.params.id} has been deleted`);
     res.status(200).send({ ok: true });
   } catch (error) {
