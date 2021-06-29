@@ -4,8 +4,8 @@ import styled from "styled-components";
 import { Formik, Field } from "formik";
 import { useHistory } from "react-router-dom";
 import { appURL } from "../config";
-
-import { translate as t, YOUNG_PHASE, YOUNG_STATUS_PHASE2, APPLICATION_STATUS, APPLICATION_STATUS_COLORS, dateForDatePicker, getAge } from "../utils";
+import { useSelector } from "react-redux";
+import { APPLICATION_STATUS_COLORS, dateForDatePicker, getAge } from "../utils";
 import api from "../services/api";
 import DownloadAttestationButton from "./buttons/DownloadAttestationButton";
 import Loader from "./Loader";
@@ -753,24 +753,47 @@ const Bloc = ({ children, title, borderBottom, borderRight, borderLeft, disabled
   );
 };
 
-function ContractStatusBadge({ title, contract, status, token }) {
+function ContractStatusBadge({ title, ...rest }) {
   return (
     <div style={{ textAlign: "center" }}>
       <div>{title}</div>
-      {contract?.invitationSent === "true" ? (
-        <>
-          <Badge
-            text={status === "VALIDATED" ? "Validé" : "En attente de validation"}
-            color={status === "VALIDATED" ? APPLICATION_STATUS_COLORS.VALIDATED : APPLICATION_STATUS_COLORS.WAITING_VALIDATION}
-          />
-          <button onClick={() => navigator.clipboard.writeText(`${appURL}/validate-contract?token=${token}`)}>Copier le lien de validation</button>
-        </>
-      ) : (
-        <Badge text="Pas encore envoyé" />
-      )}
+      <ContractStatusbadgeItem {...rest} />
     </div>
   );
 }
+function ContractStatusbadgeItem({ contract, status, token }) {
+  const user = useSelector((state) => state.Auth.user);
+
+  if (contract?.invitationSent !== "true") return <Badge text="Pas encore envoyé" />;
+  else if (status === "VALIDATED") return <Badge text="Validé" color={APPLICATION_STATUS_COLORS.VALIDATED} />;
+  else if (user.role !== "admin") return <Badge text="En attente de validation" color={APPLICATION_STATUS_COLORS.WAITING_VALIDATION} />;
+  return (
+    <>
+      <Badge text="En attente de validation" color={APPLICATION_STATUS_COLORS.WAITING_VALIDATION} />
+      <CopyLink
+        onClick={() => {
+          navigator.clipboard.writeText(`${appURL}/validate-contract?token=${token}`);
+          toastr.success("Le lien a été copié dans le presse papier.");
+        }}
+      >
+        Copier le lien de validation
+      </CopyLink>
+    </>
+  );
+}
+
+const CopyLink = styled.button`
+  background: none;
+  color: rgb(81, 69, 205);
+  font-size: 0.8rem;
+  font-style: italic;
+  border: none;
+  :hover {
+    outline: none;
+    text-decoration: underline;
+  }
+  padding: 0;
+`;
 
 const ErrorMessage = styled.div`
   border: 1px solid #fc8181;
