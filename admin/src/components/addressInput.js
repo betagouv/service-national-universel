@@ -182,7 +182,7 @@ export default ({ keys, values, handleChange, errors, touched }) => {
             <Col md={6}>
               <Label>Code postal</Label>
               <Field
-                validate={(v) => (!v && requiredMessage) || (!validator.isPostalCode(v, "FR") && "Ce champ est au mauvais format. Format attendu : XXXXX")}
+                validate={(v) => (!v && requiredMessage) || (!validator.isPostalCode(v, "FR") && "Ce champ est au mauvais format. Exemples de format attendu : 44000, 08300")}
                 disabled={!noResultMode}
                 className="form-control"
                 placeholder="Code postal"
