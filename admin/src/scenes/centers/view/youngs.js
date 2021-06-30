@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 
-import { apiURL } from "../../../config";
+import { apiURL, environment } from "../../../config";
 import SelectStatus from "../../../components/selectStatus";
 import api from "../../../services/api";
 import CenterView from "./wrapper";
@@ -49,24 +49,26 @@ export default ({ center, updateCenter }) => {
           <ReactiveBase url={`${apiURL}/es`} app="cohesionyoung" headers={{ Authorization: `JWT ${api.getToken()}` }}>
             <div style={{ float: "right", marginBottom: "1.5rem", marginRight: "1.5rem" }}>
               <div style={{ display: "flex" }}>
-                <ExportComponent
-                  title="Export pour les cas particuliers"
-                  defaultQuery={getExportQuery}
-                  collection="volontaires_cas_particuliers"
-                  react={{ and: FILTERS }}
-                  transform={(data) => {
-                    return {
-                      _id: data._id,
-                      Prénom: data.firstName,
-                      Nom: data.lastName,
-                      "Code centre": center.code || "",
-                      "Nom du centre": center.name || "",
-                      "Présence au séjour": data.cohesionStayPresence || "",
-                      "Cas particulier qui valide sa JDC malgré son absence (oui/non)": "",
-                      "Commentaires (Décrivez pourquoi)": "",
-                    };
-                  }}
-                />
+                {environment !== "production" ? (
+                  <ExportComponent
+                    title="Export pour les cas particuliers"
+                    defaultQuery={getExportQuery}
+                    collection="volontaires_cas_particuliers"
+                    react={{ and: FILTERS }}
+                    transform={(data) => {
+                      return {
+                        _id: data._id,
+                        Prénom: data.firstName,
+                        Nom: data.lastName,
+                        "Code centre": center.code || "",
+                        "Nom du centre": center.name || "",
+                        "Présence au séjour": data.cohesionStayPresence || "",
+                        "Cas particulier qui valide sa JDC malgré son absence (oui/non)": "",
+                        "Commentaires (Décrivez pourquoi)": "",
+                      };
+                    }}
+                  />
+                ) : null}
                 <ExportComponent
                   title="Exporter les volontaires"
                   defaultQuery={getExportQuery}
