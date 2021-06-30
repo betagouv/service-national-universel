@@ -10,28 +10,22 @@ import { setUser, setStructure } from "./redux/auth/actions";
 import Auth from "./scenes/auth";
 import Onboarding from "./scenes/onboarding";
 import Validate from "./scenes/validate";
-
 import Profil from "./scenes/profil";
 import Settings from "./scenes/settings";
-
 import Dashboard from "./scenes/dashboard";
 import DashboardResponsible from "./scenes/dashboard-responsible";
 import DashboardHeadCenter from "./scenes/dashboard-head-center";
-
 import Structure from "./scenes/structure";
 import Missions from "./scenes/missions";
 import Volontaires from "./scenes/volontaires";
 import VolontairesResponsible from "./scenes/volontaires-responsible";
 import VolontairesHeadCenter from "./scenes/volontaires-head-center";
-import Tuteur from "./scenes/tuteur";
 import Utilisateur from "./scenes/utilisateur";
 import Content from "./scenes/content";
 import Goal from "./scenes/goal";
 import Center from "./scenes/centers";
 import Inscription from "./scenes/inscription";
 import MeetingPoint from "./scenes/meetingPoint";
-
-import Team from "./scenes/team";
 
 import Drawer from "./components/drawer";
 import Header from "./components/header";
@@ -115,9 +109,7 @@ const Home = () => {
           <RestrictedRoute path="/structure" component={Structure} />
           <RestrictedRoute path="/settings" component={Settings} />
           <RestrictedRoute path="/profil" component={Profil} />
-          <RestrictedRoute path="/team" component={Team} />
           <RestrictedRoute path="/volontaire" component={renderVolontaire} />
-          <RestrictedRoute path="/tuteur" component={Tuteur} />
           <RestrictedRoute path="/mission" component={Missions} />
           <RestrictedRoute path="/inscription" component={Inscription} />
           <RestrictedRoute path="/user" component={Utilisateur} />
