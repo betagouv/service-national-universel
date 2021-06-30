@@ -14,7 +14,7 @@ export default ({ children, young, tab }) => {
   const history = useHistory();
   if (!young) return null;
   return (
-    <div style={{ flex: tab === "missions" ? "0%" : 2, position: "relative", padding: "3rem" }}>
+    <div style={{ flex: 2, position: "relative", padding: "3rem" }}>
       <Header>
         <div style={{ flex: 1 }}>
           <Title>
