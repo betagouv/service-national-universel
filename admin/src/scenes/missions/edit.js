@@ -118,8 +118,8 @@ export default (props) => {
             values.location = await putLocation(values.city, values.zip);
           }
           const { ok, code, data: mission } = await api[values._id ? "put" : "post"]("/mission", values);
-          if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", translate(code));
           setLoading(false);
+          if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", translate(code));
           history.push(`/mission/${mission._id}`);
           toastr.success("Mission enregistrée");
         } catch (e) {

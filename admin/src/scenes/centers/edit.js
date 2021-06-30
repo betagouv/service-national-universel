@@ -39,9 +39,9 @@ export default (props) => {
       initialValues={defaultValue || {}}
       onSubmit={async (values) => {
         try {
+          setLoading(true);
           if (isNew) values.placesLeft = values.placesTotal;
           else values.placesLeft += values.placesTotal - defaultValue.placesTotal;
-          setLoading(true);
           const { ok, code, data } = await api[values._id ? "put" : "post"]("/cohesion-center", values);
           setLoading(false);
           if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de ce centre !!", translate(code));
