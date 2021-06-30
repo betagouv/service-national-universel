@@ -15,11 +15,13 @@ import Loader from "../../components/Loader";
 import { associationTypes, privateTypes, publicTypes, publicEtatTypes, translate } from "../../utils";
 import api from "../../services/api";
 import { Box, BoxTitle } from "../../components/box";
+import LoadingButton from "../../components/buttons/LoadingButton";
 
 export default (props) => {
   const [defaultValue, setDefaultValue] = useState();
   const [networks, setNetworks] = useState([]);
   const [referents, setReferents] = useState([]);
+  const [loading, setLoading] = useState(false);
   const user = useSelector((state) => state.Auth.user);
   const history = useHistory();
 
@@ -77,21 +79,25 @@ export default (props) => {
       }
       onSubmit={async (values) => {
         try {
+          setLoading(true);
           let id = values._id;
           if (!id) {
             values.placesLeft = values.placesTotal;
             const { ok, data, code } = await api.post("/structure", values);
             if (!ok) return toastr.error("Une erreur s'est produite lors de la création de la structure", translate(code));
             id = data._id;
+            setLoading(false);
             toastr.success("Structure créée");
           } else {
             await api.put(`/structure/${values._id}`, values);
             history.push(`/structure/${values._id}`);
+            setLoading(false);
             toastr.success("Structure mise à jour");
           }
 
           if (values.isNetwork !== defaultValue.isNetwork) {
             const { data: members, ok } = await api.get(`/referent/structure/${id}`);
+            setLoading(false);
             if (!ok) return;
             members
               .filter((m) => ["supervisor", "responsible"].includes(m.role))
@@ -102,6 +108,7 @@ export default (props) => {
               });
           }
         } catch (e) {
+          setLoading(false);
           console.log(e);
           toastr.error("Erreur!");
         }
@@ -111,7 +118,15 @@ export default (props) => {
         <Wrapper>
           <Header>
             <Title>{defaultValue ? values.name : "Création d'une structure"}</Title>
-            <SaveButton handleChange={handleChange} handleSubmit={handleSubmit} defaultValue={defaultValue} />
+            <LoadingButton
+              onClick={() => {
+                handleChange({ target: { value: "VALIDATED", name: "status" } });
+                handleSubmit();
+              }}
+              loading={loading}
+            >
+              {defaultValue ? "Enregistrer les modifications" : "Créer la structure"}
+            </LoadingButton>
           </Header>
           {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas continuer car tous les champs ne sont pas correctement renseignés.</h3> : null}
           <Box>
@@ -330,27 +345,21 @@ export default (props) => {
           </Box>
           {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas continuer car tous les champs ne sont pas correctement renseignés.</h3> : null}
           <Header style={{ justifyContent: "flex-end" }}>
-            <SaveButton handleChange={handleChange} handleSubmit={handleSubmit} defaultValue={defaultValue} />
+            <LoadingButton
+              onClick={() => {
+                handleChange({ target: { value: "VALIDATED", name: "status" } });
+                handleSubmit();
+              }}
+              loading={loading}
+            >
+              {defaultValue ? "Enregistrer les modifications" : "Créer la structure"}
+            </LoadingButton>
           </Header>
         </Wrapper>
       )}
     </Formik>
   );
 };
-
-const SaveButton = ({ handleChange, handleSubmit, defaultValue }) => (
-  <ButtonContainer>
-    <button
-      type="submit"
-      onClick={() => {
-        handleChange({ target: { value: "VALIDATED", name: "status" } });
-        handleSubmit();
-      }}
-    >
-      {defaultValue ? "Enregistrer les modifications" : "Créer la structure"}
-    </button>
-  </ButtonContainer>
-);
 
 const Wrapper = styled.div`
   padding: 3rem;
