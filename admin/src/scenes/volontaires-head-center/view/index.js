@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Switch, Route } from "react-router-dom";
 
 import api from "../../../services/api";
-import Details from "./details";
+import Details from "../../../components/volontaires-view/Details";
+import Wrapper from "./wrapper";
 import Phase1 from "./phase1";
 
 export default ({ ...props }) => {
@@ -21,7 +22,16 @@ export default ({ ...props }) => {
   return (
     <Switch>
       <Route path="/volontaire/:id/phase1" component={() => <Phase1 young={young} />} />
-      <Route path="/volontaire/:id" component={() => <Details young={young} />} />
+      <Route
+        path="/volontaire/:id"
+        component={() => (
+          <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
+            <Wrapper young={young} tab="details">
+              <Details young={young} />
+            </Wrapper>
+          </div>
+        )}
+      />
     </Switch>
   );
 };
