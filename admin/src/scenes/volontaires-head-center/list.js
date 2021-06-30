@@ -47,10 +47,15 @@ export default () => {
   const user = useSelector((state) => state.Auth.user);
   const [volontaire, setVolontaire] = useState(null);
   const [meetingPoints, setMeetingPoints] = useState(null);
+  const [center, setCenter] = useState(null);
   useEffect(() => {
     (async () => {
       const { data } = await api.get("/meeting-point/all");
       setMeetingPoints(data);
+    })();
+    (async () => {
+      const { data } = await api.get(`/cohesion-center/${user.cohesionCenterId}`);
+      setCenter(data);
     })();
   }, []);
   const getDefaultQuery = () => ({
@@ -69,6 +74,24 @@ export default () => {
                 <Title>Volontaires</Title>
               </div>
               <div style={{ display: "flex" }}>
+                <ExportComponent
+                  title="Export pour les cas particuliers"
+                  defaultQuery={getExportQuery}
+                  collection="volontaires_cas_particuliers"
+                  react={{ and: FILTERS }}
+                  transform={(data) => {
+                    return {
+                      _id: data._id,
+                      Prénom: data.firstName,
+                      Nom: data.lastName,
+                      "Code centre": center.code || "",
+                      "Nom du centre": center.name || "",
+                      "Présence au séjour": data.cohesionStayPresence || "",
+                      "Cas particulier qui valide sa JDC malgré son absence (oui/non)": "",
+                      "Commentaires (Décrivez pourquoi)": "",
+                    };
+                  }}
+                />
                 <ExportComponent
                   defaultQuery={getExportQuery}
                   title="Exporter les volontaires"
