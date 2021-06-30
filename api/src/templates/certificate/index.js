@@ -5,10 +5,10 @@ const { getSignedUrl } = require("../../utils");
 
 const getLocationCohesionCenter = (y) => {
   let t = "";
-  if (y.cohestionCenterCity) {
-    t = `à ${y.cohestionCenterCity}`;
-    if (y.cohestionCenterZip) {
-      t += `, ${y.cohestionCenterZip}`;
+  if (y.cohesionCenterCity) {
+    t = `à ${y.cohesionCenterCity}`;
+    if (y.cohesionCenterZip) {
+      t += `, ${y.cohesionCenterZip}`;
     }
   }
   return t;
