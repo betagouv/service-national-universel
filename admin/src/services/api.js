@@ -76,7 +76,7 @@ class api {
           mode: "cors",
           method: "POST",
           credentials: "include",
-          headers: { "Content-Type": "application/json", Authorization: this.token },
+          headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}` },
           body: typeof body === "string" ? body : JSON.stringify(body),
         });
         if (response.status !== 200) return reject({});
