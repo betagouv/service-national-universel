@@ -84,14 +84,14 @@ export default (props) => {
           if (!id) {
             values.placesLeft = values.placesTotal;
             const { ok, data, code } = await api.post("/structure", values);
+            setLoading(false);
             if (!ok) return toastr.error("Une erreur s'est produite lors de la création de la structure", translate(code));
             id = data._id;
-            setLoading(false);
             toastr.success("Structure créée");
           } else {
             await api.put(`/structure/${values._id}`, values);
-            history.push(`/structure/${values._id}`);
             setLoading(false);
+            history.push(`/structure/${values._id}`);
             toastr.success("Structure mise à jour");
           }
 

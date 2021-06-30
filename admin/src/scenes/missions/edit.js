@@ -134,8 +134,8 @@ export default (props) => {
             <Title>{defaultValue ? values.name : "Création d'une mission"}</Title>
             {!defaultValue ? (
               <LoadingButton
-                color={"white"}
-                textColor={"black"}
+                color={"#fff"}
+                textColor={"#767697"}
                 loading={loading}
                 onClick={() => {
                   handleChange({ target: { value: "DRAFT", name: "status" } });
@@ -381,9 +381,9 @@ export default (props) => {
             <Header style={{ justifyContent: "flex-end" }}>
               {!defaultValue ? (
                 <LoadingButton
-                  color={"white"}
+                  color={"#fff"}
+                  textColor={"#767697"}
                   loading={loading}
-                  textColor={"black"}
                   onClick={() => {
                     handleChange({ target: { value: "DRAFT", name: "status" } });
                     handleSubmit();

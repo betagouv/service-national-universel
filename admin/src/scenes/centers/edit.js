@@ -11,9 +11,11 @@ import Loader from "../../components/Loader";
 import { Box, BoxContent, BoxHeadTitle } from "../../components/box";
 import Item from "./components/Item";
 import Select from "./components/Select";
+import LoadingButton from "../../components/buttons/LoadingButton";
 
 export default (props) => {
   const [defaultValue, setDefaultValue] = useState(null);
+  const [loading, setLoading] = useState(false);
   const history = useHistory();
   const isNew = !props?.match?.params?.id;
 
@@ -39,12 +41,14 @@ export default (props) => {
         try {
           if (isNew) values.placesLeft = values.placesTotal;
           else values.placesLeft += values.placesTotal - defaultValue.placesTotal;
-
+          setLoading(true);
           const { ok, code, data } = await api[values._id ? "put" : "post"]("/cohesion-center", values);
+          setLoading(false);
           if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de ce centre !!", translate(code));
           history.push(`/centre/${data._id}`);
           toastr.success("Centre enregistré");
         } catch (e) {
+          setLoading(false);
           return toastr.error("Une erreur s'est produite lors de l'enregistrement de ce centre", e?.error?.message);
         }
       }}
@@ -53,9 +57,9 @@ export default (props) => {
         <div>
           <Header>
             <Title>{defaultValue ? values.name : "Création d'un centre"}</Title>
-            <ButtonContainer>
-              <button onClick={handleSubmit}>{defaultValue ? "Enregistrer les modifications" : "Créer le centre"}</button>
-            </ButtonContainer>
+            <LoadingButton onClick={handleSubmit} loading={loading}>
+              {defaultValue ? "Enregistrer les modifications" : "Créer le centre"}
+            </LoadingButton>
           </Header>
           <Wrapper>
             {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas enregistrer ce centre car tous les champs ne sont pas correctement renseignés.</h3> : null}
@@ -131,9 +135,9 @@ export default (props) => {
             </Row>
             {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas proposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
             <Header style={{ justifyContent: "flex-end" }}>
-              <ButtonContainer>
-                <button onClick={handleSubmit}>{defaultValue ? "Enregistrer les modifications" : "Créer le centre"}</button>
-              </ButtonContainer>
+              <LoadingButton onClick={handleSubmit} loading={loading}>
+                {defaultValue ? "Enregistrer les modifications" : "Créer le centre"}
+              </LoadingButton>
             </Header>
           </Wrapper>
         </div>
@@ -172,28 +176,4 @@ const Title = styled.div`
   font-size: 24px;
   margin-bottom: 10px;
   flex: 1;
-`;
-
-const ButtonContainer = styled.div`
-  button {
-    background-color: #5245cc;
-    color: #fff;
-    &.white-button {
-      color: #000;
-      background-color: #fff;
-      :hover {
-        background: #ddd;
-      }
-    }
-    margin-left: 1rem;
-    border: none;
-    border-radius: 5px;
-    padding: 7px 30px;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    :hover {
-      background: #372f78;
-    }
-  }
 `;

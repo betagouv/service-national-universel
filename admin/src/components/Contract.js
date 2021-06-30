@@ -10,12 +10,11 @@ import api from "../services/api";
 import DownloadAttestationButton from "./buttons/DownloadAttestationButton";
 import Loader from "./Loader";
 import { Box } from "./box";
-import VioletHeaderButton from "./buttons/VioletHeaderButton";
-import WhiteHeaderButton from "./buttons/WhiteHeaderButton";
 import { toastr } from "react-redux-toastr";
 import { useParams } from "react-router";
 import Badge from "./Badge";
 import DownloadContractButton from "./buttons/DownloadContractButton";
+import LoadingButton from "./buttons/LoadingButton";
 
 export default ({ young, admin }) => {
   const history = useHistory();
@@ -31,6 +30,7 @@ export default ({ young, admin }) => {
   const [tutor, setTutor] = useState(null);
   const [managerDepartment, setManagerDepartment] = useState(null);
   const [structure, setStructure] = useState(null);
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
     const getApplication = async () => {
       if (!young) return;
@@ -197,6 +197,7 @@ export default ({ young, admin }) => {
           initialValues={initialValues}
           onSubmit={async (values, actions) => {
             try {
+              setLoading(true);
               const { ok, code } = await api.post(`/contract`, {
                 ...values,
                 youngId: young._id,
@@ -206,6 +207,7 @@ export default ({ young, admin }) => {
                 tutorId: tutor._id,
                 isYoungAdult: isYoungAdult ? "true" : "false",
               });
+              setLoading(false);
               if (!ok) return toastr.error("Erreur !", translate(code));
               if (values.sendMessage) {
                 toastr.success("Le message a été envoyé aux parties prenantes");
@@ -215,6 +217,7 @@ export default ({ young, admin }) => {
               // Refresh
               history.go(0);
             } catch (e) {
+              setLoading(false);
               toastr.error("Erreur !", translate(e.code));
             }
             actions.setSubmitting(false);
@@ -653,7 +656,7 @@ export default ({ young, admin }) => {
                   </Bloc>
                 </Box>
                 <div style={{ display: "flex", justifyContent: "center" }}>
-                  <WhiteHeaderButton
+                  <LoadingButton
                     onClick={async () => {
                       const erroredFields = await validateForm();
                       if (Object.keys(erroredFields).length) toastr.error("Il y a des erreurs dans le formulaire");
@@ -669,21 +672,24 @@ export default ({ young, admin }) => {
                         handleSubmit();
                       }
                     }}
-                    type="submit"
+                    color={"#fff"}
+                    textColor={"#767697"}
+                    loading={loading}
                   >
-                    <p>Enregistrer les modifications</p>
-                  </WhiteHeaderButton>
+                    Enregistrer les modifications
+                  </LoadingButton>
                   {contract?.invitationSent !== "true" && (
-                    <VioletHeaderButton
+                    <LoadingButton
                       onClick={async () => {
                         const erroredFields = await validateForm();
                         if (Object.keys(erroredFields).length) toastr.error("Il y a des erreurs dans le formulaire");
                         setFieldValue("sendMessage", true, false);
                         handleSubmit();
                       }}
+                      loading={loading}
                     >
-                      <p>Envoyer une demande de validation aux {values.parent2Email ? "4" : "3"} parties prenantes</p>
-                    </VioletHeaderButton>
+                      Envoyer une demande de validation aux {values.parent2Email ? "4" : "3"} parties prenantes
+                    </LoadingButton>
                   )}
                 </div>
                 {Object.keys(errors).length ? (
@@ -698,9 +704,11 @@ export default ({ young, admin }) => {
         </Formik>
       )}
       {young.statusPhase2 === "VALIDATED" ? (
-        <DownloadAttestationButton young={young} uri="2">
-          Télécharger l'attestation de réalisation de la phase 2
-        </DownloadAttestationButton>
+        <div style={{ marginTop: "2rem" }}>
+          <DownloadAttestationButton young={young} uri="2">
+            Télécharger l'attestation de réalisation de la phase 2
+          </DownloadAttestationButton>
+        </div>
       ) : null}
     </>
   );
