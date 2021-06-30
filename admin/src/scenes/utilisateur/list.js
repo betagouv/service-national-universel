@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
-import { ReactiveBase, ReactiveList, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
+import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import { toastr } from "react-redux-toastr";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
@@ -15,9 +15,10 @@ import Loader from "../../components/Loader";
 const FILTERS = ["SEARCH", "ROLE", "SUBROLE", "REGION", "DEPARTMENT"];
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
-import { Filter, FilterRow, ResultTable, Table, TopResultStats, BottomResultStats, ActionBox, Header, Title, MultiLine } from "../../components/list";
+import { Filter, FilterRow, ResultTable, Table, ActionBox, Header, Title, MultiLine } from "../../components/list";
 import Badge from "../../components/Badge";
 import ExportComponent from "../../components/ExportXlsx";
+import ReactiveListComponent from "../../components/ReactiveListComponent";
 
 export default () => {
   const [responsable, setResponsable] = useState(null);
@@ -145,34 +146,9 @@ export default () => {
               </FilterRow>
             </Filter>
             <ResultTable>
-              <ReactiveList
+              <ReactiveListComponent
                 defaultQuery={getDefaultQuery}
-                componentId="result"
                 react={{ and: FILTERS }}
-                pagination={true}
-                paginationAt="both"
-                innerClass={{ pagination: "pagination" }}
-                size={30}
-                showLoader={true}
-                dataField="createdAt"
-                sortBy="desc"
-                loader={<div style={{ padding: "0 20px" }}>Chargement...</div>}
-                renderNoResults={() => <div style={{ padding: "10px 25px" }}>Aucun résultat.</div>}
-                onError={() => {
-                  window.location.href = "/auth?unauthorized=1";
-                }}
-                renderResultStats={(e) => {
-                  return (
-                    <>
-                      <TopResultStats>
-                        Affiche {e.displayedResults * e.currentPage + 1} à {e.displayedResults * (e.currentPage + 1)} résultats sur {e.numberOfResults} résultats
-                      </TopResultStats>
-                      <BottomResultStats>
-                        Affiche {e.displayedResults * e.currentPage + 1} à {e.displayedResults * (e.currentPage + 1)} résultats sur {e.numberOfResults} résultats
-                      </BottomResultStats>
-                    </>
-                  );
-                }}
                 render={({ data }) => (
                   <Table>
                     <thead>

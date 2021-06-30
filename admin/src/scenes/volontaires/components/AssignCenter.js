@@ -1,12 +1,13 @@
 import React, { useState } from "react";
 import { toastr } from "react-redux-toastr";
-import { ReactiveBase, ReactiveList, DataSearch } from "@appbaseio/reactivesearch";
+import { ReactiveBase, DataSearch } from "@appbaseio/reactivesearch";
 
 import { apiURL } from "../../../config";
 import api from "../../../services/api";
 import { Filter, ResultTable, BottomResultStats, Table, MultiLine } from "../../../components/list";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
 import { translate } from "../../../utils";
+import ReactiveListComponent from "../../../components/ReactiveListComponent";
 
 export default ({ young, onAffect, onClick }) => {
   const FILTERS = ["SEARCH"];
@@ -47,19 +48,11 @@ export default ({ young, onAffect, onClick }) => {
             />
           </Filter>
           <ResultTable hide={!searchedValue}>
-            <ReactiveList
-              componentId="result"
+            <ReactiveListComponent
               scrollOnChange={false}
               react={{ and: FILTERS }}
-              pagination={true}
               paginationAt="bottom"
-              innerClass={{ pagination: "pagination" }}
               size={3}
-              showLoader={true}
-              dataField="createdAt"
-              sortBy="desc"
-              loader={<div style={{ padding: "0 20px" }}>Chargement...</div>}
-              renderNoResults={() => <div style={{ padding: "10px 25px" }}>Aucun Résultat.</div>}
               renderResultStats={(e) => {
                 return (
                   <div>

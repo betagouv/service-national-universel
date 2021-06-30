@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ReactiveBase, ReactiveList, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
+import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
 import relativeTime from "dayjs/plugin/relativeTime";
 import dayjs from "dayjs";
@@ -18,7 +18,8 @@ import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS, getDepar
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
 const FILTERS = ["SEARCH", "STATUS", "REGION", "DEPARTMENT", "SCHOOL"];
-import { Filter, FilterRow, ResultTable, Table, TopResultStats, BottomResultStats, ActionBox, Header, Title, MultiLine } from "../../components/list";
+import { Filter, FilterRow, ResultTable, Table, ActionBox, Header, Title, MultiLine } from "../../components/list";
+import ReactiveListComponent from "../../components/ReactiveListComponent";
 
 export default () => {
   const [young, setYoung] = useState(null);
@@ -155,36 +156,11 @@ export default () => {
               </FilterRow>
             </Filter>
             <ResultTable>
-              <ReactiveList
+              <ReactiveListComponent
                 defaultQuery={getDefaultQuery}
-                componentId="result"
                 react={{ and: FILTERS }}
-                pagination={true}
-                paginationAt="both"
-                innerClass={{ pagination: "pagination" }}
-                // renderPagination={(e) => <ResultFooter {...e} />}
-                size={30}
-                showLoader={true}
                 sortBy="desc"
                 dataField="lastStatusAt"
-                loader={<div style={{ padding: "0 20px" }}>Chargement...</div>}
-                innerClass={{ pagination: "pagination" }}
-                renderNoResults={() => <div />}
-                onError={() => {
-                  window.location.href = "/auth?unauthorized=1";
-                }}
-                renderResultStats={(e) => {
-                  return (
-                    <>
-                      <TopResultStats>
-                        Affiche {e.displayedResults * e.currentPage + 1} à {e.displayedResults * (e.currentPage + 1)} résultats sur {e.numberOfResults} résultats
-                      </TopResultStats>
-                      <BottomResultStats>
-                        Affiche {e.displayedResults * e.currentPage + 1} à {e.displayedResults * (e.currentPage + 1)} résultats sur {e.numberOfResults} résultats
-                      </BottomResultStats>
-                    </>
-                  );
-                }}
                 render={({ data, resultStats }) => {
                   return (
                     <Table>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ReactiveBase, ReactiveList, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
+import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 
 import { apiURL } from "../../../config";
 import SelectStatus from "../../../components/selectStatus";
@@ -10,9 +10,10 @@ import Panel from "../../volontaires/panel";
 import { getFilterLabel, YOUNG_STATUS_PHASE1, translate, formatDateFR, isInRuralArea, formatLongDateFR, getAge, ES_NO_LIMIT } from "../../../utils";
 import Loader from "../../../components/Loader";
 import ExportComponent from "../../../components/ExportXlsx";
-import { Filter, FilterRow, ResultTable, Table, TopResultStats, BottomResultStats, MultiLine } from "../../../components/list";
+import { Filter, FilterRow, ResultTable, Table, MultiLine } from "../../../components/list";
 import DownloadAllAttestation from "../../../components/buttons/DownloadAllAttestation";
 const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_PHASE_1", "STATUS_PHASE_2", "STATUS_PHASE_3", "STATUS_APPLICATION", "LOCATION"];
+import ReactiveListComponent from "../../../components/ReactiveListComponent";
 
 export default ({ center, updateCenter }) => {
   const [young, setYoung] = useState();
@@ -221,32 +222,11 @@ export default ({ center, updateCenter }) => {
                   </FilterRow>
                 </Filter>
                 <ResultTable>
-                  <ReactiveList
+                  <ReactiveListComponent
                     defaultQuery={getDefaultQuery}
-                    componentId="result"
                     react={{ and: FILTERS }}
-                    pagination={true}
-                    paginationAt="both"
-                    innerClass={{ pagination: "pagination" }}
-                    size={30}
-                    showLoader={true}
                     dataField="lastName.keyword"
                     sortBy="asc"
-                    loader={<div style={{ padding: "0 20px" }}>Chargement...</div>}
-                    innerClass={{ pagination: "pagination" }}
-                    renderNoResults={() => <div style={{ padding: "10px 25px" }}>Aucun résultat.</div>}
-                    renderResultStats={(e) => {
-                      return (
-                        <>
-                          <TopResultStats>
-                            Affiche {e.displayedResults * e.currentPage + 1} à {e.displayedResults * (e.currentPage + 1)} résultats sur {e.numberOfResults} résultats
-                          </TopResultStats>
-                          <BottomResultStats>
-                            Affiche {e.displayedResults * e.currentPage + 1} à {e.displayedResults * (e.currentPage + 1)} résultats sur {e.numberOfResults} résultats
-                          </BottomResultStats>
-                        </>
-                      );
-                    }}
                     render={({ data }) => (
                       <Table>
                         <thead>
