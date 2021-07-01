@@ -48,6 +48,7 @@
     "file-saver": "^2.0.5",
     "forcedomain": "^2.2.2",
     "formik": "^2.1.5",
+    "helmet": "^4.6.0",
     "hsts": "^2.2.0",
     "isomorphic-fetch": "^3.0.0",
     "less": "^4.1.0",
