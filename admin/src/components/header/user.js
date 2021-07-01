@@ -25,7 +25,7 @@ export default () => {
       <Dropdown>
         <div>
           <MenuToggle>
-            <Avatar onClick={() => setOpen(!open)} name={`${user.firstName} ${user.lastName}`} />
+            <Avatar onClick={() => setOpen(!open)} name={`${user.firstName} ${user.lastName}`} menuOpened={open} />
           </MenuToggle>
         </div>
         <Menu open={open}>

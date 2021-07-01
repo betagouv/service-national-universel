@@ -9,10 +9,10 @@ const getInitials = (word = "") => {
     .substring(0, 3);
 };
 
-export default ({ name, logo, size = "medium", onClick }) => {
+export default ({ name, logo, size = "medium", onClick, menuOpened }) => {
   if (!logo) {
     return (
-      <Round size={size} onClick={onClick}>
+      <Round size={size} onClick={onClick} menuOpened={menuOpened}>
         <div className="initials">{getInitials(name)}</div>
       </Round>
     );
@@ -64,4 +64,5 @@ const Round = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  ${({ menuOpened }) => (menuOpened ? "box-shadow: rgba(0, 0, 0, 0.4) 0px 2px 12px 0px;" : "")};
 `;
