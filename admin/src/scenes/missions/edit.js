@@ -172,7 +172,7 @@ export default (props) => {
                       <p style={{ color: "#a0aec1", fontSize: 12 }}>
                         Privilégiez une phrase précisant l'action du volontaire.
                         <br />
-                        Exemple: "Je fais les courses de produits pour mes voisons les plus fragiles"
+                        Exemple: "Je fais les courses de produits pour mes voisins les plus fragiles"
                       </p>
                       <Field validate={(v) => !v && requiredMessage} value={values.name} onChange={handleChange} name="name" placeholder="Nom de votre mission" />
                       <ErrorMessage errors={errors} touched={touched} name="name" />
