@@ -104,10 +104,10 @@ export default () => {
                 componentId="SEARCH"
                 dataField={["name", "city", "zip"]}
                 react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
-                // fuzziness={2}
                 style={{ flex: 2 }}
                 innerClass={{ input: "searchbox" }}
                 autosuggest={false}
+                queryFormat="and"
               />
               <FilterRow>
                 <MultiDropdownList
