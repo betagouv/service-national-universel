@@ -39,7 +39,7 @@ export default ({ setOpen, open, label = "Inviter un référent", role = "" }) =
                   const obj = { ...values };
                   if (obj.department && !obj.region) obj.region = department2region[obj.department];
 
-                  await api.post(`/referent/signup_invite/${role}`, obj);
+                  await api.post(`/referent/signup_invite/${obj.role}`, obj);
                   toastr.success("Invitation envoyée");
                   setOpen();
                   setOpen(false);

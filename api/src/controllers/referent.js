@@ -112,6 +112,9 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
     } else if (reqTemplate === "admin") {
       template = "../templates/inviteAdmin.html";
       mailObject = "Activez votre compte administrateur SNU";
+    } else if (reqTemplate === "head_center") {
+      template = "../templates/inviteHeadCenter.html";
+      mailObject = "Activez votre compte de chef de centre SNU";
     }
     let htmlContent = fs.readFileSync(path.resolve(__dirname, template)).toString();
     htmlContent = htmlContent.replace(/{{toName}}/g, `${obj.firstName} ${obj.lastName}`);
@@ -119,6 +122,7 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
     htmlContent = htmlContent.replace(/{{department}}/g, `${obj.department}`);
     htmlContent = htmlContent.replace(/{{region}}/g, `${obj.region}`);
     htmlContent = htmlContent.replace(/{{structureName}}/g, req.body.structureName);
+    htmlContent = htmlContent.replace(/{{centerName}}/g, req.body.centerName || "");
     htmlContent = htmlContent.replace(/{{cta}}/g, `${config.ADMIN_URL}/auth/signup/invite?token=${invitation_token}`);
 
     await sendEmail({ name: `${obj.firstName} ${obj.lastName}`, email: obj.email }, mailObject, htmlContent);
