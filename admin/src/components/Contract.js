@@ -173,7 +173,7 @@ export default ({ young, admin }) => {
           </div>
           <hr />
           <div style={{ display: "grid", gridAutoColumns: "1fr", gridAutoFlow: "column" }}>
-            <ContractStatusBadge title="Représentant de l'Etat" contract={contract} status={contract?.projectManagerStatus} token={contract?.projectManagerStatus} />
+            <ContractStatusBadge title="Représentant de l'Etat" contract={contract} status={contract?.projectManagerStatus} token={contract?.projectManagerToken} />
             <ContractStatusBadge title="Représentant structure" contract={contract} status={contract?.structureManagerStatus} token={contract?.structureManagerToken} />
             {!isYoungAdult ? (
               <>
