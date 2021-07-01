@@ -43,7 +43,7 @@ export default () => {
                 Télécharger mon attestation {">"}
               </DownloadAttestationButton>
             </p>
-            {young.statusPhase1 === "DONE" && young.statusPhase2 === "VALIDATED" ? (
+            {/* {young.statusPhase1 === "DONE" && young.statusPhase2 === "VALIDATED" ? (
               <>
                 <Separator />
                 <p>
@@ -65,7 +65,7 @@ export default () => {
                   </DownloadAttestationButton>
                 </p>
               </>
-            ) : null}
+            ) : null} */}
           </div>
           <div className="thumb" />
         </Hero>

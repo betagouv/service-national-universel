@@ -161,13 +161,13 @@ export default (props) => {
               </NavLink>
             </DiagorienteButton>
           )}
-          {young.statusPhase1 === "DONE" && young.statusPhase2 === "VALIDATED" ? (
+          {/* {young.statusPhase1 === "DONE" && young.statusPhase2 === "VALIDATED" ? (
             <DrawerButton>
               <DownloadAttestationButton young={young} uri="snu">
                 Télécharger mon attestation SNU
               </DownloadAttestationButton>
             </DrawerButton>
-          ) : null}
+          ) : null} */}
           <DrawerButton>
             <a href="https://www.snu.gouv.fr/foire-aux-questions-11" target="blank">
               <div className="icon">
