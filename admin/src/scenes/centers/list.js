@@ -9,7 +9,7 @@ import { apiURL } from "../../config";
 import Panel from "./panel";
 import { formatStringDate, translate, getFilterLabel, formatLongDateFR, formatDateFR, YOUNG_STATUS_COLORS, ES_NO_LIMIT } from "../../utils";
 import SelectStatusMission from "../../components/selectStatusMission";
-import VioletHeaderButton from "../../components/buttons/VioletHeaderButton";
+import VioletButton from "../../components/buttons/VioletButton";
 import Loader from "../../components/Loader";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine } from "../../components/list";
@@ -63,9 +63,9 @@ export default () => {
               />
               {user.role === "admin" ? (
                 <Link to={`/centre/create`}>
-                  <VioletHeaderButton>
+                  <VioletButton>
                     <p>Créer un nouveau centre</p>
-                  </VioletHeaderButton>
+                  </VioletButton>
                 </Link>
               ) : null}
             </Header>

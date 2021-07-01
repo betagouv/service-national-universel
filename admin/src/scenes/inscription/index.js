@@ -8,7 +8,7 @@ import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-import VioletHeaderButton from "../../components/buttons/VioletHeaderButton";
+import VioletButton from "../../components/buttons/VioletButton";
 import ExportComponent from "../../components/ExportXlsx";
 import SelectStatus from "../../components/selectStatus";
 import api from "../../services/api";
@@ -35,9 +35,9 @@ export default () => {
               <Title>Inscriptions</Title>
               <div style={{ display: "flex" }}>
                 <Link to="/volontaire/create">
-                  <VioletHeaderButton>
+                  <VioletButton>
                     <p>Nouvelle inscription</p>
-                  </VioletHeaderButton>
+                  </VioletButton>
                 </Link>
                 <ExportComponent
                   title="Exporter les inscriptions"

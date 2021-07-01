@@ -9,7 +9,7 @@ import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
 import { translate, corpsEnUniforme, formatLongDateFR, ES_NO_LIMIT } from "../../utils";
-import VioletHeaderButton from "../../components/buttons/VioletHeaderButton";
+import VioletButton from "../../components/buttons/VioletButton";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine } from "../../components/list";
 import Badge from "../../components/Badge";
@@ -56,9 +56,9 @@ export default () => {
               </div>
               <div style={{ display: "flex" }}>
                 <Link to="/structure/create">
-                  <VioletHeaderButton>
+                  <VioletButton>
                     <p>Inviter une nouvelle structure</p>
-                  </VioletHeaderButton>
+                  </VioletButton>
                 </Link>
                 <ExportComponent
                   title="Exporter les structures"
