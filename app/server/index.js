@@ -2,9 +2,12 @@ const express = require("express");
 const path = require("path");
 const hsts = require("hsts");
 const { forceDomain } = require("forcedomain");
+const helmet = require("helmet");
 
 const app = express();
 const port = 8080;
+
+app.use(helmet());
 
 app.use(function (req, res, next) {
   if (req.headers.host === "moncompte.snu.gouv.fr") {
