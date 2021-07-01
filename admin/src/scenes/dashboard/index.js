@@ -7,7 +7,7 @@ import Volontaire from "./volontaire";
 import Structure from "./structure";
 import Mission from "./missions";
 import Center from "./centers";
-import VioletHeaderButton from "../../components/buttons/VioletHeaderButton";
+import VioletButton from "../../components/buttons/VioletButton";
 import ExportAll from "./inscription/ExportAll";
 
 export default () => {
@@ -36,9 +36,9 @@ export default () => {
         </TabNavigationList>
         <div style={{ display: "flex", marginTop: "1rem" }}>
           {user.role === "admin" && currentTab === "inscriptions" ? <ExportAll /> : null}
-          <VioletHeaderButton onClick={() => print()}>
+          <VioletButton onClick={() => print()}>
             <p>Exporter les statistiques</p>
-          </VioletHeaderButton>
+          </VioletButton>
         </div>
       </TabNavigation>
       <Wrapper>

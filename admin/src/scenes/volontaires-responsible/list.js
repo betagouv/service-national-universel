@@ -8,7 +8,6 @@ import SelectStatusApplication from "../../components/selectStatusApplication";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
-import VioletHeaderButton from "../../components/buttons/VioletHeaderButton";
 import ExportComponent from "../../components/ExportXlsx";
 import Loader from "../../components/Loader";
 import { translate, getFilterLabel, formatStringLongDate, formatStringDate, getAge, ES_NO_LIMIT } from "../../utils";

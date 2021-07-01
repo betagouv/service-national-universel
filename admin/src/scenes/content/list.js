@@ -7,7 +7,7 @@ import { useSelector } from "react-redux";
 
 import ProgramCard from "./components/programCard";
 import api from "../../services/api";
-import VioletHeaderButton from "../../components/buttons/VioletHeaderButton";
+import VioletButton from "../../components/buttons/VioletButton";
 import Loader from "../../components/Loader";
 import { translate } from "../../utils";
 
@@ -36,9 +36,9 @@ export default () => {
         <div style={{ flex: 1 }}>{getTitle()}</div>
         {["referent_department", "referent_region", "admin"].includes(user.role) ? (
           <Link to="/contenu/create">
-            <VioletHeaderButton>
+            <VioletButton>
               <p>Ajouter un nouveau dispositif</p>
-            </VioletHeaderButton>
+            </VioletButton>
           </Link>
         ) : null}
       </Header>

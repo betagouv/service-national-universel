@@ -1,8 +1,8 @@
 import styled from "styled-components";
 
-const VioletButtonHeader = styled.div`
+const VioletButton = styled.div`
   > * {
-    background-color: #fff;
+    background-color: #5245cc;
     border: none;
     border-radius: 5px;
     padding: 7px 30px;
@@ -10,12 +10,12 @@ const VioletButtonHeader = styled.div`
     margin-left: 1rem;
     font-size: 14px;
     font-weight: 700;
-    color: #767697;
+    color: #fff;
     cursor: pointer;
     :hover {
-      background: #eee;
+      background: #372f78;
     }
   }
 `;
 
-export default VioletButtonHeader;
+export default VioletButton;
