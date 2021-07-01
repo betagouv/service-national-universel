@@ -9,25 +9,15 @@ import FilterDepartment from "../components/FilterDepartment";
 
 import Status from "./status";
 
-import { YOUNG_STATUS, REFERENT_ROLES } from "../../../utils";
+import { YOUNG_STATUS } from "../../../utils";
 
 export default () => {
-  const [filter, setFilter] = useState({ status: Object.keys(YOUNG_STATUS), region: "", department: "", cohort: "2021" });
   const user = useSelector((state) => state.Auth.user);
+  const [filter, setFilter] = useState({ status: Object.keys(YOUNG_STATUS).filter((e) => e !== "IN_PROGRESS"), region: user.region, department: user.department, cohort: "2021" });
 
   function updateFilter(n) {
     setFilter({ ...filter, ...n });
   }
-
-  useEffect(() => {
-    const status = Object.keys(YOUNG_STATUS).filter((e) => e !== "IN_PROGRESS");
-    if (user.role === REFERENT_ROLES.REFERENT_DEPARTMENT) {
-      updateFilter({ department: user.department, status });
-    }
-    if (user.role === REFERENT_ROLES.REFERENT_REGION) {
-      updateFilter({ region: user.region, status });
-    }
-  }, []);
 
   return (
     <>
