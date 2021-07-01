@@ -30,7 +30,7 @@ export default ({ young, admin }) => {
   const [tutor, setTutor] = useState(null);
   const [managerDepartment, setManagerDepartment] = useState(null);
   const [structure, setStructure] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loadings, setLoadings] = useState([false, false]);
   useEffect(() => {
     const getApplication = async () => {
       if (!young) return;
@@ -197,7 +197,7 @@ export default ({ young, admin }) => {
           initialValues={initialValues}
           onSubmit={async (values, actions) => {
             try {
-              setLoading(true);
+              values.sendMessage ? setLoadings([false, true]) : setLoadings([true, false]);
               const { ok, code } = await api.post(`/contract`, {
                 ...values,
                 youngId: young._id,
@@ -207,7 +207,7 @@ export default ({ young, admin }) => {
                 tutorId: tutor._id,
                 isYoungAdult: isYoungAdult ? "true" : "false",
               });
-              setLoading(false);
+              setLoadings([false, false]);
               if (!ok) return toastr.error("Erreur !", translate(code));
               if (values.sendMessage) {
                 toastr.success("Le message a été envoyé aux parties prenantes");
@@ -217,7 +217,7 @@ export default ({ young, admin }) => {
               // Refresh
               history.go(0);
             } catch (e) {
-              setLoading(false);
+              setLoadings([false, false]);
               toastr.error("Erreur !", translate(e.code));
             }
             actions.setSubmitting(false);
@@ -674,7 +674,8 @@ export default ({ young, admin }) => {
                     }}
                     color={"#fff"}
                     textColor={"#767697"}
-                    loading={loading}
+                    loading={loadings[0]}
+                    disabled={loadings[1]}
                   >
                     Enregistrer les modifications
                   </LoadingButton>
@@ -686,7 +687,8 @@ export default ({ young, admin }) => {
                         setFieldValue("sendMessage", true, false);
                         handleSubmit();
                       }}
-                      loading={loading}
+                      loading={loadings[1]}
+                      disabled={loadings[0]}
                     >
                       Envoyer une demande de validation aux {values.parent2Email ? "4" : "3"} parties prenantes
                     </LoadingButton>

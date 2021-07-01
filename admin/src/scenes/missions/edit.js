@@ -21,7 +21,7 @@ export default (props) => {
   const [structure, setStructure] = useState();
   const [referents, setReferents] = useState([]);
   const [showTutor, setShowTutor] = useState();
-  const [loading, setLoading] = useState(false);
+  const [loadings, setLoadings] = useState([false, false]);
   const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
   const isNew = !props?.match?.params?.id;
@@ -100,7 +100,7 @@ export default (props) => {
         }
       }
       onSubmit={async (values) => {
-        setLoading(true);
+        values.status === "DRAFT" ? setLoadings([true, false]) : setLoadings([false, true]);
         //if new mission, init placesLeft to placesTotal
         if (isNew) values.placesLeft = values.placesTotal;
         //if edit mission, add modified delta to placesLeft
@@ -118,12 +118,12 @@ export default (props) => {
             values.location = await putLocation(values.city, values.zip);
           }
           const { ok, code, data: mission } = await api[values._id ? "put" : "post"]("/mission", values);
-          setLoading(false);
+          setLoadings([false, false]);
           if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", translate(code));
           history.push(`/mission/${mission._id}`);
           toastr.success("Mission enregistrée");
         } catch (e) {
-          setLoading(false);
+          setLoading([false, false]);
           return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", e?.error?.message);
         }
       }}
@@ -136,7 +136,8 @@ export default (props) => {
               <LoadingButton
                 color={"#fff"}
                 textColor={"#767697"}
-                loading={loading}
+                loading={loadings[0]}
+                disabled={loadings[1]}
                 onClick={() => {
                   handleChange({ target: { value: "DRAFT", name: "status" } });
                   handleSubmit();
@@ -147,7 +148,8 @@ export default (props) => {
             ) : null}
 
             <LoadingButton
-              loading={loading}
+              loading={loadings[1]}
+              disabled={loadings[0]}
               onClick={() => {
                 handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
                 handleSubmit();
@@ -383,7 +385,8 @@ export default (props) => {
                 <LoadingButton
                   color={"#fff"}
                   textColor={"#767697"}
-                  loading={loading}
+                  loading={loadings[0]}
+                  disabled={loadings[1]}
                   onClick={() => {
                     handleChange({ target: { value: "DRAFT", name: "status" } });
                     handleSubmit();
@@ -394,7 +397,8 @@ export default (props) => {
               ) : null}
 
               <LoadingButton
-                loading={loading}
+                loading={loadings[1]}
+                disabled={loadings[0]}
                 onClick={() => {
                   handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
                   handleSubmit();
