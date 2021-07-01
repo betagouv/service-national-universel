@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const mongooseElastic = require("@selego/mongoose-elastic");
+const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../es");
 const sendinblue = require("../sendinblue");
 
@@ -187,6 +188,16 @@ Schema.post("findOneAndUpdate", function (doc) {
 });
 Schema.post("remove", function (doc) {
   sendinblue.unsync(doc);
+});
+
+Schema.plugin(patchHistory, {
+  mongoose,
+  name: `${MODELNAME}Patches`,
+  trackOriginalValue: true,
+  includes: {
+    modelName: { type: String, required: true, default: MODELNAME },
+  },
+  excludes: ["/password", "/lastLoginAt", "/forgotPasswordResetToken", "/forgotPasswordResetExpires", "/invitationToken", "/invitationExpires"],
 });
 Schema.plugin(mongooseElastic(esClient), MODELNAME);
 
