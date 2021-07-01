@@ -11,9 +11,11 @@ import { translate, REFERENT_ROLES, departmentList, regionList, region2departmen
 import api from "../../services/api";
 import Loader from "../../components/Loader";
 import { Box, BoxTitle } from "../../components/box";
+import LoadingButton from "../../components/buttons/LoadingButton";
 
 export default (props) => {
   const [defaultValue, setDefaultValue] = useState(null);
+  const [loading, setLoading] = useState(false);
   const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
   const isNew = !props?.match?.params?.id;
@@ -47,12 +49,15 @@ export default (props) => {
       }
       onSubmit={async (values) => {
         try {
+          setLoading(true);
           if (values.visibility === "DEPARTMENT") values.region = department2region[values.department];
           const { ok, code, data } = await api[values._id ? "put" : "post"]("/program", values);
+          setLoading(false);
           if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette possibilité d'engagement", translate(code));
           history.push(`/contenu`);
           toastr.success("Enregistrée");
         } catch (e) {
+          setLoading(false);
           return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette possibilité d'engagement", e?.error?.message);
         }
       }}
@@ -61,9 +66,9 @@ export default (props) => {
         <div>
           <Header>
             <Title>{defaultValue ? values.name : "Nouvelle possibilité d'engagement"}</Title>
-            <ButtonContainer>
-              <button onClick={handleSubmit}>{defaultValue ? "Enregistrer les modifications" : "Enregistrer et publier"}</button>
-            </ButtonContainer>
+            <LoadingButton onClick={handleSubmit} loading={loading}>
+              {defaultValue ? "Enregistrer les modifications" : "Enregistrer et publier"}
+            </LoadingButton>
           </Header>
           <Wrapper>
             {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas proposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
@@ -168,9 +173,9 @@ export default (props) => {
             </Box>
             {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas proposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
             <Header style={{ justifyContent: "flex-end" }}>
-              <ButtonContainer>
-                <button onClick={handleSubmit}>{defaultValue ? "Enregistrer les modifications" : "Enregistrer et publier"}</button>
-              </ButtonContainer>
+              <LoadingButton onClick={handleSubmit} loading={loading}>
+                {defaultValue ? "Enregistrer les modifications" : "Enregistrer et publier"}
+              </LoadingButton>
             </Header>
           </Wrapper>
         </div>

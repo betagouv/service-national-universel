@@ -14,12 +14,14 @@ import api from "../../services/api";
 import Invite from "../structure/components/invite";
 import Loader from "../../components/Loader";
 import { Box, BoxTitle } from "../../components/box";
+import LoadingButton from "../../components/buttons/LoadingButton";
 
 export default (props) => {
   const [defaultValue, setDefaultValue] = useState(null);
   const [structure, setStructure] = useState();
   const [referents, setReferents] = useState([]);
   const [showTutor, setShowTutor] = useState();
+  const [loadings, setLoadings] = useState([false, false]);
   const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
   const isNew = !props?.match?.params?.id;
@@ -98,6 +100,7 @@ export default (props) => {
         }
       }
       onSubmit={async (values) => {
+        values.status === "DRAFT" ? setLoadings([true, false]) : setLoadings([false, true]);
         //if new mission, init placesLeft to placesTotal
         if (isNew) values.placesLeft = values.placesTotal;
         //if edit mission, add modified delta to placesLeft
@@ -115,10 +118,12 @@ export default (props) => {
             values.location = await putLocation(values.city, values.zip);
           }
           const { ok, code, data: mission } = await api[values._id ? "put" : "post"]("/mission", values);
+          setLoadings([false, false]);
           if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", translate(code));
           history.push(`/mission/${mission._id}`);
           toastr.success("Mission enregistrée");
         } catch (e) {
+          setLoading([false, false]);
           return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", e?.error?.message);
         }
       }}
@@ -127,27 +132,31 @@ export default (props) => {
         <div>
           <Header>
             <Title>{defaultValue ? values.name : "Création d'une mission"}</Title>
-            <ButtonContainer>
-              {!defaultValue ? (
-                <button
-                  className="white-button"
-                  onClick={() => {
-                    handleChange({ target: { value: "DRAFT", name: "status" } });
-                    handleSubmit();
-                  }}
-                >
-                  Enregistrer
-                </button>
-              ) : null}
-              <button
+            {!defaultValue ? (
+              <LoadingButton
+                color={"#fff"}
+                textColor={"#767697"}
+                loading={loadings[0]}
+                disabled={loadings[1]}
                 onClick={() => {
-                  handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
+                  handleChange({ target: { value: "DRAFT", name: "status" } });
                   handleSubmit();
                 }}
               >
-                {defaultValue ? "Enregistrer les modifications" : "Enregistrer et proposer la mission"}
-              </button>
-            </ButtonContainer>
+                Enregistrer
+              </LoadingButton>
+            ) : null}
+
+            <LoadingButton
+              loading={loadings[1]}
+              disabled={loadings[0]}
+              onClick={() => {
+                handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
+                handleSubmit();
+              }}
+            >
+              {defaultValue ? "Enregistrer les modifications" : "Enregistrer et proposer la mission"}
+            </LoadingButton>
           </Header>
           <Wrapper>
             {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas proposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
@@ -372,27 +381,31 @@ export default (props) => {
             </Box>
             {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas proposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
             <Header style={{ justifyContent: "flex-end" }}>
-              <ButtonContainer>
-                {!defaultValue ? (
-                  <button
-                    className="white-button"
-                    onClick={() => {
-                      handleChange({ target: { value: "DRAFT", name: "status" } });
-                      handleSubmit();
-                    }}
-                  >
-                    Enregistrer
-                  </button>
-                ) : null}
-                <button
+              {!defaultValue ? (
+                <LoadingButton
+                  color={"#fff"}
+                  textColor={"#767697"}
+                  loading={loadings[0]}
+                  disabled={loadings[1]}
                   onClick={() => {
-                    handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
+                    handleChange({ target: { value: "DRAFT", name: "status" } });
                     handleSubmit();
                   }}
                 >
-                  {defaultValue ? "Enregistrer les modifications" : "Enregistrer et proposer la mission"}
-                </button>
-              </ButtonContainer>
+                  Enregistrer
+                </LoadingButton>
+              ) : null}
+
+              <LoadingButton
+                loading={loadings[1]}
+                disabled={loadings[0]}
+                onClick={() => {
+                  handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
+                  handleSubmit();
+                }}
+              >
+                {defaultValue ? "Enregistrer les modifications" : "Enregistrer et proposer la mission"}
+              </LoadingButton>
             </Header>
           </Wrapper>
         </div>
