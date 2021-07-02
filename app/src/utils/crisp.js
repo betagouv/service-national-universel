@@ -3,6 +3,7 @@ import { translate } from "../utils";
 
 export function setCrispUserData(young) {
   if (!young) return;
+  console.log("set user crisp data");
   // feed crisp chat with useful user's info
   window.$crisp.push(["set", "session:data", ["cohorte", young.cohort]]);
   window.$crisp.push(["set", "session:data", ["departement", young.department]]);
