@@ -32,7 +32,7 @@ import api from "./services/api";
 import { SENTRY_URL, environment } from "./config";
 
 import "./index.css";
-import { YOUNG_STATUS } from "./utils";
+import { YOUNG_STATUS, setCrispUserData } from "./utils";
 
 if (environment === "production") Sentry.init({ dsn: SENTRY_URL, environment: "app" });
 
@@ -52,6 +52,7 @@ export default () => {
         if (token) api.setToken(token);
         if (ok && user) {
           dispatch(setYoung(user));
+          setCrispUserData(user);
         }
       } catch (e) {
         console.log(e);
