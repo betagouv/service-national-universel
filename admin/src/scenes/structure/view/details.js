@@ -142,6 +142,7 @@ const Wrapper = styled.div`
     }
     &-text {
       color: rgba(26, 32, 44);
+      white-space: pre-line;
     }
   }
 `;
