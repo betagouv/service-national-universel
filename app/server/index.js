@@ -7,6 +7,15 @@ const helmet = require("helmet");
 const app = express();
 const port = 8080;
 
+// Use helmet only in staging
+if (process.env.STAGING === "true") {
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+    })
+  );
+}
+
 app.use(function (req, res, next) {
   if (req.headers.host === "moncompte.snu.gouv.fr") {
     res.redirect(301, "https://inscription.snu.gouv.fr/auth");
