@@ -99,6 +99,7 @@ export const Content = styled.div`
   @media (max-width: 768px) {
     width: 100%;
     padding: 30px 15px 30px 15px;
+    text-align: center;
   }
   position: relative;
   background-color: #fff;

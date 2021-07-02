@@ -61,26 +61,41 @@ export default () => {
 };
 
 const WrapperItem = styled(Link)`
-  margin-bottom: 1rem;
+
   .info {
-    margin-left: 1.5rem;
+
     .subtitle {
-      color: #6b7280;
-      font-size: 0.875rem !important;
-      font-weight: 500;
+
     }
   }
   .title {
     display: flex;
+    flex-direction: column;
     align-items: center;
     color: #161e2e;
-    font-size: 1.25rem !important;
+    margin-bottom: 0.5rem;
     font-weight: 500;
     .link {
-      margin-right: 0.5rem;
+
       :hover {
         text-decoration: underline;
       }
     }
+  }
+  @media (min-width: 768px) {
+    margin-bottom: 1rem;
+  .info {
+    margin-left: 1.5rem;
+    .subtitle {
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+  }
+  .title {
+    font-size: 1.25rem;
+    .link {
+      margin-right: 0.5rem;
+    }
+  }
   }
 `;
