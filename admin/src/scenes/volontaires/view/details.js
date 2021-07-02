@@ -1,7 +1,6 @@
 import React from "react";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
-import { toastr } from "react-redux-toastr";
 
 import { translate as t, isInRuralArea } from "../../../utils";
 import YoungView from "./wrapper";
@@ -24,7 +23,7 @@ export default ({ young }) => {
             <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
               <Bloc title="Informations générales">
                 <Details title="Sexe" value={t(young.gender)} />
-                <Details title="E-mail" value={young.email} copy />
+                <Details title="E-mail" value={young.email} />
                 <Details title="Tel" value={young.phone} />
                 <Details title="Région" value={young.region} />
                 <Details title="Dép" value={young.department} />
@@ -174,23 +173,13 @@ const Bloc = ({ children, title, last }) => {
   );
 };
 
-const Details = ({ title, value, copy }) => {
+const Details = ({ title, value }) => {
   if (!value) return <div />;
   if (typeof value === "function") value = value();
   return (
     <div className="detail">
       <div className="detail-title">{`${title} :`}</div>
       <div className="detail-text">{value}</div>
-      {copy ? (
-        <div
-          className="icon"
-          icon={require(`../../../assets/copy.svg`)}
-          onClick={() => {
-            navigator.clipboard.writeText(value);
-            toastr.success(`'${title}' a été copié dans le presse papier.`);
-          }}
-        />
-      ) : null}
     </div>
   );
 };
@@ -212,15 +201,5 @@ const Wrapper = styled.div`
     &-text {
       color: rgba(26, 32, 44);
     }
-  }
-  .icon {
-    cursor: pointer;
-    margin: 0 0.5rem;
-    width: 15px;
-    height: 15px;
-    background: ${`url(${require("../../../assets/copy.svg")})`};
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 15px 15px;
   }
 `;
