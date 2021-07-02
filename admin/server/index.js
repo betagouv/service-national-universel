@@ -7,6 +7,15 @@ const helmet = require("helmet");
 const app = express();
 const port = 8080;
 
+// Use helmet only in staging
+if (process.env.STAGING === "true") {
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+    })
+  );
+}
+
 app.use(
   forceDomain({
     hostname: "admin.snu.gouv.fr",
