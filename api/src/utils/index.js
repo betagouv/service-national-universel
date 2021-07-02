@@ -36,6 +36,28 @@ function uploadFile(path, file) {
   });
 }
 
+function deleteFile(name) {
+  return new Promise((resolve, reject) => {
+    const s3bucket = new AWS.S3({ endpoint: CELLAR_ENDPOINT, accessKeyId: CELLAR_KEYID, secretAccessKey: CELLAR_KEYSECRET });
+    const params = { Bucket: BUCKET_NAME, Key: name };
+    s3bucket.deleteObject(params, (err, data) => {
+      if (err) return reject(`error in callback:${err}`);
+      resolve(data);
+    });
+  });
+}
+
+function listFiles(path) {
+  return new Promise((resolve, reject) => {
+    const s3bucket = new AWS.S3({ endpoint: CELLAR_ENDPOINT, accessKeyId: CELLAR_KEYID, secretAccessKey: CELLAR_KEYSECRET });
+    const params = { Bucket: BUCKET_NAME, Prefix: path };
+    s3bucket.listObjects(params, (err, data) => {
+      if (err) return reject(`error in callback:${err}`);
+      resolve(data.Contents);
+    });
+  });
+}
+
 const getFile = (name) => {
   const p = new Promise((resolve, reject) => {
     const s3bucket = new AWS.S3({ endpoint: CELLAR_ENDPOINT, accessKeyId: CELLAR_KEYID, secretAccessKey: CELLAR_KEYSECRET });
@@ -325,4 +347,6 @@ module.exports = {
   sendAutoAffectationMail,
   updatePlacesBus,
   sendAutoCancelMeetingPoint,
+  listFiles,
+  deleteFile,
 };
