@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
+import { toastr } from "react-redux-toastr";
 
 import { YOUNG_SITUATIONS, YOUNG_PHASE, translate as t, YOUNG_STATUS, isInRuralArea, getAge, formatDateFR } from "../../utils";
 import { appURL } from "../../config";
@@ -73,7 +74,7 @@ export default ({ onChange, value }) => {
         </Info>
       ) : null}
       <Info title="Coordonnées" id={young._id}>
-        <Details title="E-mail" value={young.email} />
+        <Details title="E-mail" value={young.email} copy />
         <Details title="Tel" value={young.phone} />
         <Details title="Région" value={young.region} />
         <Details title="Dép" value={young.department} />
@@ -138,13 +139,23 @@ const Info = ({ children, title, id }) => {
   );
 };
 
-const Details = ({ title, value }) => {
+const Details = ({ title, value, copy }) => {
   if (!value) return <div />;
   if (typeof value === "function") value = value();
   return (
     <div className="detail">
       <div className="detail-title">{`${title} :`}</div>
       <div className="detail-text">{value}</div>
+      {copy ? (
+        <div
+          className="icon"
+          icon={require(`../../assets/copy.svg`)}
+          onClick={() => {
+            navigator.clipboard.writeText(value);
+            toastr.success(`'${title}' a été copié dans le presse papier.`);
+          }}
+        />
+      ) : null}
     </div>
   );
 };

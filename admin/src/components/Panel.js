@@ -87,4 +87,14 @@ export default styled.div`
       font-style: italic;
     }
   }
+  .icon {
+    cursor: pointer;
+    margin: 0 0.5rem;
+    width: 15px;
+    height: 15px;
+    background: ${`url(${require("../assets/copy.svg")})`};
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 15px 15px;
+  }
 `;
