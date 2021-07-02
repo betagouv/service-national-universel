@@ -75,7 +75,7 @@ const Item = ({ values, handleChange, name, label, errors, touched }) => {
 const Wrapper = styled.div`
   display: flex;
   text-align: center;
-  @media (max-width: 767px) {
+  @media (max-width: 1080px) {
     display: block;
     > * {
       margin: 0.5rem auto;
@@ -106,7 +106,7 @@ const Container = styled.div`
 
 const Title = styled.h2`
   margin-bottom: 1rem;
-  font-size: 0.875rem;
+  font-size: 0.875rem !important;
   letter-spacing: 0.05rem;
   color: #161e2e;
   text-transform: uppercase;
@@ -124,7 +124,7 @@ const ItemContainer = styled.div`
   align-items: center;
   justify-content: space-between;
   text-align: center;
-  @media (max-width: 767px) {
+  @media (max-width: 1080px) {
     padding: 0;
     display: block;
     > * {
