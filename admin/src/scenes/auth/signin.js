@@ -11,8 +11,6 @@ import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import Header from "./components/header";
-import Title from "./components/title";
-import Subtitle from "./components/subtitle";
 
 export default () => {
   const dispatch = useDispatch();
@@ -133,6 +131,27 @@ const AuthWrapper = styled.div`
   > * {
     flex: 1;
   }
+`;
+
+const Title = styled.h1`
+  position: relative;
+  font-size: 2rem;
+  @media (max-width: 768px) {
+    font-size: 1.2rem;
+  }
+  font-weight: 700;
+  margin-bottom: 14px;
+`;
+
+const Subtitle = styled.h2`
+  position: relative;
+  font-size: 1rem;
+  color: #6e757c;
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+  }
+  font-weight: 400;
+  margin-bottom: 20px;
 `;
 
 const Register = styled.h3`

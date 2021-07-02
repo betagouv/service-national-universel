@@ -11,8 +11,6 @@ import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import Header from "./components/header";
-import Title from "./components/title";
-import Subtitle from "./components/subtitle";
 import MultiSelect from "../../components/Multiselect";
 
 import { associationTypes, privateTypes, publicTypes, publicEtatTypes, translate } from "../../utils";
@@ -416,8 +414,29 @@ const LoginBox = styled.div`
   }
 `;
 
+const Title = styled.h1`
+  position: relative;
+  font-size: 2rem;
+  @media (max-width: 768px) {
+    font-size: 1.2rem;
+  }
+  font-weight: 700;
+  margin-bottom: 14px;
+`;
+
 const MainTitle = styled(Title)`
   font-size: 1.7rem;
+`;
+
+const Subtitle = styled.h2`
+  position: relative;
+  font-size: 1rem;
+  color: #6e757c;
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+  }
+  font-weight: 400;
+  margin-bottom: 20px;
 `;
 
 const StyledFormGroup = styled(FormGroup2)`
