@@ -7,8 +7,6 @@ const helmet = require("helmet");
 const app = express();
 const port = 8080;
 
-app.use(helmet());
-
 app.use(
   forceDomain({
     hostname: "admin.snu.gouv.fr",
