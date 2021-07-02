@@ -9,11 +9,11 @@ import { translate, YOUNG_STATUS_COLORS, formatStringLongDate, ENABLE_ASSIGN_CEN
 import WrapperPhase1 from "./wrapper";
 import api from "../../../services/api";
 import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
+import DownloadConvocationButton from "../../../components/buttons/DownloadConvocationButton";
 import AssignCenter from "../components/AssignCenter";
 import { Box, BoxTitle } from "../../../components/box";
 import { toastr } from "react-redux-toastr";
 import Badge from "../../../components/Badge";
-import { environment } from "../../../config";
 import Select from "../components/Select";
 
 export default (props) => {
@@ -204,11 +204,18 @@ export default (props) => {
             </Col>
           </Row>
         </Box>
-        {young.statusPhase1 === "DONE" && young.cohesionCenterName ? (
-          <DownloadAttestationButton young={young} uri="1">
-            Télécharger l'attestation de réalisation de la phase 1
-          </DownloadAttestationButton>
-        ) : null}
+        <div>
+          {young.statusPhase1 === "DONE" && young.cohesionCenterName ? (
+            <DownloadAttestationButton young={young} uri="1">
+              Télécharger l'attestation de réalisation de la phase 1
+            </DownloadAttestationButton>
+          ) : null}
+          {young.meetingPointId || young.deplacementPhase1Autonomous === "true" ? (
+            <DownloadConvocationButton young={young} uri="cohesion" style={{ marginTop: "1rem" }}>
+              Télécharger la convocation au séjour de cohésion
+            </DownloadConvocationButton>
+          ) : null}
+        </div>
       </WrapperPhase1>
     </div>
   );
