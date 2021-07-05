@@ -133,14 +133,14 @@ describe("Referent", () => {
     it("should return 200 if tutor not found but it's weird", async () => {
       const res = await request(getAppHelper())
         .post("/referent/email-tutor/test/" + notExistingReferentId)
-        .send();
+        .send({ message: "hello", subject: "hi" });
       expect(res.statusCode).toEqual(200);
     });
     it("should return 200 if tutor found", async () => {
       const tutor = await createReferentHelper(getNewReferentFixture());
       const res = await request(getAppHelper())
         .post("/referent/email-tutor/correction/" + tutor._id)
-        .send({ message: "hello" });
+        .send({ message: "hello", subject: "hi" });
       expect(res.statusCode).toEqual(200);
     });
   });

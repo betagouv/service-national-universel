@@ -65,7 +65,7 @@ router.post("/forgot_password_reset", async (req, res) => ReferentAuth.forgotPas
 router.post("/signin_as/:type/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const { error, value: params } = Joi.object({ id: Joi.string().required(), type: Joi.string().required() }).unknown().validate(req.params);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMETERS });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const { id, type } = params;
 
     if (type === "referent" && req.user.role !== "admin") return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -105,7 +105,7 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
       .unknown()
       .validate({ ...req.params, ...req.body });
 
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMETERS });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     if (!canInviteUser(req.user.role, value.role)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { template: reqTemplate, email, firstName, lastName, role, region, department, structureId, structureName, centerName } = value;
@@ -170,7 +170,7 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
 router.post("/signup_retry", async (req, res) => {
   try {
     const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required() }).unknown().validate(req.body);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMETERS });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const referent = await ReferentObject.findOne({ email: value.email });
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.USER_NOT_FOUND });
@@ -204,7 +204,7 @@ router.post("/signup_retry", async (req, res) => {
 router.post("/signup_verify", async (req, res) => {
   try {
     const { error, value } = Joi.object({ invitationToken: Joi.string().required() }).unknown().validate(req.body);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMETERS });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const referent = await ReferentObject.findOne({ invitationToken: value.invitationToken, invitationExpires: { $gt: Date.now() } });
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.INVITATION_TOKEN_EXPIRED_OR_INVALID });
@@ -221,12 +221,12 @@ router.post("/signup_invite", async (req, res) => {
     const { error, value } = Joi.object({
       email: Joi.string().lowercase().trim().email().required(),
       password: Joi.string().required(),
-      firstName: Joi.string(),
-      lastName: Joi.string(),
+      firstName: Joi.string().allow(null, ""),
+      lastName: Joi.string().allow(null, ""),
     })
       .unknown()
       .validate(req.body);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMETERS });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const { email, password, firstName, lastName } = value;
 
     const referent = await ReferentObject.findOne({ email });
@@ -259,11 +259,14 @@ router.post("/signup_invite", async (req, res) => {
 
 router.put("/young/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
+    const { error, value } = referentValidator.validateYoung(req.body);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
     const { id } = req.params;
     const young = await YoungObject.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
-    let { __v, ...newYoung } = req.body;
+    let { __v, ...newYoung } = value;
 
     // if withdrawn, cascade withdrawn on every status
     if (
@@ -303,7 +306,10 @@ router.put("/young/:id", passport.authenticate("referent", { session: false }), 
 
 router.post("/young", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const obj = { ...req.body };
+    const { error, value } = referentValidator.validateYoung(req.body);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    const obj = { ...value };
     const invitation_token = crypto.randomBytes(20).toString("hex");
     obj.invitationToken = invitation_token;
     obj.invitationExpires = inSevenDays(); // 7 days
@@ -327,23 +333,34 @@ router.post("/young", passport.authenticate("referent", { session: false }), asy
 
 router.post("/email-tutor/:template/:tutorId", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const { tutorId, template } = req.params;
+    const { error, value } = Joi.object({
+      tutorId: Joi.string().required(),
+      template: Joi.string().required(),
+      subject: Joi.string().required().allow(null, ""),
+      message: Joi.string().required().allow(null, ""),
+    })
+      .unknown()
+      .validate({ ...req.params, ...req.body });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    const { tutorId, template, subject, message } = value;
     const tutor = await ReferentObject.findById(tutorId);
     if (!tutor) return res.status(200).send({ ok: true });
 
     let htmlContent = "";
-    let subject = "";
 
     if (template === "correction") {
-      htmlContent = fs.readFileSync(path.resolve(__dirname, "../templates/correctionMission.html")).toString();
-      htmlContent = htmlContent.replace(/{{message}}/g, `${req.body.message.replace(/\n/g, "<br/>")}`);
-      htmlContent = htmlContent.replace(/{{cta}}/g, "https://admin.snu.gouv.fr");
-      subject = req.body.subject;
+      htmlContent = fs
+        .readFileSync(path.resolve(__dirname, "../templates/correctionMission.html"))
+        .toString()
+        .replace(/{{message}}/g, `${message.replace(/\n/g, "<br/>")}`)
+        .replace(/{{cta}}/g, "https://admin.snu.gouv.fr");
     } else if (template === "refused") {
-      htmlContent = fs.readFileSync(path.resolve(__dirname, "../templates/refusedMission.html")).toString();
-      htmlContent = htmlContent.replace(/{{message}}/g, `${req.body.message.replace(/\n/g, "<br/>")}`);
-      htmlContent = htmlContent.replace(/{{cta}}/g, "https://admin.snu.gouv.fr");
-      subject = req.body.subject;
+      htmlContent = fs
+        .readFileSync(path.resolve(__dirname, "../templates/refusedMission.html"))
+        .toString()
+        .replace(/{{message}}/g, `${message.replace(/\n/g, "<br/>")}`)
+        .replace(/{{cta}}/g, "https://admin.snu.gouv.fr");
     } else {
       throw new Error("Template de mail introuvable");
     }
@@ -359,7 +376,19 @@ router.post("/email-tutor/:template/:tutorId", passport.authenticate("referent",
 
 router.post("/email/:template/:youngId", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const { youngId, template } = req.params;
+    const { error, value } = Joi.object({
+      youngId: Joi.string().required(),
+      template: Joi.string().required(),
+      message: Joi.string().allow(null, ""),
+      prevStatus: Joi.string().allow(null, ""),
+      missionName: Joi.string().allow(null, ""),
+      structureName: Joi.string().allow(null, ""),
+    })
+      .unknown()
+      .validate({ ...req.params, ...req.body });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+    const { youngId, template, message, prevStatus, missionName, structureName } = value;
+
     const young = await YoungObject.findById(youngId);
     if (!young) return res.status(200).send({ ok: true });
 
@@ -367,40 +396,50 @@ router.post("/email/:template/:youngId", passport.authenticate("referent", { ses
     let subject = "";
 
     if (template === "correction") {
-      htmlContent = fs.readFileSync(path.resolve(__dirname, "../templates/waitingCorrection.html")).toString();
-      htmlContent = htmlContent.replace(/{{message}}/g, `${req.body.message}`);
-      htmlContent = htmlContent.replace(/{{cta}}/g, "https://inscription.snu.gouv.fr");
-      htmlContent = htmlContent.replace(/\n/g, "<br/>");
+      htmlContent = fs
+        .readFileSync(path.resolve(__dirname, "../templates/waitingCorrection.html"))
+        .toString()
+        .replace(/{{message}}/g, `${message}`)
+        .replace(/{{cta}}/g, "https://inscription.snu.gouv.fr")
+        .replace(/\n/g, "<br/>");
       subject = "Votre candidature au SNU est en attente de correction";
     } else if (template === "validate") {
-      const template = req.body.prevStatus === "WITHDRAWN" ? "revalidated" : "validated";
-      htmlContent = fs.readFileSync(path.resolve(__dirname, `../templates/${template}.html`)).toString();
-      htmlContent = htmlContent.replace(/{{cta}}/g, "https://inscription.snu.gouv.fr");
-      htmlContent = htmlContent.replace(/{{firstName}}/g, young.firstName);
-      htmlContent = htmlContent.replace(/{{lastName}}/g, young.lastName);
-      subject = req.body.prevStatus === "WITHDRAWN" ? "Votre compte SNU a été réactivé" : "Votre candidature au SNU a été validée";
+      const template = prevStatus === "WITHDRAWN" ? "revalidated" : "validated";
+      htmlContent = fs
+        .readFileSync(path.resolve(__dirname, `../templates/${template}.html`))
+        .toString()
+        .replace(/{{cta}}/g, "https://inscription.snu.gouv.fr")
+        .replace(/{{firstName}}/g, young.firstName)
+        .replace(/{{lastName}}/g, young.lastName);
+      subject = prevStatus === "WITHDRAWN" ? "Votre compte SNU a été réactivé" : "Votre candidature au SNU a été validée";
     } else if (template === "refuse") {
-      htmlContent = fs.readFileSync(path.resolve(__dirname, "../templates/rejected.html")).toString();
-      htmlContent = htmlContent.replace(/{{message}}/g, `${req.body.message}`);
-      htmlContent = htmlContent.replace(/{{firstName}}/g, young.firstName);
-      htmlContent = htmlContent.replace(/{{lastName}}/g, young.lastName);
-      htmlContent = htmlContent.replace(/\n/g, "<br/>");
+      htmlContent = fs
+        .readFileSync(path.resolve(__dirname, "../templates/rejected.html"))
+        .toString()
+        .replace(/{{message}}/g, `${message}`)
+        .replace(/{{firstName}}/g, young.firstName)
+        .replace(/{{lastName}}/g, young.lastName)
+        .replace(/\n/g, "<br/>");
       subject = "Votre candidature au SNU a été refusée";
     } else if (template === "waiting_list") {
-      htmlContent = fs.readFileSync(path.resolve(__dirname, "../templates/waitingList.html")).toString();
-      htmlContent = htmlContent.replace(/{{firstName}}/g, young.firstName);
-      htmlContent = htmlContent.replace(/{{lastName}}/g, young.lastName);
-      htmlContent = htmlContent.replace(/\n/g, "<br/>");
+      htmlContent = fs
+        .readFileSync(path.resolve(__dirname, "../templates/waitingList.html"))
+        .toString()
+        .replace(/{{firstName}}/g, young.firstName)
+        .replace(/{{lastName}}/g, young.lastName)
+        .replace(/\n/g, "<br/>");
       subject = "Votre candidature au SNU a été mise sur liste complémentaire";
     } else if (template === "apply") {
-      htmlContent = fs.readFileSync(path.resolve(__dirname, "../templates/apply.html")).toString();
-      htmlContent = htmlContent.replace(/{{cta}}/g, "https://inscription.snu.gouv.fr/auth");
-      htmlContent = htmlContent.replace(/{{firstName}}/g, young.firstName);
-      htmlContent = htmlContent.replace(/{{lastName}}/g, young.lastName);
-      htmlContent = htmlContent.replace(/{{missionName}}/g, req.body.missionName);
-      htmlContent = htmlContent.replace(/{{structureName}}/g, req.body.structureName);
-      htmlContent = htmlContent.replace(/\n/g, "<br/>");
-      subject = `La mission ${req.body.missionName} devrait vous intéresser !`;
+      htmlContent = fs
+        .readFileSync(path.resolve(__dirname, "../templates/apply.html"))
+        .toString()
+        .replace(/{{cta}}/g, "https://inscription.snu.gouv.fr/auth")
+        .replace(/{{firstName}}/g, young.firstName)
+        .replace(/{{lastName}}/g, young.lastName)
+        .replace(/{{missionName}}/g, missionName)
+        .replace(/{{structureName}}/g, structureName)
+        .replace(/\n/g, "<br/>");
+      subject = `La mission ${missionName} devrait vous intéresser !`;
     }
 
     await sendEmail({ name: `${young.firstName} ${young.lastName}`, email: young.email }, subject, htmlContent);
@@ -414,7 +453,16 @@ router.post("/email/:template/:youngId", passport.authenticate("referent", { ses
 
 router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const { youngId, key, fileName } = req.params;
+    const { error, value } = Joi.object({
+      youngId: Joi.string().required(),
+      key: Joi.string().required(),
+      fileName: Joi.string().required(),
+    })
+      .unknown()
+      .validate({ ...req.params });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    const { youngId, key, fileName } = value;
     const downloaded = await getFile(`app/young/${youngId}/${key}/${fileName}`);
     const decryptedBuffer = decrypt(downloaded.Body);
 
