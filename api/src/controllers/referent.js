@@ -301,7 +301,7 @@ router.post("/email-tutor/:template/:tutorId", passport.authenticate("referent",
       throw new Error("Template de mail introuvable");
     }
 
-    await sendEmail({ name: `${tutor.firstName} ${tutor.lastName}`, email: "raph@selego.co" }, subject, htmlContent);
+    await sendEmail({ name: `${tutor.firstName} ${tutor.lastName}`, email: tutor.email }, subject, htmlContent);
     return res.status(200).send({ ok: true }); //todo
   } catch (error) {
     console.log(error);
