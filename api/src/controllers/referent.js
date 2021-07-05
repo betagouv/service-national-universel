@@ -387,16 +387,14 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
     });
   } catch (error) {
     capture(error);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
 router.post("/file/:key", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const key = req.params.key;
-
     const { names, youngId } = JSON.parse(req.body.body);
-
     const files = Object.keys(req.files || {}).map((e) => req.files[e]);
 
     const young = await YoungObject.findById(youngId);
