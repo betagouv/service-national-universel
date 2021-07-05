@@ -4,6 +4,7 @@ const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../es");
 const sendinblue = require("../sendinblue");
+const { SUB_ROLES_LIST, ROLES_LIST } = require("snu-lib/roles");
 
 const MODELNAME = "referent";
 
@@ -87,16 +88,7 @@ const Schema = new mongoose.Schema({
 
   role: {
     type: String,
-    enum: [
-      "admin",
-      "referent_region",
-      "referent_department",
-      "structure_responsible",
-      "structure_member",
-      "responsible",
-      "supervisor",
-      "head_center",
-    ],
+    enum: ROLES_LIST,
     documentation: {
       description: "Rôle de l'utilisateur sur l'app",
     },
@@ -117,15 +109,7 @@ const Schema = new mongoose.Schema({
   },
   subRole: {
     type: String,
-    enum: [
-      "manager_department",
-      "assistant_manager_department",
-      "manager_department_phase2",
-      "secretariat",
-      "coordinator",
-      "assistant_coordinator",
-      "",
-    ],
+    enum: SUB_ROLES_LIST,
   },
   cohesionCenterId: {
     type: String,

@@ -23,9 +23,15 @@ const { decrypt } = require("../cryptoUtils");
 const { sendEmail } = require("../sendinblue");
 const { uploadFile, validatePassword, updatePlacesCenter, assignNextYoungFromWaitingList, ERRORS } = require("../utils");
 const { encrypt } = require("../cryptoUtils");
+const referentValidator = require("../utils/validator/referent");
 const ReferentAuth = new AuthObject(ReferentObject);
-
 const { cookieOptions, JWT_MAX_AGE } = require("../cookie-options");
+const Joi = require("joi");
+const { ROLES_LIST, canInviteUser } = require("snu-lib/roles");
+
+function inSevenDays() {
+  return Date.now() + 86400000 * 7;
+}
 
 async function updateTutorNameInMissionsAndApplications(tutor) {
   if (!tutor || !tutor.firstName || !tutor.lastName) return;
@@ -58,14 +64,21 @@ router.post("/forgot_password_reset", async (req, res) => ReferentAuth.forgotPas
 
 router.post("/signin_as/:type/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const { type, id } = req.params;
-    let user = null;
+    const { error, value: params } = Joi.object({ id: Joi.string().required(), type: Joi.string().required() }).unknown().validate(req.params);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMETERS });
+    const { id, type } = params;
+
     if (type === "referent" && req.user.role !== "admin") return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    let user = null;
     if (type === "referent") user = await ReferentObject.findById(id);
     else if (type === "young") user = await YoungObject.findById(id);
+
     if (!user) return res.status(404).send({ code: ERRORS.USER_NOT_FOUND, ok: false });
+
     const token = jwt.sign({ _id: user.id }, config.secret, { expiresIn: JWT_MAX_AGE });
     res.cookie("jwt", token, cookieOptions());
+
     return res.status(200).send({ data: user, ok: true, token });
   } catch (error) {
     capture(error);
@@ -75,24 +88,41 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
 
 router.post("/signup_invite/:template", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const obj = {};
-    const reqTemplate = req.params.template;
-    if (req.body.hasOwnProperty(`email`)) obj.email = req.body.email.trim().toLowerCase();
-    if (req.body.hasOwnProperty(`firstName`))
-      obj.firstName = req.body.firstName.charAt(0).toUpperCase() + (req.body.firstName || "").toLowerCase().slice(1);
-    if (req.body.hasOwnProperty(`lastName`)) obj.lastName = req.body.lastName.toUpperCase();
-    if (req.body.hasOwnProperty(`role`)) obj.role = req.body.role;
+    const { error, value } = Joi.object({
+      template: Joi.string().required(),
+      email: Joi.string().lowercase().trim().email().required(),
+      firstName: Joi.string().required(),
+      lastName: Joi.string().required(),
+      role: Joi.string()
+        .valid(...ROLES_LIST)
+        .required(),
+      region: Joi.string().allow(null, ""),
+      department: Joi.string().allow(null, ""),
+      structureId: Joi.string().allow(null, ""),
+      structureName: Joi.string().allow(null, ""),
+      centerName: Joi.string().allow(null, ""),
+    })
+      .unknown()
+      .validate({ ...req.params, ...req.body });
 
-    if (req.body.hasOwnProperty(`region`)) obj.region = req.body.region; //TODO
-    if (req.body.hasOwnProperty(`department`)) obj.department = req.body.department;
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMETERS });
+    if (!canInviteUser(req.user.role, value.role)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    if (req.body.hasOwnProperty(`structureId`)) obj.structureId = req.body.structureId;
+    const { template: reqTemplate, email, firstName, lastName, role, region, department, structureId, structureName, centerName } = value;
+    const referentProperties = {};
+    if (email) referentProperties.email = email.trim().toLowerCase();
+    if (firstName) referentProperties.firstName = firstName.charAt(0).toUpperCase() + (firstName || "").toLowerCase().slice(1);
+    if (lastName) referentProperties.lastName = lastName.toUpperCase();
+    if (role) referentProperties.role = role;
+    if (region) referentProperties.region = region;
+    if (department) referentProperties.department = department;
+    if (structureId) referentProperties.structureId = structureId;
 
     const invitation_token = crypto.randomBytes(20).toString("hex");
-    obj.invitationToken = invitation_token;
-    obj.invitationExpires = Date.now() + 86400000 * 7; // 7 days
+    referentProperties.invitationToken = invitation_token;
+    referentProperties.invitationExpires = inSevenDays();
 
-    const referent = await ReferentObject.create(obj);
+    const referent = await ReferentObject.create(referentProperties);
     await updateTutorNameInMissionsAndApplications(referent);
 
     let template = "";
@@ -116,41 +146,47 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
       template = "../templates/inviteHeadCenter.html";
       mailObject = "Activez votre compte de chef de centre SNU";
     }
-    let htmlContent = fs.readFileSync(path.resolve(__dirname, template)).toString();
-    htmlContent = htmlContent.replace(/{{toName}}/g, `${obj.firstName} ${obj.lastName}`);
-    htmlContent = htmlContent.replace(/{{fromName}}/g, `${req.user.firstName} ${req.user.lastName}`);
-    htmlContent = htmlContent.replace(/{{department}}/g, `${obj.department}`);
-    htmlContent = htmlContent.replace(/{{region}}/g, `${obj.region}`);
-    htmlContent = htmlContent.replace(/{{structureName}}/g, req.body.structureName);
-    htmlContent = htmlContent.replace(/{{centerName}}/g, req.body.centerName || "");
-    htmlContent = htmlContent.replace(/{{cta}}/g, `${config.ADMIN_URL}/auth/signup/invite?token=${invitation_token}`);
+    let htmlContent = fs
+      .readFileSync(path.resolve(__dirname, template))
+      .toString()
+      .replace(/{{toName}}/g, `${referent.firstName} ${referent.lastName}`)
+      .replace(/{{fromName}}/g, `${req.user.firstName} ${req.user.lastName}`)
+      .replace(/{{department}}/g, `${referent.department}`)
+      .replace(/{{region}}/g, `${referent.region}`)
+      .replace(/{{structureName}}/g, structureName)
+      .replace(/{{centerName}}/g, centerName || "")
+      .replace(/{{cta}}/g, `${config.ADMIN_URL}/auth/signup/invite?token=${invitation_token}`);
 
-    await sendEmail({ name: `${obj.firstName} ${obj.lastName}`, email: obj.email }, mailObject, htmlContent);
+    await sendEmail({ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }, mailObject, htmlContent);
 
     return res.status(200).send({ data: referent, ok: true });
   } catch (error) {
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
     capture(error);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error: error.message });
   }
 });
 
 router.post("/signup_retry", async (req, res) => {
   try {
-    const email = (req.body.email || "").trim().toLowerCase();
+    const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required() }).unknown().validate(req.body);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMETERS });
 
-    const referent = await ReferentObject.findOne({ email });
-    if (!referent) return res.status(400).send({ ok: false, code: ERRORS.USER_NOT_FOUND });
+    const referent = await ReferentObject.findOne({ email: value.email });
+    if (!referent) return res.status(404).send({ ok: false, code: ERRORS.USER_NOT_FOUND });
 
     const invitationToken = crypto.randomBytes(20).toString("hex");
     referent.set({ invitationToken });
-    referent.set({ invitationExpires: Date.now() + 86400000 * 7 });
+    referent.set({ invitationExpires: inSevenDays() });
 
-    let htmlContent = fs.readFileSync(path.resolve(__dirname, "../templates/inviteReferentDepartment.html")).toString();
-    htmlContent = htmlContent.replace(/{{toName}}/g, `${referent.firstName} ${referent.lastName}`);
-    htmlContent = htmlContent.replace(/{{fromName}}/g, `contact@snu.gouv.fr`);
-    htmlContent = htmlContent.replace(/{{department}}/g, `${referent.department}`);
-    htmlContent = htmlContent.replace(/{{cta}}/g, `${config.ADMIN_URL}/auth/signup/invite?token=${invitationToken}`);
+    // Why is it only for referent department?
+    const htmlContent = fs
+      .readFileSync(path.resolve(__dirname, "../templates/inviteReferentDepartment.html"))
+      .toString()
+      .replace(/{{toName}}/g, `${referent.firstName} ${referent.lastName}`)
+      .replace(/{{fromName}}/g, `contact@snu.gouv.fr`)
+      .replace(/{{department}}/g, `${referent.department}`)
+      .replace(/{{cta}}/g, `${config.ADMIN_URL}/auth/signup/invite?token=${invitationToken}`);
     await sendEmail(
       { name: `${referent.firstName} ${referent.lastName}`, email: referent.email },
       "Activez votre compte référent départemental SNU",
@@ -167,8 +203,12 @@ router.post("/signup_retry", async (req, res) => {
 
 router.post("/signup_verify", async (req, res) => {
   try {
-    const referent = await ReferentObject.findOne({ invitationToken: req.body.invitationToken, invitationExpires: { $gt: Date.now() } });
-    if (!referent) return res.status(200).send({ ok: false, code: ERRORS.INVITATION_TOKEN_EXPIRED_OR_INVALID });
+    const { error, value } = Joi.object({ invitationToken: Joi.string().required() }).unknown().validate(req.body);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMETERS });
+
+    const referent = await ReferentObject.findOne({ invitationToken: value.invitationToken, invitationExpires: { $gt: Date.now() } });
+    if (!referent) return res.status(404).send({ ok: false, code: ERRORS.INVITATION_TOKEN_EXPIRED_OR_INVALID });
+
     const token = jwt.sign({ _id: referent._id }, config.secret, { expiresIn: "30d" });
     return res.status(200).send({ ok: true, token, data: referent });
   } catch (error) {
@@ -178,22 +218,27 @@ router.post("/signup_verify", async (req, res) => {
 });
 router.post("/signup_invite", async (req, res) => {
   try {
-    const email = (req.body.email || "").trim().toLowerCase();
+    const { error, value } = Joi.object({
+      email: Joi.string().lowercase().trim().email().required(),
+      password: Joi.string().required(),
+      firstName: Joi.string(),
+      lastName: Joi.string(),
+    })
+      .unknown()
+      .validate(req.body);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMETERS });
+    const { email, password, firstName, lastName } = value;
 
     const referent = await ReferentObject.findOne({ email });
-    if (!referent) return res.status(200).send({ ok: false, data: null, code: ERRORS.USER_NOT_FOUND });
+    if (!referent) return res.status(404).send({ ok: false, data: null, code: ERRORS.USER_NOT_FOUND });
+    if (referent.registredAt) return res.status(400).send({ ok: false, data: null, code: ERRORS.USER_ALREADY_REGISTERED });
+    if (!validatePassword(password)) return res.status(400).send({ ok: false, prescriber: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
 
-    if (referent.registredAt) return res.status(200).send({ ok: false, data: null, code: ERRORS.USER_ALREADY_REGISTERED });
-
-    if (!validatePassword(req.body.password)) return res.status(200).send({ ok: false, prescriber: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
-
-    // Todo: firstname should be firstName, maybe we missed something here.
-    referent.set({ firstname: req.body.firstname });
-    referent.set({ lastname: req.body.lastname });
-    referent.set({ password: req.body.password });
+    referent.set({ firstName: firstName });
+    referent.set({ lastName: lastName });
+    referent.set({ password: password });
     referent.set({ registredAt: Date.now() });
     referent.set({ lastLoginAt: Date.now() });
-
     referent.set({ invitationToken: "" });
     referent.set({ invitationExpires: null });
 
@@ -261,7 +306,7 @@ router.post("/young", passport.authenticate("referent", { session: false }), asy
     const obj = { ...req.body };
     const invitation_token = crypto.randomBytes(20).toString("hex");
     obj.invitationToken = invitation_token;
-    obj.invitationExpires = Date.now() + 86400000 * 7; // 7 days
+    obj.invitationExpires = inSevenDays(); // 7 days
 
     const young = await YoungObject.create(obj);
 

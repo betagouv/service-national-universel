@@ -73,8 +73,17 @@ function validateDepartmentService(departmentService) {
     .validate(departmentService, { stripUnknown: true });
 }
 
+function validateYoung() {
+  return Joi.object().keys({
+    name: Joi.string().allow(null, ""),
+    email: Joi.string().allow(null, ""),
+    phone: Joi.string().allow(null, ""),
+  });
+}
+
 module.exports = {
   validateMission,
   validateProgram,
   validateDepartmentService,
+  validateYoung,
 };
