@@ -8,7 +8,7 @@ const MissionObject = require("../models/mission");
 const UserObject = require("../models/referent");
 const ApplicationObject = require("../models/application");
 const { ERRORS } = require("../utils/index.js");
-const { validateId } = require("../utils/defaultValidator");
+const { validateId } = require("../utils/validator/default");
 const youngValidator = require("../utils/validator/young");
 const referentValidator = require("../utils/validator/referent");
 

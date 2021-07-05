@@ -6,7 +6,7 @@ const { capture } = require("../sentry");
 const DepartmentServiceModel = require("../models/departmentService");
 const ReferentModel = require("../models/referent");
 const { ERRORS } = require("../utils");
-const { validateId } = require("../utils/defaultValidator");
+const { validateId } = require("../utils/validator/default");
 const referentValidator = require("../utils/validator/referent");
 
 router.post("/", passport.authenticate("referent", { session: false }), async (req, res) => {

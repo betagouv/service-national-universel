@@ -5,7 +5,7 @@ const { capture } = require("../sentry");
 
 const ProgramObject = require("../models/program");
 const { ERRORS } = require("../utils");
-const { validateId, validateString } = require("../utils/defaultValidator");
+const { validateId, validateString } = require("../utils/validator/default");
 const referentValidator = require("../utils/validator/referent");
 const youngValidator = require("../utils/validator/young");
 
