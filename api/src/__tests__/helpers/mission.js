@@ -1,7 +1,7 @@
 const MissionObject = require("../../models/mission");
 
-async function getMissionsHelper() {
-  return await MissionObject.find({});
+async function getMissionsHelper(params = {}) {
+  return await MissionObject.find(params);
 }
 
 async function getMissionByIdHelper(missionId) {
