@@ -216,6 +216,8 @@ router.put("/young/:id", passport.authenticate("referent", { session: false }), 
   try {
     const { id } = req.params;
     const young = await YoungObject.findById(id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
+
     let { __v, ...newYoung } = req.body;
 
     // if withdrawn, cascade withdrawn on every status
@@ -370,6 +372,7 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
     const { youngId, key, fileName } = req.params;
     const downloaded = await getFile(`app/young/${youngId}/${key}/${fileName}`);
     const decryptedBuffer = decrypt(downloaded.Body);
+
     let mimeFromFile = null;
     try {
       const { mime } = await FileType.fromBuffer(decryptedBuffer);
@@ -384,14 +387,16 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
     });
   } catch (error) {
     capture(error);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
 
 router.post("/file/:key", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const key = req.params.key;
+
     const { names, youngId } = JSON.parse(req.body.body);
+
     const files = Object.keys(req.files || {}).map((e) => req.files[e]);
 
     const young = await YoungObject.findById(youngId);
