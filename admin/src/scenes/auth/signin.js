@@ -10,7 +10,9 @@ import queryString from "query-string";
 import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
+import LoginBox from "./components/loginBox";
 import Header from "./components/header";
+import AuthWrapper from "./components/authWrapper";
 
 export default () => {
   const dispatch = useDispatch();
@@ -125,16 +127,6 @@ const Thumb = styled.div`
   }
 `;
 
-const AuthWrapper = styled.div`
-  display: flex;
-  flex: 1;
-  width: 100%;
-  > * {
-    flex: 1;
-    display: flex;
-  }
-`;
-
 const Title = styled.h1`
   position: relative;
   font-size: 2rem;
@@ -169,19 +161,6 @@ const Register = styled.h3`
   a {
     color: #32267f;
     font-weight: 500;
-  }
-`;
-
-const LoginBox = styled.div`
-  padding: 4rem;
-  background-color: #f6f6f6;
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  justify-content: center;
-  @media (max-width: 768px) {
-    border-radius: 0;
-    margin: 0;
   }
 `;
 

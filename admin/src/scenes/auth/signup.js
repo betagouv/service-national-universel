@@ -13,6 +13,8 @@ import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import Header from "./components/header";
+import LoginBox from "./components/loginBox";
+import AuthWrapper from "./components/authWrapper";
 
 import { DEFAULT_STRUCTURE_NAME, translate } from "../../utils";
 
@@ -29,7 +31,7 @@ export default () => {
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
+    <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
       <Header />
       <AuthWrapper>
         <Thumb />
@@ -182,23 +184,6 @@ const Thumb = styled.div`
   flex: 1;
   @media (max-width: 768px) {
     display: none;
-  }
-`;
-
-const AuthWrapper = styled.div`
-  display: flex;
-  width: 100%;
-  > * {
-    flex: 1;
-  }
-`;
-
-const LoginBox = styled.div`
-  padding: 4rem;
-  background-color: #f6f6f6;
-  @media (max-width: 768px) {
-    border-radius: 0;
-    margin: 0;
   }
 `;
 

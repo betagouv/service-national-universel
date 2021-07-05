@@ -10,6 +10,8 @@ import api from "../../services/api";
 import { Link } from "react-router-dom";
 import { translate } from "../../utils";
 import Header from "./components/header";
+import LoginBox from "./components/loginBox";
+import AuthWrapper from "./components/authWrapper";
 
 export default () => {
   const [mail, setMail] = useState("");
@@ -99,16 +101,6 @@ const Thumb = styled.div`
   }
 `;
 
-const AuthWrapper = styled.div`
-  display: flex;
-  width: 100%;
-  flex: 1;
-  > * {
-    flex: 1;
-    display: flex;
-  }
-`;
-
 const Title = styled.h1`
   position: relative;
   font-size: 2rem;
@@ -143,19 +135,6 @@ const Register = styled.h3`
   a {
     color: #32267f;
     font-weight: 500;
-  }
-`;
-
-const LoginBox = styled.div`
-  padding: 4rem;
-  background-color: #f6f6f6;
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  justify-content: center;
-  @media (max-width: 768px) {
-    border-radius: 0;
-    margin: 0;
   }
 `;
 
