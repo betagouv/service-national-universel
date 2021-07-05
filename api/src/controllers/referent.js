@@ -27,7 +27,7 @@ const referentValidator = require("../utils/validator/referent");
 const ReferentAuth = new AuthObject(ReferentObject);
 const { cookieOptions, JWT_MAX_AGE } = require("../cookie-options");
 const Joi = require("joi");
-const { ROLES_LIST, canInviteUser } = require("snu-lib/roles");
+const { ROLES_LIST, canInviteUser, canDelete } = require("snu-lib/roles");
 
 function inSevenDays() {
   return Date.now() + 86400000 * 7;
@@ -643,24 +643,6 @@ router.put("/", passport.authenticate("referent", { session: false }), async (re
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
-
-function canDelete(user, value) {
-  if (user.role === "admin") return true;
-  // https://trello.com/c/Wv2TrQnQ/383-admin-ajouter-onglet-utilisateurs-pour-les-r%C3%A9f%C3%A9rents
-  if (user.role === "referent_region") {
-    if (
-      (["referent_department", "referent_region"].includes(value.role) && user.region === value.region) ||
-      ["supervisor", "responsible"].includes(value.role)
-    )
-      return true;
-    return false;
-  }
-  if (user.role === "referent_department") {
-    if ((user.role === value.role && user.department === value.department) || ["supervisor", "responsible"].includes(value.role)) return true;
-    return false;
-  }
-  return false;
-}
 
 router.delete("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
