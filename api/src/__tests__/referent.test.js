@@ -1,6 +1,7 @@
 require("dotenv").config({ path: "./.env-testing" });
 const faker = require("faker");
 const request = require("supertest");
+const jwt = require("jsonwebtoken");
 const getAppHelper = require("./helpers/app");
 const getNewYoungFixture = require("./fixtures/young");
 const getNewReferentFixture = require("./fixtures/referent");
@@ -351,7 +352,7 @@ describe("Referent", () => {
     });
   });
 
-  describe.only("DELETE /referent/:id", () => {
+  describe("DELETE /referent/:id", () => {
     it("should return 404 if referent not found", async () => {
       const res = await request(getAppHelper()).delete(`/referent/${notExistingReferentId}`).send();
       expect(res.statusCode).toEqual(404);
@@ -369,6 +370,64 @@ describe("Referent", () => {
       const res = await request(getAppHelper()).delete(`/referent/${referent._id}`).send();
       expect(res.statusCode).toEqual(401);
       passport.user.role = "admin";
+    });
+  });
+
+  describe("POST /referent/signin_as/:type/:id", () => {
+    it("should return 401 if role is not admin", async () => {
+      const passport = require("passport");
+      passport.user.role = "responsible";
+      const res = await request(getAppHelper())
+        .post("/referent/signin_as/referent/" + notExistingReferentId)
+        .send();
+      expect(res.statusCode).toEqual(401);
+      passport.user.role = "admin";
+    });
+    it("should return 404 if referent not found", async () => {
+      const res = await request(getAppHelper())
+        .post("/referent/signin_as/referent/" + notExistingReferentId)
+        .send();
+      expect(res.statusCode).toEqual(404);
+    });
+    it("should return 404 if type param is not found", async () => {
+      const res = await request(getAppHelper()).post("/referent/signin_as/foo/bar").send();
+      expect(res.statusCode).toEqual(404);
+    });
+    it("should return 200 if referent found", async () => {
+      const referent = await createReferentHelper(getNewReferentFixture());
+      const res = await request(getAppHelper())
+        .post("/referent/signin_as/referent/" + referent._id)
+        .send();
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.data).toEqual(
+        expect.objectContaining({
+          _id: referent._id.toString(),
+          firstName: referent.firstName,
+          lastName: referent.lastName,
+        })
+      );
+    });
+    it("should return 200 if young found", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const res = await request(getAppHelper())
+        .post("/referent/signin_as/young/" + young._id)
+        .send();
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.data).toEqual(
+        expect.objectContaining({
+          _id: young._id.toString(),
+          firstName: young.firstName,
+          lastName: young.lastName,
+        })
+      );
+    });
+    it("should return a jwt token", async () => {
+      const referent = await createReferentHelper(getNewReferentFixture());
+      const res = await request(getAppHelper())
+        .post("/referent/signin_as/referent/" + referent._id)
+        .send();
+      expect(res.statusCode).toEqual(200);
+      expect(res.headers["set-cookie"][0]).toContain("jwt=");
     });
   });
 });
