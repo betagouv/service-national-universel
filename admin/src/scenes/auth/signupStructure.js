@@ -384,7 +384,6 @@ const FormGroup2 = styled.div`
 
 const StructureWrapper = styled.div`
   background-color: #fff;
-  min-width: 1000px;
   display: flex;
   flex: 1;
   flex-direction: column;
