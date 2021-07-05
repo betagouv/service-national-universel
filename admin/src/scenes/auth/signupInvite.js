@@ -51,7 +51,7 @@ export default () => {
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
+    <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
       <Header />
       <AuthWrapper>
         <Thumb />

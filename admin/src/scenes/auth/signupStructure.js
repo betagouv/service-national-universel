@@ -34,7 +34,7 @@ export default () => {
 
   if (!user) return <Redirect to="/" />;
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
+    <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
       <Header />
       <Formik
         validateOnChange={false}
