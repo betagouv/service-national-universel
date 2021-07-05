@@ -4,12 +4,15 @@ import { Formik, Field } from "formik";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
+import { ReactiveBase } from "@appbaseio/reactivesearch";
 
 import { translate, departmentList, regionList, region2department, department2region, REFERENT_ROLES, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE } from "../../utils";
 import LoadingButton from "../../components/buttons/LoadingButton";
+import { apiURL } from "../../config";
 import api from "../../services/api";
 
 export default ({ setOpen, open, label = "Inviter un référent", role = "" }) => {
+
   const getSubRole = (role) => {
     let subRole = [];
     if (role === "referent_department") subRole = REFERENT_DEPARTMENT_SUBROLE;
@@ -80,7 +83,7 @@ export default ({ setOpen, open, label = "Inviter un référent", role = "" }) =
                       </FormGroup>
                     </Col>
                   </Row>
-                  {[REFERENT_ROLES.REFERENT_DEPARTMENT, REFERENT_ROLES.REFERENT_REGION].includes(values.role) ? (
+                  {[REFERENT_ROLES.REFERENT_DEPARTMENT, REFERENT_ROLES.REFERENT_REGION, REFERENT_ROLES.HEAD_CENTER].includes(values.role) ? (
                     <Row>
                       <>
                         <Col md={6}>
@@ -94,6 +97,12 @@ export default ({ setOpen, open, label = "Inviter un référent", role = "" }) =
                             <FormGroup>
                               <div>Région</div>
                               <ChooseRegion validate={(v) => !v} value={values.region} onChange={handleChange} />
+                            </FormGroup>
+                          ) : null}
+                          {values.role === REFERENT_ROLES.HEAD_CENTER ? (
+                            <FormGroup>
+                                <div>Centre</div>
+                                <ChooseCenter validate={(v) => !v} value={values.center} onChange={handleChange} />
                             </FormGroup>
                           ) : null}
                         </Col>
@@ -170,6 +179,38 @@ const ChooseRegion = ({ value, onChange }) => {
         );
       })}
     </Input>
+  );
+};
+
+const ChooseCenter = ({ value, onChange }) => {
+  const { user } = useSelector((state) => state.Auth);
+  const [centers, setCenters] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data } = await api.get("/cohesion-center");
+        if (data) setCenters(data);
+      } catch (e) {
+        console.log(e);
+      }
+    })();
+    if (user.role === REFERENT_ROLES.HEAD_CENTER) {
+      return onChange({ target: { value: user.role, name: "role" } });
+    }
+    return onChange({ target: { value: centers?.[0], name: "center" } });
+  }, []);
+
+  return (
+      <Input disabled={user.role === REFERENT_ROLES.HEAD_CENTER} type="select" name="center" value={value} onChange={onChange}>
+        {centers?.map((e) => {
+          return (
+            <option value={e.name} key={e._id}>
+              {e.name}
+            </option>
+          );
+        })}
+      </Input>
   );
 };
 
