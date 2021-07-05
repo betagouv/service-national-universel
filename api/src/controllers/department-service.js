@@ -6,12 +6,12 @@ const { capture } = require("../sentry");
 const DepartmentServiceModel = require("../models/departmentService");
 const ReferentModel = require("../models/referent");
 const { ERRORS } = require("../utils");
-const { validateId } = require("../utils/defaultValidate");
-const validateFromReferent = require("../utils/referent");
+const { validateId } = require("../utils/defaultValidator");
+const referentValidator = require("../utils/validator/referent");
 
 router.post("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const { error, value: checkedDepartementService } = validateFromReferent.validateDepartmentService(req.body);
+    const { error, value: checkedDepartementService } = referentValidator.validateDepartmentService(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
     const data = await DepartmentServiceModel.findOneAndUpdate({ department: checkedDepartementService.department }, checkedDepartementService, {
       new: true,
