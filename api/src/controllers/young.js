@@ -166,6 +166,10 @@ router.get("/department-service", passport.authenticate(["young"], { session: fa
 router.get("/:id/patches", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const young = await YoungObject.findById(req.params.id);
+    if (!young) {
+      capture(`young not found ${req.params.id}`);
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
     const data = await young.patches.find({ ref: young.id }).sort("-date");
     return res.status(200).send({ ok: true, data });
   } catch (error) {

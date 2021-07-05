@@ -119,6 +119,10 @@ router.get("/all", passport.authenticate("referent", { session: false }), async 
 router.get("/:id/patches", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const structure = await StructureObject.findById(req.params.id);
+    if (!structure) {
+      capture(`structure not found ${req.params.id}`);
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
     const data = await structure.patches.find({ ref: structure.id }).sort("-date");
     return res.status(200).send({ ok: true, data });
   } catch (error) {
