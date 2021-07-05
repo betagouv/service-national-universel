@@ -60,6 +60,20 @@ export default () => {
                 defaultQuery={getExportQuery}
                 collection="mission"
                 react={{ and: FILTERS }}
+                transformAll={async (data) => {
+                  const set = new Set(data.map((item) => item.tutorId));
+                  set.delete(undefined);
+                  const tutorIds = [...set];
+                  if (tutorIds?.length) {
+                    const { responses } = await api.esQuery([
+                      { index: "referent", type: "_doc" },
+                      { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: tutorIds } } },
+                    ]);
+                    const tutors = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+                    return data.map((item) => ({ ...item, tutor: tutors?.find((e) => e._id === item.tutorId) }));
+                  }
+                  return data;
+                }}
                 transform={(data) => {
                   return {
                     _id: data._id,
@@ -67,7 +81,11 @@ export default () => {
                     Description: data.description,
                     "Id de la structure": data.structureId,
                     "Nom de la structure": data.structureName,
-                    Tuteur: data.tutorName,
+                    "Id du tuteur": data.tutorId,
+                    "Nom du tuteur": data.tutor?.lastName,
+                    "Prénom du tuteur": data.tutor?.firstName,
+                    "Email du tuteur": data.tutor?.email,
+                    "Téléphone du tuteur": data.tutor?.mobile ? data.tutor?.mobile : data.tutor?.phone,
                     "Liste des domaines de la mission": data.domains,
                     "Date du début": formatDateFR(data.startAt),
                     "Date de fin": formatDateFR(data.endAt),
