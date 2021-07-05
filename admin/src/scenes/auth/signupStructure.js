@@ -384,9 +384,10 @@ const FormGroup2 = styled.div`
 
 const StructureWrapper = styled.div`
   background-color: #fff;
-  margin: 2rem auto;
   min-width: 1000px;
-  width: 65%;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
 `;
 
 const Thumb = styled.div`
@@ -411,6 +412,7 @@ const Title = styled.h1`
 
 const MainTitle = styled(Title)`
   font-size: 1.7rem;
+  margin: 2rem;
 `;
 
 const Subtitle = styled.h2`
