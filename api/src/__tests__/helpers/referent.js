@@ -13,6 +13,13 @@ async function deleteReferentByIdHelper(referentId) {
   await referent.remove();
 }
 
+async function deleteAllReferentBySubrole(subRole) {
+  const referents = await ReferentObject.find({ subRole: subRole });
+  for (const referent of referents) {
+    await deleteReferentByIdHelper(referent._id);
+  }
+}
+
 async function createReferentHelper(referent) {
   return await ReferentObject.create(referent);
 }
@@ -41,4 +48,5 @@ module.exports = {
   createReferentHelper,
   expectReferentToEqual,
   notExistingReferentId,
+  deleteAllReferentBySubrole,
 };

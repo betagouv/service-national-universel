@@ -12,10 +12,24 @@ const {
   expectYoungToEqual,
   notExistingYoungId,
 } = require("./helpers/young");
-const { getReferentsHelper, deleteReferentByIdHelper, notExistingReferentId, createReferentHelper } = require("./helpers/referent");
+const {
+  getReferentsHelper,
+  deleteReferentByIdHelper,
+  notExistingReferentId,
+  createReferentHelper,
+  expectReferentToEqual,
+  deleteAllReferentBySubrole,
+  getReferentByIdHelper,
+} = require("./helpers/referent");
 const { dbConnect, dbClose } = require("./helpers/db");
 const { createCohesionCenter, getCohesionCenterById } = require("./helpers/cohesionCenter");
 const { getNewCohesionCenterFixture } = require("./fixtures/cohesionCenter");
+const { getNewApplicationFixture } = require("./fixtures/application");
+const { createApplication, getApplicationsHelper } = require("./helpers/application");
+const { createStructureHelper, notExistingStructureId } = require("./helpers/structure");
+const getNewStructureFixture = require("./fixtures/structure");
+const { createMissionHelper, getMissionsHelper } = require("./helpers/mission");
+const getNewMissionFixture = require("./fixtures/mission");
 
 jest.mock("../utils", () => ({
   ...jest.requireActual("../utils"),
@@ -147,6 +161,7 @@ describe("Referent", () => {
       }
     });
   });
+
   describe("GET /referent/youngFile/:youngId/:key/:fileName", () => {
     it("should return 200 if file is found", async () => {
       const res = await request(getAppHelper()).get("/referent/youngFile/1/key/test.pdf").send();
@@ -155,6 +170,7 @@ describe("Referent", () => {
       expect(res.body.mimeType).toEqual("application/pdf");
     });
   });
+
   describe("POST /referent/file/:key", () => {
     it("should return 404 if young not found", async () => {
       const res = await request(getAppHelper())
@@ -163,11 +179,196 @@ describe("Referent", () => {
       expect(res.statusCode).toEqual(404);
     });
     it("should send file for the young", async () => {
+      // This test should be improved to check the file is sent (currently no file is sent)
       const young = await createYoungHelper(getNewYoungFixture());
       const res = await request(getAppHelper())
         .post("/referent/file/CniFile")
         .send({ body: JSON.stringify({ youngId: young._id, names: ["e"] }) });
       expect(res.body).toEqual({ data: ["e"], ok: true });
+    });
+  });
+
+  describe("GET /referent/young/:youngId", () => {
+    it("should return 404 if young not found", async () => {
+      const res = await request(getAppHelper())
+        .get("/referent/young/" + notExistingYoungId)
+        .send();
+      expect(res.statusCode).toEqual(404);
+    });
+    it("should return 200 if young found", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const res = await request(getAppHelper())
+        .get("/referent/young/" + young._id)
+        .send();
+      expect(res.statusCode).toEqual(200);
+      expectYoungToEqual(young, res.body.data);
+    });
+    it("should contain applications", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id });
+      const res = await request(getAppHelper())
+        .get("/referent/young/" + young._id)
+        .send();
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.data.applications).toEqual([
+        {
+          ...application.toObject(),
+          _id: application._id.toString(),
+          createdAt: application.createdAt.toISOString(),
+          updatedAt: application.updatedAt.toISOString(),
+        },
+      ]);
+    });
+  });
+
+  describe("GET /referent/:id/patches", () => {
+    it("should return 404 if referent not found", async () => {
+      const res = await request(getAppHelper()).get(`/referent/${notExistingReferentId}/patches`).send();
+      expect(res.statusCode).toEqual(404);
+    });
+    it("should return 200 if referent found with patches", async () => {
+      const referent = await createReferentHelper(getNewReferentFixture());
+      referent.firstName = "MY NEW NAME";
+      await referent.save();
+      const res = await request(getAppHelper()).get(`/referent/${referent._id}/patches`).send();
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.data).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            ops: expect.arrayContaining([expect.objectContaining({ op: "replace", path: "/firstName", value: "MY NEW NAME" })]),
+          }),
+        ])
+      );
+    });
+  });
+
+  describe("GET /referent/:id", () => {
+    it("should return 404 if referent not found", async () => {
+      const res = await request(getAppHelper()).get(`/referent/${notExistingReferentId}`).send();
+      expect(res.statusCode).toEqual(404);
+    });
+    it("should return 200 if referent found", async () => {
+      const referent = await createReferentHelper(getNewReferentFixture());
+      const res = await request(getAppHelper()).get(`/referent/${referent._id}`).send();
+      expect(res.statusCode).toEqual(200);
+      expectReferentToEqual(referent, res.body.data);
+    });
+    it("should return 401 if role is not admin", async () => {
+      const passport = require("passport");
+      passport.user.role = "responsible";
+      const referent = await createReferentHelper(getNewReferentFixture());
+      const res = await request(getAppHelper()).get(`/referent/${referent._id}`).send();
+      expect(res.statusCode).toEqual(401);
+      passport.user.role = "admin";
+    });
+  });
+
+  describe("GET /referent/subrole/:subRole", () => {
+    it("should return all subroles", async () => {
+      // Delete all referent with subrole
+      await deleteAllReferentBySubrole("manager_department");
+      // Create a referent with a subrole.
+      const referent = await createReferentHelper({ ...getNewReferentFixture(), subRole: "manager_department" });
+      const res = await request(getAppHelper()).get("/referent/subrole/manager_department").send();
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.data).toHaveLength(1);
+      expect(res.body.data).toEqual(expect.arrayContaining([expect.objectContaining({ firstName: referent.firstName })]));
+    });
+  });
+
+  describe("GET /referent/structure/:structureId", () => {
+    it("should return empty array if structure not found", async () => {
+      const res = await request(getAppHelper()).get(`/referent/structure/${notExistingStructureId}`).send();
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.data).toHaveLength(0);
+    });
+
+    it("should return all referents for the structure", async () => {
+      const structure = await createStructureHelper(getNewStructureFixture());
+      const referent = await createReferentHelper({ ...getNewReferentFixture(), structureId: structure._id });
+      const res = await request(getAppHelper()).get(`/referent/structure/${structure._id}`).send();
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.data).toHaveLength(1);
+      expectReferentToEqual(referent, res.body.data[0]);
+    });
+  });
+
+  describe("PUT /referent/:id", () => {
+    it("should return 404 if referent not found", async () => {
+      const res = await request(getAppHelper()).put(`/referent/${notExistingReferentId}`).send();
+      expect(res.statusCode).toEqual(404);
+    });
+    it("should return 200 if referent found", async () => {
+      const referent = await createReferentHelper(getNewReferentFixture());
+      referent.firstName = "MY NEW NAME";
+      await referent.save();
+      const res = await request(getAppHelper()).put(`/referent/${referent._id}`).send();
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.data).toEqual(
+        expect.objectContaining({
+          firstName: "MY NEW NAME",
+        })
+      );
+    });
+    it("should return 401 if role is not admin", async () => {
+      const passport = require("passport");
+      passport.user.role = "responsible";
+      const referent = await createReferentHelper(getNewReferentFixture());
+      const res = await request(getAppHelper()).put(`/referent/${referent._id}`).send();
+      expect(res.statusCode).toEqual(401);
+      passport.user.role = "admin";
+    });
+
+    it("should update tutor name in missions and applications", async () => {
+      const firstName = "MY NEW NAME";
+      const lastName = "MY NEW LAST NAME";
+      const fullName = `${firstName} ${lastName}`;
+      const referent = await createReferentHelper(getNewReferentFixture());
+      const mission = await createMissionHelper(getNewMissionFixture());
+      const application = await createApplication(getNewApplicationFixture());
+      mission.tutorId = referent._id;
+      application.tutorId = referent._id;
+      application.missionId = mission._id;
+      await mission.save();
+      await application.save();
+      referent.firstName = firstName;
+      referent.lastName = lastName;
+      await referent.save();
+      const res = await request(getAppHelper()).put(`/referent/${referent._id}`).send();
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.data).toEqual(
+        expect.objectContaining({
+          firstName: firstName,
+          lastName: lastName,
+        })
+      );
+      const missions = await getMissionsHelper({ tutorId: referent._id.toString() });
+      const applications = await getApplicationsHelper({ tutorId: referent._id });
+      expect(missions).toHaveLength(1);
+      expect(applications).toHaveLength(1);
+      expect(missions.map((mission) => mission.tutorName)).toEqual([fullName]);
+      expect(applications.map((application) => application.tutorName)).toEqual([fullName]);
+    });
+  });
+
+  describe.only("DELETE /referent/:id", () => {
+    it("should return 404 if referent not found", async () => {
+      const res = await request(getAppHelper()).delete(`/referent/${notExistingReferentId}`).send();
+      expect(res.statusCode).toEqual(404);
+    });
+    it("should return 200 if referent found", async () => {
+      const referent = await createReferentHelper(getNewReferentFixture());
+      const res = await request(getAppHelper()).delete(`/referent/${referent._id}`).send();
+      expect(res.statusCode).toEqual(200);
+      expect(await getReferentByIdHelper(referent._id)).toBeNull();
+    });
+    it("should return 401 if role is not admin", async () => {
+      const passport = require("passport");
+      passport.user.role = "responsible";
+      const referent = await createReferentHelper(getNewReferentFixture());
+      const res = await request(getAppHelper()).delete(`/referent/${referent._id}`).send();
+      expect(res.statusCode).toEqual(401);
+      passport.user.role = "admin";
     });
   });
 });
