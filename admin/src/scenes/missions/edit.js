@@ -5,6 +5,7 @@ import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 import { Formik, Field } from "formik";
 import { useHistory } from "react-router-dom";
+import ReactSelect from "react-select";
 
 import MultiSelect from "../../components/Multiselect";
 import AddressInput from "../../components/addressInput";
@@ -19,6 +20,7 @@ import LoadingButton from "../../components/buttons/LoadingButton";
 export default (props) => {
   const [defaultValue, setDefaultValue] = useState(null);
   const [structure, setStructure] = useState();
+  const [structures, setStructures] = useState();
   const [referents, setReferents] = useState([]);
   const [showTutor, setShowTutor] = useState();
   const [loadings, setLoadings] = useState([false, false]);
@@ -57,8 +59,15 @@ export default (props) => {
     }
   }
 
+  async function initStructures() {
+    const responseStructure = await api.get(`/structure/all`);
+    const s = responseStructure.data.map((e) => ({ label: e.name, value: e.name, _id: e._id }));
+    setStructures(s);
+  }
+
   useEffect(() => {
     initMission();
+    initStructures();
   }, []);
   useEffect(() => {
     initStructure();
@@ -67,7 +76,7 @@ export default (props) => {
     initReferents();
   }, [structure]);
 
-  if ((!defaultValue && !isNew) || !structure) return <Loader />;
+  if ((!defaultValue && !isNew) || !structure || !structures) return <Loader />;
 
   return (
     <Formik
@@ -179,7 +188,25 @@ export default (props) => {
                     </FormGroup>
                     <FormGroup>
                       <label>STRUCTURE RATTACHÉE</label>
-                      <Input disabled value={values.structureName} placeholder="Structure de la mission" />
+                      <ReactSelect
+                        styles={{
+                          menu: () => ({
+                            borderStyle: "solid",
+                            borderWidth: 1,
+                            borderRadius: 5,
+                            borderColor: "#dedede",
+                          }),
+                        }}
+                        defaultValue={{ label: values.structureName, value: values.structureName, _id: values.structureId }}
+                        options={structures}
+                        placeholder={"Modifier la structure rattachée"}
+                        noOptionsMessage={() => "Aucune structure ne correspond à cette recherche."}
+                        // onChange={(e) => {
+                        //   handleChange({ target: { value: e._id, name: "cohesionCenterId" } });
+                        //   handleChange({ target: { value: e.value, name: "cohesionCenterName" } });
+                        //   onSelect?.(e);
+                        // }}
+                      />
                     </FormGroup>
                     <FormGroup>
                       <label>DOMAINES D'ACTION</label>
