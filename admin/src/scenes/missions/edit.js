@@ -91,7 +91,6 @@ export default (props) => {
   }, [structure]);
 
   if ((!defaultValue && !isNew) || !structure || !structures) return <Loader />;
-
   return (
     <Formik
       validateOnChange={false}
@@ -398,7 +397,7 @@ export default (props) => {
                 </Col>
               </Row>
             </Box>
-            {defaultValue ? (
+            {defaultValue && user.role === "admin" ? (
               <Box>
                 <Row>
                   <Col md={12}>
