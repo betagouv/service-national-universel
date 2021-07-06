@@ -186,57 +186,5 @@ Schema.plugin(patchHistory, {
 Schema.plugin(mongooseElastic(esClient), MODELNAME);
 
 const OBJ = mongoose.model(MODELNAME, Schema);
+
 module.exports = OBJ;
-
-/*
-
-{
-   "id":10090,
-   "name":"se.legoff@gmail.com",
-   "email":"se.legoff@gmail.com",
-   "context_role":"responsable",
-   "created_at":"2020-12-02 14:37:10",
-   "updated_at":"2020-12-02 14:37:10",
-   "profile":{
-      "id":10080,
-      "user_id":10090,
-      "first_name":"Sebastien",
-      "last_name":"Le Goff",
-      "email":"se.legoff@gmail.com",
-      "phone":null,
-      "mobile":"+33658469890",
-      "reseau_id":null,
-      "referent_department":null,
-      "referent_region":null,
-      "created_at":"2020-12-02 14:37:10",
-      "updated_at":"2020-12-02 14:37:29",
-      "full_name":"Sebastien Le Goff",
-      "avatar":null,
-      "roles":{
-         "admin":false,
-         "referent":false,
-         "referentRegion":false,
-         "superviseur":false,
-         "responsable":true,
-         "tuteur":false
-      },
-      "has_user":true,
-      "structures":[
-         {
-            "id":2166,
-            "name":"TEST SEB",
-            "logo":null,
-            "full_address":",  ",
-            "ceu":false,
-            "pivot":{
-               "profile_id":10080,
-               "structure_id":2166,
-               "role":"responsable"
-            }
-         }
-      ],
-      "reseau":null
-   }
-}
-
-*/

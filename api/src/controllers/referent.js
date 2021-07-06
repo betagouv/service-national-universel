@@ -27,7 +27,16 @@ const referentValidator = require("../utils/validator/referent");
 const ReferentAuth = new AuthObject(ReferentObject);
 const { cookieOptions, JWT_MAX_AGE } = require("../cookie-options");
 const Joi = require("joi");
-const { ROLES_LIST, canInviteUser, canDelete, canViewPatchesHistory, canViewReferent, SUB_ROLES, ROLES } = require("snu-lib/roles");
+const {
+  ROLES_LIST,
+  canInviteUser,
+  canDelete,
+  canViewPatchesHistory,
+  canViewReferent,
+  SUB_ROLES,
+  ROLES,
+  canUpdateReferent,
+} = require("snu-lib/roles");
 
 function inSevenDays() {
   return Date.now() + 86400000 * 7;
@@ -622,47 +631,29 @@ router.get("/manager_department/:department", passport.authenticate("referent", 
 
 router.put("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
+    const { error, value } = referentValidator.validateReferent(req.body);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
     const data = await ReferentObject.findOne({ _id: req.params.id });
     if (!data) return res.status(404).send({ ok: false });
 
-    const isAdmin = req.user.role === "admin";
-    const isResponsibleModifyingResponsibleWithoutChangingRole =
-      // Is responsible...
-      ["responsible", "supervisor"].includes(req.user.role) &&
-      // ... modifying responsible ...
-      ["responsible", "supervisor"].includes(data.role) &&
-      // ... witout changing its role.
-      ["responsible", "supervisor"].includes(req.body.role);
+    if (!canUpdateReferent(req.user, data, value)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    // TODO: we must handle rights more precisely.
-    // See: https://trello.com/c/Wv2TrQnQ/383-admin-ajouter-onglet-utilisateurs-pour-les-r%C3%A9f%C3%A9rents
-    const isReferentModifyingReferentWithoutChangingRole =
-      // Is referent...
-      ["referent_department", "referent_region"].includes(req.user.role) &&
-      // ... modifying referent ...
-      ["referent_department", "referent_region"].includes(data.role) &&
-      // ... witout changing its role.
-      ["referent_department", "referent_region"].includes(req.body.role);
-    const authorized = isAdmin || isResponsibleModifyingResponsibleWithoutChangingRole || isReferentModifyingReferentWithoutChangingRole;
-
-    if (!authorized) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    const referent = await ReferentObject.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const referent = await ReferentObject.findByIdAndUpdate(req.params.id, value, { new: true, useFindAndModify: false });
     await updateTutorNameInMissionsAndApplications(referent);
     res.status(200).send({ ok: true, data: referent });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error: error.message });
   }
 });
 
-//@check
 router.put("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const obj = req.body;
-    obj.email = req.body.email && req.body.email.trim().toLowerCase();
-    obj.firstName = req.body.firstName && req.body.firstName.charAt(0).toUpperCase() + (req.body.firstName || "").toLowerCase().slice(1);
-    obj.lastName = req.body.lastName && req.body.lastName.toUpperCase();
-    const user = await ReferentObject.findByIdAndUpdate(req.user._id, obj, { new: true });
+    const { error, value } = referentValidator.validateSelf(req.body);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    const user = await ReferentObject.findByIdAndUpdate(req.user._id, value, { new: true, useFindAndModify: false });
     await updateTutorNameInMissionsAndApplications(user);
     res.status(200).send({ ok: true, data: user });
   } catch (error) {

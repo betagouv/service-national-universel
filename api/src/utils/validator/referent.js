@@ -254,9 +254,57 @@ function validateYoung(young) {
     .validate(young, { stripUnknown: true });
 }
 
+function validateReferent(referent) {
+  return Joi.object()
+    .keys({
+      firstName: Joi.string()
+        .custom((value) => (value ? value.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()) : null))
+        .allow(null, ""),
+      lastName: Joi.string().uppercase().allow(null, ""),
+      email: Joi.string().lowercase().trim().email().allow(null, ""),
+      password: Joi.string().allow(null, ""),
+      forgotPasswordResetToken: Joi.string().allow(null, ""),
+      invitationToken: Joi.string().allow(null, ""),
+      role: Joi.string().allow(null, ""),
+      region: Joi.string().allow(null, ""),
+      department: Joi.string().allow(null, ""),
+      subRole: Joi.string().allow(null, ""),
+      cohesionCenterId: Joi.string().allow(null, ""),
+      cohesionCenterName: Joi.string().allow(null, ""),
+      phone: Joi.string().allow(null, ""),
+      mobile: Joi.string().allow(null, ""),
+      structureId: Joi.string().allow(null, ""),
+    })
+    .validate(referent, { stripUnknown: true });
+}
+
+function validateSelf(referent) {
+  // Referents can not update their role.
+  return Joi.object()
+    .keys({
+      firstName: Joi.string()
+        .custom((value) => (value ? value.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()) : null))
+        .allow(null, ""),
+      lastName: Joi.string().uppercase().allow(null, ""),
+      email: Joi.string().lowercase().trim().email().allow(null, ""),
+      password: Joi.string().allow(null, ""),
+      region: Joi.string().allow(null, ""),
+      department: Joi.string().allow(null, ""),
+      subRole: Joi.string().allow(null, ""),
+      cohesionCenterId: Joi.string().allow(null, ""),
+      cohesionCenterName: Joi.string().allow(null, ""),
+      phone: Joi.string().allow(null, ""),
+      mobile: Joi.string().allow(null, ""),
+      structureId: Joi.string().allow(null, ""),
+    })
+    .validate(referent, { stripUnknown: true });
+}
+
 module.exports = {
   validateMission,
   validateProgram,
   validateDepartmentService,
   validateYoung,
+  validateReferent,
+  validateSelf,
 };

@@ -289,13 +289,12 @@ describe("Referent", () => {
     });
     it("should return 200 if referent found", async () => {
       const referent = await createReferentHelper(getNewReferentFixture());
-      referent.firstName = "MY NEW NAME";
-      await referent.save();
-      const res = await request(getAppHelper()).put(`/referent/${referent._id}`).send();
+      const res = await request(getAppHelper()).put(`/referent/${referent._id}`).send({ firstName: "MY NEW NAME", lastName: "my neW last Name" });
       expect(res.statusCode).toEqual(200);
       expect(res.body.data).toEqual(
         expect.objectContaining({
-          firstName: "MY NEW NAME",
+          firstName: "My New Name",
+          lastName: "MY NEW LAST NAME",
         })
       );
     });
@@ -311,7 +310,7 @@ describe("Referent", () => {
     it("should update tutor name in missions and applications", async () => {
       const firstName = "MY NEW NAME";
       const lastName = "MY NEW LAST NAME";
-      const fullName = `${firstName} ${lastName}`;
+      const fullName = `My New Name MY NEW LAST NAME`;
       const referent = await createReferentHelper(getNewReferentFixture());
       const mission = await createMissionHelper(getNewMissionFixture());
       const application = await createApplication(getNewApplicationFixture());
@@ -320,17 +319,9 @@ describe("Referent", () => {
       application.missionId = mission._id;
       await mission.save();
       await application.save();
-      referent.firstName = firstName;
-      referent.lastName = lastName;
-      await referent.save();
-      const res = await request(getAppHelper()).put(`/referent/${referent._id}`).send();
+      const res = await request(getAppHelper()).put(`/referent/${referent._id}`).send({ firstName, lastName });
       expect(res.statusCode).toEqual(200);
-      expect(res.body.data).toEqual(
-        expect.objectContaining({
-          firstName: firstName,
-          lastName: lastName,
-        })
-      );
+      expect(res.body.data).toEqual(expect.objectContaining({ lastName: lastName }));
       const missions = await getMissionsHelper({ tutorId: referent._id.toString() });
       const applications = await getApplicationsHelper({ tutorId: referent._id });
       expect(missions).toHaveLength(1);
