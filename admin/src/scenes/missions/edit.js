@@ -23,7 +23,7 @@ export default (props) => {
   const [structures, setStructures] = useState();
   const [referents, setReferents] = useState([]);
   const [showTutor, setShowTutor] = useState();
-  const [loadings, setLoadings] = useState([false, false]);
+  const [loadings, setLoadings] = useState([false, false, false]);
   const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
   const isNew = !props?.match?.params?.id;
@@ -61,8 +61,22 @@ export default (props) => {
 
   async function initStructures() {
     const responseStructure = await api.get(`/structure/all`);
-    const s = responseStructure.data.map((e) => ({ label: e.name, value: e.name, _id: e._id }));
+    const s = responseStructure.data.map((e) => ({ label: e.name, value: e.name, _id: e._id, structure: e }));
     setStructures(s);
+  }
+
+  async function modifyStructure() {
+    try {
+      setLoadings([false, false, true]);
+      const { ok, code, data: y } = await api.put(`/mission/${defaultValue._id}/structure/${structure._id}`);
+      setLoadings([false, false, false]);
+      if (!ok) return toastr.error("Une erreur s'est produite lors de la modification de la structure", translate(code));
+      history.push(`/mission/${defaultValue._id}`);
+      toastr.success("Structure modifiée");
+    } catch (e) {
+      setLoadings([false, false, false]);
+      return toastr.error("Une erreur s'est produite lors de la modification de la structure", e?.error?.message);
+    }
   }
 
   useEffect(() => {
@@ -185,28 +199,6 @@ export default (props) => {
                       </p>
                       <Field validate={(v) => !v && requiredMessage} value={values.name} onChange={handleChange} name="name" placeholder="Nom de votre mission" />
                       <ErrorMessage errors={errors} touched={touched} name="name" />
-                    </FormGroup>
-                    <FormGroup>
-                      <label>STRUCTURE RATTACHÉE</label>
-                      <ReactSelect
-                        styles={{
-                          menu: () => ({
-                            borderStyle: "solid",
-                            borderWidth: 1,
-                            borderRadius: 5,
-                            borderColor: "#dedede",
-                          }),
-                        }}
-                        defaultValue={{ label: values.structureName, value: values.structureName, _id: values.structureId }}
-                        options={structures}
-                        placeholder={"Modifier la structure rattachée"}
-                        noOptionsMessage={() => "Aucune structure ne correspond à cette recherche."}
-                        // onChange={(e) => {
-                        //   handleChange({ target: { value: e._id, name: "cohesionCenterId" } });
-                        //   handleChange({ target: { value: e.value, name: "cohesionCenterName" } });
-                        //   onSelect?.(e);
-                        // }}
-                      />
                     </FormGroup>
                     <FormGroup>
                       <label>DOMAINES D'ACTION</label>
@@ -406,6 +398,46 @@ export default (props) => {
                 </Col>
               </Row>
             </Box>
+            {defaultValue ? (
+              <Box>
+                <Row>
+                  <Col md={12}>
+                    <Wrapper>
+                      <BoxTitle>Structure associée</BoxTitle>
+                      <ReactSelect
+                        styles={{
+                          menu: () => ({
+                            borderStyle: "solid",
+                            borderWidth: 1,
+                            borderRadius: 5,
+                            borderColor: "#dedede",
+                          }),
+                        }}
+                        defaultValue={{ label: structure.name, value: structure.name, _id: structure._id }}
+                        options={structures}
+                        placeholder={"Modifier la structure rattachée"}
+                        noOptionsMessage={() => "Aucune structure ne correspond à cette recherche."}
+                        onChange={(e) => {
+                          setStructure(e.structure);
+                        }}
+                      />
+                      <Header style={{ justifyContent: "flex-end" }}>
+                        <LoadingButton
+                          loading={loadings[2]}
+                          disabled={loadings[0] || loadings[1]}
+                          onClick={() => {
+                            modifyStructure();
+                          }}
+                        >
+                          Modifier la structure
+                        </LoadingButton>
+                      </Header>
+                    </Wrapper>
+                  </Col>
+                </Row>
+              </Box>
+            ) : null}
+
             {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas proposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
             <Header style={{ justifyContent: "flex-end" }}>
               {!defaultValue ? (
@@ -413,7 +445,7 @@ export default (props) => {
                   color={"#fff"}
                   textColor={"#767697"}
                   loading={loadings[0]}
-                  disabled={loadings[1]}
+                  disabled={loadings[1] || loadings[2]}
                   onClick={() => {
                     handleChange({ target: { value: "DRAFT", name: "status" } });
                     handleSubmit();
@@ -425,7 +457,7 @@ export default (props) => {
 
               <LoadingButton
                 loading={loadings[1]}
-                disabled={loadings[0]}
+                disabled={loadings[0] || loadings[2]}
                 onClick={() => {
                   handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
                   handleSubmit();

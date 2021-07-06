@@ -7,6 +7,8 @@ const { capture } = require("../sentry");
 const MissionObject = require("../models/mission");
 const UserObject = require("../models/referent");
 const ApplicationObject = require("../models/application");
+const StructureObject = require("../models/structure");
+const ReferentObject = require("../models/referent");
 const { ERRORS } = require("../utils/index.js");
 const { validateId } = require("../utils/validator/default");
 const youngValidator = require("../utils/validator/young");
@@ -108,6 +110,33 @@ router.get("/structure/:structureId", passport.authenticate("referent", { sessio
     const data = await MissionObject.find({ structureId: checkedId });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+router.put("/:id/structure/:structureId", passport.authenticate("referent", { session: false }), async (req, res) => {
+  try {
+    const { error: errorId, value: checkedId } = validateId(req.params.id);
+    const { error: errorStructureId, value: checkedStructureId } = validateId(req.params.structureId);
+    if (errorId || errorStructureId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error });
+    const structure = await StructureObject.findById(checkedStructureId);
+    const mission = await MissionObject.findById(checkedId);
+    mission.set({ structureId: structure._id, structureName: structure.name });
+    await mission.save();
+    await mission.index();
+    const applications = await ApplicationObject.find({ missionId: checkedId });
+    applications.forEach(async (application) => {
+      application.set({ structureId: structure._id });
+      await application.save();
+    });
+    const referents = await ReferentObject.find({ _id: mission.tutorId });
+    referents.forEach(async (referent) => {
+      referent.set({ structureId: structure._id });
+      await referent.save();
+    });
+    return res.status(200).send({ ok: true, data: mission });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
