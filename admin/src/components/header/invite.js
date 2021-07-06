@@ -106,12 +106,14 @@ export default ({ setOpen, open, label = "Inviter un référent", role = "" }) =
                             </FormGroup>
                           ) : null}
                         </Col>
-                        <Col md={6}>
-                          <FormGroup>
-                            <div>Fonction</div>
-                            <ChooseSubRole validate={(v) => !v} value={values.subRole} onChange={handleChange} options={getSubRole(values.role)} />
-                          </FormGroup>
-                        </Col>
+                        {values.role !== REFERENT_ROLES.HEAD_CENTER && (
+                          <Col md={6}>
+                            <FormGroup>
+                              <div>Fonction</div>
+                              <ChooseSubRole validate={(v) => !v} value={values.subRole} onChange={handleChange} options={getSubRole(values.role)} />
+                            </FormGroup>
+                          </Col>
+                        )}
                       </>
                     </Row>
                   ) : null}
