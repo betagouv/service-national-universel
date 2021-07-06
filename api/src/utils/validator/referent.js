@@ -267,7 +267,7 @@ function validateReferent(referent) {
       forgotPasswordResetToken: Joi.string().allow(null, ""),
       invitationToken: Joi.string().allow(null, ""),
       role: Joi.string()
-        .allow(null, "")
+        .allow(null)
         .valid(...ROLES_LIST),
       region: Joi.string().allow(null, ""),
       department: Joi.string().allow(null, ""),
