@@ -498,16 +498,10 @@ router.post("/file/:key", passport.authenticate("referent", { session: false }),
     const { error, value } = Joi.object({
       key: Joi.string().required(),
       body: Joi.string().required(),
-      originalFiles: Joi.array().items(
-        Joi.object({
-          name: Joi.string().required(),
-          content: Joi.string().required(),
-        }).required()
-      ),
     })
       .unknown()
-      .validate({ ...req.params, ...req.body, originalFiles: req.files });
-    const { key, originalFiles, body } = value;
+      .validate({ ...req.params, ...req.body });
+    const { key, body } = value;
     const {
       error: bodyError,
       value: { names, youngId },
@@ -522,7 +516,25 @@ router.post("/file/:key", passport.authenticate("referent", { session: false }),
     const young = await YoungObject.findById(youngId);
     if (!young) return res.status(404).send({ ok: false });
 
-    const files = Object.keys(originalFiles || {}).map((e) => originalFiles[e]);
+    // Validate files with Joi
+    const { error: filesError, value: files } = Joi.array()
+      .items(
+        Joi.alternatives().try(
+          Joi.object({
+            name: Joi.string().required(),
+            data: Joi.binary().required(),
+          }).unknown(),
+          Joi.array().items(
+            Joi.object({
+              name: Joi.string().required(),
+              data: Joi.binary().required(),
+            }).unknown()
+          )
+        )
+      )
+      .validate(Object.keys(req.files || {}).map((e) => req.files[e]));
+    if (filesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: filesError.message });
+
     for (let currentFile of files) {
       // If multiple file with same names are provided, currentFile is an array. We just take the latest.
       if (Array.isArray(currentFile)) {
