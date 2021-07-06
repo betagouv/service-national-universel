@@ -27,7 +27,7 @@ const referentValidator = require("../utils/validator/referent");
 const ReferentAuth = new AuthObject(ReferentObject);
 const { cookieOptions, JWT_MAX_AGE } = require("../cookie-options");
 const Joi = require("joi");
-const { ROLES_LIST, canInviteUser, canDelete } = require("snu-lib/roles");
+const { ROLES_LIST, canInviteUser, canDelete, canViewPatchesHistory, canViewReferent, SUB_ROLES, ROLES } = require("snu-lib/roles");
 
 function inSevenDays() {
   return Date.now() + 86400000 * 7;
@@ -486,20 +486,40 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
 
 router.post("/file/:key", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const key = req.params.key;
-    const { names, youngId } = JSON.parse(req.body.body);
-    const files = Object.keys(req.files || {}).map((e) => req.files[e]);
+    const { error, value } = Joi.object({
+      key: Joi.string().required(),
+      body: Joi.string().required(),
+      originalFiles: Joi.array().items(
+        Joi.object({
+          name: Joi.string().required(),
+          content: Joi.string().required(),
+        }).required()
+      ),
+    })
+      .unknown()
+      .validate({ ...req.params, ...req.body, originalFiles: req.files });
+    const { key, originalFiles, body } = value;
+    const {
+      error: bodyError,
+      value: { names, youngId },
+    } = Joi.object({
+      names: Joi.array().items(Joi.string().required()).required(),
+      youngId: Joi.string().required(),
+    }).validate(JSON.parse(body));
+
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+    if (bodyError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: bodyError.message });
 
     const young = await YoungObject.findById(youngId);
     if (!young) return res.status(404).send({ ok: false });
 
-    for (let i = 0; i < files.length; i++) {
-      let currentFile = files[i];
+    const files = Object.keys(originalFiles || {}).map((e) => originalFiles[e]);
+    for (let currentFile of files) {
       // If multiple file with same names are provided, currentFile is an array. We just take the latest.
       if (Array.isArray(currentFile)) {
         currentFile = currentFile[currentFile.length - 1];
       }
-      const { name, data, mimetype } = currentFile;
+      const { name, data } = currentFile;
 
       const encryptedBuffer = encrypt(data);
       const resultingFile = { mimetype: "image/png", encoding: "7bit", data: encryptedBuffer };
@@ -517,11 +537,12 @@ router.post("/file/:key", passport.authenticate("referent", { session: false }),
 
 router.get("/young/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const data = await YoungObject.findOne({ _id: req.params.id });
-    if (!data) {
-      capture(`Young not found ${req.params.id}`);
-      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    }
+    const { error, value } = Joi.object({ id: Joi.string().required() })
+      .unknown()
+      .validate({ ...req.params });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+    const data = await YoungObject.findById(value.id);
+    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const applications = await ApplicationObject.find({ youngId: data._id });
     return res.status(200).send({ ok: true, data: { ...data._doc, applications } });
   } catch (error) {
@@ -532,11 +553,16 @@ router.get("/young/:id", passport.authenticate("referent", { session: false }), 
 
 router.get("/:id/patches", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const referent = await ReferentObject.findById(req.params.id);
-    if (!referent) {
-      capture(`referent not found ${req.params.id}`);
-      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    }
+    const { error, value } = Joi.object({ id: Joi.string().required() })
+      .unknown()
+      .validate({ ...req.params });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    if (!canViewPatchesHistory(req.user)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const referent = await ReferentObject.findById(value.id);
+    if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
     const data = await referent.patches.find({ ref: referent.id }).sort("-date");
     return res.status(200).send({ ok: true, data });
   } catch (error) {
@@ -557,15 +583,15 @@ router.get("/", passport.authenticate("referent", { session: false }), async (re
 
 router.get("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const data = await ReferentObject.findOne({ _id: req.params.id });
+    const { error, value } = Joi.object({ id: Joi.string().required() })
+      .unknown()
+      .validate({ ...req.params });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    const data = await ReferentObject.findOne({ _id: value.id });
     if (!data) return res.status(404).send({ ok: false });
 
-    const isAdminOrReferent = ["referent_department", "referent_region", "admin"].includes(req.user.role);
-    const isResponsibleModifyingResponsible =
-      ["responsible", "supervisor"].includes(req.user.role) && ["responsible", "supervisor"].includes(data.role);
-    // See: https://trello.com/c/Wv2TrQnQ/383-admin-ajouter-onglet-utilisateurs-pour-les-r%C3%A9f%C3%A9rents
-    const authorized = isAdminOrReferent || isResponsibleModifyingResponsible;
-    if (!authorized) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canViewReferent(req.user, data)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
@@ -573,19 +599,20 @@ router.get("/:id", passport.authenticate("referent", { session: false }), async 
   }
 });
 
-router.get("/subrole/:subRole", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.get("/manager_department/:department", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const data = await ReferentObject.find({ subRole: String(req.params.subRole) });
-    return res.status(200).send({ ok: true, data });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
-  }
-});
+    const { error, value } = Joi.object({ department: Joi.string().required() })
+      .unknown()
+      .validate({ ...req.params });
 
-router.get("/structure/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
-  try {
-    const data = await ReferentObject.find({ structureId: req.params.id });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    const data = await ReferentObject.findOne({
+      subRole: SUB_ROLES.manager_department,
+      role: ROLES.REFERENT_DEPARTMENT,
+      department: value.department,
+    });
+    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);

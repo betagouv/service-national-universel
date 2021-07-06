@@ -94,19 +94,6 @@ export default (props) => {
             history.push(`/structure/${values._id}`);
             toastr.success("Structure mise à jour");
           }
-
-          if (values.isNetwork !== defaultValue.isNetwork) {
-            const { data: members, ok } = await api.get(`/referent/structure/${id}`);
-            setLoading(false);
-            if (!ok) return;
-            members
-              .filter((m) => ["supervisor", "responsible"].includes(m.role))
-              .forEach(async (m) => {
-                await api.put(`/referent/${m._id}`, {
-                  role: values.isNetwork === "true" ? "supervisor" : "responsible",
-                });
-              });
-          }
         } catch (e) {
           setLoading(false);
           console.log(e);
