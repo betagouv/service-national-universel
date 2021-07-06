@@ -92,7 +92,7 @@ function validateYoung(young) {
       statusPhase2: Joi.string().allow(null, ""),
       statusPhase2Contract: Joi.array().items(Joi.string().allow(null, "")),
       statusPhase3: Joi.string().allow(null, ""),
-      lastStatusAt: Joi.string().allow(null, ""),
+      lastStatusAt: Joi.alternatives().try(Joi.string().allow(null, ""), Joi.number().allow(null)),
       withdrawnMessage: Joi.string().allow(null, ""),
       inscriptionStep: Joi.string().allow(null, ""),
       cohesion2020Step: Joi.string().allow(null, ""),
