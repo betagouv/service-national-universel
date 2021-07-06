@@ -1,4 +1,5 @@
 const Joi = require("joi");
+const { ROLES_LIST, SUB_ROLES_LIST } = require("snu-lib/roles");
 
 function validateMission(mission) {
   return Joi.object()
@@ -265,10 +266,14 @@ function validateReferent(referent) {
       password: Joi.string().allow(null, ""),
       forgotPasswordResetToken: Joi.string().allow(null, ""),
       invitationToken: Joi.string().allow(null, ""),
-      role: Joi.string().allow(null, ""),
+      role: Joi.string()
+        .allow(null, "")
+        .valid(...ROLES_LIST),
       region: Joi.string().allow(null, ""),
       department: Joi.string().allow(null, ""),
-      subRole: Joi.string().allow(null, ""),
+      subRole: Joi.string()
+        .allow(null, "")
+        .valid(...SUB_ROLES_LIST),
       cohesionCenterId: Joi.string().allow(null, ""),
       cohesionCenterName: Joi.string().allow(null, ""),
       phone: Joi.string().allow(null, ""),
@@ -290,7 +295,9 @@ function validateSelf(referent) {
       password: Joi.string().allow(null, ""),
       region: Joi.string().allow(null, ""),
       department: Joi.string().allow(null, ""),
-      subRole: Joi.string().allow(null, ""),
+      subRole: Joi.string()
+        .allow(null, "")
+        .valid(...SUB_ROLES_LIST),
       cohesionCenterId: Joi.string().allow(null, ""),
       cohesionCenterName: Joi.string().allow(null, ""),
       phone: Joi.string().allow(null, ""),
