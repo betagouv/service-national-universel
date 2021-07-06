@@ -282,6 +282,20 @@ describe("Referent", () => {
     });
   });
 
+  describe("PUT /referent", () => {
+    it("should return 400 when a role is given", async () => {
+      const referent = await createReferentHelper(getNewReferentFixture());
+      const res = await request(getAppHelper()).put(`/referent/${referent._id}`).send({ role: "referent" });
+      expect(res.statusCode).toEqual(400);
+    });
+    it("should return 200 when firstName is given", async () => {
+      const referent = await createReferentHelper(getNewReferentFixture());
+      const res = await request(getAppHelper()).put(`/referent/${referent._id}`).send({ firstName: "MY NEW NAME" });
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.data?.firstName).toEqual("My New Name");
+    });
+  });
+
   describe("PUT /referent/:id", () => {
     it("should return 404 if referent not found", async () => {
       const res = await request(getAppHelper()).put(`/referent/${notExistingReferentId}`).send();

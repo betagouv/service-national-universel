@@ -73,7 +73,9 @@ router.post("/forgot_password_reset", async (req, res) => ReferentAuth.forgotPas
 
 router.post("/signin_as/:type/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const { error, value: params } = Joi.object({ id: Joi.string().required(), type: Joi.string().required() }).unknown().validate(req.params);
+    const { error, value: params } = Joi.object({ id: Joi.string().required(), type: Joi.string().required() })
+      .unknown()
+      .validate(req.params, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const { id, type } = params;
 
@@ -112,7 +114,7 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
       centerName: Joi.string().allow(null, ""),
     })
       .unknown()
-      .validate({ ...req.params, ...req.body });
+      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     if (!canInviteUser(req.user.role, value.role)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -178,7 +180,9 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
 
 router.post("/signup_retry", async (req, res) => {
   try {
-    const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required() }).unknown().validate(req.body);
+    const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required() })
+      .unknown()
+      .validate(req.body, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const referent = await ReferentObject.findOne({ email: value.email });
@@ -212,7 +216,7 @@ router.post("/signup_retry", async (req, res) => {
 
 router.post("/signup_verify", async (req, res) => {
   try {
-    const { error, value } = Joi.object({ invitationToken: Joi.string().required() }).unknown().validate(req.body);
+    const { error, value } = Joi.object({ invitationToken: Joi.string().required() }).unknown().validate(req.body, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const referent = await ReferentObject.findOne({ invitationToken: value.invitationToken, invitationExpires: { $gt: Date.now() } });
@@ -234,7 +238,7 @@ router.post("/signup_invite", async (req, res) => {
       lastName: Joi.string().allow(null, ""),
     })
       .unknown()
-      .validate(req.body);
+      .validate(req.body, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const { email, password, firstName, lastName } = value;
 
@@ -349,7 +353,7 @@ router.post("/email-tutor/:template/:tutorId", passport.authenticate("referent",
       message: Joi.string().required().allow(null, ""),
     })
       .unknown()
-      .validate({ ...req.params, ...req.body });
+      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
     const { tutorId, template, subject, message } = value;
@@ -394,7 +398,7 @@ router.post("/email/:template/:youngId", passport.authenticate("referent", { ses
       structureName: Joi.string().allow(null, ""),
     })
       .unknown()
-      .validate({ ...req.params, ...req.body });
+      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
     const { youngId, template, message, prevStatus, missionName, structureName } = value;
 
@@ -468,7 +472,7 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
       fileName: Joi.string().required(),
     })
       .unknown()
-      .validate({ ...req.params });
+      .validate({ ...req.params }, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
     const { youngId, key, fileName } = value;
@@ -500,7 +504,7 @@ router.post("/file/:key", passport.authenticate("referent", { session: false }),
       body: Joi.string().required(),
     })
       .unknown()
-      .validate({ ...req.params, ...req.body });
+      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
     const { key, body } = value;
     const {
       error: bodyError,
@@ -508,7 +512,7 @@ router.post("/file/:key", passport.authenticate("referent", { session: false }),
     } = Joi.object({
       names: Joi.array().items(Joi.string().required()).required(),
       youngId: Joi.string().required(),
-    }).validate(JSON.parse(body));
+    }).validate(JSON.parse(body), { stripUnknown: true });
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
     if (bodyError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: bodyError.message });
@@ -532,7 +536,10 @@ router.post("/file/:key", passport.authenticate("referent", { session: false }),
           )
         )
       )
-      .validate(Object.keys(req.files || {}).map((e) => req.files[e]));
+      .validate(
+        Object.keys(req.files || {}).map((e) => req.files[e]),
+        { stripUnknown: true }
+      );
     if (filesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: filesError.message });
 
     for (let currentFile of files) {
@@ -560,7 +567,7 @@ router.get("/young/:id", passport.authenticate("referent", { session: false }), 
   try {
     const { error, value } = Joi.object({ id: Joi.string().required() })
       .unknown()
-      .validate({ ...req.params });
+      .validate({ ...req.params }, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
     const data = await YoungObject.findById(value.id);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -576,7 +583,7 @@ router.get("/:id/patches", passport.authenticate("referent", { session: false })
   try {
     const { error, value } = Joi.object({ id: Joi.string().required() })
       .unknown()
-      .validate({ ...req.params });
+      .validate({ ...req.params }, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
     if (!canViewPatchesHistory(req.user)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -606,7 +613,7 @@ router.get("/:id", passport.authenticate("referent", { session: false }), async 
   try {
     const { error, value } = Joi.object({ id: Joi.string().required() })
       .unknown()
-      .validate({ ...req.params });
+      .validate({ ...req.params }, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
     const data = await ReferentObject.findOne({ _id: value.id });
@@ -624,7 +631,7 @@ router.get("/manager_department/:department", passport.authenticate("referent", 
   try {
     const { error, value } = Joi.object({ department: Joi.string().required() })
       .unknown()
-      .validate({ ...req.params });
+      .validate({ ...req.params }, { stripUnknown: true });
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
