@@ -96,7 +96,7 @@ function validateYoung(young) {
       withdrawnMessage: Joi.string().allow(null, ""),
       inscriptionStep: Joi.string().allow(null, ""),
       cohesion2020Step: Joi.string().allow(null, ""),
-      historic: Joi.array().items(Joi.string().allow(null, "")),
+      historic: Joi.array().items(Joi.any().allow(null, "")),
       password: Joi.string().allow(null, ""),
       lastLoginAt: Joi.string().allow(null, ""),
       forgotPasswordResetToken: Joi.string().allow(null, ""),
