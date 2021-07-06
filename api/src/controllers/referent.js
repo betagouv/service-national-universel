@@ -116,7 +116,7 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
 
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.details.map((e) => e.message) });
     if (!canInviteUser(req.user.role, value.role)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { template: reqTemplate, email, firstName, lastName, role, region, department, structureId, structureName, centerName } = value;
