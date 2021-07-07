@@ -20,7 +20,7 @@ export default ({ model, value }) => {
 
   useEffect(() => {
     getPatches();
-  });
+  }, []);
 
   return !data ? (
     <Loader />

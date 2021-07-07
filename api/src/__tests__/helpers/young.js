@@ -35,10 +35,13 @@ function expectYoungToEqual(young, expectedYoung) {
   expect(youngParsed.gender).toEqual(expectedYoungParsed.gender);
 }
 
+const notExistingYoungId = "104a49ba503040e4d2153973";
+
 module.exports = {
   getYoungsHelper,
   getYoungByIdHelper,
   deleteYoungByIdHelper,
   createYoungHelper,
   expectYoungToEqual,
+  notExistingYoungId,
 };

@@ -15,6 +15,8 @@ import LoadingButton from "../../components/buttons/LoadingButton";
 import Header from "./components/header";
 import LoginBox from "./components/loginBox";
 import AuthWrapper from "./components/authWrapper";
+import Title from "./components/title";
+import Subtitle from "./components/subtitle";
 
 import { DEFAULT_STRUCTURE_NAME, translate } from "../../utils";
 
@@ -187,25 +189,22 @@ const Thumb = styled.div`
   }
 `;
 
-const Title = styled.h1`
-  position: relative;
-  font-size: 2rem;
-  @media (max-width: 768px) {
-    font-size: 1.2rem;
+
+const AuthWrapper = styled.div`
+  display: flex;
+  width: 100%;
+  > * {
+    flex: 1;
   }
-  font-weight: 700;
-  margin-bottom: 14px;
 `;
 
-const Subtitle = styled.h2`
-  position: relative;
-  font-size: 1rem;
-  color: #6e757c;
+const LoginBox = styled.div`
+  padding: 4rem;
+  background-color: #f6f6f6;
   @media (max-width: 768px) {
-    font-size: 0.8rem;
+    border-radius: 0;
+    margin: 0;
   }
-  font-weight: 400;
-  margin-bottom: 20px;
 `;
 
 const StyledFormGroup = styled(FormGroup)`

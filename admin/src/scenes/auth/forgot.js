@@ -12,6 +12,8 @@ import { translate } from "../../utils";
 import Header from "./components/header";
 import LoginBox from "./components/loginBox";
 import AuthWrapper from "./components/authWrapper";
+import Title from "./components/title";
+import Subtitle from "./components/subtitle";
 
 export default () => {
   const [mail, setMail] = useState("");
@@ -101,25 +103,12 @@ const Thumb = styled.div`
   }
 `;
 
-const Title = styled.h1`
-  position: relative;
-  font-size: 2rem;
-  @media (max-width: 768px) {
-    font-size: 1.2rem;
+const AuthWrapper = styled.div`
+  display: flex;
+  width: 100%;
+  > * {
+    flex: 1;
   }
-  font-weight: 700;
-  margin-bottom: 14px;
-`;
-
-const Subtitle = styled.h2`
-  position: relative;
-  font-size: 1rem;
-  color: #6e757c;
-  @media (max-width: 768px) {
-    font-size: 0.8rem;
-  }
-  font-weight: 400;
-  margin-bottom: 20px;
 `;
 
 const Register = styled.h3`

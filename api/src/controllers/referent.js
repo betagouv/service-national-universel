@@ -216,6 +216,8 @@ router.put("/young/:id", passport.authenticate("referent", { session: false }), 
   try {
     const { id } = req.params;
     const young = await YoungObject.findById(id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
+
     let { __v, ...newYoung } = req.body;
 
     // if withdrawn, cascade withdrawn on every status
@@ -301,7 +303,7 @@ router.post("/email-tutor/:template/:tutorId", passport.authenticate("referent",
       throw new Error("Template de mail introuvable");
     }
 
-    await sendEmail({ name: `${tutor.firstName} ${tutor.lastName}`, email: "raph@selego.co" }, subject, htmlContent);
+    await sendEmail({ name: `${tutor.firstName} ${tutor.lastName}`, email: tutor.email }, subject, htmlContent);
     return res.status(200).send({ ok: true }); //todo
   } catch (error) {
     console.log(error);
@@ -370,6 +372,7 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
     const { youngId, key, fileName } = req.params;
     const downloaded = await getFile(`app/young/${youngId}/${key}/${fileName}`);
     const decryptedBuffer = decrypt(downloaded.Body);
+
     let mimeFromFile = null;
     try {
       const { mime } = await FileType.fromBuffer(decryptedBuffer);
@@ -462,6 +465,8 @@ router.get("/", passport.authenticate("referent", { session: false }), async (re
 router.get("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const data = await ReferentObject.findOne({ _id: req.params.id });
+    if (!data) return res.status(404).send({ ok: false });
+
     const isAdminOrReferent = ["referent_department", "referent_region", "admin"].includes(req.user.role);
     const isResponsibleModifyingResponsible =
       ["responsible", "supervisor"].includes(req.user.role) && ["responsible", "supervisor"].includes(data.role);
@@ -498,6 +503,8 @@ router.get("/structure/:id", passport.authenticate("referent", { session: false 
 router.put("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const data = await ReferentObject.findOne({ _id: req.params.id });
+    if (!data) return res.status(404).send({ ok: false });
+
     const isAdmin = req.user.role === "admin";
     const isResponsibleModifyingResponsibleWithoutChangingRole =
       // Is responsible...
@@ -527,21 +534,6 @@ router.put("/:id", passport.authenticate("referent", { session: false }), async 
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
-
-// router.put("/file/logo", passport.authenticate("referent", { session: false }), upload.single('logo'), async (req, res) => {
-//   try {
-//     const logoName = Object.keys(req.files)[0];
-//     const logo = req.files[logoName];
-//     let _id = req.user.role === "admin" ? req.query.user_id || req.user._id : req.user._id;
-//     const url = `app/users/${_id}/${logo.name}`;
-//     // await uploadToS3FromBuffer(url, logo.data);
-
-//     res.status(200).send({ ok: true, url: "" });
-//   } catch (error) {
-//     capture(error);
-//     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
-//   }
-// });
 
 //@check
 router.put("/", passport.authenticate("referent", { session: false }), async (req, res) => {
@@ -580,6 +572,7 @@ function canDelete(user, value) {
 router.delete("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const referent = await ReferentObject.findOne({ _id: req.params.id });
+    if (!referent) return res.status(404).send({ ok: false });
     if (!canDelete(req.user, referent)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     await referent.remove();
     console.log(`Referent ${req.params.id} has been deleted`);

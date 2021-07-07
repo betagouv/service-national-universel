@@ -76,9 +76,10 @@ const Wrapper = styled.div`
   display: flex;
   text-align: center;
   @media (max-width: 1080px) {
-    display: block;
+    flex-direction: row;
+    justify-content: center;
     > * {
-      margin: 0.5rem auto;
+      margin: 0.2rem;
     }
   }
 `;
