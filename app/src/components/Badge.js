@@ -21,6 +21,8 @@ const Badge = styled.div`
   color: #9a9a9a;
   background-color: #f6f6f6;
   border: 1px solid #cecece;
+  white-space: nowrap;
+  height: fit-content;
   ${({ color }) => `
     color: ${color};
     background-color: ${color}33;

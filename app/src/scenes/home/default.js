@@ -61,13 +61,6 @@ export default () => {
 };
 
 const WrapperItem = styled(Link)`
-
-  .info {
-
-    .subtitle {
-
-    }
-  }
   .title {
     display: flex;
     flex-direction: column;
@@ -75,27 +68,19 @@ const WrapperItem = styled(Link)`
     color: #161e2e;
     margin-bottom: 0.5rem;
     font-weight: 500;
-    .link {
-
-      :hover {
-        text-decoration: underline;
-      }
+    .link:hover {
+      text-decoration: underline;
     }
   }
   @media (min-width: 768px) {
     margin-bottom: 1rem;
-  .info {
-    margin-left: 1.5rem;
-    .subtitle {
-      font-size: 0.875rem;
-      font-weight: 500;
+    .title {
+      flex-direction: row;
+      justify-content: space-between;
+      font-size: 1.25rem;
+      .link {
+        margin-right: 0.5rem;
+      }
     }
-  }
-  .title {
-    font-size: 1.25rem;
-    .link {
-      margin-right: 0.5rem;
-    }
-  }
   }
 `;
