@@ -159,7 +159,7 @@ export default (props) => {
                 color={"#fff"}
                 textColor={"#767697"}
                 loading={loadings[0]}
-                disabled={loadings[1]}
+                disabled={loadings[1] || loadings[2]}
                 onClick={() => {
                   handleChange({ target: { value: "DRAFT", name: "status" } });
                   handleSubmit();
@@ -171,7 +171,7 @@ export default (props) => {
 
             <LoadingButton
               loading={loadings[1]}
-              disabled={loadings[0]}
+              disabled={loadings[0] || loadings[2]}
               onClick={() => {
                 handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
                 handleSubmit();
