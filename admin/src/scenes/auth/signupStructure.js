@@ -401,23 +401,6 @@ const Thumb = styled.div`
   }
 `;
 
-const AuthWrapper = styled.div`
-  display: flex;
-  width: 100%;
-  > * {
-    flex: 1;
-  }
-`;
-
-const LoginBox = styled.div`
-  padding: 4rem;
-  background-color: #f6f6f6;
-  @media (max-width: 768px) {
-    border-radius: 0;
-    margin: 0;
-  }
-`;
-
 const MainTitle = styled(Title)`
   font-size: 1.7rem;
   margin: 2rem;

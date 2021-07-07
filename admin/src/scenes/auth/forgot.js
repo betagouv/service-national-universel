@@ -103,14 +103,6 @@ const Thumb = styled.div`
   }
 `;
 
-const AuthWrapper = styled.div`
-  display: flex;
-  width: 100%;
-  > * {
-    flex: 1;
-  }
-`;
-
 const Register = styled.h3`
   position: relative;
   font-size: 1rem;
