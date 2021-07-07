@@ -14,6 +14,8 @@ import Header from "./components/header";
 import Title from "./components/title";
 import Subtitle from "./components/subtitle";
 import MultiSelect from "../../components/Multiselect";
+import LoginBox from "./components/loginBox";
+import AuthWrapper from "./components/authWrapper";
 
 import { associationTypes, privateTypes, publicTypes, publicEtatTypes, translate } from "../../utils";
 import AddressInput from "../../components/addressInput";
@@ -34,7 +36,7 @@ export default () => {
 
   if (!user) return <Redirect to="/" />;
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
+    <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
       <Header />
       <Formik
         validateOnChange={false}
@@ -384,9 +386,9 @@ const FormGroup2 = styled.div`
 
 const StructureWrapper = styled.div`
   background-color: #fff;
-  margin: 2rem auto;
-  min-width: 1000px;
-  width: 65%;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
 `;
 
 const Thumb = styled.div`
@@ -399,25 +401,9 @@ const Thumb = styled.div`
   }
 `;
 
-const AuthWrapper = styled.div`
-  display: flex;
-  width: 100%;
-  > * {
-    flex: 1;
-  }
-`;
-
-const LoginBox = styled.div`
-  padding: 4rem;
-  background-color: #f6f6f6;
-  @media (max-width: 768px) {
-    border-radius: 0;
-    margin: 0;
-  }
-`;
-
 const MainTitle = styled(Title)`
   font-size: 1.7rem;
+  margin: 2rem;
 `;
 
 const StyledFormGroup = styled(FormGroup2)`

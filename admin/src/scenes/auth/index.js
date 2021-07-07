@@ -11,7 +11,7 @@ import InvitationExpired from "./invitationexpired";
 
 export default () => {
   return (
-    <div style={{ backgroundColor: "#fff" }}>
+    <div style={{ backgroundColor: "fff", flex: 1, display: "flex" }}>
       <Switch>
         <Route path="/auth/reset" component={Reset} />
         <Route path="/auth/forgot" component={Forgot} />
