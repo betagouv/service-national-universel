@@ -22,13 +22,16 @@ export default () => {
 
   useEffect(() => {
     (async () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const invitationToken = urlParams.get("token");
-      if (!invitationToken) return setInvitation("INVITATION_TOKEN_EXPIRED_OR_INVALID");
-      const { data: u, code, token } = await api.post(`/referent/signup_verify`, { invitationToken });
-      if (token) api.setToken(token);
-      if (code === "INVITATION_TOKEN_EXPIRED_OR_INVALID") return setInvitation("INVITATION_TOKEN_EXPIRED_OR_INVALID");
-      setNewUser(u);
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const invitationToken = urlParams.get("token");
+        if (!invitationToken) return setInvitation("INVITATION_TOKEN_EXPIRED_OR_INVALID");
+        const { data, code, token } = await api.post(`/referent/signup_verify`, { invitationToken });
+        if (token) api.setToken(token);
+        setNewUser(data);
+      } catch (error) {
+        if (error?.code === "INVITATION_TOKEN_EXPIRED_OR_INVALID") return setInvitation("INVITATION_TOKEN_EXPIRED_OR_INVALID");
+      }
     })();
   }, []);
 
