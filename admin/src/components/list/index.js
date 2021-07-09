@@ -146,7 +146,7 @@ export const Table = styled.table`
 `;
 
 export const FilterRow = styled.div`
-  display: flex;
+  ${({ visible }) => (!visible ? "display: none;" : "display: flex;")}
   align-items: flex-start;
   flex-wrap: wrap;
   .dropdown-filter {
