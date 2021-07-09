@@ -9,7 +9,7 @@ import Panel from "../../volontaires/panel";
 import { formatStringLongDate, getFilterLabel, translate, getAge, ES_NO_LIMIT } from "../../../utils";
 import Loader from "../../../components/Loader";
 import ExportComponent from "../../../components/ExportXlsx";
-const FILTERS = ["SEARCH", "STATUS", "COHORT", "DEPARTMENT", "REGION", "STATUS_PHASE_1", "STATUS_PHASE_2", "STATUS_PHASE_3", "STATUS_APPLICATION", "LOCATION"];
+const FILTERS = ["SEARCH", "STATUS"];
 import { Filter, FilterRow, ResultTable, Table, MultiLine } from "../../../components/list";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
 
