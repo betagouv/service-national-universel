@@ -146,7 +146,6 @@ export const Table = styled.table`
 `;
 
 export const FilterRow = styled.div`
-  padding: 15px 0 0;
   display: flex;
   align-items: flex-start;
   flex-wrap: wrap;

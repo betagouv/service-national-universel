@@ -36,6 +36,9 @@ export default ({ setYoung }) => {
   const [volontaire, setVolontaire] = useState(null);
   const [centers, setCenters] = useState(null);
   const [meetingPoints, setMeetingPoints] = useState(null);
+  const [filterVisible, setFilterVisible] = useState(false);
+
+  const handleShowFilter = () => setFilterVisible(!filterVisible);
 
   useEffect(() => {
     (async () => {
@@ -188,20 +191,20 @@ export default ({ setYoung }) => {
               />
             </Header>
             <Filter>
-              <DataSearch
-                defaultQuery={getDefaultQuery}
-                showIcon={false}
-                placeholder="Rechercher par prénom, nom, email, ville, code postal..."
-                componentId="SEARCH"
-                dataField={["email.keyword", "firstName", "lastName", "city", "zip"]}
-                react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
-                // fuzziness={2}
-                style={{ flex: 2 }}
-                innerClass={{ input: "searchbox" }}
-                autosuggest={false}
-                queryFormat="and"
-              />
               <FilterRow>
+                <DataSearch
+                  defaultQuery={getDefaultQuery}
+                  showIcon={false}
+                  placeholder="Rechercher par prénom, nom, email, ville, code postal..."
+                  componentId="SEARCH"
+                  dataField={["email.keyword", "firstName", "lastName", "city", "zip"]}
+                  react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
+                  // fuzziness={2}
+                  style={{ flex: 1, marginRight: "1rem" }}
+                  innerClass={{ input: "searchbox" }}
+                  autosuggest={false}
+                  queryFormat="and"
+                />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -218,120 +221,125 @@ export default ({ setYoung }) => {
                 />
                 <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
                 <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  placeholder="Cohorte"
-                  componentId="COHORT"
-                  dataField="cohort.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  showSearch={false}
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  componentId="STATUS_PHASE_1"
-                  dataField="statusPhase1.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "STATUS_PHASE_1") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Statut phase 1")}
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  componentId="COHESION_PRESENCE"
-                  dataField="cohesionStayPresence.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "COHESION_PRESENCE") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Participations au séjour de cohésion")}
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  componentId="MEDICAL_FILE_RECEIVED"
-                  dataField="cohesionStayMedicalFileReceived.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "MEDICAL_FILE_RECEIVED") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Fiches sanitaires")}
-                />
-
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  componentId="STATUS_PHASE_2"
-                  dataField="statusPhase2.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "STATUS_PHASE_2") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Statut phase 2")}
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  componentId="STATUS_PHASE_3"
-                  dataField="statusPhase3.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "STATUS_PHASE_3") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Statut phase 3")}
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  componentId="STATUS_APPLICATION"
-                  dataField="phase2ApplicationStatus.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "STATUS_APPLICATION") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Statut mission")}
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  componentId="CONTRACT_STATUS"
-                  dataField="statusPhase2Contract.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "CONTRACT_STATUS") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Statut contrats")}
-                />
+                <Chevron color="#444" style={{ cursor: "pointer", transform: filterVisible && "rotate(180deg)" }} onClick={handleShowFilter} />
               </FilterRow>
+              {filterVisible ? (
+                <FilterRow>
+                  <MultiDropdownList
+                    defaultQuery={getDefaultQuery}
+                    className="dropdown-filter"
+                    placeholder="Cohorte"
+                    componentId="COHORT"
+                    dataField="cohort.keyword"
+                    react={{ and: FILTERS.filter((e) => e !== "COHORT") }}
+                    renderItem={(e, count) => {
+                      return `${translate(e)} (${count})`;
+                    }}
+                    title=""
+                    URLParams={true}
+                    showSearch={false}
+                  />
+                  <MultiDropdownList
+                    defaultQuery={getDefaultQuery}
+                    className="dropdown-filter"
+                    componentId="STATUS_PHASE_1"
+                    dataField="statusPhase1.keyword"
+                    react={{ and: FILTERS.filter((e) => e !== "STATUS_PHASE_1") }}
+                    renderItem={(e, count) => {
+                      return `${translate(e)} (${count})`;
+                    }}
+                    title=""
+                    URLParams={true}
+                    showSearch={false}
+                    renderLabel={(items) => getFilterLabel(items, "Statut phase 1")}
+                  />
+                  <MultiDropdownList
+                    defaultQuery={getDefaultQuery}
+                    className="dropdown-filter"
+                    componentId="COHESION_PRESENCE"
+                    dataField="cohesionStayPresence.keyword"
+                    react={{ and: FILTERS.filter((e) => e !== "COHESION_PRESENCE") }}
+                    renderItem={(e, count) => {
+                      return `${translate(e)} (${count})`;
+                    }}
+                    title=""
+                    URLParams={true}
+                    showSearch={false}
+                    renderLabel={(items) => getFilterLabel(items, "Participations au séjour de cohésion")}
+                  />
+                  <MultiDropdownList
+                    defaultQuery={getDefaultQuery}
+                    className="dropdown-filter"
+                    componentId="MEDICAL_FILE_RECEIVED"
+                    dataField="cohesionStayMedicalFileReceived.keyword"
+                    react={{ and: FILTERS.filter((e) => e !== "MEDICAL_FILE_RECEIVED") }}
+                    renderItem={(e, count) => {
+                      return `${translate(e)} (${count})`;
+                    }}
+                    title=""
+                    URLParams={true}
+                    showSearch={false}
+                    renderLabel={(items) => getFilterLabel(items, "Fiches sanitaires")}
+                  />
+
+                  <MultiDropdownList
+                    defaultQuery={getDefaultQuery}
+                    className="dropdown-filter"
+                    componentId="STATUS_PHASE_2"
+                    dataField="statusPhase2.keyword"
+                    react={{ and: FILTERS.filter((e) => e !== "STATUS_PHASE_2") }}
+                    renderItem={(e, count) => {
+                      return `${translate(e)} (${count})`;
+                    }}
+                    title=""
+                    URLParams={true}
+                    showSearch={false}
+                    renderLabel={(items) => getFilterLabel(items, "Statut phase 2")}
+                  />
+                  <MultiDropdownList
+                    defaultQuery={getDefaultQuery}
+                    className="dropdown-filter"
+                    componentId="STATUS_PHASE_3"
+                    dataField="statusPhase3.keyword"
+                    react={{ and: FILTERS.filter((e) => e !== "STATUS_PHASE_3") }}
+                    renderItem={(e, count) => {
+                      return `${translate(e)} (${count})`;
+                    }}
+                    title=""
+                    URLParams={true}
+                    showSearch={false}
+                    renderLabel={(items) => getFilterLabel(items, "Statut phase 3")}
+                  />
+                  <MultiDropdownList
+                    defaultQuery={getDefaultQuery}
+                    className="dropdown-filter"
+                    componentId="STATUS_APPLICATION"
+                    dataField="phase2ApplicationStatus.keyword"
+                    react={{ and: FILTERS.filter((e) => e !== "STATUS_APPLICATION") }}
+                    renderItem={(e, count) => {
+                      return `${translate(e)} (${count})`;
+                    }}
+                    title=""
+                    URLParams={true}
+                    showSearch={false}
+                    renderLabel={(items) => getFilterLabel(items, "Statut mission")}
+                  />
+                  <MultiDropdownList
+                    defaultQuery={getDefaultQuery}
+                    className="dropdown-filter"
+                    componentId="CONTRACT_STATUS"
+                    dataField="statusPhase2Contract.keyword"
+                    react={{ and: FILTERS.filter((e) => e !== "CONTRACT_STATUS") }}
+                    renderItem={(e, count) => {
+                      return `${translate(e)} (${count})`;
+                    }}
+                    title=""
+                    URLParams={true}
+                    showSearch={false}
+                    renderLabel={(items) => getFilterLabel(items, "Statut contrats")}
+                  />
+                </FilterRow>
+              ) : null}
             </Filter>
             <ResultTable>
               <ReactiveListComponent
