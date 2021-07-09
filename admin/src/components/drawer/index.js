@@ -98,7 +98,7 @@ export default (props) => {
 
   function getTextEnvironmentBanner() {
     if (environment === "staging") return "Espace de Test";
-    if (environment === "development") return "Local";
+    if (environment === "development") return "Développement";
     return "";
   }
 
