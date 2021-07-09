@@ -27,10 +27,9 @@ const { createCohesionCenter, getCohesionCenterById } = require("./helpers/cohes
 const { getNewCohesionCenterFixture } = require("./fixtures/cohesionCenter");
 const { getNewApplicationFixture } = require("./fixtures/application");
 const { createApplication, getApplicationsHelper } = require("./helpers/application");
-const { createStructureHelper, notExistingStructureId } = require("./helpers/structure");
-const getNewStructureFixture = require("./fixtures/structure");
 const { createMissionHelper, getMissionsHelper } = require("./helpers/mission");
 const getNewMissionFixture = require("./fixtures/mission");
+const { SUB_ROLES, ROLES } = require("snu-lib/roles");
 
 jest.mock("../utils", () => ({
   ...jest.requireActual("../utils"),
@@ -133,14 +132,14 @@ describe("Referent", () => {
     it("should return 200 if tutor not found but it's weird", async () => {
       const res = await request(getAppHelper())
         .post("/referent/email-tutor/test/" + notExistingReferentId)
-        .send();
+        .send({ message: "hello", subject: "hi" });
       expect(res.statusCode).toEqual(200);
     });
     it("should return 200 if tutor found", async () => {
       const tutor = await createReferentHelper(getNewReferentFixture());
       const res = await request(getAppHelper())
         .post("/referent/email-tutor/correction/" + tutor._id)
-        .send({ message: "hello" });
+        .send({ message: "hello", subject: "hi" });
       expect(res.statusCode).toEqual(200);
     });
   });
@@ -264,33 +263,36 @@ describe("Referent", () => {
     });
   });
 
-  describe("GET /referent/subrole/:subRole", () => {
-    it("should return all subroles", async () => {
-      // Delete all referent with subrole
+  describe("GET /referent/manager_department/:department", () => {
+    it("should return 404 if manager not found", async () => {
+      const res = await request(getAppHelper()).get(`/referent/manager_department/foo`).send();
+      expect(res.statusCode).toEqual(404);
+    });
+    it("should return 200 if manager found", async () => {
       await deleteAllReferentBySubrole("manager_department");
-      // Create a referent with a subrole.
-      const referent = await createReferentHelper({ ...getNewReferentFixture(), subRole: "manager_department" });
-      const res = await request(getAppHelper()).get("/referent/subrole/manager_department").send();
+      const referent = await createReferentHelper({
+        ...getNewReferentFixture(),
+        department: "bar",
+        subRole: SUB_ROLES.manager_department,
+        role: ROLES.REFERENT_DEPARTMENT,
+      });
+      const res = await request(getAppHelper()).get(`/referent/manager_department/bar`).send();
       expect(res.statusCode).toEqual(200);
-      expect(res.body.data).toHaveLength(1);
-      expect(res.body.data).toEqual(expect.arrayContaining([expect.objectContaining({ firstName: referent.firstName })]));
+      expectReferentToEqual(referent, res.body.data);
     });
   });
 
-  describe("GET /referent/structure/:structureId", () => {
-    it("should return empty array if structure not found", async () => {
-      const res = await request(getAppHelper()).get(`/referent/structure/${notExistingStructureId}`).send();
-      expect(res.statusCode).toEqual(200);
-      expect(res.body.data).toHaveLength(0);
+  describe("PUT /referent", () => {
+    it("should return 400 when a role is given", async () => {
+      const referent = await createReferentHelper(getNewReferentFixture());
+      const res = await request(getAppHelper()).put(`/referent/${referent._id}`).send({ role: "referent" });
+      expect(res.statusCode).toEqual(400);
     });
-
-    it("should return all referents for the structure", async () => {
-      const structure = await createStructureHelper(getNewStructureFixture());
-      const referent = await createReferentHelper({ ...getNewReferentFixture(), structureId: structure._id });
-      const res = await request(getAppHelper()).get(`/referent/structure/${structure._id}`).send();
+    it("should return 200 when firstName is given", async () => {
+      const referent = await createReferentHelper(getNewReferentFixture());
+      const res = await request(getAppHelper()).put(`/referent/${referent._id}`).send({ firstName: "MY NEW NAME" });
       expect(res.statusCode).toEqual(200);
-      expect(res.body.data).toHaveLength(1);
-      expectReferentToEqual(referent, res.body.data[0]);
+      expect(res.body.data?.firstName).toEqual("My New Name");
     });
   });
 
@@ -301,13 +303,12 @@ describe("Referent", () => {
     });
     it("should return 200 if referent found", async () => {
       const referent = await createReferentHelper(getNewReferentFixture());
-      referent.firstName = "MY NEW NAME";
-      await referent.save();
-      const res = await request(getAppHelper()).put(`/referent/${referent._id}`).send();
+      const res = await request(getAppHelper()).put(`/referent/${referent._id}`).send({ firstName: "MY NEW NAME", lastName: "my neW last Name" });
       expect(res.statusCode).toEqual(200);
       expect(res.body.data).toEqual(
         expect.objectContaining({
-          firstName: "MY NEW NAME",
+          firstName: "My New Name",
+          lastName: "MY NEW LAST NAME",
         })
       );
     });
@@ -323,7 +324,7 @@ describe("Referent", () => {
     it("should update tutor name in missions and applications", async () => {
       const firstName = "MY NEW NAME";
       const lastName = "MY NEW LAST NAME";
-      const fullName = `${firstName} ${lastName}`;
+      const fullName = `My New Name MY NEW LAST NAME`;
       const referent = await createReferentHelper(getNewReferentFixture());
       const mission = await createMissionHelper(getNewMissionFixture());
       const application = await createApplication(getNewApplicationFixture());
@@ -332,17 +333,9 @@ describe("Referent", () => {
       application.missionId = mission._id;
       await mission.save();
       await application.save();
-      referent.firstName = firstName;
-      referent.lastName = lastName;
-      await referent.save();
-      const res = await request(getAppHelper()).put(`/referent/${referent._id}`).send();
+      const res = await request(getAppHelper()).put(`/referent/${referent._id}`).send({ firstName, lastName });
       expect(res.statusCode).toEqual(200);
-      expect(res.body.data).toEqual(
-        expect.objectContaining({
-          firstName: firstName,
-          lastName: lastName,
-        })
-      );
+      expect(res.body.data).toEqual(expect.objectContaining({ lastName: lastName }));
       const missions = await getMissionsHelper({ tutorId: referent._id.toString() });
       const applications = await getApplicationsHelper({ tutorId: referent._id });
       expect(missions).toHaveLength(1);

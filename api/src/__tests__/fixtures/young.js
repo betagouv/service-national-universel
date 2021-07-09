@@ -74,7 +74,7 @@ function getNewYoungFixture() {
       lat: Number(faker.address.latitude()),
       lon: Number(faker.address.longitude()),
     },
-    schoolId: faker.datatype.number(),
+    schoolId: String(faker.datatype.number()),
     parent1Status: "",
     parent1FirstName: faker.name.firstName(),
     parent1LastName: faker.name.lastName(),
