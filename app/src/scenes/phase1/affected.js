@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
-import { HeroContainer, Hero, Content, Separator } from "../../components/Content";
+import { HeroContainer, Hero, Content, Separator, AlertBoxInformation } from "../../components/Content";
 import NextStep from "./nextStep";
 import api from "../../services/api";
 import { translate } from "../../utils";
@@ -15,6 +15,8 @@ import Convocation from "./components/Convocation";
 export default () => {
   const young = useSelector((state) => state.Auth.young);
   const [center, setCenter] = useState();
+  const [showInfoMessage, setShowInfoMessage] = useState(true);
+
   const isFromDOMTOM = () => {
     return ["Guadeloupe", "Martinique", "Guyane", "La Réunion", "Saint-Pierre-et-Miquelon", "Mayotte", "Saint-Martin", "Polynésie française", "Nouvelle-Calédonie"].includes(
       young.department
@@ -45,6 +47,13 @@ export default () => {
   return (
     <>
       <HeroContainer>
+        {showInfoMessage ? (
+          <AlertBoxInformation
+            title="Information"
+            message="Suite au séjour de cohésion, les espaces volontaires vont s'actualiser dans les prochaines semaines, les attestations seront disponibles directement en ligne."
+            onClose={() => setShowInfoMessage(false)}
+          />
+        ) : null}
         <Hero>
           <div className="content">
             <h1>

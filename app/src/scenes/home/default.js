@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { translate, PHASE_STATUS_COLOR } from "../../utils";
-import { HeroContainer, Hero, Content, Alert } from "../../components/Content";
+import { HeroContainer, Hero, Content, Alert, AlertBoxInformation } from "../../components/Content";
 import Badge from "../../components/Badge";
 import { Link } from "react-router-dom";
 
@@ -10,18 +10,17 @@ export default () => {
   const young = useSelector((state) => state.Auth.young);
   const is2020 = young.cohort === "2020";
   const [showAlert, setShowAlert] = useState(!is2020);
-
-  const goTo = (id) => {
-    if (document.getElementById) {
-      const yOffset = -70; // header's height
-      const element = document.getElementById(id);
-      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-      window.scrollTo({ top: y, behavior: "smooth" });
-    }
-  };
+  const [showInfoMessage, setShowInfoMessage] = useState(true);
 
   return (
     <HeroContainer>
+      {showInfoMessage ? (
+        <AlertBoxInformation
+          title="Information"
+          message="Suite au séjour de cohésion, les espaces volontaires vont s'actualiser dans les prochaines semaines, les attestations seront disponibles directement en ligne."
+          onClose={() => setShowInfoMessage(false)}
+        />
+      ) : null}
       <Hero>
         {showAlert && (
           <Alert color="#31c48d">
