@@ -211,10 +211,12 @@ export default (props) => {
         )}
       </Formik>
       <Emails email={user.email} />
-      <Box>
-        <div style={{ fontSize: ".9rem", padding: "1rem", color: "#382F79" }}>Historique</div>
-        <HistoricComponent model="referent" value={user} />
-      </Box>
+      {currentUser.role === "admin" ? (
+        <Box>
+          <div style={{ fontSize: ".9rem", padding: "1rem", color: "#382F79" }}>Historique</div>
+          <HistoricComponent model="referent" value={user} />
+        </Box>
+      ) : null}
       {currentUser.role === "admin" || (["referent_department", "referent_region"].includes(currentUser.role) && ["responsible", "supervisor"].includes(user.role)) ? (
         <DeleteBtn
           onClick={async () => {
