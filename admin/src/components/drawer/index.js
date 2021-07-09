@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { NavLink, Link } from "react-router-dom";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
+import { environment } from "../../config";
 
 const DrawerTab = ({ title, to, onClick }) => (
   <li onClick={onClick}>
@@ -72,6 +73,7 @@ function headCenter({ user, onClick }) {
 export default (props) => {
   const user = useSelector((state) => state.Auth.user);
   const [open, setOpen] = useState();
+  const [environmentBannerVisible, setEnvironmentBannerVisible] = useState(true);
   useEffect(() => {
     setOpen(props.open);
   }, [props.open]);
@@ -94,6 +96,12 @@ export default (props) => {
     return "";
   }
 
+  function getTextEnvironmentBanner() {
+    if (environment === "staging") return "Espace de Test";
+    if (environment === "development") return "Local";
+    return "";
+  }
+
   return (
     <Sidebar open={open} id="drawer">
       <Logo>
@@ -102,6 +110,9 @@ export default (props) => {
           {getName()}
         </HeaderSideBar>
       </Logo>
+      {environment !== "production" && environmentBannerVisible ? (
+        <EnvironmentBanner onClick={() => setEnvironmentBannerVisible(false)}>{getTextEnvironmentBanner()}</EnvironmentBanner>
+      ) : null}
       <ul>
         <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />
         {user.role === "head_center" && headCenter({ user, onClick: handleClick })}
@@ -118,6 +129,19 @@ const HeaderSideBar = styled(Link)`
   display: flex;
   @media (max-width: 1550px) {
     flex-direction: column;
+  }
+`;
+
+const EnvironmentBanner = styled.div`
+  background: #d33c4a;
+  color: white;
+  font-style: italic;
+  font-weight: 500;
+  text-align: center;
+  padding: 5px;
+  cursor: pointer;
+  :hover {
+    opacity: 0.5;
   }
 `;
 
