@@ -108,7 +108,7 @@ export default () => {
                     "Téléphone représentant légal 2": data.young.parent2Phone,
                     "Nom de la mission": data.missionName,
                     "Département de la mission": data.missionDepartment,
-                    "Régino de la mission": data.missionRegion,
+                    "Région de la mission": data.missionRegion,
                     "Candidature créée lé": data.createdAt,
                     "Candidature mise à jour le": data.updatedAt,
                     "Statut de la candidature": data.status,
