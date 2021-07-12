@@ -63,7 +63,7 @@ async function updateTutorNameInMissionsAndApplications(tutor) {
   }
 }
 
-router.post("/signin", signinLimiter, (req, res) => ReferentAuth.signin(req, res));
+router.post("/signin", (req, res) => ReferentAuth.signin(req, res));
 router.post("/logout", (req, res) => ReferentAuth.logout(req, res));
 router.post("/signup", (req, res) => ReferentAuth.signup(req, res));
 
