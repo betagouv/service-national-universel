@@ -14,7 +14,7 @@ export default ({ value, onChange }) => {
     const schema = new passwordValidator();
     schema
       .is()
-      .min(8) // Minimum length 8
+      .min(10) // Minimum length 10
       .has()
       .uppercase() // Must have uppercase letters
       .has()
