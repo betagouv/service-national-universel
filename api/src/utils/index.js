@@ -9,9 +9,20 @@ const ReferentModel = require("../models/referent");
 const { sendEmail } = require("../sendinblue");
 const path = require("path");
 const fs = require("fs");
+const rateLimit = require("express-rate-limit");
 const sendinblue = require("../sendinblue");
 const { ADMIN_URL, APP_URL } = require("../config");
 const { CELLAR_ENDPOINT, CELLAR_KEYID, CELLAR_KEYSECRET, BUCKET_NAME, ENVIRONMENT } = require("../config");
+
+// Set the number of requests allowed to 15 in a 1 hour window
+const signinLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 15,
+  message: {
+    ok: false,
+    code: "TOO_MANY_REQUESTS",
+  }
+});
 
 function getReq(url, cb) {
   if (url.toString().indexOf("https") === 0) return https.get(url, cb);
@@ -92,7 +103,16 @@ function fileExist(url) {
 
 function validatePassword(password) {
   const schema = new passwordValidator();
-  schema.is().min(8); // Minimum length 8
+  schema.is()
+    .min(10) // Minimum length 10
+    .has()
+    .uppercase() // Must have uppercase letters
+    .has()
+    .lowercase() // Must have lowercase letters
+    .has()
+    .digits() // Must have digits
+    .has()
+    .symbols(); // Must have symbols
 
   return schema.validate(password);
 }
@@ -349,4 +369,5 @@ module.exports = {
   sendAutoCancelMeetingPoint,
   listFiles,
   deleteFile,
+  signinLimiter,
 };

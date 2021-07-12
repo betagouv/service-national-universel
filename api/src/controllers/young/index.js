@@ -19,13 +19,13 @@ const MeetingPointObject = require("../../models/meetingPoint");
 const DepartmentServiceModel = require("../../models/departmentService");
 const BusObject = require("../../models/bus");
 const AuthObject = require("../../auth");
-const { uploadFile, validatePassword, updatePlacesCenter, updatePlacesBus, assignNextYoungFromWaitingList, ERRORS } = require("../../utils");
+const { uploadFile, validatePassword, updatePlacesCenter, updatePlacesBus, signinLimiter, assignNextYoungFromWaitingList, ERRORS } = require("../../utils");
 const { sendEmail } = require("../../sendinblue");
 const { cookieOptions } = require("../../cookie-options");
 
 const YoungAuth = new AuthObject(YoungObject);
 
-router.post("/signin", (req, res) => YoungAuth.signin(req, res));
+router.post("/signin", signinLimiter, (req, res) => YoungAuth.signin(req, res));
 router.post("/logout", (req, res) => YoungAuth.logout(req, res));
 router.post("/signup", (req, res) => YoungAuth.signup(req, res));
 
