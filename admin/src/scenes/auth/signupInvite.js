@@ -71,7 +71,7 @@ export default () => {
                     if (code === "PASSWORD_NOT_VALIDATED")
                       return toastr.error(
                         "Mot de passe incorrect",
-                        "Votre mot de passe doit contenir au moins 8 caractères, dont une majuscule, une minuscule, un chiffre et un symbole",
+                        "Votre mot de passe doit contenir au moins 10 caractères, dont une majuscule, une minuscule, un chiffre et un symbole",
                         { timeOut: 10000 }
                       );
                     if (code === "USER_ALREADY_REGISTERED") return toastr.error("Votre compte est déja activé. Veuillez vous connecter", { timeOut: 10000 });
