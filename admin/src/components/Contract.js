@@ -68,10 +68,9 @@ export default ({ young, admin }) => {
   useEffect(() => {
     const getManagerDepartment = async () => {
       if (!young) return;
-      const { ok, data, code } = await api.get(`/referent/subrole/manager_department`);
+      const { ok, data, code } = await api.get(`/referent/manager_department/${young.department}`);
       if (!ok) return toastr.error("Oups, une erreur est survenue", code);
-      const md = data.find((e) => e.department === young.department);
-      return setManagerDepartment(md);
+      return setManagerDepartment(data);
     };
     getManagerDepartment();
   }, [young]);

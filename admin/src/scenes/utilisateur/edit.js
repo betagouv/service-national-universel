@@ -98,7 +98,7 @@ export default (props) => {
         onSubmit={async (values) => {
           try {
             const { ok, code, data } = await api.put(`/referent/${values._id}`, values);
-            if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
+            if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             setUser(data);
             toastr.success("Utilisateur mis à jour !");
           } catch (e) {
@@ -155,6 +155,7 @@ export default (props) => {
                           clearDepartmentAndRegion(handleChange);
                           handleChange({ target: { name: "role", value } });
                         }}
+                        allowEmpty={false}
                         title="Rôle"
                         options={[
                           REFERENT_ROLES.REFERENT_DEPARTMENT,
@@ -210,10 +211,12 @@ export default (props) => {
         )}
       </Formik>
       <Emails email={user.email} />
-      <Box>
-        <div style={{ fontSize: ".9rem", padding: "1rem", color: "#382F79" }}>Historique</div>
-        <HistoricComponent model="referent" value={user} />
-      </Box>
+      {currentUser.role === "admin" ? (
+        <Box>
+          <div style={{ fontSize: ".9rem", padding: "1rem", color: "#382F79" }}>Historique</div>
+          <HistoricComponent model="referent" value={user} />
+        </Box>
+      ) : null}
       {currentUser.role === "admin" || (["referent_department", "referent_region"].includes(currentUser.role) && ["responsible", "supervisor"].includes(user.role)) ? (
         <DeleteBtn
           onClick={async () => {
@@ -325,7 +328,7 @@ const Item = ({ title, values, name, handleChange, type = "text", disabled = fal
   );
 };
 
-const Select = ({ title, name, values, onChange, disabled, errors, touched, validate, options }) => {
+const Select = ({ title, name, values, onChange, disabled, errors, touched, validate, options, allowEmpty = true }) => {
   return (
     <Row className="detail">
       <Col md={4}>
@@ -333,7 +336,7 @@ const Select = ({ title, name, values, onChange, disabled, errors, touched, vali
       </Col>
       <Col md={8}>
         <select disabled={disabled} className="form-control" name={name} value={values[name]} onChange={onChange}>
-          <option key={-1} value="" label=""></option>
+          {allowEmpty && <option key={-1} value="" label=""></option>}
           {options.map((o, i) => (
             <option key={i} value={o.value} label={o.label}>
               {o.label}

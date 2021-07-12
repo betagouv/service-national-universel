@@ -5,7 +5,9 @@ const { capture } = require("../sentry");
 
 const StructureObject = require("../models/structure");
 const MissionObject = require("../models/mission");
+const ReferentObject = require("../models/referent");
 const { ERRORS } = require("../utils");
+const { ROLES } = require("snu-lib/roles");
 
 // Update "network name" to ease search ("Affilié à un réseau national" filter).
 // See: https://trello.com/c/BjRN9NME/523-admin-filtre-affiliation-%C3%A0-une-t%C3%AAte-de-r%C3%A9seau
@@ -47,10 +49,24 @@ async function updateMissionStructureName(structure) {
   }
 }
 
+async function updateResponsibleAndSupervisorRole(structure) {
+  try {
+    const referents = await ReferentObject.find({ structureId: structure._id, role: { $in: [ROLES.RESPONSIBLE, ROLES.SUPERVISOR] } });
+    if (!referents?.length) return console.log(`no referents edited for structure ${structure._id}`);
+    for (const referent of referents) {
+      referent.set({ role: structure.isNetwork ? ROLES.SUPERVISOR : ROLES.RESPONSIBLE });
+      await referent.save();
+    }
+  } catch (error) {
+    capture(error);
+  }
+}
+
 router.post("/", async (req, res) => {
   try {
     const data = await StructureObject.create(req.body);
     await updateNetworkName(data);
+    await updateResponsibleAndSupervisorRole(data);
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
@@ -65,6 +81,7 @@ router.put("/", passport.authenticate("referent", { session: false }), async (re
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     await updateNetworkName(data);
     await updateMissionStructureName(data);
+    await updateResponsibleAndSupervisorRole(data);
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
@@ -79,6 +96,7 @@ router.put("/:id", passport.authenticate("referent", { session: false }), async 
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     await updateNetworkName(data);
     await updateMissionStructureName(data);
+    await updateResponsibleAndSupervisorRole(data);
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
@@ -119,6 +137,10 @@ router.get("/all", passport.authenticate("referent", { session: false }), async 
 router.get("/:id/patches", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const structure = await StructureObject.findById(req.params.id);
+    if (!structure) {
+      capture(`structure not found ${req.params.id}`);
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
     const data = await structure.patches.find({ ref: structure.id }).sort("-date");
     return res.status(200).send({ ok: true, data });
   } catch (error) {

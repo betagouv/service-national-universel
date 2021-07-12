@@ -10,12 +10,14 @@ import Header from "./components/header";
 import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import { translate } from "../../utils";
+import LoginBox from "./components/loginBox";
+import AuthWrapper from "./components/authWrapper";
 
 export default () => {
   const urlParams = new URLSearchParams(window.location.search);
 
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
+    <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
       <Header />
 
       <AuthWrapper>
@@ -71,15 +73,6 @@ export default () => {
   );
 };
 
-const LoginBox = styled.div`
-  padding: 4rem;
-  background-color: #f6f6f6;
-  @media (max-width: 768px) {
-    border-radius: 0;
-    margin: 0;
-  }
-`;
-
 const Thumb = styled.div`
   min-height: 400px;
   background: url(${require("../../assets/rang.jpg")}) no-repeat center;
@@ -87,14 +80,6 @@ const Thumb = styled.div`
   flex: 1;
   @media (max-width: 768px) {
     display: none;
-  }
-`;
-
-const AuthWrapper = styled.div`
-  display: flex;
-  width: 100%;
-  > * {
-    flex: 1;
   }
 `;
 

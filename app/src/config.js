@@ -3,12 +3,15 @@ const forceProd = false;
 const environment = getEnvironment();
 
 let apiURL = "http://localhost:8080";
+let adminURL = "http://localhost:8082";
 
 if (environment === "staging") {
   apiURL = "https://app-a29a266c-556d-4f95-bc0e-9583a27f3f85.cleverapps.io";
+  adminURL = "https://app-735c50af-69c1-4a10-ac30-7ba11d1112f7.cleverapps.io";
 }
 if (environment === "production") {
   apiURL = "https://app-5a3e097d-fdf1-44fa-9172-88ad9d7b2b20.cleverapps.io";
+  adminURL = "https://admin.snu.gouv.fr";
 }
 
 const S3PREFIX = "";
@@ -26,4 +29,4 @@ function getEnvironment() {
   return "production";
 }
 
-export { apiURL, S3PREFIX, SENTRY_URL, environment, franceConnectUrl };
+export { apiURL, S3PREFIX, SENTRY_URL, environment, franceConnectUrl, adminURL };

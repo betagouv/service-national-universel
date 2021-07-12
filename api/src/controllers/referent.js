@@ -23,9 +23,24 @@ const { decrypt } = require("../cryptoUtils");
 const { sendEmail } = require("../sendinblue");
 const { uploadFile, validatePassword, updatePlacesCenter, assignNextYoungFromWaitingList, ERRORS } = require("../utils");
 const { encrypt } = require("../cryptoUtils");
+const referentValidator = require("../utils/validator/referent");
 const ReferentAuth = new AuthObject(ReferentObject);
-
 const { cookieOptions, JWT_MAX_AGE } = require("../cookie-options");
+const Joi = require("joi");
+const {
+  ROLES_LIST,
+  canInviteUser,
+  canDelete,
+  canViewPatchesHistory,
+  canViewReferent,
+  SUB_ROLES,
+  ROLES,
+  canUpdateReferent,
+} = require("snu-lib/roles");
+
+function inSevenDays() {
+  return Date.now() + 86400000 * 7;
+}
 
 async function updateTutorNameInMissionsAndApplications(tutor) {
   if (!tutor || !tutor.firstName || !tutor.lastName) return;
@@ -58,14 +73,23 @@ router.post("/forgot_password_reset", async (req, res) => ReferentAuth.forgotPas
 
 router.post("/signin_as/:type/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const { type, id } = req.params;
-    let user = null;
+    const { error, value: params } = Joi.object({ id: Joi.string().required(), type: Joi.string().required() })
+      .unknown()
+      .validate(req.params, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { id, type } = params;
+
     if (type === "referent" && req.user.role !== "admin") return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    let user = null;
     if (type === "referent") user = await ReferentObject.findById(id);
     else if (type === "young") user = await YoungObject.findById(id);
+
     if (!user) return res.status(404).send({ code: ERRORS.USER_NOT_FOUND, ok: false });
+
     const token = jwt.sign({ _id: user.id }, config.secret, { expiresIn: JWT_MAX_AGE });
     res.cookie("jwt", token, cookieOptions());
+
     return res.status(200).send({ data: user, ok: true, token });
   } catch (error) {
     capture(error);
@@ -75,24 +99,41 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
 
 router.post("/signup_invite/:template", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const obj = {};
-    const reqTemplate = req.params.template;
-    if (req.body.hasOwnProperty(`email`)) obj.email = req.body.email.trim().toLowerCase();
-    if (req.body.hasOwnProperty(`firstName`))
-      obj.firstName = req.body.firstName.charAt(0).toUpperCase() + (req.body.firstName || "").toLowerCase().slice(1);
-    if (req.body.hasOwnProperty(`lastName`)) obj.lastName = req.body.lastName.toUpperCase();
-    if (req.body.hasOwnProperty(`role`)) obj.role = req.body.role;
+    const { error, value } = Joi.object({
+      template: Joi.string().required(),
+      email: Joi.string().lowercase().trim().email().required(),
+      firstName: Joi.string().required(),
+      lastName: Joi.string().required(),
+      role: Joi.string()
+        .valid(...ROLES_LIST)
+        .required(),
+      region: Joi.string().allow(null, ""),
+      department: Joi.string().allow(null, ""),
+      structureId: Joi.string().allow(null, ""),
+      structureName: Joi.string().allow(null, ""),
+      centerName: Joi.string().allow(null, ""),
+    })
+      .unknown()
+      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
 
-    if (req.body.hasOwnProperty(`region`)) obj.region = req.body.region; //TODO
-    if (req.body.hasOwnProperty(`department`)) obj.department = req.body.department;
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.details.map((e) => e.message) });
+    if (!canInviteUser(req.user.role, value.role)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    if (req.body.hasOwnProperty(`structureId`)) obj.structureId = req.body.structureId;
+    const { template: reqTemplate, email, firstName, lastName, role, region, department, structureId, structureName, centerName } = value;
+    const referentProperties = {};
+    if (email) referentProperties.email = email.trim().toLowerCase();
+    if (firstName) referentProperties.firstName = firstName.charAt(0).toUpperCase() + (firstName || "").toLowerCase().slice(1);
+    if (lastName) referentProperties.lastName = lastName.toUpperCase();
+    if (role) referentProperties.role = role;
+    if (region) referentProperties.region = region;
+    if (department) referentProperties.department = department;
+    if (structureId) referentProperties.structureId = structureId;
 
     const invitation_token = crypto.randomBytes(20).toString("hex");
-    obj.invitationToken = invitation_token;
-    obj.invitationExpires = Date.now() + 86400000 * 7; // 7 days
+    referentProperties.invitationToken = invitation_token;
+    referentProperties.invitationExpires = inSevenDays();
 
-    const referent = await ReferentObject.create(obj);
+    const referent = await ReferentObject.create(referentProperties);
     await updateTutorNameInMissionsAndApplications(referent);
 
     let template = "";
@@ -116,41 +157,49 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
       template = "../templates/inviteHeadCenter.html";
       mailObject = "Activez votre compte de chef de centre SNU";
     }
-    let htmlContent = fs.readFileSync(path.resolve(__dirname, template)).toString();
-    htmlContent = htmlContent.replace(/{{toName}}/g, `${obj.firstName} ${obj.lastName}`);
-    htmlContent = htmlContent.replace(/{{fromName}}/g, `${req.user.firstName} ${req.user.lastName}`);
-    htmlContent = htmlContent.replace(/{{department}}/g, `${obj.department}`);
-    htmlContent = htmlContent.replace(/{{region}}/g, `${obj.region}`);
-    htmlContent = htmlContent.replace(/{{structureName}}/g, req.body.structureName);
-    htmlContent = htmlContent.replace(/{{centerName}}/g, req.body.centerName || "");
-    htmlContent = htmlContent.replace(/{{cta}}/g, `${config.ADMIN_URL}/auth/signup/invite?token=${invitation_token}`);
+    let htmlContent = fs
+      .readFileSync(path.resolve(__dirname, template))
+      .toString()
+      .replace(/{{toName}}/g, `${referent.firstName} ${referent.lastName}`)
+      .replace(/{{fromName}}/g, `${req.user.firstName} ${req.user.lastName}`)
+      .replace(/{{department}}/g, `${referent.department}`)
+      .replace(/{{region}}/g, `${referent.region}`)
+      .replace(/{{structureName}}/g, structureName)
+      .replace(/{{centerName}}/g, centerName || "")
+      .replace(/{{cta}}/g, `${config.ADMIN_URL}/auth/signup/invite?token=${invitation_token}`);
 
-    await sendEmail({ name: `${obj.firstName} ${obj.lastName}`, email: obj.email }, mailObject, htmlContent);
+    await sendEmail({ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }, mailObject, htmlContent);
 
     return res.status(200).send({ data: referent, ok: true });
   } catch (error) {
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
     capture(error);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error: error.message });
   }
 });
 
 router.post("/signup_retry", async (req, res) => {
   try {
-    const email = (req.body.email || "").trim().toLowerCase();
+    const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required() })
+      .unknown()
+      .validate(req.body, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    const referent = await ReferentObject.findOne({ email });
-    if (!referent) return res.status(400).send({ ok: false, code: ERRORS.USER_NOT_FOUND });
+    const referent = await ReferentObject.findOne({ email: value.email });
+    if (!referent) return res.status(404).send({ ok: false, code: ERRORS.USER_NOT_FOUND });
 
     const invitationToken = crypto.randomBytes(20).toString("hex");
     referent.set({ invitationToken });
-    referent.set({ invitationExpires: Date.now() + 86400000 * 7 });
+    referent.set({ invitationExpires: inSevenDays() });
 
-    let htmlContent = fs.readFileSync(path.resolve(__dirname, "../templates/inviteReferentDepartment.html")).toString();
-    htmlContent = htmlContent.replace(/{{toName}}/g, `${referent.firstName} ${referent.lastName}`);
-    htmlContent = htmlContent.replace(/{{fromName}}/g, `contact@snu.gouv.fr`);
-    htmlContent = htmlContent.replace(/{{department}}/g, `${referent.department}`);
-    htmlContent = htmlContent.replace(/{{cta}}/g, `${config.ADMIN_URL}/auth/signup/invite?token=${invitationToken}`);
+    // Why is it only for referent department?
+    const htmlContent = fs
+      .readFileSync(path.resolve(__dirname, "../templates/inviteReferentDepartment.html"))
+      .toString()
+      .replace(/{{toName}}/g, `${referent.firstName} ${referent.lastName}`)
+      .replace(/{{fromName}}/g, `contact@snu.gouv.fr`)
+      .replace(/{{department}}/g, `${referent.department}`)
+      .replace(/{{cta}}/g, `${config.ADMIN_URL}/auth/signup/invite?token=${invitationToken}`);
     await sendEmail(
       { name: `${referent.firstName} ${referent.lastName}`, email: referent.email },
       "Activez votre compte référent départemental SNU",
@@ -167,8 +216,12 @@ router.post("/signup_retry", async (req, res) => {
 
 router.post("/signup_verify", async (req, res) => {
   try {
-    const referent = await ReferentObject.findOne({ invitationToken: req.body.invitationToken, invitationExpires: { $gt: Date.now() } });
-    if (!referent) return res.status(200).send({ ok: false, code: ERRORS.INVITATION_TOKEN_EXPIRED_OR_INVALID });
+    const { error, value } = Joi.object({ invitationToken: Joi.string().required() }).unknown().validate(req.body, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const referent = await ReferentObject.findOne({ invitationToken: value.invitationToken, invitationExpires: { $gt: Date.now() } });
+    if (!referent) return res.status(404).send({ ok: false, code: ERRORS.INVITATION_TOKEN_EXPIRED_OR_INVALID });
+
     const token = jwt.sign({ _id: referent._id }, config.secret, { expiresIn: "30d" });
     return res.status(200).send({ ok: true, token, data: referent });
   } catch (error) {
@@ -178,22 +231,27 @@ router.post("/signup_verify", async (req, res) => {
 });
 router.post("/signup_invite", async (req, res) => {
   try {
-    const email = (req.body.email || "").trim().toLowerCase();
+    const { error, value } = Joi.object({
+      email: Joi.string().lowercase().trim().email().required(),
+      password: Joi.string().required(),
+      firstName: Joi.string().allow(null, ""),
+      lastName: Joi.string().allow(null, ""),
+    })
+      .unknown()
+      .validate(req.body, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { email, password, firstName, lastName } = value;
 
     const referent = await ReferentObject.findOne({ email });
-    if (!referent) return res.status(200).send({ ok: false, data: null, code: ERRORS.USER_NOT_FOUND });
+    if (!referent) return res.status(404).send({ ok: false, data: null, code: ERRORS.USER_NOT_FOUND });
+    if (referent.registredAt) return res.status(400).send({ ok: false, data: null, code: ERRORS.USER_ALREADY_REGISTERED });
+    if (!validatePassword(password)) return res.status(400).send({ ok: false, prescriber: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
 
-    if (referent.registredAt) return res.status(200).send({ ok: false, data: null, code: ERRORS.USER_ALREADY_REGISTERED });
-
-    if (!validatePassword(req.body.password)) return res.status(200).send({ ok: false, prescriber: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
-
-    // Todo: firstname should be firstName, maybe we missed something here.
-    referent.set({ firstname: req.body.firstname });
-    referent.set({ lastname: req.body.lastname });
-    referent.set({ password: req.body.password });
+    referent.set({ firstName: firstName });
+    referent.set({ lastName: lastName });
+    referent.set({ password: password });
     referent.set({ registredAt: Date.now() });
     referent.set({ lastLoginAt: Date.now() });
-
     referent.set({ invitationToken: "" });
     referent.set({ invitationExpires: null });
 
@@ -214,9 +272,14 @@ router.post("/signup_invite", async (req, res) => {
 
 router.put("/young/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
+    const { error, value } = referentValidator.validateYoung(req.body);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
     const { id } = req.params;
     const young = await YoungObject.findById(id);
-    let { __v, ...newYoung } = req.body;
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
+
+    let { __v, ...newYoung } = value;
 
     // if withdrawn, cascade withdrawn on every status
     if (
@@ -256,10 +319,13 @@ router.put("/young/:id", passport.authenticate("referent", { session: false }), 
 
 router.post("/young", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const obj = { ...req.body };
+    const { error, value } = referentValidator.validateYoung(req.body);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    const obj = { ...value };
     const invitation_token = crypto.randomBytes(20).toString("hex");
     obj.invitationToken = invitation_token;
-    obj.invitationExpires = Date.now() + 86400000 * 7; // 7 days
+    obj.invitationExpires = inSevenDays(); // 7 days
 
     const young = await YoungObject.create(obj);
 
@@ -280,28 +346,39 @@ router.post("/young", passport.authenticate("referent", { session: false }), asy
 
 router.post("/email-tutor/:template/:tutorId", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const { tutorId, template } = req.params;
+    const { error, value } = Joi.object({
+      tutorId: Joi.string().required(),
+      template: Joi.string().required(),
+      subject: Joi.string().required().allow(null, ""),
+      message: Joi.string().required().allow(null, ""),
+    })
+      .unknown()
+      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    const { tutorId, template, subject, message } = value;
     const tutor = await ReferentObject.findById(tutorId);
     if (!tutor) return res.status(200).send({ ok: true });
 
     let htmlContent = "";
-    let subject = "";
 
     if (template === "correction") {
-      htmlContent = fs.readFileSync(path.resolve(__dirname, "../templates/correctionMission.html")).toString();
-      htmlContent = htmlContent.replace(/{{message}}/g, `${req.body.message.replace(/\n/g, "<br/>")}`);
-      htmlContent = htmlContent.replace(/{{cta}}/g, "https://admin.snu.gouv.fr");
-      subject = req.body.subject;
+      htmlContent = fs
+        .readFileSync(path.resolve(__dirname, "../templates/correctionMission.html"))
+        .toString()
+        .replace(/{{message}}/g, `${message.replace(/\n/g, "<br/>")}`)
+        .replace(/{{cta}}/g, "https://admin.snu.gouv.fr");
     } else if (template === "refused") {
-      htmlContent = fs.readFileSync(path.resolve(__dirname, "../templates/refusedMission.html")).toString();
-      htmlContent = htmlContent.replace(/{{message}}/g, `${req.body.message.replace(/\n/g, "<br/>")}`);
-      htmlContent = htmlContent.replace(/{{cta}}/g, "https://admin.snu.gouv.fr");
-      subject = req.body.subject;
+      htmlContent = fs
+        .readFileSync(path.resolve(__dirname, "../templates/refusedMission.html"))
+        .toString()
+        .replace(/{{message}}/g, `${message.replace(/\n/g, "<br/>")}`)
+        .replace(/{{cta}}/g, "https://admin.snu.gouv.fr");
     } else {
       throw new Error("Template de mail introuvable");
     }
 
-    await sendEmail({ name: `${tutor.firstName} ${tutor.lastName}`, email: "raph@selego.co" }, subject, htmlContent);
+    await sendEmail({ name: `${tutor.firstName} ${tutor.lastName}`, email: tutor.email }, subject, htmlContent);
     return res.status(200).send({ ok: true }); //todo
   } catch (error) {
     console.log(error);
@@ -312,7 +389,19 @@ router.post("/email-tutor/:template/:tutorId", passport.authenticate("referent",
 
 router.post("/email/:template/:youngId", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const { youngId, template } = req.params;
+    const { error, value } = Joi.object({
+      youngId: Joi.string().required(),
+      template: Joi.string().required(),
+      message: Joi.string().allow(null, ""),
+      prevStatus: Joi.string().allow(null, ""),
+      missionName: Joi.string().allow(null, ""),
+      structureName: Joi.string().allow(null, ""),
+    })
+      .unknown()
+      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+    const { youngId, template, message, prevStatus, missionName, structureName } = value;
+
     const young = await YoungObject.findById(youngId);
     if (!young) return res.status(200).send({ ok: true });
 
@@ -320,40 +409,50 @@ router.post("/email/:template/:youngId", passport.authenticate("referent", { ses
     let subject = "";
 
     if (template === "correction") {
-      htmlContent = fs.readFileSync(path.resolve(__dirname, "../templates/waitingCorrection.html")).toString();
-      htmlContent = htmlContent.replace(/{{message}}/g, `${req.body.message}`);
-      htmlContent = htmlContent.replace(/{{cta}}/g, "https://inscription.snu.gouv.fr");
-      htmlContent = htmlContent.replace(/\n/g, "<br/>");
+      htmlContent = fs
+        .readFileSync(path.resolve(__dirname, "../templates/waitingCorrection.html"))
+        .toString()
+        .replace(/{{message}}/g, `${message}`)
+        .replace(/{{cta}}/g, "https://inscription.snu.gouv.fr")
+        .replace(/\n/g, "<br/>");
       subject = "Votre candidature au SNU est en attente de correction";
     } else if (template === "validate") {
-      const template = req.body.prevStatus === "WITHDRAWN" ? "revalidated" : "validated";
-      htmlContent = fs.readFileSync(path.resolve(__dirname, `../templates/${template}.html`)).toString();
-      htmlContent = htmlContent.replace(/{{cta}}/g, "https://inscription.snu.gouv.fr");
-      htmlContent = htmlContent.replace(/{{firstName}}/g, young.firstName);
-      htmlContent = htmlContent.replace(/{{lastName}}/g, young.lastName);
-      subject = req.body.prevStatus === "WITHDRAWN" ? "Votre compte SNU a été réactivé" : "Votre candidature au SNU a été validée";
+      const template = prevStatus === "WITHDRAWN" ? "revalidated" : "validated";
+      htmlContent = fs
+        .readFileSync(path.resolve(__dirname, `../templates/${template}.html`))
+        .toString()
+        .replace(/{{cta}}/g, "https://inscription.snu.gouv.fr")
+        .replace(/{{firstName}}/g, young.firstName)
+        .replace(/{{lastName}}/g, young.lastName);
+      subject = prevStatus === "WITHDRAWN" ? "Votre compte SNU a été réactivé" : "Votre candidature au SNU a été validée";
     } else if (template === "refuse") {
-      htmlContent = fs.readFileSync(path.resolve(__dirname, "../templates/rejected.html")).toString();
-      htmlContent = htmlContent.replace(/{{message}}/g, `${req.body.message}`);
-      htmlContent = htmlContent.replace(/{{firstName}}/g, young.firstName);
-      htmlContent = htmlContent.replace(/{{lastName}}/g, young.lastName);
-      htmlContent = htmlContent.replace(/\n/g, "<br/>");
+      htmlContent = fs
+        .readFileSync(path.resolve(__dirname, "../templates/rejected.html"))
+        .toString()
+        .replace(/{{message}}/g, `${message}`)
+        .replace(/{{firstName}}/g, young.firstName)
+        .replace(/{{lastName}}/g, young.lastName)
+        .replace(/\n/g, "<br/>");
       subject = "Votre candidature au SNU a été refusée";
     } else if (template === "waiting_list") {
-      htmlContent = fs.readFileSync(path.resolve(__dirname, "../templates/waitingList.html")).toString();
-      htmlContent = htmlContent.replace(/{{firstName}}/g, young.firstName);
-      htmlContent = htmlContent.replace(/{{lastName}}/g, young.lastName);
-      htmlContent = htmlContent.replace(/\n/g, "<br/>");
+      htmlContent = fs
+        .readFileSync(path.resolve(__dirname, "../templates/waitingList.html"))
+        .toString()
+        .replace(/{{firstName}}/g, young.firstName)
+        .replace(/{{lastName}}/g, young.lastName)
+        .replace(/\n/g, "<br/>");
       subject = "Votre candidature au SNU a été mise sur liste complémentaire";
     } else if (template === "apply") {
-      htmlContent = fs.readFileSync(path.resolve(__dirname, "../templates/apply.html")).toString();
-      htmlContent = htmlContent.replace(/{{cta}}/g, "https://inscription.snu.gouv.fr/auth");
-      htmlContent = htmlContent.replace(/{{firstName}}/g, young.firstName);
-      htmlContent = htmlContent.replace(/{{lastName}}/g, young.lastName);
-      htmlContent = htmlContent.replace(/{{missionName}}/g, req.body.missionName);
-      htmlContent = htmlContent.replace(/{{structureName}}/g, req.body.structureName);
-      htmlContent = htmlContent.replace(/\n/g, "<br/>");
-      subject = `La mission ${req.body.missionName} devrait vous intéresser !`;
+      htmlContent = fs
+        .readFileSync(path.resolve(__dirname, "../templates/apply.html"))
+        .toString()
+        .replace(/{{cta}}/g, "https://inscription.snu.gouv.fr/auth")
+        .replace(/{{firstName}}/g, young.firstName)
+        .replace(/{{lastName}}/g, young.lastName)
+        .replace(/{{missionName}}/g, missionName)
+        .replace(/{{structureName}}/g, structureName)
+        .replace(/\n/g, "<br/>");
+      subject = `La mission ${missionName} devrait vous intéresser !`;
     }
 
     await sendEmail({ name: `${young.firstName} ${young.lastName}`, email: young.email }, subject, htmlContent);
@@ -367,9 +466,19 @@ router.post("/email/:template/:youngId", passport.authenticate("referent", { ses
 
 router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const { youngId, key, fileName } = req.params;
+    const { error, value } = Joi.object({
+      youngId: Joi.string().required(),
+      key: Joi.string().required(),
+      fileName: Joi.string().required(),
+    })
+      .unknown()
+      .validate({ ...req.params }, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    const { youngId, key, fileName } = value;
     const downloaded = await getFile(`app/young/${youngId}/${key}/${fileName}`);
     const decryptedBuffer = decrypt(downloaded.Body);
+
     let mimeFromFile = null;
     try {
       const { mime } = await FileType.fromBuffer(decryptedBuffer);
@@ -390,20 +499,55 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
 
 router.post("/file/:key", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const key = req.params.key;
-    const { names, youngId } = JSON.parse(req.body.body);
-    const files = Object.keys(req.files || {}).map((e) => req.files[e]);
+    const { error, value } = Joi.object({
+      key: Joi.string().required(),
+      body: Joi.string().required(),
+    })
+      .unknown()
+      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
+    const { key, body } = value;
+    const {
+      error: bodyError,
+      value: { names, youngId },
+    } = Joi.object({
+      names: Joi.array().items(Joi.string().required()).required(),
+      youngId: Joi.string().required(),
+    }).validate(JSON.parse(body), { stripUnknown: true });
+
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+    if (bodyError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: bodyError.message });
 
     const young = await YoungObject.findById(youngId);
     if (!young) return res.status(404).send({ ok: false });
 
-    for (let i = 0; i < files.length; i++) {
-      let currentFile = files[i];
+    // Validate files with Joi
+    const { error: filesError, value: files } = Joi.array()
+      .items(
+        Joi.alternatives().try(
+          Joi.object({
+            name: Joi.string().required(),
+            data: Joi.binary().required(),
+          }).unknown(),
+          Joi.array().items(
+            Joi.object({
+              name: Joi.string().required(),
+              data: Joi.binary().required(),
+            }).unknown()
+          )
+        )
+      )
+      .validate(
+        Object.keys(req.files || {}).map((e) => req.files[e]),
+        { stripUnknown: true }
+      );
+    if (filesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: filesError.message });
+
+    for (let currentFile of files) {
       // If multiple file with same names are provided, currentFile is an array. We just take the latest.
       if (Array.isArray(currentFile)) {
         currentFile = currentFile[currentFile.length - 1];
       }
-      const { name, data, mimetype } = currentFile;
+      const { name, data } = currentFile;
 
       const encryptedBuffer = encrypt(data);
       const resultingFile = { mimetype: "image/png", encoding: "7bit", data: encryptedBuffer };
@@ -421,11 +565,12 @@ router.post("/file/:key", passport.authenticate("referent", { session: false }),
 
 router.get("/young/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const data = await YoungObject.findOne({ _id: req.params.id });
-    if (!data) {
-      capture(`Young not found ${req.params.id}`);
-      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    }
+    const { error, value } = Joi.object({ id: Joi.string().required() })
+      .unknown()
+      .validate({ ...req.params }, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+    const data = await YoungObject.findById(value.id);
+    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const applications = await ApplicationObject.find({ youngId: data._id });
     return res.status(200).send({ ok: true, data: { ...data._doc, applications } });
   } catch (error) {
@@ -436,7 +581,16 @@ router.get("/young/:id", passport.authenticate("referent", { session: false }), 
 
 router.get("/:id/patches", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const referent = await ReferentObject.findById(req.params.id);
+    const { error, value } = Joi.object({ id: Joi.string().required() })
+      .unknown()
+      .validate({ ...req.params }, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    if (!canViewPatchesHistory(req.user)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const referent = await ReferentObject.findById(value.id);
+    if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
     const data = await referent.patches.find({ ref: referent.id }).sort("-date");
     return res.status(200).send({ ok: true, data });
   } catch (error) {
@@ -457,13 +611,15 @@ router.get("/", passport.authenticate("referent", { session: false }), async (re
 
 router.get("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const data = await ReferentObject.findOne({ _id: req.params.id });
-    const isAdminOrReferent = ["referent_department", "referent_region", "admin"].includes(req.user.role);
-    const isResponsibleModifyingResponsible =
-      ["responsible", "supervisor"].includes(req.user.role) && ["responsible", "supervisor"].includes(data.role);
-    // See: https://trello.com/c/Wv2TrQnQ/383-admin-ajouter-onglet-utilisateurs-pour-les-r%C3%A9f%C3%A9rents
-    const authorized = isAdminOrReferent || isResponsibleModifyingResponsible;
-    if (!authorized) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    const { error, value } = Joi.object({ id: Joi.string().required() })
+      .unknown()
+      .validate({ ...req.params }, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    const data = await ReferentObject.findOne({ _id: value.id });
+    if (!data) return res.status(404).send({ ok: false });
+
+    if (!canViewReferent(req.user, data)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
@@ -471,19 +627,20 @@ router.get("/:id", passport.authenticate("referent", { session: false }), async 
   }
 });
 
-router.get("/subrole/:subRole", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.get("/manager_department/:department", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const data = await ReferentObject.find({ subRole: String(req.params.subRole) });
-    return res.status(200).send({ ok: true, data });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
-  }
-});
+    const { error, value } = Joi.object({ department: Joi.string().required() })
+      .unknown()
+      .validate({ ...req.params }, { stripUnknown: true });
 
-router.get("/structure/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
-  try {
-    const data = await ReferentObject.find({ structureId: req.params.id });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    const data = await ReferentObject.findOne({
+      subRole: SUB_ROLES.manager_department,
+      role: ROLES.REFERENT_DEPARTMENT,
+      department: value.department,
+    });
+    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
@@ -493,60 +650,29 @@ router.get("/structure/:id", passport.authenticate("referent", { session: false 
 
 router.put("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
+    const { error, value } = referentValidator.validateReferent(req.body);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
     const data = await ReferentObject.findOne({ _id: req.params.id });
-    const isAdmin = req.user.role === "admin";
-    const isResponsibleModifyingResponsibleWithoutChangingRole =
-      // Is responsible...
-      ["responsible", "supervisor"].includes(req.user.role) &&
-      // ... modifying responsible ...
-      ["responsible", "supervisor"].includes(data.role) &&
-      // ... witout changing its role.
-      ["responsible", "supervisor"].includes(req.body.role);
+    if (!data) return res.status(404).send({ ok: false });
 
-    // TODO: we must handle rights more precisely.
-    // See: https://trello.com/c/Wv2TrQnQ/383-admin-ajouter-onglet-utilisateurs-pour-les-r%C3%A9f%C3%A9rents
-    const isReferentModifyingReferentWithoutChangingRole =
-      // Is referent...
-      ["referent_department", "referent_region"].includes(req.user.role) &&
-      // ... modifying referent ...
-      ["referent_department", "referent_region"].includes(data.role) &&
-      // ... witout changing its role.
-      ["referent_department", "referent_region"].includes(req.body.role);
-    const authorized = isAdmin || isResponsibleModifyingResponsibleWithoutChangingRole || isReferentModifyingReferentWithoutChangingRole;
+    if (!canUpdateReferent(req.user, data, value)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    if (!authorized) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    const referent = await ReferentObject.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const referent = await ReferentObject.findByIdAndUpdate(req.params.id, value, { new: true, useFindAndModify: false });
     await updateTutorNameInMissionsAndApplications(referent);
     res.status(200).send({ ok: true, data: referent });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error: error.message });
   }
 });
 
-// router.put("/file/logo", passport.authenticate("referent", { session: false }), upload.single('logo'), async (req, res) => {
-//   try {
-//     const logoName = Object.keys(req.files)[0];
-//     const logo = req.files[logoName];
-//     let _id = req.user.role === "admin" ? req.query.user_id || req.user._id : req.user._id;
-//     const url = `app/users/${_id}/${logo.name}`;
-//     // await uploadToS3FromBuffer(url, logo.data);
-
-//     res.status(200).send({ ok: true, url: "" });
-//   } catch (error) {
-//     capture(error);
-//     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
-//   }
-// });
-
-//@check
 router.put("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const obj = req.body;
-    obj.email = req.body.email && req.body.email.trim().toLowerCase();
-    obj.firstName = req.body.firstName && req.body.firstName.charAt(0).toUpperCase() + (req.body.firstName || "").toLowerCase().slice(1);
-    obj.lastName = req.body.lastName && req.body.lastName.toUpperCase();
-    const user = await ReferentObject.findByIdAndUpdate(req.user._id, obj, { new: true });
+    const { error, value } = referentValidator.validateSelf(req.body);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    const user = await ReferentObject.findByIdAndUpdate(req.user._id, value, { new: true, useFindAndModify: false });
     await updateTutorNameInMissionsAndApplications(user);
     res.status(200).send({ ok: true, data: user });
   } catch (error) {
@@ -555,27 +681,10 @@ router.put("/", passport.authenticate("referent", { session: false }), async (re
   }
 });
 
-function canDelete(user, value) {
-  if (user.role === "admin") return true;
-  // https://trello.com/c/Wv2TrQnQ/383-admin-ajouter-onglet-utilisateurs-pour-les-r%C3%A9f%C3%A9rents
-  if (user.role === "referent_region") {
-    if (
-      (["referent_department", "referent_region"].includes(value.role) && user.region === value.region) ||
-      ["supervisor", "responsible"].includes(value.role)
-    )
-      return true;
-    return false;
-  }
-  if (user.role === "referent_department") {
-    if ((user.role === value.role && user.department === value.department) || ["supervisor", "responsible"].includes(value.role)) return true;
-    return false;
-  }
-  return false;
-}
-
 router.delete("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const referent = await ReferentObject.findOne({ _id: req.params.id });
+    if (!referent) return res.status(404).send({ ok: false });
     if (!canDelete(req.user, referent)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     await referent.remove();
     console.log(`Referent ${req.params.id} has been deleted`);

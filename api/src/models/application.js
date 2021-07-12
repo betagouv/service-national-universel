@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
 const esClient = require("../es");
+const patchHistory = require("mongoose-patch-history").default;
 
 const MODELNAME = "application";
 
@@ -133,6 +134,14 @@ const Schema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
 });
 
+Schema.plugin(patchHistory, {
+  mongoose,
+  name: `${MODELNAME}Patches`,
+  trackOriginalValue: true,
+  includes: {
+    modelName: { type: String, required: true, default: MODELNAME },
+  },
+});
 Schema.plugin(mongooseElastic(esClient), MODELNAME);
 
 const OBJ = mongoose.model(MODELNAME, Schema);

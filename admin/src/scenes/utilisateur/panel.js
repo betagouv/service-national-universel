@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
@@ -72,7 +71,7 @@ export default ({ onChange, value }) => {
         )}
       </div>
       <Info title="Coordonnées">
-        <Details title="E-mail" value={value.email} />
+        <Details title="E-mail" value={value.email} copy />
       </Info>
       <Info title="Informations">
         <Details title="Rôle" value={translate(value.role)} />
@@ -108,12 +107,22 @@ const Info = ({ children, title }) => {
   );
 };
 
-const Details = ({ title, value, children }) => {
+const Details = ({ title, value, children, copy }) => {
   if (!value) return <div />;
   return (
     <div className="detail">
       <div className="detail-title">{`${title} :`}</div>
       <div className="detail-text">{value}</div>
+      {copy ? (
+        <div
+          className="icon"
+          icon={require(`../../assets/copy.svg`)}
+          onClick={() => {
+            navigator.clipboard.writeText(value);
+            toastr.success(`'${title}' a été copié dans le presse papier.`);
+          }}
+        />
+      ) : null}
       {children ? children : null}
     </div>
   );

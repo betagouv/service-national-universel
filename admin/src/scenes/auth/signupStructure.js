@@ -11,7 +11,11 @@ import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import Header from "./components/header";
+import Title from "./components/title";
+import Subtitle from "./components/subtitle";
 import MultiSelect from "../../components/Multiselect";
+import LoginBox from "./components/loginBox";
+import AuthWrapper from "./components/authWrapper";
 
 import { associationTypes, privateTypes, publicTypes, publicEtatTypes, translate } from "../../utils";
 import AddressInput from "../../components/addressInput";
@@ -32,7 +36,7 @@ export default () => {
 
   if (!user) return <Redirect to="/" />;
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
+    <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
       <Header />
       <Formik
         validateOnChange={false}
@@ -382,9 +386,9 @@ const FormGroup2 = styled.div`
 
 const StructureWrapper = styled.div`
   background-color: #fff;
-  margin: 2rem auto;
-  min-width: 1000px;
-  width: 65%;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
 `;
 
 const Thumb = styled.div`
@@ -397,46 +401,9 @@ const Thumb = styled.div`
   }
 `;
 
-const AuthWrapper = styled.div`
-  display: flex;
-  width: 100%;
-  > * {
-    flex: 1;
-  }
-`;
-
-const LoginBox = styled.div`
-  padding: 4rem;
-  background-color: #f6f6f6;
-  @media (max-width: 768px) {
-    border-radius: 0;
-    margin: 0;
-  }
-`;
-
-const Title = styled.h1`
-  position: relative;
-  font-size: 2rem;
-  @media (max-width: 768px) {
-    font-size: 1.2rem;
-  }
-  font-weight: 700;
-  margin-bottom: 14px;
-`;
-
 const MainTitle = styled(Title)`
   font-size: 1.7rem;
-`;
-
-const Subtitle = styled.h2`
-  position: relative;
-  font-size: 1rem;
-  color: #6e757c;
-  @media (max-width: 768px) {
-    font-size: 0.8rem;
-  }
-  font-weight: 400;
-  margin-bottom: 20px;
+  margin: 2rem;
 `;
 
 const StyledFormGroup = styled(FormGroup2)`

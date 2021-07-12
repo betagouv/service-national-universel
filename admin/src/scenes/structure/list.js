@@ -144,6 +144,7 @@ export default () => {
                 <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === "referent_region" ? [user.region] : []} />
                 <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === "referent_department" ? [user.department] : []} />
                 <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
                   placeholder="Affiliation à un réseau national"
                   componentId="WITH_NETWORK"

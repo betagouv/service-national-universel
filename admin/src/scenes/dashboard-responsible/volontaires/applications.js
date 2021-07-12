@@ -17,18 +17,35 @@ export default () => {
   const history = useHistory();
   const structureId = user.structureId;
 
-  // Get all missions from structure then get all applications int order to display the volontaires' list.
-  useEffect(() => {
-    async function initMissions() {
-      const missionsResponse = await api.get(`/mission/structure/${structureId}`);
-      if (!missionsResponse.ok) {
-        toastr.error("Oups, une erreur est survenue lors de la récuperation des missions", translate(missionsResponse.code));
-        history.push("/");
-      } else {
-        setMissions(missionsResponse.data);
+  async function appendMissions(structure) {
+    const missionsResponse = await api.get(`/mission/structure/${structure}`);
+    if (!missionsResponse.ok) {
+      toastr.error("Oups, une erreur est survenue lors de la récuperation des missions", translate(missionsResponse.code));
+      return history.push("/");
+    }
+    return missionsResponse.data;
+  }
+
+  async function initMissions(structure) {
+    const m = await appendMissions(structure);
+    if (user.role === "supervisor") {
+      const subStructures = await api.get(`/structure/network/${structure}`);
+      if (!subStructures.ok) {
+        toastr.error("Oups, une erreur est survenue lors de la récuperation des missions des antennes", translate(subStructures.code));
+        return history.push("/");
+      }
+      for (let i = 0; i < subStructures.data.length; i++) {
+        const subStructure = subStructures.data[i];
+        const tempMissions = await appendMissions(subStructure._id);
+        m.push(...tempMissions);
       }
     }
-    initMissions();
+    setMissions(m);
+  }
+
+  // Get all missions from structure then get all applications int order to display the volontaires' list.
+  useEffect(() => {
+    initMissions(structureId);
   }, [structureId, user]);
   useEffect(() => {
     async function initApplications() {
@@ -66,7 +83,7 @@ export default () => {
         <Col md={6} xl={3}>
           <Link to={`/volontaire?STATUS=%5B"WAITING_VALIDATION"%5D`}>
             <CardContainer>
-              <Card borderBottomColor={APPLICATION_STATUS_COLORS.WAITING_VALIDATION}>
+              <Card borderBottomColor={APPLICATION_STATUS_COLORS.WAITING_VALIDATION} style={{ marginBottom: 10 }}>
                 <CardTitle>En attente de validation</CardTitle>
                 <CardValueWrapper>
                   <CardValue>{stats.WAITING_VALIDATION || "-"}</CardValue>
@@ -84,7 +101,7 @@ export default () => {
         <Col md={6} xl={3}>
           <Link to={`/volontaire?STATUS=%5B"VALIDATED"%5D`}>
             <CardContainer>
-              <Card borderBottomColor={APPLICATION_STATUS_COLORS.VALIDATED}>
+              <Card borderBottomColor={APPLICATION_STATUS_COLORS.VALIDATED} style={{ marginBottom: 10 }}>
                 <CardTitle>Validées</CardTitle>
                 <CardValueWrapper>
                   <CardValue>{stats.VALIDATED || "-"}</CardValue>

@@ -79,7 +79,7 @@ const Container = styled.div`
 
 const Title = styled.h2`
   margin-bottom: 1rem;
-  font-size: 0.875rem;
+  font-size: 0.875rem !important;
   letter-spacing: 0.05rem;
   color: #161e2e;
   text-transform: uppercase;

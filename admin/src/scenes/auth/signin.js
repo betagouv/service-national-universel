@@ -10,7 +10,11 @@ import queryString from "query-string";
 import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
+import LoginBox from "./components/loginBox";
 import Header from "./components/header";
+import AuthWrapper from "./components/authWrapper";
+import Title from "./components/title";
+import Subtitle from "./components/subtitle";
 
 export default () => {
   const dispatch = useDispatch();
@@ -23,7 +27,7 @@ export default () => {
   if (unauthorized === "1") toastr.error("Votre session a expiré", "Merci de vous reconnecter.", { timeOut: 10000 });
 
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
+    <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
       <Header />
       <AuthWrapper>
         <Thumb />
@@ -125,35 +129,6 @@ const Thumb = styled.div`
   }
 `;
 
-const AuthWrapper = styled.div`
-  display: flex;
-  width: 100%;
-  > * {
-    flex: 1;
-  }
-`;
-
-const Title = styled.h1`
-  position: relative;
-  font-size: 2rem;
-  @media (max-width: 768px) {
-    font-size: 1.2rem;
-  }
-  font-weight: 700;
-  margin-bottom: 14px;
-`;
-
-const Subtitle = styled.h2`
-  position: relative;
-  font-size: 1rem;
-  color: #6e757c;
-  @media (max-width: 768px) {
-    font-size: 0.8rem;
-  }
-  font-weight: 400;
-  margin-bottom: 20px;
-`;
-
 const Register = styled.h3`
   position: relative;
   font-size: 1rem;
@@ -167,15 +142,6 @@ const Register = styled.h3`
   a {
     color: #32267f;
     font-weight: 500;
-  }
-`;
-
-const LoginBox = styled.div`
-  padding: 4rem;
-  background-color: #f6f6f6;
-  @media (max-width: 768px) {
-    border-radius: 0;
-    margin: 0;
   }
 `;
 

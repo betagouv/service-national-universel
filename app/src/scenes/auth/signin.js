@@ -16,7 +16,7 @@ import Submit from "./components/Submit";
 import Register from "./components/Register";
 import ErrorLogin from "./components/ErrorLogin";
 import ModalInProgress from "../../components/modals/ModalInProgress";
-import { isInscription2021Closed } from "../../utils";
+import { isInscription2021Closed, setCrispUserData } from "../../utils";
 import { toastr } from "react-redux-toastr";
 
 export default () => {
@@ -56,6 +56,7 @@ export default () => {
                 } else {
                   if (token) api.setToken(token);
                   dispatch(setYoung(young));
+                  setCrispUserData(young);
                 }
               }
             } catch (e) {

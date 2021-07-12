@@ -17,7 +17,7 @@ const FILTERS = ["SEARCH", "STATUS", "PHASE", "COHORT", "MISSIONS", "TUTOR"];
 
 export default () => {
   const user = useSelector((state) => state.Auth.user);
-  const [missions, setMissions] = useState([]);
+  const [missions, setMissions] = useState();
   const [panel, setPanel] = useState(null);
   const getDefaultQuery = () => ({ query: { bool: { filter: { terms: { "missionId.keyword": missions.map((e) => e._id) } } } }, sort: [{ "youngLastName.keyword": "asc" }] });
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
@@ -58,7 +58,7 @@ export default () => {
     if (ok) setPanel({ application, young: data });
   };
 
-  if (!missions.length) return <Loader />;
+  if (!missions) return <Loader />;
   return (
     <div>
       <ReactiveBase url={`${apiURL}/es`} app="application" headers={{ Authorization: `JWT ${api.getToken()}` }}>
@@ -108,7 +108,7 @@ export default () => {
                     "Téléphone représentant légal 2": data.young.parent2Phone,
                     "Nom de la mission": data.missionName,
                     "Département de la mission": data.missionDepartment,
-                    "Régino de la mission": data.missionRegion,
+                    "Région de la mission": data.missionRegion,
                     "Candidature créée lé": data.createdAt,
                     "Candidature mise à jour le": data.updatedAt,
                     "Statut de la candidature": data.status,

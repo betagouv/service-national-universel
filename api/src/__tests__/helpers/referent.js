@@ -13,6 +13,13 @@ async function deleteReferentByIdHelper(referentId) {
   await referent.remove();
 }
 
+async function deleteAllReferentBySubrole(subRole) {
+  const referents = await ReferentObject.find({ subRole: subRole });
+  for (const referent of referents) {
+    await deleteReferentByIdHelper(referent._id);
+  }
+}
+
 async function createReferentHelper(referent) {
   return await ReferentObject.create(referent);
 }
@@ -32,10 +39,14 @@ function expectReferentToEqual(referent, expectedReferent) {
   expect(referentParsed.role).toEqual(expectedReferentParsed.role);
 }
 
+const notExistingReferentId = "104a49ba503040e4d2153973";
+
 module.exports = {
   getReferentsHelper,
   getReferentByIdHelper,
   deleteReferentByIdHelper,
   createReferentHelper,
   expectReferentToEqual,
+  notExistingReferentId,
+  deleteAllReferentBySubrole,
 };

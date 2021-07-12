@@ -15,6 +15,8 @@ import Header from "./components/header";
 
 import { translate } from "../../utils";
 import Loader from "../../components/Loader";
+import LoginBox from "./components/loginBox";
+import AuthWrapper from "./components/authWrapper";
 
 export default () => {
   const [invitation, setInvitation] = useState("");
@@ -22,13 +24,16 @@ export default () => {
 
   useEffect(() => {
     (async () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const invitationToken = urlParams.get("token");
-      if (!invitationToken) return setInvitation("INVITATION_TOKEN_EXPIRED_OR_INVALID");
-      const { data: u, code, token } = await api.post(`/referent/signup_verify`, { invitationToken });
-      if (token) api.setToken(token);
-      if (code === "INVITATION_TOKEN_EXPIRED_OR_INVALID") return setInvitation("INVITATION_TOKEN_EXPIRED_OR_INVALID");
-      setNewUser(u);
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const invitationToken = urlParams.get("token");
+        if (!invitationToken) return setInvitation("INVITATION_TOKEN_EXPIRED_OR_INVALID");
+        const { data, code, token } = await api.post(`/referent/signup_verify`, { invitationToken });
+        if (token) api.setToken(token);
+        setNewUser(data);
+      } catch (error) {
+        if (error?.code === "INVITATION_TOKEN_EXPIRED_OR_INVALID") return setInvitation("INVITATION_TOKEN_EXPIRED_OR_INVALID");
+      }
     })();
   }, []);
 
@@ -49,7 +54,7 @@ export default () => {
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
+    <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
       <Header />
       <AuthWrapper>
         <Thumb />
@@ -172,23 +177,6 @@ const Thumb = styled.div`
   flex: 1;
   @media (max-width: 768px) {
     display: none;
-  }
-`;
-
-const AuthWrapper = styled.div`
-  display: flex;
-  width: 100%;
-  > * {
-    flex: 1;
-  }
-`;
-
-const LoginBox = styled.div`
-  padding: 4rem;
-  background-color: #f6f6f6;
-  @media (max-width: 768px) {
-    border-radius: 0;
-    margin: 0;
   }
 `;
 

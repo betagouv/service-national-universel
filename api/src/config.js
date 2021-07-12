@@ -41,15 +41,17 @@ module.exports = {
   API_ENGAGEMENT_KEY,
 };
 
-console.log("CELLAR_ENDPOINT", CELLAR_ENDPOINT);
-console.log("CELLAR_KEYID", CELLAR_KEYID);
-console.log("CELLAR_KEYSECRET", CELLAR_KEYSECRET);
-console.log("FILE_ENCRYPTION_SECRET", FILE_ENCRYPTION_SECRET);
-console.log("BUCKET_NAME", BUCKET_NAME);
-console.log("SENDINBLUEKEY", SENDINBLUEKEY);
-console.log("SENTRY_URL", SENTRY_URL);
-console.log("API_ENGAGEMENT_KEY", API_ENGAGEMENT_KEY);
-console.log("ENVIRONMENT", ENVIRONMENT);
+if (process.env.NODE_ENV !== "test") {
+  console.log("CELLAR_ENDPOINT", CELLAR_ENDPOINT);
+  console.log("CELLAR_KEYID", CELLAR_KEYID);
+  console.log("CELLAR_KEYSECRET", CELLAR_KEYSECRET);
+  console.log("FILE_ENCRYPTION_SECRET", FILE_ENCRYPTION_SECRET);
+  console.log("BUCKET_NAME", BUCKET_NAME);
+  console.log("SENDINBLUEKEY", SENDINBLUEKEY);
+  console.log("SENTRY_URL", SENTRY_URL);
+  console.log("API_ENGAGEMENT_KEY", API_ENGAGEMENT_KEY);
+  console.log("ENVIRONMENT", ENVIRONMENT);
+}
 
 function getEnvironment() {
   if (process.env.STAGING === "true") return "staging";

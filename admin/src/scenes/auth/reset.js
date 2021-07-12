@@ -73,6 +73,7 @@ export default ({ location }) => {
 const Wrapper = styled(Row)`
   height: 100vh;
   overflow: hidden;
+  flex: 1;
 `;
 
 const AuthWrapper = styled.div`

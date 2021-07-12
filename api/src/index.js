@@ -30,7 +30,7 @@ app.use(express.static(__dirname + "/../public"));
 app.use("/es", require("./controllers/es"));
 app.use("/mission", require("./controllers/mission"));
 app.use("/structure", require("./controllers/structure"));
-app.use("/young", require("./controllers/young"));
+app.use("/young", require("./controllers/young/index"));
 app.use("/referent", require("./controllers/referent"));
 app.use("/application", require("./controllers/application"));
 app.use("/contract", require("./controllers/contract"));
