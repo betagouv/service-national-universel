@@ -69,7 +69,7 @@ export default () => {
                       )}
                       {tooManyRequests && (
                         <StyledFormGroup>
-                          <ErrorLogin>Vous avez atteint le maximum de tentatives de connexion autorisées. Réessayez dans une heure </ErrorLogin>
+                          <ErrorLogin>Vous avez atteint le maximum de tentatives de connexion autorisées. Réessayez dans une heure. </ErrorLogin>
                         </StyledFormGroup>
                       )}
 
