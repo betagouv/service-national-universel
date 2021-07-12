@@ -61,9 +61,7 @@ export default () => {
                 collection="mission"
                 react={{ and: FILTERS }}
                 transformAll={async (data) => {
-                  const set = new Set(data.map((item) => item.tutorId));
-                  set.delete(undefined);
-                  const tutorIds = [...set];
+                  const tutorIds = [...new Set(data.map((item) => item.tutorId).filter((e) => e))];
                   if (tutorIds?.length) {
                     const { responses } = await api.esQuery([
                       { index: "referent", type: "_doc" },
