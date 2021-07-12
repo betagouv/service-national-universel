@@ -21,7 +21,7 @@ const AuthObject = require("../auth");
 
 const { decrypt } = require("../cryptoUtils");
 const { sendEmail } = require("../sendinblue");
-const { uploadFile, validatePassword, updatePlacesCenter, assignNextYoungFromWaitingList, ERRORS } = require("../utils");
+const { uploadFile, validatePassword, updatePlacesCenter, signinLimiter, assignNextYoungFromWaitingList, ERRORS } = require("../utils");
 const { encrypt } = require("../cryptoUtils");
 const referentValidator = require("../utils/validator/referent");
 const ReferentAuth = new AuthObject(ReferentObject);
@@ -63,7 +63,7 @@ async function updateTutorNameInMissionsAndApplications(tutor) {
   }
 }
 
-router.post("/signin", (req, res) => ReferentAuth.signin(req, res));
+router.post("/signin", signinLimiter, (req, res) => ReferentAuth.signin(req, res));
 router.post("/logout", (req, res) => ReferentAuth.logout(req, res));
 router.post("/signup", (req, res) => ReferentAuth.signup(req, res));
 

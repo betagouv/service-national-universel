@@ -24,6 +24,7 @@ export default () => {
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
   const [userIsValid, setUserIsValid] = useState(true);
+  const [tooManyRequests, settooManyRequests] = useState(false);
   const params = queryString.parse(location.search);
   const { redirect, disconnected } = params;
 
@@ -62,6 +63,9 @@ export default () => {
             } catch (e) {
               console.log("e", e);
               setUserIsValid(false);
+              if (e.code === "TOO_MANY_REQUESTS") {
+                settooManyRequests(true);
+              }
             }
             actions.setSubmitting(false);
           }}
@@ -72,6 +76,11 @@ export default () => {
                 {!userIsValid && (
                   <StyledFormGroup>
                     <ErrorLogin>Identifiant incorrect </ErrorLogin>
+                  </StyledFormGroup>
+                )}
+                {tooManyRequests && (
+                  <StyledFormGroup>
+                    <ErrorLogin>Vous avez atteint le maximum de tentatives de connexion autorisées. Réessayez dans une heure </ErrorLogin>
                   </StyledFormGroup>
                 )}
 
