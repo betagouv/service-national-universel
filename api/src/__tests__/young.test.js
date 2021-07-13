@@ -24,6 +24,18 @@ jest.mock("../qpv", () => ({
   getQPV: (a) => Promise.resolve(a === "qpvShouldWork"),
 }));
 
+jest.mock("../utils", () => ({
+  ...jest.requireActual("../utils"),
+  getFile: () => Promise.resolve({ Body: "" }),
+  uploadFile: (path, file) => Promise.resolve({ path, file }),
+}));
+
+jest.mock("../cryptoUtils", () => ({
+  ...jest.requireActual("../cryptoUtils"),
+  decrypt: () => Buffer.from("test"),
+  encrypt: () => Buffer.from("test"),
+}));
+
 jest.mock("node-fetch");
 
 jest.setTimeout(10_000);
@@ -396,6 +408,24 @@ describe("Young", () => {
       });
       const res = await request(getAppHelper()).post("/young/signup_verify").send({ invitationToken });
       expect(res.statusCode).toEqual(200);
+    });
+  });
+
+  describe("POST /young/file/:key", () => {
+    it("should send file for the young", async () => {
+      // This test should be improved to check the file is sent (currently no file is sent)
+      const young = await createYoungHelper(getNewYoungFixture());
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
+      passport.user.set = jest.fn();
+
+      const res = await request(getAppHelper())
+        .post("/young/file/CniFile")
+        .send({ body: JSON.stringify({ names: ["e"] }) });
+      expect(res.body).toEqual({ data: ["e"], ok: true });
+      expect(passport.user.set).toHaveBeenCalledWith({ CniFile: ["e"] });
+      passport.user = previous;
     });
   });
 });
