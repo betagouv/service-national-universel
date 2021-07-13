@@ -33,7 +33,7 @@ const { cookieOptions } = require("../../cookie-options");
 
 const YoungAuth = new AuthObject(YoungObject);
 
-router.post("/signin", (req, res) => YoungAuth.signin(req, res));
+router.post("/signin", signinLimiter, (req, res) => YoungAuth.signin(req, res));
 router.post("/logout", (req, res) => YoungAuth.logout(req, res));
 router.post("/signup", (req, res) => YoungAuth.signup(req, res));
 

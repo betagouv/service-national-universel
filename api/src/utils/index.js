@@ -18,6 +18,7 @@ const { CELLAR_ENDPOINT, CELLAR_KEYID, CELLAR_KEYSECRET, BUCKET_NAME, ENVIRONMEN
 const signinLimiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   max: 15,
+  skipSuccessfulRequests: true,
   message: {
     ok: false,
     code: "TOO_MANY_REQUESTS",
