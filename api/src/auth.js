@@ -40,7 +40,6 @@ class Auth {
 
     try {
       const user = await this.model.findOne({ email });
-      
 
       if (!user) return res.status(401).send({ ok: false, code: USER_NOT_EXISTS });
       if (user.status === "DELETED") return res.status(401).send({ ok: false, code: OPERATION_UNAUTHORIZED });
@@ -68,6 +67,7 @@ class Auth {
         firstName: Joi.string().lowercase().trim().required(),
         lastName: Joi.string().uppercase().trim().required(),
         password: Joi.string().min(8).required(),
+        role: Joi.string().allow(null, ""),
       })
         .unknown()
         .validate(req.body);
@@ -78,10 +78,10 @@ class Auth {
         return res.status(400).send({ ok: false, code: error.toString() });
       }
 
-      const { password, email, lastName } = value;
+      const { password, email, lastName, role } = value;
       const firstName = value.firstName.charAt(0).toUpperCase() + value.firstName.toLowerCase().slice(1);
 
-      const user = await this.model.create({ password, email, firstName, lastName });
+      const user = await this.model.create({ password, email, firstName, lastName, role });
       const token = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });
       res.cookie("jwt", token, cookieOptions());
 

@@ -85,12 +85,14 @@ const Home = () => {
   const renderDashboard = () => {
     if (["supervisor", "responsible"].includes(user?.role)) return <DashboardResponsible />;
     if (user?.role === "head_center") return <DashboardHeadCenter />;
-    return <Dashboard />;
+    if (["referent_department", "referent_region", "admin"].includes(user?.role)) return <Dashboard />;
+    return null;
   };
   const renderVolontaire = () => {
     if (["supervisor", "responsible"].includes(user?.role)) return <VolontairesResponsible />;
     if (user?.role === "head_center") return <VolontairesHeadCenter />;
-    return <Volontaires />;
+    if (["referent_department", "referent_region", "admin"].includes(user?.role)) return <Volontaires />;
+    return null;
   };
 
   // if (user && !user.structureId) return <Onboarding />;
