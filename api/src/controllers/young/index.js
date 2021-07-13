@@ -243,7 +243,7 @@ router.put("/:id/meeting-point", passport.authenticate(["young", "referent"], { 
   }
 });
 
-router.put("/:id/cancel-meeting-point", passport.authenticate(["referent"], { session: false }), async (req, res) => {
+router.put("/:id/cancel-meeting-point", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const young = await YoungObject.findById(req.params.id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
