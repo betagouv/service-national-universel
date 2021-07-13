@@ -265,7 +265,6 @@ router.put("/", passport.authenticate("young", { session: false }), async (req, 
     const obj = req.body;
 
     const young = await YoungObject.findByIdAndUpdate(req.user._id, obj, { new: true });
-    res.status(200).send({ ok: true, data: young });
 
     //Check quartier prioritaires.
     if (obj.zip && obj.city && obj.address) {
@@ -300,9 +299,10 @@ router.put("/", passport.authenticate("young", { session: false }), async (req, 
       const center = await CohesionCenterObject.findById(young.cohesionCenterId);
       if (center) await updatePlacesCenter(center);
     }
+    return res.status(200).send({ ok: true, data: young });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
 
