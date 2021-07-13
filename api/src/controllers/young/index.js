@@ -156,7 +156,7 @@ router.put("/validate_phase3/:young/:token", async (req, res) => {
   }
 });
 
-router.get("/department-service", passport.authenticate(["young"], { session: false }), async (req, res) => {
+router.get("/department-service", passport.authenticate("young", { session: false }), async (req, res) => {
   try {
     const data = await DepartmentServiceModel.findOne({ department: req.user.department });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -176,16 +176,6 @@ router.get("/:id/patches", passport.authenticate("referent", { session: false })
     }
     const data = await young.patches.find({ ref: young.id }).sort("-date");
     return res.status(200).send({ ok: true, data });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
-  }
-});
-
-router.get("/", passport.authenticate("young", { session: false }), async (req, res) => {
-  try {
-    const young = await YoungObject.findOne({ user_id: req.user._id });
-    return res.status(200).send({ ok: true, young });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
@@ -359,6 +349,8 @@ router.post("/france-connect/user-info", async (req, res) => {
 router.delete("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const young = await YoungObject.findOne({ _id: req.params.id });
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
     await young.remove();
     console.log(`Young ${req.params.id} has been deleted`);
     res.status(200).send({ ok: true });
