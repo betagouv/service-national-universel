@@ -74,7 +74,7 @@ router.post("/file/:key", passport.authenticate("young", { session: false }), as
 router.post("/signup_verify", async (req, res) => {
   try {
     const young = await YoungObject.findOne({ invitationToken: req.body.invitationToken, invitationExpires: { $gt: Date.now() } });
-    if (!young) return res.status(200).send({ ok: false, code: ERRORS.INVITATION_TOKEN_EXPIRED_OR_INVALID });
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.INVITATION_TOKEN_EXPIRED_OR_INVALID });
     const token = jwt.sign({ _id: young._id }, config.secret, { expiresIn: "30d" });
     return res.status(200).send({ ok: true, token, data: young });
   } catch (error) {
@@ -87,12 +87,12 @@ router.post("/signup_invite", async (req, res) => {
   try {
     const email = (req.body.email || "").trim().toLowerCase();
 
-    const young = await YoungObject.findOne({ email });
+    const young = await YoungObject.findOne({ email, invitationToken: req.body.invitationToken, invitationExpires: { $gt: Date.now() } });
     if (!young) return res.status(404).send({ ok: false, data: null, code: ERRORS.USER_NOT_FOUND });
 
-    if (young.registredAt) return res.status(200).send({ ok: false, data: null, code: ERRORS.YOUNG_ALREADY_REGISTERED });
+    if (young.registredAt) return res.status(400).send({ ok: false, data: null, code: ERRORS.YOUNG_ALREADY_REGISTERED });
 
-    if (!validatePassword(req.body.password)) return res.status(200).send({ ok: false, prescriber: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
+    if (!validatePassword(req.body.password)) return res.status(400).send({ ok: false, prescriber: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
 
     young.set({ password: req.body.password });
     young.set({ registredAt: Date.now() });
