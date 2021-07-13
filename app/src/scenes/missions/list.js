@@ -47,7 +47,7 @@ export default () => {
       query.query.bool.filter.push({
         range: {
           startAt: {
-            gt: "2021-07-02",
+            gte: "2021-07-02",
           },
         },
       });
