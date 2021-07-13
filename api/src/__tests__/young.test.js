@@ -310,47 +310,91 @@ describe("Young", () => {
     });
     it("should return 404 when invitation is expired", async () => {
       await deleteYoungByEmailHelper("foo@example.org");
+      const invitationToken = Date.now().toString();
       const young = await createYoungHelper({
         ...getNewYoungFixture(),
         email: "foo@example.org",
-        invitationToken: "foo",
+        invitationToken,
         invitationExpires: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7),
       });
       const res = await request(getAppHelper()).post("/young/signup_invite").send({
         email: young.email,
-        invitationToken: "foo",
+        invitationToken,
         password: "aabb",
       });
       expect(res.statusCode).toEqual(404);
     });
     it("should return 400 when password is not valid", async () => {
       await deleteYoungByEmailHelper("foo@example.org");
+      const invitationToken = Date.now().toString();
       const young = await createYoungHelper({
         ...getNewYoungFixture(),
         email: "foo@example.org",
-        invitationToken: "foo",
+        invitationToken,
         invitationExpires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
       });
       const res = await request(getAppHelper()).post("/young/signup_invite").send({
         email: young.email,
-        invitationToken: "foo",
+        invitationToken,
         password: "aabb",
       });
       expect(res.statusCode).toEqual(400);
     });
     it("should return 200 when young found", async () => {
       await deleteYoungByEmailHelper("foo@example.org");
+      const invitationToken = Date.now().toString();
       const young = await createYoungHelper({
         ...getNewYoungFixture(),
         email: "foo@example.org",
-        invitationToken: "foo",
+        invitationToken,
         invitationExpires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
       });
       const res = await request(getAppHelper()).post("/young/signup_invite").send({
         email: young.email,
         password: "%%minMAJ123",
-        invitationToken: "foo",
+        invitationToken,
       });
+      expect(res.statusCode).toEqual(200);
+    });
+  });
+
+  describe("POST /young/signup_verify", () => {
+    it("should return 404 when young not found", async () => {
+      const res = await request(getAppHelper()).post("/young/signup_verify").send({});
+      expect(res.statusCode).toEqual(404);
+    });
+    it("should return 404 when invitation is expired", async () => {
+      await deleteYoungByEmailHelper("foo@example.org");
+      const invitationToken = Date.now().toString();
+      await createYoungHelper({
+        ...getNewYoungFixture(),
+        invitationToken,
+        invitationExpires: new Date(Date.now() - 1000 * 60 * 60 * 24 * 70),
+      });
+      // expect(new Date(Date.now() - 1000 * 60 * 60 * 24 * 7)).toEqual([]);
+      const res = await request(getAppHelper()).post("/young/signup_verify").send({ invitationToken });
+      expect(res.statusCode).toEqual(404);
+    });
+    it("should return 404 when invitation token is wrong", async () => {
+      await deleteYoungByEmailHelper("foo@example.org");
+      const invitationToken = Date.now().toString();
+      await createYoungHelper({
+        ...getNewYoungFixture(),
+        invitationToken,
+        invitationExpires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+      });
+      const res = await request(getAppHelper()).post("/young/signup_verify").send({ invitationToken: "bar" });
+      expect(res.statusCode).toEqual(404);
+    });
+    it("should return 200 when invitation token is wrong", async () => {
+      await deleteYoungByEmailHelper("foo@example.org");
+      const invitationToken = Date.now().toString();
+      await createYoungHelper({
+        ...getNewYoungFixture(),
+        invitationToken,
+        invitationExpires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+      });
+      const res = await request(getAppHelper()).post("/young/signup_verify").send({ invitationToken });
       expect(res.statusCode).toEqual(200);
     });
   });
