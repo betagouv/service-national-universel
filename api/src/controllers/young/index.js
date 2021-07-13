@@ -30,6 +30,8 @@ const {
 } = require("../../utils");
 const { sendEmail } = require("../../sendinblue");
 const { cookieOptions } = require("../../cookie-options");
+const Joi = require("joi");
+const youngValidator = require("../../utils/validator/young");
 
 const YoungAuth = new AuthObject(YoungObject);
 
@@ -73,7 +75,10 @@ router.post("/file/:key", passport.authenticate("young", { session: false }), as
 
 router.post("/signup_verify", async (req, res) => {
   try {
-    const young = await YoungObject.findOne({ invitationToken: req.body.invitationToken, invitationExpires: { $gt: Date.now() } });
+    const { error, value } = Joi.object({ invitationToken: Joi.string().required() }).unknown().validate(req.body, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMETERS });
+
+    const young = await YoungObject.findOne({ invitationToken: value.invitationToken, invitationExpires: { $gt: Date.now() } });
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.INVITATION_TOKEN_EXPIRED_OR_INVALID });
     const token = jwt.sign({ _id: young._id }, config.secret, { expiresIn: "30d" });
     return res.status(200).send({ ok: true, token, data: young });
@@ -85,16 +90,25 @@ router.post("/signup_verify", async (req, res) => {
 
 router.post("/signup_invite", async (req, res) => {
   try {
-    const email = (req.body.email || "").trim().toLowerCase();
+    const { error, value } = Joi.object({
+      invitationToken: Joi.string().required(),
+      email: Joi.string().lowercase().trim().email().required(),
+      password: Joi.string().required(),
+    })
+      .unknown()
+      .validate(req.body, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMETERS });
 
-    const young = await YoungObject.findOne({ email, invitationToken: req.body.invitationToken, invitationExpires: { $gt: Date.now() } });
+    const { email, password, invitationToken } = value;
+
+    const young = await YoungObject.findOne({ email, invitationToken, invitationExpires: { $gt: Date.now() } });
     if (!young) return res.status(404).send({ ok: false, data: null, code: ERRORS.USER_NOT_FOUND });
 
     if (young.registredAt) return res.status(400).send({ ok: false, data: null, code: ERRORS.YOUNG_ALREADY_REGISTERED });
 
-    if (!validatePassword(req.body.password)) return res.status(400).send({ ok: false, prescriber: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
+    if (!validatePassword(password)) return res.status(400).send({ ok: false, prescriber: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
 
-    young.set({ password: req.body.password });
+    young.set({ password });
     young.set({ registredAt: Date.now() });
     young.set({ lastLoginAt: Date.now() });
     young.set({ invitationToken: "" });
@@ -116,7 +130,10 @@ router.post("/signup_invite", async (req, res) => {
 
 router.post("/", async (req, res) => {
   try {
-    const young = await YoungObject.create(req.body);
+    const { error, value } = youngValidator.validateYoung(req.body);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    const young = await YoungObject.create(value);
     return res.status(200).send({ young, ok: true });
   } catch (error) {
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.YOUNG_ALREADY_REGISTERED });
@@ -127,9 +144,17 @@ router.post("/", async (req, res) => {
 
 router.get("/validate_phase3/:young/:token", async (req, res) => {
   try {
-    const data = await YoungObject.findOne({ _id: req.params.young, phase3Token: req.params.token });
+    const { error, value } = Joi.object({
+      young: Joi.string().required(),
+      token: Joi.string().required(),
+    })
+      .unknown()
+      .validate(req.params, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMETERS });
+
+    const data = await YoungObject.findOne({ _id: value.young, phase3Token: value.token });
     if (!data) {
-      capture(`Young not found ${req.params.id}`);
+      capture(`Young not found ${req.params.young}`);
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
     return res.status(200).send({ ok: true, data });
@@ -141,14 +166,25 @@ router.get("/validate_phase3/:young/:token", async (req, res) => {
 
 router.put("/validate_phase3/:young/:token", async (req, res) => {
   try {
-    const data = await YoungObject.findOne({ _id: req.params.young, phase3Token: req.params.token });
+    const { error, value } = Joi.object({
+      young: Joi.string().required(),
+      token: Joi.string().required(),
+      phase3TutorNote: Joi.string().optional(),
+    })
+      .unknown()
+      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMETERS });
+
+    const data = await YoungObject.findOne({ _id: value.young, phase3Token: value.token });
+
     if (!data) {
-      capture(`Young not found ${req.params.id}`);
+      capture(`Young not found ${value.young}`);
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
-    data.set({ statusPhase3: "VALIDATED", phase3TutorNote: req.body.phase3TutorNote });
+
+    data.set({ statusPhase3: "VALIDATED", phase3TutorNote: value.phase3TutorNote });
+
     await data.save();
-    await data.index();
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
@@ -158,7 +194,10 @@ router.put("/validate_phase3/:young/:token", async (req, res) => {
 
 router.get("/department-service", passport.authenticate("young", { session: false }), async (req, res) => {
   try {
-    const data = await DepartmentServiceModel.findOne({ department: req.user.department });
+    const { error, value } = Joi.object({ department: Joi.string().required() }).unknown().validate(req.user, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMETERS });
+
+    const data = await DepartmentServiceModel.findOne({ department: value.department });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
@@ -169,9 +208,12 @@ router.get("/department-service", passport.authenticate("young", { session: fals
 
 router.get("/:id/patches", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const young = await YoungObject.findById(req.params.id);
+    const { error, value } = Joi.object({ id: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    const young = await YoungObject.findById(value.id);
     if (!young) {
-      capture(`young not found ${req.params.id}`);
+      capture(`young not found ${value.id}`);
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
     const data = await young.patches.find({ ref: young.id }).sort("-date");
@@ -184,25 +226,43 @@ router.get("/:id/patches", passport.authenticate("referent", { session: false })
 
 router.put("/validate_mission", passport.authenticate("young", { session: false }), async (req, res) => {
   try {
-    const obj = req.body;
-    obj.phase3Token = crypto.randomBytes(20).toString("hex");
+    const { error, value } = Joi.object({
+      phase3StructureName: Joi.string().optional().allow(null, ""),
+      phase3MissionDomain: Joi.string().optional().allow(null, ""),
+      phase3MissionDescription: Joi.string().optional().allow(null, ""),
+      phase3MissionStartAt: Joi.string().optional().allow(null, ""),
+      phase3MissionEndAt: Joi.string().optional().allow(null, ""),
+      phase3TutorFirstName: Joi.string().optional().allow(null, ""),
+      phase3TutorLastName: Joi.string().optional().allow(null, ""),
+      phase3TutorEmail: Joi.string().optional().allow(null, ""),
+      phase3TutorPhone: Joi.string().optional().allow(null, ""),
+      statusPhase3: Joi.string().optional().allow(null, ""),
+    })
+      .unknown()
+      .validate(req.body, { stripUnknown: true });
+
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMETERS, error: error.message });
+
+    value.phase3Token = crypto.randomBytes(20).toString("hex");
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    // Update young object.
-    young.set(obj);
+    young.set(value);
     await young.save();
 
-    // todo send mail to tutor
-    let htmlContent = fs.readFileSync(path.resolve(__dirname, "../../templates/validatePhase3.html")).toString();
+    // Todo: send mail to tutor
     let youngName = `${young.firstName} ${young.lastName}`;
     let subject = `Confirmez la participation de ${youngName} sur votre mission`;
-    htmlContent = htmlContent.replace(/{{toName}}/g, `${young.phase3TutorFirstName} ${young.phase3TutorLastName}`);
-    htmlContent = htmlContent.replace(/{{youngName}}/g, youngName);
-    htmlContent = htmlContent.replace(/{{structureName}}/g, young.phase3StructureName);
-    htmlContent = htmlContent.replace(/{{startAt}}/g, young.phase3MissionStartAt.toLocaleDateString("fr"));
-    htmlContent = htmlContent.replace(/{{endAt}}/g, young.phase3MissionEndAt.toLocaleDateString("fr"));
-    htmlContent = htmlContent.replace(/{{cta}}/g, `${config.ADMIN_URL}/validate?token=${young.phase3Token}&young_id=${young._id}`);
+    let htmlContent = fs
+      .readFileSync(path.resolve(__dirname, "../../templates/validatePhase3.html"))
+      .toString()
+      .replace(/{{toName}}/g, `${young.phase3TutorFirstName} ${young.phase3TutorLastName}`)
+      .replace(/{{youngName}}/g, youngName)
+      .replace(/{{structureName}}/g, young.phase3StructureName)
+      .replace(/{{startAt}}/g, young.phase3MissionStartAt.toLocaleDateString("fr"))
+      .replace(/{{endAt}}/g, young.phase3MissionEndAt.toLocaleDateString("fr"))
+      .replace(/{{cta}}/g, `${config.ADMIN_URL}/validate?token=${young.phase3Token}&young_id=${young._id}`);
+
     await sendEmail({ name: `${young.phase3TutorFirstName} ${young.phase3TutorLastName}`, email: young.phase3TutorEmail }, subject, htmlContent);
     young.phase3Token = null;
 
@@ -216,9 +276,19 @@ router.put("/validate_mission", passport.authenticate("young", { session: false 
 //@check
 router.put("/:id/meeting-point", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
   try {
-    const young = await YoungObject.findById(req.params.id);
+    const { error, value } = Joi.object({
+      meetingPointId: Joi.string().optional(),
+      deplacementPhase1Autonomous: Joi.string().optional(),
+      id: Joi.string().required(),
+    })
+      .unknown()
+      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMETERS, error: error.message });
+    const { id, meetingPointId, deplacementPhase1Autonomous } = value;
+
+    const young = await YoungObject.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const { __v, meetingPointId, deplacementPhase1Autonomous } = req.body;
+
     let bus = null;
 
     //choosing a meetingPoint
@@ -245,7 +315,10 @@ router.put("/:id/meeting-point", passport.authenticate(["young", "referent"], { 
 
 router.put("/:id/cancel-meeting-point", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const young = await YoungObject.findById(req.params.id);
+    const { error, value } = Joi.object({ id: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    const young = await YoungObject.findById(value.id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const oldMeetingPoint = await MeetingPointObject.findById(young.meetingPointId);
     const oldBus = await BusObject.findById(oldMeetingPoint?.busId);
@@ -262,13 +335,14 @@ router.put("/:id/cancel-meeting-point", passport.authenticate("referent", { sess
 //@check
 router.put("/", passport.authenticate("young", { session: false }), async (req, res) => {
   try {
-    const obj = req.body;
+    const { error, value } = youngValidator.validateYoung(req.body);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMETERS, error: error.message });
 
-    const young = await YoungObject.findByIdAndUpdate(req.user._id, obj, { new: true });
+    const young = await YoungObject.findByIdAndUpdate(req.user._id, value, { new: true });
 
     //Check quartier prioritaires.
-    if (obj.zip && obj.city && obj.address) {
-      const qpv = await getQPV(obj.zip, obj.city, obj.address);
+    if (value.zip && value.city && value.address) {
+      const qpv = await getQPV(value.zip, value.city, value.address);
       if (qpv === true) {
         young.set({ qpv: "true" });
       } else if (qpv === false) {
@@ -308,9 +382,12 @@ router.put("/", passport.authenticate("young", { session: false }), async (req, 
 
 // Get authorization from France Connect.
 router.post("/france-connect/authorization-url", async (req, res) => {
+  const { error, value } = Joi.object({ callback: Joi.string().required() }).unknown().validate(req.body, { stripUnknown: true });
+  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMETERS, error: error.message });
+
   const query = {
     scope: `openid given_name family_name email`,
-    redirect_uri: `${config.APP_URL}/${req.body.callback}`,
+    redirect_uri: `${config.APP_URL}/${value.callback}`,
     response_type: "code",
     client_id: process.env.FRANCE_CONNECT_CLIENT_ID,
     state: "home",
@@ -323,13 +400,18 @@ router.post("/france-connect/authorization-url", async (req, res) => {
 
 // Get user information for authorized user on France Connect.
 router.post("/france-connect/user-info", async (req, res) => {
+  const { error, value } = Joi.object({ code: Joi.string().required(), callback: Joi.string().required() })
+    .unknown()
+    .validate(req.body, { stripUnknown: true });
+  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMETERS, error: error.message });
+
   // Get token…
   const body = {
     grant_type: "authorization_code",
-    redirect_uri: `${config.APP_URL}/${req.body.callback}`,
+    redirect_uri: `${config.APP_URL}/${value.callback}`,
     client_id: process.env.FRANCE_CONNECT_CLIENT_ID,
     client_secret: process.env.FRANCE_CONNECT_CLIENT_SECRET,
-    code: req.body.code,
+    code: value.code,
   };
   const tokenResponse = await fetch(`${process.env.FRANCE_CONNECT_URL}/token`, {
     method: "POST",
@@ -354,11 +436,14 @@ router.post("/france-connect/user-info", async (req, res) => {
 // Delete one user (only admin can delete user)
 router.delete("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const young = await YoungObject.findOne({ _id: req.params.id });
+    const { error, value } = Joi.object({ id: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMETERS, error: error.message });
+
+    const young = await YoungObject.findOne({ _id: value.id });
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     await young.remove();
-    console.log(`Young ${req.params.id} has been deleted`);
+    console.log(`Young ${value.id} has been deleted`);
     res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
