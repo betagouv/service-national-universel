@@ -88,7 +88,7 @@ router.post("/signup_invite", async (req, res) => {
     const email = (req.body.email || "").trim().toLowerCase();
 
     const young = await YoungObject.findOne({ email });
-    if (!young) return res.status(200).send({ ok: false, data: null, code: ERRORS.USER_NOT_FOUND });
+    if (!young) return res.status(404).send({ ok: false, data: null, code: ERRORS.USER_NOT_FOUND });
 
     if (young.registredAt) return res.status(200).send({ ok: false, data: null, code: ERRORS.YOUNG_ALREADY_REGISTERED });
 
