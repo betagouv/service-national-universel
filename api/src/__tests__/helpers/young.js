@@ -13,6 +13,11 @@ async function deleteYoungByIdHelper(youngId) {
   await young.remove();
 }
 
+async function deleteYoungByEmailHelper(email) {
+  const young = await YoungObject.findOne({ email });
+  await young.remove();
+}
+
 async function createYoungHelper(young) {
   return await YoungObject.create(young);
 }
@@ -43,5 +48,6 @@ module.exports = {
   deleteYoungByIdHelper,
   createYoungHelper,
   expectYoungToEqual,
+  deleteYoungByEmailHelper,
   notExistingYoungId,
 };

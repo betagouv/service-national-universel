@@ -3,7 +3,7 @@ const fetch = require("node-fetch");
 const request = require("supertest");
 const getAppHelper = require("./helpers/app");
 const getNewYoungFixture = require("./fixtures/young");
-const { getYoungsHelper, createYoungHelper, notExistingYoungId } = require("./helpers/young");
+const { getYoungsHelper, createYoungHelper, notExistingYoungId, deleteYoungByEmailHelper } = require("./helpers/young");
 const { dbConnect, dbClose } = require("./helpers/db");
 const getNewDepartmentServiceFixture = require("./fixtures/departmentService");
 const { createDepartmentServiceHelper, deleteAllDepartmentServicesHelper } = require("./helpers/departmentService");
@@ -291,6 +291,67 @@ describe("Young", () => {
       const passport = require("passport");
       await request(getAppHelper()).put("/young").send();
       expect(passport.lastTypeCalledOnAuthenticate).toEqual("young");
+    });
+  });
+
+  describe("POST /young/signup_invite", () => {
+    it("should return 404 when young not found", async () => {
+      const res = await request(getAppHelper()).post("/young/signup_invite").send({});
+      expect(res.statusCode).toEqual(404);
+    });
+    it("should return 404 when invitation token is not provided", async () => {
+      await deleteYoungByEmailHelper("foo@example.org");
+      const young = await createYoungHelper({ ...getNewYoungFixture(), email: "foo@example.org" });
+      const res = await request(getAppHelper()).post("/young/signup_invite").send({
+        email: young.email,
+        password: "%%minMAJ123",
+      });
+      expect(res.statusCode).toEqual(404);
+    });
+    it("should return 404 when invitation is expired", async () => {
+      await deleteYoungByEmailHelper("foo@example.org");
+      const young = await createYoungHelper({
+        ...getNewYoungFixture(),
+        email: "foo@example.org",
+        invitationToken: "foo",
+        invitationExpires: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7),
+      });
+      const res = await request(getAppHelper()).post("/young/signup_invite").send({
+        email: young.email,
+        invitationToken: "foo",
+        password: "aabb",
+      });
+      expect(res.statusCode).toEqual(404);
+    });
+    it("should return 400 when password is not valid", async () => {
+      await deleteYoungByEmailHelper("foo@example.org");
+      const young = await createYoungHelper({
+        ...getNewYoungFixture(),
+        email: "foo@example.org",
+        invitationToken: "foo",
+        invitationExpires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+      });
+      const res = await request(getAppHelper()).post("/young/signup_invite").send({
+        email: young.email,
+        invitationToken: "foo",
+        password: "aabb",
+      });
+      expect(res.statusCode).toEqual(400);
+    });
+    it("should return 200 when young found", async () => {
+      await deleteYoungByEmailHelper("foo@example.org");
+      const young = await createYoungHelper({
+        ...getNewYoungFixture(),
+        email: "foo@example.org",
+        invitationToken: "foo",
+        invitationExpires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+      });
+      const res = await request(getAppHelper()).post("/young/signup_invite").send({
+        email: young.email,
+        password: "%%minMAJ123",
+        invitationToken: "foo",
+      });
+      expect(res.statusCode).toEqual(200);
     });
   });
 });
