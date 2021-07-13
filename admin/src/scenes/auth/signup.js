@@ -45,11 +45,11 @@ export default () => {
               <Formik
                 validateOnChange={false}
                 validateOnBlur={false}
-                initialValues={{ firstName: "", lastName: "", email: "", password: "", role: "responsible" }}
+                initialValues={{ firstName: "", lastName: "", email: "", password: "" }}
                 onSubmit={async (values, actions) => {
                   try {
-                    const { firstName, lastName, email, password, role } = values;
-                    const { user, token, code, ok } = await api.post(`/referent/signup`, { firstName, lastName, email, password, role });
+                    const { firstName, lastName, email, password } = values;
+                    const { user, token, code, ok } = await api.post(`/referent/signup`, { firstName, lastName, email, password });
                     actions.setSubmitting(false);
                     if (!ok) {
                       if (code === "PASSWORD_NOT_VALIDATED")
