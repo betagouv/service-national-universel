@@ -128,7 +128,10 @@ const Home = () => {
 
 const RestrictedRoute = ({ component: Component, isLoggedIn, ...rest }) => {
   const user = useSelector((state) => state.Auth.user);
-  if (!user) return <Redirect to={{ pathname: "/auth" }} />;
+  if (!user) {
+    const redirect = encodeURIComponent(window.location.href.replace(window.location.origin, "").substring(1));
+    return <Redirect to={{ search: redirect && redirect !== "logout" ? `?redirect=${redirect}` : "", pathname: "/auth" }} />;
+  }
   return <Route {...rest} render={(props) => <Component {...props} />} />;
 };
 
