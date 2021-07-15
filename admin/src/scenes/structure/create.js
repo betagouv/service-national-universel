@@ -47,6 +47,7 @@ export default (props) => {
         facebook: "",
         twitter: "",
         instagram: "",
+        legalStatus: "PUBLIC",
       }}
       onSubmit={async (values) => {
         try {
