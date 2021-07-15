@@ -47,7 +47,7 @@ export default (props) => {
         facebook: "",
         twitter: "",
         instagram: "",
-        legalStatus: "PUBLIC",
+        legalStatus: "",
       }}
       onSubmit={async (values) => {
         try {
@@ -100,6 +100,9 @@ export default (props) => {
                       <span>*</span>STATUT JURIDIQUE
                     </label>
                     <Field validate={(v) => !v && requiredMessage} component="select" name="legalStatus" value={values.legalStatus} onChange={handleChange}>
+                      <option key="" value="">
+                        {""}
+                      </option>
                       <option key="PUBLIC" value="PUBLIC">
                         {translate("PUBLIC")}
                       </option>
