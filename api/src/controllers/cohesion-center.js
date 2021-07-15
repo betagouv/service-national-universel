@@ -154,6 +154,8 @@ router.get("/:id/head", passport.authenticate("referent", { session: false }), a
     const center = await CohesionCenterModel.findById(req.params.id);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const data = await ReferentModel.findOne({ role: "head_center", cohesionCenterId: center._id });
+    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
@@ -185,8 +187,15 @@ router.get("/young/:youngId", passport.authenticate(["referent", "young"], { ses
 
 router.put("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    if (req.user.role !== "admin") return res.status(404).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    const center = await CohesionCenterModel.findByIdAndUpdate(req.body._id, req.body, { new: true });
+    if (req.user.role !== "admin") return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const center = await CohesionCenterModel.findById(req.body._id);
+    if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    let { __v, ...newCenter } = req.body;
+    center.set(newCenter);
+    await center.save();
+
     const data = await updatePlacesCenter(center);
     await updateCenterDependencies(center);
     res.status(200).send({ ok: true, data });
