@@ -27,6 +27,7 @@ import Loader from "./components/Loader";
 import Header from "./components/header";
 import Drawer from "./components/drawer";
 import Footer from "./components/footer";
+import MilitaryPreparation from "./scenes/militaryPreparation";
 
 import api from "./services/api";
 import { SENTRY_URL, environment } from "./config";
@@ -109,6 +110,7 @@ const Espace = () => {
             <Route path="/candidature" component={Applications} />
             <Route path="/cohesion" component={Cohesion} />
             <Route path="/diagoriente" component={Diagoriente} />
+            <Route path="/ma-preparation-militaire" component={MilitaryPreparation} />
             <Route path="/" component={Home} />
           </Switch>
         </Content>
