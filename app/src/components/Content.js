@@ -192,6 +192,13 @@ export const Separator = styled.hr`
   border-style: none;
   background-color: #e5e7eb;
 `;
+export const SeparatorXS = styled.hr`
+  margin: 2.5rem 0;
+  height: 1px;
+  border-style: none;
+  background-color: #e5e7eb;
+  max-width: 20rem;
+`;
 
 export const WhiteButton = styled.button`
   color: #374151;
