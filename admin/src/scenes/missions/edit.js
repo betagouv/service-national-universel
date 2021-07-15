@@ -403,24 +403,25 @@ export default (props) => {
                   <Col md={12}>
                     <Wrapper>
                       <BoxTitle>Structure associée</BoxTitle>
-                      <ReactSelect
-                        styles={{
-                          menu: () => ({
-                            borderStyle: "solid",
-                            borderWidth: 1,
-                            borderRadius: 5,
-                            borderColor: "#dedede",
-                          }),
-                        }}
-                        defaultValue={{ label: structure.name, value: structure.name, _id: structure._id }}
-                        options={structures}
-                        placeholder={"Modifier la structure rattachée"}
-                        noOptionsMessage={() => "Aucune structure ne correspond à cette recherche."}
-                        onChange={(e) => {
-                          setStructure(e.structure);
-                        }}
-                      />
-                      <Header style={{ justifyContent: "flex-end" }}>
+                      <div style={{ display: "flex" }}>
+                        <ReactSelect
+                          styles={{
+                            container: () => ({ flex: 1 }),
+                            menu: () => ({
+                              borderStyle: "solid",
+                              borderWidth: 1,
+                              borderRadius: 5,
+                              borderColor: "#dedede",
+                            }),
+                          }}
+                          defaultValue={{ label: structure.name, value: structure.name, _id: structure._id }}
+                          options={structures}
+                          placeholder={"Modifier la structure rattachée"}
+                          noOptionsMessage={() => "Aucune structure ne correspond à cette recherche."}
+                          onChange={(e) => {
+                            setStructure(e.structure);
+                          }}
+                        />
                         <LoadingButton
                           loading={loadings[2]}
                           disabled={loadings[0] || loadings[1]}
@@ -430,7 +431,7 @@ export default (props) => {
                         >
                           Modifier la structure
                         </LoadingButton>
-                      </Header>
+                      </div>
                     </Wrapper>
                   </Col>
                 </Row>
