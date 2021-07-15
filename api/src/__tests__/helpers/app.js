@@ -17,6 +17,7 @@ function getAppHelper() {
   app.use("/cohesion-center", require("../../controllers/cohesion-center"));
   app.use("/department-service", require("../../controllers/department-service"));
   app.use("/diagoriente", require("../../controllers/diagoriente"));
+  app.use("/email", require("../../controllers/email"));
 
   return app;
 }
