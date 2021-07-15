@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Container } from "reactstrap";
 import styled from "styled-components";
 import { Col, Row } from "reactstrap";
+import { toastr } from "react-redux-toastr";
 
 import api from "../../services/api";
 import { translate, formatStringDate } from "../../utils";
@@ -10,7 +11,7 @@ import SocialIcons from "../../components/SocialIcons";
 import ApplyModal from "./components/ApplyModal";
 import ApplyDoneModal from "./components/ApplyDoneModal";
 import Loader from "../../components/Loader";
-import { toastr } from "react-redux-toastr";
+import Badge from "../../components/Badge";
 
 export default (props) => {
   const [mission, setMission] = useState();
@@ -55,8 +56,9 @@ export default (props) => {
           <h1>{mission.name}</h1>
           <Tags>
             {getTags().map((e, i) => (
-              <div key={i}>{e}</div>
+              <Badge key={i} text={e} textColor="#6b7280" backgroundColor="#ffffff" />
             ))}
+            {mission?.isMilitaryPreparation === "true" ? <Badge text="Préparation Militaire" color="#03224C" /> : null}
           </Tags>
         </div>
         <div>
@@ -254,17 +256,6 @@ const Tags = styled.div`
   display: flex;
   align-items: center;
   margin-top: 0.8rem;
-  div {
-    text-transform: uppercase;
-    background-color: white;
-    color: #6b7280;
-    border: 1px solid #e5e7eb;
-    border-radius: 30px;
-    padding: 5px 15px;
-    margin-right: 15px;
-    font-size: 12px;
-    font-weight: 500;
-  }
 `;
 
 const Wrapper = styled.div`

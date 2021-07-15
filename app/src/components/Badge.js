@@ -1,9 +1,9 @@
 import React from "react";
 import styled from "styled-components";
 
-export default ({ text, tooltipText, ...rest }) => {
+export default ({ text, textColor, backgroundColor, tooltipText, ...rest }) => {
   return (
-    <Badge {...rest}>
+    <Badge {...rest} textColor={textColor} backgroundColor={backgroundColor}>
       {text}
       <div className="tooltiptext">{tooltipText}</div>
     </Badge>
@@ -23,10 +23,10 @@ const Badge = styled.div`
   border: 1px solid #cecece;
   white-space: nowrap;
   height: fit-content;
-  ${({ color }) => `
-    color: ${color};
-    background-color: ${color}33;
-    border: 1px solid ${color};
+  ${({ color, textColor, backgroundColor }) => `
+    color: ${textColor || color};
+    background-color: ${backgroundColor || `${color}33`};
+    border: 1px solid ${textColor || color};
   `};
   /* Tooltip text */
   .tooltiptext {
