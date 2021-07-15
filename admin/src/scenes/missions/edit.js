@@ -97,6 +97,7 @@ export default (props) => {
           period: [],
           domains: [],
           subPeriod: [],
+          isMilitaryPreparation: "",
         }
       }
       onSubmit={async (values) => {
@@ -250,6 +251,19 @@ export default (props) => {
                         onChange={handleChange}
                         placeholder="Spécifiez les contraintes liées à la mission"
                       />
+                    </FormGroup>
+                    <FormGroup>
+                      <div>
+                        <label>PRÉPARATION MILITAIRE</label>
+                        <Field component="select" name="isMilitaryPreparation" value={values.isMilitaryPreparation} onChange={handleChange}>
+                          <option key="false" value="false">
+                            Non
+                          </option>
+                          <option key="true" value="true">
+                            Oui
+                          </option>
+                        </Field>
+                      </div>
                     </FormGroup>
                   </Wrapper>
                 </Col>
