@@ -23,7 +23,11 @@ export default (props) => {
   const [structures, setStructures] = useState();
   const [referents, setReferents] = useState([]);
   const [showTutor, setShowTutor] = useState();
-  const [loadings, setLoadings] = useState([false, false, false]);
+  const [loadings, setLoadings] = useState({
+    saveButton: false,
+    submitButton: false,
+    changeStructureButton: false,
+  });
   const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
   const isNew = !props?.match?.params?.id;
@@ -67,17 +71,29 @@ export default (props) => {
 
   async function modifyStructure() {
     try {
-      setLoadings([false, false, true]);
+      setLoadings({
+        saveButton: false,
+        submitButton: false,
+        changeStructureButton: true,
+      });
       const { ok, code, data: y } = await api.put(`/mission/${defaultValue._id}/structure/${structure._id}`);
-      setLoadings([false, false, false]);
+      setLoadings({
+        saveButton: false,
+        submitButton: false,
+        changeStructureButton: false,
+      });
       if (!ok)
         return code === "OPERATION_NOT_ALLOWED"
-          ? toastr.error("Le tuteur de cette mission est affiliée à d'autres missions de la structure.", translate(code))
-          : toastr.error("Une erreur s'est produite lors de la modification de la structure", translate(code));
+          ? toastr.error(translate(code), "Le tuteur de cette mission est affilié à d'autres missions de la structure.")
+          : toastr.error(translate(code), "Une erreur s'est produite lors de la modification de la structure.");
       history.push(`/mission/${defaultValue._id}`);
       toastr.success("Structure modifiée");
     } catch (e) {
-      setLoadings([false, false, false]);
+      setLoadings({
+        saveButton: false,
+        submitButton: false,
+        changeStructureButton: false,
+      });
       return toastr.error("Une erreur s'est produite lors de la modification de la structure", e?.error?.message);
     }
   }
@@ -125,7 +141,17 @@ export default (props) => {
         }
       }
       onSubmit={async (values) => {
-        values.status === "DRAFT" ? setLoadings([true, false]) : setLoadings([false, true]);
+        values.status === "DRAFT"
+          ? setLoadings({
+              saveButton: true,
+              submitButton: false,
+              changeStructureButton: false,
+            })
+          : setLoadings({
+              saveButton: false,
+              submitButton: true,
+              changeStructureButton: false,
+            });
         //if new mission, init placesLeft to placesTotal
         if (isNew) values.placesLeft = values.placesTotal;
         //if edit mission, add modified delta to placesLeft
@@ -143,12 +169,20 @@ export default (props) => {
             values.location = await putLocation(values.city, values.zip);
           }
           const { ok, code, data: mission } = await api[values._id ? "put" : "post"]("/mission", values);
-          setLoadings([false, false]);
+          setLoadings({
+            saveButton: false,
+            submitButton: false,
+            changeStructureButton: false,
+          });
           if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", translate(code));
           history.push(`/mission/${mission._id}`);
           toastr.success("Mission enregistrée");
         } catch (e) {
-          setLoading([false, false]);
+          setLoading({
+            saveButton: false,
+            submitButton: false,
+            changeStructureButton: false,
+          });
           return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", e?.error?.message);
         }
       }}
@@ -161,8 +195,8 @@ export default (props) => {
               <LoadingButton
                 color={"#fff"}
                 textColor={"#767697"}
-                loading={loadings[0]}
-                disabled={loadings[1] || loadings[2]}
+                loading={loadings.saveButton}
+                disabled={loadings.submitButton || loadings.changeStructureButton}
                 onClick={() => {
                   handleChange({ target: { value: "DRAFT", name: "status" } });
                   handleSubmit();
@@ -173,8 +207,8 @@ export default (props) => {
             ) : null}
 
             <LoadingButton
-              loading={loadings[1]}
-              disabled={loadings[0] || loadings[2]}
+              loading={loadings.submitButton}
+              disabled={loadings.saveButton || loadings.changeStructureButton}
               onClick={() => {
                 handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
                 handleSubmit();
@@ -400,8 +434,8 @@ export default (props) => {
                 </Col>
               </Row>
             </Box>
-            {user.role === "admin" ? (
-              defaultValue && structures?.length ? (
+            {user.role === "admin" && defaultValue ? (
+              structures?.length ? (
                 <Box>
                   <Row>
                     <Col md={12}>
@@ -428,8 +462,8 @@ export default (props) => {
                           />
                           <div style={{ alignSelf: "flex-start" }}>
                             <LoadingButton
-                              loading={loadings[2]}
-                              disabled={loadings[0] || loadings[1]}
+                              loading={loadings.changeStructureButton}
+                              disabled={loadings.saveButton || loadings.submitButton}
                               onClick={() => {
                                 modifyStructure();
                               }}
@@ -453,8 +487,8 @@ export default (props) => {
                 <LoadingButton
                   color={"#fff"}
                   textColor={"#767697"}
-                  loading={loadings[0]}
-                  disabled={loadings[1] || loadings[2]}
+                  loading={loadings.saveButton}
+                  disabled={loadings.submitButton || loadings.changeStructureButton}
                   onClick={() => {
                     handleChange({ target: { value: "DRAFT", name: "status" } });
                     handleSubmit();
@@ -465,8 +499,8 @@ export default (props) => {
               ) : null}
 
               <LoadingButton
-                loading={loadings[1]}
-                disabled={loadings[0] || loadings[2]}
+                loading={loadings.submitButton}
+                disabled={loadings.saveButton || loadings.changeStructureButton}
                 onClick={() => {
                   handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
                   handleSubmit();
