@@ -43,10 +43,13 @@ function expectMissionToEqual(mission, expectedMission) {
   expect(missionParsed.location.lon).toEqual(expectedMissionParsed.location.lon);
 }
 
+const notExisitingMissionId = "123a49ba503040e4d2153944";
+
 module.exports = {
   getMissionsHelper,
   getMissionByIdHelper,
   deleteMissionByIdHelper,
   createMissionHelper,
   expectMissionToEqual,
+  notExisitingMissionId,
 };

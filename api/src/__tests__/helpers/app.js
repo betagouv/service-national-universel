@@ -12,6 +12,7 @@ function getAppHelper() {
   app.use("/young", require("../../controllers/young"));
   app.use("/mission", require("../../controllers/mission"));
   app.use("/program", require("../../controllers/program"));
+  app.use("/application", require("../../controllers/application"));
   app.use("/department-service", require("../../controllers/department-service"));
   return app;
 }
