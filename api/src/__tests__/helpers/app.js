@@ -13,6 +13,7 @@ function getAppHelper() {
   app.use("/mission", require("../../controllers/mission"));
   app.use("/program", require("../../controllers/program"));
   app.use("/application", require("../../controllers/application"));
+  app.use("/bus", require("../../controllers/bus"));
   app.use("/department-service", require("../../controllers/department-service"));
   return app;
 }
