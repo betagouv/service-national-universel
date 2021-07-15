@@ -36,6 +36,11 @@ export default ({ young, handleClick }) => {
             </NavLink>
           </li>
           <li>
+            <NavLink to="/ma-preparation-militaire" onClick={(event) => handleClick(event, DRAWER_TABS.PHASE2, "preparation-militaire")}>
+              Ma préparation militaire
+            </NavLink>
+          </li>
+          <li>
             <NavLink to="/candidature" onClick={(event) => handleClick(event, DRAWER_TABS.PHASE2, "candidature")}>
               Suivre mes candidatures
             </NavLink>
