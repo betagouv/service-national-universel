@@ -22,11 +22,12 @@ export default () => {
   const [invitation, setInvitation] = useState("");
   const [newuser, setNewUser] = useState(null);
 
+  const urlParams = new URLSearchParams(window.location.search);
+  const invitationToken = urlParams.get("token");
+
   useEffect(() => {
     (async () => {
       try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const invitationToken = urlParams.get("token");
         if (!invitationToken) return setInvitation("INVITATION_TOKEN_EXPIRED_OR_INVALID");
         const { data, code, token } = await api.post(`/referent/signup_verify`, { invitationToken });
         if (token) api.setToken(token);
@@ -62,29 +63,24 @@ export default () => {
           <LoginBox>
             <Title>{title}</Title>
             <Formik
-              initialValues={{ firstName: newuser.firstName, lastName: newuser.lastName, email: newuser.email, password: "", role: newuser.role }}
+              initialValues={{ firstName: newuser.firstName, lastName: newuser.lastName, email: newuser.email, password: "" }}
               onSubmit={async (values, actions) => {
                 try {
-                  const { data: user, token, code, ok } = await api.post(`/referent/signup_invite`, values);
+                  const { data: user, token, code, ok } = await api.post(`/referent/signup_invite`, { ...values, invitationToken });
                   actions.setSubmitting(false);
-                  if (!ok) {
-                    if (code === "PASSWORD_NOT_VALIDATED")
-                      return toastr.error(
-                        "Mot de passe incorrect",
-                        "Votre mot de passe doit contenir au moins 10 caractères, dont une majuscule, une minuscule, un chiffre et un symbole",
-                        { timeOut: 10000 }
-                      );
-                    if (code === "USER_ALREADY_REGISTERED") return toastr.error("Votre compte est déja activé. Veuillez vous connecter", { timeOut: 10000 });
-                    return toastr.error("Problème", translate(code));
-                  }
-                  if (token) api.setToken(token);
-                  if (user) {
-                    dispatch(setUser(user));
-                  }
+                  if (ok && token) api.setToken(token);
+                  if (ok && user) dispatch(setUser(user));
                 } catch (e) {
-                  if (e && e.code === "USER_ALREADY_REGISTERED") return toastr.error("Le compte existe déja. Veuillez vous connecter");
                   actions.setSubmitting(false);
                   console.log("e", e);
+                  if (e.code === "PASSWORD_NOT_VALIDATED")
+                    return toastr.error(
+                      "Mot de passe incorrect",
+                      "Votre mot de passe doit contenir au moins 10 caractères, dont une majuscule, une minuscule, un chiffre et un symbole",
+                      { timeOut: 10000 }
+                    );
+                  if (e.code === "USER_ALREADY_REGISTERED") return toastr.error("Votre compte est déja activé. Veuillez vous connecter", { timeOut: 10000 });
+                  return toastr.error("Problème", translate(e.code));
                 }
               }}
             >

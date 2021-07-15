@@ -268,13 +268,14 @@ router.post("/signup_invite", async (req, res) => {
       password: Joi.string().required(),
       firstName: Joi.string().allow(null, ""),
       lastName: Joi.string().allow(null, ""),
+      invitationToken: Joi.string().required(),
     })
       .unknown()
       .validate(req.body, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    const { email, password, firstName, lastName } = value;
+    const { email, password, firstName, lastName, invitationToken } = value;
 
-    const referent = await ReferentObject.findOne({ email });
+    const referent = await ReferentObject.findOne({ email, invitationToken, invitationExpires: { $gt: Date.now() } });
     if (!referent) return res.status(404).send({ ok: false, data: null, code: ERRORS.USER_NOT_FOUND });
     if (referent.registredAt) return res.status(400).send({ ok: false, data: null, code: ERRORS.USER_ALREADY_REGISTERED });
     if (!validatePassword(password)) return res.status(400).send({ ok: false, prescriber: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
