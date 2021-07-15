@@ -44,9 +44,6 @@ router.post("/", passport.authenticate("referent", { session: false }), async (r
 });
 
 router.post("/:centerId/assign-young/:youngId", passport.authenticate("referent", { session: false }), async (req, res) => {
-  const error = false;
-  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
-
   try {
     const young = await YoungModel.findById(req.params.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
