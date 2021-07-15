@@ -90,7 +90,7 @@ export default (props) => {
     initReferents();
   }, [structure]);
 
-  if ((!defaultValue && !isNew) || !structure || !structures) return <Loader />;
+  if ((!defaultValue && !isNew) || !structure) return <Loader />;
   return (
     <Formik
       validateOnChange={false}
