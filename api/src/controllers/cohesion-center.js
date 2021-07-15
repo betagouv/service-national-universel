@@ -207,7 +207,9 @@ router.put("/", passport.authenticate("referent", { session: false }), async (re
 
 router.delete("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const center = await CohesionCenterModel.findOne({ _id: req.params.id });
+    const center = await CohesionCenterModel.findById(req.params.id);
+    if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
     if (req.user.role !== "admin") return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     await center.remove();
     await deleteCenterDependencies({ _id: req.params.id });
