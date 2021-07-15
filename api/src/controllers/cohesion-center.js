@@ -3,7 +3,6 @@ const router = express.Router();
 const passport = require("passport");
 const { capture } = require("../sentry");
 const config = require("../config");
-const Joi = require("joi");
 
 const CohesionCenterModel = require("../models/cohesionCenter");
 const ReferentModel = require("../models/referent");
@@ -35,17 +34,6 @@ router.post("/refresh/:id", passport.authenticate("referent", { session: false }
 });
 
 router.post("/", passport.authenticate("referent", { session: false }), async (req, res) => {
-  // Validate params.
-  // const { error, value: inscriptionsGoals } = Joi.array()
-  //   .items({
-  //     department: Joi.string().required(),
-  //     region: Joi.string(),
-  //     max: Joi.number().allow(null),
-  //   })
-  //   .validate(req.body, { stripUnknown: true });
-  const error = false;
-  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
-
   try {
     const data = await CohesionCenterModel.create(req.body);
     return res.status(200).send({ data, ok: true });
