@@ -65,8 +65,38 @@ async function updateTutorNameInMissionsAndApplications(tutor) {
 
 router.post("/signin", signinLimiter, (req, res) => ReferentAuth.signin(req, res));
 router.post("/logout", (req, res) => ReferentAuth.logout(req, res));
-router.post("/signup", (req, res) => ReferentAuth.signup(req, res));
+router.post("/signup", async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      email: Joi.string().lowercase().trim().email().required(),
+      firstName: Joi.string().lowercase().trim().required(),
+      lastName: Joi.string().uppercase().trim().required(),
+      password: Joi.string().min(8).required(),
+    })
+      .unknown()
+      .validate(req.body);
 
+    if (error) {
+      if (error.details.find((e) => e.path === "email")) return res.status(400).send({ ok: false, user: null, code: EMAIL_INVALID });
+      if (error.details.find((e) => e.path === "password")) return res.status(400).send({ ok: false, user: null, code: PASSWORD_NOT_VALIDATED });
+      return res.status(400).send({ ok: false, code: error.toString() });
+    }
+
+    const { password, email, lastName } = value;
+    const firstName = value.firstName.charAt(0).toUpperCase() + value.firstName.toLowerCase().slice(1);
+    const role = ROLES.RESPONSIBLE; // responsible by default
+
+    const user = await ReferentObject.create({ password, email, firstName, lastName, role });
+    const token = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });
+    res.cookie("jwt", token, cookieOptions());
+
+    return res.status(200).send({ user, token, ok: true });
+  } catch (error) {
+    if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
 router.get("/signin_token", passport.authenticate("referent", { session: false }), (req, res) => ReferentAuth.signinToken(req, res));
 router.post("/forgot_password", async (req, res) => ReferentAuth.forgotPassword(req, res, `${config.ADMIN_URL}/auth/reset`));
 router.post("/forgot_password_reset", async (req, res) => ReferentAuth.forgotPasswordReset(req, res));
@@ -107,6 +137,7 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
       role: Joi.string()
         .valid(...ROLES_LIST)
         .required(),
+      subRole: Joi.string().allow(null, ""),
       region: Joi.string().allow(null, ""),
       department: Joi.string().allow(null, ""),
       structureId: Joi.string().allow(null, ""),
@@ -119,12 +150,13 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.details.map((e) => e.message) });
     if (!canInviteUser(req.user.role, value.role)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const { template: reqTemplate, email, firstName, lastName, role, region, department, structureId, structureName, centerName } = value;
+    const { template: reqTemplate, email, firstName, lastName, role, subRole, region, department, structureId, structureName, centerName } = value;
     const referentProperties = {};
     if (email) referentProperties.email = email.trim().toLowerCase();
     if (firstName) referentProperties.firstName = firstName.charAt(0).toUpperCase() + (firstName || "").toLowerCase().slice(1);
     if (lastName) referentProperties.lastName = lastName.toUpperCase();
     if (role) referentProperties.role = role;
+    if (subRole) referentProperties.subRole = subRole;
     if (region) referentProperties.region = region;
     if (department) referentProperties.department = department;
     if (structureId) referentProperties.structureId = structureId;
@@ -236,13 +268,14 @@ router.post("/signup_invite", async (req, res) => {
       password: Joi.string().required(),
       firstName: Joi.string().allow(null, ""),
       lastName: Joi.string().allow(null, ""),
+      invitationToken: Joi.string().required(),
     })
       .unknown()
       .validate(req.body, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    const { email, password, firstName, lastName } = value;
+    const { email, password, firstName, lastName, invitationToken } = value;
 
-    const referent = await ReferentObject.findOne({ email });
+    const referent = await ReferentObject.findOne({ email, invitationToken, invitationExpires: { $gt: Date.now() } });
     if (!referent) return res.status(404).send({ ok: false, data: null, code: ERRORS.USER_NOT_FOUND });
     if (referent.registredAt) return res.status(400).send({ ok: false, data: null, code: ERRORS.USER_ALREADY_REGISTERED });
     if (!validatePassword(password)) return res.status(400).send({ ok: false, prescriber: null, code: ERRORS.PASSWORD_NOT_VALIDATED });

@@ -40,7 +40,6 @@ class Auth {
 
     try {
       const user = await this.model.findOne({ email });
-      
 
       if (!user) return res.status(401).send({ ok: false, code: USER_NOT_EXISTS });
       if (user.status === "DELETED") return res.status(401).send({ ok: false, code: OPERATION_UNAUTHORIZED });

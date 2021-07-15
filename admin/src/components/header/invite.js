@@ -38,7 +38,6 @@ export default ({ setOpen, open, label = "Inviter un référent", role = "" }) =
                 try {
                   const obj = { ...values };
                   if (obj.department && !obj.region) obj.region = department2region[obj.department];
-
                   await api.post(`/referent/signup_invite/${obj.role}`, obj);
                   toastr.success("Invitation envoyée");
                   setOpen();
@@ -191,6 +190,7 @@ const ChooseRole = ({ value, onChange }) => {
 const ChooseSubRole = ({ value, onChange, options }) => {
   return (
     <Input type="select" name="subRole" value={value} onChange={onChange}>
+      <option value=""></option>
       {options.map((o, i) => (
         <option key={i} value={o.value} label={o.label}>
           {o.label}

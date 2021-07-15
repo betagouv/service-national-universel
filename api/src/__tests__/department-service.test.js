@@ -8,6 +8,7 @@ const {
   deleteDepartmentServiceByIdHelper,
   createDepartmentServiceHelper,
   expectDepartmentServiceToEqual,
+  deleteAllDepartmentServicesHelper,
 } = require("./helpers/departmentService");
 const { dbConnect, dbClose } = require("./helpers/db");
 const getAppHelper = require("./helpers/app");
@@ -43,6 +44,7 @@ describe("Department service", () => {
   });
 
   it("GET /department-service", async () => {
+    await deleteAllDepartmentServicesHelper();
     const departmentServiceFixture = getNewDepartmentServiceFixture();
     const departmentService = await createDepartmentServiceHelper(departmentServiceFixture);
     const res = await request(getAppHelper()).get("/department-service").send();

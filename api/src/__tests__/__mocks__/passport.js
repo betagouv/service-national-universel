@@ -8,6 +8,7 @@ passport.user._id = mongoose.Types.ObjectId();
 passport.authenticate = (type) => {
   return (req, res, next) => {
     req.user = passport.user;
+    passport.lastTypeCalledOnAuthenticate = type;
     next();
   };
 };

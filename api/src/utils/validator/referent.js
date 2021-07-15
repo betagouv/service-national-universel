@@ -1,60 +1,17 @@
 const Joi = require("joi");
 const { ROLES_LIST, SUB_ROLES_LIST } = require("snu-lib/roles");
+const { youngKeys, validateMission: validateMissionDefault, validateProgram: validateProgramDefault, validateFirstName } = require("./default");
 
 function validateMission(mission) {
-  return Joi.object()
-    .keys({
-      name: Joi.string().allow(null, ""),
-      domains: Joi.array().items(Joi.string().allow(null, "")),
-      startAt: Joi.string().allow(null, ""),
-      endAt: Joi.string().allow(null, ""),
-      format: Joi.string().allow(null, ""),
-      frequence: Joi.string().allow(null, ""),
-      period: Joi.array().items(Joi.string().allow(null, "")),
-      subPeriod: Joi.array().items(Joi.string().allow(null, "")),
-      placesTotal: Joi.number().allow(null),
-      placesLeft: Joi.number().allow(null),
-      actions: Joi.string().allow(null, ""),
-      description: Joi.string().allow(null, ""),
-      justifications: Joi.string().allow(null, ""),
-      contraintes: Joi.string().allow(null, ""),
-      structureId: Joi.string().allow(null, ""),
-      structureName: Joi.string().allow(null, ""),
-      status: Joi.string().allow(null, ""),
-      tutorId: Joi.string().allow(null, ""),
-      tutorName: Joi.string().allow(null, ""),
-      address: Joi.string().allow(null, ""),
-      zip: Joi.string().allow(null, ""),
-      city: Joi.string().allow(null, ""),
-      department: Joi.string().allow(null, ""),
-      region: Joi.string().allow(null, ""),
-      country: Joi.string().allow(null, ""),
-      location: Joi.object().keys({
-        lat: Joi.number().allow(null),
-        lon: Joi.number().allow(null),
-      }),
-      remote: Joi.string().allow(null, ""),
-    })
-    .validate(mission, { stripUnknown: true });
+  return validateMissionDefault(mission);
 }
 
 function validateProgram(program) {
-  return Joi.object()
-    .keys({
-      name: Joi.string().allow(null, ""),
-      description: Joi.string().allow(null, ""),
-      descriptionFor: Joi.string().allow(null, ""),
-      descriptionMoney: Joi.string().allow(null, ""),
-      descriptionDuration: Joi.string().allow(null, ""),
-      url: Joi.string().allow(null, ""),
-      imageFile: Joi.string().allow(null, ""),
-      imageString: Joi.string().allow(null, ""),
-      type: Joi.string().allow(null, ""),
-      department: Joi.string().allow(null, ""),
-      region: Joi.string().allow(null, ""),
-      visibility: Joi.string().allow(null, ""),
-    })
-    .validate(program, { stripUnknown: true });
+  return validateProgramDefault(program);
+}
+
+function validateYoung(young) {
+  return Joi.object().keys(youngKeys()).validate(young, { stripUnknown: true });
 }
 
 function validateDepartmentService(departmentService) {
@@ -74,193 +31,10 @@ function validateDepartmentService(departmentService) {
     .validate(departmentService, { stripUnknown: true });
 }
 
-function validateYoung(young) {
-  return Joi.object()
-    .keys({
-      firstName: Joi.string().allow(null, ""),
-      lastName: Joi.string().allow(null, ""),
-      frenchNationality: Joi.string().allow(null, ""),
-      birthCountry: Joi.string().allow(null, ""),
-      email: Joi.string().allow(null, ""),
-      phone: Joi.string().allow(null, ""),
-      gender: Joi.string().allow(null, ""),
-      birthdateAt: Joi.string().allow(null, ""),
-      cohort: Joi.string().allow(null, ""),
-      phase: Joi.string().allow(null, ""),
-      status: Joi.string().allow(null, ""),
-      statusPhase1: Joi.string().allow(null, ""),
-      statusPhase2: Joi.string().allow(null, ""),
-      statusPhase2Contract: Joi.array().items(Joi.string().allow(null, "")),
-      statusPhase3: Joi.string().allow(null, ""),
-      lastStatusAt: Joi.alternatives().try(Joi.string().allow(null, ""), Joi.number().allow(null)),
-      withdrawnMessage: Joi.string().allow(null, ""),
-      inscriptionStep: Joi.string().allow(null, ""),
-      cohesion2020Step: Joi.string().allow(null, ""),
-      historic: Joi.array().items(Joi.any().allow(null, "")),
-      password: Joi.string().allow(null, ""),
-      lastLoginAt: Joi.string().allow(null, ""),
-      forgotPasswordResetToken: Joi.string().allow(null, ""),
-      forgotPasswordResetExpires: Joi.string().allow(null, ""),
-      invitationToken: Joi.string().allow(null, ""),
-      invitationExpires: Joi.string().allow(null, ""),
-      cniFiles: Joi.array().items(Joi.string().allow(null, "")),
-      cohesionStayPresence: Joi.string().allow(null, ""),
-      cohesionStayMedicalFileReceived: Joi.string().allow(null, ""),
-      cohesionCenterId: Joi.string().allow(null, ""),
-      cohesionCenterName: Joi.string().allow(null, ""),
-      cohesionCenterZip: Joi.string().allow(null, ""),
-      cohesionCenterCity: Joi.string().allow(null, ""),
-      autoAffectationPhase1ExpiresAt: Joi.string().allow(null, ""),
-      meetingPointId: Joi.string().allow(null, ""),
-      deplacementPhase1Autonomous: Joi.string().allow(null, ""),
-      phase2ApplicationStatus: Joi.array().items(Joi.string().allow(null, "")),
-      phase3StructureName: Joi.string().allow(null, ""),
-      phase3MissionDomain: Joi.string().allow(null, ""),
-      phase3MissionDescription: Joi.string().allow(null, ""),
-      phase3MissionStartAt: Joi.string().allow(null, ""),
-      phase3MissionEndAt: Joi.string().allow(null, ""),
-      phase3TutorFirstName: Joi.string().allow(null, ""),
-      phase3TutorLastName: Joi.string().allow(null, ""),
-      phase3TutorEmail: Joi.string().allow(null, ""),
-      phase3TutorPhone: Joi.string().allow(null, ""),
-      phase3TutorNote: Joi.string().allow(null, ""),
-      phase3Token: Joi.string().allow(null, ""),
-      address: Joi.string().allow(null, ""),
-      complementAddress: Joi.string().allow(null, ""),
-      zip: Joi.string().allow(null, ""),
-      city: Joi.string().allow(null, ""),
-      cityCode: Joi.string().allow(null, ""),
-      populationDensity: Joi.string().allow(null, ""),
-      department: Joi.string().allow(null, ""),
-      region: Joi.string().allow(null, ""),
-      location: Joi.object().keys({
-        lat: Joi.number().allow(null),
-        lon: Joi.number().allow(null),
-      }),
-      qpv: Joi.string().allow(null, ""),
-      situation: Joi.string().allow(null, ""),
-      grade: Joi.string().allow(null, ""),
-      schoolCertification: Joi.string().allow(null, ""),
-      schooled: Joi.string().allow(null, ""),
-      schoolName: Joi.string().allow(null, ""),
-      schoolType: Joi.string().allow(null, ""),
-      schoolAddress: Joi.string().allow(null, ""),
-      schoolComplementAdresse: Joi.string().allow(null, ""),
-      schoolZip: Joi.string().allow(null, ""),
-      schoolCity: Joi.string().allow(null, ""),
-      schoolDepartment: Joi.string().allow(null, ""),
-      schoolRegion: Joi.string().allow(null, ""),
-      schoolLocation: Joi.object().keys({
-        lat: Joi.number().allow(null),
-        lon: Joi.number().allow(null),
-      }),
-      schoolId: Joi.string().allow(null, ""),
-      parent1Status: Joi.string().allow(null, ""),
-      parent1FirstName: Joi.string().allow(null, ""),
-      parent1LastName: Joi.string().allow(null, ""),
-      parent1Email: Joi.string().allow(null, ""),
-      parent1Phone: Joi.string().allow(null, ""),
-      parent1OwnAddress: Joi.string().allow(null, ""),
-      parent1Address: Joi.string().allow(null, ""),
-      parent1ComplementAddress: Joi.string().allow(null, ""),
-      parent1Zip: Joi.string().allow(null, ""),
-      parent1City: Joi.string().allow(null, ""),
-      parent1Department: Joi.string().allow(null, ""),
-      parent1Region: Joi.string().allow(null, ""),
-      parent1Location: Joi.object().keys({
-        lat: Joi.number().allow(null),
-        lon: Joi.number().allow(null),
-      }),
-      parent1FromFranceConnect: Joi.string().allow(null, ""),
-      parent2Status: Joi.string().allow(null, ""),
-      parent2FirstName: Joi.string().allow(null, ""),
-      parent2LastName: Joi.string().allow(null, ""),
-      parent2Email: Joi.string().allow(null, ""),
-      parent2Phone: Joi.string().allow(null, ""),
-      parent2OwnAddress: Joi.string().allow(null, ""),
-      parent2Address: Joi.string().allow(null, ""),
-      parent2ComplementAddress: Joi.string().allow(null, ""),
-      parent2Zip: Joi.string().allow(null, ""),
-      parent2City: Joi.string().allow(null, ""),
-      parent2Department: Joi.string().allow(null, ""),
-      parent2Region: Joi.string().allow(null, ""),
-      parent2Location: Joi.object().keys({
-        lat: Joi.number().allow(null),
-        lon: Joi.number().allow(null),
-      }),
-      parent2FromFranceConnect: Joi.string().allow(null, ""),
-      handicap: Joi.string().allow(null, ""),
-      ppsBeneficiary: Joi.string().allow(null, ""),
-      paiBeneficiary: Joi.string().allow(null, ""),
-      medicosocialStructure: Joi.string().allow(null, ""),
-      medicosocialStructureName: Joi.string().allow(null, ""),
-      medicosocialStructureAddress: Joi.string().allow(null, ""),
-      medicosocialStructureComplementAddress: Joi.string().allow(null, ""),
-      medicosocialStructureZip: Joi.string().allow(null, ""),
-      medicosocialStructureCity: Joi.string().allow(null, ""),
-      medicosocialStructureDepartment: Joi.string().allow(null, ""),
-      medicosocialStructureRegion: Joi.string().allow(null, ""),
-      medicosocialStructureLocation: Joi.object().keys({
-        lat: Joi.number().allow(null),
-        lon: Joi.number().allow(null),
-      }),
-      engagedStructure: Joi.string().allow(null, ""),
-      specificAmenagment: Joi.string().allow(null, ""),
-      specificAmenagmentType: Joi.string().allow(null, ""),
-      highSkilledActivity: Joi.string().allow(null, ""),
-      highSkilledActivityType: Joi.string().allow(null, ""),
-      highSkilledActivityProofFiles: Joi.array().items(Joi.string().allow(null, "")),
-      parentConsentment: Joi.string().allow(null, ""),
-      parentConsentmentFiles: Joi.array().items(Joi.string().allow(null, "")),
-      parentConsentmentFilesCompliant: Joi.string().allow(null, ""),
-      parentConsentmentFilesCompliantInfo: Joi.string().allow(null, ""),
-      consentment: Joi.string().allow(null, ""),
-      imageRight: Joi.string().allow(null, ""),
-      imageRightFiles: Joi.array().items(Joi.string().allow(null, "")),
-      autoTestPCR: Joi.string().allow(null, ""),
-      autoTestPCRFiles: Joi.array().items(Joi.string().allow(null, "")),
-      jdc: Joi.string().allow(null, ""),
-      motivations: Joi.string().allow(null, ""),
-      domains: Joi.array().items(Joi.string().allow(null, "")),
-      professionnalProject: Joi.string().allow(null, ""),
-      professionnalProjectPrecision: Joi.string().allow(null, ""),
-      period: Joi.string().allow(null, ""),
-      periodRanking: Joi.array().items(Joi.string().allow(null, "")),
-      mobilityNearSchool: Joi.string().allow(null, ""),
-      mobilityNearHome: Joi.string().allow(null, ""),
-      mobilityNearRelative: Joi.string().allow(null, ""),
-      mobilityNearRelativeName: Joi.string().allow(null, ""),
-      mobilityNearRelativeAddress: Joi.string().allow(null, ""),
-      mobilityNearRelativeZip: Joi.string().allow(null, ""),
-      mobilityTransport: Joi.array().items(Joi.string().allow(null, "")),
-      mobilityTransportOther: Joi.string().allow(null, ""),
-      missionFormat: Joi.string().allow(null, ""),
-      engaged: Joi.string().allow(null, ""),
-      engagedDescription: Joi.string().allow(null, ""),
-      desiredLocation: Joi.string().allow(null, ""),
-      defenseInterest: Joi.string().allow(null, ""),
-      defenseTypeInterest: Joi.string().allow(null, ""),
-      defenseDomainInterest: Joi.string().allow(null, ""),
-      defenseMotivationInterest: Joi.string().allow(null, ""),
-      securityInterest: Joi.string().allow(null, ""),
-      securityDomainInterest: Joi.string().allow(null, ""),
-      solidarityInterest: Joi.string().allow(null, ""),
-      healthInterest: Joi.string().allow(null, ""),
-      educationInterest: Joi.string().allow(null, ""),
-      cultureInterest: Joi.string().allow(null, ""),
-      sportInterest: Joi.string().allow(null, ""),
-      environmentInterest: Joi.string().allow(null, ""),
-      citizenshipInterest: Joi.string().allow(null, ""),
-    })
-    .validate(young, { stripUnknown: true });
-}
-
 function validateReferent(referent) {
   return Joi.object()
     .keys({
-      firstName: Joi.string()
-        .custom((value) => (value ? value.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()) : null))
-        .allow(null, ""),
+      firstName: validateFirstName().allow(null, ""),
       lastName: Joi.string().uppercase().allow(null, ""),
       email: Joi.string().lowercase().trim().email().allow(null, ""),
       password: Joi.string().allow(null, ""),
@@ -287,9 +61,7 @@ function validateSelf(referent) {
   // Referents can not update their role.
   return Joi.object()
     .keys({
-      firstName: Joi.string()
-        .custom((value) => (value ? value.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()) : null))
-        .allow(null, ""),
+      firstName: validateFirstName().allow(null, ""),
       lastName: Joi.string().uppercase().allow(null, ""),
       email: Joi.string().lowercase().trim().email().allow(null, ""),
       password: Joi.string().allow(null, ""),

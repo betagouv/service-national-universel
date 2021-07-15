@@ -4,12 +4,15 @@ import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactive
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine } from "../../components/list";
+import Chevron from "../../components/Chevron";
 import Badge from "../../components/Badge";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 
 const FILTERS = ["SEARCH", "CENTER", "DEPARTMENT", "BUS"];
 
 export default () => {
+  const [filterVisible, setFilterVisible] = useState(false);
+  const handleShowFilter = () => setFilterVisible(!filterVisible);
   const getDefaultQuery = () => {
     return { query: { match_all: {} } };
   };
@@ -25,18 +28,18 @@ export default () => {
               </div>
             </Header>
             <Filter>
-              <DataSearch
-                defaultQuery={getDefaultQuery}
-                showIcon={false}
-                placeholder="Rechercher..."
-                componentId="SEARCH"
-                dataField={["centerCode", "departureAddress", "busExcelId"]}
-                react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
-                style={{ flex: 2 }}
-                innerClass={{ input: "searchbox" }}
-                autosuggest={false}
-              />
-              <FilterRow>
+              <FilterRow visible>
+                <DataSearch
+                  defaultQuery={getDefaultQuery}
+                  showIcon={false}
+                  placeholder="Rechercher..."
+                  componentId="SEARCH"
+                  dataField={["centerCode", "departureAddress", "busExcelId"]}
+                  react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
+                  style={{ flex: 1, marginRight: "1rem" }}
+                  innerClass={{ input: "searchbox" }}
+                  autosuggest={false}
+                />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -51,6 +54,9 @@ export default () => {
                   searchPlaceholder="Rechercher..."
                   size={1000}
                 />
+                <Chevron color="#444" style={{ cursor: "pointer", transform: filterVisible && "rotate(180deg)" }} onClick={handleShowFilter} />
+              </FilterRow>
+              <FilterRow visible={filterVisible}>
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"

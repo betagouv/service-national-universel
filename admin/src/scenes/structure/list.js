@@ -14,6 +14,7 @@ import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine } from "../../components/list";
 import Badge from "../../components/Badge";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
+import Chevron from "../../components/Chevron";
 
 const FILTERS = ["SEARCH", "LEGAL_STATUS", "DEPARTMENT", "REGION", "CORPS", "WITH_NETWORK", "LOCATION"];
 const formatLongDate = (date) => {
@@ -28,6 +29,8 @@ export default () => {
   const [structureIds, setStructureIds] = useState([]);
   // List of missions associated to the structures
   const [missions, setMissions] = useState([]);
+  const [filterVisible, setFilterVisible] = useState(false);
+  const handleShowFilter = () => setFilterVisible(!filterVisible);
 
   useEffect(() => {
     (async () => {
@@ -97,19 +100,19 @@ export default () => {
               </div>
             </Header>
             <Filter>
-              <DataSearch
-                defaultQuery={getDefaultQuery}
-                showIcon={false}
-                placeholder="Rechercher par mots clés, ville, code postal..."
-                componentId="SEARCH"
-                dataField={["name", "city", "zip"]}
-                react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
-                style={{ flex: 2 }}
-                innerClass={{ input: "searchbox" }}
-                autosuggest={false}
-                queryFormat="and"
-              />
-              <FilterRow>
+              <FilterRow visible>
+                <DataSearch
+                  defaultQuery={getDefaultQuery}
+                  showIcon={false}
+                  placeholder="Rechercher par mots clés, ville, code postal..."
+                  componentId="SEARCH"
+                  dataField={["name", "city", "zip"]}
+                  react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
+                  style={{ flex: 1, marginRight: "1rem" }}
+                  innerClass={{ input: "searchbox" }}
+                  autosuggest={false}
+                  queryFormat="and"
+                />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -124,6 +127,11 @@ export default () => {
                   URLParams={true}
                   showSearch={false}
                 />
+                <Chevron color="#444" style={{ cursor: "pointer", transform: filterVisible && "rotate(180deg)" }} onClick={handleShowFilter} />
+              </FilterRow>
+              <FilterRow visible={filterVisible}>
+                <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === "referent_region" ? [user.region] : []} />
+                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === "referent_department" ? [user.department] : []} />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -141,8 +149,6 @@ export default () => {
                   URLParams={true}
                   showSearch={false}
                 />
-                <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === "referent_region" ? [user.region] : []} />
-                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === "referent_department" ? [user.department] : []} />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"

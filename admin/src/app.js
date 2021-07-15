@@ -85,12 +85,14 @@ const Home = () => {
   const renderDashboard = () => {
     if (["supervisor", "responsible"].includes(user?.role)) return <DashboardResponsible />;
     if (user?.role === "head_center") return <DashboardHeadCenter />;
-    return <Dashboard />;
+    if (["referent_department", "referent_region", "admin"].includes(user?.role)) return <Dashboard />;
+    return null;
   };
   const renderVolontaire = () => {
     if (["supervisor", "responsible"].includes(user?.role)) return <VolontairesResponsible />;
     if (user?.role === "head_center") return <VolontairesHeadCenter />;
-    return <Volontaires />;
+    if (["referent_department", "referent_region", "admin"].includes(user?.role)) return <Volontaires />;
+    return null;
   };
 
   // if (user && !user.structureId) return <Onboarding />;
@@ -126,7 +128,10 @@ const Home = () => {
 
 const RestrictedRoute = ({ component: Component, isLoggedIn, ...rest }) => {
   const user = useSelector((state) => state.Auth.user);
-  if (!user) return <Redirect to={{ pathname: "/auth" }} />;
+  if (!user) {
+    const redirect = encodeURIComponent(window.location.href.replace(window.location.origin, "").substring(1));
+    return <Redirect to={{ search: redirect && redirect !== "logout" ? `?redirect=${redirect}` : "", pathname: "/auth" }} />;
+  }
   return <Route {...rest} render={(props) => <Component {...props} />} />;
 };
 

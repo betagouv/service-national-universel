@@ -45,7 +45,7 @@ export default () => {
               <Formik
                 validateOnChange={false}
                 validateOnBlur={false}
-                initialValues={{ firstName: "", lastName: "", email: "", password: "", role: "responsible" }}
+                initialValues={{ firstName: "", lastName: "", email: "", password: "" }}
                 onSubmit={async (values, actions) => {
                   try {
                     const { firstName, lastName, email, password } = values;
