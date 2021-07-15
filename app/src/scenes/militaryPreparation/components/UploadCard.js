@@ -18,7 +18,7 @@ export default ({ values, name, handleChange, upTitle = "document requis", title
         value={values[name]}
         name={name}
         onChange={async (e) => {
-          const res = await api.uploadFile("/young/file/militaryPreparation", e.target.files);
+          const res = await api.uploadFile(`/young/file/${name}`, e.target.files);
 
           if (res.code === "FILE_CORRUPTED") {
             return toastr.error(

@@ -9,6 +9,8 @@ import SelectStatus from "../../../components/selectStatus";
 import Badge from "../../../components/Badge";
 import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
 import { Box, BoxTitle } from "../../../components/box";
+import DownloadButton from "../../../components/buttons/DownloadButton";
+import api from "../../../services/api";
 
 export default ({ young, onChange }) => {
   return (
@@ -24,6 +26,19 @@ export default ({ young, onChange }) => {
             </div>
           </Bloc>
         </Box>
+        {young.militaryPreparationFiles1?.length ? (
+          <Box>
+            <Bloc title="Documents Preparation militaire">
+              {(young.militaryPreparationFiles1 || []).map((e, i) => (
+                <DownloadButton
+                  key={i}
+                  source={() => api.get(`/referent/youngFile/${young._id}/militaryPreparationFiles1/${e}`)}
+                  title={`Télécharger la pièce jusitificative (${i + 1}/${young.militaryPreparationFiles1.length})`}
+                />
+              ))}
+            </Bloc>
+          </Box>
+        ) : null}
         <ToggleBox>
           <Row>
             <Col md={12}>
