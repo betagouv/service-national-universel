@@ -16,6 +16,8 @@ function getAppHelper() {
   app.use("/bus", require("../../controllers/bus"));
   app.use("/cohesion-center", require("../../controllers/cohesion-center"));
   app.use("/department-service", require("../../controllers/department-service"));
+  app.use("/diagoriente", require("../../controllers/diagoriente"));
+
   return app;
 }
 
