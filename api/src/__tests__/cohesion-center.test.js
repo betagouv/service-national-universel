@@ -20,7 +20,7 @@ jest.mock("../sendinblue", () => ({
 
 jest.mock("../utils", () => ({
   ...jest.requireActual("../utils"),
-  get: () => "",
+  getSignedUrl: () => "",
 }));
 
 jest.mock("../htmlToPdf", () => jest.fn());
