@@ -397,45 +397,51 @@ export default (props) => {
                 </Col>
               </Row>
             </Box>
-            {defaultValue && user.role === "admin" && structures?.length ? (
-              <Box>
-                <Row>
-                  <Col md={12}>
-                    <Wrapper>
-                      <BoxTitle>Structure associée</BoxTitle>
-                      <div style={{ display: "flex" }}>
-                        <ReactSelect
-                          styles={{
-                            container: () => ({ flex: 1 }),
-                            menu: () => ({
-                              borderStyle: "solid",
-                              borderWidth: 1,
-                              borderRadius: 5,
-                              borderColor: "#dedede",
-                            }),
-                          }}
-                          defaultValue={{ label: structure.name, value: structure.name, _id: structure._id }}
-                          options={structures}
-                          placeholder={"Modifier la structure rattachée"}
-                          noOptionsMessage={() => "Aucune structure ne correspond à cette recherche."}
-                          onChange={(e) => {
-                            setStructure(e.structure);
-                          }}
-                        />
-                        <LoadingButton
-                          loading={loadings[2]}
-                          disabled={loadings[0] || loadings[1]}
-                          onClick={() => {
-                            modifyStructure();
-                          }}
-                        >
-                          Modifier la structure
-                        </LoadingButton>
-                      </div>
-                    </Wrapper>
-                  </Col>
-                </Row>
-              </Box>
+            {user.role === "admin" ? (
+              defaultValue && structures?.length ? (
+                <Box>
+                  <Row>
+                    <Col md={12}>
+                      <Wrapper>
+                        <BoxTitle>Structure associée</BoxTitle>
+                        <Header>
+                          <ReactSelect
+                            styles={{
+                              container: () => ({ flex: 1 }),
+                              menu: () => ({
+                                borderStyle: "solid",
+                                borderWidth: 1,
+                                borderRadius: 5,
+                                borderColor: "#dedede",
+                              }),
+                            }}
+                            defaultValue={{ label: structure.name, value: structure.name, _id: structure._id }}
+                            options={structures}
+                            placeholder={"Modifier la structure rattachée"}
+                            noOptionsMessage={() => "Aucune structure ne correspond à cette recherche."}
+                            onChange={(e) => {
+                              setStructure(e.structure);
+                            }}
+                          />
+                          <div style={{ alignSelf: "flex-start" }}>
+                            <LoadingButton
+                              loading={loadings[2]}
+                              disabled={loadings[0] || loadings[1]}
+                              onClick={() => {
+                                modifyStructure();
+                              }}
+                            >
+                              Modifier la structure
+                            </LoadingButton>
+                          </div>
+                        </Header>
+                      </Wrapper>
+                    </Col>
+                  </Row>
+                </Box>
+              ) : (
+                <Loader />
+              )
             ) : null}
 
             {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas proposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
