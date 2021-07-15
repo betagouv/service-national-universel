@@ -59,6 +59,12 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false }
       applications.length;
       obj.priority = applications.length + 1;
     }
+    const mission = await MissionObject.findById(obj.missionId);
+    if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const young = await YoungObject.findById(obj.youngId);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
     const data = await ApplicationObject.create(obj);
     await updateStatusPhase2(data);
     await updatePlacesMission(data);
