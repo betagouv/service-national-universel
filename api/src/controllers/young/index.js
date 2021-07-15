@@ -46,8 +46,23 @@ router.post("/reset_password", passport.authenticate("young", { session: false }
 
 router.post("/file/:key", passport.authenticate("young", { session: false }), async (req, res) => {
   try {
-    const key = req.params.key;
-    const names = JSON.parse(req.body.body).names;
+    const { error, value } = Joi.object({
+      key: Joi.string().required(),
+      body: Joi.string().required(),
+    })
+      .unknown()
+      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
+    const { key, body } = value;
+    const {
+      error: bodyError,
+      value: { names },
+    } = Joi.object({
+      names: Joi.array().items(Joi.string().required()).required(),
+    }).validate(JSON.parse(body), { stripUnknown: true });
+
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+    if (bodyError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: bodyError.message });
+
     const files = Object.keys(req.files || {}).map((e) => req.files[e]);
 
     for (let i = 0; i < files.length; i++) {
