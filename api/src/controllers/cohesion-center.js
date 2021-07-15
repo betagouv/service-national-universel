@@ -126,7 +126,6 @@ router.post("/:centerId/assign-young-waiting-list/:youngId", passport.authentica
       cohesionCenterZip: center.zip,
     });
     await young.save();
-    await young.index();
 
     center.waitingList.push(young._id);
     await center.save();
