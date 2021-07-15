@@ -40,7 +40,7 @@ export default ({ young, onChange }) => {
                 <Details title="Projet professionnel">
                   {young.professionnalProject ? (
                     <div>
-                      {t(young.professionnalProject)} {young.professionnalProjectPrecision ? `(${young.professionnalProjectPrecision})` : null}
+                      {t(young.professionnalProject)} {young.professionnalProjectPrecision ? `(${t(young.professionnalProjectPrecision)})` : null}
                     </div>
                   ) : null}
                 </Details>
