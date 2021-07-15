@@ -125,7 +125,7 @@ router.put("/:id/structure/:structureId", passport.authenticate("referent", { se
     const mission = await MissionObject.findById(checkedId);
     if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const missionReferent = await MissionObject.find({ tutorId: mission.tutorId });
-    if (!missionReferent || missionReferent.length > 1) return res.status(404).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    if (!missionReferent || missionReferent.length > 1) return res.status(405).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     mission.set({ structureId: structure._id, structureName: structure.name });
     await mission.save();
     const referent = await ReferentObject.findById({ _id: mission.tutorId });

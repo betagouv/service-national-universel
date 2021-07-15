@@ -70,7 +70,10 @@ export default (props) => {
       setLoadings([false, false, true]);
       const { ok, code, data: y } = await api.put(`/mission/${defaultValue._id}/structure/${structure._id}`);
       setLoadings([false, false, false]);
-      if (!ok) return toastr.error("Une erreur s'est produite lors de la modification de la structure", translate(code));
+      if (!ok)
+        return code === "OPERATION_NOT_ALLOWED"
+          ? toastr.error("Le tuteur de cette mission est affiliée à d'autres missions de la structure.", translate(code))
+          : toastr.error("Une erreur s'est produite lors de la modification de la structure", translate(code));
       history.push(`/mission/${defaultValue._id}`);
       toastr.success("Structure modifiée");
     } catch (e) {
