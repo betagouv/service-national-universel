@@ -41,6 +41,7 @@ function validateMission(mission) {
         lon: Joi.number().allow(null),
       }),
       remote: Joi.string().allow(null, ""),
+      isMilitaryPreparation: Joi.string().allow(null, ""),
     })
     .validate(mission, { stripUnknown: true });
 }
@@ -241,6 +242,11 @@ function youngKeys() {
     sportInterest: Joi.string().allow(null, ""),
     environmentInterest: Joi.string().allow(null, ""),
     citizenshipInterest: Joi.string().allow(null, ""),
+    //todo : up names
+    militaryPreparationFiles1: Joi.array().items(Joi.string().allow(null, "")),
+    militaryPreparationFiles2: Joi.array().items(Joi.string().allow(null, "")),
+    militaryPreparationFiles3: Joi.array().items(Joi.string().allow(null, "")),
+    militaryPreparationFiles4: Joi.array().items(Joi.string().allow(null, "")),
   };
 }
 

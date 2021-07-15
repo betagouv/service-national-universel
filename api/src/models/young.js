@@ -967,6 +967,25 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  // preparation militaire
+  //todo : up names
+  militaryPreparationFiles1: {
+    type: [String],
+    default: [],
+  },
+  militaryPreparationFiles2: {
+    type: [String],
+    default: [],
+  },
+  militaryPreparationFiles3: {
+    type: [String],
+    default: [],
+  },
+  militaryPreparationFiles4: {
+    type: [String],
+    default: [],
+  },
+
   // TODO : clean interests
   defenseInterest: { type: String },
   defenseTypeInterest: { type: String },
