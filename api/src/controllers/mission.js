@@ -123,6 +123,7 @@ router.put("/:id/structure/:structureId", passport.authenticate("referent", { se
     if (errorId || errorStructureId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error });
     const structure = await StructureObject.findById(checkedStructureId);
     const mission = await MissionObject.findById(checkedId);
+    if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     mission.set({ structureId: structure._id, structureName: structure.name });
     await mission.save();
     await mission.index();
