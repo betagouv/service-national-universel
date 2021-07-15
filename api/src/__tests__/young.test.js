@@ -35,7 +35,6 @@ jest.mock("../cryptoUtils", () => ({
   decrypt: () => Buffer.from("test"),
   encrypt: () => Buffer.from("test"),
 }));
-
 jest.mock("node-fetch");
 
 jest.setTimeout(10_000);
@@ -200,7 +199,9 @@ describe("Young", () => {
 
   describe("POST /young/france-connect/authorization-url", () => {
     it("should return 200", async () => {
-      const res = await request(getAppHelper()).post("/young/france-connect/authorization-url").send({});
+      const res = await request(getAppHelper()).post("/young/france-connect/authorization-url").send({
+        callback: "foo",
+      });
       expect(res.statusCode).toEqual(200);
     });
   });
@@ -222,7 +223,10 @@ describe("Young", () => {
           json: jsonResponse,
         })
       );
-      const res = await request(getAppHelper()).post("/young/france-connect/user-info").send({});
+      const res = await request(getAppHelper()).post("/young/france-connect/user-info").send({
+        code: "foo",
+        callback: "bar",
+      });
       expect(res.statusCode).toEqual(200);
     });
   });
@@ -307,18 +311,14 @@ describe("Young", () => {
   });
 
   describe("POST /young/signup_invite", () => {
-    it("should return 404 when young not found", async () => {
-      const res = await request(getAppHelper()).post("/young/signup_invite").send({});
-      expect(res.statusCode).toEqual(404);
-    });
-    it("should return 404 when invitation token is not provided", async () => {
+    it("should return 400 when invitation token is not provided", async () => {
       await deleteYoungByEmailHelper("foo@example.org");
       const young = await createYoungHelper({ ...getNewYoungFixture(), email: "foo@example.org" });
       const res = await request(getAppHelper()).post("/young/signup_invite").send({
         email: young.email,
         password: "%%minMAJ123",
       });
-      expect(res.statusCode).toEqual(404);
+      expect(res.statusCode).toEqual(400);
     });
     it("should return 404 when invitation is expired", async () => {
       await deleteYoungByEmailHelper("foo@example.org");
@@ -371,9 +371,9 @@ describe("Young", () => {
   });
 
   describe("POST /young/signup_verify", () => {
-    it("should return 404 when young not found", async () => {
+    it("should return 400 when missing invitationToken", async () => {
       const res = await request(getAppHelper()).post("/young/signup_verify").send({});
-      expect(res.statusCode).toEqual(404);
+      expect(res.statusCode).toEqual(400);
     });
     it("should return 404 when invitation is expired", async () => {
       await deleteYoungByEmailHelper("foo@example.org");
@@ -426,6 +426,35 @@ describe("Young", () => {
       expect(res.body).toEqual({ data: ["e"], ok: true });
       expect(passport.user.set).toHaveBeenCalledWith({ CniFile: ["e"] });
       passport.user = previous;
+    });
+  });
+
+  describe("GET /young/validate_phase3/:young/:token", () => {
+    it("should return 404 when token or young is wrong", async () => {
+      const res = await request(getAppHelper()).get(`/young/validate_phase3/${notExistingYoungId}/token`);
+      expect(res.statusCode).toEqual(404);
+    });
+    it("should return 200 when token is right", async () => {
+      const token = Date.now().toString();
+      const young = await createYoungHelper({ ...getNewYoungFixture(), phase3Token: token });
+      const res = await request(getAppHelper()).get(`/young/validate_phase3/${young._id}/${token}`);
+      expect(res.statusCode).toEqual(200);
+    });
+  });
+
+  describe("PUT /young/validate_phase3/:young/:token", () => {
+    it("should return 404 when token or young is wrong", async () => {
+      const res = await request(getAppHelper()).put(`/young/validate_phase3/${notExistingYoungId}/token`);
+      expect(res.statusCode).toEqual(404);
+    });
+    it("should return 200 when token is right with tutor note", async () => {
+      const token = Date.now().toString();
+      const young = await createYoungHelper({ ...getNewYoungFixture(), phase3Token: token });
+      const res = await request(getAppHelper()).put(`/young/validate_phase3/${young._id}/${token}`).send({
+        phase3TutorNote: "hello",
+      });
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.data.phase3TutorNote).toEqual("hello");
     });
   });
 });
