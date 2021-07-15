@@ -134,6 +134,7 @@ export default (props) => {
                       <span>*</span>STATUT JURIDIQUE
                     </label>
                     <Field validate={(v) => !v && requiredMessage} component="select" name="legalStatus" value={values.legalStatus} onChange={handleChange}>
+                      <option key="" value="" />
                       <option key="PUBLIC" value="PUBLIC">
                         {translate("PUBLIC")}
                       </option>
@@ -153,7 +154,7 @@ export default (props) => {
                     <FormGroup>
                       <label>DISPOSEZ-VOUS D'UN AGRÉMENT ?</label>
                       <MultiSelect
-                        value={values.associationTypes}
+                        value={values.associationTypes.filter((e) => e.length) || []}
                         onChange={handleChange}
                         name="associationTypes"
                         options={associationTypes}
