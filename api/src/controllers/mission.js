@@ -125,7 +125,6 @@ router.put("/:id/structure/:structureId", passport.authenticate("referent", { se
     const mission = await MissionObject.findById(checkedId);
     mission.set({ structureId: structure._id, structureName: structure.name });
     await mission.save();
-    await mission.index();
     const applications = await ApplicationObject.find({ missionId: checkedId });
     applications.forEach(async (application) => {
       application.set({ structureId: structure._id });
