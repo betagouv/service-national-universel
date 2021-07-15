@@ -226,10 +226,7 @@ function youngKeys() {
     missionFormat: Joi.string().allow(null, ""),
     engaged: Joi.string().allow(null, ""),
     engagedDescription: Joi.string().allow(null, ""),
-    desiredLocation: Joi.object().keys({
-      lat: Joi.number().allow(null),
-      lon: Joi.number().allow(null),
-    }),
+    desiredLocation: Joi.string().allow(null, ""),
     defenseInterest: Joi.string().allow(null, ""),
     defenseTypeInterest: Joi.string().allow(null, ""),
     defenseDomainInterest: Joi.string().allow(null, ""),
