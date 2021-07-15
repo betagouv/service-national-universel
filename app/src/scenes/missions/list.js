@@ -11,13 +11,15 @@ import { translate, getLimitDateForPhase2 } from "../../utils";
 import api from "../../services/api";
 import Loader from "../../components/Loader";
 import FilterGeoloc from "./components/FilterGeoloc";
+import AlertBox from "../../components/AlertBox";
 
 const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "GEOLOC", "DATE", "PERIOD", "RELATIVE"];
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
   const [targetLocation, setTargetLocation] = useState("");
-  const [showAlert, setShowAlert] = useState(true);
+  const [showAlertLimitDate, setShowAlertLimitDate] = useState(true);
+  const [showAlertMilitaryPreparation, setShowAlertMilitaryPreparation] = useState(true);
   const [applications, setApplications] = useState();
   const getDefaultQuery = () => {
     let query = {
@@ -84,7 +86,20 @@ export default () => {
 
   return (
     <div>
-      {showAlert ? <AlertBox onClose={() => setShowAlert(false)} /> : null}
+      {showAlertLimitDate ? (
+        <AlertBox
+          onClose={() => setShowAlertLimitDate(false)}
+          title={`Vous pourrez faire une mission jusqu’au ${getLimitDateForPhase2(young.cohort)}.`}
+          message="Des missions supplémentaires seront proposées tout au long de l’année. Vous serez informé par e-mail dès qu’une mission répondant à vos préférences sera publiée."
+        />
+      ) : null}
+      {showAlertMilitaryPreparation ? (
+        <AlertBox
+          onClose={() => setShowAlertMilitaryPreparation(false)}
+          title="Préparation Militaire"
+          message={`Pour accéder à une préparation militaire au-delà des 100kms, merci de contacter votre référent phase 2 : xxx `}
+        />
+      ) : null}
       <Heading>
         <p>Phase 2</p>
         <h1>Trouvez une mission d'intérêt général</h1>
@@ -179,6 +194,7 @@ export default () => {
                     subtitle={e.name}
                     tags={tags}
                     places={e.placesLeft}
+                    isMilitaryPreparation={e.isMilitaryPreparation}
                   />
                 );
               });
@@ -202,20 +218,6 @@ const Filters = styled(Container)`
     border: 0;
   }
 `;
-
-const AlertBox = ({ onClose }) => {
-  const young = useSelector((state) => state.Auth.young);
-  return (
-    <Alert>
-      <img src={require("../../assets/information.svg")} height={15} />
-      <div className="text">
-        <strong>Vous pourrez faire une mission jusqu’au {getLimitDateForPhase2(young.cohort)}.</strong>
-        <p>Des missions supplémentaires seront proposées tout au long de l’année. Vous serez informé par e-mail dès qu’une mission répondant à vos préférences sera publiée.</p>
-      </div>
-      <img src={require("../../assets/close.svg")} height={15} onClick={onClose} style={{ cursor: "pointer" }} />
-    </Alert>
-  );
-};
 
 const Missions = styled(Container)`
   padding: 20px 40px;
@@ -316,33 +318,5 @@ const DomainsFilter = styled(Col)`
     background-color: #fff;
     background-clip: padding-box;
     /* transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; */
-  }
-`;
-
-const Alert = styled(Container)`
-  border-radius: 8px;
-  @media (max-width: 768px) {
-    border-radius: 0;
-  }
-  display: flex;
-  align-items: center;
-  background-color: #5949d0;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  margin-bottom: 20px;
-  padding: 10px 20px;
-  .text {
-    margin-left: 20px;
-    margin-right: auto;
-    color: #fff;
-    strong {
-      font-size: 15px;
-      font-weight: 700;
-      margin-bottom: 3px;
-    }
-    p {
-      margin-bottom: 0;
-      font-size: 12px;
-      font-weight: 500;
-    }
   }
 `;
