@@ -22,7 +22,6 @@ const updateStatusPhase2 = async (app) => {
     if (application.status === "DONE") {
       young.set({ statusPhase2: "VALIDATED", phase: "CONTINUE" });
       await young.save();
-      await young.index();
       return;
     }
     // if at least one application is not ABANDON or CANCEL, phase 2 is in progress
@@ -31,7 +30,6 @@ const updateStatusPhase2 = async (app) => {
     }
   }
   await young.save();
-  await young.index();
 };
 
 const updatePlacesMission = async (app) => {
@@ -47,7 +45,6 @@ const updatePlacesMission = async (app) => {
       console.log(`Mission ${mission.id}: total ${mission.placesTotal}, left from ${mission.placesLeft} to ${placesLeft}`);
       mission.set({ placesLeft });
       await mission.save();
-      await mission.index();
     }
   } catch (e) {
     console.log(e);
