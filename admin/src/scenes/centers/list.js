@@ -11,6 +11,7 @@ import { formatStringDate, translate, getFilterLabel, formatLongDateFR, formatDa
 import SelectStatusMission from "../../components/selectStatusMission";
 import VioletButton from "../../components/buttons/VioletButton";
 import Loader from "../../components/Loader";
+import Chevron from "../../components/Chevron";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine } from "../../components/list";
 import Badge from "../../components/Badge";
@@ -20,7 +21,9 @@ const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "TUTOR", "R
 
 export default () => {
   const [center, setCenter] = useState(null);
+  const [filterVisible, setFilterVisible] = useState(false);
   const user = useSelector((state) => state.Auth.user);
+  const handleShowFilter = () => setFilterVisible(!filterVisible);
   const getDefaultQuery = () => {
     return { query: { match_all: {} } };
   };
@@ -70,19 +73,25 @@ export default () => {
               ) : null}
             </Header>
             <Filter>
-              <DataSearch
-                defaultQuery={getDefaultQuery}
-                showIcon={false}
-                placeholder="Rechercher par mots clés, ville, code postal..."
-                componentId="SEARCH"
-                dataField={["name", "city", "zip", "code"]}
-                react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
-                // fuzziness={1}
-                style={{ flex: 2 }}
-                innerClass={{ input: "searchbox" }}
-                autosuggest={false}
-              />
-              <FilterRow>
+              <FilterRow visible>
+                <DataSearch
+                  defaultQuery={getDefaultQuery}
+                  showIcon={false}
+                  placeholder="Rechercher par mots clés, ville, code postal..."
+                  componentId="SEARCH"
+                  dataField={["name", "city", "zip", "code"]}
+                  react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
+                  // fuzziness={1}
+                  style={{ flex: 1, marginRight: "1rem" }}
+                  innerClass={{ input: "searchbox" }}
+                  autosuggest={false}
+                />
+                <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === "referent_region" ? [user.region] : []} />
+                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === "referent_department" ? [user.department] : []} />
+                <Chevron color="#444" style={{ cursor: "pointer", transform: filterVisible && "rotate(180deg)" }} onClick={handleShowFilter} />
+              </FilterRow>
+
+              <FilterRow visible={filterVisible}>
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -97,8 +106,7 @@ export default () => {
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Statut")}
                 />
-                <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === "referent_region" ? [user.region] : []} />
-                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === "referent_department" ? [user.department] : []} />
+
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
