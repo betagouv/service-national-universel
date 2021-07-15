@@ -135,17 +135,6 @@ router.get("/mission/:id", passport.authenticate("referent", { session: false })
   }
 });
 
-//@check
-router.delete("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
-  try {
-    await MissionObject.findOneAndUpdate({ _id: req.params.id }, { deleted: "yes" });
-    res.status(200).send({ ok: true });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, error, code: ERRORS.SERVER_ERROR });
-  }
-});
-
 router.post("/:id/notify/:template", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
     const { id, template } = req.params;
