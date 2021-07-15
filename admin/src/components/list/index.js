@@ -78,6 +78,7 @@ export const Filter = styled.div`
     display: block;
     width: 100%;
     background-color: #fff;
+    min-width: 20rem;
     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
     color: #767676;
     border: 0;
