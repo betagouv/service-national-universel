@@ -124,14 +124,16 @@ router.put("/:id/structure/:structureId", passport.authenticate("referent", { se
     const structure = await StructureObject.findById(checkedStructureId);
     const mission = await MissionObject.findById(checkedId);
     if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const missionReferent = await MissionObject.find({ tutorId: mission.tutorId });
-    if (!missionReferent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    if (missionReferent.length > 1) return res.status(405).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    if (mission.tutorId) {
+      const missionReferent = await MissionObject.find({ tutorId: mission.tutorId });
+      if (!missionReferent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      if (missionReferent.length > 1) return res.status(405).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      const referent = await ReferentObject.findById({ _id: mission.tutorId });
+      referent.set({ structureId: structure._id });
+      await referent.save();
+    }
     mission.set({ structureId: structure._id, structureName: structure.name });
     await mission.save();
-    const referent = await ReferentObject.findById({ _id: mission.tutorId });
-    referent.set({ structureId: structure._id });
-    await referent.save();
     const applications = await ApplicationObject.find({ missionId: checkedId });
     applications.forEach(async (application) => {
       application.set({ structureId: structure._id });
