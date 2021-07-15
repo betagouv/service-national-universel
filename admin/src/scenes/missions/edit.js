@@ -397,7 +397,7 @@ export default (props) => {
                 </Col>
               </Row>
             </Box>
-            {defaultValue && user.role === "admin" ? (
+            {defaultValue && user.role === "admin" && structures?.length ? (
               <Box>
                 <Row>
                   <Col md={12}>
