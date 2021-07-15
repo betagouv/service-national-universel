@@ -25,6 +25,8 @@ export default () => {
   const [young, setYoung] = useState(null);
   const getDefaultQuery = () => ({ query: { bool: { filter: { term: { "phase.keyword": "INSCRIPTION" } } } } });
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
+  const [filterVisible, setFilterVisible] = useState(false);
+  const handleShowFilter = () => setFilterVisible(!filterVisible);
 
   return (
     <div>
@@ -117,25 +119,17 @@ export default () => {
               </div>
             </Header>
             <Filter>
-              <DataSearch
-                showIcon={false}
-                placeholder="Rechercher une inscription..."
-                componentId="SEARCH"
-                dataField={["email.keyword", "firstName", "lastName", "phone"]}
-                react={{ and: FILTERS }}
-                // fuzziness={2}
-                style={{ flex: 2 }}
-                innerClass={{ input: "searchbox" }}
-                autosuggest={false}
-              />
-              <FilterRow>
-                <MultiDropdownList
-                  style={{ display: "none" }}
-                  defaultQuery={getDefaultQuery}
-                  componentId="SCHOOL"
-                  dataField="schoolName.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "SCHOOL") }}
-                  URLParams={true}
+              <FilterRow visible>
+                <DataSearch
+                  showIcon={false}
+                  placeholder="Rechercher une inscription..."
+                  componentId="SEARCH"
+                  dataField={["email.keyword", "firstName", "lastName", "phone"]}
+                  react={{ and: FILTERS }}
+                  // fuzziness={2}
+                  style={{ flex: 1, marginRight: "1rem" }}
+                  innerClass={{ input: "searchbox" }}
+                  autosuggest={false}
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
@@ -150,6 +144,18 @@ export default () => {
                   URLParams={true}
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Statut")}
+                />
+                <Chevron color="#444" style={{ cursor: "pointer", transform: filterVisible && "rotate(180deg)" }} onClick={handleShowFilter} />
+              </FilterRow>
+
+              <FilterRow visible={filterVisible}>
+                <MultiDropdownList
+                  style={{ display: "none" }}
+                  defaultQuery={getDefaultQuery}
+                  componentId="SCHOOL"
+                  dataField="schoolName.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "SCHOOL") }}
+                  URLParams={true}
                 />
                 <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
                 <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} />

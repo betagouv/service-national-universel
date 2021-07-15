@@ -26,6 +26,8 @@ export default () => {
   const [structureIds, setStructureIds] = useState();
   const [structures, setStructures] = useState();
   const [services, setServices] = useState();
+  const [filterVisible, setFilterVisible] = useState(false);
+  const handleShowFilter = () => setFilterVisible(!filterVisible);
   const getDefaultQuery = () => {
     if (user.role === "supervisor") return { query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } } };
     else return { query: { match_all: {} } };
@@ -100,19 +102,19 @@ export default () => {
               />
             </Header>
             <Filter>
-              <DataSearch
-                showIcon={false}
-                placeholder="Rechercher par prénom, nom, email..."
-                componentId="SEARCH"
-                dataField={["email.keyword", "firstName", "lastName"]}
-                react={{ and: FILTERS }}
-                // fuzziness={2}
-                style={{ flex: 2 }}
-                innerClass={{ input: "searchbox" }}
-                autosuggest={false}
-                queryFormat="and"
-              />
-              <FilterRow>
+              <FilterRow visible>
+                <DataSearch
+                  showIcon={false}
+                  placeholder="Rechercher par prénom, nom, email..."
+                  componentId="SEARCH"
+                  dataField={["email.keyword", "firstName", "lastName"]}
+                  react={{ and: FILTERS }}
+                  // fuzziness={2}
+                  style={{ flex: 1, marginRight: "1rem" }}
+                  innerClass={{ input: "searchbox" }}
+                  autosuggest={false}
+                  queryFormat="and"
+                />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -127,6 +129,11 @@ export default () => {
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Rôle")}
                 />
+                <Chevron color="#444" style={{ cursor: "pointer", transform: filterVisible && "rotate(180deg)" }} onClick={handleShowFilter} />
+              </FilterRow>
+              <FilterRow visible={filterVisible}>
+                <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
+                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -141,8 +148,6 @@ export default () => {
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Fonction")}
                 />
-                <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
-                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
               </FilterRow>
             </Filter>
             <ResultTable>
