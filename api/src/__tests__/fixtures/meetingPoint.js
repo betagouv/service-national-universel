@@ -1,10 +1,11 @@
 const faker = require("faker");
+const { ObjectId } = require("mongoose").Types;
 
 faker.locale = "fr";
 
 function getNewMeetingPointFixture() {
   return {
-    busId: faker.lorem.words(),
+    busId: ObjectId(),
     busExcelId: faker.lorem.words(),
     centerId: faker.lorem.words(),
     centerCode: faker.lorem.words(),

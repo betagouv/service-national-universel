@@ -18,6 +18,7 @@ function getAppHelper() {
   app.use("/department-service", require("../../controllers/department-service"));
   app.use("/diagoriente", require("../../controllers/diagoriente"));
   app.use("/email", require("../../controllers/email"));
+  app.use("/meeting-point", require("../../controllers/meeting-point"));
 
   return app;
 }
