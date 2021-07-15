@@ -12,6 +12,8 @@ import { translate, ROLES } from "../../../utils";
 import TabList from "../../../components/views/TabList";
 import Tab from "../../../components/views/Tab";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
+import Badge from "../../../components/Badge";
+import Title from "../../../components/views/Title";
 
 export default ({ mission, tab, children }) => {
   const history = useHistory();
@@ -48,8 +50,9 @@ export default ({ mission, tab, children }) => {
     <div style={{ flex: tab === "missions" ? "0%" : 2, position: "relative", padding: "3rem" }}>
       <Header>
         <div style={{ flex: 1 }}>
-          <Title>{mission.name}</Title>
-
+          <Title>
+            {mission.name} {mission.isMilitaryPreparation === "true" ? <Badge text="Préparation Militaire" /> : null}
+          </Title>
           <TabList>
             <Tab isActive={tab === "details"} onClick={() => history.push(`/mission/${mission._id}`)}>
               Détails
@@ -103,13 +106,6 @@ export default ({ mission, tab, children }) => {
     </div>
   );
 };
-
-const Title = styled.div`
-  color: rgb(38, 42, 62);
-  font-weight: 700;
-  font-size: 24px;
-  margin-bottom: 10px;
-`;
 
 const Header = styled.div`
   padding: 0 25px 0;
