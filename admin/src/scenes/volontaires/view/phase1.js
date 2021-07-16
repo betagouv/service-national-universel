@@ -20,7 +20,7 @@ export default (props) => {
   const user = useSelector((state) => state.Auth.user);
   const [meetingPoint, setMeetingPoint] = useState();
   const [young, setYoung] = useState(props.young);
-  const disabled = young.statusPhase1 === "WITHDRAWN";
+  const disabled = young.statusPhase1 === "WITHDRAWN" || user.role !== "admin";
 
   useEffect(() => {
     if (!young.meetingPointId) return;

@@ -15,7 +15,7 @@ import Select from "../components/Select";
 
 export default (props) => {
   const [young, setYoung] = useState(props.young);
-  const disabled = young.statusPhase1 === "WITHDRAWN";
+  const disabled = true;
 
   const updateYoung = async (v) => {
     const { data, ok, code } = await api.put(`/referent/young/${young._id}`, v);
