@@ -9,6 +9,7 @@ const { capture } = require("./sentry");
 const config = require("./config");
 const { sendEmail } = require("./sendinblue");
 const { COOKIE_MAX_AGE, JWT_MAX_AGE, cookieOptions, logoutCookieOptions } = require("./cookie-options");
+const { validatePassword } = require("./utils");
 
 const EMAIL_OR_PASSWORD_INVALID = "EMAIL_OR_PASSWORD_INVALID";
 const PASSWORD_INVALID = "PASSWORD_INVALID";
@@ -66,7 +67,7 @@ class Auth {
         email: Joi.string().lowercase().trim().email().required(),
         firstName: Joi.string().lowercase().trim().required(),
         lastName: Joi.string().uppercase().trim().required(),
-        password: Joi.string().min(8).required(),
+        password: Joi.string().required(),
       })
         .unknown()
         .validate(req.body);
@@ -76,6 +77,8 @@ class Auth {
         if (error.details.find((e) => e.path === "password")) return res.status(400).send({ ok: false, user: null, code: PASSWORD_NOT_VALIDATED });
         return res.status(400).send({ ok: false, code: error.toString() });
       }
+
+      if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: PASSWORD_NOT_VALIDATED });
 
       const { password, email, lastName } = value;
       const firstName = value.firstName.charAt(0).toUpperCase() + value.firstName.toLowerCase().slice(1);
