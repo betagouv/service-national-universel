@@ -968,22 +968,25 @@ const Schema = new mongoose.Schema({
   },
 
   // preparation militaire
-  //todo : up names
-  militaryPreparationFiles1: {
+  militaryPreparationFilesIdentity: {
     type: [String],
     default: [],
   },
-  militaryPreparationFiles2: {
+  militaryPreparationFilesCensus: {
     type: [String],
     default: [],
   },
-  militaryPreparationFiles3: {
+  militaryPreparationFilesAuthorization: {
     type: [String],
     default: [],
   },
-  militaryPreparationFiles4: {
+  militaryPreparationFilesCertificate: {
     type: [String],
     default: [],
+  },
+  statusMilitaryPreparationFiles: {
+    type: String,
+    enum: ["VALIDATED", "WAITING_VALIDATION", "WAITING_CORRECTION"],
   },
 
   // TODO : clean interests

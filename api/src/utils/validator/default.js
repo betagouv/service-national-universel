@@ -242,11 +242,11 @@ function youngKeys() {
     sportInterest: Joi.string().allow(null, ""),
     environmentInterest: Joi.string().allow(null, ""),
     citizenshipInterest: Joi.string().allow(null, ""),
-    //todo : up names
-    militaryPreparationFiles1: Joi.array().items(Joi.string().allow(null, "")),
-    militaryPreparationFiles2: Joi.array().items(Joi.string().allow(null, "")),
-    militaryPreparationFiles3: Joi.array().items(Joi.string().allow(null, "")),
-    militaryPreparationFiles4: Joi.array().items(Joi.string().allow(null, "")),
+    militaryPreparationFilesIdentity: Joi.array().items(Joi.string().allow(null, "")),
+    militaryPreparationFilesCensus: Joi.array().items(Joi.string().allow(null, "")),
+    militaryPreparationFilesAuthorization: Joi.array().items(Joi.string().allow(null, "")),
+    militaryPreparationFilesCertificate: Joi.array().items(Joi.string().allow(null, "")),
+    statusMilitaryPreparationFiles: Joi.string().allow(null, ""),
   };
 }
 

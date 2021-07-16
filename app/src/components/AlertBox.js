@@ -9,7 +9,7 @@ export default ({ onClose, title, message }) => (
       <strong>{title}</strong>
       <div>{message}</div>
     </div>
-    <img src={require("../assets/close.svg")} height={15} onClick={onClose} style={{ cursor: "pointer" }} />
+    {onClose ? <img src={require("../assets/close.svg")} height={15} onClick={onClose} style={{ cursor: "pointer" }} /> : null}
   </Alert>
 );
 
