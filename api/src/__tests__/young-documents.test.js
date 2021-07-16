@@ -1,17 +1,16 @@
 require("dotenv").config({ path: "./.env-testing" });
-const fetch = require("node-fetch");
 const request = require("supertest");
 const getAppHelper = require("./helpers/app");
 const getNewYoungFixture = require("./fixtures/young");
-const { getYoungsHelper, createYoungHelper, notExistingYoungId, deleteYoungByEmailHelper } = require("./helpers/young");
+const { createYoungHelper, notExistingYoungId } = require("./helpers/young");
 const { dbConnect, dbClose } = require("./helpers/db");
 const getNewDepartmentServiceFixture = require("./fixtures/departmentService");
-const { createDepartmentServiceHelper, deleteAllDepartmentServicesHelper } = require("./helpers/departmentService");
+const { createDepartmentServiceHelper } = require("./helpers/departmentService");
 const { createMeetingPointHelper } = require("./helpers/meetingPoint");
 const getNewMeetingPointFixture = require("./fixtures/meetingPoint");
 const { createBusHelper } = require("./helpers/bus");
 const getNewBusFixture = require("./fixtures/bus");
-const { createCohesionCenter, getCohesionCenterById } = require("./helpers/cohesionCenter");
+const { createCohesionCenter } = require("./helpers/cohesionCenter");
 const { getNewCohesionCenterFixture } = require("./fixtures/cohesionCenter");
 
 jest.mock("../sendinblue", () => ({
@@ -20,8 +19,6 @@ jest.mock("../sendinblue", () => ({
 }));
 
 jest.mock("../htmlToPdf", () => jest.fn());
-
-jest.mock("node-fetch");
 
 jest.setTimeout(10_000);
 
