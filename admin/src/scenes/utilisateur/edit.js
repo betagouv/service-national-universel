@@ -24,6 +24,7 @@ export default (props) => {
   const [user, setUser] = useState();
   const [service, setService] = useState();
   const [centers, setCenters] = useState();
+  const [structures, setStructures] = useState();
   const currentUser = useSelector((state) => state.Auth.user);
   const history = useHistory();
   const dispatch = useDispatch();
@@ -32,8 +33,11 @@ export default (props) => {
     (async () => {
       const id = props.match && props.match.params && props.match.params.id;
       if (!id) return setUser(null);
+      const responseStructure = await api.get(`/structure/all`);
+      const s = responseStructure.data.map((e) => ({ label: e.name, value: e.name, _id: e._id }));
       const { data } = await api.get(`/referent/${id}`);
-      setUser(data);
+      setUser({ ...data, structureName: s.find((e) => e._id === data?.structureId)?.value });
+      setStructures(s);
       const { data: d } = await api.get(`/department-service/referent/${id}`);
       setService(d);
       const responseCenter = await api.get(`/cohesion-center`);
@@ -168,7 +172,27 @@ export default (props) => {
                       />
 
                       {values.role === REFERENT_ROLES.HEAD_CENTER && centers ? (
-                        <AutocompleteSelectCenter title="Centre" values={values} handleChange={handleChange} placeholder="Choisir un centre" options={centers} />
+                        <AutocompleteSelect
+                          title="Centre"
+                          onChange={(e) => {
+                            handleChange({ target: { value: e._id, name: "cohesionCenterId" } });
+                            handleChange({ target: { value: e.value, name: "cohesionCenterName" } });
+                          }}
+                          placeholder="Choisir un centre"
+                          options={centers}
+                          defaultValue={{ label: values.cohesionCenterName, value: values.cohesionCenterName, _id: values.cohesionCenterId }}
+                        />
+                      ) : null}
+                      {values.role === REFERENT_ROLES.RESPONSIBLE && structures ? (
+                        <AutocompleteSelect
+                          title="Structure"
+                          onChange={(e) => {
+                            handleChange({ target: { value: e._id, name: "structureId" } });
+                          }}
+                          placeholder="Choisir une structure"
+                          options={structures}
+                          defaultValue={{ label: values.structureName, value: values.structureName, _id: values.structureId }}
+                        />
                       ) : null}
                       {[REFERENT_ROLES.REFERENT_DEPARTMENT, REFERENT_ROLES.REFERENT_REGION].includes(values.role) ? (
                         <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRole(values.role)} />
@@ -348,7 +372,7 @@ const Select = ({ title, name, values, onChange, disabled, errors, touched, vali
   );
 };
 
-const AutocompleteSelectCenter = ({ title, values, handleChange, placeholder, options, onSelect }) => {
+const AutocompleteSelect = ({ title, onChange, placeholder, options, defaultValue }) => {
   return (
     <Row className="detail">
       <Col md={4} style={{ alignSelf: "flex-start" }}>
@@ -364,15 +388,11 @@ const AutocompleteSelectCenter = ({ title, values, handleChange, placeholder, op
               borderColor: "#dedede",
             }),
           }}
-          defaultValue={{ label: values.cohesionCenterName, value: values.cohesionCenterName, _id: values.cohesionCenterId }}
+          defaultValue={defaultValue}
           options={options}
           placeholder={placeholder}
           noOptionsMessage={() => "Aucun centre ne correspond à cette recherche."}
-          onChange={(e) => {
-            handleChange({ target: { value: e._id, name: "cohesionCenterId" } });
-            handleChange({ target: { value: e.value, name: "cohesionCenterName" } });
-            onSelect?.(e);
-          }}
+          onChange={(e) => onChange(e)}
         />
       </Col>
     </Row>
