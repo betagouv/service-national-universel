@@ -19,23 +19,6 @@ jest.mock("../sendinblue", () => ({
   sendEmail: () => Promise.resolve(),
 }));
 
-jest.mock("../qpv", () => ({
-  ...jest.requireActual("../qpv"),
-  getQPV: (a) => Promise.resolve(a === "qpvShouldWork"),
-}));
-
-jest.mock("../utils", () => ({
-  ...jest.requireActual("../utils"),
-  getFile: () => Promise.resolve({ Body: "" }),
-  uploadFile: (path, file) => Promise.resolve({ path, file }),
-}));
-
-jest.mock("../cryptoUtils", () => ({
-  ...jest.requireActual("../cryptoUtils"),
-  decrypt: () => Buffer.from("test"),
-  encrypt: () => Buffer.from("test"),
-}));
-
 jest.mock("../htmlToPdf", () => jest.fn());
 
 jest.mock("node-fetch");
