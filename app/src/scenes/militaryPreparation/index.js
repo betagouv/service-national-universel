@@ -1,22 +1,38 @@
 import React from "react";
 import styled from "styled-components";
-import { Row, Col, Input } from "reactstrap";
+import { Row, Col } from "reactstrap";
 import { useDispatch, useSelector } from "react-redux";
-import { Field, Formik } from "formik";
+import { Formik } from "formik";
+import { useHistory } from "react-router-dom";
 
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../redux/auth/actions";
-import { translate, MISSION_DOMAINS, PERIOD, PROFESSIONNAL_PROJECT, PROFESSIONNAL_PROJECT_PRECISION } from "../../utils";
+import { translate } from "../../utils";
 import { HeroContainer, Hero, Content, SeparatorXS } from "../../components/Content";
 import UploadCard from "./components/UploadCard";
+import LoadingButton from "../../components/buttons/LoadingButton";
+import AlertBox from "../../components/AlertBox";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
+  const history = useHistory();
 
   return (
     <>
+      {young.statusMilitaryPreparationFiles === "WAITING_VALIDATION" ? (
+        <AlertBox
+          title="Votre dossier est en cours de vérification par nos équipes."
+          message={`Vous serez notifié par email à l'adresse ${young.email} dès qu'il y aura du nouveau !`}
+        />
+      ) : null}
+      {young.statusMilitaryPreparationFiles === "WAITING_CORRECTION" ? (
+        <AlertBox
+          title="Votre dossier est invalide/incomplet."
+          message={`Vous avez reçu un email à l'adresse ${young.email} indiquant les pièces bloquantes. Merci de retéléverser des documents valides. N'oubliez pas de valider vos changements !`}
+        />
+      ) : null}
       <HeroContainer>
         <Hero>
           <Content>
@@ -46,9 +62,10 @@ export default () => {
         validateOnBlur={false}
         onSubmit={async (values) => {
           try {
-            const { ok, code, data: young } = await api.put("/young", values);
+            const { ok, code, data: young } = await api.put("/young", { statusMilitaryPreparationFiles: "WAITING_VALIDATION" });
             if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             dispatch(setYoung(young));
+            toastr.success("Votre dossier a bien été mis en attente de vérification");
             history.push("/");
           } catch (e) {
             console.log(e);
@@ -56,58 +73,55 @@ export default () => {
           }
         }}
       >
-        {({ values, handleChange, handleSubmit, errors, touched }) => (
-          <HeroContainer>
-            <Row>
-              <Col md={6} xs={12}>
-                <UploadCard values={values} name="militaryPreparationFiles1" handleChange={handleChange} />
-              </Col>
-            </Row>
-          </HeroContainer>
+        {({ values, handleChange, handleSubmit, errors }) => (
+          <>
+            <CardsContainer>
+              <Row>
+                <Col md={6} xs={12} style={{ paddingBottom: "15px" }}>
+                  <UploadCard errors={errors} title="Pièce d'identité" values={values} name="militaryPreparationFilesIdentity" handleChange={handleChange} />
+                </Col>
+                <Col md={6} xs={12} style={{ paddingBottom: "15px" }}>
+                  <UploadCard errors={errors} title="Attestation de recensement" values={values} name="militaryPreparationFilesCensus" handleChange={handleChange} />
+                </Col>
+                <Col md={6} xs={12} style={{ paddingBottom: "15px" }}>
+                  <UploadCard
+                    errors={errors}
+                    title="Autorisation parentale pour effectuer une préparation militaire"
+                    values={values}
+                    name="militaryPreparationFilesAuthorization"
+                    handleChange={handleChange}
+                  />
+                </Col>
+                <Col md={6} xs={12} style={{ paddingBottom: "15px" }}>
+                  <UploadCard
+                    errors={errors}
+                    title="Certificat médical de non contre indication à la pratique sportive"
+                    values={values}
+                    name="militaryPreparationFilesCertificate"
+                    handleChange={handleChange}
+                  />
+                </Col>
+              </Row>
+              <Footer>
+                <LoadingButton onClick={handleSubmit}>Valider mon dossier</LoadingButton>
+                {Object.keys(errors).length ? <h3>Vous ne pouvez pas envoyer votre dossier à vérifier car il manque des pièces requises.</h3> : null}
+              </Footer>
+            </CardsContainer>
+          </>
         )}
       </Formik>
     </>
   );
 };
 
-const Infos = styled.div`
-  font-size: 0.8rem;
-  color: #6a7181;
-  font-weight: 400;
-  @media (max-width: 768px) {
-    font-size: 0.7rem;
-  }
-`;
-
-const PreferenceItem = ({ title, children, subtitle }) => {
-  return (
-    <HeroContainer>
-      <Hero>
-        <PreferenceContent style={{ width: "100%" }}>
-          <Title>
-            <span>{title}</span>
-            <Infos>{subtitle}</Infos>
-          </Title>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>{children}</div>
-        </PreferenceContent>
-      </Hero>
-    </HeroContainer>
-  );
-};
-
-const Wrapper = styled.div`
-  display: flex;
-  text-align: center;
-  @media (max-width: 767px) {
-    display: block;
-    > * {
-      margin: 0.5rem auto;
-    }
-  }
+const CardsContainer = styled.div`
+  margin: 0 auto;
+  max-width: 80rem;
 `;
 
 const Footer = styled.div`
   margin-bottom: 2rem;
+  margin-top: 1rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -121,61 +135,5 @@ const Footer = styled.div`
     font-weight: 400;
     font-size: 12px;
     padding: 1em;
-  }
-`;
-
-const Title = styled.div`
-  position: relative;
-  text-align: center;
-  font-size: 1.25rem;
-  @media (max-width: 768px) {
-    font-size: 0.8rem;
-  }
-  font-weight: 700;
-  margin: 1rem 0;
-  ::after {
-    content: "";
-    display: block;
-    height: 1px;
-    width: 100%;
-    background-color: #d2d6dc;
-    position: absolute;
-    left: 0;
-    top: 50%;
-    @media (max-width: 768px) {
-      top: 110%;
-    }
-    transform: translateY(-50%);
-    z-index: -1;
-  }
-  span {
-    padding: 0 10px;
-    background-color: #fff;
-    color: rgb(22, 30, 46);
-  }
-`;
-
-const PreferenceContent = styled(Content)`
-  padding: 2rem;
-  padding-top: 0.5rem;
-`;
-
-const ContinueButton = styled.button`
-  color: #fff;
-  background-color: #5145cd;
-  padding: 9px 20px;
-  border: 0;
-  outline: 0;
-  border-radius: 6px;
-  font-weight: 500;
-  font-size: 1rem;
-  @media (max-width: 768px) {
-    font-size: 0.8rem;
-  }
-  display: block;
-  outline: 0;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  :hover {
-    opacity: 0.9;
   }
 `;

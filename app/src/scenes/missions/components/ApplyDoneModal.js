@@ -8,7 +8,7 @@ export default ({ value, onChange }) => {
   if (!value) return <div />;
 
   const renderText = () => {
-    if (value.isMilitaryPreparation === "true") return "Super, maintenant donne tes docs !";
+    if (value.isMilitaryPreparation === "true") return "Merci de téléverser vos pièces dans « Ma préparation militaire »";
     return "Votre candidature sera traitée dans les prochains jours par le responsable de la structure.";
   };
 

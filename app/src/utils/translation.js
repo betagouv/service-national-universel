@@ -16,6 +16,8 @@ export const translate = (value) => {
       return "En attente de réalisation";
     case "WAITING_VALIDATION":
       return "En attente de validation";
+    case "WAITING_VERIFICATION":
+      return "En attente de vérification d'éligibilité";
     case "WAITING_ACCEPTATION":
       return "En attente d'acceptation";
     case "WAITING_CORRECTION":

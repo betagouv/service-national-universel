@@ -7,6 +7,7 @@ import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
 import { translate, APPLICATION_STATUS_COLORS, APPLICATION_STATUS, getAge } from "../../../utils";
+import Badge from "../../../components/Badge";
 
 export default ({ application, index }) => {
   const [value, setValue] = useState(application);
@@ -49,7 +50,10 @@ export default ({ application, index }) => {
                     <div>
                       <h4>{value.mission.structureName}</h4>
                       <p>{value.mission.name}</p>
-                      <Tags>{getTags(value.mission).map((e, i) => e && <div key={i}>{translate(e)}</div>)}</Tags>
+                      <Tags>
+                        {getTags(value.mission).map((e, i) => e && <Badge key={i} text={e} textColor="#6b7280" backgroundColor="#ffffff" />)}
+                        {value.mission.isMilitaryPreparation === "true" ? <Badge text="Préparation Militaire" color="#03224C" /> : null}
+                      </Tags>
                     </div>
                   </div>
                 </div>
