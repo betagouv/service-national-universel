@@ -36,7 +36,7 @@ export default ({ onChange, value }) => {
     (async () => {
       if (!value.structureId) return;
       const { ok, data, code } = await api.get(`/structure/${value.structureId}`);
-      if (!ok) return toastr.error("Oups, une erreur est survnue lors de la récuperation de la structure", translate(code));
+      if (!ok) return toastr.error("Oups, une erreur est survnue lors de la récupération de la structure", translate(code));
       return setStructure(data);
     })();
   }, [value]);

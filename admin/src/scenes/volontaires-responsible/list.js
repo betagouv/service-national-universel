@@ -29,7 +29,7 @@ export default () => {
   async function appendMissions(structure) {
     const missionsResponse = await api.get(`/mission/structure/${structure}`);
     if (!missionsResponse.ok) {
-      toastr.error("Oups, une erreur est survenue lors de la récuperation des missions", translate(missionsResponse.code));
+      toastr.error("Oups, une erreur est survenue lors de la récupération des missions", translate(missionsResponse.code));
       return history.push("/");
     }
     return missionsResponse.data;
@@ -40,7 +40,7 @@ export default () => {
     if (user.role === "supervisor") {
       const subStructures = await api.get(`/structure/network/${structure}`);
       if (!subStructures.ok) {
-        toastr.error("Oups, une erreur est survenue lors de la récuperation des missions des antennes", translate(subStructures.code));
+        toastr.error("Oups, une erreur est survenue lors de la récupération des missions des antennes", translate(subStructures.code));
         return history.push("/");
       }
       for (let i = 0; i < subStructures.data.length; i++) {

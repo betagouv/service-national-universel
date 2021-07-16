@@ -143,7 +143,7 @@ const InfoStructure = ({ title, structure }) => {
   useEffect(() => {
     (async () => {
       const { ok, data, code } = await api.get(`/structure/${structure}`);
-      if (!ok) toastr.error("Oups, une erreur est survenue lors de la récuperation de la structure", translate(code));
+      if (!ok) toastr.error("Oups, une erreur est survenue lors de la récupération de la structure", translate(code));
       else setValue(data.description);
       return;
     })();

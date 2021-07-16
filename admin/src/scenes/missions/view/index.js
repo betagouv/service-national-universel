@@ -22,14 +22,14 @@ export default ({ ...props }) => {
 
       const missionResponse = await api.get(`/mission/${id}`);
       if (!missionResponse.ok) {
-        toastr.error("Oups, une erreur est survenue lors de la récuperation de la mission", translate(missionResponse.code));
+        toastr.error("Oups, une erreur est survenue lors de la récupération de la mission", translate(missionResponse.code));
         return history.push("/mission");
       }
       setMission(missionResponse.data);
 
       const structureResponse = await api.get(`/structure/${missionResponse.data.structureId}`);
       if (!structureResponse.ok) {
-        toastr.error("Oups, une erreur est survenue lors de la récuperation de la structure", translate(structureResponse.code));
+        toastr.error("Oups, une erreur est survenue lors de la récupération de la structure", translate(structureResponse.code));
         return history.push("/mission");
       }
       setStructure(structureResponse.data);
@@ -38,7 +38,7 @@ export default ({ ...props }) => {
         console.log(missionResponse.data.tutorId);
         const tutorResponse = await api.get(`/referent/${missionResponse.data.tutorId}`);
         if (!tutorResponse.ok) {
-          toastr.error("Oups, une erreur est survenue lors de la récuperation du tuteur", translate(tutorResponse.code));
+          toastr.error("Oups, une erreur est survenue lors de la récupération du tuteur", translate(tutorResponse.code));
           return history.push("/mission");
         }
         setTutor(tutorResponse.data);
@@ -46,7 +46,7 @@ export default ({ ...props }) => {
 
       const applicationResponse = await api.get(`/application/mission/${missionResponse.data._id}`);
       if (!applicationResponse.ok) {
-        toastr.error("Oups, une erreur est survenue lors de la récuperation des volontaires", translate(applicationResponse.code));
+        toastr.error("Oups, une erreur est survenue lors de la récupération des volontaires", translate(applicationResponse.code));
         return history.push("/mission");
       }
       setApplications(applicationResponse.data);
