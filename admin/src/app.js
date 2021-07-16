@@ -8,7 +8,6 @@ import styled from "styled-components";
 import { setUser, setStructure } from "./redux/auth/actions";
 
 import Auth from "./scenes/auth";
-import Onboarding from "./scenes/onboarding";
 import Validate from "./scenes/validate";
 import Profil from "./scenes/profil";
 import Settings from "./scenes/settings";
@@ -95,7 +94,6 @@ const Home = () => {
     return null;
   };
 
-  // if (user && !user.structureId) return <Onboarding />;
   return (
     <div style={{ display: "flex" }}>
       <Drawer open={menuVisible} onOpen={setMenuVisible} />
@@ -107,7 +105,6 @@ const Home = () => {
         />
         <Switch>
           <Route path="/auth" component={Auth} />
-          <Route path="/onboarding" component={Onboarding} />
           <RestrictedRoute path="/structure" component={Structure} />
           <RestrictedRoute path="/settings" component={Settings} />
           <RestrictedRoute path="/profil" component={Profil} />
