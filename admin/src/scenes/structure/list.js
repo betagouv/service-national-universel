@@ -8,7 +8,7 @@ import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
-import { translate, corpsEnUniforme, formatLongDateFR, ES_NO_LIMIT } from "../../utils";
+import { translate, corpsEnUniforme, formatLongDateFR, ES_NO_LIMIT, ROLES } from "../../utils";
 import VioletButton from "../../components/buttons/VioletButton";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine } from "../../components/list";
@@ -46,7 +46,8 @@ export default () => {
   }, [structureIds]);
 
   const user = useSelector((state) => state.Auth.user);
-  const getDefaultQuery = () => (user.role === "supervisor" ? { query: { bool: { filter: { term: { "networkId.keyword": user.structureId } } } } } : { query: { match_all: {} } });
+  const getDefaultQuery = () =>
+    user.role === ROLES.SUPERVISOR ? { query: { bool: { filter: { term: { "networkId.keyword": user.structureId } } } } } : { query: { match_all: {} } };
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
   return (
     <div>

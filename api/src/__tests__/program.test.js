@@ -6,6 +6,7 @@ const passport = require("./__mocks__/passport");
 const getNewProgramFixture = require("./fixtures/program");
 const { getProgramsHelper, getProgramByIdHelper, deleteProgramByIdHelper, createProgramHelper, expectProgramToEqual } = require("./helpers/program");
 const { dbConnect, dbClose } = require("./helpers/db");
+const { ROLES } = require("snu-lib/roles");
 
 jest.setTimeout(10_000);
 
@@ -62,9 +63,9 @@ describe("Program", () => {
     const programHeadCenter = await createProgramHelper(programFixtureHeadCenter);
     const programFixture = getNewProgramFixture();
     const program = await createProgramHelper(programFixture);
-    passport.user.role = "head_center";
+    passport.user.role = ROLES.HEAD_CENTER;
     const res = await request(getAppHelper()).get(`/program/`);
-    passport.user.role = "admin";
+    passport.user.role = ROLES.ADMIN;
     expect(res.statusCode).toEqual(200);
     expect(res.body.data.length).toEqual(1);
     expectProgramToEqual(programFixtureHeadCenter, res.body.data[0]);
@@ -83,7 +84,7 @@ describe("Program", () => {
     const programNoRegionAndDepartment = await createProgramHelper(programFixtureNoRegionAndDepartment);
     passport.user.role = "structure_member";
     const res = await request(getAppHelper()).get(`/program/`);
-    passport.user.role = "admin";
+    passport.user.role = ROLES.ADMIN;
     expect(res.statusCode).toEqual(200);
     expect(res.body.data.length).toEqual(1);
     expectProgramToEqual(programFixtureRegionDepartment, res.body.data[0]);

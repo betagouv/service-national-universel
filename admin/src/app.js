@@ -34,6 +34,7 @@ import Loader from "./components/Loader";
 import api from "./services/api";
 
 import { SENTRY_URL, environment } from "./config";
+import { ROLES } from "./utils";
 
 import "./index.css";
 
@@ -82,15 +83,15 @@ const Home = () => {
   const [menuVisible, setMenuVisible] = useState(false);
 
   const renderDashboard = () => {
-    if (["supervisor", "responsible"].includes(user?.role)) return <DashboardResponsible />;
-    if (user?.role === "head_center") return <DashboardHeadCenter />;
-    if (["referent_department", "referent_region", "admin"].includes(user?.role)) return <Dashboard />;
+    if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user?.role)) return <DashboardResponsible />;
+    if (user?.role === ROLES.HEAD_CENTER) return <DashboardHeadCenter />;
+    if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(user?.role)) return <Dashboard />;
     return null;
   };
   const renderVolontaire = () => {
-    if (["supervisor", "responsible"].includes(user?.role)) return <VolontairesResponsible />;
-    if (user?.role === "head_center") return <VolontairesHeadCenter />;
-    if (["referent_department", "referent_region", "admin"].includes(user?.role)) return <Volontaires />;
+    if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user?.role)) return <VolontairesResponsible />;
+    if (user?.role === ROLES.HEAD_CENTER) return <VolontairesHeadCenter />;
+    if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(user?.role)) return <Volontaires />;
     return null;
   };
 

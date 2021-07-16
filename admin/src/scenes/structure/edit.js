@@ -12,7 +12,7 @@ import AddressInput from "../../components/addressInput";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
 import Invite from "./components/invite";
 import Loader from "../../components/Loader";
-import { associationTypes, privateTypes, publicTypes, publicEtatTypes, translate } from "../../utils";
+import { associationTypes, privateTypes, publicTypes, publicEtatTypes, translate, ROLES } from "../../utils";
 import api from "../../services/api";
 import { Box, BoxTitle } from "../../components/box";
 import LoadingButton from "../../components/buttons/LoadingButton";
@@ -290,7 +290,7 @@ export default (props) => {
                     </Field>
                   </FormGroup>
                   <FormGroup>
-                    {user.role === "admin" && (
+                    {user.role === ROLES.ADMIN && (
                       <div>
                         <label>TÊTE DE RÉSEAU</label>
                         <Field component="select" name="isNetwork" value={values.isNetwork} onChange={handleChange}>

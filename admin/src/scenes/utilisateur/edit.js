@@ -11,7 +11,7 @@ import ReactSelect from "react-select";
 import { Box, BoxContent, BoxHeadTitle } from "../../components/box";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import DateInput from "../../components/dateInput";
-import { departmentList, regionList, department2region, translate, REFERENT_ROLES, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE } from "../../utils";
+import { departmentList, regionList, department2region, translate, ROLES, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE } from "../../utils";
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 import Loader from "../../components/Loader";
@@ -64,7 +64,7 @@ export default (props) => {
   };
 
   function canModify(user, value) {
-    if (user.role === "admin") return true;
+    if (user.role === ROLES.ADMIN) return true;
     // https://trello.com/c/Wv2TrQnQ/383-admin-ajouter-onglet-utilisateurs-pour-les-r%C3%A9f%C3%A9rents
     if (user.role === "referent_region") {
       if (["referent_department", "referent_region"].includes(value.role) && user.region === value.region) return true;
@@ -115,7 +115,7 @@ export default (props) => {
                 <SubTitle>{getSubtitle()}</SubTitle>
               </div>
               <div style={{ display: "flex" }}>
-                {currentUser.role === "admin" ? <PanelActionButton onClick={handleImpersonate} icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" /> : null}
+                {currentUser.role === ROLES.ADMIN ? <PanelActionButton onClick={handleImpersonate} icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" /> : null}
                 <SaveBtn loading={isSubmitting} onClick={handleSubmit}>
                   Enregistrer
                 </SaveBtn>
@@ -148,7 +148,7 @@ export default (props) => {
                     <BoxContent direction="column">
                       <Select
                         name="role"
-                        disabled={currentUser.role !== "admin"}
+                        disabled={currentUser.role !== ROLES.ADMIN}
                         values={values}
                         onChange={(e) => {
                           const value = e.target.value;
@@ -157,25 +157,21 @@ export default (props) => {
                         }}
                         allowEmpty={false}
                         title="Rôle"
-                        options={[
-                          REFERENT_ROLES.REFERENT_DEPARTMENT,
-                          REFERENT_ROLES.REFERENT_REGION,
-                          REFERENT_ROLES.ADMIN,
-                          REFERENT_ROLES.RESPONSIBLE,
-                          REFERENT_ROLES.SUPERVISOR,
-                          REFERENT_ROLES.HEAD_CENTER,
-                        ].map((key) => ({ value: key, label: translate(key) }))}
+                        options={[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN, ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER].map((key) => ({
+                          value: key,
+                          label: translate(key),
+                        }))}
                       />
 
-                      {values.role === REFERENT_ROLES.HEAD_CENTER && centers ? (
+                      {values.role === ROLES.HEAD_CENTER && centers ? (
                         <AutocompleteSelectCenter title="Centre" values={values} handleChange={handleChange} placeholder="Choisir un centre" options={centers} />
                       ) : null}
-                      {[REFERENT_ROLES.REFERENT_DEPARTMENT, REFERENT_ROLES.REFERENT_REGION].includes(values.role) ? (
+                      {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(values.role) ? (
                         <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRole(values.role)} />
                       ) : null}
-                      {values.role === REFERENT_ROLES.REFERENT_DEPARTMENT ? (
+                      {values.role === ROLES.REFERENT_DEPARTMENT ? (
                         <Select
-                          disabled={currentUser.role !== "admin"}
+                          disabled={currentUser.role !== ROLES.ADMIN}
                           name="department"
                           values={values}
                           onChange={(e) => {
@@ -188,9 +184,9 @@ export default (props) => {
                           options={departmentList.map((d) => ({ value: d, label: d }))}
                         />
                       ) : null}
-                      {values.role === REFERENT_ROLES.REFERENT_REGION ? (
+                      {values.role === ROLES.REFERENT_REGION ? (
                         <Select
-                          disabled={values.role === REFERENT_ROLES.REFERENT_DEPARTMENT}
+                          disabled={values.role === ROLES.REFERENT_DEPARTMENT}
                           name="region"
                           values={values}
                           onChange={(e) => {
@@ -211,13 +207,13 @@ export default (props) => {
         )}
       </Formik>
       <Emails email={user.email} />
-      {currentUser.role === "admin" ? (
+      {currentUser.role === ROLES.ADMIN ? (
         <Box>
           <div style={{ fontSize: ".9rem", padding: "1rem", color: "#382F79" }}>Historique</div>
           <HistoricComponent model="referent" value={user} />
         </Box>
       ) : null}
-      {currentUser.role === "admin" || (["referent_department", "referent_region"].includes(currentUser.role) && ["responsible", "supervisor"].includes(user.role)) ? (
+      {currentUser.role === ROLES.ADMIN || (["referent_department", "referent_region"].includes(currentUser.role) && ["responsible", "supervisor"].includes(user.role)) ? (
         <DeleteBtn
           onClick={async () => {
             if (!confirm("Êtes-vous sûr(e) de vouloir supprimer ce profil")) return;

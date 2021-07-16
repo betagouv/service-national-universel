@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 
 import { apiURL } from "../../../config";
 import api from "../../../services/api";
-import { translate, getAge } from "../../../utils";
+import { translate, getAge, ROLES } from "../../../utils";
 import { Filter, ResultTable, BottomResultStats, Table, MultiLine } from "../../../components/list";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
@@ -133,7 +133,7 @@ const HitYoung = ({ hit, handleAffect, handleWaitingList, onClick }) => {
       <td onClick={(e) => e.stopPropagation()}>
         <div style={{ display: "flex" }}>
           <PanelActionButton onClick={handleAffect} title="Affecter à ce centre" />
-          {["admin", "referent_region"].includes(user.role) ? <PanelActionButton onClick={handleWaitingList} title="Placer en liste d'attente" /> : null}
+          {[ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role) ? <PanelActionButton onClick={handleWaitingList} title="Placer en liste d'attente" /> : null}
         </div>
       </td>
     </tr>

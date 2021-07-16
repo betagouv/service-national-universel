@@ -1,4 +1,5 @@
 const faker = require("faker");
+const { ROLES } = require("snu-lib/roles");
 
 faker.locale = "fr";
 
@@ -12,7 +13,7 @@ function getNewReferentFixture() {
     department: faker.address.state(),
     phone: faker.phone.phoneNumber(),
     mobile: faker.phone.phoneNumber(),
-    role: "admin",
+    role: ROLES.ADMIN,
   };
 }
 

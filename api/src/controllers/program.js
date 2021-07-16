@@ -8,6 +8,7 @@ const { ERRORS } = require("../utils");
 const { validateId, validateString } = require("../utils/validator/default");
 const referentValidator = require("../utils/validator/referent");
 const youngValidator = require("../utils/validator/young");
+const { ROLES } = require("snu-lib/roles");
 
 router.post("/", async (req, res) => {
   try {
@@ -64,8 +65,8 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
 router.get("/", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
     let data = [];
-    if (req.user.role === "admin") data = await ProgramObject.find({});
-    else if (req.user.role === "head_center") data = await ProgramObject.find({ visibility: "HEAD_CENTER" });
+    if (req.user.role === ROLES.ADMIN) data = await ProgramObject.find({});
+    else if (req.user.role === ROLES.HEAD_CENTER) data = await ProgramObject.find({ visibility: "HEAD_CENTER" });
     else {
       const { error: errorDepartement, value: checkedDepartement } = validateString(req.user.department);
       const { error: errorRegion, value: checkedRegion } = validateString(req.user.region);
