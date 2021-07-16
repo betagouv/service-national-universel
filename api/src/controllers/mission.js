@@ -146,16 +146,6 @@ router.put("/:id/structure/:structureId", passport.authenticate("referent", { se
   }
 });
 
-// router.get("/", async (req, res) => {
-//   try {
-//     const data = ""; //await MissionObject.find(req.query);
-//     return res.status(200).send({ ok: true, data });
-//   } catch (error) {
-//     capture(error);
-//     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
-//   }
-// });
-
 //@check
 router.delete("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
