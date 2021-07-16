@@ -13,7 +13,7 @@ import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import Header from "./components/header";
 
-import { translate } from "../../utils";
+import { translate, ROLES } from "../../utils";
 import Loader from "../../components/Loader";
 import LoginBox from "./components/loginBox";
 import AuthWrapper from "./components/authWrapper";
@@ -48,7 +48,7 @@ export default () => {
   if (!newuser) return <Loader />;
 
   let title;
-  if (newuser.department && newuser.role === "referent_department") {
+  if (newuser.department && newuser.role === ROLES.REFERENT_DEPARTMENT) {
     title = `Activez votre compte de Référent du département : ${newuser.department}`;
   } else {
     title = "Activez votre compte";

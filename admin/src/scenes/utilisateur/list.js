@@ -74,7 +74,7 @@ export default () => {
                     if (!structure) structure = {};
                   }
                   let service = {};
-                  if (data.role === "referent_department" && services) {
+                  if (data.role === ROLES.REFERENT_DEPARTMENT && services) {
                     service = services.find((s) => s.department === data.department);
                     if (!service) service = {};
                   }

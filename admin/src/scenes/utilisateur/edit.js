@@ -58,19 +58,19 @@ export default (props) => {
 
   const getSubRole = (role) => {
     let subRole = [];
-    if (role === "referent_department") subRole = REFERENT_DEPARTMENT_SUBROLE;
-    if (role === "referent_region") subRole = REFERENT_REGION_SUBROLE;
+    if (role === ROLES.REFERENT_DEPARTMENT) subRole = REFERENT_DEPARTMENT_SUBROLE;
+    if (role === ROLES.REFERENT_REGION) subRole = REFERENT_REGION_SUBROLE;
     return Object.keys(subRole).map((e) => ({ value: e, label: translate(subRole[e]) }));
   };
 
   function canModify(user, value) {
     if (user.role === ROLES.ADMIN) return true;
     // https://trello.com/c/Wv2TrQnQ/383-admin-ajouter-onglet-utilisateurs-pour-les-r%C3%A9f%C3%A9rents
-    if (user.role === "referent_region") {
-      if (["referent_department", "referent_region"].includes(value.role) && user.region === value.region) return true;
+    if (user.role === ROLES.REFERENT_REGION) {
+      if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(value.role) && user.region === value.region) return true;
       return false;
     }
-    if (user.role === "referent_department") {
+    if (user.role === ROLES.REFERENT_DEPARTMENT) {
       if (user.role === value.role && user.department === value.department) return true;
       return false;
     }
@@ -213,7 +213,7 @@ export default (props) => {
           <HistoricComponent model="referent" value={user} />
         </Box>
       ) : null}
-      {currentUser.role === ROLES.ADMIN || (["referent_department", "referent_region"].includes(currentUser.role) && ["responsible", "supervisor"].includes(user.role)) ? (
+      {currentUser.role === ROLES.ADMIN || ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(currentUser.role) && ["responsible", "supervisor"].includes(user.role)) ? (
         <DeleteBtn
           onClick={async () => {
             if (!confirm("Êtes-vous sûr(e) de vouloir supprimer ce profil")) return;
@@ -232,7 +232,7 @@ export default (props) => {
           {`Supprimer le compte de ${user.firstName} ${user.lastName}`}
         </DeleteBtn>
       ) : null}
-      {canModify(currentUser, user) && user.role === "referent_department" && (
+      {canModify(currentUser, user) && user.role === ROLES.REFERENT_DEPARTMENT && (
         <Formik
           initialValues={service || { department: user.department }}
           onSubmit={async (values) => {
