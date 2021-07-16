@@ -108,7 +108,7 @@ function filter(body, user, index) {
   }
 
   if (index === "mission") {
-    if (user.role === "responsible") filter.push({ terms: { "structureId.keyword": [user.structureId] } });
+    if (user.role === ROLES.RESPONSIBLE) filter.push({ terms: { "structureId.keyword": [user.structureId] } });
   }
 
   if (index === "cohesioncenter") {

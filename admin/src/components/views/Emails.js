@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import { formatLongDateUTC } from "../../utils";
 import api from "../../services/api";
 import { Box } from "../../components/box";
+import { ROLES } from "../../utils";
 
 export default ({ email }) => {
   const [emails, setEmails] = useState();
@@ -16,7 +17,7 @@ export default ({ email }) => {
     setMinify(!minify);
   };
 
-  if (user.role !== "admin") return null;
+  if (user.role !== ROLES.ADMIN) return null;
 
   const getEmails = async () => {
     if (!email) return;

@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
 import api from "../../../services/api";
-import { translate } from "../../../utils";
+import { translate, ROLES } from "../../../utils";
 
 export default ({ program, image, enableToggle = true, onDelete }) => {
   const [expandDetails, setExpandDetails] = useState(false);
@@ -75,10 +75,10 @@ const Actions = ({ program, onDelete }) => {
   const id = program._id;
 
   const handleUserAccess = () =>
-    (program.visibility === "HEAD_CENTER" && user.role === "admin") ||
-    (program.visibility === "NATIONAL" && user.role === "admin") ||
-    (program.visibility === "REGION" && ["admin", "referent_region"].includes(user.role)) ||
-    (program.visibility === "DEPARTMENT" && ["admin", "referent_region", "referent_department"].includes(user.role));
+    (program.visibility === "HEAD_CENTER" && user.role === ROLES.ADMIN) ||
+    (program.visibility === "NATIONAL" && user.role === ROLES.ADMIN) ||
+    (program.visibility === "REGION" && [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role)) ||
+    (program.visibility === "DEPARTMENT" && [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role));
 
   const handleDelete = async () => {
     if (!confirm("Êtes-vous sûr(e) de vouloir supprimer cette possibilité d'engagement ?")) return;

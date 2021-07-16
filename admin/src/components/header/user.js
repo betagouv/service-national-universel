@@ -6,6 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import Invite from "./invite";
 import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
+import { ROLES } from "../../utils";
 
 import Avatar from "../Avatar";
 
@@ -30,12 +31,12 @@ export default () => {
         </div>
         <Menu open={open}>
           <Close onClick={() => setOpen(false)}>&times;</Close>
-          {["admin", "referent_department", "referent_region"].includes(user.role) ? (
+          {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) ? (
             <Item>
               <InviteReferent role={user.role} />
             </Item>
           ) : null}
-          {["responsible", "supervisor"].includes(user.role) && user.structureId ? (
+          {[ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role) && user.structureId ? (
             <Item>
               <NavLink to={`/structure/${user.structureId}`}>Inviter un utilisateur</NavLink>
             </Item>

@@ -64,7 +64,7 @@ export default (props) => {
   };
 
   function canModify(user, value) {
-    if (user.role === "admin") return true;
+    if (user.role === REFERENT_ROLES.ADMIN) return true;
     // https://trello.com/c/Wv2TrQnQ/383-admin-ajouter-onglet-utilisateurs-pour-les-r%C3%A9f%C3%A9rents
     if (user.role === "referent_region") {
       if (["referent_department", "referent_region"].includes(value.role) && user.region === value.region) return true;
@@ -115,7 +115,7 @@ export default (props) => {
                 <SubTitle>{getSubtitle()}</SubTitle>
               </div>
               <div style={{ display: "flex" }}>
-                {currentUser.role === "admin" ? <PanelActionButton onClick={handleImpersonate} icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" /> : null}
+                {currentUser.role === REFERENT_ROLES.ADMIN ? <PanelActionButton onClick={handleImpersonate} icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" /> : null}
                 <SaveBtn loading={isSubmitting} onClick={handleSubmit}>
                   Enregistrer
                 </SaveBtn>
@@ -148,7 +148,7 @@ export default (props) => {
                     <BoxContent direction="column">
                       <Select
                         name="role"
-                        disabled={currentUser.role !== "admin"}
+                        disabled={currentUser.role !== REFERENT_ROLES.ADMIN}
                         values={values}
                         onChange={(e) => {
                           const value = e.target.value;
@@ -175,7 +175,7 @@ export default (props) => {
                       ) : null}
                       {values.role === REFERENT_ROLES.REFERENT_DEPARTMENT ? (
                         <Select
-                          disabled={currentUser.role !== "admin"}
+                          disabled={currentUser.role !== REFERENT_ROLES.ADMIN}
                           name="department"
                           values={values}
                           onChange={(e) => {
@@ -211,13 +211,13 @@ export default (props) => {
         )}
       </Formik>
       <Emails email={user.email} />
-      {currentUser.role === "admin" ? (
+      {currentUser.role === REFERENT_ROLES.ADMIN ? (
         <Box>
           <div style={{ fontSize: ".9rem", padding: "1rem", color: "#382F79" }}>Historique</div>
           <HistoricComponent model="referent" value={user} />
         </Box>
       ) : null}
-      {currentUser.role === "admin" || (["referent_department", "referent_region"].includes(currentUser.role) && ["responsible", "supervisor"].includes(user.role)) ? (
+      {currentUser.role === REFERENT_ROLES.ADMIN || (["referent_department", "referent_region"].includes(currentUser.role) && ["responsible", "supervisor"].includes(user.role)) ? (
         <DeleteBtn
           onClick={async () => {
             if (!confirm("Êtes-vous sûr(e) de vouloir supprimer ce profil")) return;

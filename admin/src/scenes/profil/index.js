@@ -21,8 +21,8 @@ export default () => {
 
   const getSubRole = (role) => {
     let subRole = [];
-    if (role === "referent_department") subRole = REFERENT_DEPARTMENT_SUBROLE;
-    if (role === "referent_region") subRole = REFERENT_REGION_SUBROLE;
+    if (role === REFERENT_ROLES.REFERENT_DEPARTMENT) subRole = REFERENT_DEPARTMENT_SUBROLE;
+    if (role === REFERENT_ROLES.REFERENT_REGION) subRole = REFERENT_REGION_SUBROLE;
     return Object.keys(subRole).map((e) => ({ value: e, label: translate(subRole[e]) }));
   };
 
@@ -89,7 +89,7 @@ export default () => {
                         <Item title="Téléphone fixe" values={values} name="phone" handleChange={handleChange} />
                       </Col>
                     </Row>
-                    {["referent_department", "referent_region"].includes(values.role) ? (
+                    {[REFERENT_ROLES.REFERENT_DEPARTMENT, REFERENT_ROLES.REFERENT_REGION].includes(values.role) ? (
                       <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRole(values.role)} />
                     ) : null}
                   </BoxContent>
@@ -101,7 +101,7 @@ export default () => {
             )}
           </Formik>
         </Col>
-        {user.role === "referent_department" && (
+        {user.role === REFERENT_ROLES.REFERENT_DEPARTMENT && (
           <Col md={6}>
             <Formik
               initialValues={service || { department: user.department }}

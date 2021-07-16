@@ -7,7 +7,7 @@ import { useHistory } from "react-router-dom";
 import { Link } from "react-router-dom";
 
 import { setUser } from "../../redux/auth/actions";
-import { translate, getFilterLabel, formatLongDateFR, formatStringLongDate, ES_NO_LIMIT } from "../../utils";
+import { translate, getFilterLabel, formatLongDateFR, formatStringLongDate, ES_NO_LIMIT, ROLES } from "../../utils";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
@@ -162,7 +162,7 @@ export default () => {
                         <th>Rôle</th>
                         <th>Crée le</th>
                         <th>Dernière connexion le</th>
-                        {["admin", "supervisor"].includes(user.role) && <th>Actions</th>}
+                        {[ROLES.ADMIN, ROLES.SUPERVISOR].includes(user.role) && <th>Actions</th>}
                       </tr>
                     </thead>
                     <tbody>
@@ -194,7 +194,7 @@ const Hit = ({ hit, onClick, user, selected }) => {
       <td>{hit.role && <Badge text={translate(hit.role)} />}</td>
       <td>{formatStringLongDate(hit.createdAt)}</td>
       <td>{formatStringLongDate(hit.lastLoginAt)}</td>
-      {["admin", "supervisor"].includes(user.role) && (
+      {[ROLES.ADMIN, ROLES.SUPERVISOR].includes(user.role) && (
         <td onClick={(e) => e.stopPropagation()}>
           <Action hit={hit} />
         </td>

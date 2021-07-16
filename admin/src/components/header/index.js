@@ -1,6 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
+import { ROLES } from "../../utils";
 
 import User from "./user";
 
@@ -9,11 +10,11 @@ export default ({ onClickBurger }) => {
   if (!user) return <div />;
 
   function getName() {
-    if (user.role === "admin") return "Espace modérateur";
-    if (user.role === "referent_department") return "ESPACE RÉFÉRENT DÉPARTEMENTAL";
-    if (user.role === "referent_region") return "ESPACE RÉFÉRENT REGIONAL";
-    if (user.role === "responsible") return "Espace responsable";
-    if (user.role === "supervisor") return "Espace superviseur";
+    if (user.role === ROLES.ADMIN) return "Espace modérateur";
+    if (user.role === ROLES.REFERENT_DEPARTMENT) return "ESPACE RÉFÉRENT DÉPARTEMENTAL";
+    if (user.role === ROLES.REFERENT_REGION) return "ESPACE RÉFÉRENT REGIONAL";
+    if (user.role === ROLES.RESPONSIBLE) return "Espace responsable";
+    if (user.role === ROLES.SUPERVISOR) return "Espace superviseur";
     return "";
   }
 
