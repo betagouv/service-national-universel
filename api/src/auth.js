@@ -124,16 +124,19 @@ class Auth {
 
   async resetPassword(req, res) {
     const { error, value } = Joi.object({
-      password: Joi.string().min(8).required(),
-      newPassword: Joi.string().min(8).required(),
-      verifyPassword: Joi.string().min(8).required(),
+      password: Joi.string().required(),
+      newPassword: Joi.string().required(),
+      verifyPassword: Joi.string().required(),
     })
       .unknown()
       .validate(req.body);
 
-    if (error) res.status(400).send({ ok: false, code: PASSWORD_NOT_VALIDATED });
-
+    if (error) return res.status(400).send({ ok: false, code: PASSWORD_NOT_VALIDATED });
     const { password, verifyPassword, newPassword } = value;
+
+    if (!validatePassword(newPassword) || !validatePassword(verifyPassword)) {
+      return res.status(400).send({ ok: false, code: PASSWORD_NOT_VALIDATED });
+    }
 
     try {
       const match = await req.user.comparePassword(password);
@@ -189,8 +192,8 @@ class Auth {
 
   async forgotPasswordReset(req, res) {
     const { error, value } = Joi.object({
-      password: Joi.string().min(8).required(),
-      token: Joi.string().required(),
+      password: Joi.string().required(),
+      token: Joi.string().min(16).required(),
     })
       .unknown()
       .validate(req.body);
@@ -201,6 +204,7 @@ class Auth {
     }
 
     const { token, password } = value;
+    if (!validatePassword(password)) return res.status(400).send({ ok: false, code: PASSWORD_NOT_VALIDATED });
 
     try {
       const obj = await this.model.findOne({
