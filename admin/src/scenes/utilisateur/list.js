@@ -29,7 +29,7 @@ export default () => {
   const [filterVisible, setFilterVisible] = useState(false);
   const handleShowFilter = () => setFilterVisible(!filterVisible);
   const getDefaultQuery = () => {
-    if (user.role === "supervisor") return { query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } } };
+    if (user.role === ROLES.SUPERVISOR) return { query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } } };
     else return { query: { match_all: {} } };
   };
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
@@ -44,14 +44,14 @@ export default () => {
       if (!ok) return;
       setServices(data);
     })();
-    if (user.role !== "supervisor") return;
+    if (user.role !== ROLES.SUPERVISOR) return;
     (async () => {
       const { data } = await api.get(`/structure/network/${user.structureId}`);
       const ids = data.map((s) => s._id);
       setStructureIds(ids);
     })();
   }, []);
-  if (user.role === "supervisor" && !structureIds) return <Loader />;
+  if (user.role === ROLES.SUPERVISOR && !structureIds) return <Loader />;
 
   return (
     <div>

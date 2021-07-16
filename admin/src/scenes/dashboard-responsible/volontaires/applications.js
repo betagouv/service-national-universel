@@ -4,7 +4,7 @@ import { Col, Row } from "reactstrap";
 import { useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
 
-import { APPLICATION_STATUS_COLORS } from "../../../utils";
+import { APPLICATION_STATUS_COLORS, ROLES } from "../../../utils";
 import Badge from "../../../components/Badge";
 import api from "../../../services/api";
 import { CardArrow, Card, CardTitle, CardValueWrapper, CardValue, CardContainer, Title } from "../../../components/dashboard";
@@ -28,7 +28,7 @@ export default () => {
 
   async function initMissions(structure) {
     const m = await appendMissions(structure);
-    if (user.role === "supervisor") {
+    if (user.role === ROLES.SUPERVISOR) {
       const subStructures = await api.get(`/structure/network/${structure}`);
       if (!subStructures.ok) {
         toastr.error("Oups, une erreur est survenue lors de la récupération des missions des antennes", translate(subStructures.code));
@@ -77,7 +77,7 @@ export default () => {
       <Row>
         <Col md={12}>
           <h4 style={{ fontWeight: "normal", margin: "25px 0" }}>
-            Volontaires candidatant sur des missions de {user.role === "supervisor" ? "mes" : "ma"} structure{user.role === "supervisor" ? "s" : ""}
+            Volontaires candidatant sur des missions de {user.role === ROLES.SUPERVISOR ? "mes" : "ma"} structure{user.role === ROLES.SUPERVISOR ? "s" : ""}
           </h4>
         </Col>
         <Col md={6} xl={3}>
@@ -146,7 +146,7 @@ export default () => {
       <Row>
         <Col md={12}>
           <h4 style={{ fontWeight: "normal", margin: "25px 0" }}>
-            Volontaires participant à des missions de {user.role === "supervisor" ? "mes" : "ma"} structure{user.role === "supervisor" ? "s" : ""}
+            Volontaires participant à des missions de {user.role === ROLES.SUPERVISOR ? "mes" : "ma"} structure{user.role === ROLES.SUPERVISOR ? "s" : ""}
           </h4>
         </Col>
         <Col md={6} xl={3}>

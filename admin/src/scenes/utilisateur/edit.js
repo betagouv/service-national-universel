@@ -214,7 +214,7 @@ export default (props) => {
         </Box>
       ) : null}
       {currentUser.role === ROLES.ADMIN ||
-      ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(currentUser.role) && [ROLES.RESPONSIBLE, "supervisor"].includes(user.role)) ? (
+      ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(currentUser.role) && [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role)) ? (
         <DeleteBtn
           onClick={async () => {
             if (!confirm("Êtes-vous sûr(e) de vouloir supprimer ce profil")) return;

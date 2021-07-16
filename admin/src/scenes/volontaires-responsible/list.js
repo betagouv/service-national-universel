@@ -12,7 +12,7 @@ import ExportComponent from "../../components/ExportXlsx";
 import Loader from "../../components/Loader";
 import Chevron from "../../components/Chevron";
 import { Filter, FilterRow, ResultTable, Table, Header, Title } from "../../components/list";
-import { translate, getFilterLabel, formatStringLongDate, formatStringDate, getAge, ES_NO_LIMIT } from "../../utils";
+import { translate, getFilterLabel, formatStringLongDate, formatStringDate, getAge, ES_NO_LIMIT, ROLES } from "../../utils";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 
 const FILTERS = ["SEARCH", "STATUS", "PHASE", "COHORT", "MISSIONS", "TUTOR"];
@@ -37,7 +37,7 @@ export default () => {
 
   async function initMissions(structure) {
     const m = await appendMissions(structure);
-    if (user.role === "supervisor") {
+    if (user.role === ROLES.SUPERVISOR) {
       const subStructures = await api.get(`/structure/network/${structure}`);
       if (!subStructures.ok) {
         toastr.error("Oups, une erreur est survenue lors de la récupération des missions des antennes", translate(subStructures.code));

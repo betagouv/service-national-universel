@@ -26,13 +26,13 @@ export default () => {
   const user = useSelector((state) => state.Auth.user);
   const handleShowFilter = () => setFilterVisible(!filterVisible);
   const getDefaultQuery = () => {
-    if (user.role === "supervisor") return { query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } } };
+    if (user.role === ROLES.SUPERVISOR) return { query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } } };
     return { query: { match_all: {} } };
   };
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
   useEffect(() => {
-    if (user.role !== "supervisor") return;
+    if (user.role !== ROLES.SUPERVISOR) return;
     (async () => {
       const { data } = await api.get(`/structure/network/${user.structureId}`);
       const ids = data.map((s) => s._id);
@@ -40,7 +40,7 @@ export default () => {
     })();
     return;
   }, []);
-  if (user.role === "supervisor" && !structureIds) return <Loader />;
+  if (user.role === ROLES.SUPERVISOR && !structureIds) return <Loader />;
 
   return (
     <div>
@@ -181,7 +181,7 @@ export default () => {
                   showSearch={true}
                   searchPlaceholder="Rechercher..."
                 />
-                {user.role === "supervisor" ? (
+                {user.role === ROLES.SUPERVISOR ? (
                   <MultiDropdownList
                     defaultQuery={getDefaultQuery}
                     className="dropdown-filter"

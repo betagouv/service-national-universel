@@ -110,7 +110,7 @@ describe("Structure", () => {
       const res = await request(getAppHelper()).put("/structure").send(structure);
       expect(res.status).toBe(200);
       const updatedResponsible = await getReferentByIdHelper(responsible._id);
-      expect(updatedResponsible.role).toBe("supervisor");
+      expect(updatedResponsible.role).toBe(ROLES.SUPERVISOR);
       passport.user.structureId = "";
     });
   });
@@ -173,7 +173,7 @@ describe("Structure", () => {
         .send(structure);
       expect(res.status).toBe(200);
       const updatedResponsible = await getReferentByIdHelper(responsible._id);
-      expect(updatedResponsible.role).toBe("supervisor");
+      expect(updatedResponsible.role).toBe(ROLES.SUPERVISOR);
     });
   });
 
