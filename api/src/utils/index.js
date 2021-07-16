@@ -13,6 +13,7 @@ const rateLimit = require("express-rate-limit");
 const sendinblue = require("../sendinblue");
 const { ADMIN_URL, APP_URL } = require("../config");
 const { CELLAR_ENDPOINT, CELLAR_KEYID, CELLAR_KEYSECRET, BUCKET_NAME, ENVIRONMENT } = require("../config");
+const { ROLES } = require("snu-lib/roles");
 
 // Set the number of requests allowed to 15 in a 1 hour window
 const signinLimiter = rateLimit({
@@ -22,7 +23,7 @@ const signinLimiter = rateLimit({
   message: {
     ok: false,
     code: "TOO_MANY_REQUESTS",
-  }
+  },
 });
 
 function getReq(url, cb) {
@@ -104,7 +105,8 @@ function fileExist(url) {
 
 function validatePassword(password) {
   const schema = new passwordValidator();
-  schema.is()
+  schema
+    .is()
     .min(10) // Minimum length 10
     .has()
     .uppercase() // Must have uppercase letters
@@ -289,8 +291,8 @@ const assignNextYoungFromWaitingList = async (young) => {
 
     const center = await CohesionCenterModel.findById(young.cohesionCenterId);
     if (!center) return null;
-    let to = await ReferentModel.find({ role: "admin", email: { $in: ["youssef.tahiri@education.gouv.fr", "nicolas.roy@recherche.gouv.fr"] } });
-    to = to.concat(await ReferentModel.find({ role: "referent_region", region: center.region }));
+    let to = await ReferentModel.find({ role: ROLES.ADMIN, email: { $in: ["youssef.tahiri@education.gouv.fr", "nicolas.roy@recherche.gouv.fr"] } });
+    to = to.concat(await ReferentModel.find({ role: ROLES.REFERENT_REGION, region: center.region }));
     for (let i = 0; i < to.length; i++) {
       await sendAutoAffectationNotFoundMails(to[i], young, center);
     }

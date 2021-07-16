@@ -13,11 +13,12 @@ const { ERRORS } = require("../utils/index.js");
 const { validateId } = require("../utils/validator/default");
 const youngValidator = require("../utils/validator/young");
 const referentValidator = require("../utils/validator/referent");
+const { ROLES } = require("snu-lib/roles");
 
 const canModify = (user, mission) => {
   return !(
-    (user.role === "referent_department" && user.department !== mission.department) ||
-    (user.role === "referent_region" && user.region !== mission.region)
+    (user.role === ROLES.REFERENT_DEPARTMENT && user.department !== mission.department) ||
+    (user.role === ROLES.REFERENT_REGION && user.region !== mission.region)
   );
 };
 

@@ -20,6 +20,7 @@ const {
   deleteCenterDependencies,
 } = require("../utils");
 const renderFromHtml = require("../htmlToPdf");
+const { ROLES } = require("snu-lib/roles");
 
 router.post("/refresh/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
@@ -153,7 +154,7 @@ router.get("/:id/head", passport.authenticate("referent", { session: false }), a
   try {
     const center = await CohesionCenterModel.findById(req.params.id);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const data = await ReferentModel.findOne({ role: "head_center", cohesionCenterId: center._id });
+    const data = await ReferentModel.findOne({ role: ROLES.HEAD_CENTER, cohesionCenterId: center._id });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     return res.status(200).send({ ok: true, data });
@@ -187,7 +188,7 @@ router.get("/young/:youngId", passport.authenticate(["referent", "young"], { ses
 
 router.put("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    if (req.user.role !== "admin") return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (req.user.role !== ROLES.ADMIN) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const center = await CohesionCenterModel.findById(req.body._id);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -210,7 +211,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false }), asy
     const center = await CohesionCenterModel.findById(req.params.id);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (req.user.role !== "admin") return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (req.user.role !== ROLES.ADMIN) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     await center.remove();
     await deleteCenterDependencies({ _id: req.params.id });
     console.log(`Center ${req.params.id} has been deleted`);
