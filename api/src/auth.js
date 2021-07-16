@@ -10,6 +10,7 @@ const config = require("./config");
 const { sendEmail } = require("./sendinblue");
 const { COOKIE_MAX_AGE, JWT_MAX_AGE, cookieOptions, logoutCookieOptions } = require("./cookie-options");
 const { validatePassword } = require("./utils");
+const { validateFirstName } = require("./utils/validator/default");
 
 const EMAIL_OR_PASSWORD_INVALID = "EMAIL_OR_PASSWORD_INVALID";
 const PASSWORD_INVALID = "PASSWORD_INVALID";
@@ -65,7 +66,7 @@ class Auth {
     try {
       const { error, value } = Joi.object({
         email: Joi.string().lowercase().trim().email().required(),
-        firstName: Joi.string().lowercase().trim().required(),
+        firstName: validateFirstName().trim().required(),
         lastName: Joi.string().uppercase().trim().required(),
         password: Joi.string().required(),
       })
@@ -78,10 +79,8 @@ class Auth {
         return res.status(400).send({ ok: false, code: error.toString() });
       }
 
+      const { password, email, lastName, firstName } = value;
       if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: PASSWORD_NOT_VALIDATED });
-
-      const { password, email, lastName } = value;
-      const firstName = value.firstName.charAt(0).toUpperCase() + value.firstName.toLowerCase().slice(1);
 
       const user = await this.model.create({ password, email, firstName, lastName });
       const token = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });
