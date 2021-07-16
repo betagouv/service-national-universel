@@ -51,7 +51,7 @@ async function updateResponsibleAndSupervisorRole(structure) {
     const referents = await ReferentObject.find({ structureId: structure._id, role: { $in: [ROLES.RESPONSIBLE, ROLES.SUPERVISOR] } });
     if (!referents?.length) return console.log(`no referents edited for structure ${structure._id}`);
     for (const referent of referents) {
-      referent.set({ role: structure.isNetwork ? ROLES.SUPERVISOR : ROLES.RESPONSIBLE });
+      referent.set({ role: structure.isNetwork === "true" ? ROLES.SUPERVISOR : ROLES.RESPONSIBLE });
       await referent.save();
     }
   } catch (error) {
