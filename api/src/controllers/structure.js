@@ -148,7 +148,7 @@ router.get("/:id/patches", passport.authenticate("referent", { session: false })
 
 router.get("/:id", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
-    const data = await StructureObject.findOne({ _id: req.params.id });
+    const data = await StructureObject.findById(req.params.id);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
