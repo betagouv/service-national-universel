@@ -51,7 +51,7 @@ export default () => {
               <div style={{ flex: 1 }}>
                 <Title>Missions</Title>
               </div>
-              {user.role === "responsible" && user.structureId && (
+              {user.role === ROLES.RESPONSIBLE && user.structureId && (
                 <Link to={`/mission/create/${user.structureId}`}>
                   <VioletButton>
                     <p>Nouvelle mission</p>

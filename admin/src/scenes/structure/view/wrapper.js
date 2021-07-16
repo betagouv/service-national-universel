@@ -15,7 +15,7 @@ import Badge from "../../../components/Badge";
 export default ({ children, structure, tab }) => {
   const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
-  const isResponsible = user.role === "responsible";
+  const isResponsible = user.role === ROLES.RESPONSIBLE;
 
   const handleDelete = async () => {
     if (!confirm("Êtes-vous sûr(e) de vouloir supprimer cette structure ?")) return;

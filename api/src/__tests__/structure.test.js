@@ -19,6 +19,7 @@ const { createMissionHelper, getMissionByIdHelper } = require("./helpers/mission
 const getNewMissionFixture = require("./fixtures/mission");
 const getNewReferentFixture = require("./fixtures/referent");
 const { createReferentHelper, getReferentByIdHelper } = require("./helpers/referent");
+const { ROLES } = require("snu-lib/roles");
 
 jest.mock("../sendinblue", () => ({
   ...jest.requireActual("../sendinblue"),
@@ -102,7 +103,7 @@ describe("Structure", () => {
 
     it("should update responsible structure name", async () => {
       const structure = await createStructureHelper({ ...getNewStructureFixture(), name: "s", isNetwork: "false" });
-      const responsible = await createReferentHelper({ ...getNewReferentFixture(), structureId: structure._id, role: "responsible" });
+      const responsible = await createReferentHelper({ ...getNewReferentFixture(), structureId: structure._id, role: ROLES.RESPONSIBLE });
       const passport = require("passport");
       passport.user.structureId = structure._id;
       structure.isNetwork = "true";
@@ -165,7 +166,7 @@ describe("Structure", () => {
 
     it("should update responsible structure name", async () => {
       const structure = await createStructureHelper({ ...getNewStructureFixture(), name: "s", isNetwork: "false" });
-      const responsible = await createReferentHelper({ ...getNewReferentFixture(), structureId: structure._id, role: "responsible" });
+      const responsible = await createReferentHelper({ ...getNewReferentFixture(), structureId: structure._id, role: ROLES.RESPONSIBLE });
       structure.isNetwork = "true";
       const res = await request(getAppHelper())
         .put("/structure/" + structure._id)

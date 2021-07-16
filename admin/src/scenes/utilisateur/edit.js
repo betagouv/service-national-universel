@@ -213,7 +213,8 @@ export default (props) => {
           <HistoricComponent model="referent" value={user} />
         </Box>
       ) : null}
-      {currentUser.role === ROLES.ADMIN || ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(currentUser.role) && ["responsible", "supervisor"].includes(user.role)) ? (
+      {currentUser.role === ROLES.ADMIN ||
+      ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(currentUser.role) && [ROLES.RESPONSIBLE, "supervisor"].includes(user.role)) ? (
         <DeleteBtn
           onClick={async () => {
             if (!confirm("Êtes-vous sûr(e) de vouloir supprimer ce profil")) return;
