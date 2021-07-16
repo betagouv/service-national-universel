@@ -39,7 +39,7 @@ import { ROLES } from "./utils";
 
 import "./index.css";
 
-if (environment === "production") Sentry.init({ dsn: SENTRY_URL, environment: ROLES.ADMIN });
+if (environment === "production") Sentry.init({ dsn: SENTRY_URL, environment: "admin" });
 
 export default () => {
   const [loading, setLoading] = useState(true);
