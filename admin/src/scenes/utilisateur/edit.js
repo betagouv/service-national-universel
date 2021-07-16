@@ -101,6 +101,13 @@ export default (props) => {
         initialValues={user}
         onSubmit={async (values) => {
           try {
+            if (values.role === REFERENT_ROLES.RESPONSIBLE && user.structureId !== values.structureId) {
+              const { ok, code, data } = await api.get(`/mission/structure/${user.structureId}`);
+              if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+              if (data.map((mission) => mission.tutorId === user._id).length) {
+                return toastr.error("Une erreur s'est produite :", "Le responsable est affilié comme tuteur à des missions de la structure.");
+              }
+            }
             const { ok, code, data } = await api.put(`/referent/${values._id}`, values);
             if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             setUser(data);
