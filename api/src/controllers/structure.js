@@ -19,20 +19,17 @@ async function updateNetworkName(structure) {
     if (network) {
       structure.set({ networkName: `${network.name}` });
       await structure.save();
-      await structure.index();
     }
   } else if (structure.isNetwork === "true") {
     // When the structure is a partent (is a network).
     // Update the structure itself (a parent belongs to her own structure).
     structure.set({ networkName: `${structure.name}` });
     await structure.save();
-    await structure.index();
     // Then update their childs.
     const childs = await StructureObject.find({ networkId: structure._id });
     for (const child of childs) {
       child.set({ networkName: `${structure.name}` });
       await child.save();
-      await child.index();
     }
   }
 }
