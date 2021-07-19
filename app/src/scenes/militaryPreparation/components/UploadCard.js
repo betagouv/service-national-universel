@@ -103,4 +103,5 @@ const SubTitle = styled.div`
   font-size: 1rem;
   font-weight: 400;
   color: grey;
+  margin: 1rem 0;
 `;

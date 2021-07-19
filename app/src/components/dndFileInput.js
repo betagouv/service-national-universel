@@ -136,6 +136,7 @@ const File = styled.div`
   background-size: 16px;
   span {
     margin-left: auto;
+    padding-left: 1rem;
     color: #535a66;
     font-weight: 500;
     cursor: pointer;

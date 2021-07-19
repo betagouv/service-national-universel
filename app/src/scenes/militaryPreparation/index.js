@@ -78,15 +78,30 @@ export default () => {
             <CardsContainer>
               <Row>
                 <Col md={6} xs={12} style={{ paddingBottom: "15px" }}>
-                  <UploadCard errors={errors} title="Pièce d'identité" values={values} name="militaryPreparationFilesIdentity" handleChange={handleChange} />
+                  <UploadCard
+                    errors={errors}
+                    title="Pièce d'identité"
+                    subTitle="Déposez ici la copie d’une pièce d’identité en cours de validité (CNI, passeport)."
+                    values={values}
+                    name="militaryPreparationFilesIdentity"
+                    handleChange={handleChange}
+                  />
                 </Col>
                 <Col md={6} xs={12} style={{ paddingBottom: "15px" }}>
-                  <UploadCard errors={errors} title="Attestation de recensement" values={values} name="militaryPreparationFilesCensus" handleChange={handleChange} />
+                  <UploadCard
+                    errors={errors}
+                    title="Attestation de recensement"
+                    subTitle="Déposez ici la copie de votre attestation de recensement."
+                    values={values}
+                    name="militaryPreparationFilesCensus"
+                    handleChange={handleChange}
+                  />
                 </Col>
                 <Col md={6} xs={12} style={{ paddingBottom: "15px" }}>
                   <UploadCard
                     errors={errors}
                     title="Autorisation parentale pour effectuer une préparation militaire"
+                    subTitle="Téléchargez puis téléversez le formulaire rempli par votre représentant légal consentant à votre participation à une préparation militaire."
                     values={values}
                     name="militaryPreparationFilesAuthorization"
                     handleChange={handleChange}
@@ -96,6 +111,7 @@ export default () => {
                   <UploadCard
                     errors={errors}
                     title="Certificat médical de non contre indication à la pratique sportive"
+                    subTitle="Téléchargez puis téléversez le formulaire rempli par votre médecin traitant certifiant l’absence de contre-indication à la pratique sportive."
                     values={values}
                     name="militaryPreparationFilesCertificate"
                     handleChange={handleChange}
