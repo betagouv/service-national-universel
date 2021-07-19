@@ -12,6 +12,7 @@ import CreateMission from "./createMission";
 import PlusSVG from "../../../assets/plus.svg";
 import CrossSVG from "../../../assets/cross.svg";
 import Loader from "../../../components/Loader";
+import ContractLink from "../../../components/ContractLink";
 
 export default ({ young, onChangeApplication }) => {
   const [applications, setApplications] = useState(null);
@@ -160,16 +161,6 @@ const ToggleBloc = ({ children, title, borderBottom, borderRight, borderLeft, di
     </Row>
   );
 };
-
-const ContractLink = styled.div`
-  font-weight: 500;
-  font-size: 0.8rem;
-  text-align: center;
-  margin-top: 0.5rem;
-  :hover {
-    text-decoration: underline;
-  }
-`;
 
 const Icon = styled.img`
   height: 18px;

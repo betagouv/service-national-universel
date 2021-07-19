@@ -11,6 +11,7 @@ import Panel from "./panel";
 import ExportComponent from "../../components/ExportXlsx";
 import Loader from "../../components/Loader";
 import Chevron from "../../components/Chevron";
+import ContractLink from "../../components/ContractLink";
 import { Filter, FilterRow, ResultTable, Table, Header, Title } from "../../components/list";
 import { translate, getFilterLabel, formatStringLongDate, formatStringDate, getAge, ES_NO_LIMIT, ROLES } from "../../utils";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
@@ -286,15 +287,5 @@ const TeamMember = styled.div`
     color: #606266;
     font-size: 12px;
     margin: 0;
-  }
-`;
-
-const ContractLink = styled.div`
-  font-weight: 500;
-  font-size: 0.8rem;
-  text-align: center;
-  margin-top: 0.5rem;
-  :hover {
-    text-decoration: underline;
   }
 `;

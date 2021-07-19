@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
+import { useHistory } from "react-router-dom";
 
 import { apiURL } from "../../../config";
 import SelectStatusApplication from "../../../components/selectStatusApplication";
@@ -8,6 +9,7 @@ import MissionView from "./wrapper";
 import Panel from "../../volontaires/panel";
 import { formatStringLongDate, getFilterLabel, translate, getAge, ES_NO_LIMIT } from "../../../utils";
 import Loader from "../../../components/Loader";
+import ContractLink from "../../../components/ContractLink";
 import ExportComponent from "../../../components/ExportXlsx";
 const FILTERS = ["SEARCH", "STATUS"];
 import { Filter, FilterRow, ResultTable, Table, MultiLine } from "../../../components/list";
@@ -169,6 +171,7 @@ export default ({ mission, applications }) => {
 };
 
 const Hit = ({ hit, onClick, onChangeApplication, selected }) => {
+  const history = useHistory();
   return (
     <tr style={{ backgroundColor: (selected && "#e6ebfa") || (hit.status === "WITHDRAWN" && "#BE3B1211") }} onClick={onClick}>
       <td>
@@ -184,6 +187,15 @@ const Hit = ({ hit, onClick, onChangeApplication, selected }) => {
       </td>
       <td onClick={(e) => e.stopPropagation()}>
         <SelectStatusApplication hit={hit} callback={onChangeApplication} />
+        {hit.status === "VALIDATED" || hit.status === "IN_PROGRESS" || hit.status === "DONE" || hit.status === "ABANDON" ? (
+          <ContractLink
+            onClick={() => {
+              history.push(`/volontaire/${hit.youngId}/phase2/application/${hit._id}/contrat`);
+            }}
+          >
+            Contrat d'engagement &gt;
+          </ContractLink>
+        ) : null}
       </td>
     </tr>
   );
