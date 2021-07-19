@@ -301,7 +301,6 @@ export default ({ young, admin }) => {
                             <ContractField name="youngPhone" placeholder="0123456789" className="md" context={context} />
                           </div>
                         </div>
-                        <hr />
                         {!isYoungAdult && (
                           <>
                             <h2>Représenté par ses représentant légaux</h2>
@@ -339,6 +338,7 @@ export default ({ young, admin }) => {
                             )}
                           </>
                         )}
+                        <hr />
                         <div>
                           <br />
                           <p>Il a été convenu ce qui suit :</p>
