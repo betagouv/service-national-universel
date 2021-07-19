@@ -1,10 +1,9 @@
 import React, { useEffect, useState } from "react";
-import styled from "styled-components";
 import { Col, Row } from "reactstrap";
 import { useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
 
-import { APPLICATION_STATUS_COLORS, ROLES } from "../../../utils";
+import { APPLICATION_STATUS_COLORS, ROLES, translate } from "../../../utils";
 import Badge from "../../../components/Badge";
 import api from "../../../services/api";
 import { CardArrow, Card, CardTitle, CardValueWrapper, CardValue, CardContainer, Title } from "../../../components/dashboard";
@@ -64,6 +63,7 @@ export default () => {
   useEffect(() => {
     setStats({
       WAITING_VALIDATION: applications.filter((e) => e.status === "WAITING_VALIDATION").length,
+      WAITING_VERIFICATION: applications.filter((e) => e.status === "WAITING_VERIFICATION").length,
       VALIDATED: applications.filter((e) => e.status === "VALIDATED").length,
       REFUSED: applications.filter((e) => e.status === "REFUSED").length,
       CANCEL: applications.filter((e) => e.status === "CANCEL").length,
@@ -79,6 +79,19 @@ export default () => {
           <h4 style={{ fontWeight: "normal", margin: "25px 0" }}>
             Volontaires candidatant sur des missions de {user.role === ROLES.SUPERVISOR ? "mes" : "ma"} structure{user.role === ROLES.SUPERVISOR ? "s" : ""}
           </h4>
+        </Col>
+        <Col md={6} xl={3}>
+          <Link to={`/volontaire?STATUS=%5B"WAITING_VERIFICATION"%5D`}>
+            <CardContainer>
+              <Card borderBottomColor={APPLICATION_STATUS_COLORS.WAITING_VERIFICATION} style={{ marginBottom: 10 }}>
+                <CardTitle>{translate("WAITING_VERIFICATION")}</CardTitle>
+                <CardValueWrapper>
+                  <CardValue>{stats.WAITING_VERIFICATION || "-"}</CardValue>
+                  <CardArrow />
+                </CardValueWrapper>
+              </Card>
+            </CardContainer>
+          </Link>
         </Col>
         <Col md={6} xl={3}>
           <Link to={`/volontaire?STATUS=%5B"WAITING_VALIDATION"%5D`}>

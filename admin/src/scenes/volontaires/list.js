@@ -30,6 +30,7 @@ const FILTERS = [
   "CONTRACT_STATUS",
   "MEDICAL_FILE_RECEIVED",
   "COHESION_PRESENCE",
+  "MILITARY_PREPARATION_FILES_STATUS",
 ];
 
 export default ({ setYoung }) => {
@@ -336,6 +337,20 @@ export default ({ setYoung }) => {
                   URLParams={true}
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Statut contrats")}
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  componentId="MILITARY_PREPARATION_FILES_STATUS"
+                  dataField="statusMilitaryPreparationFiles.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "MILITARY_PREPARATION_FILES_STATUS") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Statut docs PM")}
                 />
               </FilterRow>
             </Filter>
