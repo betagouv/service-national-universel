@@ -187,7 +187,7 @@ export const translate = (value) => {
     case "USER_ALREADY_REGISTERED":
       return "Utilisateur déjà inscrit";
     case "PASSWORD_NOT_VALIDATED":
-      return "Mot de passe invalide";
+      return "Votre mot de passe doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole";
     case "INVITATION_TOKEN_EXPIRED_OR_INVALID":
       return "Invitation invalide";
     case "USER_NOT_FOUND":
