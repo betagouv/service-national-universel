@@ -157,7 +157,8 @@ export default ({ setYoung }) => {
                     "Mobilité aux alentours de son domicile": data.mobilityNearHome,
                     "Mobilité aux alentours d'un de ses proches": data.mobilityNearRelative,
                     "Informations du proche":
-                      data.mobilityNearRelative && data.mobilityNearRelativeName + " - " + data.mobilityNearRelativeAddress + " - " + data.mobilityNearRelativeZip,
+                      data.mobilityNearRelative &&
+                      data.mobilityNearRelativeName + " - " + data.mobilityNearRelativeAddress + " - " + data.mobilityNearRelativeZip + " - " + data.mobilityNearRelativeCity,
                     "Mode de transport": data.mobilityTransport?.map((t) => translate(t)),
                     "Autre mode de transport": data.mobilityTransportOther,
                     "Format de mission": data.missionFormat,

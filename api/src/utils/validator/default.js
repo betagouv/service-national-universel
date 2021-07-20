@@ -221,6 +221,7 @@ function youngKeys() {
     mobilityNearRelativeName: Joi.string().allow(null, ""),
     mobilityNearRelativeAddress: Joi.string().allow(null, ""),
     mobilityNearRelativeZip: Joi.string().allow(null, ""),
+    mobilityNearRelativeCity: Joi.string().allow(null, ""),
     mobilityTransport: Joi.array().items(Joi.string().allow(null, "")),
     mobilityTransportOther: Joi.string().allow(null, ""),
     missionFormat: Joi.string().allow(null, ""),
