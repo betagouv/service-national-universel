@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Modal, ModalHeader, ModalBody, Row, Col, FormGroup, Input } from "reactstrap";
 import { Formik, Field } from "formik";
 import styled from "styled-components";
+import ReactSelect from "react-select";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { ReactiveBase } from "@appbaseio/reactivesearch";
@@ -101,8 +102,8 @@ export default ({ setOpen, open, label = "Inviter un référent", role = "" }) =
                           ) : null}
                           {values.role === REFERENT_ROLES.HEAD_CENTER ? (
                             <FormGroup>
-                                <div>Centre</div>
-                                <ChooseCenter validate={(v) => !v} value={values.center} onChange={handleChange} />
+                              <div>Centre</div>
+                              <ChooseCenter validate={(v) => !v} value={values.center} onChange={handleChange} />
                             </FormGroup>
                           ) : null}
                         </Col>
@@ -184,7 +185,38 @@ const ChooseRegion = ({ value, onChange }) => {
   );
 };
 
-const ChooseCenter = ({ value, onChange }) => {
+const AutocompleteSelectCenter = ({ title, values, handleChange, placeholder, options, onSelect }) => {
+  return (
+    <Row className="detail">
+      <Col md={4} style={{ alignSelf: "flex-start" }}>
+        <label>{title}</label>
+      </Col>
+      <Col md={8}>
+        <ReactSelect
+          styles={{
+            menu: () => ({
+              borderStyle: "solid",
+              borderWidth: 1,
+              borderRadius: 5,
+              borderColor: "#dedede",
+            }),
+          }}
+          defaultValue={{ label: values.cohesionCenterName, value: values.cohesionCenterName, _id: values.cohesionCenterId }}
+          options={options}
+          placeholder={placeholder}
+          noOptionsMessage={() => "Aucun centre ne correspond à cette recherche."}
+          onChange={(e) => {
+            handleChange({ target: { value: e._id, name: "cohesionCenterId" } });
+            handleChange({ target: { value: e.value, name: "cohesionCenterName" } });
+            onSelect?.(e);
+          }}
+        />
+      </Col>
+    </Row>
+  );
+};
+
+const ChooseCenter = ({ values, onChange }) => {
   const { user } = useSelector((state) => state.Auth);
   const [centers, setCenters] = useState(null);
 
@@ -192,27 +224,35 @@ const ChooseCenter = ({ value, onChange }) => {
     (async () => {
       try {
         const { data } = await api.get("/cohesion-center");
+        console.log('DATA', JSON.stringify(data));
         if (data) setCenters(data);
       } catch (e) {
         console.log(e);
       }
     })();
     if (user.role === REFERENT_ROLES.HEAD_CENTER) {
-      return onChange({ target: { value: user.role, name: "role" } });
+      return (
+        onChange({ target: { value: user.cohesionCenterId, name: "cohesionCenterId" } }),
+        onChange({ target: { value: user.cohesionCenterName, name: "cohesionCenterName" } })
+      )
     }
-    return onChange({ target: { value: centers?.[0], name: "center" } });
+    return (
+      onChange({ target: { value: centers?.[0].name, name: "cohesionCenterName" } }),
+      onChange({ target: { value: centers?.[0]._id, name: "cohesionCenterId" } })
+    )
   }, []);
 
   return (
-      <Input disabled={user.role === REFERENT_ROLES.HEAD_CENTER} type="select" name="center" value={value} onChange={onChange}>
-        {centers?.map((e) => {
-          return (
-            <option value={e.name} key={e._id}>
-              {e.name}
-            </option>
-          );
-        })}
-      </Input>
+    // <Input disabled={user.role === REFERENT_ROLES.HEAD_CENTER} type="select" name="cohesionCenterName" value={value} onChange={onChange}>
+    //   {centers?.map((e) => {
+    //     return (
+    //       <option value={e.name} key={e._id}>
+    //         {e.name}
+    //       </option>
+    //     );
+    //   })}
+    // </Input>
+    <AutocompleteSelectCenter title="Centre" values={values} handleChange={onChange} placeholder="Choisir un centre" options={centers} />
   );
 };
 
