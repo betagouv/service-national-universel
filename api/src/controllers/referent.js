@@ -77,8 +77,10 @@ router.post("/signup", async (req, res) => {
       .validate(req.body);
 
     if (error) {
-      if (error.details.find((e) => e.path === "email")) return res.status(400).send({ ok: false, user: null, code: EMAIL_INVALID });
-      if (error.details.find((e) => e.path === "password")) return res.status(400).send({ ok: false, user: null, code: PASSWORD_NOT_VALIDATED });
+      if (error.details.find((e) => e.path.find((p) => p === "email")))
+        return res.status(400).send({ ok: false, user: null, code: ERRORS.EMAIL_INVALID });
+      if (error.details.find((e) => e.path.find((p) => p === "password")))
+        return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
       return res.status(400).send({ ok: false, code: error.toString() });
     }
 
