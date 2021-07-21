@@ -22,13 +22,17 @@ export default ({ children, young, tab }) => {
           </Title>
           <TabList>
             {tab !== "contract" ? (
-              <Tab isActive={tab === "details"} onClick={() => history.push(`/volontaire/${young._id}`)}>
-                Détails
-              </Tab>
+              <>
+                <Tab isActive={tab === "details"} onClick={() => history.push(`/volontaire/${young._id}`)}>
+                  Détails
+                </Tab>
+                {young.statusMilitaryPreparationFiles === "VALIDATED" ? (
+                  <Tab isActive={tab === "militaryPreparation"} onClick={() => history.push(`/volontaire/${young._id}/preparation-militaire`)}>
+                    Préparation militaire
+                  </Tab>
+                ) : null}
+              </>
             ) : null}
-            <Tab isActive={tab === "militaryPreparation"} onClick={() => history.push(`/volontaire/${young._id}/preparation-militaire`)}>
-              Préparation militaire
-            </Tab>
           </TabList>
         </div>
       </Header>

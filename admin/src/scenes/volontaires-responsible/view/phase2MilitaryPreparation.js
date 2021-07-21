@@ -1,19 +1,13 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Row } from "reactstrap";
 import styled from "styled-components";
 import { useHistory } from "react-router-dom";
-import { toastr } from "react-redux-toastr";
 
 import { translate as t, APPLICATION_STATUS_COLORS } from "../../../utils";
 import Badge from "../../../components/Badge";
-import { Box, BoxTitle, Separator } from "../../../components/box";
+import { Box, BoxTitle } from "../../../components/box";
 import DownloadButton from "../../../components/buttons/DownloadButton";
 import api from "../../../services/api";
-import LoadingButton from "../../../components/buttons/LoadingButton";
-import Loader from "../../../components/Loader";
-import ModalConfirm from "../../../components/modals/ModalConfirm";
-import ModalCorrectionMilitaryPreparation from "../../../components/modals/ModalRefuseMilitaryPreparation";
-import ModalRefuseMilitaryPreparation from "../../../components/modals/ModalRefuseMilitaryPreparation";
 
 export default ({ young }) => {
   const history = useHistory();
