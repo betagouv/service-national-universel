@@ -9,7 +9,7 @@ export function getPasswordErrorMessage(v) {
   const schema = new passwordValidator();
   schema
     .is()
-    .min(12) // Minimum length 10
+    .min(12) // Minimum length 12
     .has()
     .uppercase() // Must have uppercase letters
     .has()
