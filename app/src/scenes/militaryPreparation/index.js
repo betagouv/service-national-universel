@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { Row, Col } from "reactstrap";
 import { useDispatch, useSelector } from "react-redux";
@@ -19,6 +19,21 @@ export default () => {
   const dispatch = useDispatch();
   const history = useHistory();
 
+  const [applicationsToMilitaryPreparation, setApplicationsToMilitaryPreparation] = useState(null);
+
+  useEffect(() => {
+    getApplications();
+  }, []);
+
+  const getApplications = async () => {
+    if (!young) return;
+    const { ok, data, code } = await api.get(`/application/young/${young._id}`);
+    if (!ok) return toastr.error("Oups, une erreur est survenue", code);
+    const d = data.filter((a) => a.mission.isMilitaryPreparation === "true");
+    console.log(d);
+    return setApplicationsToMilitaryPreparation(d);
+  };
+
   return (
     <>
       {young.statusMilitaryPreparationFiles === "WAITING_VALIDATION" ? (
@@ -29,9 +44,12 @@ export default () => {
       ) : null}
       {young.statusMilitaryPreparationFiles === "WAITING_CORRECTION" ? (
         <AlertBox
-          title="Votre dossier est invalide/incomplet."
+          title="Votre dossier est incomplet et/ou invalide"
           message={`Vous avez reçu un email à l'adresse ${young.email} indiquant les pièces bloquantes. Merci de retéléverser des documents valides. N'oubliez pas de valider vos changements !`}
         />
+      ) : null}
+      {young.statusMilitaryPreparationFiles === "REFUSED" ? (
+        <AlertBox title="Votre dossier a été refusé." message={`Vous avez reçu un email à l'adresse ${young.email} indiquant les pièces bloquantes.`} />
       ) : null}
       <HeroContainer>
         <Hero>
@@ -65,7 +83,7 @@ export default () => {
             const { ok, code, data: young } = await api.put("/young", { statusMilitaryPreparationFiles: "WAITING_VALIDATION" });
             if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             dispatch(setYoung(young));
-            toastr.success("Votre dossier a bien été mis en attente de vérification");
+            toastr.success("Votre dossier a bien été transmis");
             history.push("/");
           } catch (e) {
             console.log(e);
@@ -73,7 +91,7 @@ export default () => {
           }
         }}
       >
-        {({ values, handleChange, handleSubmit, errors }) => (
+        {({ values, handleChange, handleSubmit, errors, isSubmitting }) => (
           <>
             <CardsContainer>
               <Row>
@@ -119,7 +137,16 @@ export default () => {
                 </Col>
               </Row>
               <Footer>
-                <LoadingButton onClick={handleSubmit}>Valider mon dossier</LoadingButton>
+                {!young.statusMilitaryPreparationFiles ? (
+                  <LoadingButton loading={isSubmitting} onClick={handleSubmit}>
+                    Valider mon dossier
+                  </LoadingButton>
+                ) : null}
+                {["WAITING_CORRECTION", "WAITING_VALIDATION"].includes(young.statusMilitaryPreparationFiles) ? (
+                  <LoadingButton loading={isSubmitting} onClick={handleSubmit}>
+                    Mettre à jour mon dossier
+                  </LoadingButton>
+                ) : null}
                 {Object.keys(errors).length ? <h3>Vous ne pouvez pas envoyer votre dossier à vérifier car il manque des pièces requises.</h3> : null}
               </Footer>
             </CardsContainer>

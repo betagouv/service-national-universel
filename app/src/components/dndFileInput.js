@@ -120,6 +120,9 @@ const ImageInput = styled.label`
     display: block;
     margin: 10px auto;
   }
+  :hover {
+    background-color: #f8f8f8;
+  }
 `;
 
 const File = styled.div`
