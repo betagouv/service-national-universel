@@ -25,7 +25,7 @@ export default ({ value, onChange }) => {
       .symbols(); // Must have symbols
 
     if (!schema.validate(v)) {
-      return "Votre mot de passe doit contenir au moins 10 caractères, dont une majuscule, une minuscule, un chiffre et un symbole";
+      return "Votre mot de passe doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole";
     }
   }
 

@@ -9,7 +9,7 @@ export function getPasswordErrorMessage(v) {
   const schema = new passwordValidator();
   schema
     .is()
-    .min(10) // Minimum length 10
+    .min(12) // Minimum length 10
     .has()
     .uppercase() // Must have uppercase letters
     .has()
@@ -20,7 +20,7 @@ export function getPasswordErrorMessage(v) {
     .symbols(); // Must have symbols
 
   if (!schema.validate(v)) {
-    return "Votre mot de passe doit contenir au moins 10 caractères, dont une majuscule, une minuscule, un chiffre et un symbole";
+    return "Votre mot de passe doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole";
   }
 }
 

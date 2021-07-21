@@ -13,6 +13,7 @@ const { validatePassword } = require("./utils");
 const { validateFirstName } = require("./utils/validator/default");
 
 const EMAIL_OR_PASSWORD_INVALID = "EMAIL_OR_PASSWORD_INVALID";
+const NEW_PASSWORD_IDENTICAL_LAST_PASSWORD = "NEW_PASSWORD_IDENTICAL_LAST_PASSWORD";
 const PASSWORD_INVALID = "PASSWORD_INVALID";
 const EMAIL_INVALID = "EMAIL_INVALID";
 const EMAIL_AND_PASSWORD_REQUIRED = "EMAIL_AND_PASSWORD_REQUIRED";
@@ -146,7 +147,9 @@ class Auth {
       if (newPassword !== verifyPassword) {
         return res.status(422).send({ ok: false, code: PASSWORDS_NOT_MATCH });
       }
-
+      if (password === newPassword) {
+        return res.status(422).send({ ok: false, code: NEW_PASSWORD_IDENTICAL_LAST_PASSWORD });
+      }
       const obj = await this.model.findById(req.user._id);
       obj.set({ password: newPassword });
       await obj.save();
