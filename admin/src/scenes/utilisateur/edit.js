@@ -443,7 +443,7 @@ const AutocompleteSelectStructure = ({ options, structure, setStructure, onClick
             Modifier la structure
           </LoadingButton>
         </Col>
-        <Col md={8}>
+        <Col md={8} style={{ alignSelf: "flex-start" }}>
           <ReactSelect
             styles={{
               menu: () => ({
