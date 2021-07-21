@@ -8,7 +8,7 @@ import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
-import { formatStringDate, translate, getFilterLabel, formatLongDateFR, formatDateFR, ES_NO_LIMIT } from "../../utils";
+import { formatStringDate, translate, getFilterLabel, formatLongDateFR, formatDateFR, ES_NO_LIMIT, ROLES } from "../../utils";
 import SelectStatusMission from "../../components/selectStatusMission";
 import VioletButton from "../../components/buttons/VioletButton";
 import Loader from "../../components/Loader";
@@ -26,13 +26,13 @@ export default () => {
   const user = useSelector((state) => state.Auth.user);
   const handleShowFilter = () => setFilterVisible(!filterVisible);
   const getDefaultQuery = () => {
-    if (user.role === "supervisor") return { query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } } };
+    if (user.role === ROLES.SUPERVISOR) return { query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } } };
     return { query: { match_all: {} } };
   };
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
   useEffect(() => {
-    if (user.role !== "supervisor") return;
+    if (user.role !== ROLES.SUPERVISOR) return;
     (async () => {
       const { data } = await api.get(`/structure/network/${user.structureId}`);
       const ids = data.map((s) => s._id);
@@ -40,7 +40,7 @@ export default () => {
     })();
     return;
   }, []);
-  if (user.role === "supervisor" && !structureIds) return <Loader />;
+  if (user.role === ROLES.SUPERVISOR && !structureIds) return <Loader />;
 
   return (
     <div>
@@ -51,7 +51,7 @@ export default () => {
               <div style={{ flex: 1 }}>
                 <Title>Missions</Title>
               </div>
-              {user.role === "responsible" && user.structureId && (
+              {user.role === ROLES.RESPONSIBLE && user.structureId && (
                 <Link to={`/mission/create/${user.structureId}`}>
                   <VioletButton>
                     <p>Nouvelle mission</p>
@@ -140,8 +140,8 @@ export default () => {
                 <Chevron color="#444" style={{ cursor: "pointer", transform: filterVisible && "rotate(180deg)" }} onClick={handleShowFilter} />
               </FilterRow>
               <FilterRow visible={filterVisible}>
-                <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === "referent_region" ? [user.region] : []} />
-                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === "referent_department" ? [user.department] : []} />
+                <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
+                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [user.department] : []} />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -181,7 +181,7 @@ export default () => {
                   showSearch={true}
                   searchPlaceholder="Rechercher..."
                 />
-                {user.role === "supervisor" ? (
+                {user.role === ROLES.SUPERVISOR ? (
                   <MultiDropdownList
                     defaultQuery={getDefaultQuery}
                     className="dropdown-filter"

@@ -6,6 +6,7 @@ const { sendEmail } = require("../../sendinblue");
 const ReferentModel = require("../../models/referent");
 const { regionListTest, regionList, getDataInscriptions, getDataStructure } = require("../utils");
 const { capture } = require("../../sentry");
+const { ROLES } = require("snu-lib/roles");
 
 const arr = regionList;
 
@@ -16,7 +17,7 @@ async function sendRecapRegion() {
   for (let i = 0; i < arr.length; i++) {
     const region = arr[i];
     console.log("> start region :", region);
-    const referents = await ReferentModel.find({ role: "referent_region", region });
+    const referents = await ReferentModel.find({ role: ROLES.REFERENT_REGION, region });
     if (referents && referents.length) {
       console.log(referents.length, "referent(s) found");
       const dataInscriptions = await getDataInscriptions({ region });

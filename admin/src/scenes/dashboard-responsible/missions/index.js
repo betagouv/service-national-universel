@@ -22,7 +22,7 @@ export default ({ filter }) => {
     async function initMissions() {
       const missionsResponse = await api.get(`/mission/structure/${structureId}`);
       if (!missionsResponse.ok) {
-        toastr.error("Oups, une erreur est survenue lors de la récuperation des missions", translate(missionsResponse.code));
+        toastr.error("Oups, une erreur est survenue lors de la récupération des missions", translate(missionsResponse.code));
         history.push("/");
       } else {
         setMissions(missionsResponse.data);

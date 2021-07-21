@@ -1,6 +1,7 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
+const { ROLES } = require("snu-lib/roles");
 
 const { capture } = require("../sentry");
 
@@ -45,7 +46,7 @@ async function exec(req, res, index = "") {
 function filter(body, user, index) {
   let filter = [];
 
-  if (user.role === "admin") return body;
+  if (user.role === ROLES.ADMIN) return body;
 
   // Filter young when user is not admin
   //
@@ -57,8 +58,8 @@ function filter(body, user, index) {
   if (index === "young") {
     filter.push({ terms: { "status.keyword": ["WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "VALIDATED", "WITHDRAWN", "WAITING_LIST"] } });
 
-    if (user.role === "referent_region") filter.push({ term: { "region.keyword": user.region } });
-    if (user.role === "referent_department") filter.push({ term: { "department.keyword": user.department } });
+    if (user.role === ROLES.REFERENT_REGION) filter.push({ term: { "region.keyword": user.region } });
+    if (user.role === ROLES.REFERENT_DEPARTMENT) filter.push({ term: { "department.keyword": user.department } });
   }
 
   if (index === "cohesionyoung") {
@@ -66,40 +67,40 @@ function filter(body, user, index) {
   }
 
   if (index === "referent") {
-    if (user.role === "responsible") filter.push({ terms: { "role.keyword": ["responsible", "supervisor"] } });
+    if (user.role === ROLES.RESPONSIBLE) filter.push({ terms: { "role.keyword": [ROLES.RESPONSIBLE, ROLES.SUPERVISOR] } });
 
     // See: https://trello.com/c/Wv2TrQnQ/383-admin-ajouter-onglet-utilisateurs-pour-les-r%C3%A9f%C3%A9rents
     // a `referent_region` sees only other referent_region and `referent_department` from their region.
-    if (user.role === "referent_department") {
+    if (user.role === ROLES.REFERENT_DEPARTMENT) {
       filter.push({
         bool: {
           should: [
-            { terms: { "role.keyword": ["referent_department"] } },
-            { bool: { must: [{ term: { "role.keyword": "referent_region" } }, { term: { "region.keyword": user.region } }] } },
-            { bool: { must: [{ term: { "role.keyword": "head_center" } }, { term: { "department.keyword": user.department } }] } },
+            { terms: { "role.keyword": [ROLES.REFERENT_DEPARTMENT] } },
+            { bool: { must: [{ term: { "role.keyword": ROLES.REFERENT_REGION } }, { term: { "region.keyword": user.region } }] } },
+            { bool: { must: [{ term: { "role.keyword": ROLES.HEAD_CENTER } }, { term: { "department.keyword": user.department } }] } },
           ],
         },
       });
     }
     // a `referent_region` sees only other referent_region and `referent_department` from their region.
-    if (user.role === "referent_region") {
+    if (user.role === ROLES.REFERENT_REGION) {
       filter.push({
         bool: {
           should: [
-            { terms: { "role.keyword": ["referent_region"] } },
-            { bool: { must: [{ term: { "role.keyword": "referent_department" } }, { term: { "region.keyword": user.region } }] } },
-            { bool: { must: [{ term: { "role.keyword": "head_center" } }, { term: { "region.keyword": user.region } }] } },
+            { terms: { "role.keyword": [ROLES.REFERENT_REGION] } },
+            { bool: { must: [{ term: { "role.keyword": ROLES.REFERENT_DEPARTMENT } }, { term: { "region.keyword": user.region } }] } },
+            { bool: { must: [{ term: { "role.keyword": ROLES.HEAD_CENTER } }, { term: { "region.keyword": user.region } }] } },
           ],
         },
       });
     }
-    if (user.role === "head_center") {
+    if (user.role === ROLES.HEAD_CENTER) {
       filter.push({
         bool: {
           should: [
-            { terms: { "role.keyword": ["head_center"] } },
-            { bool: { must: [{ term: { "role.keyword": "referent_department" } }, { term: { "department.keyword": user.department } }] } },
-            { bool: { must: [{ term: { "role.keyword": "referent_region" } }, { term: { "region.keyword": user.region } }] } },
+            { terms: { "role.keyword": [ROLES.HEAD_CENTER] } },
+            { bool: { must: [{ term: { "role.keyword": ROLES.REFERENT_DEPARTMENT } }, { term: { "department.keyword": user.department } }] } },
+            { bool: { must: [{ term: { "role.keyword": ROLES.REFERENT_REGION } }, { term: { "region.keyword": user.region } }] } },
           ],
         },
       });
@@ -107,12 +108,12 @@ function filter(body, user, index) {
   }
 
   if (index === "mission") {
-    if (user.role === "responsible") filter.push({ terms: { "structureId.keyword": [user.structureId] } });
+    if (user.role === ROLES.RESPONSIBLE) filter.push({ terms: { "structureId.keyword": [user.structureId] } });
   }
 
   if (index === "cohesioncenter") {
-    if (user.role === "referent_region") filter.push({ term: { "region.keyword": user.region } });
-    if (user.role === "referent_department") filter.push({ term: { "department.keyword": user.department } });
+    if (user.role === ROLES.REFERENT_REGION) filter.push({ term: { "region.keyword": user.region } });
+    if (user.role === ROLES.REFERENT_DEPARTMENT) filter.push({ term: { "department.keyword": user.department } });
   }
 
   const arr = body.split(`\n`);

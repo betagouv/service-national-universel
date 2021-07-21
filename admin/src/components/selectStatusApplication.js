@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 
 import api from "../services/api";
 
-import { translate, APPLICATION_STATUS_COLORS, APPLICATION_STATUS } from "../utils";
+import { translate, APPLICATION_STATUS_COLORS, APPLICATION_STATUS, ROLES } from "../utils";
 import { toastr } from "react-redux-toastr";
 import Chevron from "./Chevron";
 
@@ -28,7 +28,7 @@ export default ({ hit, options = [], callback }) => {
 
   options = [APPLICATION_STATUS.IN_PROGRESS, APPLICATION_STATUS.DONE, APPLICATION_STATUS.ABANDON];
   if (application.status === APPLICATION_STATUS.WAITING_VALIDATION) options = [APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.REFUSED, APPLICATION_STATUS.CANCEL];
-  if (["admin", "referent_department", "referent_region"].includes(user.role))
+  if ([ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role))
     options = [
       APPLICATION_STATUS.WAITING_VALIDATION,
       APPLICATION_STATUS.VALIDATED,

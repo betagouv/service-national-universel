@@ -12,6 +12,7 @@ const { dbConnect, dbClose } = require("./helpers/db");
 const { createMeetingPointHelper, getMeetingPointByIdHelper } = require("./helpers/meetingPoint");
 const { createReferentHelper, getReferentByIdHelper } = require("./helpers/referent");
 const { createYoungHelper, getYoungByIdHelper } = require("./helpers/young");
+const { ROLES } = require("snu-lib/roles");
 
 jest.mock("../sendinblue", () => ({
   ...jest.requireActual("../sendinblue"),
@@ -170,7 +171,7 @@ describe("Cohesion Center", () => {
     });
     it("should return 200 when cohesion center is found", async () => {
       const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
-      const referent = await createReferentHelper({ ...getNewReferentFixture(), role: "head_center", cohesionCenterId: cohesionCenter._id });
+      const referent = await createReferentHelper({ ...getNewReferentFixture(), role: ROLES.HEAD_CENTER, cohesionCenterId: cohesionCenter._id });
       const res = await request(getAppHelper())
         .get("/cohesion-center/" + cohesionCenter._id + "/head")
         .send();
@@ -227,7 +228,7 @@ describe("Cohesion Center", () => {
     });
     it("should updateCenterDependencies", async () => {
       const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
-      const referent = await createReferentHelper({ ...getNewReferentFixture(), role: "head_center", cohesionCenterId: cohesionCenter._id });
+      const referent = await createReferentHelper({ ...getNewReferentFixture(), role: ROLES.HEAD_CENTER, cohesionCenterId: cohesionCenter._id });
       const young = await createYoungHelper({ ...getNewYoungFixture(), cohesionCenterId: cohesionCenter._id });
       const meetingPoint = await createMeetingPointHelper({ ...getNewMeetingPointFixture(), centerId: cohesionCenter._id });
 
@@ -246,13 +247,13 @@ describe("Cohesion Center", () => {
     });
     it("should be only allowed to admin", async () => {
       const passport = require("passport");
-      passport.user.role = "responsible";
+      passport.user.role = ROLES.RESPONSIBLE;
       const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
       const res = await request(getAppHelper()).put("/cohesion-center/").send({
         _id: cohesionCenter._id,
       });
       expect(res.status).toBe(401);
-      passport.user.role = "admin";
+      passport.user.role = ROLES.ADMIN;
     });
   });
 
@@ -273,7 +274,7 @@ describe("Cohesion Center", () => {
   });
   it("should deleteCenterDependencies", async () => {
     const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
-    const referent = await createReferentHelper({ ...getNewReferentFixture(), role: "head_center", cohesionCenterId: cohesionCenter._id });
+    const referent = await createReferentHelper({ ...getNewReferentFixture(), role: ROLES.HEAD_CENTER, cohesionCenterId: cohesionCenter._id });
     const young = await createYoungHelper({ ...getNewYoungFixture(), cohesionCenterId: cohesionCenter._id });
     const meetingPoint = await createMeetingPointHelper({ ...getNewMeetingPointFixture(), centerId: cohesionCenter._id });
 
@@ -290,13 +291,13 @@ describe("Cohesion Center", () => {
   });
   it("should be only allowed to admin", async () => {
     const passport = require("passport");
-    passport.user.role = "responsible";
+    passport.user.role = ROLES.RESPONSIBLE;
     const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
     const res = await request(getAppHelper())
       .delete("/cohesion-center/" + cohesionCenter._id)
       .send();
     expect(res.status).toBe(401);
-    passport.user.role = "admin";
+    passport.user.role = ROLES.ADMIN;
   });
 
   describe("GET /cohesion-center/:id/certificate", () => {

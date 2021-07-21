@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 
 import api from "../services/api";
 
-import { translate, YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_COLORS, isEndOfInscriptionManagement2021 } from "../utils";
+import { translate, YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_COLORS, isEndOfInscriptionManagement2021, ROLES } from "../utils";
 import { toastr } from "react-redux-toastr";
 
 import ModalCorrection from "./modals/ModalCorrection";
@@ -47,7 +47,7 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
   const handleClickStatus = async (status) => {
     // Gabrielle says: (https://trello.com/c/JBS3Jn8I/576-inscription-impact-fin-instruction-dossiers-au-6-mai)
     // > Bloquer tous les changements de statuts (sauf désistement)
-    if (user.role !== "admin" && phase === YOUNG_PHASE.INSCRIPTION && status !== YOUNG_STATUS.WITHDRAWN && isEndOfInscriptionManagement2021()) {
+    if (user.role !== ROLES.ADMIN && phase === YOUNG_PHASE.INSCRIPTION && status !== YOUNG_STATUS.WITHDRAWN && isEndOfInscriptionManagement2021()) {
       return alert("Les inscriptions sont closes, vous ne pouvez plus faire de changement de statut.");
     }
 

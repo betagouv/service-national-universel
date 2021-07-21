@@ -7,7 +7,7 @@ import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
-import { translate, YOUNG_STATUS } from "../../../utils";
+import { translate, YOUNG_STATUS, ROLES } from "../../../utils";
 import SelectStatus from "../../../components/selectStatus";
 import Badge from "../../../components/Badge";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
@@ -54,7 +54,7 @@ export default ({ children, young, tab }) => {
             <Tab isActive={tab === "phase3"} onClick={() => history.push(`/volontaire/${young._id}/phase3`)}>
               Phase 3
             </Tab>
-            {user.role === "admin" ? (
+            {user.role === ROLES.ADMIN ? (
               <Tab isActive={tab === "historique"} onClick={() => history.push(`/volontaire/${young._id}/historique`)}>
                 Historique <i style={{ color: "#5145cd", fontWeight: "lighter", fontSize: ".85rem" }}>Bêta</i>
               </Tab>

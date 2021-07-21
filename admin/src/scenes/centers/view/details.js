@@ -18,7 +18,7 @@ export default ({ center }) => {
       const { ok, data, code } = await api.get(`/cohesion-center/${center._id}/head`);
       if (!ok) {
         setHeadCenter(null);
-        toastr.error("Oups, une erreur est survenue lors de la récuperation du chef de centre", translate(code));
+        toastr.error("Oups, une erreur est survenue lors de la récupération du chef de centre", translate(code));
       } else setHeadCenter(data);
     })();
   }, [center]);

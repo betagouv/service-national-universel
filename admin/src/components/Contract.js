@@ -5,7 +5,7 @@ import { Formik, Field } from "formik";
 import { useHistory } from "react-router-dom";
 import { appURL } from "../config";
 import { useSelector } from "react-redux";
-import { APPLICATION_STATUS_COLORS, dateForDatePicker, getAge } from "../utils";
+import { APPLICATION_STATUS_COLORS, dateForDatePicker, getAge, ROLES } from "../utils";
 import api from "../services/api";
 import DownloadAttestationButton from "./buttons/DownloadAttestationButton";
 import Loader from "./Loader";
@@ -301,7 +301,6 @@ export default ({ young, admin }) => {
                             <ContractField name="youngPhone" placeholder="0123456789" className="md" context={context} />
                           </div>
                         </div>
-                        <hr />
                         {!isYoungAdult && (
                           <>
                             <h2>Représenté par ses représentant légaux</h2>
@@ -339,6 +338,7 @@ export default ({ young, admin }) => {
                             )}
                           </>
                         )}
+                        <hr />
                         <div>
                           <br />
                           <p>Il a été convenu ce qui suit :</p>
@@ -767,7 +767,7 @@ function ContractStatusbadgeItem({ contract, status, token }) {
 
   if (contract?.invitationSent !== "true") return <Badge text="Pas encore envoyé" />;
   else if (status === "VALIDATED") return <Badge text="Validé" color={APPLICATION_STATUS_COLORS.VALIDATED} />;
-  else if (user.role !== "admin") return <Badge text="En attente de validation" color={APPLICATION_STATUS_COLORS.WAITING_VALIDATION} />;
+  else if (user.role !== ROLES.ADMIN) return <Badge text="En attente de validation" color={APPLICATION_STATUS_COLORS.WAITING_VALIDATION} />;
   return (
     <>
       <Badge text="En attente de validation" color={APPLICATION_STATUS_COLORS.WAITING_VALIDATION} />

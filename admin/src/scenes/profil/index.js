@@ -12,7 +12,7 @@ import Loader from "../../components/Loader";
 import Badge from "../../components/Badge";
 import Error, { requiredMessage } from "../../components/errorMessage";
 import { Box, BoxContent } from "../../components/box";
-import { translate, REFERENT_ROLES, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE } from "../../utils";
+import { translate, ROLES, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE } from "../../utils";
 
 export default () => {
   const user = useSelector((state) => state.Auth.user);
@@ -21,8 +21,8 @@ export default () => {
 
   const getSubRole = (role) => {
     let subRole = [];
-    if (role === "referent_department") subRole = REFERENT_DEPARTMENT_SUBROLE;
-    if (role === "referent_region") subRole = REFERENT_REGION_SUBROLE;
+    if (role === ROLES.REFERENT_DEPARTMENT) subRole = REFERENT_DEPARTMENT_SUBROLE;
+    if (role === ROLES.REFERENT_REGION) subRole = REFERENT_REGION_SUBROLE;
     return Object.keys(subRole).map((e) => ({ value: e, label: translate(subRole[e]) }));
   };
 
@@ -71,8 +71,8 @@ export default () => {
                   </BoxTitle>
                   <BoxContent direction="column">
                     <Item required title="E-mail" values={values} name="email" handleChange={handleChange} errors={errors} touched={touched} />
-                    {user.role === REFERENT_ROLES.REFERENT_DEPARTMENT ? <Item title="Département" disabled values={values} name="department" handleChange={handleChange} /> : null}
-                    {user.role === REFERENT_ROLES.REFERENT_REGION ? <Item title="Région" disabled values={values} name="region" handleChange={handleChange} /> : null}
+                    {user.role === ROLES.REFERENT_DEPARTMENT ? <Item title="Département" disabled values={values} name="department" handleChange={handleChange} /> : null}
+                    {user.role === ROLES.REFERENT_REGION ? <Item title="Région" disabled values={values} name="region" handleChange={handleChange} /> : null}
                     <Row>
                       <Col md={6}>
                         <Item required title="Prénom" values={values} name="firstName" handleChange={handleChange} errors={errors} touched={touched} />
@@ -89,7 +89,7 @@ export default () => {
                         <Item title="Téléphone fixe" values={values} name="phone" handleChange={handleChange} />
                       </Col>
                     </Row>
-                    {["referent_department", "referent_region"].includes(values.role) ? (
+                    {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(values.role) ? (
                       <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRole(values.role)} />
                     ) : null}
                   </BoxContent>
@@ -101,7 +101,7 @@ export default () => {
             )}
           </Formik>
         </Col>
-        {user.role === "referent_department" && (
+        {user.role === ROLES.REFERENT_DEPARTMENT && (
           <Col md={6}>
             <Formik
               initialValues={service || { department: user.department }}

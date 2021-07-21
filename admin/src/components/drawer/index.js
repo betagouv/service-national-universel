@@ -3,6 +3,7 @@ import { NavLink, Link } from "react-router-dom";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { environment } from "../../config";
+import { ROLES } from "../../utils";
 
 const DrawerTab = ({ title, to, onClick }) => (
   <li onClick={onClick}>
@@ -87,12 +88,12 @@ export default (props) => {
   if (!user) return <div />;
 
   function getName() {
-    if (user.role === "admin") return "Espace modérateur";
-    if (user.role === "referent_department") return "ESPACE RÉFÉRENT DÉPARTEMENTAL";
-    if (user.role === "referent_region") return "ESPACE RÉFÉRENT REGIONAL";
-    if (user.role === "responsible") return "Espace responsable";
-    if (user.role === "supervisor") return "Espace superviseur";
-    if (user.role === "head_center") return "espace chef de centre";
+    if (user.role === ROLES.ADMIN) return "Espace modérateur";
+    if (user.role === ROLES.REFERENT_DEPARTMENT) return "ESPACE RÉFÉRENT DÉPARTEMENTAL";
+    if (user.role === ROLES.REFERENT_REGION) return "ESPACE RÉFÉRENT REGIONAL";
+    if (user.role === ROLES.RESPONSIBLE) return "Espace responsable";
+    if (user.role === ROLES.SUPERVISOR) return "Espace superviseur";
+    if (user.role === ROLES.HEAD_CENTER) return "espace chef de centre";
     return "";
   }
 
@@ -115,11 +116,11 @@ export default (props) => {
       ) : null}
       <ul>
         <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />
-        {user.role === "head_center" && headCenter({ user, onClick: handleClick })}
-        {user.role === "supervisor" && supervisor({ user, onClick: handleClick })}
-        {user.role === "responsible" && responsible({ user, onClick: handleClick })}
-        {user.role === "admin" && admin({ onClick: handleClick })}
-        {["referent_department", "referent_region"].includes(user.role) && referent({ onClick: handleClick })}
+        {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick })}
+        {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick })}
+        {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick })}
+        {user.role === ROLES.ADMIN && admin({ onClick: handleClick })}
+        {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && referent({ onClick: handleClick })}
       </ul>
     </Sidebar>
   );
