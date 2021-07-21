@@ -26,6 +26,9 @@ export default ({ children, young, tab }) => {
                 Détails
               </Tab>
             ) : null}
+            <Tab isActive={tab === "militaryPreparation"} onClick={() => history.push(`/volontaire/${young._id}/preparation-militaire`)}>
+              Préparation militaire
+            </Tab>
           </TabList>
         </div>
       </Header>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Switch, Route } from "react-router-dom";
 import Phase2Contract from "./phase2Contract";
+import Phase2MilitaryPreparation from "./phase2MilitaryPreparation";
 
 import api from "../../../services/api";
 import Details from "../../../components/volontaires-view/Details";
@@ -24,6 +25,16 @@ export default ({ ...props }) => {
   return (
     <Switch>
       <Route path="/volontaire/:id/phase2/application/:applicationId/contrat" component={() => <Phase2Contract young={young} onChange={getYoung} />} />
+      <Route
+        path="/volontaire/:id/preparation-militaire"
+        component={() => (
+          <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
+            <Wrapper young={young} tab="militaryPreparation">
+              <Phase2MilitaryPreparation young={young} />
+            </Wrapper>
+          </div>
+        )}
+      />
       <Route
         path="/volontaire/:id"
         component={() => (
