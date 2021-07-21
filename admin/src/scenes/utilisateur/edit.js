@@ -78,7 +78,7 @@ export default (props) => {
       setLoadingChangeStructure(false);
       if (!ok)
         return code === "OPERATION_NOT_ALLOWED"
-          ? toastr.error(translate(code), "Ce responsable est affilié comme tuteur de missions de la structure.")
+          ? toastr.error(translate(code), "Ce responsable est affilié comme tuteur de missions de la structure.", { timeOut: 5000 })
           : toastr.error(translate(code), "Une erreur s'est produite lors de la modification de la structure.");
       toastr.success("Structure modifiée");
       history.go(0);
