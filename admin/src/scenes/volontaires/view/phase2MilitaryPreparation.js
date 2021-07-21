@@ -166,6 +166,7 @@ export default ({ young }) => {
               <LinkStyled href={`/mission/${a.missionId}`} target="_blank">
                 {a.missionName}
               </LinkStyled>
+              <Badge text={t(a.status)} color={APPLICATION_STATUS_COLORS[a.status]} />
             </div>
           ))}
           <Line>
