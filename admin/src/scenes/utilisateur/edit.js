@@ -8,6 +8,8 @@ import "dayjs/locale/fr";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import ReactSelect from "react-select";
+import { Link } from "react-router-dom";
+
 import { Box, BoxContent, BoxHeadTitle } from "../../components/box";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import DateInput from "../../components/dateInput";
@@ -115,6 +117,11 @@ export default (props) => {
                 <SubTitle>{getSubtitle()}</SubTitle>
               </div>
               <div style={{ display: "flex" }}>
+                {values.structureId ? (
+                  <Link to={`/structure/${values.structureId}`}>
+                    <PanelActionButton icon="eye" title="Voir la structure" />
+                  </Link>
+                ) : null}
                 {currentUser.role === ROLES.ADMIN ? <PanelActionButton onClick={handleImpersonate} icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" /> : null}
                 <SaveBtn loading={isSubmitting} onClick={handleSubmit}>
                   Enregistrer
