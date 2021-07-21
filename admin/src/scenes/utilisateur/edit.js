@@ -26,6 +26,7 @@ export default (props) => {
   const [centers, setCenters] = useState();
   const [structures, setStructures] = useState();
   const [structure, setStructure] = useState();
+  const [dirtyStructure, setDirtyStructure] = useState(false);
   const [loadingChangeStructure, setLoadingChangeStructure] = useState(false);
   const currentUser = useSelector((state) => state.Auth.user);
   const history = useHistory();
@@ -73,7 +74,7 @@ export default (props) => {
   async function modifyStructure() {
     try {
       setLoadingChangeStructure(true);
-      const { ok, code, data: y } = await api.put(`/referent/${user._id}/structure/${structure._id}`);
+      const { ok, code } = await api.put(`/referent/${user._id}/structure/${structure._id}`);
       setLoadingChangeStructure(false);
       if (!ok)
         return code === "OPERATION_NOT_ALLOWED"
@@ -121,6 +122,13 @@ export default (props) => {
         initialValues={user}
         onSubmit={async (values) => {
           try {
+            if (
+              dirtyStructure &&
+              !confirm(
+                'Attention, vous avez modifié la structure de cet utilisateur sans valider. Si vous continuez, ce changement de structure ne sera pas pris en compte. Pour valider ce changement, cliquez sur annuler et valider en cliquant sur "Modifier la structure".'
+              )
+            )
+              return;
             const { ok, code, data } = await api.put(`/referent/${values._id}`, values);
             if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             setUser(data);
@@ -206,7 +214,10 @@ export default (props) => {
                           <AutocompleteSelectStructure
                             options={structures}
                             structure={structure}
-                            setStructure={setStructure}
+                            setStructure={(e) => {
+                              setStructure(e);
+                              setDirtyStructure(true);
+                            }}
                             userId={user._id}
                             onClick={modifyStructure}
                             disabled={isSubmitting}
@@ -428,24 +439,11 @@ const AutocompleteSelectStructure = ({ options, structure, setStructure, onClick
       <Row className="detail">
         <Col md={4} style={{ alignSelf: "flex-start" }}>
           <label>{"Structure"}</label>
-          <LoadingButton
-            onClick={() => {
-              onClick();
-            }}
-            loading={loading}
-            disabled={disabled}
-            style={{
-              marginTop: "1rem",
-              marginLeft: "0rem",
-              padding: "7px 20px",
-            }}
-          >
-            Modifier la structure
-          </LoadingButton>
         </Col>
-        <Col md={8} style={{ alignSelf: "flex-start" }}>
+        <Col md={8} style={{ alignSelf: "flex-start", display: "flex", alignItems: "flex-end", flexDirection: "column" }}>
           <ReactSelect
             styles={{
+              container: () => ({ width: "100%" }),
               menu: () => ({
                 borderStyle: "solid",
                 borderWidth: 1,
@@ -461,6 +459,20 @@ const AutocompleteSelectStructure = ({ options, structure, setStructure, onClick
               setStructure(e);
             }}
           />
+          <LoadingButton
+            onClick={() => {
+              onClick();
+            }}
+            loading={loading}
+            disabled={disabled}
+            style={{
+              marginTop: "1rem",
+              marginLeft: "0",
+              padding: "7px 20px",
+            }}
+          >
+            Modifier la structure
+          </LoadingButton>
         </Col>
       </Row>
     </>
