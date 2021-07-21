@@ -71,18 +71,18 @@ router.post("/signup", async (req, res) => {
       email: Joi.string().lowercase().trim().email().required(),
       firstName: Joi.string().lowercase().trim().required(),
       lastName: Joi.string().uppercase().trim().required(),
-      password: Joi.string().min(8).required(),
+      password: Joi.string().required(),
     })
       .unknown()
       .validate(req.body);
 
     if (error) {
-      if (error.details.find((e) => e.path === "email")) return res.status(400).send({ ok: false, user: null, code: EMAIL_INVALID });
-      if (error.details.find((e) => e.path === "password")) return res.status(400).send({ ok: false, user: null, code: PASSWORD_NOT_VALIDATED });
+      if (error.details.find((e) => e.path.find((p) => p === "email")))
+        return res.status(400).send({ ok: false, user: null, code: ERRORS.EMAIL_INVALID });
       return res.status(400).send({ ok: false, code: error.toString() });
     }
-
-    const { password, email, lastName } = value;
+    const { email, lastName, password } = value;
+    if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
     const firstName = value.firstName.charAt(0).toUpperCase() + value.firstName.toLowerCase().slice(1);
     const role = ROLES.RESPONSIBLE; // responsible by default
 
