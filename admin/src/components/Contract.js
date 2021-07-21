@@ -675,7 +675,7 @@ export default ({ young, admin }) => {
                           "Si vous enregistrez les modifications, les parties prenantes ayant validé recevront une notification et devront à nouveau valider le contrat d'engagment. De la même manière, les parties prenantes dont l'email a été modifié recevront également un email.";
                         if (confirm(confirmText)) {
                           const erroredFields = await validateForm();
-                          if (Object.keys(erroredFields).length) toastr.error("Il y a des erreurs dans le formulaire");
+                          if (Object.keys(erroredFields).length) return toastr.error("Il y a des erreurs dans le formulaire");
                           setFieldValue("sendMessage", true, false);
                           handleSubmit();
                         }
@@ -695,7 +695,7 @@ export default ({ young, admin }) => {
                     <LoadingButton
                       onClick={async () => {
                         const erroredFields = await validateForm();
-                        if (Object.keys(erroredFields).length) toastr.error("Il y a des erreurs dans le formulaire");
+                        if (Object.keys(erroredFields).length) return toastr.error("Il y a des erreurs dans le formulaire");
                         setFieldValue("sendMessage", true, false);
                         handleSubmit();
                       }}
