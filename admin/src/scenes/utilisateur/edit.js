@@ -187,17 +187,21 @@ export default (props) => {
                           label: translate(key),
                         }))}
                       />
-                      {values.role === REFERENT_ROLES.HEAD_CENTER ? (
+                      {values.role === ROLES.HEAD_CENTER ? (
                         centers ? (
                           <AutocompleteSelectCenter
                             options={centers}
                             defaultValue={{ label: values.cohesionCenterName, value: values.cohesionCenterName, _id: values.cohesionCenterId }}
+                            onChange={(e) => {
+                              handleChange({ target: { value: e._id, name: "cohesionCenterId" } });
+                              handleChange({ target: { value: e.value, name: "cohesionCenterName" } });
+                            }}
                           />
                         ) : (
                           <Loader />
                         )
                       ) : null}
-                      {values.role === REFERENT_ROLES.RESPONSIBLE ? (
+                      {values.role === ROLES.RESPONSIBLE ? (
                         structures ? (
                           <AutocompleteSelectStructure
                             options={structures}
@@ -391,7 +395,7 @@ const Select = ({ title, name, values, onChange, disabled, errors, touched, vali
   );
 };
 
-const AutocompleteSelectCenter = ({ options, defaultValue, set }) => {
+const AutocompleteSelectCenter = ({ options, defaultValue, onChange }) => {
   return (
     <Row className="detail">
       <Col md={4} style={{ alignSelf: "flex-start" }}>
@@ -411,10 +415,7 @@ const AutocompleteSelectCenter = ({ options, defaultValue, set }) => {
           options={options}
           placeholder="Choisir un centre"
           noOptionsMessage={() => "Aucun centre ne correspond à cette recherche."}
-          onChange={(e) => {
-            handleChange({ target: { value: e._id, name: "cohesionCenterId" } });
-            handleChange({ target: { value: e.value, name: "cohesionCenterName" } });
-          }}
+          onChange={onChange}
         />
       </Col>
     </Row>
