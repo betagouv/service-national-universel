@@ -68,9 +68,9 @@ export default () => {
               L'inscription à cette préparation est bien évidemment basée sur le volontariat. Cette période en immersion vous permettra d'avoir une excellente première approche,
               afin de tester votre motivation à faire carrière ou non dans l'armée.{" "}
             </p>
-            <SeparatorXS />
+            {/* <SeparatorXS />
             <h2>Contactez votre référent pour plus d’informations</h2>
-            <a>Michel Cymes - mcymes@toulouse.fr</a>
+            <a>Michel Cymes - mcymes@toulouse.fr</a> */}
           </Content>
         </Hero>
       </HeroContainer>
