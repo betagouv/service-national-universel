@@ -9,7 +9,6 @@ import { ReactiveBase } from "@appbaseio/reactivesearch";
 
 import { translate, departmentList, regionList, region2department, department2region, REFERENT_ROLES, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE } from "../../utils";
 import LoadingButton from "../../components/buttons/LoadingButton";
-import { apiURL } from "../../config";
 import api from "../../services/api";
 
 export default ({ setOpen, open, label = "Inviter un référent", role = "" }) => {
