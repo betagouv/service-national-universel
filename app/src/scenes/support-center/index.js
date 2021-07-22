@@ -11,21 +11,21 @@ import api from "../../services/api";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
-
+  const createTicket = async () => {
+    try {
+      await api.post("/support-center/ticket");
+      toastr.success("Ticket créé");
+    } catch (e) {
+      console.log(e);
+      toastr.error("Erreur!");
+    }
+  }
 
   return (
     <div>
-      <section>{JSON.stringify(young)}</section>
+      <pre>{JSON.stringify(young)}</pre>
       <button
-        onClick={() => {
-          fetch('http://92.222.24.89/api/v1/users', {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET, PUT, POST, DELETE, OPTIONS',
-            method: "GET",
-            headers: { "Content-Type": "application/json", "Authorization": `Bearer t2t18-3PuTGA_SWqVBrzwAzWQCN8Obd2G0s58OCK-yE6cnrdHGcyZwQQbQvUdFVm` },
-          })
-        }
-        }
+        onClick={createTicket}
       >Ouvrir un ticket</button>
       <button>Accéder à mes tickets</button>
     </div>
