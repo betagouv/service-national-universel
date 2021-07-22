@@ -104,7 +104,7 @@ export default ({ young, admin }) => {
         structureId: structure._id,
         applicationId: application._id,
         missionId: mission._id,
-        tutorId: tutor._id,
+        tutorId: tutor?._id,
         isYoungAdult: isYoungAdult ? "true" : "false",
       });
       setLoadings({
@@ -208,7 +208,7 @@ export default ({ young, admin }) => {
             </div>
             <div style={{ textAlign: "right" }}>
               {contract?.invitationSent === "true" ? (
-                <Badge text="Contrat envoyé" style={{ verticalAlign: "top" }} />
+                <Badge text="Contrat envoyé" style={{ verticalAlign: "top" }} color={APPLICATION_STATUS_COLORS.VALIDATED} />
               ) : (
                 <Badge text="Contrat pas encore envoyé" style={{ verticalAlign: "top" }} />
               )}
