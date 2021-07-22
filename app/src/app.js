@@ -16,6 +16,7 @@ import Phase1 from "./scenes/phase1";
 import Phase2 from "./scenes/phase2";
 import Phase3 from "./scenes/phase3";
 import Diagoriente from "./scenes/diagoriente";
+import SupportCenter from "./scenes/support-center";
 import Documents from "./scenes/documents";
 import Preferences from "./scenes/preferences";
 import Missions from "./scenes/missions";
@@ -109,6 +110,7 @@ const Espace = () => {
             <Route path="/candidature" component={Applications} />
             <Route path="/cohesion" component={Cohesion} />
             <Route path="/diagoriente" component={Diagoriente} />
+            <Route path="/support" component={SupportCenter} />
             <Route path="/" component={Home} />
           </Switch>
         </Content>
