@@ -1,20 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { Col, Container, Row } from "reactstrap";
-import { ReactiveBase, ReactiveList, DataSearch, SingleDropdownList } from "@appbaseio/reactivesearch";
+import { ReactiveBase, ReactiveList, DataSearch, SingleDropdownList, MultiDropdownList } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
 import MissionCard from "./components/missionCard";
 import ReactiveFilter from "../../components/ReactiveFilter";
 import { apiURL } from "../../config";
-import { translate, getLimitDateForPhase2 } from "../../utils";
+import { translate, getLimitDateForPhase2, getFilterLabel } from "../../utils";
 import api from "../../services/api";
 import Loader from "../../components/Loader";
 import FilterGeoloc from "./components/FilterGeoloc";
 import AlertBox from "../../components/AlertBox";
 import MilitaryPreparationCard from "./components/MilitaryPreparationCard";
 
-const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "GEOLOC", "DATE", "PERIOD", "RELATIVE"];
+const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "GEOLOC", "DATE", "PERIOD", "RELATIVE", "MILITARY_PREPARATION"];
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
@@ -131,7 +131,7 @@ export default () => {
             <Col md={6}>
               <FilterGeoloc young={young} targetLocation={targetLocation} componentId="GEOLOC" />
             </Col>
-            <DomainsFilter md={6}>
+            <DomainsFilter md={4}>
               <SingleDropdownList
                 defaultQuery={getDefaultQuery}
                 selectAllLabel="Tous les domaines"
@@ -146,7 +146,7 @@ export default () => {
                 showSearch={false}
               />
             </DomainsFilter>
-            <DomainsFilter md={6}>
+            <DomainsFilter md={4}>
               <SingleDropdownList
                 defaultQuery={getDefaultQuery}
                 selectAllLabel="Toutes les périodes"
@@ -159,6 +159,22 @@ export default () => {
                 }}
                 renderLabel={(item) => translate(item) || "Filtrer par période"}
                 showSearch={false}
+              />
+            </DomainsFilter>
+            <DomainsFilter md={4}>
+              <MultiDropdownList
+                defaultQuery={getDefaultQuery}
+                className="dropdown-filter"
+                placeholder="Préparation Militaire"
+                componentId="MILITARY_PREPARATION"
+                dataField="isMilitaryPreparation.keyword"
+                react={{ and: FILTERS.filter((e) => e !== "MILITARY_PREPARATION") }}
+                renderItem={(e, count) => {
+                  return `${translate(e)} (${count})`;
+                }}
+                title=""
+                URLParams={true}
+                renderLabel={(items) => getFilterLabel(items, "Préparation Militaire")}
               />
             </DomainsFilter>
           </Row>

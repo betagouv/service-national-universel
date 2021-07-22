@@ -193,6 +193,7 @@ export default () => {
                   }}
                   title=""
                   URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "Préparation Militaire")}
                 />
                 {user.role === ROLES.SUPERVISOR ? (
                   <MultiDropdownList

@@ -29,14 +29,6 @@ export const publicEtatTypes = [
 
 export const corpsEnUniforme = ["SDIS (Service départemental d'Incendie et de Secours)", "Gendarmerie", "Police", "Armées"];
 
-export const getFilterLabel = (selected, placeholder = "Choisissez un filtre") => {
-  if (Object.keys(selected).length === 0) return placeholder;
-  const translated = Object.keys(selected).map((item) => {
-    return translate(item);
-  });
-  return translated.join(", ");
-};
-
 export const confirmMessageChangePhase1Presence = (value) => {
   if (!value) return true;
   const label = value === "true" ? "Présent" : "Absent";
