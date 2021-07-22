@@ -201,22 +201,14 @@ const ChooseRegion = ({ value, onChange }) => {
 const ChooseCenter = ({ value, onChange, centers, onSelect }) => {
   const { user } = useSelector((state) => state.Auth);
 
-  // useEffect(() => {
-  //   if (user.role === REFERENT_ROLES.HEAD_CENTER) {
-  //     return (
-  //       onChange({ target: { value: user.cohesionCenterId, name: "cohesionCenterId" } }),
-  //       onChange({ target: { value: user.cohesionCenterName, name: "cohesionCenterName" } })
-  //     )
-  //   }
-  //   return (
-  //     (e) => {
-  //       console.log('VALUE', JSON.stringify(e));
-  //       onChange({ target: { value: e._id, name: "cohesionCenterId" } });
-  //       onChange({ target: { value: e.value, name: "cohesionCenterName" } });
-  //       onSelect?.(e);
-  //     }
-  //   )
-  // }, []);
+   useEffect(() => {
+     if (user.role === REFERENT_ROLES.HEAD_CENTER) {
+       return (
+         onChange({ target: { value: user.cohesionCenterId, name: "cohesionCenterId" } }),
+         onChange({ target: { value: user.cohesionCenterName, name: "cohesionCenterName" } })
+       )
+     }
+   }, []);
 
   return (
     // <Input
