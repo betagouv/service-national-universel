@@ -24,12 +24,11 @@ export default () => {
       <pre>{JSON.stringify(young)}</pre>
       <button
         onClick={createTicket}
-        className="bg-green-600"
       >Ouvrir un ticket</button>
-      <section className="bg-green-600">
+      <section>
         <h2>Besoin d'aide ?</h2>
         <p>Vous avec un problème technique, vous souhaitez en savoir plus sur votre situation, ou souhaitez contacter l’un de vos référents ?</p>
-        <LoadingButton className="bg-green-600">
+        <LoadingButton>
           <NavLink to="/support/ticket" className="">
             Contacter le support
           </NavLink>
