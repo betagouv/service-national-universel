@@ -12,6 +12,7 @@ import api from "../../services/api";
 import Loader from "../../components/Loader";
 import FilterGeoloc from "./components/FilterGeoloc";
 import AlertBox from "../../components/AlertBox";
+import MilitaryPreparationCard from "./components/MilitaryPreparationCard";
 
 const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "GEOLOC", "DATE", "PERIOD", "RELATIVE"];
 
@@ -94,10 +95,10 @@ export default () => {
         />
       ) : null}
       {showAlertMilitaryPreparation ? (
-        <AlertBox
+        <MilitaryPreparationCard
           onClose={() => setShowAlertMilitaryPreparation(false)}
-          title="Préparation Militaire"
-          message={`Pour accéder à une préparation militaire au-delà des 100kms, merci de contacter votre référent phase 2 : xxx `}
+          title="Réalisez votre mission lors d’une préparation militaire"
+          message="Une période de découverte du milieu militaire pour vivre durant quelques jours le quotidien d’un soldat. En savoir plus"
         />
       ) : null}
       <Heading>
