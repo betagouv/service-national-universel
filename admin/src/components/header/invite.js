@@ -246,10 +246,6 @@ const ChooseCenter = ({ value, onChange, centers, onSelect }) => {
       noOptionsMessage={() => "Aucun centre ne correspond à cette recherche."}
       onChange={(e) => {
         console.log('VALUE', JSON.stringify(e));
-        if (user.role === REFERENT_ROLES.HEAD_CENTER) {
-          onChange({ target: { value: user.cohesionCenterId, name: "cohesionCenterId" } });
-          onChange({ target: { value: user.cohesionCenterName, name: "cohesionCenterName" } });
-        }
         onChange({ target: { value: e._id, name: "cohesionCenterId" } });
         onChange({ target: { value: e.value, name: "cohesionCenterName" } });
         onSelect?.(e);
