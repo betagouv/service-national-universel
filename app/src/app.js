@@ -8,6 +8,7 @@ import { Integrations } from "@sentry/tracing";
 
 import queryString from "query-string";
 import styled from "styled-components";
+import "tailwindcss/tailwind.css"
 
 import { setYoung } from "./redux/auth/actions";
 
