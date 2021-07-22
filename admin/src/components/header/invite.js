@@ -17,7 +17,6 @@ export default ({ setOpen, open, label = "Inviter un référent", role = "" }) =
     (async () => {
       try {
         const { data } = await api.get("/cohesion-center");
-        console.log('DATA', JSON.stringify(data));
         const c = data.map((e) => ({ label: e.name, value: e.name, _id: e._id }));
         setCenters(c);
       } catch (e) {
