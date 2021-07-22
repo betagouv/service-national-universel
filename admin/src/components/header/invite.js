@@ -49,6 +49,8 @@ export default ({ setOpen, open, label = "Inviter un référent", role = "" }) =
                 email: "",
                 region: "",
                 department: "",
+                cohesionCenterName: "",
+                cohesionCenterId: "",
               }}
               onSubmit={async (values, { setSubmitting }) => {
                 try {
@@ -198,14 +200,14 @@ const ChooseRegion = ({ value, onChange }) => {
 const ChooseCenter = ({ value, onChange, centers, onSelect }) => {
   const { user } = useSelector((state) => state.Auth);
 
-   useEffect(() => {
-     if (user.role === REFERENT_ROLES.HEAD_CENTER) {
-       return (
-         onChange({ target: { value: user.cohesionCenterId, name: "cohesionCenterId" } }),
-         onChange({ target: { value: user.cohesionCenterName, name: "cohesionCenterName" } })
-       )
-     }
-   }, []);
+  useEffect(() => {
+    if (user.role === REFERENT_ROLES.HEAD_CENTER) {
+      return (
+        onChange({ target: { value: user.cohesionCenterId, name: "cohesionCenterId" } }),
+        onChange({ target: { value: user.cohesionCenterName, name: "cohesionCenterName" } })
+      )
+    }
+  }, []);
 
   return (
     <ReactSelect
