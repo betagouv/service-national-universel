@@ -32,7 +32,7 @@ Les équipes du Service National Universel`);
     (async () => {
       const structureResponse = await api.get(`/structure/${structureId}`);
       if (!structureResponse.ok) {
-        toastr.error("Oups, une erreur est survenue lors de la récuperation de la structure", translate(structureResponse.code));
+        toastr.error("Oups, une erreur est survenue lors de la récupération de la structure", translate(structureResponse.code));
       }
       setStructure(structureResponse.data);
     })();

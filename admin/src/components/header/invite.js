@@ -12,8 +12,8 @@ import api from "../../services/api";
 export default ({ setOpen, open, label = "Inviter un référent", role = "" }) => {
   const getSubRole = (role) => {
     let subRole = [];
-    if (role === "referent_department") subRole = REFERENT_DEPARTMENT_SUBROLE;
-    if (role === "referent_region") subRole = REFERENT_REGION_SUBROLE;
+    if (role === REFERENT_ROLES.REFERENT_DEPARTMENT) subRole = REFERENT_DEPARTMENT_SUBROLE;
+    if (role === REFERENT_ROLES.REFERENT_REGION) subRole = REFERENT_REGION_SUBROLE;
     return Object.keys(subRole).map((e) => ({ value: e, label: translate(subRole[e]) }));
   };
   return (

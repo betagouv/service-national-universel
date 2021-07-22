@@ -13,7 +13,7 @@ function getNewStructureFixture() {
     instagram: faker.internet.url(),
     status: "WAITING_VALIDATION",
     isNetwork: "true",
-    networkId: faker.datatype.number(),
+    networkId: "",
     networkName: faker.name.findName(),
     legalStatus: "ASSOCIATION",
     associationTypes: [],

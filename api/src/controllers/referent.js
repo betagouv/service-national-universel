@@ -71,18 +71,18 @@ router.post("/signup", async (req, res) => {
       email: Joi.string().lowercase().trim().email().required(),
       firstName: Joi.string().lowercase().trim().required(),
       lastName: Joi.string().uppercase().trim().required(),
-      password: Joi.string().min(8).required(),
+      password: Joi.string().required(),
     })
       .unknown()
       .validate(req.body);
 
     if (error) {
-      if (error.details.find((e) => e.path === "email")) return res.status(400).send({ ok: false, user: null, code: EMAIL_INVALID });
-      if (error.details.find((e) => e.path === "password")) return res.status(400).send({ ok: false, user: null, code: PASSWORD_NOT_VALIDATED });
+      if (error.details.find((e) => e.path.find((p) => p === "email")))
+        return res.status(400).send({ ok: false, user: null, code: ERRORS.EMAIL_INVALID });
       return res.status(400).send({ ok: false, code: error.toString() });
     }
-
-    const { password, email, lastName } = value;
+    const { email, lastName, password } = value;
+    if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
     const firstName = value.firstName.charAt(0).toUpperCase() + value.firstName.toLowerCase().slice(1);
     const role = ROLES.RESPONSIBLE; // responsible by default
 
@@ -109,7 +109,7 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const { id, type } = params;
 
-    if (type === "referent" && req.user.role !== "admin") return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (type === "referent" && req.user.role !== ROLES.ADMIN) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     let user = null;
     if (type === "referent") user = await ReferentObject.findById(id);
@@ -170,22 +170,22 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
 
     let template = "";
     let mailObject = "";
-    if (reqTemplate === "referent_department") {
+    if (reqTemplate === ROLES.REFERENT_DEPARTMENT) {
       template = "../templates/inviteReferentDepartment.html";
       mailObject = "Activez votre compte référent départemental SNU";
-    } else if (reqTemplate === "referent_region") {
+    } else if (reqTemplate === ROLES.REFERENT_REGION) {
       template = "../templates/inviteReferentRegion.html";
       mailObject = "Activez votre compte référent régional SNU";
-    } else if (reqTemplate === "responsible") {
+    } else if (reqTemplate === ROLES.RESPONSIBLE) {
       template = "../templates/inviteMember.html";
       mailObject = "Activez votre compte de responsable de structure";
     } else if (reqTemplate === "responsible_new_structure") {
       template = "../templates/inviteMemberNewStructure.html";
       mailObject = "Activez votre compte de responsable de structure";
-    } else if (reqTemplate === "admin") {
+    } else if (reqTemplate === ROLES.ADMIN) {
       template = "../templates/inviteAdmin.html";
       mailObject = "Activez votre compte administrateur SNU";
-    } else if (reqTemplate === "head_center") {
+    } else if (reqTemplate === ROLES.HEAD_CENTER) {
       template = "../templates/inviteHeadCenter.html";
       mailObject = "Activez votre compte de chef de centre SNU";
     }

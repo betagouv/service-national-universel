@@ -84,7 +84,6 @@ export const Filter = styled.div`
     border: 0;
     outline: 0;
     padding: 15px 20px;
-    height: auto;
     border-radius: 6px;
     margin-right: 15px;
     ::placeholder {
@@ -93,6 +92,7 @@ export const Filter = styled.div`
   }
   .dropdown-filter {
     button {
+      height: 2.5rem;
       background-color: #fff;
       box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
       border: 0;

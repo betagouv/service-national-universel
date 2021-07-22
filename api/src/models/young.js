@@ -922,6 +922,12 @@ const Schema = new mongoose.Schema({
       description: "Code postal du proche",
     },
   },
+  mobilityNearRelativeCity: {
+    type: String,
+    documentation: {
+      description: "Ville du proche",
+    },
+  },
   mobilityTransport: {
     type: [String],
     documentation: {

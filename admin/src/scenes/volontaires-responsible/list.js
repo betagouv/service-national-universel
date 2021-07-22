@@ -11,8 +11,9 @@ import Panel from "./panel";
 import ExportComponent from "../../components/ExportXlsx";
 import Loader from "../../components/Loader";
 import Chevron from "../../components/Chevron";
+import ContractLink from "../../components/ContractLink";
 import { Filter, FilterRow, ResultTable, Table, Header, Title } from "../../components/list";
-import { translate, getFilterLabel, formatStringLongDate, formatStringDate, getAge, ES_NO_LIMIT } from "../../utils";
+import { translate, getFilterLabel, formatStringLongDate, formatStringDate, getAge, ES_NO_LIMIT, ROLES } from "../../utils";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 
 const FILTERS = ["SEARCH", "STATUS", "PHASE", "COHORT", "MISSIONS", "TUTOR"];
@@ -29,7 +30,7 @@ export default () => {
   async function appendMissions(structure) {
     const missionsResponse = await api.get(`/mission/structure/${structure}`);
     if (!missionsResponse.ok) {
-      toastr.error("Oups, une erreur est survenue lors de la récuperation des missions", translate(missionsResponse.code));
+      toastr.error("Oups, une erreur est survenue lors de la récupération des missions", translate(missionsResponse.code));
       return history.push("/");
     }
     return missionsResponse.data;
@@ -37,10 +38,10 @@ export default () => {
 
   async function initMissions(structure) {
     const m = await appendMissions(structure);
-    if (user.role === "supervisor") {
+    if (user.role === ROLES.SUPERVISOR) {
       const subStructures = await api.get(`/structure/network/${structure}`);
       if (!subStructures.ok) {
-        toastr.error("Oups, une erreur est survenue lors de la récuperation des missions des antennes", translate(subStructures.code));
+        toastr.error("Oups, une erreur est survenue lors de la récupération des missions des antennes", translate(subStructures.code));
         return history.push("/");
       }
       for (let i = 0; i < subStructures.data.length; i++) {
@@ -286,15 +287,5 @@ const TeamMember = styled.div`
     color: #606266;
     font-size: 12px;
     margin: 0;
-  }
-`;
-
-const ContractLink = styled.div`
-  font-weight: 500;
-  font-size: 0.8rem;
-  text-align: center;
-  margin-top: 0.5rem;
-  :hover {
-    text-decoration: underline;
   }
 `;

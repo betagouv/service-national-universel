@@ -5,8 +5,17 @@ const getAppHelper = require("./helpers/app");
 const getNewMissionFixture = require("./fixtures/mission");
 const getNewStructureFixture = require("./fixtures/structure");
 const { dbConnect, dbClose } = require("./helpers/db");
-const { getMissionsHelper, getMissionByIdHelper, deleteMissionByIdHelper, createMissionHelper, expectMissionToEqual } = require("./helpers/mission");
-const { deleteStructureByIdHelper, createStructureHelper, expectStructureToEqual } = require("./helpers/structure");
+const {
+  getMissionsHelper,
+  getMissionByIdHelper,
+  deleteMissionByIdHelper,
+  createMissionHelper,
+  expectMissionToEqual,
+  notExisitingMissionId,
+} = require("./helpers/mission");
+const { createReferentHelper } = require("./helpers/referent");
+const { deleteStructureByIdHelper, createStructureHelper, expectStructureToEqual, notExistingStructureId } = require("./helpers/structure");
+const getNewReferentFixture = require("./fixtures/referent");
 
 jest.setTimeout(10_000);
 
@@ -81,5 +90,30 @@ describe("Mission", () => {
     expect(res.statusCode).toEqual(200);
     const missionsAfter = await getMissionsHelper();
     expect(missionsAfter.length).toEqual(missionsBefore.length - 1);
+  });
+
+  describe("PUT mission/:id/structure/:structureId", () => {
+    it("should return 404 when mission does not exist", async () => {
+      const res = await request(getAppHelper()).put(`/mission/${notExisitingMissionId}/structure/${notExistingStructureId}`);
+      expect(res.statusCode).toEqual(404);
+    });
+    it("should return 404 when structure does not exist", async () => {
+      const mission = await createMissionHelper(getNewMissionFixture());
+      const res = await request(getAppHelper()).put(`/mission/${mission._id}/structure/${notExistingStructureId}`);
+      expect(res.statusCode).toEqual(404);
+    });
+    it("should return 200 when mission and structure exist", async () => {
+      const mission = await createMissionHelper(getNewMissionFixture());
+      const structure = await createStructureHelper(getNewStructureFixture());
+      const res = await request(getAppHelper()).put(`/mission/${mission._id}/structure/${structure._id}`);
+      expect(res.statusCode).toEqual(200);
+    });
+    it("should update referent", async () => {
+      const referent = await createReferentHelper(getNewReferentFixture());
+      const mission = await createMissionHelper({ ...getNewMissionFixture(), tutorId: referent._id });
+      const structure = await createStructureHelper(getNewStructureFixture());
+      const res = await request(getAppHelper()).put(`/mission/${mission._id}/structure/${structure._id}`);
+      expect(res.statusCode).toEqual(200);
+    });
   });
 });

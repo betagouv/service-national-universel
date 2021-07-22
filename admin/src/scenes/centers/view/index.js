@@ -20,7 +20,7 @@ export default ({ ...props }) => {
 
       const centerResponse = await api.get(`/cohesion-center/${id}`);
       if (!centerResponse.ok) {
-        toastr.error("Oups, une erreur est survenue lors de la récuperation de la mission", translate(centerResponse.code));
+        toastr.error("Oups, une erreur est survenue lors de la récupération de la mission", translate(centerResponse.code));
         return history.push("/center");
       }
       setCenter(centerResponse.data);

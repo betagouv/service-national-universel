@@ -366,7 +366,7 @@ const Hit = ({ hit, onClick, selected, callback }) => {
           ]}
           value={value.cohesionStayPresence}
           name="cohesionStayPresence"
-          disabled={value.statusPhase1 === "WITHDRAWN"}
+          disabled={true}
           handleChange={(e) => {
             const value = e.target.value;
             if (!confirmMessageChangePhase1Presence(value)) return;
@@ -383,7 +383,7 @@ const Hit = ({ hit, onClick, selected, callback }) => {
           ]}
           value={value.cohesionStayMedicalFileReceived}
           name="cohesionStayMedicalFileReceived"
-          disabled={value.statusPhase1 === "WITHDRAWN"}
+          disabled={true}
           handleChange={(e) => {
             const value = e.target.value;
             updateYoung({ cohesionStayMedicalFileReceived: value });

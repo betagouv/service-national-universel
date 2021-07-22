@@ -5,7 +5,7 @@ import { Formik } from "formik";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-import { translate, YOUNG_STATUS_COLORS, formatStringLongDate, ENABLE_ASSIGN_CENTER, confirmMessageChangePhase1Presence } from "../../../utils";
+import { translate, YOUNG_STATUS_COLORS, formatStringLongDate, ENABLE_ASSIGN_CENTER, confirmMessageChangePhase1Presence, ROLES } from "../../../utils";
 import WrapperPhase1 from "./wrapper";
 import api from "../../../services/api";
 import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
@@ -20,7 +20,7 @@ export default (props) => {
   const user = useSelector((state) => state.Auth.user);
   const [meetingPoint, setMeetingPoint] = useState();
   const [young, setYoung] = useState(props.young);
-  const disabled = young.statusPhase1 === "WITHDRAWN";
+  const disabled = young.statusPhase1 === "WITHDRAWN" || user.role !== ROLES.ADMIN;
 
   useEffect(() => {
     if (!young.meetingPointId) return;
@@ -87,7 +87,7 @@ export default (props) => {
       return (
         <>
           <p>{young.firstName} est en attente d'affectation à un centre de cohésion</p>
-          {ENABLE_ASSIGN_CENTER && user.role === "admin" ? <AssignCenter young={young} onAffect={props.getYoung} /> : null}
+          {ENABLE_ASSIGN_CENTER && user.role === ROLES.ADMIN ? <AssignCenter young={young} onAffect={props.getYoung} /> : null}
         </>
       );
     if (young.statusPhase1 === "WAITING_LIST")

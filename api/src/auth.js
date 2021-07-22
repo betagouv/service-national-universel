@@ -9,6 +9,8 @@ const { capture } = require("./sentry");
 const config = require("./config");
 const { sendEmail } = require("./sendinblue");
 const { COOKIE_MAX_AGE, JWT_MAX_AGE, cookieOptions, logoutCookieOptions } = require("./cookie-options");
+const { validatePassword } = require("./utils");
+const { validateFirstName } = require("./utils/validator/default");
 
 const EMAIL_OR_PASSWORD_INVALID = "EMAIL_OR_PASSWORD_INVALID";
 const PASSWORD_INVALID = "PASSWORD_INVALID";
@@ -64,9 +66,9 @@ class Auth {
     try {
       const { error, value } = Joi.object({
         email: Joi.string().lowercase().trim().email().required(),
-        firstName: Joi.string().lowercase().trim().required(),
+        firstName: validateFirstName().trim().required(),
         lastName: Joi.string().uppercase().trim().required(),
-        password: Joi.string().min(8).required(),
+        password: Joi.string().required(),
       })
         .unknown()
         .validate(req.body);
@@ -77,8 +79,8 @@ class Auth {
         return res.status(400).send({ ok: false, code: error.toString() });
       }
 
-      const { password, email, lastName } = value;
-      const firstName = value.firstName.charAt(0).toUpperCase() + value.firstName.toLowerCase().slice(1);
+      const { password, email, lastName, firstName } = value;
+      if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: PASSWORD_NOT_VALIDATED });
 
       const user = await this.model.create({ password, email, firstName, lastName });
       const token = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });
@@ -122,16 +124,19 @@ class Auth {
 
   async resetPassword(req, res) {
     const { error, value } = Joi.object({
-      password: Joi.string().min(8).required(),
-      newPassword: Joi.string().min(8).required(),
-      verifyPassword: Joi.string().min(8).required(),
+      password: Joi.string().required(),
+      newPassword: Joi.string().required(),
+      verifyPassword: Joi.string().required(),
     })
       .unknown()
       .validate(req.body);
 
-    if (error) res.status(400).send({ ok: false, code: PASSWORD_NOT_VALIDATED });
-
+    if (error) return res.status(400).send({ ok: false, code: PASSWORD_NOT_VALIDATED });
     const { password, verifyPassword, newPassword } = value;
+
+    if (!validatePassword(newPassword) || !validatePassword(verifyPassword)) {
+      return res.status(400).send({ ok: false, code: PASSWORD_NOT_VALIDATED });
+    }
 
     try {
       const match = await req.user.comparePassword(password);
@@ -187,8 +192,8 @@ class Auth {
 
   async forgotPasswordReset(req, res) {
     const { error, value } = Joi.object({
-      password: Joi.string().min(8).required(),
-      token: Joi.string().required(),
+      password: Joi.string().required(),
+      token: Joi.string().min(16).required(),
     })
       .unknown()
       .validate(req.body);
@@ -199,6 +204,7 @@ class Auth {
     }
 
     const { token, password } = value;
+    if (!validatePassword(password)) return res.status(400).send({ ok: false, code: PASSWORD_NOT_VALIDATED });
 
     try {
       const obj = await this.model.findOne({

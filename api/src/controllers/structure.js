@@ -19,20 +19,17 @@ async function updateNetworkName(structure) {
     if (network) {
       structure.set({ networkName: `${network.name}` });
       await structure.save();
-      await structure.index();
     }
   } else if (structure.isNetwork === "true") {
     // When the structure is a partent (is a network).
     // Update the structure itself (a parent belongs to her own structure).
     structure.set({ networkName: `${structure.name}` });
     await structure.save();
-    await structure.index();
     // Then update their childs.
     const childs = await StructureObject.find({ networkId: structure._id });
     for (const child of childs) {
       child.set({ networkName: `${structure.name}` });
       await child.save();
-      await child.index();
     }
   }
 }
@@ -54,7 +51,7 @@ async function updateResponsibleAndSupervisorRole(structure) {
     const referents = await ReferentObject.find({ structureId: structure._id, role: { $in: [ROLES.RESPONSIBLE, ROLES.SUPERVISOR] } });
     if (!referents?.length) return console.log(`no referents edited for structure ${structure._id}`);
     for (const referent of referents) {
-      referent.set({ role: structure.isNetwork ? ROLES.SUPERVISOR : ROLES.RESPONSIBLE });
+      referent.set({ role: structure.isNetwork === "true" ? ROLES.SUPERVISOR : ROLES.RESPONSIBLE });
       await referent.save();
     }
   } catch (error) {
@@ -151,7 +148,7 @@ router.get("/:id/patches", passport.authenticate("referent", { session: false })
 
 router.get("/:id", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
-    const data = await StructureObject.findOne({ _id: req.params.id });
+    const data = await StructureObject.findById(req.params.id);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data });
   } catch (error) {

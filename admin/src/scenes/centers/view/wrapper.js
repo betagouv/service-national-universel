@@ -8,7 +8,7 @@ import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
 import SelectStatusMission from "../../../components/selectStatusMission";
-import { translate, enableAssignCenter } from "../../../utils";
+import { translate, enableAssignCenter, ROLES } from "../../../utils";
 import TabList from "../../../components/views/TabList";
 import Tab from "../../../components/views/Tab";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
@@ -68,7 +68,7 @@ export default ({ center: centerDefault, tab, children }) => {
               </table>
             </BoxPlaces>
           </Col>
-          {user.role === "admin" ? (
+          {user.role === ROLES.ADMIN ? (
             <Col>
               <Link to={`/centre/${center._id}/edit`}>
                 <PanelActionButton title="Modifier" icon="pencil" style={{ margin: 0 }} />

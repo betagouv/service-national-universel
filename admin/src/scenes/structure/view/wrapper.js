@@ -6,7 +6,7 @@ import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
-import { translate, STRUCTURE_STATUS_COLORS } from "../../../utils";
+import { translate, STRUCTURE_STATUS_COLORS, ROLES } from "../../../utils";
 import api from "../../../services/api";
 import TabList from "../../../components/views/TabList";
 import Tab from "../../../components/views/Tab";
@@ -15,7 +15,7 @@ import Badge from "../../../components/Badge";
 export default ({ children, structure, tab }) => {
   const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
-  const isResponsible = user.role === "responsible";
+  const isResponsible = user.role === ROLES.RESPONSIBLE;
 
   const handleDelete = async () => {
     if (!confirm("Êtes-vous sûr(e) de vouloir supprimer cette structure ?")) return;
@@ -48,7 +48,7 @@ export default ({ children, structure, tab }) => {
                 <Tab isActive={tab === "missions"} onClick={() => history.push(`/structure/${structure._id}/missions`)}>
                   Missions
                 </Tab>
-                {user.role === "admin" ? (
+                {user.role === ROLES.ADMIN ? (
                   <Tab isActive={tab === "historique"} onClick={() => history.push(`/structure/${structure._id}/historique`)}>
                     Historique <i style={{ color: "#5145cd", fontWeight: "lighter", fontSize: ".85rem" }}>Bêta</i>
                   </Tab>

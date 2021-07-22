@@ -1,6 +1,5 @@
-import { translate } from "./translation";
+import { translate } from "snu-lib/translation";
 export * from "snu-lib";
-export * from "./translation";
 
 export const domains = ["Défense et mémoire", "Sécurité", "Solidarité", "Santé", "Éducation", "Culture", "Sport", "Environnement et développement durable", "Citoyenneté"];
 export const status = ["Brouillon", "En attente de validation", "En attente de correction", "Validée", "Refusée", "Annulée", "Archivée"];
@@ -80,12 +79,12 @@ export const putLocation = async (city, zip) => {
 };
 
 export const ENABLE_ASSIGN_CENTER = true;
-export const ENABLE_ASSIGN_CENTER_ROLES = ["admin"];
-export const ENABLE_ASSIGN_CENTER_EMAILS = ["tangi.mendes@beta.gouv.fr", "trouinard.baptiste@gmail.com"];
+export const ENABLE_ASSIGN_CENTER_ROLES = [];
+export const ENABLE_ASSIGN_CENTER_EMAILS = [];
 
 export const ENABLE_ASSIGN_MEETING_POINT = false;
 export const ENABLE_ASSIGN_MEETING_POINT_ROLES = [];
-export const ENABLE_ASSIGN_MEETING_POINT_EMAILS = ["tangi.mendes@beta.gouv.fr", "trouinard.baptiste@gmail.com"];
+export const ENABLE_ASSIGN_MEETING_POINT_EMAILS = [];
 
 export const enableAssignCenter = (user) => ENABLE_ASSIGN_CENTER && (ENABLE_ASSIGN_CENTER_ROLES.includes(user.role) || ENABLE_ASSIGN_CENTER_EMAILS.includes(user.email));
 export const enableMeetingPoint = (user) =>

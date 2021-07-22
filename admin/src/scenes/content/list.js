@@ -9,7 +9,7 @@ import ProgramCard from "./components/programCard";
 import api from "../../services/api";
 import VioletButton from "../../components/buttons/VioletButton";
 import Loader from "../../components/Loader";
-import { translate } from "../../utils";
+import { translate, ROLES } from "../../utils";
 
 export default () => {
   const [programs, setPrograms] = useState();
@@ -25,7 +25,7 @@ export default () => {
   }, []);
 
   const getTitle = () => {
-    if (user.role === "head_center") return <Title>Outils pour les professionnels d'État</Title>;
+    if (user.role === ROLES.HEAD_CENTER) return <Title>Outils pour les professionnels d'État</Title>;
     return <Title>Les grands programmes d'engagement</Title>;
   };
 
@@ -34,7 +34,7 @@ export default () => {
     <>
       <Header>
         <div style={{ flex: 1 }}>{getTitle()}</div>
-        {["referent_department", "referent_region", "admin"].includes(user.role) ? (
+        {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(user.role) ? (
           <Link to="/contenu/create">
             <VioletButton>
               <p>Ajouter un nouveau dispositif</p>

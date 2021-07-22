@@ -8,7 +8,7 @@ import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
 import SelectStatusMission from "../../../components/selectStatusMission";
-import { translate } from "../../../utils";
+import { translate, ROLES } from "../../../utils";
 import TabList from "../../../components/views/TabList";
 import Tab from "../../../components/views/Tab";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
@@ -57,7 +57,7 @@ export default ({ mission, tab, children }) => {
             <Tab isActive={tab === "youngs"} onClick={() => history.push(`/mission/${mission._id}/youngs`)}>
               Volontaires
             </Tab>
-            {user.role === "admin" ? (
+            {user.role === ROLES.ADMIN ? (
               <Tab isActive={tab === "historique"} onClick={() => history.push(`/mission/${mission._id}/historique`)}>
                 Historique <i style={{ color: "#5145cd", fontWeight: "lighter", fontSize: ".85rem" }}>Bêta</i>
               </Tab>

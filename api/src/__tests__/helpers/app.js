@@ -12,7 +12,15 @@ function getAppHelper() {
   app.use("/young", require("../../controllers/young"));
   app.use("/mission", require("../../controllers/mission"));
   app.use("/program", require("../../controllers/program"));
+  app.use("/application", require("../../controllers/application"));
+  app.use("/bus", require("../../controllers/bus"));
+  app.use("/cohesion-center", require("../../controllers/cohesion-center"));
   app.use("/department-service", require("../../controllers/department-service"));
+  app.use("/diagoriente", require("../../controllers/diagoriente"));
+  app.use("/email", require("../../controllers/email"));
+  app.use("/structure", require("../../controllers/structure"));
+  app.use("/meeting-point", require("../../controllers/meeting-point"));
+
   return app;
 }
 

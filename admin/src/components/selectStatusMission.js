@@ -5,7 +5,7 @@ import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
 import api from "../services/api";
-import { translate, MISSION_STATUS_COLORS, MISSION_STATUS } from "../utils";
+import { translate, MISSION_STATUS_COLORS, MISSION_STATUS, ROLES } from "../utils";
 import MailCorrectionMission from "../scenes/missions/components/MailCorrectionMission";
 import MailRefusedMission from "../scenes/missions/components/MailRefusedMission";
 import Chevron from "./Chevron";
@@ -27,9 +27,9 @@ export default ({ hit, options = [] }) => {
 
   if (!mission) return <i style={{ color: "#382F79" }}>Chargement...</i>;
 
-  if (user.role === "responsible" || user.role === "supervisor")
+  if (user.role === ROLES.RESPONSIBLE || user.role === ROLES.SUPERVISOR)
     options.push(MISSION_STATUS.WAITING_VALIDATION, MISSION_STATUS.DRAFT, MISSION_STATUS.CANCEL, MISSION_STATUS.ARCHIVED);
-  if (user.role === "admin" || user.role === "referent_department" || user.role === "referent_region") options = Object.keys(MISSION_STATUS);
+  if (user.role === ROLES.ADMIN || user.role === ROLES.REFERENT_DEPARTMENT || user.role === ROLES.REFERENT_REGION) options = Object.keys(MISSION_STATUS);
 
   const handleClickStatus = (status) => {
     if (!confirm("Êtes-vous sûr(e) de vouloir modifier le statut de cette mission ?")) return;

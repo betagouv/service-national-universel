@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Col, Row } from "reactstrap";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { YOUNG_STATUS_COLORS } from "../../../utils";
+import { YOUNG_STATUS_COLORS, ROLES } from "../../../utils";
 import { CardArrow, Card, CardTitle, CardSubtitle, CardValueWrapper, CardValue, CardPercentage } from "../../../components/dashboard";
 
 import api from "../../../services/api";
@@ -42,7 +42,7 @@ export default ({ filter }) => {
 
   return (
     <Row>
-      {user.role === "admin" && (
+      {user.role === ROLES.ADMIN && (
         <Col md={6} xl={2}>
           <Link to={getLink('/inscription?STATUS=%5B"IN_PROGRESS"%5D')}>
             <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS} style={{ minHeight: "180px" }}>

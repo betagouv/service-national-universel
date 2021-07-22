@@ -10,7 +10,7 @@ import api from "../../services/api";
 import { apiURL, appURL } from "../../config";
 import Panel from "./panel";
 import Badge from "../../components/Badge";
-import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS_COLORS, isInRuralArea, formatDateFR, formatLongDateFR, getAge, ES_NO_LIMIT } from "../../utils";
+import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS_COLORS, isInRuralArea, formatDateFR, formatLongDateFR, getAge, ES_NO_LIMIT, ROLES } from "../../utils";
 import { Link } from "react-router-dom";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
@@ -157,7 +157,8 @@ export default ({ setYoung }) => {
                     "Mobilité aux alentours de son domicile": data.mobilityNearHome,
                     "Mobilité aux alentours d'un de ses proches": data.mobilityNearRelative,
                     "Informations du proche":
-                      data.mobilityNearRelative && data.mobilityNearRelativeName + " - " + data.mobilityNearRelativeAddress + " - " + data.mobilityNearRelativeZip,
+                      data.mobilityNearRelative &&
+                      data.mobilityNearRelativeName + " - " + data.mobilityNearRelativeAddress + " - " + data.mobilityNearRelativeZip + " - " + data.mobilityNearRelativeCity,
                     "Mode de transport": data.mobilityTransport?.map((t) => translate(t)),
                     "Autre mode de transport": data.mobilityTransportOther,
                     "Format de mission": data.missionFormat,
@@ -419,7 +420,7 @@ const Action = ({ hit, color }) => {
           <Link to={`/volontaire/${hit._id}/edit`}>
             <DropdownItem className="dropdown-item">Modifier le profil</DropdownItem>
           </Link>
-          {["admin", "referent_department", "referent_region"].includes(user.role) ? (
+          {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) ? (
             <DropdownItem className="dropdown-item">
               <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${hit._id}`}>Prendre sa place</a>
             </DropdownItem>

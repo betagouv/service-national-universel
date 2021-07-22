@@ -316,7 +316,7 @@ describe("Young", () => {
       const young = await createYoungHelper({ ...getNewYoungFixture(), email: "foo@example.org" });
       const res = await request(getAppHelper()).post("/young/signup_invite").send({
         email: young.email,
-        password: "%%minMAJ123",
+        password: "%%minMAJ1235",
       });
       expect(res.statusCode).toEqual(400);
     });
@@ -363,7 +363,7 @@ describe("Young", () => {
       });
       const res = await request(getAppHelper()).post("/young/signup_invite").send({
         email: young.email,
-        password: "%%minMAJ123",
+        password: "%%minMAJ1235",
         invitationToken,
       });
       expect(res.statusCode).toEqual(200);

@@ -12,7 +12,7 @@ import AddressInput from "../../components/addressInput";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
 import Invite from "./components/invite";
 import Loader from "../../components/Loader";
-import { associationTypes, privateTypes, publicTypes, publicEtatTypes, translate } from "../../utils";
+import { associationTypes, privateTypes, publicTypes, publicEtatTypes, translate, ROLES } from "../../utils";
 import api from "../../services/api";
 import { Box, BoxTitle } from "../../components/box";
 import LoadingButton from "../../components/buttons/LoadingButton";
@@ -134,6 +134,7 @@ export default (props) => {
                       <span>*</span>STATUT JURIDIQUE
                     </label>
                     <Field validate={(v) => !v && requiredMessage} component="select" name="legalStatus" value={values.legalStatus} onChange={handleChange}>
+                      <option key="" value="" />
                       <option key="PUBLIC" value="PUBLIC">
                         {translate("PUBLIC")}
                       </option>
@@ -163,7 +164,9 @@ export default (props) => {
                   )}
                   {values.legalStatus === "PRIVATE" && (
                     <FormGroup>
-                      <label>TYPE DE STRUCTURE PRIVÉE</label>
+                      <label>
+                        <span>*</span>TYPE DE STRUCTURE PRIVÉE
+                      </label>
                       <Field validate={(v) => !v && requiredMessage} component="select" name="structurePriveeType" value={values.structurePriveeType} onChange={handleChange}>
                         <option key="" value="" />
                         {privateTypes.map((e) => {
@@ -174,12 +177,15 @@ export default (props) => {
                           );
                         })}
                       </Field>
+                      <ErrorMessage errors={errors} touched={touched} name="structurePriveeType" />
                     </FormGroup>
                   )}
                   {values.legalStatus === "PUBLIC" && (
                     <div>
                       <FormGroup>
-                        <label>TYPE DE STRUCTURE PUBLIQUE</label>
+                        <label>
+                          <span>*</span>TYPE DE STRUCTURE PUBLIQUE
+                        </label>
                         <Field validate={(v) => !v && requiredMessage} component="select" name="structurePubliqueType" value={values.structurePubliqueType} onChange={handleChange}>
                           <option key="" value="" />
                           {publicTypes.map((e) => {
@@ -190,10 +196,13 @@ export default (props) => {
                             );
                           })}
                         </Field>
+                        <ErrorMessage errors={errors} touched={touched} name="structurePubliqueType" />
                       </FormGroup>
                       {["Service de l'Etat", "Etablissement public"].includes(values.structurePubliqueType) && (
                         <FormGroup>
-                          <label>TYPE DE SERVICE DE L'ETAT</label>
+                          <label>
+                            <span>*</span>TYPE DE SERVICE DE L'ETAT
+                          </label>
                           <Field
                             validate={(v) => !v && requiredMessage}
                             component="select"
@@ -210,6 +219,7 @@ export default (props) => {
                               );
                             })}
                           </Field>
+                          <ErrorMessage errors={errors} touched={touched} name="structurePubliqueEtatType" />
                         </FormGroup>
                       )}
                     </div>
@@ -280,7 +290,7 @@ export default (props) => {
                     </Field>
                   </FormGroup>
                   <FormGroup>
-                    {user.role === "admin" && (
+                    {user.role === ROLES.ADMIN && (
                       <div>
                         <label>TÊTE DE RÉSEAU</label>
                         <Field component="select" name="isNetwork" value={values.isNetwork} onChange={handleChange}>

@@ -19,11 +19,10 @@ export default () => {
   if (!young || !permissionPhase1(young)) history.push("/");
 
   const renderStep = () => {
-    // TODO !!!!!! remettre les bons ecrans !
-    if (young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE) return <Affected />; // Done
+    if (young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE) return <Done />;
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED) return <Affected />;
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.CANCEL && young.cohesion2020Step !== "DONE") return <Cancel />;
-    if (young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) return <Affected />; // NotDone
+    if (young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) return <NotDone />;
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_ACCEPTATION) return <WaitingAcceptation />;
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION) return <WaitingAffectation />;
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_LIST) return <WaitingList />;

@@ -10,7 +10,7 @@ import { toastr } from "react-redux-toastr";
 import { Link } from "react-router-dom";
 
 import LoadingButton from "../../../components/buttons/LoadingButton";
-import { translate } from "../../../utils";
+import { translate, ROLES } from "../../../utils";
 import api from "../../../services/api";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
 import { appURL, environment } from "../../../config";
@@ -119,7 +119,7 @@ export default (props) => {
             </Row>
             <Row>
               {values.cohort === "2020" ? <JDC values={values} handleChange={handleChange} /> : null}
-              {user.role === "admin" ? <InformationsSupplementaires values={values} handleChange={handleChange} /> : null}
+              {user.role === ROLES.ADMIN ? <InformationsSupplementaires values={values} handleChange={handleChange} /> : null}
             </Row>
             <TitleWrapper>
               <DeleteButton young={young} />

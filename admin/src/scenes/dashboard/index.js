@@ -9,6 +9,7 @@ import Mission from "./missions";
 import Center from "./centers";
 import VioletButton from "../../components/buttons/VioletButton";
 import ExportAll from "./inscription/ExportAll";
+import { ROLES } from "../../utils";
 
 export default () => {
   const [currentTab, setCurrentTab] = useState("inscriptions");
@@ -35,7 +36,7 @@ export default () => {
           </TabItem>
         </TabNavigationList>
         <div style={{ display: "flex", marginTop: "1rem" }}>
-          {user.role === "admin" && currentTab === "inscriptions" ? <ExportAll /> : null}
+          {user.role === ROLES.ADMIN && currentTab === "inscriptions" ? <ExportAll /> : null}
           <VioletButton onClick={() => print()}>
             <p>Exporter les statistiques</p>
           </VioletButton>

@@ -13,7 +13,7 @@ import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import Header from "./components/header";
 
-import { translate } from "../../utils";
+import { translate, ROLES } from "../../utils";
 import Loader from "../../components/Loader";
 import LoginBox from "./components/loginBox";
 import AuthWrapper from "./components/authWrapper";
@@ -48,7 +48,7 @@ export default () => {
   if (!newuser) return <Loader />;
 
   let title;
-  if (newuser.department && newuser.role === "referent_department") {
+  if (newuser.department && newuser.role === ROLES.REFERENT_DEPARTMENT) {
     title = `Activez votre compte de Référent du département : ${newuser.department}`;
   } else {
     title = "Activez votre compte";
@@ -76,7 +76,7 @@ export default () => {
                   if (e.code === "PASSWORD_NOT_VALIDATED")
                     return toastr.error(
                       "Mot de passe incorrect",
-                      "Votre mot de passe doit contenir au moins 10 caractères, dont une majuscule, une minuscule, un chiffre et un symbole",
+                      "Votre mot de passe doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole",
                       { timeOut: 10000 }
                     );
                   if (e.code === "USER_ALREADY_REGISTERED") return toastr.error("Votre compte est déja activé. Veuillez vous connecter", { timeOut: 10000 });

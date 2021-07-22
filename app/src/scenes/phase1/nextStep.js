@@ -1,26 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import styled from "styled-components";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import { YOUNG_STATUS_PHASE1 } from "snu-lib/constants";
 import { HeroContainer, Hero } from "../../components/Content";
 import ImageRight from "./ImageRight";
 import AutoTest from "./AutoTest";
 import MedicalFile from "./MedicalFile";
-import { toastr } from "react-redux-toastr";
-import api from "../../services/api";
-import { translate } from "../../utils";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
-  const [service, setService] = useState();
-
-  useEffect(() => {
-    (async () => {
-      const { data, code, ok } = await api.get(`/department-service`);
-      if (!ok) return toastr.error("error", translate(code));
-      setService(data);
-    })();
-  }, []);
 
   return (
     <HeroContainer>
@@ -112,39 +100,5 @@ const Content = styled.div`
       font-size: 0.8rem !important;
     }
     font-weight: 400 !important;
-  }
-`;
-
-const ContentHorizontal = styled(Content)`
-  display: flex;
-  width: 100%;
-
-  .link {
-    color: #5145cd;
-    font-size: 0.875rem;
-    margin-top: 0.5rem;
-    font-weight: 400;
-    cursor: pointer;
-  }
-`;
-
-const ContinueButton = styled.button`
-  color: #fff;
-  background-color: #5145cd;
-  padding: 9px 20px;
-  border: 0;
-  outline: 0;
-  border-radius: 6px;
-  font-weight: 500;
-  font-size: 1rem;
-  @media (max-width: 768px) {
-    font-size: 0.8rem;
-  }
-  margin-top: 40px;
-  display: block;
-  outline: 0;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  :hover {
-    opacity: 0.9;
   }
 `;

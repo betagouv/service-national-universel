@@ -255,11 +255,11 @@ describe("Referent", () => {
     });
     it("should return 401 if role is not admin", async () => {
       const passport = require("passport");
-      passport.user.role = "responsible";
+      passport.user.role = ROLES.RESPONSIBLE;
       const referent = await createReferentHelper(getNewReferentFixture());
       const res = await request(getAppHelper()).get(`/referent/${referent._id}`).send();
       expect(res.statusCode).toEqual(401);
-      passport.user.role = "admin";
+      passport.user.role = ROLES.ADMIN;
     });
   });
 
@@ -314,11 +314,11 @@ describe("Referent", () => {
     });
     it("should return 401 if role is not admin", async () => {
       const passport = require("passport");
-      passport.user.role = "responsible";
+      passport.user.role = ROLES.RESPONSIBLE;
       const referent = await createReferentHelper(getNewReferentFixture());
       const res = await request(getAppHelper()).put(`/referent/${referent._id}`).send();
       expect(res.statusCode).toEqual(401);
-      passport.user.role = "admin";
+      passport.user.role = ROLES.ADMIN;
     });
 
     it("should update tutor name in missions and applications", async () => {
@@ -358,23 +358,23 @@ describe("Referent", () => {
     });
     it("should return 401 if role is not admin", async () => {
       const passport = require("passport");
-      passport.user.role = "responsible";
+      passport.user.role = ROLES.RESPONSIBLE;
       const referent = await createReferentHelper(getNewReferentFixture());
       const res = await request(getAppHelper()).delete(`/referent/${referent._id}`).send();
       expect(res.statusCode).toEqual(401);
-      passport.user.role = "admin";
+      passport.user.role = ROLES.ADMIN;
     });
   });
 
   describe("POST /referent/signin_as/:type/:id", () => {
     it("should return 401 if role is not admin", async () => {
       const passport = require("passport");
-      passport.user.role = "responsible";
+      passport.user.role = ROLES.RESPONSIBLE;
       const res = await request(getAppHelper())
         .post("/referent/signin_as/referent/" + notExistingReferentId)
         .send();
       expect(res.statusCode).toEqual(401);
-      passport.user.role = "admin";
+      passport.user.role = ROLES.ADMIN;
     });
     it("should return 404 if referent not found", async () => {
       const res = await request(getAppHelper())

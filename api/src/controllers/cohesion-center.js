@@ -3,7 +3,6 @@ const router = express.Router();
 const passport = require("passport");
 const { capture } = require("../sentry");
 const config = require("../config");
-const Joi = require("joi");
 
 const CohesionCenterModel = require("../models/cohesionCenter");
 const ReferentModel = require("../models/referent");
@@ -21,6 +20,7 @@ const {
   deleteCenterDependencies,
 } = require("../utils");
 const renderFromHtml = require("../htmlToPdf");
+const { ROLES } = require("snu-lib/roles");
 
 router.post("/refresh/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
@@ -35,17 +35,6 @@ router.post("/refresh/:id", passport.authenticate("referent", { session: false }
 });
 
 router.post("/", passport.authenticate("referent", { session: false }), async (req, res) => {
-  // Validate params.
-  // const { error, value: inscriptionsGoals } = Joi.array()
-  //   .items({
-  //     department: Joi.string().required(),
-  //     region: Joi.string(),
-  //     max: Joi.number().allow(null),
-  //   })
-  //   .validate(req.body, { stripUnknown: true });
-  const error = false;
-  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
-
   try {
     const data = await CohesionCenterModel.create(req.body);
     return res.status(200).send({ data, ok: true });
@@ -56,9 +45,6 @@ router.post("/", passport.authenticate("referent", { session: false }), async (r
 });
 
 router.post("/:centerId/assign-young/:youngId", passport.authenticate("referent", { session: false }), async (req, res) => {
-  const error = false;
-  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
-
   try {
     const young = await YoungModel.findById(req.params.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -126,17 +112,6 @@ router.post("/:centerId/assign-young/:youngId", passport.authenticate("referent"
   }
 });
 router.post("/:centerId/assign-young-waiting-list/:youngId", passport.authenticate("referent", { session: false }), async (req, res) => {
-  // Validate params.
-  // const { error, value: inscriptionsGoals } = Joi.array()
-  //   .items({
-  //     department: Joi.string().required(),
-  //     region: Joi.string(),
-  //     max: Joi.number().allow(null),
-  //   })
-  //   .validate(req.body, { stripUnknown: true });
-  const error = false;
-  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
-
   try {
     const young = await YoungModel.findById(req.params.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -152,7 +127,6 @@ router.post("/:centerId/assign-young-waiting-list/:youngId", passport.authentica
       cohesionCenterZip: center.zip,
     });
     await young.save();
-    await young.index();
 
     center.waitingList.push(young._id);
     await center.save();
@@ -167,6 +141,8 @@ router.post("/:centerId/assign-young-waiting-list/:youngId", passport.authentica
 router.get("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const data = await CohesionCenterModel.findById(req.params.id);
+    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
@@ -178,7 +154,9 @@ router.get("/:id/head", passport.authenticate("referent", { session: false }), a
   try {
     const center = await CohesionCenterModel.findById(req.params.id);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const data = await ReferentModel.findOne({ role: "head_center", cohesionCenterId: center._id });
+    const data = await ReferentModel.findOne({ role: ROLES.HEAD_CENTER, cohesionCenterId: center._id });
+    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
@@ -210,8 +188,15 @@ router.get("/young/:youngId", passport.authenticate(["referent", "young"], { ses
 
 router.put("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    if (req.user.role !== "admin") return res.status(404).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    const center = await CohesionCenterModel.findByIdAndUpdate(req.body._id, req.body, { new: true });
+    if (req.user.role !== ROLES.ADMIN) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const center = await CohesionCenterModel.findById(req.body._id);
+    if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    let { __v, ...newCenter } = req.body;
+    center.set(newCenter);
+    await center.save();
+
     const data = await updatePlacesCenter(center);
     await updateCenterDependencies(center);
     res.status(200).send({ ok: true, data });
@@ -223,8 +208,10 @@ router.put("/", passport.authenticate("referent", { session: false }), async (re
 
 router.delete("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const center = await CohesionCenterModel.findOne({ _id: req.params.id });
-    if (req.user.role !== "admin") return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    const center = await CohesionCenterModel.findById(req.params.id);
+    if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (req.user.role !== ROLES.ADMIN) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     await center.remove();
     await deleteCenterDependencies({ _id: req.params.id });
     console.log(`Center ${req.params.id} has been deleted`);
