@@ -26,7 +26,6 @@ export default (props) => {
   const [centers, setCenters] = useState();
   const [structures, setStructures] = useState();
   const [structure, setStructure] = useState();
-  const [dirtyStructure, setDirtyStructure] = useState(false);
   const [loadingChangeStructure, setLoadingChangeStructure] = useState(false);
   const currentUser = useSelector((state) => state.Auth.user);
   const history = useHistory();
@@ -122,8 +121,9 @@ export default (props) => {
         initialValues={user}
         onSubmit={async (values) => {
           try {
+            // if structure has changed but no saved
             if (
-              dirtyStructure &&
+              user.structureId !== structure?._id &&
               !confirm(
                 'Attention, vous avez modifié la structure de cet utilisateur sans valider. Si vous continuez, ce changement de structure ne sera pas pris en compte. Pour valider ce changement, cliquez sur annuler et valider en cliquant sur "Modifier la structure".'
               )
@@ -216,7 +216,6 @@ export default (props) => {
                             structure={structure}
                             setStructure={(e) => {
                               setStructure(e);
-                              setDirtyStructure(true);
                             }}
                             userId={user._id}
                             onClick={modifyStructure}
