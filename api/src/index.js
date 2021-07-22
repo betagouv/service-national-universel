@@ -47,16 +47,17 @@ app.use("/email", require("./controllers/email"));
 app.use("/meeting-point", require("./controllers/meeting-point"));
 app.use("/diagoriente", require("./controllers/diagoriente"));
 app.use("/bus", require("./controllers/bus"));
+app.use("/support-center", require("./controllers/support-center"));
 
-(async () => {
-  const res = await fetch('http://92.222.24.89/api/v1/users', {
-    method: "GET",
-    headers: { "Content-Type": "application/json", "Authorization": `Bearer t2t18-3PuTGA_SWqVBrzwAzWQCN8Obd2G0s58OCK-yE6cnrdHGcyZwQQbQvUdFVm` },
-  });
-  console.log('RESPONSE', res);
-  if (!res.ok) console.log('OH NOOO...', res.error);
-  console.log('YEAAAAH ! 🎉', res.ok);
-})();
+// (async () => {
+//   const res = await fetch('http://92.222.24.89/api/v1/users', {
+//     method: "GET",
+//     headers: { "Content-Type": "application/json", "Authorization": `Bearer t2t18-3PuTGA_SWqVBrzwAzWQCN8Obd2G0s58OCK-yE6cnrdHGcyZwQQbQvUdFVm` },
+//   });
+//   console.log('RESPONSE', res);
+//   if (!res.ok) console.log('OH NOOO...', res.error);
+//   console.log('YEAAAAH ! 🎉', res.ok);
+// })();
 
 app.get("/", async (req, res) => {
   const d = new Date();
