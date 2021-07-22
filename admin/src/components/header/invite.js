@@ -240,6 +240,7 @@ const ChooseCenter = ({ value, onChange, centers, onSelect }) => {
     //   })}
     // </Input>
     <ReactSelect
+      disabled={user.role === REFERENT_ROLES.HEAD_CENTER}
       options={centers}
       placeholder="Choisir un centre"
       noOptionsMessage={() => "Aucun centre ne correspond à cette recherche."}
