@@ -22,7 +22,6 @@ const updateStatusPhase2 = async (app) => {
     if (application.status === "DONE") {
       young.set({ statusPhase2: "VALIDATED", phase: "CONTINUE" });
       await young.save();
-      await young.index();
       return;
     }
     // if at least one application is not ABANDON or CANCEL, phase 2 is in progress
@@ -31,7 +30,6 @@ const updateStatusPhase2 = async (app) => {
     }
   }
   await young.save();
-  await young.index();
 };
 
 const updatePlacesMission = async (app) => {
@@ -47,7 +45,6 @@ const updatePlacesMission = async (app) => {
       console.log(`Mission ${mission.id}: total ${mission.placesTotal}, left from ${mission.placesLeft} to ${placesLeft}`);
       mission.set({ placesLeft });
       await mission.save();
-      await mission.index();
     }
   } catch (e) {
     console.log(e);
@@ -62,6 +59,12 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false }
       applications.length;
       obj.priority = applications.length + 1;
     }
+    const mission = await MissionObject.findById(obj.missionId);
+    if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const young = await YoungObject.findById(obj.youngId);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
     const data = await ApplicationObject.create(obj);
     await updateStatusPhase2(data);
     await updatePlacesMission(data);
@@ -86,7 +89,7 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false })
 
 router.get("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const data = await ApplicationObject.findOne({ _id: req.params.id });
+    const data = await ApplicationObject.findById(req.params.id);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
@@ -99,6 +102,7 @@ router.get("/young/:id", passport.authenticate(["referent", "young"], { session:
   try {
     let data = await ApplicationObject.find({ youngId: req.params.id });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
     for (let i = 0; i < data.length; i++) {
       const application = data[i]._doc;
       const mission = await MissionObject.findById(application.missionId);
@@ -128,17 +132,6 @@ router.get("/mission/:id", passport.authenticate("referent", { session: false })
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
-  }
-});
-
-//@check
-router.delete("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
-  try {
-    await MissionObject.findOneAndUpdate({ _id: req.params.id }, { deleted: "yes" });
-    res.status(200).send({ ok: true });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, error, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -219,7 +212,7 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
       subject = `Votre candidature sur la mission d'intérêt général ${mission.name} a été refusée.`;
       to = { name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail };
     } else {
-      return res.status(200).send({ ok: true });
+      return res.status(404).send({ ok: true });
     }
 
     await sendEmail(to, subject, htmlContent);

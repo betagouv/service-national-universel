@@ -4,6 +4,7 @@ const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../es");
 const sendinblue = require("../sendinblue");
+const { SUB_ROLES_LIST, ROLES_LIST } = require("snu-lib/roles");
 
 const MODELNAME = "referent";
 
@@ -87,16 +88,7 @@ const Schema = new mongoose.Schema({
 
   role: {
     type: String,
-    enum: [
-      "admin",
-      "referent_region",
-      "referent_department",
-      "structure_responsible",
-      "structure_member",
-      "responsible",
-      "supervisor",
-      "head_center",
-    ],
+    enum: ROLES_LIST,
     documentation: {
       description: "Rôle de l'utilisateur sur l'app",
     },
@@ -117,15 +109,7 @@ const Schema = new mongoose.Schema({
   },
   subRole: {
     type: String,
-    enum: [
-      "manager_department",
-      "assistant_manager_department",
-      "manager_department_phase2",
-      "secretariat",
-      "coordinator",
-      "assistant_coordinator",
-      "",
-    ],
+    enum: SUB_ROLES_LIST,
   },
   cohesionCenterId: {
     type: String,
@@ -202,57 +186,5 @@ Schema.plugin(patchHistory, {
 Schema.plugin(mongooseElastic(esClient), MODELNAME);
 
 const OBJ = mongoose.model(MODELNAME, Schema);
+
 module.exports = OBJ;
-
-/*
-
-{
-   "id":10090,
-   "name":"se.legoff@gmail.com",
-   "email":"se.legoff@gmail.com",
-   "context_role":"responsable",
-   "created_at":"2020-12-02 14:37:10",
-   "updated_at":"2020-12-02 14:37:10",
-   "profile":{
-      "id":10080,
-      "user_id":10090,
-      "first_name":"Sebastien",
-      "last_name":"Le Goff",
-      "email":"se.legoff@gmail.com",
-      "phone":null,
-      "mobile":"+33658469890",
-      "reseau_id":null,
-      "referent_department":null,
-      "referent_region":null,
-      "created_at":"2020-12-02 14:37:10",
-      "updated_at":"2020-12-02 14:37:29",
-      "full_name":"Sebastien Le Goff",
-      "avatar":null,
-      "roles":{
-         "admin":false,
-         "referent":false,
-         "referentRegion":false,
-         "superviseur":false,
-         "responsable":true,
-         "tuteur":false
-      },
-      "has_user":true,
-      "structures":[
-         {
-            "id":2166,
-            "name":"TEST SEB",
-            "logo":null,
-            "full_address":",  ",
-            "ceu":false,
-            "pivot":{
-               "profile_id":10080,
-               "structure_id":2166,
-               "role":"responsable"
-            }
-         }
-      ],
-      "reseau":null
-   }
-}
-
-*/

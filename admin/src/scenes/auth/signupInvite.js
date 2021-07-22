@@ -13,22 +13,28 @@ import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import Header from "./components/header";
 
-import { translate } from "../../utils";
+import { translate, ROLES } from "../../utils";
 import Loader from "../../components/Loader";
+import LoginBox from "./components/loginBox";
+import AuthWrapper from "./components/authWrapper";
 
 export default () => {
   const [invitation, setInvitation] = useState("");
   const [newuser, setNewUser] = useState(null);
 
+  const urlParams = new URLSearchParams(window.location.search);
+  const invitationToken = urlParams.get("token");
+
   useEffect(() => {
     (async () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const invitationToken = urlParams.get("token");
-      if (!invitationToken) return setInvitation("INVITATION_TOKEN_EXPIRED_OR_INVALID");
-      const { data: u, code, token } = await api.post(`/referent/signup_verify`, { invitationToken });
-      if (token) api.setToken(token);
-      if (code === "INVITATION_TOKEN_EXPIRED_OR_INVALID") return setInvitation("INVITATION_TOKEN_EXPIRED_OR_INVALID");
-      setNewUser(u);
+      try {
+        if (!invitationToken) return setInvitation("INVITATION_TOKEN_EXPIRED_OR_INVALID");
+        const { data, code, token } = await api.post(`/referent/signup_verify`, { invitationToken });
+        if (token) api.setToken(token);
+        setNewUser(data);
+      } catch (error) {
+        if (error?.code === "INVITATION_TOKEN_EXPIRED_OR_INVALID") return setInvitation("INVITATION_TOKEN_EXPIRED_OR_INVALID");
+      }
     })();
   }, []);
 
@@ -42,14 +48,14 @@ export default () => {
   if (!newuser) return <Loader />;
 
   let title;
-  if (newuser.department && newuser.role === "referent_department") {
+  if (newuser.department && newuser.role === ROLES.REFERENT_DEPARTMENT) {
     title = `Activez votre compte de Référent du département : ${newuser.department}`;
   } else {
     title = "Activez votre compte";
   }
 
   return (
-    <div style={{ display: "flex", flexDirection: "column" }}>
+    <div style={{ display: "flex", flexDirection: "column", flex: 1 }}>
       <Header />
       <AuthWrapper>
         <Thumb />
@@ -57,29 +63,24 @@ export default () => {
           <LoginBox>
             <Title>{title}</Title>
             <Formik
-              initialValues={{ firstName: newuser.firstName, lastName: newuser.lastName, email: newuser.email, password: "", role: newuser.role }}
+              initialValues={{ firstName: newuser.firstName, lastName: newuser.lastName, email: newuser.email, password: "" }}
               onSubmit={async (values, actions) => {
                 try {
-                  const { data: user, token, code, ok } = await api.post(`/referent/signup_invite`, values);
+                  const { data: user, token, code, ok } = await api.post(`/referent/signup_invite`, { ...values, invitationToken });
                   actions.setSubmitting(false);
-                  if (!ok) {
-                    if (code === "PASSWORD_NOT_VALIDATED")
-                      return toastr.error(
-                        "Mot de passe incorrect",
-                        "Votre mot de passe doit contenir au moins 8 caractères, dont une majuscule, une minuscule, un chiffre et un symbole",
-                        { timeOut: 10000 }
-                      );
-                    if (code === "USER_ALREADY_REGISTERED") return toastr.error("Votre compte est déja activé. Veuillez vous connecter", { timeOut: 10000 });
-                    return toastr.error("Problème", translate(code));
-                  }
-                  if (token) api.setToken(token);
-                  if (user) {
-                    dispatch(setUser(user));
-                  }
+                  if (ok && token) api.setToken(token);
+                  if (ok && user) dispatch(setUser(user));
                 } catch (e) {
-                  if (e && e.code === "USER_ALREADY_REGISTERED") return toastr.error("Le compte existe déja. Veuillez vous connecter");
                   actions.setSubmitting(false);
                   console.log("e", e);
+                  if (e.code === "PASSWORD_NOT_VALIDATED")
+                    return toastr.error(
+                      "Mot de passe incorrect",
+                      "Votre mot de passe doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole",
+                      { timeOut: 10000 }
+                    );
+                  if (e.code === "USER_ALREADY_REGISTERED") return toastr.error("Votre compte est déja activé. Veuillez vous connecter", { timeOut: 10000 });
+                  return toastr.error("Problème", translate(e.code));
                 }
               }}
             >
@@ -172,23 +173,6 @@ const Thumb = styled.div`
   flex: 1;
   @media (max-width: 768px) {
     display: none;
-  }
-`;
-
-const AuthWrapper = styled.div`
-  display: flex;
-  width: 100%;
-  > * {
-    flex: 1;
-  }
-`;
-
-const LoginBox = styled.div`
-  padding: 4rem;
-  background-color: #f6f6f6;
-  @media (max-width: 768px) {
-    border-radius: 0;
-    margin: 0;
   }
 `;
 

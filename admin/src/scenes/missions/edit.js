@@ -5,11 +5,12 @@ import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 import { Formik, Field } from "formik";
 import { useHistory } from "react-router-dom";
+import ReactSelect from "react-select";
 
 import MultiSelect from "../../components/Multiselect";
 import AddressInput from "../../components/addressInput";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
-import { translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, MISSION_DOMAINS, PERIOD, dateForDatePicker, putLocation } from "../../utils";
+import { translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, MISSION_DOMAINS, PERIOD, dateForDatePicker, putLocation, ROLES } from "../../utils";
 import api from "../../services/api";
 import Invite from "../structure/components/invite";
 import Loader from "../../components/Loader";
@@ -19,9 +20,14 @@ import LoadingButton from "../../components/buttons/LoadingButton";
 export default (props) => {
   const [defaultValue, setDefaultValue] = useState(null);
   const [structure, setStructure] = useState();
+  const [structures, setStructures] = useState();
   const [referents, setReferents] = useState([]);
   const [showTutor, setShowTutor] = useState();
-  const [loadings, setLoadings] = useState([false, false]);
+  const [loadings, setLoadings] = useState({
+    saveButton: false,
+    submitButton: false,
+    changeStructureButton: false,
+  });
   const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
   const isNew = !props?.match?.params?.id;
@@ -57,8 +63,44 @@ export default (props) => {
     }
   }
 
+  async function initStructures() {
+    const responseStructure = await api.get(`/structure/all`);
+    const s = responseStructure.data.map((e) => ({ label: e.name, value: e.name, _id: e._id, structure: e }));
+    setStructures(s);
+  }
+
+  async function modifyStructure() {
+    try {
+      setLoadings({
+        saveButton: false,
+        submitButton: false,
+        changeStructureButton: true,
+      });
+      const { ok, code, data: y } = await api.put(`/mission/${defaultValue._id}/structure/${structure._id}`);
+      setLoadings({
+        saveButton: false,
+        submitButton: false,
+        changeStructureButton: false,
+      });
+      if (!ok)
+        return code === "OPERATION_NOT_ALLOWED"
+          ? toastr.error(translate(code), "Le tuteur de cette mission est affilié à d'autres missions de la structure.")
+          : toastr.error(translate(code), "Une erreur s'est produite lors de la modification de la structure.");
+      history.push(`/mission/${defaultValue._id}`);
+      toastr.success("Structure modifiée");
+    } catch (e) {
+      setLoadings({
+        saveButton: false,
+        submitButton: false,
+        changeStructureButton: false,
+      });
+      return toastr.error("Une erreur s'est produite lors de la modification de la structure", e?.error?.message);
+    }
+  }
+
   useEffect(() => {
     initMission();
+    initStructures();
   }, []);
   useEffect(() => {
     initStructure();
@@ -68,7 +110,6 @@ export default (props) => {
   }, [structure]);
 
   if ((!defaultValue && !isNew) || !structure) return <Loader />;
-
   return (
     <Formik
       validateOnChange={false}
@@ -100,7 +141,17 @@ export default (props) => {
         }
       }
       onSubmit={async (values) => {
-        values.status === "DRAFT" ? setLoadings([true, false]) : setLoadings([false, true]);
+        values.status === "DRAFT"
+          ? setLoadings({
+              saveButton: true,
+              submitButton: false,
+              changeStructureButton: false,
+            })
+          : setLoadings({
+              saveButton: false,
+              submitButton: true,
+              changeStructureButton: false,
+            });
         //if new mission, init placesLeft to placesTotal
         if (isNew) values.placesLeft = values.placesTotal;
         //if edit mission, add modified delta to placesLeft
@@ -118,12 +169,20 @@ export default (props) => {
             values.location = await putLocation(values.city, values.zip);
           }
           const { ok, code, data: mission } = await api[values._id ? "put" : "post"]("/mission", values);
-          setLoadings([false, false]);
+          setLoadings({
+            saveButton: false,
+            submitButton: false,
+            changeStructureButton: false,
+          });
           if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", translate(code));
           history.push(`/mission/${mission._id}`);
           toastr.success("Mission enregistrée");
         } catch (e) {
-          setLoading([false, false]);
+          setLoading({
+            saveButton: false,
+            submitButton: false,
+            changeStructureButton: false,
+          });
           return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", e?.error?.message);
         }
       }}
@@ -136,8 +195,8 @@ export default (props) => {
               <LoadingButton
                 color={"#fff"}
                 textColor={"#767697"}
-                loading={loadings[0]}
-                disabled={loadings[1]}
+                loading={loadings.saveButton}
+                disabled={loadings.submitButton || loadings.changeStructureButton}
                 onClick={() => {
                   handleChange({ target: { value: "DRAFT", name: "status" } });
                   handleSubmit();
@@ -148,8 +207,8 @@ export default (props) => {
             ) : null}
 
             <LoadingButton
-              loading={loadings[1]}
-              disabled={loadings[0]}
+              loading={loadings.submitButton}
+              disabled={loadings.saveButton || loadings.changeStructureButton}
               onClick={() => {
                 handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
                 handleSubmit();
@@ -176,10 +235,6 @@ export default (props) => {
                       </p>
                       <Field validate={(v) => !v && requiredMessage} value={values.name} onChange={handleChange} name="name" placeholder="Nom de votre mission" />
                       <ErrorMessage errors={errors} touched={touched} name="name" />
-                    </FormGroup>
-                    <FormGroup>
-                      <label>STRUCTURE RATTACHÉE</label>
-                      <Input disabled value={values.structureName} placeholder="Structure de la mission" />
                     </FormGroup>
                     <FormGroup>
                       <label>DOMAINES D'ACTION</label>
@@ -379,14 +434,61 @@ export default (props) => {
                 </Col>
               </Row>
             </Box>
+            {user.role === ROLES.ADMIN && defaultValue ? (
+              structures?.length ? (
+                <Box>
+                  <Row>
+                    <Col md={12}>
+                      <Wrapper>
+                        <BoxTitle>Structure associée</BoxTitle>
+                        <Header>
+                          <ReactSelect
+                            styles={{
+                              container: () => ({ flex: 1 }),
+                              menu: () => ({
+                                borderStyle: "solid",
+                                borderWidth: 1,
+                                borderRadius: 5,
+                                borderColor: "#dedede",
+                              }),
+                            }}
+                            defaultValue={{ label: structure.name, value: structure.name, _id: structure._id }}
+                            options={structures}
+                            placeholder={"Modifier la structure rattachée"}
+                            noOptionsMessage={() => "Aucune structure ne correspond à cette recherche."}
+                            onChange={(e) => {
+                              setStructure(e.structure);
+                            }}
+                          />
+                          <div style={{ alignSelf: "flex-start" }}>
+                            <LoadingButton
+                              loading={loadings.changeStructureButton}
+                              disabled={loadings.saveButton || loadings.submitButton}
+                              onClick={() => {
+                                modifyStructure();
+                              }}
+                            >
+                              Modifier la structure
+                            </LoadingButton>
+                          </div>
+                        </Header>
+                      </Wrapper>
+                    </Col>
+                  </Row>
+                </Box>
+              ) : (
+                <Loader />
+              )
+            ) : null}
+
             {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas proposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
             <Header style={{ justifyContent: "flex-end" }}>
               {!defaultValue ? (
                 <LoadingButton
                   color={"#fff"}
                   textColor={"#767697"}
-                  loading={loadings[0]}
-                  disabled={loadings[1]}
+                  loading={loadings.saveButton}
+                  disabled={loadings.submitButton || loadings.changeStructureButton}
                   onClick={() => {
                     handleChange({ target: { value: "DRAFT", name: "status" } });
                     handleSubmit();
@@ -397,8 +499,8 @@ export default (props) => {
               ) : null}
 
               <LoadingButton
-                loading={loadings[1]}
-                disabled={loadings[0]}
+                loading={loadings.submitButton}
+                disabled={loadings.saveButton || loadings.changeStructureButton}
                 onClick={() => {
                   handleChange({ target: { value: "WAITING_VALIDATION", name: "status" } });
                   handleSubmit();

@@ -10,7 +10,12 @@ async function getYoungByIdHelper(youngId) {
 
 async function deleteYoungByIdHelper(youngId) {
   const young = await getYoungByIdHelper(youngId);
-  await young.remove();
+  if (young) await young.remove();
+}
+
+async function deleteYoungByEmailHelper(email) {
+  const young = await YoungObject.findOne({ email });
+  if (young) await young.remove();
 }
 
 async function createYoungHelper(young) {
@@ -35,10 +40,14 @@ function expectYoungToEqual(young, expectedYoung) {
   expect(youngParsed.gender).toEqual(expectedYoungParsed.gender);
 }
 
+const notExistingYoungId = "104a49ba503040e4d2153973";
+
 module.exports = {
   getYoungsHelper,
   getYoungByIdHelper,
   deleteYoungByIdHelper,
   createYoungHelper,
   expectYoungToEqual,
+  deleteYoungByEmailHelper,
+  notExistingYoungId,
 };

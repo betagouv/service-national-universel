@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 
-import { translate as t, YOUNG_PHASE, YOUNG_STATUS_PHASE2 } from "../../../utils";
+import { translate as t, YOUNG_PHASE, YOUNG_STATUS_PHASE2, getLimitDateForPhase2 } from "../../../utils";
 import WrapperPhase2 from "./wrapper";
 import ApplicationList from "./applicationList.js";
 import SelectStatus from "../../../components/selectStatus";
@@ -11,11 +11,6 @@ import DownloadAttestationButton from "../../../components/buttons/DownloadAttes
 import { Box, BoxTitle } from "../../../components/box";
 
 export default ({ young, onChange }) => {
-  const getDate = () => {
-    if (young.cohort === "2019") return "31 mars 2021";
-    return "31 décembre 2021";
-  };
-
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <WrapperPhase2 young={young} tab="phase2">
@@ -23,7 +18,7 @@ export default ({ young, onChange }) => {
           <Bloc title="Réalisation d'une mission d'intérêt général">
             <div style={{ display: "flex" }}>
               <p style={{ flex: 1 }}>
-                Le volontaire doit achever sa phase 2 avant le <b>{getDate()}</b>
+                Le volontaire doit achever sa phase 2 avant le <b>{getLimitDateForPhase2(young.cohort)}</b>
               </p>
               <SelectStatus hit={young} statusName="statusPhase2" phase={YOUNG_PHASE.INTEREST_MISSION} options={Object.keys(YOUNG_STATUS_PHASE2)} />
             </div>
@@ -45,7 +40,7 @@ export default ({ young, onChange }) => {
                 <Details title="Projet professionnel">
                   {young.professionnalProject ? (
                     <div>
-                      {t(young.professionnalProject)} {young.professionnalProjectPrecision ? `(${young.professionnalProjectPrecision})` : null}
+                      {t(young.professionnalProject)} {young.professionnalProjectPrecision ? `(${t(young.professionnalProjectPrecision)})` : null}
                     </div>
                   ) : null}
                 </Details>
@@ -61,7 +56,7 @@ export default ({ young, onChange }) => {
                   {young.mobilityNearRelative === "true" ? (
                     <>
                       <div>Hébergement chez un proche</div>
-                      <div style={{ marginLeft: "1rem" }}>{`${young.mobilityNearRelativeName} • ${young.mobilityNearRelativeZip}`}</div>
+                      <div style={{ marginLeft: "1rem" }}>{`${young.mobilityNearRelativeName} • ${young.mobilityNearRelativeZip} ${young.mobilityNearRelativeCity}`}</div>
                     </>
                   ) : null}
                 </Details>

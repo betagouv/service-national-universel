@@ -23,6 +23,7 @@ import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Badge from "../../components/Badge";
 import { ResultTable, Filter, Table, FilterRow } from "../../components/list";
 import ToggleSwitch from "../../components/ToogleSwitch";
+import Chevron from "../../components/Chevron";
 import Select from "./components/Select";
 import { toastr } from "react-redux-toastr";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
@@ -48,6 +49,8 @@ export default () => {
   const [volontaire, setVolontaire] = useState(null);
   const [meetingPoints, setMeetingPoints] = useState(null);
   const [center, setCenter] = useState(null);
+  const [filterVisible, setFilterVisible] = useState(false);
+  const handleShowFilter = () => setFilterVisible(!filterVisible);
   useEffect(() => {
     (async () => {
       const { data } = await api.get("/meeting-point/all");
@@ -189,19 +192,19 @@ export default () => {
               </div>
             </Header>
             <Filter>
-              <DataSearch
-                showIcon={false}
-                placeholder="Rechercher par prénom, nom, email, ville, code postal..."
-                componentId="SEARCH"
-                dataField={["email.keyword", "firstName", "lastName", "city", "zip"]}
-                react={{ and: FILTERS }}
-                // fuzziness={2}
-                style={{ flex: 2 }}
-                innerClass={{ input: "searchbox" }}
-                autosuggest={false}
-                queryFormat="and"
-              />
-              <FilterRow>
+              <FilterRow visible>
+                <DataSearch
+                  showIcon={false}
+                  placeholder="Rechercher par prénom, nom, email, ville, code postal..."
+                  componentId="SEARCH"
+                  dataField={["email.keyword", "firstName", "lastName", "city", "zip"]}
+                  react={{ and: FILTERS }}
+                  // fuzziness={2}
+                  style={{ flex: 1, marginRight: "1rem" }}
+                  innerClass={{ input: "searchbox" }}
+                  autosuggest={false}
+                  queryFormat="and"
+                />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -216,6 +219,9 @@ export default () => {
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Statut")}
                 />
+                <Chevron color="#444" style={{ cursor: "pointer", transform: filterVisible && "rotate(180deg)" }} onClick={handleShowFilter} />
+              </FilterRow>
+              <FilterRow visible={filterVisible}>
                 <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
                 <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
                 <MultiDropdownList
@@ -360,7 +366,7 @@ const Hit = ({ hit, onClick, selected, callback }) => {
           ]}
           value={value.cohesionStayPresence}
           name="cohesionStayPresence"
-          disabled={value.statusPhase1 === "WITHDRAWN"}
+          disabled={true}
           handleChange={(e) => {
             const value = e.target.value;
             if (!confirmMessageChangePhase1Presence(value)) return;
@@ -377,7 +383,7 @@ const Hit = ({ hit, onClick, selected, callback }) => {
           ]}
           value={value.cohesionStayMedicalFileReceived}
           name="cohesionStayMedicalFileReceived"
-          disabled={value.statusPhase1 === "WITHDRAWN"}
+          disabled={true}
           handleChange={(e) => {
             const value = e.target.value;
             updateYoung({ cohesionStayMedicalFileReceived: value });

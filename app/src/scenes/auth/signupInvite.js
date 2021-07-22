@@ -13,20 +13,25 @@ import StyledFormGroup from "./components/StyledFormGroup";
 import Submit from "./components/Submit";
 import LoginBox from "./components/LoginBox";
 import InputField from "./components/InputField";
+import { translate } from "../../utils";
 
 export default () => {
   const [invitation, setInvitation] = useState("");
   const [newuser, setNewUser] = useState(null);
 
+  const urlParams = new URLSearchParams(window.location.search);
+  const invitationToken = urlParams.get("token");
+
   useEffect(() => {
     (async () => {
-      const urlParams = new URLSearchParams(window.location.search);
-      const invitationToken = urlParams.get("token");
       if (!invitationToken) return setInvitation("INVITATION_TOKEN_EXPIRED_OR_INVALID");
-      const { data: u, code, token } = await api.post(`/young/signup_verify`, { invitationToken });
-      if (token) api.setToken(token);
-      if (code === "INVITATION_TOKEN_EXPIRED_OR_INVALID") return setInvitation("INVITATION_TOKEN_EXPIRED_OR_INVALID");
-      setNewUser(u);
+      try {
+        const { data: u, code, token } = await api.post(`/young/signup_verify`, { invitationToken });
+        if (token) api.setToken(token);
+        setNewUser(u);
+      } catch (e) {
+        if (e.code === "INVITATION_TOKEN_EXPIRED_OR_INVALID") return setInvitation("INVITATION_TOKEN_EXPIRED_OR_INVALID");
+      }
     })();
   }, []);
 
@@ -50,21 +55,23 @@ export default () => {
           initialValues={{ firstName: newuser.firstName, lastName: newuser.lastName, email: newuser.email, password: "" }}
           onSubmit={async (values, actions) => {
             try {
-              const { data: user, token, code, ok } = await api.post(`/young/signup_invite`, values);
+              const { data: user, token, code, ok } = await api.post(`/young/signup_invite`, { ...values, invitationToken });
               actions.setSubmitting(false);
-              if (!ok) {
-                if (code === "PASSWORD_NOT_VALIDATED") return toastr.error("Mot de passe incorrect", "Votre mot de passe doit contenir au moins 8 caractères", { timeOut: 10000 });
-                if (code === "USER_ALREADY_REGISTERED") return toastr.error("Votre compte est déja activé. Veuillez vous connecter", { timeOut: 10000 });
-                return toastr.error("Problème", translate(code));
-              }
               if (token) api.setToken(token);
               if (user) {
                 dispatch(setYoung(user));
               }
             } catch (e) {
-              if (e && e.code === "USER_ALREADY_REGISTERED") return toastr.error("Le compte existe déja. Veuillez vous connecter");
               actions.setSubmitting(false);
               console.log("e", e);
+              if (e.code === "PASSWORD_NOT_VALIDATED")
+                return toastr.error(
+                  "Mot de passe incorrect",
+                  "Votre mot de passe doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole",
+                  { timeOut: 10000 }
+                );
+              if (e.code === "USER_ALREADY_REGISTERED") return toastr.error("Votre compte est déja activé. Veuillez vous connecter", { timeOut: 10000 });
+              return toastr.error("Problème", translate(e.code));
             }
           }}
         >

@@ -78,12 +78,12 @@ export const Filter = styled.div`
     display: block;
     width: 100%;
     background-color: #fff;
+    min-width: 20rem;
     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
     color: #767676;
     border: 0;
     outline: 0;
     padding: 15px 20px;
-    height: auto;
     border-radius: 6px;
     margin-right: 15px;
     ::placeholder {
@@ -92,6 +92,7 @@ export const Filter = styled.div`
   }
   .dropdown-filter {
     button {
+      height: 2.5rem;
       background-color: #fff;
       box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
       border: 0;
@@ -146,8 +147,7 @@ export const Table = styled.table`
 `;
 
 export const FilterRow = styled.div`
-  padding: 15px 0 0;
-  display: flex;
+  ${({ visible }) => (!visible ? "display: none;" : "display: flex;")}
   align-items: flex-start;
   flex-wrap: wrap;
   .dropdown-filter {

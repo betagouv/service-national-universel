@@ -11,15 +11,6 @@ export default () => {
   const is2020 = young.cohort === "2020";
   const [showAlert, setShowAlert] = useState(!is2020);
 
-  const goTo = (id) => {
-    if (document.getElementById) {
-      const yOffset = -70; // header's height
-      const element = document.getElementById(id);
-      const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
-      window.scrollTo({ top: y, behavior: "smooth" });
-    }
-  };
-
   return (
     <HeroContainer>
       <Hero>
@@ -61,25 +52,25 @@ export default () => {
 };
 
 const WrapperItem = styled(Link)`
-  margin-bottom: 1rem;
-  .info {
-    margin-left: 1.5rem;
-    .subtitle {
-      color: #6b7280;
-      font-size: 0.875rem !important;
-      font-weight: 500;
-    }
-  }
   .title {
     display: flex;
+    flex-direction: column;
     align-items: center;
     color: #161e2e;
-    font-size: 1.25rem !important;
+    margin-bottom: 0.5rem;
     font-weight: 500;
-    .link {
-      margin-right: 0.5rem;
-      :hover {
-        text-decoration: underline;
+    .link:hover {
+      text-decoration: underline;
+    }
+  }
+  @media (min-width: 768px) {
+    margin-bottom: 1rem;
+    .title {
+      flex-direction: row;
+      justify-content: space-between;
+      font-size: 1.25rem;
+      .link {
+        margin-right: 0.5rem;
       }
     }
   }

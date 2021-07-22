@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 
-import { translate } from "../../utils";
+import { translate, ROLES } from "../../utils";
 import api from "../../services/api";
 import { setUser } from "../../redux/auth/actions";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
@@ -12,13 +12,13 @@ import Panel from "../../components/Panel";
 
 // Sorry about that: return true, return false, false, true, false.
 function canModify(user, value) {
-  if (user.role === "admin") return true;
+  if (user.role === ROLES.ADMIN) return true;
   // https://trello.com/c/Wv2TrQnQ/383-admin-ajouter-onglet-utilisateurs-pour-les-r%C3%A9f%C3%A9rents
-  if (user.role === "referent_region") {
-    if (["referent_department", "referent_region"].includes(value.role) && user.region === value.region) return true;
+  if (user.role === ROLES.REFERENT_REGION) {
+    if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(value.role) && user.region === value.region) return true;
     return false;
   }
-  if (user.role === "referent_department") {
+  if (user.role === ROLES.REFERENT_DEPARTMENT) {
     if (user.role === value.role && user.department === value.department) return true;
     return false;
   }
@@ -34,9 +34,9 @@ export default ({ onChange, value }) => {
 
   useEffect(() => {
     (async () => {
-      if (!value.structureId) return;
+      if (!value.structureId) return setStructure(null);
       const { ok, data, code } = await api.get(`/structure/${value.structureId}`);
-      if (!ok) return toastr.error("Oups, une erreur est survnue lors de la récuperation de la structure", translate(code));
+      if (!ok) return toastr.error("Oups, une erreur est survnue lors de la récupération de la structure", translate(code));
       return setStructure(data);
     })();
   }, [value]);

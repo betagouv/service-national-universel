@@ -8,12 +8,13 @@ import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
-import { formatStringDate, translate, getFilterLabel, formatLongDateFR, formatDateFR, ES_NO_LIMIT } from "../../utils";
+import { formatStringDate, translate, getFilterLabel, formatLongDateFR, formatDateFR, ES_NO_LIMIT, ROLES } from "../../utils";
 import SelectStatusMission from "../../components/selectStatusMission";
 import VioletButton from "../../components/buttons/VioletButton";
 import Loader from "../../components/Loader";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine } from "../../components/list";
+import Chevron from "../../components/Chevron";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 
 const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "TUTOR", "REGION", "DEPARTMENT", "STRUCTURE"];
@@ -21,15 +22,17 @@ const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "TUTOR", "R
 export default () => {
   const [mission, setMission] = useState(null);
   const [structureIds, setStructureIds] = useState();
+  const [filterVisible, setFilterVisible] = useState(false);
   const user = useSelector((state) => state.Auth.user);
+  const handleShowFilter = () => setFilterVisible(!filterVisible);
   const getDefaultQuery = () => {
-    if (user.role === "supervisor") return { query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } } };
+    if (user.role === ROLES.SUPERVISOR) return { query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } } };
     return { query: { match_all: {} } };
   };
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
   useEffect(() => {
-    if (user.role !== "supervisor") return;
+    if (user.role !== ROLES.SUPERVISOR) return;
     (async () => {
       const { data } = await api.get(`/structure/network/${user.structureId}`);
       const ids = data.map((s) => s._id);
@@ -37,7 +40,7 @@ export default () => {
     })();
     return;
   }, []);
-  if (user.role === "supervisor" && !structureIds) return <Loader />;
+  if (user.role === ROLES.SUPERVISOR && !structureIds) return <Loader />;
 
   return (
     <div>
@@ -48,7 +51,7 @@ export default () => {
               <div style={{ flex: 1 }}>
                 <Title>Missions</Title>
               </div>
-              {user.role === "responsible" && user.structureId && (
+              {user.role === ROLES.RESPONSIBLE && user.structureId && (
                 <Link to={`/mission/create/${user.structureId}`}>
                   <VioletButton>
                     <p>Nouvelle mission</p>
@@ -60,6 +63,18 @@ export default () => {
                 defaultQuery={getExportQuery}
                 collection="mission"
                 react={{ and: FILTERS }}
+                transformAll={async (data) => {
+                  const tutorIds = [...new Set(data.map((item) => item.tutorId).filter((e) => e))];
+                  if (tutorIds?.length) {
+                    const { responses } = await api.esQuery([
+                      { index: "referent", type: "_doc" },
+                      { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: tutorIds } } },
+                    ]);
+                    const tutors = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+                    return data.map((item) => ({ ...item, tutor: tutors?.find((e) => e._id === item.tutorId) }));
+                  }
+                  return data;
+                }}
                 transform={(data) => {
                   return {
                     _id: data._id,
@@ -67,7 +82,11 @@ export default () => {
                     Description: data.description,
                     "Id de la structure": data.structureId,
                     "Nom de la structure": data.structureName,
-                    Tuteur: data.tutorName,
+                    "Id du tuteur": data.tutorId,
+                    "Nom du tuteur": data.tutor?.lastName,
+                    "Prénom du tuteur": data.tutor?.firstName,
+                    "Email du tuteur": data.tutor?.email,
+                    "Téléphone du tuteur": data.tutor?.mobile ? data.tutor?.mobile : data.tutor?.phone,
                     "Liste des domaines de la mission": data.domains,
                     "Date du début": formatDateFR(data.startAt),
                     "Date de fin": formatDateFR(data.endAt),
@@ -91,19 +110,19 @@ export default () => {
               />
             </Header>
             <Filter>
-              <DataSearch
-                defaultQuery={getDefaultQuery}
-                showIcon={false}
-                placeholder="Rechercher par mots clés, ville, code postal..."
-                componentId="SEARCH"
-                dataField={["name", "structureName", "city", "zip"]}
-                react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
-                // fuzziness={1}
-                style={{ flex: 2 }}
-                innerClass={{ input: "searchbox" }}
-                autosuggest={false}
-              />
-              <FilterRow>
+              <FilterRow visible>
+                <DataSearch
+                  defaultQuery={getDefaultQuery}
+                  showIcon={false}
+                  placeholder="Rechercher par mots clés, ville, code postal..."
+                  componentId="SEARCH"
+                  dataField={["name", "structureName", "city", "zip"]}
+                  react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
+                  // fuzziness={1}
+                  style={{ flex: 1, marginRight: "1rem" }}
+                  innerClass={{ input: "searchbox" }}
+                  autosuggest={false}
+                />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -118,8 +137,11 @@ export default () => {
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Statut")}
                 />
-                <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === "referent_region" ? [user.region] : []} />
-                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === "referent_department" ? [user.department] : []} />
+                <Chevron color="#444" style={{ cursor: "pointer", transform: filterVisible && "rotate(180deg)" }} onClick={handleShowFilter} />
+              </FilterRow>
+              <FilterRow visible={filterVisible}>
+                <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />
+                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [user.department] : []} />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -159,7 +181,7 @@ export default () => {
                   showSearch={true}
                   searchPlaceholder="Rechercher..."
                 />
-                {user.role === "supervisor" ? (
+                {user.role === ROLES.SUPERVISOR ? (
                   <MultiDropdownList
                     defaultQuery={getDefaultQuery}
                     className="dropdown-filter"

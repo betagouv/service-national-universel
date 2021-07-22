@@ -28,8 +28,8 @@ export default ({ setOpen, open, label = "Inviter un référent", role = "" }) =
 
   const getSubRole = (role) => {
     let subRole = [];
-    if (role === "referent_department") subRole = REFERENT_DEPARTMENT_SUBROLE;
-    if (role === "referent_region") subRole = REFERENT_REGION_SUBROLE;
+    if (role === REFERENT_ROLES.REFERENT_DEPARTMENT) subRole = REFERENT_DEPARTMENT_SUBROLE;
+    if (role === REFERENT_ROLES.REFERENT_REGION) subRole = REFERENT_REGION_SUBROLE;
     return Object.keys(subRole).map((e) => ({ value: e, label: translate(subRole[e]) }));
   };
   return (
@@ -54,7 +54,6 @@ export default ({ setOpen, open, label = "Inviter un référent", role = "" }) =
                 try {
                   const obj = { ...values };
                   if (obj.department && !obj.region) obj.region = department2region[obj.department];
-
                   await api.post(`/referent/signup_invite/${obj.role}`, obj);
                   toastr.success("Invitation envoyée");
                   setOpen();
@@ -242,6 +241,7 @@ const ChooseRole = ({ value, onChange }) => {
 const ChooseSubRole = ({ value, onChange, options }) => {
   return (
     <Input type="select" name="subRole" value={value} onChange={onChange}>
+      <option value=""></option>
       {options.map((o, i) => (
         <option key={i} value={o.value} label={o.label}>
           {o.label}

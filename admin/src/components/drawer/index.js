@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { NavLink, Link } from "react-router-dom";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
+import { environment } from "../../config";
+import { ROLES } from "../../utils";
 
 const DrawerTab = ({ title, to, onClick }) => (
   <li onClick={onClick}>
@@ -72,6 +74,7 @@ function headCenter({ user, onClick }) {
 export default (props) => {
   const user = useSelector((state) => state.Auth.user);
   const [open, setOpen] = useState();
+  const [environmentBannerVisible, setEnvironmentBannerVisible] = useState(true);
   useEffect(() => {
     setOpen(props.open);
   }, [props.open]);
@@ -85,12 +88,18 @@ export default (props) => {
   if (!user) return <div />;
 
   function getName() {
-    if (user.role === "admin") return "Espace modérateur";
-    if (user.role === "referent_department") return "ESPACE RÉFÉRENT DÉPARTEMENTAL";
-    if (user.role === "referent_region") return "ESPACE RÉFÉRENT REGIONAL";
-    if (user.role === "responsible") return "Espace responsable";
-    if (user.role === "supervisor") return "Espace superviseur";
-    if (user.role === "head_center") return "espace chef de centre";
+    if (user.role === ROLES.ADMIN) return "Espace modérateur";
+    if (user.role === ROLES.REFERENT_DEPARTMENT) return "ESPACE RÉFÉRENT DÉPARTEMENTAL";
+    if (user.role === ROLES.REFERENT_REGION) return "ESPACE RÉFÉRENT REGIONAL";
+    if (user.role === ROLES.RESPONSIBLE) return "Espace responsable";
+    if (user.role === ROLES.SUPERVISOR) return "Espace superviseur";
+    if (user.role === ROLES.HEAD_CENTER) return "espace chef de centre";
+    return "";
+  }
+
+  function getTextEnvironmentBanner() {
+    if (environment === "staging") return "Espace de Test";
+    if (environment === "development") return "Développement";
     return "";
   }
 
@@ -102,13 +111,16 @@ export default (props) => {
           {getName()}
         </HeaderSideBar>
       </Logo>
+      {environment !== "production" && environmentBannerVisible ? (
+        <EnvironmentBanner onClick={() => setEnvironmentBannerVisible(false)}>{getTextEnvironmentBanner()}</EnvironmentBanner>
+      ) : null}
       <ul>
         <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />
-        {user.role === "head_center" && headCenter({ user, onClick: handleClick })}
-        {user.role === "supervisor" && supervisor({ user, onClick: handleClick })}
-        {user.role === "responsible" && responsible({ user, onClick: handleClick })}
-        {user.role === "admin" && admin({ onClick: handleClick })}
-        {["referent_department", "referent_region"].includes(user.role) && referent({ onClick: handleClick })}
+        {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick })}
+        {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick })}
+        {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick })}
+        {user.role === ROLES.ADMIN && admin({ onClick: handleClick })}
+        {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && referent({ onClick: handleClick })}
       </ul>
     </Sidebar>
   );
@@ -118,6 +130,19 @@ const HeaderSideBar = styled(Link)`
   display: flex;
   @media (max-width: 1550px) {
     flex-direction: column;
+  }
+`;
+
+const EnvironmentBanner = styled.div`
+  background: #d33c4a;
+  color: white;
+  font-style: italic;
+  font-weight: 500;
+  text-align: center;
+  padding: 5px;
+  cursor: pointer;
+  :hover {
+    opacity: 0.5;
   }
 `;
 

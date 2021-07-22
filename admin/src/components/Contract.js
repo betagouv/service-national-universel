@@ -5,7 +5,7 @@ import { Formik, Field } from "formik";
 import { useHistory } from "react-router-dom";
 import { appURL } from "../config";
 import { useSelector } from "react-redux";
-import { APPLICATION_STATUS_COLORS, dateForDatePicker, getAge } from "../utils";
+import { APPLICATION_STATUS_COLORS, dateForDatePicker, getAge, ROLES, translate } from "../utils";
 import api from "../services/api";
 import DownloadAttestationButton from "./buttons/DownloadAttestationButton";
 import Loader from "./Loader";
@@ -30,7 +30,10 @@ export default ({ young, admin }) => {
   const [tutor, setTutor] = useState(null);
   const [managerDepartment, setManagerDepartment] = useState(null);
   const [structure, setStructure] = useState(null);
-  const [loadings, setLoadings] = useState([false, false]);
+  const [loadings, setLoadings] = useState({
+    saveButton: false,
+    submitButton: false,
+  });
   useEffect(() => {
     const getApplication = async () => {
       if (!young) return;
@@ -68,10 +71,9 @@ export default ({ young, admin }) => {
   useEffect(() => {
     const getManagerDepartment = async () => {
       if (!young) return;
-      const { ok, data, code } = await api.get(`/referent/subrole/manager_department`);
+      const { ok, data, code } = await api.get(`/referent/manager_department/${young.department}`);
       if (!ok) return toastr.error("Oups, une erreur est survenue", code);
-      const md = data.find((e) => e.department === young.department);
-      return setManagerDepartment(md);
+      return setManagerDepartment(data);
     };
     getManagerDepartment();
   }, [young]);
@@ -84,6 +86,47 @@ export default ({ young, admin }) => {
     };
     getStructure();
   }, [application]);
+
+  const onSubmit = async (values) => {
+    try {
+      values.sendMessage
+        ? setLoadings({
+            saveButton: false,
+            submitButton: true,
+          })
+        : setLoadings({
+            saveButton: true,
+            submitButton: false,
+          });
+      const { ok, code } = await api.post(`/contract`, {
+        ...values,
+        youngId: young._id,
+        structureId: structure._id,
+        applicationId: application._id,
+        missionId: mission._id,
+        tutorId: tutor._id,
+        isYoungAdult: isYoungAdult ? "true" : "false",
+      });
+      setLoadings({
+        saveButton: false,
+        submitButton: false,
+      });
+      if (!ok) return toastr.error("Erreur !", translate(code));
+      if (values.sendMessage) {
+        toastr.success("Le message a été envoyé aux parties prenantes");
+      } else {
+        toastr.success("Contrat sauvegardé");
+      }
+      // Refresh
+      history.go(0);
+    } catch (e) {
+      setLoadings({
+        saveButton: false,
+        submitButton: false,
+      });
+      toastr.error("Erreur !", translate(e.code));
+    }
+  };
 
   if (!application || !mission) return <Loader />;
 
@@ -191,38 +234,7 @@ export default ({ young, admin }) => {
           Télécharger le contrat
         </DownloadContractButton>
       ) : (
-        <Formik
-          validateOnChange={false}
-          validateOnBlur={false}
-          initialValues={initialValues}
-          onSubmit={async (values, actions) => {
-            try {
-              values.sendMessage ? setLoadings([false, true]) : setLoadings([true, false]);
-              const { ok, code } = await api.post(`/contract`, {
-                ...values,
-                youngId: young._id,
-                structureId: structure._id,
-                applicationId: application._id,
-                missionId: mission._id,
-                tutorId: tutor._id,
-                isYoungAdult: isYoungAdult ? "true" : "false",
-              });
-              setLoadings([false, false]);
-              if (!ok) return toastr.error("Erreur !", translate(code));
-              if (values.sendMessage) {
-                toastr.success("Le message a été envoyé aux parties prenantes");
-              } else {
-                toastr.success("Contrat sauvegardé");
-              }
-              // Refresh
-              history.go(0);
-            } catch (e) {
-              setLoadings([false, false]);
-              toastr.error("Erreur !", translate(e.code));
-            }
-            actions.setSubmitting(false);
-          }}
-        >
+        <Formik validateOnChange={false} validateOnBlur={false} initialValues={initialValues} onSubmit={onSubmit}>
           {({ values, errors, touched, isSubmitting, handleChange, handleSubmit, setFieldValue, validateForm }) => {
             const context = { values, errors, touched, handleChange };
             return (
@@ -302,7 +314,6 @@ export default ({ young, admin }) => {
                             <ContractField name="youngPhone" placeholder="0123456789" className="md" context={context} />
                           </div>
                         </div>
-                        <hr />
                         {!isYoungAdult && (
                           <>
                             <h2>Représenté par ses représentant légaux</h2>
@@ -340,6 +351,7 @@ export default ({ young, admin }) => {
                             )}
                           </>
                         )}
+                        <hr />
                         <div>
                           <br />
                           <p>Il a été convenu ce qui suit :</p>
@@ -658,24 +670,24 @@ export default ({ young, admin }) => {
                 <div style={{ display: "flex", justifyContent: "center" }}>
                   <LoadingButton
                     onClick={async () => {
-                      const erroredFields = await validateForm();
-                      if (Object.keys(erroredFields).length) toastr.error("Il y a des erreurs dans le formulaire");
                       if (contract?.invitationSent === "true") {
                         const confirmText =
                           "Si vous enregistrez les modifications, les parties prenantes ayant validé recevront une notification et devront à nouveau valider le contrat d'engagment. De la même manière, les parties prenantes dont l'email a été modifié recevront également un email.";
                         if (confirm(confirmText)) {
+                          const erroredFields = await validateForm();
+                          if (Object.keys(erroredFields).length) return toastr.error("Il y a des erreurs dans le formulaire");
                           setFieldValue("sendMessage", true, false);
                           handleSubmit();
                         }
                       } else {
                         setFieldValue("sendMessage", false, false);
-                        handleSubmit();
+                        onSubmit(values);
                       }
                     }}
                     color={"#fff"}
                     textColor={"#767697"}
-                    loading={loadings[0]}
-                    disabled={loadings[1]}
+                    loading={loadings.saveButton}
+                    disabled={loadings.submitButton}
                   >
                     Enregistrer les modifications
                   </LoadingButton>
@@ -683,12 +695,12 @@ export default ({ young, admin }) => {
                     <LoadingButton
                       onClick={async () => {
                         const erroredFields = await validateForm();
-                        if (Object.keys(erroredFields).length) toastr.error("Il y a des erreurs dans le formulaire");
+                        if (Object.keys(erroredFields).length) return toastr.error("Il y a des erreurs dans le formulaire");
                         setFieldValue("sendMessage", true, false);
                         handleSubmit();
                       }}
-                      loading={loadings[1]}
-                      disabled={loadings[0]}
+                      loading={loadings.submitButton}
+                      disabled={loadings.saveButton}
                     >
                       Envoyer une demande de validation aux {values.parent2Email ? "4" : "3"} parties prenantes
                     </LoadingButton>
@@ -768,7 +780,7 @@ function ContractStatusbadgeItem({ contract, status, token }) {
 
   if (contract?.invitationSent !== "true") return <Badge text="Pas encore envoyé" />;
   else if (status === "VALIDATED") return <Badge text="Validé" color={APPLICATION_STATUS_COLORS.VALIDATED} />;
-  else if (user.role !== "admin") return <Badge text="En attente de validation" color={APPLICATION_STATUS_COLORS.WAITING_VALIDATION} />;
+  else if (user.role !== ROLES.ADMIN) return <Badge text="En attente de validation" color={APPLICATION_STATUS_COLORS.WAITING_VALIDATION} />;
   return (
     <>
       <Badge text="En attente de validation" color={APPLICATION_STATUS_COLORS.WAITING_VALIDATION} />

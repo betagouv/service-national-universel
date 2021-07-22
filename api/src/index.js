@@ -8,10 +8,13 @@ const fileUpload = require("express-fileupload");
 const helmet = require("helmet");
 require("./mongo");
 
-const { PORT, APP_URL, ADMIN_URL, MONGO_URL } = require("./config.js");
+const { PORT, APP_URL, ADMIN_URL, ENVIRONMENT } = require("./config.js");
 
-console.log("MONGO_URL", MONGO_URL);
-console.log("APP_URL, ADMIN_URL", APP_URL, ADMIN_URL);
+if (process.env.NODE_ENV !== "test") {
+  console.log("APP_URL", APP_URL);
+  console.log("ADMIN_URL", ADMIN_URL);
+  console.log("ENVIRONMENT: ", ENVIRONMENT);
+}
 
 const app = express();
 app.use(helmet());
@@ -30,7 +33,7 @@ app.use(express.static(__dirname + "/../public"));
 app.use("/es", require("./controllers/es"));
 app.use("/mission", require("./controllers/mission"));
 app.use("/structure", require("./controllers/structure"));
-app.use("/young", require("./controllers/young"));
+app.use("/young", require("./controllers/young/index"));
 app.use("/referent", require("./controllers/referent"));
 app.use("/application", require("./controllers/application"));
 app.use("/contract", require("./controllers/contract"));

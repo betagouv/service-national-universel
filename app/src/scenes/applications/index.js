@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Col, Container } from "reactstrap";
+import { Container } from "reactstrap";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { DragDropContext, Droppable } from "react-beautiful-dnd";
@@ -12,7 +12,12 @@ import api from "../../services/api";
 
 export default () => {
   const [applications, setApplications] = useState(null);
+  const [showInfo, setShowInfo] = useState(true);
   const young = useSelector((state) => state.Auth.young);
+
+  const toggleShowInfo = () => {
+    setShowInfo(!showInfo);
+  };
 
   const reorder = (list, startIndex, endIndex) => {
     const result = Array.from(list);
@@ -52,7 +57,26 @@ export default () => {
     <div>
       <Heading>
         <p>Phase 2</p>
-        <h1>Suivez vos candidatures aux missions d'intérêt général</h1>
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <h1>Suivez vos candidatures aux missions d'intérêt général</h1>
+          <div className="icon" onClick={toggleShowInfo}>
+            <svg fill="none" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              ></path>
+            </svg>
+          </div>
+        </div>
+        {showInfo ? (
+          <AlertBox
+            onClose={() => setShowInfo(false)}
+            title="Classer mes candidatures"
+            message="L'ordre de vos choix de missions sera pris en compte pour l'attribution de votre MIG. Pour modifier l'ordre, passez votre souris au niveau du titre et lorsqu'une main s'affiche cliquez et déplacez le bloc."
+          />
+        ) : null}
       </Heading>
       <Container>
         {applications.length ? (
@@ -81,12 +105,23 @@ export default () => {
   );
 };
 
+const AlertBox = ({ onClose, title, message }) => (
+  <Alert>
+    <img src={require("../../assets/information.svg")} height={15} />
+    <div className="text">
+      <strong>{title}</strong>
+      <div>{message}</div>
+    </div>
+    <img src={require("../../assets/close.svg")} height={15} onClick={onClose} style={{ cursor: "pointer" }} />
+  </Alert>
+);
 const Heading = styled(Container)`
   margin-bottom: 40px;
   h1 {
     color: #161e2e;
     font-size: 2rem;
     font-weight: 700;
+    flex: 1;
     @media (max-width: 768px) {
       font-size: 1.2rem;
     }
@@ -97,6 +132,15 @@ const Heading = styled(Container)`
     font-weight: 700;
     margin-bottom: 5px;
     text-transform: uppercase;
+  }
+  .icon {
+    height: 24px;
+    width: 24px;
+    margin-right: 20px;
+    svg {
+      stroke: #42389d;
+    }
+    cursor: pointer;
   }
 `;
 
@@ -123,5 +167,28 @@ const Button = styled.div`
   :hover {
     color: #fff;
     background-color: #0e9f6e;
+  }
+`;
+
+const Alert = styled(Container)`
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  background-color: #5949d0;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  margin-bottom: 20px;
+  padding: 10px 20px;
+  .text {
+    margin-left: 20px;
+    margin-right: auto;
+    margin-bottom: 0;
+    color: #fff;
+    font-size: 12px;
+    font-weight: 500;
+    strong {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 3px;
+    }
   }
 `;

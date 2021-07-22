@@ -8,7 +8,7 @@ export default ({ young, children, disabled, uri, ...rest }) => {
   const viewAttestation = async (a) => {
     setLoading(true);
     await downloadPDF({
-      url: `/young/${young._id}/certificate/${a}`,
+      url: `/young/${young._id}/documents/certificate/${a}`,
       fileName: `${young.firstName} ${young.lastName} - attestation ${a}.pdf`,
       body: { options: { landscape: true } },
     });

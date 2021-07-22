@@ -40,7 +40,7 @@ export default ({ title, handleChange, values, errors, touched }) => {
           <Field
             validate={(v) => {
               if (!v) return requiredMessage;
-              if (!/\d{5}/.test(v)) return "Format incorrect";
+              if (!/^\d{5}$/.test(v)) return "Format incorrect";
             }}
             placeholder="Code postal"
             className="form-control"
@@ -49,6 +49,17 @@ export default ({ title, handleChange, values, errors, touched }) => {
             onChange={handleChange}
           />
           <ErrorMessage errors={errors} touched={touched} name="mobilityNearRelativeZip" />
+          <Field
+            validate={(v) => {
+              if (!v) return requiredMessage;
+            }}
+            placeholder="Ville"
+            className="form-control"
+            name="mobilityNearRelativeCity"
+            value={values.mobilityNearRelativeCity}
+            onChange={handleChange}
+          />
+          <ErrorMessage errors={errors} touched={touched} name="mobilityNearRelativeCity" />
         </>
       ) : null}
     </Container>
@@ -76,9 +87,10 @@ const Wrapper = styled.div`
   display: flex;
   text-align: center;
   @media (max-width: 1080px) {
-    display: block;
+    flex-direction: row;
+    justify-content: center;
     > * {
-      margin: 0.5rem auto;
+      margin: 0.2rem;
     }
   }
 `;

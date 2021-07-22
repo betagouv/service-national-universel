@@ -7,7 +7,7 @@ import { useHistory } from "react-router-dom";
 import { Link } from "react-router-dom";
 
 import { setUser } from "../../redux/auth/actions";
-import { translate, getFilterLabel, formatLongDateFR, formatStringLongDate, ES_NO_LIMIT } from "../../utils";
+import { translate, getFilterLabel, formatLongDateFR, formatStringLongDate, ES_NO_LIMIT, ROLES } from "../../utils";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
@@ -26,8 +26,10 @@ export default () => {
   const [structureIds, setStructureIds] = useState();
   const [structures, setStructures] = useState();
   const [services, setServices] = useState();
+  const [filterVisible, setFilterVisible] = useState(false);
+  const handleShowFilter = () => setFilterVisible(!filterVisible);
   const getDefaultQuery = () => {
-    if (user.role === "supervisor") return { query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } } };
+    if (user.role === ROLES.SUPERVISOR) return { query: { bool: { filter: { terms: { "structureId.keyword": structureIds } } } } };
     else return { query: { match_all: {} } };
   };
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
@@ -42,14 +44,14 @@ export default () => {
       if (!ok) return;
       setServices(data);
     })();
-    if (user.role !== "supervisor") return;
+    if (user.role !== ROLES.SUPERVISOR) return;
     (async () => {
       const { data } = await api.get(`/structure/network/${user.structureId}`);
       const ids = data.map((s) => s._id);
       setStructureIds(ids);
     })();
   }, []);
-  if (user.role === "supervisor" && !structureIds) return <Loader />;
+  if (user.role === ROLES.SUPERVISOR && !structureIds) return <Loader />;
 
   return (
     <div>
@@ -72,7 +74,7 @@ export default () => {
                     if (!structure) structure = {};
                   }
                   let service = {};
-                  if (data.role === "referent_department" && services) {
+                  if (data.role === ROLES.REFERENT_DEPARTMENT && services) {
                     service = services.find((s) => s.department === data.department);
                     if (!service) service = {};
                   }
@@ -100,19 +102,19 @@ export default () => {
               />
             </Header>
             <Filter>
-              <DataSearch
-                showIcon={false}
-                placeholder="Rechercher par prénom, nom, email..."
-                componentId="SEARCH"
-                dataField={["email.keyword", "firstName", "lastName"]}
-                react={{ and: FILTERS }}
-                // fuzziness={2}
-                style={{ flex: 2 }}
-                innerClass={{ input: "searchbox" }}
-                autosuggest={false}
-                queryFormat="and"
-              />
-              <FilterRow>
+              <FilterRow visible>
+                <DataSearch
+                  showIcon={false}
+                  placeholder="Rechercher par prénom, nom, email..."
+                  componentId="SEARCH"
+                  dataField={["email.keyword", "firstName", "lastName"]}
+                  react={{ and: FILTERS }}
+                  // fuzziness={2}
+                  style={{ flex: 1, marginRight: "1rem" }}
+                  innerClass={{ input: "searchbox" }}
+                  autosuggest={false}
+                  queryFormat="and"
+                />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -127,6 +129,11 @@ export default () => {
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Rôle")}
                 />
+                <Chevron color="#444" style={{ cursor: "pointer", transform: filterVisible && "rotate(180deg)" }} onClick={handleShowFilter} />
+              </FilterRow>
+              <FilterRow visible={filterVisible}>
+                <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
+                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -141,8 +148,6 @@ export default () => {
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Fonction")}
                 />
-                <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
-                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
               </FilterRow>
             </Filter>
             <ResultTable>
@@ -157,7 +162,7 @@ export default () => {
                         <th>Rôle</th>
                         <th>Crée le</th>
                         <th>Dernière connexion le</th>
-                        {["admin", "supervisor"].includes(user.role) && <th>Actions</th>}
+                        {[ROLES.ADMIN, ROLES.SUPERVISOR].includes(user.role) && <th>Actions</th>}
                       </tr>
                     </thead>
                     <tbody>
@@ -189,7 +194,7 @@ const Hit = ({ hit, onClick, user, selected }) => {
       <td>{hit.role && <Badge text={translate(hit.role)} />}</td>
       <td>{formatStringLongDate(hit.createdAt)}</td>
       <td>{formatStringLongDate(hit.lastLoginAt)}</td>
-      {["admin", "supervisor"].includes(user.role) && (
+      {[ROLES.ADMIN, ROLES.SUPERVISOR].includes(user.role) && (
         <td onClick={(e) => e.stopPropagation()}>
           <Action hit={hit} />
         </td>

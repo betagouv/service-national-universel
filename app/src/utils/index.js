@@ -1,16 +1,25 @@
 import passwordValidator from "password-validator";
 import { YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_PHASE2 } from "snu-lib";
 export * from "snu-lib";
-export * from "./translation";
 export * from "./crisp";
 
 export function getPasswordErrorMessage(v) {
   if (!v) return "Ce champ est obligatoire";
   const schema = new passwordValidator();
-  schema.is().min(8); // Must have symbols
+  schema
+    .is()
+    .min(12) // Minimum length 12
+    .has()
+    .uppercase() // Must have uppercase letters
+    .has()
+    .lowercase() // Must have lowercase letters
+    .has()
+    .digits() // Must have digits
+    .has()
+    .symbols(); // Must have symbols
 
   if (!schema.validate(v)) {
-    return "Votre mot de passe doit contenir au moins 8 caractères";
+    return "Votre mot de passe doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole";
   }
 }
 

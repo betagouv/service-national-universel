@@ -9,9 +9,22 @@ const ReferentModel = require("../models/referent");
 const { sendEmail } = require("../sendinblue");
 const path = require("path");
 const fs = require("fs");
+const rateLimit = require("express-rate-limit");
 const sendinblue = require("../sendinblue");
 const { ADMIN_URL, APP_URL } = require("../config");
 const { CELLAR_ENDPOINT, CELLAR_KEYID, CELLAR_KEYSECRET, BUCKET_NAME, ENVIRONMENT } = require("../config");
+const { ROLES } = require("snu-lib/roles");
+
+// Set the number of requests allowed to 15 in a 1 hour window
+const signinLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 15,
+  skipSuccessfulRequests: true,
+  message: {
+    ok: false,
+    code: "TOO_MANY_REQUESTS",
+  },
+});
 
 function getReq(url, cb) {
   if (url.toString().indexOf("https") === 0) return https.get(url, cb);
@@ -92,7 +105,17 @@ function fileExist(url) {
 
 function validatePassword(password) {
   const schema = new passwordValidator();
-  schema.is().min(8); // Minimum length 8
+  schema
+    .is()
+    .min(12) // Minimum length 12
+    .has()
+    .uppercase() // Must have uppercase letters
+    .has()
+    .lowercase() // Must have lowercase letters
+    .has()
+    .digits() // Must have digits
+    .has()
+    .symbols(); // Must have symbols
 
   return schema.validate(password);
 }
@@ -268,8 +291,8 @@ const assignNextYoungFromWaitingList = async (young) => {
 
     const center = await CohesionCenterModel.findById(young.cohesionCenterId);
     if (!center) return null;
-    let to = await ReferentModel.find({ role: "admin", email: { $in: ["youssef.tahiri@education.gouv.fr", "nicolas.roy@recherche.gouv.fr"] } });
-    to = to.concat(await ReferentModel.find({ role: "referent_region", region: center.region }));
+    let to = await ReferentModel.find({ role: ROLES.ADMIN, email: { $in: ["youssef.tahiri@education.gouv.fr", "nicolas.roy@recherche.gouv.fr"] } });
+    to = to.concat(await ReferentModel.find({ role: ROLES.REFERENT_REGION, region: center.region }));
     for (let i = 0; i < to.length; i++) {
       await sendAutoAffectationNotFoundMails(to[i], young, center);
     }
@@ -331,6 +354,12 @@ const ERRORS = {
   NO_TEMPLATE_FOUND: "NO_TEMPLATE_FOUND",
   INVALID_BODY: "INVALID_BODY",
   INVALID_PARAMS: "INVALID_PARAMS",
+  EMAIL_OR_PASSWORD_INVALID: "EMAIL_OR_PASSWORD_INVALID",
+  PASSWORD_INVALID: "PASSWORD_INVALID",
+  EMAIL_INVALID: "EMAIL_INVALID",
+  EMAIL_AND_PASSWORD_REQUIRED: "EMAIL_AND_PASSWORD_REQUIRED",
+  PASSWORDS_NOT_MATCH: "PASSWORDS_NOT_MATCH",
+  USER_NOT_EXISTS: "USER_NOT_EXISTS",
 };
 
 module.exports = {
@@ -349,4 +378,5 @@ module.exports = {
   sendAutoCancelMeetingPoint,
   listFiles,
   deleteFile,
+  signinLimiter,
 };

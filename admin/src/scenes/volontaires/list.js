@@ -10,7 +10,7 @@ import api from "../../services/api";
 import { apiURL, appURL } from "../../config";
 import Panel from "./panel";
 import Badge from "../../components/Badge";
-import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS_COLORS, isInRuralArea, formatDateFR, formatLongDateFR, getAge, ES_NO_LIMIT } from "../../utils";
+import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS_COLORS, isInRuralArea, formatDateFR, formatLongDateFR, getAge, ES_NO_LIMIT, ROLES } from "../../utils";
 import { Link } from "react-router-dom";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
@@ -36,6 +36,9 @@ export default ({ setYoung }) => {
   const [volontaire, setVolontaire] = useState(null);
   const [centers, setCenters] = useState(null);
   const [meetingPoints, setMeetingPoints] = useState(null);
+  const [filterVisible, setFilterVisible] = useState(false);
+
+  const handleShowFilter = () => setFilterVisible(!filterVisible);
 
   useEffect(() => {
     (async () => {
@@ -154,7 +157,8 @@ export default ({ setYoung }) => {
                     "Mobilité aux alentours de son domicile": data.mobilityNearHome,
                     "Mobilité aux alentours d'un de ses proches": data.mobilityNearRelative,
                     "Informations du proche":
-                      data.mobilityNearRelative && data.mobilityNearRelativeName + " - " + data.mobilityNearRelativeAddress + " - " + data.mobilityNearRelativeZip,
+                      data.mobilityNearRelative &&
+                      data.mobilityNearRelativeName + " - " + data.mobilityNearRelativeAddress + " - " + data.mobilityNearRelativeZip + " - " + data.mobilityNearRelativeCity,
                     "Mode de transport": data.mobilityTransport?.map((t) => translate(t)),
                     "Autre mode de transport": data.mobilityTransportOther,
                     "Format de mission": data.missionFormat,
@@ -188,20 +192,20 @@ export default ({ setYoung }) => {
               />
             </Header>
             <Filter>
-              <DataSearch
-                defaultQuery={getDefaultQuery}
-                showIcon={false}
-                placeholder="Rechercher par prénom, nom, email, ville, code postal..."
-                componentId="SEARCH"
-                dataField={["email.keyword", "firstName", "lastName", "city", "zip"]}
-                react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
-                // fuzziness={2}
-                style={{ flex: 2 }}
-                innerClass={{ input: "searchbox" }}
-                autosuggest={false}
-                queryFormat="and"
-              />
-              <FilterRow>
+              <FilterRow visible>
+                <DataSearch
+                  defaultQuery={getDefaultQuery}
+                  showIcon={false}
+                  placeholder="Rechercher par prénom, nom, email, ville, code postal..."
+                  componentId="SEARCH"
+                  dataField={["email.keyword", "firstName", "lastName", "city", "zip"]}
+                  react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
+                  // fuzziness={2}
+                  style={{ flex: 1, marginRight: "1rem" }}
+                  innerClass={{ input: "searchbox" }}
+                  autosuggest={false}
+                  queryFormat="and"
+                />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -216,8 +220,6 @@ export default ({ setYoung }) => {
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Statut")}
                 />
-                <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
-                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -232,6 +234,11 @@ export default ({ setYoung }) => {
                   URLParams={true}
                   showSearch={false}
                 />
+                <Chevron color="#444" style={{ cursor: "pointer", transform: filterVisible && "rotate(180deg)" }} onClick={handleShowFilter} />
+              </FilterRow>
+              <FilterRow visible={filterVisible}>
+                <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
+                <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -274,7 +281,6 @@ export default ({ setYoung }) => {
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Fiches sanitaires")}
                 />
-
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -414,7 +420,7 @@ const Action = ({ hit, color }) => {
           <Link to={`/volontaire/${hit._id}/edit`}>
             <DropdownItem className="dropdown-item">Modifier le profil</DropdownItem>
           </Link>
-          {["admin", "referent_department", "referent_region"].includes(user.role) ? (
+          {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) ? (
             <DropdownItem className="dropdown-item">
               <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${hit._id}`}>Prendre sa place</a>
             </DropdownItem>

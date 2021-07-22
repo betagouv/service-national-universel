@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { Formik } from "formik";
 import { Link } from "react-router-dom";
 
-import { translate, YOUNG_PHASE, YOUNG_STATUS_COLORS, confirmMessageChangePhase1Presence, formatStringLongDate } from "../../../utils";
+import { translate, YOUNG_PHASE, YOUNG_STATUS_COLORS, confirmMessageChangePhase1Presence, formatStringLongDate, ROLES } from "../../../utils";
 import WrapperPhase1 from "./wrapper";
 import api from "../../../services/api";
 import { Box, BoxTitle } from "../../../components/box";
@@ -15,7 +15,7 @@ import Select from "../components/Select";
 
 export default (props) => {
   const [young, setYoung] = useState(props.young);
-  const disabled = young.statusPhase1 === "WITHDRAWN";
+  const disabled = true;
 
   const updateYoung = async (v) => {
     const { data, ok, code } = await api.put(`/referent/young/${young._id}`, v);
@@ -57,7 +57,7 @@ export default (props) => {
       return (
         <>
           <p>{young.firstName} est en attente d'affectation à un centre de cohésion</p>
-          {ENABLE_ASSIGN_CENTER && user.role === "admin" ? <AssignCenter young={young} onAffect={getYoung} /> : null}
+          {ENABLE_ASSIGN_CENTER && user.role === ROLES.ADMIN ? <AssignCenter young={young} onAffect={getYoung} /> : null}
         </>
       );
     if (young.statusPhase1 === "WAITING_LIST")

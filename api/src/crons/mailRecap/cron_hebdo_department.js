@@ -6,6 +6,7 @@ const { sendEmail } = require("../../sendinblue");
 const ReferentModel = require("../../models/referent");
 const { departmentList, getDataInscriptions, getDataStructure } = require("../utils");
 const { capture } = require("../../sentry");
+const { ROLES } = require("snu-lib/roles");
 
 const arr = departmentList;
 
@@ -17,7 +18,7 @@ async function sendRecapDepartmentTuesday() {
   for (let i = 0; i < arr.length; i++) {
     const department = arr[i];
     console.log("> start department :", department);
-    const referents = await ReferentModel.find({ role: "referent_department", department });
+    const referents = await ReferentModel.find({ role: ROLES.REFERENT_DEPARTMENT, department });
     if (!(referents && referents.length)) continue;
     console.log(referents.length, "referent(s) found");
     const dataInscriptions = await getDataInscriptions({ department, days: 5 });
@@ -54,7 +55,7 @@ async function sendRecapDepartmentThursday() {
   for (let i = 0; i < arr.length; i++) {
     const department = arr[i];
     console.log("> start department :", department);
-    const referents = await ReferentModel.find({ role: "referent_department", department });
+    const referents = await ReferentModel.find({ role: ROLES.REFERENT_DEPARTMENT, department });
     if (!(referents && referents.length)) continue;
     console.log(referents.length, "referent(s) found");
     const dataInscriptions = await getDataInscriptions({ department, days: 2 });

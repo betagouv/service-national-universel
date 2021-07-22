@@ -2,7 +2,7 @@ import React from "react";
 import { Col } from "reactstrap";
 import { useSelector } from "react-redux";
 
-import { departmentList, regionList, YOUNG_SITUATIONS, translate } from "../../../utils";
+import { departmentList, regionList, YOUNG_SITUATIONS, translate, ROLES } from "../../../utils";
 import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import Item from "../components/Item";
 import Select from "../components/Select";
@@ -16,7 +16,7 @@ export default ({ values, handleChange, required = {}, errors, touched }) => {
         <BoxHeadTitle>Situation</BoxHeadTitle>
         <BoxContent direction="column">
           <Select
-            disabled={user.role !== "admin" && values._id}
+            disabled={user.role !== ROLES.ADMIN && values._id}
             title="Statut"
             values={values}
             name="situation"

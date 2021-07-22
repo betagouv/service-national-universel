@@ -6,7 +6,7 @@ import { useHistory } from "react-router-dom";
 import { Col, Row } from "reactstrap";
 import { useSelector } from "react-redux";
 
-import { translate } from "../../utils";
+import { translate, ROLES } from "../../utils";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
 import Panel from "../../components/Panel";
 import api from "../../services/api";
@@ -22,7 +22,7 @@ export default ({ onChange, center }) => {
       const { ok, data, code } = await api.get(`/cohesion-center/${center._id}/head`);
       if (!ok) {
         setHeadCenter(null);
-        toastr.error("Oups, une erreur est survenue lors de la récuperation du chef de centre", translate(code));
+        toastr.error("Oups, une erreur est survenue lors de la récupération du chef de centre", translate(code));
       } else setHeadCenter(data);
     })();
   }, [center]);
@@ -53,13 +53,13 @@ export default ({ onChange, center }) => {
           <Link to={`/centre/${center._id}`}>
             <PanelActionButton icon="eye" title="Consulter" />
           </Link>
-          {user.role === "admin" ? (
+          {user.role === ROLES.ADMIN ? (
             <Link to={`/centre/${center._id}/edit`}>
               <PanelActionButton icon="pencil" title="Modifier" />
             </Link>
           ) : null}
         </div>
-        {user.role === "admin" ? (
+        {user.role === ROLES.ADMIN ? (
           <div style={{ display: "flex" }}>
             <PanelActionButton onClick={handleDelete} icon="bin" title="Supprimer" />
           </div>

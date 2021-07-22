@@ -13,6 +13,10 @@ async function deleteDepartmentServiceByIdHelper(id) {
   await departmentService.remove();
 }
 
+async function deleteAllDepartmentServicesHelper() {
+  await DepartmentServiceObject.deleteMany({});
+}
+
 async function createDepartmentServiceHelper(departmentService) {
   return await DepartmentServiceObject.create(departmentService);
 }
@@ -40,4 +44,5 @@ module.exports = {
   deleteDepartmentServiceByIdHelper,
   createDepartmentServiceHelper,
   expectDepartmentServiceToEqual,
+  deleteAllDepartmentServicesHelper,
 };

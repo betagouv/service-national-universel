@@ -10,7 +10,7 @@ import MultiSelect from "../../components/Multiselect";
 import AddressInput from "../../components/addressInput";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
 import { Box, BoxTitle } from "../../components/box";
-import { associationTypes, privateTypes, publicTypes, publicEtatTypes, translate } from "../../utils";
+import { associationTypes, privateTypes, publicTypes, publicEtatTypes, translate, ROLES } from "../../utils";
 import api from "../../services/api";
 
 export default (props) => {
@@ -47,13 +47,14 @@ export default (props) => {
         facebook: "",
         twitter: "",
         instagram: "",
+        legalStatus: "",
       }}
       onSubmit={async (values) => {
         try {
           const { data } = await api.post("/structure", values);
           toastr.success("Structure créée");
 
-          const role = values.isNetwork === "true" ? "supervisor" : "responsible";
+          const role = values.isNetwork === "true" ? ROLES.SUPERVISOR : ROLES.RESPONSIBLE;
           if (!values.firstName || !values.lastName || !values.email) return toastr.error("Vous devez remplir tous les champs", "nom, prénom et e-mail");
           const obj = {
             firstName: values.firstName,
@@ -99,6 +100,7 @@ export default (props) => {
                       <span>*</span>STATUT JURIDIQUE
                     </label>
                     <Field validate={(v) => !v && requiredMessage} component="select" name="legalStatus" value={values.legalStatus} onChange={handleChange}>
+                      <option key="" value="" />
                       <option key="PUBLIC" value="PUBLIC">
                         {translate("PUBLIC")}
                       </option>
@@ -254,7 +256,7 @@ export default (props) => {
                     </Field>
                   </FormGroup>
                   <FormGroup>
-                    {user.role === "admin" && (
+                    {user.role === ROLES.ADMIN && (
                       <div>
                         <label>TÊTE DE RÉSEAU</label>
                         <Field component="select" name="isNetwork" value={values.isNetwork} onChange={handleChange}>

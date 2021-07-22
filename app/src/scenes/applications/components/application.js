@@ -117,7 +117,8 @@ const ContractStatus = ({ contract, property, name }) => (
 const Footer = ({ application, tutor, onChange }) => {
   const setStatus = async (status) => {
     try {
-      if (!confirm("Êtes vous sûr de vouloir modifier cette candidature ?")) return;
+      if (!confirm("Êtes vous sûr de vouloir modifier cette candidature ?\nAttention cette action est irréversible, vous ne pourrez pas de nouveau candidater à cette mission."))
+        return;
       const { data } = await api.put(`/application`, { _id: application._id, status });
       await api.post(`/application/${application._id}/notify/${status.toLowerCase()}`);
       onChange(data);

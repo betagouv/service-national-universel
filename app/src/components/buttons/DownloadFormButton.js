@@ -8,7 +8,7 @@ export default ({ young, children, disabled, uri, ...rest }) => {
   const viewFile = async (a) => {
     setLoading(true);
     await downloadPDF({
-      url: `/young/${young._id}/form/${a}`,
+      url: `/young/${young._id}/documents/form/${a}`,
       body: { young },
       fileName: `${young.firstName} ${young.lastName} - formulaire - ${a}.pdf`,
     });

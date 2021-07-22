@@ -10,7 +10,7 @@ async function getStructureByIdHelper(structureId) {
 
 async function deleteStructureByIdHelper(structureId) {
   const structure = await getStructureByIdHelper(structureId);
-  await structure.remove();
+  if (structure) await structure.remove();
 }
 
 async function createStructureHelper(mission) {
@@ -49,10 +49,13 @@ function expectStructureToEqual(structure, expectedStructure) {
   expect(structureParsed.siret).toEqual(expectedStructureParsed.siret);
 }
 
+const notExistingStructureId = "104a49ba503040e4d2153973";
+
 module.exports = {
   getStructuresHelper,
   getStructureByIdHelper,
   deleteStructureByIdHelper,
   createStructureHelper,
   expectStructureToEqual,
+  notExistingStructureId,
 };

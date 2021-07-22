@@ -4,7 +4,7 @@ import { Col, Row } from "reactstrap";
 import { useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
 
-import { APPLICATION_STATUS_COLORS } from "../../../utils";
+import { APPLICATION_STATUS_COLORS, ROLES } from "../../../utils";
 import Badge from "../../../components/Badge";
 import api from "../../../services/api";
 import { CardArrow, Card, CardTitle, CardValueWrapper, CardValue, CardContainer, Title } from "../../../components/dashboard";
@@ -17,18 +17,35 @@ export default () => {
   const history = useHistory();
   const structureId = user.structureId;
 
-  // Get all missions from structure then get all applications int order to display the volontaires' list.
-  useEffect(() => {
-    async function initMissions() {
-      const missionsResponse = await api.get(`/mission/structure/${structureId}`);
-      if (!missionsResponse.ok) {
-        toastr.error("Oups, une erreur est survenue lors de la récuperation des missions", translate(missionsResponse.code));
-        history.push("/");
-      } else {
-        setMissions(missionsResponse.data);
+  async function appendMissions(structure) {
+    const missionsResponse = await api.get(`/mission/structure/${structure}`);
+    if (!missionsResponse.ok) {
+      toastr.error("Oups, une erreur est survenue lors de la récupération des missions", translate(missionsResponse.code));
+      return history.push("/");
+    }
+    return missionsResponse.data;
+  }
+
+  async function initMissions(structure) {
+    const m = await appendMissions(structure);
+    if (user.role === ROLES.SUPERVISOR) {
+      const subStructures = await api.get(`/structure/network/${structure}`);
+      if (!subStructures.ok) {
+        toastr.error("Oups, une erreur est survenue lors de la récupération des missions des antennes", translate(subStructures.code));
+        return history.push("/");
+      }
+      for (let i = 0; i < subStructures.data.length; i++) {
+        const subStructure = subStructures.data[i];
+        const tempMissions = await appendMissions(subStructure._id);
+        m.push(...tempMissions);
       }
     }
-    initMissions();
+    setMissions(m);
+  }
+
+  // Get all missions from structure then get all applications int order to display the volontaires' list.
+  useEffect(() => {
+    initMissions(structureId);
   }, [structureId, user]);
   useEffect(() => {
     async function initApplications() {
@@ -60,13 +77,13 @@ export default () => {
       <Row>
         <Col md={12}>
           <h4 style={{ fontWeight: "normal", margin: "25px 0" }}>
-            Volontaires candidatant sur des missions de {user.role === "supervisor" ? "mes" : "ma"} structure{user.role === "supervisor" ? "s" : ""}
+            Volontaires candidatant sur des missions de {user.role === ROLES.SUPERVISOR ? "mes" : "ma"} structure{user.role === ROLES.SUPERVISOR ? "s" : ""}
           </h4>
         </Col>
         <Col md={6} xl={3}>
           <Link to={`/volontaire?STATUS=%5B"WAITING_VALIDATION"%5D`}>
             <CardContainer>
-              <Card borderBottomColor={APPLICATION_STATUS_COLORS.WAITING_VALIDATION}>
+              <Card borderBottomColor={APPLICATION_STATUS_COLORS.WAITING_VALIDATION} style={{ marginBottom: 10 }}>
                 <CardTitle>En attente de validation</CardTitle>
                 <CardValueWrapper>
                   <CardValue>{stats.WAITING_VALIDATION || "-"}</CardValue>
@@ -84,7 +101,7 @@ export default () => {
         <Col md={6} xl={3}>
           <Link to={`/volontaire?STATUS=%5B"VALIDATED"%5D`}>
             <CardContainer>
-              <Card borderBottomColor={APPLICATION_STATUS_COLORS.VALIDATED}>
+              <Card borderBottomColor={APPLICATION_STATUS_COLORS.VALIDATED} style={{ marginBottom: 10 }}>
                 <CardTitle>Validées</CardTitle>
                 <CardValueWrapper>
                   <CardValue>{stats.VALIDATED || "-"}</CardValue>
@@ -129,7 +146,7 @@ export default () => {
       <Row>
         <Col md={12}>
           <h4 style={{ fontWeight: "normal", margin: "25px 0" }}>
-            Volontaires participant à des missions de {user.role === "supervisor" ? "mes" : "ma"} structure{user.role === "supervisor" ? "s" : ""}
+            Volontaires participant à des missions de {user.role === ROLES.SUPERVISOR ? "mes" : "ma"} structure{user.role === ROLES.SUPERVISOR ? "s" : ""}
           </h4>
         </Col>
         <Col md={6} xl={3}>

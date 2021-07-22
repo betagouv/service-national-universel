@@ -5,7 +5,7 @@ import { Formik } from "formik";
 import { toastr } from "react-redux-toastr";
 
 import api from "../../../services/api";
-import { translate } from "../../../utils";
+import { translate, ROLES } from "../../../utils";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 
 export default ({ structure, onSent }) => {
@@ -20,7 +20,7 @@ export default ({ structure, onSent }) => {
   ) : (
     <Wrapper>
       <Formik
-        initialValues={{ role: "responsible", structureId: structure._id, structureName: structure.name }}
+        initialValues={{ role: ROLES.RESPONSIBLE, structureId: structure._id, structureName: structure.name }}
         onSubmit={async (values, actions) => {
           try {
             if (!values.firstName || !values.lastName || !values.email) {

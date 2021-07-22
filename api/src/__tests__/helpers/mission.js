@@ -1,7 +1,7 @@
 const MissionObject = require("../../models/mission");
 
-async function getMissionsHelper() {
-  return await MissionObject.find({});
+async function getMissionsHelper(params = {}) {
+  return await MissionObject.find(params);
 }
 
 async function getMissionByIdHelper(missionId) {
@@ -43,10 +43,13 @@ function expectMissionToEqual(mission, expectedMission) {
   expect(missionParsed.location.lon).toEqual(expectedMissionParsed.location.lon);
 }
 
+const notExisitingMissionId = "123a49ba503040e4d2153944";
+
 module.exports = {
   getMissionsHelper,
   getMissionByIdHelper,
   deleteMissionByIdHelper,
   createMissionHelper,
   expectMissionToEqual,
+  notExisitingMissionId,
 };

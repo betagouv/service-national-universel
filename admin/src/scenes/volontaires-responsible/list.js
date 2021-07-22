@@ -10,22 +10,27 @@ import { apiURL } from "../../config";
 import Panel from "./panel";
 import ExportComponent from "../../components/ExportXlsx";
 import Loader from "../../components/Loader";
-import { translate, getFilterLabel, formatStringLongDate, formatStringDate, getAge, ES_NO_LIMIT } from "../../utils";
+import Chevron from "../../components/Chevron";
+import ContractLink from "../../components/ContractLink";
+import { Filter, FilterRow, ResultTable, Table, Header, Title } from "../../components/list";
+import { translate, getFilterLabel, formatStringLongDate, formatStringDate, getAge, ES_NO_LIMIT, ROLES } from "../../utils";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 
 const FILTERS = ["SEARCH", "STATUS", "PHASE", "COHORT", "MISSIONS", "TUTOR"];
 
 export default () => {
   const user = useSelector((state) => state.Auth.user);
-  const [missions, setMissions] = useState([]);
+  const [missions, setMissions] = useState();
   const [panel, setPanel] = useState(null);
+  const [filterVisible, setFilterVisible] = useState(false);
+  const handleShowFilter = () => setFilterVisible(!filterVisible);
   const getDefaultQuery = () => ({ query: { bool: { filter: { terms: { "missionId.keyword": missions.map((e) => e._id) } } } }, sort: [{ "youngLastName.keyword": "asc" }] });
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
   async function appendMissions(structure) {
     const missionsResponse = await api.get(`/mission/structure/${structure}`);
     if (!missionsResponse.ok) {
-      toastr.error("Oups, une erreur est survenue lors de la récuperation des missions", translate(missionsResponse.code));
+      toastr.error("Oups, une erreur est survenue lors de la récupération des missions", translate(missionsResponse.code));
       return history.push("/");
     }
     return missionsResponse.data;
@@ -33,10 +38,10 @@ export default () => {
 
   async function initMissions(structure) {
     const m = await appendMissions(structure);
-    if (user.role === "supervisor") {
+    if (user.role === ROLES.SUPERVISOR) {
       const subStructures = await api.get(`/structure/network/${structure}`);
       if (!subStructures.ok) {
-        toastr.error("Oups, une erreur est survenue lors de la récuperation des missions des antennes", translate(subStructures.code));
+        toastr.error("Oups, une erreur est survenue lors de la récupération des missions des antennes", translate(subStructures.code));
         return history.push("/");
       }
       for (let i = 0; i < subStructures.data.length; i++) {
@@ -58,7 +63,8 @@ export default () => {
     if (ok) setPanel({ application, young: data });
   };
 
-  if (!missions.length) return <Loader />;
+  if (!missions) return <Loader />;
+  console.log(filterVisible);
   return (
     <div>
       <ReactiveBase url={`${apiURL}/es`} app="application" headers={{ Authorization: `JWT ${api.getToken()}` }}>
@@ -108,7 +114,7 @@ export default () => {
                     "Téléphone représentant légal 2": data.young.parent2Phone,
                     "Nom de la mission": data.missionName,
                     "Département de la mission": data.missionDepartment,
-                    "Régino de la mission": data.missionRegion,
+                    "Région de la mission": data.missionRegion,
                     "Candidature créée lé": data.createdAt,
                     "Candidature mise à jour le": data.updatedAt,
                     "Statut de la candidature": data.status,
@@ -118,19 +124,19 @@ export default () => {
               />
             </Header>
             <Filter>
-              <DataSearch
-                showIcon={false}
-                placeholder="Rechercher par mots clés, mission ou volontaire..."
-                componentId="SEARCH"
-                dataField={["youngFirstName", "youngLastName", "youngEmail", "missionName"]}
-                react={{ and: FILTERS }}
-                // fuzziness={2}
-                style={{ flex: 2 }}
-                innerClass={{ input: "searchbox" }}
-                autosuggest={false}
-                queryFormat="and"
-              />
-              <FilterRow>
+              <FilterRow visible>
+                <DataSearch
+                  showIcon={false}
+                  placeholder="Rechercher par mots clés, mission ou volontaire..."
+                  componentId="SEARCH"
+                  dataField={["youngFirstName", "youngLastName", "youngEmail", "missionName"]}
+                  react={{ and: FILTERS }}
+                  // fuzziness={2}
+                  style={{ flex: 1, marginRight: "1rem" }}
+                  innerClass={{ input: "searchbox" }}
+                  autosuggest={false}
+                  queryFormat="and"
+                />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -145,6 +151,9 @@ export default () => {
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Statut")}
                 />
+                <Chevron color="#444" style={{ cursor: "pointer", transform: filterVisible && "rotate(180deg)" }} onClick={handleShowFilter} />
+              </FilterRow>
+              <FilterRow visible={filterVisible}>
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -263,62 +272,6 @@ const Hit = ({ hit, onClick, selected, mission }) => {
   );
 };
 
-const Header = styled.div`
-  padding: 0 40px 0;
-  display: flex;
-  align-items: flex-start;
-  margin-top: 20px;
-  justify-content: space-between;
-`;
-
-const Title = styled.div`
-  color: rgb(38, 42, 62);
-  font-weight: 700;
-  font-size: 24px;
-  margin-bottom: 30px;
-`;
-
-const Filter = styled.div`
-  padding: 0 25px;
-  margin-bottom: 20px;
-
-  .searchbox {
-    display: block;
-    width: 100%;
-    background-color: #fff;
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
-    color: #767676;
-    border: 0;
-    outline: 0;
-    padding: 15px 20px;
-    height: auto;
-    border-radius: 6px;
-    margin-right: 15px;
-    ::placeholder {
-      color: #767676;
-    }
-  }
-
-  .dropdown-filter {
-    button {
-      background-color: #fff;
-      box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
-      border: 0;
-      border-radius: 6px;
-      padding: 10px 20px;
-      font-size: 14px;
-      color: #242526;
-      min-width: 150px;
-      margin-right: 15px;
-      cursor: pointer;
-      div {
-        width: 100%;
-        overflow: visible;
-      }
-    }
-  }
-`;
-
 const TeamMember = styled.div`
   h2 {
     color: #333;
@@ -334,117 +287,5 @@ const TeamMember = styled.div`
     color: #606266;
     font-size: 12px;
     margin: 0;
-  }
-`;
-
-const Table = styled.table`
-  width: 100%;
-  color: #242526;
-  margin-top: 10px;
-  background-color: #fff;
-  th {
-    border-top: 1px solid #f4f5f7;
-    border-bottom: 1px solid #f4f5f7;
-    padding: 15px;
-    font-weight: 400;
-    font-size: 14px;
-    text-transform: uppercase;
-  }
-  td {
-    padding: 15px;
-    font-size: 14px;
-    font-weight: 300;
-    strong {
-      font-weight: 700;
-      margin-bottom: 5px;
-      display: block;
-    }
-  }
-  td:first-child,
-  th:first-child {
-    padding-left: 25px;
-  }
-  tbody tr {
-    border-bottom: 1px solid #f4f5f7;
-    :hover {
-      background-color: #e6ebfa;
-    }
-  }
-`;
-
-const FilterRow = styled.div`
-  padding: 15px 0 0;
-  display: flex;
-  align-items: flex-start;
-  flex-wrap: wrap;
-  .dropdown-filter {
-    margin-right: 15px;
-    margin-bottom: 15px;
-  }
-  button {
-    background-color: #fff;
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
-    border: 0;
-    border-radius: 6px;
-    padding: 10px 20px;
-    font-size: 14px;
-    color: #242526;
-    min-width: 150px;
-    margin-right: 15px;
-    cursor: pointer;
-    div {
-      width: 100%;
-      overflow: visible;
-    }
-  }
-`;
-
-const ResultTable = styled.div`
-  background-color: #fff;
-  position: relative;
-  margin: 20px 0;
-  padding-bottom: 10px;
-  .pagination {
-    display: flex;
-    justify-content: flex-end;
-    padding: 10px 25px;
-    background: #fff;
-    a {
-      background: #f7fafc;
-      color: #242526;
-      padding: 3px 10px;
-      font-size: 12px;
-      margin: 0 5px;
-    }
-    a.active {
-      font-weight: 700;
-      /* background: #5245cc;
-      color: #fff; */
-    }
-    a:first-child {
-      background-image: url(${require("../../assets/left.svg")});
-    }
-    a:last-child {
-      background-image: url(${require("../../assets/right.svg")});
-    }
-    a:first-child,
-    a:last-child {
-      font-size: 0;
-      height: 24px;
-      width: 30px;
-      background-position: center;
-      background-repeat: no-repeat;
-      background-size: 8px;
-    }
-  }
-`;
-
-const ContractLink = styled.div`
-  font-weight: 500;
-  font-size: 0.8rem;
-  text-align: center;
-  margin-top: 0.5rem;
-  :hover {
-    text-decoration: underline;
   }
 `;
