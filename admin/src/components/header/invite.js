@@ -13,6 +13,20 @@ import { apiURL } from "../../config";
 import api from "../../services/api";
 
 export default ({ setOpen, open, label = "Inviter un référent", role = "" }) => {
+  const [centers, setCenters] = useState(null);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data } = await api.get("/cohesion-center");
+        console.log('DATA', JSON.stringify(data));
+        const c = data.map((e) => ({ label: e.name, value: e.name, _id: e._id }));
+        setCenters(c);
+      } catch (e) {
+        console.log(e);
+      }
+    })();
+  }, []);
 
   const getSubRole = (role) => {
     let subRole = [];
@@ -102,8 +116,7 @@ export default ({ setOpen, open, label = "Inviter un référent", role = "" }) =
                           ) : null}
                           {values.role === REFERENT_ROLES.HEAD_CENTER ? (
                             <FormGroup>
-                              <div>Centre</div>
-                              <ChooseCenter validate={(v) => !v} value={values.center} onChange={handleChange} />
+                              <ChooseCenter validate={(v) => !v} value={values} onChange={handleChange} centers={centers} />
                             </FormGroup>
                           ) : null}
                         </Col>
@@ -185,65 +198,39 @@ const ChooseRegion = ({ value, onChange }) => {
   );
 };
 
-const AutocompleteSelectCenter = ({ title, values, handleChange, placeholder, options, onSelect }) => {
-  return (
-    <Row className="detail">
-      <Col md={4} style={{ alignSelf: "flex-start" }}>
-        <label>{title}</label>
-      </Col>
-      <Col md={8}>
-        <ReactSelect
-          styles={{
-            menu: () => ({
-              borderStyle: "solid",
-              borderWidth: 1,
-              borderRadius: 5,
-              borderColor: "#dedede",
-            }),
-          }}
-          defaultValue={{ label: values.cohesionCenterName, value: values.cohesionCenterName, _id: values.cohesionCenterId }}
-          options={options}
-          placeholder={placeholder}
-          noOptionsMessage={() => "Aucun centre ne correspond à cette recherche."}
-          onChange={(e) => {
-            handleChange({ target: { value: e._id, name: "cohesionCenterId" } });
-            handleChange({ target: { value: e.value, name: "cohesionCenterName" } });
-            onSelect?.(e);
-          }}
-        />
-      </Col>
-    </Row>
-  );
-};
-
-const ChooseCenter = ({ values, onChange }) => {
+const ChooseCenter = ({ value, onChange, centers, onSelect }) => {
   const { user } = useSelector((state) => state.Auth);
-  const [centers, setCenters] = useState(null);
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const { data } = await api.get("/cohesion-center");
-        console.log('DATA', JSON.stringify(data));
-        if (data) setCenters(data);
-      } catch (e) {
-        console.log(e);
-      }
-    })();
-    if (user.role === REFERENT_ROLES.HEAD_CENTER) {
-      return (
-        onChange({ target: { value: user.cohesionCenterId, name: "cohesionCenterId" } }),
-        onChange({ target: { value: user.cohesionCenterName, name: "cohesionCenterName" } })
-      )
-    }
-    return (
-      onChange({ target: { value: centers?.[0].name, name: "cohesionCenterName" } }),
-      onChange({ target: { value: centers?.[0]._id, name: "cohesionCenterId" } })
-    )
-  }, []);
+  // useEffect(() => {
+  //   if (user.role === REFERENT_ROLES.HEAD_CENTER) {
+  //     return (
+  //       onChange({ target: { value: user.cohesionCenterId, name: "cohesionCenterId" } }),
+  //       onChange({ target: { value: user.cohesionCenterName, name: "cohesionCenterName" } })
+  //     )
+  //   }
+  //   return (
+  //     (e) => {
+  //       console.log('VALUE', JSON.stringify(e));
+  //       onChange({ target: { value: e._id, name: "cohesionCenterId" } });
+  //       onChange({ target: { value: e.value, name: "cohesionCenterName" } });
+  //       onSelect?.(e);
+  //     }
+  //   )
+  // }, []);
 
   return (
-    // <Input disabled={user.role === REFERENT_ROLES.HEAD_CENTER} type="select" name="cohesionCenterName" value={value} onChange={onChange}>
+    // <Input
+    //   disabled={user.role === REFERENT_ROLES.HEAD_CENTER}
+    //   type="select" name="cohesionCenterName"
+    //   value={value}
+    //   onChange={(e) => {
+    //     const name = e.target.value
+    //     const _id = e.target.key
+    //     console.log('--VALUE--', name, _id, e);
+    //     onChange({ target: { value: name, name: "cohesionCenterId" } });
+    //     onChange({ target: { value: _id, name: "cohesionCenterName" } });
+    //   }}
+    // >
     //   {centers?.map((e) => {
     //     return (
     //       <option value={e.name} key={e._id}>
@@ -252,7 +239,21 @@ const ChooseCenter = ({ values, onChange }) => {
     //     );
     //   })}
     // </Input>
-    <AutocompleteSelectCenter title="Centre" values={values} handleChange={onChange} placeholder="Choisir un centre" options={centers} />
+    <ReactSelect
+      options={centers}
+      placeholder="Choisir un centre"
+      noOptionsMessage={() => "Aucun centre ne correspond à cette recherche."}
+      onChange={(e) => {
+        console.log('VALUE', JSON.stringify(e));
+        if (user.role === REFERENT_ROLES.HEAD_CENTER) {
+          onChange({ target: { value: user.cohesionCenterId, name: "cohesionCenterId" } });
+          onChange({ target: { value: user.cohesionCenterName, name: "cohesionCenterName" } });
+        }
+        onChange({ target: { value: e._id, name: "cohesionCenterId" } });
+        onChange({ target: { value: e.value, name: "cohesionCenterName" } });
+        onSelect?.(e);
+      }}
+    />
   );
 };
 
