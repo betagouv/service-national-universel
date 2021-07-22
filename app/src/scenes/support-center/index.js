@@ -1,13 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { Container } from "reactstrap";
-import styled from "styled-components";
+import React from "react";
+import { NavLink } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { DragDropContext, Droppable } from "react-beautiful-dnd";
 import { toastr } from "react-redux-toastr";
 
-import Loader from "../../components/Loader";
 import api from "../../services/api";
+import { HeroContainer } from "../../components/Content";
+import LoadingButton from "../../components/buttons/LoadingButton";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
@@ -17,17 +15,27 @@ export default () => {
       toastr.success("Ticket créé");
     } catch (e) {
       console.log(e);
-      toastr.error("Erreur!");
+      toastr.error("Une erreur est survenue");
     }
   }
 
   return (
-    <div>
+    <HeroContainer>
       <pre>{JSON.stringify(young)}</pre>
       <button
         onClick={createTicket}
+        className="bg-green-600"
       >Ouvrir un ticket</button>
-      <button>Accéder à mes tickets</button>
-    </div>
+      <section className="bg-green-600">
+        <h2>Besoin d'aide ?</h2>
+        <p>Vous avec un problème technique, vous souhaitez en savoir plus sur votre situation, ou souhaitez contacter l’un de vos référents ?</p>
+        <LoadingButton className="bg-green-600">
+          <NavLink to="/support/ticket" className="">
+            Contacter le support
+          </NavLink>
+        </LoadingButton>
+      </section>
+
+    </HeroContainer>
   )
 }
