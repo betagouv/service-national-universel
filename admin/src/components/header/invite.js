@@ -209,26 +209,6 @@ const ChooseCenter = ({ value, onChange, centers, onSelect }) => {
    }, []);
 
   return (
-    // <Input
-    //   disabled={user.role === REFERENT_ROLES.HEAD_CENTER}
-    //   type="select" name="cohesionCenterName"
-    //   value={value}
-    //   onChange={(e) => {
-    //     const name = e.target.value
-    //     const _id = e.target.key
-    //     console.log('--VALUE--', name, _id, e);
-    //     onChange({ target: { value: name, name: "cohesionCenterId" } });
-    //     onChange({ target: { value: _id, name: "cohesionCenterName" } });
-    //   }}
-    // >
-    //   {centers?.map((e) => {
-    //     return (
-    //       <option value={e.name} key={e._id}>
-    //         {e.name}
-    //       </option>
-    //     );
-    //   })}
-    // </Input>
     <ReactSelect
       disabled={user.role === REFERENT_ROLES.HEAD_CENTER}
       options={centers}
