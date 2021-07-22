@@ -5,7 +5,6 @@ import styled from "styled-components";
 import ReactSelect from "react-select";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { ReactiveBase } from "@appbaseio/reactivesearch";
 
 import { translate, departmentList, regionList, region2department, department2region, REFERENT_ROLES, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE } from "../../utils";
 import LoadingButton from "../../components/buttons/LoadingButton";
