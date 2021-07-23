@@ -13,30 +13,28 @@ import ErrorMessage, { requiredMessage } from "../../scenes/inscription/componen
 // This component still contains test content
 export default () => {
   const young = useSelector((state) => state.Auth.young);
-  const options = ["Assistance technique", "À propos de ma situation", "Contacter un référent"]
+  const options = ["Assistance technique", "À propos de ma situation", "Contacter un référent"];
   const [scope, useScope] = useState(options[0]);
   const [subject, useSubject] = useState("");
   const [message, useMessage] = useState("");
   const createTicket = async () => {
     try {
       await api.post("/support-center/ticket", {
-        "title": subject,
-        "group": scope,
-        "customer": young.email,
-        "article": {
-          "subject": scope,
-          "body": message,
-          "type": "note",
+        title: subject,
+        group: scope,
+        customer: young.email,
+        article: {
+          subject: scope,
+          body: message,
+          type: "note",
         },
-      },
-        young,
-      );
+      });
       toastr.success("Ticket créé");
     } catch (e) {
       console.log(e);
       toastr.error("Une erreur est survenue");
     }
-  }
+  };
 
   return (
     <Container>
@@ -69,7 +67,7 @@ export default () => {
                 type="select"
                 value={scope}
                 handleChange={(e) => {
-                  console.log('SCOPE', e.target.value);
+                  console.log("SCOPE", e.target.value);
                   useScope(e.target.value);
                 }}
                 validate={(v) => (!v && requiredMessage) || (!validator.isEmail(v) && "Ce champ est au mauvais format")}
@@ -83,7 +81,7 @@ export default () => {
                 type="input"
                 value={subject}
                 handleChange={(e) => {
-                  console.log('SUBJECT', e.target.value);
+                  console.log("SUBJECT", e.target.value);
                   useSubject(e.target.value);
                 }}
                 validate={(v) => (!v && requiredMessage) || (!validator.isEmail(v) && "Ce champ est au mauvais format")}
@@ -97,7 +95,7 @@ export default () => {
                 type="textarea"
                 value={message}
                 handleChange={(e) => {
-                  console.log('MESSAGE', e.target.value);
+                  console.log("MESSAGE", e.target.value);
                   useMessage(e.target.value);
                 }}
                 validate={(v) => (!v && requiredMessage) || (!validator.isEmail(v) && "Ce champ est au mauvais format")}
@@ -113,7 +111,7 @@ export default () => {
         </Formik>
       </Form>
     </Container>
-  )
+  );
 };
 
 const Item = ({ title, name, value, handleChange, errors, touched, validate, type, options, ...props }) => {
@@ -123,7 +121,9 @@ const Item = ({ title, name, value, handleChange, errors, touched, validate, typ
       {type === "select" ? (
         <Field as={type} className="form-control" name={name} value={value} onChange={handleChange} validate={validate} {...props}>
           {options?.map((option) => (
-            <option value={option} key={option}>{option}</option>
+            <option value={option} key={option}>
+              {option}
+            </option>
           ))}
         </Field>
       ) : (
@@ -153,7 +153,7 @@ const Heading = styled.header`
   flex: 1;
   p {
     font-size: 1.5rem;
-    color: #6B7280;
+    color: #6b7280;
   }
 `;
 

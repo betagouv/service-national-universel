@@ -31,16 +31,7 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
     let options = {
       method: "POST",
       headers: { "Content-Type": "application/json", "Authorization": `Bearer ${process.env.ZAMMAD_TOKEN}` },
-      body: JSON.stringify({
-        "title": "Help me!",
-        "group": "Users",
-        "customer": "chloe@selego.co",
-        "article": {
-          "subject": "some subject",
-          "body": "some message",
-          "type": "note",
-        },
-      }),
+      body: JSON.stringify(req.body),
     };
     const response = await fetch(url, options);
     //const responseAsJson = await response.json();
