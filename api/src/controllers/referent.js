@@ -142,7 +142,8 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
       department: Joi.string().allow(null, ""),
       structureId: Joi.string().allow(null, ""),
       structureName: Joi.string().allow(null, ""),
-      centerName: Joi.string().allow(null, ""),
+      cohesionCenterName: Joi.string().allow(null, ""),
+      cohesionCenterId: Joi.string().allow(null, ""),
     })
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
@@ -150,7 +151,21 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.details.map((e) => e.message) });
     if (!canInviteUser(req.user.role, value.role)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const { template: reqTemplate, email, firstName, lastName, role, subRole, region, department, structureId, structureName, centerName } = value;
+    const {
+      template: reqTemplate,
+      email,
+      firstName,
+      lastName,
+      role,
+      subRole,
+      region,
+      department,
+      structureId,
+      structureName,
+      centerName,
+      cohesionCenterName,
+      cohesionCenterId,
+    } = value;
     const referentProperties = {};
     if (email) referentProperties.email = email.trim().toLowerCase();
     if (firstName) referentProperties.firstName = firstName.charAt(0).toUpperCase() + (firstName || "").toLowerCase().slice(1);
@@ -160,6 +175,8 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
     if (region) referentProperties.region = region;
     if (department) referentProperties.department = department;
     if (structureId) referentProperties.structureId = structureId;
+    if (cohesionCenterName) referentProperties.cohesionCenterName = cohesionCenterName;
+    if (cohesionCenterId) referentProperties.cohesionCenterId = cohesionCenterId;
 
     const invitation_token = crypto.randomBytes(20).toString("hex");
     referentProperties.invitationToken = invitation_token;
