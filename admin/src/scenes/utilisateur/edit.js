@@ -26,6 +26,9 @@ export default (props) => {
   const [user, setUser] = useState();
   const [service, setService] = useState();
   const [centers, setCenters] = useState();
+  const [structures, setStructures] = useState();
+  const [structure, setStructure] = useState();
+  const [loadingChangeStructure, setLoadingChangeStructure] = useState(false);
   const currentUser = useSelector((state) => state.Auth.user);
   const history = useHistory();
   const dispatch = useDispatch();
@@ -38,13 +41,17 @@ export default (props) => {
       setUser(data);
       const { data: d } = await api.get(`/department-service/referent/${id}`);
       setService(d);
+      const responseStructure = await api.get(`/structure/all`);
+      const s = responseStructure.data.map((e) => ({ label: e.name, value: e.name, _id: e._id }));
+      data.structureId ? setStructure(s.find((struct) => struct._id === data.structureId)) : null;
+      setStructures(s);
       const responseCenter = await api.get(`/cohesion-center`);
       const c = responseCenter.data.map((e) => ({ label: e.name, value: e.name, _id: e._id }));
       setCenters(c);
     })();
   }, []);
 
-  if (user === undefined || service === undefined || centers === undefined) return <Loader />;
+  if (user === undefined || service === undefined) return <Loader />;
 
   const getSubtitle = () => {
     const createdAt = new Date(user.createdAt);
@@ -64,6 +71,23 @@ export default (props) => {
     if (role === ROLES.REFERENT_REGION) subRole = REFERENT_REGION_SUBROLE;
     return Object.keys(subRole).map((e) => ({ value: e, label: translate(subRole[e]) }));
   };
+
+  async function modifyStructure() {
+    try {
+      setLoadingChangeStructure(true);
+      const { ok, code } = await api.put(`/referent/${user._id}/structure/${structure._id}`);
+      setLoadingChangeStructure(false);
+      if (!ok)
+        return code === "OPERATION_NOT_ALLOWED"
+          ? toastr.error(translate(code), "Ce responsable est affilié comme tuteur de missions de la structure.", { timeOut: 5000 })
+          : toastr.error(translate(code), "Une erreur s'est produite lors de la modification de la structure.");
+      toastr.success("Structure modifiée");
+      history.go(0);
+    } catch (e) {
+      setLoadingChangeStructure(false);
+      return toastr.error("Une erreur s'est produite lors de la modification de la structure", e?.error?.message);
+    }
+  }
 
   function canModify(user, value) {
     if (user.role === ROLES.ADMIN) return true;
@@ -99,10 +123,19 @@ export default (props) => {
         initialValues={user}
         onSubmit={async (values) => {
           try {
+            // if structure has changed but no saved
+            if (
+              user.structureId !== structure?._id &&
+              !confirm(
+                'Attention, vous avez modifié la structure de cet utilisateur sans valider. Si vous continuez, ce changement de structure ne sera pas pris en compte. Pour valider ce changement, cliquez sur annuler et valider en cliquant sur "Modifier la structure".'
+              )
+            )
+              return;
             const { ok, code, data } = await api.put(`/referent/${values._id}`, values);
             if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             setUser(data);
             toastr.success("Utilisateur mis à jour !");
+            history.go(0);
           } catch (e) {
             console.log(e);
             toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
@@ -169,9 +202,36 @@ export default (props) => {
                           label: translate(key),
                         }))}
                       />
-
-                      {values.role === ROLES.HEAD_CENTER && centers ? (
-                        <AutocompleteSelectCenter title="Centre" values={values} handleChange={handleChange} placeholder="Choisir un centre" options={centers} />
+                      {values.role === ROLES.HEAD_CENTER ? (
+                        centers ? (
+                          <AutocompleteSelectCenter
+                            options={centers}
+                            defaultValue={{ label: values.cohesionCenterName, value: values.cohesionCenterName, _id: values.cohesionCenterId }}
+                            onChange={(e) => {
+                              handleChange({ target: { value: e._id, name: "cohesionCenterId" } });
+                              handleChange({ target: { value: e.value, name: "cohesionCenterName" } });
+                            }}
+                          />
+                        ) : (
+                          <Loader />
+                        )
+                      ) : null}
+                      {values.role === ROLES.RESPONSIBLE ? (
+                        structures ? (
+                          <AutocompleteSelectStructure
+                            options={structures}
+                            structure={structure}
+                            setStructure={(e) => {
+                              setStructure(e);
+                            }}
+                            userId={user._id}
+                            onClick={modifyStructure}
+                            disabled={isSubmitting}
+                            loading={loadingChangeStructure}
+                          />
+                        ) : (
+                          <Loader />
+                        )
                       ) : null}
                       {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(values.role) ? (
                         <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRole(values.role)} />
@@ -352,11 +412,11 @@ const Select = ({ title, name, values, onChange, disabled, errors, touched, vali
   );
 };
 
-const AutocompleteSelectCenter = ({ title, values, handleChange, placeholder, options, onSelect }) => {
+const AutocompleteSelectCenter = ({ options, defaultValue, onChange }) => {
   return (
     <Row className="detail">
       <Col md={4} style={{ alignSelf: "flex-start" }}>
-        <label>{title}</label>
+        <label>{"Centre"}</label>
       </Col>
       <Col md={8}>
         <ReactSelect
@@ -368,18 +428,60 @@ const AutocompleteSelectCenter = ({ title, values, handleChange, placeholder, op
               borderColor: "#dedede",
             }),
           }}
-          defaultValue={{ label: values.cohesionCenterName, value: values.cohesionCenterName, _id: values.cohesionCenterId }}
+          defaultValue={defaultValue}
           options={options}
-          placeholder={placeholder}
+          placeholder="Choisir un centre"
           noOptionsMessage={() => "Aucun centre ne correspond à cette recherche."}
-          onChange={(e) => {
-            handleChange({ target: { value: e._id, name: "cohesionCenterId" } });
-            handleChange({ target: { value: e.value, name: "cohesionCenterName" } });
-            onSelect?.(e);
-          }}
+          onChange={onChange}
         />
       </Col>
     </Row>
+  );
+};
+
+const AutocompleteSelectStructure = ({ options, structure, setStructure, onClick, disabled, loading }) => {
+  return (
+    <>
+      <Row className="detail">
+        <Col md={4} style={{ alignSelf: "flex-start" }}>
+          <label>{"Structure"}</label>
+        </Col>
+        <Col md={8} style={{ alignSelf: "flex-start", display: "flex", alignItems: "flex-end", flexDirection: "column" }}>
+          <ReactSelect
+            styles={{
+              container: () => ({ width: "100%" }),
+              menu: () => ({
+                borderStyle: "solid",
+                borderWidth: 1,
+                borderRadius: 5,
+                borderColor: "#dedede",
+              }),
+            }}
+            defaultValue={structure}
+            options={options}
+            placeholder="Choisir une structure"
+            noOptionsMessage={() => "Aucun structure ne correspond à cette recherche."}
+            onChange={(e) => {
+              setStructure(e);
+            }}
+          />
+          <LoadingButton
+            onClick={() => {
+              onClick();
+            }}
+            loading={loading}
+            disabled={disabled}
+            style={{
+              marginTop: "1rem",
+              marginLeft: "0",
+              padding: "7px 20px",
+            }}
+          >
+            Modifier la structure
+          </LoadingButton>
+        </Col>
+      </Row>
+    </>
   );
 };
 

@@ -18,12 +18,14 @@ const MissionObject = require("../models/mission");
 const ApplicationObject = require("../models/application");
 const CohesionCenterObject = require("../models/cohesionCenter");
 const AuthObject = require("../auth");
+const StructureObject = require("../models/structure");
 
 const { decrypt } = require("../cryptoUtils");
 const { sendEmail } = require("../sendinblue");
 const { uploadFile, validatePassword, updatePlacesCenter, signinLimiter, assignNextYoungFromWaitingList, ERRORS } = require("../utils");
 const { encrypt } = require("../cryptoUtils");
 const referentValidator = require("../utils/validator/referent");
+const { validateId } = require("../utils/validator/default");
 const ReferentAuth = new AuthObject(ReferentObject);
 const { cookieOptions, JWT_MAX_AGE } = require("../cookie-options");
 const Joi = require("joi");
@@ -725,6 +727,25 @@ router.put("/", passport.authenticate("referent", { session: false }), async (re
     const user = await ReferentObject.findByIdAndUpdate(req.user._id, value, { new: true, useFindAndModify: false });
     await updateTutorNameInMissionsAndApplications(user);
     res.status(200).send({ ok: true, data: user });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+router.put("/:id/structure/:structureId", passport.authenticate("referent", { session: false }), async (req, res) => {
+  try {
+    const { error: errorId, value: checkedId } = validateId(req.params.id);
+    const { error: errorStructureId, value: checkedStructureId } = validateId(req.params.structureId);
+    if (errorId || errorStructureId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error });
+    const structure = await StructureObject.findById(checkedStructureId);
+    const referent = await ReferentObject.findById(checkedId);
+    if (!referent || !structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const missions = await MissionObject.find({ tutorId: referent._id });
+    if (missions.length > 0) return res.status(405).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    referent.set({ structureId: structure._id, role: ROLES.RESPONSIBLE });
+    await referent.save();
+    return res.status(200).send({ ok: true, data: referent });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
