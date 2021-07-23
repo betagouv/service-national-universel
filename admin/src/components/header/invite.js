@@ -6,7 +6,7 @@ import ReactSelect from "react-select";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
-import { translate, departmentList, regionList, region2department, department2region, REFERENT_ROLES, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE } from "../../utils";
+import { translate, departmentList, regionList, region2department, department2region, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE, ROLES } from "../../utils";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import api from "../../services/api";
 
@@ -27,8 +27,8 @@ export default ({ setOpen, open, label = "Inviter un référent", role = "" }) =
 
   const getSubRole = (role) => {
     let subRole = [];
-    if (role === REFERENT_ROLES.REFERENT_DEPARTMENT) subRole = REFERENT_DEPARTMENT_SUBROLE;
-    if (role === REFERENT_ROLES.REFERENT_REGION) subRole = REFERENT_REGION_SUBROLE;
+    if (role === ROLES.REFERENT_DEPARTMENT) subRole = REFERENT_DEPARTMENT_SUBROLE;
+    if (role === ROLES.REFERENT_REGION) subRole = REFERENT_REGION_SUBROLE;
     return Object.keys(subRole).map((e) => ({ value: e, label: translate(subRole[e]) }));
   };
   return (
@@ -96,29 +96,29 @@ export default ({ setOpen, open, label = "Inviter un référent", role = "" }) =
                       </FormGroup>
                     </Col>
                   </Row>
-                  {[REFERENT_ROLES.REFERENT_DEPARTMENT, REFERENT_ROLES.REFERENT_REGION, REFERENT_ROLES.HEAD_CENTER].includes(values.role) ? (
+                  {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.HEAD_CENTER].includes(values.role) ? (
                     <Row>
                       <>
                         <Col md={6}>
-                          {values.role === REFERENT_ROLES.REFERENT_DEPARTMENT ? (
+                          {values.role === ROLES.REFERENT_DEPARTMENT ? (
                             <FormGroup>
                               <div>Département</div>
                               <ChooseDepartment validate={(v) => !v} value={values.department} onChange={handleChange} />
                             </FormGroup>
                           ) : null}
-                          {values.role === REFERENT_ROLES.REFERENT_REGION ? (
+                          {values.role === ROLES.REFERENT_REGION ? (
                             <FormGroup>
                               <div>Région</div>
                               <ChooseRegion validate={(v) => !v} value={values.region} onChange={handleChange} />
                             </FormGroup>
                           ) : null}
-                          {values.role === REFERENT_ROLES.HEAD_CENTER ? (
+                          {values.role === ROLES.HEAD_CENTER ? (
                             <FormGroup>
                               <ChooseCenter validate={(v) => !v} value={values} onChange={handleChange} centers={centers} />
                             </FormGroup>
                           ) : null}
                         </Col>
-                        {values.role !== REFERENT_ROLES.HEAD_CENTER && (
+                        {values.role !== ROLES.HEAD_CENTER && (
                           <Col md={6}>
                             <FormGroup>
                               <div>Fonction</div>
@@ -150,18 +150,18 @@ const ChooseDepartment = ({ value, onChange }) => {
 
   useEffect(() => {
     //force the value if it is a referent_department
-    if (user.role === REFERENT_ROLES.REFERENT_DEPARTMENT) {
+    if (user.role === ROLES.REFERENT_DEPARTMENT) {
       return onChange({ target: { value: user.department, name: "department" } });
     }
     //filter the array if it is a referent_region
-    if (user.role === REFERENT_ROLES.REFERENT_REGION) {
+    if (user.role === ROLES.REFERENT_REGION) {
       setList(region2department[user.region]);
     }
     return onChange({ target: { value: list[0], name: "department" } });
   }, []);
 
   return (
-    <Input disabled={user.role === REFERENT_ROLES.REFERENT_DEPARTMENT} type="select" name="department" value={value} onChange={onChange}>
+    <Input disabled={user.role === ROLES.REFERENT_DEPARTMENT} type="select" name="department" value={value} onChange={onChange}>
       {list.map((e) => {
         return (
           <option value={e} key={e}>
@@ -177,14 +177,14 @@ const ChooseRegion = ({ value, onChange }) => {
   const { user } = useSelector((state) => state.Auth);
 
   useEffect(() => {
-    if (user.role === REFERENT_ROLES.REFERENT_REGION) {
+    if (user.role === ROLES.REFERENT_REGION) {
       return onChange({ target: { value: user.region, name: "region" } });
     }
     return onChange({ target: { value: regionList[0], name: "region" } });
   }, []);
 
   return (
-    <Input disabled={user.role === REFERENT_ROLES.REFERENT_REGION} type="select" name="region" value={value} onChange={onChange}>
+    <Input disabled={user.role === ROLES.REFERENT_REGION} type="select" name="region" value={value} onChange={onChange}>
       {regionList.map((e) => {
         return (
           <option value={e} key={e}>
@@ -200,22 +200,18 @@ const ChooseCenter = ({ value, onChange, centers, onSelect }) => {
   const { user } = useSelector((state) => state.Auth);
 
   useEffect(() => {
-    if (user.role === REFERENT_ROLES.HEAD_CENTER) {
-      return (
-        onChange({ target: { value: user.cohesionCenterId, name: "cohesionCenterId" } }),
-        onChange({ target: { value: user.cohesionCenterName, name: "cohesionCenterName" } })
-      )
+    if (user.role === ROLES.HEAD_CENTER) {
+      return onChange({ target: { value: user.cohesionCenterId, name: "cohesionCenterId" } }), onChange({ target: { value: user.cohesionCenterName, name: "cohesionCenterName" } });
     }
   }, []);
 
   return (
     <ReactSelect
-      disabled={user.role === REFERENT_ROLES.HEAD_CENTER}
+      disabled={user.role === ROLES.HEAD_CENTER}
       options={centers}
       placeholder="Choisir un centre"
       noOptionsMessage={() => "Aucun centre ne correspond à cette recherche."}
       onChange={(e) => {
-        console.log('VALUE', JSON.stringify(e));
         onChange({ target: { value: e._id, name: "cohesionCenterId" } });
         onChange({ target: { value: e.value, name: "cohesionCenterName" } });
         onSelect?.(e);
@@ -230,12 +226,10 @@ const ChooseRole = ({ value, onChange }) => {
   return (
     <Input type="select" name="role" value={value} onChange={onChange}>
       <option value=""></option>
-      <option value={REFERENT_ROLES.HEAD_CENTER}>{translate(REFERENT_ROLES.HEAD_CENTER)}</option>
-      <option value={REFERENT_ROLES.REFERENT_DEPARTMENT}>{translate(REFERENT_ROLES.REFERENT_DEPARTMENT)}</option>
-      {user.role === REFERENT_ROLES.ADMIN || user.role === REFERENT_ROLES.REFERENT_REGION ? (
-        <option value={REFERENT_ROLES.REFERENT_REGION}>{translate(REFERENT_ROLES.REFERENT_REGION)}</option>
-      ) : null}
-      {user.role === REFERENT_ROLES.ADMIN ? <option value={REFERENT_ROLES.ADMIN}>{translate(REFERENT_ROLES.ADMIN)}</option> : null}
+      <option value={ROLES.HEAD_CENTER}>{translate(ROLES.HEAD_CENTER)}</option>
+      <option value={ROLES.REFERENT_DEPARTMENT}>{translate(ROLES.REFERENT_DEPARTMENT)}</option>
+      {user.role === ROLES.ADMIN || user.role === ROLES.REFERENT_REGION ? <option value={ROLES.REFERENT_REGION}>{translate(ROLES.REFERENT_REGION)}</option> : null}
+      {user.role === ROLES.ADMIN ? <option value={ROLES.ADMIN}>{translate(ROLES.ADMIN)}</option> : null}
     </Input>
   );
 };
