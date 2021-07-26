@@ -56,7 +56,9 @@ export default ({ young, onChange }) => {
                   {young.mobilityNearRelative === "true" ? (
                     <>
                       <div>Hébergement chez un proche</div>
-                      <div style={{ marginLeft: "1rem" }}>{`${young.mobilityNearRelativeName} • ${young.mobilityNearRelativeZip} ${young.mobilityNearRelativeCity}`}</div>
+                      <div style={{ marginLeft: "1rem" }}>{`${young.mobilityNearRelativeName || ""} • ${young.mobilityNearRelativeZip || ""} ${
+                        young.mobilityNearRelativeCity || ""
+                      }`}</div>
                     </>
                   ) : null}
                 </Details>
