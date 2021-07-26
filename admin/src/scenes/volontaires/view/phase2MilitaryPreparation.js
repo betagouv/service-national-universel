@@ -128,7 +128,7 @@ export default ({ young }) => {
         <ModalConfirm
           topTitle="alerte"
           title={`Attention, vous êtes sur le point de confirmer les fichiers transmis pas ${young.firstName} pour la préparation militaire.`}
-          message="blablab du message"
+          message={`Une fois ces documents validés, un mail sera envoyé à ${young.firstName} et la candidature sera notée "En attente de validation" par l'armée concernée.`}
           onChange={() => setModal(null)}
           onConfirm={onValidate}
         />
@@ -136,8 +136,8 @@ export default ({ young }) => {
       {modal?.visible && modal?.template === "correction" && (
         <ModalCorrectionMilitaryPreparation
           topTitle="alerte"
-          title="demande de correction"
-          message="blablab du message"
+          title={`Attention, vous êtes sur le point de demander des corrections pour les fichiers transmis pas ${young.firstName} pour la préparation militaire.`}
+          message={`Une fois le message ci-dessous validé, il sera transmis par mail à ${young.firstName}.`}
           young={young}
           onChange={() => setModal(null)}
           onConfirm={onCorrection}
@@ -146,8 +146,8 @@ export default ({ young }) => {
       {modal?.visible && modal?.template === "refuse" && (
         <ModalRefuseMilitaryPreparation
           topTitle="alerte"
-          title="Candidature refusée"
-          message="Merci de ne refuser qui si vraiment le jeune ne correspond pas aux critères de base"
+          title={`Attention, vous êtes sur le point de refuser les fichiers transmis pas ${young.firstName} pour la préparation militaire.`}
+          message={`Merci de ne refuser qui si vraiment le jeune ne correspond pas aux critères. Une fois le message ci-dessous validé, il sera transmis par mail à ${young.firstName}.`}
           young={young}
           onChange={() => setModal(null)}
           onConfirm={onRefuse}
