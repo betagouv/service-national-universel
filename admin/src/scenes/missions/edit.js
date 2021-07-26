@@ -307,19 +307,21 @@ export default (props) => {
                         placeholder="Spécifiez les contraintes liées à la mission"
                       />
                     </FormGroup>
-                    <FormGroup>
-                      <div>
-                        <label>PRÉPARATION MILITAIRE</label>
-                        <Field component="select" name="isMilitaryPreparation" value={values.isMilitaryPreparation} onChange={handleChange}>
-                          <option key="false" value="false">
-                            Non
-                          </option>
-                          <option key="true" value="true">
-                            Oui
-                          </option>
-                        </Field>
-                      </div>
-                    </FormGroup>
+                    {structure.isMilitaryPreparation === "true" ? (
+                      <FormGroup>
+                        <div>
+                          <label>PRÉPARATION MILITAIRE</label>
+                          <Field component="select" name="isMilitaryPreparation" value={values.isMilitaryPreparation} onChange={handleChange}>
+                            <option key="false" value="false">
+                              Non
+                            </option>
+                            <option key="true" value="true">
+                              Oui
+                            </option>
+                          </Field>
+                        </div>
+                      </FormGroup>
+                    ) : null}
                   </Wrapper>
                 </Col>
                 <Col md={6}>

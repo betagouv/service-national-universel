@@ -304,7 +304,7 @@ export default (props) => {
                       </FormGroup>
                       <FormGroup>
                         <label>PRÉPARATION MILITAIRE</label>
-                        <Field component="select" name="isMilitaryPrepation" value={values.isMilitaryPrepation} onChange={handleChange}>
+                        <Field component="select" name="isMilitaryPreparation" value={values.isMilitaryPreparation} onChange={handleChange}>
                           <option key="false" value="false">
                             Non
                           </option>

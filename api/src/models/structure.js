@@ -199,7 +199,7 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  isMilitaryPrepation: {
+  isMilitaryPreparation: {
     type: String,
     enum: ["true", "false"],
     documentation: {
