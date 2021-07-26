@@ -6,6 +6,7 @@ import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 import { ModalContainer, Content, Footer, Header } from "./Modal";
 import ModalButton from "../buttons/ModalButton";
+import { SENDINBLUE_TEMPLATES } from "../../utils";
 
 export default ({ topTitle, title, message, onChange, onConfirm, young }) => {
   const [messageTextArea, setMessageTextArea] = useState();
@@ -20,7 +21,10 @@ les docs sont pas bons.`);
 
   const send = async () => {
     setSending(true);
-    console.log("send email correction api");
+    await api.post(`/email/send-template/${SENDINBLUE_TEMPLATES.MILITARY_PREPARATION_DOCS_CORRECTION}`, {
+      emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+      params: { message: messageTextArea },
+    });
     toastr.success("Email envoyé !");
     onConfirm(messageTextArea);
   };

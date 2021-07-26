@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 
-import { translate as t, APPLICATION_STATUS_COLORS } from "../../../utils";
+import { translate as t, APPLICATION_STATUS_COLORS, SENDINBLUE_TEMPLATES } from "../../../utils";
 import Badge from "../../../components/Badge";
 import { Box, BoxTitle, Separator } from "../../../components/box";
 import DownloadButton from "../../../components/buttons/DownloadButton";
@@ -12,7 +12,7 @@ import api from "../../../services/api";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 import Loader from "../../../components/Loader";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
-import ModalCorrectionMilitaryPreparation from "../../../components/modals/ModalRefuseMilitaryPreparation";
+import ModalCorrectionMilitaryPreparation from "../../../components/modals/ModalCorrectionMilitaryPreparation";
 import ModalRefuseMilitaryPreparation from "../../../components/modals/ModalRefuseMilitaryPreparation";
 
 export default ({ young }) => {
@@ -60,7 +60,11 @@ export default ({ young }) => {
         );
     }
     setModal(null);
-    // todo notify young
+    // todo add mission name ? other params ?
+    await api.post(`/email/send-template/${SENDINBLUE_TEMPLATES.MILITARY_PREPARATION_DOCS_VALIDATED}`, {
+      emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+    });
+    // todo notify resp mission
     // Refresh
     history.go(0);
   };
