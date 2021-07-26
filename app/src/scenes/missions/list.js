@@ -21,6 +21,7 @@ export default () => {
   const [targetLocation, setTargetLocation] = useState("");
   const [showAlertLimitDate, setShowAlertLimitDate] = useState(true);
   const [showAlertMilitaryPreparation, setShowAlertMilitaryPreparation] = useState(true);
+  const [showAlert100km, setShowAlert100km] = useState(true);
   const [applications, setApplications] = useState();
   const getDefaultQuery = () => {
     let query = {
@@ -94,11 +95,11 @@ export default () => {
           message="Des missions supplémentaires seront proposées tout au long de l’année. Vous serez informé par e-mail dès qu’une mission répondant à vos préférences sera publiée."
         />
       ) : null}
-      {showAlertMilitaryPreparation ? (
-        <MilitaryPreparationCard
-          onClose={() => setShowAlertMilitaryPreparation(false)}
-          title="Réalisez votre mission lors d’une préparation militaire"
-          message="Une période de découverte du milieu militaire pour vivre durant quelques jours le quotidien d’un soldat. En savoir plus"
+      {showAlert100km ? (
+        <AlertBox
+          onClose={() => setShowAlert100km(false)}
+          title={`Visibilité des missions`}
+          message="Vous ne voyez que les missions proposées à moins de 100 km du domicile que vous avez déclaré. Il existe des offres de missions accessibles pour vous sous conditions partout en France, notamment certaines préparations militaires. Si vous souhaitez connaitre ces offres et y accéder, contactez tout de suite votre référent départemental."
         />
       ) : null}
       <Heading>
@@ -179,6 +180,13 @@ export default () => {
             </DomainsFilter>
           </Row>
         </Filters>
+        {showAlertMilitaryPreparation ? (
+          <MilitaryPreparationCard
+            onClose={() => setShowAlertMilitaryPreparation(false)}
+            title="Réalisez votre mission lors d’une préparation militaire"
+            message="Une période de découverte du milieu militaire pour vivre durant quelques jours le quotidien d’un soldat. En savoir plus"
+          />
+        ) : null}
         <Missions>
           <ReactiveFilter componentId="STATUS" query={{ query: { bool: { filter: { term: { "status.keyword": "VALIDATED" } } } }, value: "" }} />
           <ReactiveList

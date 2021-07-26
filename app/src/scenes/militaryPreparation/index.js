@@ -67,9 +67,16 @@ export default () => {
         <Hero>
           <Content style={{ width: "100%" }}>
             <h2>Quelques mots au sujet de la préparation militaire</h2>
-            <p>
-              L'inscription à cette préparation est bien évidemment basée sur le volontariat. Cette période en immersion vous permettra d'avoir une excellente première approche,
-              afin de tester votre motivation à faire carrière ou non dans l'armée.{" "}
+            <p style={{ fontSize: "0.9rem" }}>
+              Vous désirez découvrir les armées et leurs métiers ? Vous cherchez la camaraderie, de l’exigence, des rencontres ? Continuer d’apprendre et rencontrer des jeunes de
+              tous horizons ? Vous êtes de nationalité française, vous avez 16 ans (révolus le 1er jour du stage choisi), vous n’avez pas de contre-indication médicale aux
+              activités sportives ?
+              <br />
+              <br />
+              Embarquez pour l’aventure en rejoignant une des missions d’intérêt général proposées par l’armée de terre, la marine nationale, l’armée de l’air et de l’espace, le
+              service de santé des armées, le service du commissariat des armées et le service de l’énergie opérationnelle. Vous effectuerez une période militaire
+              d’initiation-défense nationale qui <b>ne vous engagera à rien</b> mais vous permettra, si vous le souhaitez, de postuler plus tard pour un engagement dans l’active ou
+              dans la réserve.
             </p>
             {/* <SeparatorXS />
             <h2>Contactez votre référent pour plus d’informations</h2>
