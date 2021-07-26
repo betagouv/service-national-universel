@@ -164,7 +164,7 @@ export default ({ young }) => {
           {applicationsToMilitaryPreparation.map((a, i) => (
             <div key={i}>
               <LinkStyled href={`/mission/${a.missionId}`} target="_blank">
-                {a.missionName}
+                {a?.mission?.name || a.missionName}
               </LinkStyled>
               <Badge text={t(a.status)} color={APPLICATION_STATUS_COLORS[a.status]} />
             </div>

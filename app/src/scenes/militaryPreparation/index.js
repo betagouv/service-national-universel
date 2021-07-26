@@ -87,6 +87,12 @@ export default () => {
               const { ok, code, data: young } = await api.put("/young", { statusMilitaryPreparationFiles: "WAITING_VALIDATION" });
               if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
               dispatch(setYoung(young));
+              for (let i = 0; i < applicationsToMilitaryPreparation.length; i++) {
+                const app = applicationsToMilitaryPreparation[i];
+                if (app.status === "WAITING_VERIFICATION") continue;
+                const responseApplication = await api.put("/application", { _id: app._id, status: "WAITING_VERIFICATION" });
+                if (!responseApplication.ok) toastr.error(translate(responseApplication.code), "Une erreur s'est produite lors du traitement");
+              }
               toastr.success("Votre dossier a bien été transmis");
               history.push("/");
             } catch (e) {

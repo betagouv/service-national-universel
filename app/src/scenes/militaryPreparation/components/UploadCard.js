@@ -22,6 +22,7 @@ export default ({
       <Title>{title}</Title>
       <SubTitle>{subTitle}</SubTitle>
       <DndFileInput
+        optional
         errorMessage={errorMessage}
         value={values[name]}
         name={name}
