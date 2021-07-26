@@ -112,7 +112,16 @@ class Auth {
   }
 
   async resetPassword(req, res) {
-    const { password, verifyPassword, newPassword } = req.body;
+    const { error, value } = Joi.object({
+      password: Joi.string().required(),
+      newPassword: Joi.string().required(),
+      verifyPassword: Joi.string().required(),
+    })
+      .unknown()
+      .validate(req.body);
+
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    const { password, verifyPassword, newPassword } = value;
 
     if (!validatePassword(newPassword)) {
       return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_NOT_VALIDATED });

@@ -152,7 +152,7 @@ describe("Young", () => {
       expect(res.status).toBe(400);
     });
 
-    it("should return return 401 when new password is identical as last password", async () => {
+    it("should return 401 when new password is identical as last password", async () => {
       const young = await createYoungHelper({ ...getNewYoungFixture(), password: VALID_PASSWORD });
       const passport = require("passport");
       const previous = passport.user;
@@ -248,7 +248,7 @@ describe("Young", () => {
       expect(res.body.code).toBe("PASSWORD_TOKEN_EXPIRED_OR_INVALID");
     });
 
-    it("should return return 401 when new password is identical as last password", async () => {
+    it("should return 401 when new password is identical as last password", async () => {
       const fixture = getNewYoungFixture();
       const token = await crypto.randomBytes(20).toString("hex");
       const young = await createYoungHelper({
