@@ -1,5 +1,6 @@
 import { translate } from "snu-lib/translation";
 import passwordValidator from "password-validator";
+import api from "../services/api";
 export * from "snu-lib";
 
 export const domains = ["Défense et mémoire", "Sécurité", "Solidarité", "Santé", "Éducation", "Culture", "Sport", "Environnement et développement durable", "Citoyenneté"];
@@ -102,3 +103,10 @@ export const ENABLE_ASSIGN_MEETING_POINT_EMAILS = [];
 export const enableAssignCenter = (user) => ENABLE_ASSIGN_CENTER && (ENABLE_ASSIGN_CENTER_ROLES.includes(user.role) || ENABLE_ASSIGN_CENTER_EMAILS.includes(user.email));
 export const enableMeetingPoint = (user) =>
   ENABLE_ASSIGN_MEETING_POINT && (ENABLE_ASSIGN_MEETING_POINT_ROLES.includes(user.role) || ENABLE_ASSIGN_MEETING_POINT_EMAILS.includes(user.email));
+
+export const userIsResponsibleFromStructureMilitaryPreparation = async (user) => {
+  if (!user || !user.structureId) return false;
+  const { ok, data } = await api.get("/structure");
+  if (!ok) return false;
+  return data?.isMilitaryPreparation === "true";
+};
