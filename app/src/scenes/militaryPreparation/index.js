@@ -56,7 +56,7 @@ export default () => {
       ) : null}
       <HeroContainer>
         <Hero>
-          <Content>
+          <Content className="content">
             <h1>Réalisez votre mission lors d’une préparation militaire</h1>
             <p>Une période de découverte du milieu militaire pour vivre durant quelques jours le quotidien d’un soldat. </p>
           </Content>
@@ -110,6 +110,14 @@ export default () => {
         >
           {({ values, handleChange, handleSubmit, errors, isSubmitting }) => (
             <>
+              <AlertBox
+                message="Les informations collectées dans le cadre d’une candidature de votre part pour effectuer une préparation militaire sont destinées à vérifier l’éligibilité de
+                      votre demande : en effet, l’accès aux préparations militaires est soumis à des conditions prévues par l’article 2 de l’arrêté du 21 avril 2008 relatif aux
+                      périodes militaires d'initiation ou de perfectionnement à la défense nationale paru au JORF n°0102 du 30 avril 2008. Les documents que vous téléversez sur
+                      cette page sont destinés aux services académiques de votre département de résidence et aux référents des missions d’intérêt général / préparations militaires
+                      auxquelles vous postulez. Ces pièces seront conservées jusqu’à l’examen de votre candidature et, si votre candidature est acceptée, jusqu’à la fin de la
+                      préparation militaire que vous effectuerez. Sans la fourniture de ces pièces, l’éligibilité de votre candidature ne pourra pas être étudiée."
+              />
               <CardsContainer>
                 <Row>
                   <Col md={6} xs={12} style={{ paddingBottom: "15px" }}>
