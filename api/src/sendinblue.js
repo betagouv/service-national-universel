@@ -51,10 +51,20 @@ async function sendEmail(to, subject, htmlContent, { params, attachment, cc, bcc
 
 // https://developers.sendinblue.com/reference#sendtransacemail
 async function sendTemplate(id, { params, emailTo, attachment } = {}) {
-  const body = { to: emailTo.map((email) => ({ email })), templateId: id };
-  if (params) body.params = params;
-  if (attachment) body.attachment = attachment;
-  return await api("/smtp/email", { method: "POST", body: JSON.stringify(body) });
+  try {
+    const body = { templateId: id };
+    if (emailTo) body.to = emailTo;
+    if (params) body.params = params;
+    if (attachment) body.attachment = attachment;
+    if (ENVIRONMENT !== "production") {
+      body.to = body.to.filter((e) => e.email.match(/(selego\.co|beta\.gouv\.fr)/));
+    }
+    const mail = await api("/smtp/email", { method: "POST", body: JSON.stringify(body) });
+    return console.log({ templateId: id, mail, to: emailTo, params });
+  } catch (e) {
+    console.log("Erreur in sendTemplate", e);
+    capture(e);
+  }
 }
 
 /**
