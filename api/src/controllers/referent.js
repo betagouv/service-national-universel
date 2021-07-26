@@ -17,6 +17,7 @@ const YoungObject = require("../models/young");
 const MissionObject = require("../models/mission");
 const ApplicationObject = require("../models/application");
 const CohesionCenterObject = require("../models/cohesionCenter");
+const StructureObject = require("../models/structure");
 const AuthObject = require("../auth");
 const StructureObject = require("../models/structure");
 
@@ -530,6 +531,43 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
 
     const { youngId, key, fileName } = value;
     const downloaded = await getFile(`app/young/${youngId}/${key}/${fileName}`);
+    const decryptedBuffer = decrypt(downloaded.Body);
+
+    let mimeFromFile = null;
+    try {
+      const { mime } = await FileType.fromBuffer(decryptedBuffer);
+      mimeFromFile = mime;
+    } catch (e) {}
+
+    return res.status(200).send({
+      data: Buffer.from(decryptedBuffer, "base64"),
+      mimeType: mimeFromFile ? mimeFromFile : mime.lookup(fileName),
+      fileName: fileName,
+      ok: true,
+    });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.get("/youngFile/:youngId/military-preparation/:key/:fileName", passport.authenticate("referent", { session: false }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      youngId: Joi.string().required(),
+      key: Joi.string().required(),
+      fileName: Joi.string().required(),
+    })
+      .unknown()
+      .validate({ ...req.params }, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+    if (req.user.role !== ROLES.ADMIN) {
+      const structure = await StructureObject.findById(req.user.structureId);
+      if (!structure || structure?.isMilitaryPreparation !== "true") return res.status(400).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    const { youngId, key, fileName } = value;
+    const downloaded = await getFile(`app/young/${youngId}/military-preparation/${key}/${fileName}`);
     const decryptedBuffer = decrypt(downloaded.Body);
 
     let mimeFromFile = null;
