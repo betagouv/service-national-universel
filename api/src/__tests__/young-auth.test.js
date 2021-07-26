@@ -152,6 +152,18 @@ describe("Young", () => {
       expect(res.status).toBe(400);
     });
 
+    it("should return return 401 when new password is identical as last password", async () => {
+      const young = await createYoungHelper({ ...getNewYoungFixture(), password: VALID_PASSWORD });
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
+      res = await request(getAppHelper())
+        .post("/young/reset_password")
+        .send({ password: VALID_PASSWORD, verifyPassword: VALID_PASSWORD, newPassword: VALID_PASSWORD });
+      expect(res.status).toBe(401);
+      passport.user = previous;
+    });
+
     it("should return return 401 when original password does not match", async () => {
       const young = await createYoungHelper({ ...getNewYoungFixture(), password: "foo" });
       const passport = require("passport");
@@ -234,6 +246,20 @@ describe("Young", () => {
       const res = await request(getAppHelper()).post("/young/forgot_password_reset").send({ password: VALID_PASSWORD, token: token });
       expect(res.status).toBe(400);
       expect(res.body.code).toBe("PASSWORD_TOKEN_EXPIRED_OR_INVALID");
+    });
+
+    it("should return return 401 when new password is identical as last password", async () => {
+      const fixture = getNewYoungFixture();
+      const token = await crypto.randomBytes(20).toString("hex");
+      const young = await createYoungHelper({
+        ...fixture,
+        email: fixture.email.toLowerCase(),
+        forgotPasswordResetExpires: Date.now() + 1000 * 60 * 60 * 24 * 7,
+        forgotPasswordResetToken: token,
+        password: VALID_PASSWORD,
+      });
+      const res = await request(getAppHelper()).post("/young/forgot_password_reset").send({ password: VALID_PASSWORD, token });
+      expect(res.status).toBe(401);
     });
 
     it("should return return 200 otherwise", async () => {

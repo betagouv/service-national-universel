@@ -112,29 +112,17 @@ class Auth {
   }
 
   async resetPassword(req, res) {
-    const { error, value } = Joi.object({
-      password: Joi.string().required(),
-      newPassword: Joi.string().required(),
-      verifyPassword: Joi.string().required(),
-    })
-      .unknown()
-      .validate(req.body);
+    const { password, verifyPassword, newPassword } = req.body;
 
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_NOT_VALIDATED });
-    const { password, verifyPassword, newPassword } = value;
-
-    if (!validatePassword(newPassword) || !validatePassword(verifyPassword)) {
+    if (!validatePassword(newPassword)) {
       return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_NOT_VALIDATED });
     }
 
     try {
       const match = await req.user.comparePassword(password);
-      if (!match) {
-        return res.status(401).send({ ok: false, code: ERRORS.PASSWORD_INVALID });
-      }
-      if (newPassword !== verifyPassword) {
-        return res.status(422).send({ ok: false, code: ERRORS.PASSWORDS_NOT_MATCH });
-      }
+      if (!match) return res.status(401).send({ ok: false, code: ERRORS.PASSWORD_INVALID });
+      if (newPassword !== verifyPassword) return res.status(422).send({ ok: false, code: ERRORS.PASSWORDS_NOT_MATCH });
+      if (newPassword === password) return res.status(401).send({ ok: false, code: ERRORS.NEW_PASSWORD_IDENTICAL_PASSWORD });
 
       const obj = await this.model.findById(req.user._id);
       obj.set({ password: newPassword });
@@ -201,6 +189,8 @@ class Auth {
         forgotPasswordResetExpires: { $gt: Date.now() },
       });
       if (!obj) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
+      const match = await obj.comparePassword(password);
+      if (match) return res.status(401).send({ ok: false, code: ERRORS.NEW_PASSWORD_IDENTICAL_PASSWORD });
 
       obj.password = password;
       obj.forgotPasswordResetToken = "";
