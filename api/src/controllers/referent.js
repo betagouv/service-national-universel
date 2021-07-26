@@ -19,7 +19,6 @@ const ApplicationObject = require("../models/application");
 const CohesionCenterObject = require("../models/cohesionCenter");
 const StructureObject = require("../models/structure");
 const AuthObject = require("../auth");
-const StructureObject = require("../models/structure");
 
 const { decrypt } = require("../cryptoUtils");
 const { sendEmail } = require("../sendinblue");
