@@ -101,7 +101,7 @@ router.post("/file/military-preparation/:key", passport.authenticate("young", { 
       error: bodyError,
       value: { names },
     } = Joi.object({
-      names: Joi.array().items(Joi.string().required()).required(),
+      names: Joi.array().items(Joi.string()).required(),
     }).validate(JSON.parse(body), { stripUnknown: true });
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
