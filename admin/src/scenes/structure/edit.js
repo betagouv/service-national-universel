@@ -289,9 +289,9 @@ export default (props) => {
                         })}
                     </Field>
                   </FormGroup>
-                  <FormGroup>
-                    {user.role === ROLES.ADMIN && (
-                      <div>
+                  {user.role === ROLES.ADMIN && (
+                    <>
+                      <FormGroup>
                         <label>TÊTE DE RÉSEAU</label>
                         <Field component="select" name="isNetwork" value={values.isNetwork} onChange={handleChange}>
                           <option key="false" value="false">
@@ -301,9 +301,20 @@ export default (props) => {
                             Oui
                           </option>
                         </Field>
-                      </div>
-                    )}
-                  </FormGroup>
+                      </FormGroup>
+                      <FormGroup>
+                        <label>PRÉPARATION MILITAIRE</label>
+                        <Field component="select" name="isMilitaryPrepation" value={values.isMilitaryPrepation} onChange={handleChange}>
+                          <option key="false" value="false">
+                            Non
+                          </option>
+                          <option key="true" value="true">
+                            Oui
+                          </option>
+                        </Field>
+                      </FormGroup>
+                    </>
+                  )}
                 </Wrapper>
               </Col>
               <Col md={6}>
