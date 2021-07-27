@@ -21,14 +21,15 @@ export default () => {
     try {
       await api.post("/support-center/ticket", {
         "title": subject,
-        "group": "Users",
-        "customer": "marine@pierre.com",
+        "group": scope,
+        "customer": young.email,
         "article": {
           "subject": scope,
           "body": message,
           "type": "note",
         },
-      }
+      },
+        young,
       );
       toastr.success("Ticket créé");
     } catch (e) {
