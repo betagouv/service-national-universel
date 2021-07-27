@@ -12,7 +12,7 @@ import Loader from "../../components/Loader";
 import Badge from "../../components/Badge";
 import Error, { requiredMessage } from "../../components/errorMessage";
 import { Box, BoxContent } from "../../components/box";
-import { translate, ROLES, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE } from "../../utils";
+import { translate, ROLES, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE, getPasswordErrorMessage } from "../../utils";
 
 export default () => {
   const user = useSelector((state) => state.Auth.user);
@@ -70,33 +70,86 @@ export default () => {
                     <p>Données personnelles</p>
                   </BoxTitle>
                   <BoxContent direction="column">
-                    <Item required title="E-mail" values={values} name="email" handleChange={handleChange} errors={errors} touched={touched} />
-                    {user.role === ROLES.REFERENT_DEPARTMENT ? <Item title="Département" disabled values={values} name="department" handleChange={handleChange} /> : null}
-                    {user.role === ROLES.REFERENT_REGION ? <Item title="Région" disabled values={values} name="region" handleChange={handleChange} /> : null}
+                    <Item
+                      required
+                      title="E-mail"
+                      values={values}
+                      name="email"
+                      handleChange={handleChange}
+                      errors={errors}
+                      touched={touched}
+                      type={"text"}
+                      validate={(v) => required && !v && requiredMessage}
+                    />
+                    {user.role === ROLES.REFERENT_DEPARTMENT ? (
+                      <Item
+                        title="Département"
+                        disabled
+                        values={values}
+                        name="department"
+                        handleChange={handleChange}
+                        type={"text"}
+                        validate={(v) => required && !v && requiredMessage}
+                      />
+                    ) : null}
+                    {user.role === ROLES.REFERENT_REGION ? (
+                      <Item title="Région" disabled values={values} name="region" handleChange={handleChange} type={"text"} validate={(v) => required && !v && requiredMessage} />
+                    ) : null}
                     <Row>
                       <Col md={6}>
-                        <Item required title="Prénom" values={values} name="firstName" handleChange={handleChange} errors={errors} touched={touched} />
+                        <Item
+                          required
+                          title="Prénom"
+                          values={values}
+                          name="firstName"
+                          handleChange={handleChange}
+                          errors={errors}
+                          touched={touched}
+                          type={"text"}
+                          validate={(v) => required && !v && requiredMessage}
+                        />
                       </Col>
                       <Col md={6}>
-                        <Item required title="Nom" values={values} name="lastName" handleChange={handleChange} errors={errors} touched={touched} />
+                        <Item
+                          required
+                          title="Nom"
+                          values={values}
+                          name="lastName"
+                          handleChange={handleChange}
+                          errors={errors}
+                          touched={touched}
+                          type={"text"}
+                          validate={(v) => required && !v && requiredMessage}
+                        />
                       </Col>
                     </Row>
                     <Row>
                       <Col md={6}>
-                        <Item title="Téléphone mobile" values={values} name="mobile" handleChange={handleChange} />
+                        <Item
+                          title="Téléphone mobile"
+                          values={values}
+                          name="mobile"
+                          handleChange={handleChange}
+                          type={"text"}
+                          validate={(v) => required && !v && requiredMessage}
+                        />
                       </Col>
                       <Col md={6}>
-                        <Item title="Téléphone fixe" values={values} name="phone" handleChange={handleChange} />
+                        <Item title="Téléphone fixe" values={values} name="phone" handleChange={handleChange} type={"text"} validate={(v) => required && !v && requiredMessage} />
                       </Col>
                     </Row>
                     {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(values.role) ? (
                       <Select name="subRole" values={values} onChange={handleChange} title="Fonction" options={getSubRole(values.role)} />
                     ) : null}
+                    <Row>
+                      <Col md={6}>
+                        <SaveBtn loading={isSubmitting} onClick={handleSubmit}>
+                          Enregistrer
+                        </SaveBtn>
+                      </Col>
+                    </Row>
                   </BoxContent>
                 </Box>
-                <SaveBtn loading={isSubmitting} onClick={handleSubmit}>
-                  Enregistrer
-                </SaveBtn>
               </>
             )}
           </Formik>
@@ -130,21 +183,107 @@ export default () => {
                       <p>Données partagées par tous les référents de votre département</p>
                     </BoxTitle>
                     <BoxContent direction="column">
-                      <Item title="Nom de la direction" values={values} name="directionName" handleChange={handleChange} />
-                      <Item title="Adresse" values={values} name="address" handleChange={handleChange} />
-                      <Item title="Complément d'adresse" values={values} name="complementAddress" handleChange={handleChange} />
-                      <Item title="Code postal" values={values} name="zip" handleChange={handleChange} />
-                      <Item title="Ville" values={values} name="city" handleChange={handleChange} />
+                      <Item
+                        title="Nom de la direction"
+                        values={values}
+                        name="directionName"
+                        handleChange={handleChange}
+                        type={"text"}
+                        validate={(v) => required && !v && requiredMessage}
+                      />
+                      <Item title="Adresse" values={values} name="address" handleChange={handleChange} type={"text"} validate={(v) => required && !v && requiredMessage} />
+                      <Item
+                        title="Complément d'adresse"
+                        values={values}
+                        name="complementAddress"
+                        handleChange={handleChange}
+                        type={"text"}
+                        validate={(v) => required && !v && requiredMessage}
+                      />
+                      <Item title="Code postal" values={values} name="zip" handleChange={handleChange} type={"text"} validate={(v) => required && !v && requiredMessage} />
+                      <Item title="Ville" values={values} name="city" handleChange={handleChange} type={"text"} validate={(v) => required && !v && requiredMessage} />
+                      <Row>
+                        <Col md={6}>
+                          <SaveBtn loading={isSubmitting} onClick={handleSubmit}>
+                            Enregistrer
+                          </SaveBtn>
+                        </Col>
+                      </Row>
                     </BoxContent>
                   </Box>
-                  <SaveBtn loading={isSubmitting} onClick={handleSubmit}>
-                    Enregistrer
-                  </SaveBtn>
                 </>
               )}
             </Formik>
           </Col>
         )}
+      </Row>
+      <Row>
+        <Col md={6}>
+          <Formik
+            initialValues={{ password: "", newPassword: "", verifyPassword: "" }}
+            validateOnChange={false}
+            validateOnBlur={false}
+            onSubmit={async ({ password, verifyPassword, newPassword }) => {
+              try {
+                const { ok, code, user } = await api.post("/referent/reset_password", { password, verifyPassword, newPassword });
+                if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
+                dispatch(setUser(user));
+                toastr.success("Mis à jour!");
+              } catch (e) {
+                console.log(e);
+                toastr.error("Oups, une erreur est survenue pendant la mise à jour du mot de passe :", translate(e.code));
+              }
+            }}
+          >
+            {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
+              <Box style={{ height: "fit-content" }}>
+                <BoxTitle>
+                  <h3>Mot de passe</h3>
+                  <p>Modifier votre mot de passe</p>
+                </BoxTitle>
+                <BoxContent direction="column">
+                  <Item
+                    type="password"
+                    name="password"
+                    values={values}
+                    handleChange={handleChange}
+                    title="Actuel"
+                    validate={(v) => !v && requiredMessage}
+                    errors={errors}
+                    touched={touched}
+                  />
+                  <Item
+                    type="password"
+                    name="newPassword"
+                    values={values}
+                    handleChange={handleChange}
+                    title="Nouveau"
+                    errors={errors}
+                    touched={touched}
+                    validate={getPasswordErrorMessage}
+                  />
+                  <Item
+                    type="password"
+                    name="verifyPassword"
+                    values={values}
+                    handleChange={handleChange}
+                    title="Confirmer"
+                    validate={(v) => (!v && requiredMessage) || (v !== values.newPassword && "Les mots de passe renseignés ne sont pas identiques")}
+                    errors={errors}
+                    touched={touched}
+                  />
+                  <Row>
+                    <Col md={6}>
+                      <SaveBtn onClick={handleSubmit} disabled={isSubmitting} style={{ margin: "2rem 0" }}>
+                        Valider mon nouveau mot de passe
+                      </SaveBtn>
+                    </Col>
+                  </Row>
+                </BoxContent>
+              </Box>
+            )}
+          </Formik>
+        </Col>
       </Row>
     </Wrapper>
   );
@@ -170,22 +309,14 @@ const Select = ({ title, name, values, onChange, disabled, errors, touched, vali
   );
 };
 
-const Item = ({ title, values, name, handleChange, disabled, required, errors, touched }) => {
+const Item = ({ title, values, name, handleChange, disabled, required, errors, touched, type, validate }) => {
   return (
     <FormGroup>
       <label>
         {required && <span>*</span>}
         {title}
       </label>
-      <Field
-        disabled={disabled}
-        className="form-control"
-        value={translate(values[name])}
-        name={name}
-        onChange={handleChange}
-        type="text"
-        validate={(v) => required && !v && requiredMessage}
-      />
+      <Field disabled={disabled} className="form-control" value={translate(values[name])} name={name} onChange={handleChange} type={type} validate={validate} />
       {errors && touched && <Error errors={errors} touched={touched} name={name} />}
     </FormGroup>
   );

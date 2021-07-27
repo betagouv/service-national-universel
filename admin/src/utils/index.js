@@ -1,4 +1,5 @@
 import { translate } from "snu-lib/translation";
+import passwordValidator from "password-validator";
 export * from "snu-lib";
 
 export const domains = ["Défense et mémoire", "Sécurité", "Solidarité", "Santé", "Éducation", "Culture", "Sport", "Environnement et développement durable", "Citoyenneté"];
@@ -77,6 +78,26 @@ export const putLocation = async (city, zip) => {
     lat: 48.856613,
   };
 };
+
+export function getPasswordErrorMessage(v) {
+  if (!v) return "Ce champ est obligatoire";
+  const schema = new passwordValidator();
+  schema
+    .is()
+    .min(12) // Minimum length 12
+    .has()
+    .uppercase() // Must have uppercase letters
+    .has()
+    .lowercase() // Must have lowercase letters
+    .has()
+    .digits() // Must have digits
+    .has()
+    .symbols(); // Must have symbols
+
+  if (!schema.validate(v)) {
+    return "Votre mot de passe doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole";
+  }
+}
 
 export const ENABLE_ASSIGN_CENTER = true;
 export const ENABLE_ASSIGN_CENTER_ROLES = [];

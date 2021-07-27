@@ -57,16 +57,15 @@ export default () => {
           </>
         )}
       </Formik>
-
       <Formik
-        initialValues={young}
+        initialValues={{ password: "", newPassword: "", verifyPassword: "" }}
         validateOnChange={false}
         validateOnBlur={false}
         onSubmit={async ({ password, verifyPassword, newPassword }) => {
           try {
-            const { ok, code, data: young } = await api.post("/young/reset_password", { password, verifyPassword, newPassword });
+            const { ok, code, user } = await api.post("/young/reset_password", { password, verifyPassword, newPassword });
             if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
-            dispatch(setYoung(young));
+            dispatch(setYoung(user));
             toastr.success("Mis à jour!");
           } catch (e) {
             console.log(e);
