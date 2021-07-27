@@ -39,17 +39,28 @@ export default (props) => {
       if (!id) return setUser(null);
       const { data } = await api.get(`/referent/${id}`);
       setUser(data);
-      const { data: d } = await api.get(`/department-service/referent/${id}`);
-      setService(d);
-      const responseStructure = await api.get(`/structure/all`);
-      const s = responseStructure.data.map((e) => ({ label: e.name, value: e.name, _id: e._id }));
-      data.structureId ? setStructure(s.find((struct) => struct._id === data.structureId)) : null;
-      setStructures(s);
-      const responseCenter = await api.get(`/cohesion-center`);
-      const c = responseCenter.data.map((e) => ({ label: e.name, value: e.name, _id: e._id }));
-      setCenters(c);
     })();
   }, []);
+
+  useEffect(() => {
+    (async () => {
+      if (user && user._id) {
+        setStructure();
+        setService();
+        setCenters();
+        setStructures();
+        const { data: service } = await api.get(`/department-service/referent/${user._id}`);
+        setService(service);
+        const responseStructure = await api.get(`/structure/all`);
+        const s = responseStructure.data.map((e) => ({ label: e.name, value: e.name, _id: e._id }));
+        user.structureId ? setStructure(s.find((struct) => struct._id === user.structureId)) : setStructure();
+        setStructures(s);
+        const responseCenter = await api.get(`/cohesion-center`);
+        const c = responseCenter.data.map((e) => ({ label: e.name, value: e.name, _id: e._id }));
+        setCenters(c);
+      }
+    })();
+  }, [user]);
 
   if (user === undefined || service === undefined) return <Loader />;
 
@@ -75,14 +86,15 @@ export default (props) => {
   async function modifyStructure() {
     try {
       setLoadingChangeStructure(true);
-      const { ok, code } = await api.put(`/referent/${user._id}/structure/${structure._id}`);
+      const { ok, code, data } = await api.put(`/referent/${user._id}/structure/${structure._id}`);
       setLoadingChangeStructure(false);
       if (!ok)
         return code === "OPERATION_NOT_ALLOWED"
           ? toastr.error(translate(code), "Ce responsable est affilié comme tuteur de missions de la structure.", { timeOut: 5000 })
           : toastr.error(translate(code), "Une erreur s'est produite lors de la modification de la structure.");
+      setUser(data);
       toastr.success("Structure modifiée");
-      history.go(0);
+      // history.go(0);
     } catch (e) {
       setLoadingChangeStructure(false);
       return toastr.error("Une erreur s'est produite lors de la modification de la structure", e?.error?.message);
@@ -135,7 +147,7 @@ export default (props) => {
             if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             setUser(data);
             toastr.success("Utilisateur mis à jour !");
-            history.go(0);
+            // history.go(0);
           } catch (e) {
             console.log(e);
             toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
@@ -300,55 +312,59 @@ export default (props) => {
           {`Supprimer le compte de ${user.firstName} ${user.lastName}`}
         </DeleteBtn>
       ) : null}
-      {canModify(currentUser, user) && user.role === ROLES.REFERENT_DEPARTMENT && (
-        <Formik
-          initialValues={service || { department: user.department }}
-          onSubmit={async (values) => {
-            try {
-              const { ok, code, data } = await api.post(`/department-service`, values);
-              if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
-              setService(data);
-              toastr.success("Service departemental mis à jour !");
-            } catch (e) {
-              console.log(e);
-              toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
-            }
-          }}
-        >
-          {({ values, handleChange, handleSubmit, isSubmitting, submitForm }) => (
-            <>
-              <TitleWrapper>
-                <div>
-                  <Title>Information du service départemental {values.department && `(${values.department})`}</Title>
-                </div>
-                <SaveBtn loading={isSubmitting} onClick={handleSubmit}>
-                  Enregistrer
-                </SaveBtn>
-              </TitleWrapper>
-              <Row>
-                <Col md={6} style={{ marginBottom: "20px" }}>
-                  <Box>
-                    <BoxHeadTitle>{`Service Départemental`}</BoxHeadTitle>
-                    <BoxContent direction="column">
-                      <Item title="Nom de la direction" values={values} name="directionName" handleChange={handleChange} />
-                      <Item title="Adresse" values={values} name="address" handleChange={handleChange} />
-                      <Item title="Complément d'adresse" values={values} name="complementAddress" handleChange={handleChange} />
-                      <Item title="Code postal" values={values} name="zip" handleChange={handleChange} />
-                      <Item title="Ville" values={values} name="city" handleChange={handleChange} />
-                    </BoxContent>
-                    <BoxHeadTitle>Contact convocation</BoxHeadTitle>
-                    <BoxContent direction="column">
-                      <Item title="Nom du Contact" values={values} name="contactName" handleChange={handleChange} />
-                      <Item title="Tel." values={values} name="contactPhone" handleChange={handleChange} />
-                      <Item title="Email" values={values} name="contactMail" handleChange={handleChange} />
-                    </BoxContent>
-                  </Box>
-                </Col>
-              </Row>
-            </>
-          )}
-        </Formik>
-      )}
+      {canModify(currentUser, user) && user.role === ROLES.REFERENT_DEPARTMENT ? (
+        service !== undefined ? (
+          <Formik
+            initialValues={service || { department: user.department }}
+            onSubmit={async (values) => {
+              try {
+                const { ok, code, data } = await api.post(`/department-service`, values);
+                if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
+                setService(data);
+                toastr.success("Service departemental mis à jour !");
+              } catch (e) {
+                console.log(e);
+                toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
+              }
+            }}
+          >
+            {({ values, handleChange, handleSubmit, isSubmitting, submitForm }) => (
+              <>
+                <TitleWrapper>
+                  <div>
+                    <Title>Information du service départemental {values.department && `(${values.department})`}</Title>
+                  </div>
+                  <SaveBtn loading={isSubmitting} onClick={handleSubmit}>
+                    Enregistrer
+                  </SaveBtn>
+                </TitleWrapper>
+                <Row>
+                  <Col md={6} style={{ marginBottom: "20px" }}>
+                    <Box>
+                      <BoxHeadTitle>{`Service Départemental`}</BoxHeadTitle>
+                      <BoxContent direction="column">
+                        <Item title="Nom de la direction" values={values} name="directionName" handleChange={handleChange} />
+                        <Item title="Adresse" values={values} name="address" handleChange={handleChange} />
+                        <Item title="Complément d'adresse" values={values} name="complementAddress" handleChange={handleChange} />
+                        <Item title="Code postal" values={values} name="zip" handleChange={handleChange} />
+                        <Item title="Ville" values={values} name="city" handleChange={handleChange} />
+                      </BoxContent>
+                      <BoxHeadTitle>Contact convocation</BoxHeadTitle>
+                      <BoxContent direction="column">
+                        <Item title="Nom du Contact" values={values} name="contactName" handleChange={handleChange} />
+                        <Item title="Tel." values={values} name="contactPhone" handleChange={handleChange} />
+                        <Item title="Email" values={values} name="contactMail" handleChange={handleChange} />
+                      </BoxContent>
+                    </Box>
+                  </Col>
+                </Row>
+              </>
+            )}
+          </Formik>
+        ) : (
+          <Loader />
+        )
+      ) : null}
     </Wrapper>
   );
 };
