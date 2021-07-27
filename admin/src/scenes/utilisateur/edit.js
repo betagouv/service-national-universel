@@ -28,7 +28,11 @@ export default (props) => {
   const [centers, setCenters] = useState();
   const [structures, setStructures] = useState();
   const [structure, setStructure] = useState();
-  const [loadingChangeStructure, setLoadingChangeStructure] = useState(false);
+  const [loadings, setLoadings] = useState({
+    loadingChangeStructure: false,
+    loadingModifyService: false,
+    save: false,
+  });
   const currentUser = useSelector((state) => state.Auth.user);
   const history = useHistory();
   const dispatch = useDispatch();
@@ -39,6 +43,11 @@ export default (props) => {
       if (!id) return setUser(null);
       const { data } = await api.get(`/referent/${id}`);
       setUser(data);
+      const { data: service } = await api.get(`/department-service/referent/${id}`);
+      setService(service);
+      const responseCenter = await api.get(`/cohesion-center`);
+      const c = responseCenter.data.map((e) => ({ label: e.name, value: e.name, _id: e._id }));
+      setCenters(c);
     })();
   }, []);
 
@@ -46,23 +55,16 @@ export default (props) => {
     (async () => {
       if (user && user._id) {
         setStructure();
-        setService();
-        setCenters();
         setStructures();
-        const { data: service } = await api.get(`/department-service/referent/${user._id}`);
-        setService(service);
         const responseStructure = await api.get(`/structure/all`);
         const s = responseStructure.data.map((e) => ({ label: e.name, value: e.name, _id: e._id }));
         user.structureId ? setStructure(s.find((struct) => struct._id === user.structureId)) : setStructure();
         setStructures(s);
-        const responseCenter = await api.get(`/cohesion-center`);
-        const c = responseCenter.data.map((e) => ({ label: e.name, value: e.name, _id: e._id }));
-        setCenters(c);
       }
     })();
   }, [user]);
 
-  if (user === undefined || service === undefined) return <Loader />;
+  if (user === undefined) return <Loader />;
 
   const getSubtitle = () => {
     const createdAt = new Date(user.createdAt);
@@ -85,9 +87,17 @@ export default (props) => {
 
   async function modifyStructure() {
     try {
-      setLoadingChangeStructure(true);
+      setLoadings({
+        loadingChangeStructure: true,
+        loadingModifyService: false,
+        save: false,
+      });
       const { ok, code, data } = await api.put(`/referent/${user._id}/structure/${structure._id}`);
-      setLoadingChangeStructure(false);
+      setLoadings({
+        loadingChangeStructure: false,
+        loadingModifyService: false,
+        save: false,
+      });
       if (!ok)
         return code === "OPERATION_NOT_ALLOWED"
           ? toastr.error(translate(code), "Ce responsable est affilié comme tuteur de missions de la structure.", { timeOut: 5000 })
@@ -96,7 +106,11 @@ export default (props) => {
       toastr.success("Structure modifiée");
       // history.go(0);
     } catch (e) {
-      setLoadingChangeStructure(false);
+      setLoadings({
+        loadingChangeStructure: false,
+        loadingModifyService: false,
+        save: false,
+      });
       return toastr.error("Une erreur s'est produite lors de la modification de la structure", e?.error?.message);
     }
   }
@@ -143,12 +157,27 @@ export default (props) => {
               )
             )
               return;
+            setLoadings({
+              loadingChangeStructure: false,
+              loadingModifyService: false,
+              save: true,
+            });
             const { ok, code, data } = await api.put(`/referent/${values._id}`, values);
+            setLoadings({
+              loadingChangeStructure: false,
+              loadingModifyService: false,
+              save: false,
+            });
             if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             setUser(data);
             toastr.success("Utilisateur mis à jour !");
             // history.go(0);
           } catch (e) {
+            setLoadings({
+              loadingChangeStructure: false,
+              loadingModifyService: false,
+              save: false,
+            });
             console.log(e);
             toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
           }
@@ -168,7 +197,7 @@ export default (props) => {
                   </Link>
                 ) : null}
                 {currentUser.role === ROLES.ADMIN ? <PanelActionButton onClick={handleImpersonate} icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" /> : null}
-                <SaveBtn loading={isSubmitting} onClick={handleSubmit}>
+                <SaveBtn loading={loadings.save} onClick={handleSubmit} disabled={loadings.loadingChangeStructure || loadings.loadingModifyService}>
                   Enregistrer
                 </SaveBtn>
               </div>
@@ -238,8 +267,8 @@ export default (props) => {
                             }}
                             userId={user._id}
                             onClick={modifyStructure}
-                            disabled={isSubmitting}
-                            loading={loadingChangeStructure}
+                            disabled={loadings.save || loadings.loadingModifyService}
+                            loading={loadings.loadingChangeStructure}
                           />
                         ) : (
                           <Loader />
@@ -318,11 +347,26 @@ export default (props) => {
             initialValues={service || { department: user.department }}
             onSubmit={async (values) => {
               try {
+                setLoadings({
+                  loadingChangeStructure: false,
+                  loadingModifyService: true,
+                  save: false,
+                });
                 const { ok, code, data } = await api.post(`/department-service`, values);
+                setLoadings({
+                  loadingChangeStructure: false,
+                  loadingModifyService: false,
+                  save: false,
+                });
                 if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
                 setService(data);
                 toastr.success("Service departemental mis à jour !");
               } catch (e) {
+                setLoadings({
+                  loadingChangeStructure: false,
+                  loadingModifyService: false,
+                  save: false,
+                });
                 console.log(e);
                 toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
               }
@@ -334,7 +378,7 @@ export default (props) => {
                   <div>
                     <Title>Information du service départemental {values.department && `(${values.department})`}</Title>
                   </div>
-                  <SaveBtn loading={isSubmitting} onClick={handleSubmit}>
+                  <SaveBtn loading={loadings.loadingModifyService} onClick={handleSubmit} disabled={loadings.loadingChangeStructure || loadings.save}>
                     Enregistrer
                   </SaveBtn>
                 </TitleWrapper>
