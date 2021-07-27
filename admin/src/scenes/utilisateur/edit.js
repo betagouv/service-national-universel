@@ -54,6 +54,7 @@ export default (props) => {
   useEffect(() => {
     (async () => {
       if (user && user._id) {
+        // Force to refresh display of structure
         setStructure();
         setStructures();
         const responseStructure = await api.get(`/structure/all`);
