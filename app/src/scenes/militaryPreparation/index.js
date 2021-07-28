@@ -115,10 +115,17 @@ export default () => {
                 if (!responseApplication.ok) toastr.error(translate(responseApplication.code), "Une erreur s'est produite lors du traitement");
               }
               //todo: get referent phase 2 , if not get the chef departement
-              await api.post(`/email/send-template/${SENDINBLUE_TEMPLATES.REFERENT_MILITARY_PREPARATION_DOCS_SUBMITTED}`, {
-                emailTo: [{ name: "Tangi TEST", email: "tangi.mendes+referent2@selego.co" }],
-                params: { cta: `${adminURL}/volontaire/${young._id}`, youngFirstName: young.firstName, youngLastName: young.lastName },
-              });
+              let toReferent = referentManagerPhase2;
+              if (!toReferent) {
+                const responseManagerDepartment = await api.get(`/referent/manager_department/${young.department}`);
+                if (responseManagerDepartment.ok) toReferent = responseManagerDepartment.data;
+              }
+              if (toReferent) {
+                await api.post(`/email/send-template/${SENDINBLUE_TEMPLATES.REFERENT_MILITARY_PREPARATION_DOCS_SUBMITTED}`, {
+                  emailTo: [{ name: `${toReferent.firstName} ${toReferent.lastName}`, email: toReferent.email }],
+                  params: { cta: `${adminURL}/volontaire/${young._id}/phase2`, youngFirstName: young.firstName, youngLastName: young.lastName },
+                });
+              }
               toastr.success("Votre dossier a bien été transmis");
               history.push("/");
             } catch (e) {

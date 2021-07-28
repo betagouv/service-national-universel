@@ -717,7 +717,7 @@ router.get("/:id", passport.authenticate("referent", { session: false }), async 
   }
 });
 
-router.get("/manager_department/:department", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.get("/manager_department/:department", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
     const { error, value } = Joi.object({ department: Joi.string().required() })
       .unknown()

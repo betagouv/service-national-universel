@@ -8,14 +8,9 @@ import { ModalContainer, Content, Footer, Header } from "./Modal";
 import ModalButton from "../buttons/ModalButton";
 import { SENDINBLUE_TEMPLATES } from "../../utils";
 
-export default ({ topTitle, title, message, onChange, onConfirm, young }) => {
+export default ({ topTitle, title, message, onChange, onConfirm, young, placeholder = "Votre message..." }) => {
   const [messageTextArea, setMessageTextArea] = useState();
   const [sending, setSending] = useState(false);
-
-  useEffect(() => {
-    setMessageTextArea(`Bonjour ${young.firstName} ${young.lastName},
-les docs sont pas bons. c'est mort`);
-  }, [young]);
 
   if (!young) return <div />;
 
@@ -37,7 +32,7 @@ les docs sont pas bons. c'est mort`);
         <Content>
           <h1>{title}</h1>
           <p>{message}</p>
-          <textarea rows="15" value={messageTextArea} onChange={(e) => setMessageTextArea(e.target.value)} />
+          <textarea placeholder={placeholder} rows="15" value={messageTextArea} onChange={(e) => setMessageTextArea(e.target.value)} />
         </Content>
         <Footer>
           <ModalButton loading={sending} disabled={sending || !messageTextArea} onClick={send} primary>

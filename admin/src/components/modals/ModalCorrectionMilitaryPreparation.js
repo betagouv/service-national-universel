@@ -7,15 +7,11 @@ import { toastr } from "react-redux-toastr";
 import { ModalContainer, Content, Footer, Header } from "./Modal";
 import ModalButton from "../buttons/ModalButton";
 import { SENDINBLUE_TEMPLATES } from "../../utils";
+import { appURL } from "../../config";
 
-export default ({ topTitle, title, message, onChange, onConfirm, young }) => {
+export default ({ topTitle, title, message, onChange, onConfirm, young, placeholder = "Votre message..." }) => {
   const [messageTextArea, setMessageTextArea] = useState();
   const [sending, setSending] = useState(false);
-
-  useEffect(() => {
-    setMessageTextArea(`Bonjour ${young.firstName} ${young.lastName},
-les docs sont pas bons.`);
-  }, [young]);
 
   if (!young) return <div />;
 
@@ -23,7 +19,7 @@ les docs sont pas bons.`);
     setSending(true);
     await api.post(`/email/send-template/${SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_CORRECTION}`, {
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-      params: { message: messageTextArea },
+      params: { message: messageTextArea, cta: `${appURL}/ma-preparation-militaire` },
     });
     toastr.success("Email envoyé !");
     onConfirm(messageTextArea);
@@ -37,7 +33,7 @@ les docs sont pas bons.`);
         <Content>
           <h1>{title}</h1>
           <p>{message}</p>
-          <textarea rows="15" value={messageTextArea} onChange={(e) => setMessageTextArea(e.target.value)} />
+          <textarea placeholder={placeholder} rows="15" value={messageTextArea} onChange={(e) => setMessageTextArea(e.target.value)} />
         </Content>
         <Footer>
           <ModalButton loading={sending} disabled={sending || !messageTextArea} onClick={send} primary>

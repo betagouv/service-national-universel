@@ -71,8 +71,8 @@ export default ({ young }) => {
       const tutor = await api.get(`/referent/${app.tutorId}`);
       if (!tutor) continue;
       await api.post(`/email/send-template/${SENDINBLUE_TEMPLATES.REFERENT_MILITARY_PREPARATION_DOCS_VALIDATED}`, {
-        emailTo: [{ name: `${tutor.firstName} ${tutor.lastName}`, email: "tangi.mendes+tutto@selego.co" }],
-        params: { cta: `${adminURL}/volontaire/${young._id}`, youngFirstName: young.firstName, youngLastName: young.lastName },
+        emailTo: [{ name: `${tutor.firstName} ${tutor.lastName}`, email: tutor.email }],
+        params: { cta: `${adminURL}/volontaire/${young._id}`, youngFirstName: young.firstName, youngLastName: young.lastName, missionName: app.mission?.name || app.missionName },
       });
     }
     // Refresh
