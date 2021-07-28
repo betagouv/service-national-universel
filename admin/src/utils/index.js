@@ -2,6 +2,7 @@ import { translate } from "snu-lib/translation";
 import passwordValidator from "password-validator";
 import api from "../services/api";
 export * from "snu-lib";
+import { environment } from "../config";
 
 export const domains = ["Défense et mémoire", "Sécurité", "Solidarité", "Santé", "Éducation", "Culture", "Sport", "Environnement et développement durable", "Citoyenneté"];
 export const status = ["Brouillon", "En attente de validation", "En attente de correction", "Validée", "Refusée", "Annulée", "Archivée"];
@@ -110,3 +111,5 @@ export const userIsResponsibleFromStructureMilitaryPreparation = async (user) =>
   if (!ok) return false;
   return data?.isMilitaryPreparation === "true";
 };
+
+export const ENABLE_CHOOSE_MEETING_POINT = environment !== "production";
