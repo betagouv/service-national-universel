@@ -12,7 +12,7 @@ import AddressInput from "../../components/addressInput";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
 import Invite from "./components/invite";
 import Loader from "../../components/Loader";
-import { associationTypes, privateTypes, publicTypes, publicEtatTypes, translate, ROLES } from "../../utils";
+import { associationTypes, privateTypes, publicTypes, publicEtatTypes, translate, ROLES, ENABLE_PM } from "../../utils";
 import api from "../../services/api";
 import { Box, BoxTitle } from "../../components/box";
 import LoadingButton from "../../components/buttons/LoadingButton";
@@ -302,17 +302,19 @@ export default (props) => {
                           </option>
                         </Field>
                       </FormGroup>
-                      <FormGroup>
-                        <label>PRÉPARATION MILITAIRE</label>
-                        <Field component="select" name="isMilitaryPreparation" value={values.isMilitaryPreparation} onChange={handleChange}>
-                          <option key="false" value="false">
-                            Non
-                          </option>
-                          <option key="true" value="true">
-                            Oui
-                          </option>
-                        </Field>
-                      </FormGroup>
+                      {ENABLE_PM ? (
+                        <FormGroup>
+                          <label>PRÉPARATION MILITAIRE</label>
+                          <Field component="select" name="isMilitaryPreparation" value={values.isMilitaryPreparation} onChange={handleChange}>
+                            <option key="false" value="false">
+                              Non
+                            </option>
+                            <option key="true" value="true">
+                              Oui
+                            </option>
+                          </Field>
+                        </FormGroup>
+                      ) : null}
                     </>
                   )}
                 </Wrapper>

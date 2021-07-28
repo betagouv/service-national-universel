@@ -3,17 +3,18 @@ import { Modal } from "reactstrap";
 import styled from "styled-components";
 
 import { Link } from "react-router-dom";
+import { ENABLE_PM } from "../../../utils";
 
 export default ({ value, onChange }) => {
   if (!value) return <div />;
 
   const renderText = () => {
-    if (value.isMilitaryPreparation === "true") return "Merci de téléverser vos pièces dans « Ma préparation militaire »";
+    if (ENABLE_PM && value.isMilitaryPreparation === "true") return "Merci de téléverser vos pièces dans « Ma préparation militaire »";
     return "Votre candidature sera traitée dans les prochains jours par le responsable de la structure.";
   };
 
   const renderRedirect = () => {
-    if (value.isMilitaryPreparation === "true")
+    if (ENABLE_PM && value.isMilitaryPreparation === "true")
       return (
         <Link to="/ma-preparation-militaire">
           <Button>Je renseigne mes documents</Button>

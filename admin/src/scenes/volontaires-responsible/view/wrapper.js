@@ -5,7 +5,7 @@ import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
-import { translate, userIsResponsibleFromStructureMilitaryPreparation } from "../../../utils";
+import { translate, userIsResponsibleFromStructureMilitaryPreparation, ENABLE_PM } from "../../../utils";
 import Badge from "../../../components/Badge";
 import TabList from "../../../components/views/TabList";
 import Tab from "../../../components/views/Tab";
@@ -36,7 +36,7 @@ export default ({ children, young, tab }) => {
                 <Tab isActive={tab === "details"} onClick={() => history.push(`/volontaire/${young._id}`)}>
                   Détails
                 </Tab>
-                {showMilitaryPreparationTab ? (
+                {ENABLE_PM && showMilitaryPreparationTab ? (
                   <Tab
                     disabled={young.statusMilitaryPreparationFiles !== "VALIDATED"}
                     isActive={tab === "militaryPreparation"}

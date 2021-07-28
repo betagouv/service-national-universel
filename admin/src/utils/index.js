@@ -112,4 +112,5 @@ export const userIsResponsibleFromStructureMilitaryPreparation = async (user) =>
   return data?.isMilitaryPreparation === "true";
 };
 
-export const ENABLE_PM = environment !== "production";
+const FORCE_DISBALED_PM = true;
+export const ENABLE_PM = environment !== "production" && !FORCE_DISBALED_PM;

@@ -7,7 +7,7 @@ import { useSelector } from "react-redux";
 import MissionCard from "./components/missionCard";
 import ReactiveFilter from "../../components/ReactiveFilter";
 import { apiURL } from "../../config";
-import { translate, getLimitDateForPhase2, getFilterLabel } from "../../utils";
+import { translate, getLimitDateForPhase2, getFilterLabel, ENABLE_PM } from "../../utils";
 import api from "../../services/api";
 import Loader from "../../components/Loader";
 import FilterGeoloc from "./components/FilterGeoloc";
@@ -103,7 +103,7 @@ export default () => {
           message="Des missions supplémentaires seront proposées tout au long de l’année. Vous serez informé par e-mail dès qu’une mission répondant à vos préférences sera publiée."
         />
       ) : null}
-      {showAlert100km ? (
+      {ENABLE_PM && showAlert100km ? (
         <AlertBox
           onClose={() => setShowAlert100km(false)}
           title={`Visibilité des missions`}
@@ -190,7 +190,7 @@ export default () => {
             </DomainsFilter>
           </Row>
         </Filters>
-        {showAlertMilitaryPreparation ? (
+        {ENABLE_PM && showAlertMilitaryPreparation ? (
           <MilitaryPreparationCard
             onClose={() => setShowAlertMilitaryPreparation(false)}
             title="Réalisez votre mission lors d’une préparation militaire"

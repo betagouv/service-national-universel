@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 
-import { translate as t, YOUNG_PHASE, YOUNG_STATUS_PHASE2, getLimitDateForPhase2 } from "../../../utils";
+import { translate as t, YOUNG_PHASE, YOUNG_STATUS_PHASE2, getLimitDateForPhase2, ENABLE_PM } from "../../../utils";
 import WrapperPhase2 from "./wrapper";
 import ApplicationList from "./applicationList.js";
 import Phase2MilitaryPreparation from "./phase2MilitaryPreparation";
@@ -25,7 +25,7 @@ export default ({ young, onChange }) => {
             </div>
           </Bloc>
         </Box>
-        <Phase2MilitaryPreparation young={young} />
+        {ENABLE_PM && <Phase2MilitaryPreparation young={young} />}
         <ToggleBox>
           <Row>
             <Col md={12}>

@@ -33,7 +33,7 @@ import api from "./services/api";
 import { SENTRY_URL, environment } from "./config";
 
 import "./index.css";
-import { YOUNG_STATUS, setCrispUserData } from "./utils";
+import { YOUNG_STATUS, setCrispUserData, ENABLE_PM } from "./utils";
 
 if (environment === "production") Sentry.init({ dsn: SENTRY_URL, environment: "app" });
 
@@ -110,7 +110,7 @@ const Espace = () => {
             <Route path="/candidature" component={Applications} />
             <Route path="/cohesion" component={Cohesion} />
             <Route path="/diagoriente" component={Diagoriente} />
-            <Route path="/ma-preparation-militaire" component={MilitaryPreparation} />
+            {ENABLE_PM && <Route path="/ma-preparation-militaire" component={MilitaryPreparation} />}
             <Route path="/" component={Home} />
           </Switch>
         </Content>

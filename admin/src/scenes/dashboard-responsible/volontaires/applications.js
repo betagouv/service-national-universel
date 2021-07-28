@@ -3,7 +3,7 @@ import { Col, Row } from "reactstrap";
 import { useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
 
-import { APPLICATION_STATUS_COLORS, ROLES, translate } from "../../../utils";
+import { APPLICATION_STATUS_COLORS, ROLES, translate, ENABLE_PM } from "../../../utils";
 import Badge from "../../../components/Badge";
 import api from "../../../services/api";
 import { CardArrow, Card, CardTitle, CardValueWrapper, CardValue, CardContainer, Title } from "../../../components/dashboard";
@@ -80,22 +80,24 @@ export default () => {
             Volontaires candidatant sur des missions de {user.role === ROLES.SUPERVISOR ? "mes" : "ma"} structure{user.role === ROLES.SUPERVISOR ? "s" : ""}
           </h4>
         </Col>
-        <Col md={6} xl={3}>
-          <CardContainer>
-            <Card borderBottomColor="#888888" style={{ marginBottom: 10, backgroundColor: "#cccccc" }}>
-              <CardTitle>{translate("WAITING_VERIFICATION")}</CardTitle>
-              <CardValueWrapper>
-                <CardValue>{stats.WAITING_VERIFICATION || "-"}</CardValue>
-                <CardArrow />
-              </CardValueWrapper>
-            </Card>
-            {stats.WAITING_VALIDATION ? (
-              <div style={{ textAlign: "center" }}>
-                <Badge color="#888888" text="En cours de traitement par les équipes SNU" />
-              </div>
-            ) : null}
-          </CardContainer>
-        </Col>
+        {ENABLE_PM && (
+          <Col md={6} xl={3}>
+            <CardContainer>
+              <Card borderBottomColor="#888888" style={{ marginBottom: 10, backgroundColor: "#cccccc" }}>
+                <CardTitle>{translate("WAITING_VERIFICATION")}</CardTitle>
+                <CardValueWrapper>
+                  <CardValue>{stats.WAITING_VERIFICATION || "-"}</CardValue>
+                  <CardArrow />
+                </CardValueWrapper>
+              </Card>
+              {stats.WAITING_VALIDATION ? (
+                <div style={{ textAlign: "center" }}>
+                  <Badge color="#888888" text="En cours de traitement par les équipes SNU" />
+                </div>
+              ) : null}
+            </CardContainer>
+          </Col>
+        )}
         <Col md={6} xl={3}>
           <Link to={`/volontaire?STATUS=%5B"WAITING_VALIDATION"%5D`}>
             <CardContainer>

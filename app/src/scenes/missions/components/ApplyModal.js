@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import Loader from "../../../components/Loader";
 
 import api from "../../../services/api";
-import { APPLICATION_STATUS } from "../../../utils";
+import { APPLICATION_STATUS, ENABLE_PM } from "../../../utils";
 
 import { toastr } from "react-redux-toastr";
 
@@ -34,7 +34,7 @@ export default ({ value, onChange, onSend }) => {
       tutorId: value.tutorId,
       tutorName: value.tutorName,
     };
-    if (value.isMilitaryPreparation === "true") application.status = APPLICATION_STATUS.WAITING_VERIFICATION;
+    if (ENABLE_PM && value.isMilitaryPreparation === "true") application.status = APPLICATION_STATUS.WAITING_VERIFICATION;
     const { ok, data, code } = await api.post(`/application`, application);
     if (!ok) return toastr.error("Oups, une erreur est survenue lors de la candidature", code);
     await api.post(`/application/${data._id}/notify/waiting_validation`);
