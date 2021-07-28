@@ -103,7 +103,6 @@ export default (props) => {
         return code === "OPERATION_NOT_ALLOWED"
           ? toastr.error(translate(code), "Ce responsable est affilié comme tuteur de missions de la structure.", { timeOut: 5000 })
           : toastr.error(translate(code), "Une erreur s'est produite lors de la modification de la structure.");
-      setUser();
       setUser(data);
       toastr.success("Structure modifiée");
     } catch (e) {
@@ -148,6 +147,7 @@ export default (props) => {
     <Wrapper>
       <Formik
         initialValues={user}
+        enableReinitialize={true}
         onSubmit={async (values) => {
           try {
             // if structure has changed but no saved
