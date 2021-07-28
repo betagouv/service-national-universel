@@ -218,7 +218,7 @@ export default ({ young }) => {
           </Line>
           <Separator />
           <div style={{ display: "flex" }}>
-            <LoadingButton color="#5245cc" textColor="#fff" onClick={() => handleValidate()} primary>
+            <LoadingButton color="#5245cc" textColor="#fff" onClick={() => handleValidate()}>
               Valider
             </LoadingButton>
             <LoadingButton color="#f4f4f4" textColor="#444" onClick={() => handleCorrection()}>
