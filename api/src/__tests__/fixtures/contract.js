@@ -1,0 +1,75 @@
+const faker = require("faker");
+const { ObjectId } = require("mongoose").Types;
+faker.locale = "fr";
+
+function getNewContractFixture() {
+  return {
+    youngId: ObjectId(),
+    structureId: ObjectId(),
+    applicationId: ObjectId(),
+    missionId: ObjectId(),
+    tutorId: ObjectId(),
+    isYoungAdult: "false",
+
+    parent1Token: ObjectId(),
+    projectManagerToken: ObjectId(),
+    structureManagerToken: ObjectId(),
+    parent2Token: ObjectId(),
+    youngContractToken: ObjectId(),
+
+    parent1Status: "WAITING_VALIDATION",
+    projectManagerStatus: "WAITING_VALIDATION",
+    structureManagerStatus: "WAITING_VALIDATION",
+    parent2Status: "WAITING_VALIDATION",
+    youngContractStatus: "WAITING_VALIDATION",
+
+    invitationSent: "true",
+    youngFirstName: faker.name.firstName(),
+    youngLastName: faker.name.lastName(),
+    youngBirthdate: faker.date.past(),
+    youngAddress: faker.address.streetAddress(),
+    youngCity: faker.address.city(),
+    youngDepartment: faker.address.city(),
+    youngEmail: faker.internet.email(),
+    youngPhone: faker.phone.phoneNumber(),
+    parent1FirstName: faker.name.firstName(),
+    parent1LastName: faker.name.lastName(),
+    parent1Address: faker.address.streetAddress(),
+    parent1City: faker.address.city(),
+    parent1Department: faker.address.city(),
+    parent1Phone: faker.phone.phoneNumber(),
+    parent1Email: faker.internet.email(),
+    parent2FirstName: faker.name.firstName(),
+    parent2LastName: faker.name.lastName(),
+    parent2Address: faker.address.streetAddress(),
+    parent2City: faker.address.city(),
+    parent2Department: faker.address.city(),
+    parent2Phone: faker.phone.phoneNumber(),
+    parent2Email: faker.internet.email(),
+    missionName: faker.name.findName(),
+    missionObjective: faker.lorem.sentence(),
+    missionAction: faker.lorem.sentence(),
+    missionStartAt: faker.date.past(),
+    missionEndAt: faker.date.future(),
+    missionAddress: faker.address.streetAddress(),
+    missionCity: faker.address.city(),
+    missionZip: faker.address.zipCode(),
+    missionDuration: faker.datatype.number(),
+    missionFrequence: faker.random.arrayElement(["une fois par semaine", "deux fois par semaine"]),
+    date: faker.date.past(),
+    projectManagerFirstName: faker.name.firstName(),
+    projectManagerLastName: faker.name.lastName(),
+    projectManagerRole: faker.random.arrayElement(["Chef de projet départemental"]),
+    projectManagerEmail: faker.internet.email(),
+    structureManagerFirstName: faker.name.firstName(),
+    structureManagerLastName: faker.name.lastName(),
+    structureManagerRole: faker.random.arrayElement(["Tuteur de mission", "chef de centre"]),
+    structureManagerEmail: faker.internet.email(),
+    structureSiret: faker.company.companyName(),
+    structureName: faker.company.companyName(),
+  };
+}
+
+module.exports = {
+  getNewContractFixture,
+};
