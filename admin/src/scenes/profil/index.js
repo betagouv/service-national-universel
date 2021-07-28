@@ -82,29 +82,9 @@ export default () => {
                       validate={(v) => !v && requiredMessage}
                     />
                     {user.role === ROLES.REFERENT_DEPARTMENT ? (
-                      <Item
-                        title="Département"
-                        required
-                        disabled
-                        values={values}
-                        name="department"
-                        handleChange={handleChange}
-                        type={"text"}
-                        validate={(v) => !v && requiredMessage}
-                      />
+                      <Item title="Département" disabled values={values} name="department" handleChange={handleChange} type={"text"} />
                     ) : null}
-                    {user.role === ROLES.REFERENT_REGION ? (
-                      <Item
-                        title="Région"
-                        required
-                        disabled
-                        values={values}
-                        name="region"
-                        handleChange={handleChange}
-                        type={"text"}
-                        validate={(v) => required && !v && requiredMessage}
-                      />
-                    ) : null}
+                    {user.role === ROLES.REFERENT_REGION ? <Item title="Région" disabled values={values} name="region" handleChange={handleChange} type={"text"} /> : null}
                     <Row>
                       <Col md={6}>
                         <Item
@@ -186,18 +166,11 @@ export default () => {
                       <p>Données partagées par tous les référents de votre département</p>
                     </BoxTitle>
                     <BoxContent direction="column">
-                      <Item title="Nom de la direction" values={values} name="directionName" handleChange={handleChange} type={"text"} validate={(v) => !v && requiredMessage} />
-                      <Item title="Adresse" values={values} name="address" handleChange={handleChange} type={"text"} validate={(v) => !v && requiredMessage} />
-                      <Item
-                        title="Complément d'adresse"
-                        values={values}
-                        name="complementAddress"
-                        handleChange={handleChange}
-                        type={"text"}
-                        validate={(v) => !v && requiredMessage}
-                      />
-                      <Item title="Code postal" values={values} name="zip" handleChange={handleChange} type={"text"} validate={(v) => !v && requiredMessage} />
-                      <Item title="Ville" values={values} name="city" handleChange={handleChange} type={"text"} validate={(v) => !v && requiredMessage} />
+                      <Item title="Nom de la direction" values={values} name="directionName" handleChange={handleChange} type={"text"} />
+                      <Item title="Adresse" values={values} name="address" handleChange={handleChange} type={"text"} />
+                      <Item title="Complément d'adresse" values={values} name="complementAddress" handleChange={handleChange} type={"text"} />
+                      <Item title="Code postal" values={values} name="zip" handleChange={handleChange} type={"text"} />
+                      <Item title="Ville" values={values} name="city" handleChange={handleChange} type={"text"} />
                       <Row>
                         <Col md={6}>
                           <SaveBtn loading={isSubmitting} onClick={handleSubmit}>
@@ -239,6 +212,7 @@ export default () => {
                 </BoxTitle>
                 <BoxContent direction="column">
                   <Item
+                    required
                     type="password"
                     name="password"
                     values={values}
@@ -249,6 +223,7 @@ export default () => {
                     touched={touched}
                   />
                   <Item
+                    required
                     type="password"
                     name="newPassword"
                     values={values}
@@ -259,6 +234,7 @@ export default () => {
                     validate={getPasswordErrorMessage}
                   />
                   <Item
+                    required
                     type="password"
                     name="verifyPassword"
                     values={values}
