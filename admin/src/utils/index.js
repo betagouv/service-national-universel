@@ -107,7 +107,7 @@ export const enableMeetingPoint = (user) =>
 
 export const userIsResponsibleFromStructureMilitaryPreparation = async (user) => {
   if (!user || !user.structureId) return false;
-  const { ok, data } = await api.get("/structure");
+  const { ok, data } = await api.get(`/structure/${user.structureId}`);
   if (!ok) return false;
   return data?.isMilitaryPreparation === "true";
 };
