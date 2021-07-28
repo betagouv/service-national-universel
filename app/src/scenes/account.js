@@ -1,6 +1,7 @@
 import React from "react";
 import { Row, Col } from "reactstrap";
 import { useSelector, useDispatch } from "react-redux";
+import { useHistory } from "react-router-dom";
 import { Field, Formik } from "formik";
 import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
@@ -14,6 +15,7 @@ import AddressInput from "../components/addressInput";
 export default () => {
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
+  const history = useHistory();
 
   return (
     <Wrapper>
@@ -57,17 +59,17 @@ export default () => {
           </>
         )}
       </Formik>
-
       <Formik
-        initialValues={young}
+        initialValues={{ password: "", newPassword: "", verifyPassword: "" }}
         validateOnChange={false}
         validateOnBlur={false}
         onSubmit={async ({ password, verifyPassword, newPassword }) => {
           try {
-            const { ok, code, data: young } = await api.post("/young/reset_password", { password, verifyPassword, newPassword });
+            const { ok, code, user } = await api.post("/young/reset_password", { password, verifyPassword, newPassword });
             if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
-            dispatch(setYoung(young));
-            toastr.success("Mis à jour!");
+            dispatch(setYoung(user));
+            toastr.success("Mot de passe mis à jour!");
+            return history.push("/");
           } catch (e) {
             console.log(e);
             toastr.error("Oups, une erreur est survenue pendant la mise à jour du mot de passe :", translate(e.code));
