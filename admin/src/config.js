@@ -24,4 +24,4 @@ function getEnvironment() {
   return "production";
 }
 
-export { apiURL, appURL, S3PREFIX, SENTRY_URL, environment };
+export { apiURL, appURL, S3PREFIX, SENTRY_URL, environment, adminURL };

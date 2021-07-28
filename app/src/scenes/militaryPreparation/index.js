@@ -14,6 +14,7 @@ import UploadCard from "./components/UploadCard";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import AlertBox from "../../components/AlertBox";
 import Loader from "../../components/Loader";
+import { adminURL } from "../../config";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
@@ -102,8 +103,8 @@ export default () => {
               }
               //todo: get referent phase 2 , if not get the chef departement
               await api.post(`/email/send-template/${SENDINBLUE_TEMPLATES.REFERENT_MILITARY_PREPARATION_DOCS_SUBMITTED}`, {
-                // emailTo: [{ name: `${tutor.firstName} ${tutor.lastName}`, email: "tangi.mendes+tutto@selego.co" }],
-                // params: { cta: `${adminURL}/volontaire/${young._id}`, youngFirstName: young.firstName, youngLastName: young.lastName },
+                emailTo: [{ name: "Tangi TEST", email: "tangi.mendes+referent2@selego.co" }],
+                params: { cta: `${adminURL}/volontaire/${young._id}`, youngFirstName: young.firstName, youngLastName: young.lastName },
               });
               toastr.success("Votre dossier a bien été transmis");
               history.push("/");
