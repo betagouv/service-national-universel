@@ -4,6 +4,7 @@ import styled from "styled-components";
 import { useDispatch, useSelector } from "react-redux";
 import { Formik, Field } from "formik";
 import { toastr } from "react-redux-toastr";
+import { useHistory } from "react-router-dom";
 
 import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
@@ -18,6 +19,7 @@ export default () => {
   const user = useSelector((state) => state.Auth.user);
   const [service, setService] = useState();
   const dispatch = useDispatch();
+  const history = useHistory();
 
   const getSubRole = (role) => {
     let subRole = [];
@@ -197,7 +199,8 @@ export default () => {
                 const { ok, code, user } = await api.post("/referent/reset_password", { password, verifyPassword, newPassword });
                 if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
                 dispatch(setUser(user));
-                toastr.success("Mis à jour!");
+                toastr.success("Mot de passe mis à jour!");
+                return history.push("/dashboard");
               } catch (e) {
                 console.log(e);
                 toastr.error("Oups, une erreur est survenue pendant la mise à jour du mot de passe :", translate(e.code));
