@@ -128,7 +128,10 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
     const application = await ApplicationObject.findById(contract.applicationId);
     application.contractId = contract._id;
     await application.save();
-    const departmentReferentPhase2 = await ReferentObject.findOne({ department: contract.youngDepartment, subRole: "manager_department_phase2" });
+    const departmentReferentPhase2 = await ReferentObject.findOne({
+      department: contract.youngDepartment,
+      subRole: { $in: ["manager_department_phase2", "manager_phase2"] },
+    });
 
     if (req.body.sendMessage) {
       // We send 2, 3 or 4 messages if required.
