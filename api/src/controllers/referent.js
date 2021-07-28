@@ -737,6 +737,26 @@ router.get("/manager_department/:department", passport.authenticate("referent", 
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
+router.get("/manager_phase2/:department", passport.authenticate("young", { session: false }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({ department: Joi.string().required() })
+      .unknown()
+      .validate({ ...req.params }, { stripUnknown: true });
+
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    const data = await ReferentObject.findOne({
+      subRole: SUB_ROLES.manager_phase2,
+      role: { $in: [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION] },
+      department: value.department,
+    });
+    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
 
 router.put("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {

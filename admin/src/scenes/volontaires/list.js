@@ -350,7 +350,7 @@ export default ({ setYoung }) => {
                   title=""
                   URLParams={true}
                   showSearch={false}
-                  renderLabel={(items) => getFilterLabel(items, "Statut docs PM")}
+                  renderLabel={(items) => getFilterLabel(items, "Statut documents Préparation Militaire")}
                 />
               </FilterRow>
             </Filter>

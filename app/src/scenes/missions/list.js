@@ -19,6 +19,7 @@ const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "GEOLOC", "DATE", "PERIOD", "RELA
 export default () => {
   const young = useSelector((state) => state.Auth.young);
   const [targetLocation, setTargetLocation] = useState("");
+  const [referentManagerPhase2, setReferentManagerPhase2] = useState();
   const [showAlertLimitDate, setShowAlertLimitDate] = useState(true);
   const [showAlertMilitaryPreparation, setShowAlertMilitaryPreparation] = useState(true);
   const [showAlert100km, setShowAlert100km] = useState(true);
@@ -82,6 +83,13 @@ export default () => {
     })();
   }, []);
 
+  useEffect(() => {
+    (async () => {
+      const { ok, data } = await api.get(`/referent/manager_phase2/${young.department}`);
+      if (ok) return setReferentManagerPhase2(data);
+    })();
+  }, []);
+
   const handleChangeTargetLocation = (e) => setTargetLocation(e.target.value);
 
   if (!applications) return <Loader />;
@@ -99,7 +107,9 @@ export default () => {
         <AlertBox
           onClose={() => setShowAlert100km(false)}
           title={`Visibilité des missions`}
-          message="Vous ne voyez que les missions proposées à moins de 100 km du domicile que vous avez déclaré. Il existe des offres de missions accessibles pour vous sous conditions partout en France, notamment certaines préparations militaires. Si vous souhaitez connaitre ces offres et y accéder, contactez tout de suite votre référent départemental."
+          message={`Vous ne voyez que les missions proposées à moins de 100 km du domicile que vous avez déclaré. Il existe des offres de missions accessibles pour vous sous conditions partout en France, notamment certaines préparations militaires. Si vous souhaitez connaitre ces offres et y accéder, contactez tout de suite votre référent phase 2 : ${
+            referentManagerPhase2?.email || ""
+          }`}
         />
       ) : null}
       <Heading>

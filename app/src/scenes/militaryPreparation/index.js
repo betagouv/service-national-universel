@@ -22,9 +22,17 @@ export default () => {
   const history = useHistory();
 
   const [applicationsToMilitaryPreparation, setApplicationsToMilitaryPreparation] = useState(null);
+  const [referentManagerPhase2, setReferentManagerPhase2] = useState();
 
   useEffect(() => {
     getApplications();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      const { ok, data } = await api.get(`/referent/manager_phase2/${young.department}`);
+      if (ok) return setReferentManagerPhase2(data);
+    })();
   }, []);
 
   const getApplications = async () => {
@@ -79,9 +87,14 @@ export default () => {
               d’initiation-défense nationale qui <b>ne vous engagera à rien</b> mais vous permettra, si vous le souhaitez, de postuler plus tard pour un engagement dans l’active ou
               dans la réserve.
             </p>
-            {/* <SeparatorXS />
-            <h2>Contactez votre référent pour plus d’informations</h2>
-            <a>Michel Cymes - mcymes@toulouse.fr</a> */}
+            {referentManagerPhase2 ? (
+              <>
+                <SeparatorXS />
+                <h2>Contactez votre référent pour plus d’informations</h2>
+                {referentManagerPhase2?.firstName} {referentManagerPhase2?.lastName} -{" "}
+                <StyledA href={`mailto:${referentManagerPhase2?.email}`}>{referentManagerPhase2?.email}</StyledA>
+              </>
+            ) : null}
           </Content>
         </Hero>
       </HeroContainer>
@@ -243,5 +256,13 @@ const Button = styled.div`
   :hover {
     color: #fff;
     background-color: #0e9f6e;
+  }
+`;
+const StyledA = styled.a`
+  font-size: 1rem;
+  color: #5145cd;
+  cursor: pointer;
+  :hover {
+    text-decoration: underline;
   }
 `;

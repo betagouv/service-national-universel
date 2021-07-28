@@ -81,17 +81,20 @@ export default () => {
           </h4>
         </Col>
         <Col md={6} xl={3}>
-          <Link to={`/volontaire?STATUS=%5B"WAITING_VERIFICATION"%5D`}>
-            <CardContainer>
-              <Card borderBottomColor={APPLICATION_STATUS_COLORS.WAITING_VERIFICATION} style={{ marginBottom: 10 }}>
-                <CardTitle>{translate("WAITING_VERIFICATION")}</CardTitle>
-                <CardValueWrapper>
-                  <CardValue>{stats.WAITING_VERIFICATION || "-"}</CardValue>
-                  <CardArrow />
-                </CardValueWrapper>
-              </Card>
-            </CardContainer>
-          </Link>
+          <CardContainer>
+            <Card borderBottomColor="#888888" style={{ marginBottom: 10, backgroundColor: "#cccccc" }}>
+              <CardTitle>{translate("WAITING_VERIFICATION")}</CardTitle>
+              <CardValueWrapper>
+                <CardValue>{stats.WAITING_VERIFICATION || "-"}</CardValue>
+                <CardArrow />
+              </CardValueWrapper>
+            </Card>
+            {stats.WAITING_VALIDATION ? (
+              <div style={{ textAlign: "center" }}>
+                <Badge color="#888888" text="En cours de traitement par les équipes SNU" />
+              </div>
+            ) : null}
+          </CardContainer>
         </Col>
         <Col md={6} xl={3}>
           <Link to={`/volontaire?STATUS=%5B"WAITING_VALIDATION"%5D`}>
