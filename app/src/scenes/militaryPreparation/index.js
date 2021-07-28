@@ -148,6 +148,7 @@ export default () => {
                       values={values}
                       name="militaryPreparationFilesAuthorization"
                       handleChange={handleChange}
+                      template="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Autorisation_parentale-preparation_militaire.pdf"
                     />
                   </Col>
                   <Col md={6} xs={12} style={{ paddingBottom: "15px" }}>
@@ -158,6 +159,7 @@ export default () => {
                       values={values}
                       name="militaryPreparationFilesCertificate"
                       handleChange={handleChange}
+                      template="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/certificat_medical.pdf"
                     />
                   </Col>
                 </Row>

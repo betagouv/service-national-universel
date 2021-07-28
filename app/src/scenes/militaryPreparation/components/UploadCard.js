@@ -15,12 +15,18 @@ export default ({
   title = "Carte d'embarquement militaire",
   subTitle = "Cette pièce est importante et tu le sais",
   errorMessage = "Ce document est requis",
+  template,
 }) => (
   <Card>
     <Content>
       <UpTitle>{upTitle}</UpTitle>
       <Title>{title}</Title>
       <SubTitle>{subTitle}</SubTitle>
+      {template ? (
+        <a href={template} target="_blank">
+          Télécharger le modèle
+        </a>
+      ) : null}
       <DndFileInput
         optional
         errorMessage={errorMessage}

@@ -21,7 +21,7 @@ les docs sont pas bons. c'est mort`);
 
   const send = async () => {
     setSending(true);
-    await api.post(`/email/send-template/${SENDINBLUE_TEMPLATES.MILITARY_PREPARATION_DOCS_REFUSED}`, {
+    await api.post(`/email/send-template/${SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_REFUSED}`, {
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
       params: { message: messageTextArea },
     });

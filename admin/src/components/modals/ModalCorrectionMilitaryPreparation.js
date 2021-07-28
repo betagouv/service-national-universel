@@ -21,7 +21,7 @@ les docs sont pas bons.`);
 
   const send = async () => {
     setSending(true);
-    await api.post(`/email/send-template/${SENDINBLUE_TEMPLATES.MILITARY_PREPARATION_DOCS_CORRECTION}`, {
+    await api.post(`/email/send-template/${SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_CORRECTION}`, {
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
       params: { message: messageTextArea },
     });

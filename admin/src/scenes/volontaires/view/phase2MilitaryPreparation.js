@@ -14,6 +14,7 @@ import Loader from "../../../components/Loader";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import ModalCorrectionMilitaryPreparation from "../../../components/modals/ModalCorrectionMilitaryPreparation";
 import ModalRefuseMilitaryPreparation from "../../../components/modals/ModalRefuseMilitaryPreparation";
+import { adminURL } from "../../../config";
 
 export default ({ young }) => {
   const [applicationsToMilitaryPreparation, setApplicationsToMilitaryPreparation] = useState(null);
@@ -61,10 +62,19 @@ export default ({ young }) => {
     }
     setModal(null);
     // todo add mission name ? other params ?
-    await api.post(`/email/send-template/${SENDINBLUE_TEMPLATES.MILITARY_PREPARATION_DOCS_VALIDATED}`, {
+    await api.post(`/email/send-template/${SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_VALIDATED}`, {
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
     });
     // todo notify resp mission
+    for (let i = 0; i < applicationsToMilitaryPreparation.length; i++) {
+      const app = applicationsToMilitaryPreparation[i];
+      const tutor = await api.get(`/referent/${app.tutorId}`);
+      if (!tutor) continue;
+      await api.post(`/email/send-template/${SENDINBLUE_TEMPLATES.REFERENT_MILITARY_PREPARATION_DOCS_VALIDATED}`, {
+        emailTo: [{ name: `${tutor.firstName} ${tutor.lastName}`, email: "tangi.mendes+tutto@selego.co" }],
+        params: { cta: `${adminURL}/volontaire/${young._id}`, youngFirstName: young.firstName, youngLastName: young.lastName },
+      });
+    }
     // Refresh
     history.go(0);
   };
