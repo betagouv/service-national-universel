@@ -1,11 +1,9 @@
 require("dotenv").config({ path: "./.env-testing" });
-const fetch = require("node-fetch");
+
 const request = require("supertest");
 const getAppHelper = require("./helpers/app");
 const { dbConnect, dbClose } = require("./helpers/db");
-const getNewReferentFixture = require("./fixtures/referent");
-const { createReferentHelper, getReferentByIdHelper } = require("./helpers/referent");
-const { ROLES } = require("snu-lib/roles");
+const getNewContractFixture = require("./fixtures/contract");
 
 jest.mock("../sendinblue", () => ({
   ...jest.requireActual("../sendinblue"),
@@ -20,8 +18,8 @@ afterAll(dbClose);
 describe("Structure", () => {
   describe("POST /contract", () => {
     it("should create contract", async () => {
-      const structure = getNewStructureFixture();
-      const res = await request(getAppHelper()).post("/structure").send(structure);
+      const contract = getNewContractFixture();
+      const res = await request(getAppHelper()).post("/contract").send(contract);
       expect(res.status).toBe(200);
     });
   });

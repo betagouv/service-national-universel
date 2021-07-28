@@ -70,6 +70,4 @@ function getNewContractFixture() {
   };
 }
 
-module.exports = {
-  getNewContractFixture,
-};
+module.exports = getNewContractFixture;
