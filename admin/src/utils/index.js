@@ -112,4 +112,4 @@ export const userIsResponsibleFromStructureMilitaryPreparation = async (user) =>
   return data?.isMilitaryPreparation === "true";
 };
 
-export const ENABLE_CHOOSE_MEETING_POINT = environment !== "production";
+export const ENABLE_PM = environment !== "production";

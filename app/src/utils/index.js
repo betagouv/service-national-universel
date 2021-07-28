@@ -50,4 +50,4 @@ export function permissionPhase3(y) {
 
 export const ENABLE_CHOOSE_MEETING_POINT = false;
 
-export const ENABLE_CHOOSE_MEETING_POINT = environment !== "production";
+export const ENABLE_PM = environment !== "production";
