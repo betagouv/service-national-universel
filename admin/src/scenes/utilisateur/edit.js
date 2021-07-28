@@ -103,9 +103,9 @@ export default (props) => {
         return code === "OPERATION_NOT_ALLOWED"
           ? toastr.error(translate(code), "Ce responsable est affilié comme tuteur de missions de la structure.", { timeOut: 5000 })
           : toastr.error(translate(code), "Une erreur s'est produite lors de la modification de la structure.");
+      setUser();
       setUser(data);
       toastr.success("Structure modifiée");
-      // history.go(0);
     } catch (e) {
       setLoadings({
         loadingChangeStructure: false,
@@ -172,7 +172,6 @@ export default (props) => {
             if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             setUser(data);
             toastr.success("Utilisateur mis à jour !");
-            // history.go(0);
           } catch (e) {
             setLoadings({
               loadingChangeStructure: false,
