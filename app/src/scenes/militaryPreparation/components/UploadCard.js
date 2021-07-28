@@ -23,9 +23,9 @@ export default ({
       <Title>{title}</Title>
       <SubTitle>{subTitle}</SubTitle>
       {template ? (
-        <a href={template} target="_blank">
+        <TemplateLink href={template} target="_blank">
           Télécharger le modèle
-        </a>
+        </TemplateLink>
       ) : null}
       <DndFileInput
         optional
@@ -51,6 +51,16 @@ export default ({
     </Content>
   </Card>
 );
+
+const TemplateLink = styled.a`
+  font-size: 0.9rem;
+  color: #5145cd;
+  cursor: pointer;
+  margin-bottom: 0.5rem;
+  :hover {
+    text-decoration: underline;
+  }
+`;
 
 const Card = styled.div`
   border-radius: 0.5rem;
