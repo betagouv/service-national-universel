@@ -8,7 +8,7 @@ import { useHistory, Link } from "react-router-dom";
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../redux/auth/actions";
-import { translate } from "../../utils";
+import { translate, SENDINBLUE_TEMPLATES } from "../../utils";
 import { HeroContainer, Hero, Content, SeparatorXS } from "../../components/Content";
 import UploadCard from "./components/UploadCard";
 import LoadingButton from "../../components/buttons/LoadingButton";
@@ -100,6 +100,11 @@ export default () => {
                 const responseApplication = await api.put("/application", { _id: app._id, status: "WAITING_VERIFICATION" });
                 if (!responseApplication.ok) toastr.error(translate(responseApplication.code), "Une erreur s'est produite lors du traitement");
               }
+              //todo: get referent phase 2 , if not get the chef departement
+              await api.post(`/email/send-template/${SENDINBLUE_TEMPLATES.REFERENT_MILITARY_PREPARATION_DOCS_SUBMITTED}`, {
+                // emailTo: [{ name: `${tutor.firstName} ${tutor.lastName}`, email: "tangi.mendes+tutto@selego.co" }],
+                // params: { cta: `${adminURL}/volontaire/${young._id}`, youngFirstName: young.firstName, youngLastName: young.lastName },
+              });
               toastr.success("Votre dossier a bien été transmis");
               history.push("/");
             } catch (e) {

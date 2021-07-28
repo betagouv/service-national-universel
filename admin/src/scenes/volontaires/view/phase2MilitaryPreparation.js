@@ -167,9 +167,6 @@ export default ({ young }) => {
           onConfirm={onRefuse}
         />
       )}
-      {/*{modal === "refused" && (
-        <ModalConfirm topTitle="alerte" title="attention, etes vous sur ?" message="blablab du message" onChange={() => setModal(null)} onConfirm={() => console.log("confirm")} />
-      )} */}
       <Box>
         <Bloc
           title="Documents - Préparation militaire"
