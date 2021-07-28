@@ -79,21 +79,31 @@ export default () => {
                       errors={errors}
                       touched={touched}
                       type={"text"}
-                      validate={(v) => required && !v && requiredMessage}
+                      validate={(v) => !v && requiredMessage}
                     />
                     {user.role === ROLES.REFERENT_DEPARTMENT ? (
                       <Item
                         title="Département"
+                        required
                         disabled
                         values={values}
                         name="department"
                         handleChange={handleChange}
                         type={"text"}
-                        validate={(v) => required && !v && requiredMessage}
+                        validate={(v) => !v && requiredMessage}
                       />
                     ) : null}
                     {user.role === ROLES.REFERENT_REGION ? (
-                      <Item title="Région" disabled values={values} name="region" handleChange={handleChange} type={"text"} validate={(v) => required && !v && requiredMessage} />
+                      <Item
+                        title="Région"
+                        required
+                        disabled
+                        values={values}
+                        name="region"
+                        handleChange={handleChange}
+                        type={"text"}
+                        validate={(v) => required && !v && requiredMessage}
+                      />
                     ) : null}
                     <Row>
                       <Col md={6}>
@@ -106,7 +116,7 @@ export default () => {
                           errors={errors}
                           touched={touched}
                           type={"text"}
-                          validate={(v) => required && !v && requiredMessage}
+                          validate={(v) => !v && requiredMessage}
                         />
                       </Col>
                       <Col md={6}>
@@ -119,23 +129,16 @@ export default () => {
                           errors={errors}
                           touched={touched}
                           type={"text"}
-                          validate={(v) => required && !v && requiredMessage}
+                          validate={(v) => !v && requiredMessage}
                         />
                       </Col>
                     </Row>
                     <Row>
                       <Col md={6}>
-                        <Item
-                          title="Téléphone mobile"
-                          values={values}
-                          name="mobile"
-                          handleChange={handleChange}
-                          type={"text"}
-                          validate={(v) => required && !v && requiredMessage}
-                        />
+                        <Item title="Téléphone mobile" values={values} name="mobile" handleChange={handleChange} type={"text"} />
                       </Col>
                       <Col md={6}>
-                        <Item title="Téléphone fixe" values={values} name="phone" handleChange={handleChange} type={"text"} validate={(v) => required && !v && requiredMessage} />
+                        <Item title="Téléphone fixe" values={values} name="phone" handleChange={handleChange} type={"text"} />
                       </Col>
                     </Row>
                     {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(values.role) ? (
@@ -183,25 +186,18 @@ export default () => {
                       <p>Données partagées par tous les référents de votre département</p>
                     </BoxTitle>
                     <BoxContent direction="column">
-                      <Item
-                        title="Nom de la direction"
-                        values={values}
-                        name="directionName"
-                        handleChange={handleChange}
-                        type={"text"}
-                        validate={(v) => required && !v && requiredMessage}
-                      />
-                      <Item title="Adresse" values={values} name="address" handleChange={handleChange} type={"text"} validate={(v) => required && !v && requiredMessage} />
+                      <Item title="Nom de la direction" values={values} name="directionName" handleChange={handleChange} type={"text"} validate={(v) => !v && requiredMessage} />
+                      <Item title="Adresse" values={values} name="address" handleChange={handleChange} type={"text"} validate={(v) => !v && requiredMessage} />
                       <Item
                         title="Complément d'adresse"
                         values={values}
                         name="complementAddress"
                         handleChange={handleChange}
                         type={"text"}
-                        validate={(v) => required && !v && requiredMessage}
+                        validate={(v) => !v && requiredMessage}
                       />
-                      <Item title="Code postal" values={values} name="zip" handleChange={handleChange} type={"text"} validate={(v) => required && !v && requiredMessage} />
-                      <Item title="Ville" values={values} name="city" handleChange={handleChange} type={"text"} validate={(v) => required && !v && requiredMessage} />
+                      <Item title="Code postal" values={values} name="zip" handleChange={handleChange} type={"text"} validate={(v) => !v && requiredMessage} />
+                      <Item title="Ville" values={values} name="city" handleChange={handleChange} type={"text"} validate={(v) => !v && requiredMessage} />
                       <Row>
                         <Col md={6}>
                           <SaveBtn loading={isSubmitting} onClick={handleSubmit}>
