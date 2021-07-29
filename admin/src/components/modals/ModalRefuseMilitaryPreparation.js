@@ -16,12 +16,16 @@ export default ({ topTitle, title, message, onChange, onConfirm, young, placehol
 
   const send = async () => {
     setSending(true);
-    await api.post(`/email/send-template/${SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_REFUSED}`, {
-      emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-      params: { message: messageTextArea },
-    });
-    toastr.success("Email envoyé !");
-    onConfirm(messageTextArea);
+    try {
+      await api.post(`/email/send-template/${SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_REFUSED}`, {
+        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+        params: { message: messageTextArea },
+      });
+      toastr.success("Email envoyé !");
+      onConfirm(messageTextArea);
+    } catch (error) {
+      toastr.error("Une erreur est survenue", translate(error.code));
+    }
   };
 
   return (

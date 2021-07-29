@@ -6,7 +6,7 @@ import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 import { ModalContainer, Content, Footer, Header } from "./Modal";
 import ModalButton from "../buttons/ModalButton";
-import { SENDINBLUE_TEMPLATES } from "../../utils";
+import { SENDINBLUE_TEMPLATES, translate } from "../../utils";
 import { appURL } from "../../config";
 
 export default ({ topTitle, title, message, onChange, onConfirm, young, placeholder = "Votre message..." }) => {
@@ -17,12 +17,16 @@ export default ({ topTitle, title, message, onChange, onConfirm, young, placehol
 
   const send = async () => {
     setSending(true);
-    await api.post(`/email/send-template/${SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_CORRECTION}`, {
-      emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-      params: { message: messageTextArea, cta: `${appURL}/ma-preparation-militaire` },
-    });
-    toastr.success("Email envoyé !");
-    onConfirm(messageTextArea);
+    try {
+      await api.post(`/email/send-template/${SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_CORRECTION}`, {
+        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+        params: { message: messageTextArea, cta: `${appURL}/ma-preparation-militaire` },
+      });
+      toastr.success("Email envoyé !");
+      onConfirm(messageTextArea);
+    } catch (error) {
+      toastr.error("Une erreur est survenue", translate(error.code));
+    }
   };
 
   return (

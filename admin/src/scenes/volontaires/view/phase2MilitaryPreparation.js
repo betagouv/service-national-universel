@@ -45,37 +45,39 @@ export default ({ young }) => {
   };
   const onValidate = async () => {
     console.log("onValidate");
+    try {
+      // validate the files
+      const responseYoung = await api.put(`/referent/young/${young._id}`, { statusMilitaryPreparationFiles: "VALIDATED" });
+      if (!responseYoung.ok) return toastr.error(translate(responseYoung.code), "Une erreur s'est produite lors de la validation des documents");
 
-    // validate the files
-    const responseYoung = await api.put(`/referent/young/${young._id}`, { statusMilitaryPreparationFiles: "VALIDATED" });
-    if (!responseYoung.ok) return toastr.error(translate(responseYoung.code), "Une erreur s'est produite lors de la validation des documents");
-
-    // change status of applications
-    for (let i = 0; i < applicationsToMilitaryPreparation.length; i++) {
-      const app = applicationsToMilitaryPreparation[i];
-      const responseApplication = await api.put("/application", { _id: app._id, status: "WAITING_VALIDATION" });
-      if (!responseApplication.ok)
-        toastr.error(
-          translate(responseApplication.code),
-          `Une erreur s'est produite lors du changement automatique de statut de la candidtature à la mission : ${app.missionName}`
-        );
-    }
-    setModal(null);
-    // todo add mission name ? other params ?
-    await api.post(`/email/send-template/${SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_VALIDATED}`, {
-      emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-    });
-    // todo notify resp mission
-    for (let i = 0; i < applicationsToMilitaryPreparation.length; i++) {
-      const app = applicationsToMilitaryPreparation[i];
-      const tutor = await api.get(`/referent/${app.tutorId}`);
-      if (!tutor) continue;
-      await api.post(`/email/send-template/${SENDINBLUE_TEMPLATES.REFERENT_MILITARY_PREPARATION_DOCS_VALIDATED}`, {
-        emailTo: [{ name: `${tutor.firstName} ${tutor.lastName}`, email: tutor.email }],
-        params: { cta: `${adminURL}/volontaire/${young._id}`, youngFirstName: young.firstName, youngLastName: young.lastName, missionName: app.mission?.name || app.missionName },
+      // change status of applications
+      for (let i = 0; i < applicationsToMilitaryPreparation.length; i++) {
+        const app = applicationsToMilitaryPreparation[i];
+        const responseApplication = await api.put("/application", { _id: app._id, status: "WAITING_VALIDATION" });
+        if (!responseApplication.ok)
+          toastr.error(
+            translate(responseApplication.code),
+            `Une erreur s'est produite lors du changement automatique de statut de la candidtature à la mission : ${app.missionName}`
+          );
+      }
+      setModal(null);
+      await api.post(`/email/send-template/${SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_VALIDATED}`, {
+        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
       });
+      for (let i = 0; i < applicationsToMilitaryPreparation.length; i++) {
+        const app = applicationsToMilitaryPreparation[i];
+        const responseTutor = await api.get(`/referent/${app.tutorId}`);
+        if (!responseTutor.ok) continue;
+        await api.post(`/email/send-template/${SENDINBLUE_TEMPLATES.REFERENT_MILITARY_PREPARATION_DOCS_VALIDATED}`, {
+          emailTo: [{ name: `${responseTutor.data.firstName} ${responseTutor.data.lastName}`, email: responseTutor.data.email }],
+          params: { cta: `${adminURL}/volontaire/${young._id}`, youngFirstName: young.firstName, youngLastName: young.lastName, missionName: app.mission?.name || app.missionName },
+        });
+      }
+      // Refresh
+    } catch (e) {
+      console.error(e);
+      toastr.error("Une erreur est survenue", t(e.code));
     }
-    // Refresh
     history.go(0);
   };
 
