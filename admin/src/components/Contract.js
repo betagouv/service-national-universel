@@ -731,7 +731,7 @@ export default ({ young, admin }) => {
 const ContractField = ({ name, placeholder, optional, context: { values, errors, touched, handleChange }, ...rest }) => {
   const content = (
     <>
-      {errors[name] && touched[name] && <ErrorInContractField>Ce champ est obligatoire</ErrorInContractField>}
+      {errors[name] && <ErrorInContractField>Ce champ est obligatoire</ErrorInContractField>}
       <Field validate={(v) => (optional ? undefined : !v)} value={values[name]} onChange={handleChange} name={name} placeholder={placeholder} {...rest} />
     </>
   );
