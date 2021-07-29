@@ -138,7 +138,6 @@ export default (props) => {
           period: [],
           domains: [],
           subPeriod: [],
-          isMilitaryPreparation: "",
         }
       }
       onSubmit={async (values) => {

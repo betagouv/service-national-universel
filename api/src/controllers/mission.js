@@ -11,7 +11,6 @@ const StructureObject = require("../models/structure");
 const ReferentObject = require("../models/referent");
 const { ERRORS } = require("../utils/index.js");
 const { validateId } = require("../utils/validator/default");
-const youngValidator = require("../utils/validator/young");
 const referentValidator = require("../utils/validator/referent");
 const { ROLES } = require("snu-lib/roles");
 
@@ -22,9 +21,9 @@ const canModify = (user, mission) => {
   );
 };
 
-router.post("/", async (req, res) => {
+router.post("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const { error, value: checkedMission } = youngValidator.validateMission(req.body);
+    const { error, value: checkedMission } = referentValidator.validateMission(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
     const data = await MissionObject.create(checkedMission);
     return res.status(200).send({ ok: true, data });
