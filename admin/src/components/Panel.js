@@ -101,7 +101,7 @@ export default styled.div`
     display: flex;
     flex-direction: column;
     padding: 5px 20px;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
     text-align: left;
     :hover {
       box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 12px 0px;
@@ -110,6 +110,14 @@ export default styled.div`
     &-priority {
       font-size: 0.75rem;
       color: #5245cc;
+      margin-right: 0.5rem;
+    }
+    &-text {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      display: block;
+      text-overflow: ellipsis;
     }
   }
   .quote {

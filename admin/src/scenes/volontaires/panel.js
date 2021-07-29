@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 
 import { YOUNG_SITUATIONS, YOUNG_PHASE, translate as t, YOUNG_STATUS, isInRuralArea, getAge, formatDateFR } from "../../utils";
@@ -9,10 +9,10 @@ import api from "../../services/api";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
 import Panel from "../../components/Panel";
 import Historic from "../../components/historic";
+import ContractLink from "../../components/ContractLink";
 
 export default ({ onChange, value }) => {
   const [young, setYoung] = useState(null);
-
   useEffect(() => {
     (async () => {
       const id = value && value._id;
@@ -61,7 +61,6 @@ export default ({ onChange, value }) => {
             {young.applications.length &&
               young.applications
                 .sort((a, b) => (parseInt(a.priority) > parseInt(b.priority) ? 1 : parseInt(b.priority) > parseInt(a.priority) ? -1 : 0))
-                .slice(0, 3)
                 .map((a, i) => <ApplicationDetails key={a._id} application={a} i={i + 1} />)}
             <Link to={`/volontaire/${young._id}/phase2`}>
               <div style={{ textAlign: "center", color: "#5245cc" }}>{"Voir toutes ses candidatures >"}</div>
@@ -159,14 +158,28 @@ const Details = ({ title, value, copy }) => {
 };
 
 const ApplicationDetails = ({ application, i }) => {
+  const history = useHistory();
+
   if (!application) return <div />;
   return (
-    <Link to={`/mission/${application.missionId}`}>
-      <div className="application-detail">
-        <div className="application-detail-priority">{`CHOIX ${i}`}</div>
-        <div className="application-detail-text">{application.missionName}</div>
+    <div className="application-detail">
+      <div className="application-detail-text">
+        <Link to={`/mission/${application.missionId}`}>
+          <span className="application-detail-priority">{`CHOIX ${i}`}</span>
+          {application.missionName}
+        </Link>
       </div>
-    </Link>
+      {["VALIDATED", "IN_PROGRESS", "DONE", "ABANDON"].includes(application.status) ? (
+        <ContractLink
+          style={{ margin: 0 }}
+          onClick={() => {
+            history.push(`/volontaire/${application.youngId}/phase2/application/${application._id}/contrat`);
+          }}
+        >
+          Contrat d'engagement &gt;
+        </ContractLink>
+      ) : null}
+    </div>
   );
 };
 
