@@ -17,8 +17,8 @@ const YoungObject = require("../models/young");
 const MissionObject = require("../models/mission");
 const ApplicationObject = require("../models/application");
 const CohesionCenterObject = require("../models/cohesionCenter");
-const AuthObject = require("../auth");
 const StructureObject = require("../models/structure");
+const AuthObject = require("../auth");
 
 const { decrypt } = require("../cryptoUtils");
 const { sendEmail } = require("../sendinblue");
@@ -29,6 +29,7 @@ const { validateId } = require("../utils/validator/default");
 const ReferentAuth = new AuthObject(ReferentObject);
 const { cookieOptions, JWT_MAX_AGE } = require("../cookie-options");
 const Joi = require("joi");
+const { department2region } = require("snu-lib/region-and-departments");
 const {
   ROLES_LIST,
   canInviteUser,
@@ -550,6 +551,43 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
   }
 });
 
+router.get("/youngFile/:youngId/military-preparation/:key/:fileName", passport.authenticate("referent", { session: false }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      youngId: Joi.string().required(),
+      key: Joi.string().required(),
+      fileName: Joi.string().required(),
+    })
+      .unknown()
+      .validate({ ...req.params }, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+    if (req.user.role !== ROLES.ADMIN) {
+      const structure = await StructureObject.findById(req.user.structureId);
+      if (!structure || structure?.isMilitaryPreparation !== "true") return res.status(400).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    const { youngId, key, fileName } = value;
+    const downloaded = await getFile(`app/young/${youngId}/military-preparation/${key}/${fileName}`);
+    const decryptedBuffer = decrypt(downloaded.Body);
+
+    let mimeFromFile = null;
+    try {
+      const { mime } = await FileType.fromBuffer(decryptedBuffer);
+      mimeFromFile = mime;
+    } catch (e) {}
+
+    return res.status(200).send({
+      data: Buffer.from(decryptedBuffer, "base64"),
+      mimeType: mimeFromFile ? mimeFromFile : mime.lookup(fileName),
+      fileName: fileName,
+      ok: true,
+    });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.post("/file/:key", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
@@ -680,7 +718,7 @@ router.get("/:id", passport.authenticate("referent", { session: false }), async 
   }
 });
 
-router.get("/manager_department/:department", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.get("/manager_department/:department", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
     const { error, value } = Joi.object({ department: Joi.string().required() })
       .unknown()
@@ -695,6 +733,35 @@ router.get("/manager_department/:department", passport.authenticate("referent", 
     });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+router.get("/manager_phase2/:department", passport.authenticate("young", { session: false }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({ department: Joi.string().required() })
+      .unknown()
+      .validate({ ...req.params }, { stripUnknown: true });
+
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    // get the referent_department
+    let data = await ReferentObject.findOne({
+      subRole: SUB_ROLES.manager_phase2,
+      role: ROLES.REFERENT_DEPARTMENT,
+      department: value.department,
+    });
+    // if not found, get the referent_region
+    if (!data) {
+      data = await ReferentObject.findOne({
+        subRole: SUB_ROLES.manager_phase2,
+        role: ROLES.REFERENT_REGION,
+        region: department2region[value.department],
+      });
+    }
+    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    return res.status(200).send({ ok: true, data: { firstName: data.firstName, lastName: data.lastName, email: data.email } });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });

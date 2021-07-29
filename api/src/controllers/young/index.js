@@ -88,6 +88,50 @@ router.post("/file/:key", passport.authenticate("young", { session: false }), as
   }
 });
 
+router.post("/file/military-preparation/:key", passport.authenticate("young", { session: false }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      key: Joi.string().required(),
+      body: Joi.string().required(),
+    })
+      .unknown()
+      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
+    const { key, body } = value;
+    const {
+      error: bodyError,
+      value: { names },
+    } = Joi.object({
+      names: Joi.array().items(Joi.string()).required(),
+    }).validate(JSON.parse(body), { stripUnknown: true });
+
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+    if (bodyError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: bodyError.message });
+
+    const files = Object.keys(req.files || {}).map((e) => req.files[e]);
+
+    for (let i = 0; i < files.length; i++) {
+      let currentFile = files[i];
+      // If multiple file with same names are provided, currentFile is an array. We just take the latest.
+      if (Array.isArray(currentFile)) {
+        currentFile = currentFile[currentFile.length - 1];
+      }
+      const { name, data, mimetype } = currentFile;
+      if (!["image/jpeg", "image/png", "application/pdf"].includes(mimetype)) return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
+
+      const encryptedBuffer = encrypt(data);
+      const resultingFile = { mimetype: "image/png", encoding: "7bit", data: encryptedBuffer };
+      await uploadFile(`app/young/${req.user._id}/military-preparation/${key}/${name}`, resultingFile);
+    }
+    req.user.set({ [key]: names });
+    await req.user.save();
+    return res.status(200).send({ data: names, ok: true });
+  } catch (error) {
+    capture(error);
+    if (error === "FILE_CORRUPTED") return res.status(500).send({ ok: false, code: ERRORS.FILE_CORRUPTED });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.post("/signup_verify", async (req, res) => {
   try {
     const { error, value } = Joi.object({ invitationToken: Joi.string().required() }).unknown().validate(req.body, { stripUnknown: true });

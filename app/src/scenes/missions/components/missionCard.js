@@ -3,7 +3,9 @@ import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { Col, Row } from "reactstrap";
 
-export default ({ id, title, image, subtitle, tags = [], places, location, onClick, applied }) => {
+import Badge from "../../../components/Badge";
+
+export default ({ id, title, image, subtitle, tags = [], places, location, onClick, applied, isMilitaryPreparation }) => {
   return (
     <>
       <Card>
@@ -19,8 +21,9 @@ export default ({ id, title, image, subtitle, tags = [], places, location, onCli
                   <p>{subtitle}</p>
                   <Tags>
                     {tags.map((e, i) => (
-                      <div key={i}>{e}</div>
+                      <Badge key={i} text={e} textColor="#6b7280" backgroundColor="#ffffff" />
                     ))}
+                    {isMilitaryPreparation === "true" ? <Badge text="Préparation Militaire" color="#03224C" /> : null}
                   </Tags>
                 </div>
               </div>
@@ -133,17 +136,6 @@ const Tags = styled(Row)`
   display: flex;
   align-items: center;
   margin-top: 0.8rem;
-  div {
-    text-transform: uppercase;
-    color: #6b7280;
-    border: 1px solid #e5e7eb;
-    border-radius: 30px;
-    padding: 5px 15px;
-    margin-right: 15px;
-    margin-bottom: 5px;
-    font-size: 12px;
-    font-weight: 500;
-  }
 `;
 
 const Location = styled.div`

@@ -2,7 +2,7 @@ import React from "react";
 import { NavLink } from "react-router-dom";
 
 import { DRAWER_TABS } from "../utils";
-import { YOUNG_STATUS_PHASE2 } from "../../utils";
+import { YOUNG_STATUS_PHASE2, ENABLE_PM } from "../../utils";
 import DownloadAttestationButton from "../buttons/DownloadAttestationButton";
 
 export default ({ young, handleClick }) => {
@@ -35,6 +35,13 @@ export default ({ young, handleClick }) => {
               Trouver une mission
             </NavLink>
           </li>
+          {ENABLE_PM && (
+            <li>
+              <NavLink to="/ma-preparation-militaire" onClick={(event) => handleClick(event, DRAWER_TABS.PHASE2, "preparation-militaire")}>
+                Ma préparation militaire
+              </NavLink>
+            </li>
+          )}
           <li>
             <NavLink to="/candidature" onClick={(event) => handleClick(event, DRAWER_TABS.PHASE2, "candidature")}>
               Suivre mes candidatures

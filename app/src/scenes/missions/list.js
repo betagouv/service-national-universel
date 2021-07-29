@@ -1,23 +1,28 @@
 import React, { useEffect, useState } from "react";
 import { Col, Container, Row } from "reactstrap";
-import { ReactiveBase, ReactiveList, DataSearch, SingleDropdownList } from "@appbaseio/reactivesearch";
+import { ReactiveBase, ReactiveList, DataSearch, SingleDropdownList, MultiDropdownList } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
 import MissionCard from "./components/missionCard";
 import ReactiveFilter from "../../components/ReactiveFilter";
 import { apiURL } from "../../config";
-import { translate, getLimitDateForPhase2 } from "../../utils";
+import { translate, getLimitDateForPhase2, getFilterLabel, ENABLE_PM } from "../../utils";
 import api from "../../services/api";
 import Loader from "../../components/Loader";
 import FilterGeoloc from "./components/FilterGeoloc";
+import AlertBox from "../../components/AlertBox";
+import MilitaryPreparationCard from "./components/MilitaryPreparationCard";
 
-const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "GEOLOC", "DATE", "PERIOD", "RELATIVE"];
+const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "GEOLOC", "DATE", "PERIOD", "RELATIVE", "MILITARY_PREPARATION"];
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
   const [targetLocation, setTargetLocation] = useState("");
-  const [showAlert, setShowAlert] = useState(true);
+  const [referentManagerPhase2, setReferentManagerPhase2] = useState();
+  const [showAlertLimitDate, setShowAlertLimitDate] = useState(true);
+  const [showAlertMilitaryPreparation, setShowAlertMilitaryPreparation] = useState(true);
+  const [showAlert100km, setShowAlert100km] = useState(true);
   const [applications, setApplications] = useState();
   const getDefaultQuery = () => {
     let query = {
@@ -78,13 +83,35 @@ export default () => {
     })();
   }, []);
 
+  useEffect(() => {
+    (async () => {
+      const { ok, data } = await api.get(`/referent/manager_phase2/${young.department}`);
+      if (ok) return setReferentManagerPhase2(data);
+    })();
+  }, []);
+
   const handleChangeTargetLocation = (e) => setTargetLocation(e.target.value);
 
   if (!applications) return <Loader />;
 
   return (
     <div>
-      {showAlert ? <AlertBox onClose={() => setShowAlert(false)} /> : null}
+      {showAlertLimitDate ? (
+        <AlertBox
+          onClose={() => setShowAlertLimitDate(false)}
+          title={`Vous pourrez faire une mission jusqu’au ${getLimitDateForPhase2(young.cohort)}.`}
+          message="Des missions supplémentaires seront proposées tout au long de l’année. Vous serez informé par e-mail dès qu’une mission répondant à vos préférences sera publiée."
+        />
+      ) : null}
+      {ENABLE_PM && showAlert100km ? (
+        <AlertBox
+          onClose={() => setShowAlert100km(false)}
+          title={`Visibilité des missions`}
+          message={`Vous ne voyez que les missions proposées à moins de 100 km du domicile que vous avez déclaré. Il existe des offres de missions accessibles pour vous sous conditions partout en France, notamment certaines préparations militaires. Si vous souhaitez connaitre ces offres et y accéder, contactez tout de suite votre référent phase 2 : ${
+            referentManagerPhase2?.email || ""
+          }`}
+        />
+      ) : null}
       <Heading>
         <p>Phase 2</p>
         <h1>Trouvez une mission d'intérêt général</h1>
@@ -115,7 +142,7 @@ export default () => {
             <Col md={6}>
               <FilterGeoloc young={young} targetLocation={targetLocation} componentId="GEOLOC" />
             </Col>
-            <DomainsFilter md={6}>
+            <DomainsFilter md={4}>
               <SingleDropdownList
                 defaultQuery={getDefaultQuery}
                 selectAllLabel="Tous les domaines"
@@ -130,7 +157,7 @@ export default () => {
                 showSearch={false}
               />
             </DomainsFilter>
-            <DomainsFilter md={6}>
+            <DomainsFilter md={4}>
               <SingleDropdownList
                 defaultQuery={getDefaultQuery}
                 selectAllLabel="Toutes les périodes"
@@ -145,8 +172,31 @@ export default () => {
                 showSearch={false}
               />
             </DomainsFilter>
+            <DomainsFilter md={4}>
+              <MultiDropdownList
+                defaultQuery={getDefaultQuery}
+                className="dropdown-filter"
+                placeholder="Préparation Militaire"
+                componentId="MILITARY_PREPARATION"
+                dataField="isMilitaryPreparation.keyword"
+                react={{ and: FILTERS.filter((e) => e !== "MILITARY_PREPARATION") }}
+                renderItem={(e, count) => {
+                  return `${translate(e)} (${count})`;
+                }}
+                title=""
+                URLParams={true}
+                renderLabel={(items) => getFilterLabel(items, "Préparation Militaire")}
+              />
+            </DomainsFilter>
           </Row>
         </Filters>
+        {ENABLE_PM && showAlertMilitaryPreparation ? (
+          <MilitaryPreparationCard
+            onClose={() => setShowAlertMilitaryPreparation(false)}
+            title="Réalisez votre mission lors d’une préparation militaire"
+            message="Une période de découverte du milieu militaire pour vivre durant quelques jours le quotidien d’un soldat. En savoir plus"
+          />
+        ) : null}
         <Missions>
           <ReactiveFilter componentId="STATUS" query={{ query: { bool: { filter: { term: { "status.keyword": "VALIDATED" } } } }, value: "" }} />
           <ReactiveList
@@ -179,6 +229,7 @@ export default () => {
                     subtitle={e.name}
                     tags={tags}
                     places={e.placesLeft}
+                    isMilitaryPreparation={e.isMilitaryPreparation}
                   />
                 );
               });
@@ -202,20 +253,6 @@ const Filters = styled(Container)`
     border: 0;
   }
 `;
-
-const AlertBox = ({ onClose }) => {
-  const young = useSelector((state) => state.Auth.young);
-  return (
-    <Alert>
-      <img src={require("../../assets/information.svg")} height={15} />
-      <div className="text">
-        <strong>Vous pourrez faire une mission jusqu’au {getLimitDateForPhase2(young.cohort)}.</strong>
-        <p>Des missions supplémentaires seront proposées tout au long de l’année. Vous serez informé par e-mail dès qu’une mission répondant à vos préférences sera publiée.</p>
-      </div>
-      <img src={require("../../assets/close.svg")} height={15} onClick={onClose} style={{ cursor: "pointer" }} />
-    </Alert>
-  );
-};
 
 const Missions = styled(Container)`
   padding: 20px 40px;
@@ -316,33 +353,5 @@ const DomainsFilter = styled(Col)`
     background-color: #fff;
     background-clip: padding-box;
     /* transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out; */
-  }
-`;
-
-const Alert = styled(Container)`
-  border-radius: 8px;
-  @media (max-width: 768px) {
-    border-radius: 0;
-  }
-  display: flex;
-  align-items: center;
-  background-color: #5949d0;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  margin-bottom: 20px;
-  padding: 10px 20px;
-  .text {
-    margin-left: 20px;
-    margin-right: auto;
-    color: #fff;
-    strong {
-      font-size: 15px;
-      font-weight: 700;
-      margin-bottom: 3px;
-    }
-    p {
-      margin-bottom: 0;
-      font-size: 12px;
-      font-weight: 500;
-    }
   }
 `;

@@ -88,7 +88,9 @@ export default ({ onChange, mission }) => {
       <div className="info">
         <div className="title">{`Volontaire(s) (${mission.placesTotal - mission.placesLeft})`}</div>
         <div className="detail">
-          <div className="description">{`Cette mission a reçu ${mission.placesTotal - mission.placesLeft} candidature(s)`}</div>
+          <Link to={`/mission/${mission._id}/youngs`}>
+            <div className="description">{`Cette mission a reçu ${mission.placesTotal - mission.placesLeft} candidature(s)`}</div>
+          </Link>
         </div>
         {/* <Link to={``}>
         <button>Consulter tous les volontaires</button>

@@ -33,7 +33,7 @@ export default function DownloadButton({ source, title, ...rest }) {
 }
 
 const DownloadBtn = styled(LoadingButton)`
-  color: #555;
+  color: #555 !important;
   background: url(${require("../../assets/download.svg")}) left 15px center no-repeat;
   background-color: #fff;
   border: 1px solid #eee;

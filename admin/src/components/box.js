@@ -71,3 +71,10 @@ export const BoxTitle = styled.div`
   justify-content: space-between;
   width: 100%;
 `;
+
+export const Separator = styled.hr`
+  margin: 1rem;
+  height: 1px;
+  border-style: none;
+  background-color: #e5e7eb;
+`;

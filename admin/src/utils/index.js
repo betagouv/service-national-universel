@@ -1,6 +1,8 @@
 import { translate } from "snu-lib/translation";
 import passwordValidator from "password-validator";
+import api from "../services/api";
 export * from "snu-lib";
+import { environment } from "../config";
 
 export const domains = ["Défense et mémoire", "Sécurité", "Solidarité", "Santé", "Éducation", "Culture", "Sport", "Environnement et développement durable", "Citoyenneté"];
 export const status = ["Brouillon", "En attente de validation", "En attente de correction", "Validée", "Refusée", "Annulée", "Archivée"];
@@ -28,14 +30,6 @@ export const publicEtatTypes = [
 ];
 
 export const corpsEnUniforme = ["SDIS (Service départemental d'Incendie et de Secours)", "Gendarmerie", "Police", "Armées"];
-
-export const getFilterLabel = (selected, placeholder = "Choisissez un filtre") => {
-  if (Object.keys(selected).length === 0) return placeholder;
-  const translated = Object.keys(selected).map((item) => {
-    return translate(item);
-  });
-  return translated.join(", ");
-};
 
 export const confirmMessageChangePhase1Presence = (value) => {
   if (!value) return true;
@@ -110,3 +104,13 @@ export const ENABLE_ASSIGN_MEETING_POINT_EMAILS = [];
 export const enableAssignCenter = (user) => ENABLE_ASSIGN_CENTER && (ENABLE_ASSIGN_CENTER_ROLES.includes(user.role) || ENABLE_ASSIGN_CENTER_EMAILS.includes(user.email));
 export const enableMeetingPoint = (user) =>
   ENABLE_ASSIGN_MEETING_POINT && (ENABLE_ASSIGN_MEETING_POINT_ROLES.includes(user.role) || ENABLE_ASSIGN_MEETING_POINT_EMAILS.includes(user.email));
+
+export const userIsResponsibleFromStructureMilitaryPreparation = async (user) => {
+  if (!user || !user.structureId) return false;
+  const { ok, data } = await api.get(`/structure/${user.structureId}`);
+  if (!ok) return false;
+  return data?.isMilitaryPreparation === "true";
+};
+
+const FORCE_DISBALED_PM = false;
+export const ENABLE_PM = environment !== "production" && !FORCE_DISBALED_PM;

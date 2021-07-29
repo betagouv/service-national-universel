@@ -27,8 +27,11 @@ const VioletButtonHeader = styled(Button)`
   margin-left: 1rem;
   font-size: 14px;
   font-weight: 700;
-  ${({ textColor }) => (textColor ? `color: ${textColor};` : `color: #fff;`)}
+  color: ${({ textColor }) => (textColor ? `${textColor}` : `#fff`)} !important;
   cursor: pointer;
   ${({ disabled, color }) => (!disabled && !color ? ":hover {background: #372f78;}" : null)}
   ${({ color }) => (color ? `background-color: ${color};}` : "background-color: #5245cc;")}
+  &:hover {
+    box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.5);
+  }
 `;

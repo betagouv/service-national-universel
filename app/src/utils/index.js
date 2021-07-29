@@ -2,6 +2,7 @@ import passwordValidator from "password-validator";
 import { YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_PHASE2 } from "snu-lib";
 export * from "snu-lib";
 export * from "./crisp";
+import { environment } from "../config";
 
 export function getPasswordErrorMessage(v) {
   if (!v) return "Ce champ est obligatoire";
@@ -48,3 +49,6 @@ export function permissionPhase3(y) {
 }
 
 export const ENABLE_CHOOSE_MEETING_POINT = false;
+
+const FORCE_DISBALED_PM = false;
+export const ENABLE_PM = environment !== "production" && !FORCE_DISBALED_PM;

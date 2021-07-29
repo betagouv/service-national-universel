@@ -59,10 +59,12 @@ const HeroStyle = styled.div`
 
   .content {
     width: 65%;
+    padding: 60px 30px 60px 50px;
     @media (max-width: 768px) {
       width: 100%;
+      padding: 30px 15px 30px 15px;
+      text-align: center;
     }
-    padding: 60px 30px 60px 50px;
     position: relative;
     background-color: #fff;
     > * {
@@ -107,6 +109,9 @@ const HeroStyle = styled.div`
   }
   .thumb {
     min-height: 400px;
+    @media (max-width: 768px) {
+      min-height: 0;
+    }
     background: url(${require("../assets/phase3.jpg")}) no-repeat center;
     background-size: cover;
     flex: 1;
@@ -191,6 +196,13 @@ export const Separator = styled.hr`
   height: 1px;
   border-style: none;
   background-color: #e5e7eb;
+`;
+export const SeparatorXS = styled.hr`
+  margin: 2.5rem 0;
+  height: 1px;
+  border-style: none;
+  background-color: #e5e7eb;
+  max-width: 20rem;
 `;
 
 export const WhiteButton = styled.button`

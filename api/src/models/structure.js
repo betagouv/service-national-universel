@@ -199,6 +199,14 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  isMilitaryPreparation: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "La structure est une préparation militaire",
+    },
+  },
+
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

@@ -37,6 +37,7 @@ export default ({ children, structure, tab }) => {
         <div style={{ flex: 1 }}>
           <Title>
             {structure.name} <Badge color={STRUCTURE_STATUS_COLORS[structure.status]} text={translate(structure.status)} />
+            {structure.isMilitaryPreparation === "true" ? <Badge text="Préparation Militaire" /> : null}
           </Title>
 
           <TabList>

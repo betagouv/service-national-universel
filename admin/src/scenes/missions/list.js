@@ -17,7 +17,7 @@ import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine } from 
 import Chevron from "../../components/Chevron";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 
-const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "TUTOR", "REGION", "DEPARTMENT", "STRUCTURE"];
+const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "TUTOR", "REGION", "DEPARTMENT", "STRUCTURE", "MILITARY_PREPARATION"];
 
 export default () => {
   const [mission, setMission] = useState(null);
@@ -180,6 +180,20 @@ export default () => {
                   URLParams={true}
                   showSearch={true}
                   searchPlaceholder="Rechercher..."
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Préparation Militaire"
+                  componentId="MILITARY_PREPARATION"
+                  dataField="isMilitaryPreparation.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "MILITARY_PREPARATION") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "Préparation Militaire")}
                 />
                 {user.role === ROLES.SUPERVISOR ? (
                   <MultiDropdownList

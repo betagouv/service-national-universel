@@ -10,7 +10,7 @@ import ReactSelect from "react-select";
 import MultiSelect from "../../components/Multiselect";
 import AddressInput from "../../components/addressInput";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
-import { translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, MISSION_DOMAINS, PERIOD, dateForDatePicker, putLocation, ROLES } from "../../utils";
+import { translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, MISSION_DOMAINS, PERIOD, dateForDatePicker, putLocation, ROLES, ENABLE_PM } from "../../utils";
 import api from "../../services/api";
 import Invite from "../structure/components/invite";
 import Loader from "../../components/Loader";
@@ -138,6 +138,7 @@ export default (props) => {
           period: [],
           domains: [],
           subPeriod: [],
+          isMilitaryPreparation: "",
         }
       }
       onSubmit={async (values) => {
@@ -306,6 +307,21 @@ export default (props) => {
                         placeholder="Spécifiez les contraintes liées à la mission"
                       />
                     </FormGroup>
+                    {ENABLE_PM && structure.isMilitaryPreparation === "true" ? (
+                      <FormGroup>
+                        <div>
+                          <label>PRÉPARATION MILITAIRE</label>
+                          <Field component="select" name="isMilitaryPreparation" value={values.isMilitaryPreparation} onChange={handleChange}>
+                            <option key="false" value="false">
+                              Non
+                            </option>
+                            <option key="true" value="true">
+                              Oui
+                            </option>
+                          </Field>
+                        </div>
+                      </FormGroup>
+                    ) : null}
                   </Wrapper>
                 </Col>
                 <Col md={6}>
