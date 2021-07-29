@@ -4,11 +4,12 @@ import { Link } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 
-import { translate, formatStringDate } from "../../utils";
+import { translate, formatStringDate, MISSION_STATUS_COLORS } from "../../utils";
 import api from "../../services/api";
 import SelectStatusMission from "../../components/selectStatusMission";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
 import Panel from "../../components/Panel";
+import Badge from "../../components/Badge";
 
 export default ({ onChange, mission }) => {
   const [tutor, setTutor] = useState();
@@ -82,8 +83,7 @@ export default ({ onChange, mission }) => {
       </div>
       <div className="info">
         <div className="title">Statut</div>
-        <SelectStatusMission hit={mission} />
-        <div className="description">A noter que des notifications emails seront envoyées</div>
+        <Badge text={translate(mission.status)} color={MISSION_STATUS_COLORS[mission.status]} />
       </div>
       <div className="info">
         <div className="title">{`Volontaire(s) (${mission.placesTotal - mission.placesLeft})`}</div>

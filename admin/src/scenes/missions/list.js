@@ -227,7 +227,15 @@ export default () => {
                     </thead>
                     <tbody>
                       {data.map((hit) => (
-                        <Hit key={hit._id} hit={hit} onClick={() => setMission(hit)} selected={mission?._id === hit._id} />
+                        <Hit
+                          key={hit._id}
+                          hit={hit}
+                          onClick={(m) => setMission(m)}
+                          selected={mission?._id === hit._id}
+                          callback={(e) => {
+                            if (e._id === mission?._id) setMission(e);
+                          }}
+                        />
                       ))}
                     </tbody>
                   </Table>
@@ -242,34 +250,45 @@ export default () => {
   );
 };
 
-const Hit = ({ hit, onClick, selected }) => {
-  // console.log("h", hit);
+const Hit = ({ hit, onClick, selected, callback }) => {
+  const [value, setValue] = useState(null);
+
+  const onChangeStatus = (e) => {
+    setValue(e);
+    callback(e);
+  };
+
+  useEffect(() => {
+    setValue(hit);
+  }, [hit._id]);
+
+  if (!value) return <></>;
   return (
-    <tr style={{ backgroundColor: selected && "#e6ebfa" }} onClick={onClick}>
+    <tr style={{ backgroundColor: selected && "#e6ebfa" }} onClick={() => onClick(value)}>
       <td>
         <MultiLine>
-          <h2>{hit.name}</h2>
+          <h2>{value.name}</h2>
           <p>
-            {hit.structureName} {`• ${hit.city} (${hit.department})`}
+            {value.structureName} {`• ${value.city} (${value.department})`}
           </p>
         </MultiLine>
       </td>
       <td>
         <div>
-          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Du</span> {formatStringDate(hit.startAt)}
+          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Du</span> {formatStringDate(value.startAt)}
         </div>
         <div>
-          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Au</span> {formatStringDate(hit.endAt)}
+          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Au</span> {formatStringDate(value.endAt)}
         </div>
       </td>
       <td>
-        {hit.placesTotal <= 1 ? `${hit.placesTotal} place` : `${hit.placesTotal} places`}
+        {value.placesTotal <= 1 ? `${value.placesTotal} place` : `${value.placesTotal} places`}
         <div style={{ fontSize: 12, color: "rgb(113,128,150)" }}>
-          {hit.placesTotal - hit.placesLeft} / {hit.placesTotal}
+          {value.placesTotal - value.placesLeft} / {value.placesTotal}
         </div>
       </td>
       <td onClick={(e) => e.stopPropagation()}>
-        <SelectStatusMission hit={hit} />
+        <SelectStatusMission hit={value} callback={onChangeStatus} />
       </td>
     </tr>
   );

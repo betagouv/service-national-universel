@@ -10,7 +10,7 @@ import MailCorrectionMission from "../scenes/missions/components/MailCorrectionM
 import MailRefusedMission from "../scenes/missions/components/MailRefusedMission";
 import Chevron from "./Chevron";
 
-export default ({ hit, options = [] }) => {
+export default ({ hit, options = [], callback = () => {} }) => {
   const [waitingCorrectionModal, setWaitingCorrectionModal] = useState(false);
   const [refusedModal, setRefusedModal] = useState(false);
   const [mission, setMission] = useState(null);
@@ -45,6 +45,7 @@ export default ({ hit, options = [] }) => {
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       setMission(newMission);
       toastr.success("Mis à jour!");
+      callback(newMission);
     } catch (e) {
       console.log(e);
       toastr.error("Oups, une erreur est survenue :", translate(e.code));
