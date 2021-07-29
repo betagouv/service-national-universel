@@ -8,7 +8,7 @@ import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
-import { translate, corpsEnUniforme, formatLongDateFR, ES_NO_LIMIT, ROLES } from "../../utils";
+import { translate, corpsEnUniforme, formatLongDateFR, ES_NO_LIMIT, ROLES, getFilterLabel } from "../../utils";
 import VioletButton from "../../components/buttons/VioletButton";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine } from "../../components/list";
@@ -16,7 +16,7 @@ import Badge from "../../components/Badge";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import Chevron from "../../components/Chevron";
 
-const FILTERS = ["SEARCH", "LEGAL_STATUS", "DEPARTMENT", "REGION", "CORPS", "WITH_NETWORK", "LOCATION"];
+const FILTERS = ["SEARCH", "LEGAL_STATUS", "DEPARTMENT", "REGION", "CORPS", "WITH_NETWORK", "LOCATION", "MILITARY_PREPARATION"];
 const formatLongDate = (date) => {
   if (!date) return "-";
   const d = new Date(date);
@@ -162,6 +162,20 @@ export default () => {
                   showSearch={true}
                   searchPlaceholder="Rechercher..."
                   sortBy="asc"
+                />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Préparation Militaire"
+                  componentId="MILITARY_PREPARATION"
+                  dataField="isMilitaryPreparation.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "MILITARY_PREPARATION") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "Préparation Militaire")}
                 />
               </FilterRow>
             </Filter>
