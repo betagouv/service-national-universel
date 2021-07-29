@@ -6,7 +6,7 @@ import { apiURL } from "../../../config";
 import api from "../../../services/api";
 import { Filter, ResultTable, BottomResultStats, Table, MultiLine } from "../../../components/list";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
-import { formatStringLongDate } from "../../../utils";
+import { formatStringLongDate, getResultLabel } from "../../../utils";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
 
 export default ({ young, onAffect, onClick }) => {
@@ -57,9 +57,7 @@ export default ({ young, onAffect, onClick }) => {
               renderResultStats={(e) => {
                 return (
                   <div>
-                    <BottomResultStats>
-                      Affiche {e.displayedResults * e.currentPage + 1} à {e.displayedResults * (e.currentPage + 1)} résultats sur {e.numberOfResults} résultats
-                    </BottomResultStats>
+                    <BottomResultStats>{getResultLabel(e)}</BottomResultStats>
                   </div>
                 );
               }}

@@ -1,6 +1,7 @@
 import React from "react";
 import { ReactiveList } from "@appbaseio/reactivesearch";
 import { TopResultStats, BottomResultStats } from "./list";
+import { getResultLabel } from "../utils";
 
 export default (props) => {
   return (
@@ -19,12 +20,8 @@ export default (props) => {
       renderResultStats={(e) => {
         return (
           <>
-            <TopResultStats>
-              Affiche {e.displayedResults * e.currentPage + 1} à {e.displayedResults * (e.currentPage + 1)} résultats sur {e.numberOfResults} résultats
-            </TopResultStats>
-            <BottomResultStats>
-              Affiche {e.displayedResults * e.currentPage + 1} à {e.displayedResults * (e.currentPage + 1)} résultats sur {e.numberOfResults} résultats
-            </BottomResultStats>
+            <TopResultStats>{getResultLabel(e)}</TopResultStats>
+            <BottomResultStats>{getResultLabel(e)}</BottomResultStats>
           </>
         );
       }}

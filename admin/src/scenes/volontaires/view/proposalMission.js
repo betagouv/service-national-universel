@@ -6,7 +6,7 @@ import ReactiveListComponent from "../../../components/ReactiveListComponent";
 
 import { apiURL } from "../../../config";
 import api from "../../../services/api";
-import { APPLICATION_STATUS, formatStringDate } from "../../../utils";
+import { APPLICATION_STATUS, formatStringDate, getResultLabel } from "../../../utils";
 import { Link } from "react-router-dom";
 
 export default ({ young, onSend }) => {
@@ -71,9 +71,7 @@ export default ({ young, onSend }) => {
                 renderResultStats={(e) => {
                   return (
                     <div>
-                      <BottomResultStats>
-                        Affiche {e.displayedResults * e.currentPage + 1} à {e.displayedResults * (e.currentPage + 1)} résultats sur {e.numberOfResults} résultats
-                      </BottomResultStats>
+                      <BottomResultStats>{getResultLabel(e)}</BottomResultStats>
                     </div>
                   );
                 }}
