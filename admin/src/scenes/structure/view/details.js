@@ -3,7 +3,7 @@ import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 
-import { translate } from "../../../utils";
+import { translate, ES_NO_LIMIT } from "../../../utils";
 import StructureView from "./wrapper";
 import api from "../../../services/api";
 import Avatar from "../../../components/Avatar";
@@ -22,6 +22,7 @@ export default ({ structure }) => {
     queries.push({ index: "referent", type: "_doc" });
     queries.push({
       query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": structure._id } }] } },
+      size: ES_NO_LIMIT,
     });
     if (structure.networkId) {
       queries.push({ index: "structure", type: "_doc" });
