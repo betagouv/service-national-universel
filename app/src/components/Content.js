@@ -1,6 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import { Container } from "reactstrap";
+import { HERO_IMAGES_LIST } from "../utils";
 
 export const AlertBoxInformation = ({ title, message, onClose }) => (
   <AlertBoxStyle>
@@ -112,7 +113,7 @@ const HeroStyle = styled.div`
     @media (max-width: 768px) {
       min-height: 0;
     }
-    background: url(${require("../assets/phase3.jpg")}) no-repeat center;
+    ${({ thumbImage = HERO_IMAGES_LIST[Math.floor(Math.random() * HERO_IMAGES_LIST.length)] }) => `background: url(${require(`../assets/${thumbImage}`)}) no-repeat center;`}
     background-size: cover;
     flex: 1;
     -webkit-clip-path: polygon(15% 0, 0 100%, 100% 100%, 100% 0);

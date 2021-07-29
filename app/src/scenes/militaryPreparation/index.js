@@ -64,7 +64,7 @@ export default () => {
         <AlertBox title="Votre dossier a été refusé." message={`Vous avez reçu un email à l'adresse ${young.email} indiquant les pièces bloquantes.`} />
       ) : null}
       <HeroContainer>
-        <Hero>
+        <Hero thumbImage="marine.jpg">
           <Content className="content">
             <h1>Réalisez votre mission lors d’une préparation militaire</h1>
             <p>Une période de découverte du milieu militaire pour vivre durant quelques jours le quotidien d’un soldat. </p>

@@ -48,6 +48,8 @@ export function permissionPhase3(y) {
   return y.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED;
 }
 
+export const HERO_IMAGES_LIST = ["login.jpg", "phase3.jpg", "rang.jpeg"];
+
 export const ENABLE_CHOOSE_MEETING_POINT = false;
 
 const FORCE_DISBALED_PM = false;
