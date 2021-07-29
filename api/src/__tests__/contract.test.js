@@ -31,6 +31,10 @@ afterAll(dbClose);
 
 describe("Structure", () => {
   describe("POST /contract", () => {
+    it("should return 500 when empty", async () => {
+      const res = await request(getAppHelper()).post("/contract").send();
+      expect(res.status).toBe(500);
+    });
     it("should return 500 when application is not found", async () => {
       const youngFixture = getNewYoungFixture();
       const young = await createYoungHelper(youngFixture);
@@ -281,6 +285,29 @@ describe("Structure", () => {
       expect(resToken.status).toBe(200);
       const contrat = await getContractByIdHelper(resPost.body.data._id);
       expect(contrat.youngContractStatus).toBe("VALIDATED");
+    });
+  });
+  describe("POST /contract/:id/download", () => {
+    it("should return 404 not found", async () => {
+      const resDownload = await request(getAppHelper()).post(`/contract/${ObjectId()}/download`).send();
+      expect(resDownload.status).toBe(404);
+    });
+    it("should return 500 not found", async () => {
+      const resDownload = await request(getAppHelper()).post(`/contract/2/download`).send();
+      expect(resDownload.status).toBe(500);
+    });
+    it("should return 200", async () => {
+      let young = await createYoungHelper(getNewYoungFixture());
+      const applicationFixture = getNewApplicationFixture();
+      applicationFixture.youngId = young._id;
+      const application = await createApplication(applicationFixture);
+      const contractFixture = getNewContractFixture();
+      contractFixture.youngId = young._id;
+      contractFixture.applicationId = application._id;
+      const resPost = await request(getAppHelper()).post("/contract").send(contractFixture);
+      expect(resPost.status).toBe(200);
+      const resDownload = await request(getAppHelper()).post(`/contract/${resPost.body.data._id}/download`).send();
+      expect(resDownload.status).toBe(200);
     });
   });
 });
