@@ -11,6 +11,7 @@ import {
   APPLICATION_STATUS,
   APPLICATION_STATUS_COLORS,
   YOUNG_STATUS_PHASE3,
+  region2department,
 } from "../../../utils";
 import api from "../../../services/api";
 import { CardArrow, Card, CardTitle, CardValueWrapper, CardValue, CardPercentage, CardSection, Subtitle } from "../../../components/dashboard";
@@ -73,7 +74,7 @@ export default ({ filter }) => {
         size: 0,
       });
 
-      if (filter.region) queries[1].query.bool.filter.push({ term: { "youngRegion.keyword": filter.region } });
+      if (filter.region) queries[1].query.bool.filter.push({ terms: { "youngDepartment.keyword": region2department[filter.region] } });
       if (filter.department) queries[1].query.bool.filter.push({ term: { "youngDepartment.keyword": filter.department } });
 
       const { responses } = await api.esQuery(queries);
