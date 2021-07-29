@@ -9,15 +9,27 @@ import FilterDepartment from "../components/FilterDepartment";
 
 import Status from "./status";
 
-import { YOUNG_STATUS } from "../../../utils";
+import { YOUNG_STATUS, ROLES } from "../../../utils";
 
 export default () => {
   const user = useSelector((state) => state.Auth.user);
-  const [filter, setFilter] = useState({ status: Object.keys(YOUNG_STATUS).filter((e) => e !== "IN_PROGRESS"), region: user.region, department: user.department, cohort: "2021" });
+  const [filter, setFilter] = useState();
 
   function updateFilter(n) {
-    setFilter({ ...filter, ...n });
+    setFilter({ ...(filter || { status: Object.keys(YOUNG_STATUS), region: "", department: "", cohort: "2021" }), ...n });
   }
+
+  useEffect(() => {
+    const cohort = "2021";
+    const status = Object.keys(YOUNG_STATUS).filter((e) => e !== "IN_PROGRESS");
+    if (user.role === ROLES.REFERENT_DEPARTMENT) {
+      updateFilter({ department: user.department, status, cohort });
+    } else if (user.role === ROLES.REFERENT_REGION) {
+      updateFilter({ region: user.region, status, cohort });
+    } else {
+      updateFilter({ cohort });
+    }
+  }, []);
 
   return (
     <>
@@ -26,15 +38,19 @@ export default () => {
           <Title>Volontaires</Title>
         </Col>
       </Row>
-      <FiltersList>
-        <FilterRegion updateFilter={updateFilter} filter={filter} />
-        <FilterDepartment updateFilter={updateFilter} filter={filter} />
-        <FilterWrapper>
-          <YearPicker options={["2019", "2020", "2021"]} onChange={(cohort) => updateFilter({ cohort })} value={filter.cohort} />
-        </FilterWrapper>
-      </FiltersList>
-      <SubTitle>En quelques chiffres</SubTitle>
-      <Status filter={filter} />
+      {filter ? (
+        <>
+          <FiltersList>
+            <FilterRegion updateFilter={updateFilter} filter={filter} />
+            <FilterDepartment updateFilter={updateFilter} filter={filter} />
+            <FilterWrapper>
+              <YearPicker options={["2019", "2020", "2021"]} onChange={(cohort) => updateFilter({ cohort })} value={filter.cohort} />
+            </FilterWrapper>
+          </FiltersList>
+          <SubTitle>En quelques chiffres</SubTitle>
+          <Status filter={filter} />
+        </>
+      ) : null}
     </>
   );
 };

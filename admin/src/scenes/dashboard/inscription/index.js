@@ -18,7 +18,7 @@ import ScholarshopSituation from "./scolarshipSituation";
 import ParticularSituation from "./particularSituation";
 import PriorityArea from "./priorityArea";
 import RuralArea from "./ruralArea";
-import { YOUNG_STATUS, translate, REFERENT_ROLES } from "../../../utils";
+import { YOUNG_STATUS, translate, ROLES } from "../../../utils";
 
 export default () => {
   const [filter, setFilter] = useState();
@@ -30,9 +30,9 @@ export default () => {
 
   useEffect(() => {
     const status = Object.keys(YOUNG_STATUS).filter((e) => e !== "IN_PROGRESS");
-    if (user.role === REFERENT_ROLES.REFERENT_DEPARTMENT) {
+    if (user.role === ROLES.REFERENT_DEPARTMENT) {
       updateFilter({ department: user.department, status });
-    } else if (user.role === REFERENT_ROLES.REFERENT_REGION) {
+    } else if (user.role === ROLES.REFERENT_REGION) {
       updateFilter({ region: user.region, status });
     } else {
       updateFilter();
@@ -112,7 +112,7 @@ const FilterStatus = ({ value = [], onChange }) => {
   }
 
   let STATUS = Object.keys(YOUNG_STATUS);
-  if (user.role !== REFERENT_ROLES.ADMIN) STATUS = STATUS.filter((e) => e !== "IN_PROGRESS");
+  if (user.role !== ROLES.ADMIN) STATUS = STATUS.filter((e) => e !== "IN_PROGRESS");
   return (
     <div style={{ display: "flex", flexWrap: "wrap" }}>
       {STATUS.map((e, i) => {
