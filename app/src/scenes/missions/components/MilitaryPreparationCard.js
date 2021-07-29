@@ -1,12 +1,15 @@
 import React from "react";
 import styled from "styled-components";
 import { Container } from "reactstrap";
+import { Link } from "react-router-dom";
 
 export default ({ onClose, title, message }) => (
   <Alert>
     <div className="text">
-      <strong>{title}</strong>
-      <div>{message}</div>
+      <Link to="/ma-preparation-militaire">
+        <strong>{title}</strong>
+        <p>{message}</p>
+      </Link>
     </div>
     {onClose ? <img src={require("../../../assets/close.svg")} height={15} onClick={onClose} style={{ cursor: "pointer" }} /> : null}
   </Alert>
@@ -30,15 +33,17 @@ const Alert = styled(Container)`
     margin-left: 20px;
     margin-right: auto;
     margin-bottom: 0;
-    color: #4d6d96;
-    text-shadow: 1px 0 0 #fff, -1px 0 0 #fff, 0 1px 0 #fff, 0 -1px 0 #fff, 1px 1px #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff;
-    font-size: 1rem;
-    font-weight: 500;
     strong {
       color: #161968;
       font-size: 1rem;
       font-weight: 700;
       margin-bottom: 3px;
+    }
+    p {
+      color: #4d6d96;
+      text-shadow: 1px 0 0 #fff, -1px 0 0 #fff, 0 1px 0 #fff, 0 -1px 0 #fff, 1px 1px #fff, -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff;
+      font-size: 1rem;
+      font-weight: 500;
     }
   }
 `;
