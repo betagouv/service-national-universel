@@ -34,7 +34,7 @@ export default ({ structure, onSent }) => {
             return toastr.success("Invitation envoyée");
           } catch (e) {
             if (e.code === "USER_ALREADY_REGISTERED")
-              return toastr.error("Cet email est déjà enregistré.", `${values.email} a déjà un compte sur cette plateforme.`, { timeOut: 10000 });
+              return toastr.error("Cette adresse email est déjà utilisée.", `${values.email} a déjà un compte sur cette plateforme.`, { timeOut: 10000 });
             toastr.error("Oups, une erreur est survenue lors de l'ajout du nouveau membre", translate(e));
           }
           actions.setSubmitting(false);
