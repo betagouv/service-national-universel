@@ -67,18 +67,21 @@ export default (props) => {
       </Heading>
       <Box>
         <Row>
-          <Col md={12} style={{ borderBottom: "2px solid #f4f5f7" }}>
+          <Col md={12}>
             <HeadCard>
-              <div className="thumb">
-                <img src={require("../../assets/observe.svg")} />
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <div className="thumb">
+                  <img src={require("../../assets/observe.svg")} />
+                </div>
+                <p>
+                  Au sein de la structure <span>{mission.structureName}</span>
+                </p>
               </div>
-              <p>
-                Au sein de la structure <span>{mission.structureName}</span>
-              </p>
               <SocialIcons structure={mission.structureId} />
             </HeadCard>
           </Col>
         </Row>
+        <hr />
         <Row>
           <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
             <Wrapper>
@@ -198,6 +201,9 @@ const Legend = styled.div`
   color: rgb(38, 42, 62);
   margin-bottom: 20px;
   font-size: 1.3rem;
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+  }
   font-weight: 500;
 `;
 const Box = styled.div`
@@ -217,6 +223,10 @@ const Button = styled.div`
   color: #fff;
   font-size: 1rem;
   padding: 0.8rem 3rem;
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+    padding: 0.5rem 1rem;
+  }
   width: fit-content;
   :hover {
     color: #fff;
@@ -225,20 +235,30 @@ const Button = styled.div`
 `;
 
 const Heading = styled(Container)`
-  margin-bottom: 40px;
+  margin-bottom: 3rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  @media (max-width: 768px) {
+    margin-bottom: 1rem;
+  }
   h1 {
     color: #161e2e;
     font-size: 3rem;
     font-weight: 700;
     padding-right: 3rem;
+    @media (max-width: 768px) {
+      padding-right: 1rem;
+      font-size: 1.1rem;
+    }
   }
   p {
     &.title {
       color: #42389d;
-      font-size: 16px;
+      font-size: 1rem;
+      @media (max-width: 768px) {
+        font-size: 0.7rem;
+      }
       font-weight: 700;
       margin-bottom: 5px;
       text-transform: uppercase;
@@ -260,10 +280,16 @@ const Tags = styled.div`
 
 const Wrapper = styled.div`
   padding: 3rem;
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
   .detail {
     font-size: 1rem;
     text-align: left;
     margin-top: 2rem;
+    @media (max-width: 768px) {
+      margin-top: 1rem;
+    }
     &-title {
       font-size: 0.8rem;
       margin-right: 1rem;
@@ -292,7 +318,11 @@ const HeadCard = styled.div`
   display: flex;
   padding: 0 1.5rem;
   align-items: center;
-  height: 4rem;
+  min-height: 4rem;
+  @media (max-width: 768px) {
+    flex-direction: column;
+    padding: 0 0.5rem;
+  }
   .thumb {
     transform: translateY(-20%);
     margin: 0 1rem;
@@ -300,12 +330,18 @@ const HeadCard = styled.div`
     height: 4.5rem;
     width: 4.5rem;
     border-radius: 0.5rem;
-    padding: 10px;
+    padding: 0.7rem;
     text-align: center;
+    @media (max-width: 768px) {
+      height: 3rem;
+      width: 3rem;
+      padding: 0.4rem;
+      margin: 0 0.5rem 0 0;
+    }
     img {
       border-radius: 6px;
-      max-width: 100%;
       height: 100%;
+      width: 100%;
       object-fit: cover;
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }
@@ -316,6 +352,10 @@ const HeadCard = styled.div`
     span {
       color: #242526;
       font-weight: 600;
+    }
+    @media (max-width: 768px) {
+      font-size: 0.8rem;
+      padding: 0.3rem 0;
     }
   }
   .social-link {
@@ -330,5 +370,8 @@ const HeadCard = styled.div`
   }
   .social-icons-container {
     margin-left: auto;
+    @media (max-width: 768px) {
+      margin: 0.5rem 0;
+    }
   }
 `;

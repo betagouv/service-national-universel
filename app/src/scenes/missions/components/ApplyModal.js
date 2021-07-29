@@ -52,7 +52,7 @@ export default ({ value, onChange, onSend }) => {
         ) : (
           <>
             <Button disabled={sending} onClick={send}>
-              Confirmer ma candidature
+              Confirmer&nbsp;ma&nbsp;candidature
             </Button>
             <CancelButton onClick={onChange}>Annuler</CancelButton>
           </>
@@ -103,6 +103,10 @@ const Button = styled.div`
   color: #fff;
   font-size: 1rem;
   padding: 0.8rem 3rem;
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+    padding: 0.5rem 1rem;
+  }
   :hover {
     color: #fff;
     background-color: #0e9f6e;

@@ -17,6 +17,9 @@ const Badge = styled.div`
   margin: 0.25rem 0.25rem;
   border-radius: 99999px;
   font-size: 0.8rem;
+  @media (max-width: 768px) {
+    font-size: 0.6rem;
+  }
   font-weight: 500;
   color: #9a9a9a;
   background-color: #f6f6f6;
