@@ -61,19 +61,33 @@ export default ({ young, admin }) => {
   }, [application]);
   useEffect(() => {
     const getTutor = async () => {
-      if (!application || !(application.tutorId || application.tutor?._id)) return;
-      const { ok, data, code } = await api.get(`/referent/${application.tutorId || application.tutor?._id}`);
-      if (!ok) return toastr.error("Oups, une erreur est survenue", code);
-      return setTutor(data);
+      try {
+        if (!application || !(application.tutorId || application.tutor?._id)) return setTutor({});
+        const { ok, data, code } = await api.get(`/referent/${application.tutorId || application.tutor?._id}`);
+        if (!ok) {
+          toastr.error(translate(code), `Aucun représentant de la structure n'a été trouvé`, { timeOut: 5000 });
+          return setTutor({});
+        }
+        return setTutor(data);
+      } catch (e) {
+        return setTutor({});
+      }
     };
     getTutor();
   }, [application]);
   useEffect(() => {
     const getManagerDepartment = async () => {
-      if (!young) return;
-      const { ok, data, code } = await api.get(`/referent/manager_department/${young.department}`);
-      if (!ok) return toastr.error("Oups, une erreur est survenue", code);
-      return setManagerDepartment(data);
+      try {
+        if (!young) return;
+        const { ok, data, code } = await api.get(`/referent/manager_department/${young.department}`);
+        if (!ok) {
+          toastr.error(translate(code), `Aucun représentant de l'état n'a été trouvé pour le département ${young.department}`, { timeOut: 5000 });
+          return setManagerDepartment({});
+        }
+        return setManagerDepartment(data);
+      } catch (e) {
+        setManagerDepartment({});
+      }
     };
     getManagerDepartment();
   }, [young]);
@@ -128,7 +142,7 @@ export default ({ young, admin }) => {
     }
   };
 
-  if (!application || !mission) return <Loader />;
+  if (!application || !mission || !managerDepartment || !tutor) return <Loader />;
 
   const isYoungAdult = getAge(young.birthdateAt) >= 18;
 
