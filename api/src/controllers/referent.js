@@ -29,6 +29,7 @@ const { validateId } = require("../utils/validator/default");
 const ReferentAuth = new AuthObject(ReferentObject);
 const { cookieOptions, JWT_MAX_AGE } = require("../cookie-options");
 const Joi = require("joi");
+const { department2region } = require("snu-lib/region-and-departments");
 const {
   ROLES_LIST,
   canInviteUser,
@@ -745,13 +746,22 @@ router.get("/manager_phase2/:department", passport.authenticate("young", { sessi
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
-    const data = await ReferentObject.findOne({
+    // get the referent_department
+    let data = await ReferentObject.findOne({
       subRole: SUB_ROLES.manager_phase2,
-      role: { $in: [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION] },
+      role: ROLES.REFERENT_DEPARTMENT,
       department: value.department,
     });
+    // if not found, get the referent_region
+    if (!data) {
+      data = await ReferentObject.findOne({
+        subRole: SUB_ROLES.manager_phase2,
+        role: ROLES.REFERENT_REGION,
+        region: department2region[value.department],
+      });
+    }
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    return res.status(200).send({ ok: true, data });
+    return res.status(200).send({ ok: true, data: { firstName: data.firstName, lastName: data.lastName, email: data.email } });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
