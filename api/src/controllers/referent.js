@@ -39,6 +39,7 @@ const {
   SUB_ROLES,
   ROLES,
   canUpdateReferent,
+  canViewYoungMilitaryPreparationFile,
 } = require("snu-lib/roles");
 
 function inSevenDays() {
@@ -561,12 +562,15 @@ router.get("/youngFile/:youngId/military-preparation/:key/:fileName", passport.a
       .unknown()
       .validate({ ...req.params }, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
-    if (req.user.role !== ROLES.ADMIN) {
+    const { youngId, key, fileName } = value;
+
+    const young = await YoungObject.findById(youngId);
+    // if they are not admin nor referent, it is not allowed to access this route unless they are from a military preparation structure
+    if (!canViewYoungMilitaryPreparationFile(req.user, young)) {
       const structure = await StructureObject.findById(req.user.structureId);
       if (!structure || structure?.isMilitaryPreparation !== "true") return res.status(400).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    const { youngId, key, fileName } = value;
     const downloaded = await getFile(`app/young/${youngId}/military-preparation/${key}/${fileName}`);
     const decryptedBuffer = decrypt(downloaded.Body);
 
