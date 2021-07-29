@@ -97,4 +97,24 @@ export default styled.div`
     background-position: center;
     background-size: 15px 15px;
   }
+  .application-detail {
+    display: flex;
+    flex-direction: column;
+    padding: 5px 20px;
+    margin-bottom: 1rem;
+    text-align: left;
+    :hover {
+      box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 12px 0px;
+      background: #f9f9f9;
+    }
+    &-priority {
+      font-size: 0.75rem;
+      color: #5245cc;
+    }
+  }
+  .quote {
+    font-size: 18px;
+    font-weight: 400;
+    font-style: italic;
+  }
 `;
