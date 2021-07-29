@@ -15,6 +15,9 @@ export default ({ onClose, title, message }) => (
 
 const Alert = styled(Container)`
   border-radius: 8px;
+  @media (max-width: 768px) {
+    border-radius: 0;
+  }
   display: flex;
   align-items: center;
   background-color: #5949d0;
