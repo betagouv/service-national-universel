@@ -178,7 +178,7 @@ export default (props) => {
           history.push(`/mission/${mission._id}`);
           toastr.success("Mission enregistrée");
         } catch (e) {
-          setLoading({
+          setLoadings({
             saveButton: false,
             submitButton: false,
             changeStructureButton: false,
