@@ -69,6 +69,22 @@ export const ResultTable = styled.div`
       background-size: 8px;
     }
   }
+  select.sort-options {
+    background: none; // remove the arrows added by sortOptions
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    outline: 0;
+    background-color: #fff;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
+    border: 0;
+    border-radius: 6px;
+    padding: 0.2rem 0.5rem 0.2rem 0.5rem;
+    font-size: 0.7rem;
+    color: #242526;
+    min-width: 150px;
+    cursor: pointer;
+  }
 `;
 
 export const Filter = styled.div`

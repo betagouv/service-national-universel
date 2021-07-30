@@ -10,17 +10,18 @@ export default (props) => {
       componentId="result"
       pagination={true}
       paginationAt="both"
-      innerClass={{ pagination: "pagination" }}
+      innerClass={{ pagination: "pagination", sortOptions: "sort-options" }}
       size={10}
       dataField="createdAt"
       sortBy="desc"
       showLoader={true}
-      loader={<div style={{ padding: "0 20px" }}>Chargement...</div>}
-      renderNoResults={() => <div style={{ padding: "10px 25px" }}>Aucun résultat.</div>}
+      loader={<div style={{ position: "absolute", width: "100%", textAlign: "center", padding: "1rem", fontSize: "0.85rem" }}>Chargement...</div>}
+      renderNoResults={() => <div style={{ textAlign: "center", padding: "1rem", fontSize: "0.85rem" }}>Aucun résultat.</div>}
       renderResultStats={(e) => {
         return (
           <>
-            <TopResultStats>{getResultLabel(e)}</TopResultStats>
+            {/* if there is no sort options, there is area to display the resultStats */}
+            {!props.sortOptions ? <TopResultStats>{getResultLabel(e)}</TopResultStats> : null}
             <BottomResultStats>{getResultLabel(e)}</BottomResultStats>
           </>
         );

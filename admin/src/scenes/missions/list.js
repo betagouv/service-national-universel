@@ -215,6 +215,14 @@ export default () => {
               <ReactiveListComponent
                 defaultQuery={getDefaultQuery}
                 react={{ and: FILTERS }}
+                sortOptions={[
+                  { label: "Date de création (récent > ancien)", dataField: "createdAt", sortBy: "desc" },
+                  { label: "Date de création (ancien > récent)", dataField: "createdAt", sortBy: "asc" },
+                  { label: "Nombre de place (croissant)", dataField: "placesLeft", sortBy: "asc" },
+                  { label: "Nombre de place (décroissant)", dataField: "placesLeft", sortBy: "desc" },
+                  { label: "Nom de la mission A-Z", dataField: "name.keyword", sortBy: "asc" },
+                  { label: "Nom de la mission Z-A", dataField: "name.keyword", sortBy: "desc" },
+                ]}
                 render={({ data }) => (
                   <Table>
                     <thead>
