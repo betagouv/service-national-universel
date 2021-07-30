@@ -233,12 +233,13 @@ const Sidebar = styled.div`
   transition: 0.2s;
   a {
     font-size: 13px;
-    color: #fff;
+    color: #f5f5f5;
     display: flex;
     align-items: center;
     font-weight: 700;
     &.active,
     :hover {
+      color: #fff;
       background-color: #5145cd;
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }
