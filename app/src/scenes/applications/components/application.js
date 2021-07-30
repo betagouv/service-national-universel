@@ -8,6 +8,7 @@ import { useSelector } from "react-redux";
 import api from "../../../services/api";
 import { translate, APPLICATION_STATUS_COLORS, APPLICATION_STATUS, getAge } from "../../../utils";
 import Badge from "../../../components/Badge";
+import DomainThumb from "../../../components/DomainThumb";
 
 export default ({ application, index }) => {
   const [value, setValue] = useState(application);
@@ -44,9 +45,7 @@ export default ({ application, index }) => {
               <Link to={`/mission/${value.mission._id}`}>
                 <div className="info">
                   <div className="inner">
-                    <div className="thumb">
-                      <img src={require("../../../assets/observe.svg")} />
-                    </div>
+                    <DomainThumb domain={value.mission.domains[0]} size="3rem" style={{ padding: "0.4rem" }} />
                     <div>
                       <h4>{value.mission.structureName}</h4>
                       <p>{value.mission.name}</p>
@@ -271,22 +270,6 @@ const Card = styled(Row)`
   .inner {
     display: flex;
     align-items: flex-start;
-    .thumb {
-      margin-right: 20px;
-      background-color: #42389d;
-      height: 50px;
-      width: 48px;
-      border-radius: 4px;
-      padding: 10px;
-      text-align: center;
-      img {
-        border-radius: 6px;
-        max-width: 100%;
-        height: 30px;
-        object-fit: cover;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-      }
-    }
     h4 {
       font-size: 14px;
       font-weight: 500;

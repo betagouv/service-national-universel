@@ -225,11 +225,11 @@ export default () => {
                     key={e._id}
                     id={e._id}
                     title={e.structureName}
-                    image={require("../../assets/observe.svg")}
                     subtitle={e.name}
                     tags={tags}
                     places={e.placesLeft}
                     isMilitaryPreparation={e.isMilitaryPreparation}
+                    domain={e.domains[0]}
                   />
                 );
               });

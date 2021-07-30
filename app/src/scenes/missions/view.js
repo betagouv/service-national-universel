@@ -12,6 +12,7 @@ import ApplyModal from "./components/ApplyModal";
 import ApplyDoneModal from "./components/ApplyDoneModal";
 import Loader from "../../components/Loader";
 import Badge from "../../components/Badge";
+import DomainThumb from "../../components/DomainThumb";
 
 export default (props) => {
   const [mission, setMission] = useState();
@@ -70,9 +71,7 @@ export default (props) => {
           <Col md={12}>
             <HeadCard>
               <div style={{ display: "flex", alignItems: "center" }}>
-                <div className="thumb">
-                  <img src={require("../../assets/observe.svg")} />
-                </div>
+                <DomainThumb domain={mission.domains[0]} style={{ transform: "translateY(-20%)" }} size="4rem" />
                 <p>
                   Au sein de la structure <span>{mission.structureName}</span>
                 </p>
@@ -326,29 +325,6 @@ const HeadCard = styled.div`
   @media (max-width: 768px) {
     flex-direction: column;
     padding: 0 0.5rem;
-  }
-  .thumb {
-    transform: translateY(-20%);
-    margin: 0 1rem;
-    background-color: #42389d;
-    height: 4.5rem;
-    width: 4.5rem;
-    border-radius: 0.5rem;
-    padding: 0.7rem;
-    text-align: center;
-    @media (max-width: 768px) {
-      height: 3rem;
-      width: 3rem;
-      padding: 0.4rem;
-      margin: 0 0.5rem 0 0;
-    }
-    img {
-      border-radius: 6px;
-      height: 100%;
-      width: 100%;
-      object-fit: cover;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    }
   }
   p {
     margin: 0;
