@@ -143,8 +143,8 @@ export default ({ young }) => {
       {modal?.visible && modal?.template === "confirm" && (
         <ModalConfirm
           topTitle="alerte"
-          title={`Attention, vous êtes sur le point de confirmer les fichiers transmis pas ${young.firstName} pour la préparation militaire.`}
-          message={`Une fois ces documents validés, un mail sera envoyé à ${young.firstName} et la candidature sera notée "En attente de validation" par l'armée concernée.`}
+          title={`Vous êtes sur le point de confirmer l'éligibilité de ${young.firstName} à la préparation militaire, sur la base des documents reçus.`}
+          message={`Une fois l'éligibilité confirmée un mail sera envoyé à ${young.firstName} (${young.email}).`}
           onChange={() => setModal(null)}
           onConfirm={onValidate}
         />
@@ -152,8 +152,8 @@ export default ({ young }) => {
       {modal?.visible && modal?.template === "correction" && (
         <ModalCorrectionMilitaryPreparation
           topTitle="alerte"
-          title={`Attention, vous êtes sur le point de demander des corrections pour les fichiers transmis pas ${young.firstName} pour la préparation militaire.`}
-          message={`Une fois le message ci-dessous validé, il sera transmis par mail à ${young.firstName}.`}
+          title={`Attention, vous êtes sur le point de demander des corrections aux documents envoyés, car ces derniers ne vous permettent pas de confirmer ou d'infirmer l'éligibilité de ${young.firstName} à la préparation militaire`}
+          message={`Une fois le message ci-dessous validé, il sera transmis par mail à ${young.firstName} (${young.email}).`}
           young={young}
           onChange={() => setModal(null)}
           onConfirm={onCorrection}
@@ -162,8 +162,8 @@ export default ({ young }) => {
       {modal?.visible && modal?.template === "refuse" && (
         <ModalRefuseMilitaryPreparation
           topTitle="alerte"
-          title={`Attention, vous êtes sur le point de refuser les fichiers transmis pas ${young.firstName} pour la préparation militaire.`}
-          message={`Merci de ne refuser qui si vraiment le jeune ne correspond pas aux critères. Une fois le message ci-dessous validé, il sera transmis par mail à ${young.firstName}.`}
+          title={`Attention, vous êtes sur le point d'infirmer l'éligibilité de ${young.firstName} à la préparation militaire, sur la base des documents reçus.`}
+          message={`Merci de motiver votre refus au jeune en lui expliquant sur quelle base il n'est pas éligible à la préparation militaire. Une fois le message ci-dessous validé, il sera transmis par mail à ${young.firstName} (${young.email}).`}
           young={young}
           onChange={() => setModal(null)}
           onConfirm={onRefuse}

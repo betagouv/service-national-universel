@@ -41,7 +41,7 @@ export const Content = styled.div`
   }
   p {
     font-size: 1rem;
-    margin: 0;
+    margin-bottom: 1rem;
     color: #6e757c;
   }
   textarea {
