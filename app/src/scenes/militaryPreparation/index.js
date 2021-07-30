@@ -161,6 +161,7 @@ export default () => {
                       errors={errors}
                       title="Attestation de recensement"
                       subTitle="Déposez ici la copie de votre attestation de recensement."
+                      subsubTitle="À défaut, à téléverser dès réception du document ou à apporter pour le 1er jour de la préparation militaire."
                       values={values}
                       name="militaryPreparationFilesCensus"
                       handleChange={handleChange}

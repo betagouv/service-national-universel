@@ -14,6 +14,7 @@ export default ({
   upTitle = "document requis",
   title = "Carte d'embarquement militaire",
   subTitle = "Cette pièce est importante et tu le sais",
+  subsubTitle,
   errorMessage = "Ce document est requis",
   template,
 }) => (
@@ -22,6 +23,7 @@ export default ({
       <UpTitle>{upTitle}</UpTitle>
       <Title>{title}</Title>
       <SubTitle>{subTitle}</SubTitle>
+      {subsubTitle ? <SubSubTitle>{subsubTitle}</SubSubTitle> : null}
       {template ? (
         <TemplateLink href={template} target="_blank">
           Télécharger le modèle
@@ -120,4 +122,10 @@ const SubTitle = styled.div`
   font-weight: 400;
   color: grey;
   margin: 1rem 0;
+`;
+
+const SubSubTitle = styled(SubTitle)`
+  font-size: 0.9rem;
+  margin: 0 0 1rem 0;
+  font-style: italic;
 `;
