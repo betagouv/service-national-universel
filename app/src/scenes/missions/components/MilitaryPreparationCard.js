@@ -22,10 +22,24 @@ const Alert = styled(Container)`
   background: url(${require("../../../assets/pm.png")}) no-repeat right;
   background-size: cover;
   background-color: #fff;
+  overflow: hidden;
+  @media (max-width: 1000px) {
+    ::after {
+      background: rgb(255, 255, 255);
+      box-shadow: 0 0 0 3000px rgb(255, 255, 255, 0.85);
+      position: relative;
+      height: fit-content;
+      width: fit-content;
+      content: "";
+      left: 0;
+      top: 0;
+    }
+  }
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   margin-bottom: 20px;
   padding: 20px 30px;
   .text {
+    z-index: 1;
     max-width: 50%;
     @media (max-width: 1000px) {
       max-width: 100%;
