@@ -8,7 +8,7 @@ import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
-import { formatStringDate, translate, getFilterLabel, formatLongDateFR, formatDateFR, ES_NO_LIMIT, ROLES } from "../../utils";
+import { formatStringDateTimezoneUTC, translate, getFilterLabel, formatLongDateFR, formatDateFRTimezoneUTC, ES_NO_LIMIT, ROLES } from "../../utils";
 import SelectStatusMission from "../../components/selectStatusMission";
 import VioletButton from "../../components/buttons/VioletButton";
 import Loader from "../../components/Loader";
@@ -88,8 +88,8 @@ export default () => {
                     "Email du tuteur": data.tutor?.email,
                     "Téléphone du tuteur": data.tutor?.mobile ? data.tutor?.mobile : data.tutor?.phone,
                     "Liste des domaines de la mission": data.domains,
-                    "Date du début": formatDateFR(data.startAt),
-                    "Date de fin": formatDateFR(data.endAt),
+                    "Date du début": formatDateFRTimezoneUTC(data.startAt),
+                    "Date de fin": formatDateFRTimezoneUTC(data.endAt),
                     Format: data.format,
                     Fréquence: data.frequence,
                     Période: data.period,
@@ -283,10 +283,10 @@ const Hit = ({ hit, onClick, selected, callback }) => {
       </td>
       <td>
         <div>
-          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Du</span> {formatStringDate(value.startAt)}
+          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Du</span> {formatStringDateTimezoneUTC(value.startAt)}
         </div>
         <div>
-          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Au</span> {formatStringDate(value.endAt)}
+          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Au</span> {formatStringDateTimezoneUTC(value.endAt)}
         </div>
       </td>
       <td>

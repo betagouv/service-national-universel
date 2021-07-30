@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
-import { translate, formatStringDate } from "../../../utils";
+import { translate, formatStringDateTimezoneUTC } from "../../../utils";
 import MissionView from "./wrapper";
 import { Box, BoxTitle } from "../../../components/box";
 
@@ -24,11 +24,11 @@ export default ({ mission, structure, tutor }) => {
                 </div>
                 <div className="detail">
                   <div className="detail-title">Début</div>
-                  <div className="detail-text">{formatStringDate(mission.startAt)}</div>
+                  <div className="detail-text">{formatStringDateTimezoneUTC(mission.startAt)}</div>
                 </div>
                 <div className="detail">
                   <div className="detail-title">Fin</div>
-                  <div className="detail-text">{formatStringDate(mission.endAt)}</div>
+                  <div className="detail-text">{formatStringDateTimezoneUTC(mission.endAt)}</div>
                 </div>
                 <div className="detail">
                   <div className="detail-title">Adresse</div>

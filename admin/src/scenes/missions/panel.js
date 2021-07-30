@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 
-import { translate, formatStringDate, MISSION_STATUS_COLORS } from "../../utils";
+import { translate, formatStringDateTimezoneUTC, MISSION_STATUS_COLORS } from "../../utils";
 import api from "../../services/api";
 import SelectStatusMission from "../../components/selectStatusMission";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
@@ -134,11 +134,11 @@ export default ({ onChange, mission }) => {
         </div>
         <div className="detail">
           <div className="detail-title">Début</div>
-          <div className="detail-text">{formatStringDate(mission.startAt)}</div>
+          <div className="detail-text">{formatStringDateTimezoneUTC(mission.startAt)}</div>
         </div>
         <div className="detail">
           <div className="detail-title">Fin</div>
-          <div className="detail-text">{formatStringDate(mission.endAt)}</div>
+          <div className="detail-text">{formatStringDateTimezoneUTC(mission.endAt)}</div>
         </div>
         <div className="detail">
           <div className="detail-title">Adresse</div>

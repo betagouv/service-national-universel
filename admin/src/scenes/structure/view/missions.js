@@ -4,7 +4,7 @@ import api from "../../../services/api";
 import StructureView from "./wrapper";
 import Panel from "../../missions/panel";
 
-import { formatStringDate } from "../../../utils";
+import { formatStringDateTimezoneUTC } from "../../../utils";
 import SelectStatusMission from "../../../components/selectStatusMission";
 import Loader from "../../../components/Loader";
 
@@ -75,10 +75,10 @@ const Hit = ({ hit, onClick }) => {
       </td>
       <td>
         <div>
-          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Du</span> {formatStringDate(hit.startAt)}
+          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Du</span> {formatStringDateTimezoneUTC(hit.startAt)}
         </div>
         <div>
-          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Au</span> {formatStringDate(hit.endAt)}
+          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Au</span> {formatStringDateTimezoneUTC(hit.endAt)}
         </div>
       </td>
       <td>

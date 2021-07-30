@@ -1,7 +1,7 @@
 const fs = require("fs");
 const path = require("path");
 const config = require("../../config");
-const { formatDateFR } = require("snu-lib");
+const { formatDateFRTimezoneUTC } = require("snu-lib");
 
 const getBaseUrl = () => {
   if (config.ENVIRONMENT === "staging") return "https://app-a29a266c-556d-4f95-bc0e-9583a27f3f85.cleverapps.io";
@@ -143,7 +143,7 @@ const addSignature = (str, context, field) => {
 
 const replaceDate = (str, context, field) => {
   const regex = new RegExp("{{" + field + "}}", "g");
-  return str.replace(regex, formatDateFR(context[field]));
+  return str.replace(regex, formatDateFRTimezoneUTC(context[field]));
 };
 
 module.exports = { render };

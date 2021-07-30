@@ -6,7 +6,7 @@ import { apiURL } from "../../../config";
 import api from "../../../services/api";
 import { Filter, ResultTable, BottomResultStats, Table, MultiLine } from "../../../components/list";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
-import { formatStringLongDate, getResultLabel } from "../../../utils";
+import { getResultLabel } from "../../../utils";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
 
 export default ({ young, onAffect, onClick }) => {

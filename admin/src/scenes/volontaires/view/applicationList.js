@@ -5,7 +5,7 @@ import { Row } from "reactstrap";
 
 import api from "../../../services/api";
 import SelectStatusApplication from "../../../components/selectStatusApplication";
-import { APPLICATION_STATUS, formatStringDate } from "../../../utils";
+import { APPLICATION_STATUS, formatStringDateTimezoneUTC } from "../../../utils";
 import { Link, useHistory } from "react-router-dom";
 import ProposalMission from "./proposalMission";
 import CreateMission from "./createMission";
@@ -103,10 +103,10 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
       </td>
       <td>
         <div>
-          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Du</span> {formatStringDate(mission.startAt)}
+          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Du</span> {formatStringDateTimezoneUTC(mission.startAt)}
         </div>
         <div>
-          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Au</span> {formatStringDate(mission.endAt)}
+          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Au</span> {formatStringDateTimezoneUTC(mission.endAt)}
         </div>
       </td>
       <td>

@@ -6,7 +6,7 @@ import ReactiveListComponent from "../../../components/ReactiveListComponent";
 
 import { apiURL } from "../../../config";
 import api from "../../../services/api";
-import { APPLICATION_STATUS, formatStringDate, getResultLabel } from "../../../utils";
+import { APPLICATION_STATUS, formatStringDateTimezoneUTC, getResultLabel } from "../../../utils";
 import { Link } from "react-router-dom";
 
 export default ({ young, onSend }) => {
@@ -109,10 +109,10 @@ const HitMission = ({ hit, onSend }) => {
       </td>
       <td>
         <div>
-          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Du</span> {formatStringDate(hit.startAt)}
+          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Du</span> {formatStringDateTimezoneUTC(hit.startAt)}
         </div>
         <div>
-          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Au</span> {formatStringDate(hit.endAt)}
+          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Au</span> {formatStringDateTimezoneUTC(hit.endAt)}
         </div>
       </td>
       <td>
