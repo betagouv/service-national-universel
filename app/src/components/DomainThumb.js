@@ -1,9 +1,9 @@
 import React from "react";
 import styled from "styled-components";
 
-export default ({ domain = "default", backgroundColor = "#42389d", size = "3rem", sizeMobile = "3rem", style }) => (
+export default ({ domain, backgroundColor = "#42389d", size = "3rem", sizeMobile = "3rem", style }) => (
   <Thumb backgroundColor={backgroundColor} size={size} sizeMobile={sizeMobile} style={style}>
-    <img src={require(`../assets/mission-domains/${domain.toLowerCase()}.svg`)} />
+    <img src={require(`../assets/mission-domains/${(domain || "default").toLowerCase()}.svg`)} />
   </Thumb>
 );
 
