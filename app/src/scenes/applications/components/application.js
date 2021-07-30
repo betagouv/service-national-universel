@@ -45,7 +45,7 @@ export default ({ application, index }) => {
               <Link to={`/mission/${value.mission._id}`}>
                 <div className="info">
                   <div className="inner">
-                    <DomainThumb domain={value.mission.domains[0]} size="3rem" style={{ padding: "0.4rem" }} />
+                    <DomainThumb domain={value.mission.domains[0]} size="3rem" />
                     <div>
                       <h4>{value.mission.structureName}</h4>
                       <p>{value.mission.name}</p>

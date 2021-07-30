@@ -14,7 +14,7 @@ export default ({ id, title, domain, subtitle, tags = [], places, location, onCl
           <Link to={`/mission/${id}`}>
             <div>
               <div className="inner">
-                <DomainThumb domain={domain} size="3rem" style={{ padding: "0.4rem" }} />
+                <DomainThumb domain={domain} size="3rem" />
                 <div>
                   <h4>{title}</h4>
                   <p>{subtitle}</p>
