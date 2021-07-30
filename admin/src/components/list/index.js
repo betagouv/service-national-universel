@@ -189,21 +189,18 @@ export const FilterRow = styled.div`
 `;
 
 export const ResultStats = styled.div`
+  position: absolute;
   color: #242526;
   font-size: 12px;
-  padding-left: 25px;
+  right: 310px;
 `;
 
 export const TopResultStats = styled(ResultStats)`
-  position: absolute;
-  top: 25px;
-  left: 0;
+  top: 15px;
 `;
 
 export const BottomResultStats = styled(ResultStats)`
-  position: absolute;
-  top: calc(100% - 50px);
-  left: 0;
+  bottom: 25px;
 `;
 
 export const ActionBox = styled.div`

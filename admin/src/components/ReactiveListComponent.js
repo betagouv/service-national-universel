@@ -20,8 +20,7 @@ export default (props) => {
       renderResultStats={(e) => {
         return (
           <>
-            {/* if there is no sort options, there is area to display the resultStats */}
-            {!props.sortOptions ? <TopResultStats>{getResultLabel(e)}</TopResultStats> : null}
+            <TopResultStats>{getResultLabel(e)}</TopResultStats>
             <BottomResultStats>{getResultLabel(e)}</BottomResultStats>
           </>
         );
