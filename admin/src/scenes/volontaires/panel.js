@@ -54,7 +54,6 @@ export default ({ onChange, value }) => {
           <div className="quote">{young.withdrawnMessage ? `« ${young.withdrawnMessage} »` : "Non renseigné"}</div>
         </Info>
       ) : null}
-      {young && young.historic && young.historic.length !== 0 && <Historic value={young.historic} />}
       <Info title="Recherche de MIG" id={young._id}>
         {young.applications.length ? (
           <>
@@ -115,6 +114,7 @@ export default ({ onChange, value }) => {
         <Details title="Aménagement spécifique" value={t(young.specificAmenagment)} />
         <Details title="Activités de haut niveau" value={t(young.highSkilledActivity)} />
       </Info>
+      {young && young.historic && young.historic.length !== 0 && <Historic value={young.historic} />}
       {young.motivations && (
         <div className="info">
           <div className="info-title">Motivations</div>
