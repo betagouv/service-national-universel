@@ -12,9 +12,8 @@ import api from "../../../services/api";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 import Loader from "../../../components/Loader";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
-import ModalCorrectionMilitaryPreparation from "../../../components/modals/ModalCorrectionMilitaryPreparation";
-import ModalRefuseMilitaryPreparation from "../../../components/modals/ModalRefuseMilitaryPreparation";
-import { adminURL } from "../../../config";
+import ModalConfirmWithMessage from "../../../components/modals/ModalConfirmWithMessage";
+import { adminURL, appURL } from "../../../config";
 
 export default ({ young }) => {
   const [applicationsToMilitaryPreparation, setApplicationsToMilitaryPreparation] = useState(null);
@@ -85,7 +84,7 @@ export default ({ young }) => {
     console.log("handleCorrection");
     setModal({ visible: true, template: "correction" });
   };
-  const onCorrection = async () => {
+  const onCorrection = async (message) => {
     console.log("onCorrection");
 
     // update the young
@@ -103,7 +102,11 @@ export default ({ young }) => {
           `Une erreur s'est produite lors du changement automatique de statut de la candidtature à la mission : ${app.missionName}`
         );
     }
-
+    await api.post(`/email/send-template/${SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_CORRECTION}`, {
+      emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+      params: { message, cta: `${appURL}/ma-preparation-militaire` },
+    });
+    toastr.success("Email envoyé !");
     setModal(null);
     // Refresh
     history.go(0);
@@ -114,7 +117,7 @@ export default ({ young }) => {
     setModal({ visible: true, template: "refuse" });
   };
 
-  const onRefuse = async () => {
+  const onRefuse = async (message) => {
     console.log("onRefuse");
 
     // update the young
@@ -132,7 +135,11 @@ export default ({ young }) => {
           `Une erreur s'est produite lors du changement automatique de statut de la candidtature à la mission : ${app.missionName}`
         );
     }
-
+    await api.post(`/email/send-template/${SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_REFUSED}`, {
+      emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+      params: { message },
+    });
+    toastr.success("Email envoyé !");
     setModal(null);
     // Refresh
     history.go(0);
@@ -150,7 +157,7 @@ export default ({ young }) => {
         />
       )}
       {modal?.visible && modal?.template === "correction" && (
-        <ModalCorrectionMilitaryPreparation
+        <ModalConfirmWithMessage
           topTitle="alerte"
           title={`Attention, vous êtes sur le point de demander des corrections aux documents envoyés, car ces derniers ne vous permettent pas de confirmer ou d'infirmer l'éligibilité de ${young.firstName} à la préparation militaire`}
           message={`Une fois le message ci-dessous validé, il sera transmis par mail à ${young.firstName} (${young.email}).`}
@@ -160,7 +167,7 @@ export default ({ young }) => {
         />
       )}
       {modal?.visible && modal?.template === "refuse" && (
-        <ModalRefuseMilitaryPreparation
+        <ModalConfirmWithMessage
           topTitle="alerte"
           title={`Attention, vous êtes sur le point d'infirmer l'éligibilité de ${young.firstName} à la préparation militaire, sur la base des documents reçus.`}
           message={`Merci de motiver votre refus au jeune en lui expliquant sur quelle base il n'est pas éligible à la préparation militaire. Une fois le message ci-dessous validé, il sera transmis par mail à ${young.firstName} (${young.email}).`}
