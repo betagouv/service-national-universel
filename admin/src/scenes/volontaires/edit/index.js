@@ -63,7 +63,7 @@ export default (props) => {
         onSubmit={async (values) => {
           try {
             const { ok, code, data: young } = await api.put(`/referent/young/${values._id}`, values);
-            if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
+            if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             toastr.success("Mis à jour!");
           } catch (e) {
             console.log(e);
