@@ -72,7 +72,6 @@ export default () => {
         <Switch>
           <Route path="/validate-contract/done" component={ContractDone} />
           <Route path="/validate-contract" component={Contract} />
-
           <Route path="/inscription" component={Inscription} />
           <Route path="/auth" component={Auth} />
           <Route path="/" component={Espace} />
