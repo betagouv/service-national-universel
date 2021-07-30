@@ -6,7 +6,7 @@ import { Col, Row } from "reactstrap";
 import { toastr } from "react-redux-toastr";
 
 import api from "../../services/api";
-import { translate, formatStringDate } from "../../utils";
+import { translate, formatStringDateTimezoneUTC } from "../../utils";
 import SocialIcons from "../../components/SocialIcons";
 import ApplyModal from "./components/ApplyModal";
 import ApplyDoneModal from "./components/ApplyDoneModal";
@@ -95,7 +95,11 @@ export default (props) => {
           </Col>
           <Col md={6}>
             <Wrapper>
-              <Legend>{mission.startAt && mission.endAt ? `Du ${formatStringDate(mission.startAt)} au ${formatStringDate(mission.endAt)}` : "Aucune date renseignée"}</Legend>
+              <Legend>
+                {mission.startAt && mission.endAt
+                  ? `Du ${formatStringDateTimezoneUTC(mission.startAt)} au ${formatStringDateTimezoneUTC(mission.endAt)}`
+                  : "Aucune date renseignée"}
+              </Legend>
               <Detail title="Fréquence" content={mission.frequence} />
               <Detail title="Période pour réaliser la mission" content={mission.period} />
               <Detail title="Lieu" content={[mission.address, mission.zip, mission.city, mission.department]} />

@@ -10,7 +10,7 @@ import api from "../../services/api";
 import { apiURL, appURL } from "../../config";
 import Panel from "./panel";
 import Badge from "../../components/Badge";
-import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS_COLORS, isInRuralArea, formatDateFR, formatLongDateFR, getAge, ES_NO_LIMIT, ROLES } from "../../utils";
+import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS_COLORS, isInRuralArea, formatLongDateFR, getAge, ES_NO_LIMIT, ROLES } from "../../utils";
 import { Link } from "react-router-dom";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
@@ -86,7 +86,7 @@ export default ({ setYoung }) => {
                     Cohorte: data.cohort,
                     Prénom: data.firstName,
                     Nom: data.lastName,
-                    "Date de naissance": formatDateFR(data.birthdateAt),
+                    "Date de naissance": formatLongDateUTC(data.birthdateAt),
                     Sexe: data.gender,
                     Email: data.email,
                     Téléphone: data.phone,

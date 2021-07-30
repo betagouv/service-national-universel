@@ -7,7 +7,7 @@ import api from "../../../services/api";
 import CenterView from "./wrapper";
 import Panel from "../../volontaires/panel";
 
-import { getFilterLabel, YOUNG_STATUS_PHASE1, translate, formatDateFR, isInRuralArea, formatLongDateFR, getAge, ES_NO_LIMIT } from "../../../utils";
+import { getFilterLabel, YOUNG_STATUS_PHASE1, translate, formatDateFRTimezoneUTC, isInRuralArea, formatLongDateFR, getAge, ES_NO_LIMIT } from "../../../utils";
 import Loader from "../../../components/Loader";
 import ExportComponent from "../../../components/ExportXlsx";
 import { Filter, FilterRow, ResultTable, Table, MultiLine } from "../../../components/list";
@@ -83,7 +83,7 @@ export default ({ center, updateCenter }) => {
                       Cohorte: data.cohort,
                       Prénom: data.firstName,
                       Nom: data.lastName,
-                      "Date de naissance": formatDateFR(data.birthdateAt),
+                      "Date de naissance": formatDateFRTimezoneUTC(data.birthdateAt),
                       Sexe: data.gender,
                       Email: data.email,
                       Téléphone: data.phone,

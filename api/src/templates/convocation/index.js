@@ -7,7 +7,7 @@ const MeetingPointModel = require("../../models/meetingPoint");
 const BusModel = require("../../models/bus");
 const DepartmentServiceModel = require("../../models/departmentService");
 const { capture } = require("../../sentry");
-const { formatStringDate } = require("snu-lib");
+const { formatStringDate, formatStringDateTimezoneUTC } = require("snu-lib");
 
 const isFromDOMTOM = (young) => {
   return [
@@ -63,7 +63,7 @@ const render = async (young) => {
       .replace(/{{DATE}}/g, formatStringDate(Date.now()))
       .replace(/{{FIRST_NAME}}/g, young.firstName)
       .replace(/{{LAST_NAME}}/g, young.lastName)
-      .replace(/{{BIRTHDATE}}/g, formatStringDate(young.birthdateAt))
+      .replace(/{{BIRTHDATE}}/g, formatStringDateTimezoneUTC(young.birthdateAt))
       .replace(/{{ADDRESS}}/g, young.address)
       .replace(/{{ZIP}}/g, young.zip)
       .replace(/{{CITY}}/g, young.city)
@@ -98,7 +98,7 @@ const renderDOMTOM = async (young) => {
       .replace(/{{DATE}}/g, formatStringDate(Date.now()))
       .replace(/{{FIRST_NAME}}/g, young.firstName)
       .replace(/{{LAST_NAME}}/g, young.lastName)
-      .replace(/{{BIRTHDATE}}/g, formatStringDate(young.birthdateAt))
+      .replace(/{{BIRTHDATE}}/g, formatStringDateTimezoneUTC(young.birthdateAt))
       .replace(/{{ADDRESS}}/g, young.address)
       .replace(/{{ZIP}}/g, young.zip)
       .replace(/{{CITY}}/g, young.city)

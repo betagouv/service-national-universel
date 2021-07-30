@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 
-import { YOUNG_SITUATIONS, translate as t, getAge, formatDateFR } from "../../utils";
+import { YOUNG_SITUATIONS, translate as t, getAge, formatDateFRTimezoneUTC } from "../../utils";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import api from "../../services/api";
 import SelectStatusApplication from "../../components/selectStatusApplication";
@@ -31,7 +31,7 @@ export default ({ onChange, value, application }) => {
         <div>{t(young.gender)}</div>
         {young.birthdateAt && (
           <div>
-            Né(e) le {formatDateFR(young.birthdateAt)} • {getAge(young.birthdateAt)} ans
+            Né(e) le {formatDateFRTimezoneUTC(young.birthdateAt)} • {getAge(young.birthdateAt)} ans
           </div>
         )}
         <div style={{ display: "flex" }}>
