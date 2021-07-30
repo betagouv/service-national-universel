@@ -225,7 +225,7 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
 
     const invitation_token = crypto.randomBytes(20).toString("hex");
     referentProperties.invitationToken = invitation_token;
-    referentProperties.invitationExpires = Date.now();
+    referentProperties.invitationExpires = inSevenDays();
 
     const referent = await ReferentObject.create(referentProperties);
     await updateTutorNameInMissionsAndApplications(referent);
@@ -269,7 +269,7 @@ router.post("/signup_retry", async (req, res) => {
 
     const { template, mailObject } = selectTemplate(referent.role);
 
-    const structureName = referent.structureId ? (await Structure.findById(referent.structureId)).name : "";
+    const structureName = referent.structureId ? (await StructureObject.findById(referent.structureId)).name : "";
 
     const htmlContent = fs
       .readFileSync(path.resolve(__dirname, template))
