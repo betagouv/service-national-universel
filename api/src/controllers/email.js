@@ -2,6 +2,7 @@ const express = require("express");
 const passport = require("passport");
 const router = express.Router();
 const Joi = require("joi");
+const Netmask = require("netmask").Netmask;
 
 const { ERRORS } = require("../utils");
 const { sendTemplate } = require("../sendinblue");
@@ -10,7 +11,48 @@ const { capture } = require("../sentry");
 const EmailObject = require("../models/email");
 //https://developers.sendinblue.com/docs/how-to-use-webhooks
 
-router.post("/", async (req, res) => {
+function ipAllowListMiddleware(req, res, next) {
+  // See: https://www.clever-cloud.com/doc/find-help/faq/#how-to-get-the-users-ip-address
+  const ip = req.headers["x-forwarded-for"];
+  // See: https://developers.sendinblue.com/docs/how-to-use-webhooks#securing-your-webhooks
+  const block = new Netmask("185.107.232.0/24");
+  // See: https://developers.sendinblue.com/docs/additional-ips-to-be-whitelisted
+  const allowedIpList = [
+    "195.154.31.153",
+    "195.154.31.142",
+    "195.154.79.186",
+    "195.154.31.171",
+    "195.154.31.129",
+    "163.172.109.130",
+    "163.172.109.105",
+    "163.172.77.49",
+    "163.172.109.49",
+    "163.172.109.19",
+    "195.154.30.169",
+    "163.172.76.108",
+    "163.172.99.26",
+    "163.172.77.137",
+    "163.172.77.62",
+    "163.172.23.50",
+    "163.172.75.222",
+    "163.172.75.202",
+    "51.159.71.10",
+    "51.159.71.12",
+    "51.159.71.13",
+    "51.159.71.15",
+    "51.159.71.17",
+    "51.159.71.41",
+    "163.172.99.58",
+    "51.159.58.33",
+    "51.159.58.37",
+    "51.159.58.36",
+    "51.159.58.214",
+  ];
+  if (ip && (block.contains(ip) || allowedIpList.includes(ip))) return next();
+  return res.status(401).send({ ok: false, code: ERRORS.INVALID_IP, message: "Invalid IP" });
+}
+
+router.post("/", ipAllowListMiddleware, async (req, res) => {
   try {
     await EmailObject.create({
       event: req.body.event,
@@ -22,30 +64,6 @@ router.post("/", async (req, res) => {
       tags: req.body.tags,
       reason: req.body.reason,
     });
-    return res.status(200).send({ ok: true });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, error });
-  }
-});
-
-router.post("/send-template/:id", async (req, res) => {
-  try {
-    const { error, value } = Joi.object({
-      id: Joi.string().pattern(/^\d+$/).required(), // only number
-      emailTo: Joi.array()
-        .items(Joi.object({ name: Joi.string().required(), email: Joi.string().trim().email().required() }))
-        .required(),
-      params: Joi.object().allow(null, "", {}),
-      attachment: Joi.string().allow(null, ""),
-    })
-      .unknown()
-      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
-
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.details.map((e) => e.message) });
-
-    const { id: reqId, emailTo, params, attachment } = value;
-    await sendTemplate(parseInt(reqId), { emailTo, params, attachment });
     return res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);

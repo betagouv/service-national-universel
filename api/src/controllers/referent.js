@@ -21,7 +21,7 @@ const StructureObject = require("../models/structure");
 const AuthObject = require("../auth");
 
 const { decrypt } = require("../cryptoUtils");
-const { sendEmail } = require("../sendinblue");
+const { sendEmail, sendTemplate } = require("../sendinblue");
 const { uploadFile, validatePassword, updatePlacesCenter, signinLimiter, assignNextYoungFromWaitingList, ERRORS } = require("../utils");
 const { encrypt } = require("../cryptoUtils");
 const referentValidator = require("../utils/validator/referent");
@@ -29,6 +29,7 @@ const { validateId } = require("../utils/validator/default");
 const ReferentAuth = new AuthObject(ReferentObject);
 const { cookieOptions, JWT_MAX_AGE } = require("../cookie-options");
 const Joi = require("joi");
+const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 const { department2region } = require("snu-lib/region-and-departments");
 const {
   ROLES_LIST,
@@ -45,6 +46,46 @@ const {
 function inSevenDays() {
   return Date.now() + 86400000 * 7;
 }
+
+const selectTemplate = (role) => {
+  switch (role) {
+    case ROLES.REFERENT_DEPARTMENT:
+      return {
+        template: "../templates/inviteReferentDepartment.html",
+        mailObject: "Activez votre compte référent départemental SNU",
+      };
+    case ROLES.REFERENT_REGION:
+      return {
+        template: "../templates/inviteReferentRegion.html",
+        mailObject: "Activez votre compte référent régional SNU",
+      };
+    case ROLES.RESPONSIBLE:
+      return {
+        template: "../templates/inviteMember.html",
+        mailObject: "Activez votre compte de responsable de structure",
+      };
+    case "responsible_new_structure":
+      return {
+        template: "../templates/inviteMemberNewStructure.html",
+        mailObject: "Activez votre compte de responsable de structure",
+      };
+    case ROLES.ADMIN:
+      return {
+        template: "../templates/inviteAdmin.html",
+        mailObject: "Activez votre compte administrateur SNU",
+      };
+    case ROLES.HEAD_CENTER:
+      return {
+        template: "../templates/inviteHeadCenter.html",
+        mailObject: "Activez votre compte de chef de centre SNU",
+      };
+    default:
+      return {
+        template: "",
+        mailObject: "",
+      };
+  }
+};
 
 async function updateTutorNameInMissionsAndApplications(tutor) {
   if (!tutor || !tutor.firstName || !tutor.lastName) return;
@@ -190,27 +231,8 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
     const referent = await ReferentObject.create(referentProperties);
     await updateTutorNameInMissionsAndApplications(referent);
 
-    let template = "";
-    let mailObject = "";
-    if (reqTemplate === ROLES.REFERENT_DEPARTMENT) {
-      template = "../templates/inviteReferentDepartment.html";
-      mailObject = "Activez votre compte référent départemental SNU";
-    } else if (reqTemplate === ROLES.REFERENT_REGION) {
-      template = "../templates/inviteReferentRegion.html";
-      mailObject = "Activez votre compte référent régional SNU";
-    } else if (reqTemplate === ROLES.RESPONSIBLE) {
-      template = "../templates/inviteMember.html";
-      mailObject = "Activez votre compte de responsable de structure";
-    } else if (reqTemplate === "responsible_new_structure") {
-      template = "../templates/inviteMemberNewStructure.html";
-      mailObject = "Activez votre compte de responsable de structure";
-    } else if (reqTemplate === ROLES.ADMIN) {
-      template = "../templates/inviteAdmin.html";
-      mailObject = "Activez votre compte administrateur SNU";
-    } else if (reqTemplate === ROLES.HEAD_CENTER) {
-      template = "../templates/inviteHeadCenter.html";
-      mailObject = "Activez votre compte de chef de centre SNU";
-    }
+    const { template, mailObject } = selectTemplate(reqTemplate);
+
     let htmlContent = fs
       .readFileSync(path.resolve(__dirname, template))
       .toString()
@@ -219,7 +241,7 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
       .replace(/{{department}}/g, `${referent.department}`)
       .replace(/{{region}}/g, `${referent.region}`)
       .replace(/{{structureName}}/g, structureName)
-      .replace(/{{centerName}}/g, centerName || "")
+      .replace(/{{centerName}}/g, cohesionCenterName || "")
       .replace(/{{cta}}/g, `${config.ADMIN_URL}/auth/signup/invite?token=${invitation_token}`);
 
     await sendEmail({ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }, mailObject, htmlContent);
@@ -246,19 +268,22 @@ router.post("/signup_retry", async (req, res) => {
     referent.set({ invitationToken });
     referent.set({ invitationExpires: inSevenDays() });
 
-    // Why is it only for referent department?
+    const { template, mailObject } = selectTemplate(referent.role);
+
+    const structureName = referent.structureId ? (await StructureObject.findById(referent.structureId)).name : "";
+
     const htmlContent = fs
-      .readFileSync(path.resolve(__dirname, "../templates/inviteReferentDepartment.html"))
+      .readFileSync(path.resolve(__dirname, template))
       .toString()
       .replace(/{{toName}}/g, `${referent.firstName} ${referent.lastName}`)
       .replace(/{{fromName}}/g, `contact@snu.gouv.fr`)
       .replace(/{{department}}/g, `${referent.department}`)
+      .replace(/{{region}}/g, `${referent.region}`)
+      .replace(/{{structureName}}/g, `${structureName}`)
+      .replace(/{{centerName}}/g, `${referent.cohesionCenterName}` || "")
       .replace(/{{cta}}/g, `${config.ADMIN_URL}/auth/signup/invite?token=${invitationToken}`);
-    await sendEmail(
-      { name: `${referent.firstName} ${referent.lastName}`, email: referent.email },
-      "Activez votre compte référent départemental SNU",
-      htmlContent
-    );
+
+    await sendEmail({ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }, mailObject, htmlContent);
 
     await referent.save();
     return res.status(200).send({ ok: true });
@@ -404,14 +429,15 @@ router.post("/email-tutor/:template/:tutorId", passport.authenticate("referent",
     const { error, value } = Joi.object({
       tutorId: Joi.string().required(),
       template: Joi.string().required(),
-      subject: Joi.string().required().allow(null, ""),
-      message: Joi.string().required().allow(null, ""),
+      subject: Joi.string().allow(null, ""),
+      message: Joi.string().allow(null, ""),
+      app: Joi.object().allow(null, {}),
     })
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
-    const { tutorId, template, subject, message } = value;
+    const { tutorId, template, subject, message, app } = value;
     const tutor = await ReferentObject.findById(tutorId);
     if (!tutor) return res.status(200).send({ ok: true });
 
@@ -429,6 +455,17 @@ router.post("/email-tutor/:template/:tutorId", passport.authenticate("referent",
         .toString()
         .replace(/{{message}}/g, `${message.replace(/\n/g, "<br/>")}`)
         .replace(/{{cta}}/g, "https://admin.snu.gouv.fr");
+    } else if (template === SENDINBLUE_TEMPLATES.REFERENT_MILITARY_PREPARATION_DOCS_VALIDATED) {
+      await sendTemplate(parseInt(SENDINBLUE_TEMPLATES.REFERENT_MILITARY_PREPARATION_DOCS_VALIDATED), {
+        emailTo: [{ name: `${tutor.firstName} ${tutor.lastName}`, email: tutor.email }],
+        params: {
+          cta: `${config.ADMIN_URL}/volontaire/${app.youngId}`,
+          youngFirstName: app.youngFirstName,
+          youngLastName: app.youngLastName,
+          missionName: app.missionName,
+        },
+      });
+      return res.status(200).send({ ok: true });
     } else {
       throw new Error("Template de mail introuvable");
     }
@@ -508,10 +545,27 @@ router.post("/email/:template/:youngId", passport.authenticate("referent", { ses
         .replace(/{{structureName}}/g, structureName)
         .replace(/\n/g, "<br/>");
       subject = `La mission ${missionName} devrait vous intéresser !`;
+    } else if (template === SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_VALIDATED) {
+      await sendTemplate(parseInt(SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_VALIDATED), {
+        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+      });
+      return res.status(200).send({ ok: true });
+    } else if (template === SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_CORRECTION) {
+      await sendTemplate(parseInt(SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_CORRECTION), {
+        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+        params: { message, cta: `${config.APP_URL}/ma-preparation-militaire` },
+      });
+      return res.status(200).send({ ok: true });
+    } else if (template === SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_REFUSED) {
+      await sendTemplate(parseInt(SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_REFUSED), {
+        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+        params: { message },
+      });
+      return res.status(200).send({ ok: true });
     }
 
     await sendEmail({ name: `${young.firstName} ${young.lastName}`, email: young.email }, subject, htmlContent);
-    return res.status(200).send({ ok: true }); //todo
+    return res.status(200).send({ ok: true });
   } catch (error) {
     console.log(error);
     capture(error);
@@ -742,7 +796,7 @@ router.get("/manager_department/:department", passport.authenticate(["referent",
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
-router.get("/manager_phase2/:department", passport.authenticate("young", { session: false }), async (req, res) => {
+router.get("/manager_phase2/:department", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
   try {
     const { error, value } = Joi.object({ department: Joi.string().required() })
       .unknown()

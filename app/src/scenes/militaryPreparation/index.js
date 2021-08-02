@@ -114,18 +114,8 @@ export default () => {
                 const responseApplication = await api.put("/application", { _id: app._id, status: "WAITING_VERIFICATION" });
                 if (!responseApplication.ok) toastr.error(translate(responseApplication.code), "Une erreur s'est produite lors du traitement");
               }
-              //todo: get referent phase 2 , if not get the chef departement
-              let toReferent = referentManagerPhase2;
-              if (!toReferent) {
-                const responseManagerDepartment = await api.get(`/referent/manager_department/${young.department}`);
-                if (responseManagerDepartment.ok) toReferent = responseManagerDepartment.data;
-              }
-              if (toReferent) {
-                await api.post(`/email/send-template/${SENDINBLUE_TEMPLATES.REFERENT_MILITARY_PREPARATION_DOCS_SUBMITTED}`, {
-                  emailTo: [{ name: `${toReferent.firstName} ${toReferent.lastName}`, email: toReferent.email }],
-                  params: { cta: `${adminURL}/volontaire/${young._id}/phase2`, youngFirstName: young.firstName, youngLastName: young.lastName },
-                });
-              }
+              const responseNotification = await api.post("/application/notify/docs-military-preparation");
+              if (!responseNotification.ok) return toastr.error(translate(responseNotification.code), "Une erreur s'est produite lors de l'envoie de la notification.");
               toastr.success("Votre dossier a bien été transmis");
               history.push("/");
             } catch (e) {

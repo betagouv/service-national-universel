@@ -9,8 +9,12 @@ const ApplicationObject = require("../models/application");
 const MissionObject = require("../models/mission");
 const YoungObject = require("../models/young");
 const ReferentObject = require("../models/referent");
-const { sendEmail } = require("../sendinblue");
+const { sendEmail, sendTemplate } = require("../sendinblue");
 const { ERRORS } = require("../utils");
+const { validateApplication } = require("../utils/validator/default");
+const { ADMIN_URL } = require("../config");
+const { SUB_ROLES, ROLES, SENDINBLUE_TEMPLATES, department2region } = require("snu-lib");
+const { serializeApplication } = require("../utils/serializer");
 
 const updateStatusPhase2 = async (app) => {
   const young = await YoungObject.findById(app.youngId);
@@ -53,22 +57,24 @@ const updatePlacesMission = async (app) => {
 
 router.post("/", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
   try {
-    const obj = req.body;
-    if (!obj.hasOwnProperty("priority")) {
-      const applications = await ApplicationObject.find({ youngId: obj.youngId });
+    const { value, error } = validateApplication(req.body);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    if (!value.hasOwnProperty("priority")) {
+      const applications = await ApplicationObject.find({ youngId: value.youngId });
       applications.length;
-      obj.priority = applications.length + 1;
+      value.priority = applications.length + 1;
     }
-    const mission = await MissionObject.findById(obj.missionId);
+    const mission = await MissionObject.findById(value.missionId);
     if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const young = await YoungObject.findById(obj.youngId);
+    const young = await YoungObject.findById(value.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const data = await ApplicationObject.create(obj);
+    const data = await ApplicationObject.create(value);
     await updateStatusPhase2(data);
     await updatePlacesMission(data);
-    return res.status(200).send({ ok: true, data });
+    return res.status(200).send({ ok: true, data: serializeApplication(data) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
@@ -77,10 +83,19 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false }
 
 router.put("/", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
-    const application = await ApplicationObject.findByIdAndUpdate(req.body._id, req.body, { new: true });
+    const { value, error } = validateApplication(req.body);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    const id = req.body._id;
+    const application = await ApplicationObject.findById(id);
+    if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    application.set(value);
+    await application.save();
+
     await updateStatusPhase2(application);
     await updatePlacesMission(application);
-    res.status(200).send({ ok: true, data: application });
+    res.status(200).send({ ok: true, data: serializeApplication(application) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
@@ -133,6 +148,37 @@ router.get("/mission/:id", passport.authenticate("referent", { session: false })
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
+});
+
+router.post("/notify/docs-military-preparation", passport.authenticate("young", { session: false }), async (req, res) => {
+  // get the referent_department manager_phase2
+  let toReferent = await ReferentObject.findOne({
+    subRole: SUB_ROLES.manager_phase2,
+    role: ROLES.REFERENT_DEPARTMENT,
+    department: req.user.department,
+  });
+  // if not found, get the referent_region
+  if (!toReferent) {
+    toReferent = await ReferentObject.findOne({
+      subRole: SUB_ROLES.manager_phase2,
+      role: ROLES.REFERENT_REGION,
+      region: department2region[req.user.department],
+    });
+  }
+  // if not found, get the manager_department
+  if (!toReferent) {
+    toReferent = await ReferentObject.findOne({
+      subRole: SUB_ROLES.manager_department,
+      role: ROLES.REFERENT_DEPARTMENT,
+      department: req.user.department,
+    });
+  }
+  if (!toReferent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+  const mail = await sendTemplate(parseInt(SENDINBLUE_TEMPLATES.REFERENT_MILITARY_PREPARATION_DOCS_SUBMITTED), {
+    emailTo: [{ name: `${toReferent.firstName} ${toReferent.lastName}`, email: toReferent.email }],
+    params: { cta: `${ADMIN_URL}/volontaire/${req.user._id}/phase2`, youngFirstName: req.user.firstName, youngLastName: req.user.lastName },
+  });
+  return res.status(200).send({ ok: true, data: mail });
 });
 
 router.post("/:id/notify/:template", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
@@ -212,7 +258,7 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
       subject = `Votre candidature sur la mission d'intérêt général ${mission.name} a été refusée.`;
       to = { name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail };
     } else {
-      return res.status(404).send({ ok: true });
+      return res.status(200).send({ ok: true });
     }
 
     await sendEmail(to, subject, htmlContent);

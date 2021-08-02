@@ -1,4 +1,39 @@
+import React from "react";
 import styled from "styled-components";
+import { toastr } from "react-redux-toastr";
+
+export const Info = ({ children, title, id }) => {
+  return (
+    <div className="info">
+      <div style={{ position: "relative" }}>
+        <div className="info-title">{title}</div>
+      </div>
+      {children}
+    </div>
+  );
+};
+
+export const Details = ({ title, value, copy, to }) => {
+  if (!value) return <div />;
+  if (typeof value === "function") value = value();
+  return (
+    <div className="detail">
+      {/* `${title}&nbsp;:` */}
+      <div className="detail-title">{`${title} :`}</div>
+      <div className="detail-text">{value}</div>
+      {copy ? (
+        <div
+          className="icon"
+          icon={require(`../assets/copy.svg`)}
+          onClick={() => {
+            navigator.clipboard.writeText(value);
+            toastr.success(`'${title}' a été copié dans le presse papier.`);
+          }}
+        />
+      ) : null}
+    </div>
+  );
+};
 
 export default styled.div`
   background: #ffffff;
@@ -60,12 +95,13 @@ export default styled.div`
     display: flex;
     font-size: 14px;
     text-align: left;
+    align-items: flex-end;
     margin-top: 10px;
     &-title {
       font-weight: bold;
       min-width: 100px;
       width: 100px;
-      margin-right: 5px;
+      margin-right: 0.5rem;
     }
     &-text {
       color: rgba(26, 32, 44);

@@ -20,6 +20,7 @@ function getAppHelper() {
   app.use("/email", require("../../controllers/email"));
   app.use("/structure", require("../../controllers/structure"));
   app.use("/meeting-point", require("../../controllers/meeting-point"));
+  app.use("/contract", require("../../controllers/contract"));
 
   return app;
 }
