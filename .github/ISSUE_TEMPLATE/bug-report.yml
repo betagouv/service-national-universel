@@ -1,0 +1,62 @@
+name: 💥 Rapport de bug
+title: "fix: "
+description: Aidez-nous à améliorer la plateform du SNU !
+labels: [bug]
+body:
+  - type: textarea
+    id: description
+    attributes:
+      label: Description du bug
+      description: Une description claire et concise du bug.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Comment le reproduire ?
+      description: Quelles sont les étapes / scénarios pour reproduire ce bug ?
+      placeholder: "1. Aller sur la page...\n2.Cliquer sur...\n3.Ouvrir l'onglet..."
+    validations:
+      required: false
+  - type: textarea
+    id: expected
+    attributes:
+      label: Comportement attendu
+      description: Une description claire et concise du comportement attendu.
+    validations:
+      required: false
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Une image vaut 1000 mots
+      description: Si possible, inclure une capture d'écran peut aider à décrire le problème
+    validations:
+      required: false
+  - type: checkboxes
+    id: os
+    attributes:
+      label: Système d'exploitation
+      description: Sur quel système d'exploitation rencontrez-vous ce bug ?
+      options:
+        - label: iOS (iphone)
+        - label: Android
+        - label: MacOS (Apple)
+        - label: Windows
+        - label: Linux
+  - type: checkboxes
+    id: browser
+    attributes:
+      label: Navigateur
+      description: Sur quel navigateur internet rencontrez-vous ce bug ?
+      options:
+        - label: Safari
+        - label: Chrome
+        - label: Firefox
+        - label: Autre
+  - type: textarea
+    id: comment
+    attributes:
+      label: Commentaires
+      description: Ajoutez un commentaire
+    validations:
+      required: false
