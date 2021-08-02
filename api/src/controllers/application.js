@@ -193,7 +193,16 @@ router.post("/notify/docs-military-preparation", passport.authenticate("young", 
 
 router.post("/:id/notify/:template", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
-    const { id, template } = req.params;
+    const { error, value } = Joi.object({
+      id: Joi.string().required(),
+      template: Joi.string().required(),
+      message: Joi.string().optional(),
+    })
+      .unknown()
+      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const { id, template, message } = value;
 
     const application = await ApplicationObject.findById(id);
     if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -262,7 +271,7 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
         .replace(/{{lastName}}/g, application.youngLastName)
         .replace(/{{structureName}}/g, mission.structureName)
         .replace(/{{missionName}}/g, mission.name)
-        .replace(/{{message}}/g, req.body.message)
+        .replace(/{{message}}/g, message)
         .replace(/{{cta}}/g, "https://inscription.snu.gouv.fr/auth/login?redirect=mission")
         .replace(/\n/g, "<br/>");
       subject = `Votre candidature sur la mission d'intérêt général ${mission.name} a été refusée.`;
