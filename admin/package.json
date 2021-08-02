@@ -71,7 +71,7 @@
     "snu-lib": "file:../lib",
     "styled-components": "^5.1.1",
     "validator": "^13.1.1",
-    "xlsx": "^0.16.9"
+    "xlsx": "^0.17.0"
   },
   "engines": {
     "node": "^14.14",
