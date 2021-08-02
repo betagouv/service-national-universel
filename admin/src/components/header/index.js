@@ -44,7 +44,7 @@ const Header = styled.div`
   position: sticky;
   left: 0;
   top: 0;
-  z-index: 20;
+  z-index: 10;
   padding: 1rem;
 `;
 

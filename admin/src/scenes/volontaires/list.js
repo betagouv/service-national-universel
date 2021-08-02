@@ -371,10 +371,10 @@ export default ({ setYoung }) => {
                   <Table>
                     <thead>
                       <tr>
-                        <th width="40%">Volontaire</th>
-                        <th width="40%">Contextes</th>
-                        <th width="40%">Dernière connexion</th>
-                        <th>Actions</th>
+                        <th width="25%">Volontaire</th>
+                        <th>Contextes</th>
+                        {/* <th width="40%">Dernière connexion</th> */}
+                        <th width="10%">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -411,13 +411,13 @@ const Hit = ({ hit, onClick, selected }) => {
         </MultiLine>
       </td>
       <td>
-        <Badge text={`Cohorte ${hit.cohort}`} />
-        <Badge text="Phase 1" tooltipText={translate(hit.statusPhase1)} color={YOUNG_STATUS_COLORS[hit.statusPhase1]} />
-        <Badge text="Phase 2" tooltipText={translate(hit.statusPhase2)} color={YOUNG_STATUS_COLORS[hit.statusPhase2]} />
-        <Badge text="Phase 3" tooltipText={translate(hit.statusPhase3)} color={YOUNG_STATUS_COLORS[hit.statusPhase3]} />
-        {hit.status === "WITHDRAWN" ? <Badge text="Désisté" color={YOUNG_STATUS_COLORS.WITHDRAWN} /> : null}
+        <Badge text={hit.cohort} tooltipText={`Cohorte ${hit.cohort}`} />
+        <Badge text="Phase 1" tooltipText={translate(hit.statusPhase1)} minTooltipText={`Phase 1: ${translate(hit.statusPhase1)}`} color={YOUNG_STATUS_COLORS[hit.statusPhase1]} />
+        <Badge text="Phase 2" tooltipText={translate(hit.statusPhase2)} minTooltipText={`Phase 2: ${translate(hit.statusPhase2)}`} color={YOUNG_STATUS_COLORS[hit.statusPhase2]} />
+        <Badge text="Phase 3" tooltipText={translate(hit.statusPhase3)} minTooltipText={`Phase 3: ${translate(hit.statusPhase3)}`} color={YOUNG_STATUS_COLORS[hit.statusPhase3]} />
+        {hit.status === "WITHDRAWN" ? <Badge text="Désisté" color={YOUNG_STATUS_COLORS.WITHDRAWN} tooltipText={translate(hit.status)} /> : null}
       </td>
-      <td>{formatStringLongDate(hit.lastLoginAt)}</td>
+      {/* <td>{formatStringLongDate(hit.lastLoginAt)}</td> */}
       <td onClick={(e) => e.stopPropagation()}>
         <Action hit={hit} />
       </td>

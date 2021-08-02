@@ -1,11 +1,12 @@
 import React from "react";
 import styled from "styled-components";
 
-export default function DownloadButton({ text, tooltipText, ...rest }) {
+export default function DownloadButton({ text, tooltipText, minTooltipText, minify = true, ...rest }) {
   return (
-    <Badge {...rest}>
-      {text}
+    <Badge minify={minify} {...rest}>
+      <span>{text}</span>
       <div className="tooltiptext">{tooltipText}</div>
+      <div className="minTooltipText">{minTooltipText || tooltipText}</div>
     </Badge>
   );
 }
@@ -27,6 +28,7 @@ const Badge = styled.div`
     border: 1px solid ${color};
   `};
   /* Tooltip text */
+  .minTooltipText,
   .tooltiptext {
     font-size: 0.75rem;
     visibility: hidden;
@@ -34,7 +36,6 @@ const Badge = styled.div`
       color: ${color};
     `};
     text-align: center;
-    /* Position the tooltip text - see examples below! */
     position: absolute;
     z-index: 1;
     width: 120px;
@@ -47,4 +48,21 @@ const Badge = styled.div`
   :hover .tooltiptext {
     visibility: visible;
   }
+
+  ${({ minify }) =>
+    minify &&
+    ` @media (max-width: 1100px) {
+    width: 1.2rem;
+    height: 1.2rem;
+    padding: 0;
+    span {
+      display: none;
+    }
+    :hover .tooltiptext {
+      visibility: hidden;
+    }
+    :hover .minTooltipText {
+      visibility: visible;
+    }
+  }`}
 `;

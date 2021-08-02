@@ -20,6 +20,9 @@ export default ({ loading, children, disabled, ...rest }) => (
 );
 
 const VioletButtonHeader = styled(Button)`
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   border: none;
   border-radius: 5px;
   padding: 7px 30px;

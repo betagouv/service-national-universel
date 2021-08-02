@@ -191,8 +191,8 @@ export default () => {
                     <Table>
                       <thead>
                         <tr>
-                          <th width="50%">Structures</th>
-                          <th width="20%">Missions</th>
+                          <th width="40%">Structures</th>
+                          <th>Missions</th>
                           <th>Contexte</th>
                         </tr>
                       </thead>
@@ -240,15 +240,15 @@ const Hit = ({ hit, onClick, selected, missions }) => {
         <div>{missionsInfo.placesTotal} places</div>
       </td>
       <td>
-        {hit.status === "DRAFT" ? <Badge text={translate(hit.status)} color="#d9bb71" /> : null}
-        {hit.isNetwork === "true" ? <Badge text="Tête de réseau" color="#00f" /> : null}
+        {hit.status === "DRAFT" ? <Badge text={translate(hit.status)} color="#d9bb71" minTooltipText={translate(hit.status)} /> : null}
+        {hit.isNetwork === "true" ? <Badge text="Tête de réseau" color="#00f" minTooltipText="Tête de réseau" /> : null}
         {hit.networkName ? (
           <Link to={`structure/${hit.networkId}`}>
-            <Badge text={hit.networkName} color="#5245cc" />
+            <Badge text={hit.networkName} color="#5245cc" minTooltipText={hit.networkName} />
           </Link>
         ) : null}
-        {hit.department ? <Badge text={translate(hit.department)} /> : null}
-        {corpsEnUniforme.includes(hit.structurePubliqueEtatType) ? <Badge text="Corps en uniforme" /> : null}
+        {hit.department ? <Badge text={translate(hit.department)} minify={false} /> : null}
+        {corpsEnUniforme.includes(hit.structurePubliqueEtatType) ? <Badge text="Corps en uniforme" minify={false} /> : null}
       </td>
     </tr>
   );

@@ -2,6 +2,9 @@ import styled from "styled-components";
 
 const VioletButton = styled.div`
   > * {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     background-color: #5245cc;
     border: none;
     border-radius: 5px;
