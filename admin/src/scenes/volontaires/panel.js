@@ -11,7 +11,9 @@ import Historic from "../../components/historic";
 import ContractLink from "../../components/ContractLink";
 
 export default ({ onChange, value }) => {
+  const [referentManagerPhase2, setReferentManagerPhase2] = useState();
   const [young, setYoung] = useState(null);
+
   useEffect(() => {
     (async () => {
       const id = value && value._id;
@@ -20,6 +22,14 @@ export default ({ onChange, value }) => {
       setYoung(data);
     })();
   }, [value]);
+  useEffect(() => {
+    if (!young) return;
+    (async () => {
+      const { ok, data } = await api.get(`/referent/manager_phase2/${young.department}`);
+      if (ok) return setReferentManagerPhase2(data);
+    })();
+    return () => setReferentManagerPhase2();
+  }, [young]);
 
   if (!value || !young) return <div />;
 
@@ -67,6 +77,7 @@ export default ({ onChange, value }) => {
         ) : (
           <NoResult>Aucune candidature n'est liée à ce volontaire.</NoResult>
         )}
+        <Details title="Contact phase 2" value={referentManagerPhase2?.email} copy />
       </Info>
       <Info title="Coordonnées" id={young._id}>
         <Details title="E-mail" value={young.email} copy />

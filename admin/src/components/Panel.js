@@ -95,12 +95,13 @@ export default styled.div`
     display: flex;
     font-size: 14px;
     text-align: left;
+    align-items: flex-end;
     margin-top: 10px;
     &-title {
       font-weight: bold;
       min-width: 100px;
       width: 100px;
-      margin-right: 5px;
+      margin-right: 0.5rem;
     }
     &-text {
       color: rgba(26, 32, 44);
