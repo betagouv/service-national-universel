@@ -143,12 +143,15 @@ router.get("/young/:id", passport.authenticate(["referent", "young"], { session:
 
 router.get("/mission/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const data = await ApplicationObject.find({ missionId: req.params.id });
+    const { error, value } = Joi.object({ id: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    const data = await ApplicationObject.find({ missionId: value.id });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     for (let i = 0; i < data.length; i++) {
       const application = data[i]._doc;
       const mission = await MissionObject.findById(application.missionId);
-      data[i] = { ...application, mission };
+      data[i] = { ...serializeApplication(application), mission };
     }
     return res.status(200).send({ ok: true, data });
   } catch (error) {
