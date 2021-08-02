@@ -7,7 +7,7 @@ import api from "../../services/api";
 import LoadingButton from "../buttons/LoadingButton";
 import { translate } from "../../utils";
 
-export default ({ value, onChange, onSend, structureId }) => {
+export default ({ isOpen, value, onChange, onSend, structureId }) => {
   const [message, setMessage] = useState();
   const [sending, setSending] = useState(false);
   const [structure, setStructure] = useState();
@@ -51,7 +51,7 @@ Les équipes du Service National Universel`);
   };
 
   return (
-    <Modal isOpen={true} toggle={onChange}>
+    <Modal isOpen={isOpen} toggle={onChange}>
       <ModalContainer>
         <img src={require("../../assets/close.svg")} height={10} onClick={onChange} />
         <h1>Veuillez éditer le message ci-dessous pour préciser les raisons du refus avant de l'envoyer</h1>

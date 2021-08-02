@@ -7,7 +7,7 @@ import LoadingButton from "../buttons/LoadingButton";
 
 import { toastr } from "react-redux-toastr";
 
-export default ({ value, onChange, onSend }) => {
+export default ({ isOpen, value, onChange, onSend }) => {
   const [message, setMessage] = useState();
   const [sending, setSending] = useState(false);
 
@@ -35,7 +35,7 @@ En vous souhaitant une excellente continuation.`);
   };
 
   return (
-    <Modal isOpen={true} toggle={onChange}>
+    <Modal isOpen={isOpen} toggle={onChange}>
       <ModalContainer>
         <img src={require("../../assets/close.svg")} height={10} onClick={onChange} />
         <h1>Veuillez éditer le message ci-dessous pour préciser les raisons du refus avant de l'envoyer</h1>

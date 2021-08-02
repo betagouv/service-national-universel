@@ -4,9 +4,9 @@ import styled from "styled-components";
 
 import ModalButton from "../buttons/ModalButton";
 
-export default ({ onChange, onValidate, callback }) => {
+export default ({ isOpen, onChange, onValidate, callback }) => {
   return (
-    <Modal isOpen={true} toggle={onChange}>
+    <Modal isOpen={isOpen} toggle={onChange}>
       <ModalContainer>
         <img src={require("../../assets/close.svg")} height={10} onClick={onChange} />
         <Header>attention</Header>

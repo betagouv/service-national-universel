@@ -97,49 +97,45 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
 
   return (
     <>
-      {modal === YOUNG_STATUS.WAITING_CORRECTION && (
-        <ModalCorrection
-          value={young}
-          onChange={() => setModal(false)}
-          onSend={(msg) => {
-            setStatus(YOUNG_STATUS.WAITING_CORRECTION, msg);
-            setModal(null);
-          }}
-        />
-      )}
-      {modal === YOUNG_STATUS.REFUSED && (
-        <ModalRefused
-          value={young}
-          onChange={() => setModal(false)}
-          onSend={(msg) => {
-            setStatus(YOUNG_STATUS.REFUSED, msg);
-            setModal(null);
-          }}
-        />
-      )}
-      {modal === YOUNG_STATUS.WITHDRAWN && (
-        <ModalWithdrawn
-          value={young}
-          onChange={() => setModal(false)}
-          onSend={(msg) => {
-            setStatus(YOUNG_STATUS.WITHDRAWN, msg);
-            setModal(null);
-          }}
-        />
-      )}
-      {modal === "goal" && (
-        <ModalGoal
-          onChange={() => setModal(false)}
-          onValidate={() => {
-            setStatus(YOUNG_STATUS.VALIDATED);
-            setModal(null);
-          }}
-          callback={() => {
-            setStatus(YOUNG_STATUS.WAITING_LIST);
-            setModal(null);
-          }}
-        />
-      )}
+      <ModalCorrection
+        isOpen={modal === YOUNG_STATUS.WAITING_CORRECTION}
+        value={young}
+        onChange={() => setModal(false)}
+        onSend={(msg) => {
+          setStatus(YOUNG_STATUS.WAITING_CORRECTION, msg);
+          setModal(null);
+        }}
+      />
+      <ModalRefused
+        isOpen={modal === YOUNG_STATUS.REFUSED}
+        value={young}
+        onChange={() => setModal(false)}
+        onSend={(msg) => {
+          setStatus(YOUNG_STATUS.REFUSED, msg);
+          setModal(null);
+        }}
+      />
+      <ModalWithdrawn
+        isOpen={modal === YOUNG_STATUS.WITHDRAWN}
+        value={young}
+        onChange={() => setModal(false)}
+        onSend={(msg) => {
+          setStatus(YOUNG_STATUS.WITHDRAWN, msg);
+          setModal(null);
+        }}
+      />
+      <ModalGoal
+        isOpen={modal === "goal"}
+        onChange={() => setModal(false)}
+        onValidate={() => {
+          setStatus(YOUNG_STATUS.VALIDATED);
+          setModal(null);
+        }}
+        callback={() => {
+          setStatus(YOUNG_STATUS.WAITING_LIST);
+          setModal(null);
+        }}
+      />
       <ActionBox color={YOUNG_STATUS_COLORS[young[statusName]]}>
         <UncontrolledDropdown setActiveFromChild>
           <DropdownToggle tag="button" disabled={disabled}>

@@ -4,7 +4,7 @@ import { Modal } from "reactstrap";
 import { ModalContainer, Content, Footer, Header } from "./Modal";
 import ModalButton from "../buttons/ModalButton";
 
-export default ({ topTitle, title, message, onChange, onConfirm }) => {
+export default ({ isOpen, topTitle, title, message, onChange, onConfirm }) => {
   const [sending, setSending] = useState(false);
 
   const submit = async () => {
@@ -13,7 +13,7 @@ export default ({ topTitle, title, message, onChange, onConfirm }) => {
   };
 
   return (
-    <Modal isOpen={true} toggle={onChange}>
+    <Modal isOpen={isOpen} toggle={onChange}>
       <ModalContainer>
         <img src={require("../../assets/close.svg")} height={10} onClick={onChange} />
         <Header>{topTitle}</Header>
