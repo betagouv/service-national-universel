@@ -279,6 +279,28 @@ function validateApplication(application) {
     .validate(application, { stripUnknown: true });
 }
 
+function validateCohesionCenter(application) {
+  return Joi.object()
+    .keys({
+      name: Joi.string().allow(null, ""),
+      code: Joi.string().allow(null, ""),
+      country: Joi.string().allow(null, ""),
+      COR: Joi.string().allow(null, ""),
+      departmentCode: Joi.string().allow(null, ""),
+      address: Joi.string().allow(null, ""),
+      city: Joi.string().allow(null, ""),
+      zip: Joi.string().allow(null, ""),
+      department: Joi.string().allow(null, ""),
+      region: Joi.string().allow(null, ""),
+      placesTotal: Joi.alternatives().try(Joi.string().allow(null, ""), Joi.number().allow(null)),
+      placesLeft: Joi.alternatives().try(Joi.string().allow(null, ""), Joi.number().allow(null)),
+      outfitDelivered: Joi.string().allow(null, ""),
+      observations: Joi.string().allow(null, ""),
+      waitingList: Joi.array().items(Joi.string().allow(null, "")),
+    })
+    .validate(application, { stripUnknown: true });
+}
+
 module.exports = {
   validateId,
   validateString,
@@ -287,4 +309,5 @@ module.exports = {
   validateProgram,
   validateFirstName,
   validateApplication,
+  validateCohesionCenter,
 };

@@ -23,6 +23,7 @@ const renderFromHtml = require("../htmlToPdf");
 const { ROLES } = require("snu-lib/roles");
 const Joi = require("joi");
 const { serializeCohesionCenter } = require("../utils/serializer");
+const { validateCohesionCenter } = require("../utils/validator/default");
 
 router.post("/refresh/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
@@ -41,8 +42,11 @@ router.post("/refresh/:id", passport.authenticate("referent", { session: false }
 
 router.post("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const data = await CohesionCenterModel.create(req.body);
-    return res.status(200).send({ data, ok: true });
+    const { error, value } = validateCohesionCenter(req.body);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    const data = await CohesionCenterModel.create(value);
+    return res.status(200).send({ ok: true, data: serializeCohesionCenter(data) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
