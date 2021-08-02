@@ -3,6 +3,7 @@ const router = express.Router();
 const passport = require("passport");
 const fs = require("fs");
 const path = require("path");
+const Joi = require("joi");
 
 const { capture } = require("../sentry");
 const ApplicationObject = require("../models/application");
@@ -104,9 +105,12 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false })
 
 router.get("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const data = await ApplicationObject.findById(req.params.id);
+    const { error, value } = Joi.object({ id: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    const data = await ApplicationObject.findById(value.id);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    return res.status(200).send({ ok: true, data });
+    return res.status(200).send({ ok: true, data: serializeApplication(data) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
@@ -115,7 +119,10 @@ router.get("/:id", passport.authenticate("referent", { session: false }), async 
 
 router.get("/young/:id", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
-    let data = await ApplicationObject.find({ youngId: req.params.id });
+    const { error, value } = Joi.object({ id: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    let data = await ApplicationObject.find({ youngId: value.id });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     for (let i = 0; i < data.length; i++) {
@@ -125,7 +132,7 @@ router.get("/young/:id", passport.authenticate(["referent", "young"], { session:
       if (mission?.tutorId) tutor = await ReferentObject.findById(mission.tutorId);
       if (mission?.tutorId && !application.tutorId) application.tutorId = mission.tutorId;
       if (mission?.structureId && !application.structureId) application.structureId = mission.structureId;
-      data[i] = { ...application, mission, tutor };
+      data[i] = { ...serializeApplication(application), mission, tutor };
     }
     return res.status(200).send({ ok: true, data });
   } catch (error) {
