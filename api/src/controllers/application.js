@@ -11,6 +11,7 @@ const YoungObject = require("../models/young");
 const ReferentObject = require("../models/referent");
 const { sendEmail } = require("../sendinblue");
 const { ERRORS } = require("../utils");
+const { validateApplication } = require("../utils/validator/default");
 
 const updateStatusPhase2 = async (app) => {
   const young = await YoungObject.findById(app.youngId);
@@ -53,19 +54,21 @@ const updatePlacesMission = async (app) => {
 
 router.post("/", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
   try {
-    const obj = req.body;
-    if (!obj.hasOwnProperty("priority")) {
-      const applications = await ApplicationObject.find({ youngId: obj.youngId });
+    const { value, error } = validateApplication(req.body);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    if (!value.hasOwnProperty("priority")) {
+      const applications = await ApplicationObject.find({ youngId: value.youngId });
       applications.length;
-      obj.priority = applications.length + 1;
+      value.priority = applications.length + 1;
     }
-    const mission = await MissionObject.findById(obj.missionId);
+    const mission = await MissionObject.findById(value.missionId);
     if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const young = await YoungObject.findById(obj.youngId);
+    const young = await YoungObject.findById(value.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const data = await ApplicationObject.create(obj);
+    const data = await ApplicationObject.create(value);
     await updateStatusPhase2(data);
     await updatePlacesMission(data);
     return res.status(200).send({ ok: true, data });
