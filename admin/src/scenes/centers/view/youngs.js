@@ -50,24 +50,6 @@ export default ({ center, updateCenter }) => {
             <div style={{ float: "right", marginBottom: "1.5rem", marginRight: "1.5rem" }}>
               <div style={{ display: "flex" }}>
                 <ExportComponent
-                  title="Export pour les cas particuliers"
-                  defaultQuery={getExportQuery}
-                  collection="volontaires_cas_particuliers"
-                  react={{ and: FILTERS }}
-                  transform={(data) => {
-                    return {
-                      _id: data._id,
-                      Prénom: data.firstName,
-                      Nom: data.lastName,
-                      "Code centre": center.code || "",
-                      "Nom du centre": center.name || "",
-                      "Présence au séjour": data.cohesionStayPresence || "",
-                      "Cas particulier qui valide sa JDC malgré son absence (oui/non)": "",
-                      "Commentaires (Décrivez pourquoi)": "",
-                    };
-                  }}
-                />
-                <ExportComponent
                   title="Exporter les volontaires"
                   defaultQuery={getExportQuery}
                   collection="volontaire"
