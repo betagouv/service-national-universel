@@ -91,6 +91,8 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false })
     if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     application.set(value);
+    await application.save();
+
     await updateStatusPhase2(application);
     await updatePlacesMission(application);
     res.status(200).send({ ok: true, data: serializeApplication(application) });
@@ -256,7 +258,7 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
       subject = `Votre candidature sur la mission d'intérêt général ${mission.name} a été refusée.`;
       to = { name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail };
     } else {
-      return res.status(404).send({ ok: true });
+      return res.status(200).send({ ok: true });
     }
 
     await sendEmail(to, subject, htmlContent);

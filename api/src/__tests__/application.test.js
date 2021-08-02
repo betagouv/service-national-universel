@@ -172,14 +172,14 @@ describe("Application", () => {
       const res = await request(getAppHelper()).post(`/application/${application._id}/notify/foo`).send({});
       expect(res.status).toBe(404);
     });
-    it("should return 404 when template is not found", async () => {
+    it("should return 200 when template is not found", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
       const referent = await createReferentHelper(getNewReferentFixture());
       const mission = await createMissionHelper({ ...getNewMissionFixture(), tutorId: referent._id });
       const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission._id });
 
       const res = await request(getAppHelper()).post(`/application/${application._id}/notify/foo`).send({});
-      expect(res.status).toBe(404);
+      expect(res.status).toBe(200);
     });
     it("should return 200 when template is found", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
