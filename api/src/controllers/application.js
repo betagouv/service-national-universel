@@ -83,7 +83,14 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false }
 
 router.put("/", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
-    const application = await ApplicationObject.findByIdAndUpdate(req.body._id, req.body, { new: true });
+    const { value, error } = validateApplication(req.body);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    const id = req.body._id;
+    const application = await ApplicationObject.findById(id);
+    if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    application.set(value);
     await updateStatusPhase2(application);
     await updatePlacesMission(application);
     res.status(200).send({ ok: true, data: serializeApplication(application) });
