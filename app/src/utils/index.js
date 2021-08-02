@@ -52,5 +52,4 @@ export const HERO_IMAGES_LIST = ["login.jpg", "phase3.jpg", "rang.jpeg"];
 
 export const ENABLE_CHOOSE_MEETING_POINT = false;
 
-const FORCE_DISBALED_PM = false;
-export const ENABLE_PM = environment !== "production" && !FORCE_DISBALED_PM;
+export const ENABLE_PM = true;
