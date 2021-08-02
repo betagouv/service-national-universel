@@ -6,9 +6,8 @@ import { useHistory } from "react-router-dom";
 
 import { translate, formatStringDateTimezoneUTC, MISSION_STATUS_COLORS } from "../../utils";
 import api from "../../services/api";
-import SelectStatusMission from "../../components/selectStatusMission";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
-import Panel from "../../components/Panel";
+import Panel, { Info, Details } from "../../components/Panel";
 import Badge from "../../components/Badge";
 
 export default ({ onChange, mission }) => {
@@ -67,7 +66,9 @@ export default ({ onChange, mission }) => {
           <Subtitle>MISSION</Subtitle>
           <div className="close" onClick={onChange} />
         </div>
-        <div className="title">{mission.name}</div>
+        <div className="title">
+          {mission.name} <Badge text={translate(mission.status)} color={MISSION_STATUS_COLORS[mission.status]} />
+        </div>
         <div style={{ display: "flex" }}>
           <Link to={`/mission/${mission._id}`}>
             <PanelActionButton icon="eye" title="Consulter" />
@@ -81,105 +82,46 @@ export default ({ onChange, mission }) => {
           <PanelActionButton onClick={handleDelete} icon="bin" title="Supprimer" />
         </div>
       </div>
-      <div className="info">
-        <div className="title">Statut</div>
-        <Badge text={translate(mission.status)} color={MISSION_STATUS_COLORS[mission.status]} />
-      </div>
-      <div className="info">
-        <div className="title">{`Volontaire(s) (${mission.placesTotal - mission.placesLeft})`}</div>
-        <div className="detail">
-          <Link to={`/mission/${mission._id}/youngs`}>
-            <div className="description">{`Cette mission a reçu ${mission.placesTotal - mission.placesLeft} candidature(s)`}</div>
-          </Link>
-        </div>
-        {/* <Link to={``}>
-        <button>Consulter tous les volontaires</button>
-      </Link> */}
-      </div>
-      <div className="info">
-        <div className="title">
-          La structure
-          <Link to={`/structure/${structure._id}`}>
-            <SubtitleLink>{`${structure.name} >`}</SubtitleLink>
-          </Link>
-        </div>
-
-        <div className="detail">
-          <div className="detail-title">Statut</div>
-          <div className="detail-text">{translate(structure.legalStatus)}</div>
-        </div>
-        <div className="detail">
-          <div className="detail-title">Dép.</div>
-          <div className="detail-text">{structure.department}</div>
-        </div>
-
-        <div className="detail">
-          <div className="detail-title">Tuteur</div>
-          <div className="detail-text">{tutor ? `${tutor.firstName} ${tutor.lastName}` : ""}</div>
-        </div>
-        <div className="detail">
-          <div className="detail-title">E-mail</div>
-          <div className="detail-text">{tutor && tutor.email}</div>
-        </div>
-        <div className="detail">
-          <div className="detail-title">tel.</div>
-          <div className="detail-text">{tutor && tutor.phone}</div>
-        </div>
-      </div>
-      <div className="info">
-        <div className="title">La mission</div>
-        <div className="detail">
-          <div className="detail-title">Domaines</div>
-          <div className="detail-text">{mission.domains.map((d) => translate(d)).join(", ")}</div>
-        </div>
-        <div className="detail">
-          <div className="detail-title">Début</div>
-          <div className="detail-text">{formatStringDateTimezoneUTC(mission.startAt)}</div>
-        </div>
-        <div className="detail">
-          <div className="detail-title">Fin</div>
-          <div className="detail-text">{formatStringDateTimezoneUTC(mission.endAt)}</div>
-        </div>
-        <div className="detail">
-          <div className="detail-title">Adresse</div>
-          <div className="detail-text">{mission.address}</div>
-        </div>
-        <div className="detail">
-          <div className="detail-title">Dép.</div>
-          <div className="detail-text">{mission.department}</div>
-        </div>
-        <div className="detail">
-          <div className="detail-title">Format</div>
-          <div className="detail-text">{translate(mission.format)}</div>
-        </div>
-        <div className="detail">
-          <div className="detail-title">Fréquence</div>
-          <div className="detail-text">{mission.frequence}</div>
-        </div>
-        <div className="detail">
-          <div className="detail-title">Périodes</div>
-          <div className="detail-text">{mission.period.map((p) => translate(p)).join(", ")}</div>
-        </div>
-        <div className="detail">
-          <div className="detail-title">Objectifs</div>
-          <div className="detail-text">{mission.description}</div>
-        </div>
-        <div className="detail">
-          <div className="detail-title">Actions</div>
-          <div className="detail-text">{mission.actions}</div>
-        </div>
-        <div className="detail">
-          <div className="detail-title">Contraintes</div>
-          <div className="detail-text">{mission.contraintes}</div>
-        </div>
-        {/* <div>
-        {Object.keys(mission).map((e) => {
-          return <div>{`${e}:${mission[e]}`}</div>;
-        })}
-      </div> */}
-        {/* <div>Volontaires (0)</div>
-      <div>Aucun volontaire n'a encore été assigné. // TODO</div> */}
-      </div>
+      <Info title="Volontaires">
+        <Details title="Validée(s)" value={mission.placesTotal - mission.placesLeft} />
+        <Details title="Disponible(s)" value={mission.placesLeft} />
+        <Details title="Total" value={mission.placesTotal} />
+        <Link to={`/mission/${mission._id}/youngs`}>
+          <PanelActionButton icon="eye" title="Consulter tous les volontaires" />
+        </Link>
+      </Info>
+      <Info title="La structure">
+        <Link to={`/structure/${structure._id}`}>
+          <SubtitleLink>{`${structure.name} >`}</SubtitleLink>
+        </Link>
+        <Details title="Statut" value={translate(structure.legalStatus)} />
+        <Details title="Région" value={structure.region} />
+        <Details title="Dép." value={structure.department} />
+        <Details title="Ville" value={structure.city} />
+        <Details title="Code postal" value={structure.zip} />
+        {tutor ? (
+          <>
+            <Details title="Tuteur" value={`${tutor.firstName} ${tutor.lastName}`} />
+            <Details title="E-mail" value={tutor.email} />
+            <Details title="Tel." value={tutor.phone} />
+          </>
+        ) : null}
+      </Info>
+      <Info title="La mission">
+        <Details title="Domaines" value={mission.domains.map((d) => translate(d)).join(", ")} />
+        <Details title="Début" value={formatStringDateTimezoneUTC(mission.startAt)} />
+        <Details title="Fin" value={formatStringDateTimezoneUTC(mission.endAt)} />
+        <Details title="Région" value={mission.region} />
+        <Details title="Dép." value={mission.department} />
+        <Details title="Ville" value={mission.city} />
+        <Details title="Code postal" value={mission.zip} />
+        <Details title="Format" value={translate(mission.format)} />
+        <Details title="Fréquence" value={mission.frequence} />
+        <Details title="Périodes" value={mission.period.map((p) => translate(p)).join(", ")} />
+        <Details title="Objectifs" value={mission.description} />
+        <Details title="Actions" value={mission.actions} />
+        <Details title="Contraintes" value={mission.contraintes} />
+      </Info>
     </Panel>
   );
 };

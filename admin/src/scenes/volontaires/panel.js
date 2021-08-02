@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Link, useHistory } from "react-router-dom";
-import { toastr } from "react-redux-toastr";
 
 import { YOUNG_SITUATIONS, YOUNG_PHASE, translate as t, YOUNG_STATUS, isInRuralArea, getAge, formatDateFRTimezoneUTC } from "../../utils";
 import { appURL } from "../../config";
 import api from "../../services/api";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
-import Panel from "../../components/Panel";
+import Panel, { Info, Details } from "../../components/Panel";
 import Historic from "../../components/historic";
 import ContractLink from "../../components/ContractLink";
 
@@ -122,38 +121,6 @@ export default ({ onChange, value }) => {
         </div>
       )}
     </Panel>
-  );
-};
-
-const Info = ({ children, title, id }) => {
-  return (
-    <div className="info">
-      <div style={{ position: "relative" }}>
-        <div className="info-title">{title}</div>
-      </div>
-      {children}
-    </div>
-  );
-};
-
-const Details = ({ title, value, copy }) => {
-  if (!value) return <div />;
-  if (typeof value === "function") value = value();
-  return (
-    <div className="detail">
-      <div className="detail-title">{`${title} :`}</div>
-      <div className="detail-text">{value}</div>
-      {copy ? (
-        <div
-          className="icon"
-          icon={require(`../../assets/copy.svg`)}
-          onClick={() => {
-            navigator.clipboard.writeText(value);
-            toastr.success(`'${title}' a été copié dans le presse papier.`);
-          }}
-        />
-      ) : null}
-    </div>
   );
 };
 
