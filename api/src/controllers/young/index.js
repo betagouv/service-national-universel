@@ -135,7 +135,7 @@ router.post("/file/military-preparation/:key", passport.authenticate("young", { 
 router.post("/signup_verify", async (req, res) => {
   try {
     const { error, value } = Joi.object({ invitationToken: Joi.string().required() }).unknown().validate(req.body, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMETERS });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const young = await YoungObject.findOne({ invitationToken: value.invitationToken, invitationExpires: { $gt: Date.now() } });
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.INVITATION_TOKEN_EXPIRED_OR_INVALID });
@@ -156,7 +156,7 @@ router.post("/signup_invite", async (req, res) => {
     })
       .unknown()
       .validate(req.body, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMETERS });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const { email, password, invitationToken } = value;
 
@@ -209,7 +209,7 @@ router.get("/validate_phase3/:young/:token", async (req, res) => {
     })
       .unknown()
       .validate(req.params, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMETERS });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const data = await YoungObject.findOne({ _id: value.young, phase3Token: value.token });
     if (!data) {
@@ -232,7 +232,7 @@ router.put("/validate_phase3/:young/:token", async (req, res) => {
     })
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMETERS });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const data = await YoungObject.findOne({ _id: value.young, phase3Token: value.token });
 
@@ -254,7 +254,7 @@ router.put("/validate_phase3/:young/:token", async (req, res) => {
 router.get("/department-service", passport.authenticate("young", { session: false }), async (req, res) => {
   try {
     const { error, value } = Joi.object({ department: Joi.string().required() }).unknown().validate(req.user, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMETERS });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const data = await DepartmentServiceModel.findOne({ department: value.department });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -300,7 +300,7 @@ router.put("/validate_mission", passport.authenticate("young", { session: false 
       .unknown()
       .validate(req.body, { stripUnknown: true });
 
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMETERS, error: error.message });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
     value.phase3Token = crypto.randomBytes(20).toString("hex");
     const young = await YoungObject.findById(req.user._id);
@@ -342,7 +342,7 @@ router.put("/:id/meeting-point", passport.authenticate(["young", "referent"], { 
     })
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMETERS, error: error.message });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
     const { id, meetingPointId, deplacementPhase1Autonomous } = value;
 
     const young = await YoungObject.findById(id);
@@ -395,7 +395,7 @@ router.put("/:id/cancel-meeting-point", passport.authenticate("referent", { sess
 router.put("/", passport.authenticate("young", { session: false }), async (req, res) => {
   try {
     const { error, value } = youngValidator.validateYoung(req.body);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMETERS, error: error.message });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
     const young = await YoungObject.findByIdAndUpdate(req.user._id, value, { new: true });
 
@@ -442,7 +442,7 @@ router.put("/", passport.authenticate("young", { session: false }), async (req, 
 // Get authorization from France Connect.
 router.post("/france-connect/authorization-url", async (req, res) => {
   const { error, value } = Joi.object({ callback: Joi.string().required() }).unknown().validate(req.body, { stripUnknown: true });
-  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMETERS, error: error.message });
+  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
   const query = {
     scope: `openid given_name family_name email`,
@@ -462,7 +462,7 @@ router.post("/france-connect/user-info", async (req, res) => {
   const { error, value } = Joi.object({ code: Joi.string().required(), callback: Joi.string().required() })
     .unknown()
     .validate(req.body, { stripUnknown: true });
-  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMETERS, error: error.message });
+  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
   // Get token…
   const body = {
@@ -496,7 +496,7 @@ router.post("/france-connect/user-info", async (req, res) => {
 router.delete("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const { error, value } = Joi.object({ id: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMETERS, error: error.message });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
     const young = await YoungObject.findOne({ _id: value.id });
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
