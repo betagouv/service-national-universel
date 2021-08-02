@@ -488,12 +488,11 @@ router.post("/email/:template/:youngId", passport.authenticate("referent", { ses
       prevStatus: Joi.string().allow(null, ""),
       missionName: Joi.string().allow(null, ""),
       structureName: Joi.string().allow(null, ""),
-      cta: Joi.string().allow(null, ""),
     })
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
-    const { youngId, template, message, prevStatus, missionName, structureName, cta } = value;
+    const { youngId, template, message, prevStatus, missionName, structureName } = value;
 
     const young = await YoungObject.findById(youngId);
     if (!young) return res.status(200).send({ ok: true });
