@@ -86,7 +86,7 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false })
     const application = await ApplicationObject.findByIdAndUpdate(req.body._id, req.body, { new: true });
     await updateStatusPhase2(application);
     await updatePlacesMission(application);
-    res.status(200).send({ ok: true, data: application });
+    res.status(200).send({ ok: true, data: serializeApplication(application) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
