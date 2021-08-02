@@ -71,30 +71,6 @@ router.post("/", ipAllowListMiddleware, async (req, res) => {
   }
 });
 
-router.post("/send-template/:id", async (req, res) => {
-  try {
-    const { error, value } = Joi.object({
-      id: Joi.string().pattern(/^\d+$/).required(), // only number
-      emailTo: Joi.array()
-        .items(Joi.object({ name: Joi.string().required(), email: Joi.string().trim().email().required() }))
-        .required(),
-      params: Joi.object().allow(null, "", {}),
-      attachment: Joi.string().allow(null, ""),
-    })
-      .unknown()
-      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
-
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.details.map((e) => e.message) });
-
-    const { id: reqId, emailTo, params, attachment } = value;
-    await sendTemplate(parseInt(reqId), { emailTo, params, attachment });
-    return res.status(200).send({ ok: true });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, error });
-  }
-});
-
 //@check
 router.get("/", passport.authenticate(["referent"], { session: false }), async (req, res) => {
   try {
