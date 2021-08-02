@@ -52,7 +52,7 @@ async function sendEmail(to, subject, htmlContent, { params, attachment, cc, bcc
 // https://developers.sendinblue.com/reference#sendtransacemail
 async function sendTemplate(id, { params, emailTo, attachment } = {}) {
   try {
-    const body = { templateId: id };
+    const body = { templateId: parseInt(id) };
     if (emailTo) body.to = emailTo;
     if (params) body.params = params;
     if (attachment) body.attachment = attachment;

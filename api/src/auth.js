@@ -1,16 +1,15 @@
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
-const fs = require("fs");
-const path = require("path");
 const Joi = require("joi");
 
 const { capture } = require("./sentry");
 
 const config = require("./config");
-const { sendEmail } = require("./sendinblue");
+const { sendTemplate } = require("./sendinblue");
 const { COOKIE_MAX_AGE, JWT_MAX_AGE, cookieOptions, logoutCookieOptions } = require("./cookie-options");
 const { validatePassword, ERRORS } = require("./utils");
 const { validateFirstName } = require("./utils/validator/default");
+const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 class Auth {
   constructor(model) {
     this.model = model;
@@ -163,11 +162,10 @@ class Auth {
       obj.set({ forgotPasswordResetToken: token, forgotPasswordResetExpires: Date.now() + COOKIE_MAX_AGE });
       await obj.save();
 
-      const htmlContent = fs
-        .readFileSync(path.resolve(__dirname, "./templates/forgetpassword.html"))
-        .toString()
-        .replace(/{{cta}}/g, `${cta}?token=${token}`);
-      await sendEmail({ name: `${obj.firstName} ${obj.lastName}`, email }, "Réinitialiser mon mot de passe", htmlContent);
+      await sendTemplate(SENDINBLUE_TEMPLATES.FORGOT_PASSWORD, {
+        emailTo: [{ name: `${obj.firstName} ${obj.lastName}`, email }],
+        params: { cta: `${cta}?token=${token}` },
+      });
 
       return res.status(200).send({ ok: true });
     } catch (error) {
