@@ -9,10 +9,13 @@ import api from "../../../services/api";
 import { translate, APPLICATION_STATUS_COLORS, APPLICATION_STATUS, getAge } from "../../../utils";
 import Badge from "../../../components/Badge";
 import DomainThumb from "../../../components/DomainThumb";
+import DownloadContractButton from "../../../components/buttons/DownloadContractButton";
 
 export default ({ application, index }) => {
   const [value, setValue] = useState(application);
   const [contract, setContract] = useState(null);
+  const young = useSelector((state) => state.Auth.young);
+
   const getTags = (mission) => {
     if (!mission) return [];
     const tags = [];
@@ -31,6 +34,16 @@ export default ({ application, index }) => {
     };
     getContract();
   }, [application]);
+
+  const contractHasAllValidation = (contract, young) => {
+    const isYoungAdult = getAge(young.birthdateAt) >= 18;
+    return (
+      contract.projectManagerStatus === "VALIDATED" &&
+      contract.structureManagerStatus === "VALIDATED" &&
+      ((isYoungAdult && contract.youngContractStatus === "VALIDATED") ||
+        (!isYoungAdult && contract.parent1Status === "VALIDATED" && (!young.parent2Email || contract.parent2Status === "VALIDATED")))
+    );
+  };
 
   if (!value || !value.mission) return <div />;
 
@@ -64,7 +77,20 @@ export default ({ application, index }) => {
               </TagContainer>
             </Col>
           </Card>
-          {contract && contract?.invitationSent && <ContractInfo contract={contract} />}
+          {contract && contract?.invitationSent && (
+            <>
+              <hr />
+              {contractHasAllValidation(contract, young) ? (
+                <div style={{ marginLeft: "1rem", fontSize: "0.9rem", fontWeight: "500", marginBottom: "1rem" }}>
+                  <ContractInfoContainer>
+                    <DownloadContractButton children={"Télécharger le contrat"} young={young} uri={contract._id} />
+                  </ContractInfoContainer>
+                </div>
+              ) : (
+                <ContractInfo contract={contract} young={young} />
+              )}
+            </>
+          )}
           <Footer
             application={value}
             tutor={value.tutor}
@@ -78,28 +104,23 @@ export default ({ application, index }) => {
   );
 };
 
-function ContractInfo({ contract }) {
-  const young = useSelector((state) => state.Auth.young);
+function ContractInfo({ contract, young }) {
   const isYoungAdult = getAge(young.birthdateAt) >= 18;
-
   return (
     <>
-      <hr />
-      <div>
-        <div style={{ marginLeft: "1rem", fontSize: "0.9rem", fontWeight: "500" }}>Signatures du contrat d'engagement de la mission d'intérêt général</div>
-        <ContractInfoContainer>
-          <ContractStatus contract={contract} property="projectManagerStatus" name="Représentant de l'Etat" />
-          <ContractStatus contract={contract} property="structureManagerStatus" name="Représentant structure" />
-          {isYoungAdult ? (
-            <ContractStatus contract={contract} property="youngContractStatus" name="Volontaire" />
-          ) : (
-            <>
-              <ContractStatus contract={contract} property="parent1Status" name="Représentant légal 1" />
-              {young.parent2Email && <ContractStatus contract={contract} property="parent2Status" name="Représentant légal 2" />}
-            </>
-          )}
-        </ContractInfoContainer>
-      </div>
+      <div style={{ marginLeft: "1rem", fontSize: "0.9rem", fontWeight: "500" }}>Signatures du contrat d'engagement de la mission d'intérêt général</div>
+      <ContractInfoContainer>
+        <ContractStatus contract={contract} property="projectManagerStatus" name="Représentant de l'Etat" />
+        <ContractStatus contract={contract} property="structureManagerStatus" name="Représentant structure" />
+        {isYoungAdult ? (
+          <ContractStatus contract={contract} property="youngContractStatus" name="Volontaire" />
+        ) : (
+          <>
+            <ContractStatus contract={contract} property="parent1Status" name="Représentant légal 1" />
+            {young.parent2Email && <ContractStatus contract={contract} property="parent2Status" name="Représentant légal 2" />}
+          </>
+        )}
+      </ContractInfoContainer>
     </>
   );
 }
