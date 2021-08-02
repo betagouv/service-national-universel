@@ -60,23 +60,17 @@ export default ({ young }) => {
           );
       }
       setModal(null);
-      await api.post(`/email/send-template/${SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_VALIDATED}`, {
-        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-      });
+      // todo :  await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_VALIDATED}`)
+      await api.post(`/referent/email/${SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_VALIDATED}/${young._id}`);
       for (let i = 0; i < applicationsToMilitaryPreparation.length; i++) {
         const app = applicationsToMilitaryPreparation[i];
-        const responseTutor = await api.get(`/referent/${app.tutorId}`);
-        if (!responseTutor.ok) continue;
-        await api.post(`/email/send-template/${SENDINBLUE_TEMPLATES.REFERENT_MILITARY_PREPARATION_DOCS_VALIDATED}`, {
-          emailTo: [{ name: `${responseTutor.data.firstName} ${responseTutor.data.lastName}`, email: responseTutor.data.email }],
-          params: { cta: `${adminURL}/volontaire/${young._id}`, youngFirstName: young.firstName, youngLastName: young.lastName, missionName: app.mission?.name || app.missionName },
-        });
+        await api.post(`/referent/email-tutor/${SENDINBLUE_TEMPLATES.REFERENT_MILITARY_PREPARATION_DOCS_VALIDATED}/${app.tutorId}`, { app });
       }
-      // Refresh
     } catch (e) {
       console.error(e);
       toastr.error("Une erreur est survenue", t(e.code));
     }
+    //Refresh
     history.go(0);
   };
 
@@ -102,10 +96,9 @@ export default ({ young }) => {
           `Une erreur s'est produite lors du changement automatique de statut de la candidtature à la mission : ${app.missionName}`
         );
     }
-    await api.post(`/email/send-template/${SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_CORRECTION}`, {
-      emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-      params: { message, cta: `${appURL}/ma-preparation-militaire` },
-    });
+    // todo :  await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_CORRECTION}`)
+    await api.post(`/referent/email/${SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_CORRECTION}/${young._id}`, { message });
+
     toastr.success("Email envoyé !");
     setModal(null);
     // Refresh
@@ -135,10 +128,9 @@ export default ({ young }) => {
           `Une erreur s'est produite lors du changement automatique de statut de la candidtature à la mission : ${app.missionName}`
         );
     }
-    await api.post(`/email/send-template/${SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_REFUSED}`, {
-      emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-      params: { message },
-    });
+    // todo :  await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_CORRECTION}`)
+    await api.post(`/referent/email/${SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_REFUSED}/${young._id}`, { message });
+
     toastr.success("Email envoyé !");
     setModal(null);
     // Refresh
