@@ -4,7 +4,7 @@ description: Proposer une nouvelle fonctionnalité pour améliorer la plateform 
 labels: [enhancement]
 body:
   - type: textarea
-    id: description
+    id: description-bug
     attributes:
       label: Fonctionnalité liée à un problème ?
       description: Une description claire et concise du manque.

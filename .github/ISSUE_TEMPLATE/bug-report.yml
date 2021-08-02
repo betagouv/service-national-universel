@@ -53,6 +53,10 @@ body:
         - label: Chrome
         - label: Firefox
         - label: Autre
+  - type: input
+    id: version
+    attributes:
+      label: Si connue, quelle est la version du navigateur ?
   - type: textarea
     id: comment
     attributes:
