@@ -4,6 +4,7 @@ const passport = require("passport");
 const crypto = require("crypto");
 const fs = require("fs");
 const path = require("path");
+const archiver = require("archiver");
 
 const renderFromHtml = require("../htmlToPdf");
 const { capture } = require("../sentry");
@@ -15,6 +16,7 @@ const { ERRORS } = require("../utils");
 const { sendEmail } = require("../sendinblue");
 const { APP_URL } = require("../config");
 const contractTemplate = require("../templates/contractPhase2");
+const { ROLES } = require("snu-lib");
 
 async function updateYoungStatusPhase2Contract(youngId) {
   const young = await YoungObject.findById(youngId);
@@ -320,6 +322,42 @@ router.post("/:id/download", passport.authenticate(["young", "referent"], { sess
     res.setHeader("Content-Dispositon", 'inline; filename="test.pdf"');
     res.set("Cache-Control", "public, max-age=1");
     res.send(buffer);
+  } catch (e) {
+    capture(e);
+    res.status(500).send({ ok: false, e, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/download/all", passport.authenticate(["referent"], { session: false }), async (req, res) => {
+  try {
+    console.log(`${req.user.id} download all contracts`);
+    const contracts = await ContractObject.find({ _id: { $in: ["60c20e380ec9bd07a05b2b7b", "60c31c28a7a6230790cbcec9"] } });
+    if (!contracts || contracts.length === 0) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const output = fs.createWriteStream(__dirname + "/example.zip");
+    const archive = archiver("zip", {
+      zlib: { level: 9 }, // Sets the compression level.
+    });
+
+    archive.pipe(output);
+
+    const options = req.body.options || { format: "A4", margin: 0 };
+
+    for (let i = 0; i < contracts.length; i++) {
+      const contract = contracts[i];
+      const contractHtml = await contractTemplate.render(contract);
+      if (!contractHtml) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      const buffer = await renderFromHtml(contractHtml, options);
+      archive.append(buffer, { name: `contract_${contract.id}.pdf` });
+    }
+    await archive.finalize();
+    output.close();
+
+    res.contentType("application/zip");
+    res.setHeader("Content-Dispositon", 'inline; filename="test.zip"');
+    res.set("Cache-Control", "public, max-age=1");
+    res.send(output);
   } catch (e) {
     capture(e);
     res.status(500).send({ ok: false, e, code: ERRORS.SERVER_ERROR });
