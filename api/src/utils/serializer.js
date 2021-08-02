@@ -35,7 +35,31 @@ function serializeBus(bus, user) {
   };
 }
 
+function serializeCohesionCenter(center, user) {
+  return {
+    _id: center._id,
+    name: center.name,
+    code: center.code,
+    country: center.country,
+    COR: center.COR,
+    departmentCode: center.departmentCode,
+    address: center.address,
+    city: center.city,
+    zip: center.zip,
+    department: center.department,
+    region: center.region,
+    placesTotal: center.placesTotal,
+    placesLeft: center.placesLeft,
+    outfitDelivered: center.outfitDelivered,
+    observations: center.observations,
+    waitingList: center.waitingList,
+    createdAt: center.createdAt,
+    updatedAt: center.updatedAt,
+  };
+}
+
 module.exports = {
   serializeApplication,
   serializeBus,
+  serializeCohesionCenter,
 };

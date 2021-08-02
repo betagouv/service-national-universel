@@ -21,13 +21,18 @@ const {
 } = require("../utils");
 const renderFromHtml = require("../htmlToPdf");
 const { ROLES } = require("snu-lib/roles");
+const Joi = require("joi");
+const { serializeCohesionCenter } = require("../utils/serializer");
 
 router.post("/refresh/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const data = await CohesionCenterModel.findById(req.params.id);
+    const { error, value } = Joi.object({ id: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    const data = await CohesionCenterModel.findById(value.id);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     await updatePlacesCenter(data);
-    return res.status(200).send({ ok: true, data });
+    return res.status(200).send({ ok: true, data: serializeCohesionCenter(data) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
