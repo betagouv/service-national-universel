@@ -24,6 +24,18 @@ function serializeApplication(application, user) {
   };
 }
 
+function serializeBus(bus, user) {
+  return {
+    _id: bus._id,
+    idExcel: bus.idExcel,
+    capacity: bus.capacity,
+    placesLeft: bus.placesLeft,
+    createdAt: bus.createdAt,
+    updatedAt: bus.updatedAt,
+  };
+}
+
 module.exports = {
   serializeApplication,
+  serializeBus,
 };
