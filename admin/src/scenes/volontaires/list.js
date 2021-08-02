@@ -205,6 +205,7 @@ export default ({ setYoung }) => {
                   style={{ flex: 1, marginRight: "1rem" }}
                   innerClass={{ input: "searchbox" }}
                   autosuggest={false}
+                  URLParams={true}
                   queryFormat="and"
                 />
                 <MultiDropdownList

@@ -82,6 +82,7 @@ export default () => {
                   // fuzziness={1}
                   style={{ flex: 1, marginRight: "1rem" }}
                   innerClass={{ input: "searchbox" }}
+                  URLParams={true}
                   autosuggest={false}
                 />
                 <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />

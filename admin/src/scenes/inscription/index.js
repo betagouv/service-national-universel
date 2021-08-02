@@ -129,6 +129,7 @@ export default () => {
                   // fuzziness={2}
                   style={{ flex: 1, marginRight: "1rem" }}
                   innerClass={{ input: "searchbox" }}
+                  URLParams={true}
                   autosuggest={false}
                 />
                 <MultiDropdownList
