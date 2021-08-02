@@ -14,6 +14,7 @@ const { ERRORS } = require("../utils");
 const { validateApplication } = require("../utils/validator/default");
 const { ADMIN_URL } = require("../config");
 const { SUB_ROLES, ROLES, SENDINBLUE_TEMPLATES, department2region } = require("snu-lib");
+const { serializeApplication } = require("../utils/serializer");
 
 const updateStatusPhase2 = async (app) => {
   const young = await YoungObject.findById(app.youngId);
@@ -73,7 +74,7 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false }
     const data = await ApplicationObject.create(value);
     await updateStatusPhase2(data);
     await updatePlacesMission(data);
-    return res.status(200).send({ ok: true, data });
+    return res.status(200).send({ ok: true, data: serializeApplication(data) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
