@@ -7,7 +7,7 @@ import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 import LoadingButton from "../buttons/LoadingButton";
 
-export default ({ value, onChange, onSend }) => {
+export default ({ isOpen, value, onChange, onSend }) => {
   const [message, setMessage] = useState();
   const [sending, setSending] = useState(false);
 
@@ -33,7 +33,7 @@ Merci de vous reconnecter à votre compte pour apporter les modifications demand
   };
 
   return (
-    <Modal isOpen={true} toggle={onChange}>
+    <Modal isOpen={isOpen} toggle={onChange}>
       <ModalContainer>
         <img src={require("../../assets/close.svg")} height={10} onClick={onChange} />
         <h1>Veuillez éditer le message ci-dessous pour préciser les corrections à apporter avant de l'envoyer</h1>

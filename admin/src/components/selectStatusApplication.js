@@ -84,17 +84,16 @@ export default ({ hit, options = [], callback }) => {
         </UncontrolledDropdown>
         {/* <div>{JSON.stringify(young)}</div> */}
       </ActionBox>
-      {modal && (
-        <ModalRefusedApplication
-          value={application}
-          structureId={application.structureId}
-          onChange={() => setModal(false)}
-          onSend={(msg) => {
-            setStatus(APPLICATION_STATUS.REFUSED, msg);
-            setModal(null);
-          }}
-        />
-      )}
+      <ModalRefusedApplication
+        isOpen={modal}
+        value={application}
+        structureId={application.structureId}
+        onChange={() => setModal(false)}
+        onSend={(msg) => {
+          setStatus(APPLICATION_STATUS.REFUSED, msg);
+          setModal(null);
+        }}
+      />
     </>
   );
 };

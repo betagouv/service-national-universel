@@ -17,7 +17,7 @@ import { adminURL, appURL } from "../../../config";
 
 export default ({ young }) => {
   const [applicationsToMilitaryPreparation, setApplicationsToMilitaryPreparation] = useState(null);
-  const [modal, setModal] = useState({ visible: false, template: null, data: null });
+  const [modal, setModal] = useState({ isOpen: false, template: null, data: null });
   const history = useHistory();
 
   useEffect(() => {
@@ -40,7 +40,7 @@ export default ({ young }) => {
 
   const handleValidate = () => {
     console.log("handleValidate");
-    setModal({ visible: true, template: "confirm" });
+    setModal({ isOpen: true, template: "confirm" });
   };
   const onValidate = async () => {
     console.log("onValidate");
@@ -59,7 +59,7 @@ export default ({ young }) => {
             `Une erreur s'est produite lors du changement automatique de statut de la candidtature à la mission : ${app.missionName}`
           );
       }
-      setModal(null);
+      setModal({ isOpen: false, template: null, data: null });
       await api.post(`/email/send-template/${SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_VALIDATED}`, {
         emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
       });
@@ -82,7 +82,7 @@ export default ({ young }) => {
 
   const handleCorrection = () => {
     console.log("handleCorrection");
-    setModal({ visible: true, template: "correction" });
+    setModal({ isOpen: true, template: "correction" });
   };
   const onCorrection = async (message) => {
     console.log("onCorrection");
@@ -107,14 +107,14 @@ export default ({ young }) => {
       params: { message, cta: `${appURL}/ma-preparation-militaire` },
     });
     toastr.success("Email envoyé !");
-    setModal(null);
+    setModal({ isOpen: false, template: null, data: null });
     // Refresh
     history.go(0);
   };
 
   const handleRefused = () => {
     console.log("handleRefused");
-    setModal({ visible: true, template: "refuse" });
+    setModal({ isOpen: true, template: "refuse" });
   };
 
   const onRefuse = async (message) => {
@@ -140,42 +140,39 @@ export default ({ young }) => {
       params: { message },
     });
     toastr.success("Email envoyé !");
-    setModal(null);
+    setModal({ isOpen: false, template: null, data: null });
     // Refresh
     history.go(0);
   };
 
   return (
     <>
-      {modal?.visible && modal?.template === "confirm" && (
-        <ModalConfirm
-          topTitle="alerte"
-          title={`Vous êtes sur le point de confirmer l'éligibilité de ${young.firstName} à la préparation militaire, sur la base des documents reçus.`}
-          message={`Une fois l'éligibilité confirmée un mail sera envoyé à ${young.firstName} (${young.email}).`}
-          onChange={() => setModal(null)}
-          onConfirm={onValidate}
-        />
-      )}
-      {modal?.visible && modal?.template === "correction" && (
-        <ModalConfirmWithMessage
-          topTitle="alerte"
-          title={`Attention, vous êtes sur le point de demander des corrections aux documents envoyés, car ces derniers ne vous permettent pas de confirmer ou d'infirmer l'éligibilité de ${young.firstName} à la préparation militaire`}
-          message={`Une fois le message ci-dessous validé, il sera transmis par mail à ${young.firstName} (${young.email}).`}
-          young={young}
-          onChange={() => setModal(null)}
-          onConfirm={onCorrection}
-        />
-      )}
-      {modal?.visible && modal?.template === "refuse" && (
-        <ModalConfirmWithMessage
-          topTitle="alerte"
-          title={`Attention, vous êtes sur le point d'infirmer l'éligibilité de ${young.firstName} à la préparation militaire, sur la base des documents reçus.`}
-          message={`Merci de motiver votre refus au jeune en lui expliquant sur quelle base il n'est pas éligible à la préparation militaire. Une fois le message ci-dessous validé, il sera transmis par mail à ${young.firstName} (${young.email}).`}
-          young={young}
-          onChange={() => setModal(null)}
-          onConfirm={onRefuse}
-        />
-      )}
+      <ModalConfirm
+        isOpen={modal.isOpen && modal.template === "confirm"}
+        topTitle="alerte"
+        title={`Vous êtes sur le point de confirmer l'éligibilité de ${young.firstName} à la préparation militaire, sur la base des documents reçus.`}
+        message={`Une fois l'éligibilité confirmée un mail sera envoyé à ${young.firstName} (${young.email}).`}
+        onChange={() => setModal({ isOpen: false, template: null, data: null })}
+        onConfirm={onValidate}
+      />
+      <ModalConfirmWithMessage
+        isOpen={modal.isOpen && modal.template === "correction"}
+        topTitle="alerte"
+        title={`Attention, vous êtes sur le point de demander des corrections aux documents envoyés, car ces derniers ne vous permettent pas de confirmer ou d'infirmer l'éligibilité de ${young.firstName} à la préparation militaire`}
+        message={`Une fois le message ci-dessous validé, il sera transmis par mail à ${young.firstName} (${young.email}).`}
+        young={young}
+        onChange={() => setModal({ isOpen: false, template: null, data: null })}
+        onConfirm={onCorrection}
+      />
+      <ModalConfirmWithMessage
+        isOpen={modal.isOpen && modal.template === "refuse"}
+        topTitle="alerte"
+        title={`Attention, vous êtes sur le point d'infirmer l'éligibilité de ${young.firstName} à la préparation militaire, sur la base des documents reçus.`}
+        message={`Merci de motiver votre refus au jeune en lui expliquant sur quelle base il n'est pas éligible à la préparation militaire. Une fois le message ci-dessous validé, il sera transmis par mail à ${young.firstName} (${young.email}).`}
+        young={young}
+        onChange={() => setModal({ isOpen: false, template: null, data: null })}
+        onConfirm={onRefuse}
+      />
       <Box>
         <Bloc
           title="Documents - Préparation militaire"

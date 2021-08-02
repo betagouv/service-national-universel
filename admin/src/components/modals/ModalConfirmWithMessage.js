@@ -4,7 +4,7 @@ import { Modal } from "reactstrap";
 import { ModalContainer, Content, Footer, Header } from "./Modal";
 import ModalButton from "../buttons/ModalButton";
 
-export default ({ topTitle, title, message, onChange, onConfirm, young, placeholder = "Votre message..." }) => {
+export default ({ isOpen, topTitle, title, message, onChange, onConfirm, young, placeholder = "Votre message..." }) => {
   const [messageTextArea, setMessageTextArea] = useState();
   const [sending, setSending] = useState(false);
 
@@ -16,7 +16,7 @@ export default ({ topTitle, title, message, onChange, onConfirm, young, placehol
   };
 
   return (
-    <Modal isOpen={true} toggle={onChange}>
+    <Modal isOpen={isOpen} toggle={onChange}>
       <ModalContainer>
         <img src={require("../../assets/close.svg")} height={10} onClick={onChange} />
         <Header>{topTitle}</Header>
