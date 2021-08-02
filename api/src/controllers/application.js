@@ -9,9 +9,11 @@ const ApplicationObject = require("../models/application");
 const MissionObject = require("../models/mission");
 const YoungObject = require("../models/young");
 const ReferentObject = require("../models/referent");
-const { sendEmail } = require("../sendinblue");
+const { sendEmail, sendTemplate } = require("../sendinblue");
 const { ERRORS } = require("../utils");
 const { validateApplication } = require("../utils/validator/default");
+const { ADMIN_URL } = require("../config");
+const { SUB_ROLES, ROLES, SENDINBLUE_TEMPLATES, department2region } = require("snu-lib");
 
 const updateStatusPhase2 = async (app) => {
   const young = await YoungObject.findById(app.youngId);
@@ -136,6 +138,37 @@ router.get("/mission/:id", passport.authenticate("referent", { session: false })
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
+});
+
+router.post("/notify/docs-military-preparation", passport.authenticate("young", { session: false }), async (req, res) => {
+  // get the referent_department manager_phase2
+  let toReferent = await ReferentObject.findOne({
+    subRole: SUB_ROLES.manager_phase2,
+    role: ROLES.REFERENT_DEPARTMENT,
+    department: req.user.department,
+  });
+  // if not found, get the referent_region
+  if (!toReferent) {
+    toReferent = await ReferentObject.findOne({
+      subRole: SUB_ROLES.manager_phase2,
+      role: ROLES.REFERENT_REGION,
+      region: department2region[req.user.department],
+    });
+  }
+  // if not found, get the manager_department
+  if (!toReferent) {
+    toReferent = await ReferentObject.findOne({
+      subRole: SUB_ROLES.manager_department,
+      role: ROLES.REFERENT_DEPARTMENT,
+      department: req.user.department,
+    });
+  }
+  if (!toReferent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+  const mail = await sendTemplate(parseInt(SENDINBLUE_TEMPLATES.REFERENT_MILITARY_PREPARATION_DOCS_SUBMITTED), {
+    emailTo: [{ name: `${toReferent.firstName} ${toReferent.lastName}`, email: toReferent.email }],
+    params: { cta: `${ADMIN_URL}/volontaire/${req.user._id}/phase2`, youngFirstName: req.user.firstName, youngLastName: req.user.lastName },
+  });
+  return res.status(200).send({ ok: true, data: mail });
 });
 
 router.post("/:id/notify/:template", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {

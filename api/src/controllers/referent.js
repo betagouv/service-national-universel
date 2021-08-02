@@ -21,7 +21,7 @@ const StructureObject = require("../models/structure");
 const AuthObject = require("../auth");
 
 const { decrypt } = require("../cryptoUtils");
-const { sendEmail } = require("../sendinblue");
+const { sendEmail, sendTemplate } = require("../sendinblue");
 const { uploadFile, validatePassword, updatePlacesCenter, signinLimiter, assignNextYoungFromWaitingList, ERRORS } = require("../utils");
 const { encrypt } = require("../cryptoUtils");
 const referentValidator = require("../utils/validator/referent");
@@ -29,6 +29,7 @@ const { validateId } = require("../utils/validator/default");
 const ReferentAuth = new AuthObject(ReferentObject);
 const { cookieOptions, JWT_MAX_AGE } = require("../cookie-options");
 const Joi = require("joi");
+const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 const { department2region } = require("snu-lib/region-and-departments");
 const {
   ROLES_LIST,
@@ -428,14 +429,15 @@ router.post("/email-tutor/:template/:tutorId", passport.authenticate("referent",
     const { error, value } = Joi.object({
       tutorId: Joi.string().required(),
       template: Joi.string().required(),
-      subject: Joi.string().required().allow(null, ""),
-      message: Joi.string().required().allow(null, ""),
+      subject: Joi.string().allow(null, ""),
+      message: Joi.string().allow(null, ""),
+      app: Joi.object().allow(null, {}),
     })
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
-    const { tutorId, template, subject, message } = value;
+    const { tutorId, template, subject, message, app } = value;
     const tutor = await ReferentObject.findById(tutorId);
     if (!tutor) return res.status(200).send({ ok: true });
 
@@ -453,6 +455,17 @@ router.post("/email-tutor/:template/:tutorId", passport.authenticate("referent",
         .toString()
         .replace(/{{message}}/g, `${message.replace(/\n/g, "<br/>")}`)
         .replace(/{{cta}}/g, "https://admin.snu.gouv.fr");
+    } else if (template === SENDINBLUE_TEMPLATES.REFERENT_MILITARY_PREPARATION_DOCS_VALIDATED) {
+      await sendTemplate(parseInt(SENDINBLUE_TEMPLATES.REFERENT_MILITARY_PREPARATION_DOCS_VALIDATED), {
+        emailTo: [{ name: `${tutor.firstName} ${tutor.lastName}`, email: tutor.email }],
+        params: {
+          cta: `${config.ADMIN_URL}/volontaire/${app.youngId}`,
+          youngFirstName: app.youngFirstName,
+          youngLastName: app.youngLastName,
+          missionName: app.missionName,
+        },
+      });
+      return res.status(200).send({ ok: true });
     } else {
       throw new Error("Template de mail introuvable");
     }
@@ -532,10 +545,27 @@ router.post("/email/:template/:youngId", passport.authenticate("referent", { ses
         .replace(/{{structureName}}/g, structureName)
         .replace(/\n/g, "<br/>");
       subject = `La mission ${missionName} devrait vous intéresser !`;
+    } else if (template === SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_VALIDATED) {
+      await sendTemplate(parseInt(SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_VALIDATED), {
+        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+      });
+      return res.status(200).send({ ok: true });
+    } else if (template === SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_CORRECTION) {
+      await sendTemplate(parseInt(SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_CORRECTION), {
+        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+        params: { message, cta: `${config.APP_URL}/ma-preparation-militaire` },
+      });
+      return res.status(200).send({ ok: true });
+    } else if (template === SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_REFUSED) {
+      await sendTemplate(parseInt(SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_REFUSED), {
+        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+        params: { message },
+      });
+      return res.status(200).send({ ok: true });
     }
 
     await sendEmail({ name: `${young.firstName} ${young.lastName}`, email: young.email }, subject, htmlContent);
-    return res.status(200).send({ ok: true }); //todo
+    return res.status(200).send({ ok: true });
   } catch (error) {
     console.log(error);
     capture(error);
