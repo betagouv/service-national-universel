@@ -4,7 +4,7 @@ faker.locale = "fr";
 
 function getNewApplicationFixture() {
   return {
-    sqlId: faker.random.uuid(),
+    sqlId: faker.datatype.uuid(),
     youngId: ObjectId(),
     youngFirstName: faker.name.firstName(),
     youngLastName: faker.name.lastName(),
