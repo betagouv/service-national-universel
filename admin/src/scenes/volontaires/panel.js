@@ -27,6 +27,7 @@ export default ({ onChange, value }) => {
     (async () => {
       const { ok, data } = await api.get(`/referent/manager_phase2/${young.department}`);
       if (ok) return setReferentManagerPhase2(data);
+      setReferentManagerPhase2(null);
     })();
     return () => setReferentManagerPhase2();
   }, [young]);
@@ -78,7 +79,7 @@ export default ({ onChange, value }) => {
         ) : (
           <NoResult>Aucune candidature n'est liée à ce volontaire.</NoResult>
         )}
-        <Details title="Contact phase 2" value={referentManagerPhase2?.email} copy />
+        <Details title="Contact phase 2" value={referentManagerPhase2?.email || (referentManagerPhase2 !== undefined && "Non trouvé") || "Chargement..."} copy />
       </Info>
       <Info title="Coordonnées" id={young._id}>
         <Details title="E-mail" value={young.email} copy />
