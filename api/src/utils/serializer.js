@@ -1,61 +1,40 @@
-function serializeApplication(application, user) {
-  return {
-    _id: application._id,
-    youngId: application.youngId,
-    youngFirstName: application.youngFirstName,
-    youngLastName: application.youngLastName,
-    youngEmail: application.youngEmail,
-    youngBirthdateAt: application.youngBirthdateAt,
-    youngCity: application.youngCity,
-    youngDepartment: application.youngDepartment,
-    youngCohort: application.youngCohort,
-    missionId: application.missionId,
-    missionName: application.missionName,
-    missionDepartment: application.missionDepartment,
-    missionRegion: application.missionRegion,
-    structureId: application.structureId,
-    tutorId: application.tutorId,
-    contractId: application.contractId,
-    tutorName: application.tutorName,
-    priority: application.priority,
-    status: application.status,
-    createdAt: application.createdAt,
-    updatedAt: application.updatedAt,
-  };
+const { isYoung } = require(".");
+
+function serializeApplication(application) {
+  return application.toObject({
+    transform: (_doc, ret) => {
+      delete ret.sqlId;
+      return ret;
+    },
+  });
 }
 
 function serializeBus(bus, user) {
-  return {
-    _id: bus._id,
-    idExcel: bus.idExcel,
-    capacity: bus.capacity,
-    placesLeft: bus.placesLeft,
-    createdAt: bus.createdAt,
-    updatedAt: bus.updatedAt,
-  };
+  return bus.toObject();
 }
 
 function serializeCohesionCenter(center, user) {
-  return {
-    _id: center._id,
-    name: center.name,
-    code: center.code,
-    country: center.country,
-    COR: center.COR,
-    departmentCode: center.departmentCode,
-    address: center.address,
-    city: center.city,
-    zip: center.zip,
-    department: center.department,
-    region: center.region,
-    placesTotal: center.placesTotal,
-    placesLeft: center.placesLeft,
-    outfitDelivered: center.outfitDelivered,
-    observations: center.observations,
-    waitingList: center.waitingList,
-    createdAt: center.createdAt,
-    updatedAt: center.updatedAt,
-  };
+  return center.toObject();
+}
+
+function serializeYoung(young, user) {
+  return young.toObject({
+    transform: (_doc, ret) => {
+      delete ret.sqlId;
+      delete ret.password;
+      delete ret.forgotPasswordResetToken;
+      delete ret.forgotPasswordResetExpires;
+      delete ret.invitationToken;
+      delete ret.invitationExpires;
+      delete ret.phase3Token;
+      delete ret.__v;
+      if (isYoung(user)) {
+        delete ret.historic;
+        delete ret.qpv;
+      }
+      return ret;
+    },
+  });
 }
 
 module.exports = {
