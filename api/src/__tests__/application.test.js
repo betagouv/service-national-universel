@@ -261,5 +261,27 @@ describe("Application", () => {
         expect(res.status).toBe(200);
       }
     });
+    it("should only allow young to send application for themselves", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const referent = await createReferentHelper(getNewReferentFixture());
+      const mission = await createMissionHelper({ ...getNewMissionFixture(), tutorId: referent._id });
+      const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission._id });
+      const secondYoung = await createYoungHelper(getNewYoungFixture());
+      const secondApplication = await createApplication({ ...getNewApplicationFixture(), youngId: secondYoung._id, missionId: mission._id });
+
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
+
+      // Successful request
+      let res = await request(getAppHelper()).post(`/application/${application._id}/notify/refused`).send({});
+      expect(res.status).toBe(200);
+
+      // Failed request (not allowed)
+      res = await request(getAppHelper()).post(`/application/${secondApplication._id}/notify/refused`).send({});
+      expect(res.status).toBe(401);
+
+      passport.user = previous;
+    });
   });
 });
