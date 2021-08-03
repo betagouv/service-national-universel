@@ -42,19 +42,25 @@ export default () => {
   return (
     <>
       <Row style={{}}>
-        <Col md={12}>
+        <Col md={6}>
           <Title>Inscriptions</Title>
+        </Col>
+        <Col md={6}>
+          {filter ? (
+            <>
+              <FiltersList>
+                <FilterRegion updateFilter={updateFilter} filter={filter} />
+                <FilterDepartment updateFilter={updateFilter} filter={filter} />
+                <FilterWrapper>
+                  <YearPicker options={["2019", "2020", "2021"]} onChange={(cohort) => updateFilter({ cohort })} value={filter.cohort} />
+                </FilterWrapper>
+              </FiltersList>
+            </>
+          ) : null}
         </Col>
       </Row>
       {filter && (
         <>
-          <FiltersList>
-            <FilterRegion updateFilter={updateFilter} filter={filter} />
-            <FilterDepartment updateFilter={updateFilter} filter={filter} />
-            <FilterWrapper>
-              <YearPicker options={["2019", "2020", "2021"]} onChange={(cohort) => updateFilter({ cohort })} value={filter.cohort} />
-            </FilterWrapper>
-          </FiltersList>
           <Row>
             <Col md={12}>
               <SubTitle>Pilotage</SubTitle>
