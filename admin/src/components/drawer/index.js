@@ -109,6 +109,7 @@ export default (props) => {
         <HeaderSideBar to="/">
           <img src={require("../../assets/logo-snu.png")} height={38} />
           {getName()}
+          <Burger onClick={handleClick} src={require("../../assets/burger.svg")} />
         </HeaderSideBar>
       </Logo>
       {environment !== "production" && environmentBannerVisible ? (
@@ -145,6 +146,23 @@ const EnvironmentBanner = styled.div`
     opacity: 0.5;
   }
 `;
+const Burger = styled.img`
+  display: none;
+  @media (max-width: 1000px) {
+    margin-left: auto;
+    margin-right: 0 !important;
+    display: block;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    object-fit: contain;
+    cursor: pointer;
+    svg {
+      color: #f00;
+    }
+  }
+`;
 
 const Logo = styled.h1`
   background: #372f78;
@@ -173,12 +191,12 @@ const Sidebar = styled.div`
   ::-webkit-scrollbar {
     display: none;
   }
-  @media (max-width: 767px) {
+  @media (max-width: 1000px) {
     transform: translateX(${({ open }) => (open ? 0 : "-105%")});
     opacity: 1;
     visibility: visible;
     height: 100vh;
-    width: 100vw;
+    width: 60vw;
     z-index: 11;
     position: fixed;
   }

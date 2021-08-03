@@ -137,7 +137,7 @@ const ContentContainer = styled.div`
   margin-left: auto;
   width: 85%;
   max-width: calc(100% - 250px);
-  @media (max-width: 768px) {
+  @media (max-width: 1000px) {
     width: 100%;
     padding: 0;
     margin-left: auto;
