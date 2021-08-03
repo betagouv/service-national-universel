@@ -14,7 +14,14 @@ function serializeBus(bus, user) {
 }
 
 function serializeCohesionCenter(center, user) {
-  return center.toObject();
+  return center.toObject({
+    transform: (_doc, ret) => {
+      if (isYoung(user)) {
+        delete ret.waitingList;
+      }
+      return ret;
+    },
+  });
 }
 
 function serializeYoung(young, user) {
@@ -41,4 +48,5 @@ module.exports = {
   serializeApplication,
   serializeBus,
   serializeCohesionCenter,
+  serializeYoung,
 };

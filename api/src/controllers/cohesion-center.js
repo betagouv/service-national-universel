@@ -22,7 +22,7 @@ const {
 const renderFromHtml = require("../htmlToPdf");
 const { ROLES, canCreateCohesionCenter } = require("snu-lib/roles");
 const Joi = require("joi");
-const { serializeCohesionCenter } = require("../utils/serializer");
+const { serializeCohesionCenter, serializeYoung } = require("../utils/serializer");
 const { validateCohesionCenter } = require("../utils/validator");
 
 router.post("/refresh/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
@@ -114,7 +114,11 @@ router.post("/:centerId/assign-young/:youngId", passport.authenticate("referent"
     if (oldCenter) await updatePlacesCenter(oldCenter);
     if (bus) await updatePlacesBus(bus);
 
-    return res.status(200).send({ data, young, ok: true });
+    return res.status(200).send({
+      data: serializeCohesionCenter(data, req.user),
+      young: serializeYoung(young, req.user),
+      ok: true,
+    });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
@@ -140,7 +144,7 @@ router.post("/:centerId/assign-young-waiting-list/:youngId", passport.authentica
     center.waitingList.push(young._id);
     await center.save();
 
-    return res.status(200).send({ data: center, ok: true });
+    return res.status(200).send({ data: serializeCohesionCenter(center), ok: true });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
@@ -152,7 +156,7 @@ router.get("/:id", passport.authenticate("referent", { session: false }), async 
     const data = await CohesionCenterModel.findById(req.params.id);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    return res.status(200).send({ ok: true, data });
+    return res.status(200).send({ ok: true, data: serializeCohesionCenter(data) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
@@ -166,7 +170,7 @@ router.get("/:id/head", passport.authenticate("referent", { session: false }), a
     const data = await ReferentModel.findOne({ role: ROLES.HEAD_CENTER, cohesionCenterId: center._id });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    return res.status(200).send({ ok: true, data });
+    return res.status(200).send({ ok: true, data: serializeCohesionCenter(data) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
@@ -176,7 +180,7 @@ router.get("/:id/head", passport.authenticate("referent", { session: false }), a
 router.get("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const data = await CohesionCenterModel.find({});
-    return res.status(200).send({ ok: true, data });
+    return res.status(200).send({ ok: true, data: data.map(serializeCohesionCenter) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
@@ -188,6 +192,7 @@ router.get("/young/:youngId", passport.authenticate(["referent", "young"], { ses
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const data = await CohesionCenterModel.findById(young.cohesionCenterId);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
