@@ -125,6 +125,10 @@ router.get("/young/:id", passport.authenticate(["referent", "young"], { session:
     const { error, value: id } = Joi.string().required().validate(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
+    if (isYoung(req.user) && req.user._id.toString() !== id) {
+      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     let data = await ApplicationObject.find({ youngId: id });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
