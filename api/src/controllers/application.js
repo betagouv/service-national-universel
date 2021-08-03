@@ -83,7 +83,7 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false }
 
 router.put("/", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
-    const { value, error } = validateUpdateApplication(req.body);
+    const { value, error } = validateUpdateApplication(req.body, req.user);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
     const id = req.body._id;
