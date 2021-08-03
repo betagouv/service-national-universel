@@ -155,4 +155,25 @@ describe("Mission", () => {
       expect(res.statusCode).toEqual(200);
     });
   });
+
+  describe("GET /mission/:id/patches", () => {
+    it("should return 404 if mission not found", async () => {
+      const res = await request(getAppHelper()).get(`/mission/${notExisitingMissionId}/patches`).send();
+      expect(res.statusCode).toEqual(404);
+    });
+    it("should return 200 if mission found with patches", async () => {
+      const mission = await createMissionHelper(getNewMissionFixture());
+      mission.name = "MY NEW NAME";
+      await mission.save();
+      const res = await request(getAppHelper()).get(`/mission/${mission._id}/patches`).send();
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.data).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            ops: expect.arrayContaining([expect.objectContaining({ op: "replace", path: "/name", value: "MY NEW NAME" })]),
+          }),
+        ])
+      );
+    });
+  });
 });
