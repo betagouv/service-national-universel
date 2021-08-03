@@ -15,19 +15,9 @@ const { encrypt } = require("../../cryptoUtils");
 const { getQPV } = require("../../qpv");
 const YoungObject = require("../../models/young");
 const CohesionCenterObject = require("../../models/cohesionCenter");
-const MeetingPointObject = require("../../models/meetingPoint");
 const DepartmentServiceModel = require("../../models/departmentService");
-const BusObject = require("../../models/bus");
 const AuthObject = require("../../auth");
-const {
-  uploadFile,
-  validatePassword,
-  updatePlacesCenter,
-  updatePlacesBus,
-  signinLimiter,
-  assignNextYoungFromWaitingList,
-  ERRORS,
-} = require("../../utils");
+const { uploadFile, validatePassword, updatePlacesCenter, signinLimiter, assignNextYoungFromWaitingList, ERRORS } = require("../../utils");
 const { sendEmail } = require("../../sendinblue");
 const { cookieOptions } = require("../../cookie-options");
 const Joi = require("joi");
@@ -333,65 +323,6 @@ router.put("/validate_mission", passport.authenticate("young", { session: false 
 });
 
 //@check
-router.put("/:id/meeting-point", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
-  try {
-    const { error, value } = Joi.object({
-      meetingPointId: Joi.string().optional(),
-      deplacementPhase1Autonomous: Joi.string().optional(),
-      id: Joi.string().required(),
-    })
-      .unknown()
-      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
-    const { id, meetingPointId, deplacementPhase1Autonomous } = value;
-
-    const young = await YoungObject.findById(id);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    let bus = null;
-
-    //choosing a meetingPoint
-    if (meetingPointId) {
-      const meetingPoint = await MeetingPointObject.findById(meetingPointId);
-      if (!meetingPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      bus = await BusObject.findById(meetingPoint.busId);
-      if (!bus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      if (bus.placesLeft <= 0) return res.status(404).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-    }
-    const oldMeetingPoint = await MeetingPointObject.findById(young.meetingPointId);
-    const oldBus = await BusObject.findById(oldMeetingPoint?.busId);
-
-    young.set({ meetingPointId, deplacementPhase1Autonomous });
-    await young.save();
-    if (bus) await updatePlacesBus(bus);
-    if (oldBus) await updatePlacesBus(oldBus);
-    res.status(200).send({ ok: true, data: young });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
-  }
-});
-
-router.put("/:id/cancel-meeting-point", passport.authenticate("referent", { session: false }), async (req, res) => {
-  try {
-    const { error, value: id } = Joi.string().required().validate(req.params.id);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
-
-    const young = await YoungObject.findById(id);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const oldMeetingPoint = await MeetingPointObject.findById(young.meetingPointId);
-    const oldBus = await BusObject.findById(oldMeetingPoint?.busId);
-    young.set({ meetingPointId: undefined, deplacementPhase1Autonomous: undefined });
-    await young.save();
-    if (oldBus) await updatePlacesBus(oldBus);
-    res.status(200).send({ ok: true, data: young });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
-  }
-});
-
-//@check
 router.put("/", passport.authenticate("young", { session: false }), async (req, res) => {
   try {
     const { error, value } = validateYoung(req.body);
@@ -511,5 +442,6 @@ router.delete("/:id", passport.authenticate("referent", { session: false }), asy
 });
 
 router.use("/:id/documents", require("./documents"));
+router.use("/:id/meeting-point", require("./meeting-point"));
 
 module.exports = router;

@@ -16,14 +16,14 @@ export default ({ values, handleChange, handleSubmit }) => {
   const user = useSelector((state) => state.Auth.user);
 
   const getData = async () => {
-    const { data, code, ok } = await api.get(`/meeting-point/young/${values._id}`);
+    const { data, code, ok } = await api.get(`/young/${values._id}/meeting-point`);
     if (!ok) return toastr.error("error", translate(code));
     setMeetingPoint(data);
   };
 
   const handleCancel = async () => {
     if (!confirm(`Êtes-vous sûr de vouloir supprimer ce choix de point de rassemblement ?`)) return;
-    const { data, code, ok } = await api.put(`/young/${values._id}/cancel-meeting-point`);
+    const { data, code, ok } = await api.put(`/young/${values._id}/meeting-point/cancel`);
     if (!ok) return toastr.error("error", translate(code));
     handleChange({ target: { name: "deplacementPhase1Autonomous", value: undefined } });
     handleChange({ target: { name: "meetingPointId", value: undefined } });

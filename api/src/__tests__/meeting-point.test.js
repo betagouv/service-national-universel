@@ -56,37 +56,6 @@ describe("Meeting point", () => {
     });
   });
 
-  describe("GET /meeting-point/young/:id", () => {
-    it("should return 404 when young is not found", async () => {
-      const res = await request(getAppHelper())
-        .get("/meeting-point/young/" + notExistingYoungId)
-        .send();
-      expect(res.status).toBe(404);
-    });
-    it("should return null when young has no meeting point", async () => {
-      const young = await createYoungHelper({ ...getNewYoungFixture(), meetingPointId: notExistingMeetingPointId });
-      const res = await request(getAppHelper())
-        .get("/meeting-point/young/" + young._id)
-        .send();
-      expect(res.status).toBe(200);
-      expect(res.body.data).toBeFalsy();
-    });
-    it("should return 200 when young has a meeting point", async () => {
-      const meetingPoint = await createMeetingPointHelper(getNewMeetingPointFixture());
-      const young = await createYoungHelper({ ...getNewYoungFixture(), meetingPointId: meetingPoint._id });
-      const res = await request(getAppHelper())
-        .get("/meeting-point/young/" + young._id)
-        .send();
-      expect(res.status).toBe(200);
-      expect(res.body.data._id).toBe(meetingPoint._id.toString());
-    });
-    it("should be only accessible by referent", async () => {
-      const passport = require("passport");
-      await request(getAppHelper()).get("/meeting-point/young/" + notExistingYoungId);
-      expect(passport.lastTypeCalledOnAuthenticate).toEqual(["referent"]);
-    });
-  });
-
   describe("GET /meeting-point", () => {
     it("should return 404 when center is not found", async () => {
       const res = await request(getAppHelper()).get("/meeting-point").send();

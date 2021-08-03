@@ -13,8 +13,6 @@ const {
   deleteAllProgram,
   notExisitingProgramId,
 } = require("./helpers/program");
-const { createReferentHelper } = require("./helpers/referent");
-const getNewReferentFixture = require("./fixtures/referent");
 const { dbConnect, dbClose } = require("./helpers/db");
 const { ROLES } = require("snu-lib/roles");
 

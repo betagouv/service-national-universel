@@ -7,7 +7,7 @@ const { getYoungsHelper, createYoungHelper, notExistingYoungId, deleteYoungByEma
 const { dbConnect, dbClose } = require("./helpers/db");
 const getNewDepartmentServiceFixture = require("./fixtures/departmentService");
 const { createDepartmentServiceHelper, deleteAllDepartmentServicesHelper } = require("./helpers/departmentService");
-const { createMeetingPointHelper } = require("./helpers/meetingPoint");
+const { createMeetingPointHelper, notExistingMeetingPointId } = require("./helpers/meetingPoint");
 const getNewMeetingPointFixture = require("./fixtures/meetingPoint");
 const { createBusHelper } = require("./helpers/bus");
 const getNewBusFixture = require("./fixtures/bus");
@@ -180,20 +180,45 @@ describe("Young", () => {
     });
   });
 
-  describe("PUT /young/:id/cancel-meeting-point", () => {
+  describe("PUT /young/:id/meeting-point/cancel", () => {
     it("should return 404 if young not found", async () => {
-      const res = await request(getAppHelper()).put(`/young/${notExistingYoungId}/cancel-meeting-point`).send({});
+      const res = await request(getAppHelper()).put(`/young/${notExistingYoungId}/meeting-point/cancel`).send({});
       expect(res.statusCode).toEqual(404);
     });
     it("should return 200 if young found", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
-      const res = await request(getAppHelper()).put(`/young/${young._id}/cancel-meeting-point`).send({});
+      const res = await request(getAppHelper()).put(`/young/${young._id}/meeting-point/cancel`).send({});
       expect(res.statusCode).toEqual(200);
     });
     it("should be only accessible by referent", async () => {
       const passport = require("passport");
-      await request(getAppHelper()).put(`/young/${notExistingYoungId}/cancel-meeting-point`).send();
+      await request(getAppHelper()).put(`/young/${notExistingYoungId}/meeting-point/cancel`).send();
       expect(passport.lastTypeCalledOnAuthenticate).toEqual("referent");
+    });
+  });
+
+  describe("GET /young/:id/meeting-point", () => {
+    it("should return 404 when young is not found", async () => {
+      const res = await request(getAppHelper()).get(`/young/${notExistingYoungId}/meeting-point`).send();
+      expect(res.status).toBe(404);
+    });
+    it("should return null when young has no meeting point", async () => {
+      const young = await createYoungHelper({ ...getNewYoungFixture(), meetingPointId: notExistingMeetingPointId });
+      const res = await request(getAppHelper()).get(`/young/${young._id}/meeting-point`).send();
+      expect(res.status).toBe(200);
+      expect(res.body.data).toBeFalsy();
+    });
+    it("should return 200 when young has a meeting point", async () => {
+      const meetingPoint = await createMeetingPointHelper(getNewMeetingPointFixture());
+      const young = await createYoungHelper({ ...getNewYoungFixture(), meetingPointId: meetingPoint._id });
+      const res = await request(getAppHelper()).get(`/young/${young._id}/meeting-point`).send();
+      expect(res.status).toBe(200);
+      expect(res.body.data._id).toBe(meetingPoint._id.toString());
+    });
+    it("should be only accessible by referent", async () => {
+      const passport = require("passport");
+      await request(getAppHelper()).get(`/young/${notExistingYoungId}/meeting-point`);
+      expect(passport.lastTypeCalledOnAuthenticate).toEqual(["referent"]);
     });
   });
 
