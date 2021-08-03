@@ -63,10 +63,7 @@ router.post("/:centerId/assign-young/:youngId", passport.authenticate("referent"
     const center = await CohesionCenterModel.findById(req.params.centerId);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (center.placesLeft <= 0) return res.status(404).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-    let oldCenter = null;
-    if (young.cohesionCenterId) {
-      oldCenter = await CohesionCenterModel.findById(young.cohesionCenterId);
-    }
+    const oldCenter = young.cohesionCenterId ? await CohesionCenterModel.findById(young.cohesionCenterId) : null;
 
     // update youngs infos
     young.set({
