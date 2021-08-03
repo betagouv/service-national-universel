@@ -88,6 +88,8 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false })
 
     const application = await ApplicationObject.findById(value._id);
     if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    // A young can only update his own application.
     if (isYoung(req.user) && application.youngId.toString() !== req.user._id.toString()) {
       return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
@@ -106,10 +108,10 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false })
 
 router.get("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const { error, value } = Joi.object({ id: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
+    const { error, value: id } = Joi.string().required().validate(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
-    const data = await ApplicationObject.findById(value.id);
+    const data = await ApplicationObject.findById(id);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data: serializeApplication(data) });
   } catch (error) {
@@ -120,10 +122,10 @@ router.get("/:id", passport.authenticate("referent", { session: false }), async 
 
 router.get("/young/:id", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
-    const { error, value } = Joi.object({ id: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
+    const { error, value: id } = Joi.string().required().validate(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
-    let data = await ApplicationObject.find({ youngId: value.id });
+    let data = await ApplicationObject.find({ youngId: id });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     for (let i = 0; i < data.length; i++) {
@@ -144,10 +146,10 @@ router.get("/young/:id", passport.authenticate(["referent", "young"], { session:
 
 router.get("/mission/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const { error, value } = Joi.object({ id: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
+    const { error, value: id } = Joi.string().required().validate(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
-    const data = await ApplicationObject.find({ missionId: value.id });
+    const data = await ApplicationObject.find({ missionId: id });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     for (let i = 0; i < data.length; i++) {
       const application = data[i]._doc;
