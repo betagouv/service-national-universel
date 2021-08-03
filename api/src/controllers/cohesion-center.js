@@ -207,12 +207,15 @@ router.get("/", passport.authenticate("referent", { session: false }), async (re
 });
 router.get("/young/:youngId", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
-    const young = await YoungModel.findById(req.params.youngId);
+    const { error, value: id } = Joi.string().required().validate(req.params.youngId);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const data = await CohesionCenterModel.findById(young.cohesionCenterId);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (isYoung(req.user) && req.user._id.toString() !== req.params.youngId) {
+    if (isYoung(req.user) && req.user._id.toString() !== id) {
       return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
