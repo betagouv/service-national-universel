@@ -54,6 +54,15 @@ describe("Cohesion Center", () => {
       const res = await request(getAppHelper()).post("/cohesion-center").send(getNewCohesionCenterFixture());
       expect(res.status).toBe(200);
     });
+    it("should only not be accessible by responsible", async () => {
+      const passport = require("passport");
+      passport.user.role = ROLES.RESPONSIBLE;
+
+      const res = await request(getAppHelper()).post("/cohesion-center").send(getNewCohesionCenterFixture());
+      expect(res.status).toBe(401);
+
+      passport.user.role = ROLES.ADMIN;
+    });
   });
 
   describe("POST cohesion-center/:centerId/assign-young/:youngId", () => {

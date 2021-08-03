@@ -20,7 +20,7 @@ const {
   deleteCenterDependencies,
 } = require("../utils");
 const renderFromHtml = require("../htmlToPdf");
-const { ROLES } = require("snu-lib/roles");
+const { ROLES, canCreateCohesionCenter } = require("snu-lib/roles");
 const Joi = require("joi");
 const { serializeCohesionCenter } = require("../utils/serializer");
 const { validateCohesionCenter } = require("../utils/validator");
@@ -32,6 +32,7 @@ router.post("/refresh/:id", passport.authenticate("referent", { session: false }
 
     const data = await CohesionCenterModel.findById(id);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
     await updatePlacesCenter(data);
     return res.status(200).send({ ok: true, data: serializeCohesionCenter(data) });
   } catch (error) {
@@ -44,6 +45,8 @@ router.post("/", passport.authenticate("referent", { session: false }), async (r
   try {
     const { error, value } = validateCohesionCenter(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    if (!canCreateCohesionCenter(req.user)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const data = await CohesionCenterModel.create(value);
     return res.status(200).send({ ok: true, data: serializeCohesionCenter(data) });
