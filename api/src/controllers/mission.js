@@ -1,9 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
-
 const { capture } = require("../sentry");
-
 const MissionObject = require("../models/mission");
 const UserObject = require("../models/referent");
 const ApplicationObject = require("../models/application");
@@ -11,37 +9,15 @@ const StructureObject = require("../models/structure");
 const ReferentObject = require("../models/referent");
 const { ERRORS } = require("../utils/index.js");
 const { validateId, validateMission } = require("../utils/validator");
-const { ROLES } = require("snu-lib/roles");
-
-const canModify = (user, mission) => {
-  return !(
-    (user.role === ROLES.REFERENT_DEPARTMENT && user.department !== mission.department) ||
-    (user.role === ROLES.REFERENT_REGION && user.region !== mission.region)
-  );
-};
+const { canModifyMission } = require("snu-lib/roles");
+const { serializeMission } = require("../utils/serializer");
 
 router.post("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const { error, value: checkedMission } = validateMission(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
     const data = await MissionObject.create(checkedMission);
-    return res.status(200).send({ ok: true, data });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
-  }
-});
-
-router.put("/", passport.authenticate("referent", { session: false }), async (req, res) => {
-  try {
-    const { error: errorId, value: checkedId } = validateId(req.body._id);
-    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
-    const m = await MissionObject.findById(checkedId);
-    if (!canModify(req.user, m)) return res.status(404).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    const { error: errorMission, value: checkedMission } = validateMission(req.body);
-    if (errorMission) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
-    const mission = await MissionObject.findByIdAndUpdate(checkedId, checkedMission, { new: true });
-    res.status(200).send({ ok: true, data: mission });
+    return res.status(200).send({ ok: true, data: serializeMission(data) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
@@ -51,12 +27,19 @@ router.put("/", passport.authenticate("referent", { session: false }), async (re
 router.put("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const { error: errorId, value: checkedId } = validateId(req.params.id);
-    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error });
+    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+
     const m = await MissionObject.findById(checkedId);
-    if (!canModify(req.user, m)) return res.status(404).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    if (!canModifyMission(req.user, m)) return res.status(404).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
     const { error: errorMission, value: checkedMission } = validateMission(req.body);
     if (errorMission) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
-    const mission = await MissionObject.findByIdAndUpdate(checkedId, checkedMission, { new: true });
+
+    const mission = await MissionObject.findById(checkedId);
+    mission.set(checkedMission);
+    await mission.save();
+
     res.status(200).send({ ok: true, data: mission });
   } catch (error) {
     capture(error);

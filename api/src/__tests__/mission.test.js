@@ -23,24 +23,27 @@ beforeAll(dbConnect);
 afterAll(dbClose);
 
 describe("Mission", () => {
-  it("POST /mission", async () => {
-    const missionFixture = getNewMissionFixture();
-    const missionsBefore = await getMissionsHelper();
-    const res = await request(getAppHelper()).post("/mission").send(missionFixture);
-    expect(res.statusCode).toEqual(200);
-    expectMissionToEqual(missionFixture, res.body.data);
-    const missionsAfter = await getMissionsHelper();
-    expect(missionsAfter.length).toEqual(missionsBefore.length + 1);
-    await deleteMissionByIdHelper(res.body.data._id);
+  describe("POST /mission", () => {
+    it("should create a new mission", async () => {
+      const missionFixture = getNewMissionFixture();
+      const missionsBefore = await getMissionsHelper();
+      const res = await request(getAppHelper()).post("/mission").send(missionFixture);
+      expect(res.statusCode).toEqual(200);
+      expectMissionToEqual(missionFixture, res.body.data);
+      const missionsAfter = await getMissionsHelper();
+      expect(missionsAfter.length).toEqual(missionsBefore.length + 1);
+      await deleteMissionByIdHelper(res.body.data._id);
+    });
   });
-
-  it("GET /mission/:id", async () => {
-    const missionFixture = getNewMissionFixture();
-    const mission = await createMissionHelper(missionFixture);
-    const res = await request(getAppHelper()).get(`/mission/${mission._id}`);
-    expect(res.statusCode).toEqual(200);
-    expectMissionToEqual(missionFixture, res.body.data);
-    await deleteMissionByIdHelper(mission._id);
+  describe("GET /mission/:id", () => {
+    it("should get a mission", async () => {
+      const missionFixture = getNewMissionFixture();
+      const mission = await createMissionHelper(missionFixture);
+      const res = await request(getAppHelper()).get(`/mission/${mission._id}`);
+      expect(res.statusCode).toEqual(200);
+      expectMissionToEqual(missionFixture, res.body.data);
+      await deleteMissionByIdHelper(mission._id);
+    });
   });
 
   it("GET /mission/structure/:structureid", async () => {
@@ -63,19 +66,6 @@ describe("Mission", () => {
     const modifiedMission = { ...missionFixture };
     modifiedMission.startAt = faker.date.past();
     const res = await request(getAppHelper()).put(`/mission/${mission._id}`).send(modifiedMission);
-    expect(res.statusCode).toEqual(200);
-    mission = await getMissionByIdHelper(mission._id);
-    expectMissionToEqual(modifiedMission, mission);
-    await deleteMissionByIdHelper(mission._id);
-  });
-
-  it("PUT /mission/", async () => {
-    const missionFixture = getNewMissionFixture();
-    let mission = await createMissionHelper(missionFixture);
-    let modifiedMission = { ...missionFixture };
-    modifiedMission._id = mission._id;
-    modifiedMission.startAt = faker.date.past();
-    const res = await request(getAppHelper()).put("/mission/").send(modifiedMission);
     expect(res.statusCode).toEqual(200);
     mission = await getMissionByIdHelper(mission._id);
     expectMissionToEqual(modifiedMission, mission);
