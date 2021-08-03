@@ -267,12 +267,12 @@ router.get("/department-service", passport.authenticate("young", { session: fals
 
 router.get("/:id/patches", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const { error, value } = Joi.object({ id: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
+    const { error, value: id } = Joi.string().required().validate(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
-    const young = await YoungObject.findById(value.id);
+    const young = await YoungObject.findById(id);
     if (!young) {
-      capture(`young not found ${value.id}`);
+      capture(`young not found ${id}`);
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
     const data = await young.patches.find({ ref: young.id }).sort("-date");
@@ -374,10 +374,10 @@ router.put("/:id/meeting-point", passport.authenticate(["young", "referent"], { 
 
 router.put("/:id/cancel-meeting-point", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const { error, value } = Joi.object({ id: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
+    const { error, value: id } = Joi.string().required().validate(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
-    const young = await YoungObject.findById(value.id);
+    const young = await YoungObject.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const oldMeetingPoint = await MeetingPointObject.findById(young.meetingPointId);
     const oldBus = await BusObject.findById(oldMeetingPoint?.busId);
@@ -495,14 +495,14 @@ router.post("/france-connect/user-info", async (req, res) => {
 // Delete one user (only admin can delete user)
 router.delete("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const { error, value } = Joi.object({ id: Joi.string().required() }).unknown().validate(req.params, { stripUnknown: true });
+    const { error, value: id } = Joi.string().required().validate(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
-    const young = await YoungObject.findOne({ _id: value.id });
+    const young = await YoungObject.findOne({ _id: id });
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     await young.remove();
-    console.log(`Young ${value.id} has been deleted`);
+    console.log(`Young ${id} has been deleted`);
     res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
