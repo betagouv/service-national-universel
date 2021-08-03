@@ -10,11 +10,13 @@ import { translate, ROLES } from "../../utils";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
 import Panel, { Info, Details } from "../../components/Panel";
 import api from "../../services/api";
+import ModalConfirm from "../../components/modals/ModalConfirm";
 
 export default ({ onChange, center }) => {
   const history = useHistory();
   const [headCenter, setHeadCenter] = useState();
   const user = useSelector((state) => state.Auth.user);
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
   useEffect(() => {
     (async () => {
@@ -27,14 +29,17 @@ export default ({ onChange, center }) => {
     })();
   }, [center]);
 
-  const handleDelete = async () => {
-    if (!confirm("Êtes-vous sûr(e) de vouloir supprimer ce centre ?")) return;
+  const onClickDelete = () => {
+    setModal({ isOpen: true, onConfirm: onConfirmDelete, title: "Êtes-vous sûr(e) de vouloir supprimer ce centre de cohésion ?", message: "Cette action est irréversible." });
+  };
+
+  const onConfirmDelete = async () => {
     try {
       const { ok, code } = await api.remove(`/cohesion-center/${center._id}`);
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       toastr.success("Ce centre a été supprimé.");
-      return history.push(`/centre`);
+      return history.go(0);
     } catch (e) {
       console.log(e);
       return toastr.error("Oups, une erreur est survenue pendant la supression du centre :", translate(e.code));
@@ -61,7 +66,7 @@ export default ({ onChange, center }) => {
         </div>
         {user.role === ROLES.ADMIN ? (
           <div style={{ display: "flex" }}>
-            <PanelActionButton onClick={handleDelete} icon="bin" title="Supprimer" />
+            <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" />
           </div>
         ) : null}
       </div>
@@ -103,6 +108,16 @@ export default ({ onChange, center }) => {
           </>
         ) : null}
       </Info>
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        onChange={() => setModal({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
     </Panel>
   );
 };

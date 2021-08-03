@@ -10,11 +10,14 @@ import { translate } from "../../utils";
 import Team from "./components/Team";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
 import Panel, { Info, Details } from "../../components/Panel";
+import ModalConfirm from "../../components/modals/ModalConfirm";
 
 export default ({ onChange, value }) => {
   const [missionsInfo, setMissionsInfo] = useState({ count: "-", placesTotal: "-" });
   const [referents, setReferents] = useState([]);
   const [parentStructure, setParentStructure] = useState(null);
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+
   const history = useHistory();
   useEffect(() => {
     if (!value) return;
@@ -52,8 +55,16 @@ export default ({ onChange, value }) => {
     })();
   }, [value]);
 
-  const handleDelete = async (structure) => {
-    if (!confirm("Êtes-vous sûr(e) de vouloir supprimer cette structure ?")) return;
+  const onClickDelete = (structure) => {
+    setModal({
+      isOpen: true,
+      onConfirm: () => onConfirmDelete(structure),
+      title: "Êtes-vous sûr(e) de vouloir supprimer cette structure ?",
+      message: "Cette action est irréversible.",
+    });
+  };
+
+  const onConfirmDelete = async (structure) => {
     try {
       const { ok, code } = await api.remove(`/structure/${structure._id}`);
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
@@ -82,7 +93,7 @@ export default ({ onChange, value }) => {
           <Link to={`/structure/${value._id}/edit`}>
             <PanelActionButton icon="pencil" title="Modifier" />
           </Link>
-          <PanelActionButton onClick={() => handleDelete(value)} icon="bin" title="Supprimer" />
+          <PanelActionButton onClick={() => onClickDelete(value)} icon="bin" title="Supprimer" />
         </div>
       </div>
       <Info title="La structure">
@@ -135,11 +146,16 @@ export default ({ onChange, value }) => {
           <div style={{ marginTop: "1rem" }}>{parentStructure.name}</div>
         </Info>
       ) : null}
-      <div>
-        {/*Object.keys(value).map((e, k) => {
-          return <div key={k}>{`${e}:${value[e]}`}</div>;
-        }) */}
-      </div>
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        onChange={() => setModal({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
     </Panel>
   );
 };

@@ -6,6 +6,7 @@ import { toastr } from "react-redux-toastr";
 
 import api from "../../../services/api";
 import { translate, ROLES } from "../../../utils";
+import ModalConfirm from "../../../components/modals/ModalConfirm";
 
 export default ({ program, image, enableToggle = true, onDelete }) => {
   const [expandDetails, setExpandDetails] = useState(false);
@@ -73,6 +74,7 @@ export default ({ program, image, enableToggle = true, onDelete }) => {
 const Actions = ({ program, onDelete }) => {
   const user = useSelector((state) => state.Auth.user);
   const id = program._id;
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
   const handleUserAccess = () =>
     (program.visibility === "HEAD_CENTER" && user.role === ROLES.ADMIN) ||
@@ -80,8 +82,16 @@ const Actions = ({ program, onDelete }) => {
     (program.visibility === "REGION" && [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role)) ||
     (program.visibility === "DEPARTMENT" && [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role));
 
-  const handleDelete = async () => {
-    if (!confirm("Êtes-vous sûr(e) de vouloir supprimer cette possibilité d'engagement ?")) return;
+  const onClickDelete = () => {
+    setModal({
+      isOpen: true,
+      onConfirm: onConfirmDelete,
+      title: "Êtes-vous sûr(e) de vouloir supprimer cette possibilité d'engagement ?",
+      message: "Cette action est irréversible.",
+    });
+  };
+
+  const onConfirmDelete = async () => {
     try {
       const { ok, code } = await api.remove(`/program/${id}`);
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
@@ -96,16 +106,28 @@ const Actions = ({ program, onDelete }) => {
 
   return (
     handleUserAccess() && (
-      <ActionStyle>
-        <Link to={`/contenu/${id}/edit`}>
-          <Action>
-            <div>Editer</div>
+      <>
+        <ActionStyle>
+          <Link to={`/contenu/${id}/edit`}>
+            <Action>
+              <div>Editer</div>
+            </Action>
+          </Link>
+          <Action onClick={onClickDelete}>
+            <div>Supprimer</div>
           </Action>
-        </Link>
-        <Action onClick={handleDelete}>
-          <div>Supprimer</div>
-        </Action>
-      </ActionStyle>
+        </ActionStyle>
+        <ModalConfirm
+          isOpen={modal?.isOpen}
+          title={modal?.title}
+          message={modal?.message}
+          onChange={() => setModal({ isOpen: false, onConfirm: null })}
+          onConfirm={() => {
+            modal?.onConfirm();
+            setModal({ isOpen: false, onConfirm: null });
+          }}
+        />
+      </>
     )
   );
 };
