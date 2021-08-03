@@ -4,7 +4,14 @@ const request = require("supertest");
 const getAppHelper = require("./helpers/app");
 const passport = require("./__mocks__/passport");
 const getNewProgramFixture = require("./fixtures/program");
-const { getProgramsHelper, getProgramByIdHelper, deleteProgramByIdHelper, createProgramHelper, expectProgramToEqual } = require("./helpers/program");
+const {
+  getProgramsHelper,
+  getProgramByIdHelper,
+  deleteProgramByIdHelper,
+  createProgramHelper,
+  expectProgramToEqual,
+  deleteAllProgram,
+} = require("./helpers/program");
 const { dbConnect, dbClose } = require("./helpers/db");
 const { ROLES } = require("snu-lib/roles");
 
@@ -48,6 +55,7 @@ describe("Program", () => {
   });
 
   it("GET /program/ AS ADMIN", async () => {
+    await deleteAllProgram();
     const programFixture = getNewProgramFixture();
     const program = await createProgramHelper(programFixture);
     const res = await request(getAppHelper()).get(`/program/`);
@@ -58,6 +66,7 @@ describe("Program", () => {
   });
 
   it("GET /program/ AS HEAD_CENTER", async () => {
+    await deleteAllProgram();
     let programFixtureHeadCenter = getNewProgramFixture();
     programFixtureHeadCenter.visibility = "HEAD_CENTER";
     const programHeadCenter = await createProgramHelper(programFixtureHeadCenter);
@@ -74,6 +83,7 @@ describe("Program", () => {
   });
 
   it("GET /program/ AS STRUCTURE_MEMBER", async () => {
+    await deleteAllProgram();
     let programFixtureRegionDepartment = getNewProgramFixture();
     programFixtureRegionDepartment.region = passport.user.region;
     programFixtureRegionDepartment.department = passport.user.department;
@@ -93,6 +103,7 @@ describe("Program", () => {
   });
 
   it("DELETE /program/:id", async () => {
+    await deleteAllProgram();
     const programFixture = getNewProgramFixture();
     const program = await createProgramHelper(programFixture);
     const programsBefore = await getProgramsHelper();

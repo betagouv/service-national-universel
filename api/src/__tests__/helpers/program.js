@@ -17,6 +17,10 @@ async function createProgramHelper(program) {
   return await ProgramObject.create(program);
 }
 
+async function deleteAllProgram() {
+  await ProgramObject.deleteMany({});
+}
+
 function expectProgramToEqual(program, expectedProgram) {
   // Need to parse the objects because attributes types changed
   // Deep equal failed on Date which became string
@@ -39,4 +43,5 @@ module.exports = {
   deleteProgramByIdHelper,
   createProgramHelper,
   expectProgramToEqual,
+  deleteAllProgram,
 };
