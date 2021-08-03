@@ -1,10 +1,6 @@
 const Joi = require("joi");
 const { ROLES_LIST, SUB_ROLES_LIST } = require("snu-lib/roles");
-const YoungModel = require("../models/young");
-
-function isYoung(user) {
-  return user instanceof YoungModel;
-}
+const { isYoung } = require("../utils");
 
 function validateId(id) {
   return Joi.string().validate(id, { stripUnknown: true });
@@ -287,6 +283,7 @@ function validateUpdateApplication(application, user) {
       ...applicationKeys,
       // A young can only update a mission for him/herself.
       youngId: isYoung(user) ? Joi.string().equal(user._id.toString()).allow(null, "") : Joi.string().allow(null, ""),
+      _id: Joi.string().required(),
     })
     .validate(application, { stripUnknown: true });
 }

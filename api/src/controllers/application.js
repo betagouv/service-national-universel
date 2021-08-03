@@ -11,7 +11,7 @@ const MissionObject = require("../models/mission");
 const YoungObject = require("../models/young");
 const ReferentObject = require("../models/referent");
 const { sendEmail, sendTemplate } = require("../sendinblue");
-const { ERRORS } = require("../utils");
+const { ERRORS, isYoung } = require("../utils");
 const { validateUpdateApplication, validateNewApplication } = require("../utils/validator");
 const { ADMIN_URL } = require("../config");
 const { SUB_ROLES, ROLES, SENDINBLUE_TEMPLATES, department2region } = require("snu-lib");
@@ -86,9 +86,11 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false })
     const { value, error } = validateUpdateApplication(req.body, req.user);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
-    const id = req.body._id;
-    const application = await ApplicationObject.findById(id);
+    const application = await ApplicationObject.findById(value._id);
     if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (isYoung(req.user) && application.youngId.toString() !== req.user._id.toString()) {
+      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     application.set(value);
     await application.save();

@@ -337,6 +337,10 @@ const getYoungFromWaitingList = async (young) => {
   }
 };
 
+function isYoung(user) {
+  return user instanceof YoungModel;
+}
+
 const ERRORS = {
   SERVER_ERROR: "SERVER_ERROR",
   NOT_FOUND: "NOT_FOUND",
@@ -381,4 +385,5 @@ module.exports = {
   listFiles,
   deleteFile,
   signinLimiter,
+  isYoung,
 };
