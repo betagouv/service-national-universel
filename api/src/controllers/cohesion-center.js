@@ -21,10 +21,10 @@ const {
   isYoung,
 } = require("../utils");
 const renderFromHtml = require("../htmlToPdf");
-const { ROLES, canCreateCohesionCenter } = require("snu-lib/roles");
+const { ROLES, canCreateOrUpdateCohesionCenter } = require("snu-lib/roles");
 const Joi = require("joi");
 const { serializeCohesionCenter, serializeYoung, serializeReferent } = require("../utils/serializer");
-const { validateCohesionCenter } = require("../utils/validator");
+const { validateNewCohesionCenter, validateUpdateCohesionCenter } = require("../utils/validator");
 
 router.post("/refresh/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
@@ -44,10 +44,10 @@ router.post("/refresh/:id", passport.authenticate("referent", { session: false }
 
 router.post("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const { error, value } = validateCohesionCenter(req.body);
+    const { error, value } = validateNewCohesionCenter(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
-    if (!canCreateCohesionCenter(req.user)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const data = await CohesionCenterModel.create(value);
     return res.status(200).send({ ok: true, data: serializeCohesionCenter(data) });
@@ -228,12 +228,14 @@ router.get("/young/:youngId", passport.authenticate(["referent", "young"], { ses
 
 router.put("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    if (req.user.role !== ROLES.ADMIN) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    const { error, value: newCenter } = validateUpdateCohesionCenter(req.body);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
-    const center = await CohesionCenterModel.findById(req.body._id);
+    if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const center = await CohesionCenterModel.findById(newCenter._id);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    let { __v, ...newCenter } = req.body;
     center.set(newCenter);
     await center.save();
 

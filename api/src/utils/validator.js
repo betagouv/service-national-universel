@@ -299,25 +299,31 @@ function validateNewApplication(application, user) {
     .validate(application, { stripUnknown: true });
 }
 
-function validateCohesionCenter(application) {
+const cohesionCenterKeys = {
+  name: Joi.string().allow(null, ""),
+  code: Joi.string().allow(null, ""),
+  country: Joi.string().allow(null, ""),
+  COR: Joi.string().allow(null, ""),
+  departmentCode: Joi.string().allow(null, ""),
+  address: Joi.string().allow(null, ""),
+  city: Joi.string().allow(null, ""),
+  zip: Joi.string().allow(null, ""),
+  department: Joi.string().allow(null, ""),
+  region: Joi.string().allow(null, ""),
+  placesTotal: Joi.alternatives().try(Joi.string().allow(null, ""), Joi.number().allow(null)),
+  placesLeft: Joi.alternatives().try(Joi.string().allow(null, ""), Joi.number().allow(null)),
+  outfitDelivered: Joi.string().allow(null, ""),
+  observations: Joi.string().allow(null, ""),
+  waitingList: Joi.array().items(Joi.string().allow(null, "")),
+};
+
+function validateNewCohesionCenter(application) {
+  return Joi.object().keys(cohesionCenterKeys).validate(application, { stripUnknown: true });
+}
+
+function validateUpdateCohesionCenter(application) {
   return Joi.object()
-    .keys({
-      name: Joi.string().allow(null, ""),
-      code: Joi.string().allow(null, ""),
-      country: Joi.string().allow(null, ""),
-      COR: Joi.string().allow(null, ""),
-      departmentCode: Joi.string().allow(null, ""),
-      address: Joi.string().allow(null, ""),
-      city: Joi.string().allow(null, ""),
-      zip: Joi.string().allow(null, ""),
-      department: Joi.string().allow(null, ""),
-      region: Joi.string().allow(null, ""),
-      placesTotal: Joi.alternatives().try(Joi.string().allow(null, ""), Joi.number().allow(null)),
-      placesLeft: Joi.alternatives().try(Joi.string().allow(null, ""), Joi.number().allow(null)),
-      outfitDelivered: Joi.string().allow(null, ""),
-      observations: Joi.string().allow(null, ""),
-      waitingList: Joi.array().items(Joi.string().allow(null, "")),
-    })
+    .keys({ ...cohesionCenterKeys, _id: Joi.string().required() })
     .validate(application, { stripUnknown: true });
 }
 
@@ -397,7 +403,8 @@ module.exports = {
   validateMission,
   validateProgram,
   validateFirstName,
-  validateCohesionCenter,
+  validateNewCohesionCenter,
+  validateUpdateCohesionCenter,
   validateYoung,
   validateDepartmentService,
   validateReferent,
