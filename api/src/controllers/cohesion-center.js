@@ -18,6 +18,7 @@ const {
   getSignedUrl,
   updateCenterDependencies,
   deleteCenterDependencies,
+  isYoung,
 } = require("../utils");
 const renderFromHtml = require("../htmlToPdf");
 const { ROLES, canCreateCohesionCenter } = require("snu-lib/roles");
@@ -193,7 +194,11 @@ router.get("/young/:youngId", passport.authenticate(["referent", "young"], { ses
     const data = await CohesionCenterModel.findById(young.cohesionCenterId);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    return res.status(200).send({ ok: true, data });
+    if (isYoung(req.user) && req.user._id.toString() !== req.params.youngId) {
+      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    return res.status(200).send({ ok: true, data: serializeCohesionCenter(data) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });

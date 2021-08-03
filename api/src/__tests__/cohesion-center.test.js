@@ -217,6 +217,29 @@ describe("Cohesion Center", () => {
         .send();
       expect(res.status).toBe(200);
     });
+    it("should only allow young to see their own cohesion center", async () => {
+      const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
+      const young = await createYoungHelper({ ...getNewYoungFixture(), cohesionCenterId: cohesionCenter._id });
+      const secondYoung = await createYoungHelper({ ...getNewYoungFixture(), cohesionCenterId: cohesionCenter._id });
+
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
+
+      // Successful request
+      let res = await request(getAppHelper())
+        .get("/cohesion-center/young/" + young._id)
+        .send();
+      expect(res.status).toBe(200);
+
+      // Failed request (not allowed)
+      res = await request(getAppHelper())
+        .get("/cohesion-center/young/" + secondYoung._id)
+        .send();
+      expect(res.status).toBe(401);
+
+      passport.user = previous;
+    });
   });
 
   describe("PUT /cohesion-center/:id", () => {
