@@ -38,16 +38,9 @@ export default ({ onChange, value, application }) => {
           <Link to={`/volontaire/${young._id}`}>
             <PanelActionButton icon="eye" title="Consulter" />
           </Link>
-          {/* <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`}>
-            <Button icon={require("../../assets/impersonate.svg")} color="white">
-              Prendre&nbsp;sa&nbsp;place
-            </Button>
-          </a> */}
-          {application.status === "VALIDATED" || application.status === "IN_PROGRESS" || application.status === "DONE" ? (
+          {application.status === "VALIDATED" || application.status === "IN_PROGRESS" || application.status === "DONE" || application.status === "ABANDON" ? (
             <Link to={`/volontaire/${application.youngId}/phase2/application/${application._id}/contrat`}>
-              <Button icon={require("../../assets/eye.svg")} color="white">
-                Contrat
-              </Button>
+              <PanelActionButton icon="eye" title="Voir contrat" />
             </Link>
           ) : null}
         </div>
