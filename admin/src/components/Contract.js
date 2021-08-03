@@ -5,7 +5,7 @@ import { Formik, Field } from "formik";
 import { useHistory } from "react-router-dom";
 import { appURL } from "../config";
 import { useSelector } from "react-redux";
-import { APPLICATION_STATUS_COLORS, dateForDatePicker, getAge, ROLES, translate } from "../utils";
+import { APPLICATION_STATUS_COLORS, dateForDatePicker, getAge, ROLES, translate, isReferentOrAdmin } from "../utils";
 import api from "../services/api";
 import DownloadAttestationButton from "./buttons/DownloadAttestationButton";
 import Loader from "./Loader";
@@ -18,6 +18,7 @@ import LoadingButton from "./buttons/LoadingButton";
 
 export default ({ young, admin }) => {
   const history = useHistory();
+  const user = useSelector((state) => state.Auth.user);
 
   let { applicationId } = useParams();
   // manager_department
@@ -216,9 +217,17 @@ export default ({ young, admin }) => {
       </BackLink>
       <Box>
         <Bloc title="Contrat d’engagement en mission d’intérêt général">
-          <div style={{ display: "grid", gridAutoColumns: "1fr", gridAutoFlow: "column" }}>
-            <div style={{ display: "flex" }}>
-              <p style={{ flex: 1 }}>Ce contrat doit être validé par le(s) représentant(s) légal(aux) du volontaire, le tuteur de mission et le référent départemental.</p>
+          <div style={{ display: "flex" }}>
+            <div style={{ flex: 1, marginRight: "1rem", fontSize: "0.8rem", fontStyle: "italic", color: "#444" }}>
+              <p>Ce contrat doit être validé par le(s) représentant(s) légal(aux) du volontaire, le tuteur de mission et le référent départemental.</p>
+              {isReferentOrAdmin(user) ? (
+                <p>
+                  La structure d'accueil doit envoyer le contrat d'engagement après validation de la candidature. Néanmoins vous pouvez le faire en rattrapage et suivi d'une
+                  structure.
+                </p>
+              ) : (
+                <p>La structure d'accueil doit envoyer le contrat d'engagement après validation de la candidature. </p>
+              )}
             </div>
             <div style={{ textAlign: "right" }}>
               {contract?.invitationSent === "true" ? (
