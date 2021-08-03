@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { Col, Row } from "reactstrap";
@@ -14,13 +14,18 @@ import Tab from "../../../components/views/Tab";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
 import Badge from "../../../components/Badge";
 import Title from "../../../components/views/Title";
+import ModalConfirm from "../../../components/modals/ModalConfirm";
 
 export default ({ mission, tab, children }) => {
   const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
-  const handleDelete = async () => {
-    if (!confirm("Êtes-vous sûr(e) de vouloir supprimer cette mission ?")) return;
+  const onClickDelete = () => {
+    setModal({ isOpen: true, onConfirm: onConfirmDelete, title: "Êtes-vous sûr(e) de vouloir supprimer cette mission ?", message: "Cette action est irréversible." });
+  };
+
+  const onConfirmDelete = async () => {
     try {
       const { ok, code } = await api.remove(`/mission/${mission._id}`);
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
@@ -35,7 +40,11 @@ export default ({ mission, tab, children }) => {
     }
   };
 
-  const duplicate = async () => {
+  const onClickDuplicate = () => {
+    setModal({ isOpen: true, onConfirm: onConfirmDuplicate, title: "Êtes-vous sûr(e) de vouloir dupliquer cette mission ?" });
+  };
+
+  const onConfirmDuplicate = async () => {
     mission.name += " (copie)";
     delete mission._id;
     mission.placesLeft = mission.placesTotal;
@@ -96,13 +105,23 @@ export default ({ mission, tab, children }) => {
               <Link to={`/mission/${mission._id}/edit`}>
                 <PanelActionButton title="Modifier" icon="pencil" />
               </Link>
-              <PanelActionButton onClick={duplicate} title="Dupliquer" icon="duplicate" />
-              <PanelActionButton onClick={handleDelete} title="Supprimer" icon="bin" />
+              <PanelActionButton onClick={onClickDuplicate} title="Dupliquer" icon="duplicate" />
+              <PanelActionButton onClick={onClickDelete} title="Supprimer" icon="bin" />
             </Row>
           </Col>
         </Row>
       </Header>
       {children}
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        onChange={() => setModal({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
     </div>
   );
 };

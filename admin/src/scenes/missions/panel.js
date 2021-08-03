@@ -9,11 +9,13 @@ import api from "../../services/api";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
 import Panel, { Info, Details } from "../../components/Panel";
 import Badge from "../../components/Badge";
+import ModalConfirm from "../../components/modals/ModalConfirm";
 
 export default ({ onChange, mission }) => {
   const [tutor, setTutor] = useState();
   const [structure, setStructure] = useState({});
   const history = useHistory();
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
   useEffect(() => {
     (async () => {
@@ -32,18 +34,11 @@ export default ({ onChange, mission }) => {
     })();
   }, [mission]);
 
-  const duplicate = async () => {
-    mission.name += " (copie)";
-    delete mission._id;
-    mission.placesLeft = mission.placesTotal;
-    const { data, ok, code } = await api.post("/mission", mission);
-    if (!ok) toastr.error("Oups, une erreur est survnue lors de la duplication de la mission", translate(code));
-    toastr.success("Mission dupliquée !");
-    return history.push(`/mission/${data._id}`);
+  const onClickDelete = () => {
+    setModal({ isOpen: true, onConfirm: onConfirmDelete, title: "Êtes-vous sûr(e) de vouloir supprimer cette mission ?", message: "Cette action est irréversible." });
   };
 
-  const handleDelete = async () => {
-    if (!confirm("Êtes-vous sûr(e) de vouloir supprimer cette mission ?")) return;
+  const onConfirmDelete = async () => {
     try {
       const { ok, code } = await api.remove(`/mission/${mission._id}`);
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
@@ -51,11 +46,25 @@ export default ({ onChange, mission }) => {
         return toastr.error("Vous ne pouvez pas supprimer cette mission car des candidatures sont encore liées à cette mission.", { timeOut: 5000 });
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       toastr.success("Cette mission a été supprimée.");
-      return history.push(`/mission`);
+      return history.go(0);
     } catch (e) {
       console.log(e);
       return toastr.error("Oups, une erreur est survenue pendant la supression de la mission :", translate(e.code));
     }
+  };
+
+  const onClickDuplicate = () => {
+    setModal({ isOpen: true, onConfirm: onConfirmDuplicate, title: "Êtes-vous sûr(e) de vouloir dupliquer cette mission ?" });
+  };
+
+  const onConfirmDuplicate = async () => {
+    mission.name += " (copie)";
+    delete mission._id;
+    mission.placesLeft = mission.placesTotal;
+    const { data, ok, code } = await api.post("/mission", mission);
+    if (!ok) toastr.error("Oups, une erreur est survnue lors de la duplication de la mission", translate(code));
+    toastr.success("Mission dupliquée !");
+    return history.push(`/mission/${data._id}`);
   };
 
   if (!mission) return <div />;
@@ -76,10 +85,10 @@ export default ({ onChange, mission }) => {
           <Link to={`/mission/${mission._id}/edit`}>
             <PanelActionButton icon="pencil" title="Modifier" />
           </Link>
-          <PanelActionButton onClick={duplicate} icon="duplicate" title="Dupliquer" />
+          <PanelActionButton onClick={onClickDuplicate} icon="duplicate" title="Dupliquer" />
         </div>
         <div style={{ display: "flex" }}>
-          <PanelActionButton onClick={handleDelete} icon="bin" title="Supprimer" />
+          <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" />
         </div>
       </div>
       <Info title="Volontaires">
@@ -122,6 +131,16 @@ export default ({ onChange, mission }) => {
         <Details title="Actions" value={mission.actions} />
         <Details title="Contraintes" value={mission.contraintes} />
       </Info>
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        onChange={() => setModal({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
     </Panel>
   );
 };
