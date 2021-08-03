@@ -63,7 +63,6 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false }
 
     if (!value.hasOwnProperty("priority")) {
       const applications = await ApplicationObject.find({ youngId: value.youngId });
-      applications.length;
       value.priority = applications.length + 1;
     }
     const mission = await MissionObject.findById(value.missionId);
