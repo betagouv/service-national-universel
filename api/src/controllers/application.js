@@ -133,7 +133,7 @@ router.get("/young/:id", passport.authenticate(["referent", "young"], { session:
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     for (let i = 0; i < data.length; i++) {
-      const application = data[i]._doc;
+      const application = data[i];
       const mission = await MissionObject.findById(application.missionId);
       let tutor = {};
       if (mission?.tutorId) tutor = await ReferentObject.findById(mission.tutorId);
@@ -156,7 +156,7 @@ router.get("/mission/:id", passport.authenticate("referent", { session: false })
     const data = await ApplicationObject.find({ missionId: id });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     for (let i = 0; i < data.length; i++) {
-      const application = data[i]._doc;
+      const application = data[i];
       const mission = await MissionObject.findById(application.missionId);
       data[i] = { ...serializeApplication(application), mission };
     }
