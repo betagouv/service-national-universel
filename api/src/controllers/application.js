@@ -12,7 +12,7 @@ const YoungObject = require("../models/young");
 const ReferentObject = require("../models/referent");
 const { sendEmail, sendTemplate } = require("../sendinblue");
 const { ERRORS } = require("../utils");
-const { validateApplication } = require("../utils/validator");
+const { validateUpdateApplication, validateNewApplication } = require("../utils/validator");
 const { ADMIN_URL } = require("../config");
 const { SUB_ROLES, ROLES, SENDINBLUE_TEMPLATES, department2region } = require("snu-lib");
 const { serializeApplication } = require("../utils/serializer");
@@ -58,7 +58,7 @@ const updatePlacesMission = async (app) => {
 
 router.post("/", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
   try {
-    const { value, error } = validateApplication(req.body);
+    const { value, error } = validateNewApplication(req.body, req.user);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
     if (!value.hasOwnProperty("priority")) {
@@ -83,7 +83,7 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false }
 
 router.put("/", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
-    const { value, error } = validateApplication(req.body);
+    const { value, error } = validateUpdateApplication(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
     const id = req.body._id;
