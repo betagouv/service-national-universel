@@ -13,6 +13,17 @@ function serializeBus(bus, user) {
   return bus.toObject();
 }
 
+function serializeMission(mission, user) {
+  return mission.toObject({
+    transform: (_doc, ret) => {
+      delete ret.sqlId;
+      delete ret.sqlStructureId;
+      delete ret.sqlTutorId;
+      return ret;
+    },
+  });
+}
+
 function serializeCohesionCenter(center, user) {
   return center.toObject({
     transform: (_doc, ret) => {
@@ -64,4 +75,5 @@ module.exports = {
   serializeCohesionCenter,
   serializeYoung,
   serializeReferent,
+  serializeMission,
 };
