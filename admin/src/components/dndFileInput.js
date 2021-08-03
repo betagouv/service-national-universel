@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { requiredMessage } from "./errorMessage";
 import DownloadButton from "./buttons/DownloadButton";
+import ModalConfirm from "./modals/ModalConfirm";
 
 function getFileName(file) {
   return (file && file.name) || file;
@@ -10,6 +11,7 @@ function getFileName(file) {
 
 export default ({ value, onChange, name, errorMessage = requiredMessage, placeholder = "votre fichier", source, required }) => {
   const [filesList, setFilesList] = useState(value || []);
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
   function onAdd(files) {
     Object.keys(files).forEach((i) => {
@@ -29,47 +31,51 @@ export default ({ value, onChange, name, errorMessage = requiredMessage, placeho
   }
 
   return (
-    <div style={{}}>
-      {filesList.map((e, i) => (
-        <File key={i}>
-          <FileName>{getFileName(e)}</FileName>
-          <div>
-            <span
-              onClick={() => {
-                if (!confirm("Êtes-vous sûr(e) de vouloir supprimer ce document")) return;
-                return handleChange(filesList.filter((n, j) => i !== j));
-              }}
-            >
-              Supprimer
-            </span>
-            <DownloadLink
-              key={i}
-              source={() => {
-                console.log(e);
-                return source(getFileName(e));
-              }}
-              title={`Télécharger`}
-            />
-          </div>
-        </File>
-      ))}
-      <ImageInput id="file-drop">
-        <Field
-          type="file"
-          accept=".jpg, .jpeg, .png, .pdf"
-          hidden
-          multiple
-          name={name}
-          value={[]}
-          validate={(v) => (required && (!v || !v.length) && errorMessage) || (v && v.size > 5000000 && "Ce fichier est trop volumineux.")}
-          onChange={(e) => onAdd(e.target.files)}
-        />
-        <>
-          <span style={{ color: "#5850ec" }}>Téléversez {placeholder}</span>
-          <span style={{ display: "block", fontSize: 13 }}>PDF, PNG ou JPG jusqu'à 5 Mo</span>
-        </>
-      </ImageInput>
-    </div>
+    <>
+      <div style={{}}>
+        {filesList.map((e, i) => (
+          <File key={i}>
+            <FileName>{getFileName(e)}</FileName>
+            <div>
+              <span onClick={() => setModal({ isOpen: true, onConfirm: () => handleChange(filesList.filter((n, j) => i !== j)) })}>Supprimer</span>
+              <DownloadLink
+                key={i}
+                source={() => {
+                  console.log(e);
+                  return source(getFileName(e));
+                }}
+                title={`Télécharger`}
+              />
+            </div>
+          </File>
+        ))}
+        <ImageInput id="file-drop">
+          <Field
+            type="file"
+            accept=".jpg, .jpeg, .png, .pdf"
+            hidden
+            multiple
+            name={name}
+            value={[]}
+            validate={(v) => (required && (!v || !v.length) && errorMessage) || (v && v.size > 5000000 && "Ce fichier est trop volumineux.")}
+            onChange={(e) => onAdd(e.target.files)}
+          />
+          <>
+            <span style={{ color: "#5850ec" }}>Téléversez {placeholder}</span>
+            <span style={{ display: "block", fontSize: 13 }}>PDF, PNG ou JPG jusqu'à 5 Mo</span>
+          </>
+        </ImageInput>
+      </div>
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title="Êtes-vous sûr(e) de vouloir supprimer ce document"
+        onChange={() => setModal({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
+    </>
   );
 };
 

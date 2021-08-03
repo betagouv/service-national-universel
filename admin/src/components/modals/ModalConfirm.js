@@ -4,12 +4,14 @@ import { Modal } from "reactstrap";
 import { ModalContainer, Content, Footer, Header } from "./Modal";
 import ModalButton from "../buttons/ModalButton";
 
-export default ({ isOpen, topTitle, title, message, onChange, onConfirm }) => {
+//todo : onChange => onCancel
+export default ({ isOpen, topTitle = "alerte", title, message, onChange, onConfirm }) => {
   const [sending, setSending] = useState(false);
 
   const submit = async () => {
     setSending(true);
     onConfirm();
+    setSending(false);
   };
 
   return (

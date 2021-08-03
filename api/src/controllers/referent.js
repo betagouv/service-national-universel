@@ -658,7 +658,7 @@ router.post("/file/:key", passport.authenticate("referent", { session: false }),
       error: bodyError,
       value: { names, youngId },
     } = Joi.object({
-      names: Joi.array().items(Joi.string().required()).required(),
+      names: Joi.array().items(Joi.string()).required(),
       youngId: Joi.string().required(),
     }).validate(JSON.parse(body), { stripUnknown: true });
 
