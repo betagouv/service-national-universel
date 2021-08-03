@@ -7,10 +7,10 @@ const UserObject = require("../models/referent");
 const ApplicationObject = require("../models/application");
 const StructureObject = require("../models/structure");
 const ReferentObject = require("../models/referent");
-const { ERRORS } = require("../utils/index.js");
+const { ERRORS, isYoung } = require("../utils/index.js");
 const { validateId, validateMission } = require("../utils/validator");
 const { canModifyMission } = require("snu-lib/roles");
-const { serializeMission } = require("../utils/serializer");
+const { serializeMission, serializeApplication } = require("../utils/serializer");
 
 router.post("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
@@ -29,14 +29,14 @@ router.put("/:id", passport.authenticate("referent", { session: false }), async 
     const { error: errorId, value: checkedId } = validateId(req.params.id);
     if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
 
-    const m = await MissionObject.findById(checkedId);
+    const mission = await MissionObject.findById(checkedId);
+    if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canModifyMission(req.user, m)) return res.status(404).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canModifyMission(req.user, mission)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { error: errorMission, value: checkedMission } = validateMission(req.body);
     if (errorMission) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
 
-    const mission = await MissionObject.findById(checkedId);
     mission.set(checkedMission);
     await mission.save();
 
@@ -51,19 +51,30 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
   try {
     const { error, value: checkedId } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error });
-    const data = await MissionObject.findOne({ _id: checkedId });
-    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const mission = data.toJSON();
+    const mission = await MissionObject.findById(checkedId);
+    if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    // Add tutor info.
+    let missionTutor;
     if (mission.tutorId) {
-      const tutor = await UserObject.findOne({ _id: mission.tutorId });
-      if (tutor) {
-        mission.tutor = { firstName: tutor.firstName, lastName: tutor.lastName, email: tutor.email, id: tutor._id };
-      }
+      const tutor = await UserObject.findById(mission.tutorId);
+      if (tutor) missionTutor = { firstName: tutor.firstName, lastName: tutor.lastName, email: tutor.email, id: tutor._id };
     }
-    const application = await ApplicationObject.findOne({ missionId: req.params.id, youngId: req.user._id });
-    return res.status(200).send({ ok: true, data: { ...mission, application } });
+
+    // Add application for young.
+    if (isYoung(req.user)) {
+      const application = await ApplicationObject.findOne({ missionId: checkedId, youngId: req.user._id });
+      return res.status(200).send({
+        ok: true,
+        data: {
+          ...serializeMission(mission),
+          tutor: missionTutor,
+          application: application ? serializeApplication(application) : null,
+        },
+      });
+    }
+    return res.status(200).send({ ok: true, data: { ...serializeMission(mission), tutor: missionTutor } });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });

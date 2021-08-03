@@ -16,6 +16,11 @@ const {
 const { createReferentHelper } = require("./helpers/referent");
 const { deleteStructureByIdHelper, createStructureHelper, expectStructureToEqual, notExistingStructureId } = require("./helpers/structure");
 const getNewReferentFixture = require("./fixtures/referent");
+const { ROLES } = require("snu-lib/roles");
+const { createYoungHelper } = require("./helpers/young");
+const getNewYoungFixture = require("./fixtures/young");
+const { createApplication } = require("./helpers/application");
+const { getNewApplicationFixture } = require("./fixtures/application");
 
 jest.setTimeout(10_000);
 
@@ -35,6 +40,36 @@ describe("Mission", () => {
       await deleteMissionByIdHelper(res.body.data._id);
     });
   });
+  describe("PUT /mission/:id", () => {
+    it("should update a mission", async () => {
+      const missionFixture = getNewMissionFixture();
+      let mission = await createMissionHelper(missionFixture);
+      const modifiedMission = { ...missionFixture };
+      modifiedMission.startAt = faker.date.past();
+      const res = await request(getAppHelper()).put(`/mission/${mission._id}`).send(modifiedMission);
+      expect(res.statusCode).toEqual(200);
+      mission = await getMissionByIdHelper(mission._id);
+      expectMissionToEqual(modifiedMission, mission);
+      await deleteMissionByIdHelper(mission._id);
+    });
+    it("should return 404 if mission does not exist", async () => {
+      const res = await request(getAppHelper()).put("/mission/" + notExisitingMissionId);
+      expect(res.statusCode).toEqual(404);
+    });
+    it("should return 401 if user can not update mission", async () => {
+      const mission = await createMissionHelper({ ...getNewMissionFixture(), department: "hop", region: "hop" });
+      const passport = require("passport");
+      passport.user.role = ROLES.REFERENT_DEPARTMENT;
+      let res = await request(getAppHelper()).put("/mission/" + mission._id);
+      expect(res.statusCode).toEqual(401);
+
+      passport.user.role = ROLES.REFERENT_REGION;
+      res = await request(getAppHelper()).put("/mission/" + mission._id);
+      expect(res.statusCode).toEqual(401);
+
+      passport.user.role = ROLES.ADMIN;
+    });
+  });
   describe("GET /mission/:id", () => {
     it("should get a mission", async () => {
       const missionFixture = getNewMissionFixture();
@@ -42,7 +77,33 @@ describe("Mission", () => {
       const res = await request(getAppHelper()).get(`/mission/${mission._id}`);
       expect(res.statusCode).toEqual(200);
       expectMissionToEqual(missionFixture, res.body.data);
+      expect(res.body.data.tutor).toBeFalsy();
       await deleteMissionByIdHelper(mission._id);
+    });
+    it("should return 404 if mission does not exist", async () => {
+      const res = await request(getAppHelper()).get("/mission/" + notExisitingMissionId);
+      expect(res.statusCode).toEqual(404);
+    });
+    it("should return mission tutor if it exists", async () => {
+      const tutor = await createReferentHelper({ ...getNewReferentFixture(), firstName: "Hello" });
+      const mission = await createMissionHelper({ ...getNewMissionFixture(), tutorId: tutor.id });
+      const res = await request(getAppHelper()).get(`/mission/${mission._id}`);
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.data.tutor.firstName).toEqual(tutor.firstName);
+    });
+    it("should return application if user is a young", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
+
+      const mission = await createMissionHelper({ ...getNewMissionFixture() });
+      const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission._id });
+      const res = await request(getAppHelper()).get(`/mission/${mission._id}`);
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.data.application.youngId).toEqual(application.youngId);
+
+      passport.user = previous;
     });
   });
 
@@ -58,18 +119,6 @@ describe("Mission", () => {
     expectStructureToEqual(res.body.data[0], missionFixture);
     await deleteMissionByIdHelper(mission._id);
     await deleteStructureByIdHelper(structure._id);
-  });
-
-  it("PUT /mission/:id", async () => {
-    const missionFixture = getNewMissionFixture();
-    let mission = await createMissionHelper(missionFixture);
-    const modifiedMission = { ...missionFixture };
-    modifiedMission.startAt = faker.date.past();
-    const res = await request(getAppHelper()).put(`/mission/${mission._id}`).send(modifiedMission);
-    expect(res.statusCode).toEqual(200);
-    mission = await getMissionByIdHelper(mission._id);
-    expectMissionToEqual(modifiedMission, mission);
-    await deleteMissionByIdHelper(mission._id);
   });
 
   it("DELETE /mission/:id", async () => {
