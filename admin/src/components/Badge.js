@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 
-export default function DownloadButton({ text, tooltipText, minTooltipText, minify = true, ...rest }) {
+export default function DownloadButton({ text, tooltipText, minTooltipText, minify = false, ...rest }) {
   return (
     <Badge minify={minify} {...rest}>
       <span>{text}</span>
