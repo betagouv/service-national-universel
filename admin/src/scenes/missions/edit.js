@@ -168,7 +168,9 @@ export default (props) => {
           if (!values.location || !values.location.lat || !values.location.lon) {
             values.location = await putLocation(values.city, values.zip);
           }
-          const { ok, code, data: mission } = await api[values._id ? "put" : "post"]("/mission", values);
+
+          const { ok, code, data: mission } = values._id ? await api.put("/mission", values) : await api.post("/mission", values);
+
           setLoadings({
             saveButton: false,
             submitButton: false,
