@@ -273,7 +273,7 @@ const applicationKeys = {
   tutorId: Joi.string().allow(null, ""),
   tutorName: Joi.string().allow(null, ""),
   contractId: Joi.string().allow(null, ""),
-  priority: Joi.string().allow(null, ""),
+  priority: Joi.alternatives().try(Joi.string().allow(null, ""), Joi.number().allow(null)),
   status: Joi.string().allow(null, ""),
 };
 
