@@ -7,10 +7,10 @@ const getNewMeetingPointFixture = require("./fixtures/meetingPoint");
 const getNewYoungFixture = require("./fixtures/young");
 const getAppHelper = require("./helpers/app");
 const { createBusHelper } = require("./helpers/bus");
-const { createCohesionCenter } = require("./helpers/cohesionCenter");
+const { createCohesionCenter, notExistingCohesionCenterId } = require("./helpers/cohesionCenter");
 const { dbConnect, dbClose } = require("./helpers/db");
 const { createMeetingPointHelper, notExistingMeetingPointId } = require("./helpers/meetingPoint");
-const { createYoungHelper, notExistingYoungId } = require("./helpers/young");
+const { createYoungHelper } = require("./helpers/young");
 
 jest.mock("../sendinblue", () => ({
   ...jest.requireActual("../sendinblue"),
@@ -42,6 +42,24 @@ describe("Meeting point", () => {
       await request(getAppHelper()).get("/meeting-point/" + notExistingMeetingPointId);
       expect(passport.lastTypeCalledOnAuthenticate).toStrictEqual(["young", "referent"]);
     });
+    it("should return 200 when meeting point is found for a young", async () => {
+      const meetingPoint = await createMeetingPointHelper(getNewMeetingPointFixture());
+      const young = await createYoungHelper({ ...getNewYoungFixture(), meetingPointId: meetingPoint._id });
+      const passport = require("passport");
+      passport.user = young;
+      const res = await request(getAppHelper())
+        .get("/meeting-point/" + meetingPoint._id)
+        .send();
+      expect(res.status).toBe(200);
+    });
+    it("should return 401 if young try to access other meetingPoint", async () => {
+      const meetingPoint = await createMeetingPointHelper(getNewMeetingPointFixture());
+      const young = await createYoungHelper({ ...getNewYoungFixture(), meetingPointId: notExistingMeetingPointId });
+      const passport = require("passport");
+      passport.user = young;
+      const res = await request(getAppHelper()).get("/meeting-point/" + meetingPoint._id);
+      expect(res.status).toBe(401);
+    });
   });
 
   describe("GET /meeting-point/all", () => {
@@ -57,7 +75,13 @@ describe("Meeting point", () => {
   });
 
   describe("GET /meeting-point", () => {
-    it("should return 404 when center is not found", async () => {
+    it("should return 404 when meeting-point is not found", async () => {
+      const young = await createYoungHelper({
+        ...getNewYoungFixture(),
+        cohesionCenterId: notExistingCohesionCenterId,
+      });
+      const passport = require("passport");
+      passport.user = young;
       const res = await request(getAppHelper()).get("/meeting-point").send();
       expect(res.status).toBe(404);
     });
