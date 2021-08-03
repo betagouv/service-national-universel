@@ -8,7 +8,7 @@ const config = require("./config");
 const { sendTemplate } = require("./sendinblue");
 const { COOKIE_MAX_AGE, JWT_MAX_AGE, cookieOptions, logoutCookieOptions } = require("./cookie-options");
 const { validatePassword, ERRORS } = require("./utils");
-const { validateFirstName } = require("./utils/validator/default");
+const { validateFirstName } = require("./utils/validator");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 class Auth {
   constructor(model) {

@@ -31,7 +31,7 @@ const {
 const { sendEmail } = require("../../sendinblue");
 const { cookieOptions } = require("../../cookie-options");
 const Joi = require("joi");
-const youngValidator = require("../../utils/validator/young");
+const { validateYoung } = require("../../utils/validator");
 
 const YoungAuth = new AuthObject(YoungObject);
 
@@ -189,7 +189,7 @@ router.post("/signup_invite", async (req, res) => {
 
 router.post("/", async (req, res) => {
   try {
-    const { error, value } = youngValidator.validateYoung(req.body);
+    const { error, value } = validateYoung(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
     const young = await YoungObject.create(value);
@@ -394,7 +394,7 @@ router.put("/:id/cancel-meeting-point", passport.authenticate("referent", { sess
 //@check
 router.put("/", passport.authenticate("young", { session: false }), async (req, res) => {
   try {
-    const { error, value } = youngValidator.validateYoung(req.body);
+    const { error, value } = validateYoung(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
     const young = await YoungObject.findByIdAndUpdate(req.user._id, value, { new: true });

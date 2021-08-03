@@ -24,8 +24,7 @@ const { decrypt } = require("../cryptoUtils");
 const { sendEmail, sendTemplate } = require("../sendinblue");
 const { uploadFile, validatePassword, updatePlacesCenter, signinLimiter, assignNextYoungFromWaitingList, ERRORS } = require("../utils");
 const { encrypt } = require("../cryptoUtils");
-const referentValidator = require("../utils/validator/referent");
-const { validateId } = require("../utils/validator/default");
+const { validateId, validateSelf, validateYoung, validateReferent } = require("../utils/validator");
 const ReferentAuth = new AuthObject(ReferentObject);
 const { cookieOptions, JWT_MAX_AGE } = require("../cookie-options");
 const Joi = require("joi");
@@ -352,7 +351,7 @@ router.post("/signup_invite", async (req, res) => {
 
 router.put("/young/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const { error, value } = referentValidator.validateYoung(req.body);
+    const { error, value } = validateYoung(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
     const { id } = req.params;
@@ -399,7 +398,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false }), 
 
 router.post("/young", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const { error, value } = referentValidator.validateYoung(req.body);
+    const { error, value } = validateYoung(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
     const obj = { ...value };
@@ -828,7 +827,7 @@ router.get("/manager_phase2/:department", passport.authenticate(["young", "refer
 
 router.put("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const { error, value } = referentValidator.validateReferent(req.body);
+    const { error, value } = validateReferent(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
     const data = await ReferentObject.findOne({ _id: req.params.id });
@@ -847,7 +846,7 @@ router.put("/:id", passport.authenticate("referent", { session: false }), async 
 
 router.put("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const { error, value } = referentValidator.validateSelf(req.body);
+    const { error, value } = validateSelf(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
     const user = await ReferentObject.findByIdAndUpdate(req.user._id, value, { new: true, useFindAndModify: false });

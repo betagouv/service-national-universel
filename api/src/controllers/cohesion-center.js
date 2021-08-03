@@ -23,7 +23,7 @@ const renderFromHtml = require("../htmlToPdf");
 const { ROLES } = require("snu-lib/roles");
 const Joi = require("joi");
 const { serializeCohesionCenter } = require("../utils/serializer");
-const { validateCohesionCenter } = require("../utils/validator/default");
+const { validateCohesionCenter } = require("../utils/validator");
 
 router.post("/refresh/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
