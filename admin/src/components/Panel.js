@@ -100,7 +100,6 @@ export default styled.div`
     &-title {
       font-weight: bold;
       min-width: 100px;
-      width: 100px;
       margin-right: 0.5rem;
     }
     &-text {
