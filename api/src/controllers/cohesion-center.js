@@ -23,7 +23,7 @@ const {
 const renderFromHtml = require("../htmlToPdf");
 const { ROLES, canCreateCohesionCenter } = require("snu-lib/roles");
 const Joi = require("joi");
-const { serializeCohesionCenter, serializeYoung } = require("../utils/serializer");
+const { serializeCohesionCenter, serializeYoung, serializeReferent } = require("../utils/serializer");
 const { validateCohesionCenter } = require("../utils/validator");
 
 router.post("/refresh/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
@@ -189,7 +189,7 @@ router.get("/:id/head", passport.authenticate("referent", { session: false }), a
     const data = await ReferentModel.findOne({ role: ROLES.HEAD_CENTER, cohesionCenterId: center._id });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    return res.status(200).send({ ok: true, data });
+    return res.status(200).send({ ok: true, data: serializeReferent(data) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });

@@ -44,9 +44,24 @@ function serializeYoung(young, user) {
   });
 }
 
+function serializeReferent(referent, user) {
+  return referent.toObject({
+    transform: (_doc, ret) => {
+      delete ret.sqlId;
+      delete ret.password;
+      delete ret.forgotPasswordResetToken;
+      delete ret.forgotPasswordResetExpires;
+      delete ret.invitationToken;
+      delete ret.invitationExpires;
+      return ret;
+    },
+  });
+}
+
 module.exports = {
   serializeApplication,
   serializeBus,
   serializeCohesionCenter,
   serializeYoung,
+  serializeReferent,
 };
