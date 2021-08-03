@@ -52,7 +52,7 @@ export default (props) => {
           setLoading(true);
           if (values.visibility === "DEPARTMENT") values.region = department2region[values.department];
 
-          const { ok, code, data } = values._id ? await api.put("/program", values) : await api.post("/program", values);
+          const { ok, code, data } = values._id ? await api.put(`/program/${values._id}`, values) : await api.post("/program", values);
 
           setLoading(false);
           if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette possibilité d'engagement", translate(code));

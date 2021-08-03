@@ -37,6 +37,8 @@ function expectProgramToEqual(program, expectedProgram) {
   expect(programParsed.descriptionFor).toEqual(expectedProgramParsed.descriptionFor);
 }
 
+const notExisitingProgramId = "123a49ba503040e4d2153944";
+
 module.exports = {
   getProgramsHelper,
   getProgramByIdHelper,
@@ -44,4 +46,5 @@ module.exports = {
   createProgramHelper,
   expectProgramToEqual,
   deleteAllProgram,
+  notExisitingProgramId,
 };

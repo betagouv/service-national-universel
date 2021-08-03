@@ -11,7 +11,10 @@ const {
   createProgramHelper,
   expectProgramToEqual,
   deleteAllProgram,
+  notExisitingProgramId,
 } = require("./helpers/program");
+const { createReferentHelper } = require("./helpers/referent");
+const getNewReferentFixture = require("./fixtures/referent");
 const { dbConnect, dbClose } = require("./helpers/db");
 const { ROLES } = require("snu-lib/roles");
 
@@ -21,28 +24,48 @@ beforeAll(dbConnect);
 afterAll(dbClose);
 
 describe("Program", () => {
-  it("POST /program", async () => {
-    const programFixture = getNewProgramFixture();
-    const programsBefore = await getProgramsHelper();
-    const res = await request(getAppHelper()).post("/program").send(programFixture);
-    expect(res.statusCode).toEqual(200);
-    expectProgramToEqual(programFixture, res.body.data);
-    const programsAfter = await getProgramsHelper();
-    expect(programsAfter.length).toEqual(programsBefore.length + 1);
-    await deleteProgramByIdHelper(res.body.data._id);
+  describe("POST /program", () => {
+    it("should create a new program", async () => {
+      const programFixture = { ...getNewProgramFixture(), department: "Ain" };
+      const programsBefore = await getProgramsHelper();
+      const res = await request(getAppHelper()).post("/program").send(programFixture);
+      expect(res.statusCode).toEqual(200);
+      expectProgramToEqual(programFixture, res.body.data);
+      const programsAfter = await getProgramsHelper();
+      expect(programsAfter.length).toEqual(programsBefore.length + 1);
+      await deleteProgramByIdHelper(res.body.data._id);
+    });
   });
+  describe("PUT /program/:id", () => {
+    it("should update a program", async () => {
+      const programFixture = getNewProgramFixture();
+      let program = await createProgramHelper(programFixture);
+      const modifiedProgram = { ...programFixture };
+      modifiedProgram.url = faker.internet.url();
+      modifiedProgram._id = program._id;
+      const res = await request(getAppHelper()).put(`/program/${program._id}`).send(modifiedProgram);
+      expect(res.statusCode).toEqual(200);
+      program = await getProgramByIdHelper(program._id);
+      expectProgramToEqual(program, modifiedProgram);
+      await deleteProgramByIdHelper(program._id);
+    });
+    it("should return 404 if program does not exist", async () => {
+      const res = await request(getAppHelper()).put("/program/" + notExisitingProgramId);
+      expect(res.statusCode).toEqual(404);
+    });
+    it("should return 401 if user can not update program", async () => {
+      const program = await createProgramHelper({ ...getNewProgramFixture(), department: "hip", region: "hop" });
+      const passport = require("passport");
+      passport.user.role = ROLES.REFERENT_DEPARTMENT;
+      let res = await request(getAppHelper()).put("/program/" + program._id);
+      expect(res.statusCode).toEqual(401);
 
-  it("PUT /program", async () => {
-    const programFixture = getNewProgramFixture();
-    let program = await createProgramHelper(programFixture);
-    const modifiedProgram = { ...programFixture };
-    modifiedProgram.url = faker.internet.url();
-    modifiedProgram._id = program._id;
-    const res = await request(getAppHelper()).put("/program").send(modifiedProgram);
-    expect(res.statusCode).toEqual(200);
-    program = await getProgramByIdHelper(program._id);
-    expectProgramToEqual(program, modifiedProgram);
-    await deleteProgramByIdHelper(program._id);
+      passport.user.role = ROLES.REFERENT_REGION;
+      res = await request(getAppHelper()).put("/program/" + program._id);
+      expect(res.statusCode).toEqual(401);
+
+      passport.user.role = ROLES.ADMIN;
+    });
   });
 
   it("GET /program/:id", async () => {
