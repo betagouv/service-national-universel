@@ -38,6 +38,30 @@ describe("Application", () => {
         .send({ ...application, youngId: young._id, missionId: notExisitingMissionId });
       expect(res.status).toBe(404);
     });
+    it("should only allow young to apply for themselves", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const secondYoung = await createYoungHelper(getNewYoungFixture());
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
+      const mission = await createMissionHelper(getNewMissionFixture());
+      const application = getNewApplicationFixture();
+
+      // Successful application
+      let res = await request(getAppHelper())
+        .post("/application")
+        .send({ ...application, youngId: young._id, missionId: mission._id });
+      expect(res.status).toBe(200);
+      expect(res.body.data.youngId).toBe(young._id.toString());
+
+      // Failed application
+      res = await request(getAppHelper())
+        .post("/application")
+        .send({ ...application, youngId: secondYoung._id, missionId: mission._id });
+      expect(res.status).toBe(400);
+
+      passport.user = previous;
+    });
     it("should create an application when priority is given", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
       const mission = await createMissionHelper(getNewMissionFixture());
@@ -95,6 +119,32 @@ describe("Application", () => {
       const res = await request(getAppHelper()).put("/application").send({ priority: "1", status: "DONE", _id: application._id.toString() });
       expect(res.status).toBe(200);
       expect(res.body.data.status).toBe("DONE");
+    });
+    it("should only allow young to update for themselves", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const secondYoung = await createYoungHelper(getNewYoungFixture());
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
+      const mission = await createMissionHelper(getNewMissionFixture());
+      const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission._id });
+      const secondApplication = await createApplication({ ...getNewApplicationFixture(), youngId: secondYoung._id, missionId: mission._id });
+
+      // Successful update
+      let res = await request(getAppHelper()).put("/application").send({ priority: "1", status: "DONE", _id: application._id.toString() });
+      expect(res.status).toBe(200);
+
+      // Failed update (not allowed)
+      res = await request(getAppHelper()).put("/application").send({ priority: "1", status: "DONE", _id: secondApplication._id.toString() });
+      expect(res.status).toBe(401);
+
+      // Failed update (wrong young id)
+      res = await request(getAppHelper())
+        .put("/application")
+        .send({ priority: "1", status: "DONE", _id: application._id.toString(), youngId: secondYoung._id });
+      expect(res.status).toBe(400);
+
+      passport.user = previous;
     });
   });
 
