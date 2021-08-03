@@ -2,25 +2,25 @@ import React from "react";
 import { Col, Row } from "reactstrap";
 import { Link } from "react-router-dom";
 
-import { translate, YOUNG_STATUS_COLORS, YOUNG_STATUS_PHASE3 } from "../../../../utils";
-import { CardArrow, Card, CardTitle, CardValueWrapper, CardValue, CardPercentage, CardSection, Subtitle } from "../../../../components/dashboard";
+import { translate } from "../../../../utils";
+import { CardArrow, Card, CardTitle, CardSection, CardValueWrapper, CardValue, CardPercentage, Subtitle } from "../../../../components/dashboard";
 
-export default ({ data, getLink }) => {
+export default ({ sectionTitle, title, obj, filterName, colors, data, getLink }) => {
   const total = Object.keys(data).reduce((acc, a) => acc + data[a], 0);
   return (
-    <React.Fragment>
+    <>
       <Row>
         <Col md={12}>
-          <CardSection>Phase 3</CardSection>
-          <Subtitle>Statut</Subtitle>
+          {sectionTitle ? <CardSection>{sectionTitle}</CardSection> : null}
+          <Subtitle>{title}</Subtitle>
         </Col>
       </Row>
       <Row>
-        {Object.values(YOUNG_STATUS_PHASE3).map((e) => {
+        {Object.values(obj).map((e) => {
           return (
             <Col md={6} xl={4} key={e}>
-              <Link to={getLink(`/volontaire?STATUS_PHASE_3=%5B"${e}"%5D`)}>
-                <Card borderBottomColor={YOUNG_STATUS_COLORS[e]}>
+              <Link to={getLink(`/volontaire?${filterName}=%5B"${e}"%5D`)}>
+                <Card borderBottomColor={colors[e]}>
                   <CardTitle>{translate(e)}</CardTitle>
                   <CardValueWrapper>
                     <CardValue>{data[e] || 0}</CardValue>
@@ -35,6 +35,6 @@ export default ({ data, getLink }) => {
           );
         })}
       </Row>
-    </React.Fragment>
+    </>
   );
 };

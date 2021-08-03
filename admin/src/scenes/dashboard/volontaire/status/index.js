@@ -1,13 +1,19 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { region2department } from "../../../../utils";
+import {
+  region2department,
+  CONTRACT_STATUS_COLORS,
+  CONTRACT_STATUS,
+  APPLICATION_STATUS,
+  APPLICATION_STATUS_COLORS,
+  YOUNG_STATUS_COLORS,
+  YOUNG_STATUS_PHASE1,
+  YOUNG_STATUS_PHASE2,
+  YOUNG_STATUS_PHASE3,
+} from "../../../../utils";
 import api from "../../../../services/api";
 import Status from "./status";
-import Contract from "./contract";
-import Phase1 from "./phase1";
-import Phase2 from "./phase2";
-import Phase3 from "./phase3";
-import Application from "./application";
+import StatusMap from "./statusMap";
 import Participation from "./participation";
 
 export default ({ filter }) => {
@@ -112,18 +118,60 @@ export default ({ filter }) => {
         )}
         {currentTab === "phase1" && (
           <>
-            <Phase1 data={statusPhase1} getLink={getLink} />
+            <StatusMap
+              sectionTitle="Phase 1"
+              title="Statut"
+              obj={YOUNG_STATUS_PHASE1}
+              filterName="STATUS_PHASE_1"
+              colors={YOUNG_STATUS_COLORS}
+              data={statusPhase1}
+              getLink={getLink}
+            />
             <Participation data={cohesionStayPresence} getLink={getLink} />
           </>
         )}
         {currentTab === "phase2" && (
           <>
-            <Phase2 data={statusPhase2} getLink={getLink} />
-            <Contract data={statusPhase2Contract} getLink={getLink} />
-            <Application data={statusApplication} getLink={getLink} />
+            <StatusMap
+              sectionTitle="Phase 2"
+              title="Statut"
+              obj={YOUNG_STATUS_PHASE2}
+              filterName="STATUS_PHASE_2"
+              colors={YOUNG_STATUS_COLORS}
+              data={statusPhase2}
+              getLink={getLink}
+            />
+            <StatusMap
+              title="Statut sur des contrats d'engagement"
+              obj={CONTRACT_STATUS}
+              filterName="CONTRACT_STATUS"
+              colors={CONTRACT_STATUS_COLORS}
+              data={statusPhase2Contract}
+              getLink={getLink}
+            />
+            <StatusMap
+              title="Statut sur une mission de phase 2"
+              obj={APPLICATION_STATUS}
+              filterName="APPLICATION_STATUS"
+              colors={APPLICATION_STATUS_COLORS}
+              data={statusApplication}
+              getLink={getLink}
+            />
           </>
         )}
-        {currentTab === "phase3" && <Phase3 data={statusPhase3} getLink={getLink} />}
+        {currentTab === "phase3" && (
+          <>
+            <StatusMap
+              sectionTitle="Phase 3"
+              title="Statut"
+              obj={YOUNG_STATUS_PHASE3}
+              filterName="STATUS_PHASE_3"
+              colors={YOUNG_STATUS_COLORS}
+              data={statusPhase3}
+              getLink={getLink}
+            />
+          </>
+        )}
       </Wrapper>
     </>
   );
