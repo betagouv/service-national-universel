@@ -35,7 +35,7 @@ export default ({
         value={values[name]}
         name={name}
         onChange={async (e) => {
-          const res = await api.uploadFile(`/young/file/military-preparation/${name}`, e.target.files);
+          const res = await api.uploadFile(`/young/${values._id}/file/military-preparation/${name}`, e.target.files);
           if (res.code === "FILE_CORRUPTED") {
             return toastr.error(
               "Le fichier semble corrompu",

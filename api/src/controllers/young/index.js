@@ -21,7 +21,7 @@ const { uploadFile, validatePassword, updatePlacesCenter, signinLimiter, assignN
 const { sendEmail } = require("../../sendinblue");
 const { cookieOptions } = require("../../cookie-options");
 const Joi = require("joi");
-const { validateYoung } = require("../../utils/validator");
+const { validateYoung, validateId } = require("../../utils/validator");
 
 const YoungAuth = new AuthObject(YoungObject);
 
@@ -78,8 +78,11 @@ router.post("/file/:key", passport.authenticate("young", { session: false }), as
   }
 });
 
-router.post("/file/military-preparation/:key", passport.authenticate("young", { session: false }), async (req, res) => {
+router.post("/:id/file/military-preparation/:key", passport.authenticate("young", { session: false }), async (req, res) => {
   try {
+    const { error: errorId, value: checkedId } = validateId(req.params.id);
+    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: errorId });
+
     const { error, value } = Joi.object({
       key: Joi.string().required(),
       body: Joi.string().required(),
@@ -96,7 +99,11 @@ router.post("/file/military-preparation/:key", passport.authenticate("young", { 
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
     if (bodyError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: bodyError.message });
-
+    const young = await YoungObject.findById(checkedId);
+    if (!young) {
+      capture(`young not found ${id}`);
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
     const files = Object.keys(req.files || {}).map((e) => req.files[e]);
 
     for (let i = 0; i < files.length; i++) {
@@ -110,10 +117,10 @@ router.post("/file/military-preparation/:key", passport.authenticate("young", { 
 
       const encryptedBuffer = encrypt(data);
       const resultingFile = { mimetype: "image/png", encoding: "7bit", data: encryptedBuffer };
-      await uploadFile(`app/young/${req.user._id}/military-preparation/${key}/${name}`, resultingFile);
+      await uploadFile(`app/young/${young._id}/military-preparation/${key}/${name}`, resultingFile);
     }
-    req.user.set({ [key]: names });
-    await req.user.save();
+    young.set({ [key]: names });
+    await young.save();
     return res.status(200).send({ data: names, ok: true });
   } catch (error) {
     capture(error);
