@@ -31,6 +31,7 @@ class api {
       method: "POST",
       redirect: "follow",
       referrer: "no-referrer",
+      credentials: "include",
       headers: { "Content-Type": "application/x-ndjson", Authorization: `JWT ${this.token}` },
       body: query,
     })
