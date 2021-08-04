@@ -5,7 +5,7 @@ import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { ReactiveBase, ReactiveList } from "@appbaseio/reactivesearch";
 
-import ProgramCard from "../components/programCard";
+import ProgramCard from "../../../components/programCard";
 import MissionCard from "../components/missionCard";
 import api from "../../../services/api";
 import { apiURL } from "../../../config";
@@ -49,7 +49,7 @@ export default () => {
             </Col>
           ))}
         </Row>
-        <SeeMore to="/phase3/les-programmes">Tous les programmes d'engagement →</SeeMore>
+        <SeeMore to="/les-programmes">Tous les programmes d'engagement →</SeeMore>
         <hr style={{ margin: "40px 0", opacity: 0.8 }} />
       </TransparentHero>
       <TransparentHero>

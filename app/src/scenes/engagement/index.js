@@ -3,7 +3,8 @@ import { Col, Container, Row } from "reactstrap";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 
-import ProgramCard from "./components/programCard";
+// import ProgramCard from "../phase3/components/programCard";
+import ProgramCard from "../../components/programCard";
 import api from "../../services/api";
 import Loader from "../../components/Loader";
 import { useSelector } from "react-redux";

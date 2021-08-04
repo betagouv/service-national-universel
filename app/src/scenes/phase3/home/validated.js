@@ -49,7 +49,7 @@ export default () => {
               <br />
               Si vous le souhaitez, vous pouvez prolonger encore votre engagement
               <br />
-              <Link to="/phase3/les-programmes">Les possibilités d'engagement {">"}</Link>
+              <Link to="/les-programmes">Les possibilités d'engagement {">"}</Link>
               <br />
               <Link to="/phase3/mission">Trouver une mission {">"}</Link>
             </p>
