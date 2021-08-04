@@ -10,38 +10,33 @@ const { ERRORS } = require("../utils");
 const { ROLES } = require("snu-lib/roles");
 const patches = require("./patches");
 
+const setAndSave = async (data, keys) => {
+  data.set({ ...keys });
+  await data.save();
+};
+
 // Update "network name" to ease search ("Affilié à un réseau national" filter).
 // See: https://trello.com/c/BjRN9NME/523-admin-filtre-affiliation-%C3%A0-une-t%C3%AAte-de-r%C3%A9seau
 async function updateNetworkName(structure) {
   if (structure.networkId) {
-    // When the structure is a child (part of a network).
-    // Get network for the structure, then update networkName thanks to its name.
+    // When the structure is a child (part of a network), get the network
     const network = await StructureObject.findOne({ _id: structure.networkId });
-    if (network) {
-      structure.set({ networkName: `${network.name}` });
-      await structure.save();
-    }
+    // then update networkName thanks to its name.
+    if (network) await setAndSave(structure, { networkName: network.name });
   } else if (structure.isNetwork === "true") {
     // When the structure is a partent (is a network).
     // Update the structure itself (a parent belongs to her own structure).
-    structure.set({ networkName: `${structure.name}` });
-    await structure.save();
+    await setAndSave(structure, { networkName: structure.name });
     // Then update their childs.
     const childs = await StructureObject.find({ networkId: structure._id });
-    for (const child of childs) {
-      child.set({ networkName: `${structure.name}` });
-      await child.save();
-    }
+    for (const child of childs) await setAndSave(child, { networkName: structure.name });
   }
 }
 async function updateMissionStructureName(structure) {
   try {
     const missions = await MissionObject.find({ structureId: structure._id });
     if (!missions?.length) return console.log(`no missions edited for structure ${structure._id}`);
-    for (const mission of missions) {
-      mission.set({ structureName: structure.name });
-      await mission.save();
-    }
+    for (const mission of missions) await setAndSave(mission, { structureName: structure.name });
   } catch (error) {
     capture(error);
   }
@@ -51,10 +46,7 @@ async function updateResponsibleAndSupervisorRole(structure) {
   try {
     const referents = await ReferentObject.find({ structureId: structure._id, role: { $in: [ROLES.RESPONSIBLE, ROLES.SUPERVISOR] } });
     if (!referents?.length) return console.log(`no referents edited for structure ${structure._id}`);
-    for (const referent of referents) {
-      referent.set({ role: structure.isNetwork === "true" ? ROLES.SUPERVISOR : ROLES.RESPONSIBLE });
-      await referent.save();
-    }
+    for (const referent of referents) await setAndSave(referent, { role: structure.isNetwork === "true" ? ROLES.SUPERVISOR : ROLES.RESPONSIBLE });
   } catch (error) {
     capture(error);
   }
