@@ -7,17 +7,9 @@ const { dbConnect, dbClose } = require("./helpers/db");
 const getNewContractFixture = require("./fixtures/contract");
 const { getNewApplicationFixture } = require("./fixtures/application");
 const getNewYoungFixture = require("./fixtures/young");
-const { createApplication, getApplicationsHelper, deleteApplicationHelper } = require("./helpers/application");
-const {
-  getYoungsHelper,
-  getYoungByIdHelper,
-  deleteYoungByIdHelper,
-  createYoungHelper,
-  expectYoungToEqual,
-  deleteYoungByEmailHelper,
-  notExistingYoungId,
-} = require("./helpers/young");
-const { expectContractToEqual, createContractHelper, getContractByIdHelper } = require("./helpers/contract");
+const { createApplication } = require("./helpers/application");
+const { getYoungByIdHelper, createYoungHelper } = require("./helpers/young");
+const { expectContractToEqual, getContractByIdHelper } = require("./helpers/contract");
 
 jest.mock("../sendinblue", () => ({
   ...jest.requireActual("../sendinblue"),

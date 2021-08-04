@@ -1,7 +1,6 @@
 require("dotenv").config({ path: "./.env-testing" });
 const faker = require("faker");
 const request = require("supertest");
-const jwt = require("jsonwebtoken");
 const getAppHelper = require("./helpers/app");
 const getNewYoungFixture = require("./fixtures/young");
 const getNewReferentFixture = require("./fixtures/referent");
