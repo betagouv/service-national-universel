@@ -59,7 +59,6 @@ export default (props) => {
       return (
         <>
           <p>{young.firstName} est en attente d'affectation à un centre de cohésion</p>
-          {ENABLE_ASSIGN_CENTER && user.role === ROLES.ADMIN ? <AssignCenter young={young} onAffect={getYoung} /> : null}
         </>
       );
     if (young.statusPhase1 === "WAITING_LIST")

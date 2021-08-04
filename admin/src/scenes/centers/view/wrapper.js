@@ -8,7 +8,7 @@ import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
 import SelectStatusMission from "../../../components/selectStatusMission";
-import { translate, enableAssignCenter, ROLES } from "../../../utils";
+import { translate, canAssignCohesionCenter, ROLES } from "../../../utils";
 import TabList from "../../../components/views/TabList";
 import Tab from "../../../components/views/Tab";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
@@ -42,7 +42,7 @@ export default ({ center: centerDefault, tab, children }) => {
             <Tab isActive={tab === "waiting_list"} onClick={() => history.push(`/centre/${center._id}/liste-attente`)}>
               Liste d'attente
             </Tab>
-            {enableAssignCenter(user) ? (
+            {canAssignCohesionCenter(user) ? (
               <Tab isActive={tab === "affectation"} onClick={() => history.push(`/centre/${center._id}/affectation`)}>
                 Affectation manuelle
               </Tab>

@@ -9,7 +9,7 @@ import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import Loader from "../../../components/Loader";
 import api from "../../../services/api";
 import AssignMeetingPoint from "../components/AssignMeetingPoint";
-import { translate, enableMeetingPoint } from "../../../utils";
+import { translate, canAssignMeetingPoint } from "../../../utils";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 
 export default ({ values, handleChange, handleSubmit }) => {
@@ -60,14 +60,14 @@ export default ({ values, handleChange, handleSubmit }) => {
               <Loader />
             ) : (
               <>
-                {enableMeetingPoint(user) ? <AssignMeetingPoint young={values} onAffect={getData} /> : null}
+                {canAssignMeetingPoint(user) ? <AssignMeetingPoint young={values} onAffect={getData} /> : null}
                 {values.deplacementPhase1Autonomous === "true" ? <i>{`${values.firstName} se rend au centre par ses propres moyens.`}</i> : <MeetingPoint value={meetingPoint} />}
-                {enableMeetingPoint(user) && (meetingPoint || values.deplacementPhase1Autonomous === "true") ? (
+                {canAssignMeetingPoint(user) && (meetingPoint || values.deplacementPhase1Autonomous === "true") ? (
                   <CancelButton color="#be3b12" onClick={onClickCancel}>
                     Annuler ce choix
                   </CancelButton>
                 ) : null}
-                {enableMeetingPoint(user) && !meetingPoint && values.deplacementPhase1Autonomous !== "true" ? (
+                {canAssignMeetingPoint(user) && !meetingPoint && values.deplacementPhase1Autonomous !== "true" ? (
                   <CancelButton
                     color="#382F79"
                     onClick={() => {

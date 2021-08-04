@@ -93,18 +93,6 @@ export function getPasswordErrorMessage(v) {
   }
 }
 
-export const ENABLE_ASSIGN_CENTER = false;
-export const ENABLE_ASSIGN_CENTER_ROLES = [];
-export const ENABLE_ASSIGN_CENTER_EMAILS = [];
-
-export const ENABLE_ASSIGN_MEETING_POINT = false;
-export const ENABLE_ASSIGN_MEETING_POINT_ROLES = [];
-export const ENABLE_ASSIGN_MEETING_POINT_EMAILS = [];
-
-export const enableAssignCenter = (user) => ENABLE_ASSIGN_CENTER && (ENABLE_ASSIGN_CENTER_ROLES.includes(user.role) || ENABLE_ASSIGN_CENTER_EMAILS.includes(user.email));
-export const enableMeetingPoint = (user) =>
-  ENABLE_ASSIGN_MEETING_POINT && (ENABLE_ASSIGN_MEETING_POINT_ROLES.includes(user.role) || ENABLE_ASSIGN_MEETING_POINT_EMAILS.includes(user.email));
-
 export const userIsResponsibleFromStructureMilitaryPreparation = async (user) => {
   if (!user || !user.structureId) return false;
   const { ok, data } = await api.get(`/structure/${user.structureId}`);
