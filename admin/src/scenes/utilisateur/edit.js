@@ -21,6 +21,7 @@ import PanelActionButton from "../../components/buttons/PanelActionButton";
 import { setUser as ReduxSetUser } from "../../redux/auth/actions";
 import Emails from "../../components/views/Emails";
 import HistoricComponent from "../../components/views/Historic";
+import ModalConfirm from "../../components/modals/ModalConfirm";
 
 export default (props) => {
   const [user, setUser] = useState();
@@ -29,6 +30,7 @@ export default (props) => {
   const [structures, setStructures] = useState();
   const [structure, setStructure] = useState();
   const [loadingChangeStructure, setLoadingChangeStructure] = useState(false);
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const currentUser = useSelector((state) => state.Auth.user);
   const history = useHistory();
   const dispatch = useDispatch();
@@ -113,6 +115,28 @@ export default (props) => {
     } catch (e) {
       console.log(e);
       toastr.error("Oops, une erreur est survenu lors de la masquarade !", translate(e.code));
+    }
+  };
+
+  const onClickDelete = () => {
+    setModal({
+      isOpen: true,
+      onConfirm: () => onConfirmDelete(),
+      title: "Êtes-vous sûr(e) de vouloir supprimer ce profil ?",
+      message: "Cette action est irréversible.",
+    });
+  };
+
+  const onConfirmDelete = async () => {
+    try {
+      const { ok, code } = await api.remove(`/referent/${user._id}`);
+      if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
+      if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+      toastr.success("Ce profil a été supprimé.");
+      return history.push(`/user`);
+    } catch (e) {
+      console.log(e);
+      return toastr.error("Oups, une erreur est survenue pendant la supression du profil :", translate(e.code));
     }
   };
 
@@ -282,23 +306,7 @@ export default (props) => {
       ) : null}
       {currentUser.role === ROLES.ADMIN ||
       ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(currentUser.role) && [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role)) ? (
-        <DeleteBtn
-          onClick={async () => {
-            if (!confirm("Êtes-vous sûr(e) de vouloir supprimer ce profil")) return;
-            try {
-              const { ok, code } = await api.remove(`/referent/${user._id}`);
-              if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
-              if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
-              toastr.success("Ce profil a été supprimé.");
-              return history.push(`/user`);
-            } catch (e) {
-              console.log(e);
-              return toastr.error("Oups, une erreur est survenue pendant la supression du profil :", translate(e.code));
-            }
-          }}
-        >
-          {`Supprimer le compte de ${user.firstName} ${user.lastName}`}
-        </DeleteBtn>
+        <DeleteBtn onClick={onClickDelete}>{`Supprimer le compte de ${user.firstName} ${user.lastName}`}</DeleteBtn>
       ) : null}
       {canModify(currentUser, user) && user.role === ROLES.REFERENT_DEPARTMENT && (
         <Formik
@@ -349,6 +357,16 @@ export default (props) => {
           )}
         </Formik>
       )}
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        onChange={() => setModal({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
     </Wrapper>
   );
 };
