@@ -41,6 +41,7 @@ const {
   canUpdateReferent,
   canViewYoungMilitaryPreparationFile,
 } = require("snu-lib/roles");
+const patches = require("./patches");
 
 function inSevenDays() {
   return Date.now() + 86400000 * 7;
@@ -727,25 +728,7 @@ router.get("/young/:id", passport.authenticate("referent", { session: false }), 
   }
 });
 
-router.get("/:id/patches", passport.authenticate("referent", { session: false }), async (req, res) => {
-  try {
-    const { error, value } = Joi.object({ id: Joi.string().required() })
-      .unknown()
-      .validate({ ...req.params }, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
-
-    if (!canViewPatchesHistory(req.user)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    const referent = await ReferentObject.findById(value.id);
-    if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    const data = await referent.patches.find({ ref: referent.id }).sort("-date");
-    return res.status(200).send({ ok: true, data });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
-  }
-});
+router.get("/:id/patches", passport.authenticate("referent", { session: false }), async (req, res) => await patches.get(req, res, ReferentObject));
 
 router.get("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {

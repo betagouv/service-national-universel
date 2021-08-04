@@ -22,6 +22,7 @@ const { sendEmail } = require("../../sendinblue");
 const { cookieOptions } = require("../../cookie-options");
 const Joi = require("joi");
 const { validateYoung, validateId } = require("../../utils/validator");
+const patches = require("../patches");
 
 const YoungAuth = new AuthObject(YoungObject);
 
@@ -262,23 +263,7 @@ router.get("/department-service", passport.authenticate("young", { session: fals
   }
 });
 
-router.get("/:id/patches", passport.authenticate("referent", { session: false }), async (req, res) => {
-  try {
-    const { error, value: id } = Joi.string().required().validate(req.params.id);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
-
-    const young = await YoungObject.findById(id);
-    if (!young) {
-      capture(`young not found ${id}`);
-      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    }
-    const data = await young.patches.find({ ref: young.id }).sort("-date");
-    return res.status(200).send({ ok: true, data });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
-  }
-});
+router.get("/:id/patches", passport.authenticate("referent", { session: false }), async (req, res) => await patches.get(req, res, YoungObject));
 
 router.put("/validate_mission", passport.authenticate("young", { session: false }), async (req, res) => {
   try {

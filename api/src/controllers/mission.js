@@ -11,6 +11,7 @@ const { ERRORS, isYoung } = require("../utils/index.js");
 const { validateId, validateMission } = require("../utils/validator");
 const { canModifyMission } = require("snu-lib/roles");
 const { serializeMission, serializeApplication } = require("../utils/serializer");
+const patches = require("./patches");
 
 router.post("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
@@ -81,20 +82,7 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
   }
 });
 
-router.get("/:id/patches", passport.authenticate("referent", { session: false }), async (req, res) => {
-  try {
-    const mission = await MissionObject.findById(req.params.id);
-    if (!mission) {
-      capture(`mission not found ${req.params.id}`);
-      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    }
-    const data = await mission.patches.find({ ref: mission.id }).sort("-date");
-    return res.status(200).send({ ok: true, data });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
-  }
-});
+router.get("/:id/patches", passport.authenticate("referent", { session: false }), async (req, res) => await patches.get(req, res, MissionObject));
 
 router.get("/structure/:structureId", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
