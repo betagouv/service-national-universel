@@ -27,6 +27,7 @@ import Chevron from "../../components/Chevron";
 import Select from "./components/Select";
 import { toastr } from "react-redux-toastr";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
+import ModalConfirm from "../../components/modals/ModalConfirm";
 
 const FILTERS = [
   "SEARCH",
@@ -331,6 +332,7 @@ export default () => {
 
 const Hit = ({ hit, onClick, selected, callback }) => {
   const [value, setValue] = useState(null);
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
   const updateYoung = async (v) => {
     const { data, ok, code } = await api.put(`/referent/young/${value._id}`, v);
@@ -370,8 +372,14 @@ const Hit = ({ hit, onClick, selected, callback }) => {
           disabled={true}
           handleChange={(e) => {
             const value = e.target.value;
-            if (!confirmMessageChangePhase1Presence(value)) return;
-            updateYoung({ cohesionStayPresence: value });
+            setModal({
+              isOpen: true,
+              onConfirm: () => {
+                updateYoung({ cohesionStayPresence: value });
+              },
+              title: "Changement de présence",
+              message: confirmMessageChangePhase1Presence(value),
+            });
           }}
         />
       </td>
@@ -391,6 +399,16 @@ const Hit = ({ hit, onClick, selected, callback }) => {
           }}
         />
       </td>
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        onChange={() => setModal({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
     </tr>
   );
 };

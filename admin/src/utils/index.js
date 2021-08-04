@@ -32,14 +32,14 @@ export const publicEtatTypes = [
 export const corpsEnUniforme = ["SDIS (Service départemental d'Incendie et de Secours)", "Gendarmerie", "Police", "Armées"];
 
 export const confirmMessageChangePhase1Presence = (value) => {
-  if (!value) return true;
+  if (!value) return `Vous allez passer ce volontaire "Non renseigné" au séjour de cohésion. `;
   const label = value === "true" ? "Présent" : "Absent";
-  let message = `ATTENTION, vous allez passer ce volontaire "${label}" au séjour de cohésion. `;
+  let message = `Vous allez passer ce volontaire "${label}" au séjour de cohésion. `;
   if (value === "true")
     message +=
       'L\'attestation de réalisation de la phase 1 du SNU lui sera rendu disponible au téléchargement depuis son espace volontaire. Son statut de phase 1 au séjour de cohésion passera à "Effectué"';
   else message += 'Son statut de phase 1 au séjour de cohésion passera à "Non réalisé"';
-  return confirm(message);
+  return message;
 };
 
 export const putLocation = async (city, zip) => {
@@ -93,7 +93,7 @@ export function getPasswordErrorMessage(v) {
   }
 }
 
-export const ENABLE_ASSIGN_CENTER = true;
+export const ENABLE_ASSIGN_CENTER = false;
 export const ENABLE_ASSIGN_CENTER_ROLES = [];
 export const ENABLE_ASSIGN_CENTER_EMAILS = [];
 

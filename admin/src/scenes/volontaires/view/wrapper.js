@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { Col, Row } from "reactstrap";
@@ -15,13 +15,22 @@ import TabList from "../../../components/views/TabList";
 import Tab from "../../../components/views/Tab";
 import Title from "../../../components/views/Title";
 import { appURL } from "../../../config";
+import ModalConfirm from "../../../components/modals/ModalConfirm";
 
 export default ({ children, young, tab }) => {
   const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+  const onClickDelete = () => {
+    setModal({
+      isOpen: true,
+      onConfirm: onConfirmDelete,
+      title: "Êtes-vous sûr(e) de vouloir supprimer ce volontaire ?",
+      message: "Cette action est irréversible.",
+    });
+  };
 
-  const handleDelete = async () => {
-    if (!confirm("Êtes-vous sûr(e) de vouloir supprimer ce volontaire ?")) return;
+  const onConfirmDelete = async () => {
     try {
       const { ok, code } = await api.remove(`/young/${young._id}`);
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
@@ -33,6 +42,7 @@ export default ({ children, young, tab }) => {
       return toastr.error("Oups, une erreur est survenue pendant la supression du volontaire :", translate(e.code));
     }
   };
+
   if (!young) return null;
   return (
     <div style={{ flex: tab === "missions" ? "0%" : 2, position: "relative", padding: "3rem" }}>
@@ -75,12 +85,22 @@ export default ({ children, young, tab }) => {
               <Link to={`/volontaire/${young._id}/edit`}>
                 <PanelActionButton icon="pencil" title="Modifier" />
               </Link>
-              <PanelActionButton onClick={handleDelete} icon="bin" title="Supprimer" />
+              <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" />
             </Row>
           </Col>
         </Row>
       </Header>
       {children}
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        onChange={() => setModal({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
     </div>
   );
 };

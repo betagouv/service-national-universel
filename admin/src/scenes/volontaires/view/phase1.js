@@ -15,12 +15,14 @@ import { Box, BoxTitle } from "../../../components/box";
 import { toastr } from "react-redux-toastr";
 import Badge from "../../../components/Badge";
 import Select from "../components/Select";
+import ModalConfirm from "../../../components/modals/ModalConfirm";
 
 export default (props) => {
   const user = useSelector((state) => state.Auth.user);
   const [meetingPoint, setMeetingPoint] = useState();
   const [young, setYoung] = useState(props.young);
   const disabled = young.statusPhase1 === "WITHDRAWN" || user.role !== ROLES.ADMIN;
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
   useEffect(() => {
     if (!young.meetingPointId) return;
@@ -173,9 +175,15 @@ export default (props) => {
                         name="cohesionStayPresence"
                         handleChange={(e) => {
                           const value = e.target.value;
-                          if (!confirmMessageChangePhase1Presence(value)) return;
-                          handleChange({ target: { value, name: "cohesionStayPresence" } });
-                          updateYoung({ cohesionStayPresence: value });
+                          setModal({
+                            isOpen: true,
+                            onConfirm: () => {
+                              handleChange({ target: { value, name: "cohesionStayPresence" } });
+                              updateYoung({ cohesionStayPresence: value });
+                            },
+                            title: "Changement de présence",
+                            message: confirmMessageChangePhase1Presence(value),
+                          });
                         }}
                         disabled={disabled}
                       />
@@ -217,6 +225,16 @@ export default (props) => {
           ) : null}
         </div>
       </WrapperPhase1>
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        onChange={() => setModal({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
     </div>
   );
 };
