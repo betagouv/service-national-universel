@@ -4,11 +4,9 @@ import { Modal } from "reactstrap";
 import { ModalContainer, Content, Footer, Header } from "./Modal";
 import ModalButton from "../buttons/ModalButton";
 
-export default ({ isOpen, topTitle, title, message, onChange, onConfirm, young, placeholder = "Votre message..." }) => {
+export default ({ isOpen, topTitle, title, message, onChange, onConfirm, placeholder = "Votre message..." }) => {
   const [messageTextArea, setMessageTextArea] = useState();
   const [sending, setSending] = useState(false);
-
-  if (!young) return <div />;
 
   const submit = async () => {
     setSending(true);

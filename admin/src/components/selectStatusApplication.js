@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
-import ModalRefusedApplication from "./modals/ModalRefusedApplication";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
@@ -9,10 +8,14 @@ import api from "../services/api";
 import { translate, APPLICATION_STATUS_COLORS, APPLICATION_STATUS, ROLES } from "../utils";
 import { toastr } from "react-redux-toastr";
 import Chevron from "./Chevron";
+import ModalConfirmWithMessage from "./modals/ModalConfirmWithMessage";
+import ModalConfirm from "./modals/ModalConfirm";
 
 export default ({ hit, options = [], callback }) => {
   const [application, setApplication] = useState(null);
-  const [modal, setModal] = useState(false);
+  const [modalConfirm, setModalConfirm] = useState({ isOpen: false, onConfirm: null });
+  const [modalRefuse, setModalRefuse] = useState({ isOpen: false, onConfirm: null });
+
   const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
@@ -39,9 +42,16 @@ export default ({ hit, options = [], callback }) => {
       APPLICATION_STATUS.ABANDON,
     ];
 
+  const onClickStatus = (status) => {
+    setModalConfirm({
+      isOpen: true,
+      title: "Êtes-vous sûr(e) de vouloir modifier le statut de cette candidature?\nUn email sera automatiquement envoyé.",
+      onConfirm: () => handleClickStatus(status),
+    });
+  };
+
   const handleClickStatus = (status) => {
-    if (!confirm("Êtes-vous sûr(e) de vouloir modifier le statut de cette candidature?\nUn email sera automatiquement envoyé.")) return;
-    if (status === APPLICATION_STATUS.REFUSED) setModal(true);
+    if (status === APPLICATION_STATUS.REFUSED) setModalRefuse({ isOpen: true });
     else setStatus(status);
   };
 
@@ -75,23 +85,32 @@ export default ({ hit, options = [], callback }) => {
           <DropdownMenu>
             {options.map((status) => {
               return (
-                <DropdownItem key={status} className="dropdown-item" onClick={() => handleClickStatus(status)}>
+                <DropdownItem key={status} className="dropdown-item" onClick={() => onClickStatus(status)}>
                   {translate(status)}
                 </DropdownItem>
               );
             })}
           </DropdownMenu>
         </UncontrolledDropdown>
-        {/* <div>{JSON.stringify(young)}</div> */}
       </ActionBox>
-      <ModalRefusedApplication
-        isOpen={modal}
-        value={application}
-        structureId={application.structureId}
-        onChange={() => setModal(false)}
-        onSend={(msg) => {
+      <ModalConfirmWithMessage
+        isOpen={modalRefuse.isOpen}
+        title="Veuillez éditer le message ci-dessous pour préciser les raisons du refus avant de l'envoyer"
+        message={`Une fois le message ci-dessous validé, il sera transmis par mail à ${application.youngFirstName} (${application.youngEmail}).`}
+        onChange={() => setModalRefuse({ isOpen: false, data: null })}
+        onConfirm={(msg) => {
           setStatus(APPLICATION_STATUS.REFUSED, msg);
-          setModal(null);
+          setModalRefuse({ isOpen: false, onConfirm: null });
+        }}
+      />
+      <ModalConfirm
+        isOpen={modalConfirm?.isOpen}
+        title={modalConfirm?.title}
+        message={modalConfirm?.message}
+        onChange={() => setModalConfirm({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modalConfirm?.onConfirm();
+          setModalConfirm({ isOpen: false, onConfirm: null });
         }}
       />
     </>

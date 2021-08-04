@@ -9,11 +9,13 @@ import { translate, MISSION_STATUS_COLORS, MISSION_STATUS, ROLES } from "../util
 import MailCorrectionMission from "../scenes/missions/components/MailCorrectionMission";
 import MailRefusedMission from "../scenes/missions/components/MailRefusedMission";
 import Chevron from "./Chevron";
+import ModalConfirm from "./modals/ModalConfirm";
 
 export default ({ hit, options = [], callback = () => {} }) => {
   const [waitingCorrectionModal, setWaitingCorrectionModal] = useState(false);
   const [refusedModal, setRefusedModal] = useState(false);
   const [mission, setMission] = useState(null);
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
@@ -31,8 +33,16 @@ export default ({ hit, options = [], callback = () => {} }) => {
     options.push(MISSION_STATUS.WAITING_VALIDATION, MISSION_STATUS.DRAFT, MISSION_STATUS.CANCEL, MISSION_STATUS.ARCHIVED);
   if (user.role === ROLES.ADMIN || user.role === ROLES.REFERENT_DEPARTMENT || user.role === ROLES.REFERENT_REGION) options = Object.keys(MISSION_STATUS);
 
-  const handleClickStatus = (status) => {
-    if (!confirm("Êtes-vous sûr(e) de vouloir modifier le statut de cette mission ?")) return;
+  const onClickStatus = (status) => {
+    setModal({
+      isOpen: true,
+      onConfirm: () => onConfirmStatus(status),
+      title: `Changement de statut de mission`,
+      message: `Êtes-vous sûr(e) de vouloir modifier le statut de cette mission de "${translate(mission.status)}" à "${translate(status)}" ?`,
+    });
+  };
+
+  const onConfirmStatus = (status) => {
     if (status === MISSION_STATUS.WAITING_CORRECTION && mission.tutor) return setWaitingCorrectionModal(true);
     if (status === MISSION_STATUS.REFUSED && mission.tutor) return setRefusedModal(true);
     setStatus(status);
@@ -83,7 +93,7 @@ export default ({ hit, options = [], callback = () => {} }) => {
           <DropdownMenu>
             {options.map((status) => {
               return (
-                <DropdownItem key={status} className="dropdown-item" onClick={() => handleClickStatus(status)}>
+                <DropdownItem key={status} className="dropdown-item" onClick={() => onClickStatus(status)}>
                   {translate(status)}
                 </DropdownItem>
               );
@@ -92,6 +102,16 @@ export default ({ hit, options = [], callback = () => {} }) => {
         </UncontrolledDropdown>
         {/* <div>{JSON.stringify(young)}</div> */}
       </ActionBox>
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        onChange={() => setModal({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
     </>
   );
 };
