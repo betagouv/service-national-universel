@@ -73,7 +73,7 @@ export default () => {
               const { ok, data, code } = await api.put("/referent", { mobile, phone });
               if (ok) dispatch(setUser(data));
             }
-            await api.put("/structure", { ...values, _id: user.structureId });
+            await api.put(`/structure/${user.structureId}`, { ...values });
             toastr.success("Structure créée");
             return history.push("/");
           } catch (e) {

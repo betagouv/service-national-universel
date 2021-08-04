@@ -71,21 +71,6 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.put("/", passport.authenticate("referent", { session: false }), async (req, res) => {
-  try {
-    let obj = req.body;
-    const data = await StructureObject.findByIdAndUpdate(req.user.structureId, obj, { new: true });
-    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    await updateNetworkName(data);
-    await updateMissionStructureName(data);
-    await updateResponsibleAndSupervisorRole(data);
-    return res.status(200).send({ ok: true, data });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
-  }
-});
-
 router.put("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     let obj = req.body;
