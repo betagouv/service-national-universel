@@ -37,19 +37,25 @@ export default (props) => {
 
   useEffect(() => {
     (async () => {
-      const id = props.match && props.match.params && props.match.params.id;
-      if (!id) return setUser(null);
-      const { data } = await api.get(`/referent/${id}`);
-      setUser(data);
-      const { data: d } = await api.get(`/department-service/referent/${id}`);
-      setService(d);
-      const responseStructure = await api.get(`/structure/all`);
-      const s = responseStructure.data.map((e) => ({ label: e.name, value: e.name, _id: e._id }));
-      data.structureId ? setStructure(s.find((struct) => struct._id === data.structureId)) : null;
-      setStructures(s);
-      const responseCenter = await api.get(`/cohesion-center`);
-      const c = responseCenter.data.map((e) => ({ label: e.name, value: e.name, _id: e._id }));
-      setCenters(c);
+      try {
+        const id = props.match && props.match.params && props.match.params.id;
+        if (!id) return setUser(null);
+        const { ok, data } = await api.get(`/referent/${id}`);
+        if (!ok) return setUser(null);
+        setUser(data);
+        const { data: d } = await api.get(`/department-service/referent/${id}`);
+        setService(d);
+        const responseStructure = await api.get(`/structure/all`);
+        const s = responseStructure.data.map((e) => ({ label: e.name, value: e.name, _id: e._id }));
+        data.structureId ? setStructure(s.find((struct) => struct._id === data.structureId)) : null;
+        setStructures(s);
+        const responseCenter = await api.get(`/cohesion-center`);
+        const c = responseCenter.data.map((e) => ({ label: e.name, value: e.name, _id: e._id }));
+        setCenters(c);
+      } catch (e) {
+        console.log(e);
+        return toastr.error("Une erreur s'est produite lors du chargement de cet utilisateur");
+      }
     })();
   }, []);
 
