@@ -10,7 +10,19 @@ import api from "../../services/api";
 import { apiURL, appURL } from "../../config";
 import Panel from "./panel";
 import Badge from "../../components/Badge";
-import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS_COLORS, isInRuralArea, formatLongDateFR, getAge, ES_NO_LIMIT, ROLES, formatLongDateUTC } from "../../utils";
+import {
+  translate,
+  getFilterLabel,
+  formatStringLongDate,
+  YOUNG_STATUS_COLORS,
+  isInRuralArea,
+  formatLongDateFR,
+  getAge,
+  ES_NO_LIMIT,
+  ROLES,
+  formatLongDateUTC,
+  colors,
+} from "../../utils";
 import { Link } from "react-router-dom";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
@@ -402,7 +414,7 @@ export default ({ setYoung }) => {
 
 const Hit = ({ hit, onClick, selected }) => {
   return (
-    <tr style={{ backgroundColor: (selected && "#e6ebfa") || (hit.status === "WITHDRAWN" && "#BE3B1211") }} onClick={onClick}>
+    <tr style={{ backgroundColor: (selected && "#e6ebfa") || (hit.status === "WITHDRAWN" && colors.extraLightGrey) }} onClick={onClick}>
       <td>
         <MultiLine>
           <h2>{`${hit.firstName} ${hit.lastName}`}</h2>

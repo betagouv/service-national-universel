@@ -7,7 +7,7 @@ import api from "../../../services/api";
 import CenterView from "./wrapper";
 import Panel from "../../volontaires/panel";
 
-import { getFilterLabel, YOUNG_STATUS_PHASE1, translate, formatDateFRTimezoneUTC, isInRuralArea, formatLongDateFR, getAge, ES_NO_LIMIT } from "../../../utils";
+import { getFilterLabel, YOUNG_STATUS_PHASE1, translate, formatDateFRTimezoneUTC, isInRuralArea, formatLongDateFR, getAge, ES_NO_LIMIT, colors } from "../../../utils";
 import Loader from "../../../components/Loader";
 import ExportComponent from "../../../components/ExportXlsx";
 import { Filter, FilterRow, ResultTable, Table, MultiLine } from "../../../components/list";
@@ -262,7 +262,7 @@ export default ({ center, updateCenter }) => {
 
 const Hit = ({ hit, onClick, selected, onChangeYoung }) => {
   return (
-    <tr style={{ backgroundColor: (selected && "#e6ebfa") || (hit.status === "WITHDRAWN" && "#BE3B1211") }} onClick={onClick}>
+    <tr style={{ backgroundColor: (selected && "#e6ebfa") || (hit.status === "WITHDRAWN" && colors.extraLightGrey) }} onClick={onClick}>
       <td>
         <MultiLine>
           <h2>{`${hit.firstName} ${hit.lastName}`}</h2>

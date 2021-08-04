@@ -7,7 +7,7 @@ import SelectStatusApplication from "../../../components/selectStatusApplication
 import api from "../../../services/api";
 import MissionView from "./wrapper";
 import Panel from "../../volontaires/panel";
-import { formatStringLongDate, getFilterLabel, translate, getAge, ES_NO_LIMIT } from "../../../utils";
+import { formatStringLongDate, getFilterLabel, translate, getAge, ES_NO_LIMIT, colors } from "../../../utils";
 import Loader from "../../../components/Loader";
 import ContractLink from "../../../components/ContractLink";
 import ExportComponent from "../../../components/ExportXlsx";
@@ -173,7 +173,7 @@ export default ({ mission, applications }) => {
 const Hit = ({ hit, onClick, onChangeApplication, selected }) => {
   const history = useHistory();
   return (
-    <tr style={{ backgroundColor: (selected && "#e6ebfa") || (hit.status === "WITHDRAWN" && "#BE3B1211") }} onClick={onClick}>
+    <tr style={{ backgroundColor: (selected && "#e6ebfa") || (hit.status === "WITHDRAWN" && colors.extraLightGrey) }} onClick={onClick}>
       <td>
         <MultiLine>
           <h2>{`${hit.youngFirstName} ${hit.youngLastName}`}</h2>
