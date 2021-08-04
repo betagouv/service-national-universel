@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Col, Container, Row } from "reactstrap";
-import { ReactiveBase, ReactiveList, DataSearch, SingleDropdownList, MultiDropdownList } from "@appbaseio/reactivesearch";
+import { ReactiveBase, ReactiveList, DataSearch, MultiDropdownList } from "@appbaseio/reactivesearch";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
@@ -143,33 +143,34 @@ export default () => {
               <FilterGeoloc young={young} targetLocation={targetLocation} componentId="GEOLOC" />
             </Col>
             <DomainsFilter md={4}>
-              <SingleDropdownList
+              <MultiDropdownList
                 defaultQuery={getDefaultQuery}
-                selectAllLabel="Tous les domaines"
-                URLParams={true}
+                className="dropdown-filter"
                 componentId="DOMAIN"
                 dataField="domains.keyword"
                 react={{ and: FILTERS.filter((e) => e !== "DOMAIN") }}
                 renderItem={(e, count) => {
                   return `${translate(e)} ${count ? `(${count})` : ""}`;
                 }}
-                renderLabel={(item) => translate(item) || "Filtrer par domaine"}
+                title=""
+                URLParams={true}
+                renderLabel={(items) => getFilterLabel(items, "Filtrer par domaine")}
                 showSearch={false}
               />
             </DomainsFilter>
             <DomainsFilter md={4}>
-              <SingleDropdownList
+              <MultiDropdownList
                 defaultQuery={getDefaultQuery}
-                selectAllLabel="Toutes les périodes"
-                URLParams={true}
+                className="dropdown-filter"
                 componentId="PERIOD"
                 dataField="period.keyword"
                 react={{ and: FILTERS.filter((e) => e !== "PERIOD") }}
                 renderItem={(e, count) => {
                   return `${translate(e)} ${count ? `(${count})` : ""}`;
                 }}
-                renderLabel={(item) => translate(item) || "Filtrer par période"}
-                showSearch={false}
+                title=""
+                URLParams={true}
+                renderLabel={(items) => getFilterLabel(items, "Filtrer par période")}
               />
             </DomainsFilter>
             <DomainsFilter md={4}>
@@ -185,7 +186,7 @@ export default () => {
                 }}
                 title=""
                 URLParams={true}
-                renderLabel={(items) => getFilterLabel(items, "Préparation Militaire")}
+                renderLabel={(items) => getFilterLabel(items, "Filtrer par Préparation Militaire")}
               />
             </DomainsFilter>
           </Row>
