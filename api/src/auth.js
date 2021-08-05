@@ -49,43 +49,6 @@ class Auth {
     }
   }
 
-  async signup(req, res) {
-    try {
-      const { error, value } = Joi.object({
-        email: Joi.string().lowercase().trim().email().required(),
-        firstName: validateFirstName().trim().required(),
-        lastName: Joi.string().uppercase().trim().required(),
-        password: Joi.string().required(),
-      })
-        .unknown()
-        .validate(req.body);
-
-      if (error) {
-        if (error.details.find((e) => e.path === "email")) return res.status(400).send({ ok: false, user: null, code: ERRORS.EMAIL_INVALID });
-        if (error.details.find((e) => e.path === "password"))
-          return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
-        return res.status(400).send({ ok: false, code: error.toString() });
-      }
-
-      const { password, email, lastName, firstName } = value;
-      if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
-
-      const user = await this.model.create({ password, email, firstName, lastName });
-      const token = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });
-      res.cookie("jwt", token, cookieOptions());
-
-      return res.status(200).send({
-        ok: true,
-        token,
-        user: isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user),
-      });
-    } catch (error) {
-      if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
-      capture(error);
-      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-    }
-  }
-
   async logout(_req, res) {
     try {
       res.clearCookie("jwt", logoutCookieOptions());

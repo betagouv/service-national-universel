@@ -7,10 +7,10 @@ const router = express.Router();
 const jwt = require("jsonwebtoken");
 const fs = require("fs");
 const path = require("path");
+const Joi = require("joi");
 
 const config = require("../../config");
 const { capture } = require("../../sentry");
-
 const { encrypt } = require("../../cryptoUtils");
 const { getQPV } = require("../../qpv");
 const YoungObject = require("../../models/young");
@@ -19,16 +19,51 @@ const DepartmentServiceModel = require("../../models/departmentService");
 const AuthObject = require("../../auth");
 const { uploadFile, validatePassword, updatePlacesCenter, signinLimiter, assignNextYoungFromWaitingList, ERRORS } = require("../../utils");
 const { sendEmail } = require("../../sendinblue");
-const { cookieOptions } = require("../../cookie-options");
-const Joi = require("joi");
-const { validateYoung, validateId } = require("../../utils/validator");
+const { cookieOptions, JWT_MAX_AGE } = require("../../cookie-options");
+const { validateYoung, validateId, validateFirstName } = require("../../utils/validator");
 const patches = require("../patches");
+const { serializeYoung } = require("../../utils/serializer");
 
 const YoungAuth = new AuthObject(YoungObject);
 
 router.post("/signin", signinLimiter, (req, res) => YoungAuth.signin(req, res));
 router.post("/logout", (req, res) => YoungAuth.logout(req, res));
-router.post("/signup", (req, res) => YoungAuth.signup(req, res));
+router.post("/signup", async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      email: Joi.string().lowercase().trim().email().required(),
+      firstName: validateFirstName().trim().required(),
+      lastName: Joi.string().uppercase().trim().required(),
+      password: Joi.string().required(),
+    })
+      .unknown()
+      .validate(req.body);
+
+    if (error) {
+      if (error.details.find((e) => e.path === "email")) return res.status(400).send({ ok: false, user: null, code: ERRORS.EMAIL_INVALID });
+      if (error.details.find((e) => e.path === "password"))
+        return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
+      return res.status(400).send({ ok: false, code: error.toString() });
+    }
+
+    const { password, email, lastName, firstName } = value;
+    if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
+
+    const user = await YoungObject.create({ password, email, firstName, lastName });
+    const token = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });
+    res.cookie("jwt", token, cookieOptions());
+
+    return res.status(200).send({
+      ok: true,
+      token,
+      user: serializeYoung(user, user),
+    });
+  } catch (error) {
+    if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error: error.message });
+  }
+});
 
 router.get("/signin_token", passport.authenticate("young", { session: false }), (req, res) => YoungAuth.signinToken(req, res));
 router.post("/forgot_password", async (req, res) => YoungAuth.forgotPassword(req, res, `${config.APP_URL}/auth/reset`));
