@@ -16,20 +16,15 @@ class Auth {
   }
 
   async signin(req, res) {
-    const { error, value } = Joi.object({
-      email: Joi.string().lowercase().trim().email().required(),
-      password: Joi.string().required(),
-    })
+    const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required(), password: Joi.string().required() })
       .unknown()
       .validate(req.body);
-
     if (error) return res.status(400).send({ ok: false, code: ERRORS.EMAIL_AND_PASSWORD_REQUIRED });
 
     const { password, email } = value;
 
     try {
       const user = await this.model.findOne({ email });
-
       if (!user) return res.status(401).send({ ok: false, code: ERRORS.USER_NOT_EXISTS });
       if (user.status === "DELETED") return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
