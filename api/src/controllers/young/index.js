@@ -72,28 +72,32 @@ router.post("/reset_password", passport.authenticate("young", { session: false }
 
 router.post("/file/:key", passport.authenticate("young", { session: false }), async (req, res) => {
   try {
-    const validKeys = ["cniFiles", "highSkilledActivityProofFiles", "parentConsentmentFiles", "autoTestPCRFiles", "imageRightFiles"];
-    const { error, value } = Joi.object({
-      key: Joi.string()
-        .required()
-        .valid(...validKeys),
-      body: Joi.string().required(),
-    })
-      .unknown()
-      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
-    const { key, body } = value;
-    const {
-      error: bodyError,
-      value: { names },
-    } = Joi.object({
-      names: Joi.array().items(Joi.string().required()).required(),
-    }).validate(JSON.parse(body), { stripUnknown: true });
+    const rootKeys = ["cniFiles", "highSkilledActivityProofFiles", "parentConsentmentFiles", "autoTestPCRFiles", "imageRightFiles"];
+    const militaryKeys = [
+      "militaryPreparationFilesIdentity",
+      "militaryPreparationFilesCensus",
+      "militaryPreparationFilesAuthorization",
+      "militaryPreparationFilesCertificate",
+    ];
+    const { error: keyError, value: key } = Joi.string()
+      .required()
+      .valid(...[...rootKeys, ...militaryKeys])
+      .validate(req.params.key);
+    if (keyError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: keyError.message });
 
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+    const { error: bodyError, value: body } = Joi.string().required().validate(req.body.body);
     if (bodyError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: bodyError.message });
 
-    const files = Object.keys(req.files || {}).map((e) => req.files[e]);
+    const {
+      error: namesError,
+      value: { names },
+    } = Joi.object({ names: Joi.array().items(Joi.string().required()).required() }).validate(JSON.parse(body), { stripUnknown: true });
+    if (namesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: namesError.message });
 
+    const user = await YoungObject.findById(req.user._id);
+    if (!user) return res.status(404).send({ ok: false, code: ERRORS.USER_NOT_FOUND });
+
+    const files = Object.keys(req.files || {}).map((e) => req.files[e]);
     for (let i = 0; i < files.length; i++) {
       let currentFile = files[i];
       // If multiple file with same names are provided, currentFile is an array. We just take the latest.
@@ -105,61 +109,16 @@ router.post("/file/:key", passport.authenticate("young", { session: false }), as
 
       const encryptedBuffer = encrypt(data);
       const resultingFile = { mimetype: "image/png", encoding: "7bit", data: encryptedBuffer };
-      await uploadFile(`app/young/${req.user._id}/${key}/${name}`, resultingFile);
-    }
-    req.user.set({ [key]: names });
-    await req.user.save();
-    return res.status(200).send({ data: names, ok: true });
-  } catch (error) {
-    capture(error);
-    if (error === "FILE_CORRUPTED") return res.status(500).send({ ok: false, code: ERRORS.FILE_CORRUPTED });
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
 
-router.post("/:id/file/military-preparation/:key", passport.authenticate("young", { session: false }), async (req, res) => {
-  try {
-    const { error: errorId, value: checkedId } = validateId(req.params.id);
-    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: errorId });
-
-    const { error, value } = Joi.object({
-      key: Joi.string().required(),
-      body: Joi.string().required(),
-    })
-      .unknown()
-      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
-    const { key, body } = value;
-    const {
-      error: bodyError,
-      value: { names },
-    } = Joi.object({
-      names: Joi.array().items(Joi.string()).required(),
-    }).validate(JSON.parse(body), { stripUnknown: true });
-
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
-    if (bodyError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: bodyError.message });
-    const young = await YoungObject.findById(checkedId);
-    if (!young) {
-      capture(`young not found ${id}`);
-      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    }
-    const files = Object.keys(req.files || {}).map((e) => req.files[e]);
-
-    for (let i = 0; i < files.length; i++) {
-      let currentFile = files[i];
-      // If multiple file with same names are provided, currentFile is an array. We just take the latest.
-      if (Array.isArray(currentFile)) {
-        currentFile = currentFile[currentFile.length - 1];
+      if (militaryKeys.includes(key)) {
+        await uploadFile(`app/young/${user._id}/military-preparation/${key}/${name}`, resultingFile);
+      } else {
+        await uploadFile(`app/young/${user._id}/${key}/${name}`, resultingFile);
       }
-      const { name, data, mimetype } = currentFile;
-      if (!["image/jpeg", "image/png", "application/pdf"].includes(mimetype)) return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
-
-      const encryptedBuffer = encrypt(data);
-      const resultingFile = { mimetype: "image/png", encoding: "7bit", data: encryptedBuffer };
-      await uploadFile(`app/young/${young._id}/military-preparation/${key}/${name}`, resultingFile);
     }
-    young.set({ [key]: names });
-    await young.save();
+    user.set({ [key]: names });
+    await user.save();
+
     return res.status(200).send({ data: names, ok: true });
   } catch (error) {
     capture(error);

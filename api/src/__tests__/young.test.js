@@ -443,14 +443,33 @@ describe("Young", () => {
       const passport = require("passport");
       const previous = passport.user;
       passport.user = young;
-      passport.user.set = jest.fn();
 
-      const res = await request(getAppHelper())
+      let res = await request(getAppHelper())
         .post("/young/file/cniFiles")
         .send({ body: JSON.stringify({ names: ["e"] }) });
       expect(res.status).toEqual(200);
       expect(res.body).toEqual({ data: ["e"], ok: true });
-      expect(passport.user.set).toHaveBeenCalledWith({ cniFiles: ["e"] });
+
+      // With military file.
+      res = await request(getAppHelper())
+        .post("/young/file/militaryPreparationFilesIdentity")
+        .send({ body: JSON.stringify({ names: ["e"] }) });
+      expect(res.status).toEqual(200);
+      expect(res.body).toEqual({ data: ["e"], ok: true });
+
+      passport.user = previous;
+    });
+
+    it("should not accept invalid body", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
+
+      const res = await request(getAppHelper())
+        .post("/young/file/cniFiles")
+        .send({ body: JSON.stringify({ pop: ["e"] }) });
+      expect(res.status).toEqual(400);
       passport.user = previous;
     });
 
