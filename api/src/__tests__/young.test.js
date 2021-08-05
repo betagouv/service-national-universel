@@ -66,35 +66,6 @@ describe("Young", () => {
     });
   });
 
-  describe("GET /young/department-service/", () => {
-    it("should return the department based on young deparment", async () => {
-      const youngFixture = getNewYoungFixture();
-      const young = await createYoungHelper({ ...youngFixture, department: "Ain" });
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = young;
-
-      await deleteAllDepartmentServicesHelper();
-      const departmentFixture = getNewDepartmentServiceFixture();
-      const department = await createDepartmentServiceHelper({ ...departmentFixture, department: "Ain" });
-      const res = await request(getAppHelper()).get(`/young/department-service`);
-      expect(res.statusCode).toEqual(200);
-      expect(res.body.data.department).toEqual(young.department);
-      expect(res.body.data._id).toEqual(department._id.toString());
-      passport.user = previous;
-    });
-
-    it("should return 404 if no department found", async () => {
-      const res = await request(getAppHelper()).get("/young/department-service");
-      expect(res.statusCode).toEqual(404);
-    });
-    it("should be only accessible by young", async () => {
-      const passport = require("passport");
-      await request(getAppHelper()).get("/young/department-service");
-      expect(passport.lastTypeCalledOnAuthenticate).toEqual("young");
-    });
-  });
-
   describe("GET /young/:id/patches", () => {
     it("should return 404 if young not found", async () => {
       const res = await request(getAppHelper()).get(`/young/${notExistingYoungId}/patches`).send();

@@ -79,7 +79,7 @@ router.post("/signup_verify", async (req, res) => {
     const young = await YoungObject.findOne({ invitationToken: value.invitationToken, invitationExpires: { $gt: Date.now() } });
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.INVITATION_TOKEN_EXPIRED_OR_INVALID });
     const token = jwt.sign({ _id: young._id }, config.secret, { expiresIn: "30d" });
-    return res.status(200).send({ ok: true, token, data: young });
+    return res.status(200).send({ ok: true, token, data: serializeYoung(young, young) });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -117,9 +117,7 @@ router.post("/signup_invite", async (req, res) => {
 
     await young.save();
 
-    young.password = undefined;
-
-    return res.status(200).send({ data: young, token, ok: true });
+    return res.status(200).send({ data: serializeYoung(young, young), token, ok: true });
   } catch (error) {
     capture(error);
     return res.sendStatus(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -189,7 +187,7 @@ router.post("/", async (req, res) => {
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
     const young = await YoungObject.create(value);
-    return res.status(200).send({ young, ok: true });
+    return res.status(200).send({ young: serializeYoung(young, young), ok: true });
   } catch (error) {
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.YOUNG_ALREADY_REGISTERED });
     capture(error);
@@ -212,7 +210,7 @@ router.get("/validate_phase3/:young/:token", async (req, res) => {
       capture(`Young not found ${req.params.young}`);
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
-    return res.status(200).send({ ok: true, data });
+    return res.status(200).send({ ok: true, data: serializeYoung(data, data) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
@@ -238,25 +236,9 @@ router.put("/validate_phase3/:young/:token", async (req, res) => {
     }
 
     data.set({ statusPhase3: "VALIDATED", phase3TutorNote: value.phase3TutorNote });
-
     await data.save();
-    return res.status(200).send({ ok: true, data });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
-  }
-});
 
-// todo : delete and replace by /department-service/:department in frontend
-// update the serializer // authorization (a young can only view department service of his own department)
-router.get("/department-service", passport.authenticate("young", { session: false }), async (req, res) => {
-  try {
-    const { error, value } = Joi.object({ department: Joi.string().required() }).unknown().validate(req.user, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
-    const data = await DepartmentServiceModel.findOne({ department: value.department });
-    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    return res.status(200).send({ ok: true, data });
+    return res.status(200).send({ ok: true, data: serializeYoung(data, data) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
@@ -307,7 +289,7 @@ router.put("/validate_mission", passport.authenticate("young", { session: false 
     await sendEmail({ name: `${young.phase3TutorFirstName} ${young.phase3TutorLastName}`, email: young.phase3TutorEmail }, subject, htmlContent);
     young.phase3Token = null;
 
-    res.status(200).send({ ok: true, data: young });
+    res.status(200).send({ ok: true, data: serializeYoung(young, young) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });

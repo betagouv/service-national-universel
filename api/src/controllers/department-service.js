@@ -5,9 +5,8 @@ const Joi = require("joi");
 
 const { capture } = require("../sentry");
 const DepartmentServiceModel = require("../models/departmentService");
-const ReferentModel = require("../models/referent");
-const { ERRORS } = require("../utils");
-const { validateId, validateDepartmentService } = require("../utils/validator");
+const { ERRORS, isYoung } = require("../utils");
+const { validateDepartmentService } = require("../utils/validator");
 const { serializeDepartmentService, serializeArray } = require("../utils/serializer");
 
 router.post("/", passport.authenticate("referent", { session: false }), async (req, res) => {
@@ -26,15 +25,13 @@ router.post("/", passport.authenticate("referent", { session: false }), async (r
   }
 });
 
-router.get("/:department", passport.authenticate(["referent"], { session: false }), async (req, res) => {
+router.get("/:department", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
-    const {
-      error,
-      value: { department },
-    } = Joi.object({ department: Joi.string().required() })
-      .unknown()
-      .validate({ ...req.params }, { stripUnknown: true });
+    const { error, value: department } = Joi.string().required().validate(req.params.department);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    if (isYoung(req.user) && req.user.department !== department) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
     const data = await DepartmentServiceModel.findOne({ department });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data: serializeDepartmentService(data, req.user) });
