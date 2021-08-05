@@ -13,11 +13,13 @@ import ModalRefused from "./modals/ModalRefused";
 import ModalWithdrawn from "./modals/ModalWithdrawn";
 import ModalGoal from "./modals/ModalGoal";
 import Chevron from "./Chevron";
+import ModalConfirm from "./modals/ModalConfirm";
 
 export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status", phase = YOUNG_PHASE.INSCRIPTION, disabled, callback = () => {} }) => {
   const [modal, setModal] = useState(null);
   const [young, setYoung] = useState(null);
   const user = useSelector((state) => state.Auth.user);
+  const [modalConfirm, setModalConfirm] = useState({ isOpen: false, onConfirm: null });
 
   const getInscriptions = async (department) => {
     const { data, ok, code } = await api.get(`/inscription-goal/${department}/current`);
@@ -48,17 +50,27 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
     // Gabrielle says: (https://trello.com/c/JBS3Jn8I/576-inscription-impact-fin-instruction-dossiers-au-6-mai)
     // > Bloquer tous les changements de statuts (sauf désistement)
     if (user.role !== ROLES.ADMIN && phase === YOUNG_PHASE.INSCRIPTION && status !== YOUNG_STATUS.WITHDRAWN && isEndOfInscriptionManagement2021()) {
-      return alert("Les inscriptions sont closes, vous ne pouvez plus faire de changement de statut.");
+      return setModalConfirm({
+        isOpen: true,
+        title: "Les inscriptions sont closes",
+        message: "Vous ne pouvez plus à faire de changement de statut.",
+        confirmText: "OK",
+      });
     }
-
-    if (!confirm("Êtes-vous sûr(e) de vouloir modifier le statut de ce profil?\nUn email sera automatiquement envoyé à l'utlisateur.")) return;
-    if ([YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.REFUSED, YOUNG_STATUS.WITHDRAWN].includes(status)) return setModal(status);
-    // if (status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INSCRIPTION) {
-    //   const youngs = await getInscriptionGoalReachedNormalized(young.department);
-    //   const ratioRegistered = youngs.registered / youngs.max;
-    //   if (ratioRegistered >= 1) return setModal("goal");
-    // }
-    setStatus(status);
+    setModalConfirm({
+      isOpen: true,
+      onConfirm: () => {
+        if ([YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.REFUSED, YOUNG_STATUS.WITHDRAWN].includes(status)) return setModal(status);
+        // if (status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INSCRIPTION) {
+        //   const youngs = await getInscriptionGoalReachedNormalized(young.department);
+        //   const ratioRegistered = youngs.registered / youngs.max;
+        //   if (ratioRegistered >= 1) return setModal("goal");
+        // }
+        setStatus(status);
+      },
+      title: "Modification de statut",
+      message: "Êtes-vous sûr(e) de vouloir modifier le statut de ce profil?\nUn email sera automatiquement envoyé à l'utlisateur.",
+    });
   };
 
   const setStatus = async (status, note) => {
@@ -97,6 +109,16 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
 
   return (
     <>
+      <ModalConfirm
+        isOpen={modalConfirm?.isOpen}
+        title={modalConfirm?.title}
+        message={modalConfirm?.message}
+        onChange={() => setModalConfirm({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modalConfirm?.onConfirm?.();
+          setModalConfirm({ isOpen: false, onConfirm: null });
+        }}
+      />
       <ModalCorrection
         isOpen={modal === YOUNG_STATUS.WAITING_CORRECTION}
         value={young}

@@ -5,7 +5,7 @@ import { ModalContainer, Content, Footer, Header } from "./Modal";
 import ModalButton from "../buttons/ModalButton";
 
 //todo : onChange => onCancel
-export default ({ isOpen, topTitle = "alerte", title, message, onChange, onConfirm }) => {
+export default ({ isOpen, topTitle = "alerte", title, message, onChange, onConfirm, confirmText = "Confirmer", cancelText = "Annuler" }) => {
   const [sending, setSending] = useState(false);
 
   const submit = async () => {
@@ -25,10 +25,10 @@ export default ({ isOpen, topTitle = "alerte", title, message, onChange, onConfi
         </Content>
         <Footer>
           <ModalButton loading={sending} disabled={sending} color="#5245cc" onClick={submit} primary>
-            Confirmer
+            {confirmText}
           </ModalButton>
           <ModalButton disabled={sending} color="#5245cc" onClick={onChange}>
-            Annuler
+            {cancelText}
           </ModalButton>
         </Footer>
       </ModalContainer>
