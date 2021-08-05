@@ -3,7 +3,10 @@ const { ROLES_LIST, SUB_ROLES_LIST } = require("snu-lib/roles");
 const { isYoung } = require("../utils");
 
 function validateId(id) {
-  return Joi.string().validate(id, { stripUnknown: true });
+  // Source: https://github.com/mkg20001/joi-objectid/blob/71b2a8c0ccd31153e4efd3e7c10602b4385242f6/index.js#L12
+  return Joi.string()
+    .regex(/^[0-9a-fA-F]{24}$/, id)
+    .validate(id, { stripUnknown: true });
 }
 
 function validateString(string) {
