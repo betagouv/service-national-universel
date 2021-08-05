@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 import FilterDepartment from "../components/FilterDepartment";
 import FilterRegion from "../components/FilterRegion";
 
-import Status from "./status";
+import Statistics from "./Statistics";
 
 import { YOUNG_STATUS, REFERENT_ROLES } from "../../../utils";
 
@@ -46,7 +46,7 @@ export default () => {
           )}
         </Col>
       </Row>
-      {filter && <Status filter={filter} />}
+      {filter && <Statistics filter={filter} />}
     </>
   );
 };

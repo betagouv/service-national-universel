@@ -72,6 +72,17 @@ export const BoxTitle = styled.div`
   width: 100%;
 `;
 
+export const BoxTitleCircular = styled.h2`
+  font-style: normal;
+  font-weight: bold;
+  font-size: 16px;
+  line-height: 18px;
+  letter-spacing: 0.1px;
+  color: #171725;
+  margin: 1rem;
+  margin-bottom: 0;
+`;
+
 export const Separator = styled.hr`
   margin: 1rem;
   height: 1px;
