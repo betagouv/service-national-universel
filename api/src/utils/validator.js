@@ -385,6 +385,15 @@ function validateDepartmentService(departmentService) {
     })
     .validate(departmentService, { stripUnknown: true });
 }
+function validateWaitingList(waitingList) {
+  return Joi.object()
+    .keys({
+      zip: Joi.string().allow(null, ""),
+      mail: Joi.string().allow(null, ""),
+      birthdateAt: Joi.string().allow(null, ""),
+    })
+    .validate(waitingList, { stripUnknown: true });
+}
 
 function validateReferent(referent) {
   return Joi.object()
@@ -449,4 +458,5 @@ module.exports = {
   validateSelf,
   validateNewApplication,
   validateUpdateApplication,
+  validateWaitingList,
 };

@@ -21,6 +21,7 @@ function getAppHelper() {
   app.use("/structure", require("../../controllers/structure"));
   app.use("/meeting-point", require("../../controllers/meeting-point"));
   app.use("/contract", require("../../controllers/contract"));
+  app.use("/waiting-list", require("../../controllers/waiting-list"));
 
   return app;
 }
