@@ -82,9 +82,15 @@ function serializeStructure(structure, user) {
     },
   });
 }
+function serializeDepartmentService(departmentService, user) {
+  return departmentService.toObject();
+}
 
 function serializeArrayStructures(structures, user) {
   return structures.map((s) => serializeStructure(s, user));
+}
+function serializeArray(arr, user, serialize) {
+  return arr.map((s) => serialize(s, user));
 }
 
 // return only the initialValue's properties that are in the whitelist 'keys'
@@ -103,4 +109,6 @@ module.exports = {
   serializeMission,
   serializeStructure,
   serializeArrayStructures,
+  serializeArray,
+  serializeDepartmentService,
 };

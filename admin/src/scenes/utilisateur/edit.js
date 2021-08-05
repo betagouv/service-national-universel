@@ -43,7 +43,7 @@ export default (props) => {
         const { ok, data } = await api.get(`/referent/${id}`);
         if (!ok) return setUser(null);
         setUser(data);
-        const { data: d } = await api.get(`/department-service/referent/${id}`);
+        const { data: d } = await api.get(`/department-service/${data.department}`);
         setService(d);
         const responseStructure = await api.get("/structure");
         const s = responseStructure.data.map((e) => ({ label: e.name, value: e.name, _id: e._id }));
