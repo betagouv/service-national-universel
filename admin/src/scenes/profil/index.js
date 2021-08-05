@@ -30,7 +30,7 @@ export default () => {
 
   useEffect(() => {
     (async () => {
-      const { data: d } = await api.get(`/department-service/referent/${user._id}`);
+      const { data: d } = await api.get(`/department-service/${user.department}`);
       setService(d);
     })();
   }, []);

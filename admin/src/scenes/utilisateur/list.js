@@ -40,7 +40,7 @@ export default () => {
       setStructures(data);
     })();
     (async () => {
-      const { data, ok } = await api.get(`/department-service/all`);
+      const { data, ok } = await api.get(`/department-service`);
       if (!ok) return;
       setServices(data);
     })();
