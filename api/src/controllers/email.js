@@ -10,6 +10,7 @@ const { sendTemplate } = require("../sendinblue");
 const { capture } = require("../sentry");
 const EmailObject = require("../models/email");
 //https://developers.sendinblue.com/docs/how-to-use-webhooks
+const { canViewEmailHistory } = require("snu-lib/roles");
 
 function ipAllowListMiddleware(req, res, next) {
   // See: https://www.clever-cloud.com/doc/find-help/faq/#how-to-get-the-users-ip-address
@@ -74,6 +75,7 @@ router.post("/", ipAllowListMiddleware, async (req, res) => {
 //@check
 router.get("/", passport.authenticate(["referent"], { session: false }), async (req, res) => {
   try {
+    if (!canViewEmailHistory(req.user)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     const data = await EmailObject.find({ email: req.query.email }).sort("-date");
     return res.status(200).send({ ok: true, data });
   } catch (error) {
