@@ -69,6 +69,31 @@ function serializeReferent(referent, user) {
   });
 }
 
+function serializeStructure(structure, user) {
+  return structure.toObject({
+    transform: (_doc, ret) => {
+      if (isYoung(user)) {
+        return subObject(ret, ["facebook", "instagram", "website", "twitter", "description"]);
+      }
+      delete ret.sqlId;
+      delete ret.sqlUserId;
+      delete ret.sqlNetworkId;
+      return ret;
+    },
+  });
+}
+
+function serializeArrayStructures(structures, user) {
+  return structures.map((s) => serializeStructure(s, user));
+}
+
+// return only the initialValue's properties that are in the whitelist 'keys'
+const subObject = (initialValue, keys) =>
+  keys.reduce((o, k) => {
+    o[k] = initialValue[k];
+    return o;
+  }, {});
+
 module.exports = {
   serializeApplication,
   serializeBus,
@@ -76,4 +101,6 @@ module.exports = {
   serializeYoung,
   serializeReferent,
   serializeMission,
+  serializeStructure,
+  serializeArrayStructures,
 };

@@ -47,13 +47,10 @@ export default () => {
     async function fetchData() {
       try {
         if (window.location.href.indexOf("/auth") !== -1) return setLoading(false);
-
         const res = await api.get("/referent/signin_token");
         if (!res.ok || !res.user) return setLoading(false);
         if (res.token) api.setToken(res.token);
-        // const { data: structure, ok } = await api.get(`/structure`);
         if (res.user) dispatch(setUser(res.user));
-        // if (structure) dispatch(setStructure(structure));
       } catch (e) {
         console.log(e);
       }

@@ -51,6 +51,41 @@ function validateMission(mission) {
     .validate(mission, { stripUnknown: true });
 }
 
+function validateStructure(structure) {
+  return Joi.object()
+    .keys({
+      name: Joi.string().allow(null, ""),
+      siret: Joi.string().allow(null, ""),
+      description: Joi.string().allow(null, ""),
+      website: Joi.string().allow(null, ""),
+      facebook: Joi.string().allow(null, ""),
+      twitter: Joi.string().allow(null, ""),
+      instagram: Joi.string().allow(null, ""),
+      status: Joi.string().allow(null, ""),
+      isNetwork: Joi.string().allow(null, ""),
+      networkId: Joi.string().allow(null, ""),
+      networkName: Joi.string().allow(null, ""),
+      legalStatus: Joi.string().allow(null, ""),
+      associationTypes: Joi.array().items(Joi.string().allow(null, "")),
+      structurePubliqueType: Joi.string().allow(null, ""),
+      structurePubliqueEtatType: Joi.string().allow(null, ""),
+      structurePriveeType: Joi.string().allow(null, ""),
+      address: Joi.string().allow(null, ""),
+      zip: Joi.string().allow(null, ""),
+      city: Joi.string().allow(null, ""),
+      department: Joi.string().allow(null, ""),
+      region: Joi.string().allow(null, ""),
+      country: Joi.string().allow(null, ""),
+      location: Joi.object().keys({
+        lat: Joi.number().allow(null),
+        lon: Joi.number().allow(null),
+      }),
+      state: Joi.string().allow(null, ""),
+      isMilitaryPreparation: Joi.string().allow(null, ""),
+    })
+    .validate(structure, { stripUnknown: true });
+}
+
 function validateProgram(program) {
   return Joi.object()
     .keys({
@@ -404,6 +439,7 @@ module.exports = {
   validateString,
   youngKeys,
   validateMission,
+  validateStructure,
   validateProgram,
   validateFirstName,
   validateNewCohesionCenter,

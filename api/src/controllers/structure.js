@@ -7,8 +7,10 @@ const StructureObject = require("../models/structure");
 const MissionObject = require("../models/mission");
 const ReferentObject = require("../models/referent");
 const { ERRORS } = require("../utils");
-const { ROLES } = require("snu-lib/roles");
+const { ROLES, canModifyStructure, canDelete } = require("snu-lib/roles");
 const patches = require("./patches");
+const { validateId, validateStructure } = require("../utils/validator");
+const { serializeStructure, serializeArrayStructures } = require("../utils/serializer");
 
 const setAndSave = async (data, keys) => {
   data.set({ ...keys });
@@ -54,10 +56,12 @@ async function updateResponsibleAndSupervisorRole(structure) {
 
 router.post("/", async (req, res) => {
   try {
-    const data = await StructureObject.create(req.body);
+    const { error, value: checkedStructure } = validateStructure(req.body);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    const data = await StructureObject.create(checkedStructure);
     await updateNetworkName(data);
     await updateResponsibleAndSupervisorRole(data);
-    return res.status(200).send({ ok: true, data });
+    return res.status(200).send({ ok: true, data: serializeStructure(data, req.user) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
@@ -66,13 +70,23 @@ router.post("/", async (req, res) => {
 
 router.put("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    let obj = req.body;
-    const data = await StructureObject.findByIdAndUpdate(req.params.id, obj, { new: true });
-    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    await updateNetworkName(data);
-    await updateMissionStructureName(data);
-    await updateResponsibleAndSupervisorRole(data);
-    return res.status(200).send({ ok: true, data });
+    const { error: errorId, value: checkedId } = validateId(req.params.id);
+    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error: errorId });
+
+    const structure = await StructureObject.findById(checkedId);
+    if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (!canModifyStructure(req.user, structure)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const { error: errorStructure, value: checkedStructure } = validateStructure(req.body);
+    if (errorStructure) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error: errorStructure });
+
+    structure.set(checkedStructure);
+    await structure.save();
+    await updateNetworkName(structure);
+    await updateMissionStructureName(structure);
+    await updateResponsibleAndSupervisorRole(structure);
+    return res.status(200).send({ ok: true, data: serializeStructure(structure, req.user) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
@@ -82,30 +96,26 @@ router.put("/:id", passport.authenticate("referent", { session: false }), async 
 router.get("/networks", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const data = await StructureObject.find({ isNetwork: "true" }).sort("name");
-    return res.status(200).send({ ok: true, data });
+    return res.status(200).send({ ok: true, data: serializeArrayStructures(data, req.user) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
 
-router.get("/network/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.get("/:id/children", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const data = await StructureObject.find({ networkId: req.params.id });
-    return res.status(200).send({ ok: true, data });
+    const { error: errorId, value: checkedId } = validateId(req.params.id);
+    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: errorId });
+
+    const structure = await StructureObject.findById(checkedId);
+    if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const data = await StructureObject.find({ networkId: structure._id });
+    return res.status(200).send({ ok: true, data: serializeArrayStructures(data, req.user) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
-  }
-});
-
-router.get("/all", passport.authenticate("referent", { session: false }), async (req, res) => {
-  try {
-    const data = await StructureObject.find({});
-    return res.status(200).send({ ok: true, data });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: SERVER_ERROR, error });
   }
 });
 
@@ -113,9 +123,13 @@ router.get("/:id/patches", passport.authenticate("referent", { session: false })
 
 router.get("/:id", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
-    const data = await StructureObject.findById(req.params.id);
+    const { error: errorId, value: checkedId } = validateId(req.params.id);
+    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: errorId });
+
+    const data = await StructureObject.findById(checkedId);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    return res.status(200).send({ ok: true, data });
+
+    return res.status(200).send({ ok: true, data: serializeStructure(data, req.user) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
@@ -124,8 +138,8 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
 
 router.get("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const data = await StructureObject.findById(req.user.structureId);
-    return res.status(200).send({ ok: true, data });
+    const data = await StructureObject.find({});
+    return res.status(200).send({ ok: true, data: serializeArrayStructures(data, req.user) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
@@ -134,9 +148,14 @@ router.get("/", passport.authenticate("referent", { session: false }), async (re
 
 router.delete("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const structure = await StructureObject.findOne({ _id: req.params.id });
+    const { error: errorId, value: checkedId } = validateId(req.params.id);
+    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: errorId });
+
+    const structure = await StructureObject.findById(checkedId);
+    if (!canDelete(req.user, structure)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
     await structure.remove();
-    console.log(`Structure ${req.params.id} has been deleted`);
+    console.log(`Structure ${req.params.id} has been deleted by ${req.user._id}`);
     res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);

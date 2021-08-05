@@ -17,7 +17,7 @@ export default () => {
 
   useEffect(() => {
     (async () => {
-      const { ok, data } = await api.get("/structure");
+      const { ok, data } = await api.get(`/structure/${user.structureId}`);
       if (ok) setShowAlert(data.name.toUpperCase() === DEFAULT_STRUCTURE_NAME.toUpperCase());
     })();
   }, []);

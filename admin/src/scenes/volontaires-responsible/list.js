@@ -39,7 +39,7 @@ export default () => {
   async function initMissions(structure) {
     const m = await appendMissions(structure);
     if (user.role === ROLES.SUPERVISOR) {
-      const subStructures = await api.get(`/structure/network/${structure}`);
+      const subStructures = await api.get(`/structure/${structure}/children`);
       if (!subStructures.ok) {
         toastr.error("Oups, une erreur est survenue lors de la récupération des missions des antennes", translate(subStructures.code));
         return history.push("/");

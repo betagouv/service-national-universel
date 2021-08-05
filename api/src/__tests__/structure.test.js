@@ -38,7 +38,7 @@ describe("Structure", () => {
   });
 
   describe("PUT /structure/:id", () => {
-    it("should create structure", async () => {
+    it("should update structure", async () => {
       const structure = await createStructureHelper({ ...getNewStructureFixture(), name: "struct" });
       structure.name = "changed";
       const res = await request(getAppHelper())
@@ -61,14 +61,13 @@ describe("Structure", () => {
 
     it("should update children", async () => {
       const network = await createStructureHelper({ ...getNewStructureFixture(), name: "network", isNetwork: "true" });
-      const structure = await createStructureHelper({ ...getNewStructureFixture(), networkId: network._id, name: "child" });
-      network.name = "changed";
+      const child = await createStructureHelper({ ...getNewStructureFixture(), networkId: network._id, name: "child", isNetwork: "false" });
       const res = await request(getAppHelper())
         .put("/structure/" + network._id)
-        .send(network);
+        .send({ name: "changed" });
       expect(res.status).toBe(200);
-      const updatedStructure = await getStructureByIdHelper(structure._id);
-      expect(updatedStructure.networkName).toBe("changed");
+      const updatedChild = await getStructureByIdHelper(child._id);
+      expect(updatedChild.networkName).toBe("changed");
       const updatedNetwork = await getStructureByIdHelper(network._id);
       expect(updatedNetwork.networkName).toBe("changed");
       expect(updatedNetwork.name).toBe("changed");
@@ -77,10 +76,9 @@ describe("Structure", () => {
     it("should update mission structure name", async () => {
       const structure = await createStructureHelper({ ...getNewStructureFixture(), name: "s" });
       const mission = await createMissionHelper({ ...getNewMissionFixture(), structureId: structure._id });
-      structure.name = "changed";
       const res = await request(getAppHelper())
         .put("/structure/" + structure._id)
-        .send(structure);
+        .send({ name: "changed" });
       expect(res.status).toBe(200);
       const updatedMission = await getMissionByIdHelper(mission._id);
       expect(updatedMission.structureName).toBe("changed");
@@ -89,10 +87,9 @@ describe("Structure", () => {
     it("should update responsible structure name", async () => {
       const structure = await createStructureHelper({ ...getNewStructureFixture(), name: "s", isNetwork: "false" });
       const responsible = await createReferentHelper({ ...getNewReferentFixture(), structureId: structure._id, role: ROLES.RESPONSIBLE });
-      structure.isNetwork = "true";
       const res = await request(getAppHelper())
         .put("/structure/" + structure._id)
-        .send(structure);
+        .send({ isNetwork: "true" });
       expect(res.status).toBe(200);
       const updatedResponsible = await getReferentByIdHelper(responsible._id);
       expect(updatedResponsible.role).toBe(ROLES.SUPERVISOR);
@@ -109,31 +106,12 @@ describe("Structure", () => {
     });
   });
 
-  describe("GET /structure", () => {
-    it("should return empty response if no structure", async () => {
-      const passport = require("passport");
-      passport.user.structureId = notExistingStructureId;
-      const res = await request(getAppHelper()).get("/structure");
-      expect(res.status).toBe(200);
-      expect(res.body.data).toBeFalsy();
-      passport.user.structureId = "";
-    });
-    it("should create structure", async () => {
-      const structure = await createStructureHelper({ ...getNewStructureFixture(), name: "struct" });
-      const passport = require("passport");
-      passport.user.structureId = structure._id;
-      const res = await request(getAppHelper()).get("/structure");
-      expect(res.status).toBe(200);
-      passport.user.structureId = "";
-    });
-  });
-
   describe("GET /structure/:id", () => {
     it("should return 404 if no structure", async () => {
       const res = await request(getAppHelper()).get("/structure/" + notExistingStructureId);
       expect(res.status).toBe(404);
     });
-    it("should create structure", async () => {
+    it("should return structure", async () => {
       const structure = await createStructureHelper({ ...getNewStructureFixture(), name: "struct" });
       const res = await request(getAppHelper()).get("/structure/" + structure._id);
       expect(res.status).toBe(200);
@@ -161,10 +139,10 @@ describe("Structure", () => {
     });
   });
 
-  describe("GET /structure/all", () => {
+  describe("GET /structure", () => {
     it("should return all structures", async () => {
       const structure = await createStructureHelper(getNewStructureFixture());
-      const res = await request(getAppHelper()).get("/structure/all");
+      const res = await request(getAppHelper()).get("/structure");
       expect(res.status).toBe(200);
       expect(res.body.data).toEqual(expect.arrayContaining([expect.objectContaining({ _id: structure._id.toString() })]));
     });
@@ -181,12 +159,12 @@ describe("Structure", () => {
     });
   });
 
-  describe("GET /structure/network/:id", () => {
-    it("should return all networks", async () => {
+  describe("GET /structure/:id/children", () => {
+    it("should return children of network", async () => {
       const network = await createStructureHelper({ ...getNewStructureFixture(), name: "network", isNetwork: "true" });
       const structure = await createStructureHelper({ ...getNewStructureFixture(), networkId: network._id, name: "child" });
 
-      const res = await request(getAppHelper()).get("/structure/network/" + network._id);
+      const res = await request(getAppHelper()).get(`/structure/${network._id}/children`);
       expect(res.status).toBe(200);
       expect(res.body.data).toEqual(expect.arrayContaining([expect.objectContaining({ _id: structure._id.toString() })]));
     });

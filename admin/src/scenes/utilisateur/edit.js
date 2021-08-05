@@ -45,7 +45,7 @@ export default (props) => {
         setUser(data);
         const { data: d } = await api.get(`/department-service/referent/${id}`);
         setService(d);
-        const responseStructure = await api.get(`/structure/all`);
+        const responseStructure = await api.get("/structure");
         const s = responseStructure.data.map((e) => ({ label: e.name, value: e.name, _id: e._id }));
         data.structureId ? setStructure(s.find((struct) => struct._id === data.structureId)) : null;
         setStructures(s);

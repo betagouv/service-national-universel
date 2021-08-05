@@ -22,7 +22,7 @@ export default ({ young, onSend }) => {
 
   useEffect(() => {
     (async () => {
-      const { data } = await api.get("/structure/all");
+      const { data } = await api.get("/structure");
       const res = data.map((s) => ({ label: s.name, value: s.name, _id: s._id }));
       if (data) setStructures(res);
     })();

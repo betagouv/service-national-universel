@@ -64,7 +64,7 @@ export default (props) => {
   }
 
   async function initStructures() {
-    const responseStructure = await api.get(`/structure/all`);
+    const responseStructure = await api.get("/structure");
     const s = responseStructure.data.map((e) => ({ label: e.name, value: e.name, _id: e._id, structure: e }));
     setStructures(s);
   }

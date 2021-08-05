@@ -35,7 +35,7 @@ export default () => {
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
   useEffect(() => {
     (async () => {
-      const { data, ok } = await api.get(`/structure/all`);
+      const { data, ok } = await api.get("/structure");
       if (!ok) return;
       setStructures(data);
     })();
@@ -46,7 +46,7 @@ export default () => {
     })();
     if (user.role !== ROLES.SUPERVISOR) return;
     (async () => {
-      const { data } = await api.get(`/structure/network/${user.structureId}`);
+      const { data } = await api.get(`/structure/${user.structureId}/children`);
       const ids = data.map((s) => s._id);
       setStructureIds(ids);
     })();

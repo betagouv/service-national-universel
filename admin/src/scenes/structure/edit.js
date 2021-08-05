@@ -89,8 +89,9 @@ export default (props) => {
             id = data._id;
             toastr.success("Structure créée");
           } else {
-            await api.put(`/structure/${values._id}`, values);
+            const responsePutStructure = await api.put(`/structure/${values._id}`, values);
             setLoading(false);
+            if (!responsePutStructure.ok) return toastr.error(translate(responsePutStructure.code));
             history.push(`/structure/${values._id}`);
             toastr.success("Structure mise à jour");
           }
