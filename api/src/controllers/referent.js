@@ -454,8 +454,8 @@ router.post("/email-tutor/:template/:tutorId", passport.authenticate("referent",
         .toString()
         .replace(/{{message}}/g, `${message.replace(/\n/g, "<br/>")}`)
         .replace(/{{cta}}/g, "https://admin.snu.gouv.fr");
-    } else if (template === SENDINBLUE_TEMPLATES.REFERENT_MILITARY_PREPARATION_DOCS_VALIDATED) {
-      await sendTemplate(parseInt(SENDINBLUE_TEMPLATES.REFERENT_MILITARY_PREPARATION_DOCS_VALIDATED), {
+    } else if (template === SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_VALIDATED) {
+      await sendTemplate(parseInt(SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_VALIDATED), {
         emailTo: [{ name: `${tutor.firstName} ${tutor.lastName}`, email: tutor.email }],
         params: {
           cta: `${config.ADMIN_URL}/volontaire/${app.youngId}`,
@@ -544,19 +544,19 @@ router.post("/email/:template/:youngId", passport.authenticate("referent", { ses
         .replace(/{{structureName}}/g, structureName)
         .replace(/\n/g, "<br/>");
       subject = `La mission ${missionName} devrait vous intéresser !`;
-    } else if (template === SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_VALIDATED) {
-      await sendTemplate(parseInt(SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_VALIDATED), {
+    } else if (template === SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_VALIDATED) {
+      await sendTemplate(parseInt(SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_VALIDATED), {
         emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
       });
       return res.status(200).send({ ok: true });
-    } else if (template === SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_CORRECTION) {
-      await sendTemplate(parseInt(SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_CORRECTION), {
+    } else if (template === SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_CORRECTION) {
+      await sendTemplate(parseInt(SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_CORRECTION), {
         emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
         params: { message, cta: `${config.APP_URL}/ma-preparation-militaire` },
       });
       return res.status(200).send({ ok: true });
-    } else if (template === SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_REFUSED) {
-      await sendTemplate(parseInt(SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_REFUSED), {
+    } else if (template === SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_REFUSED) {
+      await sendTemplate(parseInt(SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_REFUSED), {
         emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
         params: { message },
       });

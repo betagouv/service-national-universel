@@ -191,7 +191,7 @@ router.post("/notify/docs-military-preparation", passport.authenticate("young", 
     });
   }
   if (!toReferent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-  const mail = await sendTemplate(parseInt(SENDINBLUE_TEMPLATES.REFERENT_MILITARY_PREPARATION_DOCS_SUBMITTED), {
+  const mail = await sendTemplate(parseInt(SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_SUBMITTED), {
     emailTo: [{ name: `${toReferent.firstName} ${toReferent.lastName}`, email: toReferent.email }],
     params: { cta: `${ADMIN_URL}/volontaire/${req.user._id}/phase2`, youngFirstName: req.user.firstName, youngLastName: req.user.lastName },
   });

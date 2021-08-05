@@ -60,11 +60,11 @@ export default ({ young }) => {
           );
       }
       setModal({ isOpen: false, template: null, data: null });
-      // todo :  await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_VALIDATED}`)
-      await api.post(`/referent/email/${SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_VALIDATED}/${young._id}`);
+      // todo :  await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_VALIDATED}`)
+      await api.post(`/referent/email/${SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_VALIDATED}/${young._id}`);
       for (let i = 0; i < applicationsToMilitaryPreparation.length; i++) {
         const app = applicationsToMilitaryPreparation[i];
-        await api.post(`/referent/email-tutor/${SENDINBLUE_TEMPLATES.REFERENT_MILITARY_PREPARATION_DOCS_VALIDATED}/${app.tutorId}`, { app });
+        await api.post(`/referent/email-tutor/${SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_VALIDATED}/${app.tutorId}`, { app });
       }
     } catch (e) {
       console.error(e);
@@ -96,8 +96,8 @@ export default ({ young }) => {
           `Une erreur s'est produite lors du changement automatique de statut de la candidtature à la mission : ${app.missionName}`
         );
     }
-    // todo :  await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_CORRECTION}`)
-    await api.post(`/referent/email/${SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_CORRECTION}/${young._id}`, { message });
+    // todo :  await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_CORRECTION}`)
+    await api.post(`/referent/email/${SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_CORRECTION}/${young._id}`, { message });
 
     toastr.success("Email envoyé !");
     setModal({ isOpen: false, template: null, data: null });
@@ -129,7 +129,7 @@ export default ({ young }) => {
         );
     }
     // todo :  await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_CORRECTION}`)
-    await api.post(`/referent/email/${SENDINBLUE_TEMPLATES.YOUNG_MILITARY_PREPARATION_DOCS_REFUSED}/${young._id}`, { message });
+    await api.post(`/referent/email/${SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_REFUSED}/${young._id}`, { message });
 
     toastr.success("Email envoyé !");
     setModal({ isOpen: false, template: null, data: null });
