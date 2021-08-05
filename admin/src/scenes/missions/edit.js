@@ -76,7 +76,7 @@ export default (props) => {
         submitButton: false,
         changeStructureButton: true,
       });
-      const { ok, code, data: y } = await api.put(`/mission/${defaultValue._id}/structure/${structure._id}`);
+      const { ok, code } = await api.put(`/mission/${defaultValue._id}/structure/${structure._id}`);
       setLoadings({
         saveButton: false,
         submitButton: false,
