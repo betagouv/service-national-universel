@@ -299,21 +299,17 @@ router.put("/validate_mission", passport.authenticate("young", { session: false 
 //@check
 router.put("/", passport.authenticate("young", { session: false }), async (req, res) => {
   try {
-    const { error, value } = validateYoung(req.body);
+    const { error, value } = validateYoung(req.body, req.user);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
     const young = await YoungObject.findByIdAndUpdate(req.user._id, value, { new: true });
 
-    //Check quartier prioritaires.
+    // Check quartier prioritaires.
     if (value.zip && value.city && value.address) {
       const qpv = await getQPV(value.zip, value.city, value.address);
-      if (qpv === true) {
-        young.set({ qpv: "true" });
-      } else if (qpv === false) {
-        young.set({ qpv: "false" });
-      } else {
-        young.set({ qpv: "" });
-      }
+      if (qpv === true) young.set({ qpv: "true" });
+      else if (qpv === false) young.set({ qpv: "false" });
+      else young.set({ qpv: "" });
       await young.save();
     }
 

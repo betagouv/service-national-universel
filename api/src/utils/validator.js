@@ -105,8 +105,83 @@ function validateProgram(program) {
     .validate(program, { stripUnknown: true });
 }
 
-function youngKeys() {
-  return {
+function validateFirstName() {
+  return Joi.string().custom((value) => (value ? value.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()) : null));
+}
+
+const applicationKeys = {
+  youngId: Joi.string().allow(null, ""),
+  youngFirstName: Joi.string().allow(null, ""),
+  youngLastName: Joi.string().allow(null, ""),
+  youngEmail: Joi.string().allow(null, ""),
+  youngBirthdateAt: Joi.string().allow(null, ""),
+  youngCity: Joi.string().allow(null, ""),
+  youngDepartment: Joi.string().allow(null, ""),
+  youngCohort: Joi.string().allow(null, ""),
+  missionId: Joi.string().allow(null, ""),
+  missionName: Joi.string().allow(null, ""),
+  missionDepartment: Joi.string().allow(null, ""),
+  missionRegion: Joi.string().allow(null, ""),
+  structureId: Joi.string().allow(null, ""),
+  tutorId: Joi.string().allow(null, ""),
+  tutorName: Joi.string().allow(null, ""),
+  contractId: Joi.string().allow(null, ""),
+  priority: Joi.alternatives().try(Joi.string().allow(null, ""), Joi.number().allow(null)),
+  status: Joi.string().allow(null, ""),
+};
+
+function validateUpdateApplication(application, user) {
+  return Joi.object()
+    .keys({
+      ...applicationKeys,
+      // A young can only update a mission for him/herself.
+      youngId: isYoung(user) ? Joi.string().equal(user._id.toString()).allow(null, "") : Joi.string().allow(null, ""),
+      _id: Joi.string().required(),
+    })
+    .validate(application, { stripUnknown: true });
+}
+
+function validateNewApplication(application, user) {
+  return Joi.object()
+    .keys({
+      ...applicationKeys,
+      // A young can only apply to a mission for him/herself.
+      youngId: isYoung(user) ? Joi.string().equal(user._id.toString()).required() : Joi.string().required(),
+      missionId: Joi.string().required(),
+    })
+    .validate(application, { stripUnknown: true });
+}
+
+const cohesionCenterKeys = {
+  name: Joi.string().allow(null, ""),
+  code: Joi.string().allow(null, ""),
+  country: Joi.string().allow(null, ""),
+  COR: Joi.string().allow(null, ""),
+  departmentCode: Joi.string().allow(null, ""),
+  address: Joi.string().allow(null, ""),
+  city: Joi.string().allow(null, ""),
+  zip: Joi.string().allow(null, ""),
+  department: Joi.string().allow(null, ""),
+  region: Joi.string().allow(null, ""),
+  placesTotal: Joi.alternatives().try(Joi.string().allow(null, ""), Joi.number().allow(null)),
+  placesLeft: Joi.alternatives().try(Joi.string().allow(null, ""), Joi.number().allow(null)),
+  outfitDelivered: Joi.string().allow(null, ""),
+  observations: Joi.string().allow(null, ""),
+  waitingList: Joi.array().items(Joi.string().allow(null, "")),
+};
+
+function validateNewCohesionCenter(application) {
+  return Joi.object().keys(cohesionCenterKeys).validate(application, { stripUnknown: true });
+}
+
+function validateUpdateCohesionCenter(application) {
+  return Joi.object()
+    .keys({ ...cohesionCenterKeys, _id: Joi.string().required() })
+    .validate(application, { stripUnknown: true });
+}
+
+function validateYoung(young, user) {
+  const keys = {
     firstName: Joi.string().allow(null, ""),
     lastName: Joi.string().allow(null, ""),
     frenchNationality: Joi.string().allow(null, ""),
@@ -127,7 +202,6 @@ function youngKeys() {
     inscriptionStep: Joi.string().allow(null, ""),
     cohesion2020Step: Joi.string().allow(null, ""),
     historic: Joi.array().items(Joi.any().allow(null, "")),
-    password: Joi.string().allow(null, ""),
     lastLoginAt: Joi.string().allow(null, ""),
     forgotPasswordResetToken: Joi.string().allow(null, ""),
     forgotPasswordResetExpires: Joi.string().allow(null, ""),
@@ -288,85 +362,12 @@ function youngKeys() {
     militaryPreparationFilesCertificate: Joi.array().items(Joi.string().allow(null, "")),
     statusMilitaryPreparationFiles: Joi.string().allow(null, ""),
   };
-}
 
-function validateFirstName() {
-  return Joi.string().custom((value) => (value ? value.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()) : null));
-}
+  if (!isYoung(user)) {
+    keys.password = Joi.string().allow(null, "");
+  }
 
-const applicationKeys = {
-  youngId: Joi.string().allow(null, ""),
-  youngFirstName: Joi.string().allow(null, ""),
-  youngLastName: Joi.string().allow(null, ""),
-  youngEmail: Joi.string().allow(null, ""),
-  youngBirthdateAt: Joi.string().allow(null, ""),
-  youngCity: Joi.string().allow(null, ""),
-  youngDepartment: Joi.string().allow(null, ""),
-  youngCohort: Joi.string().allow(null, ""),
-  missionId: Joi.string().allow(null, ""),
-  missionName: Joi.string().allow(null, ""),
-  missionDepartment: Joi.string().allow(null, ""),
-  missionRegion: Joi.string().allow(null, ""),
-  structureId: Joi.string().allow(null, ""),
-  tutorId: Joi.string().allow(null, ""),
-  tutorName: Joi.string().allow(null, ""),
-  contractId: Joi.string().allow(null, ""),
-  priority: Joi.alternatives().try(Joi.string().allow(null, ""), Joi.number().allow(null)),
-  status: Joi.string().allow(null, ""),
-};
-
-function validateUpdateApplication(application, user) {
-  return Joi.object()
-    .keys({
-      ...applicationKeys,
-      // A young can only update a mission for him/herself.
-      youngId: isYoung(user) ? Joi.string().equal(user._id.toString()).allow(null, "") : Joi.string().allow(null, ""),
-      _id: Joi.string().required(),
-    })
-    .validate(application, { stripUnknown: true });
-}
-
-function validateNewApplication(application, user) {
-  return Joi.object()
-    .keys({
-      ...applicationKeys,
-      // A young can only apply to a mission for him/herself.
-      youngId: isYoung(user) ? Joi.string().equal(user._id.toString()).required() : Joi.string().required(),
-      missionId: Joi.string().required(),
-    })
-    .validate(application, { stripUnknown: true });
-}
-
-const cohesionCenterKeys = {
-  name: Joi.string().allow(null, ""),
-  code: Joi.string().allow(null, ""),
-  country: Joi.string().allow(null, ""),
-  COR: Joi.string().allow(null, ""),
-  departmentCode: Joi.string().allow(null, ""),
-  address: Joi.string().allow(null, ""),
-  city: Joi.string().allow(null, ""),
-  zip: Joi.string().allow(null, ""),
-  department: Joi.string().allow(null, ""),
-  region: Joi.string().allow(null, ""),
-  placesTotal: Joi.alternatives().try(Joi.string().allow(null, ""), Joi.number().allow(null)),
-  placesLeft: Joi.alternatives().try(Joi.string().allow(null, ""), Joi.number().allow(null)),
-  outfitDelivered: Joi.string().allow(null, ""),
-  observations: Joi.string().allow(null, ""),
-  waitingList: Joi.array().items(Joi.string().allow(null, "")),
-};
-
-function validateNewCohesionCenter(application) {
-  return Joi.object().keys(cohesionCenterKeys).validate(application, { stripUnknown: true });
-}
-
-function validateUpdateCohesionCenter(application) {
-  return Joi.object()
-    .keys({ ...cohesionCenterKeys, _id: Joi.string().required() })
-    .validate(application, { stripUnknown: true });
-}
-
-function validateYoung(young) {
-  return Joi.object().keys(youngKeys()).validate(young, { stripUnknown: true });
+  return Joi.object().keys(keys).validate(young, { stripUnknown: true });
 }
 
 function validateDepartmentService(departmentService) {
