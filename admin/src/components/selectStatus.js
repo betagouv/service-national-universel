@@ -20,7 +20,7 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
   const user = useSelector((state) => state.Auth.user);
 
   const getInscriptions = async (department) => {
-    const { data, ok, code } = await api.post(`/inscription-goal/current`, { department });
+    const { data, ok, code } = await api.get(`/inscription-goal/${department}/current`);
     return data;
   };
 
