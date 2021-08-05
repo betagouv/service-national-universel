@@ -13,7 +13,7 @@ const ReferentObject = require("../models/referent");
 const { sendEmail, sendTemplate } = require("../sendinblue");
 const { ERRORS, isYoung } = require("../utils");
 const { validateUpdateApplication, validateNewApplication } = require("../utils/validator");
-const { ADMIN_URL } = require("../config");
+const { ADMIN_URL, APP_URL } = require("../config");
 const { SUB_ROLES, ROLES, SENDINBLUE_TEMPLATES, department2region } = require("snu-lib");
 const { serializeApplication } = require("../utils/serializer");
 
@@ -227,17 +227,16 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
     let to = {};
 
     if (template === "waiting_validation") {
-      htmlContent = fs
-        .readFileSync(path.resolve(__dirname, "../templates/application/waitingValidation.html"))
-        .toString()
-        .replace(/{{firstName}}/g, referent.firstName)
-        .replace(/{{lastName}}/g, referent.lastName)
-        .replace(/{{youngFirstName}}/g, application.youngFirstName)
-        .replace(/{{youngLastName}}/g, application.youngLastName)
-        .replace(/{{missionName}}/g, mission.name)
-        .replace(/{{cta}}/g, "https://admin.snu.gouv.fr/volontaire");
-      subject = `${application.youngFirstName} ${application.youngLastName} a candidaté sur votre mission d'intérêt général ${mission.name}`;
-      to = { name: `${referent.firstName} ${referent.lastName}`, email: referent.email };
+      const mail = await sendTemplate(SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION, {
+        emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
+        params: {
+          youngFirstName: application.youngFirstName,
+          youngLastName: application.youngLastName,
+          missionName: mission.name,
+          cta: `${ADMIN_URL}/volontaire`,
+        },
+      });
+      return res.status(200).send({ ok: true, data: mail });
     } else if (template === "validated_responsible") {
       htmlContent = fs
         .readFileSync(path.resolve(__dirname, "../templates/application/validatedResponsible.html"))
@@ -251,42 +250,23 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
       subject = `${application.youngFirstName} ${application.youngLastName} est validée sur votre mission d'intérêt général ${mission.name}`;
       to = { name: `${referent.firstName} ${referent.lastName}`, email: referent.email };
     } else if (template === "validated_young") {
-      htmlContent = fs
-        .readFileSync(path.resolve(__dirname, "../templates/application/validatedYoung.html"))
-        .toString()
-        .replace(/{{firstName}}/g, application.youngFirstName)
-        .replace(/{{lastName}}/g, application.youngLastName)
-        .replace(/{{structureName}}/g, mission.structureName)
-        .replace(/{{youngFirstName}}/g, application.youngFirstName)
-        .replace(/{{youngLastName}}/g, application.youngLastName)
-        .replace(/{{missionName}}/g, mission.name)
-        .replace(/{{cta}}/g, "https://inscription.snu.gouv.fr/auth/login?redirect=candidature");
-      subject = `Votre candidature sur la mission d'intérêt général ${mission.name} a été validée`;
-      to = { name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail };
+      const mail = await sendTemplate(SENDINBLUE_TEMPLATES.young.VALIDATE_APPLICATION, {
+        emailTo: [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }],
+        params: { missionName: mission.name, cta: `${APP_URL}/candidature` },
+      });
+      return res.status(200).send({ ok: true, data: mail });
     } else if (template === "cancel") {
-      htmlContent = fs
-        .readFileSync(path.resolve(__dirname, "../templates/application/cancel.html"))
-        .toString()
-        .replace(/{{firstName}}/g, referent.firstName)
-        .replace(/{{lastName}}/g, referent.lastName)
-        .replace(/{{youngFirstName}}/g, application.youngFirstName)
-        .replace(/{{youngLastName}}/g, application.youngLastName)
-        .replace(/{{missionName}}/g, mission.name);
-      subject = `${application.youngFirstName} ${application.youngLastName} a annulé sa candidature sur votre mission d'intérêt général ${mission.name}`;
-      to = { name: `${referent.firstName} ${referent.lastName}`, email: referent.email };
+      const mail = await sendTemplate(SENDINBLUE_TEMPLATES.referent.CANCEL_APPLICATION, {
+        emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
+        params: { youngFirstName: application.youngFirstName, youngLastName: application.youngLastName, missionName: mission.name },
+      });
+      return res.status(200).send({ ok: true, data: mail });
     } else if (template === "refused") {
-      htmlContent = fs
-        .readFileSync(path.resolve(__dirname, "../templates/application/refused.html"))
-        .toString()
-        .replace(/{{firstName}}/g, application.youngFirstName)
-        .replace(/{{lastName}}/g, application.youngLastName)
-        .replace(/{{structureName}}/g, mission.structureName)
-        .replace(/{{missionName}}/g, mission.name)
-        .replace(/{{message}}/g, message)
-        .replace(/{{cta}}/g, "https://inscription.snu.gouv.fr/auth/login?redirect=mission")
-        .replace(/\n/g, "<br/>");
-      subject = `Votre candidature sur la mission d'intérêt général ${mission.name} a été refusée.`;
-      to = { name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail };
+      const mail = await sendTemplate(SENDINBLUE_TEMPLATES.young.REFUSE_APPLICATION, {
+        emailTo: [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }],
+        params: { message, missionName: mission.name, cta: `${APP_URL}/mission` },
+      });
+      return res.status(200).send({ ok: true, data: mail });
     } else {
       return res.status(200).send({ ok: true });
     }
