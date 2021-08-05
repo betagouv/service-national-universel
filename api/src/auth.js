@@ -59,7 +59,6 @@ class Auth {
 
   async signinToken(req, res) {
     const { error, value } = Joi.object({ token: Joi.string().required() }).validate({ token: req.cookies.jwt });
-
     if (error) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
 
     try {
@@ -95,11 +94,11 @@ class Auth {
       if (newPassword !== verifyPassword) return res.status(422).send({ ok: false, code: ERRORS.PASSWORDS_NOT_MATCH });
       if (newPassword === password) return res.status(401).send({ ok: false, code: ERRORS.NEW_PASSWORD_IDENTICAL_PASSWORD });
 
-      const obj = await this.model.findById(req.user._id);
-      obj.set({ password: newPassword });
-      await obj.save();
+      const user = await this.model.findById(req.user._id);
+      user.set({ password: newPassword });
+      await user.save();
 
-      return res.status(200).send({ ok: true, user: obj });
+      return res.status(200).send({ ok: true, user: isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user) });
     } catch (error) {
       capture(error);
       return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
