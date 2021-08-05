@@ -437,7 +437,6 @@ function validateSelf(referent) {
 module.exports = {
   validateId,
   validateString,
-  youngKeys,
   validateMission,
   validateStructure,
   validateProgram,
