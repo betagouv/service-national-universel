@@ -10,7 +10,7 @@ const { ERRORS } = require("../utils");
 const { ROLES, canModifyStructure, canDelete } = require("snu-lib/roles");
 const patches = require("./patches");
 const { validateId, validateStructure } = require("../utils/validator");
-const { serializeStructure, serializeArrayStructures } = require("../utils/serializer");
+const { serializeStructure, serializeArray } = require("../utils/serializer");
 
 const setAndSave = async (data, keys) => {
   data.set({ ...keys });
@@ -96,7 +96,7 @@ router.put("/:id", passport.authenticate("referent", { session: false }), async 
 router.get("/networks", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const data = await StructureObject.find({ isNetwork: "true" }).sort("name");
-    return res.status(200).send({ ok: true, data: serializeArrayStructures(data, req.user) });
+    return res.status(200).send({ ok: true, data: serializeArray(data, req.user, serializeStructure) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
@@ -112,7 +112,7 @@ router.get("/:id/children", passport.authenticate("referent", { session: false }
     if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const data = await StructureObject.find({ networkId: structure._id });
-    return res.status(200).send({ ok: true, data: serializeArrayStructures(data, req.user) });
+    return res.status(200).send({ ok: true, data: serializeArray(data, req.user, serializeStructure) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
@@ -139,7 +139,7 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
 router.get("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const data = await StructureObject.find({});
-    return res.status(200).send({ ok: true, data: serializeArrayStructures(data, req.user) });
+    return res.status(200).send({ ok: true, data: serializeArray(data, req.user, serializeStructure) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });

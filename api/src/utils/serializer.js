@@ -86,9 +86,6 @@ function serializeDepartmentService(departmentService, user) {
   return departmentService.toObject();
 }
 
-function serializeArrayStructures(structures, user) {
-  return structures.map((s) => serializeStructure(s, user));
-}
 function serializeArray(arr, user, serialize) {
   return arr.map((s) => serialize(s, user));
 }
@@ -108,7 +105,6 @@ module.exports = {
   serializeReferent,
   serializeMission,
   serializeStructure,
-  serializeArrayStructures,
   serializeArray,
   serializeDepartmentService,
 };
