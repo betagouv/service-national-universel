@@ -26,20 +26,6 @@ router.post("/", passport.authenticate("referent", { session: false }), async (r
   }
 });
 
-//todo : delete after merged
-router.get("/referent/:id", passport.authenticate(["referent"], { session: false }), async (req, res) => {
-  try {
-    const { error, value: checkedId } = validateId(req.params.id);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error });
-    const r = await ReferentModel.findById(checkedId);
-    if (!r) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const data = await DepartmentServiceModel.findOne({ department: r.department });
-    return res.status(200).send({ ok: true, data: serializeDepartmentService(data, req.user) });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
-  }
-});
 router.get("/:department", passport.authenticate(["referent"], { session: false }), async (req, res) => {
   try {
     const {
@@ -50,6 +36,7 @@ router.get("/:department", passport.authenticate(["referent"], { session: false 
       .validate({ ...req.params }, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
     const data = await DepartmentServiceModel.findOne({ department });
+    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data: serializeDepartmentService(data, req.user) });
   } catch (error) {
     capture(error);

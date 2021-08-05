@@ -249,6 +249,8 @@ router.put("/validate_phase3/:young/:token", async (req, res) => {
   }
 });
 
+// todo : delete and replace by /department-service/:department in frontend
+// update the serializer // authorization (a young can only view department service of his own department)
 router.get("/department-service", passport.authenticate("young", { session: false }), async (req, res) => {
   try {
     const { error, value } = Joi.object({ department: Joi.string().required() }).unknown().validate(req.user, { stripUnknown: true });
