@@ -72,8 +72,11 @@ router.post("/reset_password", passport.authenticate("young", { session: false }
 
 router.post("/file/:key", passport.authenticate("young", { session: false }), async (req, res) => {
   try {
+    const validKeys = ["cniFiles", "highSkilledActivityProofFiles", "parentConsentmentFiles", "autoTestPCRFiles", "imageRightFiles"];
     const { error, value } = Joi.object({
-      key: Joi.string().required(),
+      key: Joi.string()
+        .required()
+        .valid(...validKeys),
       body: Joi.string().required(),
     })
       .unknown()

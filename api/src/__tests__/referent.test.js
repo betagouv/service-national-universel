@@ -173,7 +173,7 @@ describe("Referent", () => {
   describe("POST /referent/file/:key", () => {
     it("should return 404 if young not found", async () => {
       const res = await request(getAppHelper())
-        .get("/referent/file/CniFile")
+        .get("/referent/file/cniFiles")
         .send({ body: JSON.stringify({ youngId: notExistingYoungId, names: ["e"] }) });
       expect(res.statusCode).toEqual(404);
     });
@@ -181,7 +181,7 @@ describe("Referent", () => {
       // This test should be improved to check the file is sent (currently no file is sent)
       const young = await createYoungHelper(getNewYoungFixture());
       const res = await request(getAppHelper())
-        .post("/referent/file/CniFile")
+        .post("/referent/file/cniFiles")
         .send({ body: JSON.stringify({ youngId: young._id, names: ["e"] }) });
       expect(res.body).toEqual({ data: ["e"], ok: true });
     });

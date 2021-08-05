@@ -446,10 +446,24 @@ describe("Young", () => {
       passport.user.set = jest.fn();
 
       const res = await request(getAppHelper())
-        .post("/young/file/CniFile")
+        .post("/young/file/cniFiles")
         .send({ body: JSON.stringify({ names: ["e"] }) });
+      expect(res.status).toEqual(200);
       expect(res.body).toEqual({ data: ["e"], ok: true });
-      expect(passport.user.set).toHaveBeenCalledWith({ CniFile: ["e"] });
+      expect(passport.user.set).toHaveBeenCalledWith({ cniFiles: ["e"] });
+      passport.user = previous;
+    });
+
+    it("should not accept invalid file name", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
+
+      const res = await request(getAppHelper())
+        .post("/young/file/thisPropertyDoesNotExists")
+        .send({ body: JSON.stringify({ names: ["e"] }) });
+      expect(res.status).toEqual(400);
       passport.user = previous;
     });
   });
