@@ -121,14 +121,27 @@ describe("Mission", () => {
     });
   });
 
-  it("DELETE /mission/:id", async () => {
-    const missionFixture = getNewMissionFixture();
-    let mission = await createMissionHelper(missionFixture);
-    const missionsBefore = await getMissionsHelper();
-    const res = await request(getAppHelper()).delete(`/mission/${mission._id}`).send();
-    expect(res.statusCode).toEqual(200);
-    const missionsAfter = await getMissionsHelper();
-    expect(missionsAfter.length).toEqual(missionsBefore.length - 1);
+  describe("DELETE /mission/:id", () => {
+    it("should return 404 if mission does not exist", async () => {
+      const res = await request(getAppHelper()).delete("/mission/" + notExisitingMissionId);
+      expect(res.statusCode).toEqual(404);
+    });
+    it("should delete mission", async () => {
+      const missionFixture = getNewMissionFixture();
+      let mission = await createMissionHelper(missionFixture);
+      const missionsBefore = await getMissionsHelper();
+      const res = await request(getAppHelper()).delete(`/mission/${mission._id}`).send();
+      expect(res.statusCode).toEqual(200);
+      const missionsAfter = await getMissionsHelper();
+      expect(missionsAfter.length).toEqual(missionsBefore.length - 1);
+    });
+    it("should return 409 when mission has applications", async () => {
+      const mission = await createMissionHelper(getNewMissionFixture());
+      await createApplication({ ...getNewApplicationFixture(), missionId: mission._id });
+      const res = await request(getAppHelper()).delete(`/mission/${mission._id}`).send();
+      expect(res.statusCode).toEqual(409);
+      await deleteMissionByIdHelper(mission._id);
+    });
   });
 
   describe("PUT mission/:id/structure/:structureId", () => {

@@ -142,10 +142,14 @@ router.delete("/:id", passport.authenticate("referent", { session: false }), asy
   try {
     const { error, value: checkedId } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error });
-    const mission = await MissionObject.findOne({ _id: checkedId });
+
+    const mission = await MissionObject.findById(checkedId);
+    if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
     const applications = await ApplicationObject.find({ missionId: mission._id });
-    if (applications && applications.length) return res.status(500).send({ ok: false, code: ERRORS.LINKED_OBJECT });
+    if (applications && applications.length) return res.status(409).send({ ok: false, code: ERRORS.LINKED_OBJECT });
     await mission.remove();
+
     console.log(`Mission ${req.params.id} has been deleted`);
     res.status(200).send({ ok: true });
   } catch (error) {
