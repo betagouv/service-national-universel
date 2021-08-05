@@ -106,26 +106,21 @@ class Auth {
   }
 
   async forgotPassword(req, res, cta) {
-    const { error, value } = Joi.object({
-      email: Joi.string().lowercase().trim().email().required(),
-    })
-      .unknown()
-      .validate(req.body);
-
+    const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required() }).unknown().validate(req.body);
     if (error) return res.status(404).send({ ok: false, code: ERRORS.USER_NOT_EXISTS });
 
     const { email } = value;
 
     try {
-      const obj = await this.model.findOne({ email });
-      if (!obj) return res.status(404).send({ ok: false, code: ERRORS.USER_NOT_EXISTS });
+      const user = await this.model.findOne({ email });
+      if (!user) return res.status(404).send({ ok: false, code: ERRORS.USER_NOT_EXISTS });
 
       const token = await crypto.randomBytes(20).toString("hex");
-      obj.set({ forgotPasswordResetToken: token, forgotPasswordResetExpires: Date.now() + COOKIE_MAX_AGE });
-      await obj.save();
+      user.set({ forgotPasswordResetToken: token, forgotPasswordResetExpires: Date.now() + COOKIE_MAX_AGE });
+      await user.save();
 
       await sendTemplate(SENDINBLUE_TEMPLATES.FORGOT_PASSWORD, {
-        emailTo: [{ name: `${obj.firstName} ${obj.lastName}`, email }],
+        emailTo: [{ name: `${user.firstName} ${user.lastName}`, email }],
         params: { cta: `${cta}?token=${token}` },
       });
 
@@ -137,10 +132,7 @@ class Auth {
   }
 
   async forgotPasswordReset(req, res) {
-    const { error, value } = Joi.object({
-      password: Joi.string().required(),
-      token: Joi.string().min(16).required(),
-    })
+    const { error, value } = Joi.object({ password: Joi.string().required(), token: Joi.string().min(16).required() })
       .unknown()
       .validate(req.body);
 
@@ -153,18 +145,18 @@ class Auth {
     if (!validatePassword(password)) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_NOT_VALIDATED });
 
     try {
-      const obj = await this.model.findOne({
+      const user = await this.model.findOne({
         forgotPasswordResetToken: token,
         forgotPasswordResetExpires: { $gt: Date.now() },
       });
-      if (!obj) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
-      const match = await obj.comparePassword(password);
+      if (!user) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
+      const match = await user.comparePassword(password);
       if (match) return res.status(401).send({ ok: false, code: ERRORS.NEW_PASSWORD_IDENTICAL_PASSWORD });
 
-      obj.password = password;
-      obj.forgotPasswordResetToken = "";
-      obj.forgotPasswordResetExpires = "";
-      await obj.save();
+      user.password = password;
+      user.forgotPasswordResetToken = "";
+      user.forgotPasswordResetExpires = "";
+      await user.save();
       return res.status(200).send({ ok: true });
     } catch (error) {
       capture(error);
