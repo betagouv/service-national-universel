@@ -3,12 +3,10 @@ const crypto = require("crypto");
 const Joi = require("joi");
 
 const { capture } = require("./sentry");
-
 const config = require("./config");
 const { sendTemplate } = require("./sendinblue");
 const { COOKIE_MAX_AGE, JWT_MAX_AGE, cookieOptions, logoutCookieOptions } = require("./cookie-options");
 const { validatePassword, ERRORS, isYoung } = require("./utils");
-const { validateFirstName } = require("./utils/validator");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 const { serializeYoung, serializeReferent } = require("./utils/serializer");
 class Auth {
@@ -60,9 +58,7 @@ class Auth {
   }
 
   async signinToken(req, res) {
-    const { error, value } = Joi.object({
-      token: Joi.string().required(),
-    }).validate({ token: req.cookies.jwt });
+    const { error, value } = Joi.object({ token: Joi.string().required() }).validate({ token: req.cookies.jwt });
 
     if (error) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
 
@@ -70,7 +66,7 @@ class Auth {
       const { user } = req;
       user.set({ lastLoginAt: Date.now() });
       await user.save();
-      res.send({ user, token: value.token, ok: true });
+      res.send({ ok: true, token: value.token, user: isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user) });
     } catch (error) {
       capture(error);
       return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
