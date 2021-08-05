@@ -23,6 +23,7 @@ const { cookieOptions, JWT_MAX_AGE } = require("../../cookie-options");
 const { validateYoung, validateId, validateFirstName } = require("../../utils/validator");
 const patches = require("../patches");
 const { serializeYoung } = require("../../utils/serializer");
+const { canDeleteYoung } = require("snu-lib/roles");
 
 const YoungAuth = new AuthObject(YoungObject);
 
@@ -417,11 +418,13 @@ router.post("/france-connect/user-info", async (req, res) => {
 // Delete one user (only admin can delete user)
 router.delete("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const { error, value: id } = Joi.string().required().validate(req.params.id);
+    const { error, value: id } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
-    const young = await YoungObject.findOne({ _id: id });
+    const young = await YoungObject.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (!canDeleteYoung(req.user, young)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     await young.remove();
     console.log(`Young ${id} has been deleted`);

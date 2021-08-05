@@ -33,8 +33,7 @@ const { department2region } = require("snu-lib/region-and-departments");
 const {
   ROLES_LIST,
   canInviteUser,
-  canDelete,
-  canViewPatchesHistory,
+  canDeleteReferent,
   canViewReferent,
   SUB_ROLES,
   ROLES,
@@ -864,7 +863,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false }), asy
   try {
     const referent = await ReferentObject.findOne({ _id: req.params.id });
     if (!referent) return res.status(404).send({ ok: false });
-    if (!canDelete(req.user, referent)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canDeleteReferent(req.user, referent)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     await referent.remove();
     console.log(`Referent ${req.params.id} has been deleted`);
     res.status(200).send({ ok: true });

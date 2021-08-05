@@ -7,7 +7,7 @@ const StructureObject = require("../models/structure");
 const MissionObject = require("../models/mission");
 const ReferentObject = require("../models/referent");
 const { ERRORS } = require("../utils");
-const { ROLES, canModifyStructure, canDelete } = require("snu-lib/roles");
+const { ROLES, canModifyStructure, canDeleteStructure } = require("snu-lib/roles");
 const patches = require("./patches");
 const { validateId, validateStructure } = require("../utils/validator");
 const { serializeStructure, serializeArray } = require("../utils/serializer");
@@ -152,7 +152,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false }), asy
     if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: errorId });
 
     const structure = await StructureObject.findById(checkedId);
-    if (!canDelete(req.user, structure)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canDeleteStructure(req.user, structure)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     await structure.remove();
     console.log(`Structure ${req.params.id} has been deleted by ${req.user._id}`);
