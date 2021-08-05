@@ -7,9 +7,10 @@ const { capture } = require("./sentry");
 const config = require("./config");
 const { sendTemplate } = require("./sendinblue");
 const { COOKIE_MAX_AGE, JWT_MAX_AGE, cookieOptions, logoutCookieOptions } = require("./cookie-options");
-const { validatePassword, ERRORS } = require("./utils");
+const { validatePassword, ERRORS, isYoung } = require("./utils");
 const { validateFirstName } = require("./utils/validator");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
+const { serializeYoung, serializeReferent } = require("./utils/serializer");
 class Auth {
   constructor(model) {
     this.model = model;
@@ -37,7 +38,11 @@ class Auth {
       const token = jwt.sign({ _id: user.id }, config.secret, { expiresIn: JWT_MAX_AGE });
       res.cookie("jwt", token, cookieOptions());
 
-      return res.status(200).send({ ok: true, token, user });
+      return res.status(200).send({
+        ok: true,
+        token,
+        user: isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user),
+      });
     } catch (error) {
       capture(error);
       return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -69,7 +74,11 @@ class Auth {
       const token = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });
       res.cookie("jwt", token, cookieOptions());
 
-      return res.status(200).send({ user, token, ok: true });
+      return res.status(200).send({
+        ok: true,
+        token,
+        user: isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user),
+      });
     } catch (error) {
       if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
       capture(error);
