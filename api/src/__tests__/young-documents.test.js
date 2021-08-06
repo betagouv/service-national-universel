@@ -65,7 +65,7 @@ describe("Young", () => {
       const young = await createYoungHelper(getNewYoungFixture());
       const res = await request(getAppHelper())
         .post("/young/" + young._id + "/documents/convocation/cohesion")
-        .send({ young });
+        .send();
       expect(res.status).toBe(500);
     });
     it("should return the convocation", async () => {

@@ -1,79 +1,46 @@
 const express = require("express");
 const passport = require("passport");
+const Joi = require("joi");
 const router = express.Router({ mergeParams: true });
 const { capture } = require("../../sentry");
 const renderFromHtml = require("../../htmlToPdf");
 const YoungObject = require("../../models/young");
-const { ERRORS } = require("../../utils");
+const { ERRORS, isYoung } = require("../../utils");
 const certificate = require("../../templates/certificate");
 const form = require("../../templates/form");
 const convocation = require("../../templates/convocation");
 
-router.post("/certificate/:template", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
-  const young = await YoungObject.findById(req.params.id);
-  if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+function getHtmlTemplate(type, template, young) {
+  if (type === "certificate" && template === "1") return certificate.phase1(young);
+  if (type === "certificate" && template === "2") return certificate.phase2(young);
+  if (type === "certificate" && template === "3") return certificate.phase3(young);
+  if (type === "certificate" && template === "snu") return certificate.snu(young);
+  if (type === "form" && template === "imageRight") return form.imageRight(young);
+  if (type === "form" && template === "autotestPCR") return form.autotestPCR(young);
+  if (type === "convocation" && template === "cohesion") return convocation.cohesion(young);
+}
 
-  const options = req.body.options || { format: "A4", margin: 0 };
-
-  //create html
-  let newhtml = "";
-  if (req.params.template === "1") {
-    newhtml = certificate.phase1(young);
-  } else if (req.params.template === "2") {
-    newhtml = certificate.phase2(young);
-  } else if (req.params.template === "3") {
-    newhtml = certificate.phase3(young);
-  } else if (req.params.template === "snu") {
-    newhtml = certificate.snu(young);
-  }
-
-  if (!newhtml) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-  const buffer = await renderFromHtml(newhtml, options);
-  res.contentType("application/pdf");
-  res.setHeader("Content-Dispositon", 'inline; filename="test.pdf"');
-  res.set("Cache-Control", "public, max-age=1");
-  res.send(buffer);
-});
-
-router.post("/form/:template", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
-  const young = await YoungObject.findById(req.params.id);
-  if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-  const options = req.body.options || { format: "A4", margin: 0 };
-  //create html
-  let newhtml = "";
-  if (req.params.template === "imageRight") {
-    newhtml = form.imageRight(req.body.young);
-  } else if (req.params.template === "autotestPCR") {
-    newhtml = form.autotestPCR(req.body.young);
-  }
-
-  if (!newhtml) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-  const buffer = await renderFromHtml(newhtml, options);
-  res.contentType("application/pdf");
-  res.setHeader("Content-Dispositon", 'inline; filename="test.pdf"');
-  res.set("Cache-Control", "public, max-age=1");
-  res.send(buffer);
-});
-
-router.post("/convocation/:template", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
+router.post("/:type/:template", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
   try {
-    console.log(`${req.params.id} download convocation`);
-    const young = await YoungObject.findById(req.params.id);
+    const { error, value } = Joi.object({ id: Joi.string().required(), type: Joi.string().required(), template: Joi.string().required() })
+      .unknown()
+      .validate(req.params, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { id, type, template } = value;
+
+    const young = await YoungObject.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const options = req.body.options || { format: "A4", margin: 0 };
-    //create html
-    let newhtml = "";
-    if (req.params.template === "cohesion") {
-      newhtml = await convocation.cohesion(req.body.young);
+    // A young can only download their own documents.
+    if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
+      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
-    if (!newhtml) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    // Create html
+    const html = await getHtmlTemplate(type, template, young);
+    if (!html) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const buffer = await renderFromHtml(newhtml, options);
+    const buffer = await renderFromHtml(html, type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 });
     res.contentType("application/pdf");
     res.setHeader("Content-Dispositon", 'inline; filename="test.pdf"');
     res.set("Cache-Control", "public, max-age=1");

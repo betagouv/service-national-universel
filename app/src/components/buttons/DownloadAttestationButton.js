@@ -9,7 +9,6 @@ export default ({ young, children, disabled, uri, ...rest }) => {
     setLoading(true);
     await downloadPDF({
       url: `/young/${young._id}/documents/certificate/${a}`,
-      body: { options: { landscape: true } },
       fileName: `${young.firstName} ${young.lastName} - attestation ${a}.pdf`,
     });
     setLoading(false);
