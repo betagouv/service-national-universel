@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import ProposedPlaces from "./ProposedPlaces";
 import Status from "./status";
-import MissionDetail from "./MissionDetail";
+import MissionDetail from "./missionDetail";
 import Period from "./Period";
 import Format from "./Format";
 import ProfessionalProject from "./ProfessionalProject";
