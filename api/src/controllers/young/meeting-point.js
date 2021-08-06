@@ -7,14 +7,21 @@ const { capture } = require("../../sentry");
 const YoungModel = require("../../models/young");
 const MeetingPointModel = require("../../models/meetingPoint");
 const BusModel = require("../../models/bus");
-const { ERRORS, updatePlacesBus } = require("../../utils");
+const { ERRORS, updatePlacesBus, isYoung } = require("../../utils");
+const { serializeMeetingPoint, serializeYoung } = require("../../utils/serializer");
+const { validateId } = require("../../utils/validator");
 
 router.get("/", passport.authenticate(["referent"], { session: false }), async (req, res) => {
   try {
-    const young = await YoungModel.findById(req.params.id);
+    const { error, value: id } = validateId(req.params.id);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+
+    const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
     const data = await MeetingPointModel.findById(young.meetingPointId);
-    return res.status(200).send({ ok: true, data });
+
+    return res.status(200).send({ ok: true, data: data ? serializeMeetingPoint(data) : null });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
@@ -23,17 +30,21 @@ router.get("/", passport.authenticate(["referent"], { session: false }), async (
 
 router.put("/cancel", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const { error, value: id } = Joi.string().required().validate(req.params.id);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+    const { error, value: id } = validateId(req.params.id);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
 
     const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
     const oldMeetingPoint = await MeetingPointModel.findById(young.meetingPointId);
     const oldBus = await BusModel.findById(oldMeetingPoint?.busId);
+
     young.set({ meetingPointId: undefined, deplacementPhase1Autonomous: undefined });
     await young.save();
+
     if (oldBus) await updatePlacesBus(oldBus);
-    res.status(200).send({ ok: true, data: young });
+
+    res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
@@ -55,6 +66,11 @@ router.put("/", passport.authenticate(["young", "referent"], { session: false })
     const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    // A young can only download their own documents.
+    if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
+      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+
     let bus = null;
 
     //choosing a meetingPoint
@@ -70,9 +86,10 @@ router.put("/", passport.authenticate(["young", "referent"], { session: false })
 
     young.set({ meetingPointId, deplacementPhase1Autonomous });
     await young.save();
+
     if (bus) await updatePlacesBus(bus);
     if (oldBus) await updatePlacesBus(oldBus);
-    res.status(200).send({ ok: true, data: young });
+    res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });

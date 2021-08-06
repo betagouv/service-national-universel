@@ -87,6 +87,10 @@ function serializeDepartmentService(departmentService, user) {
   return departmentService.toObject();
 }
 
+function serializeMeetingPoint(meetingPoint, user) {
+  return meetingPoint.toObject();
+}
+
 function serializeArray(arr, user, serialize) {
   return arr.map((s) => serialize(s, user));
 }
@@ -108,4 +112,5 @@ module.exports = {
   serializeStructure,
   serializeArray,
   serializeDepartmentService,
+  serializeMeetingPoint,
 };
