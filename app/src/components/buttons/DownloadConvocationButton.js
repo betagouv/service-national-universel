@@ -9,7 +9,6 @@ export default ({ young, children, disabled, uri, ...rest }) => {
     setLoading(true);
     await downloadPDF({
       url: `/young/${young._id}/documents/convocation/${a}`,
-      body: { young },
       fileName: `${young.firstName} ${young.lastName} - convocation - ${a}.pdf`,
       errorTitle: "Une erreur est survenue lors de l'édition de votre convocation",
     });
