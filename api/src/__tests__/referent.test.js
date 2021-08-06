@@ -367,10 +367,11 @@ describe("Referent", () => {
 
   describe("POST /referent/signin_as/:type/:id", () => {
     it("should return 401 if role is not admin", async () => {
+      const referent = await createReferentHelper(getNewReferentFixture());
       const passport = require("passport");
       passport.user.role = ROLES.RESPONSIBLE;
       const res = await request(getAppHelper())
-        .post("/referent/signin_as/referent/" + notExistingReferentId)
+        .post("/referent/signin_as/referent/" + referent._id)
         .send();
       expect(res.statusCode).toEqual(401);
       passport.user.role = ROLES.ADMIN;
