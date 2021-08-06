@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import ProposedPlaces from "./ProposedPlaces";
-import Status from "./Status";
+import Status from "./status";
 import MissionDetail from "./MissionDetail";
 import Period from "./Period";
 import Format from "./Format";
