@@ -4,9 +4,7 @@ import { Col, Row } from "reactstrap";
 import { useSelector } from "react-redux";
 
 import YearPicker from "../../dashboard/components/YearPicker";
-
 import Status from "./status";
-
 import { YOUNG_STATUS, REFERENT_ROLES } from "../../../utils";
 
 export default () => {
@@ -31,20 +29,22 @@ export default () => {
   return (
     <>
       <Row style={{}}>
-        <Col md={12}>
+        <Col md={6}>
           <Title>Volontaires</Title>
         </Col>
+        <Col md={6}>
+          {filter && (
+            <>
+              <FiltersList>
+                <FilterWrapper>
+                  <YearPicker options={["2019", "2020", "2021"]} onChange={(cohort) => updateFilter({ cohort })} value={filter.cohort} />
+                </FilterWrapper>
+              </FiltersList>
+            </>
+          )}
+        </Col>
       </Row>
-      {filter && (
-        <>
-          <FiltersList>
-            <FilterWrapper>
-              <YearPicker options={["2019", "2020", "2021"]} onChange={(cohort) => updateFilter({ cohort })} value={filter.cohort} />
-            </FilterWrapper>
-          </FiltersList>
-          <Status filter={filter} />
-        </>
-      )}
+      {filter && <Status filter={filter} />}
     </>
   );
 };
