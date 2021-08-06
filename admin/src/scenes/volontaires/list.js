@@ -10,23 +10,11 @@ import api from "../../services/api";
 import { apiURL, appURL } from "../../config";
 import Panel from "./panel";
 import Badge from "../../components/Badge";
-import {
-  translate,
-  getFilterLabel,
-  formatStringLongDate,
-  YOUNG_STATUS_COLORS,
-  isInRuralArea,
-  formatLongDateFR,
-  getAge,
-  ES_NO_LIMIT,
-  ROLES,
-  formatLongDateUTC,
-  colors,
-} from "../../utils";
+import { translate, getFilterLabel, YOUNG_STATUS_COLORS, isInRuralArea, formatLongDateFR, getAge, ES_NO_LIMIT, ROLES, formatLongDateUTC, colors } from "../../utils";
 import { Link } from "react-router-dom";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
-import { Filter, FilterRow, ResultTable, Table, TopResultStats, BottomResultStats, ActionBox, Header, Title, MultiLine } from "../../components/list";
+import { Filter, FilterRow, ResultTable, Table, ActionBox, Header, Title, MultiLine } from "../../components/list";
 
 const FILTERS = [
   "SEARCH",
@@ -45,7 +33,7 @@ const FILTERS = [
   "MILITARY_PREPARATION_FILES_STATUS",
 ];
 
-export default ({ setYoung }) => {
+export default () => {
   const [volontaire, setVolontaire] = useState(null);
   const [centers, setCenters] = useState(null);
   const [meetingPoints, setMeetingPoints] = useState(null);
@@ -386,7 +374,6 @@ export default ({ setYoung }) => {
                       <tr>
                         <th width="25%">Volontaire</th>
                         <th>Contextes</th>
-                        {/* <th width="40%">Dernière connexion</th> */}
                         <th width="10%">Actions</th>
                       </tr>
                     </thead>
@@ -413,8 +400,12 @@ export default ({ setYoung }) => {
 };
 
 const Hit = ({ hit, onClick, selected }) => {
+  const getBackgroundColor = () => {
+    if (selected) return colors.lightBlueGrey;
+    if (hit.status === "WITHDRAWN") return colors.extraLightGrey;
+  };
   return (
-    <tr style={{ backgroundColor: (selected && "#e6ebfa") || (hit.status === "WITHDRAWN" && colors.extraLightGrey) }} onClick={onClick}>
+    <tr style={{ backgroundColor: getBackgroundColor() }} onClick={onClick}>
       <td>
         <MultiLine>
           <h2>{`${hit.firstName} ${hit.lastName}`}</h2>
@@ -425,30 +416,11 @@ const Hit = ({ hit, onClick, selected }) => {
       </td>
       <td>
         <Badge minify text={hit.cohort} tooltipText={`Cohorte ${hit.cohort}`} />
-        <Badge
-          minify
-          text="Phase 1"
-          tooltipText={translate(hit.statusPhase1)}
-          minTooltipText={`Phase 1: ${translate(hit.statusPhase1)}`}
-          color={YOUNG_STATUS_COLORS[hit.statusPhase1]}
-        />
-        <Badge
-          minify
-          text="Phase 2"
-          tooltipText={translate(hit.statusPhase2)}
-          minTooltipText={`Phase 2: ${translate(hit.statusPhase2)}`}
-          color={YOUNG_STATUS_COLORS[hit.statusPhase2]}
-        />
-        <Badge
-          minify
-          text="Phase 3"
-          tooltipText={translate(hit.statusPhase3)}
-          minTooltipText={`Phase 3: ${translate(hit.statusPhase3)}`}
-          color={YOUNG_STATUS_COLORS[hit.statusPhase3]}
-        />
+        <BadgePhase text="Phase 1" value={hit.statusPhase1} />
+        <BadgePhase text="Phase 2" value={hit.statusPhase2} />
+        <BadgePhase text="Phase 3" value={hit.statusPhase3} />
         {hit.status === "WITHDRAWN" ? <Badge minify text="Désisté" color={YOUNG_STATUS_COLORS.WITHDRAWN} tooltipText={translate(hit.status)} /> : null}
       </td>
-      {/* <td>{formatStringLongDate(hit.lastLoginAt)}</td> */}
       <td onClick={(e) => e.stopPropagation()}>
         <Action hit={hit} />
       </td>
@@ -456,7 +428,11 @@ const Hit = ({ hit, onClick, selected }) => {
   );
 };
 
-const Action = ({ hit, color }) => {
+const BadgePhase = ({ text, value }) => (
+  <Badge minify text={text} tooltipText={translate(value)} minTooltipText={`${text}: ${translate(value)}`} color={YOUNG_STATUS_COLORS[value]} />
+);
+
+const Action = ({ hit }) => {
   const user = useSelector((state) => state.Auth.user);
 
   return (
