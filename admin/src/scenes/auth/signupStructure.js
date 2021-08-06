@@ -17,7 +17,7 @@ import MultiSelect from "../../components/Multiselect";
 import LoginBox from "./components/loginBox";
 import AuthWrapper from "./components/authWrapper";
 
-import { associationTypes, privateTypes, publicTypes, publicEtatTypes, translate } from "../../utils";
+import { associationTypes, privateTypes, publicTypes, publicEtatTypes, translate, colors } from "../../utils";
 import AddressInput from "../../components/addressInput";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
 
@@ -442,7 +442,7 @@ const Submit = styled(LoadingButton)`
   border-radius: 0;
   padding: 0.5rem 3rem;
   border: 0;
-  background-color: #5145cd;
+  background-color: ${colors.purple};
   margin-top: 30px;
   margin-bottom: 30px;
   border-radius: 10px;

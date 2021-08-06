@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
 import api from "../../../services/api";
-import { translate, ROLES } from "../../../utils";
+import { translate, ROLES, colors } from "../../../utils";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 
 export default ({ program, image, enableToggle = true, onDelete }) => {
@@ -190,7 +190,7 @@ const SeeMore = styled.a`
     color: #372f78;
   }
   cursor: pointer;
-  color: #5145cd;
+  color: ${colors.purple};
   font-size: 16px;
   font-weight: 600;
 `;

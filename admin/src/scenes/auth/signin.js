@@ -15,6 +15,7 @@ import Header from "./components/header";
 import AuthWrapper from "./components/authWrapper";
 import Title from "./components/title";
 import Subtitle from "./components/subtitle";
+import { colors } from "../../utils";
 
 export default () => {
   const dispatch = useDispatch();
@@ -47,7 +48,7 @@ export default () => {
                       dispatch(setUser(user));
                     }
                   } catch (e) {
-                    console.log('ERROR', e);
+                    console.log("ERROR", e);
                     if (e && ["EMAIL_OR_PASSWORD_INVALID", "USER_NOT_EXISTS", "EMAIL_AND_PASSWORD_REQUIRED"].includes(e.code)) {
                       return setUserIsValid(false);
                     }
@@ -193,7 +194,7 @@ const InputField = styled(Field)`
 const Forgot = styled.div`
   margin-bottom: 20px;
   a {
-    color: #5145cd;
+    color: ${colors.purple};
     font-size: 14px;
   }
 `;
@@ -205,7 +206,7 @@ const Submit = styled(LoadingButton)`
   border-radius: 0;
   padding: 0.5rem 3rem;
   border: 0;
-  background-color: #5145cd;
+  background-color: ${colors.purple};
   margin-top: 30px;
   margin-bottom: 30px;
   border-radius: 10px;

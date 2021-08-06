@@ -10,6 +10,7 @@ import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import Loader from "../../components/Loader";
 import Done from "./done.js";
+import { colors } from "../../utils";
 
 export default () => {
   const [young, setYoung] = useState(null);
@@ -217,7 +218,7 @@ const InputField = styled(Field)`
 const Forgot = styled.div`
   margin-bottom: 20px;
   a {
-    color: #5145cd;
+    color: ${colors.purple};
     font-size: 14px;
   }
 `;
@@ -229,7 +230,7 @@ const Submit = styled(LoadingButton)`
   border-radius: 0;
   padding: 0.5rem 3rem;
   border: 0;
-  background-color: #5145cd;
+  background-color: ${colors.purple};
   margin-top: 30px;
   margin-bottom: 30px;
   border-radius: 10px;

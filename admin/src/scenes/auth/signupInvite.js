@@ -13,7 +13,7 @@ import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import Header from "./components/header";
 
-import { translate, ROLES } from "../../utils";
+import { translate, ROLES, colors } from "../../utils";
 import Loader from "../../components/Loader";
 import LoginBox from "./components/loginBox";
 import AuthWrapper from "./components/authWrapper";
@@ -219,7 +219,7 @@ const Submit = styled(LoadingButton)`
   border-radius: 0;
   padding: 0.5rem 3rem;
   border: 0;
-  background-color: #5145cd;
+  background-color: ${colors.purple};
   margin-top: 30px;
   margin-bottom: 30px;
   border-radius: 10px;
