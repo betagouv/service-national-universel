@@ -66,7 +66,7 @@ export default ({ children, young, tab }) => {
             </Tab>
             {user.role === ROLES.ADMIN ? (
               <Tab isActive={tab === "historique"} onClick={() => history.push(`/volontaire/${young._id}/historique`)}>
-                Historique <i style={{ color: ${colors.purple}, fontWeight: "lighter", fontSize: ".85rem" }}>Bêta</i>
+                Historique <i style={{ color: colors.purple, fontWeight: "lighter", fontSize: ".85rem" }}>Bêta</i>
               </Tab>
             ) : null}
           </TabList>

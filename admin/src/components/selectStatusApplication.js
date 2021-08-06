@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 
 import api from "../services/api";
 
-import { translate, APPLICATION_STATUS_COLORS, APPLICATION_STATUS, ROLES } from "../utils";
+import { translate, APPLICATION_STATUS_COLORS, APPLICATION_STATUS, ROLES, colors } from "../utils";
 import { toastr } from "react-redux-toastr";
 import Chevron from "./Chevron";
 import ModalConfirmWithMessage from "./modals/ModalConfirmWithMessage";
@@ -27,7 +27,7 @@ export default ({ hit, options = [], callback }) => {
     })();
   }, [hit._id]);
 
-  if (!application) return <i style={{ color: "#382F79" }}>Chargement...</i>;
+  if (!application) return <i style={{ color: colors.darkPurple }}>Chargement...</i>;
 
   options = [APPLICATION_STATUS.IN_PROGRESS, APPLICATION_STATUS.DONE, APPLICATION_STATUS.ABANDON];
   if (application.status === APPLICATION_STATUS.WAITING_VALIDATION) options = [APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.REFUSED, APPLICATION_STATUS.CANCEL];

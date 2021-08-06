@@ -6,7 +6,7 @@ import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
-import { translate, STRUCTURE_STATUS_COLORS, ROLES , colors} from "../../../utils";
+import { translate, STRUCTURE_STATUS_COLORS, ROLES, colors } from "../../../utils";
 import api from "../../../services/api";
 import TabList from "../../../components/views/TabList";
 import Tab from "../../../components/views/Tab";
@@ -56,7 +56,7 @@ export default ({ children, structure, tab }) => {
                 </Tab>
                 {user.role === ROLES.ADMIN ? (
                   <Tab isActive={tab === "historique"} onClick={() => history.push(`/structure/${structure._id}/historique`)}>
-                    Historique <i style={{ color: ${colors.purple}, fontWeight: "lighter", fontSize: ".85rem" }}>Bêta</i>
+                    Historique <i style={{ color: colors.purple, fontWeight: "lighter", fontSize: ".85rem" }}>Bêta</i>
                   </Tab>
                 ) : null}
               </>

@@ -13,7 +13,7 @@ import { Link } from "react-router-dom";
 import { Box, BoxContent, BoxHeadTitle } from "../../components/box";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import DateInput from "../../components/dateInput";
-import { departmentList, regionList, department2region, translate, ROLES, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE } from "../../utils";
+import { departmentList, regionList, department2region, translate, ROLES, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE, colors } from "../../utils";
 import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 import Loader from "../../components/Loader";
@@ -306,7 +306,7 @@ export default (props) => {
       <Emails email={user.email} />
       {currentUser.role === ROLES.ADMIN ? (
         <Box>
-          <div style={{ fontSize: ".9rem", padding: "1rem", color: "#382F79" }}>Historique</div>
+          <div style={{ fontSize: ".9rem", padding: "1rem", color: colors.darkPurple }}>Historique</div>
           <HistoricComponent model="referent" value={user} />
         </Box>
       ) : null}

@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import { formatLongDateUTC } from "../../utils";
 import api from "../../services/api";
 import { Box } from "../../components/box";
-import { ROLES } from "../../utils";
+import { ROLES, colors } from "../../utils";
 
 export default ({ email }) => {
   const [emails, setEmails] = useState();
@@ -32,7 +32,7 @@ export default ({ email }) => {
 
   return (
     <Box>
-      <div style={{ fontSize: ".9rem", padding: "1rem", color: "#382F79" }}>Emails Sendinblue</div>
+      <div style={{ fontSize: ".9rem", padding: "1rem", color: colors.darkPurple }}>Emails Sendinblue</div>
       {emails?.length ? (
         <>
           <Table>

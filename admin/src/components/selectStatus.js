@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 
 import api from "../services/api";
 
-import { translate, YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_COLORS, isEndOfInscriptionManagement2021, ROLES } from "../utils";
+import { translate, YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_COLORS, isEndOfInscriptionManagement2021, ROLES, colors } from "../utils";
 import { toastr } from "react-redux-toastr";
 
 import ModalCorrection from "./modals/ModalCorrection";
@@ -44,7 +44,7 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
     })();
   }, [hit._id]);
 
-  if (!young) return <i style={{ color: "#382F79" }}>Chargement...</i>;
+  if (!young) return <i style={{ color: colors.darkPurple }}>Chargement...</i>;
 
   const handleClickStatus = async (status) => {
     // Gabrielle says: (https://trello.com/c/JBS3Jn8I/576-inscription-impact-fin-instruction-dossiers-au-6-mai)

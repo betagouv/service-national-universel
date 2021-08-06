@@ -9,7 +9,7 @@ import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import Loader from "../../../components/Loader";
 import api from "../../../services/api";
 import AssignMeetingPoint from "../components/AssignMeetingPoint";
-import { translate, canAssignMeetingPoint } from "../../../utils";
+import { translate, canAssignMeetingPoint, colors } from "../../../utils";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 
 export default ({ values, handleChange, handleSubmit }) => {
@@ -69,7 +69,7 @@ export default ({ values, handleChange, handleSubmit }) => {
                 ) : null}
                 {canAssignMeetingPoint(user) && !meetingPoint && values.deplacementPhase1Autonomous !== "true" ? (
                   <CancelButton
-                    color="#382F79"
+                    color={colors.darkPurple}
                     onClick={() => {
                       handleChange({ target: { name: "meetingPointId", value: undefined } });
                       handleChange({ target: { name: "deplacementPhase1Autonomous", value: "true" } });

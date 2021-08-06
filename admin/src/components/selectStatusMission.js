@@ -5,7 +5,7 @@ import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
 import api from "../services/api";
-import { translate, MISSION_STATUS_COLORS, MISSION_STATUS, ROLES } from "../utils";
+import { translate, MISSION_STATUS_COLORS, MISSION_STATUS, ROLES, colors } from "../utils";
 import MailCorrectionMission from "../scenes/missions/components/MailCorrectionMission";
 import MailRefusedMission from "../scenes/missions/components/MailRefusedMission";
 import Chevron from "./Chevron";
@@ -27,7 +27,7 @@ export default ({ hit, options = [], callback = () => {} }) => {
     })();
   }, [hit._id]);
 
-  if (!mission) return <i style={{ color: "#382F79" }}>Chargement...</i>;
+  if (!mission) return <i style={{ color: colors.darkPurple }}>Chargement...</i>;
 
   if (user.role === ROLES.RESPONSIBLE || user.role === ROLES.SUPERVISOR)
     options.push(MISSION_STATUS.WAITING_VALIDATION, MISSION_STATUS.DRAFT, MISSION_STATUS.CANCEL, MISSION_STATUS.ARCHIVED);
