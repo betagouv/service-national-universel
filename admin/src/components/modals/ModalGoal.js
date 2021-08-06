@@ -3,6 +3,7 @@ import { Modal } from "reactstrap";
 import styled from "styled-components";
 
 import ModalButton from "../buttons/ModalButton";
+import { colors } from "../../utils";
 
 export default ({ isOpen, onChange, onValidate, callback }) => {
   return (
@@ -18,7 +19,7 @@ export default ({ isOpen, onChange, onValidate, callback }) => {
           </p>
         </Content>
         <Footer>
-          <ModalButton color="#5245cc" onClick={callback}>
+          <ModalButton color={colors.purple} onClick={callback}>
             Placer en liste complémentaire
           </ModalButton>
           <ModalButton onClick={onValidate}>Valider</ModalButton>
@@ -52,7 +53,7 @@ const Header = styled.div`
   align-items: center;
   font-size: 0.8rem;
   text-transform: uppercase;
-  color: #ef4036;
+  color: ${colors.red};
 `;
 
 const Content = styled.div`
@@ -70,7 +71,7 @@ const Content = styled.div`
   p {
     font-size: 1rem;
     margin: 0;
-    color: #6e757c;
+    color: ${colors.grey};
   }
 `;
 

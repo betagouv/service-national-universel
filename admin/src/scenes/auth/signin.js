@@ -88,7 +88,7 @@ export default () => {
                             onChange={handleChange}
                           />
                         </div>
-                        <p style={{ fontSize: 12, color: "rgb(253, 49, 49)", marginTop: 5 }}>{errors.email}</p>
+                        <p style={{ fontSize: 12, color: colors.red, marginTop: 5 }}>{errors.email}</p>
                       </StyledFormGroup>
                       <StyledFormGroup>
                         <div>
@@ -104,7 +104,7 @@ export default () => {
                             onChange={handleChange}
                           />
                         </div>
-                        <p style={{ fontSize: 12, color: "rgb(253, 49, 49)", marginTop: 5 }}>{errors.password}</p>
+                        <p style={{ fontSize: 12, color: colors.red, marginTop: 5 }}>{errors.password}</p>
                       </StyledFormGroup>
                       <Forgot>
                         <Link to="/auth/forgot">Mot de passe perdu ?</Link>
@@ -144,7 +144,7 @@ const Register = styled.h3`
   position: relative;
   font-size: 1rem;
   text-align: center;
-  color: #6e757c;
+  color: ${colors.grey};
   @media (max-width: 768px) {
     font-size: 0.8rem;
   }

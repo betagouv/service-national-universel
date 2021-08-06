@@ -41,7 +41,7 @@ export default () => {
           <LoginBox>
             <div>
               <Title>Inscrivez votre structure d'accueil</Title>
-              <Subtitle style={{ color: "#6E757C" }}>A destination des structures souhaitant accueillir des volontaires</Subtitle>
+              <Subtitle style={{ color: colors.grey }}>A destination des structures souhaitant accueillir des volontaires</Subtitle>
               <Formik
                 validateOnChange={false}
                 validateOnBlur={false}
@@ -167,14 +167,14 @@ const Register = styled.h3`
   position: relative;
   font-size: 1rem;
   text-align: center;
-  color: #6e757c;
+  color: ${colors.grey};
   @media (max-width: 768px) {
     font-size: 0.8rem;
   }
   font-weight: 400;
   margin-bottom: 20px;
   a {
-    color: #32267f;
+    color: ${colors.purple};
     font-weight: 500;
   }
 `;

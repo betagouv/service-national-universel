@@ -63,7 +63,7 @@ export default ({ values, handleChange, handleSubmit }) => {
                 {canAssignMeetingPoint(user) ? <AssignMeetingPoint young={values} onAffect={getData} /> : null}
                 {values.deplacementPhase1Autonomous === "true" ? <i>{`${values.firstName} se rend au centre par ses propres moyens.`}</i> : <MeetingPoint value={meetingPoint} />}
                 {canAssignMeetingPoint(user) && (meetingPoint || values.deplacementPhase1Autonomous === "true") ? (
-                  <CancelButton color="#be3b12" onClick={onClickCancel}>
+                  <CancelButton color={colors.red} onClick={onClickCancel}>
                     Annuler ce choix
                   </CancelButton>
                 ) : null}

@@ -8,7 +8,7 @@ import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
-import { translate, corpsEnUniforme, formatLongDateFR, ES_NO_LIMIT, ROLES, getFilterLabel } from "../../utils";
+import { translate, corpsEnUniforme, formatLongDateFR, ES_NO_LIMIT, ROLES, getFilterLabel, colors } from "../../utils";
 import VioletButton from "../../components/buttons/VioletButton";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine } from "../../components/list";
@@ -241,11 +241,11 @@ const Hit = ({ hit, onClick, selected, missions }) => {
         <div>{missionsInfo.placesTotal} places</div>
       </td>
       <td>
-        {hit.status === "DRAFT" ? <Badge text={translate(hit.status)} color="#d9bb71" minTooltipText={translate(hit.status)} /> : null}
-        {hit.isNetwork === "true" ? <Badge text="Tête de réseau" color="#00f" minTooltipText="Tête de réseau" /> : null}
+        {hit.status === "DRAFT" ? <Badge text={translate(hit.status)} color={colors.lightGold} minTooltipText={translate(hit.status)} /> : null}
+        {hit.isNetwork === "true" ? <Badge text="Tête de réseau" color={colors.darkBlue} minTooltipText="Tête de réseau" /> : null}
         {hit.networkName ? (
           <Link to={`structure/${hit.networkId}`}>
-            <Badge text={hit.networkName} color="#5245cc" minTooltipText={hit.networkName} />
+            <Badge text={hit.networkName} color={colors.purple} minTooltipText={hit.networkName} />
           </Link>
         ) : null}
         {hit.department ? <Badge text={translate(hit.department)} minify={false} /> : null}

@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { colors } from "../../utils";
 
 export const ModalContainer = styled.div`
   display: flex;
@@ -23,7 +24,7 @@ export const Header = styled.div`
   align-items: center;
   font-size: 0.8rem;
   text-transform: uppercase;
-  color: #ef4036;
+  color: ${colors.red};
 `;
 
 export const Content = styled.div`
@@ -42,13 +43,13 @@ export const Content = styled.div`
   p {
     font-size: 1rem;
     margin-bottom: 1rem;
-    color: #6e757c;
+    color: ${colors.grey};
   }
   textarea {
     padding: 1rem;
     line-height: 1.5;
     border-radius: 0.5rem;
-    border: 1px solid #ccc;
+    border: 1px solid ${colors.grey};
     min-width: 100%;
     margin-bottom: 2rem;
   }
@@ -66,7 +67,7 @@ export const Footer = styled.div`
     text-align: center;
     min-width: 80%;
     max-width: 80%;
-    border: #696969;
+    border: 1px solid ${colors.grey};
     border-radius: 10px;
     padding: 7px 30px;
   }
@@ -74,7 +75,7 @@ export const Footer = styled.div`
     margin: 0.3rem 0;
   }
   p {
-    color: #696969;
+    color: ${colors.grey};
     font-size: 0.8rem;
     font-weight: 400;
     :hover {
