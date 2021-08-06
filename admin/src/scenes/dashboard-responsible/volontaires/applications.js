@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Col, Row } from "reactstrap";
 import { useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
+import { toastr } from "react-redux-toastr";
 
 import { APPLICATION_STATUS_COLORS, ROLES, translate, ENABLE_PM } from "../../../utils";
 import Badge from "../../../components/Badge";
