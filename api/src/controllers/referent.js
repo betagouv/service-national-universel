@@ -256,7 +256,7 @@ router.post("/signup_verify", async (req, res) => {
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.INVITATION_TOKEN_EXPIRED_OR_INVALID });
 
     const token = jwt.sign({ _id: referent._id }, config.secret, { expiresIn: "30d" });
-    return res.status(200).send({ ok: true, token, data: referent });
+    return res.status(200).send({ ok: true, token, data: serializeReferent(referent, referent) });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -281,13 +281,7 @@ router.post("/signup_invite", async (req, res) => {
     if (referent.registredAt) return res.status(400).send({ ok: false, data: null, code: ERRORS.USER_ALREADY_REGISTERED });
     if (!validatePassword(password)) return res.status(400).send({ ok: false, prescriber: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
 
-    referent.set({ firstName: firstName });
-    referent.set({ lastName: lastName });
-    referent.set({ password: password });
-    referent.set({ registredAt: Date.now() });
-    referent.set({ lastLoginAt: Date.now() });
-    referent.set({ invitationToken: "" });
-    referent.set({ invitationExpires: null });
+    referent.set({ firstName, lastName, password, registredAt: Date.now(), lastLoginAt: Date.now(), invitationToken: "", invitationExpires: null });
 
     const token = jwt.sign({ _id: referent.id }, config.secret, { expiresIn: "30d" });
     res.cookie("jwt", token, cookieOptions());
@@ -295,9 +289,7 @@ router.post("/signup_invite", async (req, res) => {
     await referent.save();
     await updateTutorNameInMissionsAndApplications(referent);
 
-    referent.password = undefined;
-
-    return res.status(200).send({ data: referent, token, ok: true });
+    return res.status(200).send({ data: serializeReferent(referent, referent), token, ok: true });
   } catch (error) {
     capture(error);
     return res.sendStatus(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
