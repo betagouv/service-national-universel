@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Modal } from "reactstrap";
 import styled from "styled-components";
+import { toastr } from "react-redux-toastr";
 
 import api from "../../../services/api";
-
-import { toastr } from "react-redux-toastr";
+import { SENDINBLUE_TEMPLATES } from "../../../utils";
 
 export default ({ value, onChange, onSend }) => {
   const [message, setMessage] = useState();
@@ -21,9 +21,9 @@ export default ({ value, onChange, onSend }) => {
 
   const send = async () => {
     setSending(true);
-    await api.post(`/referent/${value.tutorId}/email/refused`, {
+    await api.post(`/referent/${value.tutorId}/email/${SENDINBLUE_TEMPLATES.referent.MISSION_REFUSED}`, {
       message,
-      subject: `Votre mission d'intérêt général "${value.name}" est refusée`,
+      missionName: value.name,
     });
     toastr.success("Email envoyé !");
     onSend(message);

@@ -29,6 +29,7 @@ const { createApplication, getApplicationsHelper } = require("./helpers/applicat
 const { createMissionHelper, getMissionsHelper } = require("./helpers/mission");
 const getNewMissionFixture = require("./fixtures/mission");
 const { SUB_ROLES, ROLES } = require("snu-lib/roles");
+const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 
 jest.mock("../utils", () => ({
   ...jest.requireActual("../utils"),
@@ -129,14 +130,21 @@ describe("Referent", () => {
 
   //todo 404 if tutor not found
   describe("POST /referent/:tutorId/email/:template", () => {
-    it("should return 200 if tutor not found but it's weird", async () => {
+    it("should return 404 if tutor not found", async () => {
       const res = await request(getAppHelper()).post(`/referent/${notExistingReferentId}/email/test`).send({ message: "hello", subject: "hi" });
-      expect(res.statusCode).toEqual(200);
+      expect(res.statusCode).toEqual(404);
     });
     it("should return 200 if tutor found", async () => {
       const tutor = await createReferentHelper(getNewReferentFixture());
-      const res = await request(getAppHelper()).post(`/referent/${tutor._id}/email/correction`).send({ message: "hello", subject: "hi" });
+      const res = await request(getAppHelper())
+        .post(`/referent/${tutor._id}/email/${SENDINBLUE_TEMPLATES.referent.MISSION_WAITING_CORRECTION}`)
+        .send({ message: "hello", subject: "hi" });
       expect(res.statusCode).toEqual(200);
+    });
+    it("should return 400 if wrong template", async () => {
+      const tutor = await createReferentHelper(getNewReferentFixture());
+      const res = await request(getAppHelper()).post(`/referent/${tutor._id}/email/001`).send({ message: "hello", subject: "hi" });
+      expect(res.statusCode).toEqual(400);
     });
   });
 

@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Modal } from "reactstrap";
 import styled from "styled-components";
+import { toastr } from "react-redux-toastr";
 
 import api from "../../../services/api";
-
-import { toastr } from "react-redux-toastr";
+import { SENDINBLUE_TEMPLATES } from "../../../utils";
 
 export default ({ value, onChange, onSend }) => {
   const [message, setMessage] = useState();
@@ -25,9 +25,9 @@ Merci d'effectuer ces modifications depuis votre espace.`);
 
   const send = async () => {
     setSending(true);
-    await api.post(`/referent/${value.tutorId}/email/correction`, {
+    await api.post(`/referent/${value.tutorId}/email/${SENDINBLUE_TEMPLATES.referent.MISSION_WAITING_CORRECTION}`, {
       message,
-      subject: `Votre mission d'intérêt général "${value.name}" est en attente de correction`,
+      missionName: value.name,
     });
     toastr.success("Email envoyé !");
     onSend(message);

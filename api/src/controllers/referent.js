@@ -378,46 +378,38 @@ router.post("/:tutorId/email/:template", passport.authenticate("referent", { ses
       subject: Joi.string().allow(null, ""),
       message: Joi.string().allow(null, ""),
       app: Joi.object().allow(null, {}),
+      missionName: Joi.string().allow(null, ""),
     })
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
-    const { tutorId, template, subject, message, app } = value;
+    const { tutorId, template, subject, message, app, missionName } = value;
     const tutor = await ReferentModel.findById(tutorId);
-    if (!tutor) return res.status(200).send({ ok: true });
+    if (!tutor) return res.status(404).send({ ok: false, data: null, code: ERRORS.USER_NOT_FOUND });
 
-    let htmlContent = "";
-
-    if (template === "correction") {
-      htmlContent = fs
-        .readFileSync(path.resolve(__dirname, "../templates/correctionMission.html"))
-        .toString()
-        .replace(/{{message}}/g, `${message.replace(/\n/g, "<br/>")}`)
-        .replace(/{{cta}}/g, "https://admin.snu.gouv.fr");
-    } else if (template === "refused") {
-      htmlContent = fs
-        .readFileSync(path.resolve(__dirname, "../templates/refusedMission.html"))
-        .toString()
-        .replace(/{{message}}/g, `${message.replace(/\n/g, "<br/>")}`)
-        .replace(/{{cta}}/g, "https://admin.snu.gouv.fr");
-    } else if (template === SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_VALIDATED) {
-      await sendTemplate(parseInt(SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_VALIDATED), {
+    if (
+      [
+        SENDINBLUE_TEMPLATES.referent.MISSION_WAITING_CORRECTION,
+        SENDINBLUE_TEMPLATES.referent.MISSION_REFUSED,
+        SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_VALIDATED,
+      ].includes(template)
+    )
+      await sendTemplate(template, {
         emailTo: [{ name: `${tutor.firstName} ${tutor.lastName}`, email: tutor.email }],
         params: {
-          cta: `${config.ADMIN_URL}/volontaire/${app.youngId}`,
-          youngFirstName: app.youngFirstName,
-          youngLastName: app.youngLastName,
-          missionName: app.missionName,
+          cta: config.ADMIN_URL,
+          message,
+          missionName: missionName || app?.missionName,
+          youngFirstName: app?.youngFirstName,
+          youngLastName: app?.youngLastName,
         },
       });
-      return res.status(200).send({ ok: true });
-    } else {
-      throw new Error("Template de mail introuvable");
+    else {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    await sendEmail({ name: `${tutor.firstName} ${tutor.lastName}`, email: tutor.email }, subject, htmlContent);
-    return res.status(200).send({ ok: true }); //todo
+    return res.status(200).send({ ok: true });
   } catch (error) {
     console.log(error);
     capture(error);
