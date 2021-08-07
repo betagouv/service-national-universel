@@ -11,7 +11,7 @@ export default ({ value, onChange, onSend }) => {
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
-    setMessage(`Bonjour ${value.tutor?.firstName || ""} ${value.tutor?.lastName || ""},
+    setMessage(`Bonjour ${value.tutorName || ""},
 En vue de la publication de votre mission "${
       value.name
     }" et suite à l'étude de son contenu, il vous est demandé d'apporter des précisions pour respecter le cadre du Service National Universel, à savoir :
@@ -25,7 +25,7 @@ Merci d'effectuer ces modifications depuis votre espace.`);
 
   const send = async () => {
     setSending(true);
-    await api.post(`/referent/email-tutor/correction/${value.tutor.id}`, {
+    await api.post(`/referent/${value.tutorId}/email/correction`, {
       message,
       subject: `Votre mission d'intérêt général "${value.name}" est en attente de correction`,
     });

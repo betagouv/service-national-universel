@@ -370,7 +370,7 @@ router.post("/young", passport.authenticate("referent", { session: false }), asy
   }
 });
 
-router.post("/email-tutor/:template/:tutorId", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.post("/:tutorId/email/:template", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
       tutorId: Joi.string().required(),

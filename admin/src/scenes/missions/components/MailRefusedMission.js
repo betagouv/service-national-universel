@@ -11,7 +11,7 @@ export default ({ value, onChange, onSend }) => {
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
-    setMessage(`Bonjour ${value.tutor?.firstName || ""} ${value.tutor?.lastName || ""},
+    setMessage(`Bonjour ${value.tutorName || ""},
     Suite à l'étude de son contenu, votre mission "${value.name}" a été refusée, ne respectant pas le cadre du Service National Universel car :
 - ...
 - ...`);
@@ -21,7 +21,7 @@ export default ({ value, onChange, onSend }) => {
 
   const send = async () => {
     setSending(true);
-    await api.post(`/referent/email-tutor/refused/${value.tutor.id}`, {
+    await api.post(`/referent/${value.tutorId}/email/refused`, {
       message,
       subject: `Votre mission d'intérêt général "${value.name}" est refusée`,
     });

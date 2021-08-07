@@ -43,8 +43,8 @@ export default ({ hit, options = [], callback = () => {} }) => {
   };
 
   const onConfirmStatus = (status) => {
-    if (status === MISSION_STATUS.WAITING_CORRECTION && mission.tutor) return setWaitingCorrectionModal(true);
-    if (status === MISSION_STATUS.REFUSED && mission.tutor) return setRefusedModal(true);
+    if (status === MISSION_STATUS.WAITING_CORRECTION && mission.tutorId) return setWaitingCorrectionModal(true);
+    if (status === MISSION_STATUS.REFUSED && mission.tutorId) return setRefusedModal(true);
     setStatus(status);
   };
 

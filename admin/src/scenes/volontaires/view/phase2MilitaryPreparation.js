@@ -64,7 +64,7 @@ export default ({ young }) => {
       await api.post(`/referent/email/${SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_VALIDATED}/${young._id}`);
       for (let i = 0; i < applicationsToMilitaryPreparation.length; i++) {
         const app = applicationsToMilitaryPreparation[i];
-        await api.post(`/referent/email-tutor/${SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_VALIDATED}/${app.tutorId}`, { app });
+        await api.post(`/referent/${app.tutorId}/email/${SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_VALIDATED}`, { app });
       }
     } catch (e) {
       console.error(e);
