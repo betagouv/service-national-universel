@@ -54,46 +54,6 @@ function inSevenDays() {
   return Date.now() + 86400000 * 7;
 }
 
-const selectTemplate = (role) => {
-  switch (role) {
-    case ROLES.REFERENT_DEPARTMENT:
-      return {
-        template: "../templates/inviteReferentDepartment.html",
-        mailObject: "Activez votre compte référent départemental SNU",
-      };
-    case ROLES.REFERENT_REGION:
-      return {
-        template: "../templates/inviteReferentRegion.html",
-        mailObject: "Activez votre compte référent régional SNU",
-      };
-    case ROLES.RESPONSIBLE:
-      return {
-        template: "../templates/inviteMember.html",
-        mailObject: "Activez votre compte de responsable de structure",
-      };
-    case "responsible_new_structure":
-      return {
-        template: "../templates/inviteMemberNewStructure.html",
-        mailObject: "Activez votre compte de responsable de structure",
-      };
-    case ROLES.ADMIN:
-      return {
-        template: "../templates/inviteAdmin.html",
-        mailObject: "Activez votre compte administrateur SNU",
-      };
-    case ROLES.HEAD_CENTER:
-      return {
-        template: "../templates/inviteHeadCenter.html",
-        mailObject: "Activez votre compte de chef de centre SNU",
-      };
-    default:
-      return {
-        template: "",
-        mailObject: "",
-      };
-  }
-};
-
 async function updateTutorNameInMissionsAndApplications(tutor) {
   if (!tutor || !tutor.firstName || !tutor.lastName) return;
 
@@ -204,7 +164,7 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
     if (!canInviteUser(req.user.role, value.role)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const {
-      template: reqTemplate,
+      template,
       email,
       firstName,
       lastName,
@@ -236,21 +196,15 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
     const referent = await ReferentModel.create(referentProperties);
     await updateTutorNameInMissionsAndApplications(referent);
 
-    const { template, mailObject } = selectTemplate(reqTemplate);
+    const cta = `${config.ADMIN_URL}/auth/signup/invite?token=${invitation_token}`;
+    const fromName = `${req.user.firstName} ${req.user.lastName}`;
+    const toName = `${referent.firstName} ${referent.lastName}`;
 
-    let htmlContent = fs
-      .readFileSync(path.resolve(__dirname, template))
-      .toString()
-      .replace(/{{toName}}/g, `${referent.firstName} ${referent.lastName}`)
-      .replace(/{{fromName}}/g, `${req.user.firstName} ${req.user.lastName}`)
-      .replace(/{{department}}/g, `${referent.department}`)
-      .replace(/{{region}}/g, `${referent.region}`)
-      .replace(/{{structureName}}/g, structureName)
-      .replace(/{{centerName}}/g, cohesionCenterName || "")
-      .replace(/{{cta}}/g, `${config.ADMIN_URL}/auth/signup/invite?token=${invitation_token}`);
-
-    await sendEmail({ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }, mailObject, htmlContent);
-    return res.status(200).send({ data: referent, ok: true });
+    await sendTemplate(template, {
+      emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
+      params: { cta, cohesionCenterName, structureName, region, department, fromName, toName },
+    });
+    return res.status(200).send({ data: serializeReferent(referent, req.user), ok: true });
   } catch (error) {
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
     capture(error);
@@ -272,24 +226,20 @@ router.post("/signup_retry", async (req, res) => {
     referent.set({ invitationToken });
     referent.set({ invitationExpires: inSevenDays() });
 
-    const { template, mailObject } = selectTemplate(referent.role);
-
+    const cta = `${config.ADMIN_URL}/auth/signup/invite?token=${invitationToken}`;
+    const fromName = "L'équipe SNU";
+    const toName = `${referent.firstName} ${referent.lastName}`;
+    const cohesionCenterName = referent.cohesionCenterName;
+    const region = referent.region;
+    const department = referent.department;
     const structureName = referent.structureId ? (await StructureModel.findById(referent.structureId)).name : "";
 
-    const htmlContent = fs
-      .readFileSync(path.resolve(__dirname, template))
-      .toString()
-      .replace(/{{toName}}/g, `${referent.firstName} ${referent.lastName}`)
-      .replace(/{{fromName}}/g, `contact@snu.gouv.fr`)
-      .replace(/{{department}}/g, `${referent.department}`)
-      .replace(/{{region}}/g, `${referent.region}`)
-      .replace(/{{structureName}}/g, `${structureName}`)
-      .replace(/{{centerName}}/g, `${referent.cohesionCenterName}` || "")
-      .replace(/{{cta}}/g, `${config.ADMIN_URL}/auth/signup/invite?token=${invitationToken}`);
-
-    await sendEmail({ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }, mailObject, htmlContent);
-
     await referent.save();
+    await sendTemplate(SENDINBLUE_TEMPLATES.invitationReferent[referent.role], {
+      emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
+      params: { cta, cohesionCenterName, structureName, region, department, fromName, toName },
+    });
+
     return res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);

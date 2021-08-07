@@ -6,7 +6,17 @@ import ReactSelect from "react-select";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
-import { translate, departmentList, regionList, region2department, department2region, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE, ROLES } from "../../utils";
+import {
+  translate,
+  departmentList,
+  regionList,
+  region2department,
+  department2region,
+  REFERENT_DEPARTMENT_SUBROLE,
+  REFERENT_REGION_SUBROLE,
+  ROLES,
+  SENDINBLUE_TEMPLATES,
+} from "../../utils";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import api from "../../services/api";
 
@@ -55,7 +65,7 @@ export default ({ setOpen, open, label = "Inviter un référent", role = "" }) =
                 try {
                   const obj = { ...values };
                   if (obj.department && !obj.region) obj.region = department2region[obj.department];
-                  await api.post(`/referent/signup_invite/${obj.role}`, obj);
+                  await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent[obj.role]}`, obj);
                   toastr.success("Invitation envoyée");
                   setOpen();
                   setOpen(false);

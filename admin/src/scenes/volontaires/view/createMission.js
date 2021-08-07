@@ -8,7 +8,7 @@ import Select from "react-select";
 import MultiSelect from "../../../components/Multiselect";
 import AddressInput from "../../../components/addressInput";
 import ErrorMessage, { requiredMessage } from "../../../components/errorMessage";
-import { translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, MISSION_DOMAINS, dateForDatePicker, ROLES } from "../../../utils";
+import { translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, MISSION_DOMAINS, dateForDatePicker, ROLES, SENDINBLUE_TEMPLATES } from "../../../utils";
 import api from "../../../services/api";
 import PlusSVG from "../../../assets/plus.svg";
 import CrossSVG from "../../../assets/cross.svg";
@@ -109,7 +109,7 @@ export default ({ young, onSend }) => {
           }
           // create the responsible if it is a new one
           if (createTutorVisible) {
-            const responseResponsible = await api.post(`/referent/signup_invite/${createStructureVisible ? "responsible_new_structure" : ROLES.RESPONSIBLE}`, {
+            const responseResponsible = await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent[ROLES.RESPONSIBLE]}`, {
               role: ROLES.RESPONSIBLE,
               structureId: values.structureId,
               structureName: values.structureName,
