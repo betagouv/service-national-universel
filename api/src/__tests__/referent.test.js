@@ -128,7 +128,6 @@ describe("Referent", () => {
     });
   });
 
-  //todo 404 if tutor not found
   describe("POST /referent/:tutorId/email/:template", () => {
     it("should return 404 if tutor not found", async () => {
       const res = await request(getAppHelper()).post(`/referent/${notExistingReferentId}/email/test`).send({ message: "hello", subject: "hi" });

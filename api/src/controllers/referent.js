@@ -417,6 +417,8 @@ router.post("/:tutorId/email/:template", passport.authenticate("referent", { ses
   }
 });
 
+//todo: refactor
+// post /young/:id/email/:template accessible only by ref
 router.post("/email/:template/:youngId", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
@@ -511,6 +513,8 @@ router.post("/email/:template/:youngId", passport.authenticate("referent", { ses
   }
 });
 
+//todo: refactor
+// get /young/:id/file/:key/:filename accessible only by ref or themself
 router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
@@ -544,6 +548,8 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
   }
 });
 
+//todo: refactor do not duplicate routes
+// get /young/:id/file/:key/:filename accessible only by ref or themself
 router.get("/youngFile/:youngId/military-preparation/:key/:fileName", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
@@ -650,6 +656,7 @@ router.post("/file/:key", passport.authenticate("referent", { session: false }),
   }
 });
 
+//todo: refactor: in young controller (if referent, add the applications)
 router.get("/young/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const { error, value } = Joi.object({ id: Joi.string().required() })
@@ -668,6 +675,7 @@ router.get("/young/:id", passport.authenticate("referent", { session: false }), 
 
 router.get("/:id/patches", passport.authenticate("referent", { session: false }), async (req, res) => await patches.get(req, res, ReferentModel));
 
+// todo: remove, never used
 router.get("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const user = await ReferentModel.findOne({ _id: req.user._id });
@@ -680,16 +688,14 @@ router.get("/", passport.authenticate("referent", { session: false }), async (re
 
 router.get("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const { error, value } = Joi.object({ id: Joi.string().required() })
-      .unknown()
-      .validate({ ...req.params }, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+    const { error, value: checkedId } = validateId(req.params.id);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error });
 
-    const data = await ReferentModel.findOne({ _id: value.id });
-    if (!data) return res.status(404).send({ ok: false });
+    const referent = await ReferentModel.findById(checkedId);
+    if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canViewReferent(req.user, data)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    return res.status(200).send({ ok: true, data });
+    if (!canViewReferent(req.user, referent)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    return res.status(200).send({ ok: true, data: serializeReferent(referent, req.user) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
