@@ -16,6 +16,7 @@ export default ({ onChange, mission }) => {
   const [structure, setStructure] = useState({});
   const history = useHistory();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+  const [applications, setApplications] = useState();
 
   useEffect(() => {
     (async () => {
@@ -30,6 +31,9 @@ export default ({ onChange, mission }) => {
       const { ok: ok2, data: dataStructure, code: code2 } = await api.get(`/structure/${mission.structureId}`);
       if (!ok2) toastr.error("Oups, une erreur est survnue lors de la récupération de la structure", translate(code2));
       else setStructure(dataStructure);
+      const responseApplications = await api.get(`/application/mission/${mission._id}`);
+      if (!responseApplications.ok) toastr.error("Oups, une erreur est survnue lors de la récupération des candidatures", translate(responseApplications.code));
+      else setApplications(responseApplications.data);
       return;
     })();
   }, [mission]);
@@ -92,6 +96,7 @@ export default ({ onChange, mission }) => {
         </div>
       </div>
       <Info title="Volontaires">
+        <Details title="Candidature(s)" value={applications?.length} />
         <Details title="Validée(s)" value={mission.placesTotal - mission.placesLeft} />
         <Details title="Disponible(s)" value={mission.placesLeft} />
         <Details title="Total" value={mission.placesTotal} />
@@ -155,4 +160,7 @@ const Subtitle = styled.div`
 const SubtitleLink = styled(Subtitle)`
   color: #5245cc;
   text-transform: none;
+  :hover {
+    text-decoration: underline;
+  }
 `;
