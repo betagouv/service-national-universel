@@ -66,7 +66,7 @@ export default ({ young, admin }) => {
         if (!application || !(application.tutorId || application.tutor?._id)) return setTutor({});
         const { ok, data, code } = await api.get(`/referent/${application.tutorId || application.tutor?._id}`);
         if (!ok) {
-          toastr.error(translate(code), `Aucun représentant de la structure n'a été trouvé`, { timeOut: 5000 });
+          toastr.warning(translate(code), `Aucun représentant de la structure n'a été trouvé`, { timeOut: 5000 });
           return setTutor({});
         }
         return setTutor(data);
@@ -82,7 +82,7 @@ export default ({ young, admin }) => {
         if (!young) return;
         const { ok, data, code } = await api.get(`/referent/manager_department/${young.department}`);
         if (!ok) {
-          toastr.error(translate(code), `Aucun représentant de l'état n'a été trouvé pour le département ${young.department}`, { timeOut: 5000 });
+          toastr.warning(translate(code), `Aucun représentant de l'état n'a été trouvé pour le département ${young.department}`, { timeOut: 5000 });
           return setManagerDepartment({});
         }
         return setManagerDepartment(data);
