@@ -2,10 +2,12 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { Row } from "reactstrap";
+import { ReactiveBase } from "@appbaseio/reactivesearch";
 
+import { apiURL } from "../../../config";
 import api from "../../../services/api";
 import SelectStatusApplication from "../../../components/selectStatusApplication";
-import { APPLICATION_STATUS, formatStringDateTimezoneUTC } from "../../../utils";
+import { APPLICATION_STATUS, formatStringDateTimezoneUTC, ES_NO_LIMIT } from "../../../utils";
 import { Link, useHistory } from "react-router-dom";
 import ProposalMission from "./proposalMission";
 import CreateMission from "./createMission";
@@ -13,10 +15,12 @@ import PlusSVG from "../../../assets/plus.svg";
 import CrossSVG from "../../../assets/cross.svg";
 import Loader from "../../../components/Loader";
 import ContractLink from "../../../components/ContractLink";
+import ExportComponent from "../../../components/ExportXlsx";
 
 export default ({ young, onChangeApplication }) => {
   const [applications, setApplications] = useState(null);
   const [createMissionVisible, setCreateMissionVisible] = useState(false);
+  const getExportQuery = () => ({ query: { bool: { filter: { term: { "youngId.keyword": young._id } } } }, sort: [{ "priority.keyword": "asc" }], size: ES_NO_LIMIT });
 
   useEffect(() => {
     getApplications();
@@ -52,6 +56,46 @@ export default ({ young, onChangeApplication }) => {
         </tbody>
       </Table>
       {applications.length ? null : <NoResult>Aucune candidature n'est liée à ce volontaire.</NoResult>}
+      <ReactiveBase url={`${apiURL}/es`} app="application" headers={{ Authorization: `JWT ${api.getToken()}` }}>
+        <div style={{ marginTop: "1rem" }}>
+          <ExportComponent
+            defaultQuery={getExportQuery}
+            title="Exporter les candidatures"
+            collection={`candidatures-${young.firstName}-${young.lastName}`}
+            transform={(data) => {
+              return {
+                _id: data._id,
+                Cohorte: data.youngCohort,
+                Prénom: data.youngFirstName,
+                Nom: data.youngLastName,
+                "Date de naissance": data.youngBirthdateAt,
+                Email: data.youngEmail,
+                Téléphone: young.phone,
+                "Adresse du volontaire": young.address,
+                "Code postal du volontaire": young.zip,
+                "Ville du volontaire": young.city,
+                "Département du volontaire": young.department,
+                "Prénom représentant légal 1": young.parent1FirstName,
+                "Nom représentant légal 1": young.parent1LastName,
+                "Email représentant légal 1": young.parent1Email,
+                "Téléphone représentant légal 1": young.parent1Phone,
+                "Prénom représentant légal 2": young.parent2LastName,
+                "Nom représentant légal 2": young.parent2LastName,
+                "Email représentant légal 2": young.parent2Email,
+                "Téléphone représentant légal 2": young.parent2Phone,
+                Choix: data.priority,
+                "Nom de la mission": data.missionName,
+                "Département de la mission": data.missionDepartment,
+                "Région de la mission": data.missionRegion,
+                "Candidature créée lé": data.createdAt,
+                "Candidature mise à jour le": data.updatedAt,
+                "Statut de la candidature": data.status,
+                Tuteur: data.tutorName,
+              };
+            }}
+          />
+        </div>
+      </ReactiveBase>
       <Wrapper style={{ borderBottom: "2px solid #f4f5f7" }}>
         <Legend>Proposer une mission existante au volontaire</Legend>
         <ProposalMission young={young} onSend={getApplications} />
