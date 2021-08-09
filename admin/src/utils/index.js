@@ -43,6 +43,7 @@ export const confirmMessageChangePhase1Presence = (value) => {
 };
 
 export const putLocation = async (city, zip) => {
+  // try with municipality = city + zip
   const responseMunicipality = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(city + " " + zip)}&type=municipality`, {
     mode: "cors",
     method: "GET",
@@ -55,6 +56,7 @@ export const putLocation = async (city, zip) => {
       lat: resMunicipality.features[0].geometry.coordinates[1],
     };
   }
+  // try with locality = city + zip
   const responseLocality = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(zip + " " + city)}&type=locality`, {
     mode: "cors",
     method: "GET",
@@ -65,6 +67,21 @@ export const putLocation = async (city, zip) => {
     return {
       lon: resLocality.features[0].geometry.coordinates[0],
       lat: resLocality.features[0].geometry.coordinates[1],
+    };
+  }
+  // try with postcode = zip
+  let url = `https://api-adresse.data.gouv.fr/search/?q=${city || zip}`;
+  if (zip) url += `&postcode=${zip}`;
+  const responsePostcode = await fetch(url, {
+    mode: "cors",
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  });
+  const resPostcode = await responsePostcode.json();
+  if (resPostcode.features.length > 0) {
+    return {
+      lon: resPostcode.features[0].geometry.coordinates[0],
+      lat: resPostcode.features[0].geometry.coordinates[1],
     };
   }
   return {
