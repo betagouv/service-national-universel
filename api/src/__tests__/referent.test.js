@@ -59,11 +59,6 @@ describe("Referent", () => {
     await deleteReferentByIdHelper(res.body.data._id);
   });
 
-  it("GET /referent", async () => {
-    const res = await request(getAppHelper()).get("/referent").send();
-    expect(res.statusCode).toEqual(200);
-  });
-
   it("POST /referent/young", async () => {
     const youngFixture = getNewYoungFixture();
     const youngsBefore = await getYoungsHelper();

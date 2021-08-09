@@ -675,17 +675,6 @@ router.get("/young/:id", passport.authenticate("referent", { session: false }), 
 
 router.get("/:id/patches", passport.authenticate("referent", { session: false }), async (req, res) => await patches.get(req, res, ReferentModel));
 
-// todo: remove, never used
-router.get("/", passport.authenticate("referent", { session: false }), async (req, res) => {
-  try {
-    const user = await ReferentModel.findOne({ _id: req.user._id });
-    return res.status(200).send({ ok: true, user });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
-  }
-});
-
 router.get("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const { error, value: checkedId } = validateId(req.params.id);
