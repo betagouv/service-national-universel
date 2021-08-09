@@ -24,10 +24,10 @@ export default ({ isOpen, topTitle = "alerte", title, message, onChange, onConfi
           <p>{message}</p>
         </Content>
         <Footer>
-          <ModalButton loading={sending} disabled={sending} color="#5245cc" onClick={submit} primary>
+          <ModalButton loading={sending} disabled={sending} onClick={submit} primary>
             {confirmText}
           </ModalButton>
-          <ModalButton disabled={sending} color="#5245cc" onClick={onChange}>
+          <ModalButton disabled={sending} onClick={onChange}>
             {cancelText}
           </ModalButton>
         </Footer>

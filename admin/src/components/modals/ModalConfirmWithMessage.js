@@ -27,7 +27,7 @@ export default ({ isOpen, topTitle, title, message, onChange, onConfirm, placeho
           <ModalButton loading={sending} disabled={sending || !messageTextArea} onClick={submit} primary>
             Confirmer
           </ModalButton>
-          <ModalButton disabled={sending} color="#5245cc" onClick={onChange}>
+          <ModalButton disabled={sending} onClick={onChange}>
             Annuler
           </ModalButton>
         </Footer>

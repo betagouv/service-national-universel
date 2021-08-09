@@ -50,8 +50,6 @@ export const ResultTable = styled.div`
     }
     a.active {
       font-weight: 700;
-      /* background: #5245cc;
-      color: #fff; */
     }
     a:first-child {
       background-image: url(${require("../../assets/left.svg")});

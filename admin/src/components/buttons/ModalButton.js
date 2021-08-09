@@ -1,19 +1,20 @@
 import React from "react";
 import { Spinner, Button } from "reactstrap";
 import styled from "styled-components";
+import { colors } from "../../utils";
 
 export default ({ primary, secondary, loading, children, disabled, ...rest }) => {
   const getBackgroundColor = () => {
-    if (disabled) return "#696969";
-    if (primary) return "#5245cc";
+    if (disabled) return colors.grey;
+    if (primary) return colors.purple;
     if (secondary) return "#ffffff";
     return "#ffffff";
   };
   const getColor = () => {
     if (disabled) return "#bbbbbb";
     if (primary) return "#ffffff";
-    if (secondary) return "#696969";
-    return "#696969";
+    if (secondary) return colors.grey;
+    return colors.grey;
   };
   return (
     <VioletButtonHeader

@@ -3,7 +3,7 @@ import { NavLink, Link } from "react-router-dom";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { environment } from "../../config";
-import { ROLES } from "../../utils";
+import { ROLES, colors } from "../../utils";
 
 const DrawerTab = ({ title, to, onClick }) => (
   <li onClick={onClick}>
@@ -135,7 +135,7 @@ const HeaderSideBar = styled(Link)`
 `;
 
 const EnvironmentBanner = styled.div`
-  background: #d33c4a;
+  background: ${colors.red};
   color: white;
   font-style: italic;
   font-weight: 500;
@@ -158,14 +158,11 @@ const Burger = styled.img`
     object-fit: cover;
     object-fit: contain;
     cursor: pointer;
-    svg {
-      color: #f00;
-    }
   }
 `;
 
 const Logo = styled.h1`
-  background: #372f78;
+  background: ${colors.darkPurple};
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 0;
   padding: 15px 20px 15px;
@@ -200,7 +197,7 @@ const Sidebar = styled.div`
     z-index: 11;
     position: fixed;
   }
-  background-color: #362f78;
+  background-color: ${colors.darkPurple};
   width: 15%;
   position: sticky;
   top: 0;
@@ -220,19 +217,19 @@ const Sidebar = styled.div`
       color: #fff;
       font-weight: 400;
       font-size: 16px;
-      border-bottom: 1px solid rgba(82, 69, 204, 0.5);
+      border-bottom: 1px solid ${colors.transPurple};
       transition: 0.2s;
       i {
         font-size: 0.7rem;
       }
     }
-    a.active {
-      font-weight: 700;
-      background: #5245cc;
+    a:hover {
+      background: ${colors.transPurple};
       box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.1);
     }
-    a:hover {
-      background: #5245cc;
+    a.active {
+      font-weight: 700;
+      background: ${colors.purple};
       box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.1);
     }
   }

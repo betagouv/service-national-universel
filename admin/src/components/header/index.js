@@ -58,9 +58,6 @@ const Burger = styled.img`
     object-fit: cover;
     object-fit: contain;
     cursor: pointer;
-    svg {
-      color: #f00;
-    }
   }
 `;
 

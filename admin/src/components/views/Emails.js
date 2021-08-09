@@ -118,7 +118,7 @@ const LoadMore = styled.div`
   font-size: 0.9rem;
   text-align: center;
   padding: 1rem;
-  color: #382f79;
+  color: ${colors.darkPurple};
   cursor: pointer;
   :hover {
     font-weight: 500;

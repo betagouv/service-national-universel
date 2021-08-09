@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
-import { Col, Row } from "reactstrap";
 import { Link } from "react-router-dom";
+import { colors } from "../../utils";
 
 export const CardArrow = styled.span`
   width: 15px;
@@ -92,7 +92,7 @@ export const CardSection = styled.div`
   font-size: 16px;
   line-height: 18px;
   text-transform: uppercase;
-  color: #372f78;
+  color: ${colors.darkPurple};
 `;
 
 export const CardContainer = styled.div`

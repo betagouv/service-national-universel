@@ -5,6 +5,7 @@ import styled from "styled-components";
 import ReactSelect from "react-select";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
+import { colors } from "../../utils";
 
 import {
   translate,
@@ -273,11 +274,11 @@ const Invitation = styled.div`
     transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
   }
   h3 {
-    border: 1px solid #fc8181;
+    border: 1px solid ${colors.red};
     border-radius: 0.25em;
     margin-top: 1em;
     background-color: #fff5f5;
-    color: #c53030;
+    color: ${colors.red};
     font-weight: 400;
     font-size: 12px;
     padding: 1em;
