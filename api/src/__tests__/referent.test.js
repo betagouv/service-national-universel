@@ -59,17 +59,6 @@ describe("Referent", () => {
     await deleteReferentByIdHelper(res.body.data._id);
   });
 
-  it("POST /referent/young", async () => {
-    const youngFixture = getNewYoungFixture();
-    const youngsBefore = await getYoungsHelper();
-    const res = await request(getAppHelper()).post("/referent/young/").send(youngFixture);
-    expect(res.statusCode).toEqual(200);
-    expectYoungToEqual(youngFixture, res.body.young);
-    const youngsAfter = await getYoungsHelper();
-    expect(youngsAfter.length).toEqual(youngsBefore.length + 1);
-    await deleteYoungByIdHelper(res.body.young._id);
-  });
-
   describe("PUT /referent/young/:id", () => {
     async function createYoungThenUpdate(params) {
       const youngFixture = getNewYoungFixture();

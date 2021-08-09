@@ -32,6 +32,7 @@ const {
   assignNextYoungFromWaitingList,
   ERRORS,
   isYoung,
+  inSevenDays,
 } = require("../utils");
 const { validateId, validateSelf, validateYoung, validateReferent } = require("../utils/validator");
 const { serializeYoung, serializeReferent } = require("../utils/serializer");
@@ -49,10 +50,6 @@ const {
   canViewYoungMilitaryPreparationFile,
   canSigninAs,
 } = require("snu-lib/roles");
-
-function inSevenDays() {
-  return Date.now() + 86400000 * 7;
-}
 
 async function updateTutorNameInMissionsAndApplications(tutor) {
   if (!tutor || !tutor.firstName || !tutor.lastName) return;
@@ -340,33 +337,6 @@ router.put("/young/:id", passport.authenticate("referent", { session: false }), 
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
-  }
-});
-
-router.post("/young", passport.authenticate("referent", { session: false }), async (req, res) => {
-  try {
-    const { error, value } = validateYoung(req.body);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
-
-    const obj = { ...value };
-    const invitation_token = crypto.randomBytes(20).toString("hex");
-    obj.invitationToken = invitation_token;
-    obj.invitationExpires = inSevenDays(); // 7 days
-
-    const young = await YoungModel.create(obj);
-
-    let htmlContent = fs.readFileSync(path.resolve(__dirname, "../templates/inviteYoung.html")).toString();
-    htmlContent = htmlContent.replace(/{{toName}}/g, `${young.firstName} ${young.lastName}`);
-    htmlContent = htmlContent.replace(/{{fromName}}/g, `${req.user.firstName} ${req.user.lastName}`);
-    htmlContent = htmlContent.replace(/{{cta}}/g, `${config.APP_URL}/auth/signup/invite?token=${invitation_token}`);
-
-    await sendEmail({ name: `${young.firstName} ${young.lastName}`, email: young.email }, "Activez votre compte SNU", htmlContent);
-
-    return res.status(200).send({ young, ok: true });
-  } catch (error) {
-    if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
-    capture(error);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 

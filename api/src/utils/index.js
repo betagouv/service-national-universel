@@ -341,6 +341,10 @@ function isYoung(user) {
   return user instanceof YoungModel;
 }
 
+function inSevenDays() {
+  return Date.now() + 86400000 * 7;
+}
+
 const ERRORS = {
   SERVER_ERROR: "SERVER_ERROR",
   NOT_FOUND: "NOT_FOUND",
@@ -386,4 +390,5 @@ module.exports = {
   deleteFile,
   signinLimiter,
   isYoung,
+  inSevenDays,
 };

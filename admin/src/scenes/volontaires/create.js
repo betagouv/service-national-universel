@@ -45,7 +45,7 @@ export default (props) => {
         }}
         onSubmit={async (values) => {
           try {
-            const { ok, code, data: young } = await api.post("/referent/young", values);
+            const { ok, code, data: young } = await api.post("/young/invite", values);
             if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
             toastr.success("Volontaire créé !");
             return history.push("/inscription");

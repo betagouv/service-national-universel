@@ -17,13 +17,22 @@ const YoungObject = require("../../models/young");
 const CohesionCenterObject = require("../../models/cohesionCenter");
 const DepartmentServiceModel = require("../../models/departmentService");
 const AuthObject = require("../../auth");
-const { uploadFile, validatePassword, updatePlacesCenter, signinLimiter, assignNextYoungFromWaitingList, ERRORS } = require("../../utils");
-const { sendEmail } = require("../../sendinblue");
+const {
+  uploadFile,
+  validatePassword,
+  updatePlacesCenter,
+  signinLimiter,
+  assignNextYoungFromWaitingList,
+  ERRORS,
+  inSevenDays,
+} = require("../../utils");
+const { sendEmail, sendTemplate } = require("../../sendinblue");
 const { cookieOptions, JWT_MAX_AGE } = require("../../cookie-options");
 const { validateYoung, validateId, validateFirstName } = require("../../utils/validator");
 const patches = require("../patches");
 const { serializeYoung } = require("../../utils/serializer");
 const { canDeleteYoung } = require("snu-lib/roles");
+const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 
 const YoungAuth = new AuthObject(YoungObject);
 
@@ -190,6 +199,34 @@ router.post("/", async (req, res) => {
     return res.status(200).send({ young: serializeYoung(young, young), ok: true });
   } catch (error) {
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.YOUNG_ALREADY_REGISTERED });
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/invite", passport.authenticate("referent", { session: false }), async (req, res) => {
+  try {
+    const { error, value } = validateYoung(req.body);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    const obj = { ...value };
+    const invitation_token = crypto.randomBytes(20).toString("hex");
+    obj.invitationToken = invitation_token;
+    obj.invitationExpires = inSevenDays(); // 7 days
+
+    const young = await YoungObject.create(obj);
+
+    const toName = `${young.firstName} ${young.lastName}`;
+    const cta = `${config.APP_URL}/auth/signup/invite?token=${invitation_token}`;
+    const fromName = `${req.user.firstName} ${req.user.lastName}`;
+    await sendTemplate(SENDINBLUE_TEMPLATES.INVITATION_YOUNG, {
+      emailTo: [{ name: toName, email: young.email }],
+      params: { toName, cta, fromName },
+    });
+
+    return res.status(200).send({ young, ok: true });
+  } catch (error) {
+    if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
