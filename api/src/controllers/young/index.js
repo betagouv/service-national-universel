@@ -319,20 +319,17 @@ router.put("/:id/validate-mission-phase3", passport.authenticate("young", { sess
     young.set(values);
     await young.save();
 
-    // Todo: send mail to tutor
-    let youngName = `${young.firstName} ${young.lastName}`;
-    let subject = `Confirmez la participation de ${youngName} sur votre mission`;
-    let htmlContent = fs
-      .readFileSync(path.resolve(__dirname, "../../templates/validatePhase3.html"))
-      .toString()
-      .replace(/{{toName}}/g, `${young.phase3TutorFirstName} ${young.phase3TutorLastName}`)
-      .replace(/{{youngName}}/g, youngName)
-      .replace(/{{structureName}}/g, young.phase3StructureName)
-      .replace(/{{startAt}}/g, young.phase3MissionStartAt.toLocaleDateString("fr"))
-      .replace(/{{endAt}}/g, young.phase3MissionEndAt.toLocaleDateString("fr"))
-      .replace(/{{cta}}/g, `${config.ADMIN_URL}/validate?token=${young.phase3Token}&young_id=${young._id}`);
+    const youngName = `${young.firstName} ${young.lastName}`;
+    const toName = `${young.phase3TutorFirstName} ${young.phase3TutorLastName}`;
+    const structureName = young.phase3StructureName;
+    const startAt = young.phase3MissionStartAt.toLocaleDateString("fr");
+    const endAt = young.phase3MissionEndAt.toLocaleDateString("fr");
+    const cta = `${config.ADMIN_URL}/validate?token=${young.phase3Token}&young_id=${young._id}`;
 
-    await sendEmail({ name: `${young.phase3TutorFirstName} ${young.phase3TutorLastName}`, email: young.phase3TutorEmail }, subject, htmlContent);
+    await sendTemplate(SENDINBLUE_TEMPLATES.referent.VALIDATE_MISSION_PHASE3, {
+      emailTo: [{ name: toName, email: young.phase3TutorEmail }],
+      params: { toName, youngName, structureName, startAt, endAt, cta },
+    });
     young.phase3Token = null;
 
     res.status(200).send({ ok: true, data: serializeYoung(young, young) });
