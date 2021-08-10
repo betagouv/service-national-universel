@@ -3,8 +3,14 @@ const request = require("supertest");
 const getAppHelper = require("./helpers/app");
 const { dbConnect, dbClose } = require("./helpers/db");
 const getNewStructureFixture = require("./fixtures/structure");
-const { createStructureHelper, getStructureByIdHelper, notExistingStructureId } = require("./helpers/structure");
-const { createMissionHelper, getMissionByIdHelper } = require("./helpers/mission");
+const {
+  createStructureHelper,
+  getStructureByIdHelper,
+  notExistingStructureId,
+  expectStructureToEqual,
+  deleteStructureByIdHelper,
+} = require("./helpers/structure");
+const { createMissionHelper, getMissionByIdHelper, deleteMissionByIdHelper } = require("./helpers/mission");
 const getNewMissionFixture = require("./fixtures/mission");
 const getNewReferentFixture = require("./fixtures/referent");
 const { createReferentHelper, getReferentByIdHelper } = require("./helpers/referent");
@@ -167,6 +173,20 @@ describe("Structure", () => {
       const res = await request(getAppHelper()).get(`/structure/${network._id}/children`);
       expect(res.status).toBe(200);
       expect(res.body.data).toEqual(expect.arrayContaining([expect.objectContaining({ _id: structure._id.toString() })]));
+    });
+  });
+
+  describe("GET /structure/:id/mission", () => {
+    it("should return the missions of the structure", async () => {
+      const structure = await createStructureHelper(getNewStructureFixture());
+      const missionFixture = getNewMissionFixture();
+      const mission = await createMissionHelper({ ...missionFixture, structureId: structure._id });
+      const res = await request(getAppHelper()).get(`/structure/${structure._id}/mission`);
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.data.length).toEqual(1);
+      expectStructureToEqual(res.body.data[0], missionFixture);
+      await deleteMissionByIdHelper(mission._id);
+      await deleteStructureByIdHelper(structure._id);
     });
   });
 });

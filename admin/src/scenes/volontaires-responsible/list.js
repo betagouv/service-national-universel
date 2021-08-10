@@ -29,7 +29,7 @@ export default () => {
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
   async function appendMissions(structure) {
-    const missionsResponse = await api.get(`/mission/structure/${structure}`);
+    const missionsResponse = await api.get(`/structure/${structure}/mission`);
     if (!missionsResponse.ok) {
       toastr.error("Oups, une erreur est survenue lors de la récupération des missions", translate(missionsResponse.code));
       return history.push("/");

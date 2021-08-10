@@ -15,7 +15,7 @@ export default ({ structure }) => {
   useEffect(() => {
     (async () => {
       if (!structure) return;
-      const { ok, data } = await api.get(`/mission/structure/${structure._id}`);
+      const { ok, data } = await api.get(`/structure/${structure._id}/mission`);
       if (ok) setData(data);
     })();
   }, [structure]);

@@ -21,7 +21,7 @@ export default ({ filter }) => {
   // Get all missions from structure then get all applications int order to display the volontaires' list.
   useEffect(() => {
     async function initMissions() {
-      const missionsResponse = await api.get(`/mission/structure/${structureId}`);
+      const missionsResponse = await api.get(`/structure/${structureId}/mission`);
       if (!missionsResponse.ok) {
         toastr.error("Oups, une erreur est survenue lors de la récupération des missions", translate(missionsResponse.code));
         history.push("/");

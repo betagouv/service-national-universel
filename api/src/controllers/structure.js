@@ -10,7 +10,7 @@ const { ERRORS } = require("../utils");
 const { ROLES, canModifyStructure, canDeleteStructure } = require("snu-lib/roles");
 const patches = require("./patches");
 const { validateId, validateStructure } = require("../utils/validator");
-const { serializeStructure, serializeArray } = require("../utils/serializer");
+const { serializeStructure, serializeArray, serializeMission } = require("../utils/serializer");
 
 const setAndSave = async (data, keys) => {
   data.set({ ...keys });
@@ -113,6 +113,21 @@ router.get("/:id/children", passport.authenticate("referent", { session: false }
 
     const data = await StructureObject.find({ networkId: structure._id });
     return res.status(200).send({ ok: true, data: serializeArray(data, req.user, serializeStructure) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+router.get("/:id/mission", passport.authenticate("referent", { session: false }), async (req, res) => {
+  try {
+    const { error, value: checkedId } = validateId(req.params.id);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error });
+
+    const data = await MissionObject.find({ structureId: checkedId });
+    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    return res.status(200).send({ ok: true, data: data.map(serializeMission) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
