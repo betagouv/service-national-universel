@@ -131,24 +131,6 @@ describe("Referent", () => {
     });
   });
 
-  describe("POST /referent/email/:template/:youngId", () => {
-    it("should return 200 if young not found but it's weird", async () => {
-      const res = await request(getAppHelper())
-        .post("/referent/email/test/" + notExistingYoungId)
-        .send();
-      expect(res.statusCode).toEqual(200);
-    });
-    it("should return 200 if young found", async () => {
-      const young = await createYoungHelper(getNewYoungFixture());
-      for (const email of ["correction", "validate", "refuse", "waiting_list", "apply"]) {
-        const res = await request(getAppHelper())
-          .post("/referent/email/" + email + "/" + young._id)
-          .send({ message: "hello" });
-        expect(res.statusCode).toEqual(200);
-      }
-    });
-  });
-
   describe("GET /referent/youngFile/:youngId/:key/:fileName", () => {
     it("should return 200 if file is found", async () => {
       const res = await request(getAppHelper()).get("/referent/youngFile/1/key/test.pdf").send();
