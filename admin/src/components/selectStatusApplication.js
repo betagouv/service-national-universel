@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 
 import api from "../services/api";
 
-import { translate, APPLICATION_STATUS_COLORS, APPLICATION_STATUS, ROLES, colors } from "../utils";
+import { translate, APPLICATION_STATUS_COLORS, APPLICATION_STATUS, ROLES, colors, SENDINBLUE_TEMPLATES } from "../utils";
 import { toastr } from "react-redux-toastr";
 import Chevron from "./Chevron";
 import ModalConfirmWithMessage from "./modals/ModalConfirmWithMessage";
@@ -62,10 +62,12 @@ export default ({ hit, options = [], callback }) => {
       setApplication(data);
       toastr.success("Mis à jour!");
       if (status === APPLICATION_STATUS.VALIDATED) {
-        await api.post(`/application/${data._id}/notify/validated_responsible`);
-        await api.post(`/application/${data._id}/notify/validated_young`);
-      } else {
-        await api.post(`/application/${data._id}/notify/${status.toLowerCase()}`, { message });
+        await api.post(`/application/${data._id}/notify/${SENDINBLUE_TEMPLATES.referent.YOUNG_VALIDATED}`);
+        await api.post(`/application/${data._id}/notify/${SENDINBLUE_TEMPLATES.young.VALIDATE_APPLICATION}`);
+      } else if (status === APPLICATION_STATUS.CANCEL) {
+        await api.post(`/application/${data._id}/notify/${SENDINBLUE_TEMPLATES.referent.CANCEL_APPLICATION}`, { message });
+      } else if (status === APPLICATION_STATUS.REFUSED) {
+        await api.post(`/application/${data._id}/notify/${SENDINBLUE_TEMPLATES.young.REFUSE_APPLICATION}`, { message });
       }
       callback && callback(status);
     } catch (e) {

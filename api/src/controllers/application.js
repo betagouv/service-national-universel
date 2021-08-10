@@ -175,57 +175,33 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
       return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    let htmlContent = "";
-    let subject = "";
-    let to = {};
+    let emailTo;
+    // build default values for params
+    // => young name, and mission name
+    let params = { youngFirstName: application.youngFirstName, youngLastName: application.youngLastName, missionName: mission.name };
 
-    if (template === "waiting_validation") {
-      const mail = await sendTemplate(SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION, {
-        emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
-        params: {
-          youngFirstName: application.youngFirstName,
-          youngLastName: application.youngLastName,
-          missionName: mission.name,
-          cta: `${ADMIN_URL}/volontaire`,
-        },
-      });
-      return res.status(200).send({ ok: true, data: mail });
-    } else if (template === "validated_responsible") {
-      htmlContent = fs
-        .readFileSync(path.resolve(__dirname, "../templates/application/validatedResponsible.html"))
-        .toString()
-        .replace(/{{firstName}}/g, referent.firstName)
-        .replace(/{{lastName}}/g, referent.lastName)
-        .replace(/{{youngFirstName}}/g, application.youngFirstName)
-        .replace(/{{youngLastName}}/g, application.youngLastName)
-        .replace(/{{missionName}}/g, mission.name)
-        .replace(/{{cta}}/g, "https://admin.snu.gouv.fr/volontaire");
-      subject = `${application.youngFirstName} ${application.youngLastName} est validée sur votre mission d'intérêt général ${mission.name}`;
-      to = { name: `${referent.firstName} ${referent.lastName}`, email: referent.email };
-    } else if (template === "validated_young") {
-      const mail = await sendTemplate(SENDINBLUE_TEMPLATES.young.VALIDATE_APPLICATION, {
-        emailTo: [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }],
-        params: { missionName: mission.name, cta: `${APP_URL}/candidature` },
-      });
-      return res.status(200).send({ ok: true, data: mail });
-    } else if (template === "cancel") {
-      const mail = await sendTemplate(SENDINBLUE_TEMPLATES.referent.CANCEL_APPLICATION, {
-        emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
-        params: { youngFirstName: application.youngFirstName, youngLastName: application.youngLastName, missionName: mission.name },
-      });
-      return res.status(200).send({ ok: true, data: mail });
-    } else if (template === "refused") {
-      const mail = await sendTemplate(SENDINBLUE_TEMPLATES.young.REFUSE_APPLICATION, {
-        emailTo: [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }],
-        params: { message, missionName: mission.name, cta: `${APP_URL}/mission` },
-      });
-      return res.status(200).send({ ok: true, data: mail });
+    if (template === SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION) {
+      emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
+      params = { ...params, cta: `${ADMIN_URL}/volontaire` };
+    } else if (template === SENDINBLUE_TEMPLATES.referent.YOUNG_VALIDATED) {
+      emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
+      params = { ...params, cta: `${ADMIN_URL}/volontaire` };
+    } else if (template === SENDINBLUE_TEMPLATES.young.VALIDATE_APPLICATION) {
+      emailTo = [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }];
+      params = { ...params, cta: `${APP_URL}/candidature` };
+    } else if (template === SENDINBLUE_TEMPLATES.referent.CANCEL_APPLICATION) {
+      emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
+    } else if (template === SENDINBLUE_TEMPLATES.young.REFUSE_APPLICATION) {
+      emailTo = [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }];
+      params = { ...params, message, cta: `${APP_URL}/mission` };
     } else {
-      return res.status(200).send({ ok: true });
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
-
-    await sendEmail(to, subject, htmlContent);
-    return res.status(200).send({ ok: true }); //todo
+    const mail = await sendTemplate(template, {
+      emailTo,
+      params,
+    });
+    return res.status(200).send({ ok: true, data: mail });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
