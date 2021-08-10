@@ -105,7 +105,6 @@ router.post("/:centerId/assign-young/:youngId", passport.authenticate("referent"
     // await sendAutoAffectationMail(young, center);
 
     //if young is in waitingList of the center
-    // todo check if the young is in antoher center's waiting list
     if (center.waitingList.indexOf(young._id) !== -1) {
       const i = center.waitingList.indexOf(young._id);
       center.waitingList.splice(i, 1);

@@ -287,10 +287,10 @@ router.put("/validate_phase3/:young/:token", async (req, res) => {
 
 router.get("/:id/patches", passport.authenticate("referent", { session: false }), async (req, res) => await patches.get(req, res, YoungObject));
 
-// todo validate only their own mission
-router.put("/validate_mission", passport.authenticate("young", { session: false }), async (req, res) => {
+router.put("/:id/validate-mission-phase3", passport.authenticate("young", { session: false }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
+      id: Joi.string().required(),
       phase3StructureName: Joi.string().optional().allow(null, ""),
       phase3MissionDomain: Joi.string().optional().allow(null, ""),
       phase3MissionDescription: Joi.string().optional().allow(null, ""),
@@ -303,15 +303,20 @@ router.put("/validate_mission", passport.authenticate("young", { session: false 
       statusPhase3: Joi.string().optional().allow(null, ""),
     })
       .unknown()
-      .validate(req.body, { stripUnknown: true });
-
+      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
-    value.phase3Token = crypto.randomBytes(20).toString("hex");
-    const young = await YoungObject.findById(req.user._id);
+    const young = await YoungObject.findById(value.id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    young.set(value);
+    // young can only update their own mission phase3.
+    if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
+      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+    const { id, ...values } = value;
+    values.phase3Token = crypto.randomBytes(20).toString("hex");
+
+    young.set(values);
     await young.save();
 
     // Todo: send mail to tutor

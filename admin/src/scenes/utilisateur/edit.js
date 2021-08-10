@@ -147,7 +147,6 @@ export default (props) => {
   };
 
   return (
-    //@todo fix the depart and region
     <Wrapper>
       <Formik
         initialValues={user}

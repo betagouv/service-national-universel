@@ -94,9 +94,9 @@ describe("Young", () => {
     });
   });
 
-  describe("PUT /young/validate_mission", () => {
+  describe("PUT /young/:id/validate-mission-phase3", () => {
     it("should return 404 if young not found", async () => {
-      const res = await request(getAppHelper()).put("/young/validate_mission").send({});
+      const res = await request(getAppHelper()).put(`/young/${notExistingYoungId}/validate-mission-phase3`).send({});
       expect(res.statusCode).toEqual(404);
     });
     it("should return 200 if young found", async () => {
@@ -105,14 +105,26 @@ describe("Young", () => {
       const previous = passport.user;
       passport.user = young;
 
-      const res = await request(getAppHelper()).put("/young/validate_mission").send({});
+      const res = await request(getAppHelper()).put(`/young/${young._id}/validate-mission-phase3`).send({});
       expect(res.statusCode).toEqual(200);
       passport.user = previous;
     });
     it("should be only accessible by young", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
       const passport = require("passport");
-      await request(getAppHelper()).put("/young/validate_mission").send();
+      const res = await request(getAppHelper()).put(`/young/${young._id}/validate-mission-phase3`).send();
+      expect(res.statusCode).toEqual(200);
       expect(passport.lastTypeCalledOnAuthenticate).toEqual("young");
+    });
+    it("should be only accessible for yourself if you are a young", async () => {
+      const me = await createYoungHelper(getNewYoungFixture());
+      const they = await createYoungHelper(getNewYoungFixture());
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = me;
+      const res = await request(getAppHelper()).put(`/young/${they._id}/validate-mission-phase3`).send();
+      expect(res.statusCode).toEqual(401);
+      passport.user = previous;
     });
   });
 
