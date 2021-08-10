@@ -4,8 +4,7 @@ import { Modal } from "reactstrap";
 import { ModalContainer, Content, Footer, Header } from "./Modal";
 import ModalButton from "../buttons/ModalButton";
 
-//todo : onChange => onCancel
-export default ({ isOpen, topTitle = "alerte", title, message, onChange, onConfirm, confirmText = "Confirmer", cancelText = "Annuler" }) => {
+export default ({ isOpen, topTitle = "alerte", title, message, onChange, onCancel, onConfirm, confirmText = "Confirmer", cancelText = "Annuler" }) => {
   const [sending, setSending] = useState(false);
 
   const submit = async () => {
@@ -15,9 +14,9 @@ export default ({ isOpen, topTitle = "alerte", title, message, onChange, onConfi
   };
 
   return (
-    <Modal isOpen={isOpen} toggle={onChange}>
+    <Modal isOpen={isOpen} toggle={onCancel || onChange}>
       <ModalContainer>
-        <img src={require("../../assets/close.svg")} height={10} onClick={onChange} />
+        <img src={require("../../assets/close.svg")} height={10} onClick={onCancel || onChange} />
         <Header>{topTitle}</Header>
         <Content>
           <h1>{title}</h1>
@@ -27,7 +26,7 @@ export default ({ isOpen, topTitle = "alerte", title, message, onChange, onConfi
           <ModalButton loading={sending} disabled={sending} onClick={submit} primary>
             {confirmText}
           </ModalButton>
-          <ModalButton disabled={sending} onClick={onChange}>
+          <ModalButton disabled={sending} onClick={onCancel || onChange}>
             {cancelText}
           </ModalButton>
         </Footer>

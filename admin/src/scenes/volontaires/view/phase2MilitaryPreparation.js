@@ -139,7 +139,7 @@ export default ({ young }) => {
         topTitle="alerte"
         title={`Vous êtes sur le point de confirmer l'éligibilité de ${young.firstName} à la préparation militaire, sur la base des documents reçus.`}
         message={`Une fois l'éligibilité confirmée un mail sera envoyé à ${young.firstName} (${young.email}).`}
-        onChange={() => setModal({ isOpen: false, template: null, data: null })}
+        onCancel={() => setModal({ isOpen: false, template: null, data: null })}
         onConfirm={onValidate}
       />
       <ModalConfirmWithMessage

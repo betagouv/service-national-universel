@@ -140,7 +140,7 @@ export default ({ onChange, mission }) => {
         isOpen={modal?.isOpen}
         title={modal?.title}
         message={modal?.message}
-        onChange={() => setModal({ isOpen: false, onConfirm: null })}
+        onCancel={() => setModal({ isOpen: false, onConfirm: null })}
         onConfirm={() => {
           modal?.onConfirm();
           setModal({ isOpen: false, onConfirm: null });

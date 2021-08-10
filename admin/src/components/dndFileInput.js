@@ -69,7 +69,7 @@ export default ({ value, onChange, name, errorMessage = requiredMessage, placeho
       <ModalConfirm
         isOpen={modal?.isOpen}
         title="Êtes-vous sûr(e) de vouloir supprimer ce document"
-        onChange={() => setModal({ isOpen: false, onConfirm: null })}
+        onCancel={() => setModal({ isOpen: false, onConfirm: null })}
         onConfirm={() => {
           modal?.onConfirm();
           setModal({ isOpen: false, onConfirm: null });

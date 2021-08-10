@@ -114,7 +114,7 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
         isOpen={modalConfirm?.isOpen}
         title={modalConfirm?.title}
         message={modalConfirm?.message}
-        onChange={() => setModalConfirm({ isOpen: false, onConfirm: null })}
+        onCancel={() => setModalConfirm({ isOpen: false, onConfirm: null })}
         onConfirm={() => {
           modalConfirm?.onConfirm?.();
           setModalConfirm({ isOpen: false, onConfirm: null });
