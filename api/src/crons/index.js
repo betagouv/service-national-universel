@@ -39,7 +39,7 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
   });
 
   //every hour
-  cron.schedule(EVERY_HOUR, () => {
-    autoAffectationCohesionCenter.handler();
-  });
+  // cron.schedule(EVERY_HOUR, () => {
+  //   autoAffectationCohesionCenter.handler();
+  // });
 }
