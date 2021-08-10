@@ -10,6 +10,7 @@ const { dbConnect, dbClose } = require("./helpers/db");
 const { notExisitingMissionId, createMissionHelper, getMissionByIdHelper } = require("./helpers/mission");
 const { createReferentHelper } = require("./helpers/referent");
 const { notExistingYoungId, createYoungHelper, getYoungByIdHelper } = require("./helpers/young");
+const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 
 jest.mock("../sendinblue", () => ({
   ...jest.requireActual("../sendinblue"),
@@ -168,7 +169,7 @@ describe("Application", () => {
     });
   });
 
-  describe("GET /application/:id/notify/:template", () => {
+  describe("POST /application/:id/notify/:template", () => {
     it("should return 404 when application is not found", async () => {
       const res = await request(getAppHelper()).post(`/application/${notExistingApplicationId}/notify/foo`).send({});
       expect(res.status).toBe(404);
@@ -184,22 +185,27 @@ describe("Application", () => {
       const res = await request(getAppHelper()).post(`/application/${application._id}/notify/foo`).send({});
       expect(res.status).toBe(404);
     });
-    it("should return 200 when template is not found", async () => {
+    it("should return 404 when template is not found", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
       const referent = await createReferentHelper(getNewReferentFixture());
       const mission = await createMissionHelper({ ...getNewMissionFixture(), tutorId: referent._id });
       const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission._id });
 
       const res = await request(getAppHelper()).post(`/application/${application._id}/notify/foo`).send({});
-      expect(res.status).toBe(200);
+      expect(res.status).toBe(404);
     });
     it("should return 200 when template is found", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
       const referent = await createReferentHelper(getNewReferentFixture());
       const mission = await createMissionHelper({ ...getNewMissionFixture(), tutorId: referent._id });
       const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission._id });
-
-      for (const template of ["waiting_validation", "validated_responsible", "validated_young", "cancel", "refused"]) {
+      for (const template of [
+        SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION,
+        SENDINBLUE_TEMPLATES.referent.YOUNG_VALIDATED,
+        SENDINBLUE_TEMPLATES.young.VALIDATE_APPLICATION,
+        SENDINBLUE_TEMPLATES.referent.CANCEL_APPLICATION,
+        SENDINBLUE_TEMPLATES.young.REFUSE_APPLICATION,
+      ]) {
         const res = await request(getAppHelper()).post(`/application/${application._id}/notify/${template}`).send({});
         expect(res.status).toBe(200);
       }
@@ -217,11 +223,15 @@ describe("Application", () => {
       passport.user = young;
 
       // Successful request
-      let res = await request(getAppHelper()).post(`/application/${application._id}/notify/refused`).send({});
+      let res = await request(getAppHelper())
+        .post(`/application/${application._id}/notify/${SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION}`)
+        .send({});
       expect(res.status).toBe(200);
 
       // Failed request (not allowed)
-      res = await request(getAppHelper()).post(`/application/${secondApplication._id}/notify/refused`).send({});
+      res = await request(getAppHelper())
+        .post(`/application/${secondApplication._id}/notify/${SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION}`)
+        .send({});
       expect(res.status).toBe(401);
 
       passport.user = previous;
