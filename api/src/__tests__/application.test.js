@@ -168,28 +168,6 @@ describe("Application", () => {
     });
   });
 
-  describe("GET /application/mission/:id", () => {
-    it("should return empty array when mission has no application", async () => {
-      const res = await request(getAppHelper()).get("/application/mission/" + notExisitingMissionId);
-      expect(res.body.data).toStrictEqual([]);
-      expect(res.status).toBe(200);
-    });
-    it("should return applications", async () => {
-      const young = await createYoungHelper(getNewYoungFixture());
-      const mission = await createMissionHelper(getNewMissionFixture());
-      await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission._id });
-      const res = await request(getAppHelper()).get("/application/mission/" + mission._id);
-      expect(res.status).toBe(200);
-      expect(res.body.data.length).toBe(1);
-      expect(res.body.data[0].status).toBe("WAITING_VALIDATION");
-    });
-    it("should be only accessible by referent", async () => {
-      const passport = require("passport");
-      await request(getAppHelper()).get(`/application/mission/${notExisitingMissionId}`).send();
-      expect(passport.lastTypeCalledOnAuthenticate).toEqual("referent");
-    });
-  });
-
   describe("GET /application/:id/notify/:template", () => {
     it("should return 404 when application is not found", async () => {
       const res = await request(getAppHelper()).post(`/application/${notExistingApplicationId}/notify/foo`).send({});

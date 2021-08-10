@@ -120,25 +120,6 @@ router.get("/:id", passport.authenticate("referent", { session: false }), async 
   }
 });
 
-router.get("/mission/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
-  try {
-    const { error, value: id } = Joi.string().required().validate(req.params.id);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
-
-    const data = await ApplicationObject.find({ missionId: id });
-    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    for (let i = 0; i < data.length; i++) {
-      const application = data[i];
-      const mission = await MissionObject.findById(application.missionId);
-      data[i] = { ...serializeApplication(application), mission };
-    }
-    return res.status(200).send({ ok: true, data });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
-  }
-});
-
 router.post("/notify/docs-military-preparation", passport.authenticate("young", { session: false }), async (req, res) => {
   // get the referent_department manager_phase2
   let toReferent = await ReferentObject.findOne({
