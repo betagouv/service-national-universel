@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Modal } from "reactstrap";
 import styled from "styled-components";
+import { toastr } from "react-redux-toastr";
 
 import api from "../../services/api";
-
-import { toastr } from "react-redux-toastr";
+import { SENDINBLUE_TEMPLATES } from "../../utils";
 import LoadingButton from "../buttons/LoadingButton";
 
 export default ({ isOpen, value, onChange, onSend }) => {
@@ -27,7 +27,7 @@ Merci de vous reconnecter à votre compte pour apporter les modifications demand
 
   const send = async () => {
     setSending(true);
-    await api.post(`/referent/email/correction/${value._id}`, { message, subject: "Demande de correction" });
+    await api.post(`/young/${value._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_CORRECTION}`, { message });
     toastr.success("Email envoyé !");
     onSend(message);
   };

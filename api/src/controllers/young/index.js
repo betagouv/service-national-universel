@@ -333,7 +333,6 @@ router.put("/validate_mission", passport.authenticate("young", { session: false 
   }
 });
 
-//@check
 router.put("/", passport.authenticate("young", { session: false }), async (req, res) => {
   try {
     const { error, value } = validateYoung(req.body, req.user);
@@ -374,6 +373,42 @@ router.put("/", passport.authenticate("young", { session: false }), async (req, 
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+//todo : add operation unauthorized:
+// taking a user and a target, check if the user can send the template to the target
+router.post("/:id/email/:template", passport.authenticate("referent", { session: false }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({
+      id: Joi.string().required(),
+      template: Joi.string().required(),
+      message: Joi.string().allow(null, ""),
+      prevStatus: Joi.string().allow(null, ""),
+      missionName: Joi.string().allow(null, ""),
+      structureName: Joi.string().allow(null, ""),
+    })
+      .unknown()
+      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+    const { id, template, message, prevStatus, missionName, structureName } = value;
+
+    const young = await YoungObject.findById(id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    let cta = config.APP_URL;
+    if (template === SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_CORRECTION) cta = `${config.APP_URL}/ma-preparation-militaire`;
+
+    await sendTemplate(template, {
+      emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+      params: { firstName: young.firstName, lastName: young.lastName, cta, message, missionName, structureName },
+    });
+
+    return res.status(200).send({ ok: true });
+  } catch (error) {
+    console.log(error);
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 

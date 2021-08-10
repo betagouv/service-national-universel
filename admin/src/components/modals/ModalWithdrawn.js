@@ -15,8 +15,6 @@ export default ({ isOpen, value, onChange, onSend }) => {
 
   const send = async () => {
     setSending(true);
-    // await api.post(`/referent/email/correction/${value._id}`, { message, subject: "Demande de correction" });
-    // toastr.success("Email envoyé !");
     onSend(message);
   };
 

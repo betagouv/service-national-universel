@@ -293,6 +293,7 @@ router.post("/signup_invite", async (req, res) => {
   }
 });
 
+// todo move to young controller
 router.put("/young/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const { error, value } = validateYoung(req.body);
@@ -388,6 +389,7 @@ router.post("/:tutorId/email/:template", passport.authenticate("referent", { ses
 });
 
 //todo: refactor
+// keeping it for retrocompatibility
 // post /young/:id/email/:template accessible only by ref
 router.post("/email/:template/:youngId", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {

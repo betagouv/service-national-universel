@@ -401,4 +401,20 @@ describe("Young", () => {
       expect(res.body.data.phase3TutorNote).toEqual("hello");
     });
   });
+
+  describe("POST /young/:id/:email/:template", () => {
+    it("should return 404 if young not found ", async () => {
+      const res = await request(getAppHelper()).post(`/young/${notExistingYoungId}/email/test/`).send();
+      expect(res.statusCode).toEqual(404);
+    });
+    it("should return 200 if young found", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      for (const email of ["correction", "validate", "refuse", "waiting_list", "apply"]) {
+        const res = await request(getAppHelper())
+          .post("/young/" + young._id + "/email/" + "170")
+          .send({ message: "hello" });
+        expect(res.statusCode).toEqual(200);
+      }
+    });
+  });
 });

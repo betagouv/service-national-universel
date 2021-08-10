@@ -6,6 +6,7 @@ import api from "../../services/api";
 import LoadingButton from "../buttons/LoadingButton";
 
 import { toastr } from "react-redux-toastr";
+import { SENDINBLUE_TEMPLATES } from "../../utils";
 
 export default ({ isOpen, value, onChange, onSend }) => {
   const [message, setMessage] = useState();
@@ -29,7 +30,7 @@ En vous souhaitant une excellente continuation.`);
 
   const send = async () => {
     setSending(true);
-    await api.post(`/referent/email/refuse/${value._id}`, { message });
+    await api.post(`/young/${value._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_REFUSED}`, { message });
     toastr.success("Email envoyé !");
     onSend(message);
   };

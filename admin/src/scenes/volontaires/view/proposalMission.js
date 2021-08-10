@@ -6,7 +6,7 @@ import ReactiveListComponent from "../../../components/ReactiveListComponent";
 
 import { apiURL } from "../../../config";
 import api from "../../../services/api";
-import { APPLICATION_STATUS, formatStringDateTimezoneUTC, getResultLabel } from "../../../utils";
+import { APPLICATION_STATUS, formatStringDateTimezoneUTC, getResultLabel, SENDINBLUE_TEMPLATES } from "../../../utils";
 import { Link } from "react-router-dom";
 
 export default ({ young, onSend }) => {
@@ -36,7 +36,10 @@ export default ({ young, onSend }) => {
     if (!ok) return toastr.error("Oups, une erreur est survenue lors de la candidature", code);
 
     //send mail
-    const { ok: okMail, code: codeMail } = await api.post(`/referent/email/apply/${young._id}`, { missionName: mission.name, structureName: mission.structureName });
+    const { ok: okMail, code: codeMail } = await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.MISSION_PROPOSITION}`, {
+      missionName: mission.name,
+      structureName: mission.structureName,
+    });
     if (!okMail) return toastr.error("Oups, une erreur est survenue lors de l'envoi du mail", codeMail);
     toastr.success("Email envoyé !");
     return onSend();
