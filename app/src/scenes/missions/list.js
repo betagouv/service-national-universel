@@ -74,7 +74,7 @@ export default () => {
   useEffect(() => {
     (async () => {
       if (!young) return setApplications(null);
-      const { data } = await api.get(`/application/young/${young._id}`);
+      const { data } = await api.get(`/young/${young._id}/application`);
       const app = data?.reduce((acc, a) => {
         acc.push(a.missionId);
         return acc;

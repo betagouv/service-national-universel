@@ -14,9 +14,13 @@ const { capture } = require("../../sentry");
 const { encrypt } = require("../../cryptoUtils");
 const { getQPV } = require("../../qpv");
 const YoungObject = require("../../models/young");
+const ReferentModel = require("../../models/referent");
 const CohesionCenterObject = require("../../models/cohesionCenter");
 const DepartmentServiceModel = require("../../models/departmentService");
+const ApplicationModel = require("../../models/application");
+const MissionModel = require("../../models/mission");
 const AuthObject = require("../../auth");
+const YoungAuth = new AuthObject(YoungObject);
 const {
   uploadFile,
   validatePassword,
@@ -25,16 +29,15 @@ const {
   assignNextYoungFromWaitingList,
   ERRORS,
   inSevenDays,
+  isYoung,
 } = require("../../utils");
 const { sendEmail, sendTemplate } = require("../../sendinblue");
 const { cookieOptions, JWT_MAX_AGE } = require("../../cookie-options");
 const { validateYoung, validateId, validateFirstName } = require("../../utils/validator");
 const patches = require("../patches");
-const { serializeYoung } = require("../../utils/serializer");
+const { serializeYoung, serializeApplication } = require("../../utils/serializer");
 const { canDeleteYoung } = require("snu-lib/roles");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
-
-const YoungAuth = new AuthObject(YoungObject);
 
 router.post("/signin", signinLimiter, (req, res) => YoungAuth.signin(req, res));
 router.post("/logout", (req, res) => YoungAuth.logout(req, res));
@@ -284,6 +287,7 @@ router.put("/validate_phase3/:young/:token", async (req, res) => {
 
 router.get("/:id/patches", passport.authenticate("referent", { session: false }), async (req, res) => await patches.get(req, res, YoungObject));
 
+// todo validate only their own mission
 router.put("/validate_mission", passport.authenticate("young", { session: false }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
@@ -409,6 +413,34 @@ router.post("/:id/email/:template", passport.authenticate("referent", { session:
     console.log(error);
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.get("/:id/application", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
+  try {
+    const { error, value: id } = Joi.string().required().validate(req.params.id);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    if (isYoung(req.user) && req.user._id.toString() !== id) {
+      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    let data = await ApplicationModel.find({ youngId: id });
+    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    for (let i = 0; i < data.length; i++) {
+      const application = data[i];
+      const mission = await MissionModel.findById(application.missionId);
+      let tutor = {};
+      if (mission?.tutorId) tutor = await ReferentModel.findById(mission.tutorId);
+      if (mission?.tutorId && !application.tutorId) application.tutorId = mission.tutorId;
+      if (mission?.structureId && !application.structureId) application.structureId = mission.structureId;
+      data[i] = { ...serializeApplication(application), mission, tutor };
+    }
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
 

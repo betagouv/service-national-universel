@@ -2,11 +2,19 @@ require("dotenv").config({ path: "./.env-testing" });
 const fetch = require("node-fetch");
 const request = require("supertest");
 const getAppHelper = require("./helpers/app");
+const { dbConnect, dbClose } = require("./helpers/db");
+//application
+const { getNewApplicationFixture } = require("./fixtures/application");
+const { createApplication } = require("./helpers/application");
+//mission
+const getNewMissionFixture = require("./fixtures/mission");
+const { createMissionHelper } = require("./helpers/mission");
+//young
 const getNewYoungFixture = require("./fixtures/young");
 const { getYoungsHelper, createYoungHelper, notExistingYoungId, deleteYoungByEmailHelper } = require("./helpers/young");
-const { dbConnect, dbClose } = require("./helpers/db");
-const { createCohesionCenter, getCohesionCenterById } = require("./helpers/cohesionCenter");
+//cohesion center
 const { getNewCohesionCenterFixture } = require("./fixtures/cohesionCenter");
+const { createCohesionCenter, getCohesionCenterById } = require("./helpers/cohesionCenter");
 
 jest.mock("../sendinblue", () => ({
   ...jest.requireActual("../sendinblue"),
@@ -415,6 +423,42 @@ describe("Young", () => {
           .send({ message: "hello" });
         expect(res.statusCode).toEqual(200);
       }
+    });
+  });
+
+  describe("GET /young/:id/application", () => {
+    it("should return empty array when young has no application", async () => {
+      const res = await request(getAppHelper()).get("/young/" + notExistingYoungId + "/application");
+      expect(res.body.data).toStrictEqual([]);
+      expect(res.status).toBe(200);
+    });
+    it("should return applications", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const mission = await createMissionHelper(getNewMissionFixture());
+      await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission._id });
+      const res = await request(getAppHelper()).get("/young/" + young._id + "/application");
+      expect(res.status).toBe(200);
+      expect(res.body.data.length).toBe(1);
+      expect(res.body.data[0].status).toBe("WAITING_VALIDATION");
+    });
+    it("should only allow young to see their own applications", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const secondYoung = await createYoungHelper(getNewYoungFixture());
+      const mission = await createMissionHelper(getNewMissionFixture());
+      await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission._id });
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
+
+      // Successful request
+      let res = await request(getAppHelper()).get("/young/" + young._id + "/application");
+      expect(res.status).toBe(200);
+
+      // Failed request (not allowed)
+      res = await request(getAppHelper()).get("/young/" + secondYoung._id + "/application");
+      expect(res.status).toBe(401);
+
+      passport.user = previous;
     });
   });
 });

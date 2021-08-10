@@ -120,6 +120,7 @@ router.get("/:id", passport.authenticate("referent", { session: false }), async 
   }
 });
 
+// todo: retrocompatibility
 router.get("/young/:id", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
     const { error, value: id } = Joi.string().required().validate(req.params.id);

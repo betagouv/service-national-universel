@@ -38,7 +38,9 @@ export default ({ young, admin }) => {
   useEffect(() => {
     const getApplication = async () => {
       if (!young) return;
-      let { ok, data, code } = await api.get(`/application/young/${young._id}`);
+      // todo : why not just
+      // let { ok, data, code } = await api.get(`/application/${applicationId}`);
+      let { ok, data, code } = await api.get(`/young/${young._id}/application`);
       if (!ok) return toastr.error("Oups, une erreur est survenue", code);
       const currentApplication = data.find((e) => e._id === applicationId);
 
