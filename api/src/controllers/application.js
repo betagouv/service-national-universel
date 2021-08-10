@@ -120,35 +120,6 @@ router.get("/:id", passport.authenticate("referent", { session: false }), async 
   }
 });
 
-// todo: retrocompatibility
-router.get("/young/:id", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
-  try {
-    const { error, value: id } = Joi.string().required().validate(req.params.id);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
-
-    if (isYoung(req.user) && req.user._id.toString() !== id) {
-      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
-    let data = await ApplicationObject.find({ youngId: id });
-    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    for (let i = 0; i < data.length; i++) {
-      const application = data[i];
-      const mission = await MissionObject.findById(application.missionId);
-      let tutor = {};
-      if (mission?.tutorId) tutor = await ReferentObject.findById(mission.tutorId);
-      if (mission?.tutorId && !application.tutorId) application.tutorId = mission.tutorId;
-      if (mission?.structureId && !application.structureId) application.structureId = mission.structureId;
-      data[i] = { ...serializeApplication(application), mission, tutor };
-    }
-    return res.status(200).send({ ok: true, data });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
-  }
-});
-
 router.get("/mission/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const { error, value: id } = Joi.string().required().validate(req.params.id);

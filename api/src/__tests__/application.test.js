@@ -167,41 +167,6 @@ describe("Application", () => {
       expect(passport.lastTypeCalledOnAuthenticate).toEqual("referent");
     });
   });
-  describe("GET /application/young/:id", () => {
-    it("should return empty array when young has no application", async () => {
-      const res = await request(getAppHelper()).get("/application/young/" + notExistingYoungId);
-      expect(res.body.data).toStrictEqual([]);
-      expect(res.status).toBe(200);
-    });
-    it("should return applications", async () => {
-      const young = await createYoungHelper(getNewYoungFixture());
-      const mission = await createMissionHelper(getNewMissionFixture());
-      await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission._id });
-      const res = await request(getAppHelper()).get("/application/young/" + young._id);
-      expect(res.status).toBe(200);
-      expect(res.body.data.length).toBe(1);
-      expect(res.body.data[0].status).toBe("WAITING_VALIDATION");
-    });
-    it("should only allow young to see their own applications", async () => {
-      const young = await createYoungHelper(getNewYoungFixture());
-      const secondYoung = await createYoungHelper(getNewYoungFixture());
-      const mission = await createMissionHelper(getNewMissionFixture());
-      await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission._id });
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = young;
-
-      // Successful request
-      let res = await request(getAppHelper()).get("/application/young/" + young._id);
-      expect(res.status).toBe(200);
-
-      // Failed request (not allowed)
-      res = await request(getAppHelper()).get("/application/young/" + secondYoung._id);
-      expect(res.status).toBe(401);
-
-      passport.user = previous;
-    });
-  });
 
   describe("GET /application/mission/:id", () => {
     it("should return empty array when mission has no application", async () => {
