@@ -105,22 +105,6 @@ router.get("/:id/application", passport.authenticate("referent", { session: fals
   }
 });
 
-// FIXME: this should be in structure controller. Route should be /structure/:id/mission.
-router.get("/structure/:structureId", passport.authenticate("referent", { session: false }), async (req, res) => {
-  try {
-    const { error, value: checkedId } = validateId(req.params.structureId);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error });
-
-    const data = await MissionObject.find({ structureId: checkedId });
-    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    return res.status(200).send({ ok: true, data: data.map(serializeMission) });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
-  }
-});
-
 // Change the structure of a mission.
 router.put("/:id/structure/:structureId", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {

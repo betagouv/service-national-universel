@@ -107,20 +107,6 @@ describe("Mission", () => {
     });
   });
 
-  describe("GET /mission/structure/:structureid", () => {
-    it("should return the missions of the structure", async () => {
-      const structure = await createStructureHelper(getNewStructureFixture());
-      const missionFixture = getNewMissionFixture();
-      const mission = await createMissionHelper({ ...missionFixture, structureId: structure._id });
-      const res = await request(getAppHelper()).get(`/mission/structure/${structure._id}`);
-      expect(res.statusCode).toEqual(200);
-      expect(res.body.data.length).toEqual(1);
-      expectStructureToEqual(res.body.data[0], missionFixture);
-      await deleteMissionByIdHelper(mission._id);
-      await deleteStructureByIdHelper(structure._id);
-    });
-  });
-
   describe("DELETE /mission/:id", () => {
     it("should return 404 if mission does not exist", async () => {
       const res = await request(getAppHelper()).delete("/mission/" + notExisitingMissionId);

@@ -100,6 +100,7 @@ export const Filter = styled.div`
     padding: 15px 20px;
     border-radius: 6px;
     margin-right: 15px;
+    margin-bottom: 15px;
     ::placeholder {
       color: #767676;
     }
