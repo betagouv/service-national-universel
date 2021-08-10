@@ -224,4 +224,26 @@ describe("Mission", () => {
       );
     });
   });
+
+  describe("GET /mission/:id/application", () => {
+    it("should return empty array when mission has no application", async () => {
+      const res = await request(getAppHelper()).get("/mission/" + notExisitingMissionId + "/application");
+      expect(res.body.data).toStrictEqual([]);
+      expect(res.status).toBe(200);
+    });
+    it("should return applications", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const mission = await createMissionHelper(getNewMissionFixture());
+      await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission._id });
+      const res = await request(getAppHelper()).get("/mission/" + mission._id + "/application");
+      expect(res.status).toBe(200);
+      expect(res.body.data.length).toBe(1);
+      expect(res.body.data[0].status).toBe("WAITING_VALIDATION");
+    });
+    it("should be only accessible by referent", async () => {
+      const passport = require("passport");
+      await request(getAppHelper()).get(`/mission/${notExisitingMissionId}/application`).send();
+      expect(passport.lastTypeCalledOnAuthenticate).toEqual("referent");
+    });
+  });
 });

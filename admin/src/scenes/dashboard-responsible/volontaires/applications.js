@@ -51,7 +51,7 @@ export default () => {
   useEffect(() => {
     if (!missions) return;
     async function initApplications() {
-      const applicationsPromises = missions.map((mission) => api.get(`/application/mission/${mission._id}`));
+      const applicationsPromises = missions.map((mission) => api.get(`/mission/${mission._id}/application`));
       const applications = await Promise.all(applicationsPromises);
       setApplications(
         applications

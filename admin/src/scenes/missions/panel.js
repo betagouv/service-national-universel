@@ -31,7 +31,7 @@ export default ({ onChange, mission }) => {
       const { ok: ok2, data: dataStructure, code: code2 } = await api.get(`/structure/${mission.structureId}`);
       if (!ok2) toastr.error("Oups, une erreur est survnue lors de la récupération de la structure", translate(code2));
       else setStructure(dataStructure);
-      const responseApplications = await api.get(`/application/mission/${mission._id}`);
+      const responseApplications = await api.get(`/mission/${mission._id}/application`);
       if (!responseApplications.ok) toastr.error("Oups, une erreur est survnue lors de la récupération des candidatures", translate(responseApplications.code));
       else setApplications(responseApplications.data);
       return;

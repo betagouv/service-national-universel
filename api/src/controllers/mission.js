@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
+const Joi = require("joi");
+
 const { capture } = require("../sentry");
 const MissionObject = require("../models/mission");
 const UserObject = require("../models/referent");
@@ -83,6 +85,25 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
 });
 
 router.get("/:id/patches", passport.authenticate("referent", { session: false }), async (req, res) => await patches.get(req, res, MissionObject));
+
+router.get("/:id/application", passport.authenticate("referent", { session: false }), async (req, res) => {
+  try {
+    const { error, value: id } = Joi.string().required().validate(req.params.id);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    const data = await ApplicationObject.find({ missionId: id });
+    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    for (let i = 0; i < data.length; i++) {
+      const application = data[i];
+      const mission = await MissionObject.findById(application.missionId);
+      data[i] = { ...serializeApplication(application), mission };
+    }
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
 
 // FIXME: this should be in structure controller. Route should be /structure/:id/mission.
 router.get("/structure/:structureId", passport.authenticate("referent", { session: false }), async (req, res) => {

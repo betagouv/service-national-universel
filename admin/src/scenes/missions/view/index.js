@@ -44,7 +44,7 @@ export default ({ ...props }) => {
         setTutor(tutorResponse.data);
       }
 
-      const applicationResponse = await api.get(`/application/mission/${missionResponse.data._id}`);
+      const applicationResponse = await api.get(`/mission/${missionResponse.data._id}/application`);
       if (!applicationResponse.ok) {
         toastr.error("Oups, une erreur est survenue lors de la récupération des volontaires", translate(applicationResponse.code));
         return history.push("/mission");
