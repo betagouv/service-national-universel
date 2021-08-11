@@ -6,7 +6,8 @@ import { useSelector } from "react-redux";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import ExportComponent from "../../components/ExportXlsx";
 
-import LockSvg from "../../assets/lock.svg";
+import LockedSvg from "../../assets/lock.svg";
+import UnlockedSvg from "../../assets/lock-open.svg";
 import api from "../../services/api";
 import { apiURL, appURL } from "../../config";
 import Panel from "./panel";
@@ -361,7 +362,7 @@ export default () => {
                   renderLabel={(items) => getFilterLabel(items, "Statut documents Préparation Militaire")}
                 />
                 <Help onClick={toggleInfos} onMouseEnter={() => setInfosHover(true)} onMouseLeave={() => setInfosHover(false)}>
-                  {infosClick ? <LockIcon src={LockSvg} /> : null}
+                  {infosClick ? <LockIcon src={LockedSvg} /> : <LockIcon src={UnlockedSvg} />}
                   Aide
                 </Help>
               </FilterRow>
