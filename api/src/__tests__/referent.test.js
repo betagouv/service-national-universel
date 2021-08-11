@@ -231,6 +231,16 @@ describe("Referent", () => {
       const res = await request(getAppHelper()).get(`/referent/${notExistingReferentId}/patches`).send();
       expect(res.statusCode).toEqual(404);
     });
+    it("should return 401 if not admin", async () => {
+      const referent = await createReferentHelper(getNewReferentFixture());
+      referent.firstName = "MY NEW NAME";
+      await referent.save();
+      const passport = require("passport");
+      passport.user.role = ROLES.RESPONSIBLE;
+      const res = await request(getAppHelper()).get(`/referent/${referent._id}/patches`).send();
+      expect(res.status).toBe(401);
+      passport.user.role = ROLES.ADMIN;
+    });
     it("should return 200 if referent found with patches", async () => {
       const referent = await createReferentHelper(getNewReferentFixture());
       referent.firstName = "MY NEW NAME";

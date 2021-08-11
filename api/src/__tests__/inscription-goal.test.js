@@ -38,9 +38,5 @@ describe("Inscription Goal", () => {
       const res = await request(getAppHelper()).get(`/inscription-goal/Ain/current`);
       expect(res.status).toBe(200);
     });
-    it("should return 400 if wrong body", async () => {
-      const res = await request(getAppHelper()).get(`/inscription-goal/ /current`);
-      expect(res.status).toBe(400);
-    });
   });
 });

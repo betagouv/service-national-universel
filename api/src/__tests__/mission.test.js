@@ -195,6 +195,16 @@ describe("Mission", () => {
       const res = await request(getAppHelper()).get(`/mission/${notExisitingMissionId}/patches`).send();
       expect(res.statusCode).toEqual(404);
     });
+    it("should return 401 if not admin", async () => {
+      const mission = await createMissionHelper(getNewMissionFixture());
+      mission.name = "MY NEW NAME";
+      await mission.save();
+      const passport = require("passport");
+      passport.user.role = ROLES.RESPONSIBLE;
+      const res = await request(getAppHelper()).get(`/mission/${mission._id}/patches`).send();
+      expect(res.status).toBe(401);
+      passport.user.role = ROLES.ADMIN;
+    });
     it("should return 200 if mission found with patches", async () => {
       const mission = await createMissionHelper(getNewMissionFixture());
       mission.name = "MY NEW NAME";
