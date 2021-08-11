@@ -12,6 +12,8 @@ const {
 } = require("./helpers/departmentService");
 const { dbConnect, dbClose } = require("./helpers/db");
 const getAppHelper = require("./helpers/app");
+const getNewYoungFixture = require("./fixtures/young");
+const { createYoungHelper } = require("./helpers/young");
 
 jest.setTimeout(10_000);
 
@@ -30,6 +32,11 @@ describe("Department service", () => {
       expect(departmentServiceAfter.length).toEqual(departmentServicesBefore.length + 1);
       await deleteDepartmentServiceByIdHelper(res.body.data._id);
     });
+    it("should return 400 if body is not validated", async () => {
+      const departmentServiceFixture = { ...getNewDepartmentServiceFixture(), department: 29 };
+      const res = await request(getAppHelper()).post("/department-service").send(departmentServiceFixture);
+      expect(res.statusCode).toEqual(400);
+    });
   });
   describe("GET /department-service/:department", () => {
     it("should get only the department-service of :department", async () => {
@@ -40,6 +47,23 @@ describe("Department service", () => {
       expect(res.statusCode).toEqual(200);
       expectDepartmentServiceToEqual(departmentServiceFixture, res.body.data);
       await deleteDepartmentServiceByIdHelper(departmentService._id);
+    });
+    it("should return 401 if a young try to get other department service", async () => {
+      const young = await createYoungHelper({ ...getNewYoungFixture(), department: "foo" });
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
+      let departmentServiceFixture = getDepartmentServicesHelper();
+      departmentServiceFixture.department = "bar";
+      const departmentService = await createDepartmentServiceHelper(departmentServiceFixture);
+      const res = await request(getAppHelper()).get(`/department-service/bar`).send();
+      expect(res.statusCode).toEqual(401);
+      await deleteDepartmentServiceByIdHelper(departmentService._id);
+      passport.user = previous;
+    });
+    it("should return 404 if department service not found", async () => {
+      const res = await request(getAppHelper()).get(`/department-service/departementinconnuaubataillon`).send();
+      expect(res.statusCode).toEqual(404);
     });
   });
   describe("GET /department-service", () => {
