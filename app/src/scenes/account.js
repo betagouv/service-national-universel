@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Row, Col } from "reactstrap";
 import { useSelector, useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
@@ -11,11 +11,29 @@ import ErrorMessage, { requiredMessage } from "../scenes/inscription/components/
 import { getPasswordErrorMessage, translate, putLocation } from "../utils";
 import validator from "validator";
 import AddressInput from "../components/addressInput";
+import ModalConfirm from "../components/modals/ModalConfirm";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
   const history = useHistory();
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+
+  const updateYoung = async (values) => {
+    try {
+      if (!values.location || !values.location.lat || !values.location.lon) {
+        values.location = await putLocation(values.city, values.zip);
+      }
+      const { ok, code, data: young } = await api.put("/young", values);
+      if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+      dispatch(setYoung(young));
+      toastr.success("Mis à jour!");
+      return history.push("/");
+    } catch (e) {
+      console.log(e);
+      toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
+    }
+  };
 
   return (
     <Wrapper>
@@ -130,25 +148,14 @@ export default () => {
         validateOnBlur={false}
         onSubmit={async (values) => {
           if (young.address !== values.address || young.city !== values.city || young.department !== values.department || young.region !== values.region) {
-            if (
-              !confirm(
-                "Attention, vous êtes sur le point de changer votre adresse. La proposition des missions et d'autres fonctionnalités dépendent de cette adresse.\n\nAssurez-vous que ce changement est indispensable avant de continuer ! Si ce n'est pas le cas, merci d'annuler cette action."
-              )
-            )
-              return;
-          }
-          try {
-            if (!values.location || !values.location.lat || !values.location.lon) {
-              values.location = await putLocation(values.city, values.zip);
-            }
-            const { ok, code, data: young } = await api.put("/young", values);
-            if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
-            dispatch(setYoung(young));
-            toastr.success("Mis à jour!");
-          } catch (e) {
-            console.log(e);
-            toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
-          }
+            return setModal({
+              isOpen: true,
+              title: "Changement d'adresse",
+              message:
+                "Attention, vous êtes sur le point de changer votre adresse. La proposition des missions et d'autres fonctionnalités dépendent de cette adresse.\n\nAssurez-vous que ce changement est indispensable avant de continuer ! Si ce n'est pas le cas, merci d'annuler cette action.",
+              onConfirm: async () => updateYoung(values),
+            });
+          } else updateYoung(values);
         }}
       >
         {({ values, handleChange, handleSubmit, isSubmitting, submitForm, errors, touched }) => (
@@ -255,6 +262,16 @@ export default () => {
             <ContinueButton onClick={handleSubmit} disabled={isSubmitting}>
               Enregistrer
             </ContinueButton>
+            <ModalConfirm
+              isOpen={modal?.isOpen}
+              title={modal?.title}
+              message={modal?.message}
+              onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+              onConfirm={() => {
+                modal?.onConfirm();
+                setModal({ isOpen: false, onConfirm: null });
+              }}
+            />
           </>
         )}
       </Formik>
