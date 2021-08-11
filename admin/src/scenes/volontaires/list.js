@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import ExportComponent from "../../components/ExportXlsx";
 
+import LockSvg from "../../assets/lock.svg";
 import api from "../../services/api";
 import { apiURL, appURL } from "../../config";
 import Panel from "./panel";
@@ -14,7 +15,7 @@ import { translate, getFilterLabel, YOUNG_STATUS_COLORS, isInRuralArea, formatLo
 import { Link } from "react-router-dom";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
-import { Filter, FilterRow, ResultTable, Table, ActionBox, Header, Title, MultiLine } from "../../components/list";
+import { Filter, FilterRow, ResultTable, Table, ActionBox, Header, Title, MultiLine, Help, LockIcon, HelpText } from "../../components/list";
 
 const FILTERS = [
   "SEARCH",
@@ -38,6 +39,12 @@ export default () => {
   const [centers, setCenters] = useState(null);
   const [meetingPoints, setMeetingPoints] = useState(null);
   const [filterVisible, setFilterVisible] = useState(false);
+
+  const [infosHover, setInfosHover] = useState(false);
+  const [infosClick, setInfosClick] = useState(false);
+  const toggleInfos = () => {
+    setInfosClick(!infosClick);
+  };
 
   const handleShowFilter = () => setFilterVisible(!filterVisible);
 
@@ -353,8 +360,61 @@ export default () => {
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Statut documents Préparation Militaire")}
                 />
+                <Help onClick={toggleInfos} onMouseEnter={() => setInfosHover(true)} onMouseLeave={() => setInfosHover(false)}>
+                  {infosClick ? <LockIcon src={LockSvg} /> : null}
+                  Aide
+                </Help>
               </FilterRow>
             </Filter>
+            {infosHover || infosClick ? (
+              <HelpText>
+                <div>
+                  Pour filtrer les volontaires, cliquez sur les éléments ci-dessus.
+                  <div style={{ height: "0.5rem" }} />
+                  <div>
+                    <span className="title">Statut :</span>statut du parcours SNU du volontaire
+                  </div>
+                  <div>
+                    <span className="title">Cohorte :</span>année d'inscription
+                  </div>
+                  <div>
+                    <span className="title">Régions et Départements :</span>origine du volontaire
+                  </div>
+                  <div>
+                    <span className="title">Statut de phase :</span>pour en savoir plus consultez le{" "}
+                    <a href="https://snu.crisp.help/fr/" target="_blank">
+                      centre d'aide
+                    </a>
+                  </div>
+                  <div>
+                    <span className="title">Participations au séjour de cohésion :</span> présent ou absent (phase 1)
+                  </div>
+                  <div>
+                    <span className="title">Fiche sanitaire :</span> reçue (Oui ou Non) (phase 1)
+                  </div>
+                  <div>
+                    <span className="title">Statut de mission :</span> s'active dès la 1ère candidature et concerne le statut de sa candidature. Pour en savoir plus sur les
+                    statuts, consultez le{" "}
+                    <a href="https://snu.crisp.help/fr/article/phase-2-les-statuts-volontaire-2ipjp1/" target="_blank">
+                      centre d'aide
+                    </a>
+                  </div>
+                  <div>
+                    <span className="title">Statut documents Préparation Militaire :</span>s'active dès la 1ère candidature à une Préparation Militaire. Pour en savoir plus sur les
+                    statuts de ce filtre consultez le{" "}
+                    <a href="https://snu.crisp.help/fr/" target="_blank">
+                      centre d'aide
+                    </a>{" "}
+                    (phase 2)
+                  </div>
+                  <div>
+                    <span className="title">Statut contrats :</span>Lorsque la candidature de mission est validée par la structure, le contrat généré est en{" "}
+                    <strong>Brouillon</strong>. Il est ensuite rempli et envoyé par la structure aux parties-prenantes via la plateforme, son statut devient{" "}
+                    <strong>Envoyée</strong> . Lorsque toutes les parties-prenantes l'ont validé, son statut passe en <strong>Validée</strong>.
+                  </div>
+                </div>
+              </HelpText>
+            ) : null}
             <ResultTable>
               <ReactiveListComponent
                 defaultQuery={getDefaultQuery}

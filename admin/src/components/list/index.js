@@ -1,4 +1,45 @@
 import styled from "styled-components";
+import { colors } from "../../utils";
+
+export const Help = styled.div`
+  margin-left: auto;
+  color: ${colors.darkPurple};
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  :hover {
+    text-decoration: underline;
+  }
+`;
+
+export const LockIcon = styled.img`
+  height: 0.8rem;
+  opacity: 0.7;
+  cursor: pointer;
+  margin-right: 0.3rem;
+`;
+
+export const HelpText = styled.div`
+  font-size: 0.8rem;
+  padding: 1rem;
+  padding-top: 0;
+  display: grid;
+  place-items: center;
+  color: #666;
+  .title {
+    color: black;
+    text-decoration: underline;
+    margin-right: 0.3rem;
+  }
+  a {
+    color: ${colors.purple};
+    :hover {
+      text-decoration: underline;
+    }
+  }
+`;
 
 export const Header = styled.div`
   padding: 0 25px 0;
