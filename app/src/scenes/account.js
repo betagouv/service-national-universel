@@ -8,7 +8,7 @@ import styled from "styled-components";
 import api from "../services/api";
 import { setYoung } from "../redux/auth/actions";
 import ErrorMessage, { requiredMessage } from "../scenes/inscription/components/errorMessage";
-import { getPasswordErrorMessage, translate } from "../utils";
+import { getPasswordErrorMessage, translate, putLocation } from "../utils";
 import validator from "validator";
 import AddressInput from "../components/addressInput";
 
@@ -138,6 +138,9 @@ export default () => {
               return;
           }
           try {
+            if (!values.location || !values.location.lat || !values.location.lon) {
+              values.location = await putLocation(values.city, values.zip);
+            }
             const { ok, code, data: young } = await api.put("/young", values);
             if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
             dispatch(setYoung(young));
