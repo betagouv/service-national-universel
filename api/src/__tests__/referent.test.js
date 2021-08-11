@@ -30,6 +30,7 @@ const { createMissionHelper, getMissionsHelper } = require("./helpers/mission");
 const getNewMissionFixture = require("./fixtures/mission");
 const { SUB_ROLES, ROLES } = require("snu-lib/roles");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
+const VALID_PASSWORD = faker.internet.password(16, false, /^[a-z]*$/, "AZ12/+");
 
 jest.mock("../utils", () => ({
   ...jest.requireActual("../utils"),
@@ -49,14 +50,38 @@ beforeAll(dbConnect);
 afterAll(dbClose);
 
 describe("Referent", () => {
-  it("POST /referent/signup_invite/admin", async () => {
-    const referentFixture = getNewReferentFixture();
-    const referentsBefore = await getReferentsHelper();
-    const res = await request(getAppHelper()).post("/referent/signup_invite/admin").send(referentFixture);
-    expect(res.statusCode).toEqual(200);
-    const referentsAfter = await getReferentsHelper();
-    expect(referentsAfter.length).toEqual(referentsBefore.length + 1);
-    await deleteReferentByIdHelper(res.body.data._id);
+  describe("POST /referent/signup_invite/:template", () => {
+    it("should invite and add referent", async () => {
+      const referentFixture = getNewReferentFixture();
+      const referentsBefore = await getReferentsHelper();
+      const res = await request(getAppHelper()).post("/referent/signup_invite/001").send(referentFixture);
+      expect(res.statusCode).toEqual(200);
+      const referentsAfter = await getReferentsHelper();
+      expect(referentsAfter.length).toEqual(referentsBefore.length + 1);
+      await deleteReferentByIdHelper(res.body.data._id);
+    });
+    it("should return 400 if no templates given", async () => {
+      const referentFixture = getNewReferentFixture();
+      const res = await request(getAppHelper())
+        .post("/referent/signup_invite/001")
+        .send({ ...referentFixture, structureId: 1 });
+      expect(res.statusCode).toEqual(400);
+    });
+    it("should return 401 if user can not invite", async () => {
+      const passport = require("passport");
+      passport.user.role = ROLES.RESPONSIBLE;
+      const referentFixture = { ...getNewReferentFixture(), role: ROLES.ADMIN };
+      const res = await request(getAppHelper()).post("/referent/signup_invite/001").send(referentFixture);
+      expect(res.statusCode).toEqual(401);
+      passport.user.role = ROLES.ADMIN;
+    });
+    it("should return 409 when user already exists", async () => {
+      const fixture = getNewReferentFixture();
+      const email = fixture.email.toLowerCase();
+      await createReferentHelper({ ...fixture, email });
+      res = await request(getAppHelper()).post("/referent/signup_invite/001").send(fixture);
+      expect(res.status).toBe(409);
+    });
   });
 
   describe("PUT /referent/young/:id", () => {
@@ -79,7 +104,13 @@ describe("Referent", () => {
       expectYoungToEqual(young, modifiedYoung);
     });
     it("should update young statuses when sending status WITHDRAWN", async () => {
-      const { young, response } = await createYoungThenUpdate({ status: "WITHDRAWN", cohesionStayPresence: "" });
+      const { young, response } = await createYoungThenUpdate({
+        status: "WITHDRAWN",
+        cohesionStayPresence: "",
+        statusPhase1: "",
+        statusPhase2: "",
+        statusPhase3: "",
+      });
       expect(response.statusCode).toEqual(200);
       expect(young.status).toEqual("WITHDRAWN");
       expect(young.statusPhase1).toEqual("WITHDRAWN");
@@ -127,6 +158,11 @@ describe("Referent", () => {
     it("should return 400 if wrong template", async () => {
       const tutor = await createReferentHelper(getNewReferentFixture());
       const res = await request(getAppHelper()).post(`/referent/${tutor._id}/email/001`).send({ message: "hello", subject: "hi" });
+      expect(res.statusCode).toEqual(400);
+    });
+    it("should return 400 if wrong template params", async () => {
+      const tutor = await createReferentHelper(getNewReferentFixture());
+      const res = await request(getAppHelper()).post(`/referent/${tutor._id}/email/001`).send({ app: "is a string but must be object" });
       expect(res.statusCode).toEqual(400);
     });
   });
