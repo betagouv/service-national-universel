@@ -18,6 +18,12 @@ describe("Inscription Goal", () => {
         .send([{ department: "test", region: "test", max: 10 }]);
       expect(res.statusCode).toEqual(200);
     });
+    it("should return 400 if wrong body", async () => {
+      const res = await request(getAppHelper())
+        .post("/inscription-goal")
+        .send([{ department: 1, region: "test", max: "must be int" }]);
+      expect(res.statusCode).toEqual(400);
+    });
   });
   describe("GET /inscription-goal", () => {
     it("should return all inscription-goal", async () => {
@@ -31,6 +37,10 @@ describe("Inscription Goal", () => {
     it("should return 200", async () => {
       const res = await request(getAppHelper()).get(`/inscription-goal/Ain/current`);
       expect(res.status).toBe(200);
+    });
+    it("should return 400 if wrong body", async () => {
+      const res = await request(getAppHelper()).get(`/inscription-goal/ /current`);
+      expect(res.status).toBe(400);
     });
   });
 });
