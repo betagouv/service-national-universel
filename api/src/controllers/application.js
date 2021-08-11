@@ -1,8 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
-const fs = require("fs");
-const path = require("path");
 const Joi = require("joi");
 
 const { capture } = require("../sentry");
@@ -10,7 +8,7 @@ const ApplicationObject = require("../models/application");
 const MissionObject = require("../models/mission");
 const YoungObject = require("../models/young");
 const ReferentObject = require("../models/referent");
-const { sendEmail, sendTemplate } = require("../sendinblue");
+const { sendTemplate } = require("../sendinblue");
 const { ERRORS, isYoung } = require("../utils");
 const { validateUpdateApplication, validateNewApplication } = require("../utils/validator");
 const { ADMIN_URL, APP_URL } = require("../config");

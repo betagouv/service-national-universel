@@ -2,8 +2,6 @@ const express = require("express");
 const passport = require("passport");
 const router = express.Router();
 const crypto = require("crypto");
-const fs = require("fs");
-const path = require("path");
 const jwt = require("jsonwebtoken");
 const mime = require("mime-types");
 const FileType = require("file-type");
@@ -22,7 +20,7 @@ const patches = require("./patches");
 const config = require("../config");
 const { capture } = require("../sentry");
 const { decrypt, encrypt } = require("../cryptoUtils");
-const { sendEmail, sendTemplate } = require("../sendinblue");
+const { sendTemplate } = require("../sendinblue");
 const {
   getFile,
   uploadFile,

@@ -5,8 +5,6 @@ const queryString = require("querystring");
 const crypto = require("crypto");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
-const fs = require("fs");
-const path = require("path");
 const Joi = require("joi");
 
 const config = require("../../config");
@@ -16,7 +14,6 @@ const { getQPV } = require("../../qpv");
 const YoungObject = require("../../models/young");
 const ReferentModel = require("../../models/referent");
 const CohesionCenterObject = require("../../models/cohesionCenter");
-const DepartmentServiceModel = require("../../models/departmentService");
 const ApplicationModel = require("../../models/application");
 const MissionModel = require("../../models/mission");
 const AuthObject = require("../../auth");
@@ -31,7 +28,7 @@ const {
   inSevenDays,
   isYoung,
 } = require("../../utils");
-const { sendEmail, sendTemplate } = require("../../sendinblue");
+const { sendTemplate } = require("../../sendinblue");
 const { cookieOptions, JWT_MAX_AGE } = require("../../cookie-options");
 const { validateYoung, validateId, validateFirstName } = require("../../utils/validator");
 const patches = require("../patches");
