@@ -15,6 +15,8 @@ const {
 } = require("./helpers/program");
 const { dbConnect, dbClose } = require("./helpers/db");
 const { ROLES } = require("snu-lib/roles");
+const getNewReferentFixture = require("./fixtures/referent");
+const { createReferentHelper } = require("./helpers/referent");
 
 jest.setTimeout(10_000);
 
@@ -32,6 +34,31 @@ describe("Program", () => {
       const programsAfter = await getProgramsHelper();
       expect(programsAfter.length).toEqual(programsBefore.length + 1);
       await deleteProgramByIdHelper(res.body.data._id);
+    });
+    it("should return 400 if program not validated", async () => {
+      const programFixture = { ...getNewProgramFixture(), department: 1 };
+      const res = await request(getAppHelper()).post("/program").send(programFixture);
+      expect(res.statusCode).toEqual(400);
+    });
+    it("should return 401 if user is referent department and create a program for another department ", async () => {
+      const referent = await createReferentHelper({ ...getNewReferentFixture(), role: ROLES.REFERENT_DEPARTMENT, department: "foo" });
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = referent;
+      const programFixture = { ...getNewProgramFixture(), department: "bar" };
+      const res = await request(getAppHelper()).post("/program").send(programFixture);
+      expect(res.statusCode).toEqual(401);
+      passport.user = previous;
+    });
+    it("should return 401 if user is referent region and create a program for another region ", async () => {
+      const referent = await createReferentHelper({ ...getNewReferentFixture(), role: ROLES.REFERENT_REGION, region: "foo" });
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = referent;
+      const programFixture = { ...getNewProgramFixture(), region: "bar" };
+      const res = await request(getAppHelper()).post("/program").send(programFixture);
+      expect(res.statusCode).toEqual(401);
+      passport.user = previous;
     });
   });
   describe("PUT /program/:id", () => {
@@ -66,13 +93,19 @@ describe("Program", () => {
     });
   });
 
-  it("GET /program/:id", async () => {
-    const programFixture = getNewProgramFixture();
-    const program = await createProgramHelper(programFixture);
-    const res = await request(getAppHelper()).get(`/program/${program._id}`);
-    expect(res.statusCode).toEqual(200);
-    expectProgramToEqual(programFixture, res.body.data);
-    await deleteProgramByIdHelper(program._id);
+  describe("GET /program/:id", () => {
+    it("should return the program", async () => {
+      const programFixture = getNewProgramFixture();
+      const program = await createProgramHelper(programFixture);
+      const res = await request(getAppHelper()).get(`/program/${program._id}`);
+      expect(res.statusCode).toEqual(200);
+      expectProgramToEqual(programFixture, res.body.data);
+      await deleteProgramByIdHelper(program._id);
+    });
+    it("should return 404 if program not found", async () => {
+      const res = await request(getAppHelper()).get(`/program/${notExisitingProgramId}`);
+      expect(res.statusCode).toEqual(404);
+    });
   });
 
   it("GET /program/ AS ADMIN", async () => {
