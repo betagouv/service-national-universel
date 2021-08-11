@@ -6,10 +6,11 @@ import { Col, Row } from "reactstrap";
 import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
-import { translate, APPLICATION_STATUS_COLORS, APPLICATION_STATUS, getAge } from "../../../utils";
+import { translate, APPLICATION_STATUS_COLORS, APPLICATION_STATUS, getAge, SENDINBLUE_TEMPLATES } from "../../../utils";
 import Badge from "../../../components/Badge";
 import DomainThumb from "../../../components/DomainThumb";
 import DownloadContractButton from "../../../components/buttons/DownloadContractButton";
+import ModalConfirm from "../../../components/modals/ModalConfirm";
 
 export default ({ application, index }) => {
   const [value, setValue] = useState(application);
@@ -139,12 +140,16 @@ const ContractStatus = ({ contract, property, name }) => (
 );
 
 const Footer = ({ application, tutor, onChange }) => {
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+
   const setStatus = async (status) => {
     try {
-      if (!confirm("Êtes vous sûr de vouloir modifier cette candidature ?\nAttention cette action est irréversible, vous ne pourrez pas de nouveau candidater à cette mission."))
-        return;
       const { data } = await api.put(`/application`, { _id: application._id, status });
-      await api.post(`/application/${application._id}/notify/${status.toLowerCase()}`);
+      let template;
+      if (status === APPLICATION_STATUS.ABANDON) template = SENDINBLUE_TEMPLATES.referent.CANCEL_APPLICATION;
+      if (status === APPLICATION_STATUS.CANCEL) template = SENDINBLUE_TEMPLATES.referent.CANCEL_APPLICATION;
+      if (status === APPLICATION_STATUS.WAITING_VALIDATION) template = SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION;
+      if (template) await api.post(`/application/${application._id}/notify/${template}`);
       onChange(data);
     } catch (error) {
       console.log(error);
@@ -166,7 +171,19 @@ const Footer = ({ application, tutor, onChange }) => {
                 <div>Mail : {tutor.email}</div>
               </>
             ) : null}
-            <div onClick={() => setStatus(APPLICATION_STATUS.ABANDON)}>Abandonner la mission</div>
+            <div
+              onClick={() =>
+                setModal({
+                  isOpen: true,
+                  title: `Abandonner la mission "${application.missionName}"`,
+                  message:
+                    "Êtes vous sûr de vouloir modifier cette candidature ?\nAttention cette action est irréversible, vous ne pourrez pas de nouveau candidater à cette mission.",
+                  onConfirm: () => setStatus(APPLICATION_STATUS.ABANDON),
+                })
+              }
+            >
+              Abandonner la mission
+            </div>
           </ContainerFooter>
           {/* <div onClick={() => setStatus(APPLICATION_STATUS.WAITING_VALIDATION)}>test</div> */}
         </>
@@ -176,7 +193,19 @@ const Footer = ({ application, tutor, onChange }) => {
         <>
           <Separator />
           <ContainerFooter>
-            <div onClick={() => setStatus(APPLICATION_STATUS.CANCEL)}>Annuler cette candidature</div>
+            <div
+              onClick={() =>
+                setModal({
+                  isOpen: true,
+                  title: `Annuler la candidature à la mission "${application.missionName}"`,
+                  message:
+                    "Êtes vous sûr de vouloir modifier cette candidature ?\nAttention cette action est irréversible, vous ne pourrez pas de nouveau candidater à cette mission.",
+                  onConfirm: () => setStatus(APPLICATION_STATUS.CANCEL),
+                })
+              }
+            >
+              Annuler cette candidature
+            </div>
           </ContainerFooter>
         </>
       );
@@ -185,8 +214,30 @@ const Footer = ({ application, tutor, onChange }) => {
         <>
           <Separator />
           <ContainerFooter>
-            <div onClick={() => setStatus(APPLICATION_STATUS.CANCEL)}>Décliner cette proposition</div>
-            <div onClick={() => setStatus(APPLICATION_STATUS.WAITING_VALIDATION)}>Accepter cette proposition</div>
+            <div
+              onClick={() =>
+                setModal({
+                  isOpen: true,
+                  title: `Décliner la proposition de mission "${application.missionName}"`,
+                  message: "Êtes vous sûr de vouloir décliner cette offre ?\nAttention cette action est irréversible, vous ne pourrez pas de nouveau candidater à cette mission.",
+                  onConfirm: () => setStatus(APPLICATION_STATUS.CANCEL),
+                })
+              }
+            >
+              Décliner cette proposition
+            </div>
+            <div
+              onClick={() =>
+                setModal({
+                  isOpen: true,
+                  title: `Accepter la proposition de mission "${application.missionName}"`,
+                  message: "Êtes vous sûr de vouloir accepter cette offre ?",
+                  onConfirm: () => setStatus(APPLICATION_STATUS.WAITING_VALIDATION),
+                })
+              }
+            >
+              Accepter cette proposition
+            </div>
           </ContainerFooter>
         </>
       );
@@ -194,7 +245,21 @@ const Footer = ({ application, tutor, onChange }) => {
     return null;
   };
 
-  return getFooter(application.status);
+  return (
+    <>
+      {getFooter(application.status)}
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
+    </>
+  );
 };
 
 const ContractInfoContainer = styled.div`
