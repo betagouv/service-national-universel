@@ -47,7 +47,7 @@ function serializeYoung(young, user) {
       delete ret.phase3Token;
       delete ret.__v;
       if (isYoung(user)) {
-        delete ret.historic;
+        // delete ret.historic; //todo : why delete this ? (we need it here -> app/src/components/drawer/index.js)
         delete ret.qpv;
       }
       return ret;

@@ -1,4 +1,5 @@
 import styled from "styled-components";
+import { colors } from "../../utils";
 
 export const ModalContainer = styled.div`
   display: flex;
@@ -42,6 +43,14 @@ export const Content = styled.div`
     font-size: 1rem;
     margin: 0;
     color: #6e757c;
+  }
+  textarea {
+    padding: 1rem;
+    line-height: 1.5;
+    border-radius: 0.5rem;
+    border: 1px solid ${colors.grey};
+    min-width: 100%;
+    margin-bottom: 2rem;
   }
 `;
 
