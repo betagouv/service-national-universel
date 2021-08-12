@@ -9,6 +9,7 @@ import { translate, YOUNG_STATUS_COLORS, formatStringLongDate, FORCE_DISABLED_AS
 import WrapperPhase1 from "./wrapper";
 import api from "../../../services/api";
 import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
+import MailAttestationButton from "../../../components/buttons/MailAttestationButton";
 import DownloadConvocationButton from "../../../components/buttons/DownloadConvocationButton";
 import AssignCenter from "../components/AssignCenter";
 import { Box, BoxTitle } from "../../../components/box";
@@ -214,9 +215,14 @@ export default (props) => {
         </Box>
         <div>
           {young.statusPhase1 === "DONE" && young.cohesionCenterName ? (
-            <DownloadAttestationButton young={young} uri="1">
-              Télécharger l'attestation de réalisation de la phase 1
-            </DownloadAttestationButton>
+            <>
+              <DownloadAttestationButton young={young} uri="1">
+                Télécharger l'attestation de réalisation de la phase 1
+              </DownloadAttestationButton>
+              <MailAttestationButton young={young} uri="1">
+                Envoyer l'attestation de réalisation de la phase 1 par mail
+              </MailAttestationButton>
+            </>
           ) : null}
           {young.meetingPointId || young.deplacementPhase1Autonomous === "true" ? (
             <DownloadConvocationButton young={young} uri="cohesion" style={{ marginTop: "1rem" }}>

@@ -340,6 +340,9 @@ const getYoungFromWaitingList = async (young) => {
 function isYoung(user) {
   return user instanceof YoungModel;
 }
+function isReferent(user) {
+  return user instanceof ReferentModel;
+}
 
 function inSevenDays() {
   return Date.now() + 86400000 * 7;
@@ -390,5 +393,6 @@ module.exports = {
   deleteFile,
   signinLimiter,
   isYoung,
+  isReferent,
   inSevenDays,
 };

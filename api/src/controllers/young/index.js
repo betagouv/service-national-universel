@@ -496,6 +496,11 @@ router.post("/france-connect/user-info", async (req, res) => {
   res.status(200).send({ ok: true, data: userInfo, tokenId: token["id_token"] });
 });
 
+router.post("/:id/send-attestation/:temp", async (req, res) => {
+  console.log("send attestation");
+  res.status(200).send({ ok: true });
+});
+
 // Delete one user (only admin can delete user)
 router.delete("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
