@@ -47,7 +47,7 @@ export default () => {
           name: "",
           status: "VALIDATED",
           legalStatus: "",
-          associationTypes: "",
+          associationTypes: [],
           structurePriveeType: "",
           structurePubliqueType: "",
           description: "",
