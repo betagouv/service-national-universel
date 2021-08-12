@@ -94,6 +94,7 @@ export default ({ young, onSend }) => {
           // create the strucutre if it is a new one
           if (createStructureVisible) {
             const responseStructure = await api.post("/structure", {
+              status: "VALIDATED",
               name: values.structureName,
               legalStatus: values.structureLegalStatus,
               description: values.structureDescription,
