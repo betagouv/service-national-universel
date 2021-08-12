@@ -159,8 +159,6 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
           email: contract.parent1Email,
           name: `${contract.parent1FirstName} ${contract.parent1LastName}`,
           token: contract.parent1Token,
-          cc: contract.youngEmail,
-          ccName: `${contract.youngFirstName} ${contract.youngLastName}`,
           isValidateAgainMail: validateAgainMailList.includes("parent1"),
         });
       }
@@ -169,8 +167,6 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
           email: contract.parent2Email,
           name: `${contract.parent2FirstName} ${contract.parent2LastName}`,
           token: contract.parent2Token,
-          cc: contract.youngEmail,
-          ccName: `${contract.youngFirstName} ${contract.youngLastName}`,
           isValidateAgainMail: validateAgainMailList.includes("parent2"),
         });
       }
