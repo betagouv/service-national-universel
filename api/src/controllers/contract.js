@@ -2,8 +2,6 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const crypto = require("crypto");
-const fs = require("fs");
-const path = require("path");
 
 const renderFromHtml = require("../htmlToPdf");
 const { capture } = require("../sentry");
@@ -12,9 +10,10 @@ const YoungObject = require("../models/young");
 const ApplicationObject = require("../models/application");
 const ReferentObject = require("../models/referent");
 const { ERRORS } = require("../utils");
-const { sendEmail } = require("../sendinblue");
+const { sendTemplate } = require("../sendinblue");
 const { APP_URL } = require("../config");
 const contractTemplate = require("../templates/contractPhase2");
+const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 
 async function updateYoungStatusPhase2Contract(youngId) {
   const young = await YoungObject.findById(youngId);
@@ -183,37 +182,20 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
         });
       }
       for (const recipient of recipients) {
-        if (recipient.isValidateAgainMail) {
-          console.log("send (re)validation mail to " + JSON.stringify({ to: recipient.email, cc: recipient.cc }));
-          const htmlContent = fs
-            .readFileSync(path.resolve(__dirname, "../templates/contract-revalidate.html"))
-            .toString()
-            .replace(/{{toName}}/g, recipient.name)
-            .replace(/{{youngName}}/g, `${contract.youngFirstName} ${contract.youngLastName}`)
-            .replace(/{{cta}}/g, `${APP_URL}/validate-contract?token=${recipient.token}&contract=${contract._id}`);
-          const subject = `(RE)Valider le contrat d'engagement de ${contract.youngFirstName} ${contract.youngLastName} sur la mission ${contract.missionName} suite à modifications effectuées`;
-          const to = { name: recipient.name, email: recipient.email };
-          if (recipient.cc) {
-            await sendEmail(to, subject, htmlContent, { cc: [{ name: recipient.ccName, email: recipient.cc }] });
-          } else {
-            await sendEmail(to, subject, htmlContent);
-          }
-        } else {
-          console.log("send validation mail to " + JSON.stringify({ to: recipient.email, cc: recipient.cc }));
-          const htmlContent = fs
-            .readFileSync(path.resolve(__dirname, "../templates/contract.html"))
-            .toString()
-            .replace(/{{toName}}/g, recipient.name)
-            .replace(/{{youngName}}/g, `${contract.youngFirstName} ${contract.youngLastName}`)
-            .replace(/{{cta}}/g, `${APP_URL}/validate-contract?token=${recipient.token}&contract=${contract._id}`);
-          const subject = `Valider le contrat d'engagement de ${contract.youngFirstName} ${contract.youngLastName} sur la mission ${contract.missionName}`;
-          const to = { name: recipient.name, email: recipient.email };
-          if (recipient.cc) {
-            await sendEmail(to, subject, htmlContent, { cc: [{ name: recipient.ccName, email: recipient.cc }] });
-          } else {
-            await sendEmail(to, subject, htmlContent);
-          }
-        }
+        let template = SENDINBLUE_TEMPLATES.VALIDATE_CONTRACT;
+        if (recipient.isValidateAgainMail) template = SENDINBLUE_TEMPLATES.REVALIDATE_CONTRACT;
+        const emailTo = [{ name: recipient.name, email: recipient.email }];
+        const cc = recipient.cc ? [{ name: recipient.ccName, email: recipient.cc }] : null;
+        await sendTemplate(template, {
+          emailTo,
+          cc,
+          params: {
+            toName: recipient.name,
+            youngName: `${contract.youngFirstName} ${contract.youngLastName}`,
+            cta: `${APP_URL}/validate-contract?token=${recipient.token}&contract=${contract._id}`,
+            missionName: contract.missionName,
+          },
+        });
       }
       contract.invitationSent = "true";
       await contract.save();

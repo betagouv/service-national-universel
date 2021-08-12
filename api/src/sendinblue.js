@@ -33,7 +33,8 @@ async function sendEmail(to, subject, htmlContent, { params, attachment, cc, bcc
     body.bcc = bcc;
     if (ENVIRONMENT !== "production") {
       body.to = body.to.filter((e) => e.email.match(/(selego\.co|beta\.gouv\.fr)/));
-      if (cc?.length) body.cc = body.cc.filter((e) => e.email.match(/(selego\.co|beta\.gouv\.fr)/));
+      if (body.cc) body.cc = body.cc.filter((e) => e.email.match(/(selego\.co|beta\.gouv\.fr)/));
+      if (body.bcc) body.bcc = body.bcc.filter((e) => e.email.match(/(selego\.co|beta\.gouv\.fr)/));
     }
     body.htmlContent = htmlContent;
     body.sender = { name: SENDER_NAME, email: SENDER_EMAIL };
@@ -50,17 +51,21 @@ async function sendEmail(to, subject, htmlContent, { params, attachment, cc, bcc
 }
 
 // https://developers.sendinblue.com/reference#sendtransacemail
-async function sendTemplate(id, { params, emailTo, attachment } = {}) {
+async function sendTemplate(id, { params, emailTo, cc, bcc, attachment } = {}) {
   try {
     const body = { templateId: parseInt(id) };
     if (emailTo) body.to = emailTo;
+    if (cc?.length) body.cc = cc;
+    if (bcc?.length) body.bcc = bcc;
     if (params) body.params = params;
     if (attachment) body.attachment = attachment;
     if (ENVIRONMENT !== "production") {
       body.to = body.to.filter((e) => e.email.match(/(selego\.co|beta\.gouv\.fr)/));
+      if (body.cc) body.cc = body.cc.filter((e) => e.email.match(/(selego\.co|beta\.gouv\.fr)/));
+      if (body.bcc) body.bcc = body.bcc.filter((e) => e.email.match(/(selego\.co|beta\.gouv\.fr)/));
     }
     const mail = await api("/smtp/email", { method: "POST", body: JSON.stringify(body) });
-    console.log({ templateId: id, mail, to: emailTo, params });
+    console.log({ templateId: id, mail, to: emailTo, cc, params });
     return mail;
   } catch (e) {
     console.log("Erreur in sendTemplate", e);
