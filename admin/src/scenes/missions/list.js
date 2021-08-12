@@ -87,7 +87,7 @@ export default () => {
                     "Prénom du tuteur": data.tutor?.firstName,
                     "Email du tuteur": data.tutor?.email,
                     "Téléphone du tuteur": data.tutor?.mobile ? data.tutor?.mobile : data.tutor?.phone,
-                    "Liste des domaines de la mission": data.domains,
+                    "Liste des domaines de la mission": data.domains?.map(translate),
                     "Date du début": formatDateFRTimezoneUTC(data.startAt),
                     "Date de fin": formatDateFRTimezoneUTC(data.endAt),
                     Format: data.format,
