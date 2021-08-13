@@ -2,11 +2,15 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
-import { translate, formatStringDateTimezoneUTC } from "../../../utils";
+import { useSelector } from "react-redux";
+
+import { translate, formatStringDateTimezoneUTC, ROLES } from "../../../utils";
 import MissionView from "./wrapper";
 import { Box, BoxTitle } from "../../../components/box";
 
 export default ({ mission, structure, tutor }) => {
+  const user = useSelector((state) => state.Auth.user);
+
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <MissionView mission={mission} tab="details">
@@ -35,9 +39,29 @@ export default ({ mission, structure, tutor }) => {
                   <div className="detail-text">{mission.address}</div>
                 </div>
                 <div className="detail">
+                  <div className="detail-title">Ville</div>
+                  <div className="detail-text">{mission.city}</div>
+                </div>
+                <div className="detail">
+                  <div className="detail-title">Code postal</div>
+                  <div className="detail-text">{mission.zip}</div>
+                </div>
+                <div className="detail">
                   <div className="detail-title">Dép.</div>
                   <div className="detail-text">{mission.department}</div>
                 </div>
+                <div className="detail">
+                  <div className="detail-title">Région</div>
+                  <div className="detail-text">{mission.region}</div>
+                </div>
+                {user.role === ROLES.ADMIN ? (
+                  <div className="detail">
+                    <div className="detail-title">GPS</div>
+                    <div className="detail-text">
+                      {mission.location.lat} , {mission.location.lon}
+                    </div>
+                  </div>
+                ) : null}
                 <div className="detail">
                   <div className="detail-title">Format</div>
                   <div className="detail-text">{translate(mission.format)}</div>

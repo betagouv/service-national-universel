@@ -109,10 +109,11 @@ export default ({ onChange, mission }) => {
           <SubtitleLink>{`${structure.name} >`}</SubtitleLink>
         </Link>
         <Details title="Statut" value={translate(structure.legalStatus)} />
-        <Details title="Région" value={structure.region} />
-        <Details title="Dép." value={structure.department} />
+        <Details title="Adresse" value={structure.address} />
         <Details title="Ville" value={structure.city} />
         <Details title="Code postal" value={structure.zip} />
+        <Details title="Dép." value={structure.department} />
+        <Details title="Région" value={structure.region} />
         {tutor ? (
           <>
             <Details title="Tuteur" value={`${tutor.firstName} ${tutor.lastName}`} />
@@ -125,10 +126,11 @@ export default ({ onChange, mission }) => {
         <Details title="Domaines" value={mission.domains.map((d) => translate(d)).join(", ")} />
         <Details title="Début" value={formatStringDateTimezoneUTC(mission.startAt)} />
         <Details title="Fin" value={formatStringDateTimezoneUTC(mission.endAt)} />
-        <Details title="Région" value={mission.region} />
-        <Details title="Dép." value={mission.department} />
+        <Details title="Adresse" value={mission.address} />
         <Details title="Ville" value={mission.city} />
         <Details title="Code postal" value={mission.zip} />
+        <Details title="Dép." value={mission.department} />
+        <Details title="Région" value={mission.region} />
         <Details title="Format" value={translate(mission.format)} />
         <Details title="Fréquence" value={mission.frequence} />
         <Details title="Périodes" value={mission.period.map((p) => translate(p)).join(", ")} />
