@@ -28,7 +28,9 @@ export default ({ mission, structure, tutor }) => {
                 <Details title="Code postal" value={mission.zip} />
                 <Details title="Dép." value={mission.department} />
                 <Details title="Région" value={mission.region} />
-                {user.role === ROLES.ADMIN ? <Details title="GPS" value={`${mission.location?.lat} , ${mission.location?.lon}`} copy /> : null}
+                {user.role === ROLES.ADMIN && mission.location?.lat && mission.location?.lon ? (
+                  <Details title="GPS" value={`${mission.location?.lat} , ${mission.location?.lon}`} copy />
+                ) : null}
                 <Details title="Format" value={translate(mission.format)} />
                 <Details title="Fréquence" value={mission.frequence} />
                 <Details title="Périodes" value={mission.period.map((p) => translate(p)).join(", ")} />
