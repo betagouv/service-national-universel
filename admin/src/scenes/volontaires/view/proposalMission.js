@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { ReactiveBase, DataSearch } from "@appbaseio/reactivesearch";
@@ -8,6 +8,7 @@ import { apiURL } from "../../../config";
 import api from "../../../services/api";
 import { APPLICATION_STATUS, formatStringDateTimezoneUTC, getResultLabel, SENDINBLUE_TEMPLATES } from "../../../utils";
 import { Link } from "react-router-dom";
+import Loadingbutton from "../../../components/buttons/LoadingButton";
 
 export default ({ young, onSend }) => {
   const FILTERS = ["SEARCH"];
@@ -97,7 +98,12 @@ export default ({ young, onSend }) => {
 };
 
 const HitMission = ({ hit, onSend }) => {
-  // console.log("h", hit);
+  const [sending, setSending] = useState(false);
+  let mounted = useRef(false);
+  useEffect(() => {
+    mounted && setSending(false);
+    return () => (mounted = false);
+  }, [hit]);
   return (
     <tr>
       <td>
@@ -125,27 +131,19 @@ const HitMission = ({ hit, onSend }) => {
         </div>
       </td>
       <td onClick={(e) => e.stopPropagation()}>
-        <Button className="btn-blue" onClick={onSend}>
+        <Loadingbutton
+          onClick={() => {
+            setSending(true);
+            onSend();
+          }}
+          disabled={sending}
+        >
           Proposer cette mission
-        </Button>
+        </Loadingbutton>
       </td>
     </tr>
   );
 };
-
-const ProposalContainer = styled.div`
-  height: 150px;
-  background-color: #372f78;
-  padding: 1rem 3rem;
-  border-radius: 0 0 8px 8px;
-`;
-
-const ProposalTitle = styled.div`
-  color: #000;
-  text-transform: uppercase;
-  font-size: 1rem;
-  font-weight: 500;
-`;
 
 const ResultTable = styled.div`
   ${({ hide }) => (hide ? "display: none;" : "")}
@@ -265,33 +263,8 @@ const Table = styled.table`
   }
 `;
 
-const TopResultStats = styled(ResultStats)`
-  position: absolute;
-  top: 25px;
-  left: 0;
-`;
 const BottomResultStats = styled(ResultStats)`
   position: absolute;
   top: calc(100% - 50px);
   left: 0;
-`;
-
-const Button = styled.button`
-  /* margin: 0 0.5rem; */
-  align-self: flex-start;
-  border-radius: 0.5rem;
-  padding: 5px;
-  font-size: 0.9rem;
-  /* min-width: 100px; */
-  width: 100%;
-  font-weight: 500;
-  cursor: pointer;
-  background-color: #fff;
-  color: #242526;
-  border: 1px solid #dcdfe6;
-  :hover {
-    color: rgb(49, 130, 206);
-    border-color: rgb(193, 218, 240);
-    background-color: rgb(234, 243, 250);
-  }
 `;
