@@ -2,8 +2,9 @@ import React from "react";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
+import { useSelector } from "react-redux";
 
-import { translate as t, isInRuralArea } from "../../../utils";
+import { translate as t, isInRuralArea, ROLES } from "../../../utils";
 import YoungView from "./wrapper";
 import api from "../../../services/api";
 import DownloadButton from "../../../components/buttons/DownloadButton";
@@ -12,6 +13,8 @@ import { Box, BoxTitle } from "../../../components/box";
 import Emails from "../../../components/views/Emails";
 
 export default ({ young }) => {
+  const user = useSelector((state) => state.Auth.user);
+
   function isFromFranceConnect() {
     return young.parent1FromFranceConnect === "true" && (!young.parent2Status || young.parent2FromFranceConnect === "true");
   }
@@ -26,10 +29,12 @@ export default ({ young }) => {
                 <Details title="Sexe" value={t(young.gender)} />
                 <Details title="E-mail" value={young.email} copy />
                 <Details title="Tel" value={young.phone} />
-                <Details title="Région" value={young.region} />
-                <Details title="Dép" value={young.department} />
-                <Details title="Ville" value={young.city && young.zip && `${young.city} (${young.zip})`} />
                 <Details title="Adresse" value={young.address} />
+                <Details title="Ville" value={young.city} />
+                <Details title="Code Postal" value={young.zip} />
+                <Details title="Dép" value={young.department} />
+                <Details title="Région" value={young.region} />
+                {user.role === ROLES.ADMIN ? <Details title="GPS" value={`${young.location.lat} , ${young.location.lon}`} copy /> : null}
                 {(young.cniFiles || []).map((e, i) => (
                   <DownloadButton
                     key={i}
