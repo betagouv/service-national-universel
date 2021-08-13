@@ -64,7 +64,7 @@ export default ({ structure }) => {
                 <Details title="Code Postal" value={structure.zip} />
                 <Details title="Dép." value={structure.department} />
                 <Details title="Région" value={structure.region} />
-                {user.role === ROLES.ADMIN ? <Details title="GPS" value={`${structure.location.lat} , ${structure.location.lon}`} copy /> : null}
+                {user.role === ROLES.ADMIN ? <Details title="GPS" value={`${structure.location?.lat} , ${structure.location?.lon}`} copy /> : null}
                 <Details title="Siret" value={structure.siret} />
                 {parentStructure ? <Details title="Réseau national" value={<Badge text={parentStructure.name} color="#5245cc" />} /> : null}
                 <Details

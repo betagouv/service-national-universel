@@ -34,7 +34,7 @@ export default ({ young }) => {
                 <Details title="Code Postal" value={young.zip} />
                 <Details title="Dép" value={young.department} />
                 <Details title="Région" value={young.region} />
-                {user.role === ROLES.ADMIN ? <Details title="GPS" value={`${young.location.lat} , ${young.location.lon}`} copy /> : null}
+                {user.role === ROLES.ADMIN ? <Details title="GPS" value={`${young.location?.lat} , ${young.location?.lon}`} copy /> : null}
                 {(young.cniFiles || []).map((e, i) => (
                   <DownloadButton
                     key={i}
