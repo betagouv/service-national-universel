@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
+import { toastr } from "react-redux-toastr";
 
 import { translate, formatStringDateTimezoneUTC, ROLES } from "../../../utils";
 import MissionView from "./wrapper";
@@ -17,142 +18,114 @@ export default ({ mission, structure, tutor }) => {
         <Box>
           <Row>
             <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
-              <Wrapper>
-                <BoxTitle>
-                  La mission<Subtitle>{translate(mission.format)}</Subtitle>
-                </BoxTitle>
-
-                <div className="detail">
-                  <div className="detail-title">Domaines</div>
-                  <div className="detail-text">{mission.domains.map((d) => translate(d)).join(", ")}</div>
-                </div>
-                <div className="detail">
-                  <div className="detail-title">Début</div>
-                  <div className="detail-text">{formatStringDateTimezoneUTC(mission.startAt)}</div>
-                </div>
-                <div className="detail">
-                  <div className="detail-title">Fin</div>
-                  <div className="detail-text">{formatStringDateTimezoneUTC(mission.endAt)}</div>
-                </div>
-                <div className="detail">
-                  <div className="detail-title">Adresse</div>
-                  <div className="detail-text">{mission.address}</div>
-                </div>
-                <div className="detail">
-                  <div className="detail-title">Ville</div>
-                  <div className="detail-text">{mission.city}</div>
-                </div>
-                <div className="detail">
-                  <div className="detail-title">Code postal</div>
-                  <div className="detail-text">{mission.zip}</div>
-                </div>
-                <div className="detail">
-                  <div className="detail-title">Dép.</div>
-                  <div className="detail-text">{mission.department}</div>
-                </div>
-                <div className="detail">
-                  <div className="detail-title">Région</div>
-                  <div className="detail-text">{mission.region}</div>
-                </div>
-                {user.role === ROLES.ADMIN ? (
-                  <div className="detail">
-                    <div className="detail-title">GPS</div>
-                    <div className="detail-text">
-                      {mission.location.lat} , {mission.location.lon}
-                    </div>
-                  </div>
-                ) : null}
-                <div className="detail">
-                  <div className="detail-title">Format</div>
-                  <div className="detail-text">{translate(mission.format)}</div>
-                </div>
-                <div className="detail">
-                  <div className="detail-title">Fréquence</div>
-                  <div className="detail-text">{mission.frequence}</div>
-                </div>
-                <div className="detail">
-                  <div className="detail-title">Périodes</div>
-                  <div className="detail-text">{mission.period.map((p) => translate(p)).join(", ")}</div>
-                </div>
-                <div className="detail">
-                  <div className="detail-title">Objectifs</div>
-                  <div className="detail-text">{mission.description}</div>
-                </div>
-                <div className="detail">
-                  <div className="detail-title">Actions</div>
-                  <div className="detail-text">{mission.actions}</div>
-                </div>
-                <div className="detail">
-                  <div className="detail-title">Contraintes</div>
-                  <div className="detail-text">{mission.contraintes}</div>
-                </div>
-              </Wrapper>
+              <Bloc title="La mission">
+                <Details title="Format" value={translate(mission.format)} />
+                <Details title="Domaines" value={mission.domains.map((d) => translate(d)).join(", ")} />
+                <Details title="Début" value={formatStringDateTimezoneUTC(mission.startAt)} />
+                <Details title="Fin" value={formatStringDateTimezoneUTC(mission.endAt)} />
+                <Details title="Adresse" value={mission.address} />
+                <Details title="Ville" value={mission.city} />
+                <Details title="Code postal" value={mission.zip} />
+                <Details title="Dép." value={mission.department} />
+                <Details title="Région" value={mission.region} />
+                {user.role === ROLES.ADMIN ? <Details title="GPS" value={`${mission.location.lat} , ${mission.location.lon}`} copy /> : null}
+                <Details title="Format" value={translate(mission.format)} />
+                <Details title="Fréquence" value={mission.frequence} />
+                <Details title="Périodes" value={mission.period.map((p) => translate(p)).join(", ")} />
+                <Details title="Objectifs" value={mission.description} />
+                <Details title="Actions" value={mission.actions} />
+                <Details title="Contraintes" value={mission.contraintes} />
+              </Bloc>
             </Col>
             <Col md={6}>
               <Row style={{ borderBottom: "2px solid #f4f5f7" }}>
                 {tutor ? (
-                  <Wrapper>
-                    <BoxTitle>
-                      Le tuteur
+                  <Bloc
+                    title="Le tuteur"
+                    titleRight={
                       <Link to={`/user/${tutor._id}`}>
                         <SubtitleLink>{`${tutor.firstName} ${tutor.lastName} >`}</SubtitleLink>
                       </Link>
-                    </BoxTitle>
-                    <div className="detail">
-                      <div className="detail-title">E-mail</div>
-                      <div className="detail-text">{tutor.email}</div>
-                    </div>
-                    <div className="detail">
-                      <div className="detail-title">Tel. fixe</div>
-                      <div className="detail-text">{tutor.phone}</div>
-                    </div>
-                    <div className="detail">
-                      <div className="detail-title">Tel. mobile</div>
-                      <div className="detail-text">{mission.mobile}</div>
-                    </div>
-                  </Wrapper>
+                    }
+                  >
+                    <Details title="E-mail" value={tutor.email} />
+                    <Details title="Tel. fixe" value={tutor.phone} />
+                    <Details title="Tel. mobile" value={mission.mobile} copy />
+                  </Bloc>
                 ) : null}
               </Row>
               <Row>
                 {structure ? (
-                  <Wrapper>
-                    <BoxTitle>
-                      Le structure
+                  <Bloc
+                    title="Le structure"
+                    titleRight={
                       <Link to={`/structure/${structure._id}`}>
                         <SubtitleLink>{`${structure.name} >`}</SubtitleLink>
                       </Link>
-                    </BoxTitle>
-                    <div className="detail">
-                      <div className="detail-title">Statut</div>
-                      <div className="detail-text">{translate(structure.legalStatus)}</div>
-                    </div>
-                    <div className="detail">
-                      <div className="detail-title">Région</div>
-                      <div className="detail-text">{structure.region}</div>
-                    </div>
-                    <div className="detail">
-                      <div className="detail-title">Dép.</div>
-                      <div className="detail-text">{structure.department}</div>
-                    </div>
-                    <div className="detail">
-                      <div className="detail-title">Ville</div>
-                      <div className="detail-text">{structure.city}</div>
-                    </div>
-                    <div className="detail">
-                      <div className="detail-title">Adresse</div>
-                      <div className="detail-text">{structure.address}</div>
-                    </div>
-                    <div className="detail">
-                      <div className="detail-title">Présentation</div>
-                      <div className="detail-text">{structure.description}</div>
-                    </div>
-                  </Wrapper>
+                    }
+                  >
+                    <Details title="Statut Légal" value={translate(structure.legalStatus)} />
+                    <Details title="Région" value={structure.region} />
+                    <Details title="Dép." value={structure.department} copy />
+                    <Details title="Ville" value={structure.city} copy />
+                    <Details title="Adresse" value={structure.address} copy />
+                    <Details title="Présentation" value={structure.description} copy />
+                  </Bloc>
                 ) : null}
               </Row>
             </Col>
           </Row>
         </Box>
       </MissionView>
+    </div>
+  );
+};
+
+const Bloc = ({ children, title, titleRight, borderBottom, borderRight, borderTop, disabled }) => {
+  return (
+    <Row
+      style={{
+        width: "100%",
+        borderTop: borderTop ? "2px solid #f4f5f7" : 0,
+        borderBottom: borderBottom ? "2px solid #f4f5f7" : 0,
+        borderRight: borderRight ? "2px solid #f4f5f7" : 0,
+        backgroundColor: disabled ? "#f9f9f9" : "transparent",
+      }}
+    >
+      <Wrapper
+        style={{
+          width: "100%",
+        }}
+      >
+        <div style={{ display: "flex", width: "100%" }}>
+          <BoxTitle>
+            <div>{title}</div>
+            <div>{titleRight}</div>
+          </BoxTitle>
+        </div>
+        {children}
+      </Wrapper>
+    </Row>
+  );
+};
+
+const Details = ({ title, value, copy }) => {
+  console.log(copy);
+  if (!value) return <div />;
+  if (typeof value === "function") value = value();
+  return (
+    <div className="detail">
+      <div className="detail-title">{`${title} :`}</div>
+      <div className="detail-text">{value}</div>
+      {copy ? (
+        <div
+          className="icon"
+          onClick={() => {
+            navigator.clipboard.writeText(value);
+            toastr.success(`'${title}' a été copié dans le presse papier.`);
+          }}
+        />
+      ) : null}
     </div>
   );
 };
@@ -167,7 +140,7 @@ const Wrapper = styled.div`
     text-align: left;
     margin-top: 1rem;
     &-title {
-      min-width: 90px;
+      min-width: 120px;
       width: 90px;
       margin-right: 1rem;
       color: #798399;
@@ -176,6 +149,16 @@ const Wrapper = styled.div`
       color: rgba(26, 32, 44);
       white-space: pre-line;
     }
+  }
+  .icon {
+    cursor: pointer;
+    margin: 0 0.5rem;
+    width: 15px;
+    height: 15px;
+    background: ${`url(${require("../../../assets/copy.svg")})`};
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 15px 15px;
   }
 `;
 
