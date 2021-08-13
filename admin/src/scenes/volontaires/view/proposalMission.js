@@ -136,7 +136,7 @@ const HitMission = ({ hit, onSend }) => {
             setSending(true);
             onSend();
           }}
-          disabled={sending}
+          loading={sending}
         >
           Proposer cette mission
         </Loadingbutton>
