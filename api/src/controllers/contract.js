@@ -16,6 +16,7 @@ const { sendEmail } = require("../sendinblue");
 const { APP_URL } = require("../config");
 const contractTemplate = require("../templates/contractPhase2");
 const { validateId, validateContract, validateOptionalId } = require("../utils/validator");
+const { serializeContract } = require("../utils/serializer");
 
 async function updateYoungStatusPhase2Contract(young) {
   const contracts = await ContractObject.find({ youngId: young._id });
@@ -230,7 +231,7 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     await updateYoungStatusPhase2Contract(young);
 
-    return res.status(200).send({ ok: true, data: contract });
+    return res.status(200).send({ ok: true, data: serializeContract(contract) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error: error.message });

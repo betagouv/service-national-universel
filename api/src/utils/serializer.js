@@ -95,6 +95,10 @@ function serializeEmail(email, user) {
   return email.toObject();
 }
 
+function serializeContract(contract, user) {
+  return contract.toObject();
+}
+
 function serializeArray(arr, user, serialize) {
   return arr.map((s) => serialize(s, user));
 }
@@ -118,4 +122,5 @@ module.exports = {
   serializeDepartmentService,
   serializeMeetingPoint,
   serializeEmail,
+  serializeContract,
 };
