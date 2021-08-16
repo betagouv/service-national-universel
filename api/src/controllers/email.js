@@ -56,16 +56,31 @@ function ipAllowListMiddleware(req, res, next) {
 
 router.post("/", ipAllowListMiddleware, async (req, res) => {
   try {
+    const { error, value } = Joi.object()
+      .keys({
+        event: Joi.string().allow(null, ""),
+        email: Joi.string().allow(null, ""),
+        subject: Joi.string().allow(null, ""),
+        "message-id": Joi.string().allow(null, ""),
+        template_id: Joi.number().allow(null),
+        tags: Joi.array().items(Joi.string().allow(null, "")),
+        reason: Joi.string().allow(null, ""),
+        date: Joi.string().allow(null, ""),
+      })
+      .validate(req.body, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, message: error.message });
+
     await EmailObject.create({
-      event: req.body.event,
-      email: req.body.email,
-      subject: req.body.subject,
-      date: req.body.date,
-      messageId: req.body["message-id"],
-      templateId: req.body["template_id"],
-      tags: req.body.tags,
-      reason: req.body.reason,
+      event: value.event,
+      email: value.email,
+      subject: value.subject,
+      date: value.date,
+      messageId: value["message-id"],
+      templateId: value["template_id"],
+      tags: value.tags,
+      reason: value.reason,
     });
+
     return res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
@@ -76,7 +91,7 @@ router.post("/", ipAllowListMiddleware, async (req, res) => {
 router.get("/", passport.authenticate(["referent"], { session: false }), async (req, res) => {
   try {
     const { error, value: email } = Joi.string().lowercase().trim().email().required().validate(req.query.email);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.EMAIL_AND_PASSWORD_REQUIRED });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, message: error.message });
 
     if (!canViewEmailHistory(req.user)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     const data = await EmailObject.find({ email }).sort("-date");
