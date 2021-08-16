@@ -15,6 +15,7 @@ const { ERRORS } = require("../utils");
 const { sendEmail } = require("../sendinblue");
 const { APP_URL } = require("../config");
 const contractTemplate = require("../templates/contractPhase2");
+const { validateId, validateContract } = require("../utils/validator");
 
 async function updateYoungStatusPhase2Contract(young) {
   const contracts = await ContractObject.find({ youngId: young._id });
@@ -69,10 +70,10 @@ async function createContract(data) {
   return contract;
 }
 
-async function updateContract(data) {
+async function updateContract(id, data) {
   const { sendMessage } = data;
-  const previous = await ContractObject.findById(data._id);
-  const contract = await ContractObject.findById(data._id);
+  const previous = await ContractObject.findById(id);
+  const contract = await ContractObject.findById(id);
   contract.set(data);
   await contract.save();
 
@@ -210,8 +211,12 @@ async function sendContractEmail(contract, options) {
 // Create or update contract.
 router.post("/", passport.authenticate(["referent"], { session: false }), async (req, res) => {
   try {
+    const { value: id } = validateId(req.body._id);
+    const { error, value: data } = validateContract(req.body);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, message: error.message });
+
     // Create or update contract.
-    const contract = req.body._id ? await updateContract(req.body) : await createContract(req.body);
+    const contract = id ? await updateContract(id, data) : await createContract(data);
 
     // Update the application.
     const application = await ApplicationObject.findById(contract.applicationId);

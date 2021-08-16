@@ -105,6 +105,74 @@ function validateProgram(program) {
     .validate(program, { stripUnknown: true });
 }
 
+function validateContract(program) {
+  return Joi.object()
+    .keys({
+      youngId: Joi.string().allow(null, ""),
+      structureId: Joi.string().allow(null, ""),
+      applicationId: Joi.string().allow(null, ""),
+      missionId: Joi.string().allow(null, ""),
+      tutorId: Joi.string().allow(null, ""),
+      isYoungAdult: Joi.string().allow(null, ""),
+      parent1Token: Joi.string().allow(null, ""),
+      projectManagerToken: Joi.string().allow(null, ""),
+      structureManagerToken: Joi.string().allow(null, ""),
+      parent2Token: Joi.string().allow(null, ""),
+      youngContractToken: Joi.string().allow(null, ""),
+      parent1Status: Joi.string().allow(null, ""),
+      projectManagerStatus: Joi.string().allow(null, ""),
+      structureManagerStatus: Joi.string().allow(null, ""),
+      parent2Status: Joi.string().allow(null, ""),
+      youngContractStatus: Joi.string().allow(null, ""),
+      invitationSent: Joi.string().allow(null, ""),
+      youngFirstName: Joi.string().allow(null, ""),
+      youngLastName: Joi.string().allow(null, ""),
+      youngBirthdate: Joi.string().allow(null, ""),
+      youngAddress: Joi.string().allow(null, ""),
+      youngCity: Joi.string().allow(null, ""),
+      youngDepartment: Joi.string().allow(null, ""),
+      youngEmail: Joi.string().allow(null, ""),
+      youngPhone: Joi.string().allow(null, ""),
+      parent1FirstName: Joi.string().allow(null, ""),
+      parent1LastName: Joi.string().allow(null, ""),
+      parent1Address: Joi.string().allow(null, ""),
+      parent1City: Joi.string().allow(null, ""),
+      parent1Department: Joi.string().allow(null, ""),
+      parent1Phone: Joi.string().allow(null, ""),
+      parent1Email: Joi.string().allow(null, ""),
+      parent2FirstName: Joi.string().allow(null, ""),
+      parent2LastName: Joi.string().allow(null, ""),
+      parent2Address: Joi.string().allow(null, ""),
+      parent2City: Joi.string().allow(null, ""),
+      parent2Department: Joi.string().allow(null, ""),
+      parent2Phone: Joi.string().allow(null, ""),
+      parent2Email: Joi.string().allow(null, ""),
+      missionName: Joi.string().allow(null, ""),
+      missionObjective: Joi.string().allow(null, ""),
+      missionAction: Joi.string().allow(null, ""),
+      missionStartAt: Joi.string().allow(null, ""),
+      missionEndAt: Joi.string().allow(null, ""),
+      missionAddress: Joi.string().allow(null, ""),
+      missionCity: Joi.string().allow(null, ""),
+      missionZip: Joi.string().allow(null, ""),
+      missionDuration: Joi.string().allow(null, ""),
+      missionFrequence: Joi.string().allow(null, ""),
+      date: Joi.string().allow(null, ""),
+      projectManagerFirstName: Joi.string().allow(null, ""),
+      projectManagerLastName: Joi.string().allow(null, ""),
+      projectManagerRole: Joi.string().allow(null, ""),
+      projectManagerEmail: Joi.string().allow(null, ""),
+      structureManagerFirstName: Joi.string().allow(null, ""),
+      structureManagerLastName: Joi.string().allow(null, ""),
+      structureManagerRole: Joi.string().allow(null, ""),
+      structureManagerEmail: Joi.string().allow(null, ""),
+      structureSiret: Joi.string().allow(null, ""),
+      structureName: Joi.string().allow(null, ""),
+      sendMessage: Joi.boolean().allow(null),
+    })
+    .validate(program, { stripUnknown: true });
+}
+
 function validateFirstName() {
   return Joi.string().custom((value) => (value ? value.replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()) : null));
 }
@@ -460,4 +528,5 @@ module.exports = {
   validateNewApplication,
   validateUpdateApplication,
   validateWaitingList,
+  validateContract,
 };
