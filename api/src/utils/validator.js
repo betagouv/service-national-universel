@@ -5,7 +5,7 @@ const { isYoung } = require("../utils");
 function validateId(id) {
   // Source: https://github.com/mkg20001/joi-objectid/blob/71b2a8c0ccd31153e4efd3e7c10602b4385242f6/index.js#L12
   return Joi.string()
-    .regex(/^[0-9a-fA-F]{24}$/, id)
+    .regex(/^[0-9a-fA-F]{24}$/, "id")
     .validate(id, { stripUnknown: true });
 }
 
