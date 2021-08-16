@@ -1,3 +1,5 @@
+//See: https://developers.sendinblue.com/docs/how-to-use-webhooks
+
 const express = require("express");
 const passport = require("passport");
 const router = express.Router();
@@ -6,10 +8,8 @@ const Netmask = require("netmask").Netmask;
 
 const { ERRORS } = require("../utils");
 const { sendTemplate } = require("../sendinblue");
-
 const { capture } = require("../sentry");
 const EmailObject = require("../models/email");
-//https://developers.sendinblue.com/docs/how-to-use-webhooks
 const { canViewEmailHistory } = require("snu-lib/roles");
 
 function ipAllowListMiddleware(req, res, next) {
