@@ -1,5 +1,5 @@
 require("dotenv").config({ path: "./.env-testing" });
-
+const crypto = require("crypto");
 const { ObjectId } = require("mongoose").Types;
 const request = require("supertest");
 const getAppHelper = require("./helpers/app");
@@ -171,106 +171,66 @@ describe("Structure", () => {
       const resGet = await request(getAppHelper()).get(`/contract/token/${ObjectId()}`).send();
       expect(resGet.status).toBe(404);
     });
-    it("should return 200 from parent", async () => {
-      let young = await createYoungHelper(getNewYoungFixture());
-      const applicationFixture = getNewApplicationFixture();
-      applicationFixture.youngId = young._id;
-      const application = await createApplication(applicationFixture);
-      const contractFixture = getNewContractFixture();
-      contractFixture.youngId = young._id;
-      contractFixture.applicationId = application._id;
-      const resPost = await request(getAppHelper()).post("/contract").send(contractFixture);
-      expect(resPost.status).toBe(200);
-      const resGet = await request(getAppHelper()).get(`/contract/token/${resPost.body.data.parent1Token}`).send();
-      expect(resGet.status).toBe(200);
-      expect(resGet.body.data.isParentToken).toBe(true);
-      expectContractToEqual(resPost.body.data, resGet.body.data);
-    });
-    it("should return 200 from young", async () => {
-      let young = await createYoungHelper(getNewYoungFixture());
-      const applicationFixture = getNewApplicationFixture();
-      applicationFixture.youngId = young._id;
-      const application = await createApplication(applicationFixture);
-      const contractFixture = getNewContractFixture();
-      contractFixture.youngId = young._id;
-      contractFixture.applicationId = application._id;
-      contractFixture.isYoungAdult = "true";
-      const resPost = await request(getAppHelper()).post("/contract").send(contractFixture);
-      expect(resPost.status).toBe(200);
-      const resGet = await request(getAppHelper()).get(`/contract/token/${resPost.body.data.youngContractToken}`).send();
-      expect(resGet.status).toBe(200);
-      expect(resGet.body.data.isYoungContractToken).toBe(true);
-      expectContractToEqual(resPost.body.data, resGet.body.data);
-    });
-    it("should return 200 from structure", async () => {
-      let young = await createYoungHelper(getNewYoungFixture());
-      const applicationFixture = getNewApplicationFixture();
-      applicationFixture.youngId = young._id;
-      const application = await createApplication(applicationFixture);
-      const contractFixture = getNewContractFixture();
-      contractFixture.youngId = young._id;
-      contractFixture.applicationId = application._id;
-      const resPost = await request(getAppHelper()).post("/contract").send(contractFixture);
-      expect(resPost.status).toBe(200);
-      const resGet = await request(getAppHelper()).get(`/contract/token/${resPost.body.data.structureManagerToken}`).send();
-      expect(resGet.status).toBe(200);
-      expect(resGet.body.data.isYoungContractToken).toBe(false);
-      expect(resGet.body.data.isParentToken).toBe(false);
-      expectContractToEqual(resPost.body.data, resGet.body.data);
+    it("should return 200 for each token", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id });
+      const tokens = {
+        projectManagerToken: crypto.randomBytes(40).toString("hex"),
+        parent1Token: crypto.randomBytes(40).toString("hex"),
+        parent2Token: crypto.randomBytes(40).toString("hex"),
+        structureManagerToken: crypto.randomBytes(40).toString("hex"),
+        youngContractToken: crypto.randomBytes(40).toString("hex"),
+      };
+      const contract = await createContractHelper({
+        ...getNewContractFixture(),
+        youngId: young._id,
+        applicationId: application._id,
+        ...tokens,
+      });
+      for (const token of Object.values(tokens)) {
+        const res = await request(getAppHelper()).get(`/contract/token/${token}`).send();
+        expect(res.status).toBe(200);
+        expect(res.body.data._id).toBe(contract._id.toString());
+        expect(res.body.data.projectManagerToken).toBeUndefined();
+        expect(res.body.data.structureManagerToken).toBeUndefined();
+        expect(res.body.data.parent1Token).toBeUndefined();
+        expect(res.body.data.parent2Token).toBeUndefined();
+        expect(res.body.data.youngContractToken).toBeUndefined();
+      }
     });
   });
+
   describe("POST /contract/token/:token", () => {
     it("should return 404 not found", async () => {
       const resGet = await request(getAppHelper()).post(`/contract/token/${ObjectId()}`).send();
       expect(resGet.status).toBe(404);
     });
-    it("should return 200 and validate parent status", async () => {
-      let young = await createYoungHelper(getNewYoungFixture());
-      const applicationFixture = getNewApplicationFixture();
-      applicationFixture.youngId = young._id;
-      const application = await createApplication(applicationFixture);
-      const contractFixture = getNewContractFixture();
-      contractFixture.youngId = young._id;
-      contractFixture.applicationId = application._id;
-      const resPost = await request(getAppHelper()).post("/contract").send(contractFixture);
-      expect(resPost.status).toBe(200);
-      const resToken = await request(getAppHelper()).post(`/contract/token/${resPost.body.data.parent1Token}`).send();
-      expect(resToken.status).toBe(200);
-      const contrat = await getContractByIdHelper(resPost.body.data._id);
-      expect(contrat.parent1Status).toBe("VALIDATED");
-    });
-    it("should return 200 and validate structure status", async () => {
-      let young = await createYoungHelper(getNewYoungFixture());
-      const applicationFixture = getNewApplicationFixture();
-      applicationFixture.youngId = young._id;
-      const application = await createApplication(applicationFixture);
-      const contractFixture = getNewContractFixture();
-      contractFixture.youngId = young._id;
-      contractFixture.applicationId = application._id;
-      const resPost = await request(getAppHelper()).post("/contract").send(contractFixture);
-      expect(resPost.status).toBe(200);
-      const resToken = await request(getAppHelper()).post(`/contract/token/${resPost.body.data.structureManagerToken}`).send();
-      expect(resToken.status).toBe(200);
-      const contrat = await getContractByIdHelper(resPost.body.data._id);
-      expect(contrat.structureManagerStatus).toBe("VALIDATED");
-    });
-    it("should return 200 and validate young status", async () => {
-      let young = await createYoungHelper(getNewYoungFixture());
-      const applicationFixture = getNewApplicationFixture();
-      applicationFixture.youngId = young._id;
-      const application = await createApplication(applicationFixture);
-      const contractFixture = getNewContractFixture();
-      contractFixture.youngId = young._id;
-      contractFixture.applicationId = application._id;
-      contractFixture.isYoungAdult = "true";
-      const resPost = await request(getAppHelper()).post("/contract").send(contractFixture);
-      expect(resPost.status).toBe(200);
-      const resToken = await request(getAppHelper()).post(`/contract/token/${resPost.body.data.youngContractToken}`).send();
-      expect(resToken.status).toBe(200);
-      const contrat = await getContractByIdHelper(resPost.body.data._id);
-      expect(contrat.youngContractStatus).toBe("VALIDATED");
+    it("should return 200 for each token and validate status", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id });
+      const tokens = {
+        projectManagerToken: crypto.randomBytes(40).toString("hex"),
+        parent1Token: crypto.randomBytes(40).toString("hex"),
+        parent2Token: crypto.randomBytes(40).toString("hex"),
+        structureManagerToken: crypto.randomBytes(40).toString("hex"),
+        youngContractToken: crypto.randomBytes(40).toString("hex"),
+      };
+      const contract = await createContractHelper({
+        ...getNewContractFixture(),
+        youngId: young._id,
+        applicationId: application._id,
+        ...tokens,
+      });
+      for (const [key, token] of Object.entries(tokens)) {
+        const res = await request(getAppHelper()).post(`/contract/token/${token}`).send();
+        expect(res.status).toBe(200);
+
+        const updatedContract = await getContractByIdHelper(contract._id);
+        expect(updatedContract[key.replace("Token", "Status")]).toBe("VALIDATED");
+      }
     });
   });
+
   describe("POST /contract/:id/download", () => {
     it("should return 404 not found", async () => {
       const resDownload = await request(getAppHelper()).post(`/contract/${ObjectId()}/download`).send();
