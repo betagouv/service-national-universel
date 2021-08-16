@@ -73,11 +73,13 @@ router.post("/", ipAllowListMiddleware, async (req, res) => {
   }
 });
 
-//@check
 router.get("/", passport.authenticate(["referent"], { session: false }), async (req, res) => {
   try {
+    const { error, value: email } = Joi.string().lowercase().trim().email().required().validate(req.query.email);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.EMAIL_AND_PASSWORD_REQUIRED });
+
     if (!canViewEmailHistory(req.user)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-    const data = await EmailObject.find({ email: req.query.email }).sort("-date");
+    const data = await EmailObject.find({ email }).sort("-date");
     return res.status(200).send({ ok: true, data: data.map((e) => serializeEmail(e)) });
   } catch (error) {
     capture(error);
