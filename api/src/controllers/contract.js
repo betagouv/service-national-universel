@@ -15,7 +15,7 @@ const { ERRORS } = require("../utils");
 const { sendEmail } = require("../sendinblue");
 const { APP_URL } = require("../config");
 const contractTemplate = require("../templates/contractPhase2");
-const { validateId, validateContract } = require("../utils/validator");
+const { validateId, validateContract, validateOptionalId } = require("../utils/validator");
 
 async function updateYoungStatusPhase2Contract(young) {
   const contracts = await ContractObject.find({ youngId: young._id });
@@ -211,7 +211,8 @@ async function sendContractEmail(contract, options) {
 // Create or update contract.
 router.post("/", passport.authenticate(["referent"], { session: false }), async (req, res) => {
   try {
-    const { value: id } = validateId(req.body._id);
+    const { error: idError, value: id } = validateOptionalId(req.body._id);
+    if (idError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, message: idError.message });
     const { error, value: data } = validateContract(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, message: error.message });
 

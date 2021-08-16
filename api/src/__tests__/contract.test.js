@@ -23,6 +23,10 @@ afterAll(dbClose);
 
 describe("Structure", () => {
   describe("POST /contract", () => {
+    it("should return 400 when contract ID is not a valid ID", async () => {
+      const res = await request(getAppHelper()).post("/contract").send({ _id: "not-an-id" });
+      expect(res.status).toBe(400);
+    });
     it("should return 404 when application is not found", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
       const res = await request(getAppHelper())
