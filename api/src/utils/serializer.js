@@ -91,6 +91,10 @@ function serializeMeetingPoint(meetingPoint, user) {
   return meetingPoint.toObject();
 }
 
+function serializeEmail(email, user) {
+  return email.toObject();
+}
+
 function serializeArray(arr, user, serialize) {
   return arr.map((s) => serialize(s, user));
 }
@@ -113,4 +117,5 @@ module.exports = {
   serializeArray,
   serializeDepartmentService,
   serializeMeetingPoint,
+  serializeEmail,
 };

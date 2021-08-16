@@ -11,6 +11,7 @@ const { sendTemplate } = require("../sendinblue");
 const { capture } = require("../sentry");
 const EmailObject = require("../models/email");
 const { canViewEmailHistory } = require("snu-lib/roles");
+const { serializeEmail } = require("../utils/serializer");
 
 function ipAllowListMiddleware(req, res, next) {
   // See: https://www.clever-cloud.com/doc/find-help/faq/#how-to-get-the-users-ip-address
@@ -77,7 +78,7 @@ router.get("/", passport.authenticate(["referent"], { session: false }), async (
   try {
     if (!canViewEmailHistory(req.user)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     const data = await EmailObject.find({ email: req.query.email }).sort("-date");
-    return res.status(200).send({ ok: true, data });
+    return res.status(200).send({ ok: true, data: data.map((e) => serializeEmail(e)) });
   } catch (error) {
     capture(error);
   }
