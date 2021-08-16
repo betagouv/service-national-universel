@@ -50,8 +50,8 @@ export default ({ mission, structure, tutor }) => {
                       </Link>
                     }
                   >
-                    <Details title="E-mail" value={tutor.email} />
-                    <Details title="Tel. fixe" value={tutor.phone} />
+                    <Details title="E-mail" value={tutor.email} copy />
+                    <Details title="Tel. fixe" value={tutor.phone} copy />
                     <Details title="Tel. mobile" value={mission.mobile} copy />
                   </Bloc>
                 ) : null}
@@ -68,10 +68,10 @@ export default ({ mission, structure, tutor }) => {
                   >
                     <Details title="Statut Légal" value={translate(structure.legalStatus)} />
                     <Details title="Région" value={structure.region} />
-                    <Details title="Dép." value={structure.department} copy />
-                    <Details title="Ville" value={structure.city} copy />
-                    <Details title="Adresse" value={structure.address} copy />
-                    <Details title="Présentation" value={structure.description} copy />
+                    <Details title="Dép." value={structure.department} />
+                    <Details title="Ville" value={structure.city} />
+                    <Details title="Adresse" value={structure.address} />
+                    <Details title="Présentation" value={structure.description} />
                   </Bloc>
                 ) : null}
               </Row>
