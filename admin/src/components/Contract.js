@@ -727,7 +727,7 @@ export default ({ young, admin }) => {
                       loading={loadings.submitButton}
                       disabled={loadings.saveButton}
                     >
-                      Envoyer une demande de validation aux {values.parent2Email ? "4" : "3"} parties prenantes
+                      Envoyer une demande de validation aux {values.parent2Email && !isYoungAdult ? "4" : "3"} parties prenantes
                     </LoadingButton>
                   )}
                 </div>
