@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import LoadingButton from "./LoadingButton";
+import { Spinner } from "reactstrap";
 import api from "../../services/api";
 
 export default ({ young, children, disabled, uri, ...rest }) => {
@@ -13,8 +13,8 @@ export default ({ young, children, disabled, uri, ...rest }) => {
     setLoading(false);
   };
   return (
-    <LoadingButton loading={loading} onClick={onClick}>
-      {children}
-    </LoadingButton>
+    <div {...rest} onClick={onClick}>
+      {loading ? <Spinner size="sm" style={{ borderWidth: "0.1em" }} /> : children}
+    </div>
   );
 };

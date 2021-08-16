@@ -5,7 +5,7 @@ import { Formik } from "formik";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-import { translate, YOUNG_STATUS_COLORS, formatStringLongDate, FORCE_DISABLED_ASSIGN_COHESION_CENTER, confirmMessageChangePhase1Presence, ROLES } from "../../../utils";
+import { translate, YOUNG_STATUS_COLORS, formatStringLongDate, FORCE_DISABLED_ASSIGN_COHESION_CENTER, confirmMessageChangePhase1Presence, ROLES, colors } from "../../../utils";
 import WrapperPhase1 from "./wrapper";
 import api from "../../../services/api";
 import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
@@ -215,14 +215,15 @@ export default (props) => {
         </Box>
         <div>
           {young.statusPhase1 === "DONE" && young.cohesionCenterName ? (
-            <>
+            <div style={{ display: "flex", alignItems: "center" }}>
               <DownloadAttestationButton young={young} uri="1">
                 Télécharger l'attestation de réalisation de la phase 1
               </DownloadAttestationButton>
-              <MailAttestationButton young={young} uri="1">
+              <div style={{ padding: "0 1rem", color: colors.grey }}>ou</div>
+              <MailAttestationButton young={young} uri="1" style={{ color: colors.purple }}>
                 Envoyer l'attestation de réalisation de la phase 1 par mail
               </MailAttestationButton>
-            </>
+            </div>
           ) : null}
           {young.meetingPointId || young.deplacementPhase1Autonomous === "true" ? (
             <DownloadConvocationButton young={young} uri="cohesion" style={{ marginTop: "1rem" }}>
