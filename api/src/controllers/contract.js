@@ -122,7 +122,7 @@ async function updateContract(data) {
     if (sendMessage) await sendYoungContractEmail(contract, previous.youngContractStatus === "VALIDATED");
   }
 
-  contract.invitationSent = "true";
+  if (sendMessage) contract.invitationSent = "true";
   await contract.save();
   return contract;
 }
