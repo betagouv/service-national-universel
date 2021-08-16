@@ -2,12 +2,15 @@ const Joi = require("joi");
 const { ROLES_LIST, SUB_ROLES_LIST } = require("snu-lib/roles");
 const { isYoung } = require("../utils");
 
+// Source: https://github.com/mkg20001/joi-objectid/blob/71b2a8c0ccd31153e4efd3e7c10602b4385242f6/index.js#L12
+const idRegex = /^[0-9a-fA-F]{24}$/;
+
 function validateId(id) {
-  // Source: https://github.com/mkg20001/joi-objectid/blob/71b2a8c0ccd31153e4efd3e7c10602b4385242f6/index.js#L12
-  return Joi.string()
-    .regex(/^[0-9a-fA-F]{24}$/, "id")
-    .required()
-    .validate(id, { stripUnknown: true });
+  return Joi.string().regex(idRegex, "id").required().validate(id, { stripUnknown: true });
+}
+
+function validateOptionalId(id) {
+  return Joi.string().regex(idRegex, "id").optional().validate(id, { stripUnknown: true });
 }
 
 function validateString(string) {
@@ -530,4 +533,5 @@ module.exports = {
   validateUpdateApplication,
   validateWaitingList,
   validateContract,
+  validateOptionalId,
 };
