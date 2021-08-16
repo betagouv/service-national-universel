@@ -95,8 +95,8 @@ function serializeEmail(email, user) {
   return email.toObject();
 }
 
-function serializeContract(contract, user) {
-  if (isYoung(user)) {
+function serializeContract(contract, user, withTokens = true) {
+  if (!withTokens || isYoung(user)) {
     return contract.toObject({
       transform: (_doc, ret) => {
         delete ret.parent1Token;

@@ -271,13 +271,9 @@ router.get("/token/:token", async (req, res) => {
         { parent2Token: token },
       ],
     });
-
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const { parent1Token, projectManagerToken, structureManagerToken, parent2Token, youngContractToken, ...rest } = data.toObject();
-    return res.status(200).send({
-      ok: true,
-      data: { ...rest, isParentToken: token === parent1Token || token === parent2Token, isYoungContractToken: token === youngContractToken },
-    });
+
+    return res.status(200).send({ ok: true, data: serializeContract(data, null, false) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
@@ -310,6 +306,7 @@ router.post("/token/:token", async (req, res) => {
 
     const young = await YoungObject.findById(data.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
     await updateYoungStatusPhase2Contract(young);
 
     return res.status(200).send({ ok: true });
