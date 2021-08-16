@@ -104,9 +104,9 @@ describe("Structure", () => {
       const res = await request(getAppHelper()).get(`/contract/${ObjectId()}`).send();
       expect(res.status).toBe(404);
     });
-    it("should return 500 not found", async () => {
+    it("should return 400 not an ID", async () => {
       const res = await request(getAppHelper()).get(`/contract/1`).send();
-      expect(res.status).toBe(500);
+      expect(res.status).toBe(400);
     });
     it("should return 200 and tokens for not adult young", async () => {
       const youngFixture = getNewYoungFixture();
