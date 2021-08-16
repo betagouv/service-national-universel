@@ -21,6 +21,7 @@ const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "TUTOR", "R
 
 export default () => {
   const [mission, setMission] = useState(null);
+  const [structure, setStructure] = useState();
   const [structureIds, setStructureIds] = useState();
   const [filterVisible, setFilterVisible] = useState(false);
   const user = useSelector((state) => state.Auth.user);
@@ -40,6 +41,13 @@ export default () => {
     })();
     return;
   }, []);
+  useEffect(() => {
+    (async () => {
+      const { data } = await api.get(`/structure/${user.structureId}`);
+      setStructure(data);
+    })();
+    return;
+  }, []);
   if (user.role === ROLES.SUPERVISOR && !structureIds) return <Loader />;
 
   return (
@@ -51,13 +59,13 @@ export default () => {
               <div style={{ flex: 1 }}>
                 <Title>Missions</Title>
               </div>
-              {user.role === ROLES.RESPONSIBLE && user.structureId && (
+              {user.role === ROLES.RESPONSIBLE && user.structureId && structure && structure.status !== "DRAFT" ? (
                 <Link to={`/mission/create/${user.structureId}`}>
                   <VioletButton>
                     <p>Nouvelle mission</p>
                   </VioletButton>
                 </Link>
-              )}
+              ) : null}
               <ExportComponent
                 title="Exporter les missions"
                 defaultQuery={getExportQuery}

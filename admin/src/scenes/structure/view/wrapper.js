@@ -64,11 +64,11 @@ export default ({ children, structure, tab }) => {
           </TabList>
         </div>
         <div style={{ display: "flex" }}>
-          {!isResponsible && (
+          {!isResponsible && structure?.status !== "DRAFT" ? (
             <Link to={`/mission/create/${structure._id}`}>
               <PanelActionButton icon="plus" title="Nouvelle mission" />
             </Link>
-          )}
+          ) : null}
           <Link to={`/structure/${structure._id}/edit`}>
             <PanelActionButton icon="pencil" title="Modifier" />
           </Link>
