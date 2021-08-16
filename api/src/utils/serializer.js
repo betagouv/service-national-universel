@@ -96,6 +96,18 @@ function serializeEmail(email, user) {
 }
 
 function serializeContract(contract, user) {
+  if (isYoung(user)) {
+    return contract.toObject({
+      transform: (_doc, ret) => {
+        delete ret.parent1Token;
+        delete ret.projectManagerToken;
+        delete ret.structureManagerToken;
+        delete ret.parent2Token;
+        delete ret.youngContractToken;
+        return ret;
+      },
+    });
+  }
   return contract.toObject();
 }
 

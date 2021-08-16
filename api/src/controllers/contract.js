@@ -11,7 +11,7 @@ const ContractObject = require("../models/contract");
 const YoungObject = require("../models/young");
 const ApplicationObject = require("../models/application");
 const ReferentObject = require("../models/referent");
-const { ERRORS } = require("../utils");
+const { ERRORS, isYoung } = require("../utils");
 const { sendEmail } = require("../sendinblue");
 const { APP_URL } = require("../config");
 const contractTemplate = require("../templates/contractPhase2");
@@ -231,7 +231,7 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     await updateYoungStatusPhase2Contract(young);
 
-    return res.status(200).send({ ok: true, data: serializeContract(contract) });
+    return res.status(200).send({ ok: true, data: serializeContract(contract, req.user) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error: error.message });
@@ -246,12 +246,11 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
     const data = await ContractObject.findById(id);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (req.user.statusPhase2) {
-      //         ^-- Quick and dirty way to check if it's a young.
-      const { parent1Token, projectManagerToken, structureManagerToken, parent2Token, youngContractToken, ...rest } = data.toObject();
-      return res.status(200).send({ ok: true, data: { ...rest } });
+    if (isYoung(req.user) && data.youngId.toString() !== req.user._id.toString()) {
+      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
-    return res.status(200).send({ ok: true, data });
+
+    return res.status(200).send({ ok: true, data: serializeContract(data, req.user) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
