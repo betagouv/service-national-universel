@@ -318,16 +318,24 @@ router.post("/token/:token", async (req, res) => {
 
 router.post("/:id/download", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
   try {
-    console.log(`${req.user.id} download contract ${req.params.id}`);
-    const contract = await ContractObject.findById(req.params.id);
+    const { error: idError, value: id } = validateId(req.params.id);
+    if (idError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, message: idError.message });
+
+    console.log(`${req.user.id} download contract ${id}`);
+
+    const contract = await ContractObject.findById(id);
     if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const options = req.body.options || { format: "A4", margin: 0 };
-    //create html
+    // A young can only download their own documents.
+    if (isYoung(req.user) && contract.youngId.toString() !== req.user._id.toString()) {
+      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+
+    // Create html
     const newhtml = await contractTemplate.render(contract);
     if (!newhtml) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const buffer = await renderFromHtml(newhtml, options);
+    const buffer = await renderFromHtml(newhtml, { format: "A4", margin: 0 });
     res.contentType("application/pdf");
     res.setHeader("Content-Dispositon", 'inline; filename="test.pdf"');
     res.set("Cache-Control", "public, max-age=1");

@@ -236,22 +236,47 @@ describe("Structure", () => {
       const resDownload = await request(getAppHelper()).post(`/contract/${ObjectId()}/download`).send();
       expect(resDownload.status).toBe(404);
     });
-    it("should return 500 not found", async () => {
+    it("should return 400 when not an ID", async () => {
       const resDownload = await request(getAppHelper()).post(`/contract/2/download`).send();
-      expect(resDownload.status).toBe(500);
+      expect(resDownload.status).toBe(400);
     });
     it("should return 200", async () => {
-      let young = await createYoungHelper(getNewYoungFixture());
-      const applicationFixture = getNewApplicationFixture();
-      applicationFixture.youngId = young._id;
-      const application = await createApplication(applicationFixture);
-      const contractFixture = getNewContractFixture();
-      contractFixture.youngId = young._id;
-      contractFixture.applicationId = application._id;
-      const resPost = await request(getAppHelper()).post("/contract").send(contractFixture);
-      expect(resPost.status).toBe(200);
-      const resDownload = await request(getAppHelper()).post(`/contract/${resPost.body.data._id}/download`).send();
+      const young = await createYoungHelper(getNewYoungFixture());
+      const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id });
+      const contract = await createContractHelper({ ...getNewContractFixture(), youngId: young._id, applicationId: application._id });
+
+      const resDownload = await request(getAppHelper()).post(`/contract/${contract._id}/download`).send();
       expect(resDownload.status).toBe(200);
+    });
+
+    it("should return 401 when young tries to see a contract from someone else", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id });
+      const contract = await createContractHelper({ ...getNewContractFixture(), youngId: young._id, applicationId: application._id });
+
+      const secondYoung = await createYoungHelper(getNewYoungFixture());
+
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = secondYoung;
+
+      const resDownload = await request(getAppHelper()).post(`/contract/${contract._id}/download`).send();
+      expect(resDownload.status).toBe(401);
+      passport.user = previous;
+    });
+
+    it("should return 200 when young tries to see their own contract", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id });
+      const contract = await createContractHelper({ ...getNewContractFixture(), youngId: young._id, applicationId: application._id });
+
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
+
+      const resDownload = await request(getAppHelper()).post(`/contract/${contract._id}/download`).send();
+      expect(resDownload.status).toBe(200);
+      passport.user = previous;
     });
   });
 });
