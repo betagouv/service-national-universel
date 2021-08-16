@@ -23,29 +23,22 @@ afterAll(dbClose);
 
 describe("Structure", () => {
   describe("POST /contract", () => {
-    it("should return 500 when empty", async () => {
-      const res = await request(getAppHelper()).post("/contract").send();
-      expect(res.status).toBe(500);
+    it("should return 404 when application is not found", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const res = await request(getAppHelper())
+        .post("/contract")
+        .send({ ...getNewContractFixture(), youngId: young._id });
+      expect(res.status).toBe(404);
     });
-    it("should return 500 when application is not found", async () => {
-      const youngFixture = getNewYoungFixture();
-      const young = await createYoungHelper(youngFixture);
-      const contract = getNewContractFixture();
-      contract.youngId = young._id;
-      const res = await request(getAppHelper()).post("/contract").send(contract);
-      expect(res.status).toBe(500);
-    });
-    it("should return 500 when young is not found", async () => {
-      const applicationFixture = getNewApplicationFixture();
-      const application = await createApplication(applicationFixture);
-      const contract = getNewContractFixture();
-      contract.applicationId = application._id;
-      const res = await request(getAppHelper()).post("/contract").send(contract);
-      expect(res.status).toBe(500);
+    it("should return 404 when young is not found", async () => {
+      const application = await createApplication(getNewApplicationFixture());
+      const res = await request(getAppHelper())
+        .post("/contract")
+        .send({ ...getNewContractFixture(), applicationId: application._id });
+      expect(res.status).toBe(404);
     });
     it("should create contract and sent it", async () => {
-      const youngFixture = getNewYoungFixture();
-      let young = await createYoungHelper(youngFixture);
+      let young = await createYoungHelper(getNewYoungFixture());
       const applicationFixture = getNewApplicationFixture();
       applicationFixture.youngId = young._id;
       const application = await createApplication(applicationFixture);

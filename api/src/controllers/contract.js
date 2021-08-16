@@ -16,8 +16,7 @@ const { sendEmail } = require("../sendinblue");
 const { APP_URL } = require("../config");
 const contractTemplate = require("../templates/contractPhase2");
 
-async function updateYoungStatusPhase2Contract(youngId) {
-  const young = await YoungObject.findById(youngId);
+async function updateYoungStatusPhase2Contract(young) {
   const contracts = await ContractObject.find({ youngId: young._id });
   young.set({
     statusPhase2Contract: contracts.map((contract) => {
@@ -216,11 +215,14 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
 
     // Update the application.
     const application = await ApplicationObject.findById(contract.applicationId);
+    if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     application.contractId = contract._id;
     await application.save();
 
     // Update young status.
-    await updateYoungStatusPhase2Contract(contract.youngId);
+    const young = await YoungObject.findById(contract.youngId);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    await updateYoungStatusPhase2Contract(young);
 
     return res.status(200).send({ ok: true, data: contract });
   } catch (error) {
@@ -296,7 +298,9 @@ router.post("/token/:token", async (req, res) => {
 
     await data.save();
 
-    await updateYoungStatusPhase2Contract(data.youngId);
+    const young = await YoungObject.findById(data.youngId);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    await updateYoungStatusPhase2Contract(young);
 
     return res.status(200).send({ ok: true });
   } catch (error) {
