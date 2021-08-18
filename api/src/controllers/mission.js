@@ -34,9 +34,7 @@ const updateApplication = async (mission) => {
       ],
     },
   });
-  console.log("updateApplication", applications.length);
   for (let application of applications) {
-    console.log(application);
     let statusComment = "";
     switch (mission.status) {
       case MISSION_STATUS.CANCEL:
@@ -90,7 +88,6 @@ router.put("/:id", passport.authenticate("referent", { session: false }), async 
     mission.set(checkedMission);
     await mission.save();
 
-    console.log("put", oldStatus, mission.status);
     // if there is a status change, update the application
     if (oldStatus !== mission.status) await updateApplication(mission);
 
