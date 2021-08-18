@@ -19,32 +19,33 @@ const patches = require("./patches");
 const updateApplication = async (mission) => {
   if (![MISSION_STATUS.CANCEL, MISSION_STATUS.ARCHIVED].includes(mission.status))
     return console.log(`no need to update applications, new status for mission ${mission._id} is ${mission.status}`);
-  const applications = await ApplicationObject.find({ missionId: mission._id });
-  for (let application of applications) {
-    // if young is waiting for a response, we cancel the application with a comment to let them know
-    if (
-      [
+  const applications = await ApplicationObject.find({
+    missionId: mission._id,
+    status: {
+      $in: [
         APPLICATION_STATUS.WAITING_VALIDATION,
         APPLICATION_STATUS.WAITING_ACCEPTATION,
         APPLICATION_STATUS.WAITING_VERIFICATION,
         // APPLICATION_STATUS.VALIDATED,
         // APPLICATION_STATUS.IN_PROGRESS,
-      ].includes(application.status)
-    ) {
-      let statusComment = "";
-      switch (mission.status) {
-        case MISSION_STATUS.CANCEL:
-          statusComment = "La mission a été annulée.";
-          break;
-        case MISSION_STATUS.ARCHIVED:
-          statusComment = "La mission a été archivée.";
-          break;
-      }
-      application.set({ status: APPLICATION_STATUS.CANCEL, statusComment });
-      await application.save();
-      // todo : notify the young
-      return;
+      ],
+    },
+  });
+  console.log("updateApplication", applications.length);
+  for (let application of applications) {
+    console.log(application);
+    let statusComment = "";
+    switch (mission.status) {
+      case MISSION_STATUS.CANCEL:
+        statusComment = "La mission a été annulée.";
+        break;
+      case MISSION_STATUS.ARCHIVED:
+        statusComment = "La mission a été archivée.";
+        break;
     }
+    application.set({ status: APPLICATION_STATUS.CANCEL, statusComment });
+    await application.save();
+    // todo : notify the young
   }
 };
 
@@ -80,8 +81,9 @@ router.put("/:id", passport.authenticate("referent", { session: false }), async 
     mission.set(checkedMission);
     await mission.save();
 
+    console.log("put", oldStatus, mission.status);
     // if there is a status change, update the application
-    if (oldStatus !== checkedMission.status) await updateApplication(checkedMission);
+    if (oldStatus !== mission.status) await updateApplication(mission);
 
     res.status(200).send({ ok: true, data: mission });
   } catch (error) {

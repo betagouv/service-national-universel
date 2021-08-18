@@ -75,7 +75,7 @@ export default ({ application, index }) => {
             <Col md={5}>
               <TagContainer>
                 <Tag color={APPLICATION_STATUS_COLORS[value.status]}>{translate(value.status)}</Tag>
-                <StatusComment>La mission a été annulée</StatusComment>
+                {value.statusComment ? <StatusComment>{value.statusComment}</StatusComment> : null}
               </TagContainer>
             </Col>
           </Card>
