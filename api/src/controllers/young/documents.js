@@ -27,22 +27,22 @@ function getMailParams(type, template, young) {
   if (type === "certificate" && template === "1")
     return {
       object: `Attestation de fin de phase 1 de ${young.firstName}`,
-      message: `Vous trouverez en pièce-jointe de ce mail l'attestation de fin de phase 1 du SNU de ${young.firstName} ${young.lastName}`,
+      message: `Vous trouverez en pièce-jointe de ce mail l'attestation de réalisation de phase 1 du SNU.`,
     };
   if (type === "certificate" && template === "2")
     return {
       object: `Attestation de fin de phase 2 de ${young.firstName}`,
-      message: `Vous trouverez en pièce-jointe de ce mail l'attestation de fin de phase 2 du SNU de ${young.firstName} ${young.lastName}`,
+      message: `Vous trouverez en pièce-jointe de ce mail l'attestation de réalisation de phase 2 du SNU.`,
     };
   if (type === "certificate" && template === "3")
     return {
       object: `Attestation de fin de phase 3 de ${young.firstName}`,
-      message: `Vous trouverez en pièce-jointe de ce mail l'attestation de fin de phase 3 du SNU de ${young.firstName} ${young.lastName}`,
+      message: `Vous trouverez en pièce-jointe de ce mail l'attestation de réalisation de phase 3 du SNU.`,
     };
   if (type === "certificate" && template === "snu")
     return {
       object: `Attestation de réalisation du SNU de ${young.firstName}`,
-      message: `Vous trouverez en pièce-jointe de ce mail l'attestation de réalisation du SNU de ${young.firstName} ${young.lastName}`,
+      message: `Vous trouverez en pièce-jointe de ce mail l'attestation de réalisation du SNU.`,
     };
 
   //todo: add other templates
@@ -102,7 +102,7 @@ router.post("/:type/:template/send-email", passport.authenticate(["young", "refe
 
     // Create html
     const html = await getHtmlTemplate(type, template, young);
-    const { object, message } = getMailParams(type, template);
+    const { object, message } = getMailParams(type, template, young);
     if (!html) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const buffer = await renderFromHtml(html, type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 });
