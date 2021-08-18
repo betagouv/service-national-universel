@@ -69,6 +69,21 @@ export default () => {
                   defaultQuery={getExportQuery}
                   collection="structure"
                   react={{ and: FILTERS }}
+                  transformAll={async (data) => {
+                    const structureIds = [...new Set(data.map((item) => item._id).filter((e) => e))];
+                    if (structureIds?.length) {
+                      const queries = [];
+                      queries.push({ index: "referent", type: "_doc" });
+                      queries.push({
+                        query: { bool: { must: { match_all: {} }, filter: [{ terms: { "structureId.keyword": structureIds } }] } },
+                        size: ES_NO_LIMIT,
+                      });
+                      const { responses } = await api.esQuery(queries);
+                      const referents = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+                      return data.map((item) => ({ ...item, team: referents?.filter((e) => e.structureId === item._id) }));
+                    }
+                    return data;
+                  }}
                   transform={(data) => {
                     return {
                       _id: data._id,
@@ -80,6 +95,7 @@ export default () => {
                       Twitter: data.twitter,
                       Instagram: data.instagram,
                       Statut: data.status,
+                      Equipe: data.team?.map((e) => `${e.firstName} ${e.lastName} : ${e.email}`),
                       "Est une tête de réseau": data.isNetwork,
                       "Nom de la tête de réseau": data.networkName,
                       "Statut juridique": data.legalStatus,
