@@ -11,6 +11,7 @@ const form = require("../../templates/form");
 const convocation = require("../../templates/convocation");
 const { sendTemplate } = require("../../sendinblue");
 const { ROLES, canSendFileByMail } = require("snu-lib/roles");
+const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 
 function getHtmlTemplate(type, template, young) {
   if (type === "certificate" && template === "1") return certificate.phase1(young);
@@ -20,6 +21,34 @@ function getHtmlTemplate(type, template, young) {
   if (type === "form" && template === "imageRight") return form.imageRight(young);
   if (type === "form" && template === "autotestPCR") return form.autotestPCR(young);
   if (type === "convocation" && template === "cohesion") return convocation.cohesion(young);
+}
+
+function getMailParams(type, template, young) {
+  if (type === "certificate" && template === "1")
+    return {
+      object: `Attestation de fin de phase 1 de ${young.firstName}`,
+      message: `Vous trouverez en pièce-jointe de ce mail l'attestation de fin de phase 1 du SNU de ${young.firstName} ${young.lastName}`,
+    };
+  if (type === "certificate" && template === "2")
+    return {
+      object: `Attestation de fin de phase 2 de ${young.firstName}`,
+      message: `Vous trouverez en pièce-jointe de ce mail l'attestation de fin de phase 2 du SNU de ${young.firstName} ${young.lastName}`,
+    };
+  if (type === "certificate" && template === "3")
+    return {
+      object: `Attestation de fin de phase 3 de ${young.firstName}`,
+      message: `Vous trouverez en pièce-jointe de ce mail l'attestation de fin de phase 3 du SNU de ${young.firstName} ${young.lastName}`,
+    };
+  if (type === "certificate" && template === "snu")
+    return {
+      object: `Attestation de réalisation du SNU de ${young.firstName}`,
+      message: `Vous trouverez en pièce-jointe de ce mail l'attestation de réalisation du SNU de ${young.firstName} ${young.lastName}`,
+    };
+
+  //todo: add other templates
+  // if (type === "form" && template === "imageRight") return { object: "", message: "" };
+  // if (type === "form" && template === "autotestPCR") return { object: "", message: "" };
+  // if (type === "convocation" && template === "cohesion") return { object: "", message: "" };
 }
 
 router.post("/:type/:template", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
@@ -73,14 +102,16 @@ router.post("/:type/:template/send-email", passport.authenticate(["young", "refe
 
     // Create html
     const html = await getHtmlTemplate(type, template, young);
+    const { object, message } = getMailParams(type, template);
     if (!html) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const buffer = await renderFromHtml(html, type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 });
     const content = buffer.toString("base64");
 
-    const mail = await sendTemplate("173", {
+    const mail = await sendTemplate(SENDINBLUE_TEMPLATES.young.DOCUMENT, {
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
       attachment: [{ content, name: fileName }],
+      params: { object, message },
     });
     res.status(200).send({ ok: true, data: mail });
   } catch (e) {
