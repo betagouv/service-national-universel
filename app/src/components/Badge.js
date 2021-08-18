@@ -5,7 +5,7 @@ export default ({ text, textColor, backgroundColor, tooltipText, ...rest }) => {
   return (
     <Badge {...rest} textColor={textColor} backgroundColor={backgroundColor}>
       {text}
-      <div className="tooltiptext">{tooltipText}</div>
+      {tooltipText ? <div className="tooltiptext">{tooltipText}</div> : null}
     </Badge>
   );
 };
