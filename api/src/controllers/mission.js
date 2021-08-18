@@ -15,6 +15,9 @@ const { canModifyMission } = require("snu-lib/roles");
 const { MISSION_STATUS, APPLICATION_STATUS } = require("snu-lib/constants");
 const { serializeMission, serializeApplication } = require("../utils/serializer");
 const patches = require("./patches");
+const { sendTemplate } = require("../sendinblue");
+const { SENDINBLUE_TEMPLATES } = require("snu-lib");
+const { APP_URL } = require("../config");
 
 const updateApplication = async (mission) => {
   if (![MISSION_STATUS.CANCEL, MISSION_STATUS.ARCHIVED].includes(mission.status))
@@ -45,7 +48,13 @@ const updateApplication = async (mission) => {
     }
     application.set({ status: APPLICATION_STATUS.CANCEL, statusComment });
     await application.save();
-    // todo : notify the young
+
+    await sendTemplate(SENDINBLUE_TEMPLATES.young.MISSION_CANCEL, {
+      emailTo: [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }],
+      params: {
+        cta: `${APP_URL}/mission`,
+      },
+    });
   }
 };
 
