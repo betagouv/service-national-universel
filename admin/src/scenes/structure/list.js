@@ -16,7 +16,7 @@ import Badge from "../../components/Badge";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import Chevron from "../../components/Chevron";
 
-const FILTERS = ["SEARCH", "LEGAL_STATUS", "DEPARTMENT", "REGION", "CORPS", "WITH_NETWORK", "LOCATION", "MILITARY_PREPARATION"];
+const FILTERS = ["SEARCH", "LEGAL_STATUS", "STATUS", "DEPARTMENT", "REGION", "CORPS", "WITH_NETWORK", "LOCATION", "MILITARY_PREPARATION"];
 const formatLongDate = (date) => {
   if (!date) return "-";
   const d = new Date(date);
@@ -115,6 +115,23 @@ export default () => {
                   URLParams={true}
                   queryFormat="and"
                 />
+                {user?.role === ROLES.ADMIN ? (
+                  <MultiDropdownList
+                    defaultQuery={getDefaultQuery}
+                    className="dropdown-filter"
+                    placeholder="Statut juridique"
+                    componentId="STATUS"
+                    dataField="status.keyword"
+                    react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
+                    renderItem={(e, count) => {
+                      return `${translate(e)} (${count})`;
+                    }}
+                    title=""
+                    URLParams={true}
+                    showSearch={false}
+                    renderLabel={(items) => getFilterLabel(items, "Statut")}
+                  />
+                ) : null}
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -128,6 +145,7 @@ export default () => {
                   title=""
                   URLParams={true}
                   showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Statut juridique")}
                 />
                 <Chevron color="#444" style={{ cursor: "pointer", transform: filterVisible && "rotate(180deg)" }} onClick={handleShowFilter} />
               </FilterRow>
