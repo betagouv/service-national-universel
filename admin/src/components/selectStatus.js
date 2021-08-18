@@ -166,13 +166,15 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
             {!disabled && <Chevron color={YOUNG_STATUS_COLORS[young[statusName]]} />}
           </DropdownToggle>
           <DropdownMenu>
-            {options.map((status) => {
-              return (
-                <DropdownItem key={status} className="dropdown-item" onClick={() => handleClickStatus(status)}>
-                  {translate(status)}
-                </DropdownItem>
-              );
-            })}
+            {options
+              .filter((e) => e !== young[statusName])
+              .map((status) => {
+                return (
+                  <DropdownItem key={status} className="dropdown-item" onClick={() => handleClickStatus(status)}>
+                    {translate(status)}
+                  </DropdownItem>
+                );
+              })}
           </DropdownMenu>
         </UncontrolledDropdown>
         {/* <div>{JSON.stringify(young)}</div> */}

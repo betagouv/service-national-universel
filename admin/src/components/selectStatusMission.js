@@ -91,13 +91,15 @@ export default ({ hit, options = [], callback = () => {} }) => {
             <Chevron color={MISSION_STATUS_COLORS[mission.status]} />
           </DropdownToggle>
           <DropdownMenu>
-            {options.map((status) => {
-              return (
-                <DropdownItem key={status} className="dropdown-item" onClick={() => onClickStatus(status)}>
-                  {translate(status)}
-                </DropdownItem>
-              );
-            })}
+            {options
+              .filter((e) => e !== mission.status)
+              .map((status) => {
+                return (
+                  <DropdownItem key={status} className="dropdown-item" onClick={() => onClickStatus(status)}>
+                    {translate(status)}
+                  </DropdownItem>
+                );
+              })}
           </DropdownMenu>
         </UncontrolledDropdown>
         {/* <div>{JSON.stringify(young)}</div> */}
