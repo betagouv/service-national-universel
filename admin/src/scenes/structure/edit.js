@@ -46,7 +46,7 @@ export default (props) => {
         query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": structure._id } }] } },
       });
 
-      const { responses } = await api.esQuery(queries);
+      const { responses } = await api.esQuery("referent", queries);
       setReferents(responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
     })();
   }, [defaultValue]);

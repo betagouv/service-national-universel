@@ -46,9 +46,14 @@ export default ({ filter }) => {
         },
         size: 0,
       });
+      if (filter.region) queries[1].query.bool.filter.push({ term: { "region.keyword": filter.region } });
+      if (filter.department) queries[1].query.bool.filter.push({ term: { "department.keyword": filter.department } });
+      const { responses: missionResponse } = await api.esQuery("mission", queries);
 
-      queries.push({ index: "young", type: "_doc" });
-      queries.push({
+      // queries *2* lol, will be fixed in a near future.
+      const queries2 = [];
+      queries2.push({ index: "young", type: "_doc" });
+      queries2.push({
         query: { bool: { must: { match_all: {} }, filter: [] } },
         aggs: {
           domains: { terms: { field: "domains.keyword" } },
@@ -64,30 +69,27 @@ export default ({ filter }) => {
         },
         size: 0,
       });
+      if (filter.region) queries2[1].query.bool.filter.push({ term: { "region.keyword": filter.region } });
+      if (filter.department) queries2[1].query.bool.filter.push({ term: { "department.keyword": filter.department } });
+      const { responses: youngResponse } = await api.esQuery("young", queries2);
 
-      if (filter.region) queries[1].query.bool.filter.push({ term: { "region.keyword": filter.region } });
-      if (filter.department) queries[1].query.bool.filter.push({ term: { "department.keyword": filter.department } });
-      if (filter.region) queries[3].query.bool.filter.push({ term: { "region.keyword": filter.region } });
-      if (filter.department) queries[3].query.bool.filter.push({ term: { "department.keyword": filter.department } });
+      setMissionsStatus(missionResponse[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+      setMissionsDomains(missionResponse[0].aggregations.domains.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+      setMissionsPeriod(missionResponse[0].aggregations.period.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+      setMissionsFormat(missionResponse[0].aggregations.format.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+      setMissionPlaceTotal(missionResponse[0].aggregations.placesTotal.value);
+      setMissionPlaceLeft(missionResponse[0].aggregations.placesLeft.value);
 
-      const { responses } = await api.esQuery(queries);
-      setMissionsStatus(responses[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-      setMissionsDomains(responses[0].aggregations.domains.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-      setMissionsPeriod(responses[0].aggregations.period.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-      setMissionsFormat(responses[0].aggregations.format.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-      setMissionPlaceTotal(responses[0].aggregations.placesTotal.value);
-      setMissionPlaceLeft(responses[0].aggregations.placesLeft.value);
-
-      setMobilityNearSchool(responses[1].aggregations.mobilityNearSchool.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-      setMobilityNearHome(responses[1].aggregations.mobilityNearHome.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-      setMobilityNearRelative(responses[1].aggregations.mobilityNearRelative.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-      setYoungsDomains(responses[1].aggregations.domains.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-      setYoungsPeriod(responses[1].aggregations.period.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-      setYoungsProfessionnalProject(responses[1].aggregations.professionnalProject.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-      setYoungsEngaged(responses[1].aggregations.engaged.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-      setYoungsProfessionnalProjectPrecision(responses[1].aggregations.professionnalProjectPrecision.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-      setYoungsFormat(responses[1].aggregations.format.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-      setMobilityTransport(responses[1].aggregations.mobilityTransport.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+      setMobilityNearSchool(youngResponse[0].aggregations.mobilityNearSchool.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+      setMobilityNearHome(youngResponse[0].aggregations.mobilityNearHome.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+      setMobilityNearRelative(youngResponse[0].aggregations.mobilityNearRelative.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+      setYoungsDomains(youngResponse[0].aggregations.domains.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+      setYoungsPeriod(youngResponse[0].aggregations.period.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+      setYoungsProfessionnalProject(youngResponse[0].aggregations.professionnalProject.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+      setYoungsEngaged(youngResponse[0].aggregations.engaged.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+      setYoungsProfessionnalProjectPrecision(youngResponse[0].aggregations.professionnalProjectPrecision.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+      setYoungsFormat(youngResponse[0].aggregations.format.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+      setMobilityTransport(youngResponse[0].aggregations.mobilityTransport.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
     }
     initStatus();
   }, [JSON.stringify(filter)]);

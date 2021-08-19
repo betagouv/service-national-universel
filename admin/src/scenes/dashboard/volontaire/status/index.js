@@ -46,13 +46,13 @@ export default ({ filter }) => {
       if (filter.region) queries[1].query.bool.filter.push({ term: { "region.keyword": filter.region } });
       if (filter.department) queries[1].query.bool.filter.push({ term: { "department.keyword": filter.department } });
 
-      const { responses } = await api.esQuery(queries);
+      const { responses } = await api.esQuery("young", queries);
 
       const queries2 = [...queries];
       queries2[1].query.bool.filter = [{ term: { "cohort.keyword": filter.cohort } }, { terms: { "status.keyword": ["WITHDRAWN"] } }];
       if (filter.region) queries2[1].query.bool.filter.push({ term: { "region.keyword": filter.region } });
       if (filter.department) queries2[1].query.bool.filter.push({ term: { "department.keyword": filter.department } });
-      const { responses: responses2 } = await api.esQuery(queries2);
+      const { responses: responses2 } = await api.esQuery("young", queries2);
 
       setStatus({
         VALIDATED: responses[0].aggregations.status.buckets.reduce((acc, c) => acc + c.doc_count, 0),
@@ -78,7 +78,7 @@ export default ({ filter }) => {
       if (filter.region) queries[1].query.bool.filter.push({ terms: { "youngDepartment.keyword": region2department[filter.region] } });
       if (filter.department) queries[1].query.bool.filter.push({ term: { "youngDepartment.keyword": filter.department } });
 
-      const { responses } = await api.esQuery(queries);
+      const { responses } = await api.esQuery("application", queries);
       setStatusApplication(responses[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
     })();
   }, [JSON.stringify(filter)]);

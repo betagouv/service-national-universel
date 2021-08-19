@@ -74,7 +74,7 @@ export default () => {
                 transformAll={async (data) => {
                   const tutorIds = [...new Set(data.map((item) => item.tutorId).filter((e) => e))];
                   if (tutorIds?.length) {
-                    const { responses } = await api.esQuery([
+                    const { responses } = await api.esQuery("referent", [
                       { index: "referent", type: "_doc" },
                       { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: tutorIds } } },
                     ]);

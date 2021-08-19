@@ -31,7 +31,7 @@ export default ({ filter }) => {
       if (filter.department) queries[1].query.bool.filter.push({ term: { "department.keyword": filter.department } });
 
       //handicap
-      const { responses } = await api.esQuery(queries);
+      const { responses } = await api.esQuery("young", queries);
 
       function transform(arr) {
         const t = arr.find((e) => e.key === "true");

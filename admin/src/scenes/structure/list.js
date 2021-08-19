@@ -39,7 +39,7 @@ export default () => {
           { index: "mission", type: "_doc" },
           { size: ES_NO_LIMIT, query: { bool: { must: { match_all: {} }, filter: [{ terms: { "structureId.keyword": structureIds } }] } } },
         ];
-        const { responses } = await api.esQuery(queries);
+        const { responses } = await api.esQuery("mission", queries);
         setMissions(responses[0]?.hits?.hits || []);
       }
     })();
@@ -78,7 +78,7 @@ export default () => {
                         query: { bool: { must: { match_all: {} }, filter: [{ terms: { "structureId.keyword": structureIds } }] } },
                         size: ES_NO_LIMIT,
                       });
-                      const { responses } = await api.esQuery(queries);
+                      const { responses } = await api.esQuery("referent", queries);
                       const referents = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
                       return data.map((item) => ({ ...item, team: referents?.filter((e) => e.structureId === item._id) }));
                     }

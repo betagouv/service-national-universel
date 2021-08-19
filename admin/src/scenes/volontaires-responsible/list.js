@@ -83,7 +83,7 @@ export default () => {
                 transformAll={async (data) => {
                   const youngIds = [...new Set(data.map((item) => item.youngId))];
                   if (youngIds?.length) {
-                    const { responses } = await api.esQuery([
+                    const { responses } = await api.esQuery("young", [
                       { index: "young", type: "_doc" },
                       { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: youngIds } } },
                     ]);

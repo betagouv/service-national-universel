@@ -51,7 +51,7 @@ export default () => {
         aggs: { range: { date_range: { field: "lastStatusAt", ranges: dates.map((e) => ({ to: e })) } } },
         size: 0,
       });
-      const { responses } = await api.esQuery(queries);
+      const { responses } = await api.esQuery("young", queries);
       const val = responses[0].aggregations.range.buckets.map((e) => e.doc_count);
       const goal = inscriptionGoal.find((g) => g.department === dptName);
       const line = [region, dptCode, dptName, goal?.max, ...val];

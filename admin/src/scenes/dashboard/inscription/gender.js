@@ -24,7 +24,7 @@ export default ({ filter }) => {
       if (filter.region) queries[1].query.bool.filter.push({ term: { "region.keyword": filter.region } });
       if (filter.department) queries[1].query.bool.filter.push({ term: { "department.keyword": filter.department } });
 
-      const { responses } = await api.esQuery(queries);
+      const { responses } = await api.esQuery("young", queries);
       const m = api.getAggregations(responses[0]);
       setGender(m);
     })();

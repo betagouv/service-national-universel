@@ -20,13 +20,13 @@ class api {
     return this.token;
   }
 
-  esQuery(queries) {
+  esQuery(index, queries) {
     let query = "";
     for (let i = 0; i < queries.length; i++) {
       query += `${JSON.stringify(queries[i])}\n`;
     }
 
-    return fetch(`${apiURL}/es/_msearch`, {
+    return fetch(`${apiURL}/es/${index}/_msearch`, {
       mode: "cors",
       method: "POST",
       redirect: "follow",

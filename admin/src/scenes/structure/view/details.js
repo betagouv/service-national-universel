@@ -21,27 +21,25 @@ export default ({ structure }) => {
 
   const getReferents = async () => {
     if (!structure) return;
-    const queries = [];
-    queries.push({ index: "referent", type: "_doc" });
-    queries.push({
-      query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": structure._id } }] } },
-      size: ES_NO_LIMIT,
-    });
+    const { responses: referentResponses } = await api.esQuery("referent", [
+      { index: "referent", type: "_doc" },
+      {
+        query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": structure._id } }] } },
+        size: ES_NO_LIMIT,
+      },
+    ]);
     if (structure.networkId) {
-      queries.push({ index: "structure", type: "_doc" });
-      queries.push({
-        query: { bool: { must: { match_all: {} }, filter: [{ term: { _id: structure.networkId } }] } },
-      });
-    }
+      const { responses: structureResponses } = await api.esQuery("structure", [
+        { index: "structure", type: "_doc" },
+        { query: { bool: { must: { match_all: {} }, filter: [{ term: { _id: structure.networkId } }] } } },
+      ]);
 
-    const { responses } = await api.esQuery(queries);
-    if (structure.networkId) {
-      const structures = responses[1]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+      const structures = structureResponses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
       setParentStructure(structures.length ? structures[0] : null);
     } else {
       setParentStructure(null);
     }
-    setReferents(responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
+    setReferents(referentResponses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
   };
 
   useEffect(() => {
