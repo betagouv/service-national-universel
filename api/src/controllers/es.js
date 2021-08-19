@@ -12,7 +12,7 @@ router.post("/mission/_msearch", passport.authenticate(["young", "referent"], { 
     const filter = user.role === ROLES.RESPONSIBLE ? [{ terms: { "structureId.keyword": [user.structureId] } }] : [];
     const response = await esClient.msearch({ index: "mission", body: withFilter(body, filter) });
     return res.status(200).send(response.body);
-  } catch (e) {
+  } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, error });
   }
@@ -24,7 +24,7 @@ router.post("/missionapi/_msearch", passport.authenticate(["young"], { session: 
     const { body } = req;
     const response = await esClient.msearch({ index: "missionapi", body });
     return res.status(200).send(response.body);
-  } catch (e) {
+  } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, error });
   }
@@ -35,7 +35,7 @@ router.post("/school/_msearch", passport.authenticate(["young"], { session: fals
     const { body } = req;
     const response = await esClient.msearch({ index: "school", body });
     return res.status(200).send(response.body);
-  } catch (e) {
+  } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, error });
   }
@@ -56,7 +56,7 @@ router.post("/young/_msearch", passport.authenticate(["referent"], { session: fa
     if (user.role === ROLES.REFERENT_DEPARTMENT) filter.push({ term: { "department.keyword": user.department } });
     const response = await esClient.msearch({ index: "young", body: withFilter(body, filter) });
     return res.status(200).send(response.body);
-  } catch (e) {
+  } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, error });
   }
@@ -79,7 +79,7 @@ router.post("/cohesionyoung/_msearch", passport.authenticate(["referent"], { ses
       ]),
     });
     return res.status(200).send(response.body);
-  } catch (e) {
+  } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, error });
   }
@@ -89,7 +89,7 @@ router.post("/structure/_msearch", passport.authenticate(["referent"], { session
     const { body } = req;
     const response = await esClient.msearch({ index: "structure", body });
     return res.status(200).send(response.body);
-  } catch (e) {
+  } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, error });
   }
@@ -138,7 +138,7 @@ router.post("/referent/_msearch", passport.authenticate(["referent"], { session:
 
     const response = await esClient.msearch({ index: "referent", body: withFilter(body, filter) });
     return res.status(200).send(response.body);
-  } catch (e) {
+  } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, error });
   }
@@ -148,7 +148,7 @@ router.post("/application/_msearch", passport.authenticate(["referent"], { sessi
     const { body } = req;
     const response = await esClient.msearch({ index: "application", body });
     return res.status(200).send(response.body);
-  } catch (e) {
+  } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, error });
   }
@@ -162,7 +162,7 @@ router.post("/cohesioncenter/_msearch", passport.authenticate(["referent"], { se
 
     const response = await esClient.msearch({ index: "cohesioncenter", body: withFilter(body, filter) });
     return res.status(200).send(response.body);
-  } catch (e) {
+  } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, error });
   }
@@ -173,7 +173,7 @@ router.post("/meetingpoint/_msearch", passport.authenticate(["referent"], { sess
     const { body } = req;
     const response = await esClient.msearch({ index: "meetingpoint", body });
     return res.status(200).send(response.body);
-  } catch (e) {
+  } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, error });
   }
