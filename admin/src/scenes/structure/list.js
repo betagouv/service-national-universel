@@ -35,11 +35,10 @@ export default () => {
   useEffect(() => {
     (async () => {
       if (structureIds?.length) {
-        const queries = [
-          { index: "mission", type: "_doc" },
-          { size: ES_NO_LIMIT, query: { bool: { must: { match_all: {} }, filter: [{ terms: { "structureId.keyword": structureIds } }] } } },
-        ];
-        const { responses } = await api.esQuery("mission", queries);
+        const { responses } = await api.esQuery("mission", {
+          size: ES_NO_LIMIT,
+          query: { bool: { must: { match_all: {} }, filter: [{ terms: { "structureId.keyword": structureIds } }] } },
+        });
         setMissions(responses[0]?.hits?.hits || []);
       }
     })();
@@ -72,13 +71,10 @@ export default () => {
                   transformAll={async (data) => {
                     const structureIds = [...new Set(data.map((item) => item._id).filter((e) => e))];
                     if (structureIds?.length) {
-                      const queries = [];
-                      queries.push({ index: "referent", type: "_doc" });
-                      queries.push({
+                      const { responses } = await api.esQuery("referent", {
                         query: { bool: { must: { match_all: {} }, filter: [{ terms: { "structureId.keyword": structureIds } }] } },
                         size: ES_NO_LIMIT,
                       });
-                      const { responses } = await api.esQuery("referent", queries);
                       const referents = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
                       return data.map((item) => ({ ...item, team: referents?.filter((e) => e.structureId === item._id) }));
                     }

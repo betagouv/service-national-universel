@@ -32,9 +32,7 @@ export default ({ filter }) => {
 
   useEffect(() => {
     async function initStatus() {
-      const queries = [];
-      queries.push({ index: "mission", type: "_doc" });
-      queries.push({
+      const body = {
         query: { bool: { must: { match_all: {} }, filter: [] } },
         aggs: {
           status: { terms: { field: "status.keyword" } },
@@ -45,15 +43,12 @@ export default ({ filter }) => {
           placesLeft: { sum: { field: "placesLeft" } },
         },
         size: 0,
-      });
-      if (filter.region) queries[1].query.bool.filter.push({ term: { "region.keyword": filter.region } });
-      if (filter.department) queries[1].query.bool.filter.push({ term: { "department.keyword": filter.department } });
-      const { responses: missionResponse } = await api.esQuery("mission", queries);
+      };
+      if (filter.region) body.query.bool.filter.push({ term: { "region.keyword": filter.region } });
+      if (filter.department) body.query.bool.filter.push({ term: { "department.keyword": filter.department } });
+      const { responses: missionResponse } = await api.esQuery("mission", body);
 
-      // queries *2* lol, will be fixed in a near future.
-      const queries2 = [];
-      queries2.push({ index: "young", type: "_doc" });
-      queries2.push({
+      const body2 = {
         query: { bool: { must: { match_all: {} }, filter: [] } },
         aggs: {
           domains: { terms: { field: "domains.keyword" } },
@@ -68,10 +63,10 @@ export default ({ filter }) => {
           engaged: { terms: { field: "engaged.keyword" } },
         },
         size: 0,
-      });
-      if (filter.region) queries2[1].query.bool.filter.push({ term: { "region.keyword": filter.region } });
-      if (filter.department) queries2[1].query.bool.filter.push({ term: { "department.keyword": filter.department } });
-      const { responses: youngResponse } = await api.esQuery("young", queries2);
+      };
+      if (filter.region) body2.query.bool.filter.push({ term: { "region.keyword": filter.region } });
+      if (filter.department) body2.query.bool.filter.push({ term: { "department.keyword": filter.department } });
+      const { responses: youngResponse } = await api.esQuery("young", body2);
 
       setMissionsStatus(missionResponse[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
       setMissionsDomains(missionResponse[0].aggregations.domains.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));

@@ -19,9 +19,7 @@ export default ({ filter }) => {
 
   useEffect(() => {
     async function initStatus() {
-      const queries = [];
-      queries.push({ index: "structure", type: "_doc" });
-      queries.push({
+      const body = {
         query: { bool: { must: { match_all: {} }, filter: [] } },
         aggs: {
           status: { terms: { field: "legalStatus.keyword" } },
@@ -29,12 +27,12 @@ export default ({ filter }) => {
         },
 
         size: 0,
-      });
+      };
 
-      if (filter.region) queries[1].query.bool.filter.push({ term: { "region.keyword": filter.region } });
-      if (filter.department) queries[1].query.bool.filter.push({ term: { "department.keyword": filter.department } });
+      if (filter.region) body.query.bool.filter.push({ term: { "region.keyword": filter.region } });
+      if (filter.department) body.query.bool.filter.push({ term: { "department.keyword": filter.department } });
 
-      const { responses } = await api.esQuery("structure", queries);
+      const { responses } = await api.esQuery("structure", body);
       setStatus(responses[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
       setTotal(responses[0].hits.total.value);
       setWithNetworkId(responses[0].aggregations.withNetworkId.doc_count);

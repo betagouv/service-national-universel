@@ -14,9 +14,7 @@ export default ({ filter }) => {
 
   useEffect(() => {
     (async () => {
-      const queries = [];
-      queries.push({ index: "young", type: "_doc" });
-      queries.push({
+      const body = {
         query: { bool: { must: { match_all: {} }, filter: [{ term: { "cohort.keyword": filter.cohort } }] } },
         aggs: {
           names: {
@@ -25,13 +23,13 @@ export default ({ filter }) => {
           },
         },
         size: 0,
-      });
+      };
 
-      if (filter.status) queries[1].query.bool.filter.push({ terms: { "status.keyword": filter.status } });
-      if (filter.region) queries[1].query.bool.filter.push({ term: { "region.keyword": filter.region } });
-      if (filter.department) queries[1].query.bool.filter.push({ term: { "department.keyword": filter.department } });
+      if (filter.status) body.query.bool.filter.push({ terms: { "status.keyword": filter.status } });
+      if (filter.region) body.query.bool.filter.push({ term: { "region.keyword": filter.region } });
+      if (filter.department) body.query.bool.filter.push({ term: { "department.keyword": filter.department } });
 
-      const { responses } = await api.esQuery("young", queries);
+      const { responses } = await api.esQuery("young", body);
 
       const totalHits = responses[0].hits.total.value;
       const arr = responses[0].aggregations.names.buckets.map((e) => {

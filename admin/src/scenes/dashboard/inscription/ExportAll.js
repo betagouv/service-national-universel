@@ -35,9 +35,7 @@ export default () => {
       const dptName = departmentLookUp[dptCode];
       const region = department2region[dptName];
 
-      const queries = [];
-      queries.push({ index: "young", type: "_doc" });
-      queries.push({
+      const body = {
         query: {
           bool: {
             must: { match_all: {} },
@@ -50,8 +48,8 @@ export default () => {
         },
         aggs: { range: { date_range: { field: "lastStatusAt", ranges: dates.map((e) => ({ to: e })) } } },
         size: 0,
-      });
-      const { responses } = await api.esQuery("young", queries);
+      };
+      const { responses } = await api.esQuery("young", body);
       const val = responses[0].aggregations.range.buckets.map((e) => e.doc_count);
       const goal = inscriptionGoal.find((g) => g.department === dptName);
       const line = [region, dptCode, dptName, goal?.max, ...val];

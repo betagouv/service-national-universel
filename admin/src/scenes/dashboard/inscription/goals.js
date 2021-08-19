@@ -22,35 +22,31 @@ export default ({ filter }) => {
   }, [goal, totalInscription]);
 
   async function fetch2020Affected() {
-    const queries = [];
-    queries.push({ index: "young", type: "_doc" });
-    queries.push({
+    const body = {
       query: { bool: { must: { match_all: {} }, filter: [{ term: { "cohort.keyword": "2020" } }, { term: { "statusPhase1.keyword": "AFFECTED" } }] } },
       aggs: { status: { terms: { field: "statusPhase1.keyword" } } },
       size: 0,
-    });
+    };
 
-    if (filter.region) queries[1].query.bool.filter.push({ term: { "region.keyword": filter.region } });
-    if (filter.department) queries[1].query.bool.filter.push({ term: { "department.keyword": filter.department } });
+    if (filter.region) body.query.bool.filter.push({ term: { "region.keyword": filter.region } });
+    if (filter.department) body.query.bool.filter.push({ term: { "department.keyword": filter.department } });
 
-    const { responses } = await api.esQuery("young", queries);
+    const { responses } = await api.esQuery("young", body);
     const m = api.getAggregations(responses[0]);
     setTotal2020Affected(m.AFFECTED || 0);
   }
 
   async function fetch2021Validated() {
-    const queries = [];
-    queries.push({ index: "young", type: "_doc" });
-    queries.push({
+    const body = {
       query: { bool: { must: { match_all: {} }, filter: [{ term: { "cohort.keyword": "2021" } }, { term: { "status.keyword": "VALIDATED" } }] } },
       aggs: { status: { terms: { field: "status.keyword" } } },
       size: 0,
-    });
+    };
 
-    if (filter.region) queries[1].query.bool.filter.push({ term: { "region.keyword": filter.region } });
-    if (filter.department) queries[1].query.bool.filter.push({ term: { "department.keyword": filter.department } });
+    if (filter.region) body.query.bool.filter.push({ term: { "region.keyword": filter.region } });
+    if (filter.department) body.query.bool.filter.push({ term: { "department.keyword": filter.department } });
 
-    const { responses } = await api.esQuery("young", queries);
+    const { responses } = await api.esQuery("young", body);
     const m = api.getAggregations(responses[0]);
     setTotal2021Validated(m.VALIDATED || 0);
   }

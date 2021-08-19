@@ -11,19 +11,17 @@ export default ({ filter }) => {
 
   useEffect(() => {
     (async () => {
-      const queries = [];
-      queries.push({ index: "young", type: "_doc" });
-      queries.push({
+      const body = {
         query: { bool: { must: { match_all: {} }, filter: [{ term: { "cohort.keyword": filter.cohort } }] } },
         aggs: { views: { date_histogram: { field: "birthdateAt", interval: "year" } } },
         size: 0,
-      });
+      };
 
-      if (filter.status) queries[1].query.bool.filter.push({ terms: { "status.keyword": filter.status } });
-      if (filter.region) queries[1].query.bool.filter.push({ term: { "region.keyword": filter.region } });
-      if (filter.department) queries[1].query.bool.filter.push({ term: { "department.keyword": filter.department } });
+      if (filter.status) body.query.bool.filter.push({ terms: { "status.keyword": filter.status } });
+      if (filter.region) body.query.bool.filter.push({ term: { "region.keyword": filter.region } });
+      if (filter.department) body.query.bool.filter.push({ term: { "department.keyword": filter.department } });
 
-      const res = await api.esQuery("young", queries);
+      const res = await api.esQuery("young", body);
       let d = res.responses[0].aggregations.views.buckets;
       d = d.map((e) => ({ value: e.doc_count, name: e.key_as_string.split("-")[0] }));
       d = d.filter((e) => e.value);

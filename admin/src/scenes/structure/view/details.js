@@ -21,18 +21,12 @@ export default ({ structure }) => {
 
   const getReferents = async () => {
     if (!structure) return;
-    const { responses: referentResponses } = await api.esQuery("referent", [
-      { index: "referent", type: "_doc" },
-      {
-        query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": structure._id } }] } },
-        size: ES_NO_LIMIT,
-      },
-    ]);
+    const { responses: referentResponses } = await api.esQuery("referent", {
+      query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": structure._id } }] } },
+      size: ES_NO_LIMIT,
+    });
     if (structure.networkId) {
-      const { responses: structureResponses } = await api.esQuery("structure", [
-        { index: "structure", type: "_doc" },
-        { query: { bool: { must: { match_all: {} }, filter: [{ term: { _id: structure.networkId } }] } } },
-      ]);
+      const { responses: structureResponses } = await api.esQuery("structure", { query: { bool: { must: { match_all: {} }, filter: [{ term: { _id: structure.networkId } }] } } });
 
       const structures = structureResponses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
       setParentStructure(structures.length ? structures[0] : null);

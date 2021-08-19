@@ -28,9 +28,7 @@ export default ({ filter }) => {
 
   useEffect(() => {
     (async () => {
-      const queries = [];
-      queries.push({ index: "young", type: "_doc" });
-      queries.push({
+      const body = {
         query: { bool: { must: { match_all: {} }, filter: [{ term: { "cohort.keyword": filter.cohort } }, { terms: { "status.keyword": ["VALIDATED"] } }] } },
         aggs: {
           status: { terms: { field: "status.keyword" } },
@@ -41,18 +39,19 @@ export default ({ filter }) => {
           cohesionStayPresence: { terms: { field: "cohesionStayPresence.keyword" } },
         },
         size: 0,
-      });
+      };
 
-      if (filter.region) queries[1].query.bool.filter.push({ term: { "region.keyword": filter.region } });
-      if (filter.department) queries[1].query.bool.filter.push({ term: { "department.keyword": filter.department } });
+      if (filter.region) body.query.bool.filter.push({ term: { "region.keyword": filter.region } });
+      if (filter.department) body.query.bool.filter.push({ term: { "department.keyword": filter.department } });
 
-      const { responses } = await api.esQuery("young", queries);
+      const { responses } = await api.esQuery("young", body);
 
-      const queries2 = [...queries];
-      queries2[1].query.bool.filter = [{ term: { "cohort.keyword": filter.cohort } }, { terms: { "status.keyword": ["WITHDRAWN"] } }];
-      if (filter.region) queries2[1].query.bool.filter.push({ term: { "region.keyword": filter.region } });
-      if (filter.department) queries2[1].query.bool.filter.push({ term: { "department.keyword": filter.department } });
-      const { responses: responses2 } = await api.esQuery("young", queries2);
+      body.query.bool.filter = [{ term: { "cohort.keyword": filter.cohort } }, { terms: { "status.keyword": ["WITHDRAWN"] } }];
+
+      if (filter.region) body.query.bool.filter.push({ term: { "region.keyword": filter.region } });
+      if (filter.department) body.query.bool.filter.push({ term: { "department.keyword": filter.department } });
+
+      const { responses: responses2 } = await api.esQuery("young", body);
 
       setStatus({
         VALIDATED: responses[0].aggregations.status.buckets.reduce((acc, c) => acc + c.doc_count, 0),
@@ -64,21 +63,20 @@ export default ({ filter }) => {
       setStatusPhase3(responses[0].aggregations.statusPhase3.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
       setCohesionStayPresence(responses[0].aggregations.cohesionStayPresence.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
     })();
+
     (async () => {
-      const queries = [];
-      queries.push({ index: "application", type: "_doc" });
-      queries.push({
+      const body = {
         query: { bool: { must: { match_all: {} }, filter: [{ term: { "youngCohort.keyword": filter.cohort } }] } },
         aggs: {
           status: { terms: { field: "status.keyword" } },
         },
         size: 0,
-      });
+      };
 
-      if (filter.region) queries[1].query.bool.filter.push({ terms: { "youngDepartment.keyword": region2department[filter.region] } });
-      if (filter.department) queries[1].query.bool.filter.push({ term: { "youngDepartment.keyword": filter.department } });
+      if (filter.region) body.query.bool.filter.push({ terms: { "youngDepartment.keyword": region2department[filter.region] } });
+      if (filter.department) body.query.bool.filter.push({ term: { "youngDepartment.keyword": filter.department } });
 
-      const { responses } = await api.esQuery("application", queries);
+      const { responses } = await api.esQuery("application", body);
       setStatusApplication(responses[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
     })();
   }, [JSON.stringify(filter)]);

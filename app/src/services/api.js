@@ -11,19 +11,15 @@ class api {
     return this.token;
   }
 
-  esQuery(index, queries) {
-    let query = "";
-    for (let i = 0; i < queries.length; i++) {
-      query += `${JSON.stringify(queries[i])}\n`;
-    }
-
+  esQuery(index, body) {
+    const header = { index, type: "_doc" };
     return fetch(`${apiURL}/es/${index}/_msearch`, {
       mode: "cors",
       method: "POST",
       redirect: "follow",
       referrer: "no-referrer",
       headers: { "Content-Type": "application/x-ndjson", Authorization: `JWT ${this.token}` },
-      body: query,
+      body: [header, body].map((e) => `${JSON.stringify(e)}\n`).join(""),
     })
       .then((r) => r.json())
       .catch((e) => {

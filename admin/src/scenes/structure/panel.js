@@ -22,28 +22,16 @@ export default ({ onChange, value }) => {
   useEffect(() => {
     if (!value) return;
     (async () => {
-      const { responses: missionResponses } = await api.esQuery("mission", [
-        { index: "mission", type: "_doc" },
-        {
-          query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": value._id } }] } },
-        },
-      ]);
-      const { responses: referentResponses } = await api.esQuery("referent", [
-        { index: "referent", type: "_doc" },
-        {
-          query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": value._id } }] } },
-        },
-      ]);
+      const { responses: missionResponses } = await api.esQuery("mission", {
+        query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": value._id } }] } },
+      });
+      const { responses: referentResponses } = await api.esQuery("referent", {
+        query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": value._id } }] } },
+      });
       if (value.networkId) {
-        const { responses: structureResponses } = await api.esQuery("structure", [
-          { index: "structure", type: "_doc" },
-          {
-            query: { bool: { must: { match_all: {} }, filter: [{ term: { _id: value.networkId } }] } },
-          },
-        ]);
-      }
-
-      if (value.networkId) {
+        const { responses: structureResponses } = await api.esQuery("structure", {
+          query: { bool: { must: { match_all: {} }, filter: [{ term: { _id: value.networkId } }] } },
+        });
         const structures = structureResponses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
         setParentStructure(structures.length ? structures[0] : null);
       } else {
