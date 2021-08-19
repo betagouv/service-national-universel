@@ -6,69 +6,99 @@ const { capture } = require("../sentry");
 const esClient = require("../es");
 
 // Routes accessible for youngs and referent
-router.post("/mission/_msearch", passport.authenticate(["young", "referent"], { session: false }), (req, res) => exec(req, res, "mission"));
+router.post("/mission/_msearch", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
+  try {
+    const { user, body } = req;
+    const filter = user.role === ROLES.RESPONSIBLE ? [{ terms: { "structureId.keyword": [user.structureId] } }] : [];
+    const response = await esClient.msearch({ index: "mission", body: withFilter(body, filter) });
+    return res.status(200).send(response.body);
+  } catch (e) {
+    capture(error);
+    res.status(500).send({ ok: false, error });
+  }
+});
 
 // Routes accessible by young only
-router.post("/missionapi/_msearch", passport.authenticate(["young"], { session: false }), (req, res) => exec(req, res, "missionapi"));
-router.post("/school/_msearch", passport.authenticate(["young"], { session: false }), (req, res) => exec(req, res, "cohesioncenter"));
+router.post("/missionapi/_msearch", passport.authenticate(["young"], { session: false }), async (req, res) => {
+  try {
+    const { body } = req;
+    const response = await esClient.msearch({ index: "missionapi", body });
+    return res.status(200).send(response.body);
+  } catch (e) {
+    capture(error);
+    res.status(500).send({ ok: false, error });
+  }
+});
+
+router.post("/school/_msearch", passport.authenticate(["young"], { session: false }), async (req, res) => {
+  try {
+    const { body } = req;
+    const response = await esClient.msearch({ index: "school", body });
+    return res.status(200).send(response.body);
+  } catch (e) {
+    capture(error);
+    res.status(500).send({ ok: false, error });
+  }
+});
 
 // Routes accessible by referents only
-router.post("/young/_msearch", passport.authenticate(["referent"], { session: false }), (req, res) => exec(req, res, "young"));
-router.post("/cohesionyoung/_msearch", passport.authenticate(["referent"], { session: false }), (req, res) => exec(req, res, "cohesionyoung"));
-router.post("/structure/_msearch", passport.authenticate(["referent"], { session: false }), (req, res) => exec(req, res, "structure"));
-router.post("/referent/_msearch", passport.authenticate(["referent"], { session: false }), (req, res) => exec(req, res, "referent"));
-router.post("/application/_msearch", passport.authenticate(["referent"], { session: false }), (req, res) => exec(req, res, "application"));
-router.post("/cohesioncenter/_msearch", passport.authenticate(["referent"], { session: false }), (req, res) => exec(req, res, "cohesioncenter"));
-router.post("/meetingpoint/_msearch", passport.authenticate(["referent"], { session: false }), (req, res) => exec(req, res, "meetingpoint"));
-
-async function exec(req, res, index = "") {
+router.post("/young/_msearch", passport.authenticate(["referent"], { session: false }), async (req, res) => {
   try {
-    const body = req.body;
-    const user = req.user;
-
-    //Dirty hack for young. They should access only to school. I think we need to do a separate route @raph
-    if (user.constructor.modelName === "young" && !index) {
-      const d = await esClient.msearch({ index: "school", body: body });
-      return res.status(200).send(d.body);
+    const { user, body } = req;
+    if (user.role === ROLES.ADMIN) {
+      const response = await esClient.msearch({ index: "young", body });
+      return res.status(200).send(response.body);
     }
-
-    const bodyFiltered = await filter(body, user, index);
-    if (index === "cohesionyoung") index = "young";
-    let i = index ? [index] : [];
-    const d = await esClient.msearch({ index: i, body: bodyFiltered });
-    return res.status(200).send(d.body);
-  } catch (error) {
-    console.log("ERROR", JSON.stringify(error));
-
-    capture(error);
-    res.status(500).send({ error });
-  }
-}
-
-function filter(body, user, index) {
-  let filter = [];
-
-  if (user.role === ROLES.ADMIN) return body;
-
-  // Filter young when user is not admin
-  //
-  // WARNING!
-  // There is a big design issue here. I spent 15 minutes to figure out why my ES query failed.
-  // This sounds like a hack and it's not scalable.
-  //
-  // @rap2h (from @rap2h): refactor this please.
-  if (index === "young") {
-    filter.push({ terms: { "status.keyword": ["WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "VALIDATED", "WITHDRAWN", "WAITING_LIST"] } });
-
+    const filter = [
+      { terms: { "status.keyword": ["WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "VALIDATED", "WITHDRAWN", "WAITING_LIST"] } },
+    ];
     if (user.role === ROLES.REFERENT_REGION) filter.push({ term: { "region.keyword": user.region } });
     if (user.role === ROLES.REFERENT_DEPARTMENT) filter.push({ term: { "department.keyword": user.department } });
+    const response = await esClient.msearch({ index: "young", body: withFilter(body, filter) });
+    return res.status(200).send(response.body);
+  } catch (e) {
+    capture(error);
+    res.status(500).send({ ok: false, error });
   }
+});
 
-  if (index === "cohesionyoung") {
-    filter.push({ terms: { "status.keyword": ["WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "VALIDATED", "WITHDRAWN", "WAITING_LIST"] } });
+router.post("/cohesionyoung/_msearch", passport.authenticate(["referent"], { session: false }), async (req, res) => {
+  // cohesionyoung is a special index, so we need to use the index "young".
+  // Todo: fix this route that is not well implemented (verification is done in frontend).
+  // We have to ceck who can see center on front end.
+  try {
+    const { user, body } = req;
+    if (user.role === ROLES.ADMIN) {
+      const response = await esClient.msearch({ index: "young", body });
+      return res.status(200).send(response.body);
+    }
+    const response = await esClient.msearch({
+      index: "young",
+      body: withFilter(body, [
+        { terms: { "status.keyword": ["WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "VALIDATED", "WITHDRAWN", "WAITING_LIST"] } },
+      ]),
+    });
+    return res.status(200).send(response.body);
+  } catch (e) {
+    capture(error);
+    res.status(500).send({ ok: false, error });
   }
+});
+router.post("/structure/_msearch", passport.authenticate(["referent"], { session: false }), async (req, res) => {
+  try {
+    const { body } = req;
+    const response = await esClient.msearch({ index: "structure", body });
+    return res.status(200).send(response.body);
+  } catch (e) {
+    capture(error);
+    res.status(500).send({ ok: false, error });
+  }
+});
+router.post("/referent/_msearch", passport.authenticate(["referent"], { session: false }), async (req, res) => {
+  try {
+    const { user, body } = req;
+    let filter = [];
 
-  if (index === "referent") {
     if (user.role === ROLES.RESPONSIBLE) filter.push({ terms: { "role.keyword": [ROLES.RESPONSIBLE, ROLES.SUPERVISOR] } });
 
     // See: https://trello.com/c/Wv2TrQnQ/383-admin-ajouter-onglet-utilisateurs-pour-les-r%C3%A9f%C3%A9rents
@@ -107,45 +137,77 @@ function filter(body, user, index) {
         },
       });
     }
-  }
 
-  if (index === "mission") {
-    if (user.role === ROLES.RESPONSIBLE) filter.push({ terms: { "structureId.keyword": [user.structureId] } });
+    const response = await esClient.msearch({ index: "referent", body: withFilter(body, filter) });
+    return res.status(200).send(response.body);
+  } catch (e) {
+    capture(error);
+    res.status(500).send({ ok: false, error });
   }
-
-  if (index === "cohesioncenter") {
+});
+router.post("/application/_msearch", passport.authenticate(["referent"], { session: false }), async (req, res) => {
+  try {
+    const { body } = req;
+    const response = await esClient.msearch({ index: "application", body });
+    return res.status(200).send(response.body);
+  } catch (e) {
+    capture(error);
+    res.status(500).send({ ok: false, error });
+  }
+});
+router.post("/cohesioncenter/_msearch", passport.authenticate(["referent"], { session: false }), async (req, res) => {
+  try {
+    const { user, body } = req;
+    let filter = [];
     if (user.role === ROLES.REFERENT_REGION) filter.push({ term: { "region.keyword": user.region } });
     if (user.role === ROLES.REFERENT_DEPARTMENT) filter.push({ term: { "department.keyword": user.department } });
-  }
 
-  const arr = body.split(`\n`);
-  const newArr = [];
-  for (let i = 0; i < arr.length - 1; i++) {
-    if (!(i % 2)) {
-      newArr.push(arr[i]);
-    } else {
-      // query
-      const str = arr[i];
-      const q = JSON.parse(str);
-      if (!q.query.bool) {
-        if (q.query.match_all) {
-          q.query = { bool: { must: { match_all: {} } } };
-        } else {
-          const tq = q.query;
-          delete q.query;
-          q.query = { bool: { must: tq } };
+    const response = await esClient.msearch({ index: "cohesioncenter", body: withFilter(body, filter) });
+    return res.status(200).send(response.body);
+  } catch (e) {
+    capture(error);
+    res.status(500).send({ ok: false, error });
+  }
+});
+
+router.post("/meetingpoint/_msearch", passport.authenticate(["referent"], { session: false }), async (req, res) => {
+  try {
+    const { body } = req;
+    const response = await esClient.msearch({ index: "meetingpoint", body });
+    return res.status(200).send(response.body);
+  } catch (e) {
+    capture(error);
+    res.status(500).send({ ok: false, error });
+  }
+});
+
+// Add filter to all lines of the body.
+function withFilter(body, filter) {
+  return (
+    body
+      .split(`\n`)
+      .map((item, key) => {
+        // Declaration line are skipped.
+        if (key % 2 === 0) return item;
+
+        const q = JSON.parse(item);
+        if (!q.query.bool) {
+          if (q.query.match_all) {
+            q.query = { bool: { must: { match_all: {} } } };
+          } else {
+            const tq = q.query;
+            delete q.query;
+            q.query = { bool: { must: tq } };
+          }
         }
-      }
-      if (q.query.bool.filter) {
-        q.query.bool.filter = [...q.query.bool.filter, ...filter];
-      } else {
-        q.query.bool.filter = filter;
-      }
 
-      newArr.push(JSON.stringify(q));
-    }
-  }
-  return newArr.join(`\n`) + `\n`;
+        if (q.query.bool.filter) q.query.bool.filter = [...q.query.bool.filter, ...filter];
+        else q.query.bool.filter = filter;
+
+        return JSON.stringify(q);
+      })
+      .join(`\n`) + `\n`
+  );
 }
 
 module.exports = router;
