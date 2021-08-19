@@ -5,7 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <meta name="google" content="notranslate" />
     <title>SNU</title>
-    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script type="text/javascript">
+      window.$crisp = [];
+      window.CRISP_WEBSITE_ID = "9a0b4de6-fa09-4356-9db0-15d4c3a40f42";
+      (function () {
+        d = document;
+        s = d.createElement("script");
+        s.src = "https://client.crisp.chat/l.js";
+        s.async = 1;
+        d.getElementsByTagName("head")[0].appendChild(s);
+      })();
+    </script>
+
     <script>
       window.axeptioSettings = {
         clientId: "5fec5b2a5558222597c2fd85",
@@ -20,30 +31,10 @@
         t.parentNode.insertBefore(e, t);
       })(document, "script");
     </script>
-  </head>
-
-  <body>
-    <noscript> You need to enable JavaScript to run this app. </noscript>
-    <div id="root"></div>
-    <script>
-      window.axeptioSettings = {
-        clientId: "606c516d6ac944450f1e899d",
-        cookiesVersion: "snu-base",
-      };
-
-      (function (d, s) {
-        var t = d.getElementsByTagName(s)[0],
-          e = d.createElement(s);
-        e.async = true;
-        e.src = "//static.axept.io/sdk.js";
-        t.parentNode.insertBefore(e, t);
-      })(document, "script");
-    </script>
     <div id="zammad-chat"></div>
     <script src="https://support.selego.co/assets/chat/chat.min.js"></script>
     <script>
       $(function () {
-        
         if (typeof ZammadChat === "undefined") return;
 
         var chat = new ZammadChat({
@@ -57,7 +48,7 @@
         });
 
         // Monkey patch Zammad.
-        
+
         // This send the user informations to zammad.
         chat.onConnectionEstablished = (data) => {
           var isNew = Boolean(data.session_id);
@@ -67,25 +58,69 @@
             if (window.location.href.includes("localhost")) url = "http://localhost:8082";
             if (window.location.href.includes("snu.gouv.fr")) url = "https://admin.snu.gouv.fr";
             var info;
-            if (window.zammadUser) info = "<a href=\"" + url + "/volontaire/" + window.zammadUser._id + "\">" + window.zammadUser.name + "</a> - " + window.zammadUser.email + "<br />Statut : " + window.zammadUser.status + " | Phase 1 : " + window.zammadUser.statusPhase1 + " | Phase 2 : " + window.zammadUser.statusPhase2 + " | Phase 3 : " + window.zammadUser.statusPhase3;
+            if (window.zammadUser)
+              info =
+                '<a href="' +
+                url +
+                "/volontaire/" +
+                window.zammadUser._id +
+                '">' +
+                window.zammadUser.name +
+                "</a> - " +
+                window.zammadUser.email +
+                "<br />Statut : " +
+                window.zammadUser.status +
+                " | Phase 1 : " +
+                window.zammadUser.statusPhase1 +
+                " | Phase 2 : " +
+                window.zammadUser.statusPhase2 +
+                " | Phase 3 : " +
+                window.zammadUser.statusPhase3;
             else info = "Non connecté.";
-            chat.send('chat_session_message', {
+            chat.send("chat_session_message", {
               content: "🧑‍🎓 " + info,
               id: chat._messageCount,
-              session_id: chat.sessionId
+              session_id: chat.sessionId,
             });
-
           }
         };
 
         // This is needed to ensure users never sees their informations when they refresh page.
         chat.onReopenSession = (data) => {
-          data.session = (data.session || []).filter(message => message.content.startsWith('INFO USER: ') === false && message.content.startsWith('🧑‍🎓 ') === false);
+          data.session = (data.session || []).filter((message) => message.content.startsWith("INFO USER: ") === false && message.content.startsWith("🧑‍🎓 ") === false);
           ZammadChat.prototype.onReopenSession.call(chat, data);
         };
 
         // End of monkey patch
       });
+    </script>
+  </head>
+
+  <body>
+    <noscript> You need to enable JavaScript to run this app. </noscript>
+    <div id="root"></div>
+    <script src="http://92.222.24.89/assets/chat/chat-no-jquery.js"></script>
+    <script>
+      (function () {
+        new window.ZammadChat({
+          fontSize: "12px",
+          chatId: 2,
+        });
+      })();
+    </script>
+    <script>
+      window.axeptioSettings = {
+        clientId: "606c516d6ac944450f1e899d",
+        cookiesVersion: "snu-base",
+      };
+
+      (function (d, s) {
+        var t = d.getElementsByTagName(s)[0],
+          e = d.createElement(s);
+        e.async = true;
+        e.src = "//static.axept.io/sdk.js";
+        t.parentNode.insertBefore(e, t);
+      })(document, "script");
     </script>
   </body>
 </html>
