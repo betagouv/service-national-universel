@@ -202,8 +202,6 @@ function withFilter(body, filter) {
         if (q.query.bool.filter) q.query.bool.filter = [...q.query.bool.filter, ...filter];
         else q.query.bool.filter = filter;
 
-        console.log(JSON.stringify(q.query.bool.filter, null, 2));
-
         return JSON.stringify(q);
       })
       .join(`\n`) + `\n`
