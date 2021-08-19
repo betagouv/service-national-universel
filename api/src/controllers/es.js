@@ -5,17 +5,21 @@ const { ROLES } = require("snu-lib/roles");
 const { capture } = require("../sentry");
 const esClient = require("../es");
 
-router.post("/_msearch", passport.authenticate(["young", "referent"], { session: false }), (req, res) => exec(req, res, ""));
+// Routes accessible for youngs and referent
 router.post("/mission/_msearch", passport.authenticate(["young", "referent"], { session: false }), (req, res) => exec(req, res, "mission"));
+
+// Routes accessible by young only
+router.post("/missionapi/_msearch", passport.authenticate(["young"], { session: false }), (req, res) => exec(req, res, "missionapi"));
+router.post("/school/_msearch", passport.authenticate(["young"], { session: false }), (req, res) => exec(req, res, "cohesioncenter"));
+
+// Routes accessible by referents only
 router.post("/young/_msearch", passport.authenticate(["referent"], { session: false }), (req, res) => exec(req, res, "young"));
 router.post("/cohesionyoung/_msearch", passport.authenticate(["referent"], { session: false }), (req, res) => exec(req, res, "cohesionyoung"));
 router.post("/structure/_msearch", passport.authenticate(["referent"], { session: false }), (req, res) => exec(req, res, "structure"));
 router.post("/referent/_msearch", passport.authenticate(["referent"], { session: false }), (req, res) => exec(req, res, "referent"));
 router.post("/application/_msearch", passport.authenticate(["referent"], { session: false }), (req, res) => exec(req, res, "application"));
-router.post("/missionapi/_msearch", passport.authenticate(["young"], { session: false }), (req, res) => exec(req, res, "missionapi"));
 router.post("/cohesioncenter/_msearch", passport.authenticate(["referent"], { session: false }), (req, res) => exec(req, res, "cohesioncenter"));
 router.post("/meetingpoint/_msearch", passport.authenticate(["referent"], { session: false }), (req, res) => exec(req, res, "meetingpoint"));
-router.post("/school/_msearch", passport.authenticate(["referent"], { session: false }), (req, res) => exec(req, res, "cohesioncenter"));
 
 async function exec(req, res, index = "") {
   try {
