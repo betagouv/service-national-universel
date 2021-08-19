@@ -30,16 +30,7 @@ export default () => {
               <br />
               Télécharger votre attestation de réalisation de votre phase 2
               <br />
-              <DownloadAttestationButton
-                style={{
-                  color: "#5949d0",
-                  textAlign: "left",
-                  fontSize: "1rem",
-                  cursor: "pointer",
-                }}
-                young={young}
-                uri="2"
-              >
+              <DownloadAttestationButton young={young} uri="2">
                 Télécharger mon attestation {">"}
               </DownloadAttestationButton>
             </p>
