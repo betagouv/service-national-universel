@@ -29,7 +29,7 @@ export default () => {
                   Télécharger mon attestation {">"}
                 </DownloadAttestationButton>
                 <MailAttestationButton young={young} type="1" template="certificate" placeholder="Attestation de réalisation de la phase 1">
-                  Envoyer l'attestation de réalisation de la phase 1 par mail {">"}
+                  Envoyer l'attestation de réalisation par mail {">"}
                 </MailAttestationButton>
               </p>
             </>
