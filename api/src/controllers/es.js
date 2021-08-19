@@ -102,7 +102,6 @@ router.post("/referent/_msearch", passport.authenticate(["referent"], { session:
     if (user.role === ROLES.RESPONSIBLE) filter.push({ terms: { "role.keyword": [ROLES.RESPONSIBLE, ROLES.SUPERVISOR] } });
 
     // See: https://trello.com/c/Wv2TrQnQ/383-admin-ajouter-onglet-utilisateurs-pour-les-r%C3%A9f%C3%A9rents
-    // a `referent_region` sees only other referent_region and `referent_department` from their region.
     if (user.role === ROLES.REFERENT_DEPARTMENT) {
       filter.push({
         bool: {
@@ -114,7 +113,6 @@ router.post("/referent/_msearch", passport.authenticate(["referent"], { session:
         },
       });
     }
-    // a `referent_region` sees only other referent_region and `referent_department` from their region.
     if (user.role === ROLES.REFERENT_REGION) {
       filter.push({
         bool: {
@@ -203,6 +201,8 @@ function withFilter(body, filter) {
 
         if (q.query.bool.filter) q.query.bool.filter = [...q.query.bool.filter, ...filter];
         else q.query.bool.filter = filter;
+
+        console.log(JSON.stringify(q.query.bool.filter, null, 2));
 
         return JSON.stringify(q);
       })
