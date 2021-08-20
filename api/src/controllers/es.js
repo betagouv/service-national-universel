@@ -127,11 +127,7 @@ router.post("/referent/_msearch", passport.authenticate(["referent"], { session:
     if (user.role === ROLES.HEAD_CENTER) {
       filter.push({
         bool: {
-          should: [
-            { terms: { "role.keyword": [ROLES.HEAD_CENTER] } },
-            { bool: { must: [{ term: { "role.keyword": ROLES.REFERENT_DEPARTMENT } }, { term: { "department.keyword": user.department } }] } },
-            { bool: { must: [{ term: { "role.keyword": ROLES.REFERENT_REGION } }, { term: { "region.keyword": user.region } }] } },
-          ],
+          must: [{ terms: { "role.keyword": [ROLES.HEAD_CENTER] } }],
         },
       });
     }
