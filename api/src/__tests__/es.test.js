@@ -142,4 +142,63 @@ describe("Es", () => {
       expect(esClient.msearch).toHaveBeenCalledWith({ body, index: "meetingpoint" });
     });
   });
+
+  describe("POST /es/structure/_msearch", () => {
+    it("should return 404 for a responsible/supervisor with no structureId", async () => {
+      const passport = require("passport");
+
+      passport.user.role = ROLES.RESPONSIBLE;
+      passport.user.structureId = undefined;
+      let res = await msearch("structure", buildMsearchQuery("structure", matchAll));
+      expect(res.statusCode).toEqual(404);
+
+      passport.user.role = ROLES.SUPERVISOR;
+      res = await msearch("structure", buildMsearchQuery("structure", matchAll));
+      expect(res.statusCode).toEqual(404);
+
+      passport.user.role = ROLES.ADMIN;
+    });
+
+    it("should not be authorized to head center", async () => {
+      const passport = require("passport");
+
+      passport.user.role = ROLES.HEAD_CENTER;
+      let res = await msearch("structure", buildMsearchQuery("structure", matchAll));
+      expect(res.statusCode).toEqual(401);
+
+      passport.user.role = ROLES.ADMIN;
+    });
+
+    it("should return 200 for a responsible/supervisor with no structureId", async () => {
+      const passport = require("passport");
+
+      const structure = await createStructureHelper({ ...getNewStructureFixture(), isNetwork: "false" });
+      const parent = await createStructureHelper(getNewStructureFixture());
+      const anotherStructure = await createStructureHelper(getNewStructureFixture());
+      parent.networkId = parent._id.toString();
+      structure.networkId = parent._id.toString();
+      anotherStructure.networkId = parent._id.toString();
+      await structure.save();
+      await parent.save();
+      await anotherStructure.save();
+
+      passport.user.role = ROLES.RESPONSIBLE;
+      passport.user.structureId = structure._id.toString();
+      let res = await msearch("structure", buildMsearchQuery("structure", matchAll));
+      expect(res.statusCode).toEqual(200);
+      expect(getFilter()[0].terms["structureId.keyword"]).toStrictEqual([structure._id.toString(), parent._id.toString()]);
+
+      passport.user.role = ROLES.SUPERVISOR;
+      passport.user.structureId = parent._id.toString();
+      res = await msearch("structure", buildMsearchQuery("structure", matchAll));
+      expect(res.statusCode).toEqual(200);
+      expect(getFilter()[0].terms["structureId.keyword"]).toStrictEqual([
+        structure._id.toString(),
+        parent._id.toString(),
+        anotherStructure._id.toString(),
+      ]);
+
+      passport.user.role = ROLES.ADMIN;
+    });
+  });
 });

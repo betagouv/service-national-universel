@@ -25,7 +25,8 @@ router.post("/mission/_msearch", passport.authenticate(["young", "referent"], { 
     // A supervisor can only see their structures' missions.
     if (user.role === ROLES.SUPERVISOR) {
       if (!user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      const data = await StructureObject.find({ networkId: user.structureId });
+      const data = await StructureObject.find({ $or: [{ networkId: String(user.structureId) }, { _id: String(user.structureId) }] });
+      // const data = await StructureObject.find({ networkId: user.structureId });
       filter.push({ terms: { "structureId.keyword": data.map((e) => e._id.toString()) } });
     }
 
@@ -108,8 +109,30 @@ router.post("/cohesionyoung/_msearch", passport.authenticate(["referent"], { ses
 });
 router.post("/structure/_msearch", passport.authenticate(["referent"], { session: false }), async (req, res) => {
   try {
-    const { body } = req;
-    const response = await esClient.msearch({ index: "structure", body });
+    const { body, user } = req;
+    const filter = [];
+
+    // A responsible can only see their structure and parent structure (not sure why we need ES though).
+    if (user.role === ROLES.RESPONSIBLE) {
+      if (!user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      const structure = await StructureObject.findById(user.structureId);
+      if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      const parent = await StructureObject.findById(structure.networkId);
+
+      filter.push({ terms: { "structureId.keyword": [structure._id.toString(), parent?._id?.toString()].filter((e) => e) } });
+    }
+
+    // A supervisor can only see their structures (all network).
+    if (user.role === ROLES.SUPERVISOR) {
+      if (!user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      const data = await StructureObject.find({ $or: [{ networkId: String(user.structureId) }, { _id: String(user.structureId) }] });
+      filter.push({ terms: { "structureId.keyword": data.map((e) => e._id.toString()) } });
+    }
+
+    // A head center can not see missions.
+    if (user.role === ROLES.HEAD_CENTER) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const response = await esClient.msearch({ index: "structure", body: withFilter(body, filter) });
     return res.status(200).send(response.body);
   } catch (error) {
     capture(error);
