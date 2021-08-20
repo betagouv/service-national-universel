@@ -124,6 +124,16 @@ describe("Es", () => {
       });
     });
   });
+  describe("POST /es/school/_msearch", () => {
+    describe("POST /es/school/_msearch", () => {
+      it("Should call msearch with correct index", async () => {
+        const body = buildMsearchQuery("school", matchAll);
+        const res = await msearch("school", body);
+        expect(res.statusCode).toEqual(200);
+        expect(esClient.msearch).toHaveBeenCalledWith({ body, index: "school" });
+      });
+    });
+  });
   describe("POST /es/meetingpoint/_msearch", () => {
     it("Should call msearch with correct index", async () => {
       const body = buildMsearchQuery("meetingpoint", matchAll);
