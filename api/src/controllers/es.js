@@ -216,7 +216,12 @@ router.post("/cohesioncenter/_msearch", passport.authenticate(["referent"], { se
 
 router.post("/meetingpoint/_msearch", passport.authenticate(["referent"], { session: false }), async (req, res) => {
   try {
-    const { body } = req;
+    const { user, body } = req;
+
+    if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER].includes(user.role)) {
+      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     const response = await esClient.msearch({ index: "meetingpoint", body });
     return res.status(200).send(response.body);
   } catch (error) {

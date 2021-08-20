@@ -237,4 +237,21 @@ describe("Es", () => {
       passport.user.role = ROLES.ADMIN;
     });
   });
+
+  describe("POST /es/meetingpoint/_msearch", () => {
+    it("should return 200", async () => {
+      let res = await msearch("meetingpoint", buildMsearchQuery("meetingpoint", matchAll));
+      expect(res.statusCode).toEqual(200);
+    });
+    it("should not be authorized to head center, responsible and supervisor", async () => {
+      const passport = require("passport");
+      let res;
+      for (const role of [ROLES.HEAD_CENTER, ROLES.RESPONSIBLE, ROLES.SUPERVISOR]) {
+        passport.user.role = role;
+        res = await msearch("meetingpoint", buildMsearchQuery("meetingpoint", matchAll));
+        expect(res.statusCode).toEqual(401);
+      }
+      passport.user.role = ROLES.ADMIN;
+    });
+  });
 });
