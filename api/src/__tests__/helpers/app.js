@@ -23,6 +23,7 @@ function getAppHelper() {
   app.use("/contract", require("../../controllers/contract"));
   app.use("/waiting-list", require("../../controllers/waiting-list"));
   app.use("/inscription-goal", require("../../controllers/inscription-goal"));
+  app.use("/es", require("../../controllers/es"));
 
   return app;
 }

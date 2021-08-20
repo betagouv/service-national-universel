@@ -4,12 +4,34 @@ const router = express.Router();
 const { ROLES } = require("snu-lib/roles");
 const { capture } = require("../sentry");
 const esClient = require("../es");
+const { ERRORS, isYoung } = require("../utils");
+const StructureObject = require("../models/structure");
 
 // Routes accessible for youngs and referent
 router.post("/mission/_msearch", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
   try {
     const { user, body } = req;
-    const filter = user.role === ROLES.RESPONSIBLE ? [{ terms: { "structureId.keyword": [user.structureId] } }] : [];
+    const filter = [];
+
+    // A young can only see validated missions.
+    if (isYoung(user)) filter.push({ term: { "status.keyword": "VALIDATED" } });
+
+    // A responsible cans only see their structure's missions.
+    if (user.role === ROLES.RESPONSIBLE) {
+      if (!user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      filter.push({ terms: { "structureId.keyword": [user.structureId] } });
+    }
+
+    // A supervisor can only see their structures' missions.
+    if (user.role === ROLES.SUPERVISOR) {
+      if (!user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      const data = await StructureObject.find({ networkId: user.structureId });
+      filter.push({ terms: { "structureId.keyword": data.map((e) => e._id.toString()) } });
+    }
+
+    // A head center can not see missions.
+    if (user.role === ROLES.HEAD_CENTER) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
     const response = await esClient.msearch({ index: "mission", body: withFilter(body, filter) });
     return res.status(200).send(response.body);
   } catch (error) {
@@ -180,6 +202,7 @@ function withFilter(body, filter) {
   return (
     body
       .split(`\n`)
+      .filter((e) => e)
       .map((item, key) => {
         // Declaration line are skipped.
         if (key % 2 === 0) return item;
