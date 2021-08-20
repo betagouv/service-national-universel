@@ -201,4 +201,40 @@ describe("Es", () => {
       passport.user.role = ROLES.ADMIN;
     });
   });
+
+  describe("POST /es/cohesioncenter/_msearch", () => {
+    it("should not be authorized to head center, responsible and supervisor", async () => {
+      const passport = require("passport");
+      let res;
+      for (const role of [ROLES.HEAD_CENTER, ROLES.RESPONSIBLE, ROLES.SUPERVISOR]) {
+        passport.user.role = role;
+        res = await msearch("cohesioncenter", buildMsearchQuery("cohesioncenter", matchAll));
+        expect(res.statusCode).toEqual(401);
+      }
+      passport.user.role = ROLES.ADMIN;
+    });
+    it("should filter region for referent region", async () => {
+      const passport = require("passport");
+      passport.user.role = ROLES.REFERENT_REGION;
+      passport.user.region = "lol";
+
+      let res = await msearch("cohesioncenter", buildMsearchQuery("cohesioncenter", matchAll));
+      expect(res.statusCode).toEqual(200);
+      expect(getFilter()[0].term["region.keyword"]).toStrictEqual("lol");
+
+      passport.user.role = ROLES.ADMIN;
+    });
+
+    it("should filter department for referent department", async () => {
+      const passport = require("passport");
+      passport.user.role = ROLES.REFERENT_DEPARTMENT;
+      passport.user.department = "foo";
+
+      let res = await msearch("cohesioncenter", buildMsearchQuery("cohesioncenter", matchAll));
+      expect(res.statusCode).toEqual(200);
+      expect(getFilter()[0].term["department.keyword"]).toStrictEqual("foo");
+
+      passport.user.role = ROLES.ADMIN;
+    });
+  });
 });

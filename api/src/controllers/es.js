@@ -198,8 +198,13 @@ router.post("/cohesioncenter/_msearch", passport.authenticate(["referent"], { se
   try {
     const { user, body } = req;
     let filter = [];
+
     if (user.role === ROLES.REFERENT_REGION) filter.push({ term: { "region.keyword": user.region } });
     if (user.role === ROLES.REFERENT_DEPARTMENT) filter.push({ term: { "department.keyword": user.department } });
+
+    if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER].includes(user.role)) {
+      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     const response = await esClient.msearch({ index: "cohesioncenter", body: withFilter(body, filter) });
     return res.status(200).send(response.body);
