@@ -184,10 +184,30 @@ router.post("/referent/_msearch", passport.authenticate(["referent"], { session:
     res.status(500).send({ ok: false, error });
   }
 });
+
 router.post("/application/_msearch", passport.authenticate(["referent"], { session: false }), async (req, res) => {
   try {
-    const { body } = req;
-    const response = await esClient.msearch({ index: "application", body });
+    const { user, body } = req;
+    const filter = [];
+
+    // A responsible cans only see their structure's applications.
+    if (user.role === ROLES.RESPONSIBLE) {
+      if (!user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      filter.push({ terms: { "structureId.keyword": [user.structureId] } });
+    }
+
+    // A supervisor can only see their structures' applications.
+    if (user.role === ROLES.SUPERVISOR) {
+      if (!user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      const data = await StructureObject.find({ $or: [{ networkId: String(user.structureId) }, { _id: String(user.structureId) }] });
+      // const data = await StructureObject.find({ networkId: user.structureId });
+      filter.push({ terms: { "structureId.keyword": data.map((e) => e._id.toString()) } });
+    }
+
+    // A head center can not see applications.
+    if (user.role === ROLES.HEAD_CENTER) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const response = await esClient.msearch({ index: "application", body: withFilter(body, filter) });
     return res.status(200).send(response.body);
   } catch (error) {
     capture(error);
