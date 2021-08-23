@@ -8,7 +8,7 @@ const { ERRORS, isYoung } = require("../utils");
 const StructureObject = require("../models/structure");
 const ApplicationObject = require("../models/application");
 const CohesionCenterObject = require("../models/cohesionCenter");
-const { serializeMissions, serializeSchools } = require("../utils/es-serializer");
+const { serializeMissions, serializeSchools, serializeYoungs } = require("../utils/es-serializer");
 
 // Routes accessible for youngs and referent
 router.post("/mission/_msearch", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
@@ -105,7 +105,7 @@ router.post("/young/_msearch", passport.authenticate(["referent"], { session: fa
     if (user.role === ROLES.REFERENT_DEPARTMENT) filter.push({ term: { "department.keyword": user.department } });
 
     const response = await esClient.msearch({ index: "young", body: withFilter(body, filter) });
-    return res.status(200).send(response.body);
+    return res.status(200).send(serializeYoungs(response.body));
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, error: error.message });
@@ -144,11 +144,8 @@ router.post("/cohesionyoung/:id/_msearch", passport.authenticate(["referent"], {
       },
     ];
 
-    const response = await esClient.msearch({
-      index: "young",
-      body: withFilter(body, filter),
-    });
-    return res.status(200).send(response.body);
+    const response = await esClient.msearch({ index: "young", body: withFilter(body, filter) });
+    return res.status(200).send(serializeYoungs(response.body));
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, error });

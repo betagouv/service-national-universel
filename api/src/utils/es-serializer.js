@@ -36,7 +36,21 @@ function serializeSchools(body) {
   });
 }
 
+function serializeYoungs(body) {
+  return serializeHits(body, (hit) => {
+    delete hit.sqlId;
+    delete hit.password;
+    delete hit.forgotPasswordResetToken;
+    delete hit.forgotPasswordResetExpires;
+    delete hit.invitationToken;
+    delete hit.invitationExpires;
+    delete hit.phase3Token;
+    return hit;
+  });
+}
+
 module.exports = {
   serializeMissions,
   serializeSchools,
+  serializeYoungs,
 };
