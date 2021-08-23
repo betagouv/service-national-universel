@@ -13,11 +13,13 @@ jest.mock("@elastic/elasticsearch", () => ({
   }),
 }));
 const esClient = require("../es");
+const { getNewCohesionCenterFixture } = require("./fixtures/cohesionCenter");
 const getNewReferentFixture = require("./fixtures/referent");
 const getNewStructureFixture = require("./fixtures/structure");
 const getNewYoungFixture = require("./fixtures/young");
 
 const getAppHelper = require("./helpers/app");
+const { createCohesionCenter } = require("./helpers/cohesionCenter");
 const { dbConnect, dbClose } = require("./helpers/db");
 const { createReferentHelper } = require("./helpers/referent");
 const { createStructureHelper } = require("./helpers/structure");
@@ -413,6 +415,55 @@ describe("Es", () => {
       });
 
       passport.user.role = ROLES.ADMIN;
+    });
+  });
+
+  describe("POST /es/cohesionyoung/:id/_msearch", () => {
+    it("should not be authorized to head center, responsible and supervisor", async () => {
+      const passport = require("passport");
+      let res;
+      for (const role of [ROLES.HEAD_CENTER, ROLES.RESPONSIBLE, ROLES.SUPERVISOR]) {
+        passport.user.role = role;
+        res = await msearch("cohesionyoung/foo", buildMsearchQuery("cohesionyoung", matchAll));
+        expect(res.statusCode).toEqual(401);
+      }
+      passport.user.role = ROLES.ADMIN;
+    });
+    it("should return 401 for referent department with department without a cohesion center", async () => {
+      const center = await createCohesionCenter(getNewCohesionCenterFixture());
+      const passport = require("passport");
+
+      passport.user.role = ROLES.REFERENT_DEPARTMENT;
+      passport.user.department = "plop";
+      let res = await msearch("cohesionyoung/" + center._id, buildMsearchQuery("referent", matchAll));
+      expect(res.statusCode).toEqual(401);
+    });
+    it("should return 401 for referent region with region without a cohesion center", async () => {
+      const center = await createCohesionCenter(getNewCohesionCenterFixture());
+      const passport = require("passport");
+
+      passport.user.role = ROLES.REFERENT_REGION;
+      passport.user.region = "plop";
+      let res = await msearch("cohesionyoung/" + center._id, buildMsearchQuery("referent", matchAll));
+      expect(res.statusCode).toEqual(401);
+    });
+    it("should return 200 for referent department with department with a cohesion center", async () => {
+      const center = await createCohesionCenter({ ...getNewCohesionCenterFixture(), department: "bim" });
+      const passport = require("passport");
+
+      passport.user.role = ROLES.REFERENT_DEPARTMENT;
+      passport.user.department = "bim";
+      let res = await msearch("cohesionyoung/" + center._id, buildMsearchQuery("referent", matchAll));
+      expect(res.statusCode).toEqual(200);
+    });
+    it("should return 200 for referent region with region with a cohesion center", async () => {
+      const center = await createCohesionCenter({ ...getNewCohesionCenterFixture(), region: "bam" });
+      const passport = require("passport");
+
+      passport.user.role = ROLES.REFERENT_REGION;
+      passport.user.region = "bam";
+      let res = await msearch("cohesionyoung/" + center._id, buildMsearchQuery("referent", matchAll));
+      expect(res.statusCode).toEqual(200);
     });
   });
 });
