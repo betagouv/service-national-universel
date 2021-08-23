@@ -57,7 +57,7 @@ export default ({ mission, applications }) => {
                     if (youngIds?.length) {
                       const { responses } = await api.esQuery("young", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: youngIds } } });
                       const youngs = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-                      return data.map((item) => ({ ...item, young: youngs.find((e) => e._id === item.youngId) }));
+                      return data.map((item) => ({ ...item, young: youngs.find((e) => e._id === item.youngId) || {} }));
                     }
                     return data;
                   }}
