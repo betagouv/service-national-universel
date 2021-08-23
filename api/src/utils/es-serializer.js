@@ -23,6 +23,20 @@ function serializeMissions(body) {
   });
 }
 
+function serializeSchools(body) {
+  return serializeHits(body, (hit) => {
+    return {
+      type: hit.type,
+      department: hit.department,
+      city: hit.city,
+      postcode: hit.postcode,
+      name2: hit.name2,
+      type: hit.type,
+    };
+  });
+}
+
 module.exports = {
   serializeMissions,
+  serializeSchools,
 };
