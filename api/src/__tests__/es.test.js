@@ -13,11 +13,13 @@ jest.mock("@elastic/elasticsearch", () => ({
   }),
 }));
 const esClient = require("../es");
+const getNewReferentFixture = require("./fixtures/referent");
 const getNewStructureFixture = require("./fixtures/structure");
 const getNewYoungFixture = require("./fixtures/young");
 
 const getAppHelper = require("./helpers/app");
 const { dbConnect, dbClose } = require("./helpers/db");
+const { createReferentHelper } = require("./helpers/referent");
 const { createStructureHelper } = require("./helpers/structure");
 const { createYoungHelper } = require("./helpers/young");
 
@@ -188,17 +190,13 @@ describe("Es", () => {
       passport.user.structureId = structure._id.toString();
       let res = await msearch("structure", buildMsearchQuery("structure", matchAll));
       expect(res.statusCode).toEqual(200);
-      expect(getFilter()[0].terms["structureId.keyword"]).toStrictEqual([structure._id.toString(), parent._id.toString()]);
+      expect(getFilter()[0].terms["_id"]).toStrictEqual([structure._id.toString(), parent._id.toString()]);
 
       passport.user.role = ROLES.SUPERVISOR;
       passport.user.structureId = parent._id.toString();
       res = await msearch("structure", buildMsearchQuery("structure", matchAll));
       expect(res.statusCode).toEqual(200);
-      expect(getFilter()[0].terms["structureId.keyword"]).toStrictEqual([
-        structure._id.toString(),
-        parent._id.toString(),
-        anotherStructure._id.toString(),
-      ]);
+      expect(getFilter()[0].terms["_id"]).toStrictEqual([structure._id.toString(), parent._id.toString(), anotherStructure._id.toString()]);
 
       passport.user.role = ROLES.ADMIN;
     });
@@ -308,6 +306,111 @@ describe("Es", () => {
       res = await msearch("application", buildMsearchQuery("application", matchAll));
       expect(res.statusCode).toEqual(200);
       expect(getFilter()[0].terms["structureId.keyword"]).toStrictEqual([structure._id.toString(), parent._id.toString()]);
+
+      passport.user.role = ROLES.ADMIN;
+    });
+  });
+
+  describe("POST /es/referent/_msearch", () => {
+    it("should return 404 for a responsible/supervisor with no structureId", async () => {
+      const passport = require("passport");
+
+      passport.user.role = ROLES.RESPONSIBLE;
+      passport.user.structureId = undefined;
+      let res = await msearch("referent", buildMsearchQuery("referent", matchAll));
+      expect(res.statusCode).toEqual(404);
+
+      passport.user.role = ROLES.SUPERVISOR;
+      passport.user.structureId = undefined;
+      res = await msearch("referent", buildMsearchQuery("referent", matchAll));
+      expect(res.statusCode).toEqual(404);
+
+      passport.user.role = ROLES.ADMIN;
+    });
+
+    it("should return 200 for head center", async () => {
+      const passport = require("passport");
+
+      passport.user.role = ROLES.HEAD_CENTER;
+      let res = await msearch("referent", buildMsearchQuery("referent", matchAll));
+      expect(res.statusCode).toEqual(200);
+      expect(getFilter()[0].bool.must[0].terms["role.keyword"]).toStrictEqual([ROLES.HEAD_CENTER]);
+
+      passport.user.role = ROLES.ADMIN;
+    });
+
+    it("should return 200 for a responsible/supervisor with a structureId", async () => {
+      const passport = require("passport");
+
+      const structure = await createStructureHelper({ ...getNewStructureFixture(), isNetwork: "false" });
+      const parent = await createStructureHelper(getNewStructureFixture());
+      const anotherStructure = await createStructureHelper(getNewStructureFixture());
+      parent.networkId = parent._id.toString();
+      structure.networkId = parent._id.toString();
+      anotherStructure.networkId = parent._id.toString();
+      await structure.save();
+      await parent.save();
+      await anotherStructure.save();
+
+      const responsible = await createReferentHelper({ ...getNewReferentFixture(), role: ROLES.RESPONSIBLE, structureId: structure._id.toString() });
+      const supervisor = await createReferentHelper({ ...getNewReferentFixture(), role: ROLES.SUPERVISOR, structureId: parent._id.toString() });
+
+      const previousUser = passport.user;
+      passport.user = responsible;
+      let res = await msearch("referent", buildMsearchQuery("referent", matchAll));
+      expect(res.statusCode).toEqual(200);
+      expect(getFilter()[0].terms["role.keyword"]).toStrictEqual([ROLES.RESPONSIBLE, ROLES.SUPERVISOR]);
+      expect(getFilter()[1].terms["structureId.keyword"]).toStrictEqual([structure._id.toString(), parent._id.toString()]);
+
+      passport.user = supervisor;
+      res = await msearch("referent", buildMsearchQuery("referent", matchAll));
+      expect(res.statusCode).toEqual(200);
+      expect(getFilter()[0].terms["role.keyword"]).toStrictEqual([ROLES.RESPONSIBLE, ROLES.SUPERVISOR]);
+      expect(getFilter()[1].terms["structureId.keyword"]).toStrictEqual([
+        structure._id.toString(),
+        parent._id.toString(),
+        anotherStructure._id.toString(),
+      ]);
+
+      passport.user = previousUser;
+    });
+
+    it("should return work for referent department", async () => {
+      const passport = require("passport");
+
+      passport.user.role = ROLES.REFERENT_DEPARTMENT;
+      passport.user.region = "foo";
+      passport.department = "bar";
+      const res = await msearch("referent", buildMsearchQuery("referent", matchAll));
+      expect(res.statusCode).toEqual(200);
+      const filters = getFilter()[0].bool.should;
+      expect(filters[0].terms["role.keyword"]).toStrictEqual([ROLES.REFERENT_DEPARTMENT]);
+      expect(filters[1]).toStrictEqual({
+        bool: { must: [{ term: { "role.keyword": ROLES.REFERENT_REGION } }, { term: { "region.keyword": passport.user.region } }] },
+      });
+      expect(filters[2]).toStrictEqual({
+        bool: { must: [{ term: { "role.keyword": ROLES.HEAD_CENTER } }, { term: { "department.keyword": passport.user.department } }] },
+      });
+
+      passport.user.role = ROLES.ADMIN;
+    });
+
+    it("should return work for referent region", async () => {
+      const passport = require("passport");
+
+      passport.user.role = ROLES.REFERENT_REGION;
+      passport.user.region = "foo";
+      passport.department = "bar";
+      const res = await msearch("referent", buildMsearchQuery("referent", matchAll));
+      expect(res.statusCode).toEqual(200);
+      const filters = getFilter()[0].bool.should;
+      expect(filters[0].terms["role.keyword"]).toStrictEqual([ROLES.REFERENT_REGION]);
+      expect(filters[1]).toStrictEqual({
+        bool: { must: [{ term: { "role.keyword": ROLES.REFERENT_DEPARTMENT } }, { term: { "region.keyword": passport.user.region } }] },
+      });
+      expect(filters[2]).toStrictEqual({
+        bool: { must: [{ term: { "role.keyword": ROLES.HEAD_CENTER } }, { term: { "region.keyword": passport.user.region } }] },
+      });
 
       passport.user.role = ROLES.ADMIN;
     });

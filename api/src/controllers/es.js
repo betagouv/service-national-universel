@@ -119,14 +119,14 @@ router.post("/structure/_msearch", passport.authenticate(["referent"], { session
       if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       const parent = await StructureObject.findById(structure.networkId);
 
-      filter.push({ terms: { "structureId.keyword": [structure._id.toString(), parent?._id?.toString()].filter((e) => e) } });
+      filter.push({ terms: { _id: [structure._id.toString(), parent?._id?.toString()].filter((e) => e) } });
     }
 
     // A supervisor can only see their structures (all network).
     if (user.role === ROLES.SUPERVISOR) {
       if (!user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       const data = await StructureObject.find({ $or: [{ networkId: String(user.structureId) }, { _id: String(user.structureId) }] });
-      filter.push({ terms: { "structureId.keyword": data.map((e) => e._id.toString()) } });
+      filter.push({ terms: { _id: data.map((e) => e._id.toString()) } });
     }
 
     // A head center can not see missions.
@@ -144,7 +144,22 @@ router.post("/referent/_msearch", passport.authenticate(["referent"], { session:
     const { user, body } = req;
     let filter = [];
 
-    if (user.role === ROLES.RESPONSIBLE) filter.push({ terms: { "role.keyword": [ROLES.RESPONSIBLE, ROLES.SUPERVISOR] } });
+    // A responsible cans only see their structure's referent (responsible and supervisor).
+    if (user.role === ROLES.RESPONSIBLE) {
+      if (!user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      const structure = await StructureObject.findById(user.structureId);
+      if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      filter.push({ terms: { "role.keyword": [ROLES.RESPONSIBLE, ROLES.SUPERVISOR] } });
+      filter.push({ terms: { "structureId.keyword": [user.structureId, structure.networkId] } });
+    }
+
+    // A supervisor can only see their structures' referent (responsible and supervisor).
+    if (user.role === ROLES.SUPERVISOR) {
+      if (!user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      const data = await StructureObject.find({ $or: [{ networkId: String(user.structureId) }, { _id: String(user.structureId) }] });
+      filter.push({ terms: { "role.keyword": [ROLES.RESPONSIBLE, ROLES.SUPERVISOR] } });
+      filter.push({ terms: { "structureId.keyword": data.map((e) => e._id.toString()) } });
+    }
 
     // See: https://trello.com/c/Wv2TrQnQ/383-admin-ajouter-onglet-utilisateurs-pour-les-r%C3%A9f%C3%A9rents
     if (user.role === ROLES.REFERENT_DEPARTMENT) {
