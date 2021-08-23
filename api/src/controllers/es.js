@@ -6,6 +6,7 @@ const { capture } = require("../sentry");
 const esClient = require("../es");
 const { ERRORS, isYoung } = require("../utils");
 const StructureObject = require("../models/structure");
+const CohesionCenterObject = require("../models/cohesionCenter");
 
 // Routes accessible for youngs and referent
 router.post("/mission/_msearch", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
@@ -85,21 +86,41 @@ router.post("/young/_msearch", passport.authenticate(["referent"], { session: fa
   }
 });
 
-router.post("/cohesionyoung/_msearch", passport.authenticate(["referent"], { session: false }), async (req, res) => {
-  // cohesionyoung is a special index, so we need to use the index "young".
-  // Todo: fix this route that is not well implemented (verification is done in frontend).
-  // We have to ceck who can see center on front end.
+// cohesionyoung is a special index, so we need to use the index "young" and specify a center ID.
+router.post("/cohesionyoung/:id/_msearch", passport.authenticate(["referent"], { session: false }), async (req, res) => {
   try {
     const { user, body } = req;
-    if (user.role === ROLES.ADMIN) {
-      const response = await esClient.msearch({ index: "young", body });
-      return res.status(200).send(response.body);
+
+    if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER].includes(user.role)) {
+      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
+
+    if (user.role === ROLES.REFERENT_REGION) {
+      const centers = await CohesionCenterObject.find({ region: user.region });
+      if (!centers.map((e) => e._id.toString()).includes(req.params.id)) {
+        return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+    }
+
+    if (user.role === ROLES.REFERENT_DEPARTMENT) {
+      const centers = await CohesionCenterObject.find({ department: user.department });
+      if (!centers.map((e) => e._id.toString()).includes(req.params.id)) {
+        return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+    }
+
+    const filter = [
+      {
+        bool: {
+          filter: [{ terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } }, { term: { cohesionCenterId: req.params.id } }],
+          must_not: [{ term: { "statusPhase1.keyword": "WAITING_LIST" } }],
+        },
+      },
+    ];
+
     const response = await esClient.msearch({
       index: "young",
-      body: withFilter(body, [
-        { terms: { "status.keyword": ["WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "VALIDATED", "WITHDRAWN", "WAITING_LIST"] } },
-      ]),
+      body: withFilter(body, filter),
     });
     return res.status(200).send(response.body);
   } catch (error) {
