@@ -8,6 +8,7 @@ const { ERRORS, isYoung } = require("../utils");
 const StructureObject = require("../models/structure");
 const ApplicationObject = require("../models/application");
 const CohesionCenterObject = require("../models/cohesionCenter");
+const { serializeMissions } = require("../utils/es-serializer");
 
 // Routes accessible for youngs and referent
 router.post("/mission/_msearch", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
@@ -36,7 +37,7 @@ router.post("/mission/_msearch", passport.authenticate(["young", "referent"], { 
     if (user.role === ROLES.HEAD_CENTER) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const response = await esClient.msearch({ index: "mission", body: withFilter(body, filter) });
-    return res.status(200).send(response.body);
+    return res.status(200).send(serializeMissions(response.body));
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, error });
