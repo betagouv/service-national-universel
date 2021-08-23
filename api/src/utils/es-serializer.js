@@ -1,16 +1,18 @@
 function serializeHits(body, callback) {
   return {
     ...body,
-    responses: body.responses.map((response) => ({
-      ...response,
-      hits: {
-        ...response.hits,
-        hits: response.hits.hits.map((hit) => ({
-          ...hit,
-          _source: callback(hit._source),
-        })),
-      },
-    })),
+    responses:
+      body.responses?.map((response) => ({
+        ...response,
+        hits: {
+          ...response.hits,
+          hits:
+            response.hits?.hits?.map((hit) => ({
+              ...hit,
+              _source: callback(hit._source),
+            })) || [],
+        },
+      })) || [],
   };
 }
 
@@ -58,9 +60,23 @@ function serializeStructures(body) {
   });
 }
 
+function serializeReferents(body) {
+  return serializeHits(body, (hit) => {
+    delete hit.sqlId;
+    delete hit.password;
+    delete hit.forgotPasswordResetToken;
+    delete hit.forgotPasswordResetExpires;
+    delete hit.invitationToken;
+    delete hit.invitationExpires;
+    delete hit.__v;
+    return hit;
+  });
+}
+
 module.exports = {
   serializeMissions,
   serializeSchools,
   serializeYoungs,
   serializeStructures,
+  serializeReferents,
 };
