@@ -73,10 +73,18 @@ function serializeReferents(body) {
   });
 }
 
+function serializeApplications(body) {
+  return serializeHits(body, (hit) => {
+    delete hit.sqlId;
+    return hit;
+  });
+}
+
 module.exports = {
   serializeMissions,
   serializeSchools,
   serializeYoungs,
   serializeStructures,
   serializeReferents,
+  serializeApplications,
 };

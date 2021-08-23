@@ -8,7 +8,14 @@ const { ERRORS, isYoung } = require("../utils");
 const StructureObject = require("../models/structure");
 const ApplicationObject = require("../models/application");
 const CohesionCenterObject = require("../models/cohesionCenter");
-const { serializeMissions, serializeSchools, serializeYoungs, serializeStructures } = require("../utils/es-serializer");
+const {
+  serializeMissions,
+  serializeSchools,
+  serializeYoungs,
+  serializeStructures,
+  serializeReferents,
+  serializeApplications,
+} = require("../utils/es-serializer");
 
 // Routes accessible for youngs and referent
 router.post("/mission/_msearch", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
@@ -40,7 +47,7 @@ router.post("/mission/_msearch", passport.authenticate(["young", "referent"], { 
     return res.status(200).send(serializeMissions(response.body));
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, error });
+    res.status(500).send({ ok: false, error: error.message });
   }
 });
 
@@ -237,7 +244,7 @@ router.post("/referent/_msearch", passport.authenticate(["referent"], { session:
     }
 
     const response = await esClient.msearch({ index: "referent", body: withFilter(body, filter) });
-    return res.status(200).send(response.body);
+    return res.status(200).send(serializeReferents(response.body));
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, error });
@@ -266,7 +273,7 @@ router.post("/application/_msearch", passport.authenticate(["referent"], { sessi
     if (user.role === ROLES.HEAD_CENTER) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const response = await esClient.msearch({ index: "application", body: withFilter(body, filter) });
-    return res.status(200).send(response.body);
+    return res.status(200).send(serializeApplications(response.body));
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, error });
