@@ -6,6 +6,7 @@ const { capture } = require("../sentry");
 const esClient = require("../es");
 const { ERRORS, isYoung } = require("../utils");
 const StructureObject = require("../models/structure");
+const ApplicationObject = require("../models/application");
 const CohesionCenterObject = require("../models/cohesionCenter");
 
 // Routes accessible for youngs and referent
@@ -76,13 +77,37 @@ router.post("/young/_msearch", passport.authenticate(["referent"], { session: fa
     const filter = [
       { terms: { "status.keyword": ["WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "VALIDATED", "WITHDRAWN", "WAITING_LIST"] } },
     ];
+
+    // A head center can only see youngs of their cohesion center.
+    if (user.role === ROLES.HEAD_CENTER) {
+      const center = await CohesionCenterObject.findById(user.cohesionCenterId);
+      if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      filter.push({ terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } }, { term: { "cohesionCenterId.keyword": center._id.toString() } });
+    }
+
+    // A responsible can only see youngs in application of their structure.
+    if (user.role === ROLES.RESPONSIBLE) {
+      if (!user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      const applications = await ApplicationObject.find({ structureId: user.structureId });
+      filter.push({ terms: { _id: applications.map((e) => e.youngId) } });
+    }
+
+    // A supervisor can only see youngs in application of their structures.
+    if (user.role === ROLES.SUPERVISOR) {
+      if (!user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      const structures = await StructureObject.find({ $or: [{ networkId: String(user.structureId) }, { _id: String(user.structureId) }] });
+      const applications = await ApplicationObject.find({ structureId: { $in: structures.map((e) => e._id.toString()) } });
+      filter.push({ terms: { _id: applications.map((e) => e.youngId) } });
+    }
+
     if (user.role === ROLES.REFERENT_REGION) filter.push({ term: { "region.keyword": user.region } });
     if (user.role === ROLES.REFERENT_DEPARTMENT) filter.push({ term: { "department.keyword": user.department } });
+
     const response = await esClient.msearch({ index: "young", body: withFilter(body, filter) });
     return res.status(200).send(response.body);
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, error });
+    res.status(500).send({ ok: false, error: error.message });
   }
 });
 
@@ -236,7 +261,6 @@ router.post("/application/_msearch", passport.authenticate(["referent"], { sessi
     if (user.role === ROLES.SUPERVISOR) {
       if (!user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       const data = await StructureObject.find({ $or: [{ networkId: String(user.structureId) }, { _id: String(user.structureId) }] });
-      // const data = await StructureObject.find({ networkId: user.structureId });
       filter.push({ terms: { "structureId.keyword": data.map((e) => e._id.toString()) } });
     }
 
