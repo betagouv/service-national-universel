@@ -13,13 +13,15 @@ jest.mock("@elastic/elasticsearch", () => ({
   }),
 }));
 const esClient = require("../es");
+const { getNewApplicationFixture } = require("./fixtures/application");
 const { getNewCohesionCenterFixture } = require("./fixtures/cohesionCenter");
 const getNewReferentFixture = require("./fixtures/referent");
 const getNewStructureFixture = require("./fixtures/structure");
 const getNewYoungFixture = require("./fixtures/young");
 
 const getAppHelper = require("./helpers/app");
-const { createCohesionCenter } = require("./helpers/cohesionCenter");
+const { createApplication } = require("./helpers/application");
+const { createCohesionCenter, notExistingCohesionCenterId } = require("./helpers/cohesionCenter");
 const { dbConnect, dbClose } = require("./helpers/db");
 const { createReferentHelper } = require("./helpers/referent");
 const { createStructureHelper } = require("./helpers/structure");
@@ -464,6 +466,93 @@ describe("Es", () => {
       passport.user.region = "bam";
       let res = await msearch("cohesionyoung/" + center._id, buildMsearchQuery("referent", matchAll));
       expect(res.statusCode).toEqual(200);
+    });
+  });
+
+  describe("POST /es/young/_msearch", () => {
+    it("should return 404 for head center when center does not exit", async () => {
+      const passport = require("passport");
+
+      passport.user.role = ROLES.HEAD_CENTER;
+      passport.user.cohesionCenterId = notExistingCohesionCenterId;
+      const res = await msearch("young", buildMsearchQuery("young", matchAll));
+      expect(res.statusCode).toEqual(404);
+
+      passport.user.role = ROLES.ADMIN;
+    });
+    it("should return young from center for head center when center exits", async () => {
+      const center = await createCohesionCenter(getNewCohesionCenterFixture());
+      const passport = require("passport");
+
+      passport.user.role = ROLES.HEAD_CENTER;
+      passport.user.cohesionCenterId = center._id.toString();
+
+      const res = await msearch("young", buildMsearchQuery("young", matchAll));
+      expect(res.statusCode).toEqual(200);
+      expect(getFilter()[2].term["cohesionCenterId.keyword"]).toBe(center._id.toString());
+
+      passport.user.role = ROLES.ADMIN;
+    });
+
+    it("should filter region for referent region", async () => {
+      const passport = require("passport");
+      passport.user.role = ROLES.REFERENT_REGION;
+      passport.user.region = "lol";
+
+      let res = await msearch("young", buildMsearchQuery("young", matchAll));
+      expect(res.statusCode).toEqual(200);
+      expect(getFilter()[1].term["region.keyword"]).toStrictEqual("lol");
+
+      passport.user.role = ROLES.ADMIN;
+    });
+
+    it("should filter department for referent department", async () => {
+      const passport = require("passport");
+      passport.user.role = ROLES.REFERENT_DEPARTMENT;
+      passport.user.department = "foo";
+
+      let res = await msearch("young", buildMsearchQuery("young", matchAll));
+      expect(res.statusCode).toEqual(200);
+      expect(getFilter()[1].term["department.keyword"]).toStrictEqual("foo");
+
+      passport.user.role = ROLES.ADMIN;
+    });
+
+    it("should return youngs for responsible", async () => {
+      const structure = await createStructureHelper(getNewStructureFixture());
+      const young = await createYoungHelper(getNewYoungFixture());
+      await createApplication({ ...getNewApplicationFixture(), structureId: structure._id, youngId: young._id });
+
+      const passport = require("passport");
+
+      passport.user.role = ROLES.RESPONSIBLE;
+      passport.user.structureId = structure._id.toString();
+
+      const res = await msearch("young", buildMsearchQuery("young", matchAll));
+      expect(res.statusCode).toEqual(200);
+      expect(getFilter()[1].terms["_id"]).toStrictEqual([young._id.toString()]);
+
+      passport.user.role = ROLES.ADMIN;
+    });
+
+    it("should return youngs for supervisor", async () => {
+      const structure = await createStructureHelper(getNewStructureFixture());
+      const structure2 = await createStructureHelper({ ...getNewStructureFixture(), networkId: structure._id.toString() });
+      const young = await createYoungHelper(getNewYoungFixture());
+      const young2 = await createYoungHelper(getNewYoungFixture());
+      await createApplication({ ...getNewApplicationFixture(), structureId: structure._id.toString(), youngId: young._id.toString() });
+      await createApplication({ ...getNewApplicationFixture(), structureId: structure2._id.toString(), youngId: young2._id.toString() });
+
+      const passport = require("passport");
+
+      passport.user.role = ROLES.SUPERVISOR;
+      passport.user.structureId = structure._id.toString();
+
+      const res = await msearch("young", buildMsearchQuery("young", matchAll));
+      expect(res.statusCode).toEqual(200);
+      expect(getFilter()[1].terms["_id"]).toStrictEqual([young._id.toString(), young2._id.toString()]);
+
+      passport.user.role = ROLES.ADMIN;
     });
   });
 });
