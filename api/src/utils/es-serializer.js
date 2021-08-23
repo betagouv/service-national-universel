@@ -49,8 +49,18 @@ function serializeYoungs(body) {
   });
 }
 
+function serializeStructures(body) {
+  return serializeHits(body, (hit) => {
+    delete hit.sqlId;
+    delete hit.sqlStructureId;
+    delete hit.sqlTutorId;
+    return hit;
+  });
+}
+
 module.exports = {
   serializeMissions,
   serializeSchools,
   serializeYoungs,
+  serializeStructures,
 };
