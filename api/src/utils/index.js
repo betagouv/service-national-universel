@@ -34,7 +34,7 @@ function getReq(url, cb) {
 function uploadFile(path, file) {
   return new Promise((resolve, reject) => {
     const s3bucket = new AWS.S3({ endpoint: CELLAR_ENDPOINT, accessKeyId: CELLAR_KEYID, secretAccessKey: CELLAR_KEYSECRET });
-    var params = {
+    const params = {
       Bucket: BUCKET_NAME,
       Key: path,
       Body: file.data,
