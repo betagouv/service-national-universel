@@ -5,17 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <meta name="google" content="notranslate" />
     <title>SNU</title>
-    <script type="text/javascript">
-      window.$crisp = [];
-      window.CRISP_WEBSITE_ID = "9a0b4de6-fa09-4356-9db0-15d4c3a40f42";
-      (function () {
-        d = document;
-        s = d.createElement("script");
-        s.src = "https://client.crisp.chat/l.js";
-        s.async = 1;
-        d.getElementsByTagName("head")[0].appendChild(s);
-      })();
-    </script>
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+    <script src="https://support.selego.co/assets/chat/chat.min.js"></script>
 
     <script>
       window.axeptioSettings = {
@@ -36,6 +27,31 @@
   <body>
     <noscript> You need to enable JavaScript to run this app. </noscript>
     <div id="root"></div>
+    <div id="zammad-chat"></div>
+    <script>
+      $(function() {
+        const chat = new ZammadChat({
+          title: 'Une question ?',
+          background: '#5145cd',
+          fontSize: '12px',
+          chatId: 4,
+          show: true,
+          flat: true,
+          target: $('#zammad-chat'),
+        });
+        /*
+        chat.onConnectionEstablished = (data) => {
+          // debugger;
+          ZammadChat.prototype.onConnectionEstablished.call(chat, data);
+          chat.send('chat_session_notice', {
+              session_id: chat.sessionId,
+              message: 'Your message',
+          });
+};
+*/
+
+      });
+      </script>
     <script>
       window.axeptioSettings = {
         clientId: "606c516d6ac944450f1e899d",
