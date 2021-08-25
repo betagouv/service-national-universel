@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
-import styled from "styled-components";
 import { useSelector } from "react-redux";
 
 import ExportComponent from "../../components/ExportXlsx";
@@ -21,6 +20,7 @@ const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "TUTOR", "R
 
 export default () => {
   const [mission, setMission] = useState(null);
+  const [structure, setStructure] = useState();
   const [structureIds, setStructureIds] = useState();
   const [filterVisible, setFilterVisible] = useState(false);
   const user = useSelector((state) => state.Auth.user);
@@ -40,6 +40,13 @@ export default () => {
     })();
     return;
   }, []);
+  useEffect(() => {
+    (async () => {
+      const { data } = await api.get(`/structure/${user.structureId}`);
+      setStructure(data);
+    })();
+    return;
+  }, []);
   if (user.role === ROLES.SUPERVISOR && !structureIds) return <Loader />;
 
   return (
@@ -51,13 +58,13 @@ export default () => {
               <div style={{ flex: 1 }}>
                 <Title>Missions</Title>
               </div>
-              {user.role === ROLES.RESPONSIBLE && user.structureId && (
+              {user.role === ROLES.RESPONSIBLE && user.structureId && structure && structure.status !== "DRAFT" ? (
                 <Link to={`/mission/create/${user.structureId}`}>
                   <VioletButton>
                     <p>Nouvelle mission</p>
                   </VioletButton>
                 </Link>
-              )}
+              ) : null}
               <ExportComponent
                 title="Exporter les missions"
                 defaultQuery={getExportQuery}
@@ -66,10 +73,7 @@ export default () => {
                 transformAll={async (data) => {
                   const tutorIds = [...new Set(data.map((item) => item.tutorId).filter((e) => e))];
                   if (tutorIds?.length) {
-                    const { responses } = await api.esQuery([
-                      { index: "referent", type: "_doc" },
-                      { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: tutorIds } } },
-                    ]);
+                    const { responses } = await api.esQuery("referent", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: tutorIds } } });
                     const tutors = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
                     return data.map((item) => ({ ...item, tutor: tutors?.find((e) => e._id === item.tutorId) }));
                   }
@@ -87,7 +91,7 @@ export default () => {
                     "Prénom du tuteur": data.tutor?.firstName,
                     "Email du tuteur": data.tutor?.email,
                     "Téléphone du tuteur": data.tutor?.mobile ? data.tutor?.mobile : data.tutor?.phone,
-                    "Liste des domaines de la mission": data.domains,
+                    "Liste des domaines de la mission": data.domains?.map(translate),
                     "Date du début": formatDateFRTimezoneUTC(data.startAt),
                     "Date de fin": formatDateFRTimezoneUTC(data.endAt),
                     Format: data.format,

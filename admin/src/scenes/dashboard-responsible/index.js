@@ -8,17 +8,30 @@ import Missions from "./missions";
 import { useSelector } from "react-redux";
 import { apiURL } from "../../config";
 import api from "../../services/api";
-import { DEFAULT_STRUCTURE_NAME } from "../../utils";
+import { DEFAULT_STRUCTURE_NAME, MISSION_STATUS } from "../../utils";
 
 export default () => {
   const [currentTab, setCurrentTab] = useState("volontaires");
   const [showAlert, setShowAlert] = useState(false);
+  const [structure, setStructure] = useState();
+  const [referentManagerPhase2, setReferentManagerPhase2] = useState();
   const user = useSelector((state) => state.Auth.user);
+
+  useEffect(() => {
+    if (!structure) return;
+    (async () => {
+      const { ok, data } = await api.get(`/referent/manager_phase2/${structure.department}`);
+      if (ok) return setReferentManagerPhase2(data);
+    })();
+  }, [structure]);
 
   useEffect(() => {
     (async () => {
       const { ok, data } = await api.get(`/structure/${user.structureId}`);
-      if (ok) setShowAlert(data.name.toUpperCase() === DEFAULT_STRUCTURE_NAME.toUpperCase());
+      if (ok) {
+        setStructure(data);
+        setShowAlert(data.status === MISSION_STATUS.DRAFT);
+      }
     })();
   }, []);
 
@@ -36,8 +49,8 @@ export default () => {
         </TabNavigationList>
       </TabNavigation>
       <Wrapper>
-        {currentTab === "volontaires" && <Volontaires />}
-        {currentTab === "missions" && <Missions />}
+        {currentTab === "volontaires" && <Volontaires referentManagerPhase2={referentManagerPhase2} />}
+        {currentTab === "missions" && <Missions referentManagerPhase2={referentManagerPhase2} />}
       </Wrapper>
     </>
   );

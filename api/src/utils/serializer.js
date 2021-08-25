@@ -47,7 +47,6 @@ function serializeYoung(young, user) {
       delete ret.phase3Token;
       delete ret.__v;
       if (isYoung(user)) {
-        // delete ret.historic; //todo : why delete this ? (we need it here -> app/src/components/drawer/index.js)
         delete ret.qpv;
       }
       return ret;
@@ -91,6 +90,26 @@ function serializeMeetingPoint(meetingPoint, user) {
   return meetingPoint.toObject();
 }
 
+function serializeEmail(email, user) {
+  return email.toObject();
+}
+
+function serializeContract(contract, user, withTokens = true) {
+  if (!withTokens || isYoung(user)) {
+    return contract.toObject({
+      transform: (_doc, ret) => {
+        delete ret.parent1Token;
+        delete ret.projectManagerToken;
+        delete ret.structureManagerToken;
+        delete ret.parent2Token;
+        delete ret.youngContractToken;
+        return ret;
+      },
+    });
+  }
+  return contract.toObject();
+}
+
 function serializeArray(arr, user, serialize) {
   return arr.map((s) => serialize(s, user));
 }
@@ -113,4 +132,6 @@ module.exports = {
   serializeArray,
   serializeDepartmentService,
   serializeMeetingPoint,
+  serializeEmail,
+  serializeContract,
 };

@@ -16,7 +16,7 @@ import Badge from "../../components/Badge";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import Chevron from "../../components/Chevron";
 
-const FILTERS = ["SEARCH", "LEGAL_STATUS", "DEPARTMENT", "REGION", "CORPS", "WITH_NETWORK", "LOCATION", "MILITARY_PREPARATION"];
+const FILTERS = ["SEARCH", "LEGAL_STATUS", "STATUS", "DEPARTMENT", "REGION", "CORPS", "WITH_NETWORK", "LOCATION", "MILITARY_PREPARATION"];
 const formatLongDate = (date) => {
   if (!date) return "-";
   const d = new Date(date);
@@ -35,11 +35,10 @@ export default () => {
   useEffect(() => {
     (async () => {
       if (structureIds?.length) {
-        const queries = [
-          { index: "mission", type: "_doc" },
-          { size: ES_NO_LIMIT, query: { bool: { must: { match_all: {} }, filter: [{ terms: { "structureId.keyword": structureIds } }] } } },
-        ];
-        const { responses } = await api.esQuery(queries);
+        const { responses } = await api.esQuery("mission", {
+          size: ES_NO_LIMIT,
+          query: { bool: { must: { match_all: {} }, filter: [{ terms: { "structureId.keyword": structureIds } }] } },
+        });
         setMissions(responses[0]?.hits?.hits || []);
       }
     })();
@@ -69,6 +68,18 @@ export default () => {
                   defaultQuery={getExportQuery}
                   collection="structure"
                   react={{ and: FILTERS }}
+                  transformAll={async (data) => {
+                    const structureIds = [...new Set(data.map((item) => item._id).filter((e) => e))];
+                    if (structureIds?.length) {
+                      const { responses } = await api.esQuery("referent", {
+                        query: { bool: { must: { match_all: {} }, filter: [{ terms: { "structureId.keyword": structureIds } }] } },
+                        size: ES_NO_LIMIT,
+                      });
+                      const referents = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+                      return data.map((item) => ({ ...item, team: referents?.filter((e) => e.structureId === item._id) }));
+                    }
+                    return data;
+                  }}
                   transform={(data) => {
                     return {
                       _id: data._id,
@@ -80,6 +91,16 @@ export default () => {
                       Twitter: data.twitter,
                       Instagram: data.instagram,
                       Statut: data.status,
+                      "Taille d'équipe": data.team?.length,
+                      "Membre 1 - Prénom": data.team[0]?.firstName,
+                      "Membre 1 - Nom": data.team[0]?.lastName,
+                      "Membre 1 - Email": data.team[0]?.email,
+                      "Membre 2 - Prénom": data.team[1]?.firstName,
+                      "Membre 2 - Nom": data.team[1]?.lastName,
+                      "Membre 2 - Email": data.team[1]?.email,
+                      "Membre 3 - Prénom": data.team[2]?.firstName,
+                      "Membre 3 - Nom": data.team[2]?.lastName,
+                      "Membre 3 - Email": data.team[2]?.email,
                       "Est une tête de réseau": data.isNetwork,
                       "Nom de la tête de réseau": data.networkName,
                       "Statut juridique": data.legalStatus,
@@ -115,6 +136,23 @@ export default () => {
                   URLParams={true}
                   queryFormat="and"
                 />
+                {user?.role === ROLES.ADMIN ? (
+                  <MultiDropdownList
+                    defaultQuery={getDefaultQuery}
+                    className="dropdown-filter"
+                    placeholder="Statut juridique"
+                    componentId="STATUS"
+                    dataField="status.keyword"
+                    react={{ and: FILTERS.filter((e) => e !== "STATUS") }}
+                    renderItem={(e, count) => {
+                      return `${translate(e)} (${count})`;
+                    }}
+                    title=""
+                    URLParams={true}
+                    showSearch={false}
+                    renderLabel={(items) => getFilterLabel(items, "Statut")}
+                  />
+                ) : null}
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
@@ -128,6 +166,7 @@ export default () => {
                   title=""
                   URLParams={true}
                   showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Statut juridique")}
                 />
                 <Chevron color="#444" style={{ cursor: "pointer", transform: filterVisible && "rotate(180deg)" }} onClick={handleShowFilter} />
               </FilterRow>

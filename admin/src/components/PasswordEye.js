@@ -6,7 +6,7 @@ import { getPasswordErrorMessage } from "../utils";
 import EyeOpen from "../assets/eye.svg";
 import EyeClose from "../assets/eye-slash.svg";
 
-export default ({ value, onChange }) => {
+export default ({ value, onChange, showError = true }) => {
   const [passwordText, setPasswordText] = useState(false);
 
   return (
@@ -14,7 +14,7 @@ export default ({ value, onChange }) => {
       <InputField
         placeholder="Tapez votre mot de passe"
         className="form-control"
-        validate={(v) => getPasswordErrorMessage(v)}
+        validate={(v) => showError && getPasswordErrorMessage(v)}
         type={passwordText ? "text" : "password"}
         name="password"
         value={value}

@@ -69,6 +69,11 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false }
     const young = await YoungObject.findById(value.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    // A young can only update create their own applications.
+    if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
+      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+
     const data = await ApplicationObject.create(value);
     await updateStatusPhase2(data);
     await updatePlacesMission(data);

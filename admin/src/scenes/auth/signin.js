@@ -16,6 +16,7 @@ import AuthWrapper from "./components/authWrapper";
 import Title from "./components/title";
 import Subtitle from "./components/subtitle";
 import { colors } from "../../utils";
+import PasswordEye from "../../components/PasswordEye";
 
 export default () => {
   const dispatch = useDispatch();
@@ -77,34 +78,12 @@ export default () => {
                       <StyledFormGroup>
                         <div>
                           <label htmlFor="email">E-mail</label>
-                          <InputField
-                            // validate={(v) => !validator.isEmail(v) && "Invalid email address"}
-                            className="form-control"
-                            name="email"
-                            type="email"
-                            id="email"
-                            placeholder="Adresse e-mail"
-                            value={values.email}
-                            onChange={handleChange}
-                          />
+                          <InputField className="form-control" name="email" type="email" id="email" placeholder="Adresse e-mail" value={values.email} onChange={handleChange} />
                         </div>
-                        <p style={{ fontSize: 12, color: colors.red, marginTop: 5 }}>{errors.email}</p>
                       </StyledFormGroup>
                       <StyledFormGroup>
-                        <div>
-                          <label htmlFor="password">Mot de passe</label>
-                          <InputField
-                            // validate={(v) => validator.isEmpty(v) && "This field is Required"}
-                            className="form-control"
-                            name="password"
-                            type="password"
-                            id="password"
-                            placeholder="Votre mot de passe"
-                            value={values.password}
-                            onChange={handleChange}
-                          />
-                        </div>
-                        <p style={{ fontSize: 12, color: colors.red, marginTop: 5 }}>{errors.password}</p>
+                        <label htmlFor="password">Mot de passe</label>
+                        <PasswordEye value={values.password} onChange={handleChange} showError={false} />
                       </StyledFormGroup>
                       <Forgot>
                         <Link to="/auth/forgot">Mot de passe perdu ?</Link>
@@ -178,7 +157,7 @@ const InputField = styled(Field)`
   transition: border 0.2s ease;
   line-height: 1.2;
   ::placeholder {
-    color: #798fb0;
+    color: #d6d6e1;
   }
   &:focus {
     outline: none;

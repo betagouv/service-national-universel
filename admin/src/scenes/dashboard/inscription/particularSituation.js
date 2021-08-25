@@ -14,9 +14,7 @@ export default ({ filter }) => {
 
   useEffect(() => {
     (async () => {
-      const queries = [];
-      queries.push({ index: "young", type: "_doc" });
-      queries.push({
+      const body = {
         query: { bool: { must: { match_all: {} }, filter: [{ term: { "cohort.keyword": filter.cohort } }] } },
         aggs: {
           handicap: { terms: { field: "handicap.keyword" } },
@@ -24,14 +22,14 @@ export default ({ filter }) => {
           paiBeneficiary: { terms: { field: "paiBeneficiary.keyword" } },
         },
         size: 0,
-      });
+      };
 
-      if (filter.status) queries[1].query.bool.filter.push({ terms: { "status.keyword": filter.status } });
-      if (filter.region) queries[1].query.bool.filter.push({ term: { "region.keyword": filter.region } });
-      if (filter.department) queries[1].query.bool.filter.push({ term: { "department.keyword": filter.department } });
+      if (filter.status) body.query.bool.filter.push({ terms: { "status.keyword": filter.status } });
+      if (filter.region) body.query.bool.filter.push({ term: { "region.keyword": filter.region } });
+      if (filter.department) body.query.bool.filter.push({ term: { "department.keyword": filter.department } });
 
       //handicap
-      const { responses } = await api.esQuery(queries);
+      const { responses } = await api.esQuery("young", body);
 
       function transform(arr) {
         const t = arr.find((e) => e.key === "true");

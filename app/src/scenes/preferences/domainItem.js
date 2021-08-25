@@ -2,18 +2,6 @@ import React from "react";
 import styled from "styled-components";
 
 export default ({ title, subtitle, handleChange, name, values, value }) => {
-  Array.prototype.inArray = function (elem) {
-    for (var i = 0; i < this.length; i++) {
-      if (this[i] === elem) return true;
-    }
-    return false;
-  };
-  Array.prototype.pushIfNotExist = function (element) {
-    if (!this.inArray(element)) {
-      this.push(element);
-    }
-  };
-
   const onClick = () => {
     const d = values[name];
     const index = d.indexOf(value);

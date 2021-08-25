@@ -9,3 +9,5 @@ api/.env-testing
 api/.env*
 api/coverage
 .vscode
+.env
+.cache_ggshield

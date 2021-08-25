@@ -6,7 +6,7 @@ import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
-import { translate, STRUCTURE_STATUS_COLORS, ROLES, colors } from "../../../utils";
+import { translate, ROLES, colors } from "../../../utils";
 import api from "../../../services/api";
 import TabList from "../../../components/views/TabList";
 import Tab from "../../../components/views/Tab";
@@ -41,7 +41,7 @@ export default ({ children, structure, tab }) => {
       <Header>
         <div style={{ flex: 1 }}>
           <Title>
-            {structure.name} <Badge color={STRUCTURE_STATUS_COLORS[structure.status]} text={translate(structure.status)} />
+            {structure.name}
             {structure.isMilitaryPreparation === "true" ? <Badge text="Préparation Militaire" /> : null}
           </Title>
 
@@ -64,11 +64,11 @@ export default ({ children, structure, tab }) => {
           </TabList>
         </div>
         <div style={{ display: "flex" }}>
-          {!isResponsible && (
+          {!isResponsible && structure?.status !== "DRAFT" ? (
             <Link to={`/mission/create/${structure._id}`}>
               <PanelActionButton icon="plus" title="Nouvelle mission" />
             </Link>
-          )}
+          ) : null}
           <Link to={`/structure/${structure._id}/edit`}>
             <PanelActionButton icon="pencil" title="Modifier" />
           </Link>

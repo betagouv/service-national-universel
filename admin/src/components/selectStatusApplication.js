@@ -85,13 +85,15 @@ export default ({ hit, options = [], callback }) => {
             <Chevron color={APPLICATION_STATUS_COLORS[application.status]} />
           </DropdownToggle>
           <DropdownMenu>
-            {options.map((status) => {
-              return (
-                <DropdownItem key={status} className="dropdown-item" onClick={() => onClickStatus(status)}>
-                  {translate(status)}
-                </DropdownItem>
-              );
-            })}
+            {options
+              .filter((e) => e !== application.status)
+              .map((status) => {
+                return (
+                  <DropdownItem key={status} className="dropdown-item" onClick={() => onClickStatus(status)}>
+                    {translate(status)}
+                  </DropdownItem>
+                );
+              })}
           </DropdownMenu>
         </UncontrolledDropdown>
       </ActionBox>

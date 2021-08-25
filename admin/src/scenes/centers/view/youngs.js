@@ -25,15 +25,6 @@ export default ({ center, updateCenter }) => {
       setMeetingPoints(data);
     })();
   }, []);
-  const getDefaultQuery = () => ({
-    query: {
-      bool: {
-        filter: [{ terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } }, { term: { cohesionCenterId: center._id } }],
-        must_not: [{ term: { "statusPhase1.keyword": "WAITING_LIST" } }],
-      },
-    },
-  });
-  const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
   const handleClick = async (young) => {
     const { ok, data } = await api.get(`/referent/young/${young._id}`);
@@ -46,12 +37,11 @@ export default ({ center, updateCenter }) => {
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <CenterView center={center} tab="volontaires">
         <div>
-          <ReactiveBase url={`${apiURL}/es`} app="cohesionyoung" headers={{ Authorization: `JWT ${api.getToken()}` }}>
+          <ReactiveBase url={`${apiURL}/es`} app={`cohesionyoung/${center._id}`} headers={{ Authorization: `JWT ${api.getToken()}` }}>
             <div style={{ float: "right", marginBottom: "1.5rem", marginRight: "1.5rem" }}>
               <div style={{ display: "flex" }}>
                 <ExportComponent
                   title="Exporter les volontaires"
-                  defaultQuery={getExportQuery}
                   collection="volontaire"
                   react={{ and: FILTERS }}
                   transform={(data) => {
@@ -179,7 +169,6 @@ export default ({ center, updateCenter }) => {
               <div style={{ flex: 1, position: "relative" }}>
                 <Filter>
                   <DataSearch
-                    defaultQuery={getDefaultQuery}
                     showIcon={false}
                     placeholder="Rechercher par prénom, nom, email, ville, code postal..."
                     componentId="SEARCH"
@@ -193,7 +182,6 @@ export default ({ center, updateCenter }) => {
                   />
                   <FilterRow>
                     <MultiDropdownList
-                      defaultQuery={getDefaultQuery}
                       className="dropdown-filter"
                       componentId="STATUS"
                       dataField="status.keyword"
@@ -207,7 +195,6 @@ export default ({ center, updateCenter }) => {
                       renderLabel={(items) => getFilterLabel(items, "Statut")}
                     />
                     <MultiDropdownList
-                      defaultQuery={getDefaultQuery}
                       className="dropdown-filter"
                       componentId="STATUS_PHASE_1"
                       dataField="statusPhase1.keyword"
@@ -224,7 +211,6 @@ export default ({ center, updateCenter }) => {
                 </Filter>
                 <ResultTable>
                   <ReactiveListComponent
-                    defaultQuery={getDefaultQuery}
                     react={{ and: FILTERS }}
                     dataField="lastName.keyword"
                     sortBy="asc"

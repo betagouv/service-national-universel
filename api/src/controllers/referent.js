@@ -607,7 +607,9 @@ router.get("/manager_phase2/:department", passport.authenticate(["young", "refer
       });
     }
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    return res.status(200).send({ ok: true, data: { firstName: data.firstName, lastName: data.lastName, email: data.email } });
+    return res
+      .status(200)
+      .send({ ok: true, data: { firstName: data.firstName, lastName: data.lastName, email: data.email, department: data.department } });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });

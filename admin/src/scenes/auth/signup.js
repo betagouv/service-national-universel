@@ -9,7 +9,7 @@ import styled from "styled-components";
 import { useHistory } from "react-router-dom";
 
 import { setUser } from "../../redux/auth/actions";
-
+import PasswordEye from "../../components/PasswordEye";
 import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import Header from "./components/header";
@@ -129,17 +129,9 @@ export default () => {
                         </Col>
                       </Row>
                       <StyledFormGroup>
-                        <label htmlFor="password">Mot de passe</label>
-                        <InputField
-                          validate={(v) => validator.isEmpty(v) && "Ce champ est requis"}
-                          name="password"
-                          type="password"
-                          id="repassword"
-                          value={values.password}
-                          onChange={handleChange}
-                          placeholder="Choisissez votre mot de passe"
-                          haserror={errors.password}
-                        />
+                        <label>Mot de passe</label>
+                        <p style={{ fontSize: 12, color: colors.grey }}>👉 Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole</p>
+                        <PasswordEye value={values.password} onChange={handleChange} />
                         <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.password}</p>
                       </StyledFormGroup>
                       <Submit loading={isSubmitting} type="submit" color="primary">

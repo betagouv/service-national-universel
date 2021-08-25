@@ -34,7 +34,7 @@ function getReq(url, cb) {
 function uploadFile(path, file) {
   return new Promise((resolve, reject) => {
     const s3bucket = new AWS.S3({ endpoint: CELLAR_ENDPOINT, accessKeyId: CELLAR_KEYID, secretAccessKey: CELLAR_KEYSECRET });
-    var params = {
+    const params = {
       Bucket: BUCKET_NAME,
       Key: path,
       Body: file.data,
@@ -340,6 +340,9 @@ const getYoungFromWaitingList = async (young) => {
 function isYoung(user) {
   return user instanceof YoungModel;
 }
+function isReferent(user) {
+  return user instanceof ReferentModel;
+}
 
 function inSevenDays() {
   return Date.now() + 86400000 * 7;
@@ -390,5 +393,6 @@ module.exports = {
   deleteFile,
   signinLimiter,
   isYoung,
+  isReferent,
   inSevenDays,
 };

@@ -66,7 +66,7 @@ router.put("/", passport.authenticate(["young", "referent"], { session: false })
     const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    // A young can only download their own documents.
+    // A young can only update their own meeting points.
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
       return res.status(401).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }

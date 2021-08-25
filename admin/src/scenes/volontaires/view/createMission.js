@@ -31,8 +31,8 @@ export default ({ young, onSend }) => {
   useEffect(() => {
     (async () => {
       if (!structure) return;
-      const queries = [{ index: "referent", type: "_doc" }, { query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": structure._id } }] } } }];
-      const { responses } = await api.esQuery(queries);
+      const body = { query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": structure._id } }] } } };
+      const { responses } = await api.esQuery("referent", body);
       if (responses) setReferents(responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
     })();
   }, [structure]);
@@ -94,6 +94,7 @@ export default ({ young, onSend }) => {
           // create the strucutre if it is a new one
           if (createStructureVisible) {
             const responseStructure = await api.post("/structure", {
+              status: "VALIDATED",
               name: values.structureName,
               legalStatus: values.structureLegalStatus,
               description: values.structureDescription,

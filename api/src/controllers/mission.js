@@ -15,6 +15,9 @@ const { canModifyMission } = require("snu-lib/roles");
 const { serializeMission, serializeApplication } = require("../utils/serializer");
 const patches = require("./patches");
 
+// todo : add canCreateOrUpdateMission()
+// if admin or referent from the same area or responsoble or supervisor
+// if structure is validated
 router.post("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const { error, value: checkedMission } = validateMission(req.body);
@@ -142,7 +145,6 @@ router.put("/:id/structure/:structureId", passport.authenticate("referent", { se
   }
 });
 
-//@check
 router.delete("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
     const { error, value: checkedId } = validateId(req.params.id);

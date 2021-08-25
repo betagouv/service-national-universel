@@ -91,7 +91,7 @@ export default () => {
             Volontaires candidatant sur des missions de {user.role === ROLES.SUPERVISOR ? "mes" : "ma"} structure{user.role === ROLES.SUPERVISOR ? "s" : ""}
           </h4>
         </Col>
-        {ENABLE_PM && (
+        {ENABLE_PM && stats?.WAITING_VERIFICATION ? (
           <Col md={6} xl={3}>
             <CardContainer>
               <Card borderBottomColor="#888888" style={{ marginBottom: 10, backgroundColor: "#cccccc" }}>
@@ -108,7 +108,7 @@ export default () => {
               ) : null}
             </CardContainer>
           </Col>
-        )}
+        ) : null}
         <Col md={6} xl={3}>
           <Link to={`/volontaire?STATUS=%5B"WAITING_VALIDATION"%5D`}>
             <CardContainer>

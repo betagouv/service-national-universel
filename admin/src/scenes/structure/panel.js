@@ -22,36 +22,27 @@ export default ({ onChange, value }) => {
   useEffect(() => {
     if (!value) return;
     (async () => {
-      const queries = [];
-      queries.push({ index: "mission", type: "_doc" });
-      queries.push({
+      const { responses: missionResponses } = await api.esQuery("mission", {
         query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": value._id } }] } },
       });
-      queries.push({ index: "referent", type: "_doc" });
-      queries.push({
+      const { responses: referentResponses } = await api.esQuery("referent", {
         query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": value._id } }] } },
       });
       if (value.networkId) {
-        queries.push({ index: "structure", type: "_doc" });
-        queries.push({
+        const { responses: structureResponses } = await api.esQuery("structure", {
           query: { bool: { must: { match_all: {} }, filter: [{ term: { _id: value.networkId } }] } },
         });
-      }
-
-      const { responses } = await api.esQuery(queries);
-
-      if (value.networkId) {
-        const structures = responses[2]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+        const structures = structureResponses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
         setParentStructure(structures.length ? structures[0] : null);
       } else {
         setParentStructure(null);
       }
       setMissionsInfo({
-        count: responses[0].hits.hits.length,
-        placesTotal: responses[0].hits.hits.reduce((acc, e) => acc + e._source.placesTotal, 0),
-        placesLeft: responses[0].hits.hits.reduce((acc, e) => acc + e._source.placesLeft, 0),
+        count: missionResponses[0].hits.hits.length,
+        placesTotal: missionResponses[0].hits.hits.reduce((acc, e) => acc + e._source.placesTotal, 0),
+        placesLeft: missionResponses[0].hits.hits.reduce((acc, e) => acc + e._source.placesLeft, 0),
       });
-      setReferents(responses[1]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
+      setReferents(referentResponses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
     })();
   }, [value]);
 
