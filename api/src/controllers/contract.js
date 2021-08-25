@@ -10,7 +10,7 @@ const YoungObject = require("../models/young");
 const ApplicationObject = require("../models/application");
 const ReferentObject = require("../models/referent");
 const { ERRORS, isYoung } = require("../utils");
-const { sendEmail, sendTemplate } = require("../sendinblue");
+const { sendTemplate } = require("../sendinblue");
 const { APP_URL } = require("../config");
 const contractTemplate = require("../templates/contractPhase2");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
@@ -180,32 +180,29 @@ async function sendYoungContractEmail(contract, isValidateAgainMail) {
 }
 
 async function sendContractEmail(contract, options) {
-  let htmlContent, subject;
+  let template, cc;
   if (options.isValidateAgainMail) {
     console.log("send (re)validation mail to " + JSON.stringify({ to: options.email, cc: options.cc }));
-    subject = `(RE)Valider le contrat d'engagement de ${contract.youngFirstName} ${contract.youngLastName} sur la mission ${contract.missionName} suite à modifications effectuées`;
-    htmlContent = fs
-      .readFileSync(path.resolve(__dirname, "../templates/contract-revalidate.html"))
-      .toString()
-      .replace(/{{toName}}/g, options.name)
-      .replace(/{{youngName}}/g, `${contract.youngFirstName} ${contract.youngLastName}`)
-      .replace(/{{cta}}/g, `${APP_URL}/validate-contract?token=${options.token}&contract=${contract._id}`);
+    template = SENDINBLUE_TEMPLATES.REVALIDATE_CONTRACT;
   } else {
     console.log("send validation mail to " + JSON.stringify({ to: options.email, cc: options.cc }));
-    subject = `Valider le contrat d'engagement de ${contract.youngFirstName} ${contract.youngLastName} sur la mission ${contract.missionName}`;
-    htmlContent = fs
-      .readFileSync(path.resolve(__dirname, "../templates/contract.html"))
-      .toString()
-      .replace(/{{toName}}/g, options.name)
-      .replace(/{{youngName}}/g, `${contract.youngFirstName} ${contract.youngLastName}`)
-      .replace(/{{cta}}/g, `${APP_URL}/validate-contract?token=${options.token}&contract=${contract._id}`);
+    template = SENDINBLUE_TEMPLATES.VALIDATE_CONTRACT;
   }
-  const to = { name: options.name, email: options.email };
+  const params = {
+    toName: options.name,
+    youngName: `${contract.youngFirstName} ${contract.youngLastName}`,
+    missionName: contract.missionName,
+    cta: `${APP_URL}/validate-contract?token=${options.token}&contract=${contract._id}`,
+  };
+  const emailTo = { name: options.name, email: options.email };
   if (options.cc) {
-    await sendEmail(to, subject, htmlContent, { cc: [{ name: options.ccName, email: options.cc }] });
-  } else {
-    await sendEmail(to, subject, htmlContent);
+    cc = [{ name: options.ccName, email: options.cc }];
   }
+  await sendTemplate(template, {
+    emailTo,
+    params,
+    cc,
+  });
 }
 
 // Create or update contract.
