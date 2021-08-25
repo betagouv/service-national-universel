@@ -219,9 +219,8 @@ export default (props) => {
               <DownloadAttestationButton young={young} uri="1">
                 Télécharger l'attestation de réalisation de la phase 1
               </DownloadAttestationButton>
-              <div style={{ padding: "0 1rem", color: colors.grey }}>ou</div>
-              <MailAttestationButton young={young} type="1" template="certificate" placeholder="Attestation de réalisation de la phase 1">
-                Envoyer l'attestation de réalisation de la phase 1 par mail
+              <MailAttestationButton style={{ marginTop: ".5rem" }} young={young} type="1" template="certificate" placeholder="Attestation de réalisation de la phase 1">
+                Envoyer l'attestation par mail
               </MailAttestationButton>
             </div>
           ) : null}
