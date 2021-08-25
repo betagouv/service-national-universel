@@ -66,7 +66,6 @@ async function sendTemplate(id, { params, emailTo, cc, bcc, attachment } = {}) {
     }
     const mail = await api("/smtp/email", { method: "POST", body: JSON.stringify(body) });
     console.log({ templateId: id, mail, to: emailTo, cc, params, attachment });
-    console.log({ templateId: id, mail, to: emailTo, cc, params, attachment });
     return mail;
   } catch (e) {
     console.log("Erreur in sendTemplate", e);
