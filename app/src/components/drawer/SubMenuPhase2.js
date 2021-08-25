@@ -15,11 +15,11 @@ export default ({ young, handleClick }) => {
               Consulter mes missions
             </NavLink>
           </li>
-          <li>
+          {/* <li>
             <DownloadAttestationButton class="subNav-item" young={young} uri="2">
               Télécharger mon attestation
             </DownloadAttestationButton>
-          </li>
+          </li> */}
         </ul>
       );
     else

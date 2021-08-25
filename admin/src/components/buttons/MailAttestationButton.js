@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { Spinner } from "reactstrap";
 import styled from "styled-components";
+import { toastr } from "react-redux-toastr";
 
 import api from "../../services/api";
-import { colors } from "../../utils";
+import { colors, translate } from "../../utils";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 
 export default ({ young, children, disabled, type, template, placeholder, ...rest }) => {
@@ -12,10 +13,12 @@ export default ({ young, children, disabled, type, template, placeholder, ...res
 
   const onConfirm = async () => {
     setLoading(true);
-    await api.post(`/young/${young._id}/documents/${template}/${type}/send-email`, {
+    const { ok, code } = await api.post(`/young/${young._id}/documents/${template}/${type}/send-email`, {
       fileName: `${young.firstName} ${young.lastName} - ${template} ${type}.pdf`,
     });
     setLoading(false);
+    if (ok) return toastr.success(`Document envoyé à ${young.email}`);
+    else return toastr.error("Erreur lors de l'envoie du document", translate(code));
   };
   return (
     <>
