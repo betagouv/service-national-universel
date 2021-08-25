@@ -5,10 +5,11 @@ import { Formik } from "formik";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-import { translate, YOUNG_STATUS_COLORS, formatStringLongDate, FORCE_DISABLED_ASSIGN_COHESION_CENTER, confirmMessageChangePhase1Presence, ROLES } from "../../../utils";
+import { translate, YOUNG_STATUS_COLORS, formatStringLongDate, FORCE_DISABLED_ASSIGN_COHESION_CENTER, confirmMessageChangePhase1Presence, ROLES, colors } from "../../../utils";
 import WrapperPhase1 from "./wrapper";
 import api from "../../../services/api";
 import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
+import MailAttestationButton from "../../../components/buttons/MailAttestationButton";
 import DownloadConvocationButton from "../../../components/buttons/DownloadConvocationButton";
 import AssignCenter from "../components/AssignCenter";
 import { Box, BoxTitle } from "../../../components/box";
@@ -212,14 +213,19 @@ export default (props) => {
             </Col>
           </Row>
         </Box>
-        <div>
+        <div style={{ display: "flex", alignItems: "flex-start" }}>
           {young.statusPhase1 === "DONE" && young.cohesionCenterName ? (
-            <DownloadAttestationButton young={young} uri="1">
-              Télécharger l'attestation de réalisation de la phase 1
-            </DownloadAttestationButton>
+            <div style={{ textAlign: "center" }}>
+              <DownloadAttestationButton young={young} uri="1">
+                Télécharger l'attestation de réalisation de la phase 1
+              </DownloadAttestationButton>
+              <MailAttestationButton style={{ marginTop: ".5rem" }} young={young} type="1" template="certificate" placeholder="Attestation de réalisation de la phase 1">
+                Envoyer l'attestation par mail
+              </MailAttestationButton>
+            </div>
           ) : null}
           {young.meetingPointId || young.deplacementPhase1Autonomous === "true" ? (
-            <DownloadConvocationButton young={young} uri="cohesion" style={{ marginTop: "1rem" }}>
+            <DownloadConvocationButton young={young} uri="cohesion">
               Télécharger la convocation au séjour de cohésion
             </DownloadConvocationButton>
           ) : null}

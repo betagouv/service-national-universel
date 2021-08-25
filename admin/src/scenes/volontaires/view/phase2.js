@@ -9,6 +9,7 @@ import Phase2MilitaryPreparation from "./phase2MilitaryPreparation";
 import SelectStatus from "../../../components/selectStatus";
 import Badge from "../../../components/Badge";
 import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
+import MailAttestationButton from "../../../components/buttons/MailAttestationButton";
 import { Box, BoxTitle } from "../../../components/box";
 
 export default ({ young, onChange }) => {
@@ -92,9 +93,16 @@ export default ({ young, onChange }) => {
           <ApplicationList young={young} onChangeApplication={onChange} />
         </Box>
         {young.statusPhase2 === "VALIDATED" ? (
-          <DownloadAttestationButton young={young} uri="2">
-            Télécharger l'attestation de réalisation de la phase 2
-          </DownloadAttestationButton>
+          <div style={{ display: "flex", alignItems: "flex-start" }}>
+            <div style={{ textAlign: "center" }}>
+              <DownloadAttestationButton young={young} uri="2">
+                Télécharger l'attestation de réalisation de la phase 2
+              </DownloadAttestationButton>
+              <MailAttestationButton style={{ marginTop: ".5rem" }} young={young} type="2" template="certificate" placeholder="Attestation de réalisation de la phase 2">
+                Envoyer l'attestation par mail
+              </MailAttestationButton>
+            </div>
+          </div>
         ) : null}
       </WrapperPhase2>
     </div>
