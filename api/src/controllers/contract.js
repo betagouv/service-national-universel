@@ -194,7 +194,7 @@ async function sendContractEmail(contract, options) {
     missionName: contract.missionName,
     cta: `${APP_URL}/validate-contract?token=${options.token}&contract=${contract._id}`,
   };
-  const emailTo = { name: options.name, email: options.email };
+  const emailTo = [{ name: options.name, email: options.email }];
   if (options.cc) {
     cc = [{ name: options.ccName, email: options.cc }];
   }
