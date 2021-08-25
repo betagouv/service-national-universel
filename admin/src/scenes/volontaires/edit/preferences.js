@@ -1,13 +1,12 @@
 import React from "react";
 import { Col, Row } from "reactstrap";
 import { useSelector } from "react-redux";
-
 import { MISSION_DOMAINS, PROFESSIONNAL_PROJECT, PROFESSIONNAL_PROJECT_PRECISION, PERIOD, TRANSPORT, translate } from "../../../utils";
 import { Box, BoxContent, BoxHeadTitle, BoxTitleCircular } from "../../../components/box";
 import Item from "../components/Item";
 import MultiSelect from "../../../components/Multiselect";
 import Select from "../components/Select";
-import { Title } from "../../../components/list";
+import RankingPeriod from "./components/rankingPeriod";
 
 export default ({ values, handleChange, required = {}, errors, touched }) => {
   const user = useSelector((state) => state.Auth.user);
@@ -65,6 +64,7 @@ export default ({ values, handleChange, required = {}, errors, touched }) => {
               { value: PERIOD.DURING_SCHOOL, label: translate(PERIOD.DURING_SCHOOL) },
             ]}
           />
+          {values.period ? <RankingPeriod handleChange={handleChange} title={translate(values.period)} period={values.period} values={values} name="periodRanking" /> : null}
           <BoxTitleCircular>Mission à proximité de</BoxTitleCircular>
           <Select
             name="mobilityNearSchool"
@@ -113,6 +113,9 @@ export default ({ values, handleChange, required = {}, errors, touched }) => {
             options={Object.values(TRANSPORT)}
             placeholder="Moyen de transport"
           />
+          {values.mobilityTransport && values.mobilityTransport.includes(TRANSPORT.OTHER) && (
+            <Item title="Précisez" values={values} name="mobilityTransportOther" handleChange={handleChange} />
+          )}
           <Select
             name="missionFormat"
             values={values}
