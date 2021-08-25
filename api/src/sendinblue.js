@@ -43,7 +43,7 @@ async function sendEmail(to, subject, htmlContent, { params, attachment, cc, bcc
     if (params) body.params = params;
     if (attachment) body.attachment = attachment;
     const mail = await api("/smtp/email", { method: "POST", body: JSON.stringify(body) });
-    console.log({ mail, to, cc, subject });
+    console.log(body, mail);
   } catch (e) {
     console.log("Erreur in sendEmail", e);
     capture(e);
@@ -65,7 +65,7 @@ async function sendTemplate(id, { params, emailTo, cc, bcc, attachment } = {}) {
       if (body.bcc) body.bcc = body.bcc.filter((e) => e.email.match(/(selego\.co|beta\.gouv\.fr)/));
     }
     const mail = await api("/smtp/email", { method: "POST", body: JSON.stringify(body) });
-    console.log({ templateId: id, mail, to: emailTo, cc, params, attachment });
+    console.log(body, mail);
     return mail;
   } catch (e) {
     console.log("Erreur in sendTemplate", e);
