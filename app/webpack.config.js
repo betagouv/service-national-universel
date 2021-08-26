@@ -32,7 +32,7 @@ module.exports = () => {
       org: "selego",
       project: "snu",
       // release: process.env.SENTRY_RELEASE,
-      environment: "admin",
+      environment: "app",
 
       // other SentryWebpackPlugin configuration
       include: ".",
