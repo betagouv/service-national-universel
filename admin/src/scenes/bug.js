@@ -1,5 +1,5 @@
 import React from "react";
 
 export default () => {
-  return <button onClick={() => methodDoesNotExist()}>Break the world</button>;
+  return <button onClick={() => methodDoesNotExistWithSourceMap()}>Break the world</button>;
 };
