@@ -30,7 +30,7 @@
     <div id="zammad-chat"></div>
     <script>
       $(function() {
-        const chat = new ZammadChat({
+        var chat = new ZammadChat({
           title: 'Une question ?',
           background: '#5145cd',
           fontSize: '12px',
@@ -39,17 +39,6 @@
           flat: true,
           target: $('#zammad-chat'),
         });
-        /*
-        chat.onConnectionEstablished = (data) => {
-          // debugger;
-          ZammadChat.prototype.onConnectionEstablished.call(chat, data);
-          chat.send('chat_session_notice', {
-              session_id: chat.sessionId,
-              message: 'Your message',
-          });
-};
-*/
-
       });
       </script>
     <script>
