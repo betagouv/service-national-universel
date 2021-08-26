@@ -2,6 +2,7 @@ import { translate } from "snu-lib/translation";
 import passwordValidator from "password-validator";
 import api from "../services/api";
 export * from "snu-lib";
+export * from "./translateHistoric";
 import { environment } from "../config";
 
 export const domains = ["Défense et mémoire", "Sécurité", "Solidarité", "Santé", "Éducation", "Culture", "Sport", "Environnement et développement durable", "Citoyenneté"];
