@@ -98,11 +98,13 @@ export default (props) => {
               <Situation values={values} handleChange={handleChange} />
               <SituationsParticulieres values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
               <Motivation values={values} />
-              <Preferences values={values} handleChange={handleChange} />
             </Row>
             <Row>
               <Representant1 values={values} handleChange={handleChange} />
               <Representant2 values={values} handleChange={handleChange} />
+            </Row>
+            <Row>
+              <Preferences values={values} handleChange={handleChange} />
             </Row>
             <Row>
               <InterTitle>Consentements</InterTitle>
