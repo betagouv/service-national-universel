@@ -5,7 +5,7 @@ async function getContractsHelper(params = {}) {
 }
 
 async function getContractByIdHelper(contractId) {
-  return await ContractObject.findOne({ _id: contractId });
+  return await ContractObject.findById(contractId);
 }
 
 async function deleteContractByIdHelper(contractId) {

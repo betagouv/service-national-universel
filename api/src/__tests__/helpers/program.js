@@ -5,7 +5,7 @@ async function getProgramsHelper() {
 }
 
 async function getProgramByIdHelper(programId) {
-  return await ProgramObject.findOne({ _id: programId });
+  return await ProgramObject.findById(programId);
 }
 
 async function deleteProgramByIdHelper(programId) {

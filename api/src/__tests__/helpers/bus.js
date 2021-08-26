@@ -5,7 +5,7 @@ async function getBusesHelper() {
 }
 
 async function getBusByIdHelper(id) {
-  return await BusObject.findOne({ _id: id });
+  return await BusObject.findById(id);
 }
 
 async function createBusHelper(Bus) {

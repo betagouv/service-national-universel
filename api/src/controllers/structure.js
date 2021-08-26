@@ -22,7 +22,7 @@ const setAndSave = async (data, keys) => {
 async function updateNetworkName(structure) {
   if (structure.networkId) {
     // When the structure is a child (part of a network), get the network
-    const network = await StructureObject.findOne({ _id: structure.networkId });
+    const network = await StructureObject.findById(structure.networkId);
     // then update networkName thanks to its name.
     if (network) await setAndSave(structure, { networkName: network.name });
   } else if (structure.isNetwork === "true") {

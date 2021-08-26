@@ -13,7 +13,7 @@ async function deleteApplicationHelper() {
 }
 
 async function getApplicationByIdHelper(applicationId) {
-  return await ApplicationObject.findOne({ _id: applicationId });
+  return await ApplicationObject.findById(applicationId);
 }
 
 const notExistingApplicationId = "104a49ba503040e4d8853973";

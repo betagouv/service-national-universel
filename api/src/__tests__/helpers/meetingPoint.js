@@ -5,7 +5,7 @@ async function createMeetingPointHelper(MeetingPoint) {
 }
 
 async function getMeetingPointByIdHelper(id) {
-  return await MeetingPointObject.findOne({ _id: id });
+  return await MeetingPointObject.findById(id);
 }
 
 const notExistingMeetingPointId = "104a49ba223040e4d2153223";
