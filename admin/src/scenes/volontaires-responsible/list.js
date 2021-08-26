@@ -24,6 +24,7 @@ export default () => {
   const [missions, setMissions] = useState();
   const [panel, setPanel] = useState(null);
   const [filterVisible, setFilterVisible] = useState(false);
+  const history = useHistory();
   const handleShowFilter = () => setFilterVisible(!filterVisible);
   const getDefaultQuery = () => ({ query: { bool: { filter: { terms: { "missionId.keyword": missions.map((e) => e._id) } } } }, sort: [{ "youngLastName.keyword": "asc" }] });
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });

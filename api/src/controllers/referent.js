@@ -640,7 +640,7 @@ router.put("/", passport.authenticate("referent", { session: false }), async (re
   try {
     const { error, value } = validateSelf(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
-    const user = ReferentModel.findById(req.user._id);
+    const user = await ReferentModel.findById(req.user._id);
     if (!user) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     user.set(value);
     await user.save();
