@@ -12,8 +12,52 @@ const ReferentObject = require("../models/referent");
 const { ERRORS, isYoung } = require("../utils/index.js");
 const { validateId, validateMission } = require("../utils/validator");
 const { canModifyMission } = require("snu-lib/roles");
+const { MISSION_STATUS, APPLICATION_STATUS } = require("snu-lib/constants");
 const { serializeMission, serializeApplication } = require("../utils/serializer");
 const patches = require("./patches");
+const { sendTemplate } = require("../sendinblue");
+const { SENDINBLUE_TEMPLATES } = require("snu-lib");
+const { APP_URL } = require("../config");
+
+const updateApplication = async (mission) => {
+  if (![MISSION_STATUS.CANCEL, MISSION_STATUS.ARCHIVED, MISSION_STATUS.REFUSED].includes(mission.status))
+    return console.log(`no need to update applications, new status for mission ${mission._id} is ${mission.status}`);
+  const applications = await ApplicationObject.find({
+    missionId: mission._id,
+    status: {
+      $in: [
+        APPLICATION_STATUS.WAITING_VALIDATION,
+        APPLICATION_STATUS.WAITING_ACCEPTATION,
+        APPLICATION_STATUS.WAITING_VERIFICATION,
+        // APPLICATION_STATUS.VALIDATED,
+        // APPLICATION_STATUS.IN_PROGRESS,
+      ],
+    },
+  });
+  for (let application of applications) {
+    let statusComment = "";
+    switch (mission.status) {
+      case MISSION_STATUS.REFUSED:
+        statusComment = "La mission n'est plus disponible.";
+        break;
+      case MISSION_STATUS.CANCEL:
+        statusComment = "La mission a été annulée.";
+        break;
+      case MISSION_STATUS.ARCHIVED:
+        statusComment = "La mission a été archivée.";
+        break;
+    }
+    application.set({ status: APPLICATION_STATUS.CANCEL, statusComment });
+    await application.save();
+
+    await sendTemplate(SENDINBLUE_TEMPLATES.young.MISSION_CANCEL, {
+      emailTo: [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }],
+      params: {
+        cta: `${APP_URL}/mission`,
+      },
+    });
+  }
+};
 
 // todo : add canCreateOrUpdateMission()
 // if admin or referent from the same area or responsoble or supervisor
@@ -43,8 +87,12 @@ router.put("/:id", passport.authenticate("referent", { session: false }), async 
     const { error: errorMission, value: checkedMission } = validateMission(req.body);
     if (errorMission) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
 
+    const oldStatus = mission.status;
     mission.set(checkedMission);
     await mission.save();
+
+    // if there is a status change, update the application
+    if (oldStatus !== mission.status) await updateApplication(mission);
 
     res.status(200).send({ ok: true, data: mission });
   } catch (error) {

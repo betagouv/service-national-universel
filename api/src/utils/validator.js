@@ -200,6 +200,7 @@ const applicationKeys = {
   contractId: Joi.string().allow(null, ""),
   priority: Joi.alternatives().try(Joi.string().allow(null, ""), Joi.number().allow(null)),
   status: Joi.string().allow(null, ""),
+  statusComment: Joi.string().allow(null, ""),
 };
 
 function validateUpdateApplication(application, user) {

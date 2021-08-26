@@ -55,7 +55,7 @@ export default ({ application, index }) => {
           <Header {...provided.dragHandleProps}>{value.status === APPLICATION_STATUS.WAITING_ACCEPTATION ? "PROPOSITION" : `CHOIX N°${index + 1}`}</Header>
           <Separator />
           <Card>
-            <Col md={9}>
+            <Col md={7}>
               <Link to={`/mission/${value.mission._id}`}>
                 <div className="info">
                   <div className="inner">
@@ -72,9 +72,10 @@ export default ({ application, index }) => {
                 </div>
               </Link>
             </Col>
-            <Col md={3}>
+            <Col md={5}>
               <TagContainer>
                 <Tag color={APPLICATION_STATUS_COLORS[value.status]}>{translate(value.status)}</Tag>
+                {value.statusComment ? <StatusComment>{value.statusComment}</StatusComment> : null}
               </TagContainer>
             </Col>
           </Card>
@@ -337,6 +338,9 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   background-color: #fff;
+  :hover {
+    background-color: #f7f7f7;
+  }
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   border-radius: 0.5rem;
   margin: 1rem 0;
@@ -349,9 +353,6 @@ const Card = styled(Row)`
   justify-content: space-between;
   .info {
     justify-content: space-between;
-  }
-  :hover {
-    background-color: #f7f7f7;
   }
   .inner {
     display: flex;
@@ -374,9 +375,10 @@ const Card = styled(Row)`
 
 const TagContainer = styled.div`
   display: flex;
-  justify-content: flex-end;
+  align-items: flex-end;
+  flex-direction: column;
   @media (max-width: 768px) {
-    justify-content: center;
+    align-items: center;
   }
 `;
 
@@ -395,4 +397,11 @@ const Tags = styled(Row)`
     font-size: 12px;
     font-weight: 500;
   }
+`;
+
+const StatusComment = styled.div`
+  font-size: 0.8rem;
+  color: #6b7280;
+  font-style: italic;
+  padding-top: 0.2rem;
 `;

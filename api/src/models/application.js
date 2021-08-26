@@ -130,6 +130,13 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  statusComment: {
+    type: String,
+    documentation: {
+      description: "Commentaire lié au statut de la candidature",
+    },
+  },
+
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
