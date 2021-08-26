@@ -621,13 +621,11 @@ router.put("/:id", passport.authenticate("referent", { session: false }), async 
     const { error, value } = validateReferent(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
-    const data = await ReferentModel.findOne({ _id: req.params.id });
-    if (!data) return res.status(404).send({ ok: false });
-
-    if (!canUpdateReferent(req.user, data, value)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
     const referent = await ReferentModel.findById(req.params.id);
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (!canUpdateReferent(req.user, referent, value)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
     referent.set(value);
     await referent.save();
     await updateTutorNameInMissionsAndApplications(referent);
