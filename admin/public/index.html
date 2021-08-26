@@ -14,17 +14,18 @@
     <div id="zammad-chat"></div>
     <script src="https://support.selego.co/assets/chat/chat.min.js"></script>
     <script>
-      $(function() {
-        if (!ZammadChat) return;
-        var chat = new ZammadChat({
-          title: 'Une question ?',
-          background: '#5145cd',
-          fontSize: '12px',
-          chatId: 5,
-          show: true,
-          flat: true,
-          target: $('#zammad-chat'),
-        });
+      $(function () {
+        if (typeof ZammadChat !== "undefined") {
+          var chat = new ZammadChat({
+            title: "Une question ?",
+            background: "#5145cd",
+            fontSize: "12px",
+            chatId: 5,
+            show: true,
+            flat: true,
+            target: $("#zammad-chat"),
+          });
+        }
       });
     </script>
   </body>
