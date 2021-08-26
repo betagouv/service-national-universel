@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
+import { toastr } from "react-redux-toastr";
 
 import { formatLongDateUTC } from "../../utils";
 import api from "../../services/api";
