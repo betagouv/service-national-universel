@@ -20,7 +20,7 @@ const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { APP_URL } = require("../config");
 
 const updateApplication = async (mission) => {
-  if (![MISSION_STATUS.CANCEL, MISSION_STATUS.ARCHIVED].includes(mission.status))
+  if (![MISSION_STATUS.CANCEL, MISSION_STATUS.ARCHIVED, MISSION_STATUS.REFUSED].includes(mission.status))
     return console.log(`no need to update applications, new status for mission ${mission._id} is ${mission.status}`);
   const applications = await ApplicationObject.find({
     missionId: mission._id,
@@ -37,6 +37,9 @@ const updateApplication = async (mission) => {
   for (let application of applications) {
     let statusComment = "";
     switch (mission.status) {
+      case MISSION_STATUS.REFUSED:
+        statusComment = "La mission n'est plus disponible.";
+        break;
       case MISSION_STATUS.CANCEL:
         statusComment = "La mission a été annulée.";
         break;
