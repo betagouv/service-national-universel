@@ -43,7 +43,7 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
   try {
     const { error, value: checkedId } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error });
-    const data = await ProgramObject.findOne({ _id: checkedId });
+    const data = await ProgramObject.findById(checkedId);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
@@ -74,7 +74,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false }), asy
   try {
     const { error, value: checkedId } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error });
-    const program = await ProgramObject.findOne({ _id: checkedId });
+    const program = await ProgramObject.findById(checkedId);
     await program.remove();
     console.log(`Program ${req.params.id} has been deleted`);
     res.status(200).send({ ok: true });

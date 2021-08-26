@@ -673,7 +673,7 @@ router.put("/:id/structure/:structureId", passport.authenticate("referent", { se
 
 router.delete("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const referent = await ReferentModel.findOne({ _id: req.params.id });
+    const referent = await ReferentModel.findById(req.params.id);
     if (!referent) return res.status(404).send({ ok: false });
     if (!canDeleteReferent(req.user, referent)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     await referent.remove();

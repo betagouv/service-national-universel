@@ -5,7 +5,7 @@ async function getDepartmentServicesHelper() {
 }
 
 async function getDepartmentServiceByIdHelper(id) {
-  return await DepartmentServiceObject.findOne({ _id: id });
+  return await DepartmentServiceObject.findById(id);
 }
 
 async function deleteDepartmentServiceByIdHelper(id) {

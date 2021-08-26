@@ -5,7 +5,7 @@ async function getReferentsHelper() {
 }
 
 async function getReferentByIdHelper(referentId) {
-  return await ReferentObject.findOne({ _id: referentId });
+  return await ReferentObject.findById(referentId);
 }
 
 async function deleteReferentByIdHelper(referentId) {

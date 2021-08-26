@@ -26,7 +26,7 @@ module.exports = function (app) {
         const { error, value } = Joi.object({ _id: Joi.string().required() }).validate({ _id: jwtPayload._id });
         if (error) return done(null, false);
 
-        const young = await Young.findOne({ _id: value._id });
+        const young = await Young.findById(value._id);
         if (young) return done(null, young);
       } catch (error) {
         capture(error);
@@ -42,7 +42,7 @@ module.exports = function (app) {
         const { error, value } = Joi.object({ _id: Joi.string().required() }).validate({ _id: jwtPayload._id });
         if (error) return done(null, false);
 
-        const referent = await Referent.findOne({ _id: value._id });
+        const referent = await Referent.findById(value._id);
         if (referent) return done(null, referent);
       } catch (error) {
         capture(error);
