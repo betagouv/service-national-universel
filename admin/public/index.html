@@ -15,6 +15,7 @@
     <div id="zammad-chat"></div>
     <script>
       $(function() {
+        if (!ZammadChat) return;
         var chat = new ZammadChat({
           title: 'Une question ?',
           background: '#5145cd',
