@@ -78,7 +78,7 @@ export default ({ values, handleChange, required = {}, errors, touched }) => {
               name="mobilityNearSchool"
               values={values}
               handleChange={handleChange}
-              title="Ecole"
+              title="Établissement"
               options={[
                 { value: "true", label: "Oui" },
                 { value: "false", label: "Non" },
@@ -113,6 +113,7 @@ export default ({ values, handleChange, required = {}, errors, touched }) => {
                 <Item title="Ville" values={values} name="mobilityNearRelativeCity" handleChange={handleChange} />
               </>
             )}
+            <hr />
             <MultiSelectWithTitle
               title="Moyen de transport"
               value={values.mobilityTransport}
@@ -122,7 +123,7 @@ export default ({ values, handleChange, required = {}, errors, touched }) => {
               placeholder="Moyen de transport"
             />
             {values.mobilityTransport && values.mobilityTransport.includes(TRANSPORT.OTHER) && (
-              <Item title="Précisez" values={values} name="mobilityTransportOther" handleChange={handleChange} />
+              <Item title="Autre (Précisez)" values={values} name="mobilityTransportOther" handleChange={handleChange} />
             )}
             <Select
               name="missionFormat"
