@@ -341,7 +341,10 @@ router.put("/", passport.authenticate("young", { session: false }), async (req, 
     const { error, value } = validateYoung(req.body, req.user);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
-    const young = await YoungObject.findByIdAndUpdate(req.user._id, value, { new: true });
+    const young = await YoungObject.findById(req.user._id);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    young.set(value);
+    await young.save();
 
     // Check quartier prioritaires.
     if (value.zip && value.city && value.address) {

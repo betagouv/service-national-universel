@@ -28,8 +28,10 @@ router.put("/:id", passport.authenticate("referent", { session: false }), async 
     if (errorProgram || errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
     if (!canCreateOrUpdateProgram(req.user, checkedProgram)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     let obj = checkedProgram;
-    const data = await ProgramObject.findByIdAndUpdate(checkedId, obj, { new: true });
+    const data = await ProgramObject.findById(checkedId);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    data.set(obj);
+    await data.save();
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
