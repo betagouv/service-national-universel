@@ -621,12 +621,13 @@ router.put("/:id", passport.authenticate("referent", { session: false }), async 
     const { error, value } = validateReferent(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
-    const data = await ReferentModel.findOne({ _id: req.params.id });
-    if (!data) return res.status(404).send({ ok: false });
+    const referent = await ReferentModel.findById(req.params.id);
+    if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canUpdateReferent(req.user, data, value)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canUpdateReferent(req.user, referent, value)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const referent = await ReferentModel.findByIdAndUpdate(req.params.id, value, { new: true, useFindAndModify: false });
+    referent.set(value);
+    await referent.save();
     await updateTutorNameInMissionsAndApplications(referent);
     res.status(200).send({ ok: true, data: referent });
   } catch (error) {
@@ -639,8 +640,10 @@ router.put("/", passport.authenticate("referent", { session: false }), async (re
   try {
     const { error, value } = validateSelf(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
-
-    const user = await ReferentModel.findByIdAndUpdate(req.user._id, value, { new: true, useFindAndModify: false });
+    const user = ReferentModel.findById(req.user._id);
+    if (!user) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    user.set(value);
+    await user.save();
     await updateTutorNameInMissionsAndApplications(user);
     res.status(200).send({ ok: true, data: user });
   } catch (error) {
