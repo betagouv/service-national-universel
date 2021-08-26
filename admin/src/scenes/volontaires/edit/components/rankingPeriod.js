@@ -76,8 +76,8 @@ const Item = ({ value, values, index, updateList, name }) => {
     <Draggable draggableId={value} index={index}>
       {(provided) => (
         <ItemContainer ref={provided.innerRef} {...provided.draggableProps} {...provided.dragHandleProps} index={index}>
-          <div style={{ display: "flex", flex: 1 }}>
-            <RoundItem value={index + 1} />
+          <div style={{ display: "flex" }}>
+            <Badge>{index + 1}</Badge>
             <Label>{translate(value)}</Label>
           </div>
           <div style={{ display: "flex" }}>
@@ -96,11 +96,15 @@ const RoundItem = ({ value, plus, minus, onClick }) => {
     if (minus) return "↓";
     return value;
   };
-  return <Badge onClick={onClick}>{getValue()}</Badge>;
+  return (
+    <Badge onClick={onClick} style={{ borderWidth: "1px", borderStyle: "solid", borderRadius: "9999px" }}>
+      {getValue()}
+    </Badge>
+  );
 };
 
 const Label = styled.div`
-  margin: 0 1rem;
+  margin: 0 0.1rem;
 `;
 
 const Badge = styled.div`
@@ -111,10 +115,7 @@ const Badge = styled.div`
   height: 1.75rem;
   color: #6b7280;
   font-size: 0.75rem;
-  border-width: 1px;
   border-color: #d2d6dc;
-  border-style: solid;
-  border-radius: 9999px;
   cursor: pointer;
   margin: 0 0.1rem;
 `;
