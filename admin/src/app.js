@@ -42,13 +42,14 @@ import { ROLES } from "./utils";
 
 import "./index.css";
 
-if (environment === "production")
+if (environment === "production") {
   Sentry.init({
     dsn: SENTRY_URL,
     environment: "admin",
     integrations: [new Integrations.BrowserTracing()],
     tracesSampleRate: 1.0,
   });
+}
 
 export default () => {
   const [loading, setLoading] = useState(true);

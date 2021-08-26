@@ -7,7 +7,7 @@ import { useHistory } from "react-router-dom";
 import validator from "validator";
 import { toastr } from "react-redux-toastr";
 import DateInput from "../components/dateInput";
-import * as Sentry from "@sentry/browser";
+import * as Sentry from "@sentry/react";
 
 import { getPasswordErrorMessage, translate } from "../../../utils";
 import ErrorMessage, { requiredMessage } from "../components/errorMessage";

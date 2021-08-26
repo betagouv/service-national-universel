@@ -2,7 +2,10 @@ import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { BrowserRouter as Router, Route, Switch, Redirect, useLocation } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
-import * as Sentry from "@sentry/browser";
+
+import * as Sentry from "@sentry/react";
+import { Integrations } from "@sentry/tracing";
+
 import queryString from "query-string";
 import styled from "styled-components";
 
@@ -29,6 +32,7 @@ import Drawer from "./components/drawer";
 import Footer from "./components/footer";
 import MilitaryPreparation from "./scenes/militaryPreparation";
 import Engagement from "./scenes/engagement";
+import Bug from "./scenes/bug";
 
 import api from "./services/api";
 import { SENTRY_URL, environment } from "./config";
@@ -36,7 +40,14 @@ import { SENTRY_URL, environment } from "./config";
 import "./index.css";
 import { YOUNG_STATUS, setCrispUserData, ENABLE_PM } from "./utils";
 
-if (environment === "production") Sentry.init({ dsn: SENTRY_URL, environment: "app" });
+if (environment === "production") {
+  Sentry.init({
+    dsn: SENTRY_URL,
+    environment: "app",
+    integrations: [new Integrations.BrowserTracing()],
+    tracesSampleRate: 1.0,
+  });
+}
 
 export default () => {
   const [loading, setLoading] = useState(true);
@@ -71,6 +82,7 @@ export default () => {
       <ScrollToTop />
       <div className="main">
         <Switch>
+          <Route path="/bug" component={Bug} />
           <Route path="/validate-contract/done" component={ContractDone} />
           <Route path="/validate-contract" component={Contract} />
           <Route path="/inscription" component={Inscription} />
