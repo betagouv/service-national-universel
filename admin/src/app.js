@@ -2,7 +2,10 @@ import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { BrowserRouter as Router, Route, Switch, Redirect } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
-import * as Sentry from "@sentry/browser";
+
+import * as Sentry from "@sentry/react";
+import { Integrations } from "@sentry/tracing";
+
 import styled from "styled-components";
 
 import { setUser, setStructure } from "./redux/auth/actions";
@@ -25,6 +28,7 @@ import Goal from "./scenes/goal";
 import Center from "./scenes/centers";
 import Inscription from "./scenes/inscription";
 import MeetingPoint from "./scenes/meetingPoint";
+import Bug from "./scenes/bug";
 
 import Drawer from "./components/drawer";
 import Header from "./components/header";
@@ -38,7 +42,13 @@ import { ROLES } from "./utils";
 
 import "./index.css";
 
-if (environment === "production") Sentry.init({ dsn: SENTRY_URL, environment: "admin" });
+if (environment === "production")
+  Sentry.init({
+    dsn: SENTRY_URL,
+    environment: "admin",
+    integrations: [new Integrations.BrowserTracing()],
+    tracesSampleRate: 1.0,
+  });
 
 export default () => {
   const [loading, setLoading] = useState(true);
@@ -102,6 +112,7 @@ const Home = () => {
           }}
         />
         <Switch>
+          <Route path="/bug" component={Bug} />
           <Route path="/auth" component={Auth} />
           <RestrictedRoute path="/structure" component={Structure} />
           <RestrictedRoute path="/settings" component={Settings} />
