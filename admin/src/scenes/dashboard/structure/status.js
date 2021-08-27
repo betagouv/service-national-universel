@@ -10,7 +10,6 @@ import { CardArrow, Card, CardTitle, CardValueWrapper, CardValue, CardPercentage
 const legalStatusTypes = ["ASSOCIATION", "PUBLIC", "PRIVATE", "OTHER"];
 
 export default ({ filter }) => {
-  console.log(filter);
   const [status, setStatus] = useState({});
   const [withNetworkId, setWithNetworkId] = useState(0);
   const [total, setTotal] = useState(0);
