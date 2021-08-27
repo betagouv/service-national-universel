@@ -29,7 +29,7 @@ export default ({ young, children, disabled, type, template, placeholder, ...res
             isOpen: true,
             onConfirm,
             title: "Envoie de document par mail",
-            message: `Vous allez recevoir le document "${placeholder}" par mail à l'adresse ${young.email} ?`,
+            message: `Vous allez recevoir le document "${placeholder}" par mail à l'adresse ${young.email}.`,
           });
         }}
       >
