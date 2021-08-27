@@ -131,7 +131,7 @@ export default () => {
                       <StyledFormGroup>
                         <label>Mot de passe</label>
                         <p style={{ fontSize: 12, color: colors.grey }}>👉 Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole</p>
-                        <PasswordEye value={values.password} onChange={handleChange} />
+                        <PasswordEye autoComplete="new-password" value={values.password} onChange={handleChange} />
                         <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.password}</p>
                       </StyledFormGroup>
                       <Submit loading={isSubmitting} type="submit" color="primary">

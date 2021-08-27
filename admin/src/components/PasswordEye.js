@@ -6,7 +6,7 @@ import { getPasswordErrorMessage } from "../utils";
 import EyeOpen from "../assets/eye.svg";
 import EyeClose from "../assets/eye-slash.svg";
 
-export default ({ value, onChange, showError = true }) => {
+export default ({ value, onChange, showError = true, autoComplete = "new-password" }) => {
   const [passwordText, setPasswordText] = useState(false);
 
   return (
@@ -16,6 +16,7 @@ export default ({ value, onChange, showError = true }) => {
         className="form-control"
         validate={(v) => showError && getPasswordErrorMessage(v)}
         type={passwordText ? "text" : "password"}
+        autoComplete={autoComplete}
         name="password"
         value={value}
         onChange={onChange}

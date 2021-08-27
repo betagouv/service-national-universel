@@ -139,6 +139,7 @@ export default () => {
                       <label htmlFor="password">Mot de passe</label>
                       <InputField
                         validate={(v) => validator.isEmpty(v) && "Ce champ est requis"}
+                        autoComplete="new-password"
                         name="password"
                         type="password"
                         id="repassword"

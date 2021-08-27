@@ -78,12 +78,21 @@ export default () => {
                       <StyledFormGroup>
                         <div>
                           <label htmlFor="email">E-mail</label>
-                          <InputField className="form-control" name="email" type="email" id="email" placeholder="Adresse e-mail" value={values.email} onChange={handleChange} />
+                          <InputField
+                            autoComplete="username"
+                            className="form-control"
+                            name="email"
+                            type="email"
+                            id="email"
+                            placeholder="Adresse e-mail"
+                            value={values.email}
+                            onChange={handleChange}
+                          />
                         </div>
                       </StyledFormGroup>
                       <StyledFormGroup>
                         <label htmlFor="password">Mot de passe</label>
-                        <PasswordEye value={values.password} onChange={handleChange} showError={false} />
+                        <PasswordEye autoComplete="current-password" value={values.password} onChange={handleChange} showError={false} />
                       </StyledFormGroup>
                       <Forgot>
                         <Link to="/auth/forgot">Mot de passe perdu ?</Link>
