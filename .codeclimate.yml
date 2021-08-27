@@ -1,0 +1,17 @@
+version: "2"         # required to adjust maintainability checks
+checks:
+  file-lines:
+    config:
+      threshold: 350
+  method-lines:
+    config:
+      threshold: 35
+  return-statements:
+    config:
+      threshold: 15
+  similar-code:
+    config:
+      threshold: 100
+  identical-code:
+    config:
+      threshold: 70
