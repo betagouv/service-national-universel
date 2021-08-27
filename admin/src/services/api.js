@@ -1,6 +1,7 @@
 import "isomorphic-fetch";
 
 import { apiURL } from "../config";
+import * as Sentry from "@sentry/react";
 
 function jsonOrRedirectToSignIn(response) {
   if (response.ok === false && response.status === 401) {
@@ -34,7 +35,10 @@ class api {
     })
       .then((r) => jsonOrRedirectToSignIn(r))
       .catch((e) => {
+        Sentry.captureMessage("Error caught in esQuery");
+        Sentry.captureException(e);
         console.error(e);
+        return { responses: [] };
       });
   }
 
