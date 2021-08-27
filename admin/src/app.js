@@ -62,9 +62,7 @@ export default () => {
         if (!res.ok || !res.user) return setLoading(false);
         if (res.token) api.setToken(res.token);
         if (res.user) dispatch(setUser(res.user));
-      } catch (e) {
-        console.log(e);
-      }
+      } catch (e) {}
       setLoading(false);
     }
     fetchData();

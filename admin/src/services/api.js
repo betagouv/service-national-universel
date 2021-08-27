@@ -88,6 +88,7 @@ class api {
   get(path) {
     return new Promise(async (resolve, reject) => {
       try {
+        if (!this.token) return reject("Missing token");
         const response = await fetch(`${apiURL}${path}`, {
           mode: "cors",
           method: "GET",
