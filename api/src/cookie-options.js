@@ -10,7 +10,7 @@ function cookieOptions() {
   } else if (config.ENVIRONMENT === "staging") {
     return { maxAge: COOKIE_MAX_AGE, httpOnly: true, secure: true, domain: ".cleverapps.io", sameSite: "Lax" };
   } else {
-    return { maxAge: COOKIE_MAX_AGE, httpOnly: true, secure: true, domain: ".snu.gouv.com", sameSite: "Lax" };
+    return { maxAge: COOKIE_MAX_AGE, httpOnly: true, secure: true, domain: ".snu.gouv.fr", sameSite: "Lax" };
   }
 }
 function logoutCookieOptions() {
