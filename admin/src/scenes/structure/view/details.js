@@ -28,12 +28,16 @@ export default ({ structure }) => {
     if (structure.networkId) {
       const { responses: structureResponses } = await api.esQuery("structure", { query: { bool: { must: { match_all: {} }, filter: [{ term: { _id: structure.networkId } }] } } });
 
-      const structures = structureResponses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-      setParentStructure(structures.length ? structures[0] : null);
+      if (structureResponses.length) {
+        const structures = structureResponses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+        setParentStructure(structures.length ? structures[0] : null);
+      }
     } else {
       setParentStructure(null);
     }
-    setReferents(referentResponses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
+    if (referentResponses.length) {
+      setReferents(referentResponses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
+    }
   };
 
   useEffect(() => {

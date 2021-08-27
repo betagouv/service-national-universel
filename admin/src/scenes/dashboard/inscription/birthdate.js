@@ -21,11 +21,13 @@ export default ({ filter }) => {
       if (filter.region) body.query.bool.filter.push({ term: { "region.keyword": filter.region } });
       if (filter.department) body.query.bool.filter.push({ term: { "department.keyword": filter.department } });
 
-      const res = await api.esQuery("young", body);
-      let d = res.responses[0].aggregations.views.buckets;
-      d = d.map((e) => ({ value: e.doc_count, name: e.key_as_string.split("-")[0] }));
-      d = d.filter((e) => e.value);
-      setDates(d);
+      const { responses } = await api.esQuery("young", body);
+      if (responses.length) {
+        let d = responses[0].aggregations.views.buckets;
+        d = d.map((e) => ({ value: e.doc_count, name: e.key_as_string.split("-")[0] }));
+        d = d.filter((e) => e.value);
+        setDates(d);
+      }
     })();
   }, [JSON.stringify(filter)]);
 

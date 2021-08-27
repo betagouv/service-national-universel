@@ -33,9 +33,11 @@ export default ({ filter }) => {
       if (filter.department) body.query.bool.filter.push({ term: { "department.keyword": filter.department } });
 
       const { responses } = await api.esQuery("structure", body);
-      setStatus(responses[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
-      setTotal(responses[0].hits.total.value);
-      setWithNetworkId(responses[0].aggregations.withNetworkId.doc_count);
+      if (responses.length) {
+        setStatus(responses[0].aggregations.status.buckets.reduce((acc, c) => ({ ...acc, [c.key]: c.doc_count }), {}));
+        setTotal(responses[0].hits.total.value);
+        setWithNetworkId(responses[0].aggregations.withNetworkId.doc_count);
+      }
     }
     initStatus();
   }, [JSON.stringify(filter)]);

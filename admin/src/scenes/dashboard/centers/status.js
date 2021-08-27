@@ -26,9 +26,11 @@ export default ({ filter }) => {
       if (filter.department) body.query.bool.filter.push({ term: { "department.keyword": filter.department } });
 
       const { responses } = await api.esQuery("cohesioncenter", body);
-      setPlacesTotal(responses[0].aggregations.placesTotal.value);
-      setPlacesLeft(responses[0].aggregations.placesLeft.value);
-      setTotal(responses[0].hits.total.value);
+      if (responses.length) {
+        setPlacesTotal(responses[0].aggregations.placesTotal.value);
+        setPlacesLeft(responses[0].aggregations.placesLeft.value);
+        setTotal(responses[0].hits.total.value);
+      }
     }
     initStatus();
   }, [JSON.stringify(filter)]);

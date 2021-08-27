@@ -39,7 +39,9 @@ export default () => {
           size: ES_NO_LIMIT,
           query: { bool: { must: { match_all: {} }, filter: [{ terms: { "structureId.keyword": structureIds } }] } },
         });
-        setMissions(responses[0]?.hits?.hits || []);
+        if (responses.length) {
+          setMissions(responses[0]?.hits?.hits || []);
+        }
       }
     })();
   }, [structureIds]);
@@ -75,8 +77,10 @@ export default () => {
                         query: { bool: { must: { match_all: {} }, filter: [{ terms: { "structureId.keyword": structureIds } }] } },
                         size: ES_NO_LIMIT,
                       });
-                      const referents = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-                      return data.map((item) => ({ ...item, team: referents?.filter((e) => e.structureId === item._id) }));
+                      if (responses.length) {
+                        const referents = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+                        return data.map((item) => ({ ...item, team: referents?.filter((e) => e.structureId === item._id) }));
+                      }
                     }
                     return data;
                   }}

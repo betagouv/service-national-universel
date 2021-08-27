@@ -74,8 +74,10 @@ export default () => {
                   const tutorIds = [...new Set(data.map((item) => item.tutorId).filter((e) => e))];
                   if (tutorIds?.length) {
                     const { responses } = await api.esQuery("referent", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: tutorIds } } });
-                    const tutors = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-                    return data.map((item) => ({ ...item, tutor: tutors?.find((e) => e._id === item.tutorId) }));
+                    if (responses.length) {
+                      const tutors = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+                      return data.map((item) => ({ ...item, tutor: tutors?.find((e) => e._id === item.tutorId) }));
+                    }
                   }
                   return data;
                 }}

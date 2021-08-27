@@ -31,32 +31,34 @@ export default ({ filter }) => {
 
       const { responses } = await api.esQuery("young", body);
 
-      const totalHits = responses[0].hits.total.value;
-      const arr = responses[0].aggregations.names.buckets.map((e) => {
-        const schoolInfo = e.firstUser?.hits?.hits[0]?._source;
-        const total = e.doc_count;
-        const inDepartment = (e.departments?.buckets?.find((f) => f.key === schoolInfo.schoolDepartment) || {}).doc_count || 0;
+      if (responses.length) {
+        const totalHits = responses[0].hits.total.value;
+        const arr = responses[0].aggregations.names.buckets.map((e) => {
+          const schoolInfo = e.firstUser?.hits?.hits[0]?._source;
+          const total = e.doc_count;
+          const inDepartment = (e.departments?.buckets?.find((f) => f.key === schoolInfo.schoolDepartment) || {}).doc_count || 0;
 
-        return {
-          id: e.key,
-          count: {
-            total,
-            department: inDepartment,
-            outOfDepartment: total - inDepartment,
-          },
-          percent: {
-            total: round1Decimal((total / totalHits) * 100),
-            department: round1Decimal((inDepartment / total) * 100),
-            outOfDepartment: round1Decimal(((total - inDepartment) / total) * 100),
-          },
-          name: schoolInfo.schoolName,
-          city: schoolInfo.schoolCity,
-          zip: schoolInfo.schoolZip,
-          department: schoolInfo.schoolDepartment,
-          type: schoolInfo.schoolType,
-        };
-      });
-      setSchools(arr);
+          return {
+            id: e.key,
+            count: {
+              total,
+              department: inDepartment,
+              outOfDepartment: total - inDepartment,
+            },
+            percent: {
+              total: round1Decimal((total / totalHits) * 100),
+              department: round1Decimal((inDepartment / total) * 100),
+              outOfDepartment: round1Decimal(((total - inDepartment) / total) * 100),
+            },
+            name: schoolInfo.schoolName,
+            city: schoolInfo.schoolCity,
+            zip: schoolInfo.schoolZip,
+            department: schoolInfo.schoolDepartment,
+            type: schoolInfo.schoolType,
+          };
+        });
+        setSchools(arr);
+      }
     })();
   }, [JSON.stringify(filter)]);
 

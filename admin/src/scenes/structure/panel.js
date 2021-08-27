@@ -32,17 +32,23 @@ export default ({ onChange, value }) => {
         const { responses: structureResponses } = await api.esQuery("structure", {
           query: { bool: { must: { match_all: {} }, filter: [{ term: { _id: value.networkId } }] } },
         });
-        const structures = structureResponses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-        setParentStructure(structures.length ? structures[0] : null);
+        if (structureResponses.length) {
+          const structures = structureResponses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+          setParentStructure(structures.length ? structures[0] : null);
+        }
       } else {
         setParentStructure(null);
       }
-      setMissionsInfo({
-        count: missionResponses[0].hits.hits.length,
-        placesTotal: missionResponses[0].hits.hits.reduce((acc, e) => acc + e._source.placesTotal, 0),
-        placesLeft: missionResponses[0].hits.hits.reduce((acc, e) => acc + e._source.placesLeft, 0),
-      });
-      setReferents(referentResponses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
+      if (missionResponses.length) {
+        setMissionsInfo({
+          count: missionResponses[0].hits.hits.length,
+          placesTotal: missionResponses[0].hits.hits.reduce((acc, e) => acc + e._source.placesTotal, 0),
+          placesLeft: missionResponses[0].hits.hits.reduce((acc, e) => acc + e._source.placesLeft, 0),
+        });
+      }
+      if (referentResponses.length) {
+        setReferents(referentResponses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
+      }
     })();
   }, [value]);
 

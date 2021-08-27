@@ -31,14 +31,16 @@ export default ({ filter }) => {
       //handicap
       const { responses } = await api.esQuery("young", body);
 
-      function transform(arr) {
-        const t = arr.find((e) => e.key === "true");
-        const f = arr.find((e) => e.key === "false");
-        return { true: t ? t.doc_count : 0, false: f ? f.doc_count : 0 };
+      if (responses.length) {
+        function transform(arr) {
+          const t = arr.find((e) => e.key === "true");
+          const f = arr.find((e) => e.key === "false");
+          return { true: t ? t.doc_count : 0, false: f ? f.doc_count : 0 };
+        }
+        setHandicap(transform(responses[0].aggregations.handicap.buckets));
+        setPpsBeneficiary(transform(responses[0].aggregations.ppsBeneficiary.buckets));
+        setPaiBeneficiary(transform(responses[0].aggregations.paiBeneficiary.buckets));
       }
-      setHandicap(transform(responses[0].aggregations.handicap.buckets));
-      setPpsBeneficiary(transform(responses[0].aggregations.ppsBeneficiary.buckets));
-      setPaiBeneficiary(transform(responses[0].aggregations.paiBeneficiary.buckets));
     })();
   }, [JSON.stringify(filter)]);
 

@@ -24,8 +24,10 @@ export default ({ filter }) => {
       if (filter.department) body.query.bool.filter.push({ term: { "department.keyword": filter.department } });
 
       const { responses } = await api.esQuery("young", body);
-      const m = api.getAggregations(responses[0]);
-      setStatus(m);
+      if (responses.length) {
+        const m = api.getAggregations(responses[0]);
+        setStatus(m);
+      }
     })();
   }, [JSON.stringify(filter)]);
 

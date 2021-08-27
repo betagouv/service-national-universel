@@ -6,6 +6,8 @@ function jsonOrRedirectToSignIn(response) {
   if (response.ok === false && response.status === 401) {
     if (window && window.location && window.location.href) {
       window.location.href = "/auth?unauthorized=1";
+      // We need to return responses to prevent the promise from rejecting.
+      return { responses: [] };
     }
   }
   return response.json();

@@ -50,10 +50,12 @@ export default () => {
         size: 0,
       };
       const { responses } = await api.esQuery("young", body);
-      const val = responses[0].aggregations.range.buckets.map((e) => e.doc_count);
-      const goal = inscriptionGoal.find((g) => g.department === dptName);
-      const line = [region, dptCode, dptName, goal?.max, ...val];
-      lines.push(line);
+      if (responses.length) {
+        const val = responses[0].aggregations.range.buckets.map((e) => e.doc_count);
+        const goal = inscriptionGoal.find((g) => g.department === dptName);
+        const line = [region, dptCode, dptName, goal?.max, ...val];
+        lines.push(line);
+      }
     }
     const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
     const ws = XLSX.utils.json_to_sheet(lines);
