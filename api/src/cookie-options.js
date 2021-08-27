@@ -6,9 +6,11 @@ const JWT_MAX_AGE = 60 * 60 * 2; // 2h
 
 function cookieOptions() {
   if (config.ENVIRONMENT === "development") {
-    return { maxAge: COOKIE_MAX_AGE, httpOnly: true, secure: false };
+    return { maxAge: COOKIE_MAX_AGE, httpOnly: true, secure: false, domain: "localhost", sameSite: "Lax" };
+  } else if (config.ENVIRONMENT === "staging") {
+    return { maxAge: COOKIE_MAX_AGE, httpOnly: true, secure: true, domain: ".cleverapps.io", sameSite: "Lax" };
   } else {
-    return { maxAge: COOKIE_MAX_AGE, httpOnly: true, secure: true, sameSite: "none" };
+    return { maxAge: COOKIE_MAX_AGE, httpOnly: true, secure: true, domain: ".snu.gouv.com", sameSite: "Lax" };
   }
 }
 function logoutCookieOptions() {
