@@ -14,6 +14,32 @@ export default ({ young, onSend }) => {
   const FILTERS = ["SEARCH"];
   const [searchedValue, setSearchedValue] = useState("");
 
+  const getDefaultQuery = () => {
+    return {
+      query: {
+        bool: {
+          filter: [
+            {
+              range: {
+                endAt: {
+                  gt: "now",
+                },
+              },
+            },
+            { term: { "status.keyword": "VALIDATED" } },
+            {
+              range: {
+                placesLeft: {
+                  gt: 0,
+                },
+              },
+            },
+          ],
+        },
+      },
+    };
+  };
+
   const handleProposal = async (mission) => {
     const application = {
       status: APPLICATION_STATUS.WAITING_ACCEPTATION,
@@ -67,6 +93,7 @@ export default ({ young, onSend }) => {
             </Filter>
             <ResultTable hide={!searchedValue}>
               <ReactiveListComponent
+                defaultQuery={getDefaultQuery}
                 scrollOnChange={false}
                 react={{ and: FILTERS }}
                 paginationAt="bottom"
