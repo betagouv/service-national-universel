@@ -202,7 +202,7 @@ router.post("/referent/_msearch", passport.authenticate(["referent"], { session:
       if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       filter.push({ terms: { "role.keyword": [ROLES.RESPONSIBLE, ROLES.SUPERVISOR] } });
       const structureIdKeyword = [user.structureId];
-      if (structure.isNetwork === "true") structureIdKeyword.push(structure.networkId);
+      if (structure.networkId) structureIdKeyword.push(structure.networkId);
       filter.push({ terms: { "structureId.keyword": structureIdKeyword } });
     }
 
