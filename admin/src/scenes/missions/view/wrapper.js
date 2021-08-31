@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { Col, Row } from "reactstrap";
@@ -8,17 +8,24 @@ import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
 import SelectStatusMission from "../../../components/selectStatusMission";
-import { translate, ROLES } from "../../../utils";
+import { translate, ROLES, colors } from "../../../utils";
 import TabList from "../../../components/views/TabList";
 import Tab from "../../../components/views/Tab";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
+import Badge from "../../../components/Badge";
+import Title from "../../../components/views/Title";
+import ModalConfirm from "../../../components/modals/ModalConfirm";
 
 export default ({ mission, tab, children }) => {
   const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
-  const handleDelete = async () => {
-    if (!confirm("Êtes-vous sûr(e) de vouloir supprimer cette mission ?")) return;
+  const onClickDelete = () => {
+    setModal({ isOpen: true, onConfirm: onConfirmDelete, title: "Êtes-vous sûr(e) de vouloir supprimer cette mission ?", message: "Cette action est irréversible." });
+  };
+
+  const onConfirmDelete = async () => {
     try {
       const { ok, code } = await api.remove(`/mission/${mission._id}`);
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
@@ -33,7 +40,11 @@ export default ({ mission, tab, children }) => {
     }
   };
 
-  const duplicate = async () => {
+  const onClickDuplicate = () => {
+    setModal({ isOpen: true, onConfirm: onConfirmDuplicate, title: "Êtes-vous sûr(e) de vouloir dupliquer cette mission ?" });
+  };
+
+  const onConfirmDuplicate = async () => {
     mission.name += " (copie)";
     delete mission._id;
     mission.placesLeft = mission.placesTotal;
@@ -48,8 +59,9 @@ export default ({ mission, tab, children }) => {
     <div style={{ flex: tab === "missions" ? "0%" : 2, position: "relative", padding: "3rem" }}>
       <Header>
         <div style={{ flex: 1 }}>
-          <Title>{mission.name}</Title>
-
+          <Title>
+            {mission.name} {mission.isMilitaryPreparation === "true" ? <Badge text="Préparation Militaire" /> : null}
+          </Title>
           <TabList>
             <Tab isActive={tab === "details"} onClick={() => history.push(`/mission/${mission._id}`)}>
               Détails
@@ -59,7 +71,7 @@ export default ({ mission, tab, children }) => {
             </Tab>
             {user.role === ROLES.ADMIN ? (
               <Tab isActive={tab === "historique"} onClick={() => history.push(`/mission/${mission._id}/historique`)}>
-                Historique <i style={{ color: "#5145cd", fontWeight: "lighter", fontSize: ".85rem" }}>Bêta</i>
+                Historique <i style={{ color: colors.purple, fontWeight: "lighter", fontSize: ".85rem" }}>Bêta</i>
               </Tab>
             ) : null}
           </TabList>
@@ -93,23 +105,26 @@ export default ({ mission, tab, children }) => {
               <Link to={`/mission/${mission._id}/edit`}>
                 <PanelActionButton title="Modifier" icon="pencil" />
               </Link>
-              <PanelActionButton onClick={duplicate} title="Dupliquer" icon="duplicate" />
-              <PanelActionButton onClick={handleDelete} title="Supprimer" icon="bin" />
+              <PanelActionButton onClick={onClickDuplicate} title="Dupliquer" icon="duplicate" />
+              <PanelActionButton onClick={onClickDelete} title="Supprimer" icon="bin" />
             </Row>
           </Col>
         </Row>
       </Header>
       {children}
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
     </div>
   );
 };
-
-const Title = styled.div`
-  color: rgb(38, 42, 62);
-  font-weight: 700;
-  font-size: 24px;
-  margin-bottom: 10px;
-`;
 
 const Header = styled.div`
   padding: 0 25px 0;

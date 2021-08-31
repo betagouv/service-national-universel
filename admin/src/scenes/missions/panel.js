@@ -4,16 +4,19 @@ import { Link } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 
-import { translate, formatStringDate } from "../../utils";
+import { translate, formatStringDateTimezoneUTC, MISSION_STATUS_COLORS } from "../../utils";
 import api from "../../services/api";
-import SelectStatusMission from "../../components/selectStatusMission";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
-import Panel from "../../components/Panel";
+import Panel, { Info, Details } from "../../components/Panel";
+import Badge from "../../components/Badge";
+import ModalConfirm from "../../components/modals/ModalConfirm";
 
 export default ({ onChange, mission }) => {
   const [tutor, setTutor] = useState();
   const [structure, setStructure] = useState({});
   const history = useHistory();
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+  const [applications, setApplications] = useState();
 
   useEffect(() => {
     (async () => {
@@ -28,22 +31,18 @@ export default ({ onChange, mission }) => {
       const { ok: ok2, data: dataStructure, code: code2 } = await api.get(`/structure/${mission.structureId}`);
       if (!ok2) toastr.error("Oups, une erreur est survnue lors de la récupération de la structure", translate(code2));
       else setStructure(dataStructure);
+      const responseApplications = await api.get(`/mission/${mission._id}/application`);
+      if (!responseApplications.ok) toastr.error("Oups, une erreur est survnue lors de la récupération des candidatures", translate(responseApplications.code));
+      else setApplications(responseApplications.data);
       return;
     })();
   }, [mission]);
 
-  const duplicate = async () => {
-    mission.name += " (copie)";
-    delete mission._id;
-    mission.placesLeft = mission.placesTotal;
-    const { data, ok, code } = await api.post("/mission", mission);
-    if (!ok) toastr.error("Oups, une erreur est survnue lors de la duplication de la mission", translate(code));
-    toastr.success("Mission dupliquée !");
-    return history.push(`/mission/${data._id}`);
+  const onClickDelete = () => {
+    setModal({ isOpen: true, onConfirm: onConfirmDelete, title: "Êtes-vous sûr(e) de vouloir supprimer cette mission ?", message: "Cette action est irréversible." });
   };
 
-  const handleDelete = async () => {
-    if (!confirm("Êtes-vous sûr(e) de vouloir supprimer cette mission ?")) return;
+  const onConfirmDelete = async () => {
     try {
       const { ok, code } = await api.remove(`/mission/${mission._id}`);
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
@@ -51,11 +50,25 @@ export default ({ onChange, mission }) => {
         return toastr.error("Vous ne pouvez pas supprimer cette mission car des candidatures sont encore liées à cette mission.", { timeOut: 5000 });
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       toastr.success("Cette mission a été supprimée.");
-      return history.push(`/mission`);
+      return history.go(0);
     } catch (e) {
       console.log(e);
       return toastr.error("Oups, une erreur est survenue pendant la supression de la mission :", translate(e.code));
     }
+  };
+
+  const onClickDuplicate = () => {
+    setModal({ isOpen: true, onConfirm: onConfirmDuplicate, title: "Êtes-vous sûr(e) de vouloir dupliquer cette mission ?" });
+  };
+
+  const onConfirmDuplicate = async () => {
+    mission.name += " (copie)";
+    delete mission._id;
+    mission.placesLeft = mission.placesTotal;
+    const { data, ok, code } = await api.post("/mission", mission);
+    if (!ok) toastr.error("Oups, une erreur est survnue lors de la duplication de la mission", translate(code));
+    toastr.success("Mission dupliquée !");
+    return history.push(`/mission/${data._id}`);
   };
 
   if (!mission) return <div />;
@@ -66,7 +79,9 @@ export default ({ onChange, mission }) => {
           <Subtitle>MISSION</Subtitle>
           <div className="close" onClick={onChange} />
         </div>
-        <div className="title">{mission.name}</div>
+        <div className="title">
+          {mission.name} <Badge text={translate(mission.status)} color={MISSION_STATUS_COLORS[mission.status]} />
+        </div>
         <div style={{ display: "flex" }}>
           <Link to={`/mission/${mission._id}`}>
             <PanelActionButton icon="eye" title="Consulter" />
@@ -74,110 +89,65 @@ export default ({ onChange, mission }) => {
           <Link to={`/mission/${mission._id}/edit`}>
             <PanelActionButton icon="pencil" title="Modifier" />
           </Link>
-          <PanelActionButton onClick={duplicate} icon="duplicate" title="Dupliquer" />
+          <PanelActionButton onClick={onClickDuplicate} icon="duplicate" title="Dupliquer" />
         </div>
         <div style={{ display: "flex" }}>
-          <PanelActionButton onClick={handleDelete} icon="bin" title="Supprimer" />
+          <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" />
         </div>
       </div>
-      <div className="info">
-        <div className="title">Statut</div>
-        <SelectStatusMission hit={mission} />
-        <div className="description">A noter que des notifications emails seront envoyées</div>
-      </div>
-      <div className="info">
-        <div className="title">{`Volontaire(s) (${mission.placesTotal - mission.placesLeft})`}</div>
-        <div className="detail">
-          <div className="description">{`Cette mission a reçu ${mission.placesTotal - mission.placesLeft} candidature(s)`}</div>
-        </div>
-        {/* <Link to={``}>
-        <button>Consulter tous les volontaires</button>
-      </Link> */}
-      </div>
-      <div className="info">
-        <div className="title">
-          La structure
-          <Link to={`/structure/${structure._id}`}>
-            <SubtitleLink>{`${structure.name} >`}</SubtitleLink>
-          </Link>
-        </div>
-
-        <div className="detail">
-          <div className="detail-title">Statut</div>
-          <div className="detail-text">{translate(structure.legalStatus)}</div>
-        </div>
-        <div className="detail">
-          <div className="detail-title">Dép.</div>
-          <div className="detail-text">{structure.department}</div>
-        </div>
-
-        <div className="detail">
-          <div className="detail-title">Tuteur</div>
-          <div className="detail-text">{tutor ? `${tutor.firstName} ${tutor.lastName}` : ""}</div>
-        </div>
-        <div className="detail">
-          <div className="detail-title">E-mail</div>
-          <div className="detail-text">{tutor && tutor.email}</div>
-        </div>
-        <div className="detail">
-          <div className="detail-title">tel.</div>
-          <div className="detail-text">{tutor && tutor.phone}</div>
-        </div>
-      </div>
-      <div className="info">
-        <div className="title">La mission</div>
-        <div className="detail">
-          <div className="detail-title">Domaines</div>
-          <div className="detail-text">{mission.domains.map((d) => translate(d)).join(", ")}</div>
-        </div>
-        <div className="detail">
-          <div className="detail-title">Début</div>
-          <div className="detail-text">{formatStringDate(mission.startAt)}</div>
-        </div>
-        <div className="detail">
-          <div className="detail-title">Fin</div>
-          <div className="detail-text">{formatStringDate(mission.endAt)}</div>
-        </div>
-        <div className="detail">
-          <div className="detail-title">Adresse</div>
-          <div className="detail-text">{mission.address}</div>
-        </div>
-        <div className="detail">
-          <div className="detail-title">Dép.</div>
-          <div className="detail-text">{mission.department}</div>
-        </div>
-        <div className="detail">
-          <div className="detail-title">Format</div>
-          <div className="detail-text">{translate(mission.format)}</div>
-        </div>
-        <div className="detail">
-          <div className="detail-title">Fréquence</div>
-          <div className="detail-text">{mission.frequence}</div>
-        </div>
-        <div className="detail">
-          <div className="detail-title">Périodes</div>
-          <div className="detail-text">{mission.period.map((p) => translate(p)).join(", ")}</div>
-        </div>
-        <div className="detail">
-          <div className="detail-title">Objectifs</div>
-          <div className="detail-text">{mission.description}</div>
-        </div>
-        <div className="detail">
-          <div className="detail-title">Actions</div>
-          <div className="detail-text">{mission.actions}</div>
-        </div>
-        <div className="detail">
-          <div className="detail-title">Contraintes</div>
-          <div className="detail-text">{mission.contraintes}</div>
-        </div>
-        {/* <div>
-        {Object.keys(mission).map((e) => {
-          return <div>{`${e}:${mission[e]}`}</div>;
-        })}
-      </div> */}
-        {/* <div>Volontaires (0)</div>
-      <div>Aucun volontaire n'a encore été assigné. // TODO</div> */}
-      </div>
+      <Info title="Volontaires">
+        <Details title="Candidature(s)" value={applications?.length} />
+        <Details title="Validée(s)" value={mission.placesTotal - mission.placesLeft} />
+        <Details title="Disponible(s)" value={mission.placesLeft} />
+        <Details title="Total" value={mission.placesTotal} />
+        <Link to={`/mission/${mission._id}/youngs`}>
+          <PanelActionButton icon="eye" title="Consulter tous les volontaires" />
+        </Link>
+      </Info>
+      <Info title="La structure">
+        <Link to={`/structure/${structure._id}`}>
+          <SubtitleLink>{`${structure.name} >`}</SubtitleLink>
+        </Link>
+        <Details title="Statut" value={translate(structure.legalStatus)} />
+        <Details title="Adresse" value={structure.address} />
+        <Details title="Ville" value={structure.city} />
+        <Details title="Code postal" value={structure.zip} />
+        <Details title="Dép." value={structure.department} />
+        <Details title="Région" value={structure.region} />
+        {tutor ? (
+          <>
+            <Details title="Tuteur" value={`${tutor.firstName} ${tutor.lastName}`} />
+            <Details title="E-mail" value={tutor.email} />
+            <Details title="Tel." value={tutor.phone} />
+          </>
+        ) : null}
+      </Info>
+      <Info title="La mission">
+        <Details title="Domaines" value={mission.domains.map((d) => translate(d)).join(", ")} />
+        <Details title="Début" value={formatStringDateTimezoneUTC(mission.startAt)} />
+        <Details title="Fin" value={formatStringDateTimezoneUTC(mission.endAt)} />
+        <Details title="Adresse" value={mission.address} />
+        <Details title="Ville" value={mission.city} />
+        <Details title="Code postal" value={mission.zip} />
+        <Details title="Dép." value={mission.department} />
+        <Details title="Région" value={mission.region} />
+        <Details title="Format" value={translate(mission.format)} />
+        <Details title="Fréquence" value={mission.frequence} />
+        <Details title="Périodes" value={mission.period.map((p) => translate(p)).join(", ")} />
+        <Details title="Objectifs" value={mission.description} />
+        <Details title="Actions" value={mission.actions} />
+        <Details title="Contraintes" value={mission.contraintes} />
+      </Info>
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
     </Panel>
   );
 };
@@ -192,4 +162,7 @@ const Subtitle = styled.div`
 const SubtitleLink = styled(Subtitle)`
   color: #5245cc;
   text-transform: none;
+  :hover {
+    text-decoration: underline;
+  }
 `;

@@ -4,6 +4,7 @@ import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
 import { translate, ES_NO_LIMIT } from "../utils";
 import LoadingButton from "./buttons/LoadingButton";
+import ModalConfirm from "./modals/ModalConfirm";
 
 export default function ExportComponent({
   title,
@@ -14,15 +15,16 @@ export default function ExportComponent({
   defaultQuery = () => ({ query: { query: { match_all: {} } }, size: ES_NO_LIMIT }),
 }) {
   const [exporting, setExporting] = useState(false);
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
-  const handleExport = () => {
-    if (
-      !confirm(
-        "En téléchargeant ces informations, vous vous engagez à les supprimer après consultation en application des dispositions légales sur la protection des données personnelles (RGPD, CNIL)"
-      )
-    )
-      return;
-    setExporting(true);
+  const onClick = () => {
+    setModal({
+      isOpen: true,
+      onConfirm: () => setExporting(true),
+      title: "Téléchargement",
+      message:
+        "En téléchargeant ces informations, vous vous engagez à les supprimer après consultation en application des dispositions légales sur la protection des données personnelles (RGPD, CNIL)",
+    });
   };
 
   if (exporting) {
@@ -48,7 +50,21 @@ export default function ExportComponent({
     );
   }
 
-  return <LoadingButton onClick={handleExport}>{title}</LoadingButton>;
+  return (
+    <>
+      <LoadingButton onClick={onClick}>{title}</LoadingButton>
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
+    </>
+  );
 }
 
 function Loading({ onFinish, collection, data, loading, transform, transformAll }) {

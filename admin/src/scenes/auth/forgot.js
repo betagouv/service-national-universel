@@ -8,7 +8,7 @@ import styled from "styled-components";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import api from "../../services/api";
 import { Link } from "react-router-dom";
-import { translate } from "../../utils";
+import { translate, colors } from "../../utils";
 import Header from "./components/header";
 import LoginBox from "./components/loginBox";
 import AuthWrapper from "./components/authWrapper";
@@ -68,7 +68,7 @@ export default () => {
                                 hasError={errors.email}
                               />
                             </div>
-                            <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.email}</p>
+                            <p style={{ fontSize: 12, color: colors.red }}>{errors.email}</p>
                           </StyledFormGroup>
                           <Submit type="submit" color="success" loading={isSubmitting}>
                             Obtenir le lien de réinitialisation par email
@@ -107,14 +107,14 @@ const Register = styled.h3`
   position: relative;
   font-size: 1rem;
   text-align: center;
-  color: #6e757c;
+  color: ${colors.grey};
   @media (max-width: 768px) {
     font-size: 0.8rem;
   }
   font-weight: 400;
   margin-bottom: 20px;
   a {
-    color: #32267f;
+    color: ${colors.darkPurple};
     font-weight: 500;
   }
 `;
@@ -122,7 +122,7 @@ const Register = styled.h3`
 const StyledFormGroup = styled(FormGroup)`
   margin-bottom: 25px;
   label {
-    color: rgb(106, 111, 133);
+    color: ${colors.grey};
     font-size: 10px;
     text-transform: uppercase;
     font-weight: 700;
@@ -162,14 +162,14 @@ const Submit = styled(LoadingButton)`
   border-radius: 0;
   padding: 0.5rem 3rem;
   border: 0;
-  background-color: #5145cd;
+  background-color: ${colors.purple};
   margin-top: 30px;
   margin-bottom: 30px;
   border-radius: 10px;
   box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
   cursor: pointer;
   :hover {
-    background-color: #42389d;
+    background-color: ${colors.darkPurple};
   }
   :focus {
     box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;

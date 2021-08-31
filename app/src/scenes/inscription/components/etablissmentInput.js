@@ -93,10 +93,7 @@ const AutoComplete = ({ placeholder, onSelect }) => {
   const getSuggestionValue = () => "";
 
   const getSuggestions = async (text) => {
-    const queries = [];
-    queries.push({ index: "school", type: "_doc" });
-    queries.push({ query: { multi_match: { query: text, type: "most_fields", fields: ["name2", "city", "type", "postcode"] } } });
-    const { responses } = await api.esQuery(queries);
+    const { responses } = await api.esQuery("school", { query: { multi_match: { query: text, type: "most_fields", fields: ["name2", "city", "type", "postcode"] } } });
     console.log("responses", responses);
     const hits = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
     // if (hits.length) return setHits(hits);

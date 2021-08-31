@@ -2,7 +2,10 @@ import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { BrowserRouter as Router, Route, Switch, Redirect, useLocation } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
-import * as Sentry from "@sentry/browser";
+
+import * as Sentry from "@sentry/react";
+import { Integrations } from "@sentry/tracing";
+
 import queryString from "query-string";
 import styled from "styled-components";
 
@@ -27,14 +30,24 @@ import Loader from "./components/Loader";
 import Header from "./components/header";
 import Drawer from "./components/drawer";
 import Footer from "./components/footer";
+import MilitaryPreparation from "./scenes/militaryPreparation";
+import Engagement from "./scenes/engagement";
+import Bug from "./scenes/bug";
 
 import api from "./services/api";
 import { SENTRY_URL, environment } from "./config";
 
 import "./index.css";
-import { YOUNG_STATUS, setCrispUserData } from "./utils";
+import { YOUNG_STATUS, setCrispUserData, ENABLE_PM } from "./utils";
 
-if (environment === "production") Sentry.init({ dsn: SENTRY_URL, environment: "app" });
+if (environment === "production") {
+  Sentry.init({
+    dsn: SENTRY_URL,
+    environment: "app",
+    integrations: [new Integrations.BrowserTracing()],
+    tracesSampleRate: 1.0,
+  });
+}
 
 export default () => {
   const [loading, setLoading] = useState(true);
@@ -69,9 +82,9 @@ export default () => {
       <ScrollToTop />
       <div className="main">
         <Switch>
+          <Route path="/bug" component={Bug} />
           <Route path="/validate-contract/done" component={ContractDone} />
           <Route path="/validate-contract" component={Contract} />
-
           <Route path="/inscription" component={Inscription} />
           <Route path="/auth" component={Auth} />
           <Route path="/" component={Espace} />
@@ -85,7 +98,10 @@ export default () => {
 const Espace = () => {
   const [menuVisible, setMenuVisible] = useState(false);
   const young = useSelector((state) => state.Auth.young);
-  if (!young) return <Redirect to="/inscription" />;
+  if (!young) {
+    const redirect = encodeURIComponent(window.location.href.replace(window.location.origin, "").substring(1));
+    return <Redirect to={{ search: redirect && redirect !== "logout" ? `?redirect=${redirect}` : "", pathname: "/inscription" }} />;
+  }
   if (young.status === YOUNG_STATUS.IN_PROGRESS) return <Redirect to="/inscription/coordonnees" />;
 
   return (
@@ -103,12 +119,14 @@ const Espace = () => {
             <Route path="/phase1" component={Phase1} />
             <Route path="/phase2" component={Phase2} />
             <Route path="/phase3" component={Phase3} />
+            <Route path="/les-programmes" component={Engagement} />
             <Route path="/documents" component={Documents} />
             <Route path="/preferences" component={Preferences} />
             <Route path="/mission" component={Missions} />
             <Route path="/candidature" component={Applications} />
             <Route path="/cohesion" component={Cohesion} />
             <Route path="/diagoriente" component={Diagoriente} />
+            {ENABLE_PM && <Route path="/ma-preparation-militaire" component={MilitaryPreparation} />}
             <Route path="/" component={Home} />
           </Switch>
         </Content>

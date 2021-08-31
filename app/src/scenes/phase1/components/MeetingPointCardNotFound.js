@@ -3,7 +3,6 @@ import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
-import { formatStringLongDate } from "../../../utils";
 import Loader from "../../../components/Loader";
 import api from "../../../services/api";
 import { translate } from "../../../utils";

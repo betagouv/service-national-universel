@@ -2,6 +2,7 @@ const fs = require("fs");
 const path = require("path");
 const config = require("../../config");
 const { getSignedUrl } = require("../../utils");
+const { COHESION_STAY_LIMIT_DATE } = require("snu-lib");
 
 const getLocationCohesionCenter = (y) => {
   let t = "";
@@ -37,11 +38,12 @@ const phase1 = (young) => {
     .replace(/{{FIRST_NAME}}/g, young.firstName)
     .replace(/{{LAST_NAME}}/g, young.lastName)
     .replace(/{{COHORT}}/g, young.cohort)
+    .replace(/{{COHESION_DATE}}/g, COHESION_STAY_LIMIT_DATE[young.cohort].toLowerCase())
     .replace(/{{COHESION_CENTER_NAME}}/g, young.cohesionCenterName || "")
     .replace(/{{COHESION_CENTER_LOCATION}}/g, COHESION_CENTER_LOCATION)
     .replace(/{{BASE_URL}}/g, getBaseUrl())
     .replace(/{{GENERAL_BG}}/g, template)
-    .replace(/{{DATE}}/g, d.toLocaleDateString("fr-FR", { year: "numeric", month: "long", day: "numeric" }));
+    .replace(/{{DATE}}/g, "2 juillet 2021");
 };
 
 const phase2 = (young) => {

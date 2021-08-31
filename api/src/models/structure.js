@@ -116,23 +116,6 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  /*
-
-        'association_types' => [
-        "vocabulary" => "Types d'association",
-        "terms" => [
-            "Agrément jeunesse et éducation populaire" => "Agrément jeunesse et éducation populaire",
-            "Agrément service civique" => "Agrément service civique",
-            "Association complémentaire de l'enseignement public" => "Association complémentaire de l'enseignement public",
-            "Associations d'usagers du système de santé" => "Associations d'usagers du système de santé",
-            "Association sportive affiliée à une fédération sportive agréée par l'État" => "Association sportive affiliée à une fédération sportive agréée par l'État",
-            "Agrément des associations de protection de l'environnement" => "Agrément des associations de protection de l'environnement",
-            "Association agréée de sécurité civile" => "Association agréée de sécurité civile",
-            "Autre agrément" => "Autre agrément",
-        ]
-    ],
-
-    */
   structurePubliqueType: {
     type: String,
     documentation: {
@@ -196,6 +179,14 @@ const Schema = new mongoose.Schema({
     type: String,
     documentation: {
       description: "",
+    },
+  },
+
+  isMilitaryPreparation: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "La structure est une préparation militaire",
     },
   },
 

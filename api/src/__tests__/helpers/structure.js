@@ -5,7 +5,7 @@ async function getStructuresHelper() {
 }
 
 async function getStructureByIdHelper(structureId) {
-  return await StructureObject.findOne({ _id: structureId });
+  return await StructureObject.findById(structureId);
 }
 
 async function deleteStructureByIdHelper(structureId) {

@@ -37,20 +37,20 @@ const Header = styled.div`
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  @media (max-width: 768px) {
+  @media (max-width: 1000px) {
     justify-content: space-between;
   }
   box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.05);
   position: sticky;
   left: 0;
   top: 0;
-  z-index: 20;
+  z-index: 10;
   padding: 1rem;
 `;
 
 const Burger = styled.img`
   display: none;
-  @media (max-width: 768px) {
+  @media (max-width: 1000px) {
     display: block;
     width: 32px;
     height: 32px;
@@ -58,16 +58,13 @@ const Burger = styled.img`
     object-fit: cover;
     object-fit: contain;
     cursor: pointer;
-    svg {
-      color: #f00;
-    }
   }
 `;
 
 const Title = styled.div`
   font-size: 1rem;
   font-weight: 700;
-  @media (min-width: 768px) {
+  @media (min-width: 1000px) {
     display: none;
   }
 `;

@@ -6,15 +6,17 @@ import { useSelector } from "react-redux";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import ExportComponent from "../../components/ExportXlsx";
 
+import LockedSvg from "../../assets/lock.svg";
+import UnlockedSvg from "../../assets/lock-open.svg";
 import api from "../../services/api";
 import { apiURL, appURL } from "../../config";
 import Panel from "./panel";
 import Badge from "../../components/Badge";
-import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS_COLORS, isInRuralArea, formatDateFR, formatLongDateFR, getAge, ES_NO_LIMIT, ROLES } from "../../utils";
+import { translate, getFilterLabel, YOUNG_STATUS_COLORS, isInRuralArea, formatLongDateFR, getAge, ES_NO_LIMIT, ROLES, formatLongDateUTC, colors } from "../../utils";
 import { Link } from "react-router-dom";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
-import { Filter, FilterRow, ResultTable, Table, TopResultStats, BottomResultStats, ActionBox, Header, Title, MultiLine } from "../../components/list";
+import { Filter, FilterRow, ResultTable, Table, ActionBox, Header, Title, MultiLine, Help, LockIcon, HelpText } from "../../components/list";
 
 const FILTERS = [
   "SEARCH",
@@ -30,13 +32,20 @@ const FILTERS = [
   "CONTRACT_STATUS",
   "MEDICAL_FILE_RECEIVED",
   "COHESION_PRESENCE",
+  "MILITARY_PREPARATION_FILES_STATUS",
 ];
 
-export default ({ setYoung }) => {
+export default () => {
   const [volontaire, setVolontaire] = useState(null);
   const [centers, setCenters] = useState(null);
   const [meetingPoints, setMeetingPoints] = useState(null);
   const [filterVisible, setFilterVisible] = useState(false);
+
+  const [infosHover, setInfosHover] = useState(false);
+  const [infosClick, setInfosClick] = useState(false);
+  const toggleInfos = () => {
+    setInfosClick(!infosClick);
+  };
 
   const handleShowFilter = () => setFilterVisible(!filterVisible);
 
@@ -85,7 +94,7 @@ export default ({ setYoung }) => {
                     Cohorte: data.cohort,
                     Prénom: data.firstName,
                     Nom: data.lastName,
-                    "Date de naissance": formatDateFR(data.birthdateAt),
+                    "Date de naissance": formatLongDateUTC(data.birthdateAt),
                     Sexe: data.gender,
                     Email: data.email,
                     Téléphone: data.phone,
@@ -204,6 +213,7 @@ export default ({ setYoung }) => {
                   style={{ flex: 1, marginRight: "1rem" }}
                   innerClass={{ input: "searchbox" }}
                   autosuggest={false}
+                  URLParams={true}
                   queryFormat="and"
                 />
                 <MultiDropdownList
@@ -337,22 +347,95 @@ export default ({ setYoung }) => {
                   showSearch={false}
                   renderLabel={(items) => getFilterLabel(items, "Statut contrats")}
                 />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  componentId="MILITARY_PREPARATION_FILES_STATUS"
+                  dataField="statusMilitaryPreparationFiles.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "MILITARY_PREPARATION_FILES_STATUS") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Statut documents Préparation Militaire")}
+                />
+                <Help onClick={toggleInfos} onMouseEnter={() => setInfosHover(true)} onMouseLeave={() => setInfosHover(false)}>
+                  {infosClick ? <LockIcon src={LockedSvg} /> : <LockIcon src={UnlockedSvg} />}
+                  Aide
+                </Help>
               </FilterRow>
             </Filter>
+            {infosHover || infosClick ? (
+              <HelpText>
+                <div>
+                  Pour filtrer les volontaires, cliquez sur les éléments ci-dessus.
+                  <div style={{ height: "0.5rem" }} />
+                  <div>
+                    <span className="title">Statut :</span>statut du parcours SNU du volontaire
+                  </div>
+                  <div>
+                    <span className="title">Cohorte :</span>année d'inscription
+                  </div>
+                  <div>
+                    <span className="title">Régions et Départements :</span>origine du volontaire
+                  </div>
+                  <div>
+                    <span className="title">Statut de phase :</span>pour en savoir plus consultez le{" "}
+                    <a href="https://snu.crisp.help/fr/" target="_blank">
+                      centre d'aide
+                    </a>
+                  </div>
+                  <div>
+                    <span className="title">Participations au séjour de cohésion :</span> présent ou absent (phase 1)
+                  </div>
+                  <div>
+                    <span className="title">Fiche sanitaire :</span> reçue (Oui ou Non) (phase 1)
+                  </div>
+                  <div>
+                    <span className="title">Statut de mission :</span> s'active dès la 1ère candidature et concerne le statut de sa candidature. Pour en savoir plus sur les
+                    statuts, consultez le{" "}
+                    <a href="https://snu.crisp.help/fr/article/phase-2-les-statuts-volontaire-2ipjp1/" target="_blank">
+                      centre d'aide
+                    </a>
+                  </div>
+                  <div>
+                    <span className="title">Statut documents Préparation Militaire :</span>s'active dès la 1ère candidature à une Préparation Militaire. Pour en savoir plus sur les
+                    statuts de ce filtre consultez le{" "}
+                    <a href="https://snu.crisp.help/fr/" target="_blank">
+                      centre d'aide
+                    </a>{" "}
+                    (phase 2)
+                  </div>
+                  <div>
+                    <span className="title">Statut contrats :</span>Lorsque la candidature de mission est validée par la structure, le contrat généré est en{" "}
+                    <strong>Brouillon</strong>. Il est ensuite rempli et envoyé par la structure aux parties-prenantes via la plateforme, son statut devient{" "}
+                    <strong>Envoyée</strong> . Lorsque toutes les parties-prenantes l'ont validé, son statut passe en <strong>Validée</strong>.
+                  </div>
+                </div>
+              </HelpText>
+            ) : null}
             <ResultTable>
               <ReactiveListComponent
                 defaultQuery={getDefaultQuery}
                 react={{ and: FILTERS }}
-                dataField="lastName.keyword"
-                sortBy="asc"
+                sortOptions={[
+                  { label: "Nom (A > Z)", dataField: "lastName.keyword", sortBy: "asc" },
+                  { label: "Nom (Z > A)", dataField: "lastName.keyword", sortBy: "desc" },
+                  { label: "Prénom (A > Z)", dataField: "firstName.keyword", sortBy: "asc" },
+                  { label: "Prénom (Z > A)", dataField: "firstName.keyword", sortBy: "desc" },
+                  { label: "Date de création (récent > ancien)", dataField: "createdAt", sortBy: "desc" },
+                  { label: "Date de création (ancien > récent)", dataField: "createdAt", sortBy: "asc" },
+                ]}
+                defaultSortOption="Nom (A > Z)"
                 render={({ data }) => (
                   <Table>
                     <thead>
                       <tr>
-                        <th width="40%">Volontaire</th>
-                        <th width="40%">Contextes</th>
-                        <th width="40%">Dernière connexion</th>
-                        <th>Actions</th>
+                        <th width="25%">Volontaire</th>
+                        <th>Contextes</th>
+                        <th width="10%">Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -378,8 +461,12 @@ export default ({ setYoung }) => {
 };
 
 const Hit = ({ hit, onClick, selected }) => {
+  const getBackgroundColor = () => {
+    if (selected) return colors.lightBlueGrey;
+    if (hit.status === "WITHDRAWN") return colors.extraLightGrey;
+  };
   return (
-    <tr style={{ backgroundColor: (selected && "#e6ebfa") || (hit.status === "WITHDRAWN" && "#BE3B1211") }} onClick={onClick}>
+    <tr style={{ backgroundColor: getBackgroundColor() }} onClick={onClick}>
       <td>
         <MultiLine>
           <h2>{`${hit.firstName} ${hit.lastName}`}</h2>
@@ -389,13 +476,12 @@ const Hit = ({ hit, onClick, selected }) => {
         </MultiLine>
       </td>
       <td>
-        <Badge text={`Cohorte ${hit.cohort}`} />
-        <Badge text="Phase 1" tooltipText={translate(hit.statusPhase1)} color={YOUNG_STATUS_COLORS[hit.statusPhase1]} />
-        <Badge text="Phase 2" tooltipText={translate(hit.statusPhase2)} color={YOUNG_STATUS_COLORS[hit.statusPhase2]} />
-        <Badge text="Phase 3" tooltipText={translate(hit.statusPhase3)} color={YOUNG_STATUS_COLORS[hit.statusPhase3]} />
-        {hit.status === "WITHDRAWN" ? <Badge text="Désisté" color={YOUNG_STATUS_COLORS.WITHDRAWN} /> : null}
+        <Badge minify text={hit.cohort} tooltipText={`Cohorte ${hit.cohort}`} />
+        <BadgePhase text="Phase 1" value={hit.statusPhase1} />
+        <BadgePhase text="Phase 2" value={hit.statusPhase2} />
+        <BadgePhase text="Phase 3" value={hit.statusPhase3} />
+        {hit.status === "WITHDRAWN" ? <Badge minify text="Désisté" color={YOUNG_STATUS_COLORS.WITHDRAWN} tooltipText={translate(hit.status)} /> : null}
       </td>
-      <td>{formatStringLongDate(hit.lastLoginAt)}</td>
       <td onClick={(e) => e.stopPropagation()}>
         <Action hit={hit} />
       </td>
@@ -403,7 +489,11 @@ const Hit = ({ hit, onClick, selected }) => {
   );
 };
 
-const Action = ({ hit, color }) => {
+const BadgePhase = ({ text, value }) => (
+  <Badge minify text={text} tooltipText={translate(value)} minTooltipText={`${text}: ${translate(value)}`} color={YOUNG_STATUS_COLORS[value]} />
+);
+
+const Action = ({ hit }) => {
   const user = useSelector((state) => state.Auth.user);
 
   return (

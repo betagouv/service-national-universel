@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 
 import { apiURL } from "../../../config";
 import api from "../../../services/api";
-import { translate, getAge, ROLES } from "../../../utils";
+import { translate, getAge, ROLES, getResultLabel } from "../../../utils";
 import { Filter, ResultTable, BottomResultStats, Table, MultiLine } from "../../../components/list";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
@@ -88,9 +88,7 @@ export default ({ center, onAffect, onClick }) => {
                 renderResultStats={(e) => {
                   return (
                     <div>
-                      <BottomResultStats>
-                        Affiche {e.displayedResults * e.currentPage + 1} à {e.displayedResults * (e.currentPage + 1)} résultats sur {e.numberOfResults} résultats
-                      </BottomResultStats>
+                      <BottomResultStats>{getResultLabel(e)}</BottomResultStats>
                     </div>
                   );
                 }}

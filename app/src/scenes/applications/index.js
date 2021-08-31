@@ -9,6 +9,7 @@ import { toastr } from "react-redux-toastr";
 import Loader from "../../components/Loader";
 import Application from "./components/application";
 import api from "../../services/api";
+import AlertBox from "../../components/AlertBox";
 
 export default () => {
   const [applications, setApplications] = useState(null);
@@ -43,7 +44,7 @@ export default () => {
   useEffect(() => {
     (async () => {
       if (!young) return;
-      const { ok, data, code } = await api.get(`/application/young/${young._id}`);
+      const { ok, data, code } = await api.get(`/young/${young._id}/application`);
       if (!ok) return toastr.error("Oups, une erreur est survenue", code);
       data.sort((a, b) => (parseInt(a.priority) > parseInt(b.priority) ? 1 : parseInt(b.priority) > parseInt(a.priority) ? -1 : 0));
       console.log(data);
@@ -105,16 +106,6 @@ export default () => {
   );
 };
 
-const AlertBox = ({ onClose, title, message }) => (
-  <Alert>
-    <img src={require("../../assets/information.svg")} height={15} />
-    <div className="text">
-      <strong>{title}</strong>
-      <div>{message}</div>
-    </div>
-    <img src={require("../../assets/close.svg")} height={15} onClick={onClose} style={{ cursor: "pointer" }} />
-  </Alert>
-);
 const Heading = styled(Container)`
   margin-bottom: 40px;
   h1 {
@@ -167,28 +158,5 @@ const Button = styled.div`
   :hover {
     color: #fff;
     background-color: #0e9f6e;
-  }
-`;
-
-const Alert = styled(Container)`
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  background-color: #5949d0;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  margin-bottom: 20px;
-  padding: 10px 20px;
-  .text {
-    margin-left: 20px;
-    margin-right: auto;
-    margin-bottom: 0;
-    color: #fff;
-    font-size: 12px;
-    font-weight: 500;
-    strong {
-      font-size: 15px;
-      font-weight: 700;
-      margin-bottom: 3px;
-    }
   }
 `;

@@ -18,7 +18,7 @@ function getNewCohesionCenterFixture() {
     placesLeft: placesLeft,
     outfitDelivered: faker.lorem.word(),
     observations: faker.lorem.word(),
-    waitingList: faker.lorem.word(),
+    waitingList: [faker.lorem.word(), faker.lorem.word()],
     COR: faker.lorem.word(),
   };
 }

@@ -10,7 +10,7 @@ if (environment === "staging") {
   adminURL = "https://app-735c50af-69c1-4a10-ac30-7ba11d1112f7.cleverapps.io";
 }
 if (environment === "production") {
-  apiURL = "https://app-5a3e097d-fdf1-44fa-9172-88ad9d7b2b20.cleverapps.io";
+  apiURL = "https://api.snu.gouv.fr";
   adminURL = "https://admin.snu.gouv.fr";
 }
 

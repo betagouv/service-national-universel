@@ -1,41 +1,22 @@
 import React, { useState } from "react";
 import { Field } from "formik";
 import styled from "styled-components";
-import passwordValidator from "password-validator";
+import { getPasswordErrorMessage } from "../utils";
 
 import EyeOpen from "../assets/eye.svg";
 import EyeClose from "../assets/eye-slash.svg";
 
-export default ({ value, onChange }) => {
+export default ({ value, onChange, showError = true, autoComplete = "new-password" }) => {
   const [passwordText, setPasswordText] = useState(false);
-
-  function getPasswordErrorMessage(v) {
-    if (!v) return "Ce champ est obligatoire";
-    const schema = new passwordValidator();
-    schema
-      .is()
-      .min(12) // Minimum length 12
-      .has()
-      .uppercase() // Must have uppercase letters
-      .has()
-      .lowercase() // Must have lowercase letters
-      .has()
-      .digits() // Must have digits
-      .has()
-      .symbols(); // Must have symbols
-
-    if (!schema.validate(v)) {
-      return "Votre mot de passe doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole";
-    }
-  }
 
   return (
     <ContainerPassword>
       <InputField
         placeholder="Tapez votre mot de passe"
         className="form-control"
-        validate={(v) => getPasswordErrorMessage(v)}
+        validate={(v) => showError && getPasswordErrorMessage(v)}
         type={passwordText ? "text" : "password"}
+        autoComplete={autoComplete}
         name="password"
         value={value}
         onChange={onChange}

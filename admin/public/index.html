@@ -5,10 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <meta name="google" content="notranslate" />
     <title>Service National Universel</title>
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
   </head>
 
   <body>
     <noscript> You need to enable JavaScript to run this app. </noscript>
     <div id="root"></div>
+    <div id="zammad-chat"></div>
+    <script src="https://support.selego.co/assets/chat/chat.min.js"></script>
+    <script>
+      $(function () {
+        if (typeof ZammadChat !== "undefined") {
+          var chat = new ZammadChat({
+            title: "Une question ?",
+            background: "#5145cd",
+            fontSize: "12px",
+            chatId: 5,
+            show: true,
+            flat: true,
+            target: $("#zammad-chat"),
+          });
+        }
+      });
+    </script>
   </body>
 </html>

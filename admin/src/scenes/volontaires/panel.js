@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { Link } from "react-router-dom";
-import { toastr } from "react-redux-toastr";
+import { Link, useHistory } from "react-router-dom";
 
-import { YOUNG_SITUATIONS, YOUNG_PHASE, translate as t, YOUNG_STATUS, isInRuralArea, getAge, formatDateFR } from "../../utils";
+import { YOUNG_SITUATIONS, YOUNG_PHASE, translate as t, YOUNG_STATUS, isInRuralArea, getAge, formatDateFRTimezoneUTC, formatStringLongDate } from "../../utils";
 import { appURL } from "../../config";
 import api from "../../services/api";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
-import Panel from "../../components/Panel";
+import Panel, { Info, Details } from "../../components/Panel";
 import Historic from "../../components/historic";
+import ContractLink from "../../components/ContractLink";
 
 export default ({ onChange, value }) => {
+  const [referentManagerPhase2, setReferentManagerPhase2] = useState();
   const [young, setYoung] = useState(null);
 
   useEffect(() => {
@@ -21,6 +22,15 @@ export default ({ onChange, value }) => {
       setYoung(data);
     })();
   }, [value]);
+  useEffect(() => {
+    if (!young) return;
+    (async () => {
+      const { ok, data } = await api.get(`/referent/manager_phase2/${young.department}`);
+      if (ok) return setReferentManagerPhase2(data);
+      setReferentManagerPhase2(null);
+    })();
+    return () => setReferentManagerPhase2();
+  }, [young]);
 
   if (!value || !young) return <div />;
 
@@ -34,7 +44,7 @@ export default ({ onChange, value }) => {
         <div>{t(young.gender)}</div>
         {young.birthdateAt && (
           <div>
-            Né(e) le {formatDateFR(young.birthdateAt)} • {getAge(young.birthdateAt)} ans
+            Né(e) le {formatDateFRTimezoneUTC(young.birthdateAt)} • {getAge(young.birthdateAt)} ans
           </div>
         )}
         <div style={{ display: "flex" }}>
@@ -48,31 +58,29 @@ export default ({ onChange, value }) => {
         <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`}>
           <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
         </a>
+        <Details title="Vu(e) le" value={formatStringLongDate(young.lastLoginAt)} />
       </div>
       {young.status === YOUNG_STATUS.WITHDRAWN ? (
         <Info title="Motif du désistement">
           <div className="quote">{young.withdrawnMessage ? `« ${young.withdrawnMessage} »` : "Non renseigné"}</div>
         </Info>
       ) : null}
-      {young && young.historic && young.historic.length !== 0 && <Historic value={young.historic} />}
-      {young.phase === YOUNG_PHASE.INTEREST_MISSION ? (
-        <Info title="Recherche de MIG" id={young._id}>
-          {young.applications.length ? (
-            <>
-              {young.applications.length &&
-                young.applications
-                  .sort((a, b) => (parseInt(a.priority) > parseInt(b.priority) ? 1 : parseInt(b.priority) > parseInt(a.priority) ? -1 : 0))
-                  .slice(0, 3)
-                  .map((a, i) => <ApplicationDetails key={a._id} application={a} i={i + 1} />)}
-              <Link to={`/volontaire/${young._id}/phase2`}>
-                <div style={{ textAlign: "center", color: "#5245cc" }}>{"Toutes ses candidatures >"}</div>
-              </Link>
-            </>
-          ) : (
-            <NoResult>Aucune candidature n'est liée à ce volontaire.</NoResult>
-          )}
-        </Info>
-      ) : null}
+      <Info title="Recherche de MIG" id={young._id}>
+        {young.applications.length ? (
+          <>
+            {young.applications.length &&
+              young.applications
+                .sort((a, b) => (parseInt(a.priority) > parseInt(b.priority) ? 1 : parseInt(b.priority) > parseInt(a.priority) ? -1 : 0))
+                .map((a, i) => <ApplicationDetails key={a._id} application={a} i={i + 1} />)}
+            <Link to={`/volontaire/${young._id}/phase2`}>
+              <div style={{ textAlign: "center", color: "#5245cc" }}>{"Voir toutes ses candidatures >"}</div>
+            </Link>
+          </>
+        ) : (
+          <NoResult>Aucune candidature n'est liée à ce volontaire.</NoResult>
+        )}
+        <Details title="Contact phase 2" value={referentManagerPhase2?.email || (referentManagerPhase2 !== undefined && "Non trouvé") || "Chargement..."} copy />
+      </Info>
       <Info title="Coordonnées" id={young._id}>
         <Details title="E-mail" value={young.email} copy />
         <Details title="Tel" value={young.phone} />
@@ -118,6 +126,7 @@ export default ({ onChange, value }) => {
         <Details title="Aménagement spécifique" value={t(young.specificAmenagment)} />
         <Details title="Activités de haut niveau" value={t(young.highSkilledActivity)} />
       </Info>
+      {young && young.historic && young.historic.length !== 0 && <Historic value={young.historic} />}
       {young.motivations && (
         <div className="info">
           <div className="info-title">Motivations</div>
@@ -128,47 +137,29 @@ export default ({ onChange, value }) => {
   );
 };
 
-const Info = ({ children, title, id }) => {
-  return (
-    <div className="info">
-      <div style={{ position: "relative" }}>
-        <div className="info-title">{title}</div>
-      </div>
-      {children}
-    </div>
-  );
-};
-
-const Details = ({ title, value, copy }) => {
-  if (!value) return <div />;
-  if (typeof value === "function") value = value();
-  return (
-    <div className="detail">
-      <div className="detail-title">{`${title} :`}</div>
-      <div className="detail-text">{value}</div>
-      {copy ? (
-        <div
-          className="icon"
-          icon={require(`../../assets/copy.svg`)}
-          onClick={() => {
-            navigator.clipboard.writeText(value);
-            toastr.success(`'${title}' a été copié dans le presse papier.`);
-          }}
-        />
-      ) : null}
-    </div>
-  );
-};
-
 const ApplicationDetails = ({ application, i }) => {
+  const history = useHistory();
+
   if (!application) return <div />;
   return (
-    <Link to={`/mission/${application.missionId}`}>
-      <div className="application-detail">
-        <div className="application-detail-priority">{`CHOIX ${i}`}</div>
-        <div className="application-detail-text">{application.missionName}</div>
+    <div className="application-detail">
+      <div className="application-detail-text">
+        <Link to={`/mission/${application.missionId}`}>
+          <span className="application-detail-priority">{`CHOIX ${i}`}</span>
+          {application.missionName}
+        </Link>
       </div>
-    </Link>
+      {["VALIDATED", "IN_PROGRESS", "DONE", "ABANDON"].includes(application.status) ? (
+        <ContractLink
+          style={{ margin: 0 }}
+          onClick={() => {
+            history.push(`/volontaire/${application.youngId}/phase2/application/${application._id}/contrat`);
+          }}
+        >
+          Contrat d'engagement &gt;
+        </ContractLink>
+      ) : null}
+    </div>
   );
 };
 

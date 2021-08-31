@@ -46,10 +46,10 @@ const Schema = new mongoose.Schema({
     documentation: {
       description: "image (fichier)",
     },
-  }, //todo
+  },
   imageString: {
     type: String,
-    default: "default.png", //todo
+    default: "default.png",
     documentation: {
       description: "nom fichier image",
     },

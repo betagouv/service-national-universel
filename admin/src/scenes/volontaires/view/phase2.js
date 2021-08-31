@@ -2,12 +2,14 @@ import React, { useState } from "react";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 
-import { translate as t, YOUNG_PHASE, YOUNG_STATUS_PHASE2, getLimitDateForPhase2 } from "../../../utils";
+import { translate as t, YOUNG_PHASE, YOUNG_STATUS_PHASE2, getLimitDateForPhase2, ENABLE_PM } from "../../../utils";
 import WrapperPhase2 from "./wrapper";
 import ApplicationList from "./applicationList.js";
+import Phase2MilitaryPreparation from "./phase2MilitaryPreparation";
 import SelectStatus from "../../../components/selectStatus";
 import Badge from "../../../components/Badge";
 import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
+import MailAttestationButton from "../../../components/buttons/MailAttestationButton";
 import { Box, BoxTitle } from "../../../components/box";
 
 export default ({ young, onChange }) => {
@@ -24,6 +26,7 @@ export default ({ young, onChange }) => {
             </div>
           </Bloc>
         </Box>
+        {ENABLE_PM && <Phase2MilitaryPreparation young={young} />}
         <ToggleBox>
           <Row>
             <Col md={12}>
@@ -56,7 +59,9 @@ export default ({ young, onChange }) => {
                   {young.mobilityNearRelative === "true" ? (
                     <>
                       <div>Hébergement chez un proche</div>
-                      <div style={{ marginLeft: "1rem" }}>{`${young.mobilityNearRelativeName} • ${young.mobilityNearRelativeZip} ${young.mobilityNearRelativeCity}`}</div>
+                      <div style={{ marginLeft: "1rem" }}>{`${young.mobilityNearRelativeName || ""} • ${young.mobilityNearRelativeZip || ""} ${
+                        young.mobilityNearRelativeCity || ""
+                      }`}</div>
                     </>
                   ) : null}
                 </Details>
@@ -88,9 +93,16 @@ export default ({ young, onChange }) => {
           <ApplicationList young={young} onChangeApplication={onChange} />
         </Box>
         {young.statusPhase2 === "VALIDATED" ? (
-          <DownloadAttestationButton young={young} uri="2">
-            Télécharger l'attestation de réalisation de la phase 2
-          </DownloadAttestationButton>
+          <div style={{ display: "flex", alignItems: "flex-start" }}>
+            <div style={{ textAlign: "center" }}>
+              <DownloadAttestationButton young={young} uri="2">
+                Télécharger l'attestation de réalisation de la phase 2
+              </DownloadAttestationButton>
+              <MailAttestationButton style={{ marginTop: ".5rem" }} young={young} type="2" template="certificate" placeholder="Attestation de réalisation de la phase 2">
+                Envoyer l'attestation par mail
+              </MailAttestationButton>
+            </div>
+          </div>
         ) : null}
       </WrapperPhase2>
     </div>

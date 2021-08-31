@@ -8,7 +8,7 @@ import { translate, ROLES } from "../../utils";
 import api from "../../services/api";
 import { setUser } from "../../redux/auth/actions";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
-import Panel from "../../components/Panel";
+import Panel, { Info, Details } from "../../components/Panel";
 
 // Sorry about that: return true, return false, false, true, false.
 function canModify(user, value) {
@@ -93,37 +93,5 @@ export default ({ onChange, value }) => {
         })}
       </div> */}
     </Panel>
-  );
-};
-
-const Info = ({ children, title }) => {
-  return (
-    <div className="info">
-      <div style={{ position: "relative" }}>
-        <div className="info-title">{title}</div>
-      </div>
-      {children}
-    </div>
-  );
-};
-
-const Details = ({ title, value, children, copy }) => {
-  if (!value) return <div />;
-  return (
-    <div className="detail">
-      <div className="detail-title">{`${title} :`}</div>
-      <div className="detail-text">{value}</div>
-      {copy ? (
-        <div
-          className="icon"
-          icon={require(`../../assets/copy.svg`)}
-          onClick={() => {
-            navigator.clipboard.writeText(value);
-            toastr.success(`'${title}' a été copié dans le presse papier.`);
-          }}
-        />
-      ) : null}
-      {children ? children : null}
-    </div>
   );
 };

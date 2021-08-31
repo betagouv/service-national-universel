@@ -7,5 +7,6 @@ export default styled.div`
   margin-top: 0.5rem;
   :hover {
     text-decoration: underline;
+    cursor: pointer;
   }
 `;

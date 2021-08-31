@@ -12,6 +12,10 @@ async function deleteApplicationHelper() {
   return await ApplicationObject.deleteMany({});
 }
 
+async function getApplicationByIdHelper(applicationId) {
+  return await ApplicationObject.findById(applicationId);
+}
+
 const notExistingApplicationId = "104a49ba503040e4d8853973";
 
 module.exports = {
@@ -19,4 +23,5 @@ module.exports = {
   getApplicationsHelper,
   deleteApplicationHelper,
   notExistingApplicationId,
+  getApplicationByIdHelper,
 };

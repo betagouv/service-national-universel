@@ -5,15 +5,17 @@ import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
 import api from "../services/api";
-import { translate, MISSION_STATUS_COLORS, MISSION_STATUS, ROLES } from "../utils";
+import { translate, MISSION_STATUS_COLORS, MISSION_STATUS, ROLES, colors } from "../utils";
 import MailCorrectionMission from "../scenes/missions/components/MailCorrectionMission";
 import MailRefusedMission from "../scenes/missions/components/MailRefusedMission";
 import Chevron from "./Chevron";
+import ModalConfirm from "./modals/ModalConfirm";
 
-export default ({ hit, options = [] }) => {
+export default ({ hit, options = [], callback = () => {} }) => {
   const [waitingCorrectionModal, setWaitingCorrectionModal] = useState(false);
   const [refusedModal, setRefusedModal] = useState(false);
   const [mission, setMission] = useState(null);
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
@@ -25,16 +27,24 @@ export default ({ hit, options = [] }) => {
     })();
   }, [hit._id]);
 
-  if (!mission) return <i style={{ color: "#382F79" }}>Chargement...</i>;
+  if (!mission) return <i style={{ color: colors.darkPurple }}>Chargement...</i>;
 
   if (user.role === ROLES.RESPONSIBLE || user.role === ROLES.SUPERVISOR)
     options.push(MISSION_STATUS.WAITING_VALIDATION, MISSION_STATUS.DRAFT, MISSION_STATUS.CANCEL, MISSION_STATUS.ARCHIVED);
   if (user.role === ROLES.ADMIN || user.role === ROLES.REFERENT_DEPARTMENT || user.role === ROLES.REFERENT_REGION) options = Object.keys(MISSION_STATUS);
 
-  const handleClickStatus = (status) => {
-    if (!confirm("Êtes-vous sûr(e) de vouloir modifier le statut de cette mission ?")) return;
-    if (status === MISSION_STATUS.WAITING_CORRECTION && mission.tutor) return setWaitingCorrectionModal(true);
-    if (status === MISSION_STATUS.REFUSED && mission.tutor) return setRefusedModal(true);
+  const onClickStatus = (status) => {
+    setModal({
+      isOpen: true,
+      onConfirm: () => onConfirmStatus(status),
+      title: `Changement de statut de mission`,
+      message: `Êtes-vous sûr(e) de vouloir modifier le statut de cette mission de "${translate(mission.status)}" à "${translate(status)}" ?`,
+    });
+  };
+
+  const onConfirmStatus = (status) => {
+    if (status === MISSION_STATUS.WAITING_CORRECTION && mission.tutorId) return setWaitingCorrectionModal(true);
+    if (status === MISSION_STATUS.REFUSED && mission.tutorId) return setRefusedModal(true);
     setStatus(status);
   };
 
@@ -45,6 +55,7 @@ export default ({ hit, options = [] }) => {
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       setMission(newMission);
       toastr.success("Mis à jour!");
+      callback(newMission);
     } catch (e) {
       console.log(e);
       toastr.error("Oups, une erreur est survenue :", translate(e.code));
@@ -80,17 +91,29 @@ export default ({ hit, options = [] }) => {
             <Chevron color={MISSION_STATUS_COLORS[mission.status]} />
           </DropdownToggle>
           <DropdownMenu>
-            {options.map((status) => {
-              return (
-                <DropdownItem key={status} className="dropdown-item" onClick={() => handleClickStatus(status)}>
-                  {translate(status)}
-                </DropdownItem>
-              );
-            })}
+            {options
+              .filter((e) => e !== mission.status)
+              .map((status) => {
+                return (
+                  <DropdownItem key={status} className="dropdown-item" onClick={() => onClickStatus(status)}>
+                    {translate(status)}
+                  </DropdownItem>
+                );
+              })}
           </DropdownMenu>
         </UncontrolledDropdown>
         {/* <div>{JSON.stringify(young)}</div> */}
       </ActionBox>
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
     </>
   );
 };

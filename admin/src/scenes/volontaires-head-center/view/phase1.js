@@ -12,9 +12,11 @@ import DownloadAttestationButton from "../../../components/buttons/DownloadAttes
 import { toastr } from "react-redux-toastr";
 import Badge from "../../../components/Badge";
 import Select from "../components/Select";
+import ModalConfirm from "../../../components/modals/ModalConfirm";
 
 export default (props) => {
   const [young, setYoung] = useState(props.young);
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const disabled = true;
 
   const updateYoung = async (v) => {
@@ -57,7 +59,6 @@ export default (props) => {
       return (
         <>
           <p>{young.firstName} est en attente d'affectation à un centre de cohésion</p>
-          {ENABLE_ASSIGN_CENTER && user.role === ROLES.ADMIN ? <AssignCenter young={young} onAffect={getYoung} /> : null}
         </>
       );
     if (young.statusPhase1 === "WAITING_LIST")
@@ -131,9 +132,15 @@ export default (props) => {
                         name="cohesionStayPresence"
                         handleChange={(e) => {
                           const value = e.target.value;
-                          if (!confirmMessageChangePhase1Presence(value)) return;
-                          handleChange({ target: { value, name: "cohesionStayPresence" } });
-                          updateYoung({ cohesionStayPresence: value });
+                          setModal({
+                            isOpen: true,
+                            onConfirm: () => {
+                              handleChange({ target: { value, name: "cohesionStayPresence" } });
+                              updateYoung({ cohesionStayPresence: value });
+                            },
+                            title: "Changement de présence",
+                            message: confirmMessageChangePhase1Presence(value),
+                          });
                         }}
                         disabled={disabled}
                       />
@@ -168,6 +175,16 @@ export default (props) => {
           </DownloadAttestationButton>
         ) : null}
       </WrapperPhase1>
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
     </div>
   );
 };

@@ -7,7 +7,7 @@ import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 import LoadingButton from "../buttons/LoadingButton";
 
-export default ({ value, onChange, onSend }) => {
+export default ({ isOpen, value, onChange, onSend }) => {
   const [message, setMessage] = useState();
   const [sending, setSending] = useState(false);
 
@@ -15,13 +15,11 @@ export default ({ value, onChange, onSend }) => {
 
   const send = async () => {
     setSending(true);
-    // await api.post(`/referent/email/correction/${value._id}`, { message, subject: "Demande de correction" });
-    // toastr.success("Email envoyé !");
     onSend(message);
   };
 
   return (
-    <Modal isOpen={true} toggle={onChange}>
+    <Modal isOpen={isOpen} toggle={onChange}>
       <ModalContainer>
         <img src={require("../../assets/close.svg")} height={10} onClick={onChange} />
         <h1>Veuillez précisez le motif du désistement ci-dessous avant de valider.</h1>

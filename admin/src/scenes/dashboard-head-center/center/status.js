@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Col, Row } from "reactstrap";
 import { useSelector } from "react-redux";
-import { YOUNG_STATUS_COLORS } from "../../../utils";
-import { Card, CardTitle, CardValueWrapper, CardValue } from "../../../components/dashboard";
+import { CardComponent } from "../../../components/dashboard";
+import { colors } from "../../../utils";
 
 import api from "../../../services/api";
 
@@ -23,28 +23,13 @@ export default () => {
   return (
     <Row>
       <Col md={6} xl={3}>
-        <Card borderBottomColor="#FEB951">
-          <CardTitle>Places proposées</CardTitle>
-          <CardValueWrapper>
-            <CardValue>{placesTotal}</CardValue>
-          </CardValueWrapper>
-        </Card>
+        <CardComponent color={colors.yellow} title="Places proposées" value={placesTotal} />
       </Col>
       <Col md={6} xl={3}>
-        <Card borderBottomColor="#6BC763">
-          <CardTitle>Places disponibles</CardTitle>
-          <CardValueWrapper>
-            <CardValue>{placesLeft}</CardValue>
-          </CardValueWrapper>
-        </Card>
+        <CardComponent color={colors.green} title="Places disponibles" value={placesLeft} />
       </Col>
       <Col md={6} xl={3}>
-        <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
-          <CardTitle>Taux d'occupation</CardTitle>
-          <CardValueWrapper>
-            <CardValue>{placesTotal ? `${(((placesTotal - placesLeft || 0) * 100) / placesTotal).toFixed(2)}%` : `0%`}</CardValue>
-          </CardValueWrapper>
-        </Card>
+        <CardComponent color={colors.darkPurple} title="Taux d'occupation" value={placesTotal ? `${(((placesTotal - placesLeft || 0) * 100) / placesTotal).toFixed(2)}%` : `0%`} />
       </Col>
     </Row>
   );

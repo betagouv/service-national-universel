@@ -7,7 +7,7 @@ import DownloadButton from "../../components/buttons/DownloadButton";
 import Historic from "../../components/historic";
 import api from "../../services/api";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
-import Panel from "../../components/Panel";
+import Panel, { Info, Details } from "../../components/Panel";
 import { appURL } from "../../config";
 
 export default ({ onChange, value }) => {
@@ -146,27 +146,5 @@ export default ({ onChange, value }) => {
         })}
       </div> */}
     </Panel>
-  );
-};
-
-const Info = ({ children, title, id }) => {
-  return (
-    <div className="info">
-      <div style={{ position: "relative" }}>
-        <div className="info-title">{title}</div>
-      </div>
-      {children}
-    </div>
-  );
-};
-
-const Details = ({ title, value }) => {
-  if (!value) return <div />;
-  if (typeof value === "function") value = value();
-  return (
-    <div className="detail">
-      <div className="detail-title">{`${title} :`}</div>
-      <div className="detail-text">{value}</div>
-    </div>
   );
 };

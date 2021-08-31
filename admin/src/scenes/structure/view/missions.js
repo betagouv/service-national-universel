@@ -4,7 +4,7 @@ import api from "../../../services/api";
 import StructureView from "./wrapper";
 import Panel from "../../missions/panel";
 
-import { formatStringDate } from "../../../utils";
+import { formatStringDateTimezoneUTC } from "../../../utils";
 import SelectStatusMission from "../../../components/selectStatusMission";
 import Loader from "../../../components/Loader";
 
@@ -15,7 +15,7 @@ export default ({ structure }) => {
   useEffect(() => {
     (async () => {
       if (!structure) return;
-      const { ok, data } = await api.get(`/mission/structure/${structure._id}`);
+      const { ok, data } = await api.get(`/structure/${structure._id}/mission`);
       if (ok) setData(data);
     })();
   }, [structure]);
@@ -75,10 +75,10 @@ const Hit = ({ hit, onClick }) => {
       </td>
       <td>
         <div>
-          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Du</span> {formatStringDate(hit.startAt)}
+          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Du</span> {formatStringDateTimezoneUTC(hit.startAt)}
         </div>
         <div>
-          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Au</span> {formatStringDate(hit.endAt)}
+          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Au</span> {formatStringDateTimezoneUTC(hit.endAt)}
         </div>
       </td>
       <td>
@@ -141,121 +141,4 @@ const Table = styled.table`
       background-color: #e6ebfa;
     }
   }
-`;
-
-const Tag = styled.span`
-  background-color: rgb(253, 246, 236);
-  border: 1px solid rgb(250, 236, 216);
-  color: rgb(230, 162, 60);
-  align-self: flex-start;
-  border-radius: 4px;
-  padding: 8px 15px;
-  font-size: 13px;
-  white-space: nowrap;
-  font-weight: 400;
-  cursor: pointer;
-  margin-right: 5px;
-`;
-
-const ButtonContainer = styled.div`
-  button {
-    background-color: #5245cc;
-    margin-left: 1rem;
-    border: none;
-    border-radius: 5px;
-    padding: 7px 30px;
-    font-size: 14px;
-    font-weight: 700;
-    color: #fff;
-    cursor: pointer;
-    :hover {
-      background: #372f78;
-    }
-  }
-`;
-
-const ActionBox = styled.div`
-  .dropdown-menu {
-    min-width: 0;
-    a,
-    div {
-      white-space: nowrap;
-      font-size: 14px;
-      padding: 5px 15px;
-    }
-  }
-  button {
-    background-color: #feb951;
-    border: 1px solid #feb951;
-    display: inline-flex;
-    align-items: center;
-    text-align: left;
-    border-radius: 4px;
-    padding: 0 0 0 12px;
-    font-size: 12px;
-    min-width: 130px;
-    font-weight: 700;
-    color: #fff;
-    cursor: pointer;
-    outline: 0;
-    .edit-icon {
-      height: 17px;
-      margin-right: 10px;
-      path {
-        fill: #fff;
-      }
-    }
-    .down-icon {
-      margin-left: auto;
-      padding: 7px 15px;
-      border-left: 2px solid #fbd392;
-      margin-left: 15px;
-      svg {
-        height: 10px;
-      }
-      svg polygon {
-        fill: #fff;
-      }
-    }
-  }
-  ${({ color }) =>
-    color === "green" &&
-    `
-    button {
-      background-color: transparent;
-      border: 1px solid #6BC763;
-      color: #6BC763;
-      .edit-icon {
-        path {
-          fill: #6BC763;
-        }
-      }
-      .down-icon {
-        border-left: 1px solid #6BC763;
-        svg polygon {
-          fill: #6BC763;
-        }
-      }
-    }  
-  `}
-  ${({ color }) =>
-    color === "red" &&
-    `
-    button {
-      background-color: transparent;
-      border: 1px solid #F1545B;
-      color: #F1545B;
-      .edit-icon {
-        path {
-          fill: #F1545B;
-        }
-      }
-      .down-icon {
-        border-left: 1px solid #F1545B;
-        svg polygon {
-          fill: #F1545B;
-        }
-      }
-    }  
-  `}
 `;

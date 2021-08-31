@@ -1,18 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
-import ModalRefusedApplication from "./modals/ModalRefusedApplication";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
 import api from "../services/api";
 
-import { translate, APPLICATION_STATUS_COLORS, APPLICATION_STATUS, ROLES } from "../utils";
+import { translate, APPLICATION_STATUS_COLORS, APPLICATION_STATUS, ROLES, colors, SENDINBLUE_TEMPLATES } from "../utils";
 import { toastr } from "react-redux-toastr";
 import Chevron from "./Chevron";
+import ModalConfirmWithMessage from "./modals/ModalConfirmWithMessage";
+import ModalConfirm from "./modals/ModalConfirm";
 
 export default ({ hit, options = [], callback }) => {
   const [application, setApplication] = useState(null);
-  const [modal, setModal] = useState(false);
+  const [modalConfirm, setModalConfirm] = useState({ isOpen: false, onConfirm: null });
+  const [modalRefuse, setModalRefuse] = useState({ isOpen: false, onConfirm: null });
+
   const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
@@ -24,7 +27,7 @@ export default ({ hit, options = [], callback }) => {
     })();
   }, [hit._id]);
 
-  if (!application) return <i style={{ color: "#382F79" }}>Chargement...</i>;
+  if (!application) return <i style={{ color: colors.darkPurple }}>Chargement...</i>;
 
   options = [APPLICATION_STATUS.IN_PROGRESS, APPLICATION_STATUS.DONE, APPLICATION_STATUS.ABANDON];
   if (application.status === APPLICATION_STATUS.WAITING_VALIDATION) options = [APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.REFUSED, APPLICATION_STATUS.CANCEL];
@@ -39,9 +42,16 @@ export default ({ hit, options = [], callback }) => {
       APPLICATION_STATUS.ABANDON,
     ];
 
+  const onClickStatus = (status) => {
+    setModalConfirm({
+      isOpen: true,
+      title: "Êtes-vous sûr(e) de vouloir modifier le statut de cette candidature?\nUn email sera automatiquement envoyé.",
+      onConfirm: () => handleClickStatus(status),
+    });
+  };
+
   const handleClickStatus = (status) => {
-    if (!confirm("Êtes-vous sûr(e) de vouloir modifier le statut de cette candidature?\nUn email sera automatiquement envoyé.")) return;
-    if (status === APPLICATION_STATUS.REFUSED) setModal(true);
+    if (status === APPLICATION_STATUS.REFUSED) setModalRefuse({ isOpen: true });
     else setStatus(status);
   };
 
@@ -52,10 +62,12 @@ export default ({ hit, options = [], callback }) => {
       setApplication(data);
       toastr.success("Mis à jour!");
       if (status === APPLICATION_STATUS.VALIDATED) {
-        await api.post(`/application/${data._id}/notify/validated_responsible`);
-        await api.post(`/application/${data._id}/notify/validated_young`);
-      } else {
-        await api.post(`/application/${data._id}/notify/${status.toLowerCase()}`, { message });
+        await api.post(`/application/${data._id}/notify/${SENDINBLUE_TEMPLATES.referent.YOUNG_VALIDATED}`);
+        await api.post(`/application/${data._id}/notify/${SENDINBLUE_TEMPLATES.young.VALIDATE_APPLICATION}`);
+      } else if (status === APPLICATION_STATUS.CANCEL) {
+        await api.post(`/application/${data._id}/notify/${SENDINBLUE_TEMPLATES.referent.CANCEL_APPLICATION}`, { message });
+      } else if (status === APPLICATION_STATUS.REFUSED) {
+        await api.post(`/application/${data._id}/notify/${SENDINBLUE_TEMPLATES.young.REFUSE_APPLICATION}`, { message });
       }
       callback && callback(status);
     } catch (e) {
@@ -73,28 +85,38 @@ export default ({ hit, options = [], callback }) => {
             <Chevron color={APPLICATION_STATUS_COLORS[application.status]} />
           </DropdownToggle>
           <DropdownMenu>
-            {options.map((status) => {
-              return (
-                <DropdownItem key={status} className="dropdown-item" onClick={() => handleClickStatus(status)}>
-                  {translate(status)}
-                </DropdownItem>
-              );
-            })}
+            {options
+              .filter((e) => e !== application.status)
+              .map((status) => {
+                return (
+                  <DropdownItem key={status} className="dropdown-item" onClick={() => onClickStatus(status)}>
+                    {translate(status)}
+                  </DropdownItem>
+                );
+              })}
           </DropdownMenu>
         </UncontrolledDropdown>
-        {/* <div>{JSON.stringify(young)}</div> */}
       </ActionBox>
-      {modal && (
-        <ModalRefusedApplication
-          value={application}
-          structureId={application.structureId}
-          onChange={() => setModal(false)}
-          onSend={(msg) => {
-            setStatus(APPLICATION_STATUS.REFUSED, msg);
-            setModal(null);
-          }}
-        />
-      )}
+      <ModalConfirmWithMessage
+        isOpen={modalRefuse.isOpen}
+        title="Veuillez éditer le message ci-dessous pour préciser les raisons du refus avant de l'envoyer"
+        message={`Une fois le message ci-dessous validé, il sera transmis par mail à ${application.youngFirstName} (${application.youngEmail}).`}
+        onChange={() => setModalRefuse({ isOpen: false, data: null })}
+        onConfirm={(msg) => {
+          setStatus(APPLICATION_STATUS.REFUSED, msg);
+          setModalRefuse({ isOpen: false, onConfirm: null });
+        }}
+      />
+      <ModalConfirm
+        isOpen={modalConfirm?.isOpen}
+        title={modalConfirm?.title}
+        message={modalConfirm?.message}
+        onCancel={() => setModalConfirm({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modalConfirm?.onConfirm();
+          setModalConfirm({ isOpen: false, onConfirm: null });
+        }}
+      />
     </>
   );
 };

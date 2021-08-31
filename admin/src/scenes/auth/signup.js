@@ -9,7 +9,7 @@ import styled from "styled-components";
 import { useHistory } from "react-router-dom";
 
 import { setUser } from "../../redux/auth/actions";
-
+import PasswordEye from "../../components/PasswordEye";
 import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import Header from "./components/header";
@@ -18,7 +18,7 @@ import AuthWrapper from "./components/authWrapper";
 import Title from "./components/title";
 import Subtitle from "./components/subtitle";
 
-import { DEFAULT_STRUCTURE_NAME, translate } from "../../utils";
+import { DEFAULT_STRUCTURE_NAME, translate, colors } from "../../utils";
 
 export default () => {
   const dispatch = useDispatch();
@@ -41,7 +41,7 @@ export default () => {
           <LoginBox>
             <div>
               <Title>Inscrivez votre structure d'accueil</Title>
-              <Subtitle style={{ color: "#6E757C" }}>A destination des structures souhaitant accueillir des volontaires</Subtitle>
+              <Subtitle style={{ color: colors.grey }}>A destination des structures souhaitant accueillir des volontaires</Subtitle>
               <Formik
                 validateOnChange={false}
                 validateOnBlur={false}
@@ -129,17 +129,9 @@ export default () => {
                         </Col>
                       </Row>
                       <StyledFormGroup>
-                        <label htmlFor="password">Mot de passe</label>
-                        <InputField
-                          validate={(v) => validator.isEmpty(v) && "Ce champ est requis"}
-                          name="password"
-                          type="password"
-                          id="repassword"
-                          value={values.password}
-                          onChange={handleChange}
-                          placeholder="Choisissez votre mot de passe"
-                          haserror={errors.password}
-                        />
+                        <label>Mot de passe</label>
+                        <p style={{ fontSize: 12, color: colors.grey }}>👉 Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole</p>
+                        <PasswordEye autoComplete="new-password" value={values.password} onChange={handleChange} />
                         <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.password}</p>
                       </StyledFormGroup>
                       <Submit loading={isSubmitting} type="submit" color="primary">
@@ -167,14 +159,14 @@ const Register = styled.h3`
   position: relative;
   font-size: 1rem;
   text-align: center;
-  color: #6e757c;
+  color: ${colors.grey};
   @media (max-width: 768px) {
     font-size: 0.8rem;
   }
   font-weight: 400;
   margin-bottom: 20px;
   a {
-    color: #32267f;
+    color: ${colors.purple};
     font-weight: 500;
   }
 `;
@@ -225,7 +217,7 @@ const Submit = styled(LoadingButton)`
   border-radius: 0;
   padding: 0.5rem 3rem;
   border: 0;
-  background-color: #5145cd;
+  background-color: ${colors.purple};
   margin-top: 30px;
   margin-bottom: 30px;
   border-radius: 10px;

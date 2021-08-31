@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import { HERO_IMAGES_LIST } from "../../../utils";
 
 export default ({ children }) => {
   return (
@@ -15,7 +16,7 @@ const AuthWrapper = styled.div`
   height: 100%;
   flex-grow: 2;
   position: relative;
-  background: url(${require("../../../assets/login.jpg")}) center no-repeat;
+  background: url(${require(`../../../assets/${HERO_IMAGES_LIST[Math.floor(Math.random() * HERO_IMAGES_LIST.length)]}`)}) center no-repeat;
   background-size: cover;
   ::after {
     content: "";

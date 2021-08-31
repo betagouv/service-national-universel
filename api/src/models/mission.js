@@ -215,10 +215,15 @@ const Schema = new mongoose.Schema({
       description: "La mission peut se réaliser à distance",
     },
   },
-  //
-  //
-  //
-  // state: { type: String },
+
+  isMilitaryPreparation: {
+    type: String,
+    enum: ["true", "false"],
+    default: "false",
+    documentation: {
+      description: "La mission est une préparation militaire",
+    },
+  },
 
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },

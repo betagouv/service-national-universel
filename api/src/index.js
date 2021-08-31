@@ -49,7 +49,7 @@ app.use("/bus", require("./controllers/bus"));
 
 app.get("/", async (req, res) => {
   const d = new Date();
-  res.status(200).send("COUCOU " + d.toLocaleString());
+  res.status(200).send("SNU " + d.toLocaleString());
 });
 
 require("./passport")(app);

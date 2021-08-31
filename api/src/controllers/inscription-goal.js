@@ -43,11 +43,9 @@ router.get("/", passport.authenticate("referent", { session: false }), async (re
   }
 });
 
-router.post("/current", passport.authenticate("referent", { session: false }), async (req, res) => {
-  const { error, value } = Joi.object({ department: Joi.string().required() }).unknown().validate(req.body);
-
+router.get("/:department/current", passport.authenticate("referent", { session: false }), async (req, res) => {
+  const { error, value } = Joi.object({ department: Joi.string().required() }).unknown().validate(req.params);
   if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
-
   try {
     const y2020 = await YoungModel.find({ cohort: "2020", statusPhase1: "WAITING_AFFECTATION", department: value.department }).count();
     const y2021 = await YoungModel.find({ cohort: "2021", status: "VALIDATED", department: value.department }).count();

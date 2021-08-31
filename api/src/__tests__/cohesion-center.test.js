@@ -54,6 +54,15 @@ describe("Cohesion Center", () => {
       const res = await request(getAppHelper()).post("/cohesion-center").send(getNewCohesionCenterFixture());
       expect(res.status).toBe(200);
     });
+    it("should only not be accessible by responsible", async () => {
+      const passport = require("passport");
+      passport.user.role = ROLES.RESPONSIBLE;
+
+      const res = await request(getAppHelper()).post("/cohesion-center").send(getNewCohesionCenterFixture());
+      expect(res.status).toBe(401);
+
+      passport.user.role = ROLES.ADMIN;
+    });
   });
 
   describe("POST cohesion-center/:centerId/assign-young/:youngId", () => {
@@ -104,6 +113,38 @@ describe("Cohesion Center", () => {
 
       const updatedCohesionCenter = await getCohesionCenterById(cohesionCenter._id);
       expect(updatedCohesionCenter.placesLeft).toBe(updatedCohesionCenter.placesTotal - 1);
+    });
+    it("should remove from center's waiting list", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const cohesionCenter = await createCohesionCenter({ ...getNewCohesionCenterFixture(), waitingList: [young._id] });
+
+      const res = await request(getAppHelper())
+        .post("/cohesion-center/" + cohesionCenter._id + "/assign-young/" + young._id)
+        .send();
+      expect(res.status).toBe(200);
+
+      const updatedYoung = await getYoungByIdHelper(young._id);
+      expect(updatedYoung.meetingPointId).toBeFalsy();
+
+      const updatedCohesionCenter = await getCohesionCenterById(cohesionCenter._id);
+      expect(updatedCohesionCenter.waitingList).not.toEqual(expect.arrayContaining([young._id.toString()]));
+    });
+    it("should remove from old center's waiting list", async () => {
+      const oldCohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
+      const young = await createYoungHelper({ ...getNewYoungFixture(), cohesionCenterId: oldCohesionCenter._id });
+      const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
+
+      const res = await request(getAppHelper())
+        .post("/cohesion-center/" + cohesionCenter._id + "/assign-young/" + young._id)
+        .send();
+      expect(res.status).toBe(200);
+
+      const updatedYoung = await getYoungByIdHelper(young._id);
+      expect(updatedYoung.meetingPointId).toBeFalsy();
+      expect(updatedYoung.cohesionCenterId).toEqual(cohesionCenter._id.toString());
+
+      const updatedOldCohesionCenter = await getCohesionCenterById(cohesionCenter._id);
+      expect(updatedOldCohesionCenter.waitingList).not.toEqual(expect.arrayContaining([young._id.toString()]));
     });
   });
 
@@ -207,6 +248,29 @@ describe("Cohesion Center", () => {
         .get("/cohesion-center/young/" + young._id)
         .send();
       expect(res.status).toBe(200);
+    });
+    it("should only allow young to see their own cohesion center", async () => {
+      const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
+      const young = await createYoungHelper({ ...getNewYoungFixture(), cohesionCenterId: cohesionCenter._id });
+      const secondYoung = await createYoungHelper({ ...getNewYoungFixture(), cohesionCenterId: cohesionCenter._id });
+
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
+
+      // Successful request
+      let res = await request(getAppHelper())
+        .get("/cohesion-center/young/" + young._id)
+        .send();
+      expect(res.status).toBe(200);
+
+      // Failed request (not allowed)
+      res = await request(getAppHelper())
+        .get("/cohesion-center/young/" + secondYoung._id)
+        .send();
+      expect(res.status).toBe(401);
+
+      passport.user = previous;
     });
   });
 

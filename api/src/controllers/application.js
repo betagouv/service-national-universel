@@ -1,16 +1,19 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
-const fs = require("fs");
-const path = require("path");
+const Joi = require("joi");
 
 const { capture } = require("../sentry");
 const ApplicationObject = require("../models/application");
 const MissionObject = require("../models/mission");
 const YoungObject = require("../models/young");
 const ReferentObject = require("../models/referent");
-const { sendEmail } = require("../sendinblue");
-const { ERRORS } = require("../utils");
+const { sendTemplate } = require("../sendinblue");
+const { ERRORS, isYoung } = require("../utils");
+const { validateUpdateApplication, validateNewApplication } = require("../utils/validator");
+const { ADMIN_URL, APP_URL } = require("../config");
+const { SUB_ROLES, ROLES, SENDINBLUE_TEMPLATES, department2region } = require("snu-lib");
+const { serializeApplication } = require("../utils/serializer");
 
 const updateStatusPhase2 = async (app) => {
   const young = await YoungObject.findById(app.youngId);
@@ -53,22 +56,28 @@ const updatePlacesMission = async (app) => {
 
 router.post("/", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
   try {
-    const obj = req.body;
-    if (!obj.hasOwnProperty("priority")) {
-      const applications = await ApplicationObject.find({ youngId: obj.youngId });
-      applications.length;
-      obj.priority = applications.length + 1;
+    const { value, error } = validateNewApplication(req.body, req.user);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    if (!value.hasOwnProperty("priority")) {
+      const applications = await ApplicationObject.find({ youngId: value.youngId });
+      value.priority = applications.length + 1;
     }
-    const mission = await MissionObject.findById(obj.missionId);
+    const mission = await MissionObject.findById(value.missionId);
     if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const young = await YoungObject.findById(obj.youngId);
+    const young = await YoungObject.findById(value.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const data = await ApplicationObject.create(obj);
+    // A young can only update create their own applications.
+    if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
+      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+
+    const data = await ApplicationObject.create(value);
     await updateStatusPhase2(data);
     await updatePlacesMission(data);
-    return res.status(200).send({ ok: true, data });
+    return res.status(200).send({ ok: true, data: serializeApplication(data) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
@@ -77,10 +86,23 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false }
 
 router.put("/", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
-    const application = await ApplicationObject.findByIdAndUpdate(req.body._id, req.body, { new: true });
+    const { value, error } = validateUpdateApplication(req.body, req.user);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    const application = await ApplicationObject.findById(value._id);
+    if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    // A young can only update his own application.
+    if (isYoung(req.user) && application.youngId.toString() !== req.user._id.toString()) {
+      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    application.set(value);
+    await application.save();
+
     await updateStatusPhase2(application);
     await updatePlacesMission(application);
-    res.status(200).send({ ok: true, data: application });
+    res.status(200).send({ ok: true, data: serializeApplication(application) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
@@ -89,55 +111,61 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false })
 
 router.get("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const data = await ApplicationObject.findById(req.params.id);
+    const { error, value: id } = Joi.string().required().validate(req.params.id);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    const data = await ApplicationObject.findById(id);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    return res.status(200).send({ ok: true, data });
+    return res.status(200).send({ ok: true, data: serializeApplication(data) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
 
-router.get("/young/:id", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
-  try {
-    let data = await ApplicationObject.find({ youngId: req.params.id });
-    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    for (let i = 0; i < data.length; i++) {
-      const application = data[i]._doc;
-      const mission = await MissionObject.findById(application.missionId);
-      let tutor = {};
-      if (mission?.tutorId) tutor = await ReferentObject.findById(mission.tutorId);
-      if (mission?.tutorId && !application.tutorId) application.tutorId = mission.tutorId;
-      if (mission?.structureId && !application.structureId) application.structureId = mission.structureId;
-      data[i] = { ...application, mission, tutor };
-    }
-    return res.status(200).send({ ok: true, data });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+router.post("/notify/docs-military-preparation", passport.authenticate("young", { session: false }), async (req, res) => {
+  // get the referent_department manager_phase2
+  let toReferent = await ReferentObject.findOne({
+    subRole: SUB_ROLES.manager_phase2,
+    role: ROLES.REFERENT_DEPARTMENT,
+    department: req.user.department,
+  });
+  // if not found, get the referent_region
+  if (!toReferent) {
+    toReferent = await ReferentObject.findOne({
+      subRole: SUB_ROLES.manager_phase2,
+      role: ROLES.REFERENT_REGION,
+      region: department2region[req.user.department],
+    });
   }
-});
-
-router.get("/mission/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
-  try {
-    const data = await ApplicationObject.find({ missionId: req.params.id });
-    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    for (let i = 0; i < data.length; i++) {
-      const application = data[i]._doc;
-      const mission = await MissionObject.findById(application.missionId);
-      data[i] = { ...application, mission };
-    }
-    return res.status(200).send({ ok: true, data });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  // if not found, get the manager_department
+  if (!toReferent) {
+    toReferent = await ReferentObject.findOne({
+      subRole: SUB_ROLES.manager_department,
+      role: ROLES.REFERENT_DEPARTMENT,
+      department: req.user.department,
+    });
   }
+  if (!toReferent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+  const mail = await sendTemplate(parseInt(SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_SUBMITTED), {
+    emailTo: [{ name: `${toReferent.firstName} ${toReferent.lastName}`, email: toReferent.email }],
+    params: { cta: `${ADMIN_URL}/volontaire/${req.user._id}/phase2`, youngFirstName: req.user.firstName, youngLastName: req.user.lastName },
+  });
+  return res.status(200).send({ ok: true, data: mail });
 });
 
 router.post("/:id/notify/:template", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
-    const { id, template } = req.params;
+    const { error, value } = Joi.object({
+      id: Joi.string().required(),
+      template: Joi.string().required(),
+      message: Joi.string().optional(),
+    })
+      .unknown()
+      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const { id, template, message } = value;
 
     const application = await ApplicationObject.findById(id);
     if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -146,77 +174,37 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
     const referent = await ReferentObject.findById(mission.tutorId);
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    let htmlContent = "";
-    let subject = "";
-    let to = {};
-
-    if (template === "waiting_validation") {
-      htmlContent = fs
-        .readFileSync(path.resolve(__dirname, "../templates/application/waitingValidation.html"))
-        .toString()
-        .replace(/{{firstName}}/g, referent.firstName)
-        .replace(/{{lastName}}/g, referent.lastName)
-        .replace(/{{youngFirstName}}/g, application.youngFirstName)
-        .replace(/{{youngLastName}}/g, application.youngLastName)
-        .replace(/{{missionName}}/g, mission.name)
-        .replace(/{{cta}}/g, "https://admin.snu.gouv.fr/volontaire");
-      subject = `${application.youngFirstName} ${application.youngLastName} a candidaté sur votre mission d'intérêt général ${mission.name}`;
-      to = { name: `${referent.firstName} ${referent.lastName}`, email: referent.email };
-    } else if (template === "validated_responsible") {
-      htmlContent = fs
-        .readFileSync(path.resolve(__dirname, "../templates/application/validatedResponsible.html"))
-        .toString()
-        .replace(/{{firstName}}/g, referent.firstName)
-        .replace(/{{lastName}}/g, referent.lastName)
-        .replace(/{{youngFirstName}}/g, application.youngFirstName)
-        .replace(/{{youngLastName}}/g, application.youngLastName)
-        .replace(/{{missionName}}/g, mission.name)
-        .replace(/{{cta}}/g, "https://admin.snu.gouv.fr/volontaire");
-      subject = `${application.youngFirstName} ${application.youngLastName} est validée sur votre mission d'intérêt général ${mission.name}`;
-      to = { name: `${referent.firstName} ${referent.lastName}`, email: referent.email };
-    } else if (template === "validated_young") {
-      htmlContent = fs
-        .readFileSync(path.resolve(__dirname, "../templates/application/validatedYoung.html"))
-        .toString()
-        .replace(/{{firstName}}/g, application.youngFirstName)
-        .replace(/{{lastName}}/g, application.youngLastName)
-        .replace(/{{structureName}}/g, mission.structureName)
-        .replace(/{{youngFirstName}}/g, application.youngFirstName)
-        .replace(/{{youngLastName}}/g, application.youngLastName)
-        .replace(/{{missionName}}/g, mission.name)
-        .replace(/{{cta}}/g, "https://inscription.snu.gouv.fr/auth/login?redirect=candidature");
-      subject = `Votre candidature sur la mission d'intérêt général ${mission.name} a été validée`;
-      to = { name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail };
-    } else if (template === "cancel") {
-      htmlContent = fs
-        .readFileSync(path.resolve(__dirname, "../templates/application/cancel.html"))
-        .toString()
-        .replace(/{{firstName}}/g, referent.firstName)
-        .replace(/{{lastName}}/g, referent.lastName)
-        .replace(/{{youngFirstName}}/g, application.youngFirstName)
-        .replace(/{{youngLastName}}/g, application.youngLastName)
-        .replace(/{{missionName}}/g, mission.name);
-      subject = `${application.youngFirstName} ${application.youngLastName} a annulé sa candidature sur votre mission d'intérêt général ${mission.name}`;
-      to = { name: `${referent.firstName} ${referent.lastName}`, email: referent.email };
-    } else if (template === "refused") {
-      htmlContent = fs
-        .readFileSync(path.resolve(__dirname, "../templates/application/refused.html"))
-        .toString()
-        .replace(/{{firstName}}/g, application.youngFirstName)
-        .replace(/{{lastName}}/g, application.youngLastName)
-        .replace(/{{structureName}}/g, mission.structureName)
-        .replace(/{{missionName}}/g, mission.name)
-        .replace(/{{message}}/g, req.body.message)
-        .replace(/{{cta}}/g, "https://inscription.snu.gouv.fr/auth/login?redirect=mission")
-        .replace(/\n/g, "<br/>");
-      subject = `Votre candidature sur la mission d'intérêt général ${mission.name} a été refusée.`;
-      to = { name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail };
-    } else {
-      return res.status(404).send({ ok: true });
+    if (isYoung(req.user) && req.user._id.toString() !== application.youngId) {
+      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    await sendEmail(to, subject, htmlContent);
-    return res.status(200).send({ ok: true }); //todo
+    let emailTo;
+    // build default values for params
+    // => young name, and mission name
+    let params = { youngFirstName: application.youngFirstName, youngLastName: application.youngLastName, missionName: mission.name };
+
+    if (template === SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION) {
+      emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
+      params = { ...params, cta: `${ADMIN_URL}/volontaire` };
+    } else if (template === SENDINBLUE_TEMPLATES.referent.YOUNG_VALIDATED) {
+      emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
+      params = { ...params, cta: `${ADMIN_URL}/volontaire` };
+    } else if (template === SENDINBLUE_TEMPLATES.young.VALIDATE_APPLICATION) {
+      emailTo = [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }];
+      params = { ...params, cta: `${APP_URL}/candidature` };
+    } else if (template === SENDINBLUE_TEMPLATES.referent.CANCEL_APPLICATION) {
+      emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
+    } else if (template === SENDINBLUE_TEMPLATES.young.REFUSE_APPLICATION) {
+      emailTo = [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }];
+      params = { ...params, message, cta: `${APP_URL}/mission` };
+    } else {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+    const mail = await sendTemplate(template, {
+      emailTo,
+      params,
+    });
+    return res.status(200).send({ ok: true, data: mail });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });

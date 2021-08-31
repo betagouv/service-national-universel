@@ -26,16 +26,7 @@ export default ({ title, handleChange, values, errors, touched }) => {
             onChange={handleChange}
           />
           <ErrorMessage errors={errors} touched={touched} name="mobilityNearRelativeName" />
-          <Field
-            validate={(v) => {
-              if (!v) return requiredMessage;
-            }}
-            placeholder="Adresse"
-            className="form-control"
-            name="mobilityNearRelativeAddress"
-            value={values.mobilityNearRelativeAddress}
-            onChange={handleChange}
-          />
+          <Field placeholder="Adresse" className="form-control" name="mobilityNearRelativeAddress" value={values.mobilityNearRelativeAddress} onChange={handleChange} />
           <ErrorMessage errors={errors} touched={touched} name="mobilityNearRelativeAddress" />
           <Field
             validate={(v) => {
