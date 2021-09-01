@@ -6,6 +6,7 @@ const YoungModel = require("../models/young");
 const CohesionCenterModel = require("../models/cohesionCenter");
 const MeetingPointModel = require("../models/meetingPoint");
 const ReferentModel = require("../models/referent");
+const StructureModel = require("../models/structure");
 const { sendEmail } = require("../sendinblue");
 const path = require("path");
 const fs = require("fs");
@@ -348,6 +349,13 @@ function inSevenDays() {
   return Date.now() + 86400000 * 7;
 }
 
+const userIsResponsibleFromStructureMilitaryPreparation = async (user) => {
+  if (!user || !user.structureId) return false;
+  const structure = await StructureModel.findById(user.structureId);
+  if (!structure) return false;
+  return structure?.isMilitaryPreparation === "true";
+};
+
 const ERRORS = {
   SERVER_ERROR: "SERVER_ERROR",
   NOT_FOUND: "NOT_FOUND",
@@ -395,4 +403,5 @@ module.exports = {
   isYoung,
   isReferent,
   inSevenDays,
+  userIsResponsibleFromStructureMilitaryPreparation,
 };
