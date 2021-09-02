@@ -1,6 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
+import { copyToClipboard } from "../utils";
 
 export const Info = ({ children, title, id }) => {
   return (
@@ -26,7 +27,7 @@ export const Details = ({ title, value, copy, to }) => {
           className="icon"
           icon={require(`../assets/copy.svg`)}
           onClick={() => {
-            navigator.clipboard.writeText(value);
+            copyToClipboard(value);
             toastr.success(`'${title}' a été copié dans le presse papier.`);
           }}
         />
