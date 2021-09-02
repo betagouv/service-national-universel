@@ -9,7 +9,7 @@ const MissionObject = require("../models/mission");
 const YoungObject = require("../models/young");
 const ReferentObject = require("../models/referent");
 const { sendTemplate } = require("../sendinblue");
-const { ERRORS, isYoung, userIsResponsibleFromStructureMilitaryPreparation } = require("../utils");
+const { ERRORS, isYoung } = require("../utils");
 const { validateUpdateApplication, validateNewApplication } = require("../utils/validator");
 const { ADMIN_URL, APP_URL } = require("../config");
 const { SUB_ROLES, ROLES, SENDINBLUE_TEMPLATES, department2region } = require("snu-lib");
@@ -173,9 +173,6 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
     if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const referent = await ReferentObject.findById(mission.tutorId);
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const isReferentInStructureMilitaryPreparation = await userIsResponsibleFromStructureMilitaryPreparation(referent);
-    if (isReferentInStructureMilitaryPreparation && template === SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION)
-      return res.status(200).send({ ok: true, data: "Mail not sent" });
 
     if (isYoung(req.user) && req.user._id.toString() !== application.youngId) {
       return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
