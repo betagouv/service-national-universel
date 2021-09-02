@@ -14,7 +14,6 @@ import UploadCard from "./components/UploadCard";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import AlertBox from "../../components/AlertBox";
 import Loader from "../../components/Loader";
-import { adminURL } from "../../config";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
@@ -114,7 +113,7 @@ export default () => {
                 const responseApplication = await api.put("/application", { _id: app._id, status: "WAITING_VERIFICATION" });
                 if (!responseApplication.ok) toastr.error(translate(responseApplication.code), "Une erreur s'est produite lors du traitement");
               }
-              const responseNotification = await api.post("/application/notify/docs-military-preparation");
+              const responseNotification = await api.post(`/application/notify/docs-military-preparation/${SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_SUBMITTED}`);
               if (!responseNotification.ok) return toastr.error(translate(responseNotification.code), "Une erreur s'est produite lors de l'envoie de la notification.");
               toastr.success("Votre dossier a bien été transmis");
               history.push("/");
