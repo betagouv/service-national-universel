@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 
 import api from "../services/api";
 
-import { translate, YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_COLORS, isEndOfInscriptionManagement2021, ROLES } from "../utils";
+import { translate, YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_COLORS, isEndOfInscriptionManagement2021, ROLES, colors, SENDINBLUE_TEMPLATES } from "../utils";
 import { toastr } from "react-redux-toastr";
 
 import ModalCorrection from "./modals/ModalCorrection";
@@ -13,14 +13,16 @@ import ModalRefused from "./modals/ModalRefused";
 import ModalWithdrawn from "./modals/ModalWithdrawn";
 import ModalGoal from "./modals/ModalGoal";
 import Chevron from "./Chevron";
+import ModalConfirm from "./modals/ModalConfirm";
 
 export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status", phase = YOUNG_PHASE.INSCRIPTION, disabled, callback = () => {} }) => {
   const [modal, setModal] = useState(null);
   const [young, setYoung] = useState(null);
   const user = useSelector((state) => state.Auth.user);
+  const [modalConfirm, setModalConfirm] = useState({ isOpen: false, onConfirm: null });
 
   const getInscriptions = async (department) => {
-    const { data, ok, code } = await api.post(`/inscription-goal/current`, { department });
+    const { data, ok, code } = await api.get(`/inscription-goal/${department}/current`);
     return data;
   };
 
@@ -42,23 +44,33 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
     })();
   }, [hit._id]);
 
-  if (!young) return <i style={{ color: "#382F79" }}>Chargement...</i>;
+  if (!young) return <i style={{ color: colors.darkPurple }}>Chargement...</i>;
 
   const handleClickStatus = async (status) => {
     // Gabrielle says: (https://trello.com/c/JBS3Jn8I/576-inscription-impact-fin-instruction-dossiers-au-6-mai)
     // > Bloquer tous les changements de statuts (sauf désistement)
     if (user.role !== ROLES.ADMIN && phase === YOUNG_PHASE.INSCRIPTION && status !== YOUNG_STATUS.WITHDRAWN && isEndOfInscriptionManagement2021()) {
-      return alert("Les inscriptions sont closes, vous ne pouvez plus faire de changement de statut.");
+      return setModalConfirm({
+        isOpen: true,
+        title: "Les inscriptions sont closes",
+        message: "Vous ne pouvez plus à faire de changement de statut.",
+        confirmText: "OK",
+      });
     }
-
-    if (!confirm("Êtes-vous sûr(e) de vouloir modifier le statut de ce profil?\nUn email sera automatiquement envoyé à l'utlisateur.")) return;
-    if ([YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.REFUSED, YOUNG_STATUS.WITHDRAWN].includes(status)) return setModal(status);
-    // if (status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INSCRIPTION) {
-    //   const youngs = await getInscriptionGoalReachedNormalized(young.department);
-    //   const ratioRegistered = youngs.registered / youngs.max;
-    //   if (ratioRegistered >= 1) return setModal("goal");
-    // }
-    setStatus(status);
+    setModalConfirm({
+      isOpen: true,
+      onConfirm: () => {
+        if ([YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.REFUSED, YOUNG_STATUS.WITHDRAWN].includes(status)) return setModal(status);
+        // if (status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INSCRIPTION) {
+        //   const youngs = await getInscriptionGoalReachedNormalized(young.department);
+        //   const ratioRegistered = youngs.registered / youngs.max;
+        //   if (ratioRegistered >= 1) return setModal("goal");
+        // }
+        setStatus(status);
+      },
+      title: "Modification de statut",
+      message: "Êtes-vous sûr(e) de vouloir modifier le statut de ce profil?\nUn email sera automatiquement envoyé à l'utlisateur.",
+    });
   };
 
   const setStatus = async (status, note) => {
@@ -81,10 +93,11 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
 
       if (status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INSCRIPTION) {
-        await api.post(`/referent/email/validate/${young._id}`, { subject: "Inscription validée", prevStatus });
+        if (prevStatus === "WITHDRAWN") await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_REACTIVATED}`);
+        else await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED}`);
       }
       if (status === YOUNG_STATUS.WAITING_LIST) {
-        // await api.post(`/referent/email/waiting_list/${young._id}`);
+        // await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_LIST}`);
       }
       setYoung(newYoung);
       toastr.success("Mis à jour!");
@@ -97,49 +110,55 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
 
   return (
     <>
-      {modal === YOUNG_STATUS.WAITING_CORRECTION && (
-        <ModalCorrection
-          value={young}
-          onChange={() => setModal(false)}
-          onSend={(msg) => {
-            setStatus(YOUNG_STATUS.WAITING_CORRECTION, msg);
-            setModal(null);
-          }}
-        />
-      )}
-      {modal === YOUNG_STATUS.REFUSED && (
-        <ModalRefused
-          value={young}
-          onChange={() => setModal(false)}
-          onSend={(msg) => {
-            setStatus(YOUNG_STATUS.REFUSED, msg);
-            setModal(null);
-          }}
-        />
-      )}
-      {modal === YOUNG_STATUS.WITHDRAWN && (
-        <ModalWithdrawn
-          value={young}
-          onChange={() => setModal(false)}
-          onSend={(msg) => {
-            setStatus(YOUNG_STATUS.WITHDRAWN, msg);
-            setModal(null);
-          }}
-        />
-      )}
-      {modal === "goal" && (
-        <ModalGoal
-          onChange={() => setModal(false)}
-          onValidate={() => {
-            setStatus(YOUNG_STATUS.VALIDATED);
-            setModal(null);
-          }}
-          callback={() => {
-            setStatus(YOUNG_STATUS.WAITING_LIST);
-            setModal(null);
-          }}
-        />
-      )}
+      <ModalConfirm
+        isOpen={modalConfirm?.isOpen}
+        title={modalConfirm?.title}
+        message={modalConfirm?.message}
+        onCancel={() => setModalConfirm({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modalConfirm?.onConfirm?.();
+          setModalConfirm({ isOpen: false, onConfirm: null });
+        }}
+      />
+      <ModalCorrection
+        isOpen={modal === YOUNG_STATUS.WAITING_CORRECTION}
+        value={young}
+        onChange={() => setModal(false)}
+        onSend={(msg) => {
+          setStatus(YOUNG_STATUS.WAITING_CORRECTION, msg);
+          setModal(null);
+        }}
+      />
+      <ModalRefused
+        isOpen={modal === YOUNG_STATUS.REFUSED}
+        value={young}
+        onChange={() => setModal(false)}
+        onSend={(msg) => {
+          setStatus(YOUNG_STATUS.REFUSED, msg);
+          setModal(null);
+        }}
+      />
+      <ModalWithdrawn
+        isOpen={modal === YOUNG_STATUS.WITHDRAWN}
+        value={young}
+        onChange={() => setModal(false)}
+        onSend={(msg) => {
+          setStatus(YOUNG_STATUS.WITHDRAWN, msg);
+          setModal(null);
+        }}
+      />
+      <ModalGoal
+        isOpen={modal === "goal"}
+        onChange={() => setModal(false)}
+        onValidate={() => {
+          setStatus(YOUNG_STATUS.VALIDATED);
+          setModal(null);
+        }}
+        callback={() => {
+          setStatus(YOUNG_STATUS.WAITING_LIST);
+          setModal(null);
+        }}
+      />
       <ActionBox color={YOUNG_STATUS_COLORS[young[statusName]]}>
         <UncontrolledDropdown setActiveFromChild>
           <DropdownToggle tag="button" disabled={disabled}>
@@ -147,13 +166,15 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
             {!disabled && <Chevron color={YOUNG_STATUS_COLORS[young[statusName]]} />}
           </DropdownToggle>
           <DropdownMenu>
-            {options.map((status) => {
-              return (
-                <DropdownItem key={status} className="dropdown-item" onClick={() => handleClickStatus(status)}>
-                  {translate(status)}
-                </DropdownItem>
-              );
-            })}
+            {options
+              .filter((e) => e !== young[statusName])
+              .map((status) => {
+                return (
+                  <DropdownItem key={status} className="dropdown-item" onClick={() => handleClickStatus(status)}>
+                    {translate(status)}
+                  </DropdownItem>
+                );
+              })}
           </DropdownMenu>
         </UncontrolledDropdown>
         {/* <div>{JSON.stringify(young)}</div> */}

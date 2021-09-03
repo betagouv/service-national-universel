@@ -1,6 +1,7 @@
 import React from "react";
 import { ReactiveList } from "@appbaseio/reactivesearch";
 import { TopResultStats, BottomResultStats } from "./list";
+import { getResultLabel } from "../utils";
 
 export default (props) => {
   return (
@@ -9,22 +10,18 @@ export default (props) => {
       componentId="result"
       pagination={true}
       paginationAt="both"
-      innerClass={{ pagination: "pagination" }}
+      innerClass={{ pagination: "pagination", sortOptions: "sort-options" }}
       size={10}
       dataField="createdAt"
       sortBy="desc"
       showLoader={true}
-      loader={<div style={{ padding: "0 20px" }}>Chargement...</div>}
-      renderNoResults={() => <div style={{ padding: "10px 25px" }}>Aucun résultat.</div>}
+      loader={<div style={{ position: "absolute", width: "100%", textAlign: "center", padding: "1rem", fontSize: "0.85rem" }}>Chargement...</div>}
+      renderNoResults={() => <div style={{ textAlign: "center", padding: "1rem", fontSize: "0.85rem" }}>Aucun résultat.</div>}
       renderResultStats={(e) => {
         return (
           <>
-            <TopResultStats>
-              Affiche {e.displayedResults * e.currentPage + 1} à {e.displayedResults * (e.currentPage + 1)} résultats sur {e.numberOfResults} résultats
-            </TopResultStats>
-            <BottomResultStats>
-              Affiche {e.displayedResults * e.currentPage + 1} à {e.displayedResults * (e.currentPage + 1)} résultats sur {e.numberOfResults} résultats
-            </BottomResultStats>
+            <TopResultStats>{getResultLabel(e)}</TopResultStats>
+            <BottomResultStats>{getResultLabel(e)}</BottomResultStats>
           </>
         );
       }}

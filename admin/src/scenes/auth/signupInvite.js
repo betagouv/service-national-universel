@@ -13,7 +13,7 @@ import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import Header from "./components/header";
 
-import { translate, ROLES } from "../../utils";
+import { translate, ROLES, colors } from "../../utils";
 import Loader from "../../components/Loader";
 import LoginBox from "./components/loginBox";
 import AuthWrapper from "./components/authWrapper";
@@ -76,7 +76,7 @@ export default () => {
                   if (e.code === "PASSWORD_NOT_VALIDATED")
                     return toastr.error(
                       "Mot de passe incorrect",
-                      "Votre mot de passe doit contenir au moins 10 caractères, dont une majuscule, une minuscule, un chiffre et un symbole",
+                      "Votre mot de passe doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole",
                       { timeOut: 10000 }
                     );
                   if (e.code === "USER_ALREADY_REGISTERED") return toastr.error("Votre compte est déja activé. Veuillez vous connecter", { timeOut: 10000 });
@@ -139,6 +139,7 @@ export default () => {
                       <label htmlFor="password">Mot de passe</label>
                       <InputField
                         validate={(v) => validator.isEmpty(v) && "Ce champ est requis"}
+                        autoComplete="new-password"
                         name="password"
                         type="password"
                         id="repassword"
@@ -219,7 +220,7 @@ const Submit = styled(LoadingButton)`
   border-radius: 0;
   padding: 0.5rem 3rem;
   border: 0;
-  background-color: #5145cd;
+  background-color: ${colors.purple};
   margin-top: 30px;
   margin-bottom: 30px;
   border-radius: 10px;

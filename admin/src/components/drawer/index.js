@@ -3,7 +3,7 @@ import { NavLink, Link } from "react-router-dom";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { environment } from "../../config";
-import { ROLES } from "../../utils";
+import { ROLES, colors } from "../../utils";
 
 const DrawerTab = ({ title, to, onClick }) => (
   <li onClick={onClick}>
@@ -109,6 +109,7 @@ export default (props) => {
         <HeaderSideBar to="/">
           <img src={require("../../assets/logo-snu.png")} height={38} />
           {getName()}
+          <Burger onClick={handleClick} src={require("../../assets/burger.svg")} />
         </HeaderSideBar>
       </Logo>
       {environment !== "production" && environmentBannerVisible ? (
@@ -134,7 +135,7 @@ const HeaderSideBar = styled(Link)`
 `;
 
 const EnvironmentBanner = styled.div`
-  background: #d33c4a;
+  background: ${colors.red};
   color: white;
   font-style: italic;
   font-weight: 500;
@@ -145,9 +146,23 @@ const EnvironmentBanner = styled.div`
     opacity: 0.5;
   }
 `;
+const Burger = styled.img`
+  display: none;
+  @media (max-width: 1000px) {
+    margin-left: auto;
+    margin-right: 0 !important;
+    display: block;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    object-fit: contain;
+    cursor: pointer;
+  }
+`;
 
 const Logo = styled.h1`
-  background: #372f78;
+  background: ${colors.darkPurple};
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 0;
   padding: 15px 20px 15px;
@@ -173,22 +188,22 @@ const Sidebar = styled.div`
   ::-webkit-scrollbar {
     display: none;
   }
-  @media (max-width: 767px) {
+  @media (max-width: 1000px) {
     transform: translateX(${({ open }) => (open ? 0 : "-105%")});
     opacity: 1;
     visibility: visible;
     height: 100vh;
-    width: 100vw;
+    width: 60vw;
     z-index: 11;
     position: fixed;
   }
-  background-color: #362f78;
+  background-color: ${colors.darkPurple};
   width: 15%;
   position: sticky;
   top: 0;
   bottom: 0;
   left: 0;
-  z-index: 1;
+  z-index: 20;
   height: 100vh;
   min-width: 250px;
   overflow-y: auto;
@@ -202,19 +217,19 @@ const Sidebar = styled.div`
       color: #fff;
       font-weight: 400;
       font-size: 16px;
-      border-bottom: 1px solid rgba(82, 69, 204, 0.5);
+      border-bottom: 1px solid ${colors.transPurple};
       transition: 0.2s;
       i {
         font-size: 0.7rem;
       }
     }
-    a.active {
-      font-weight: 700;
-      background: #5245cc;
+    a:hover {
+      background: ${colors.transPurple};
       box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.1);
     }
-    a:hover {
-      background: #5245cc;
+    a.active {
+      font-weight: 700;
+      background: ${colors.purple};
       box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.1);
     }
   }

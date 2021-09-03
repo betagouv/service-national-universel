@@ -1,5 +1,5 @@
 import styled from "styled-components";
-
+import { colors } from "../../utils";
 export default styled.li`
   min-width: 90px;
   margin: 0 0.3rem;
@@ -30,7 +30,7 @@ export default styled.li`
       left: 0;
       right: 0;
       height: 4px;
-      background-color: #5245CC;
+      background-color: ${colors.purple};
       border-top-left-radius: 4px;
       border-top-right-radius: 4px;
     }

@@ -23,6 +23,7 @@
     "@babel/preset-react": "^7.13.13",
     "@babel/runtime-corejs3": "^7.14.0",
     "@pmmmwh/react-refresh-webpack-plugin": "^0.4.3",
+    "@sentry/webpack-plugin": "^1.17.1",
     "copy-webpack-plugin": "^7.0.0",
     "css-loader": "^5.0.1",
     "file-loader": "^6.2.0",
@@ -31,15 +32,14 @@
     "react-refresh": "^0.9.0",
     "style-loader": "^2.0.0",
     "svg-inline-loader": "^0.8.0",
-    "webpack": "^5.37.0",
-    "webpack-bundle-analyzer": "^3.0.4",
-    "webpack-cli": "^4.7.0",
-    "webpack-dev-server": "^3.11.1",
-    "webpack-manifest-plugin": "^2.0.3"
+    "webpack": "^5.51.1",
+    "webpack-cli": "^4.8.0",
+    "webpack-dev-server": "^3.11.2"
   },
   "dependencies": {
     "@appbaseio/reactivesearch": "^3.14.0",
-    "@sentry/browser": "^5.22.3",
+    "@sentry/react": "^6.11.0",
+    "@sentry/tracing": "^6.11.0",
     "babel-loader": "^8.2.2",
     "bootstrap": "^4.5.2",
     "core-js": "^3.12.1",
@@ -58,6 +58,7 @@
     "query-string": "^6.14.1",
     "react": "^16.13.1",
     "react-autosuggest": "^10.0.4",
+    "react-beautiful-dnd": "^13.1.0",
     "react-dom": "^16.13.1",
     "react-loading": "^2.0.3",
     "react-multi-select-component": "^3.0.7",
@@ -71,7 +72,7 @@
     "snu-lib": "file:../lib",
     "styled-components": "^5.1.1",
     "validator": "^13.1.1",
-    "xlsx": "^0.16.9"
+    "xlsx": "^0.17.0"
   },
   "engines": {
     "node": "^14.14",

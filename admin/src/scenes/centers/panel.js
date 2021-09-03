@@ -8,13 +8,15 @@ import { useSelector } from "react-redux";
 
 import { translate, ROLES } from "../../utils";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
-import Panel from "../../components/Panel";
+import Panel, { Info, Details } from "../../components/Panel";
 import api from "../../services/api";
+import ModalConfirm from "../../components/modals/ModalConfirm";
 
 export default ({ onChange, center }) => {
   const history = useHistory();
   const [headCenter, setHeadCenter] = useState();
   const user = useSelector((state) => state.Auth.user);
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
   useEffect(() => {
     (async () => {
@@ -27,14 +29,17 @@ export default ({ onChange, center }) => {
     })();
   }, [center]);
 
-  const handleDelete = async () => {
-    if (!confirm("Êtes-vous sûr(e) de vouloir supprimer ce centre ?")) return;
+  const onClickDelete = () => {
+    setModal({ isOpen: true, onConfirm: onConfirmDelete, title: "Êtes-vous sûr(e) de vouloir supprimer ce centre de cohésion ?", message: "Cette action est irréversible." });
+  };
+
+  const onConfirmDelete = async () => {
     try {
       const { ok, code } = await api.remove(`/cohesion-center/${center._id}`);
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       toastr.success("Ce centre a été supprimé.");
-      return history.push(`/centre`);
+      return history.go(0);
     } catch (e) {
       console.log(e);
       return toastr.error("Oups, une erreur est survenue pendant la supression du centre :", translate(e.code));
@@ -61,18 +66,16 @@ export default ({ onChange, center }) => {
         </div>
         {user.role === ROLES.ADMIN ? (
           <div style={{ display: "flex" }}>
-            <PanelActionButton onClick={handleDelete} icon="bin" title="Supprimer" />
+            <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" />
           </div>
         ) : null}
       </div>
-      <div className="info">
-        <div className="title">{`${center.placesTotal - center.placesLeft} volontaire(s) affecté(s)`}</div>
+      <Info title={`${center.placesTotal - center.placesLeft} volontaire(s) affecté(s)`}>
         {center.placesTotal - center.placesLeft > 0 ? (
           <Link to={`/centre/${center._id}/volontaires`}>
             <PanelActionButton style={{ marginBottom: "1rem" }} icon="eye" title="Consulter tous les volontaires affectés" />
           </Link>
         ) : null}
-
         <Row>
           <Col md={6}>
             <div>
@@ -87,63 +90,34 @@ export default ({ onChange, center }) => {
             </div>
           </Col>
         </Row>
-      </div>
-      <div className="info">
-        <div className="title">À propos du centre</div>
-        <div className="detail">
-          <div className="detail-title">Code</div>
-          <div className="detail-text">{center.code}</div>
-        </div>
-        <div className="detail">
-          <div className="detail-title">Adresse</div>
-          <div className="detail-text">{center.address}</div>
-        </div>
-        <div className="detail">
-          <div className="detail-title">City</div>
-          <div className="detail-text">{center.city}</div>
-        </div>
-        <div className="detail">
-          <div className="detail-title">Code postal</div>
-          <div className="detail-text">{center.zip}</div>
-        </div>
-        <div className="detail">
-          <div className="detail-title">Dép.</div>
-          <div className="detail-text">{center.department}</div>
-        </div>
-        <div className="detail">
-          <div className="detail-title">Région</div>
-          <div className="detail-text">{center.region}</div>
-        </div>
+      </Info>
+      <Info title="À propos du centre">
+        <Details title="Code" value={center.code} copy />
+        <Details title="Adresse" value={center.address} />
+        <Details title="Ville" value={center.city} />
+        <Details title="Code postal" value={center.zip} />
+        <Details title="Dép." value={center.department} />
+        <Details title="Région" value={center.region} />
         {headCenter ? (
           <>
-            <div className="detail">
-              <div className="detail-title">Chef</div>
-              <div className="detail-text">
-                <Link to={`/user/${headCenter._id}`}>{`${headCenter.firstName} ${headCenter.lastName}`}</Link>
-              </div>
-            </div>
-            <div className="detail">
-              <div className="detail-title">E-mail</div>
-              <a href={`mailto:${headCenter.email}`} style={{ textDecoration: "underline" }}>
-                <div className="detail-text">{headCenter.email}</div>
-              </a>
-            </div>
-            <div className="detail">
-              <div className="detail-title">Tel fixe</div>
-              <div className="detail-text">{headCenter.phone}</div>
-            </div>
-            <div className="detail">
-              <div className="detail-title">Tel Mobile</div>
-              <div className="detail-text">{headCenter.mobile}</div>
-            </div>
+            {/* <Link to={`/user/${headCenter._id}`}>{`${headCenter.firstName} ${headCenter.lastName}`}</Link> */}
+            <Details title="Chef" value={`${headCenter.firstName} ${headCenter.lastName}`} />
+            <Details title="E-mail" value={headCenter.email} copy />
+            <Details title="Tel. fixe" value={headCenter.phone} copy />
+            <Details title="Tel. mobile" value={headCenter.mobile} copy />
           </>
         ) : null}
-
-        {/* <div className="detail">
-        <div className="detail-title">Tenue livrées</div>
-        <div className="detail-text">{translate(center.outfitDelivered)}</div>
-      </div> */}
-      </div>
+      </Info>
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
     </Panel>
   );
 };

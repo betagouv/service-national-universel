@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
-import styled from "styled-components";
 import { useSelector } from "react-redux";
 
 import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
-import { formatStringDate, translate, getFilterLabel, formatLongDateFR, formatDateFR, ES_NO_LIMIT, ROLES } from "../../utils";
+import { formatStringDateTimezoneUTC, translate, getFilterLabel, formatLongDateFR, formatDateFRTimezoneUTC, ES_NO_LIMIT, ROLES } from "../../utils";
 import SelectStatusMission from "../../components/selectStatusMission";
 import VioletButton from "../../components/buttons/VioletButton";
 import Loader from "../../components/Loader";
@@ -17,10 +16,11 @@ import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine } from 
 import Chevron from "../../components/Chevron";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 
-const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "TUTOR", "REGION", "DEPARTMENT", "STRUCTURE"];
+const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "TUTOR", "REGION", "DEPARTMENT", "STRUCTURE", "MILITARY_PREPARATION"];
 
 export default () => {
   const [mission, setMission] = useState(null);
+  const [structure, setStructure] = useState();
   const [structureIds, setStructureIds] = useState();
   const [filterVisible, setFilterVisible] = useState(false);
   const user = useSelector((state) => state.Auth.user);
@@ -34,9 +34,16 @@ export default () => {
   useEffect(() => {
     if (user.role !== ROLES.SUPERVISOR) return;
     (async () => {
-      const { data } = await api.get(`/structure/network/${user.structureId}`);
+      const { data } = await api.get(`/structure/${user.structureId}/children`);
       const ids = data.map((s) => s._id);
       setStructureIds(ids);
+    })();
+    return;
+  }, []);
+  useEffect(() => {
+    (async () => {
+      const { data } = await api.get(`/structure/${user.structureId}`);
+      setStructure(data);
     })();
     return;
   }, []);
@@ -51,13 +58,13 @@ export default () => {
               <div style={{ flex: 1 }}>
                 <Title>Missions</Title>
               </div>
-              {user.role === ROLES.RESPONSIBLE && user.structureId && (
+              {user.role === ROLES.RESPONSIBLE && user.structureId && structure && structure.status !== "DRAFT" ? (
                 <Link to={`/mission/create/${user.structureId}`}>
                   <VioletButton>
                     <p>Nouvelle mission</p>
                   </VioletButton>
                 </Link>
-              )}
+              ) : null}
               <ExportComponent
                 title="Exporter les missions"
                 defaultQuery={getExportQuery}
@@ -66,12 +73,11 @@ export default () => {
                 transformAll={async (data) => {
                   const tutorIds = [...new Set(data.map((item) => item.tutorId).filter((e) => e))];
                   if (tutorIds?.length) {
-                    const { responses } = await api.esQuery([
-                      { index: "referent", type: "_doc" },
-                      { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: tutorIds } } },
-                    ]);
-                    const tutors = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-                    return data.map((item) => ({ ...item, tutor: tutors?.find((e) => e._id === item.tutorId) }));
+                    const { responses } = await api.esQuery("referent", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: tutorIds } } });
+                    if (responses.length) {
+                      const tutors = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+                      return data.map((item) => ({ ...item, tutor: tutors?.find((e) => e._id === item.tutorId) }));
+                    }
                   }
                   return data;
                 }}
@@ -87,9 +93,9 @@ export default () => {
                     "Prénom du tuteur": data.tutor?.firstName,
                     "Email du tuteur": data.tutor?.email,
                     "Téléphone du tuteur": data.tutor?.mobile ? data.tutor?.mobile : data.tutor?.phone,
-                    "Liste des domaines de la mission": data.domains,
-                    "Date du début": formatDateFR(data.startAt),
-                    "Date de fin": formatDateFR(data.endAt),
+                    "Liste des domaines de la mission": data.domains?.map(translate),
+                    "Date du début": formatDateFRTimezoneUTC(data.startAt),
+                    "Date de fin": formatDateFRTimezoneUTC(data.endAt),
                     Format: data.format,
                     Fréquence: data.frequence,
                     Période: data.period,
@@ -121,6 +127,8 @@ export default () => {
                   // fuzziness={1}
                   style={{ flex: 1, marginRight: "1rem" }}
                   innerClass={{ input: "searchbox" }}
+                  URLParams={true}
+                  queryFormat="and"
                   autosuggest={false}
                 />
                 <MultiDropdownList
@@ -181,6 +189,20 @@ export default () => {
                   showSearch={true}
                   searchPlaceholder="Rechercher..."
                 />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Préparation Militaire"
+                  componentId="MILITARY_PREPARATION"
+                  dataField="isMilitaryPreparation.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "MILITARY_PREPARATION") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  renderLabel={(items) => getFilterLabel(items, "Préparation Militaire")}
+                />
                 {user.role === ROLES.SUPERVISOR ? (
                   <MultiDropdownList
                     defaultQuery={getDefaultQuery}
@@ -201,6 +223,14 @@ export default () => {
               <ReactiveListComponent
                 defaultQuery={getDefaultQuery}
                 react={{ and: FILTERS }}
+                sortOptions={[
+                  { label: "Date de création (récent > ancien)", dataField: "createdAt", sortBy: "desc" },
+                  { label: "Date de création (ancien > récent)", dataField: "createdAt", sortBy: "asc" },
+                  { label: "Nombre de place (croissant)", dataField: "placesLeft", sortBy: "asc" },
+                  { label: "Nombre de place (décroissant)", dataField: "placesLeft", sortBy: "desc" },
+                  { label: "Nom de la mission (A > Z)", dataField: "name.keyword", sortBy: "asc" },
+                  { label: "Nom de la mission (Z > A)", dataField: "name.keyword", sortBy: "desc" },
+                ]}
                 render={({ data }) => (
                   <Table>
                     <thead>
@@ -213,7 +243,15 @@ export default () => {
                     </thead>
                     <tbody>
                       {data.map((hit) => (
-                        <Hit key={hit._id} hit={hit} onClick={() => setMission(hit)} selected={mission?._id === hit._id} />
+                        <Hit
+                          key={hit._id}
+                          hit={hit}
+                          onClick={(m) => setMission(m)}
+                          selected={mission?._id === hit._id}
+                          callback={(e) => {
+                            if (e._id === mission?._id) setMission(e);
+                          }}
+                        />
                       ))}
                     </tbody>
                   </Table>
@@ -228,34 +266,45 @@ export default () => {
   );
 };
 
-const Hit = ({ hit, onClick, selected }) => {
-  // console.log("h", hit);
+const Hit = ({ hit, onClick, selected, callback }) => {
+  const [value, setValue] = useState(null);
+
+  const onChangeStatus = (e) => {
+    setValue(e);
+    callback(e);
+  };
+
+  useEffect(() => {
+    setValue(hit);
+  }, [hit._id]);
+
+  if (!value) return <></>;
   return (
-    <tr style={{ backgroundColor: selected && "#e6ebfa" }} onClick={onClick}>
+    <tr style={{ backgroundColor: selected && "#e6ebfa" }} onClick={() => onClick(value)}>
       <td>
         <MultiLine>
-          <h2>{hit.name}</h2>
+          <h2>{value.name}</h2>
           <p>
-            {hit.structureName} {`• ${hit.city} (${hit.department})`}
+            {value.structureName} {`• ${value.city} (${value.department})`}
           </p>
         </MultiLine>
       </td>
       <td>
         <div>
-          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Du</span> {formatStringDate(hit.startAt)}
+          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Du</span> {formatStringDateTimezoneUTC(value.startAt)}
         </div>
         <div>
-          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Au</span> {formatStringDate(hit.endAt)}
+          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Au</span> {formatStringDateTimezoneUTC(value.endAt)}
         </div>
       </td>
       <td>
-        {hit.placesTotal <= 1 ? `${hit.placesTotal} place` : `${hit.placesTotal} places`}
+        {value.placesTotal <= 1 ? `${value.placesTotal} place` : `${value.placesTotal} places`}
         <div style={{ fontSize: 12, color: "rgb(113,128,150)" }}>
-          {hit.placesTotal - hit.placesLeft} / {hit.placesTotal}
+          {value.placesTotal - value.placesLeft} / {value.placesTotal}
         </div>
       </td>
       <td onClick={(e) => e.stopPropagation()}>
-        <SelectStatusMission hit={hit} />
+        <SelectStatusMission hit={value} callback={onChangeStatus} />
       </td>
     </tr>
   );

@@ -35,18 +35,18 @@ export default () => {
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
   useEffect(() => {
     (async () => {
-      const { data, ok } = await api.get(`/structure/all`);
+      const { data, ok } = await api.get("/structure");
       if (!ok) return;
       setStructures(data);
     })();
     (async () => {
-      const { data, ok } = await api.get(`/department-service/all`);
+      const { data, ok } = await api.get(`/department-service`);
       if (!ok) return;
       setServices(data);
     })();
     if (user.role !== ROLES.SUPERVISOR) return;
     (async () => {
-      const { data } = await api.get(`/structure/network/${user.structureId}`);
+      const { data } = await api.get(`/structure/${user.structureId}/children`);
       const ids = data.map((s) => s._id);
       setStructureIds(ids);
     })();
@@ -113,6 +113,7 @@ export default () => {
                   style={{ flex: 1, marginRight: "1rem" }}
                   innerClass={{ input: "searchbox" }}
                   autosuggest={false}
+                  URLParams={true}
                   queryFormat="and"
                 />
                 <MultiDropdownList

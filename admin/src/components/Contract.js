@@ -5,7 +5,7 @@ import { Formik, Field } from "formik";
 import { useHistory } from "react-router-dom";
 import { appURL } from "../config";
 import { useSelector } from "react-redux";
-import { APPLICATION_STATUS_COLORS, dateForDatePicker, getAge, ROLES } from "../utils";
+import { APPLICATION_STATUS_COLORS, dateForDatePicker, getAge, ROLES, translate, isReferentOrAdmin } from "../utils";
 import api from "../services/api";
 import DownloadAttestationButton from "./buttons/DownloadAttestationButton";
 import Loader from "./Loader";
@@ -18,6 +18,7 @@ import LoadingButton from "./buttons/LoadingButton";
 
 export default ({ young, admin }) => {
   const history = useHistory();
+  const user = useSelector((state) => state.Auth.user);
 
   let { applicationId } = useParams();
   // manager_department
@@ -30,11 +31,16 @@ export default ({ young, admin }) => {
   const [tutor, setTutor] = useState(null);
   const [managerDepartment, setManagerDepartment] = useState(null);
   const [structure, setStructure] = useState(null);
-  const [loadings, setLoadings] = useState([false, false]);
+  const [loadings, setLoadings] = useState({
+    saveButton: false,
+    submitButton: false,
+  });
   useEffect(() => {
     const getApplication = async () => {
       if (!young) return;
-      let { ok, data, code } = await api.get(`/application/young/${young._id}`);
+      // todo : why not just
+      // let { ok, data, code } = await api.get(`/application/${applicationId}`);
+      let { ok, data, code } = await api.get(`/young/${young._id}/application`);
       if (!ok) return toastr.error("Oups, une erreur est survenue", code);
       const currentApplication = data.find((e) => e._id === applicationId);
 
@@ -58,19 +64,33 @@ export default ({ young, admin }) => {
   }, [application]);
   useEffect(() => {
     const getTutor = async () => {
-      if (!application || !(application.tutorId || application.tutor?._id)) return;
-      const { ok, data, code } = await api.get(`/referent/${application.tutorId || application.tutor?._id}`);
-      if (!ok) return toastr.error("Oups, une erreur est survenue", code);
-      return setTutor(data);
+      try {
+        if (!application || !(application.tutorId || application.tutor?._id)) return setTutor({});
+        const { ok, data, code } = await api.get(`/referent/${application.tutorId || application.tutor?._id}`);
+        if (!ok) {
+          toastr.warning(translate(code), `Aucun représentant de la structure n'a été trouvé`, { timeOut: 5000 });
+          return setTutor({});
+        }
+        return setTutor(data);
+      } catch (e) {
+        return setTutor({});
+      }
     };
     getTutor();
   }, [application]);
   useEffect(() => {
     const getManagerDepartment = async () => {
-      if (!young) return;
-      const { ok, data, code } = await api.get(`/referent/manager_department/${young.department}`);
-      if (!ok) return toastr.error("Oups, une erreur est survenue", code);
-      return setManagerDepartment(data);
+      try {
+        if (!young) return;
+        const { ok, data, code } = await api.get(`/referent/manager_department/${young.department}`);
+        if (!ok) {
+          toastr.warning(translate(code), `Aucun représentant de l'état n'a été trouvé pour le département ${young.department}`, { timeOut: 5000 });
+          return setManagerDepartment({});
+        }
+        return setManagerDepartment(data);
+      } catch (e) {
+        setManagerDepartment({});
+      }
     };
     getManagerDepartment();
   }, [young]);
@@ -84,7 +104,48 @@ export default ({ young, admin }) => {
     getStructure();
   }, [application]);
 
-  if (!application || !mission) return <Loader />;
+  const onSubmit = async (values) => {
+    try {
+      values.sendMessage
+        ? setLoadings({
+            saveButton: false,
+            submitButton: true,
+          })
+        : setLoadings({
+            saveButton: true,
+            submitButton: false,
+          });
+      const { ok, code } = await api.post(`/contract`, {
+        ...values,
+        youngId: young._id,
+        structureId: structure._id,
+        applicationId: application._id,
+        missionId: mission._id,
+        tutorId: tutor?._id,
+        isYoungAdult: isYoungAdult ? "true" : "false",
+      });
+      setLoadings({
+        saveButton: false,
+        submitButton: false,
+      });
+      if (!ok) return toastr.error("Erreur !", translate(code));
+      if (values.sendMessage) {
+        toastr.success("Le message a été envoyé aux parties prenantes");
+      } else {
+        toastr.success("Contrat sauvegardé");
+      }
+      // Refresh
+      history.go(0);
+    } catch (e) {
+      setLoadings({
+        saveButton: false,
+        submitButton: false,
+      });
+      toastr.error("Erreur !", translate(e.code));
+    }
+  };
+
+  if (!application || !mission || !managerDepartment || !tutor) return <Loader />;
 
   const isYoungAdult = getAge(young.birthdateAt) >= 18;
 
@@ -158,13 +219,21 @@ export default ({ young, admin }) => {
       </BackLink>
       <Box>
         <Bloc title="Contrat d’engagement en mission d’intérêt général">
-          <div style={{ display: "grid", gridAutoColumns: "1fr", gridAutoFlow: "column" }}>
-            <div style={{ display: "flex" }}>
-              <p style={{ flex: 1 }}>Ce contrat doit être validé par le(s) représentant(s) légal(aux) du volontaire, le tuteur de mission et le référent départemental.</p>
+          <div style={{ display: "flex" }}>
+            <div style={{ flex: 1, marginRight: "1rem", fontSize: "0.8rem", fontStyle: "italic", color: "#444" }}>
+              <p>Ce contrat doit être validé par le(s) représentant(s) légal(aux) du volontaire, le tuteur de mission et le référent départemental.</p>
+              {isReferentOrAdmin(user) ? (
+                <p>
+                  La structure d'accueil doit envoyer le contrat d'engagement après validation de la candidature. Néanmoins vous pouvez le faire en rattrapage et suivi d'une
+                  structure.
+                </p>
+              ) : (
+                <p>La structure d'accueil doit envoyer le contrat d'engagement après validation de la candidature. </p>
+              )}
             </div>
             <div style={{ textAlign: "right" }}>
               {contract?.invitationSent === "true" ? (
-                <Badge text="Contrat envoyé" style={{ verticalAlign: "top" }} />
+                <Badge text="Contrat envoyé" style={{ verticalAlign: "top" }} color={APPLICATION_STATUS_COLORS.VALIDATED} />
               ) : (
                 <Badge text="Contrat pas encore envoyé" style={{ verticalAlign: "top" }} />
               )}
@@ -190,38 +259,7 @@ export default ({ young, admin }) => {
           Télécharger le contrat
         </DownloadContractButton>
       ) : (
-        <Formik
-          validateOnChange={false}
-          validateOnBlur={false}
-          initialValues={initialValues}
-          onSubmit={async (values, actions) => {
-            try {
-              values.sendMessage ? setLoadings([false, true]) : setLoadings([true, false]);
-              const { ok, code } = await api.post(`/contract`, {
-                ...values,
-                youngId: young._id,
-                structureId: structure._id,
-                applicationId: application._id,
-                missionId: mission._id,
-                tutorId: tutor._id,
-                isYoungAdult: isYoungAdult ? "true" : "false",
-              });
-              setLoadings([false, false]);
-              if (!ok) return toastr.error("Erreur !", translate(code));
-              if (values.sendMessage) {
-                toastr.success("Le message a été envoyé aux parties prenantes");
-              } else {
-                toastr.success("Contrat sauvegardé");
-              }
-              // Refresh
-              history.go(0);
-            } catch (e) {
-              setLoadings([false, false]);
-              toastr.error("Erreur !", translate(e.code));
-            }
-            actions.setSubmitting(false);
-          }}
-        >
+        <Formik validateOnChange={false} validateOnBlur={false} initialValues={initialValues} onSubmit={onSubmit}>
           {({ values, errors, touched, isSubmitting, handleChange, handleSubmit, setFieldValue, validateForm }) => {
             const context = { values, errors, touched, handleChange };
             return (
@@ -657,24 +695,24 @@ export default ({ young, admin }) => {
                 <div style={{ display: "flex", justifyContent: "center" }}>
                   <LoadingButton
                     onClick={async () => {
-                      const erroredFields = await validateForm();
-                      if (Object.keys(erroredFields).length) toastr.error("Il y a des erreurs dans le formulaire");
                       if (contract?.invitationSent === "true") {
                         const confirmText =
                           "Si vous enregistrez les modifications, les parties prenantes ayant validé recevront une notification et devront à nouveau valider le contrat d'engagment. De la même manière, les parties prenantes dont l'email a été modifié recevront également un email.";
                         if (confirm(confirmText)) {
+                          const erroredFields = await validateForm();
+                          if (Object.keys(erroredFields).length) return toastr.error("Il y a des erreurs dans le formulaire");
                           setFieldValue("sendMessage", true, false);
                           handleSubmit();
                         }
                       } else {
                         setFieldValue("sendMessage", false, false);
-                        handleSubmit();
+                        onSubmit(values);
                       }
                     }}
                     color={"#fff"}
                     textColor={"#767697"}
-                    loading={loadings[0]}
-                    disabled={loadings[1]}
+                    loading={loadings.saveButton}
+                    disabled={loadings.submitButton}
                   >
                     Enregistrer les modifications
                   </LoadingButton>
@@ -682,14 +720,14 @@ export default ({ young, admin }) => {
                     <LoadingButton
                       onClick={async () => {
                         const erroredFields = await validateForm();
-                        if (Object.keys(erroredFields).length) toastr.error("Il y a des erreurs dans le formulaire");
+                        if (Object.keys(erroredFields).length) return toastr.error("Il y a des erreurs dans le formulaire");
                         setFieldValue("sendMessage", true, false);
                         handleSubmit();
                       }}
-                      loading={loadings[1]}
-                      disabled={loadings[0]}
+                      loading={loadings.submitButton}
+                      disabled={loadings.saveButton}
                     >
-                      Envoyer une demande de validation aux {values.parent2Email ? "4" : "3"} parties prenantes
+                      Envoyer une demande de validation aux {values.parent2Email && !isYoungAdult ? "4" : "3"} parties prenantes
                     </LoadingButton>
                   )}
                 </div>
@@ -718,7 +756,7 @@ export default ({ young, admin }) => {
 const ContractField = ({ name, placeholder, optional, context: { values, errors, touched, handleChange }, ...rest }) => {
   const content = (
     <>
-      {errors[name] && touched[name] && <ErrorInContractField>Ce champ est obligatoire</ErrorInContractField>}
+      {errors[name] && <ErrorInContractField>Ce champ est obligatoire</ErrorInContractField>}
       <Field validate={(v) => (optional ? undefined : !v)} value={values[name]} onChange={handleChange} name={name} placeholder={placeholder} {...rest} />
     </>
   );

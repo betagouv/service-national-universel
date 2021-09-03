@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import Invite from "./invite";
 import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
-import { ROLES } from "../../utils";
+import { ROLES, colors } from "../../utils";
 
 import Avatar from "../Avatar";
 
@@ -46,7 +46,7 @@ export default () => {
           </Item>
           <hr />
           <Item onClick={logout}>
-            <NavLink style={{ color: "rgb(245 105 100)" }} to="/logout">
+            <NavLink style={{ color: colors.red }} to="/logout">
               Se déconnecter
             </NavLink>
           </Item>

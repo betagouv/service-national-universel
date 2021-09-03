@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { Row, Col } from "reactstrap";
 import { Field, Formik } from "formik";
@@ -17,11 +17,13 @@ import AddressInput from "../../../components/addressInput";
 import Etablissement from "../components/etablissmentInput";
 import { translate } from "../../../utils";
 import FormFooter from "../../../components/form/FormFooter";
+import ModalConfirm from "../../../components/modals/ModalConfirm";
 
 export default () => {
   const history = useHistory();
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
   if (!young) {
     history.push("/inscription/profil");
@@ -40,6 +42,19 @@ export default () => {
     delete v.schoolId;
   };
 
+  const onSubmit = async (values) => {
+    try {
+      values.inscriptionStep = STEPS.PARTICULIERES;
+      const { ok, code, data: young } = await api.put("/young", values);
+      if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+      dispatch(setYoung(young));
+      history.push("/inscription/particulieres");
+    } catch (e) {
+      console.log(e);
+      toastr.error("Erreur !");
+    }
+  };
+
   return (
     <Wrapper>
       <Heading>
@@ -50,19 +65,14 @@ export default () => {
         initialValues={young}
         validateOnChange={false}
         validateOnBlur={false}
-        onSubmit={async (values) => {
-          try {
-            if (!confirm("Avez-vous bien pensé à téléverser le RECTO et le VERSO de votre pièce d'identité ?")) return;
-            values.inscriptionStep = STEPS.PARTICULIERES;
-            const { ok, code, data: young } = await api.put("/young", values);
-            if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
-            dispatch(setYoung(young));
-            history.push("/inscription/particulieres");
-          } catch (e) {
-            console.log(e);
-            toastr.error("Erreur !");
-          }
-        }}
+        onSubmit={(values) =>
+          setModal({
+            isOpen: true,
+            title: "Pièce d'identité",
+            message: "Avez-vous bien pensé à téléverser le RECTO et le VERSO de votre pièce d'identité ?",
+            onConfirm: () => onSubmit(values),
+          })
+        }
       >
         {({ values, handleChange, handleSubmit, errors, touched }) => (
           <>
@@ -371,6 +381,16 @@ export default () => {
           </>
         )}
       </Formik>
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
     </Wrapper>
   );
 };

@@ -10,7 +10,7 @@ import ReactSelect from "react-select";
 import MultiSelect from "../../components/Multiselect";
 import AddressInput from "../../components/addressInput";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
-import { translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, MISSION_DOMAINS, PERIOD, dateForDatePicker, putLocation, ROLES } from "../../utils";
+import { translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, MISSION_DOMAINS, PERIOD, dateForDatePicker, putLocation, ROLES, ENABLE_PM } from "../../utils";
 import api from "../../services/api";
 import Invite from "../structure/components/invite";
 import Loader from "../../components/Loader";
@@ -42,9 +42,11 @@ export default (props) => {
   }
   async function initReferents() {
     if (!structure) return;
-    const queries = [{ index: "referent", type: "_doc" }, { query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": structure._id } }] } } }];
-    const { responses } = await api.esQuery(queries);
-    if (responses) setReferents(responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
+    const body = { query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": structure._id } }] } } };
+    const { responses } = await api.esQuery("referent", body);
+    if (responses.length) {
+      setReferents(responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
+    }
   }
 
   async function initStructure() {
@@ -64,7 +66,7 @@ export default (props) => {
   }
 
   async function initStructures() {
-    const responseStructure = await api.get(`/structure/all`);
+    const responseStructure = await api.get("/structure");
     const s = responseStructure.data.map((e) => ({ label: e.name, value: e.name, _id: e._id, structure: e }));
     setStructures(s);
   }
@@ -76,7 +78,7 @@ export default (props) => {
         submitButton: false,
         changeStructureButton: true,
       });
-      const { ok, code, data: y } = await api.put(`/mission/${defaultValue._id}/structure/${structure._id}`);
+      const { ok, code } = await api.put(`/mission/${defaultValue._id}/structure/${structure._id}`);
       setLoadings({
         saveButton: false,
         submitButton: false,
@@ -168,7 +170,9 @@ export default (props) => {
           if (!values.location || !values.location.lat || !values.location.lon) {
             values.location = await putLocation(values.city, values.zip);
           }
-          const { ok, code, data: mission } = await api[values._id ? "put" : "post"]("/mission", values);
+
+          const { ok, code, data: mission } = values._id ? await api.put(`/mission/${values._id}`, values) : await api.post("/mission", values);
+
           setLoadings({
             saveButton: false,
             submitButton: false,
@@ -178,7 +182,7 @@ export default (props) => {
           history.push(`/mission/${mission._id}`);
           toastr.success("Mission enregistrée");
         } catch (e) {
-          setLoading({
+          setLoadings({
             saveButton: false,
             submitButton: false,
             changeStructureButton: false,
@@ -306,6 +310,21 @@ export default (props) => {
                         placeholder="Spécifiez les contraintes liées à la mission"
                       />
                     </FormGroup>
+                    {ENABLE_PM && structure.isMilitaryPreparation === "true" ? (
+                      <FormGroup>
+                        <div>
+                          <label>PRÉPARATION MILITAIRE</label>
+                          <Field component="select" name="isMilitaryPreparation" value={values.isMilitaryPreparation} onChange={handleChange}>
+                            <option key="false" value="false">
+                              Non
+                            </option>
+                            <option key="true" value="true">
+                              Oui
+                            </option>
+                          </Field>
+                        </div>
+                      </FormGroup>
+                    ) : null}
                   </Wrapper>
                 </Col>
                 <Col md={6}>

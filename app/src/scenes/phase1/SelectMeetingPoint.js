@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from "react-redux";
 
 import { setYoung } from "../../redux/auth/actions";
 import { HeroContainer, Hero, Content, VioletButton } from "../../components/Content";
+import ModalConfirm from "../../components/modals/ModalConfirm";
 import api from "../../services/api";
 import { translate, ENABLE_CHOOSE_MEETING_POINT } from "../../utils";
 import MeetingPointCard from "./components/MeetingPointCard";
@@ -16,6 +17,7 @@ export default () => {
   const [meetingPoints, setMeetingPoints] = useState();
   const [meetingPointId, setMeetingPointId] = useState();
   const [meetingPointNotFoundSelected, setMeetingPointNotFoundSelected] = useState(false);
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
   const renderMeetingPoint = () => {
     // if young have chosen a meetingPoint, display it
@@ -76,7 +78,7 @@ export default () => {
         </Row>
         {ENABLE_CHOOSE_MEETING_POINT ? (
           <div style={{ width: "100%", textAlign: "center" }}>
-            <VioletButton disabled={!meetingPointId && !meetingPointNotFoundSelected} onClick={submitMeetingPoint}>
+            <VioletButton disabled={!meetingPointId && !meetingPointNotFoundSelected} onClick={() => setModal({ isOpen: true, onConfirm: submitMeetingPoint })}>
               J’ai pris connaissance de mon point de rassemblement
             </VioletButton>
           </div>
@@ -95,7 +97,6 @@ export default () => {
 
   const submitMeetingPoint = async () => {
     try {
-      if (!confirm("Êtes vous certain(e) de vouloir valider ce point de rassemblement ?")) return;
       const { data, ok, code } = await api.put(`/young/${young._id}/meeting-point`, {
         meetingPointId,
         deplacementPhase1Autonomous: meetingPointNotFoundSelected ? "true" : "false",
@@ -123,6 +124,16 @@ export default () => {
   return (
     <HeroContainer>
       <Hero>{renderMeetingPoint()}</Hero>
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title="Validation de point de rassemblement"
+        message="Êtes vous certain(e) de vouloir valider ce point de rassemblement ?"
+        onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
     </HeroContainer>
   );
 };

@@ -78,7 +78,10 @@ export default () => {
 
 const Footer = styled.footer`
   text-align: center;
-  font-size: 14px;
+  font-size: 1rem;
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+  }
   padding: 5px 0;
   background: #fff;
   margin-top: auto;
@@ -90,6 +93,9 @@ const Footer = styled.footer`
   li {
     display: inline-block;
     margin: 5px 10px;
+    @media (max-width: 768px) {
+      margin: 2px 5px;
+    }
   }
   p,
   a {

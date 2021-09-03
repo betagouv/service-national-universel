@@ -5,7 +5,7 @@ async function getProgramsHelper() {
 }
 
 async function getProgramByIdHelper(programId) {
-  return await ProgramObject.findOne({ _id: programId });
+  return await ProgramObject.findById(programId);
 }
 
 async function deleteProgramByIdHelper(programId) {
@@ -15,6 +15,10 @@ async function deleteProgramByIdHelper(programId) {
 
 async function createProgramHelper(program) {
   return await ProgramObject.create(program);
+}
+
+async function deleteAllProgram() {
+  await ProgramObject.deleteMany({});
 }
 
 function expectProgramToEqual(program, expectedProgram) {
@@ -33,10 +37,14 @@ function expectProgramToEqual(program, expectedProgram) {
   expect(programParsed.descriptionFor).toEqual(expectedProgramParsed.descriptionFor);
 }
 
+const notExisitingProgramId = "123a49ba503040e4d2153944";
+
 module.exports = {
   getProgramsHelper,
   getProgramByIdHelper,
   deleteProgramByIdHelper,
   createProgramHelper,
   expectProgramToEqual,
+  deleteAllProgram,
+  notExisitingProgramId,
 };

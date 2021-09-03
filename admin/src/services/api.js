@@ -1,11 +1,14 @@
 import "isomorphic-fetch";
 
 import { apiURL } from "../config";
+import * as Sentry from "@sentry/react";
 
 function jsonOrRedirectToSignIn(response) {
   if (response.ok === false && response.status === 401) {
     if (window && window.location && window.location.href) {
       window.location.href = "/auth?unauthorized=1";
+      // We need to return responses to prevent the promise from rejecting.
+      return { responses: [] };
     }
   }
   return response.json();
@@ -20,23 +23,22 @@ class api {
     return this.token;
   }
 
-  esQuery(queries) {
-    let query = "";
-    for (let i = 0; i < queries.length; i++) {
-      query += `${JSON.stringify(queries[i])}\n`;
-    }
-
-    return fetch(`${apiURL}/es/_msearch`, {
+  esQuery(index, body) {
+    const header = { index, type: "_doc" };
+    return fetch(`${apiURL}/es/${index}/_msearch`, {
       mode: "cors",
       method: "POST",
       redirect: "follow",
       referrer: "no-referrer",
       headers: { "Content-Type": "application/x-ndjson", Authorization: `JWT ${this.token}` },
-      body: query,
+      body: [header, body].map((e) => `${JSON.stringify(e)}\n`).join(""),
     })
       .then((r) => jsonOrRedirectToSignIn(r))
       .catch((e) => {
+        Sentry.captureMessage("Error caught in esQuery");
+        Sentry.captureException(e);
         console.error(e);
+        return { responses: [] };
       });
   }
 

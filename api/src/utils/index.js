@@ -34,7 +34,7 @@ function getReq(url, cb) {
 function uploadFile(path, file) {
   return new Promise((resolve, reject) => {
     const s3bucket = new AWS.S3({ endpoint: CELLAR_ENDPOINT, accessKeyId: CELLAR_KEYID, secretAccessKey: CELLAR_KEYSECRET });
-    var params = {
+    const params = {
       Bucket: BUCKET_NAME,
       Key: path,
       Body: file.data,
@@ -107,7 +107,7 @@ function validatePassword(password) {
   const schema = new passwordValidator();
   schema
     .is()
-    .min(10) // Minimum length 10
+    .min(12) // Minimum length 12
     .has()
     .uppercase() // Must have uppercase letters
     .has()
@@ -337,6 +337,17 @@ const getYoungFromWaitingList = async (young) => {
   }
 };
 
+function isYoung(user) {
+  return user instanceof YoungModel;
+}
+function isReferent(user) {
+  return user instanceof ReferentModel;
+}
+
+function inSevenDays() {
+  return Date.now() + 86400000 * 7;
+}
+
 const ERRORS = {
   SERVER_ERROR: "SERVER_ERROR",
   NOT_FOUND: "NOT_FOUND",
@@ -354,6 +365,14 @@ const ERRORS = {
   NO_TEMPLATE_FOUND: "NO_TEMPLATE_FOUND",
   INVALID_BODY: "INVALID_BODY",
   INVALID_PARAMS: "INVALID_PARAMS",
+  EMAIL_OR_PASSWORD_INVALID: "EMAIL_OR_PASSWORD_INVALID",
+  PASSWORD_INVALID: "PASSWORD_INVALID",
+  EMAIL_INVALID: "EMAIL_INVALID",
+  EMAIL_AND_PASSWORD_REQUIRED: "EMAIL_AND_PASSWORD_REQUIRED",
+  PASSWORDS_NOT_MATCH: "PASSWORDS_NOT_MATCH",
+  USER_NOT_EXISTS: "USER_NOT_EXISTS",
+  NEW_PASSWORD_IDENTICAL_PASSWORD: "NEW_PASSWORD_IDENTICAL_PASSWORD",
+  INVALID_IP: "INVALID_IP",
 };
 
 module.exports = {
@@ -373,4 +392,7 @@ module.exports = {
   listFiles,
   deleteFile,
   signinLimiter,
+  isYoung,
+  isReferent,
+  inSevenDays,
 };

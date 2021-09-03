@@ -7,10 +7,8 @@ import ExportComponent from "../../components/ExportXlsx";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
-import { formatStringDate, translate, getFilterLabel, formatLongDateFR, formatDateFR, YOUNG_STATUS_COLORS, ES_NO_LIMIT, ROLES } from "../../utils";
-import SelectStatusMission from "../../components/selectStatusMission";
+import { translate, getFilterLabel, formatLongDateFR, ES_NO_LIMIT, ROLES } from "../../utils";
 import VioletButton from "../../components/buttons/VioletButton";
-import Loader from "../../components/Loader";
 import Chevron from "../../components/Chevron";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine } from "../../components/list";
@@ -84,6 +82,7 @@ export default () => {
                   // fuzziness={1}
                   style={{ flex: 1, marginRight: "1rem" }}
                   innerClass={{ input: "searchbox" }}
+                  URLParams={true}
                   autosuggest={false}
                 />
                 <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} defaultValue={user.role === ROLES.REFERENT_REGION ? [user.region] : []} />

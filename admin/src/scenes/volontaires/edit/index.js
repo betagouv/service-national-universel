@@ -25,6 +25,7 @@ import SituationsParticulieres from "./situations-particulieres";
 import Motivation from "./motivation";
 import Representant1 from "./representant-legal1";
 import Representant2 from "./representant-legal2";
+import Preferences from "./preferences";
 import Consentement from "./consentement";
 import ConsentementImage from "./consentement-image";
 import ConsentementPCR from "./consentement-pcr";
@@ -63,7 +64,7 @@ export default (props) => {
         onSubmit={async (values) => {
           try {
             const { ok, code, data: young } = await api.put(`/referent/young/${values._id}`, values);
-            if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
+            if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             toastr.success("Mis à jour!");
           } catch (e) {
             console.log(e);
@@ -101,6 +102,9 @@ export default (props) => {
             <Row>
               <Representant1 values={values} handleChange={handleChange} />
               <Representant2 values={values} handleChange={handleChange} />
+            </Row>
+            <Row>
+              <Preferences values={values} handleChange={handleChange} />
             </Row>
             <Row>
               <InterTitle>Consentements</InterTitle>

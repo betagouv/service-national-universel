@@ -32,7 +32,7 @@ export default () => {
     setCenter(data);
   };
   const getService = async () => {
-    const { data, code, ok } = await api.get(`/young/department-service`);
+    const { data, code, ok } = await api.get(`/department-service/${young.department}`);
     if (!ok) return toastr.error("error", translate(code));
     setService(data);
   };

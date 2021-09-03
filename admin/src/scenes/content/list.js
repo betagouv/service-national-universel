@@ -51,17 +51,20 @@ export default () => {
             else return 0;
           })
           .map((p, i) => (
-            <Col key={i} md={3} sm={12} style={{ marginBottom: "1.5rem" }}>
+            <div key={i} style={{ marginBottom: "1.5rem" }}>
               <ProgramCard onDelete={getPrograms} program={p} image={p.imageFile ? p.imageFile : require(`../../assets/programmes-engagement/${p.imageString || "default.png"}`)} />
-            </Col>
+            </div>
           ))}
       </Wrapper>
     </>
   );
 };
 
-const Wrapper = styled(Row)`
+const Wrapper = styled.div`
   padding: 2rem;
+  display: grid;
+  grid-gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
 `;
 
 const Title = styled.div`

@@ -1,8 +1,12 @@
 import styled from "styled-components";
+import { colors } from "../../utils";
 
 const VioletButton = styled.div`
   > * {
-    background-color: #5245cc;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    background-color: ${colors.purple};
     border: none;
     border-radius: 5px;
     padding: 7px 30px;
@@ -13,7 +17,7 @@ const VioletButton = styled.div`
     color: #fff;
     cursor: pointer;
     :hover {
-      background: #372f78;
+      background: ${colors.darkPurple};
     }
   }
 `;

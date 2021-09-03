@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Col, Row } from "reactstrap";
 import { Link } from "react-router-dom";
-import { YOUNG_STATUS_COLORS } from "../../../utils";
+import { YOUNG_STATUS_COLORS, colors } from "../../../utils";
 import { CardArrow, Card, CardTitle, CardValueWrapper, CardValue } from "../../../components/dashboard";
 
 import api from "../../../services/api";
@@ -13,25 +13,24 @@ export default ({ filter }) => {
 
   useEffect(() => {
     async function initStatus() {
-      const queries = [];
-      queries.push({ index: "cohesioncenter", type: "_doc" });
-      queries.push({
+      const body = {
         query: { bool: { must: { match_all: {} }, filter: [] } },
         aggs: {
           placesTotal: { sum: { field: "placesTotal" } },
           placesLeft: { sum: { field: "placesLeft" } },
         },
-
         size: 0,
-      });
+      };
 
-      if (filter.region) queries[1].query.bool.filter.push({ term: { "region.keyword": filter.region } });
-      if (filter.department) queries[1].query.bool.filter.push({ term: { "department.keyword": filter.department } });
+      if (filter.region) body.query.bool.filter.push({ term: { "region.keyword": filter.region } });
+      if (filter.department) body.query.bool.filter.push({ term: { "department.keyword": filter.department } });
 
-      const { responses } = await api.esQuery(queries);
-      setPlacesTotal(responses[0].aggregations.placesTotal.value);
-      setPlacesLeft(responses[0].aggregations.placesLeft.value);
-      setTotal(responses[0].hits.total.value);
+      const { responses } = await api.esQuery("cohesioncenter", body);
+      if (responses.length) {
+        setPlacesTotal(responses[0].aggregations.placesTotal.value);
+        setPlacesLeft(responses[0].aggregations.placesLeft.value);
+        setTotal(responses[0].hits.total.value);
+      }
     }
     initStatus();
   }, [JSON.stringify(filter)]);
@@ -61,7 +60,7 @@ export default ({ filter }) => {
       </Row>
       <Row>
         <Col md={6} xl={3}>
-          <Card borderBottomColor="#FEB951">
+          <Card borderBottomColor={colors.yellow}>
             <CardTitle>Places proposées</CardTitle>
             <CardValueWrapper>
               <CardValue>{placesTotal}</CardValue>
@@ -69,7 +68,7 @@ export default ({ filter }) => {
           </Card>
         </Col>
         <Col md={6} xl={3}>
-          <Card borderBottomColor="#6BC763">
+          <Card borderBottomColor={colors.green}>
             <CardTitle>Places disponibles</CardTitle>
             <CardValueWrapper>
               <CardValue>{placesLeft}</CardValue>

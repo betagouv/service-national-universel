@@ -3,7 +3,10 @@ import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { Col, Row } from "reactstrap";
 
-export default ({ id, title, image, subtitle, tags = [], places, location, onClick, applied }) => {
+import Badge from "../../../components/Badge";
+import DomainThumb from "../../../components/DomainThumb";
+
+export default ({ id, title, domain, subtitle, tags = [], places, location, onClick, applied, isMilitaryPreparation }) => {
   return (
     <>
       <Card>
@@ -11,16 +14,15 @@ export default ({ id, title, image, subtitle, tags = [], places, location, onCli
           <Link to={`/mission/${id}`}>
             <div>
               <div className="inner">
-                <div className="thumb">
-                  <img src={image} />
-                </div>
+                <DomainThumb domain={domain} size="3rem" />
                 <div>
                   <h4>{title}</h4>
                   <p>{subtitle}</p>
                   <Tags>
                     {tags.map((e, i) => (
-                      <div key={i}>{e}</div>
+                      <Badge key={i} text={e} textColor="#6b7280" backgroundColor="#ffffff" />
                     ))}
+                    {isMilitaryPreparation === "true" ? <Badge text="Préparation Militaire" color="#03224C" /> : null}
                   </Tags>
                 </div>
               </div>
@@ -60,37 +62,8 @@ const Card = styled(Row)`
   border-bottom: 1px solid #e5e7eb;
   .inner {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     margin-bottom: 15px;
-    .thumb {
-      margin-right: 20px;
-      background-color: #42389d;
-      height: 50px;
-      width: 50px;
-      border-radius: 4px;
-      padding: 10px;
-      text-align: center;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      @media (max-width: 768px) {
-        height: 30px;
-        width: 30px;
-        margin-right: 10px;
-      }
-      img {
-        border-radius: 6px;
-        /* max-width: 100%; */
-        height: 30px;
-        width: 30px;
-        @media (max-width: 768px) {
-          height: 18px;
-          width: 18px;
-        }
-        object-fit: cover;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-      }
-    }
     h4 {
       font-size: 14px;
       font-weight: 500;
@@ -133,17 +106,6 @@ const Tags = styled(Row)`
   display: flex;
   align-items: center;
   margin-top: 0.8rem;
-  div {
-    text-transform: uppercase;
-    color: #6b7280;
-    border: 1px solid #e5e7eb;
-    border-radius: 30px;
-    padding: 5px 15px;
-    margin-right: 15px;
-    margin-bottom: 5px;
-    font-size: 12px;
-    font-weight: 500;
-  }
 `;
 
 const Location = styled.div`

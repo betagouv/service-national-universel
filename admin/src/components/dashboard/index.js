@@ -1,5 +1,7 @@
 import React from "react";
 import styled from "styled-components";
+import { Link } from "react-router-dom";
+import { colors } from "../../utils";
 
 export const CardArrow = styled.span`
   width: 15px;
@@ -16,6 +18,35 @@ const CardStyle = styled.div`
   background-color: #fff;
   margin-bottom: 33px;
 `;
+
+export const CardComponent = ({ to, getLink, color, title, value }) => {
+  const render = () => (
+    <Card borderBottomColor={color} style={{ minHeight: "150px" }}>
+      <CardTitle>{title}</CardTitle>
+      <CardValueWrapper>
+        <CardValue>{value || 0}</CardValue>
+        <CardArrow />
+      </CardValueWrapper>
+    </Card>
+  );
+  return getLink && to ? <Link to={getLink(to)}>{render()}</Link> : render();
+};
+
+export const CardComponentPercentage = ({ to, getLink, color, title, value, total, disabled }) => {
+  const render = () => (
+    <Card borderBottomColor={color} style={{ backgroundColor: disabled && "#cccccc" }}>
+      <CardTitle>{title}</CardTitle>
+      <CardValueWrapper>
+        <CardValue>{value || 0}</CardValue>
+        <CardPercentage>
+          {total ? `${(((value || 0) * 100) / total).toFixed(0)}%` : `0%`}
+          <CardArrow />
+        </CardPercentage>
+      </CardValueWrapper>
+    </Card>
+  );
+  return getLink && to ? <Link to={getLink(to)}>{render()}</Link> : render();
+};
 
 export const Card = ({ children, ...p }) => <CardStyle {...p}>{children}</CardStyle>;
 
@@ -61,7 +92,7 @@ export const CardSection = styled.div`
   font-size: 16px;
   line-height: 18px;
   text-transform: uppercase;
-  color: #372f78;
+  color: ${colors.darkPurple};
 `;
 
 export const CardContainer = styled.div`

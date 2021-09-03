@@ -1,38 +1,40 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
-const { capture } = require("../sentry");
+const Joi = require("joi");
 
+const { capture } = require("../sentry");
 const DepartmentServiceModel = require("../models/departmentService");
-const ReferentModel = require("../models/referent");
-const { ERRORS } = require("../utils");
-const { validateId } = require("../utils/validator/default");
-const referentValidator = require("../utils/validator/referent");
+const { ERRORS, isYoung } = require("../utils");
+const { validateDepartmentService } = require("../utils/validator");
+const { serializeDepartmentService, serializeArray } = require("../utils/serializer");
 
 router.post("/", passport.authenticate("referent", { session: false }), async (req, res) => {
   try {
-    const { error, value: checkedDepartementService } = referentValidator.validateDepartmentService(req.body);
+    const { error, value: checkedDepartementService } = validateDepartmentService(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
     const data = await DepartmentServiceModel.findOneAndUpdate({ department: checkedDepartementService.department }, checkedDepartementService, {
       new: true,
       upsert: true,
       useFindAndModify: false,
     });
-    return res.status(200).send({ ok: true, data });
+    return res.status(200).send({ ok: true, data: serializeDepartmentService(data, req.user) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
 
-router.get("/referent/:id", passport.authenticate(["referent"], { session: false }), async (req, res) => {
+router.get("/:department", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
-    const { error, value: checkedId } = validateId(req.params.id);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error });
-    const r = await ReferentModel.findById(checkedId);
-    if (!r) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const data = await DepartmentServiceModel.findOne({ department: r.department });
-    return res.status(200).send({ ok: true, data });
+    const { error, value: department } = Joi.string().required().validate(req.params.department);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+
+    if (isYoung(req.user) && req.user.department !== department) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const data = await DepartmentServiceModel.findOne({ department });
+    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    return res.status(200).send({ ok: true, data: serializeDepartmentService(data, req.user) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
@@ -42,17 +44,7 @@ router.get("/referent/:id", passport.authenticate(["referent"], { session: false
 router.get("/", passport.authenticate(["referent"], { session: false }), async (req, res) => {
   try {
     const data = await DepartmentServiceModel.find({});
-    return res.status(200).send({ ok: true, data });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
-  }
-});
-
-router.get("/all", passport.authenticate(["referent"], { session: false }), async (req, res) => {
-  try {
-    const data = await DepartmentServiceModel.find({});
-    return res.status(200).send({ ok: true, data });
+    return res.status(200).send({ ok: true, data: serializeArray(data, req.user, serializeDepartmentService) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });

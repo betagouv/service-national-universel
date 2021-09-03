@@ -1,6 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import { Container } from "reactstrap";
+import { HERO_IMAGES_LIST } from "../utils";
 
 export const AlertBoxInformation = ({ title, message, onClose }) => (
   <AlertBoxStyle>
@@ -59,10 +60,12 @@ const HeroStyle = styled.div`
 
   .content {
     width: 65%;
+    padding: 60px 30px 60px 50px;
     @media (max-width: 768px) {
       width: 100%;
+      padding: 30px 15px 30px 15px;
+      text-align: center;
     }
-    padding: 60px 30px 60px 50px;
     position: relative;
     background-color: #fff;
     > * {
@@ -107,7 +110,10 @@ const HeroStyle = styled.div`
   }
   .thumb {
     min-height: 400px;
-    background: url(${require("../assets/phase3.jpg")}) no-repeat center;
+    @media (max-width: 768px) {
+      min-height: 0;
+    }
+    ${({ thumbImage = HERO_IMAGES_LIST[Math.floor(Math.random() * HERO_IMAGES_LIST.length)] }) => `background: url(${require(`../assets/${thumbImage}`)}) no-repeat center;`}
     background-size: cover;
     flex: 1;
     -webkit-clip-path: polygon(15% 0, 0 100%, 100% 100%, 100% 0);
@@ -191,6 +197,13 @@ export const Separator = styled.hr`
   height: 1px;
   border-style: none;
   background-color: #e5e7eb;
+`;
+export const SeparatorXS = styled.hr`
+  margin: 2.5rem 0;
+  height: 1px;
+  border-style: none;
+  background-color: #e5e7eb;
+  max-width: 20rem;
 `;
 
 export const WhiteButton = styled.button`

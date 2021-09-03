@@ -1,8 +1,9 @@
 const path = require("path");
-
 const webpack = require("webpack");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
+const SentryWebpackPlugin = require("@sentry/webpack-plugin");
+
 //
 module.exports = () => {
   const mode = "production";
@@ -24,13 +25,27 @@ module.exports = () => {
         removeEmptyAttributes: true,
       },
     }),
+    process.env.STAGING !== "true" &&
+      new SentryWebpackPlugin({
+        // sentry-cli configuration - can also be done directly through sentry-cli
+        // see https://docs.sentry.io/product/cli/configuration/ for details
+        authToken: process.env.SENTRY_AUTH_TOKEN,
+        org: "selego",
+        project: "snu",
+        // release: process.env.SENTRY_RELEASE,
+        environment: "admin",
+
+        // other SentryWebpackPlugin configuration
+        include: ".",
+        ignore: ["node_modules", "webpack.config.js"],
+      }),
     new webpack.DefinePlugin({ "process.env": JSON.stringify(mode) }),
-  ];
+  ].filter((e) => e);
 
   return {
     mode,
     entry: ["./src/index.js"],
-    devtool: false,
+    devtool: "source-map",
     output: {
       path: path.resolve("build"),
       filename: "[contenthash].index.js",

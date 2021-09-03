@@ -3,6 +3,8 @@ import styled from "styled-components";
 import { useSelector } from "react-redux";
 
 import DownloadAttestationButton from "../../components/buttons/DownloadAttestationButton";
+import MailAttestationButton from "../../components/buttons/MailAttestationButton";
+
 import { HeroContainer, Hero } from "../../components/Content";
 
 export default () => {
@@ -23,18 +25,12 @@ export default () => {
                 <strong>Attestation de réalisation</strong>
                 <br />
                 Télécharger votre attestation de réalisation de phase 1
-                <DownloadAttestationButton
-                  style={{
-                    color: "#5949d0",
-                    textAlign: "left",
-                    fontSize: "1rem",
-                    cursor: "pointer",
-                  }}
-                  young={young}
-                  uri="1"
-                >
+                <DownloadAttestationButton young={young} uri="1">
                   Télécharger mon attestation {">"}
                 </DownloadAttestationButton>
+                <MailAttestationButton young={young} type="1" template="certificate" placeholder="Attestation de réalisation de la phase 1">
+                  Envoyer l'attestation de réalisation par mail {">"}
+                </MailAttestationButton>
               </p>
             </>
           ) : null}

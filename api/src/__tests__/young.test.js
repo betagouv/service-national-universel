@@ -2,17 +2,20 @@ require("dotenv").config({ path: "./.env-testing" });
 const fetch = require("node-fetch");
 const request = require("supertest");
 const getAppHelper = require("./helpers/app");
+const { dbConnect, dbClose } = require("./helpers/db");
+//application
+const { getNewApplicationFixture } = require("./fixtures/application");
+const { createApplication } = require("./helpers/application");
+//mission
+const getNewMissionFixture = require("./fixtures/mission");
+const { createMissionHelper } = require("./helpers/mission");
+//young
 const getNewYoungFixture = require("./fixtures/young");
 const { getYoungsHelper, createYoungHelper, notExistingYoungId, deleteYoungByEmailHelper } = require("./helpers/young");
-const { dbConnect, dbClose } = require("./helpers/db");
-const getNewDepartmentServiceFixture = require("./fixtures/departmentService");
-const { createDepartmentServiceHelper, deleteAllDepartmentServicesHelper } = require("./helpers/departmentService");
-const { createMeetingPointHelper } = require("./helpers/meetingPoint");
-const getNewMeetingPointFixture = require("./fixtures/meetingPoint");
-const { createBusHelper } = require("./helpers/bus");
-const getNewBusFixture = require("./fixtures/bus");
-const { createCohesionCenter, getCohesionCenterById } = require("./helpers/cohesionCenter");
+//cohesion center
 const { getNewCohesionCenterFixture } = require("./fixtures/cohesionCenter");
+const { createCohesionCenter, getCohesionCenterById } = require("./helpers/cohesionCenter");
+const { ROLES } = require("snu-lib/roles");
 
 jest.mock("../sendinblue", () => ({
   ...jest.requireActual("../sendinblue"),
@@ -66,39 +69,20 @@ describe("Young", () => {
     });
   });
 
-  describe("GET /young/department-service/", () => {
-    it("should return the department based on young deparment", async () => {
-      const youngFixture = getNewYoungFixture();
-      const young = await createYoungHelper({ ...youngFixture, department: "Ain" });
-      const passport = require("passport");
-      const previous = passport.user;
-      passport.user = young;
-
-      await deleteAllDepartmentServicesHelper();
-      const departmentFixture = getNewDepartmentServiceFixture();
-      const department = await createDepartmentServiceHelper({ ...departmentFixture, department: "Ain" });
-      const res = await request(getAppHelper()).get(`/young/department-service`);
-      expect(res.statusCode).toEqual(200);
-      expect(res.body.data.department).toEqual(young.department);
-      expect(res.body.data._id).toEqual(department._id.toString());
-      passport.user = previous;
-    });
-
-    it("should return 404 if no department found", async () => {
-      const res = await request(getAppHelper()).get("/young/department-service");
-      expect(res.statusCode).toEqual(404);
-    });
-    it("should be only accessible by young", async () => {
-      const passport = require("passport");
-      await request(getAppHelper()).get("/young/department-service");
-      expect(passport.lastTypeCalledOnAuthenticate).toEqual("young");
-    });
-  });
-
   describe("GET /young/:id/patches", () => {
     it("should return 404 if young not found", async () => {
       const res = await request(getAppHelper()).get(`/young/${notExistingYoungId}/patches`).send();
       expect(res.statusCode).toEqual(404);
+    });
+    it("should return 401 if not admin", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      young.firstName = "MY NEW NAME";
+      await young.save();
+      const passport = require("passport");
+      passport.user.role = ROLES.RESPONSIBLE;
+      const res = await request(getAppHelper()).get(`/young/${young._id}/patches`).send();
+      expect(res.status).toBe(401);
+      passport.user.role = ROLES.ADMIN;
     });
     it("should return 200 if young found with patches", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
@@ -121,9 +105,9 @@ describe("Young", () => {
     });
   });
 
-  describe("PUT /young/validate_mission", () => {
+  describe("PUT /young/:id/validate-mission-phase3", () => {
     it("should return 404 if young not found", async () => {
-      const res = await request(getAppHelper()).put("/young/validate_mission").send({});
+      const res = await request(getAppHelper()).put(`/young/${notExistingYoungId}/validate-mission-phase3`).send({});
       expect(res.statusCode).toEqual(404);
     });
     it("should return 200 if young found", async () => {
@@ -132,68 +116,26 @@ describe("Young", () => {
       const previous = passport.user;
       passport.user = young;
 
-      const res = await request(getAppHelper()).put("/young/validate_mission").send({});
+      const res = await request(getAppHelper()).put(`/young/${young._id}/validate-mission-phase3`).send({});
       expect(res.statusCode).toEqual(200);
       passport.user = previous;
     });
     it("should be only accessible by young", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
       const passport = require("passport");
-      await request(getAppHelper()).put("/young/validate_mission").send();
+      const res = await request(getAppHelper()).put(`/young/${young._id}/validate-mission-phase3`).send();
+      expect(res.statusCode).toEqual(200);
       expect(passport.lastTypeCalledOnAuthenticate).toEqual("young");
     });
-  });
-
-  describe("PUT /young/:id/meeting-point", () => {
-    it("should return 404 if young not found", async () => {
-      const res = await request(getAppHelper()).put(`/young/${notExistingYoungId}/meeting-point`).send({});
-      expect(res.statusCode).toEqual(404);
-    });
-    it("should return 404 if meeting point not found", async () => {
-      const young = await createYoungHelper(getNewYoungFixture());
-      const res = await request(getAppHelper()).put(`/young/${young._id}/meeting-point`).send({
-        meetingPointId: notExistingYoungId,
-      });
-      expect(res.statusCode).toEqual(404);
-    });
-    it("should return 404 if bus is not found", async () => {
-      const young = await createYoungHelper(getNewYoungFixture());
-      const meetingPoint = await createMeetingPointHelper({ ...getNewMeetingPointFixture(), busId: notExistingYoungId });
-      const res = await request(getAppHelper()).put(`/young/${young._id}/meeting-point`).send({
-        meetingPointId: meetingPoint._id,
-      });
-      expect(res.statusCode).toEqual(404);
-    });
-    it("should return 200 if young, bus and meeting point are found", async () => {
-      const young = await createYoungHelper(getNewYoungFixture());
-      const bus = await createBusHelper(getNewBusFixture());
-      const meetingPoint = await createMeetingPointHelper({ ...getNewMeetingPointFixture(), busId: bus._id.toString() });
-      const res = await request(getAppHelper()).put(`/young/${young._id}/meeting-point`).send({
-        meetingPointId: meetingPoint._id,
-        deplacementPhase1Autonomous: "true",
-      });
-      expect(res.statusCode).toEqual(200);
-    });
-    it("should be only accessible by young and referent", async () => {
+    it("should be only accessible for yourself if you are a young", async () => {
+      const me = await createYoungHelper(getNewYoungFixture());
+      const they = await createYoungHelper(getNewYoungFixture());
       const passport = require("passport");
-      await request(getAppHelper()).put(`/young/${notExistingYoungId}/meeting-point`).send();
-      expect(passport.lastTypeCalledOnAuthenticate).toEqual(["young", "referent"]);
-    });
-  });
-
-  describe("PUT /young/:id/cancel-meeting-point", () => {
-    it("should return 404 if young not found", async () => {
-      const res = await request(getAppHelper()).put(`/young/${notExistingYoungId}/cancel-meeting-point`).send({});
-      expect(res.statusCode).toEqual(404);
-    });
-    it("should return 200 if young found", async () => {
-      const young = await createYoungHelper(getNewYoungFixture());
-      const res = await request(getAppHelper()).put(`/young/${young._id}/cancel-meeting-point`).send({});
-      expect(res.statusCode).toEqual(200);
-    });
-    it("should be only accessible by referent", async () => {
-      const passport = require("passport");
-      await request(getAppHelper()).put(`/young/${notExistingYoungId}/cancel-meeting-point`).send();
-      expect(passport.lastTypeCalledOnAuthenticate).toEqual("referent");
+      const previous = passport.user;
+      passport.user = me;
+      const res = await request(getAppHelper()).put(`/young/${they._id}/validate-mission-phase3`).send();
+      expect(res.statusCode).toEqual(401);
+      passport.user = previous;
     });
   });
 
@@ -316,7 +258,7 @@ describe("Young", () => {
       const young = await createYoungHelper({ ...getNewYoungFixture(), email: "foo@example.org" });
       const res = await request(getAppHelper()).post("/young/signup_invite").send({
         email: young.email,
-        password: "%%minMAJ123",
+        password: "%%minMAJ1235",
       });
       expect(res.statusCode).toEqual(400);
     });
@@ -363,7 +305,7 @@ describe("Young", () => {
       });
       const res = await request(getAppHelper()).post("/young/signup_invite").send({
         email: young.email,
-        password: "%%minMAJ123",
+        password: "%%minMAJ1235",
         invitationToken,
       });
       expect(res.statusCode).toEqual(200);
@@ -418,13 +360,46 @@ describe("Young", () => {
       const passport = require("passport");
       const previous = passport.user;
       passport.user = young;
-      passport.user.set = jest.fn();
+
+      let res = await request(getAppHelper())
+        .post("/young/file/cniFiles")
+        .send({ body: JSON.stringify({ names: ["e"] }) });
+      expect(res.status).toEqual(200);
+      expect(res.body).toEqual({ data: ["e"], ok: true });
+
+      // With military file.
+      res = await request(getAppHelper())
+        .post("/young/file/militaryPreparationFilesIdentity")
+        .send({ body: JSON.stringify({ names: ["e"] }) });
+      expect(res.status).toEqual(200);
+      expect(res.body).toEqual({ data: ["e"], ok: true });
+
+      passport.user = previous;
+    });
+
+    it("should not accept invalid body", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
 
       const res = await request(getAppHelper())
-        .post("/young/file/CniFile")
+        .post("/young/file/cniFiles")
+        .send({ body: JSON.stringify({ pop: ["e"] }) });
+      expect(res.status).toEqual(400);
+      passport.user = previous;
+    });
+
+    it("should not accept invalid file name", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
+
+      const res = await request(getAppHelper())
+        .post("/young/file/thisPropertyDoesNotExists")
         .send({ body: JSON.stringify({ names: ["e"] }) });
-      expect(res.body).toEqual({ data: ["e"], ok: true });
-      expect(passport.user.set).toHaveBeenCalledWith({ CniFile: ["e"] });
+      expect(res.status).toEqual(400);
       passport.user = previous;
     });
   });
@@ -455,6 +430,58 @@ describe("Young", () => {
       });
       expect(res.statusCode).toEqual(200);
       expect(res.body.data.phase3TutorNote).toEqual("hello");
+    });
+  });
+
+  describe("POST /young/:id/:email/:template", () => {
+    it("should return 404 if young not found ", async () => {
+      const res = await request(getAppHelper()).post(`/young/${notExistingYoungId}/email/test/`).send();
+      expect(res.statusCode).toEqual(404);
+    });
+    it("should return 200 if young found", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      for (const email of ["correction", "validate", "refuse", "waiting_list", "apply"]) {
+        const res = await request(getAppHelper())
+          .post("/young/" + young._id + "/email/" + "170")
+          .send({ message: "hello" });
+        expect(res.statusCode).toEqual(200);
+      }
+    });
+  });
+
+  describe("GET /young/:id/application", () => {
+    it("should return empty array when young has no application", async () => {
+      const res = await request(getAppHelper()).get("/young/" + notExistingYoungId + "/application");
+      expect(res.body.data).toStrictEqual([]);
+      expect(res.status).toBe(200);
+    });
+    it("should return applications", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const mission = await createMissionHelper(getNewMissionFixture());
+      await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission._id });
+      const res = await request(getAppHelper()).get("/young/" + young._id + "/application");
+      expect(res.status).toBe(200);
+      expect(res.body.data.length).toBe(1);
+      expect(res.body.data[0].status).toBe("WAITING_VALIDATION");
+    });
+    it("should only allow young to see their own applications", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const secondYoung = await createYoungHelper(getNewYoungFixture());
+      const mission = await createMissionHelper(getNewMissionFixture());
+      await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission._id });
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
+
+      // Successful request
+      let res = await request(getAppHelper()).get("/young/" + young._id + "/application");
+      expect(res.status).toBe(200);
+
+      // Failed request (not allowed)
+      res = await request(getAppHelper()).get("/young/" + secondYoung._id + "/application");
+      expect(res.status).toBe(401);
+
+      passport.user = previous;
     });
   });
 });

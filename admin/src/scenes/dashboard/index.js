@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
@@ -12,7 +12,7 @@ import ExportAll from "./inscription/ExportAll";
 import { ROLES } from "../../utils";
 
 export default () => {
-  const [currentTab, setCurrentTab] = useState("inscriptions");
+  const [currentTab, setCurrentTab] = useState("volontaires");
   const user = useSelector((state) => state.Auth.user);
 
   return (
@@ -85,6 +85,20 @@ const TabItem = styled.li`
   font-size: 16px;
   color: #979797;
   cursor: pointer;
+  :hover {
+    color: #aaa;
+    &:after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background-color: #aaa;
+      border-top-left-radius: 4px;
+      border-top-right-radius: 4px;
+    }
+  }
 
   ${(props) =>
     props.isActive &&

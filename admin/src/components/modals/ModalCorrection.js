@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Modal } from "reactstrap";
 import styled from "styled-components";
+import { toastr } from "react-redux-toastr";
 
 import api from "../../services/api";
-
-import { toastr } from "react-redux-toastr";
+import { SENDINBLUE_TEMPLATES } from "../../utils";
 import LoadingButton from "../buttons/LoadingButton";
 
-export default ({ value, onChange, onSend }) => {
+export default ({ isOpen, value, onChange, onSend }) => {
   const [message, setMessage] = useState();
   const [sending, setSending] = useState(false);
 
@@ -27,13 +27,13 @@ Merci de vous reconnecter à votre compte pour apporter les modifications demand
 
   const send = async () => {
     setSending(true);
-    await api.post(`/referent/email/correction/${value._id}`, { message, subject: "Demande de correction" });
+    await api.post(`/young/${value._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_CORRECTION}`, { message });
     toastr.success("Email envoyé !");
     onSend(message);
   };
 
   return (
-    <Modal isOpen={true} toggle={onChange}>
+    <Modal isOpen={isOpen} toggle={onChange}>
       <ModalContainer>
         <img src={require("../../assets/close.svg")} height={10} onClick={onChange} />
         <h1>Veuillez éditer le message ci-dessous pour préciser les corrections à apporter avant de l'envoyer</h1>

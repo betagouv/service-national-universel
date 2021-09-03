@@ -44,6 +44,6 @@ module.exports = {
 function getEnvironment() {
   if (process.env.STAGING === "true") return "staging";
   else if (process.env.PRODUCTION === "true") return "production";
-  else if (process.env.TESTING === "true") return "testing";
+  else if (process.env.TESTING === "true" || process.env.NODE_ENV === "test") return "testing";
   return "development";
 }

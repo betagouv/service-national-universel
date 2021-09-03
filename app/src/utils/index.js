@@ -1,15 +1,15 @@
 import passwordValidator from "password-validator";
 import { YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_PHASE2 } from "snu-lib";
 export * from "snu-lib";
-export * from "./translation";
 export * from "./crisp";
+import { environment } from "../config";
 
 export function getPasswordErrorMessage(v) {
   if (!v) return "Ce champ est obligatoire";
   const schema = new passwordValidator();
   schema
     .is()
-    .min(10) // Minimum length 10
+    .min(12) // Minimum length 12
     .has()
     .uppercase() // Must have uppercase letters
     .has()
@@ -20,7 +20,7 @@ export function getPasswordErrorMessage(v) {
     .symbols(); // Must have symbols
 
   if (!schema.validate(v)) {
-    return "Votre mot de passe doit contenir au moins 10 caractères, dont une majuscule, une minuscule, un chiffre et un symbole";
+    return "Votre mot de passe doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole";
   }
 }
 
@@ -48,4 +48,8 @@ export function permissionPhase3(y) {
   return y.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED;
 }
 
+export const HERO_IMAGES_LIST = ["login.jpg", "phase3.jpg", "rang.jpeg"];
+
 export const ENABLE_CHOOSE_MEETING_POINT = false;
+
+export const ENABLE_PM = true;

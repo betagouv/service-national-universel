@@ -12,7 +12,7 @@ export default function DownloadButton({ icon, title, ...rest }) {
 }
 
 const Button = styled(LoadingButton)`
-  color: #555;
+  color: #555 !important;
   background: ${({ icon }) => icon && `url(${icon})`};
   background-repeat: no-repeat;
   background-position: left 15px center;

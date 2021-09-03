@@ -32,19 +32,19 @@ export default () => {
   return (
     <>
       <Row style={{}}>
-        <Col md={12}>
+        <Col md={6}>
           <Title>Structures</Title>
         </Col>
+        <Col md={6}>
+          {filter && (
+            <FiltersList>
+              <FilterRegion updateFilter={updateFilter} filter={filter} />
+              <FilterDepartment updateFilter={updateFilter} filter={filter} />
+            </FiltersList>
+          )}
+        </Col>
       </Row>
-      {filter && (
-        <>
-          <FiltersList>
-            <FilterRegion updateFilter={updateFilter} filter={filter} />
-            <FilterDepartment updateFilter={updateFilter} filter={filter} />
-          </FiltersList>
-          <Status filter={filter} />
-        </>
-      )}
+      {filter && <Status filter={filter} />}
     </>
   );
 };
