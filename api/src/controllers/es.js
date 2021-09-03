@@ -201,7 +201,9 @@ router.post("/referent/_msearch", passport.authenticate(["referent"], { session:
       const structure = await StructureObject.findById(user.structureId);
       if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       filter.push({ terms: { "role.keyword": [ROLES.RESPONSIBLE, ROLES.SUPERVISOR] } });
-      filter.push({ terms: { "structureId.keyword": [user.structureId, structure.networkId] } });
+      const structureIdKeyword = [user.structureId];
+      if (structure.networkId) structureIdKeyword.push(structure.networkId);
+      filter.push({ terms: { "structureId.keyword": structureIdKeyword } });
     }
 
     // A supervisor can only see their structures' referent (responsible and supervisor).
@@ -242,7 +244,6 @@ router.post("/referent/_msearch", passport.authenticate(["referent"], { session:
         },
       });
     }
-
     const response = await esClient.msearch({ index: "referent", body: withFilter(body, filter) });
     return res.status(200).send(serializeReferents(response.body));
   } catch (error) {
