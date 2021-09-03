@@ -16,6 +16,78 @@
     <script>
       $(function () {
         if (typeof ZammadChat !== "undefined") {
+          ZammadChat.prototype.onConnectionEstablished = function(data) {
+            var base;
+            var isNew = Boolean(data.session_id);
+            console.log(data.session_id);
+            if (this.onInitialQueueDelayId) {
+              clearTimeout(this.onInitialQueueDelayId);
+            }
+            this.inQueue = false;
+            if (data.agent) {
+              this.agent = data.agent;
+            }
+            if (data.session_id) {
+              this.setSessionId(data.session_id);
+            }
+            this.el.find('.zammad-chat-body').html('');
+            this.el.find('.zammad-chat-agent').html(this.view('agent')({
+              agent: this.agent
+            }));
+            this.enableInput();
+            this.hideModal();
+            this.el.find('.zammad-chat-welcome').addClass('zammad-chat-is-hidden');
+            this.el.find('.zammad-chat-agent').removeClass('zammad-chat-is-hidden');
+            this.el.find('.zammad-chat-agent-status').removeClass('zammad-chat-is-hidden');
+            if (!this.isFullscreen) {
+              this.input.focus();
+            }
+            this.setAgentOnlineState('online');
+            this.waitingListTimeout.stop();
+            this.idleTimeout.stop();
+            this.inactiveTimeout.start();
+            if (isNew) {
+              this.send('chat_session_message', {
+                content: "INFO USER: Je ne dois pas réapparaitre",
+                id: this._messageCount,
+                session_id: this.sessionId
+              });
+            }
+            return typeof (base = this.options).onConnectionEstablished === "function" ? base.onConnectionEstablished(data) : void 0;
+          };
+          ZammadChat.prototype.onReopenSession = function(data) {
+            var j, len, message, ref, unfinishedMessage;
+            this.log.debug('old messages', data.session);
+            this.inactiveTimeout.start();
+            unfinishedMessage = sessionStorage.getItem('unfinished_message');
+            if (data.agent) {
+              this.onConnectionEstablished(data);
+              ref = data.session;
+              for (j = 0, len = ref.length; j < len; j++) {
+                message = ref[j];
+                if (message.content.startsWith('INFO USER: ')) {
+                  continue;
+                } 
+                this.renderMessage({
+                  message: message.content,
+                  id: message.id,
+                  from: message.created_by_id ? 'agent' : 'customer'
+                });
+              }
+              if (unfinishedMessage) {
+                this.input.html(unfinishedMessage);
+              }
+            }
+            if (data.position) {
+              this.onQueue(data);
+            }
+            this.show();
+            this.open();
+            this.scrollToBottom();
+            if (unfinishedMessage) {
+              return this.input.focus();
+            }
+          };
           var chat = new ZammadChat({
             title: "Une question ?",
             background: "#5145cd",
