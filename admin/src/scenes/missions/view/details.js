@@ -5,7 +5,7 @@ import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
-import { translate, formatStringDateTimezoneUTC, ROLES } from "../../../utils";
+import { translate, formatStringDateTimezoneUTC, ROLES, copyToClipboard } from "../../../utils";
 import MissionView from "./wrapper";
 import { Box, BoxTitle } from "../../../components/box";
 
@@ -123,7 +123,7 @@ const Details = ({ title, value, copy }) => {
         <div
           className="icon"
           onClick={() => {
-            navigator.clipboard.writeText(value);
+            copyToClipboard(value);
             toastr.success(`'${title}' a été copié dans le presse papier.`);
           }}
         />

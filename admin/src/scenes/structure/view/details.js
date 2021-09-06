@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
-import { translate, ES_NO_LIMIT, ROLES } from "../../../utils";
+import { translate, ES_NO_LIMIT, ROLES, copyToClipboard } from "../../../utils";
 import StructureView from "./wrapper";
 import api from "../../../services/api";
 import Avatar from "../../../components/Avatar";
@@ -135,7 +135,7 @@ const Details = ({ title, value, copy }) => {
         <div
           className="icon"
           onClick={() => {
-            navigator.clipboard.writeText(value);
+            copyToClipboard(value);
             toastr.success(`'${title}' a été copié dans le presse papier.`);
           }}
         />
