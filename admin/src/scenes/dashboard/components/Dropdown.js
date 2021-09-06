@@ -53,7 +53,6 @@ export default Dropdown;
 
 const DropdownWrapper = styled.div`
   position: relative;
-  z-index: 10;
   border-top-left-radius: 6px;
   border-top-right-radius: 6px;
   ${(props) =>
