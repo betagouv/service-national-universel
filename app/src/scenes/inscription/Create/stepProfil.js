@@ -114,10 +114,10 @@ export default () => {
                   hidden
                   validate={(v) => {
                     if (!v) return requiredMessage;
-                    var from = new Date(2003, 6, 2); // -1 because months are from 0 to 11
-                    var to = new Date(2006, 3, 20);
+                    const from = new Date(2003, 6, 2); // -1 because months are from 0 to 11
+                    const to = new Date(2006, 3, 20);
                     const [y, m, d] = v.substring(0, 10).split("-");
-                    var check = new Date(Date.UTC(parseInt(y), parseInt(m - 1), parseInt(d)));
+                    const check = new Date(Date.UTC(parseInt(y), parseInt(m - 1), parseInt(d)));
                     return (check < from || check > to) && "Vous n'avez pas l'âge requis pour vous inscrire au SNU";
                   }}
                   name="birthdateAt"
