@@ -20,6 +20,7 @@ export default ({ referentManagerPhase2 }) => {
 
   // Get all missions from structure then get all applications int order to display the volontaires' list.
   useEffect(() => {
+    if (!structureId) return setMissions([]);
     async function initMissions() {
       const missionsResponse = await api.get(`/structure/${structureId}/mission`);
       if (!missionsResponse.ok) {

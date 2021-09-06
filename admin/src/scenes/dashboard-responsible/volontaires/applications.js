@@ -46,6 +46,7 @@ export default () => {
 
   // Get all missions from structure then get all applications int order to display the volontaires' list.
   useEffect(() => {
+    if (!structureId) return setMissions([]);
     initMissions(structureId);
   }, [structureId, user]);
   useEffect(() => {
