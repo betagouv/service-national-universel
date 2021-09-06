@@ -201,7 +201,7 @@ export default () => {
         <NoResult>
           <p>Vous n'avez candidaté à aucune préparation militaire.</p>
           <Link to="/mission">
-            <Button>Trouver des préparations militaire</Button>
+            <Button>Trouver des préparations militaires</Button>
           </Link>
         </NoResult>
       )}
