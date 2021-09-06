@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 
-import { formatStringLongDate } from "../../utils";
+import { formatStringLongDate, translateOperationName, translateModelFields, translate } from "../../utils";
 import Loader from "../../components/Loader";
 import api from "../../services/api";
 
@@ -39,7 +39,7 @@ export default ({ model, value }) => {
           {data.length === 0 ? <NoResult>Aucune données</NoResult> : null}
           <tbody>
             {data.map((hit) => (
-              <Hit key={hit._id} hit={hit} />
+              <Hit model={model} key={hit._id} hit={hit} />
             ))}
           </tbody>
         </Table>
@@ -48,15 +48,17 @@ export default ({ model, value }) => {
   );
 };
 
-const Hit = ({ hit }) => {
+const Hit = ({ hit, model }) => {
   return (
     <>
       {hit.ops?.map((e, i) => {
         return (
           <tr key={i} style={{ borderBottom: i === hit.ops.length - 1 && "1px solid #ddd" }}>
-            <td>{`${e.op} ${e.path}`}</td>
-            <td>{JSON.stringify(e.originalValue) || "-"}</td>
-            <td>{JSON.stringify(e.value) || "-"}</td>
+            <td>
+              <Op>{`${translateOperationName(e.op)}`}</Op> : {`${translateModelFields(model, e.path.substring(1))}`}
+            </td>
+            <td>{translate(JSON.stringify(e.originalValue)?.replace(/"/g, "")) || "-"}</td>
+            <td>{translate(JSON.stringify(e.value)?.replace(/"/g, "")) || "-"}</td>
             <td>{formatStringLongDate(hit.date)}</td>
           </tr>
         );
@@ -102,4 +104,10 @@ const Table = styled.table`
 const NoResult = styled.div`
   font-style: italic;
   padding: 1rem;
+`;
+
+const Op = styled.span`
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.7rem;
 `;

@@ -74,3 +74,14 @@ const Text = styled.text`
   font-weight: bold;
   fill: ${(props) => props.textColor};
 `;
+
+export const CircularLine = styled.div`
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+`;
+export const CircularLineIndex = styled.div`
+  margin-right: 30px;
+  color: #9a9a9a;
+  font-size: 16px;
+`;

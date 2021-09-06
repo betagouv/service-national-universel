@@ -5,22 +5,25 @@ import { Formik } from "formik";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-import { translate, YOUNG_STATUS_COLORS, formatStringLongDate, ENABLE_ASSIGN_CENTER, confirmMessageChangePhase1Presence, ROLES } from "../../../utils";
+import { translate, YOUNG_STATUS_COLORS, formatStringLongDate, FORCE_DISABLED_ASSIGN_COHESION_CENTER, confirmMessageChangePhase1Presence, ROLES, colors } from "../../../utils";
 import WrapperPhase1 from "./wrapper";
 import api from "../../../services/api";
 import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
+import MailAttestationButton from "../../../components/buttons/MailAttestationButton";
 import DownloadConvocationButton from "../../../components/buttons/DownloadConvocationButton";
 import AssignCenter from "../components/AssignCenter";
 import { Box, BoxTitle } from "../../../components/box";
 import { toastr } from "react-redux-toastr";
 import Badge from "../../../components/Badge";
 import Select from "../components/Select";
+import ModalConfirm from "../../../components/modals/ModalConfirm";
 
 export default (props) => {
   const user = useSelector((state) => state.Auth.user);
   const [meetingPoint, setMeetingPoint] = useState();
   const [young, setYoung] = useState(props.young);
   const disabled = young.statusPhase1 === "WITHDRAWN" || user.role !== ROLES.ADMIN;
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
   useEffect(() => {
     if (!young.meetingPointId) return;
@@ -87,7 +90,7 @@ export default (props) => {
       return (
         <>
           <p>{young.firstName} est en attente d'affectation à un centre de cohésion</p>
-          {ENABLE_ASSIGN_CENTER && user.role === ROLES.ADMIN ? <AssignCenter young={young} onAffect={props.getYoung} /> : null}
+          {!FORCE_DISABLED_ASSIGN_COHESION_CENTER && user.role === ROLES.ADMIN ? <AssignCenter young={young} onAffect={props.getYoung} /> : null}
         </>
       );
     if (young.statusPhase1 === "WAITING_LIST")
@@ -173,9 +176,15 @@ export default (props) => {
                         name="cohesionStayPresence"
                         handleChange={(e) => {
                           const value = e.target.value;
-                          if (!confirmMessageChangePhase1Presence(value)) return;
-                          handleChange({ target: { value, name: "cohesionStayPresence" } });
-                          updateYoung({ cohesionStayPresence: value });
+                          setModal({
+                            isOpen: true,
+                            onConfirm: () => {
+                              handleChange({ target: { value, name: "cohesionStayPresence" } });
+                              updateYoung({ cohesionStayPresence: value });
+                            },
+                            title: "Changement de présence",
+                            message: confirmMessageChangePhase1Presence(value),
+                          });
                         }}
                         disabled={disabled}
                       />
@@ -204,19 +213,34 @@ export default (props) => {
             </Col>
           </Row>
         </Box>
-        <div>
+        <div style={{ display: "flex", alignItems: "flex-start" }}>
           {young.statusPhase1 === "DONE" && young.cohesionCenterName ? (
-            <DownloadAttestationButton young={young} uri="1">
-              Télécharger l'attestation de réalisation de la phase 1
-            </DownloadAttestationButton>
+            <div style={{ textAlign: "center" }}>
+              <DownloadAttestationButton young={young} uri="1">
+                Télécharger l'attestation de réalisation de la phase 1
+              </DownloadAttestationButton>
+              <MailAttestationButton style={{ marginTop: ".5rem" }} young={young} type="1" template="certificate" placeholder="Attestation de réalisation de la phase 1">
+                Envoyer l'attestation par mail
+              </MailAttestationButton>
+            </div>
           ) : null}
           {young.meetingPointId || young.deplacementPhase1Autonomous === "true" ? (
-            <DownloadConvocationButton young={young} uri="cohesion" style={{ marginTop: "1rem" }}>
+            <DownloadConvocationButton young={young} uri="cohesion">
               Télécharger la convocation au séjour de cohésion
             </DownloadConvocationButton>
           ) : null}
         </div>
       </WrapperPhase1>
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
     </div>
   );
 };

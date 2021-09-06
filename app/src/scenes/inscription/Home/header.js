@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 
-export default ({ showMessage = true }) => {
+export default ({ showMessage = true, location }) => {
   return (
     <Header>
       <Logos>
@@ -21,7 +21,7 @@ export default ({ showMessage = true }) => {
           <h3>Ouvertes jusqu'au 30 avril 2021</h3>
         </Title>
       ) : null}
-      <AvatarContainer to="/auth/login">
+      <AvatarContainer to={{ pathname: "/auth/login", search: location.search }}>
         <Avatar src={require("../../../assets/avatar.jpg")} />
         <AvatarText>connexion</AvatarText>
       </AvatarContainer>

@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import { Spinner } from "reactstrap";
+import styled from "styled-components";
+
+import { colors } from "../../utils";
 import downloadPDF from "../../utils/download-pdf";
 
 export default ({ young, children, disabled, uri, ...rest }) => {
@@ -9,14 +12,23 @@ export default ({ young, children, disabled, uri, ...rest }) => {
     setLoading(true);
     await downloadPDF({
       url: `/young/${young._id}/documents/certificate/${a}`,
-      body: { options: { landscape: true } },
       fileName: `${young.firstName} ${young.lastName} - attestation ${a}.pdf`,
     });
     setLoading(false);
   };
   return (
-    <div {...rest} onClick={() => viewAttestation(uri)}>
+    <PrimaryStyle {...rest} onClick={() => viewAttestation(uri)}>
       {loading ? <Spinner size="sm" style={{ borderWidth: "0.1em" }} /> : children}
-    </div>
+    </PrimaryStyle>
   );
 };
+
+export const PrimaryStyle = styled.div`
+  font-size: 0.9rem;
+  color: ${colors.purple};
+  cursor: pointer;
+  :hover {
+    color: ${colors.darkPurple};
+    text-decoration: underline;
+  }
+`;

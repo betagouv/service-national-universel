@@ -3,6 +3,7 @@ import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactive
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
+import { toastr } from "react-redux-toastr";
 
 import SelectStatusApplication from "../../components/selectStatusApplication";
 import api from "../../services/api";
@@ -13,7 +14,7 @@ import Loader from "../../components/Loader";
 import Chevron from "../../components/Chevron";
 import ContractLink from "../../components/ContractLink";
 import { Filter, FilterRow, ResultTable, Table, Header, Title } from "../../components/list";
-import { translate, getFilterLabel, formatStringLongDate, formatStringDate, getAge, ES_NO_LIMIT, ROLES } from "../../utils";
+import { translate, getFilterLabel, formatStringLongDate, formatStringDateTimezoneUTC, getAge, ES_NO_LIMIT, ROLES } from "../../utils";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 
 const FILTERS = ["SEARCH", "STATUS", "PHASE", "COHORT", "MISSIONS", "TUTOR"];
@@ -23,12 +24,13 @@ export default () => {
   const [missions, setMissions] = useState();
   const [panel, setPanel] = useState(null);
   const [filterVisible, setFilterVisible] = useState(false);
+  const history = useHistory();
   const handleShowFilter = () => setFilterVisible(!filterVisible);
   const getDefaultQuery = () => ({ query: { bool: { filter: { terms: { "missionId.keyword": missions.map((e) => e._id) } } } }, sort: [{ "youngLastName.keyword": "asc" }] });
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
   async function appendMissions(structure) {
-    const missionsResponse = await api.get(`/mission/structure/${structure}`);
+    const missionsResponse = await api.get(`/structure/${structure}/mission`);
     if (!missionsResponse.ok) {
       toastr.error("Oups, une erreur est survenue lors de la récupération des missions", translate(missionsResponse.code));
       return history.push("/");
@@ -39,7 +41,7 @@ export default () => {
   async function initMissions(structure) {
     const m = await appendMissions(structure);
     if (user.role === ROLES.SUPERVISOR) {
-      const subStructures = await api.get(`/structure/network/${structure}`);
+      const subStructures = await api.get(`/structure/${structure}/children`);
       if (!subStructures.ok) {
         toastr.error("Oups, une erreur est survenue lors de la récupération des missions des antennes", translate(subStructures.code));
         return history.push("/");
@@ -82,12 +84,11 @@ export default () => {
                 transformAll={async (data) => {
                   const youngIds = [...new Set(data.map((item) => item.youngId))];
                   if (youngIds?.length) {
-                    const { responses } = await api.esQuery([
-                      { index: "young", type: "_doc" },
-                      { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: youngIds } } },
-                    ]);
-                    const youngs = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-                    return data.map((item) => ({ ...item, young: youngs.find((e) => e._id === item.youngId) }));
+                    const { responses } = await api.esQuery("young", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: youngIds } } });
+                    if (responses.length) {
+                      const youngs = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+                      return data.map((item) => ({ ...item, young: youngs.find((e) => e._id === item.youngId) || {} }));
+                    }
                   }
                   return data;
                 }}
@@ -135,6 +136,7 @@ export default () => {
                   style={{ flex: 1, marginRight: "1rem" }}
                   innerClass={{ input: "searchbox" }}
                   autosuggest={false}
+                  URLParams={true}
                   queryFormat="and"
                 />
                 <MultiDropdownList
@@ -237,10 +239,10 @@ const Hit = ({ hit, onClick, selected, mission }) => {
       </td>
       <td>
         <div>
-          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Du</span> {formatStringDate(mission.startAt)}
+          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Du</span> {formatStringDateTimezoneUTC(mission.startAt)}
         </div>
         <div>
-          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Au</span> {formatStringDate(mission.endAt)}
+          <span style={{ color: "#cbd5e0", marginRight: 5 }}>Au</span> {formatStringDateTimezoneUTC(mission.endAt)}
         </div>
       </td>
       <td>

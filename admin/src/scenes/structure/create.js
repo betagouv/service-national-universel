@@ -10,7 +10,7 @@ import MultiSelect from "../../components/Multiselect";
 import AddressInput from "../../components/addressInput";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
 import { Box, BoxTitle } from "../../components/box";
-import { associationTypes, privateTypes, publicTypes, publicEtatTypes, translate, ROLES } from "../../utils";
+import { associationTypes, privateTypes, publicTypes, publicEtatTypes, translate, ROLES, SENDINBLUE_TEMPLATES } from "../../utils";
 import api from "../../services/api";
 
 export default (props) => {
@@ -64,7 +64,7 @@ export default (props) => {
             structureId: data._id,
             structureName: data.name,
           };
-          const { ok, code } = await api.post(`/referent/signup_invite/${role}`, obj);
+          const { ok, code } = await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent[role]}`, obj);
           if (!ok) return toastr.error("Oups, une erreur est survenue lors de l'ajout du nouveau membre", translate(code));
           toastr.success("Invitation envoyée");
 

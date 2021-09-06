@@ -5,7 +5,7 @@ faker.locale = "fr";
 function getNewStructureFixture() {
   return {
     name: faker.name.findName(),
-    siret: faker.datatype.number(),
+    siret: faker.datatype.number().toString(),
     description: faker.lorem.sentences(),
     website: faker.internet.url(),
     facebook: faker.internet.url(),
@@ -31,6 +31,7 @@ function getNewStructureFixture() {
       lon: Number(faker.address.longitude()),
     },
     state: faker.address.state(),
+    isMilitaryPreparation: "false",
   };
 }
 

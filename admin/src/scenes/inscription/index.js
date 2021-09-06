@@ -12,9 +12,9 @@ import VioletButton from "../../components/buttons/VioletButton";
 import ExportComponent from "../../components/ExportXlsx";
 import SelectStatus from "../../components/selectStatus";
 import api from "../../services/api";
-import { apiURL, appURL, environment } from "../../config";
+import { apiURL, appURL } from "../../config";
 import Panel from "./panel";
-import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS, getDepartmentNumber, isInRuralArea, formatDateFR, formatLongDateFR, ES_NO_LIMIT, ROLES } from "../../utils";
+import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS, isInRuralArea, formatDateFRTimezoneUTC, formatLongDateFR, ES_NO_LIMIT, ROLES, colors } from "../../utils";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
 const FILTERS = ["SEARCH", "STATUS", "REGION", "DEPARTMENT", "SCHOOL"];
@@ -52,7 +52,7 @@ export default () => {
                       Cohorte: data.cohort,
                       Prénom: data.firstName,
                       Nom: data.lastName,
-                      "Date de naissance": formatDateFR(data.birthdateAt),
+                      "Date de naissance": formatDateFRTimezoneUTC(data.birthdateAt),
                       Sexe: translate(data.gender),
                       Email: data.email,
                       Téléphone: data.phone,
@@ -129,6 +129,7 @@ export default () => {
                   // fuzziness={2}
                   style={{ flex: 1, marginRight: "1rem" }}
                   innerClass={{ input: "searchbox" }}
+                  URLParams={true}
                   autosuggest={false}
                 />
                 <MultiDropdownList
@@ -213,7 +214,7 @@ const Hit = ({ hit, index, onClick, selected }) => {
   if (user.role === ROLES.ADMIN) STATUS.push(YOUNG_STATUS.WAITING_VALIDATION);
 
   return (
-    <tr style={{ backgroundColor: (selected && "#e6ebfa") || (hit.status === "WITHDRAWN" && "#BE3B1211") }} onClick={onClick} key={hit._id}>
+    <tr style={{ backgroundColor: (selected && "#e6ebfa") || (hit.status === "WITHDRAWN" && colors.extraLightGrey) }} onClick={onClick} key={hit._id}>
       <td>{index + 1}</td>
       <td>
         <MultiLine>

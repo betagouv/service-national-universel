@@ -42,7 +42,9 @@ export default (props) => {
           setLoading(true);
           if (isNew) values.placesLeft = values.placesTotal;
           else values.placesLeft += values.placesTotal - defaultValue.placesTotal;
-          const { ok, code, data } = await api[values._id ? "put" : "post"]("/cohesion-center", values);
+
+          const { ok, code, data } = values._id ? await api.put("/cohesion-center", values) : await api.post("/cohesion-center", values);
+
           setLoading(false);
           if (!ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de ce centre !!", translate(code));
           history.push(`/centre/${data._id}`);

@@ -1,16 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { toastr } from "react-redux-toastr";
 
-import { YOUNG_PHASE, YOUNG_STATUS, PHASE_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, permissionPhase1, permissionPhase2, permissionPhase3 } from "../../utils";
+import { YOUNG_PHASE, YOUNG_STATUS, PHASE_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, permissionPhase1, permissionPhase2, permissionPhase3, translate } from "../../utils";
 import Item from "./item";
 import { DRAWER_TABS } from "../utils";
-import WithdrawnModal from "../WithdrawnModal";
 import DownloadAttestationButton from "../buttons/DownloadAttestationButton";
 import SubMenuPhase2 from "./SubMenuPhase2";
 import SubMenuPhase3 from "./SubMenuPhase3";
 import { environment } from "../../config";
+import ModalConfirm from "../../components/modals/ModalConfirm";
+import ModalConfirmWithMessage from "../../components/modals/ModalConfirmWithMessage";
+import api from "../../services/api";
+import { setYoung } from "../../redux/auth/actions";
 
 export default (props) => {
   const [open, setOpen] = useState();
@@ -200,14 +204,55 @@ export default (props) => {
 };
 
 const DeleteAccountButton = ({ young }) => {
-  const [modal, setModal] = useState(null);
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+  const [modalConfirmWithMessage, setModalConfirmWithMessage] = useState({ isOpen: false, onConfirm: null });
   const mandatoryPhasesDone = young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE && young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED;
   const getLabel = () => (mandatoryPhasesDone ? "Supprimer mon compte" : "Se désister du SNU");
+  const dispatch = useDispatch();
+
+  const onConfirm = async (status, note) => {
+    young.historic.push({ phase: young.phase, userName: `${young.firstName} ${young.lastName}`, userId: young._id, status, note });
+    young.status = status;
+    if (note) young.withdrawnMessage = note;
+    young.lastStatusAt = Date.now();
+    try {
+      const { ok, code, data } = await api.put(`/young`, young);
+      if (!ok) return toastr.error("Une erreur est survenu lors du traitement de votre demande :", translate(code));
+      logout();
+    } catch (e) {
+      console.log(e);
+      toastr.error("Oups, une erreur est survenue :", translate(e.code));
+    }
+  };
+
+  async function logout() {
+    await api.post(`/young/logout`);
+    dispatch(setYoung(null));
+  }
 
   return (
     <>
-      {modal && <WithdrawnModal status={modal} value={young} onChange={() => setModal(null)} />}
-      <div onClick={mandatoryPhasesDone ? () => setModal("DELETED") : () => setModal("WITHDRAWN")}>{getLabel()}</div>
+      <div onClick={mandatoryPhasesDone ? () => setModal({ isOpen: true }) : () => setModalConfirmWithMessage({ isOpen: true })}>{getLabel()}</div>
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title="Suppression du compte SNU"
+        message="Vous êtes sur le point de supprimer votre compte. Vous serez immédiatement déconnecté(e). Souhaitez-vous réellement supprimer votre compte ?"
+        onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          onConfirm(YOUNG_STATUS.DELETED);
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
+      <ModalConfirmWithMessage
+        isOpen={modalConfirmWithMessage.isOpen}
+        title="Désistement du SNU"
+        message="Veuillez précisez le motif de votre désistement ci-dessous avant de valider."
+        onChange={() => setModalConfirmWithMessage({ isOpen: false, data: null })}
+        onConfirm={(msg) => {
+          onConfirm(YOUNG_STATUS.WITHDRAWN, msg);
+          setModalConfirmWithMessage({ isOpen: false, onConfirm: null });
+        }}
+      />
     </>
   );
 };
@@ -238,12 +283,13 @@ const Sidebar = styled.div`
   transition: 0.2s;
   a {
     font-size: 13px;
-    color: #fff;
+    color: #f5f5f5;
     display: flex;
     align-items: center;
     font-weight: 700;
     &.active,
     :hover {
+      color: #fff;
       background-color: #5145cd;
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }

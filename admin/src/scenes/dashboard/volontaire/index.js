@@ -6,40 +6,55 @@ import { useSelector } from "react-redux";
 import YearPicker from "../components/YearPicker";
 import FilterRegion from "../components/FilterRegion";
 import FilterDepartment from "../components/FilterDepartment";
+import SubTab from "./status";
 
-import Status from "./status";
-
-import { YOUNG_STATUS } from "../../../utils";
+import { YOUNG_STATUS, ROLES } from "../../../utils";
 
 export default () => {
   const user = useSelector((state) => state.Auth.user);
-  const [filter, setFilter] = useState({ status: Object.keys(YOUNG_STATUS).filter((e) => e !== "IN_PROGRESS"), region: user.region, department: user.department, cohort: "2021" });
+  const [filter, setFilter] = useState();
 
   function updateFilter(n) {
-    setFilter({ ...filter, ...n });
+    setFilter({ ...(filter || { status: Object.keys(YOUNG_STATUS), region: "", department: "", cohort: "2021" }), ...n });
   }
+
+  useEffect(() => {
+    const cohort = "2021";
+    const status = Object.keys(YOUNG_STATUS).filter((e) => e !== "IN_PROGRESS");
+    if (user.role === ROLES.REFERENT_DEPARTMENT) {
+      updateFilter({ department: user.department, status, cohort });
+    } else if (user.role === ROLES.REFERENT_REGION) {
+      updateFilter({ region: user.region, status, cohort });
+    } else {
+      updateFilter({ cohort });
+    }
+  }, []);
 
   return (
     <>
       <Row style={{}}>
-        <Col md={12}>
+        <Col md={6}>
           <Title>Volontaires</Title>
         </Col>
+        <Col md={6}>
+          {filter ? (
+            <>
+              <FiltersList>
+                <FilterRegion updateFilter={updateFilter} filter={filter} />
+                <FilterDepartment updateFilter={updateFilter} filter={filter} />
+                <FilterWrapper>
+                  <YearPicker options={["2019", "2020", "2021"]} onChange={(cohort) => updateFilter({ cohort })} value={filter.cohort} />
+                </FilterWrapper>
+              </FiltersList>
+            </>
+          ) : null}
+        </Col>
       </Row>
-      <FiltersList>
-        <FilterRegion updateFilter={updateFilter} filter={filter} />
-        <FilterDepartment updateFilter={updateFilter} filter={filter} />
-        <FilterWrapper>
-          <YearPicker options={["2019", "2020", "2021"]} onChange={(cohort) => updateFilter({ cohort })} value={filter.cohort} />
-        </FilterWrapper>
-      </FiltersList>
-      <SubTitle>En quelques chiffres</SubTitle>
-      <Status filter={filter} />
+      {filter ? <SubTab filter={filter} /> : null}
     </>
   );
 };
 
-// Title line with filters
 const Title = styled.h2`
   color: #242526;
   font-weight: bold;
@@ -47,13 +62,6 @@ const Title = styled.h2`
   margin-bottom: 10px;
 `;
 
-const SubTitle = styled.h3`
-  color: #242526;
-  font-size: 24px;
-  margin-bottom: 1rem;
-  margin-top: 1.5rem;
-  font-weight: normal;
-`;
 const FiltersList = styled.div`
   display: flex;
   justify-content: flex-end;

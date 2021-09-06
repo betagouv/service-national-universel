@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import Loader from "../../../components/Loader";
 
 import api from "../../../services/api";
+import { APPLICATION_STATUS, ENABLE_PM, SENDINBLUE_TEMPLATES } from "../../../utils";
 
 import { toastr } from "react-redux-toastr";
 
@@ -33,9 +34,10 @@ export default ({ value, onChange, onSend }) => {
       tutorId: value.tutorId,
       tutorName: value.tutorName,
     };
+    if (ENABLE_PM && value.isMilitaryPreparation === "true") application.status = APPLICATION_STATUS.WAITING_VERIFICATION;
     const { ok, data, code } = await api.post(`/application`, application);
     if (!ok) return toastr.error("Oups, une erreur est survenue lors de la candidature", code);
-    await api.post(`/application/${data._id}/notify/waiting_validation`);
+    await api.post(`/application/${data._id}/notify/${SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION}`);
     onSend();
   };
 
@@ -50,7 +52,7 @@ export default ({ value, onChange, onSend }) => {
         ) : (
           <>
             <Button disabled={sending} onClick={send}>
-              Confirmer ma candidature
+              Confirmer&nbsp;ma&nbsp;candidature
             </Button>
             <CancelButton onClick={onChange}>Annuler</CancelButton>
           </>
@@ -101,6 +103,10 @@ const Button = styled.div`
   color: #fff;
   font-size: 1rem;
   padding: 0.8rem 3rem;
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+    padding: 0.5rem 1rem;
+  }
   :hover {
     color: #fff;
     background-color: #0e9f6e;

@@ -21,7 +21,7 @@ export default ({ young, handleClick }) => {
             </DownloadAttestationButton>
           </li>
           <li>
-            <NavLink to="/phase3/les-programmes" onClick={(event) => handleClick(event, DRAWER_TABS.PHASE3, "les-programmes")}>
+            <NavLink to="/les-programmes" onClick={(event) => handleClick(event, DRAWER_TABS.PHASE3, "les-programmes")}>
               Les possibilités d'engagement
             </NavLink>
           </li>
@@ -36,7 +36,7 @@ export default ({ young, handleClick }) => {
       return (
         <ul className="subNav">
           <li>
-            <NavLink to="/phase3/les-programmes" onClick={(event) => handleClick(event, DRAWER_TABS.PHASE3, "les-programmes")}>
+            <NavLink to="/les-programmes" onClick={(event) => handleClick(event, DRAWER_TABS.PHASE3, "les-programmes")}>
               Les programmes d'engagement
             </NavLink>
           </li>

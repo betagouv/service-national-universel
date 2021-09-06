@@ -1,4 +1,45 @@
 import styled from "styled-components";
+import { colors } from "../../utils";
+
+export const Help = styled.div`
+  margin-left: auto;
+  color: ${colors.darkPurple};
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  :hover {
+    text-decoration: underline;
+  }
+`;
+
+export const LockIcon = styled.img`
+  height: 0.8rem;
+  opacity: 0.7;
+  cursor: pointer;
+  margin-right: 0.3rem;
+`;
+
+export const HelpText = styled.div`
+  font-size: 0.8rem;
+  padding: 1rem;
+  padding-top: 0;
+  display: grid;
+  place-items: center;
+  color: #666;
+  .title {
+    color: black;
+    text-decoration: underline;
+    margin-right: 0.3rem;
+  }
+  a {
+    color: ${colors.purple};
+    :hover {
+      text-decoration: underline;
+    }
+  }
+`;
 
 export const Header = styled.div`
   padding: 0 25px 0;
@@ -50,8 +91,6 @@ export const ResultTable = styled.div`
     }
     a.active {
       font-weight: 700;
-      /* background: #5245cc;
-      color: #fff; */
     }
     a:first-child {
       background-image: url(${require("../../assets/left.svg")});
@@ -68,6 +107,22 @@ export const ResultTable = styled.div`
       background-repeat: no-repeat;
       background-size: 8px;
     }
+  }
+  select.sort-options {
+    background: none; // remove the arrows added by sortOptions
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    outline: 0;
+    background-color: #fff;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
+    border: 0;
+    border-radius: 6px;
+    padding: 0.2rem 0.5rem 0.2rem 0.5rem;
+    font-size: 0.7rem;
+    color: #242526;
+    min-width: 150px;
+    cursor: pointer;
   }
 `;
 
@@ -86,6 +141,7 @@ export const Filter = styled.div`
     padding: 15px 20px;
     border-radius: 6px;
     margin-right: 15px;
+    margin-bottom: 15px;
     ::placeholder {
       color: #767676;
     }
@@ -173,21 +229,18 @@ export const FilterRow = styled.div`
 `;
 
 export const ResultStats = styled.div`
+  position: absolute;
   color: #242526;
   font-size: 12px;
-  padding-left: 25px;
+  right: 310px;
 `;
 
 export const TopResultStats = styled(ResultStats)`
-  position: absolute;
-  top: 25px;
-  left: 0;
+  top: 15px;
 `;
 
 export const BottomResultStats = styled(ResultStats)`
-  position: absolute;
-  top: calc(100% - 50px);
-  left: 0;
+  bottom: 25px;
 `;
 
 export const ActionBox = styled.div`

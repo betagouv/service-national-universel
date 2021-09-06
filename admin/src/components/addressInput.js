@@ -125,7 +125,7 @@ export default ({ keys, values, handleChange, errors, touched }) => {
                 }}
               >
                 <option label=""></option>
-                {departmentListFiltered.map((d) => (
+                {departmentListFiltered?.sort()?.map((d) => (
                   <option key={d} value={d}>
                     {d}
                   </option>
@@ -151,7 +151,7 @@ export default ({ keys, values, handleChange, errors, touched }) => {
                 }}
               >
                 <option label=""></option>
-                {regionListFiltered.map((r) => (
+                {regionListFiltered?.sort()?.map((r) => (
                   <option key={r} value={r}>
                     {r}
                   </option>

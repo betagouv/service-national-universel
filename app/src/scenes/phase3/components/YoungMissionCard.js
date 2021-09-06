@@ -3,15 +3,15 @@ import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { Col, Row } from "reactstrap";
 
-import { translate, YOUNG_STATUS_COLORS, formatStringDate } from "../../../utils";
+import { translate, YOUNG_STATUS_COLORS, formatStringDateTimezoneUTC } from "../../../utils";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
   const getTags = () => {
     const tags = [];
     young.phase3MissionDomain && tags.push(translate(young.phase3MissionDomain));
-    young.phase3MissionStartAt && tags.push("Début : " + formatStringDate(young.phase3MissionStartAt));
-    young.phase3MissionEndAt && tags.push("Fin : " + formatStringDate(young.phase3MissionEndAt));
+    young.phase3MissionStartAt && tags.push("Début : " + formatStringDateTimezoneUTC(young.phase3MissionStartAt));
+    young.phase3MissionEndAt && tags.push("Fin : " + formatStringDateTimezoneUTC(young.phase3MissionEndAt));
     return tags;
   };
 

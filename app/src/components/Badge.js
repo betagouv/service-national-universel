@@ -1,11 +1,11 @@
 import React from "react";
 import styled from "styled-components";
 
-export default ({ text, tooltipText, ...rest }) => {
+export default ({ text, textColor, backgroundColor, tooltipText, ...rest }) => {
   return (
-    <Badge {...rest}>
+    <Badge {...rest} textColor={textColor} backgroundColor={backgroundColor}>
       {text}
-      <div className="tooltiptext">{tooltipText}</div>
+      {tooltipText ? <div className="tooltiptext">{tooltipText}</div> : null}
     </Badge>
   );
 };
@@ -17,16 +17,19 @@ const Badge = styled.div`
   margin: 0.25rem 0.25rem;
   border-radius: 99999px;
   font-size: 0.8rem;
+  @media (max-width: 768px) {
+    font-size: 0.6rem;
+  }
   font-weight: 500;
   color: #9a9a9a;
   background-color: #f6f6f6;
   border: 1px solid #cecece;
   white-space: nowrap;
   height: fit-content;
-  ${({ color }) => `
-    color: ${color};
-    background-color: ${color}33;
-    border: 1px solid ${color};
+  ${({ color, textColor, backgroundColor }) => `
+    color: ${textColor || color};
+    background-color: ${backgroundColor || `${color}33`};
+    border: 1px solid ${textColor || color};
   `};
   /* Tooltip text */
   .tooltiptext {

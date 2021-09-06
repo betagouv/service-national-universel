@@ -8,7 +8,7 @@ import Select from "react-select";
 import MultiSelect from "../../../components/Multiselect";
 import AddressInput from "../../../components/addressInput";
 import ErrorMessage, { requiredMessage } from "../../../components/errorMessage";
-import { translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, MISSION_DOMAINS, dateForDatePicker, ROLES } from "../../../utils";
+import { translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, MISSION_DOMAINS, dateForDatePicker, ROLES, SENDINBLUE_TEMPLATES } from "../../../utils";
 import api from "../../../services/api";
 import PlusSVG from "../../../assets/plus.svg";
 import CrossSVG from "../../../assets/cross.svg";
@@ -22,7 +22,7 @@ export default ({ young, onSend }) => {
 
   useEffect(() => {
     (async () => {
-      const { data } = await api.get("/structure/all");
+      const { data } = await api.get("/structure");
       const res = data.map((s) => ({ label: s.name, value: s.name, _id: s._id }));
       if (data) setStructures(res);
     })();
@@ -31,9 +31,11 @@ export default ({ young, onSend }) => {
   useEffect(() => {
     (async () => {
       if (!structure) return;
-      const queries = [{ index: "referent", type: "_doc" }, { query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": structure._id } }] } } }];
-      const { responses } = await api.esQuery(queries);
-      if (responses) setReferents(responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
+      const body = { query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": structure._id } }] } } };
+      const { responses } = await api.esQuery("referent", body);
+      if (responses.length) {
+        if (responses) setReferents(responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
+      }
     })();
   }, [structure]);
 
@@ -94,6 +96,7 @@ export default ({ young, onSend }) => {
           // create the strucutre if it is a new one
           if (createStructureVisible) {
             const responseStructure = await api.post("/structure", {
+              status: "VALIDATED",
               name: values.structureName,
               legalStatus: values.structureLegalStatus,
               description: values.structureDescription,
@@ -109,7 +112,7 @@ export default ({ young, onSend }) => {
           }
           // create the responsible if it is a new one
           if (createTutorVisible) {
-            const responseResponsible = await api.post(`/referent/signup_invite/${createStructureVisible ? "responsible_new_structure" : ROLES.RESPONSIBLE}`, {
+            const responseResponsible = await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent[ROLES.RESPONSIBLE]}`, {
               role: ROLES.RESPONSIBLE,
               structureId: values.structureId,
               structureName: values.structureName,

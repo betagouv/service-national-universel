@@ -6,11 +6,17 @@ import { Col, Row } from "reactstrap";
 import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
-import { translate, APPLICATION_STATUS_COLORS, APPLICATION_STATUS, getAge } from "../../../utils";
+import { translate, APPLICATION_STATUS_COLORS, APPLICATION_STATUS, getAge, SENDINBLUE_TEMPLATES } from "../../../utils";
+import Badge from "../../../components/Badge";
+import DomainThumb from "../../../components/DomainThumb";
+import DownloadContractButton from "../../../components/buttons/DownloadContractButton";
+import ModalConfirm from "../../../components/modals/ModalConfirm";
 
 export default ({ application, index }) => {
   const [value, setValue] = useState(application);
   const [contract, setContract] = useState(null);
+  const young = useSelector((state) => state.Auth.young);
+
   const getTags = (mission) => {
     if (!mission) return [];
     const tags = [];
@@ -30,6 +36,16 @@ export default ({ application, index }) => {
     getContract();
   }, [application]);
 
+  const contractHasAllValidation = (contract, young) => {
+    const isYoungAdult = getAge(young.birthdateAt) >= 18;
+    return (
+      contract.projectManagerStatus === "VALIDATED" &&
+      contract.structureManagerStatus === "VALIDATED" &&
+      ((isYoungAdult && contract.youngContractStatus === "VALIDATED") ||
+        (!isYoungAdult && contract.parent1Status === "VALIDATED" && (!young.parent2Email || contract.parent2Status === "VALIDATED")))
+    );
+  };
+
   if (!value || !value.mission) return <div />;
 
   return (
@@ -39,29 +55,44 @@ export default ({ application, index }) => {
           <Header {...provided.dragHandleProps}>{value.status === APPLICATION_STATUS.WAITING_ACCEPTATION ? "PROPOSITION" : `CHOIX N°${index + 1}`}</Header>
           <Separator />
           <Card>
-            <Col md={9}>
+            <Col md={7}>
               <Link to={`/mission/${value.mission._id}`}>
                 <div className="info">
                   <div className="inner">
-                    <div className="thumb">
-                      <img src={require("../../../assets/observe.svg")} />
-                    </div>
+                    <DomainThumb domain={value.mission.domains[0]} size="3rem" />
                     <div>
                       <h4>{value.mission.structureName}</h4>
                       <p>{value.mission.name}</p>
-                      <Tags>{getTags(value.mission).map((e, i) => e && <div key={i}>{translate(e)}</div>)}</Tags>
+                      <Tags>
+                        {getTags(value.mission).map((e, i) => e && <Badge key={i} text={e} textColor="#6b7280" backgroundColor="#ffffff" />)}
+                        {value.mission.isMilitaryPreparation === "true" ? <Badge text="Préparation Militaire" color="#03224C" /> : null}
+                      </Tags>
                     </div>
                   </div>
                 </div>
               </Link>
             </Col>
-            <Col md={3}>
+            <Col md={5}>
               <TagContainer>
                 <Tag color={APPLICATION_STATUS_COLORS[value.status]}>{translate(value.status)}</Tag>
+                {value.statusComment ? <StatusComment>{value.statusComment}</StatusComment> : null}
               </TagContainer>
             </Col>
           </Card>
-          {contract && contract?.invitationSent && <ContractInfo contract={contract} />}
+          {contract && contract?.invitationSent && (
+            <>
+              <hr />
+              {contractHasAllValidation(contract, young) ? (
+                <div style={{ marginLeft: "1rem", fontSize: "0.9rem", fontWeight: "500", marginBottom: "1rem" }}>
+                  <ContractInfoContainer>
+                    <DownloadContractButton children={"Télécharger le contrat"} young={young} uri={contract._id} />
+                  </ContractInfoContainer>
+                </div>
+              ) : (
+                <ContractInfo contract={contract} young={young} />
+              )}
+            </>
+          )}
           <Footer
             application={value}
             tutor={value.tutor}
@@ -75,28 +106,23 @@ export default ({ application, index }) => {
   );
 };
 
-function ContractInfo({ contract }) {
-  const young = useSelector((state) => state.Auth.young);
+function ContractInfo({ contract, young }) {
   const isYoungAdult = getAge(young.birthdateAt) >= 18;
-
   return (
     <>
-      <hr />
-      <div>
-        <div style={{ marginLeft: "1rem", fontSize: "0.9rem", fontWeight: "500" }}>Signatures du contrat d'engagement de la mission d'intérêt général</div>
-        <ContractInfoContainer>
-          <ContractStatus contract={contract} property="projectManagerStatus" name="Représentant de l'Etat" />
-          <ContractStatus contract={contract} property="structureManagerStatus" name="Représentant structure" />
-          {isYoungAdult ? (
-            <ContractStatus contract={contract} property="youngContractStatus" name="Volontaire" />
-          ) : (
-            <>
-              <ContractStatus contract={contract} property="parent1Status" name="Représentant légal 1" />
-              {young.parent2Email && <ContractStatus contract={contract} property="parent2Status" name="Représentant légal 2" />}
-            </>
-          )}
-        </ContractInfoContainer>
-      </div>
+      <div style={{ marginLeft: "1rem", fontSize: "0.9rem", fontWeight: "500" }}>Signatures du contrat d'engagement de la mission d'intérêt général</div>
+      <ContractInfoContainer>
+        <ContractStatus contract={contract} property="projectManagerStatus" name="Représentant de l'Etat" />
+        <ContractStatus contract={contract} property="structureManagerStatus" name="Représentant structure" />
+        {isYoungAdult ? (
+          <ContractStatus contract={contract} property="youngContractStatus" name="Volontaire" />
+        ) : (
+          <>
+            <ContractStatus contract={contract} property="parent1Status" name="Représentant légal 1" />
+            {young.parent2Email && <ContractStatus contract={contract} property="parent2Status" name="Représentant légal 2" />}
+          </>
+        )}
+      </ContractInfoContainer>
     </>
   );
 }
@@ -115,12 +141,16 @@ const ContractStatus = ({ contract, property, name }) => (
 );
 
 const Footer = ({ application, tutor, onChange }) => {
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+
   const setStatus = async (status) => {
     try {
-      if (!confirm("Êtes vous sûr de vouloir modifier cette candidature ?\nAttention cette action est irréversible, vous ne pourrez pas de nouveau candidater à cette mission."))
-        return;
       const { data } = await api.put(`/application`, { _id: application._id, status });
-      await api.post(`/application/${application._id}/notify/${status.toLowerCase()}`);
+      let template;
+      if (status === APPLICATION_STATUS.ABANDON) template = SENDINBLUE_TEMPLATES.referent.CANCEL_APPLICATION;
+      if (status === APPLICATION_STATUS.CANCEL) template = SENDINBLUE_TEMPLATES.referent.CANCEL_APPLICATION;
+      if (status === APPLICATION_STATUS.WAITING_VALIDATION) template = SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION;
+      if (template) await api.post(`/application/${application._id}/notify/${template}`);
       onChange(data);
     } catch (error) {
       console.log(error);
@@ -142,7 +172,19 @@ const Footer = ({ application, tutor, onChange }) => {
                 <div>Mail : {tutor.email}</div>
               </>
             ) : null}
-            <div onClick={() => setStatus(APPLICATION_STATUS.ABANDON)}>Abandonner la mission</div>
+            <div
+              onClick={() =>
+                setModal({
+                  isOpen: true,
+                  title: `Abandonner la mission "${application.missionName}"`,
+                  message:
+                    "Êtes vous sûr de vouloir modifier cette candidature ?\nAttention cette action est irréversible, vous ne pourrez pas de nouveau candidater à cette mission.",
+                  onConfirm: () => setStatus(APPLICATION_STATUS.ABANDON),
+                })
+              }
+            >
+              Abandonner la mission
+            </div>
           </ContainerFooter>
           {/* <div onClick={() => setStatus(APPLICATION_STATUS.WAITING_VALIDATION)}>test</div> */}
         </>
@@ -152,7 +194,19 @@ const Footer = ({ application, tutor, onChange }) => {
         <>
           <Separator />
           <ContainerFooter>
-            <div onClick={() => setStatus(APPLICATION_STATUS.CANCEL)}>Annuler cette candidature</div>
+            <div
+              onClick={() =>
+                setModal({
+                  isOpen: true,
+                  title: `Annuler la candidature à la mission "${application.missionName}"`,
+                  message:
+                    "Êtes vous sûr de vouloir modifier cette candidature ?\nAttention cette action est irréversible, vous ne pourrez pas de nouveau candidater à cette mission.",
+                  onConfirm: () => setStatus(APPLICATION_STATUS.CANCEL),
+                })
+              }
+            >
+              Annuler cette candidature
+            </div>
           </ContainerFooter>
         </>
       );
@@ -161,8 +215,30 @@ const Footer = ({ application, tutor, onChange }) => {
         <>
           <Separator />
           <ContainerFooter>
-            <div onClick={() => setStatus(APPLICATION_STATUS.CANCEL)}>Décliner cette proposition</div>
-            <div onClick={() => setStatus(APPLICATION_STATUS.WAITING_VALIDATION)}>Accepter cette proposition</div>
+            <div
+              onClick={() =>
+                setModal({
+                  isOpen: true,
+                  title: `Décliner la proposition de mission "${application.missionName}"`,
+                  message: "Êtes vous sûr de vouloir décliner cette offre ?\nAttention cette action est irréversible, vous ne pourrez pas de nouveau candidater à cette mission.",
+                  onConfirm: () => setStatus(APPLICATION_STATUS.CANCEL),
+                })
+              }
+            >
+              Décliner cette proposition
+            </div>
+            <div
+              onClick={() =>
+                setModal({
+                  isOpen: true,
+                  title: `Accepter la proposition de mission "${application.missionName}"`,
+                  message: "Êtes vous sûr de vouloir accepter cette offre ?",
+                  onConfirm: () => setStatus(APPLICATION_STATUS.WAITING_VALIDATION),
+                })
+              }
+            >
+              Accepter cette proposition
+            </div>
           </ContainerFooter>
         </>
       );
@@ -170,7 +246,21 @@ const Footer = ({ application, tutor, onChange }) => {
     return null;
   };
 
-  return getFooter(application.status);
+  return (
+    <>
+      {getFooter(application.status)}
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
+    </>
+  );
 };
 
 const ContractInfoContainer = styled.div`
@@ -248,6 +338,9 @@ const Container = styled.div`
   display: flex;
   flex-direction: column;
   background-color: #fff;
+  :hover {
+    background-color: #f7f7f7;
+  }
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   border-radius: 0.5rem;
   margin: 1rem 0;
@@ -261,28 +354,9 @@ const Card = styled(Row)`
   .info {
     justify-content: space-between;
   }
-  :hover {
-    background-color: #f7f7f7;
-  }
   .inner {
     display: flex;
     align-items: flex-start;
-    .thumb {
-      margin-right: 20px;
-      background-color: #42389d;
-      height: 50px;
-      width: 48px;
-      border-radius: 4px;
-      padding: 10px;
-      text-align: center;
-      img {
-        border-radius: 6px;
-        max-width: 100%;
-        height: 30px;
-        object-fit: cover;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-      }
-    }
     h4 {
       font-size: 14px;
       font-weight: 500;
@@ -301,9 +375,10 @@ const Card = styled(Row)`
 
 const TagContainer = styled.div`
   display: flex;
-  justify-content: flex-end;
+  align-items: flex-end;
+  flex-direction: column;
   @media (max-width: 768px) {
-    justify-content: center;
+    align-items: center;
   }
 `;
 
@@ -322,4 +397,11 @@ const Tags = styled(Row)`
     font-size: 12px;
     font-weight: 500;
   }
+`;
+
+const StatusComment = styled.div`
+  font-size: 0.8rem;
+  color: #6b7280;
+  font-style: italic;
+  padding-top: 0.2rem;
 `;

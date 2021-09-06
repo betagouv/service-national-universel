@@ -3,14 +3,16 @@ import { Link } from "react-router-dom";
 import { Container } from "reactstrap";
 import styled from "styled-components";
 import { Col, Row } from "reactstrap";
+import { toastr } from "react-redux-toastr";
 
 import api from "../../services/api";
-import { translate, formatStringDate } from "../../utils";
+import { translate, formatStringDateTimezoneUTC } from "../../utils";
 import SocialIcons from "../../components/SocialIcons";
 import ApplyModal from "./components/ApplyModal";
 import ApplyDoneModal from "./components/ApplyDoneModal";
 import Loader from "../../components/Loader";
-import { toastr } from "react-redux-toastr";
+import Badge from "../../components/Badge";
+import DomainThumb from "../../components/DomainThumb";
 
 export default (props) => {
   const [mission, setMission] = useState();
@@ -55,8 +57,9 @@ export default (props) => {
           <h1>{mission.name}</h1>
           <Tags>
             {getTags().map((e, i) => (
-              <div key={i}>{e}</div>
+              <Badge key={i} text={e} textColor="#6b7280" backgroundColor="#ffffff" />
             ))}
+            {mission?.isMilitaryPreparation === "true" ? <Badge text="Préparation Militaire" color="#03224C" /> : null}
           </Tags>
         </div>
         <div>
@@ -65,18 +68,19 @@ export default (props) => {
       </Heading>
       <Box>
         <Row>
-          <Col md={12} style={{ borderBottom: "2px solid #f4f5f7" }}>
+          <Col md={12}>
             <HeadCard>
-              <div className="thumb">
-                <img src={require("../../assets/observe.svg")} />
+              <div style={{ display: "flex", alignItems: "center" }}>
+                <DomainThumb domain={mission.domains[0]} style={{ transform: "translateY(-20%)" }} size="4rem" />
+                <p>
+                  Au sein de la structure <span>{mission.structureName}</span>
+                </p>
               </div>
-              <p>
-                Au sein de la structure <span>{mission.structureName}</span>
-              </p>
               <SocialIcons structure={mission.structureId} />
             </HeadCard>
           </Col>
         </Row>
+        <hr />
         <Row>
           <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
             <Wrapper>
@@ -90,7 +94,11 @@ export default (props) => {
           </Col>
           <Col md={6}>
             <Wrapper>
-              <Legend>{mission.startAt && mission.endAt ? `Du ${formatStringDate(mission.startAt)} au ${formatStringDate(mission.endAt)}` : "Aucune date renseignée"}</Legend>
+              <Legend>
+                {mission.startAt && mission.endAt
+                  ? `Du ${formatStringDateTimezoneUTC(mission.startAt)} au ${formatStringDateTimezoneUTC(mission.endAt)}`
+                  : "Aucune date renseignée"}
+              </Legend>
               <Detail title="Fréquence" content={mission.frequence} />
               <Detail title="Période pour réaliser la mission" content={mission.period} />
               <Detail title="Lieu" content={[mission.address, mission.zip, mission.city, mission.department]} />
@@ -196,6 +204,9 @@ const Legend = styled.div`
   color: rgb(38, 42, 62);
   margin-bottom: 20px;
   font-size: 1.3rem;
+  @media (max-width: 768px) {
+    font-size: 1.1rem;
+  }
   font-weight: 500;
 `;
 const Box = styled.div`
@@ -215,6 +226,10 @@ const Button = styled.div`
   color: #fff;
   font-size: 1rem;
   padding: 0.8rem 3rem;
+  @media (max-width: 768px) {
+    font-size: 0.8rem;
+    padding: 0.5rem 1rem;
+  }
   width: fit-content;
   :hover {
     color: #fff;
@@ -223,20 +238,30 @@ const Button = styled.div`
 `;
 
 const Heading = styled(Container)`
-  margin-bottom: 40px;
+  margin-bottom: 3rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  @media (max-width: 768px) {
+    margin-bottom: 1rem;
+  }
   h1 {
     color: #161e2e;
     font-size: 3rem;
     font-weight: 700;
     padding-right: 3rem;
+    @media (max-width: 768px) {
+      padding-right: 1rem;
+      font-size: 1.1rem;
+    }
   }
   p {
     &.title {
       color: #42389d;
-      font-size: 16px;
+      font-size: 1rem;
+      @media (max-width: 768px) {
+        font-size: 0.7rem;
+      }
       font-weight: 700;
       margin-bottom: 5px;
       text-transform: uppercase;
@@ -254,25 +279,20 @@ const Tags = styled.div`
   display: flex;
   align-items: center;
   margin-top: 0.8rem;
-  div {
-    text-transform: uppercase;
-    background-color: white;
-    color: #6b7280;
-    border: 1px solid #e5e7eb;
-    border-radius: 30px;
-    padding: 5px 15px;
-    margin-right: 15px;
-    font-size: 12px;
-    font-weight: 500;
-  }
 `;
 
 const Wrapper = styled.div`
   padding: 3rem;
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
   .detail {
     font-size: 1rem;
     text-align: left;
     margin-top: 2rem;
+    @media (max-width: 768px) {
+      margin-top: 1rem;
+    }
     &-title {
       font-size: 0.8rem;
       margin-right: 1rem;
@@ -301,23 +321,10 @@ const HeadCard = styled.div`
   display: flex;
   padding: 0 1.5rem;
   align-items: center;
-  height: 4rem;
-  .thumb {
-    transform: translateY(-20%);
-    margin: 0 1rem;
-    background-color: #42389d;
-    height: 4.5rem;
-    width: 4.5rem;
-    border-radius: 0.5rem;
-    padding: 10px;
-    text-align: center;
-    img {
-      border-radius: 6px;
-      max-width: 100%;
-      height: 100%;
-      object-fit: cover;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    }
+  min-height: 4rem;
+  @media (max-width: 768px) {
+    flex-direction: column;
+    padding: 0 0.5rem;
   }
   p {
     margin: 0;
@@ -325,6 +332,10 @@ const HeadCard = styled.div`
     span {
       color: #242526;
       font-weight: 600;
+    }
+    @media (max-width: 768px) {
+      font-size: 0.8rem;
+      padding: 0.3rem 0;
     }
   }
   .social-link {
@@ -339,5 +350,8 @@ const HeadCard = styled.div`
   }
   .social-icons-container {
     margin-left: auto;
+    @media (max-width: 768px) {
+      margin: 0.5rem 0;
+    }
   }
 `;

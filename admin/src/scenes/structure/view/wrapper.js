@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 import { useHistory } from "react-router-dom";
@@ -6,19 +6,24 @@ import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
-import { translate, STRUCTURE_STATUS_COLORS, ROLES } from "../../../utils";
+import { translate, ROLES, colors } from "../../../utils";
 import api from "../../../services/api";
 import TabList from "../../../components/views/TabList";
 import Tab from "../../../components/views/Tab";
 import Badge from "../../../components/Badge";
+import ModalConfirm from "../../../components/modals/ModalConfirm";
 
 export default ({ children, structure, tab }) => {
   const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
   const isResponsible = user.role === ROLES.RESPONSIBLE;
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
-  const handleDelete = async () => {
-    if (!confirm("Êtes-vous sûr(e) de vouloir supprimer cette structure ?")) return;
+  const onClickDelete = () => {
+    setModal({ isOpen: true, onConfirm: onConfirmDelete, title: "Êtes-vous sûr(e) de vouloir supprimer cette structure ?", message: "Cette action est irréversible." });
+  };
+
+  const onConfirmDelete = async () => {
     try {
       const { ok, code } = await api.remove(`/structure/${structure._id}`);
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
@@ -36,7 +41,8 @@ export default ({ children, structure, tab }) => {
       <Header>
         <div style={{ flex: 1 }}>
           <Title>
-            {structure.name} <Badge color={STRUCTURE_STATUS_COLORS[structure.status]} text={translate(structure.status)} />
+            {structure.name}
+            {structure.isMilitaryPreparation === "true" ? <Badge text="Préparation Militaire" /> : null}
           </Title>
 
           <TabList>
@@ -50,7 +56,7 @@ export default ({ children, structure, tab }) => {
                 </Tab>
                 {user.role === ROLES.ADMIN ? (
                   <Tab isActive={tab === "historique"} onClick={() => history.push(`/structure/${structure._id}/historique`)}>
-                    Historique <i style={{ color: "#5145cd", fontWeight: "lighter", fontSize: ".85rem" }}>Bêta</i>
+                    Historique <i style={{ color: colors.purple, fontWeight: "lighter", fontSize: ".85rem" }}>Bêta</i>
                   </Tab>
                 ) : null}
               </>
@@ -58,18 +64,28 @@ export default ({ children, structure, tab }) => {
           </TabList>
         </div>
         <div style={{ display: "flex" }}>
-          {!isResponsible && (
+          {!isResponsible && structure?.status !== "DRAFT" ? (
             <Link to={`/mission/create/${structure._id}`}>
               <PanelActionButton icon="plus" title="Nouvelle mission" />
             </Link>
-          )}
+          ) : null}
           <Link to={`/structure/${structure._id}/edit`}>
             <PanelActionButton icon="pencil" title="Modifier" />
           </Link>
-          <PanelActionButton onClick={handleDelete} icon="bin" title="Supprimer" />
+          <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" />
         </div>
       </Header>
       {children}
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
     </div>
   );
 };

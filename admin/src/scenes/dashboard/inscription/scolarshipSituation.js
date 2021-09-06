@@ -11,21 +11,21 @@ export default ({ filter }) => {
 
   useEffect(() => {
     (async () => {
-      const queries = [];
-      queries.push({ index: "young", type: "_doc" });
-      queries.push({
+      const body = {
         query: { bool: { must: { match_all: {} }, filter: [{ term: { "cohort.keyword": filter.cohort } }] } },
         aggs: { status: { terms: { field: "situation.keyword" } } },
         size: 0,
-      });
+      };
 
-      if (filter.status) queries[1].query.bool.filter.push({ terms: { "status.keyword": filter.status } });
-      if (filter.region) queries[1].query.bool.filter.push({ term: { "region.keyword": filter.region } });
-      if (filter.department) queries[1].query.bool.filter.push({ term: { "department.keyword": filter.department } });
+      if (filter.status) body.query.bool.filter.push({ terms: { "status.keyword": filter.status } });
+      if (filter.region) body.query.bool.filter.push({ term: { "region.keyword": filter.region } });
+      if (filter.department) body.query.bool.filter.push({ term: { "department.keyword": filter.department } });
 
-      const { responses } = await api.esQuery(queries);
-      const m = api.getAggregations(responses[0]);
-      setValue(m);
+      const { responses } = await api.esQuery("young", body);
+      if (responses.length) {
+        const m = api.getAggregations(responses[0]);
+        setValue(m);
+      }
     })();
   }, [JSON.stringify(filter)]);
 

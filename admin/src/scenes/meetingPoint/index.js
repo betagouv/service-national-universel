@@ -38,6 +38,7 @@ export default () => {
                   react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
                   style={{ flex: 1, marginRight: "1rem" }}
                   innerClass={{ input: "searchbox" }}
+                  URLParams={true}
                   autosuggest={false}
                 />
                 <MultiDropdownList

@@ -2,8 +2,6 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const crypto = require("crypto");
-const fs = require("fs");
-const path = require("path");
 
 const renderFromHtml = require("../htmlToPdf");
 const { capture } = require("../sentry");
@@ -11,13 +9,15 @@ const ContractObject = require("../models/contract");
 const YoungObject = require("../models/young");
 const ApplicationObject = require("../models/application");
 const ReferentObject = require("../models/referent");
-const { ERRORS } = require("../utils");
-const { sendEmail } = require("../sendinblue");
+const { ERRORS, isYoung } = require("../utils");
+const { sendTemplate } = require("../sendinblue");
 const { APP_URL } = require("../config");
 const contractTemplate = require("../templates/contractPhase2");
+const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
+const { validateId, validateContract, validateOptionalId } = require("../utils/validator");
+const { serializeContract } = require("../utils/serializer");
 
-async function updateYoungStatusPhase2Contract(youngId) {
-  const young = await YoungObject.findById(youngId);
+async function updateYoungStatusPhase2Contract(young) {
   const contracts = await ContractObject.find({ youngId: young._id });
   young.set({
     statusPhase2Contract: contracts.map((contract) => {
@@ -38,203 +38,215 @@ async function updateYoungStatusPhase2Contract(youngId) {
   await young.save();
 }
 
+async function createContract(data) {
+  const { sendMessage } = data;
+  const contract = await ContractObject.create(data);
+
+  contract.projectManagerToken = crypto.randomBytes(40).toString("hex");
+  contract.projectManagerStatus = "WAITING_VALIDATION";
+  if (sendMessage) await sendProjectManagerContractEmail(contract);
+
+  contract.structureManagerToken = crypto.randomBytes(40).toString("hex");
+  contract.structureManagerStatus = "WAITING_VALIDATION";
+  if (sendMessage) await sendStructureManagerContractEmail(contract);
+
+  if (contract.isYoungAdult !== "true") {
+    contract.parent1Token = crypto.randomBytes(40).toString("hex");
+    contract.parent1Status = "WAITING_VALIDATION";
+    if (sendMessage) await sendParent1ContractEmail(contract);
+    if (contract.parent2Email) {
+      contract.parent2Token = crypto.randomBytes(40).toString("hex");
+      contract.parent2Status = "WAITING_VALIDATION";
+      if (sendMessage) await sendParent2ContractEmail(contract);
+    }
+  } else {
+    contract.youngContractToken = crypto.randomBytes(40).toString("hex");
+    contract.youngContractStatus = "WAITING_VALIDATION";
+    if (sendMessage) await sendYoungContractEmail(contract);
+  }
+
+  if (sendMessage) contract.invitationSent = "true";
+  await contract.save();
+  return contract;
+}
+
+async function updateContract(id, data) {
+  const { sendMessage } = data;
+  const previous = await ContractObject.findById(id);
+  const contract = await ContractObject.findById(id);
+  contract.set(data);
+  await contract.save();
+
+  // When we update, we have to send mail again to validated.
+  if (
+    previous.invitationSent !== "true" ||
+    previous.projectManagerStatus === "VALIDATED" ||
+    previous.projectManagerEmail !== contract.projectManagerEmail
+  ) {
+    contract.projectManagerStatus = "WAITING_VALIDATION";
+    contract.projectManagerToken = crypto.randomBytes(40).toString("hex");
+    if (sendMessage) await sendProjectManagerContractEmail(contract, previous.projectManagerStatus === "VALIDATED");
+  }
+  if (
+    previous.invitationSent !== "true" ||
+    previous.structureManagerStatus === "VALIDATED" ||
+    previous.structureManagerEmail !== contract.structureManagerEmail
+  ) {
+    contract.structureManagerStatus = "WAITING_VALIDATION";
+    contract.structureManagerToken = crypto.randomBytes(40).toString("hex");
+    if (sendMessage) await sendStructureManagerContractEmail(contract, previous.structureManagerStatus === "VALIDATED");
+  }
+  if (
+    contract.isYoungAdult !== "true" &&
+    (previous.invitationSent !== "true" || previous.parent1Status === "VALIDATED" || previous.parent1Email !== contract.parent1Email)
+  ) {
+    contract.parent1Status = "WAITING_VALIDATION";
+    contract.parent1Token = crypto.randomBytes(40).toString("hex");
+    if (sendMessage) await sendParent1ContractEmail(contract, previous.parent1Status === "VALIDATED");
+  }
+  if (
+    contract.isYoungAdult !== "true" &&
+    contract.parent2Email &&
+    (previous.invitationSent !== "true" || previous.parent2Status === "VALIDATED" || previous.parent2Email !== contract.parent2Email)
+  ) {
+    contract.parent2Status = "WAITING_VALIDATION";
+    contract.parent2Token = crypto.randomBytes(40).toString("hex");
+    if (sendMessage) await sendParent2ContractEmail(contract, previous.parent2Status === "VALIDATED");
+  }
+  if (
+    contract.isYoungAdult === "true" &&
+    (previous.invitationSent !== "true" || previous.youngContractStatus === "VALIDATED" || previous.youngEmail !== contract.youngEmail)
+  ) {
+    contract.youngContractStatus = "WAITING_VALIDATION";
+    contract.youngContractToken = crypto.randomBytes(40).toString("hex");
+    if (sendMessage) await sendYoungContractEmail(contract, previous.youngContractStatus === "VALIDATED");
+  }
+
+  if (sendMessage) contract.invitationSent = "true";
+  await contract.save();
+  return contract;
+}
+
+async function sendProjectManagerContractEmail(contract, isValidateAgainMail) {
+  const departmentReferentPhase2 = await ReferentObject.findOne({
+    department: contract.youngDepartment,
+    subRole: { $in: ["manager_department_phase2", "manager_phase2"] },
+  });
+
+  return sendContractEmail(contract, {
+    email: contract.projectManagerEmail,
+    name: `${contract.projectManagerFirstName} ${contract.projectManagerLastName}`,
+    token: contract.projectManagerToken,
+    cc: departmentReferentPhase2 ? departmentReferentPhase2.email : null,
+    ccName: departmentReferentPhase2 ? `${departmentReferentPhase2.firstName} ${departmentReferentPhase2.lastName}` : null,
+    isValidateAgainMail,
+  });
+}
+
+async function sendStructureManagerContractEmail(contract, isValidateAgainMail) {
+  return sendContractEmail(contract, {
+    email: contract.structureManagerEmail,
+    name: `${contract.structureManagerFirstName} ${contract.structureManagerLastName}`,
+    token: contract.structureManagerToken,
+    isValidateAgainMail,
+  });
+}
+
+async function sendParent1ContractEmail(contract, isValidateAgainMail) {
+  return sendContractEmail(contract, {
+    email: contract.parent1Email,
+    name: `${contract.parent1FirstName} ${contract.parent1LastName}`,
+    token: contract.parent1Token,
+    isValidateAgainMail,
+  });
+}
+
+async function sendParent2ContractEmail(contract, isValidateAgainMail) {
+  return sendContractEmail(contract, {
+    email: contract.parent2Email,
+    name: `${contract.parent2FirstName} ${contract.parent2LastName}`,
+    token: contract.parent2Token,
+    isValidateAgainMail,
+  });
+}
+
+async function sendYoungContractEmail(contract, isValidateAgainMail) {
+  return sendContractEmail(contract, {
+    email: contract.youngEmail,
+    name: `${contract.youngFirstName} ${contract.youngLastName}`,
+    token: contract.youngContractToken,
+    isValidateAgainMail,
+  });
+}
+
+async function sendContractEmail(contract, options) {
+  let template, cc;
+  if (options.isValidateAgainMail) {
+    console.log("send (re)validation mail to " + JSON.stringify({ to: options.email, cc: options.cc }));
+    template = SENDINBLUE_TEMPLATES.REVALIDATE_CONTRACT;
+  } else {
+    console.log("send validation mail to " + JSON.stringify({ to: options.email, cc: options.cc }));
+    template = SENDINBLUE_TEMPLATES.VALIDATE_CONTRACT;
+  }
+  const params = {
+    toName: options.name,
+    youngName: `${contract.youngFirstName} ${contract.youngLastName}`,
+    missionName: contract.missionName,
+    cta: `${APP_URL}/validate-contract?token=${options.token}&contract=${contract._id}`,
+  };
+  const emailTo = [{ name: options.name, email: options.email }];
+  if (options.cc) {
+    cc = [{ name: options.ccName, email: options.cc }];
+  }
+  await sendTemplate(template, {
+    emailTo,
+    params,
+    cc,
+  });
+}
+
 // Create or update contract.
 router.post("/", passport.authenticate(["referent"], { session: false }), async (req, res) => {
   try {
-    let contract = req.body;
-    let mailsToSend = [];
-    let validateAgainMailList = [];
+    const { error: idError, value: id } = validateOptionalId(req.body._id);
+    if (idError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, message: idError.message });
+    const { error, value: data } = validateContract(req.body);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, message: error.message });
 
-    if (!contract._id) {
-      mailsToSend = ["projectManager", "structureManager"];
-      // Create the tokens
-      contract.projectManagerToken = crypto.randomBytes(40).toString("hex");
-      contract.structureManagerToken = crypto.randomBytes(40).toString("hex");
-      contract.projectManagerStatus = "WAITING_VALIDATION";
-      contract.structureManagerStatus = "WAITING_VALIDATION";
-      if (contract.isYoungAdult !== "true") {
-        contract.parent1Token = crypto.randomBytes(40).toString("hex");
-        contract.parent1Status = "WAITING_VALIDATION";
-        mailsToSend.push("parent1");
-        if (contract.parent2Email) {
-          contract.parent2Token = crypto.randomBytes(40).toString("hex");
-          contract.parent2Status = "WAITING_VALIDATION";
-          mailsToSend.push("parent2");
-        }
-      } else {
-        contract.youngContractToken = crypto.randomBytes(40).toString("hex");
-        contract.youngContractStatus = "WAITING_VALIDATION";
-        mailsToSend.push("young");
-      }
+    // Create or update contract.
+    const contract = id ? await updateContract(id, data) : await createContract(data);
 
-      contract = await ContractObject.create(contract);
-    } else {
-      // We have to check if mail has changed (because we have to re-send one)
-      const previous = await ContractObject.findById(contract._id);
-      contract = await ContractObject.findByIdAndUpdate(contract._id, contract, { new: true });
-
-      // When we update, we have to send mail again to validated.
-      if (
-        contract.isYoungAdult !== "true" &&
-        (previous.invitationSent !== "true" || previous.parent1Status === "VALIDATED" || previous.parent1Email !== contract.parent1Email)
-      ) {
-        if (previous.parent1Status === "VALIDATED") validateAgainMailList.push("parent1");
-        contract.parent1Status = "WAITING_VALIDATION";
-        mailsToSend.push("parent1");
-        contract.parent1Token = crypto.randomBytes(40).toString("hex");
-      }
-      if (
-        previous.invitationSent !== "true" ||
-        previous.projectManagerStatus === "VALIDATED" ||
-        previous.projectManagerEmail !== contract.projectManagerEmail
-      ) {
-        if (previous.projectManagerStatus === "VALIDATED") validateAgainMailList.push("projectManager");
-        contract.projectManagerStatus = "WAITING_VALIDATION";
-        mailsToSend.push("projectManager");
-        contract.projectManagerToken = crypto.randomBytes(40).toString("hex");
-      }
-      if (
-        previous.invitationSent !== "true" ||
-        previous.structureManagerStatus === "VALIDATED" ||
-        previous.structureManagerEmail !== contract.structureManagerEmail
-      ) {
-        if (previous.structureManagerStatus === "VALIDATED") validateAgainMailList.push("structureManager");
-        contract.structureManagerStatus = "WAITING_VALIDATION";
-        mailsToSend.push("structureManager");
-        contract.structureManagerToken = crypto.randomBytes(40).toString("hex");
-      }
-      if (
-        contract.isYoungAdult !== "true" &&
-        contract.parent2Email &&
-        (previous.invitationSent !== "true" || previous.parent2Status === "VALIDATED" || previous.parent2Email !== contract.parent2Email)
-      ) {
-        if (previous.parent2Status === "VALIDATED") validateAgainMailList.push("parent2");
-        contract.parent2Status = "WAITING_VALIDATION";
-        mailsToSend.push("parent2");
-        contract.parent2Token = crypto.randomBytes(40).toString("hex");
-      }
-      if (
-        contract.isYoungAdult === "true" &&
-        (previous.invitationSent !== "true" || previous.youngContractStatus === "VALIDATED" || previous.youngEmail !== contract.youngEmail)
-      ) {
-        if (previous.youngContractStatus === "VALIDATED") validateAgainMailList.push("young");
-        contract.youngContractStatus = "WAITING_VALIDATION";
-        mailsToSend.push("young");
-        contract.youngContractToken = crypto.randomBytes(40).toString("hex");
-      }
-    }
-
-    // Update the application
+    // Update the application.
     const application = await ApplicationObject.findById(contract.applicationId);
+    if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     application.contractId = contract._id;
     await application.save();
-    const departmentReferentPhase2 = await ReferentObject.findOne({ department: contract.youngDepartment, subRole: "manager_department_phase2" });
 
-    if (req.body.sendMessage) {
-      // We send 2, 3 or 4 messages if required.
-      const recipients = [];
-      if (mailsToSend.includes("projectManager")) {
-        recipients.push({
-          email: contract.projectManagerEmail,
-          name: `${contract.projectManagerFirstName} ${contract.projectManagerLastName}`,
-          token: contract.projectManagerToken,
-          cc: departmentReferentPhase2 ? departmentReferentPhase2.email : null,
-          ccName: departmentReferentPhase2 ? `${departmentReferentPhase2.firstName} ${departmentReferentPhase2.lastName}` : null,
-          isValidateAgainMail: validateAgainMailList.includes("projectManager"),
-        });
-      }
-      if (mailsToSend.includes("structureManager")) {
-        recipients.push({
-          email: contract.structureManagerEmail,
-          name: `${contract.structureManagerFirstName} ${contract.structureManagerLastName}`,
-          token: contract.structureManagerToken,
-          isValidateAgainMail: validateAgainMailList.includes("structureManager"),
-        });
-      }
-      if (mailsToSend.includes("parent1")) {
-        recipients.push({
-          email: contract.parent1Email,
-          name: `${contract.parent1FirstName} ${contract.parent1LastName}`,
-          token: contract.parent1Token,
-          cc: contract.youngEmail,
-          ccName: `${contract.youngFirstName} ${contract.youngLastName}`,
-          isValidateAgainMail: validateAgainMailList.includes("parent1"),
-        });
-      }
-      if (contract.parent2Email && mailsToSend.includes("parent2")) {
-        recipients.push({
-          email: contract.parent2Email,
-          name: `${contract.parent2FirstName} ${contract.parent2LastName}`,
-          token: contract.parent2Token,
-          cc: contract.youngEmail,
-          ccName: `${contract.youngFirstName} ${contract.youngLastName}`,
-          isValidateAgainMail: validateAgainMailList.includes("parent2"),
-        });
-      }
-      if (mailsToSend.includes("young")) {
-        recipients.push({
-          email: contract.youngEmail,
-          name: `${contract.youngFirstName} ${contract.youngLastName}`,
-          token: contract.youngContractToken,
-          isValidateAgainMail: validateAgainMailList.includes("young"),
-        });
-      }
-      for (const recipient of recipients) {
-        if (recipient.isValidateAgainMail) {
-          console.log("send (re)validation mail to " + JSON.stringify({ to: recipient.email, cc: recipient.cc }));
-          const htmlContent = fs
-            .readFileSync(path.resolve(__dirname, "../templates/contract-revalidate.html"))
-            .toString()
-            .replace(/{{toName}}/g, recipient.name)
-            .replace(/{{youngName}}/g, `${contract.youngFirstName} ${contract.youngLastName}`)
-            .replace(/{{cta}}/g, `${APP_URL}/validate-contract?token=${recipient.token}&contract=${contract._id}`);
-          const subject = `(RE)Valider le contrat d'engagement de ${contract.youngFirstName} ${contract.youngLastName} sur la mission ${contract.missionName} suite à modifications effectuées`;
-          const to = { name: recipient.name, email: recipient.email };
-          if (recipient.cc) {
-            await sendEmail(to, subject, htmlContent, { cc: [{ name: recipient.ccName, email: recipient.cc }] });
-          } else {
-            await sendEmail(to, subject, htmlContent);
-          }
-        } else {
-          console.log("send validation mail to " + JSON.stringify({ to: recipient.email, cc: recipient.cc }));
-          const htmlContent = fs
-            .readFileSync(path.resolve(__dirname, "../templates/contract.html"))
-            .toString()
-            .replace(/{{toName}}/g, recipient.name)
-            .replace(/{{youngName}}/g, `${contract.youngFirstName} ${contract.youngLastName}`)
-            .replace(/{{cta}}/g, `${APP_URL}/validate-contract?token=${recipient.token}&contract=${contract._id}`);
-          const subject = `Valider le contrat d'engagement de ${contract.youngFirstName} ${contract.youngLastName} sur la mission ${contract.missionName}`;
-          const to = { name: recipient.name, email: recipient.email };
-          if (recipient.cc) {
-            await sendEmail(to, subject, htmlContent, { cc: [{ name: recipient.ccName, email: recipient.cc }] });
-          } else {
-            await sendEmail(to, subject, htmlContent);
-          }
-        }
-      }
-      contract.invitationSent = "true";
-      await contract.save();
-    }
+    // Update young status.
+    const young = await YoungObject.findById(contract.youngId);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    await updateYoungStatusPhase2Contract(young);
 
-    await updateYoungStatusPhase2Contract(contract.youngId);
-
-    return res.status(200).send({ ok: true, data: contract });
+    return res.status(200).send({ ok: true, data: serializeContract(contract, req.user) });
   } catch (error) {
     capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error: error.message });
   }
 });
 
 router.get("/:id", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
-    const data = await ContractObject.findOne({ _id: req.params.id });
+    const { error: idError, value: id } = validateId(req.params.id);
+    if (idError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, message: idError.message });
+
+    const data = await ContractObject.findById(id);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    if (req.user.statusPhase2) {
-      //         ^-- Quick and dirty way to check if it's a young.
-      const { parent1Token, projectManagerToken, structureManagerToken, parent2Token, youngContractToken, ...rest } = data.toObject();
-      return res.status(200).send({ ok: true, data: { ...rest } });
+
+    if (isYoung(req.user) && data.youngId.toString() !== req.user._id.toString()) {
+      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
-    return res.status(200).send({ ok: true, data });
+
+    return res.status(200).send({ ok: true, data: serializeContract(data, req.user) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
@@ -255,13 +267,9 @@ router.get("/token/:token", async (req, res) => {
         { parent2Token: token },
       ],
     });
-
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const { parent1Token, projectManagerToken, structureManagerToken, parent2Token, youngContractToken, ...rest } = data.toObject();
-    return res.status(200).send({
-      ok: true,
-      data: { ...rest, isParentToken: token === parent1Token || token === parent2Token, isYoungContractToken: token === youngContractToken },
-    });
+
+    return res.status(200).send({ ok: true, data: serializeContract(data, null, false) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
@@ -292,7 +300,10 @@ router.post("/token/:token", async (req, res) => {
 
     await data.save();
 
-    await updateYoungStatusPhase2Contract(data.youngId);
+    const young = await YoungObject.findById(data.youngId);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    await updateYoungStatusPhase2Contract(young);
 
     return res.status(200).send({ ok: true });
   } catch (error) {
@@ -303,16 +314,24 @@ router.post("/token/:token", async (req, res) => {
 
 router.post("/:id/download", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
   try {
-    console.log(`${req.user.id} download contract ${req.params.id}`);
-    const contract = await ContractObject.findById(req.params.id);
+    const { error: idError, value: id } = validateId(req.params.id);
+    if (idError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, message: idError.message });
+
+    console.log(`${req.user.id} download contract ${id}`);
+
+    const contract = await ContractObject.findById(id);
     if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const options = req.body.options || { format: "A4", margin: 0 };
-    //create html
+    // A young can only download their own documents.
+    if (isYoung(req.user) && contract.youngId.toString() !== req.user._id.toString()) {
+      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+
+    // Create html
     const newhtml = await contractTemplate.render(contract);
     if (!newhtml) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const buffer = await renderFromHtml(newhtml, options);
+    const buffer = await renderFromHtml(newhtml, { format: "A4", margin: 0 });
     res.contentType("application/pdf");
     res.setHeader("Content-Dispositon", 'inline; filename="test.pdf"');
     res.set("Cache-Control", "public, max-age=1");

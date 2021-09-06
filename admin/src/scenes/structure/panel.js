@@ -9,51 +9,59 @@ import api from "../../services/api";
 import { translate } from "../../utils";
 import Team from "./components/Team";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
-import Panel from "../../components/Panel";
+import Panel, { Info, Details } from "../../components/Panel";
+import ModalConfirm from "../../components/modals/ModalConfirm";
 
 export default ({ onChange, value }) => {
   const [missionsInfo, setMissionsInfo] = useState({ count: "-", placesTotal: "-" });
   const [referents, setReferents] = useState([]);
   const [parentStructure, setParentStructure] = useState(null);
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+
   const history = useHistory();
   useEffect(() => {
     if (!value) return;
     (async () => {
-      const queries = [];
-      queries.push({ index: "mission", type: "_doc" });
-      queries.push({
+      const { responses: missionResponses } = await api.esQuery("mission", {
         query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": value._id } }] } },
       });
-      queries.push({ index: "referent", type: "_doc" });
-      queries.push({
+      const { responses: referentResponses } = await api.esQuery("referent", {
         query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": value._id } }] } },
       });
       if (value.networkId) {
-        queries.push({ index: "structure", type: "_doc" });
-        queries.push({
+        const { responses: structureResponses } = await api.esQuery("structure", {
           query: { bool: { must: { match_all: {} }, filter: [{ term: { _id: value.networkId } }] } },
         });
-      }
-
-      const { responses } = await api.esQuery(queries);
-
-      if (value.networkId) {
-        const structures = responses[2]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-        setParentStructure(structures.length ? structures[0] : null);
+        if (structureResponses.length) {
+          const structures = structureResponses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+          setParentStructure(structures.length ? structures[0] : null);
+        }
       } else {
         setParentStructure(null);
       }
-      setMissionsInfo({
-        count: responses[0].hits.hits.length,
-        placesTotal: responses[0].hits.hits.reduce((acc, e) => acc + e._source.placesTotal, 0),
-        placesLeft: responses[0].hits.hits.reduce((acc, e) => acc + e._source.placesLeft, 0),
-      });
-      setReferents(responses[1]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
+      if (missionResponses.length) {
+        setMissionsInfo({
+          count: missionResponses[0].hits.hits.length,
+          placesTotal: missionResponses[0].hits.hits.reduce((acc, e) => acc + e._source.placesTotal, 0),
+          placesLeft: missionResponses[0].hits.hits.reduce((acc, e) => acc + e._source.placesLeft, 0),
+        });
+      }
+      if (referentResponses.length) {
+        setReferents(referentResponses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
+      }
     })();
   }, [value]);
 
-  const handleDelete = async (structure) => {
-    if (!confirm("Êtes-vous sûr(e) de vouloir supprimer cette structure ?")) return;
+  const onClickDelete = (structure) => {
+    setModal({
+      isOpen: true,
+      onConfirm: () => onConfirmDelete(structure),
+      title: "Êtes-vous sûr(e) de vouloir supprimer cette structure ?",
+      message: "Cette action est irréversible.",
+    });
+  };
+
+  const onConfirmDelete = async (structure) => {
     try {
       const { ok, code } = await api.remove(`/structure/${structure._id}`);
       if (!ok && code === "OPERATION_UNAUTHORIZED") return toastr.error("Vous n'avez pas les droits pour effectuer cette action");
@@ -82,7 +90,7 @@ export default ({ onChange, value }) => {
           <Link to={`/structure/${value._id}/edit`}>
             <PanelActionButton icon="pencil" title="Modifier" />
           </Link>
-          <PanelActionButton onClick={() => handleDelete(value)} icon="bin" title="Supprimer" />
+          <PanelActionButton onClick={() => onClickDelete(value)} icon="bin" title="Supprimer" />
         </div>
       </div>
       <Info title="La structure">
@@ -135,32 +143,17 @@ export default ({ onChange, value }) => {
           <div style={{ marginTop: "1rem" }}>{parentStructure.name}</div>
         </Info>
       ) : null}
-      <div>
-        {/*Object.keys(value).map((e, k) => {
-          return <div key={k}>{`${e}:${value[e]}`}</div>;
-        }) */}
-      </div>
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
     </Panel>
-  );
-};
-
-const Info = ({ children, title }) => {
-  return (
-    <div className="info">
-      <div style={{ position: "relative" }}>
-        <div className="info-title">{title}</div>
-      </div>
-      {children}
-    </div>
-  );
-};
-
-const Details = ({ title, value }) => {
-  return (
-    <div className="detail">
-      <div className="detail-title">{`${title} :`}</div>
-      <div className="detail-text">{value || "--"}</div>
-    </div>
   );
 };
 

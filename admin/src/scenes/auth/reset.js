@@ -45,9 +45,9 @@ export default ({ location }) => {
                   {redirect && <Redirect to="/" />}
                   <StyledFormGroup>
                     <label>Mot de passe</label>
-                    <PasswordEye value={values.password} onChange={handleChange} />
+                    <PasswordEye autoComplete="new-password" value={values.password} onChange={handleChange} />
                     <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.password}</p>
-                    <p>👉 Il doit contenir au moins 8 caractères, dont une majuscule, une minuscule, un chiffre et un symbole</p>
+                    <p>👉 Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole</p>
                   </StyledFormGroup>
                   <div className="button">
                     <Submit loading={isSubmitting} type="submit" color="primary" disabled={isSubmitting}>

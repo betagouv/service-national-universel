@@ -10,6 +10,7 @@ const { dbConnect, dbClose } = require("./helpers/db");
 const { notExisitingMissionId, createMissionHelper, getMissionByIdHelper } = require("./helpers/mission");
 const { createReferentHelper } = require("./helpers/referent");
 const { notExistingYoungId, createYoungHelper, getYoungByIdHelper } = require("./helpers/young");
+const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 
 jest.mock("../sendinblue", () => ({
   ...jest.requireActual("../sendinblue"),
@@ -37,6 +38,30 @@ describe("Application", () => {
         .post("/application")
         .send({ ...application, youngId: young._id, missionId: notExisitingMissionId });
       expect(res.status).toBe(404);
+    });
+    it("should only allow young to apply for themselves", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const secondYoung = await createYoungHelper(getNewYoungFixture());
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
+      const mission = await createMissionHelper(getNewMissionFixture());
+      const application = getNewApplicationFixture();
+
+      // Successful application
+      let res = await request(getAppHelper())
+        .post("/application")
+        .send({ ...application, youngId: young._id, missionId: mission._id });
+      expect(res.status).toBe(200);
+      expect(res.body.data.youngId).toBe(young._id.toString());
+
+      // Failed application
+      res = await request(getAppHelper())
+        .post("/application")
+        .send({ ...application, youngId: secondYoung._id, missionId: mission._id });
+      expect(res.status).toBe(400);
+
+      passport.user = previous;
     });
     it("should create an application when priority is given", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
@@ -96,6 +121,32 @@ describe("Application", () => {
       expect(res.status).toBe(200);
       expect(res.body.data.status).toBe("DONE");
     });
+    it("should only allow young to update for themselves", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const secondYoung = await createYoungHelper(getNewYoungFixture());
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
+      const mission = await createMissionHelper(getNewMissionFixture());
+      const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission._id });
+      const secondApplication = await createApplication({ ...getNewApplicationFixture(), youngId: secondYoung._id, missionId: mission._id });
+
+      // Successful update
+      let res = await request(getAppHelper()).put("/application").send({ priority: "1", status: "DONE", _id: application._id.toString() });
+      expect(res.status).toBe(200);
+
+      // Failed update (not allowed)
+      res = await request(getAppHelper()).put("/application").send({ priority: "1", status: "DONE", _id: secondApplication._id.toString() });
+      expect(res.status).toBe(401);
+
+      // Failed update (wrong young id)
+      res = await request(getAppHelper())
+        .put("/application")
+        .send({ priority: "1", status: "DONE", _id: application._id.toString(), youngId: secondYoung._id });
+      expect(res.status).toBe(400);
+
+      passport.user = previous;
+    });
   });
 
   describe("GET /application/:id", () => {
@@ -117,46 +168,8 @@ describe("Application", () => {
       expect(passport.lastTypeCalledOnAuthenticate).toEqual("referent");
     });
   });
-  describe("GET /application/young/:id", () => {
-    it("should return empty array when young has no application", async () => {
-      const res = await request(getAppHelper()).get("/application/young/" + notExistingYoungId);
-      expect(res.body.data).toStrictEqual([]);
-      expect(res.status).toBe(200);
-    });
-    it("should return applications", async () => {
-      const young = await createYoungHelper(getNewYoungFixture());
-      const mission = await createMissionHelper(getNewMissionFixture());
-      await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission._id });
-      const res = await request(getAppHelper()).get("/application/young/" + young._id);
-      expect(res.status).toBe(200);
-      expect(res.body.data.length).toBe(1);
-      expect(res.body.data[0].status).toBe("WAITING_VALIDATION");
-    });
-  });
 
-  describe("GET /application/mission/:id", () => {
-    it("should return empty array when mission has no application", async () => {
-      const res = await request(getAppHelper()).get("/application/mission/" + notExisitingMissionId);
-      expect(res.body.data).toStrictEqual([]);
-      expect(res.status).toBe(200);
-    });
-    it("should return applications", async () => {
-      const young = await createYoungHelper(getNewYoungFixture());
-      const mission = await createMissionHelper(getNewMissionFixture());
-      await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission._id });
-      const res = await request(getAppHelper()).get("/application/mission/" + mission._id);
-      expect(res.status).toBe(200);
-      expect(res.body.data.length).toBe(1);
-      expect(res.body.data[0].status).toBe("WAITING_VALIDATION");
-    });
-    it("should be only accessible by referent", async () => {
-      const passport = require("passport");
-      await request(getAppHelper()).get(`/application/mission/${notExisitingMissionId}`).send();
-      expect(passport.lastTypeCalledOnAuthenticate).toEqual("referent");
-    });
-  });
-
-  describe("GET /application/:id/notify/:template", () => {
+  describe("POST /application/:id/notify/:template", () => {
     it("should return 404 when application is not found", async () => {
       const res = await request(getAppHelper()).post(`/application/${notExistingApplicationId}/notify/foo`).send({});
       expect(res.status).toBe(404);
@@ -186,11 +199,42 @@ describe("Application", () => {
       const referent = await createReferentHelper(getNewReferentFixture());
       const mission = await createMissionHelper({ ...getNewMissionFixture(), tutorId: referent._id });
       const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission._id });
-
-      for (const template of ["waiting_validation", "validated_responsible", "validated_young", "cancel", "refused"]) {
+      for (const template of [
+        SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION,
+        SENDINBLUE_TEMPLATES.referent.YOUNG_VALIDATED,
+        SENDINBLUE_TEMPLATES.young.VALIDATE_APPLICATION,
+        SENDINBLUE_TEMPLATES.referent.CANCEL_APPLICATION,
+        SENDINBLUE_TEMPLATES.young.REFUSE_APPLICATION,
+      ]) {
         const res = await request(getAppHelper()).post(`/application/${application._id}/notify/${template}`).send({});
         expect(res.status).toBe(200);
       }
+    });
+    it("should only allow young to send application for themselves", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const referent = await createReferentHelper(getNewReferentFixture());
+      const mission = await createMissionHelper({ ...getNewMissionFixture(), tutorId: referent._id });
+      const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission._id });
+      const secondYoung = await createYoungHelper(getNewYoungFixture());
+      const secondApplication = await createApplication({ ...getNewApplicationFixture(), youngId: secondYoung._id, missionId: mission._id });
+
+      const passport = require("passport");
+      const previous = passport.user;
+      passport.user = young;
+
+      // Successful request
+      let res = await request(getAppHelper())
+        .post(`/application/${application._id}/notify/${SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION}`)
+        .send({});
+      expect(res.status).toBe(200);
+
+      // Failed request (not allowed)
+      res = await request(getAppHelper())
+        .post(`/application/${secondApplication._id}/notify/${SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION}`)
+        .send({});
+      expect(res.status).toBe(401);
+
+      passport.user = previous;
     });
   });
 });

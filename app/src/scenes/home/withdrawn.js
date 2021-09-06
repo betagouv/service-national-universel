@@ -20,7 +20,7 @@ export default () => {
             Les équipes du Service National Universel
           </p>
           <Separator />
-          <Link to="/phase3/les-programmes">
+          <Link to="/les-programmes">
             <VioletButton>Consulter les autres possibilités d'engagement</VioletButton>
           </Link>
         </Content>

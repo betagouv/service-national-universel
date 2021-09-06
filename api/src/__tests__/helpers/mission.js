@@ -5,7 +5,7 @@ async function getMissionsHelper(params = {}) {
 }
 
 async function getMissionByIdHelper(missionId) {
-  return await MissionObject.findOne({ _id: missionId });
+  return await MissionObject.findById(missionId);
 }
 
 async function deleteMissionByIdHelper(missionId) {

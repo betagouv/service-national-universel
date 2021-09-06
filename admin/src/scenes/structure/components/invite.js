@@ -5,7 +5,7 @@ import { Formik } from "formik";
 import { toastr } from "react-redux-toastr";
 
 import api from "../../../services/api";
-import { translate, ROLES } from "../../../utils";
+import { translate, ROLES, SENDINBLUE_TEMPLATES } from "../../../utils";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 
 export default ({ structure, onSent }) => {
@@ -27,12 +27,15 @@ export default ({ structure, onSent }) => {
               toastr.error("Vous devez remplir tous les champs", "nom, prénom et e-mail");
               return;
             }
-            const { ok, code } = await api.post(`/referent/signup_invite/${values.role}`, values);
+            if (structure.isNetwork === "true") values.role = ROLES.SUPERVISOR;
+            const { ok, code } = await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent[values.role]}`, values);
             if (!ok) toastr.error("Oups, une erreur est survenue lors de l'ajout du nouveau membre", translate(code));
             setSent(`${values.firstName} ${values.lastName}`);
             onSent();
             return toastr.success("Invitation envoyée");
           } catch (e) {
+            if (e.code === "USER_ALREADY_REGISTERED")
+              return toastr.error("Cette adresse email est déjà utilisée.", `${values.email} a déjà un compte sur cette plateforme.`, { timeOut: 10000 });
             toastr.error("Oups, une erreur est survenue lors de l'ajout du nouveau membre", translate(e));
           }
           actions.setSubmitting(false);

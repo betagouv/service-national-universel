@@ -16,6 +16,7 @@ const { getNewCohesionCenterFixture } = require("./fixtures/cohesionCenter");
 jest.mock("../sendinblue", () => ({
   ...jest.requireActual("../sendinblue"),
   sendEmail: () => Promise.resolve(),
+  sendTemplate: () => Promise.resolve(),
 }));
 
 jest.mock("../htmlToPdf", () => jest.fn());
@@ -65,7 +66,7 @@ describe("Young", () => {
       const young = await createYoungHelper(getNewYoungFixture());
       const res = await request(getAppHelper())
         .post("/young/" + young._id + "/documents/convocation/cohesion")
-        .send({ young });
+        .send();
       expect(res.status).toBe(500);
     });
     it("should return the convocation", async () => {
@@ -105,5 +106,24 @@ describe("Young", () => {
         .send({ young });
       expect(res.status).toBe(200);
     });
+  });
+  describe("POST /young/:id/documents/certificate/:template/send-email", () => {
+    it("should return 404 when young is not found", async () => {
+      const res = await request(getAppHelper()).post("/young/" + notExistingYoungId + "/documents/certificate/1/send-email");
+      expect(res.status).toEqual(404);
+    });
+
+    // todo : `const content = buffer.toString("base64");` doesnt work in test environment
+    // it("should return the certificate", async () => {
+    //   const young = await createYoungHelper(getNewYoungFixture());
+    //   const certificates = ["1", "2", "3", "snu"];
+    //   for (const certificate of certificates) {
+    //     const res = await request(getAppHelper())
+    //       .post("/young/" + young._id + "/documents/certificate/" + certificate + "/send-email")
+    //       .send({ fileName: "test" });
+    //     // expect(res.body.e).toBe();
+    //     expect(res.status).toBe(200);
+    //   }
+    // });
   });
 });

@@ -18,7 +18,7 @@ import ScholarshopSituation from "./scolarshipSituation";
 import ParticularSituation from "./particularSituation";
 import PriorityArea from "./priorityArea";
 import RuralArea from "./ruralArea";
-import { YOUNG_STATUS, translate, REFERENT_ROLES } from "../../../utils";
+import { YOUNG_STATUS, translate, ROLES } from "../../../utils";
 
 export default () => {
   const [filter, setFilter] = useState();
@@ -30,9 +30,9 @@ export default () => {
 
   useEffect(() => {
     const status = Object.keys(YOUNG_STATUS).filter((e) => e !== "IN_PROGRESS");
-    if (user.role === REFERENT_ROLES.REFERENT_DEPARTMENT) {
+    if (user.role === ROLES.REFERENT_DEPARTMENT) {
       updateFilter({ department: user.department, status });
-    } else if (user.role === REFERENT_ROLES.REFERENT_REGION) {
+    } else if (user.role === ROLES.REFERENT_REGION) {
       updateFilter({ region: user.region, status });
     } else {
       updateFilter();
@@ -42,19 +42,25 @@ export default () => {
   return (
     <>
       <Row style={{}}>
-        <Col md={12}>
+        <Col md={6}>
           <Title>Inscriptions</Title>
+        </Col>
+        <Col md={6}>
+          {filter ? (
+            <>
+              <FiltersList>
+                <FilterRegion updateFilter={updateFilter} filter={filter} />
+                <FilterDepartment updateFilter={updateFilter} filter={filter} />
+                <FilterWrapper>
+                  <YearPicker options={["2019", "2020", "2021"]} onChange={(cohort) => updateFilter({ cohort })} value={filter.cohort} />
+                </FilterWrapper>
+              </FiltersList>
+            </>
+          ) : null}
         </Col>
       </Row>
       {filter && (
         <>
-          <FiltersList>
-            <FilterRegion updateFilter={updateFilter} filter={filter} />
-            <FilterDepartment updateFilter={updateFilter} filter={filter} />
-            <FilterWrapper>
-              <YearPicker options={["2019", "2020", "2021"]} onChange={(cohort) => updateFilter({ cohort })} value={filter.cohort} />
-            </FilterWrapper>
-          </FiltersList>
           <Row>
             <Col md={12}>
               <SubTitle>Pilotage</SubTitle>
@@ -112,7 +118,7 @@ const FilterStatus = ({ value = [], onChange }) => {
   }
 
   let STATUS = Object.keys(YOUNG_STATUS);
-  if (user.role !== REFERENT_ROLES.ADMIN) STATUS = STATUS.filter((e) => e !== "IN_PROGRESS");
+  if (user.role !== ROLES.ADMIN) STATUS = STATUS.filter((e) => e !== "IN_PROGRESS");
   return (
     <div style={{ display: "flex", flexWrap: "wrap" }}>
       {STATUS.map((e, i) => {

@@ -7,7 +7,7 @@ import SelectStatusApplication from "../../../components/selectStatusApplication
 import api from "../../../services/api";
 import MissionView from "./wrapper";
 import Panel from "../../volontaires/panel";
-import { formatStringLongDate, getFilterLabel, translate, getAge, ES_NO_LIMIT } from "../../../utils";
+import { formatStringLongDate, getFilterLabel, translate, getAge, ES_NO_LIMIT, colors } from "../../../utils";
 import Loader from "../../../components/Loader";
 import ContractLink from "../../../components/ContractLink";
 import ExportComponent from "../../../components/ExportXlsx";
@@ -55,12 +55,11 @@ export default ({ mission, applications }) => {
                   transformAll={async (data) => {
                     const youngIds = [...new Set(data.map((item) => item.youngId))];
                     if (youngIds?.length) {
-                      const { responses } = await api.esQuery([
-                        { index: "young", type: "_doc" },
-                        { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: youngIds } } },
-                      ]);
-                      const youngs = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-                      return data.map((item) => ({ ...item, young: youngs.find((e) => e._id === item.youngId) }));
+                      const { responses } = await api.esQuery("young", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: youngIds } } });
+                      if (responses.length) {
+                        const youngs = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
+                        return data.map((item) => ({ ...item, young: youngs.find((e) => e._id === item.youngId) || {} }));
+                      }
                     }
                     return data;
                   }}
@@ -173,7 +172,7 @@ export default ({ mission, applications }) => {
 const Hit = ({ hit, onClick, onChangeApplication, selected }) => {
   const history = useHistory();
   return (
-    <tr style={{ backgroundColor: (selected && "#e6ebfa") || (hit.status === "WITHDRAWN" && "#BE3B1211") }} onClick={onClick}>
+    <tr style={{ backgroundColor: (selected && "#e6ebfa") || (hit.status === "WITHDRAWN" && colors.extraLightGrey) }} onClick={onClick}>
       <td>
         <MultiLine>
           <h2>{`${hit.youngFirstName} ${hit.youngLastName}`}</h2>

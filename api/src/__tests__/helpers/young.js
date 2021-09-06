@@ -5,7 +5,7 @@ async function getYoungsHelper() {
 }
 
 async function getYoungByIdHelper(youngId) {
-  return await YoungObject.findOne({ _id: youngId });
+  return await YoungObject.findById(youngId);
 }
 
 async function deleteYoungByIdHelper(youngId) {

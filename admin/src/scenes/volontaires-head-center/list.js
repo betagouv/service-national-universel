@@ -12,7 +12,7 @@ import {
   translate,
   getFilterLabel,
   YOUNG_STATUS_COLORS,
-  formatDateFR,
+  formatDateFRTimezoneUTC,
   formatLongDateFR,
   isInRuralArea,
   getAge,
@@ -27,6 +27,7 @@ import Chevron from "../../components/Chevron";
 import Select from "./components/Select";
 import { toastr } from "react-redux-toastr";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
+import ModalConfirm from "../../components/modals/ModalConfirm";
 
 const FILTERS = [
   "SEARCH",
@@ -111,7 +112,7 @@ export default () => {
                       Cohorte: data.cohort,
                       Prénom: data.firstName,
                       Nom: data.lastName,
-                      "Date de naissance": formatDateFR(data.birthdateAt),
+                      "Date de naissance": formatDateFRTimezoneUTC(data.birthdateAt),
                       Sexe: data.gender,
                       Email: data.email,
                       Téléphone: data.phone,
@@ -203,6 +204,7 @@ export default () => {
                   style={{ flex: 1, marginRight: "1rem" }}
                   innerClass={{ input: "searchbox" }}
                   autosuggest={false}
+                  URLParams={true}
                   queryFormat="and"
                 />
                 <MultiDropdownList
@@ -330,6 +332,7 @@ export default () => {
 
 const Hit = ({ hit, onClick, selected, callback }) => {
   const [value, setValue] = useState(null);
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
   const updateYoung = async (v) => {
     const { data, ok, code } = await api.put(`/referent/young/${value._id}`, v);
@@ -369,8 +372,14 @@ const Hit = ({ hit, onClick, selected, callback }) => {
           disabled={true}
           handleChange={(e) => {
             const value = e.target.value;
-            if (!confirmMessageChangePhase1Presence(value)) return;
-            updateYoung({ cohesionStayPresence: value });
+            setModal({
+              isOpen: true,
+              onConfirm: () => {
+                updateYoung({ cohesionStayPresence: value });
+              },
+              title: "Changement de présence",
+              message: confirmMessageChangePhase1Presence(value),
+            });
           }}
         />
       </td>
@@ -390,6 +399,16 @@ const Hit = ({ hit, onClick, selected, callback }) => {
           }}
         />
       </td>
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
     </tr>
   );
 };

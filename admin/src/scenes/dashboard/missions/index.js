@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 import FilterDepartment from "../components/FilterDepartment";
 import FilterRegion from "../components/FilterRegion";
 
-import Status from "./status";
+import Statistics from "./Statistics";
 
 import { YOUNG_STATUS, REFERENT_ROLES } from "../../../utils";
 
@@ -32,19 +32,21 @@ export default () => {
   return (
     <>
       <Row style={{}}>
-        <Col md={12}>
+        <Col md={6}>
           <Title>Missions</Title>
         </Col>
+        <Col md={6}>
+          {filter && (
+            <>
+              <FiltersList>
+                <FilterRegion updateFilter={updateFilter} filter={filter} />
+                <FilterDepartment updateFilter={updateFilter} filter={filter} />
+              </FiltersList>
+            </>
+          )}
+        </Col>
       </Row>
-      {filter && (
-        <>
-          <FiltersList>
-            <FilterRegion updateFilter={updateFilter} filter={filter} />
-            <FilterDepartment updateFilter={updateFilter} filter={filter} />
-          </FiltersList>
-          <Status filter={filter} />
-        </>
-      )}
+      {filter && <Statistics filter={filter} />}
     </>
   );
 };

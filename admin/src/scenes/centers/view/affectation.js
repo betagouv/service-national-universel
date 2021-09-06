@@ -6,13 +6,13 @@ import { Redirect } from "react-router-dom";
 import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import ComboBoxYoungs from "../components/ComboBoxYoungs";
 import Panel from "../../volontaires/panel";
-import { enableAssignCenter } from "../../../utils";
+import { canAssignCohesionCenter } from "../../../utils";
 
 export default ({ center, updateCenter }) => {
   const [young, setYoung] = useState(null);
   const user = useSelector((state) => state.Auth.user);
 
-  if (!enableAssignCenter(user)) return <Redirect to="/" />;
+  if (!canAssignCohesionCenter(user)) return <Redirect to="/" />;
 
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>

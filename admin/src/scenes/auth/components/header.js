@@ -1,6 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
+import { colors } from "../../../utils";
 
 export default () => {
   return (
@@ -65,7 +66,7 @@ const Logos = styled.div`
 `;
 
 const Button = styled.div`
-  color: #6e757c;
+  color: ${colors.grey};
   text-transform: uppercase;
   font-size: 0.8rem;
   flex: 1;

@@ -10,7 +10,7 @@ import { toastr } from "react-redux-toastr";
 import { translate } from "../../../utils";
 import ModalButton from "../../../components/buttons/ModalButton";
 
-export default ({}) => {
+export default ({ location }) => {
   const [mail, setMail] = useState();
   const [birthdateAt, setBirthdateAt] = useState();
 
@@ -36,7 +36,7 @@ export default ({}) => {
 
   return (
     <div>
-      <Header showMessage={false} />
+      <Header showMessage={false} location={location} />
       <Wrapper>
         <TitleContainer>
           <TopTitle className="mobileOnly">inscription 2021</TopTitle>

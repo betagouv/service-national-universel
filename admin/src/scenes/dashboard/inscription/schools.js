@@ -14,9 +14,7 @@ export default ({ filter }) => {
 
   useEffect(() => {
     (async () => {
-      const queries = [];
-      queries.push({ index: "young", type: "_doc" });
-      queries.push({
+      const body = {
         query: { bool: { must: { match_all: {} }, filter: [{ term: { "cohort.keyword": filter.cohort } }] } },
         aggs: {
           names: {
@@ -25,40 +23,42 @@ export default ({ filter }) => {
           },
         },
         size: 0,
-      });
+      };
 
-      if (filter.status) queries[1].query.bool.filter.push({ terms: { "status.keyword": filter.status } });
-      if (filter.region) queries[1].query.bool.filter.push({ term: { "region.keyword": filter.region } });
-      if (filter.department) queries[1].query.bool.filter.push({ term: { "department.keyword": filter.department } });
+      if (filter.status) body.query.bool.filter.push({ terms: { "status.keyword": filter.status } });
+      if (filter.region) body.query.bool.filter.push({ term: { "region.keyword": filter.region } });
+      if (filter.department) body.query.bool.filter.push({ term: { "department.keyword": filter.department } });
 
-      const { responses } = await api.esQuery(queries);
+      const { responses } = await api.esQuery("young", body);
 
-      const totalHits = responses[0].hits.total.value;
-      const arr = responses[0].aggregations.names.buckets.map((e) => {
-        const schoolInfo = e.firstUser?.hits?.hits[0]?._source;
-        const total = e.doc_count;
-        const inDepartment = (e.departments?.buckets?.find((f) => f.key === schoolInfo.schoolDepartment) || {}).doc_count || 0;
+      if (responses.length) {
+        const totalHits = responses[0].hits.total.value;
+        const arr = responses[0].aggregations.names.buckets.map((e) => {
+          const schoolInfo = e.firstUser?.hits?.hits[0]?._source;
+          const total = e.doc_count;
+          const inDepartment = (e.departments?.buckets?.find((f) => f.key === schoolInfo.schoolDepartment) || {}).doc_count || 0;
 
-        return {
-          id: e.key,
-          count: {
-            total,
-            department: inDepartment,
-            outOfDepartment: total - inDepartment,
-          },
-          percent: {
-            total: round1Decimal((total / totalHits) * 100),
-            department: round1Decimal((inDepartment / total) * 100),
-            outOfDepartment: round1Decimal(((total - inDepartment) / total) * 100),
-          },
-          name: schoolInfo.schoolName,
-          city: schoolInfo.schoolCity,
-          zip: schoolInfo.schoolZip,
-          department: schoolInfo.schoolDepartment,
-          type: schoolInfo.schoolType,
-        };
-      });
-      setSchools(arr);
+          return {
+            id: e.key,
+            count: {
+              total,
+              department: inDepartment,
+              outOfDepartment: total - inDepartment,
+            },
+            percent: {
+              total: round1Decimal((total / totalHits) * 100),
+              department: round1Decimal((inDepartment / total) * 100),
+              outOfDepartment: round1Decimal(((total - inDepartment) / total) * 100),
+            },
+            name: schoolInfo.schoolName,
+            city: schoolInfo.schoolCity,
+            zip: schoolInfo.schoolZip,
+            department: schoolInfo.schoolDepartment,
+            type: schoolInfo.schoolType,
+          };
+        });
+        setSchools(arr);
+      }
     })();
   }, [JSON.stringify(filter)]);
 

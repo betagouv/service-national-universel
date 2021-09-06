@@ -922,6 +922,12 @@ const Schema = new mongoose.Schema({
       description: "Code postal du proche",
     },
   },
+  mobilityNearRelativeCity: {
+    type: String,
+    documentation: {
+      description: "Ville du proche",
+    },
+  },
   mobilityTransport: {
     type: [String],
     documentation: {
@@ -959,6 +965,28 @@ const Schema = new mongoose.Schema({
     documentation: {
       description: "",
     },
+  },
+
+  // preparation militaire
+  militaryPreparationFilesIdentity: {
+    type: [String],
+    default: [],
+  },
+  militaryPreparationFilesCensus: {
+    type: [String],
+    default: [],
+  },
+  militaryPreparationFilesAuthorization: {
+    type: [String],
+    default: [],
+  },
+  militaryPreparationFilesCertificate: {
+    type: [String],
+    default: [],
+  },
+  statusMilitaryPreparationFiles: {
+    type: String,
+    enum: ["VALIDATED", "WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED"],
   },
 
   // TODO : clean interests

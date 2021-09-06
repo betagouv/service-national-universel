@@ -14,20 +14,20 @@ export default ({ filter }) => {
 
   useEffect(() => {
     (async () => {
-      const queries = [];
-      queries.push({ index: "young", type: "_doc" });
-      queries.push({
+      const body = {
         query: { bool: { must: { match_all: {} }, filter: [{ term: { "cohort.keyword": filter.cohort } }] } },
         aggs: { status: { terms: { field: "status.keyword" } } },
         size: 0,
-      });
+      };
 
-      if (filter.region) queries[1].query.bool.filter.push({ term: { "region.keyword": filter.region } });
-      if (filter.department) queries[1].query.bool.filter.push({ term: { "department.keyword": filter.department } });
+      if (filter.region) body.query.bool.filter.push({ term: { "region.keyword": filter.region } });
+      if (filter.department) body.query.bool.filter.push({ term: { "department.keyword": filter.department } });
 
-      const { responses } = await api.esQuery(queries);
-      const m = api.getAggregations(responses[0]);
-      setStatus(m);
+      const { responses } = await api.esQuery("young", body);
+      if (responses.length) {
+        const m = api.getAggregations(responses[0]);
+        setStatus(m);
+      }
     })();
   }, [JSON.stringify(filter)]);
 

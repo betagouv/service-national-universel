@@ -7,7 +7,7 @@ import api from "../../../services/api";
 import CenterView from "./wrapper";
 import Panel from "../../volontaires/panel";
 
-import { getFilterLabel, YOUNG_STATUS_PHASE1, translate, formatDateFR, isInRuralArea, formatLongDateFR, getAge, ES_NO_LIMIT } from "../../../utils";
+import { getFilterLabel, YOUNG_STATUS_PHASE1, translate, formatDateFRTimezoneUTC, isInRuralArea, formatLongDateFR, getAge, ES_NO_LIMIT, colors } from "../../../utils";
 import Loader from "../../../components/Loader";
 import ExportComponent from "../../../components/ExportXlsx";
 import { Filter, FilterRow, ResultTable, Table, MultiLine } from "../../../components/list";
@@ -25,15 +25,6 @@ export default ({ center, updateCenter }) => {
       setMeetingPoints(data);
     })();
   }, []);
-  const getDefaultQuery = () => ({
-    query: {
-      bool: {
-        filter: [{ terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } }, { term: { cohesionCenterId: center._id } }],
-        must_not: [{ term: { "statusPhase1.keyword": "WAITING_LIST" } }],
-      },
-    },
-  });
-  const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
 
   const handleClick = async (young) => {
     const { ok, data } = await api.get(`/referent/young/${young._id}`);
@@ -46,30 +37,11 @@ export default ({ center, updateCenter }) => {
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <CenterView center={center} tab="volontaires">
         <div>
-          <ReactiveBase url={`${apiURL}/es`} app="cohesionyoung" headers={{ Authorization: `JWT ${api.getToken()}` }}>
+          <ReactiveBase url={`${apiURL}/es`} app={`cohesionyoung/${center._id}`} headers={{ Authorization: `JWT ${api.getToken()}` }}>
             <div style={{ float: "right", marginBottom: "1.5rem", marginRight: "1.5rem" }}>
               <div style={{ display: "flex" }}>
                 <ExportComponent
-                  title="Export pour les cas particuliers"
-                  defaultQuery={getExportQuery}
-                  collection="volontaires_cas_particuliers"
-                  react={{ and: FILTERS }}
-                  transform={(data) => {
-                    return {
-                      _id: data._id,
-                      Prénom: data.firstName,
-                      Nom: data.lastName,
-                      "Code centre": center.code || "",
-                      "Nom du centre": center.name || "",
-                      "Présence au séjour": data.cohesionStayPresence || "",
-                      "Cas particulier qui valide sa JDC malgré son absence (oui/non)": "",
-                      "Commentaires (Décrivez pourquoi)": "",
-                    };
-                  }}
-                />
-                <ExportComponent
                   title="Exporter les volontaires"
-                  defaultQuery={getExportQuery}
                   collection="volontaire"
                   react={{ and: FILTERS }}
                   transform={(data) => {
@@ -83,7 +55,7 @@ export default ({ center, updateCenter }) => {
                       Cohorte: data.cohort,
                       Prénom: data.firstName,
                       Nom: data.lastName,
-                      "Date de naissance": formatDateFR(data.birthdateAt),
+                      "Date de naissance": formatDateFRTimezoneUTC(data.birthdateAt),
                       Sexe: data.gender,
                       Email: data.email,
                       Téléphone: data.phone,
@@ -154,7 +126,8 @@ export default ({ center, updateCenter }) => {
                       "Mobilité aux alentours de son domicile": data.mobilityNearHome,
                       "Mobilité aux alentours d'un de ses proches": data.mobilityNearRelative,
                       "Informations du proche":
-                        data.mobilityNearRelative && data.mobilityNearRelativeName + " - " + data.mobilityNearRelativeAddress + " - " + data.mobilityNearRelativeZip,
+                        data.mobilityNearRelative &&
+                        data.mobilityNearRelativeName + " - " + data.mobilityNearRelativeAddress + " - " + data.mobilityNearRelativeZip + " - " + data.mobilityNearRelativeCity,
                       "Mode de transport": data.mobilityTransport?.map((t) => translate(t)),
                       "Autre mode de transport": data.mobilityTransportOther,
                       "Format de mission": data.missionFormat,
@@ -196,7 +169,6 @@ export default ({ center, updateCenter }) => {
               <div style={{ flex: 1, position: "relative" }}>
                 <Filter>
                   <DataSearch
-                    defaultQuery={getDefaultQuery}
                     showIcon={false}
                     placeholder="Rechercher par prénom, nom, email, ville, code postal..."
                     componentId="SEARCH"
@@ -210,7 +182,6 @@ export default ({ center, updateCenter }) => {
                   />
                   <FilterRow>
                     <MultiDropdownList
-                      defaultQuery={getDefaultQuery}
                       className="dropdown-filter"
                       componentId="STATUS"
                       dataField="status.keyword"
@@ -224,7 +195,6 @@ export default ({ center, updateCenter }) => {
                       renderLabel={(items) => getFilterLabel(items, "Statut")}
                     />
                     <MultiDropdownList
-                      defaultQuery={getDefaultQuery}
                       className="dropdown-filter"
                       componentId="STATUS_PHASE_1"
                       dataField="statusPhase1.keyword"
@@ -241,7 +211,6 @@ export default ({ center, updateCenter }) => {
                 </Filter>
                 <ResultTable>
                   <ReactiveListComponent
-                    defaultQuery={getDefaultQuery}
                     react={{ and: FILTERS }}
                     dataField="lastName.keyword"
                     sortBy="asc"
@@ -279,7 +248,7 @@ export default ({ center, updateCenter }) => {
 
 const Hit = ({ hit, onClick, selected, onChangeYoung }) => {
   return (
-    <tr style={{ backgroundColor: (selected && "#e6ebfa") || (hit.status === "WITHDRAWN" && "#BE3B1211") }} onClick={onClick}>
+    <tr style={{ backgroundColor: (selected && "#e6ebfa") || (hit.status === "WITHDRAWN" && colors.extraLightGrey) }} onClick={onClick}>
       <td>
         <MultiLine>
           <h2>{`${hit.firstName} ${hit.lastName}`}</h2>

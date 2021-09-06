@@ -15,6 +15,8 @@ import Header from "./components/header";
 import AuthWrapper from "./components/authWrapper";
 import Title from "./components/title";
 import Subtitle from "./components/subtitle";
+import { colors } from "../../utils";
+import PasswordEye from "../../components/PasswordEye";
 
 export default () => {
   const dispatch = useDispatch();
@@ -47,7 +49,7 @@ export default () => {
                       dispatch(setUser(user));
                     }
                   } catch (e) {
-                    console.log('ERROR', e);
+                    console.log("ERROR", e);
                     if (e && ["EMAIL_OR_PASSWORD_INVALID", "USER_NOT_EXISTS", "EMAIL_AND_PASSWORD_REQUIRED"].includes(e.code)) {
                       return setUserIsValid(false);
                     }
@@ -77,7 +79,7 @@ export default () => {
                         <div>
                           <label htmlFor="email">E-mail</label>
                           <InputField
-                            // validate={(v) => !validator.isEmail(v) && "Invalid email address"}
+                            autoComplete="username"
                             className="form-control"
                             name="email"
                             type="email"
@@ -87,23 +89,10 @@ export default () => {
                             onChange={handleChange}
                           />
                         </div>
-                        <p style={{ fontSize: 12, color: "rgb(253, 49, 49)", marginTop: 5 }}>{errors.email}</p>
                       </StyledFormGroup>
                       <StyledFormGroup>
-                        <div>
-                          <label htmlFor="password">Mot de passe</label>
-                          <InputField
-                            // validate={(v) => validator.isEmpty(v) && "This field is Required"}
-                            className="form-control"
-                            name="password"
-                            type="password"
-                            id="password"
-                            placeholder="Votre mot de passe"
-                            value={values.password}
-                            onChange={handleChange}
-                          />
-                        </div>
-                        <p style={{ fontSize: 12, color: "rgb(253, 49, 49)", marginTop: 5 }}>{errors.password}</p>
+                        <label htmlFor="password">Mot de passe</label>
+                        <PasswordEye autoComplete="current-password" value={values.password} onChange={handleChange} showError={false} />
                       </StyledFormGroup>
                       <Forgot>
                         <Link to="/auth/forgot">Mot de passe perdu ?</Link>
@@ -143,7 +132,7 @@ const Register = styled.h3`
   position: relative;
   font-size: 1rem;
   text-align: center;
-  color: #6e757c;
+  color: ${colors.grey};
   @media (max-width: 768px) {
     font-size: 0.8rem;
   }
@@ -177,7 +166,7 @@ const InputField = styled(Field)`
   transition: border 0.2s ease;
   line-height: 1.2;
   ::placeholder {
-    color: #798fb0;
+    color: #d6d6e1;
   }
   &:focus {
     outline: none;
@@ -193,7 +182,7 @@ const InputField = styled(Field)`
 const Forgot = styled.div`
   margin-bottom: 20px;
   a {
-    color: #5145cd;
+    color: ${colors.purple};
     font-size: 14px;
   }
 `;
@@ -205,7 +194,7 @@ const Submit = styled(LoadingButton)`
   border-radius: 0;
   padding: 0.5rem 3rem;
   border: 0;
-  background-color: #5145cd;
+  background-color: ${colors.purple};
   margin-top: 30px;
   margin-bottom: 30px;
   border-radius: 10px;

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { translate, formatStringLongDate, YOUNG_STATUS_COLORS } from "../utils";
+import { translate, formatStringLongDate, YOUNG_STATUS_COLORS, colors } from "../utils";
 import Badge from "../components/Badge";
 
 export default ({ value }) => {
@@ -135,7 +135,7 @@ const Historic = styled.ul`
     font-weight: 700;
     cursor: pointer;
     :hover {
-      color: #5145cd;
+      color: ${colors.purple};
     }
   }
 `;
