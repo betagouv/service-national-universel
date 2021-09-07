@@ -4,7 +4,7 @@ export const authActions = {
 };
 
 export function setUser(user) {
-  if (window)
+  if (window && user)
     window.zammadUser = {
       email: user.email,
       name: user.firstName + " " + user.lastName,
