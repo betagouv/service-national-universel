@@ -15,17 +15,47 @@
     <script src="https://support.selego.co/assets/chat/chat.min.js"></script>
     <script>
       $(function () {
-        if (typeof ZammadChat !== "undefined") {
-          var chat = new ZammadChat({
-            title: "Une question ?",
-            background: "#5145cd",
-            fontSize: "12px",
-            chatId: 5,
-            show: true,
-            flat: true,
-            target: $("#zammad-chat"),
-          });
-        }
+        
+        if (typeof ZammadChat === "undefined") return;
+
+        var chat = new ZammadChat({
+          title: "Une question ?",
+          background: "#5145cd",
+          fontSize: "12px",
+          chatId: 5,
+          show: true,
+          flat: true,
+          target: $("#zammad-chat"),
+        });
+
+        // Monkey patch Zammad.
+        
+        // This send the user informations to zammad.
+        chat.onConnectionEstablished = (data) => {
+          var isNew = Boolean(data.session_id);
+          ZammadChat.prototype.onConnectionEstablished.call(chat, data);
+          if (isNew) {
+            var url = "https://app-735c50af-69c1-4a10-ac30-7ba11d1112f7.cleverapps.io";
+            if (window.location.href.includes("localhost")) url = "http://localhost:8082";
+            if (window.location.href.includes("snu.gouv.fr")) url = "https://admin.snu.gouv.fr";
+            var user = window.zammadUser ? ("<a href=\"" + url + "/user/" + window.zammadUser._id + "\">" + window.zammadUser.name + "</a> - " + window.zammadUser.email) : "Non connecté.";
+
+            chat.send('chat_session_message', {
+              content: "INFO USER: " + user,
+              id: chat._messageCount,
+              session_id: chat.sessionId
+            });
+
+          }
+        };
+
+        // This is needed to ensure users never sees their informations when they refresh page.
+        chat.onReopenSession = (data) => {
+          data.session = (data.session || []).filter(message => message.content.startsWith('INFO USER: ') === false);
+          ZammadChat.prototype.onReopenSession.call(chat, data);
+        };
+
+        // End of monkey patch
       });
     </script>
   </body>

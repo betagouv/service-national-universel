@@ -4,6 +4,12 @@ export const authActions = {
 };
 
 export function setUser(user) {
+  if (window)
+    window.zammadUser = {
+      email: user.email,
+      name: user.firstName + " " + user.lastName,
+      _id: user._id,
+    };
   return { type: authActions.SETUSER, user };
 }
 
