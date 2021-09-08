@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const { capture } = require("../sentry");
-const config = require("../config");
 
 const CohesionCenterModel = require("../models/cohesionCenter");
 const ReferentModel = require("../models/referent");
@@ -19,6 +18,7 @@ const {
   updateCenterDependencies,
   deleteCenterDependencies,
   isYoung,
+  getBaseUrl,
 } = require("../utils");
 const renderFromHtml = require("../htmlToPdf");
 const { ROLES, canCreateOrUpdateCohesionCenter } = require("snu-lib/roles");
@@ -283,12 +283,6 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
       }
     }
     return t;
-  };
-
-  const getBaseUrl = () => {
-    if (config.ENVIRONMENT === "staging") return "https://app-a29a266c-556d-4f95-bc0e-9583a27f3f85.cleverapps.io";
-    if (config.ENVIRONMENT === "production") return "https://app-5a3e097d-fdf1-44fa-9172-88ad9d7b2b20.cleverapps.io";
-    return "http://localhost:8080";
   };
 
   let html = `<!DOCTYPE html>

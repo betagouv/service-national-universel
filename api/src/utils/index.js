@@ -348,6 +348,12 @@ function inSevenDays() {
   return Date.now() + 86400000 * 7;
 }
 
+const getBaseUrl = () => {
+  if (ENVIRONMENT === "staging") return "https://app-a29a266c-556d-4f95-bc0e-9583a27f3f85.cleverapps.io";
+  if (ENVIRONMENT === "production") return "https://api.snu.gouv.fr";
+  return "http://localhost:8080";
+};
+
 const ERRORS = {
   SERVER_ERROR: "SERVER_ERROR",
   NOT_FOUND: "NOT_FOUND",
@@ -395,4 +401,5 @@ module.exports = {
   isYoung,
   isReferent,
   inSevenDays,
+  getBaseUrl,
 };
