@@ -17,8 +17,26 @@ if (process.env.NODE_ENV !== "test") {
 }
 
 const app = express();
-app.use(helmet());
-
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      useDefaults: false,
+      directives: {
+        "default-src": "'self'",
+        "base-uri": "'self'",
+        "font-src": ["'self'", "https:", "data:"],
+        "frame-ancestors": "'self'",
+        "img-src": ["'self'", "data:"],
+        "object-src": "'none'",
+        "script-src": ["'self'", "https://code.jquery.com/jquery-2.1.4.min.js", "https://support.selego.co/assets/chat/chat.min.js"],
+        "script-src-attr": "'none'",
+        "style-src": ["'self'", "https:"],
+        "upgrade-insecure-requests": [],
+        "navigate-to": ["'self'", "https:"],
+      },
+    },
+  })
+);
 const origin = [APP_URL, ADMIN_URL];
 app.use(cors({ credentials: true, origin }));
 app.use(bodyParser.json());
