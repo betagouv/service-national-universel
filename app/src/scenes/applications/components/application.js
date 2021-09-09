@@ -189,7 +189,7 @@ const Footer = ({ application, tutor, onChange }) => {
           {/* <div onClick={() => setStatus(APPLICATION_STATUS.WAITING_VALIDATION)}>test</div> */}
         </>
       );
-    } else if (status === APPLICATION_STATUS.WAITING_VALIDATION) {
+    } else if (status === APPLICATION_STATUS.WAITING_VALIDATION || status === APPLICATION_STATUS.WAITING_VERIFICATION) {
       return (
         <>
           <Separator />
