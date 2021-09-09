@@ -123,7 +123,9 @@ router.get("/:id", passport.authenticate("referent", { session: false }), async 
   }
 });
 
-router.post("/notify/docs-military-preparation", passport.authenticate("young", { session: false }), async (req, res) => {
+router.post("/notify/docs-military-preparation/:template", passport.authenticate("young", { session: false }), async (req, res) => {
+  const { error, value: template } = Joi.string().required().validate(req.params.template);
+  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
   // get the referent_department manager_phase2
   let toReferent = await ReferentObject.findOne({
     subRole: SUB_ROLES.manager_phase2,
@@ -147,7 +149,7 @@ router.post("/notify/docs-military-preparation", passport.authenticate("young", 
     });
   }
   if (!toReferent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-  const mail = await sendTemplate(parseInt(SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_SUBMITTED), {
+  const mail = await sendTemplate(parseInt(template), {
     emailTo: [{ name: `${toReferent.firstName} ${toReferent.lastName}`, email: toReferent.email }],
     params: { cta: `${ADMIN_URL}/volontaire/${req.user._id}/phase2`, youngFirstName: req.user.firstName, youngLastName: req.user.lastName },
   });
