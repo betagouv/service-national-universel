@@ -23,7 +23,11 @@ class Auth {
     const { password, email } = value;
 
     try {
-      const user = await this.model.findOne({ email });
+      const user = await this.model.findOne({
+        email: {
+          $regex: new RegExp(email, "i"),
+        },
+      });
       if (!user) return res.status(401).send({ ok: false, code: ERRORS.USER_NOT_EXISTS });
       if (user.status === "DELETED") return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
