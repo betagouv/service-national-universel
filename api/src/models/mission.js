@@ -53,7 +53,7 @@ const Schema = new mongoose.Schema({
       description: "Date de fin de la mission",
     },
   }, // OK
-  estimatedDuration: {
+  duration: {
     type: Number,
     documentation: {
       description: "Durée prévisionnelle de la mission",

@@ -370,9 +370,9 @@ export default (props) => {
                         <p style={{ color: "#a0aec1", fontSize: 12 }}>Saisissez un nombre d'heures prévisionnelles pour la réalisation de la mission</p>
                         <Row>
                           <Col>
-                            <Input name="estimatedDuration" onChange={handleChange} value={values.estimatedDuration} type="number" min={1} max={999} />
+                            <Input name="duration" onChange={handleChange} value={values.duration} type="number" min={1} max={999} />
                           </Col>
-                          <Col style={{ display: "flex", alignItems: "center" }}>heure{values.estimatedDuration > 1 && "s"}</Col>
+                          <Col style={{ display: "flex", alignItems: "center" }}>heure{values.duration > 1 && "s"}</Col>
                         </Row>
                       </FormGroup>
                       <FormGroup>
