@@ -65,6 +65,8 @@ export default ({ setOpen, open, label = "Inviter un référent", role = "" }) =
               onSubmit={async (values, { setSubmitting }) => {
                 try {
                   const obj = { ...values };
+                  if (obj.role === ROLES.REFERENT_DEPARTMENT) obj.region = department2region[obj.department];
+                  if (obj.role === ROLES.REFERENT_REGION) obj.department = null;
                   if (obj.department && !obj.region) obj.region = department2region[obj.department];
                   await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent[obj.role]}`, obj);
                   toastr.success("Invitation envoyée");
@@ -155,7 +157,7 @@ export default ({ setOpen, open, label = "Inviter un référent", role = "" }) =
   );
 };
 
-const ChooseDepartment = ({ value, onChange }) => {
+const ChooseDepartment = ({ value, onChange, validate }) => {
   const { user } = useSelector((state) => state.Auth);
   const [list, setList] = useState(departmentList);
 
@@ -168,11 +170,20 @@ const ChooseDepartment = ({ value, onChange }) => {
     if (user.role === ROLES.REFERENT_REGION) {
       setList(region2department[user.region]);
     }
-    return onChange({ target: { value: list[0], name: "department" } });
   }, []);
 
   return (
-    <Input disabled={user.role === ROLES.REFERENT_DEPARTMENT} type="select" name="department" value={value} onChange={onChange}>
+    <Field
+      disabled={user.role === ROLES.REFERENT_DEPARTMENT}
+      as="select"
+      validate={validate}
+      className="form-control"
+      placeholder="Département"
+      name="department"
+      value={value}
+      onChange={onChange}
+    >
+      <option disabled value="" label=""></option>
       {list.map((e) => {
         return (
           <option value={e} key={e}>
@@ -180,22 +191,31 @@ const ChooseDepartment = ({ value, onChange }) => {
           </option>
         );
       })}
-    </Input>
+    </Field>
   );
 };
 
-const ChooseRegion = ({ value, onChange }) => {
+const ChooseRegion = ({ value, onChange, validate }) => {
   const { user } = useSelector((state) => state.Auth);
 
   useEffect(() => {
     if (user.role === ROLES.REFERENT_REGION) {
       return onChange({ target: { value: user.region, name: "region" } });
     }
-    return onChange({ target: { value: regionList[0], name: "region" } });
   }, []);
 
   return (
-    <Input disabled={user.role === ROLES.REFERENT_REGION} type="select" name="region" value={value} onChange={onChange}>
+    <Field
+      disabled={user.role === ROLES.REFERENT_REGION}
+      as="select"
+      validate={validate}
+      className="form-control"
+      placeholder="Région"
+      name="region"
+      value={value}
+      onChange={onChange}
+    >
+      <option key={-1} value="" label=""></option>
       {regionList.map((e) => {
         return (
           <option value={e} key={e}>
@@ -203,7 +223,7 @@ const ChooseRegion = ({ value, onChange }) => {
           </option>
         );
       })}
-    </Input>
+    </Field>
   );
 };
 
@@ -231,17 +251,17 @@ const ChooseCenter = ({ value, onChange, centers, onSelect }) => {
   );
 };
 
-const ChooseRole = ({ value, onChange }) => {
+const ChooseRole = ({ value, onChange, validate }) => {
   const { user } = useSelector((state) => state.Auth);
 
   return (
-    <Input type="select" name="role" value={value} onChange={onChange}>
+    <Field as="select" validate={validate} className="form-control" placeholder="Rôle" name="role" value={value} onChange={onChange}>
       <option value=""></option>
       <option value={ROLES.HEAD_CENTER}>{translate(ROLES.HEAD_CENTER)}</option>
       <option value={ROLES.REFERENT_DEPARTMENT}>{translate(ROLES.REFERENT_DEPARTMENT)}</option>
       {user.role === ROLES.ADMIN || user.role === ROLES.REFERENT_REGION ? <option value={ROLES.REFERENT_REGION}>{translate(ROLES.REFERENT_REGION)}</option> : null}
       {user.role === ROLES.ADMIN ? <option value={ROLES.ADMIN}>{translate(ROLES.ADMIN)}</option> : null}
-    </Input>
+    </Field>
   );
 };
 const ChooseSubRole = ({ value, onChange, options }) => {
