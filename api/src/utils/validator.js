@@ -192,6 +192,8 @@ const applicationKeys = {
   youngDepartment: Joi.string().allow(null, ""),
   youngCohort: Joi.string().allow(null, ""),
   missionId: Joi.string().allow(null, ""),
+  missionDurationEstimated: Joi.number().allow(null),
+  missionDurationDone: Joi.number().allow(null),
   missionName: Joi.string().allow(null, ""),
   missionDepartment: Joi.string().allow(null, ""),
   missionRegion: Joi.string().allow(null, ""),

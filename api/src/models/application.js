@@ -67,6 +67,18 @@ const Schema = new mongoose.Schema({
       description: "Identifiant de la mission",
     },
   },
+  missionDurationEstimated: {
+    type: Number,
+    documentation: {
+      description: "Durée prévisionnelle de la mission",
+    },
+  },
+  missionDurationDone: {
+    type: Number,
+    documentation: {
+      description: "Durée de la mission effectuée",
+    },
+  },
   missionName: {
     type: String,
     documentation: {

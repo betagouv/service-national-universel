@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
+import { toastr } from "react-redux-toastr";
 
-import { translate as t, YOUNG_PHASE, YOUNG_STATUS_PHASE2, getLimitDateForPhase2, ENABLE_PM } from "../../../utils";
+import api from "../../../services/api";
+import { translate as t, YOUNG_PHASE, YOUNG_STATUS_PHASE2, getLimitDateForPhase2, ENABLE_PM, colors, APPLICATION_STATUS } from "../../../utils";
 import WrapperPhase2 from "./wrapper";
 import ApplicationList from "./applicationList.js";
 import Phase2MilitaryPreparation from "./phase2MilitaryPreparation";
@@ -13,18 +15,58 @@ import MailAttestationButton from "../../../components/buttons/MailAttestationBu
 import { Box, BoxTitle } from "../../../components/box";
 
 export default ({ young, onChange }) => {
+  const [{ hoursEstimated, hoursDone }, setHours] = useState({});
+  useEffect(() => {
+    getApplications();
+  }, []);
+  const getApplications = async () => {
+    if (!young) return;
+    const { ok, data, code } = await api.get(`/young/${young._id}/application`);
+    if (!ok) return toastr.error("Oups, une erreur est survenue", code);
+    console.log(data);
+    const hoursEstimated = data
+      .filter((app) => [APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.IN_PROGRESS].includes(app.status))
+      .reduce((acc, v) => (v.missionDurationEstimated ? acc + v.missionDurationEstimated : acc), 0);
+    const hoursDone = data.filter((app) => app.status === APPLICATION_STATUS.DONE).reduce((acc, v) => (v.missionDurationDone ? acc + v.missionDurationDone : acc), 0);
+
+    return setHours({ hoursEstimated, hoursDone });
+  };
+
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <WrapperPhase2 young={young} tab="phase2">
         <Box>
-          <Bloc title="Réalisation d'une mission d'intérêt général">
-            <div style={{ display: "flex" }}>
+          <Row>
+            <Col md={4} sm={4} style={{ padding: "3rem", borderRight: "2px solid #f4f5f7" }}>
+              <BoxTitle>Réalisation des 84 heures de mission d'intérêt général</BoxTitle>
               <p style={{ flex: 1 }}>
                 Le volontaire doit achever sa phase 2 avant le <b>{getLimitDateForPhase2(young.cohort)}</b>
               </p>
+            </Col>
+            <Col md={4} sm={4} style={{ padding: 0, borderRight: "2px solid #f4f5f7" }}>
+              <Row
+                style={{
+                  height: "50%",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  padding: "1rem",
+                  margin: 0,
+                  borderBottom: "2px solid #f4f5f7",
+                }}
+              >
+                <HourTitle>Heures de MIG prévisionnelles</HourTitle>
+                {hoursEstimated >= 0 ? <HourDetail>{hoursEstimated}h</HourDetail> : "..."}
+              </Row>
+              <Row style={{ height: "50%", flexDirection: "column", justifyContent: "center", alignItems: "center", padding: "1rem", margin: 0 }}>
+                <HourTitle>Heures de MIG réalisées</HourTitle>
+                {hoursDone >= 0 ? <HourDetail>{hoursDone}h sur 84h</HourDetail> : "..."}
+              </Row>
+            </Col>
+            <Col md={4} sm={4} style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
               <SelectStatus hit={young} statusName="statusPhase2" phase={YOUNG_PHASE.INTEREST_MISSION} options={Object.keys(YOUNG_STATUS_PHASE2)} />
-            </div>
-          </Bloc>
+            </Col>
+          </Row>
         </Box>
         {ENABLE_PM && <Phase2MilitaryPreparation young={young} />}
         <ToggleBox>
@@ -214,3 +256,10 @@ const SeeMore = styled.div`
     margin: 0.25rem;
   }
 `;
+
+const HourTitle = styled.div`
+  text-transform: uppercase;
+  color: ${colors.grey};
+  font-size: 0.8rem;
+`;
+const HourDetail = styled.div``;
