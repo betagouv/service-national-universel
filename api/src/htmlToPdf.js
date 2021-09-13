@@ -6,15 +6,17 @@ const DEFAULT_OPTIONS = {
 };
 
 const renderFromHtml = async (html, options) => {
+  console.log("--renderFromHtml 1--");
   const { browser, page } = await getBrowserAndPage(options);
-
+  console.log("--renderFromHtml 2--");
   await page.setContent(html, options?.navigation ?? {});
-
+  console.log("--renderFromHtml 3--");
   const pdfOptions = options ?? {};
   const buffer = await page.pdf({
     ...DEFAULT_OPTIONS,
     ...pdfOptions,
   });
+  console.log("--renderFromHtml 4--");
 
   await browser.close();
 
