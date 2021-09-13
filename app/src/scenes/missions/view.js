@@ -99,6 +99,7 @@ export default (props) => {
                   ? `Du ${formatStringDateTimezoneUTC(mission.startAt)} au ${formatStringDateTimezoneUTC(mission.endAt)}`
                   : "Aucune date renseignée"}
               </Legend>
+              {mission.duration ? <Detail title="Durée estimée" content={`${mission.duration} heure(s)`} /> : null}
               <Detail title="Fréquence" content={mission.frequence} />
               <Detail title="Période pour réaliser la mission" content={mission.period} />
               <Detail title="Lieu" content={[mission.address, mission.zip, mission.city, mission.department]} />
