@@ -53,14 +53,17 @@ function getMailParams(type, template, young) {
 
 router.post("/:type/:template", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
   try {
+    console.log("--1--");
     const { error, value } = Joi.object({ id: Joi.string().required(), type: Joi.string().required(), template: Joi.string().required() })
       .unknown()
       .validate(req.params, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    console.log("--2--");
     const { id, type, template } = value;
 
     const young = await YoungObject.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    console.log("--3--");
 
     // A young can only download their own documents.
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
@@ -70,12 +73,15 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
     // Create html
     const html = await getHtmlTemplate(type, template, young);
     if (!html) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    console.log("--4--");
 
     const buffer = await renderFromHtml(html, type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 });
+    console.log("--5--");
     res.contentType("application/pdf");
     res.setHeader("Content-Dispositon", 'inline; filename="test.pdf"');
     res.set("Cache-Control", "public, max-age=1");
     res.send(buffer);
+    console.log("--6--");
   } catch (e) {
     capture(e);
     res.status(500).send({ ok: false, e, code: ERRORS.SERVER_ERROR });
