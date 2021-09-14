@@ -13,6 +13,7 @@ import Badge from "../../../components/Badge";
 import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
 import MailAttestationButton from "../../../components/buttons/MailAttestationButton";
 import { Box, BoxTitle } from "../../../components/box";
+import Loader from "../../../components/Loader";
 
 export default ({ young, onChange }) => {
   const [{ hoursEstimated, hoursDone }, setHours] = useState({});
@@ -56,11 +57,11 @@ export default ({ young, onChange }) => {
                 }}
               >
                 <HourTitle>Heures de MIG prévisionnelles</HourTitle>
-                {hoursEstimated >= 0 ? <HourDetail>{hoursEstimated}h</HourDetail> : "..."}
+                {hoursEstimated >= 0 ? <HourDetail>{hoursEstimated}h</HourDetail> : <Loader size="1rem" />}
               </Row>
               <Row style={{ height: "50%", flexDirection: "column", justifyContent: "center", alignItems: "center", padding: "1rem", margin: 0 }}>
                 <HourTitle>Heures de MIG réalisées</HourTitle>
-                {hoursDone >= 0 ? <HourDetail>{hoursDone}h sur 84h</HourDetail> : "..."}
+                {hoursDone >= 0 ? <HourDetail>{hoursDone}h sur 84h</HourDetail> : <Loader size="1rem" />}
               </Row>
             </Col>
             <Col md={4} sm={4} style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
