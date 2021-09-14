@@ -116,7 +116,7 @@ export default ({ hit, options = [], callback }) => {
         message={`Merci de valider le nombre d'heures effectuées par ${application.youngFirstName} pour la mission ${application.missionName}.`}
         onChange={() => setModalDone({ isOpen: false, onConfirm: null })}
         type="number"
-        defaultInput={application.missionDurationEstimated}
+        defaultInput={application.missionDurationDone || application.missionDurationEstimated}
         placeholder="Nombre d'heures"
         onConfirm={(duration) => {
           setStatus(APPLICATION_STATUS.DONE, null, duration);
