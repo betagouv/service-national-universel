@@ -200,7 +200,7 @@ describe("Application", () => {
       const mission = await createMissionHelper({ ...getNewMissionFixture(), tutorId: referent._id });
       const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission._id });
       for (const template of [
-        SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION,
+        "new",
         SENDINBLUE_TEMPLATES.referent.YOUNG_VALIDATED,
         SENDINBLUE_TEMPLATES.young.VALIDATE_APPLICATION,
         SENDINBLUE_TEMPLATES.referent.CANCEL_APPLICATION,
@@ -223,15 +223,11 @@ describe("Application", () => {
       passport.user = young;
 
       // Successful request
-      let res = await request(getAppHelper())
-        .post(`/application/${application._id}/notify/${SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION}`)
-        .send({});
+      let res = await request(getAppHelper()).post(`/application/${application._id}/notify/new`).send({});
       expect(res.status).toBe(200);
 
       // Failed request (not allowed)
-      res = await request(getAppHelper())
-        .post(`/application/${secondApplication._id}/notify/${SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION}`)
-        .send({});
+      res = await request(getAppHelper()).post(`/application/${secondApplication._id}/notify/new`).send({});
       expect(res.status).toBe(401);
 
       passport.user = previous;
