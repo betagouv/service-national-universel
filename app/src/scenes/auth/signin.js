@@ -75,7 +75,7 @@ export default () => {
               <form onSubmit={handleSubmit}>
                 {!userIsValid && (
                   <StyledFormGroup>
-                    <ErrorLogin>Identifiant incorrect </ErrorLogin>
+                    <ErrorLogin>E-mail et/ou mot de passe incorrect(s)</ErrorLogin>
                   </StyledFormGroup>
                 )}
                 {tooManyRequests && (
