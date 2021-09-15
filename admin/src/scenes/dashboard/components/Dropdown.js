@@ -55,6 +55,7 @@ const DropdownWrapper = styled.div`
   position: relative;
   border-top-left-radius: 6px;
   border-top-right-radius: 6px;
+  z-index: 10;
   ${(props) =>
     !props.isOpen &&
     `
