@@ -10,6 +10,7 @@ import {
   YOUNG_STATUS_PHASE1,
   YOUNG_STATUS_PHASE2,
   YOUNG_STATUS_PHASE3,
+  getLink,
 } from "../../../../utils";
 import api from "../../../../services/api";
 import Status from "./status";
@@ -85,14 +86,6 @@ export default ({ filter }) => {
     })();
   }, [JSON.stringify(filter)]);
 
-  const replaceSpaces = (v) => v.replace(/\s+/g, "+");
-  const getLink = (link) => {
-    if (filter.region) link += `&REGION=%5B"${replaceSpaces(filter.region)}"%5D`;
-    if (filter.cohort) link += `&COHORT=%5B"${replaceSpaces(filter.cohort)}"%5D`;
-    if (filter.department) link += `&DEPARTMENT=%5B"${replaceSpaces(filter.department)}"%5D`;
-    return link;
-  };
-
   return (
     <>
       <TabNavigation>
@@ -115,7 +108,7 @@ export default ({ filter }) => {
         {currentTab === "global" && (
           <>
             <SubTitle>En quelques chiffres</SubTitle>
-            <Status status={status} statusPhase1={statusPhase1} statusPhase2={statusPhase2} statusPhase3={statusPhase3} getLink={getLink} />
+            <Status status={status} statusPhase1={statusPhase1} statusPhase2={statusPhase2} statusPhase3={statusPhase3} filter={filter} getLink={getLink} />
           </>
         )}
         {currentTab === "phase1" && (
@@ -127,9 +120,10 @@ export default ({ filter }) => {
               filterName="STATUS_PHASE_1"
               colors={YOUNG_STATUS_COLORS}
               data={statusPhase1}
+              filter={filter}
               getLink={getLink}
             />
-            <Participation data={cohesionStayPresence} getLink={getLink} />
+            <Participation data={cohesionStayPresence} filter={filter} getLink={getLink} />
           </>
         )}
         {currentTab === "phase2" && (
@@ -141,6 +135,7 @@ export default ({ filter }) => {
               filterName="STATUS_PHASE_2"
               colors={YOUNG_STATUS_COLORS}
               data={statusPhase2}
+              filter={filter}
               getLink={getLink}
             />
             <StatusMap
@@ -149,6 +144,7 @@ export default ({ filter }) => {
               filterName="CONTRACT_STATUS"
               colors={CONTRACT_STATUS_COLORS}
               data={statusPhase2Contract}
+              filter={filter}
               getLink={getLink}
             />
             <StatusMap
@@ -157,6 +153,7 @@ export default ({ filter }) => {
               filterName="APPLICATION_STATUS"
               colors={APPLICATION_STATUS_COLORS}
               data={statusApplication}
+              filter={filter}
               getLink={getLink}
             />
           </>
@@ -170,6 +167,7 @@ export default ({ filter }) => {
               filterName="STATUS_PHASE_3"
               colors={YOUNG_STATUS_COLORS}
               data={statusPhase3}
+              filter={filter}
               getLink={getLink}
             />
           </>

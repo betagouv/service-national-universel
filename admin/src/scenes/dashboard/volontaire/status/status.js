@@ -5,14 +5,14 @@ import { Link } from "react-router-dom";
 import { YOUNG_STATUS_COLORS } from "../../../../utils";
 import { CardArrow, Card, CardTitle, CardValueWrapper, CardValue, CardPercentage } from "../../../../components/dashboard";
 
-export default ({ status, statusPhase1, statusPhase2, statusPhase3, getLink }) => {
+export default ({ status, statusPhase1, statusPhase2, statusPhase3, filter, getLink }) => {
   const total = Object.keys(status).reduce((acc, a) => acc + status[a], 0);
 
   return (
     <React.Fragment>
       <Row>
         <Col md={6} xl={4}>
-          <Link to={getLink(`/volontaire?STATUS=%5B"VALIDATED"%5D`)}>
+          <Link to={getLink({ base: `/volontaire`, filter, filtersUrl: ['STATUS=%5B"VALIDATED"%5D'] })}>
             <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
               <CardTitle>Volontaires</CardTitle>
               <CardValueWrapper>
@@ -28,7 +28,7 @@ export default ({ status, statusPhase1, statusPhase2, statusPhase3, getLink }) =
       </Row>
       <Row>
         <Col md={6} xl={4}>
-          <Link to={getLink(`/volontaire?STATUS_PHASE_1=%5B"DONE"%5D`)}>
+          <Link to={getLink({ base: `/volontaire`, filter, filtersUrl: ['STATUS_PHASE_1=%5B"DONE"%5D'] })}>
             <Card borderBottomColor={YOUNG_STATUS_COLORS.VALIDATED}>
               <CardTitle>Ayant validé la Phase 1</CardTitle>
               <CardValueWrapper>
@@ -42,7 +42,7 @@ export default ({ status, statusPhase1, statusPhase2, statusPhase3, getLink }) =
           </Link>
         </Col>
         <Col md={6} xl={4}>
-          <Link to={getLink(`/volontaire?STATUS_PHASE_2=%5B"VALIDATED"%5D`)}>
+          <Link to={getLink({ base: `/volontaire`, filter, filtersUrl: ['STATUS_PHASE_2=%5B"VALIDATED"%5D'] })}>
             <Card borderBottomColor={YOUNG_STATUS_COLORS.VALIDATED}>
               <CardTitle>Ayant validé la Phase 2</CardTitle>
               <CardValueWrapper>
@@ -70,7 +70,7 @@ export default ({ status, statusPhase1, statusPhase2, statusPhase3, getLink }) =
       </Row>
       <Row>
         <Col md={6} xl={4}>
-          <Link to={getLink(`/volontaire?STATUS=%5B"WITHDRAWN"%5D`)}>
+          <Link to={getLink({ base: `/volontaire`, filter, filtersUrl: ['STATUS=%5B"WITHDRAWN"%5D'] })}>
             <Card borderBottomColor={YOUNG_STATUS_COLORS.WITHDRAWN}>
               <CardTitle>Désistés</CardTitle>
               <CardValueWrapper>

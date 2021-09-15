@@ -5,7 +5,7 @@ import { Subtitle } from "../../../components/dashboard";
 import { translate, MISSION_DOMAINS } from "../../../utils";
 import { Box, BoxTitleCircular as BoxTitle } from "../../../components/box";
 
-export default ({ youngsDomains, missionsDomains, getLink }) => {
+export default ({ youngsDomains, missionsDomains }) => {
   const totalMissions = Object.keys(missionsDomains).reduce((acc, a) => acc + missionsDomains[a], 0);
   const totalYoungs = Object.keys(youngsDomains).reduce((acc, a) => acc + youngsDomains[a], 0);
 

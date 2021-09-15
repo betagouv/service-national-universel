@@ -88,4 +88,14 @@ export const copyToClipboard = (text) => {
   }
 };
 
+export const replaceSpaces = (v) => v.replace(/\s+/g, "+");
+export const getLink = ({ base = "/", filter, filtersUrl = [] }) => {
+  if (filter?.region) filtersUrl.push(`REGION=%5B"${replaceSpaces(filter?.region)}"%5D`);
+  if (filter?.cohort) filtersUrl.push(`COHORT=%5B"${replaceSpaces(filter?.cohort)}"%5D`);
+  if (filter?.department) filtersUrl.push(`DEPARTMENT=%5B"${replaceSpaces(filter?.department)}"%5D`);
+  let res = base;
+  if (filtersUrl?.length) res += `?${filtersUrl.join("&")}`;
+  return res;
+};
+
 export const ENABLE_PM = true;

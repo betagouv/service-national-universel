@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import { translate } from "../../../../utils";
 import { CardArrow, Card, CardTitle, CardSection, CardValueWrapper, CardValue, CardPercentage, Subtitle } from "../../../../components/dashboard";
 
-export default ({ sectionTitle, title, obj, filterName, colors, data, getLink }) => {
+export default ({ sectionTitle, title, obj, filterName, colors, data, getLink, filter }) => {
   const total = Object.keys(data).reduce((acc, a) => acc + data[a], 0);
   return (
     <>
@@ -19,7 +19,7 @@ export default ({ sectionTitle, title, obj, filterName, colors, data, getLink })
         {Object.values(obj).map((e) => {
           return (
             <Col md={6} xl={4} key={e}>
-              <Link to={getLink(`/volontaire?${filterName}=%5B"${e}"%5D`)}>
+              <Link to={getLink({ base: `/volontaire`, filter, filtersUrl: [`${filterName}=%5B"${e}"%5D`] })}>
                 <Card borderBottomColor={colors[e]}>
                   <CardTitle>{translate(e)}</CardTitle>
                   <CardValueWrapper>
