@@ -30,7 +30,7 @@ export default ({ filter }) => {
   useEffect(() => {
     (async () => {
       const body = {
-        query: { bool: { must: { match_all: {} }, filter: [{ term: { "cohort.keyword": filter.cohort } }, { terms: { "status.keyword": ["VALIDATED"] } }] } },
+        query: { bool: { must: { match_all: {} }, filter: [{ terms: { "status.keyword": ["VALIDATED"] } }] } },
         aggs: {
           status: { terms: { field: "status.keyword" } },
           statusPhase1: { terms: { field: "statusPhase1.keyword" } },
@@ -42,13 +42,15 @@ export default ({ filter }) => {
         size: 0,
       };
 
+      if (filter.cohort) body.query.bool.filter.push({ term: { "cohort.keyword": filter.cohort } });
       if (filter.region) body.query.bool.filter.push({ term: { "region.keyword": filter.region } });
       if (filter.department) body.query.bool.filter.push({ term: { "department.keyword": filter.department } });
 
       const { responses } = await api.esQuery("young", body);
 
-      body.query.bool.filter = [{ term: { "cohort.keyword": filter.cohort } }, { terms: { "status.keyword": ["WITHDRAWN"] } }];
+      body.query.bool.filter = [{ terms: { "status.keyword": ["WITHDRAWN"] } }];
 
+      if (filter.cohort) body.query.bool.filter.push({ term: { "cohort.keyword": filter.cohort } });
       if (filter.region) body.query.bool.filter.push({ term: { "region.keyword": filter.region } });
       if (filter.department) body.query.bool.filter.push({ term: { "department.keyword": filter.department } });
 
