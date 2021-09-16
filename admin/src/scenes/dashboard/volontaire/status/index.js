@@ -71,13 +71,14 @@ export default ({ filter }) => {
 
     (async () => {
       const body = {
-        query: { bool: { must: { match_all: {} }, filter: [{ term: { "youngCohort.keyword": filter.cohort } }] } },
+        query: { bool: { must: { match_all: {} }, filter: [] } },
         aggs: {
           status: { terms: { field: "status.keyword" } },
         },
         size: 0,
       };
 
+      if (filter.cohort) body.query.bool.filter.push({ term: { "youngCohort.keyword": filter.cohort } });
       if (filter.region) body.query.bool.filter.push({ terms: { "youngDepartment.keyword": region2department[filter.region] } });
       if (filter.department) body.query.bool.filter.push({ term: { "youngDepartment.keyword": filter.department } });
 
