@@ -165,11 +165,11 @@ export default (props) => {
               </NavLink>
             </DiagorienteButton>
           )}
-          <DrawerButton>
+          {/* <DrawerButton>
             <NavLink to="/support">
               Centre d'aide
             </NavLink>
-          </DrawerButton>
+          </DrawerButton> */}
           {/* {young.statusPhase1 === "DONE" && young.statusPhase2 === "VALIDATED" ? (
             <DrawerButton>
               <DownloadAttestationButton young={young} uri="snu">

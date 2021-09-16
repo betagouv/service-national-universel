@@ -7,68 +7,57 @@ import styled from "styled-components";
 import api from "../../services/api";
 import { Hero, HeroContainer, Separator } from "../../components/Content";
 import LoadingButton from "../../components/buttons/LoadingButton";
-import { translate } from "../../utils/translation";
 
-// This component isn't finished.
+//! This component isn't finished.
 
 export default () => {
-  const young = useSelector((state) => state.Auth.young);
-  const createTicket = async () => {
+  const fetchArticles = async () => {
     try {
-      await api.post("/support-center/ticket");
-      toastr.success("Ticket créé");
-    } catch (e) {
-      console.log(e);
-      toastr.error("Une erreur est survenue");
+      const response = await fetch("https://support.selego.co/smapi/young", {
+        method: "GET"
+      });
+      if (!response.ok) return console.log('Request failed', response);
+      console.log('My articles', response);
+    } catch (error) {
+      console.log(error);
     }
   }
-  console.log("YOUNG", JSON.stringify(young));
+  //const young = useSelector((state) => state.Auth.young);
+  // const createTicket = async () => {
+  //   try {
+  //     await api.post("/support-center/ticket");
+  //     toastr.success("Ticket créé");
+  //   } catch (e) {
+  //     console.log(e);
+  //     toastr.error("Une erreur est survenue");
+  //   }
+  // }
 
   return (
     <HeroContainer>
       <Container>
         <section className="help-section">
           <h2>Besoin d'aide ?</h2>
-          <p style={{ color: "#6B7280", }}>Vous avez un problème technique, vous souhaitez en savoir plus sur votre situation, ou souhaitez contacter l’un de vos référents ?</p>
-          <LoadingButton>
-            <Link to="/ticket">
-              Contacter le support
-            </Link>
-          </LoadingButton>
+          <p style={{ color: "#6B7280", }}>Vous rencontrez un problème technique ou souhaitez en savoir plus sur le SNU ? N'hésitez pas à consulter notre base de connaissance !</p>
+          <LinkButton href="https://support.selego.co/help/fr-fr" target="_blank">
+            Base de connaissance
+          </LinkButton>
         </section>
         <Card>
           <div className="content">
             <h3>
-              Mes informations
+              Quelques articles pour vous aider :
             </h3>
-            <p style={{ color: "#6B7280" }}>
-              <span style={{ fontWeight: "700" }}>{young.firstName} {young.lastName}</span> • née le 27/11/2020 • Ile-de-France
-            </p>
             <div className="division" style={{ borderBottom: "1px solid #E5E7EB", borderTop: "1px solid #E5E7EB" }}>
-              <p>Centre de cohésion</p>
+              <button onClick={fetchArticles}>
+                Test
+              </button>
               <br />
-              <p>{young.cohesionCenterName}</p>
-            </div>
-            <div className="division" style={{ borderBottom: "1px solid #E5E7EB" }}>
-              <p>
-                Phase 1
-              </p>
-              <p>
-                {translate(young.statusPhase1)}
-              </p>
-            </div>
-            <div className="division" style={{ borderBottom: "1px solid #E5E7EB" }}>
-              <p>Phase 2</p>
-              <p>{translate(young.statusPhase2)}</p>
-            </div>
-            <div className="division">
-              <p>Phase 3</p>
-              <p>{translate(young.statusPhase3)}</p>
             </div>
           </div>
         </Card>
       </Container>
-      <List>
+      {/* <List>
         <header className="header">
           <p>ID</p>
           <p>Sujet</p>
@@ -96,7 +85,7 @@ export default () => {
           <p>Informations mission</p>
           <p className="text">Il y a une semaine</p>
         </section>
-      </List>
+      </List> */}
     </HeroContainer>
   )
 }
@@ -104,7 +93,7 @@ export default () => {
 const Container = styled.div`
   display: flex;
   .help-section {
-    max-width: 450px;
+    max-width: 400px;
     margin: 40px 20px;
   }
 `;
@@ -151,6 +140,22 @@ const Link = styled(NavLink)`
   cursor: pointer;
   :hover {
     color: #fff;
+  }
+`;
+
+const LinkButton = styled.a`
+  background-color: #5245cc;
+  border: none;
+  border-radius: 5px;
+  padding: 12px 30px;
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  transition: opacity 0.3s;
+  :hover {
+    color: #fff;
+    background: #463bad;
   }
 `;
 
