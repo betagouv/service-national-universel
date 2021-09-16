@@ -11,9 +11,11 @@ import { formatStringLongDate, getFilterLabel, translate, getAge, ES_NO_LIMIT, c
 import Loader from "../../../components/Loader";
 import ContractLink from "../../../components/ContractLink";
 import ExportComponent from "../../../components/ExportXlsx";
-const FILTERS = ["SEARCH", "STATUS"];
+import { DepartmentFilter } from "../../../components/filters";
 import { Filter, FilterRow, ResultTable, Table, MultiLine } from "../../../components/list";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
+
+const FILTERS = ["SEARCH", "STATUS", "DEPARTMENT"];
 
 export default ({ mission, applications }) => {
   const [missionTemp, setMissionTemp] = useState(mission);
@@ -128,6 +130,7 @@ export default ({ mission, applications }) => {
                       showSearch={false}
                       renderLabel={(items) => getFilterLabel(items, "Statut")}
                     />
+                    <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} dataField="youngDepartment.keyword" />
                   </FilterRow>
                 </Filter>
                 <ResultTable>

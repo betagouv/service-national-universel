@@ -1,13 +1,13 @@
 import React from "react";
 import { MultiDropdownList } from "@appbaseio/reactivesearch";
 
-export const RegionFilter = ({ defaultQuery, filters, ...rest }) => (
+export const RegionFilter = ({ defaultQuery, filters, dataField = "region.keyword", ...rest }) => (
   <MultiDropdownList
     defaultQuery={defaultQuery}
     className="dropdown-filter"
     placeholder="Régions"
     componentId="REGION"
-    dataField="region.keyword"
+    dataField={dataField}
     title=""
     react={{ and: filters.filter((e) => e !== "REGION") }}
     URLParams={true}
