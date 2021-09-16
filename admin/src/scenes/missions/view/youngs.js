@@ -85,6 +85,7 @@ export default ({ mission, applications }) => {
                       "Nom représentant légal 1": data.young.parent1LastName,
                       "Email représentant légal 1": data.young.parent1Email,
                       "Téléphone représentant légal 1": data.young.parent1Phone,
+                      "Choix - Ordre de la candidature": data.priority,
                       "Nom de la mission": data.missionName,
                       "Département de la mission": data.missionDepartment,
                       "Région de la mission": data.missionRegion,
