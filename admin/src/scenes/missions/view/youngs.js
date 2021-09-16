@@ -100,20 +100,20 @@ export default ({ mission, applications }) => {
             <div style={{ display: "flex", alignItems: "flex-start", width: "100%", height: "100%" }}>
               <div style={{ flex: 1, position: "relative" }}>
                 <Filter>
-                  <DataSearch
-                    defaultQuery={getDefaultQuery}
-                    showIcon={false}
-                    placeholder="Rechercher par prénom, nom, email"
-                    componentId="SEARCH"
-                    dataField={["youngEmail.keyword", "youngFirstName", "youngLastName"]}
-                    react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
-                    // fuzziness={2}
-                    style={{ flex: 2 }}
-                    innerClass={{ input: "searchbox" }}
-                    autosuggest={false}
-                    queryFormat="and"
-                  />
-                  <FilterRow>
+                  <FilterRow visible>
+                    <DataSearch
+                      defaultQuery={getDefaultQuery}
+                      showIcon={false}
+                      placeholder="Rechercher par prénom, nom, email"
+                      componentId="SEARCH"
+                      dataField={["youngEmail.keyword", "youngFirstName", "youngLastName"]}
+                      react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
+                      // fuzziness={2}
+                      style={{ flex: 1, marginRight: "1rem" }}
+                      innerClass={{ input: "searchbox" }}
+                      autosuggest={false}
+                      queryFormat="and"
+                    />
                     <MultiDropdownList
                       defaultQuery={getDefaultQuery}
                       className="dropdown-filter"
