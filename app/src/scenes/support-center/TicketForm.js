@@ -23,16 +23,16 @@ export default () => {
       </Heading>
       <Form>
         <Formik
-          initialValues={{ group: "", subject: "", message: "" }}
+          initialValues={{ type: "", subject: "", message: "" }}
           validateOnChange={false}
           validateOnBlur={false}
           onSubmit={async (values) => {
             // return console.log(values);
             try {
-              const { subject, group, message } = values;
+              const { subject, type, message } = values;
               const { ok, code, data } = await api.post("/support-center/ticket", {
                 subject,
-                group,
+                type,
                 message,
               });
               if (!ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(code));
@@ -46,10 +46,10 @@ export default () => {
           {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
             <>
               <Item
-                name="group"
+                name="type"
                 title="Ma demande"
                 type="select"
-                value={values.group}
+                value={values.type}
                 handleChange={handleChange}
                 validate={(v) => !v && requiredMessage}
                 errors={errors}

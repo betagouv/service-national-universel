@@ -27,30 +27,27 @@ router.get("/", passport.authenticate(["referent", "young"], { session: false })
 
 router.post("/ticket", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
-    const { subject, group, message } = req.body;
-    console.log({ subject, group, message });
+    const { subject, type, message } = req.body;
+    const email = "jeamichel@test.com";
+    // const email = req.user.email;
 
+    const customer_id = await zammad.getCustomerIdByEmail(email);
     const response = await zammad.api("/tickets", {
       method: "POST",
       body: JSON.stringify({
-        title: `${group} - ${subject}`,
-        group,
-        // guess: req.user.email,
-        customer: req.user.email,
+        title: `${type} - ${subject}`,
+        group: "Users",
+        customer_id,
+        customer: email,
         article: {
           subject,
           body: message,
-          type: "note",
+          // type:'note',
           internal: false,
         },
-        note: "some note...",
       }),
     });
-
-    console.log("---RESPONSE---", response);
-    console.log("---STATUS---", response.status);
-
-    if (!response.ok) return res.status(400).send({ ok: false });
+    if (!response.id) return res.status(400).send({ ok: false });
     return res.status(200).send({ ok: true, data: response });
   } catch (error) {
     capture(error);
