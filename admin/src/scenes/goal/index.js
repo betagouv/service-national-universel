@@ -85,9 +85,6 @@ export default () => {
                           </Col>
                         </Row>
                       </Col>
-                      <Col md={4} style={{ textAlign: "right", alignSelf: "center" }}>
-                        … déjà inscrits
-                      </Col>
                     </Row>
                   </Departement>
                 );

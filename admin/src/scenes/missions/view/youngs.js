@@ -11,9 +11,11 @@ import { formatStringLongDate, getFilterLabel, translate, getAge, ES_NO_LIMIT, c
 import Loader from "../../../components/Loader";
 import ContractLink from "../../../components/ContractLink";
 import ExportComponent from "../../../components/ExportXlsx";
-const FILTERS = ["SEARCH", "STATUS"];
+import { DepartmentFilter } from "../../../components/filters";
 import { Filter, FilterRow, ResultTable, Table, MultiLine } from "../../../components/list";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
+
+const FILTERS = ["SEARCH", "STATUS", "DEPARTMENT"];
 
 export default ({ mission, applications }) => {
   const [missionTemp, setMissionTemp] = useState(mission);
@@ -85,6 +87,7 @@ export default ({ mission, applications }) => {
                       "Nom représentant légal 1": data.young.parent1LastName,
                       "Email représentant légal 1": data.young.parent1Email,
                       "Téléphone représentant légal 1": data.young.parent1Phone,
+                      "Choix - Ordre de la candidature": data.priority,
                       "Nom de la mission": data.missionName,
                       "Département de la mission": data.missionDepartment,
                       "Région de la mission": data.missionRegion,
@@ -99,20 +102,20 @@ export default ({ mission, applications }) => {
             <div style={{ display: "flex", alignItems: "flex-start", width: "100%", height: "100%" }}>
               <div style={{ flex: 1, position: "relative" }}>
                 <Filter>
-                  <DataSearch
-                    defaultQuery={getDefaultQuery}
-                    showIcon={false}
-                    placeholder="Rechercher par prénom, nom, email"
-                    componentId="SEARCH"
-                    dataField={["youngEmail.keyword", "youngFirstName", "youngLastName"]}
-                    react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
-                    // fuzziness={2}
-                    style={{ flex: 2 }}
-                    innerClass={{ input: "searchbox" }}
-                    autosuggest={false}
-                    queryFormat="and"
-                  />
-                  <FilterRow>
+                  <FilterRow visible>
+                    <DataSearch
+                      defaultQuery={getDefaultQuery}
+                      showIcon={false}
+                      placeholder="Rechercher par prénom, nom, email"
+                      componentId="SEARCH"
+                      dataField={["youngEmail.keyword", "youngFirstName", "youngLastName"]}
+                      react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
+                      // fuzziness={2}
+                      style={{ flex: 1, marginRight: "1rem" }}
+                      innerClass={{ input: "searchbox" }}
+                      autosuggest={false}
+                      queryFormat="and"
+                    />
                     <MultiDropdownList
                       defaultQuery={getDefaultQuery}
                       className="dropdown-filter"
@@ -127,6 +130,7 @@ export default ({ mission, applications }) => {
                       showSearch={false}
                       renderLabel={(items) => getFilterLabel(items, "Statut")}
                     />
+                    <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} dataField="youngDepartment.keyword" />
                   </FilterRow>
                 </Filter>
                 <ResultTable>

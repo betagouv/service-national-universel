@@ -388,7 +388,7 @@ describe("Es", () => {
       const res = await msearch("referent", buildMsearchQuery("referent", matchAll));
       expect(res.statusCode).toEqual(200);
       const filters = getFilter()[0].bool.should;
-      expect(filters[0].terms["role.keyword"]).toStrictEqual([ROLES.REFERENT_DEPARTMENT]);
+      expect(filters[0].terms["role.keyword"]).toStrictEqual([ROLES.REFERENT_DEPARTMENT, ROLES.SUPERVISOR, ROLES.RESPONSIBLE]);
       expect(filters[1]).toStrictEqual({
         bool: { must: [{ term: { "role.keyword": ROLES.REFERENT_REGION } }, { term: { "region.keyword": passport.user.region } }] },
       });
@@ -408,7 +408,7 @@ describe("Es", () => {
       const res = await msearch("referent", buildMsearchQuery("referent", matchAll));
       expect(res.statusCode).toEqual(200);
       const filters = getFilter()[0].bool.should;
-      expect(filters[0].terms["role.keyword"]).toStrictEqual([ROLES.REFERENT_REGION]);
+      expect(filters[0].terms["role.keyword"]).toStrictEqual([ROLES.REFERENT_REGION, ROLES.SUPERVISOR, ROLES.RESPONSIBLE]);
       expect(filters[1]).toStrictEqual({
         bool: { must: [{ term: { "role.keyword": ROLES.REFERENT_DEPARTMENT } }, { term: { "region.keyword": passport.user.region } }] },
       });

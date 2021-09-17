@@ -19,6 +19,8 @@ import Phase1 from "./scenes/phase1";
 import Phase2 from "./scenes/phase2";
 import Phase3 from "./scenes/phase3";
 import Diagoriente from "./scenes/diagoriente";
+import SupportCenter from "./scenes/support-center";
+import TicketForm from "./scenes/support-center/TicketForm";
 import Documents from "./scenes/documents";
 import Preferences from "./scenes/preferences";
 import Missions from "./scenes/missions";
@@ -38,7 +40,7 @@ import api from "./services/api";
 import { SENTRY_URL, environment } from "./config";
 
 import "./index.css";
-import { YOUNG_STATUS, setCrispUserData, ENABLE_PM } from "./utils";
+import { YOUNG_STATUS, ENABLE_PM } from "./utils";
 
 if (environment === "production") {
   Sentry.init({
@@ -65,7 +67,6 @@ export default () => {
         if (token) api.setToken(token);
         if (ok && user) {
           dispatch(setYoung(user));
-          setCrispUserData(user);
         }
       } catch (e) {
         console.log(e);
@@ -126,6 +127,8 @@ const Espace = () => {
             <Route path="/candidature" component={Applications} />
             <Route path="/cohesion" component={Cohesion} />
             <Route path="/diagoriente" component={Diagoriente} />
+            <Route path="/support" component={SupportCenter} />
+            <Route path="/ticket" component={TicketForm} />
             {ENABLE_PM && <Route path="/ma-preparation-militaire" component={MilitaryPreparation} />}
             <Route path="/" component={Home} />
           </Switch>

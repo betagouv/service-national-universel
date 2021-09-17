@@ -1,7 +1,6 @@
 import passwordValidator from "password-validator";
 import { YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_PHASE2 } from "snu-lib";
 export * from "snu-lib";
-export * from "./crisp";
 import { environment } from "../config";
 
 export function getPasswordErrorMessage(v) {

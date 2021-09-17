@@ -4,13 +4,13 @@ import { Link } from "react-router-dom";
 import { Card, CardTitle, CardValueWrapper, CardValue, Subtitle } from "../../../components/dashboard";
 import { colors } from "../../../utils";
 
-export default ({ missionPlaceLeft, missionPlaceTotal, getLink }) => {
+export default ({ missionPlaceLeft, missionPlaceTotal, filter, getLink }) => {
   return (
     <React.Fragment>
       <Subtitle>Places proposées par les structures</Subtitle>
       <Row>
         <Col md={6} xl={4} key="total">
-          <Link to={getLink(`/mission`)}>
+          <Link to={getLink({ base: "/mission", filter })}>
             <Card borderBottomColor="#372F78">
               <CardTitle>Places totales</CardTitle>
               <CardValueWrapper>
@@ -20,7 +20,7 @@ export default ({ missionPlaceLeft, missionPlaceTotal, getLink }) => {
           </Link>
         </Col>
         <Col md={6} xl={4} key="occupied">
-          <Link to={getLink(`/mission`)}>
+          <Link to={getLink({ base: "/mission", filter })}>
             <Card borderBottomColor={colors.yellow}>
               <CardTitle>Places occupées</CardTitle>
               <CardValueWrapper>
@@ -30,7 +30,7 @@ export default ({ missionPlaceLeft, missionPlaceTotal, getLink }) => {
           </Link>
         </Col>
         <Col md={6} xl={4} key="available">
-          <Link to={getLink(`/mission`)}>
+          <Link to={getLink({ base: "/mission", filter })}>
             <Card borderBottomColor={colors.green}>
               <CardTitle>Places disponibles</CardTitle>
               <CardValueWrapper>

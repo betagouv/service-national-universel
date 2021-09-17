@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { Col, Row } from "reactstrap";
 import { toastr } from "react-redux-toastr";
 
-import { colors } from "../../../utils";
+import { colors, copyToClipboard } from "../../../utils";
 import Applications from "./applications";
 
 export default ({ referentManagerPhase2 }) => {
@@ -21,7 +21,7 @@ export default ({ referentManagerPhase2 }) => {
               <div
                 className="icon"
                 onClick={() => {
-                  navigator.clipboard.writeText(referentManagerPhase2.email);
+                  copyToClipboard(referentManagerPhase2.email);
                   toastr.success(`'${referentManagerPhase2.email}' a été copié dans le presse papier.`);
                 }}
               />

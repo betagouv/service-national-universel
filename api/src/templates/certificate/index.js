@@ -1,7 +1,6 @@
 const fs = require("fs");
 const path = require("path");
-const config = require("../../config");
-const { getSignedUrl } = require("../../utils");
+const { getSignedUrl, getBaseUrl } = require("../../utils");
 const { COHESION_STAY_LIMIT_DATE } = require("snu-lib");
 
 const getLocationCohesionCenter = (y) => {
@@ -13,12 +12,6 @@ const getLocationCohesionCenter = (y) => {
     }
   }
   return t;
-};
-
-const getBaseUrl = () => {
-  if (config.ENVIRONMENT === "staging") return "https://app-a29a266c-556d-4f95-bc0e-9583a27f3f85.cleverapps.io";
-  if (config.ENVIRONMENT === "production") return "https://app-5a3e097d-fdf1-44fa-9172-88ad9d7b2b20.cleverapps.io";
-  return "http://localhost:8080";
 };
 
 function getBgUrl() {

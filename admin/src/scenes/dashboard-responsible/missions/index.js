@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 
-import { MISSION_STATUS_COLORS, MISSION_STATUS, translate, colors } from "../../../utils";
+import { MISSION_STATUS_COLORS, MISSION_STATUS, translate, colors, copyToClipboard } from "../../../utils";
 
 import api from "../../../services/api";
 import { CardArrow, Card, CardTitle, CardValueWrapper, CardValue } from "../../../components/dashboard";
@@ -20,6 +20,7 @@ export default ({ referentManagerPhase2 }) => {
 
   // Get all missions from structure then get all applications int order to display the volontaires' list.
   useEffect(() => {
+    if (!structureId) return setMissions([]);
     async function initMissions() {
       const missionsResponse = await api.get(`/structure/${structureId}/mission`);
       if (!missionsResponse.ok) {
@@ -48,7 +49,7 @@ export default ({ referentManagerPhase2 }) => {
             <div
               className="icon"
               onClick={() => {
-                navigator.clipboard.writeText(referentManagerPhase2.email);
+                copyToClipboard(referentManagerPhase2.email);
                 toastr.success(`'${referentManagerPhase2.email}' a été copié dans le presse papier.`);
               }}
             />

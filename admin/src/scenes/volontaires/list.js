@@ -27,7 +27,7 @@ const FILTERS = [
   "STATUS_PHASE_1",
   "STATUS_PHASE_2",
   "STATUS_PHASE_3",
-  "STATUS_APPLICATION",
+  "APPLICATION_STATUS",
   "LOCATION",
   "CONTRACT_STATUS",
   "MEDICAL_FILE_RECEIVED",
@@ -322,9 +322,9 @@ export default () => {
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
                   className="dropdown-filter"
-                  componentId="STATUS_APPLICATION"
+                  componentId="APPLICATION_STATUS"
                   dataField="phase2ApplicationStatus.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "STATUS_APPLICATION") }}
+                  react={{ and: FILTERS.filter((e) => e !== "APPLICATION_STATUS") }}
                   renderItem={(e, count) => {
                     return `${translate(e)} (${count})`;
                   }}

@@ -7,9 +7,7 @@ const DEFAULT_OPTIONS = {
 
 const renderFromHtml = async (html, options) => {
   const { browser, page } = await getBrowserAndPage(options);
-
   await page.setContent(html, options?.navigation ?? {});
-
   const pdfOptions = options ?? {};
   const buffer = await page.pdf({
     ...DEFAULT_OPTIONS,

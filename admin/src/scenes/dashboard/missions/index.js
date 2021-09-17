@@ -25,7 +25,7 @@ export default () => {
     } else if (user.role === REFERENT_ROLES.REFERENT_REGION) {
       updateFilter({ region: user.region, status });
     } else {
-      updateFilter({ status: Object.keys(YOUNG_STATUS), region: "", department: "", cohort: "2021" });
+      updateFilter({ status: Object.keys(YOUNG_STATUS), region: "", department: "" });
     }
   }, []);
 

@@ -113,6 +113,7 @@ export default () => {
                     "Nom représentant légal 2": data.young.parent2LastName,
                     "Email représentant légal 2": data.young.parent2Email,
                     "Téléphone représentant légal 2": data.young.parent2Phone,
+                    "Choix - Ordre de la candidature": data.priority,
                     "Nom de la mission": data.missionName,
                     "Département de la mission": data.missionDepartment,
                     "Région de la mission": data.missionRegion,

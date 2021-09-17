@@ -7,7 +7,7 @@ import Format from "./Format";
 import ProfessionalProject from "./ProfessionalProject";
 import Mobility from "./Mobility";
 import Volunteer from "./Volunteer";
-
+import { getLink } from "../../../utils";
 import api from "../../../services/api";
 
 export default ({ filter }) => {
@@ -92,18 +92,10 @@ export default ({ filter }) => {
     initStatus();
   }, [JSON.stringify(filter)]);
 
-  const replaceSpaces = (v) => v.replace(/\s+/g, "+");
-
-  const getLink = (link) => {
-    if (filter.region) link += `&REGION=%5B"${replaceSpaces(filter.region)}"%5D`;
-    if (filter.department) link += `&DEPARTMENT=%5B"${replaceSpaces(filter.department)}"%5D`;
-    return link;
-  };
-
   return (
     <React.Fragment>
-      <ProposedPlaces getLink={getLink} missionPlaceLeft={missionPlaceLeft} missionPlaceTotal={missionPlaceTotal} />
-      <Status getLink={getLink} data={missionsStatus} />
+      <ProposedPlaces getLink={getLink} filter={filter} missionPlaceLeft={missionPlaceLeft} missionPlaceTotal={missionPlaceTotal} />
+      <Status getLink={getLink} filter={filter} data={missionsStatus} />
       <MissionDetail missionsDomains={missionsDomains} youngsDomains={youngsDomains} />
       <Period youngsPeriod={youngsPeriod} missionsPeriod={missionsPeriod} />
       <Format youngsFormat={youngsFormat} missionsFormat={missionsFormat} />

@@ -219,7 +219,7 @@ router.post("/referent/_msearch", passport.authenticate(["referent"], { session:
       filter.push({
         bool: {
           should: [
-            { terms: { "role.keyword": [ROLES.REFERENT_DEPARTMENT] } },
+            { terms: { "role.keyword": [ROLES.REFERENT_DEPARTMENT, ROLES.SUPERVISOR, ROLES.RESPONSIBLE] } },
             { bool: { must: [{ term: { "role.keyword": ROLES.REFERENT_REGION } }, { term: { "region.keyword": user.region } }] } },
             { bool: { must: [{ term: { "role.keyword": ROLES.HEAD_CENTER } }, { term: { "department.keyword": user.department } }] } },
           ],
@@ -230,7 +230,7 @@ router.post("/referent/_msearch", passport.authenticate(["referent"], { session:
       filter.push({
         bool: {
           should: [
-            { terms: { "role.keyword": [ROLES.REFERENT_REGION] } },
+            { terms: { "role.keyword": [ROLES.REFERENT_REGION, ROLES.SUPERVISOR, ROLES.RESPONSIBLE] } },
             { bool: { must: [{ term: { "role.keyword": ROLES.REFERENT_DEPARTMENT } }, { term: { "region.keyword": user.region } }] } },
             { bool: { must: [{ term: { "role.keyword": ROLES.HEAD_CENTER } }, { term: { "region.keyword": user.region } }] } },
           ],

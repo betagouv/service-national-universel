@@ -25,7 +25,7 @@ export default () => {
     } else if (user.role === REFERENT_ROLES.REFERENT_REGION) {
       updateFilter({ region: user.region });
     } else {
-      updateFilter({ region: "", department: "", cohort: "2021" });
+      updateFilter({ region: "", department: "" });
     }
   }, []);
 

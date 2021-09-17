@@ -8,7 +8,9 @@ function cookieOptions() {
   if (config.ENVIRONMENT === "development") {
     return { maxAge: COOKIE_MAX_AGE, httpOnly: true, secure: false, domain: "localhost", sameSite: "Lax" };
   } else if (config.ENVIRONMENT === "staging") {
-    return { maxAge: COOKIE_MAX_AGE, httpOnly: true, secure: true, domain: ".cleverapps.io", sameSite: "Lax" };
+    // Because we need a valid subdomain (does not work with cleverapps.io).
+    // Should be fixed when we have a subdomain from gouv.fr.
+    return { maxAge: COOKIE_MAX_AGE, httpOnly: true, secure: true, sameSite: "none" };
   } else {
     return { maxAge: COOKIE_MAX_AGE, httpOnly: true, secure: true, domain: ".snu.gouv.fr", sameSite: "Lax" };
   }

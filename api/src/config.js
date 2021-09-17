@@ -18,6 +18,8 @@ const FILE_ENCRYPTION_SECRET = process.env.FILE_ENCRYPTION_SECRET || "";
 const BUCKET_NAME = process.env.BUCKET_NAME || "";
 const QPV_USERNAME = process.env.QPV_USERNAME || "";
 const QPV_PASSWORD = process.env.QPV_PASSWORD || "";
+const ZAMMAD_TOKEN = process.env.ZAMMAD_TOKEN || "";
+const ZAMMAD_URL = process.env.ZAMMAD_URL || "";
 
 const API_ENGAGEMENT_KEY = process.env.API_ENGAGEMENT_KEY || "";
 
@@ -39,6 +41,8 @@ module.exports = {
   QPV_USERNAME,
   QPV_PASSWORD,
   API_ENGAGEMENT_KEY,
+  ZAMMAD_TOKEN,
+  ZAMMAD_URL,
 };
 
 function getEnvironment() {
