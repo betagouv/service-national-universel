@@ -63,13 +63,17 @@ const Container = styled.div`
   align-items: center;
   justify-content: center;
   .help-section {
-    max-width: 400px;
+    max-width: 500px;
+    text-align: center;
     margin: 0 20px;
   }
   @media (min-width: 1024px) {
     flex-direction: row;
     align-items: flex-start;
     justify-content: space-around;
+    .help-section {
+      text-align: left;
+    }
   }
 `;
 
@@ -105,6 +109,7 @@ const InternalLink = styled(NavLink)`
 `;
 
 const Card = styled.div`
+  margin-top: 2rem;
   .division {
     display: flex;
     flex-direction: column;
@@ -121,5 +126,8 @@ const Card = styled.div`
   .block p, .block a {
     margin: 0;
     font-size: 0.9rem;
+  }
+  @media (min-width: 1024px) {
+    margin-top: 0;
   }
 `
