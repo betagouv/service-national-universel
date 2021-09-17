@@ -1,13 +1,13 @@
-import React, { useState } from "react";
+import React from "react";
 import styled from "styled-components";
 
 export default ({ options, value, onChange }) => {
   return (
     <YearPickerWrapper>
-      {options.map((key, index) => {
+      {options.map(({ key, label }) => {
         return (
           <StyledOption key={key} isActive={key === value} onClick={() => onChange(key)}>
-            {key}
+            {label}
           </StyledOption>
         );
       })}

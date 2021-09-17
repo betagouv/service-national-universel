@@ -2,13 +2,13 @@ import React from "react";
 import { MultiDropdownList } from "@appbaseio/reactivesearch";
 import { getDepartmentNumber } from "../../utils";
 
-export const DepartmentFilter = ({ defaultQuery, filters, ...rest }) => (
+export const DepartmentFilter = ({ defaultQuery, filters, dataField = "department.keyword", ...rest }) => (
   <MultiDropdownList
     defaultQuery={defaultQuery}
     className="dropdown-filter"
     placeholder="Départements"
     componentId="DEPARTMENT"
-    dataField="department.keyword"
+    dataField={dataField}
     title=""
     react={{ and: filters.filter((e) => e !== "DEPARTMENT") }}
     URLParams={true}

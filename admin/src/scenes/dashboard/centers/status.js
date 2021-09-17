@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Col, Row } from "reactstrap";
 import { Link } from "react-router-dom";
-import { YOUNG_STATUS_COLORS, colors } from "../../../utils";
+import { YOUNG_STATUS_COLORS, colors, getLink } from "../../../utils";
 import { CardArrow, Card, CardTitle, CardValueWrapper, CardValue } from "../../../components/dashboard";
 
 import api from "../../../services/api";
@@ -35,19 +35,11 @@ export default ({ filter }) => {
     initStatus();
   }, [JSON.stringify(filter)]);
 
-  const replaceSpaces = (v) => v.replace(/\s+/g, "+");
-
-  const getLink = (link) => {
-    if (filter.region) link += `REGION=%5B"${replaceSpaces(filter.region)}"%5D`;
-    if (filter.department) link += `&DEPARTMENT=%5B"${replaceSpaces(filter.department)}"%5D`;
-    return link;
-  };
-
   return (
     <>
       <Row>
         <Col md={6} xl={6}>
-          <Link to={getLink(`/centre?`)}>
+          <Link to={getLink({ base: `/centre`, filter })}>
             <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
               <CardTitle>Centres</CardTitle>
               <CardValueWrapper>

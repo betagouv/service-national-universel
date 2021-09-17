@@ -36,7 +36,7 @@ export default () => {
     (async () => {
       const { data } = await api.get(`/structure/${user.structureId}/children`);
       const ids = data.map((s) => s._id);
-      setStructureIds(ids);
+      setStructureIds([...ids, user.structureId]);
     })();
     return;
   }, []);

@@ -105,7 +105,7 @@ async function exportData(fileName, entities, transform, transformAll) {
 
   for (let j = 0; j < data.length; j++) {
     const obj = transform ? transform(data[j]) : data[j];
-    const arr = columns.map((key) => `${translate(obj[key]) || ""}`);
+    const arr = columns.map((key) => translate(obj[key]) || "");
     csv.push(arr);
   }
 

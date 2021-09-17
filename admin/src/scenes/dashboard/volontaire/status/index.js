@@ -10,6 +10,7 @@ import {
   YOUNG_STATUS_PHASE1,
   YOUNG_STATUS_PHASE2,
   YOUNG_STATUS_PHASE3,
+  getLink,
 } from "../../../../utils";
 import api from "../../../../services/api";
 import Status from "./status";
@@ -29,7 +30,7 @@ export default ({ filter }) => {
   useEffect(() => {
     (async () => {
       const body = {
-        query: { bool: { must: { match_all: {} }, filter: [{ term: { "cohort.keyword": filter.cohort } }, { terms: { "status.keyword": ["VALIDATED"] } }] } },
+        query: { bool: { must: { match_all: {} }, filter: [{ terms: { "status.keyword": ["VALIDATED"] } }] } },
         aggs: {
           status: { terms: { field: "status.keyword" } },
           statusPhase1: { terms: { field: "statusPhase1.keyword" } },
@@ -41,13 +42,15 @@ export default ({ filter }) => {
         size: 0,
       };
 
+      if (filter.cohort) body.query.bool.filter.push({ term: { "cohort.keyword": filter.cohort } });
       if (filter.region) body.query.bool.filter.push({ term: { "region.keyword": filter.region } });
       if (filter.department) body.query.bool.filter.push({ term: { "department.keyword": filter.department } });
 
       const { responses } = await api.esQuery("young", body);
 
-      body.query.bool.filter = [{ term: { "cohort.keyword": filter.cohort } }, { terms: { "status.keyword": ["WITHDRAWN"] } }];
+      body.query.bool.filter = [{ terms: { "status.keyword": ["WITHDRAWN"] } }];
 
+      if (filter.cohort) body.query.bool.filter.push({ term: { "cohort.keyword": filter.cohort } });
       if (filter.region) body.query.bool.filter.push({ term: { "region.keyword": filter.region } });
       if (filter.department) body.query.bool.filter.push({ term: { "department.keyword": filter.department } });
 
@@ -68,13 +71,14 @@ export default ({ filter }) => {
 
     (async () => {
       const body = {
-        query: { bool: { must: { match_all: {} }, filter: [{ term: { "youngCohort.keyword": filter.cohort } }] } },
+        query: { bool: { must: { match_all: {} }, filter: [] } },
         aggs: {
           status: { terms: { field: "status.keyword" } },
         },
         size: 0,
       };
 
+      if (filter.cohort) body.query.bool.filter.push({ term: { "youngCohort.keyword": filter.cohort } });
       if (filter.region) body.query.bool.filter.push({ terms: { "youngDepartment.keyword": region2department[filter.region] } });
       if (filter.department) body.query.bool.filter.push({ term: { "youngDepartment.keyword": filter.department } });
 
@@ -84,14 +88,6 @@ export default ({ filter }) => {
       }
     })();
   }, [JSON.stringify(filter)]);
-
-  const replaceSpaces = (v) => v.replace(/\s+/g, "+");
-  const getLink = (link) => {
-    if (filter.region) link += `&REGION=%5B"${replaceSpaces(filter.region)}"%5D`;
-    if (filter.cohort) link += `&COHORT=%5B"${replaceSpaces(filter.cohort)}"%5D`;
-    if (filter.department) link += `&DEPARTMENT=%5B"${replaceSpaces(filter.department)}"%5D`;
-    return link;
-  };
 
   return (
     <>
@@ -115,7 +111,7 @@ export default ({ filter }) => {
         {currentTab === "global" && (
           <>
             <SubTitle>En quelques chiffres</SubTitle>
-            <Status status={status} statusPhase1={statusPhase1} statusPhase2={statusPhase2} statusPhase3={statusPhase3} getLink={getLink} />
+            <Status status={status} statusPhase1={statusPhase1} statusPhase2={statusPhase2} statusPhase3={statusPhase3} filter={filter} getLink={getLink} />
           </>
         )}
         {currentTab === "phase1" && (
@@ -127,9 +123,10 @@ export default ({ filter }) => {
               filterName="STATUS_PHASE_1"
               colors={YOUNG_STATUS_COLORS}
               data={statusPhase1}
+              filter={filter}
               getLink={getLink}
             />
-            <Participation data={cohesionStayPresence} getLink={getLink} />
+            <Participation data={cohesionStayPresence} filter={filter} getLink={getLink} />
           </>
         )}
         {currentTab === "phase2" && (
@@ -141,6 +138,7 @@ export default ({ filter }) => {
               filterName="STATUS_PHASE_2"
               colors={YOUNG_STATUS_COLORS}
               data={statusPhase2}
+              filter={filter}
               getLink={getLink}
             />
             <StatusMap
@@ -149,6 +147,7 @@ export default ({ filter }) => {
               filterName="CONTRACT_STATUS"
               colors={CONTRACT_STATUS_COLORS}
               data={statusPhase2Contract}
+              filter={filter}
               getLink={getLink}
             />
             <StatusMap
@@ -157,6 +156,7 @@ export default ({ filter }) => {
               filterName="APPLICATION_STATUS"
               colors={APPLICATION_STATUS_COLORS}
               data={statusApplication}
+              filter={filter}
               getLink={getLink}
             />
           </>
@@ -170,6 +170,7 @@ export default ({ filter }) => {
               filterName="STATUS_PHASE_3"
               colors={YOUNG_STATUS_COLORS}
               data={statusPhase3}
+              filter={filter}
               getLink={getLink}
             />
           </>

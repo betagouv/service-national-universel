@@ -62,11 +62,16 @@ export default ({ onChange, value }) => {
           <div className="close" onClick={onChange} />
         </div>
         {canModify(user, value) && (
-          <div style={{ display: "flex" }}>
+          <div style={{ display: "flex", flexWrap: "wrap" }}>
             <Link to={`/user/${value._id}`}>
               <PanelActionButton icon="eye" title="Consulter" />
             </Link>
             <PanelActionButton onClick={handleImpersonate} icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
+            {structure ? (
+              <Link to={`/structure/${structure._id}`}>
+                <PanelActionButton icon="eye" title="Voir la structure" />
+              </Link>
+            ) : null}
           </div>
         )}
       </div>

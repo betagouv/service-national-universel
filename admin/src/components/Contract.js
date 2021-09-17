@@ -5,7 +5,7 @@ import { Formik, Field } from "formik";
 import { useHistory } from "react-router-dom";
 import { appURL } from "../config";
 import { useSelector } from "react-redux";
-import { APPLICATION_STATUS_COLORS, dateForDatePicker, getAge, ROLES, translate, isReferentOrAdmin } from "../utils";
+import { APPLICATION_STATUS_COLORS, dateForDatePicker, getAge, ROLES, translate, isReferentOrAdmin, copyToClipboard } from "../utils";
 import api from "../services/api";
 import DownloadAttestationButton from "./buttons/DownloadAttestationButton";
 import Loader from "./Loader";
@@ -812,7 +812,7 @@ function ContractStatusbadgeItem({ contract, status, token }) {
       <br />
       <CopyLink
         onClick={() => {
-          navigator.clipboard.writeText(`${appURL}/validate-contract?token=${token}`);
+          copyToClipboard(`${appURL}/validate-contract?token=${token}`);
           toastr.success("Le lien a été copié dans le presse papier.");
         }}
       >

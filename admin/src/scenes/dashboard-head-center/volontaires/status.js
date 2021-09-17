@@ -19,11 +19,7 @@ export default ({ filter }) => {
         query: {
           bool: {
             must: { match_all: {} },
-            filter: [
-              { term: { "cohort.keyword": filter.cohort } },
-              { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } },
-              { term: { "cohesionCenterId.keyword": user.cohesionCenterId } },
-            ],
+            filter: [{ terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } }, { term: { "cohesionCenterId.keyword": user.cohesionCenterId } }],
           },
         },
         aggs: {
@@ -34,6 +30,7 @@ export default ({ filter }) => {
         size: 0,
       };
 
+      if (filter.cohort) body.query.bool.filter.push({ term: { "cohort.keyword": filter.cohort } });
       if (filter.region) body.query.bool.filter.push({ term: { "region.keyword": filter.region } });
       if (filter.department) body.query.bool.filter.push({ term: { "department.keyword": filter.department } });
 

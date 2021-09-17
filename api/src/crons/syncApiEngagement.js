@@ -52,9 +52,9 @@ exports.handler = async () => {
     return;
   }
   try {
-    var myHeaders = new fetch.Headers();
+    const myHeaders = new fetch.Headers();
     myHeaders.append("apikey", API_ENGAGEMENT_KEY);
-    var requestOptions = {
+    const requestOptions = {
       method: "GET",
       headers: myHeaders,
       redirect: "follow",

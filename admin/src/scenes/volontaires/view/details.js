@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
-import { translate as t, isInRuralArea, ROLES } from "../../../utils";
+import { translate as t, isInRuralArea, ROLES, copyToClipboard } from "../../../utils";
 import YoungView from "./wrapper";
 import api from "../../../services/api";
 import DownloadButton from "../../../components/buttons/DownloadButton";
@@ -193,7 +193,7 @@ const Details = ({ title, value, copy }) => {
           className="icon"
           icon={require(`../../../assets/copy.svg`)}
           onClick={() => {
-            navigator.clipboard.writeText(value);
+            copyToClipboard(value);
             toastr.success(`'${title}' a été copié dans le presse papier.`);
           }}
         />

@@ -54,7 +54,6 @@ const translateFieldYoung = (f) => {
       return "Nom";
     case "frenchNationality":
       return "Nationalité française";
-
     case "phone":
       return "Téléphone";
     case "gender":
@@ -84,7 +83,7 @@ const translateFieldYoung = (f) => {
     case "historic":
       return "Historique";
     case "cohesionStayPresence":
-      return "Présenece séjour de cohésion";
+      return "Présence séjour de cohésion";
     case "cohesionStayMedicalFileReceived":
       return "Fiche sanitaire";
     case "cohesionCenterId":
@@ -289,16 +288,110 @@ const translateFieldYoung = (f) => {
       return "Description engagement";
     case "desiredLocation":
       return "Souhait lieu MIG";
+    case "createdAt":
+      return "créé(e) le";
+    case "updatedAt":
+      return "mis(e) à jour le";
     default:
       return f;
   }
 };
 
-// todo translate fileds mission and referents
+const translateFieldReferent = (f) => {
+  switch (f) {
+    case "firstName":
+      return "Prénom";
+    case "lastName":
+      return "Nom";
+    case "phone":
+      return "Téléphone";
+    case "mobile":
+      return "Portable";
+    case "structureId":
+      return "Id de la structure";
+    case "cohesionCenterId":
+      return "Id centre de cohésion";
+    case "cohesionCenterName":
+      return "Nom centre de cohésion";
+    case "role":
+      return "Rôle";
+    case "subRole":
+      return "Fonction";
+    case "department":
+      return "Département";
+    case "region":
+      return "Région";
+    case "createdAt":
+      return "créé(e) le";
+    case "updatedAt":
+      return "mis(e) à jour le";
+    default:
+      return f;
+  }
+};
+
+const translateFieldMission = (f) => {
+  switch (f) {
+    case "name":
+      return "Nom";
+    case "domains":
+      return "Domaines";
+    case "startAt":
+      return "Date début";
+    case "endAt":
+      return "Date fin";
+    case "frequence":
+      return "Fréquence";
+    case "format":
+      return "Format";
+    case "period":
+      return "Période(s)";
+    case "subPeriod":
+      return "Période(s) - détails";
+    case "placesTotal":
+      return "Nombre total de places ";
+    case "placesLeft":
+      return "Nombre de places disponibles";
+    case "structureId":
+      return "Id de la structure";
+    case "structureName":
+      return "Nom de la structure";
+    case "tutorId":
+      return "Id du tuteur";
+    case "tutorName":
+      return "Nom du tuteur";
+    case "address":
+      return "Adresse";
+    case "zip":
+      return "Code postal";
+    case "city":
+      return "Ville";
+    case "department":
+      return "Département";
+    case "region":
+      return "Région";
+    case "country":
+      return "Pays";
+    case "location":
+      return "Coordonnées";
+    case "remote":
+      return " à distance";
+    case "isMilitaryPreparation":
+      return "Préparation militaire";
+    case "createdAt":
+      return "créé(e) le";
+    case "updatedAt":
+      return "mis(e) à jour le";
+    default:
+      return f;
+  }
+};
 
 export const translateModelFields = (model, field) => {
   if (model === "structure") return translateFieldStructure(field);
   if (model === "young") return translateFieldYoung(field);
+  if (model === "referent") return translateFieldReferent(field);
+  if (model === "mission") return translateFieldMission(field);
   return field;
 };
 

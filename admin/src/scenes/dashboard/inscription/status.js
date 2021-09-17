@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Col, Row } from "reactstrap";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { YOUNG_STATUS_COLORS, ROLES } from "../../../utils";
+import { YOUNG_STATUS_COLORS, ROLES, getLink } from "../../../utils";
 import { CardArrow, Card, CardTitle, CardSubtitle, CardValueWrapper, CardValue, CardPercentage } from "../../../components/dashboard";
 
 import api from "../../../services/api";
@@ -15,11 +15,12 @@ export default ({ filter }) => {
   useEffect(() => {
     (async () => {
       const body = {
-        query: { bool: { must: { match_all: {} }, filter: [{ term: { "cohort.keyword": filter.cohort } }] } },
+        query: { bool: { must: { match_all: {} }, filter: [] } },
         aggs: { status: { terms: { field: "status.keyword" } } },
         size: 0,
       };
 
+      if (filter.cohort) body.query.bool.filter.push({ term: { "cohort.keyword": filter.cohort } });
       if (filter.region) body.query.bool.filter.push({ term: { "region.keyword": filter.region } });
       if (filter.department) body.query.bool.filter.push({ term: { "department.keyword": filter.department } });
 
@@ -31,20 +32,11 @@ export default ({ filter }) => {
     })();
   }, [JSON.stringify(filter)]);
 
-  const replaceSpaces = (v) => v.replace(/\s+/g, "+");
-
-  const getLink = (link) => {
-    if (filter.region) link += `&REGION=%5B"${replaceSpaces(filter.region)}"%5D`;
-    if (filter.cohort) link += `&COHORT=%5B"${replaceSpaces(filter.cohort)}"%5D`;
-    if (filter.department) link += `&DEPARTMENT=%5B"${replaceSpaces(filter.department)}"%5D`;
-    return link;
-  };
-
   return (
     <Row>
       {user.role === ROLES.ADMIN && (
         <Col md={6} xl={2}>
-          <Link to={getLink('/inscription?STATUS=%5B"IN_PROGRESS"%5D')}>
+          <Link to={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"IN_PROGRESS"%5D'] })}>
             <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS} style={{ minHeight: "180px" }}>
               <CardTitle>En cours</CardTitle>
               <CardSubtitle>Inscriptions en cours</CardSubtitle>
@@ -59,7 +51,7 @@ export default ({ filter }) => {
         </Col>
       )}
       <Col md={6} xl={2}>
-        <Link to={getLink('/inscription?STATUS=%5B"WAITING_VALIDATION"%5D')}>
+        <Link to={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"WAITING_VALIDATION"%5D'] })}>
           <Card borderBottomColor={YOUNG_STATUS_COLORS.WAITING_VALIDATION} style={{ minHeight: "180px" }}>
             <CardTitle>En attente de validation</CardTitle>
             <CardValueWrapper>
@@ -72,7 +64,7 @@ export default ({ filter }) => {
         </Link>
       </Col>
       <Col md={6} xl={2}>
-        <Link to={getLink('/inscription/?STATUS=%5B"WAITING_CORRECTION"%5D')}>
+        <Link to={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"WAITING_CORRECTION"%5D'] })}>
           <Card borderBottomColor={YOUNG_STATUS_COLORS.WAITING_CORRECTION} style={{ minHeight: "180px" }}>
             <CardTitle>En attente de correction</CardTitle>
             <CardValueWrapper>
@@ -85,7 +77,7 @@ export default ({ filter }) => {
         </Link>
       </Col>
       <Col md={6} xl={2}>
-        <Link to={getLink('/inscription/?STATUS=%5B"VALIDATED"%5D')}>
+        <Link to={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"VALIDATED"%5D'] })}>
           <Card borderBottomColor={YOUNG_STATUS_COLORS.VALIDATED} style={{ minHeight: "180px" }}>
             <CardTitle>Validées</CardTitle>
             <CardValueWrapper>
@@ -98,7 +90,7 @@ export default ({ filter }) => {
         </Link>
       </Col>
       <Col md={6} xl={2}>
-        <Link to={getLink('/inscription/?STATUS=%5B"REFUSED"%5D')}>
+        <Link to={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"REFUSED"%5D'] })}>
           <Card borderBottomColor={YOUNG_STATUS_COLORS.REFUSED} style={{ minHeight: "180px" }}>
             <CardTitle>Refusées</CardTitle>
             <CardValueWrapper>
@@ -111,7 +103,7 @@ export default ({ filter }) => {
         </Link>
       </Col>
       <Col md={6} xl={2}>
-        <Link to={getLink('/inscription/?STATUS=%5B"WAITING_LIST"%5D')}>
+        <Link to={getLink({ base: "/inscription", filter, filtersUrl: ['STATUS=%5B"WAITING_LIST"%5D'] })}>
           <Card borderBottomColor={YOUNG_STATUS_COLORS.WAITING_LIST} style={{ minHeight: "180px" }}>
             <CardTitle>Liste complémentaire</CardTitle>
             <CardValueWrapper>

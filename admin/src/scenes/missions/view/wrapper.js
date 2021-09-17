@@ -97,7 +97,7 @@ export default ({ mission, tab, children }) => {
           </Col>
           <Col md={8}>
             <Row>
-              <Col md={12} style={{ display: "flex", justifyContent: "flex-end" }}>
+              <Col md={12} style={{ display: "flex", justifyContent: "flex-end", minHeight: "35px" }}>
                 <SelectStatusMission hit={mission} />
               </Col>
             </Row>

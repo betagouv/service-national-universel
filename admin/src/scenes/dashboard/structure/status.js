@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Col, Row } from "reactstrap";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { translate, YOUNG_STATUS_COLORS } from "../../../utils";
+import { translate, YOUNG_STATUS_COLORS, getLink } from "../../../utils";
 
 import api from "../../../services/api";
 import { CardArrow, Card, CardTitle, CardValueWrapper, CardValue, CardPercentage } from "../../../components/dashboard";
@@ -41,19 +41,11 @@ export default ({ filter }) => {
     initStatus();
   }, [JSON.stringify(filter)]);
 
-  const replaceSpaces = (v) => v.replace(/\s+/g, "+");
-
-  const getLink = (link) => {
-    if (filter.region) link += `REGION=%5B"${replaceSpaces(filter.region)}"%5D`;
-    if (filter.department) link += `&DEPARTMENT=%5B"${replaceSpaces(filter.department)}"%5D`;
-    return link;
-  };
-
   return (
     <>
       <Row>
         <Col md={6} xl={6}>
-          <Link to={getLink(`/structure?`)}>
+          <Link to={getLink({ base: `/structure`, filter })}>
             <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
               <CardTitle>Structures</CardTitle>
               <CardValueWrapper>
@@ -64,7 +56,7 @@ export default ({ filter }) => {
           </Link>
         </Col>
         <Col md={6} xl={6}>
-          <Link to={getLink(`/structure?`)}>
+          <Link to={getLink({ base: `/structure`, filter })}>
             <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
               <CardTitle>Affiliées à un réseau national</CardTitle>
               <CardValueWrapper>
@@ -79,7 +71,7 @@ export default ({ filter }) => {
         {legalStatusTypes.map((l, k) => {
           return (
             <Col md={6} xl={3} key={k}>
-              <Link to={getLink(`/structure?LEGAL_STATUS=%5B"${l}"%5D&`)}>
+              <Link to={getLink({ base: `/structure`, filter, filtersUrl: [`LEGAL_STATUS=%5B"${l}"%5D&`] })}>
                 <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
                   <CardTitle>{`${translate(l)}s`}</CardTitle>
                   <CardValueWrapper>

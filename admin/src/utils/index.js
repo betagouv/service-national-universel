@@ -70,4 +70,32 @@ export const userIsResponsibleFromStructureMilitaryPreparation = async (user) =>
   return data?.isMilitaryPreparation === "true";
 };
 
+export const copyToClipboard = (text) => {
+  if (navigator.clipboard && window.isSecureContext) {
+    return navigator.clipboard.writeText(text);
+  } else {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    textArea.style.position = "absolute";
+    textArea.style.opacity = 0;
+    document.body.appendChild(textArea);
+    textArea.select();
+    return new Promise((res, rej) => {
+      // here the magic happens
+      document.execCommand("copy") ? res() : rej();
+      textArea.remove();
+    });
+  }
+};
+
+export const replaceSpaces = (v) => v.replace(/\s+/g, "+");
+export const getLink = ({ base = "/", filter, filtersUrl = [] }) => {
+  if (filter?.region) filtersUrl.push(`REGION=%5B"${replaceSpaces(filter?.region)}"%5D`);
+  if (filter?.cohort) filtersUrl.push(`COHORT=%5B"${replaceSpaces(filter?.cohort)}"%5D`);
+  if (filter?.department) filtersUrl.push(`DEPARTMENT=%5B"${replaceSpaces(filter?.department)}"%5D`);
+  let res = base;
+  if (filtersUrl?.length) res += `?${filtersUrl.join("&")}`;
+  return res;
+};
+
 export const ENABLE_PM = true;
