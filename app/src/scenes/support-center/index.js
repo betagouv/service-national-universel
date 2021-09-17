@@ -77,8 +77,8 @@ const LinkButton = styled.a`
   background-color: #5245cc;
   border: none;
   border-radius: 5px;
-  padding: 12px 30px;
-  margin: 0;
+  padding: 12px 25px;
+  margin-right: 0.3rem;
   font-size: 14px;
   font-weight: 700;
   color: #fff;
@@ -92,8 +92,8 @@ const InternalLink = styled(NavLink)`
   background-color: #5245cc;
   border: none;
   border-radius: 5px;
-  padding: 12px 30px;
-  margin: 0;
+  padding: 12px 25px;
+  margin-left: 0.3rem;
   font-size: 14px;
   font-weight: 700;
   color: #fff;
@@ -109,7 +109,6 @@ const Card = styled.div`
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    margin-top: 1rem;
   }
   .block {
     display: flex;
