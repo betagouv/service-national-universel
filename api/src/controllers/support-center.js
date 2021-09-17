@@ -28,8 +28,8 @@ router.get("/", passport.authenticate(["referent", "young"], { session: false })
 router.post("/ticket", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
     const { subject, type, message } = req.body;
-    const email = "jeamichel@test.com";
-    // const email = req.user.email;
+    // const email = "jeamichel@test.com";
+    const email = req.user.email;
 
     const customer_id = await zammad.getCustomerIdByEmail(email);
     if (!customer_id) return res.status(401).send({ ok: false, code: ERRORS.NOT_FOUND });
