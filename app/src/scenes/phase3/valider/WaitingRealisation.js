@@ -210,11 +210,7 @@ export default () => {
           </FormRow>
           <Footer>
             <h1>Faites valider la réalisation de votre mission par votre tuteur</h1>
-            <h2>
-              Un e-mail sera envoyé au tuteur pour valider votre mission.
-              <br />
-              L'administration pourra ensuite éditer votre attestion de réalisation du SNU.
-            </h2>
+            <h2>Un e-mail sera envoyé au tuteur pour valider votre mission.</h2>
             <ContinueButton
               onClick={() => {
                 handleSubmit();
