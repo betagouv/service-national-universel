@@ -38,7 +38,7 @@
             var url = "https://app-735c50af-69c1-4a10-ac30-7ba11d1112f7.cleverapps.io";
             if (window.location.href.includes("localhost")) url = "http://localhost:8082";
             if (window.location.href.includes("snu.gouv.fr")) url = "https://admin.snu.gouv.fr";
-            var user = window.zammadUser ? ("<a href=\"" + url + "/user/" + window.zammadUser._id + "\">" + window.zammadUser.name + "</a> - " + window.zammadUser.email) : "Non connecté.";
+            var user = window.zammadUser ? ("<a href=\"" + url + "/user/" + window.zammadUser._id + "\">" + window.zammadUser.name + "</a> - " + window.zammadUser.email + " - " + window.zammadUser.role + (window.zammadUser.subRole ? " ("  + window.zammadUser.subRole + ")":"") +"<br />" + (window.zammadUser.department || "") + (window.zammadUser.department && window.zammadUser.structureId  ? " | " : "") + (window.zammadUser.structureId ? "<a href=\"" + url + "/structure/" + window.zammadUser.structureId +"\">Voir la structure</a>":"") ) : "Non connecté.";
 
             chat.send('chat_session_message', {
               content: "🧑‍🏫 " + user,
