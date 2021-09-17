@@ -1,4 +1,3 @@
-
 const fetch = require("node-fetch");
 
 //https://docs.zammad.org/en/latest/api/intro.html
@@ -20,6 +19,12 @@ const ORGANISATION = {
   SOUSDIRECTION: 2,
 };
 
+const getCustomerIdByEmail = async (email) => {
+  const res = await api(`/users/search?query=email:${email}&limit=1`, { method: "GET" });
+  if (!res.length) return null;
+  else return res[0]?.id;
+};
+
 const api = async (path, options = {}) => {
   if (!ZAMMAD_TOKEN) return console.log("No token");
   const res = await fetch(`https://support.selego.co/api/v1${path}`, {
@@ -36,7 +41,7 @@ async function sync(obj, type) {
     if (ENVIRONMENT !== "production") return;
     const role = type === "referent" ? ROLE.REFERENT : ROLE.VOLONTAIRE;
     const res = await api(`/users/search?query=email:${obj.email}&limit=1`, { method: "GET" });
-    console.log("res",res)
+    console.log("res", res);
     if (!res.length) {
       //create a user
       await api("/users", {
@@ -66,4 +71,4 @@ async function unsync(obj) {
   }
 }
 
-module.exports = { api, unsync, sync };
+module.exports = { api, unsync, sync, ROLE, getCustomerIdByEmail };

@@ -46,6 +46,7 @@ app.use("/email", require("./controllers/email"));
 app.use("/meeting-point", require("./controllers/meeting-point"));
 app.use("/diagoriente", require("./controllers/diagoriente"));
 app.use("/bus", require("./controllers/bus"));
+app.use("/support-center", require("./controllers/support-center"));
 
 app.get("/", async (req, res) => {
   const d = new Date();
