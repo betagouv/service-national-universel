@@ -124,7 +124,6 @@ const Bloc = ({ children, title, titleRight, borderBottom, borderRight, borderTo
 };
 
 const Details = ({ title, value, copy }) => {
-  console.log(copy);
   if (!value) return <div />;
   if (typeof value === "function") value = value();
   return (
