@@ -5,7 +5,6 @@ const cors = require("cors");
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const fileUpload = require("express-fileupload");
-const fetch = require("node-fetch");
 const helmet = require("helmet");
 require("./mongo");
 
