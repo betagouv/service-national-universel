@@ -1,40 +1,19 @@
 import React, { useState } from "react";
-import { NavLink } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { Col } from "reactstrap";
 import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
+import { Formik, Field } from "formik";
 
 import api from "../../services/api";
 import { HeroContainer } from "../../components/Content";
-import { Formik, Field } from "formik";
 import ErrorMessage, { requiredMessage } from "../../scenes/inscription/components/errorMessage";
 
-// This component still contains test content
 export default () => {
   const young = useSelector((state) => state.Auth.young);
+
+  //todo : fetch zammad categories (scopes)
   const options = ["Assistance technique", "À propos de ma situation", "Contacter un référent"];
-  const [scope, useScope] = useState(options[0]);
-  const [subject, useSubject] = useState("");
-  const [message, useMessage] = useState("");
-  const createTicket = async () => {
-    try {
-      await api.post("/support-center/ticket", {
-        title: subject,
-        group: scope,
-        customer: young.email,
-        article: {
-          subject: scope,
-          body: message,
-          type: "note",
-        },
-      });
-      toastr.success("Ticket créé");
-    } catch (e) {
-      console.log(e);
-      toastr.error("Une erreur est survenue");
-    }
-  };
 
   return (
     <Container>
@@ -44,18 +23,29 @@ export default () => {
       </Heading>
       <Form>
         <Formik
-          initialValues={young}
+          initialValues={{ scope: "", subject: "", message: "" }}
           validateOnChange={false}
           validateOnBlur={false}
           onSubmit={async (values) => {
+            return console.log(values);
+            // todo
             try {
-              const { ok, code, data: young } = await api.put("/young", values);
-              if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
-              dispatch(setYoung(young));
-              toastr.success("Mis à jour!");
+              const { subject, scope, message } = values;
+              const { ok, code, data } = await api.post("/support-center/ticket", {
+                title: subject,
+                group: scope,
+                customer: young.email,
+                article: {
+                  subject: scope,
+                  body: message,
+                  type: "note",
+                },
+              });
+              if (!ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(code));
+              toastr.success("Ticket créé");
             } catch (e) {
               console.log(e);
-              toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
+              toastr.error("Oups, une erreur est survenue", translate(e.code));
             }
           }}
         >
@@ -65,12 +55,9 @@ export default () => {
                 name="scope"
                 title="Ma demande"
                 type="select"
-                value={scope}
-                handleChange={(e) => {
-                  console.log("SCOPE", e.target.value);
-                  useScope(e.target.value);
-                }}
-                validate={(v) => (!v && requiredMessage) || (!validator.isEmail(v) && "Ce champ est au mauvais format")}
+                value={values.scope}
+                handleChange={handleChange}
+                validate={(v) => !v && requiredMessage}
                 errors={errors}
                 touched={touched}
                 options={options}
@@ -79,31 +66,26 @@ export default () => {
                 name="subject"
                 title="Sujet"
                 type="input"
-                value={subject}
-                handleChange={(e) => {
-                  console.log("SUBJECT", e.target.value);
-                  useSubject(e.target.value);
-                }}
-                validate={(v) => (!v && requiredMessage) || (!validator.isEmail(v) && "Ce champ est au mauvais format")}
+                placeholder="Ceci est mon sujet"
+                value={values.subject}
+                handleChange={handleChange}
+                validate={(v) => !v && requiredMessage}
                 errors={errors}
                 touched={touched}
-                options={options}
               />
               <Item
                 name="message"
                 title="Mon message"
                 type="textarea"
-                value={message}
-                handleChange={(e) => {
-                  console.log("MESSAGE", e.target.value);
-                  useMessage(e.target.value);
-                }}
-                validate={(v) => (!v && requiredMessage) || (!validator.isEmail(v) && "Ce champ est au mauvais format")}
+                placeholder="Ceci est mon message..."
+                value={values.message}
+                handleChange={handleChange}
+                validate={(v) => !v && requiredMessage}
                 errors={errors}
                 touched={touched}
-                options={options}
+                rows="5"
               />
-              <ContinueButton style={{ marginLeft: 10 }} onClick={createTicket} disabled={isSubmitting}>
+              <ContinueButton type="submit" style={{ marginLeft: 10 }} onClick={handleSubmit} disabled={isSubmitting}>
                 Envoyer
               </ContinueButton>
             </>
@@ -120,6 +102,9 @@ const Item = ({ title, name, value, handleChange, errors, touched, validate, typ
       <Label>{title}</Label>
       {type === "select" ? (
         <Field as={type} className="form-control" name={name} value={value} onChange={handleChange} validate={validate} {...props}>
+          <option value="" disabled>
+            Catégorie
+          </option>
           {options?.map((option) => (
             <option value={option} key={option}>
               {option}
@@ -139,14 +124,6 @@ const Container = styled(HeroContainer)`
   margin-top: -1rem;
 `;
 
-const Link = styled(NavLink)`
-  color: #fff;
-  cursor: pointer;
-  :hover {
-    color: #fff;
-  }
-`;
-
 const Heading = styled.header`
   padding: 3rem;
   font-size: 3rem;
@@ -162,16 +139,6 @@ const Label = styled.div`
   font-weight: 600;
   font-size: 14px;
   margin-bottom: 5px;
-`;
-
-const Title = styled.h2`
-  color: #161e2e;
-  font-size: 2rem;
-  @media (max-width: 767px) {
-    font-size: 1.5rem;
-  }
-  font-weight: 700;
-  margin-bottom: 25px;
 `;
 
 const ContinueButton = styled.button`
