@@ -48,7 +48,6 @@ async function sync(obj, type) {
         method: "PUT",
         body: JSON.stringify({ email: obj.email, firstname: obj.firstName, lastname: obj.lastName, role_ids: [role] }),
       });
-      console.log("QUI CHANGE DE NOM OU DE PRENOM OU D'EMAIL");
     }
   } catch (e) {
     capture(e);
