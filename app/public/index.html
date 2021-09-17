@@ -66,10 +66,11 @@
             var url = "https://app-735c50af-69c1-4a10-ac30-7ba11d1112f7.cleverapps.io";
             if (window.location.href.includes("localhost")) url = "http://localhost:8082";
             if (window.location.href.includes("snu.gouv.fr")) url = "https://admin.snu.gouv.fr";
-            var user = window.zammadUser ? ("<a href=\"" + url + "/volontaire/" + window.zammadUser._id + "\">" + window.zammadUser.name + "</a> - " + window.zammadUser.email) : "Non connecté.";
-
+            var info;
+            if (window.zammadUser) info = "<a href=\"" + url + "/volontaire/" + window.zammadUser._id + "\">" + window.zammadUser.name + "</a> - " + window.zammadUser.email + "<br />Statut : " + window.zammadUser.status + " | Phase 1 : " + window.zammadUser.statusPhase1 + " | Phase 2 : " + window.zammadUser.statusPhase2 + " | Phase 3 : " + window.zammadUser.statusPhase3;
+            else info = "Non connecté.";
             chat.send('chat_session_message', {
-              content: "🧑‍🎓 " + user,
+              content: "🧑‍🎓 " + info,
               id: chat._messageCount,
               session_id: chat.sessionId
             });
