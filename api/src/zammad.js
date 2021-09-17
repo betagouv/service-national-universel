@@ -1,4 +1,3 @@
-
 const fetch = require("node-fetch");
 
 //https://docs.zammad.org/en/latest/api/intro.html
@@ -36,7 +35,7 @@ async function sync(obj, type) {
     if (ENVIRONMENT !== "production") return;
     const role = type === "referent" ? ROLE.REFERENT : ROLE.VOLONTAIRE;
     const res = await api(`/users/search?query=email:${obj.email}&limit=1`, { method: "GET" });
-    console.log("res",res)
+    console.log("res", res);
     if (!res.length) {
       //create a user
       await api("/users", {

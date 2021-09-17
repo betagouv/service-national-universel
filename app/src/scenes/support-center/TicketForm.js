@@ -23,23 +23,17 @@ export default () => {
       </Heading>
       <Form>
         <Formik
-          initialValues={{ scope: "", subject: "", message: "" }}
+          initialValues={{ group: "", subject: "", message: "" }}
           validateOnChange={false}
           validateOnBlur={false}
           onSubmit={async (values) => {
-            return console.log(values);
-            // todo
+            // return console.log(values);
             try {
-              const { subject, scope, message } = values;
+              const { subject, group, message } = values;
               const { ok, code, data } = await api.post("/support-center/ticket", {
-                title: subject,
-                group: scope,
-                customer: young.email,
-                article: {
-                  subject: scope,
-                  body: message,
-                  type: "note",
-                },
+                subject,
+                group,
+                message,
               });
               if (!ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(code));
               toastr.success("Ticket créé");
@@ -49,34 +43,34 @@ export default () => {
             }
           }}
         >
-      {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
-        <>
-        <Item
-        name="scope"
-        title="Ma demande"
-        type ="select"
-                value={values.scope}
+          {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
+            <>
+              <Item
+                name="group"
+                title="Ma demande"
+                type="select"
+                value={values.group}
                 handleChange={handleChange}
                 validate={(v) => !v && requiredMessage}
-        errors={errors}
-        touched={touched}
-        options={options}
-        />
-        <Item
-        name="subject"
-        title="Sujet"
-        type ="input"
+                errors={errors}
+                touched={touched}
+                options={options}
+              />
+              <Item
+                name="subject"
+                title="Sujet"
+                type="input"
                 placeholder="Ceci est mon sujet"
                 value={values.subject}
                 handleChange={handleChange}
                 validate={(v) => !v && requiredMessage}
                 errors={errors}
                 touched={touched}
-        />
-        <Item
-        name="message"
-        title="Mon message"
-        type ="textarea"
+              />
+              <Item
+                name="message"
+                title="Mon message"
+                type="textarea"
                 placeholder="Ceci est mon message..."
                 value={values.message}
                 handleChange={handleChange}
@@ -86,10 +80,10 @@ export default () => {
                 rows="5"
               />
               <ContinueButton type="submit" style={{ marginLeft: 10 }} onClick={handleSubmit} disabled={isSubmitting}>
-        Envoyer
-        </ContinueButton>
-        </>
-      )}
+                Envoyer
+              </ContinueButton>
+            </>
+          )}
         </Formik>
       </Form>
     </Container>
@@ -109,14 +103,13 @@ const Item = ({ title, name, value, handleChange, errors, touched, validate, typ
             <option value={option} key={option}>
               {option}
             </option>
-    ))
-  }
-        </Field >
+          ))}
+        </Field>
       ) : (
-  <Field as={type} className="form-control" name={name} value={value} onChange={handleChange} validate={validate} {...props} />
-)}
-{ errors && <ErrorMessage errors={errors} touched={touched} name={name} /> }
-    </Col >
+        <Field as={type} className="form-control" name={name} value={value} onChange={handleChange} validate={validate} {...props} />
+      )}
+      {errors && <ErrorMessage errors={errors} touched={touched} name={name} />}
+    </Col>
   );
 };
 
