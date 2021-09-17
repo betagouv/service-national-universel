@@ -32,6 +32,7 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
     // const email = req.user.email;
 
     const customer_id = await zammad.getCustomerIdByEmail(email);
+    if (!customer_id) return res.status(401).send({ ok: false, code: ERRORS.NOT_FOUND });
     const response = await zammad.api("/tickets", {
       method: "POST",
       body: JSON.stringify({
