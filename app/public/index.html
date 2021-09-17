@@ -5,18 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <meta name="google" content="notranslate" />
     <title>SNU</title>
-    <script type="text/javascript">
-      window.$crisp = [];
-      window.CRISP_WEBSITE_ID = "9a0b4de6-fa09-4356-9db0-15d4c3a40f42";
-      (function () {
-        d = document;
-        s = d.createElement("script");
-        s.src = "https://client.crisp.chat/l.js";
-        s.async = 1;
-        d.getElementsByTagName("head")[0].appendChild(s);
-      })();
-    </script>
-
+    <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
     <script>
       window.axeptioSettings = {
         clientId: "5fec5b2a5558222597c2fd85",
@@ -49,6 +38,53 @@
         e.src = "//static.axept.io/sdk.js";
         t.parentNode.insertBefore(e, t);
       })(document, "script");
+    </script>
+    <div id="zammad-chat"></div>
+    <script src="https://support.selego.co/assets/chat/chat.min.js"></script>
+    <script>
+      $(function () {
+        
+        if (typeof ZammadChat === "undefined") return;
+
+        var chat = new ZammadChat({
+          title: "Une question ?",
+          background: "#5145cd",
+          fontSize: "12px",
+          chatId: 4,
+          show: true,
+          flat: true,
+          target: $("#zammad-chat"),
+        });
+
+        // Monkey patch Zammad.
+        
+        // This send the user informations to zammad.
+        chat.onConnectionEstablished = (data) => {
+          var isNew = Boolean(data.session_id);
+          ZammadChat.prototype.onConnectionEstablished.call(chat, data);
+          if (isNew) {
+            var url = "https://app-735c50af-69c1-4a10-ac30-7ba11d1112f7.cleverapps.io";
+            if (window.location.href.includes("localhost")) url = "http://localhost:8082";
+            if (window.location.href.includes("snu.gouv.fr")) url = "https://admin.snu.gouv.fr";
+            var user = window.zammadUser ? ("<a href=\"" + url + "/volontaire/" + window.zammadUser._id + "\">" + window.zammadUser.name + "</a> - " + window.zammadUser.email) : "Non connecté.";
+
+            chat.send('chat_session_message', {
+              content: "🧑‍🎓 " + user,
+              id: chat._messageCount,
+              session_id: chat.sessionId
+            });
+
+          }
+        };
+
+        // This is needed to ensure users never sees their informations when they refresh page.
+        chat.onReopenSession = (data) => {
+          data.session = (data.session || []).filter(message => message.content.startsWith('INFO USER: ') === false && message.content.startsWith('🧑‍🎓 ') === false);
+          ZammadChat.prototype.onReopenSession.call(chat, data);
+        };
+
+        // End of monkey patch
+      });
     </script>
   </body>
 </html>

@@ -41,7 +41,7 @@
             var user = window.zammadUser ? ("<a href=\"" + url + "/user/" + window.zammadUser._id + "\">" + window.zammadUser.name + "</a> - " + window.zammadUser.email) : "Non connecté.";
 
             chat.send('chat_session_message', {
-              content: "INFO USER: " + user,
+              content: "🧑‍🏫 " + user,
               id: chat._messageCount,
               session_id: chat.sessionId
             });
@@ -51,7 +51,7 @@
 
         // This is needed to ensure users never sees their informations when they refresh page.
         chat.onReopenSession = (data) => {
-          data.session = (data.session || []).filter(message => message.content.startsWith('INFO USER: ') === false);
+          data.session = (data.session || []).filter(message => message.content.startsWith('INFO USER: ') === false && message.content.startsWith('🧑‍🏫 ') === false);
           ZammadChat.prototype.onReopenSession.call(chat, data);
         };
 
