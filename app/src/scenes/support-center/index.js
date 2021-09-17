@@ -7,7 +7,7 @@ import styled from "styled-components";
 import api from "../../services/api";
 import { Hero, HeroContainer, Separator } from "../../components/Content";
 import LoadingButton from "../../components/buttons/LoadingButton";
-import { translate } from "../../utils/translation";
+import { translate } from "../../utils";
 
 // This component isn't finished.
 
