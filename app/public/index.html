@@ -43,6 +43,7 @@
     <script src="https://support.selego.co/assets/chat/chat.min.js"></script>
     <script>
       $(function () {
+        
         if (typeof ZammadChat === "undefined") return;
 
         var chat = new ZammadChat({
@@ -56,7 +57,7 @@
         });
 
         // Monkey patch Zammad.
-
+        
         // This send the user informations to zammad.
         chat.onConnectionEstablished = (data) => {
           var isNew = Boolean(data.session_id);
@@ -66,36 +67,20 @@
             if (window.location.href.includes("localhost")) url = "http://localhost:8082";
             if (window.location.href.includes("snu.gouv.fr")) url = "https://admin.snu.gouv.fr";
             var info;
-            if (window.zammadUser)
-              info =
-                '<a href="' +
-                url +
-                "/volontaire/" +
-                window.zammadUser._id +
-                '">' +
-                window.zammadUser.name +
-                "</a> - " +
-                window.zammadUser.email +
-                "<br />Statut : " +
-                window.zammadUser.status +
-                " | Phase 1 : " +
-                window.zammadUser.statusPhase1 +
-                " | Phase 2 : " +
-                window.zammadUser.statusPhase2 +
-                " | Phase 3 : " +
-                window.zammadUser.statusPhase3;
+            if (window.zammadUser) info = "<a href=\"" + url + "/volontaire/" + window.zammadUser._id + "\">" + window.zammadUser.name + "</a> - " + window.zammadUser.email + "<br />Statut : " + window.zammadUser.status + " | Phase 1 : " + window.zammadUser.statusPhase1 + " | Phase 2 : " + window.zammadUser.statusPhase2 + " | Phase 3 : " + window.zammadUser.statusPhase3;
             else info = "Non connecté.";
-            chat.send("chat_session_message", {
+            chat.send('chat_session_message', {
               content: "🧑‍🎓 " + info,
               id: chat._messageCount,
-              session_id: chat.sessionId,
+              session_id: chat.sessionId
             });
+
           }
         };
 
         // This is needed to ensure users never sees their informations when they refresh page.
         chat.onReopenSession = (data) => {
-          data.session = (data.session || []).filter((message) => message.content.startsWith("INFO USER: ") === false && message.content.startsWith("🧑‍🎓 ") === false);
+          data.session = (data.session || []).filter(message => message.content.startsWith('INFO USER: ') === false && message.content.startsWith('🧑‍🎓 ') === false);
           ZammadChat.prototype.onReopenSession.call(chat, data);
         };
 
