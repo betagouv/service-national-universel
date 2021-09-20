@@ -58,7 +58,6 @@ export default (props) => {
             <Details title="Sujet" content={ticket?.title} />
             <hr />
             <Details title="Création" content={formatStringLongDate(ticket?.created_at)} />
-            <Details title="Dernière activité" content={formatStringLongDate(ticket?.updated_at)} />
             <Details title="Agent" />
           </Box>
         </Col>
