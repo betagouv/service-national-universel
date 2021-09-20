@@ -199,12 +199,15 @@ const List = styled.div`
     display: grid;
     grid-template-columns: 1fr 2fr 1fr;
     grid-template-rows: 1fr;
+    :not(:first-child):hover {
+      background-color: #dce2e7 !important;
+    }
   }
   .ticket p {
     margin: 0;
   }
   .ticket:nth-child(2n) {
-    background-color: #dce2e7;
+    background-color: #eee;
   }
   .ticket-date {
     justify-self: end;
