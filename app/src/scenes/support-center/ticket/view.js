@@ -30,6 +30,7 @@ export default (props) => {
     if (!message) return;
     const id = props.match?.params?.id;
     const { data } = await api.put(`/support-center/ticket/${id}`, { message });
+    setMessage("");
     getTicket();
   };
 
@@ -40,7 +41,7 @@ export default (props) => {
       <Heading>
         <h1>Demande #{props.match?.params?.id}</h1>
       </Heading>
-      <Row>
+      <Row style={{ marginBottom: "1rem" }}>
         <Col md={4}>
           <Box>
             <Details title="Sujet" content={ticket?.title} />
@@ -52,14 +53,18 @@ export default (props) => {
         </Col>
         <Col md={8}>
           <div>
-            <Box>
+            <Box style={{ marginBottom: "1rem" }}>
               {ticket?.articles?.map((article, i) => (
                 <Message key={i} from={article.from} date={article.created_at} content={article.body} />
               ))}
             </Box>
             <Box>
-              <input onChange={(e) => setMessage(e.target.value)} value={message} />
-              <LoadingButton onClick={send}>Envoyer</LoadingButton>
+              <InputContainer>
+                <input className="form-control" onChange={(e) => setMessage(e.target.value)} value={message} />
+                <LoadingButton onClick={send} disabled={!message}>
+                  Envoyer
+                </LoadingButton>
+              </InputContainer>
             </Box>
           </div>
         </Col>
@@ -93,6 +98,11 @@ const Details = ({ title, content }) => {
   );
 };
 
+const InputContainer = styled.div`
+  display: flex;
+  flex-direction: row;
+  padding: 0.5rem;
+`;
 const DetailContainer = styled.div`
   display: flex;
   flex-direction: column;
