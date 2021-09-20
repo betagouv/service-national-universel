@@ -82,7 +82,7 @@ const Message = ({ from, date, content }) => {
         <MessageFrom>{from}</MessageFrom>
         <MessageDate>{formatStringLongDate(date)}</MessageDate>
       </MessageHeader>
-      <MessageContent>{content}</MessageContent>
+      <MessageContent dangerouslySetInnerHTML={{ __html: content }}></MessageContent>
     </MessageContainer>
   ) : (
     <div />
