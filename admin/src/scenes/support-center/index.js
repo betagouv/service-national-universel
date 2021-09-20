@@ -9,20 +9,20 @@ import Loader from "../../components/Loader";
 
 const articles = [
   {
-    title: "Je valide une mission",
-    body: "Après qu'une structure ait créé une nouvelle mission, il est nécessaire...",
-    url: "https://support.selego.co/help/fr-fr/6-phase-2-mission-d-interet-general/41-je-valide-une-mission",
+    title: "Livret d'accueil Référent",
+    body: "Découvrez en quelques minutes les éléments de prise en main...",
+    url: "https://support.selego.co/help/fr-fr/1-referent/24-livret-d-accueil-referent",
   },
-  // {
-  //   title: "Je modifie mon identifiant e-mail",
-  //   body: `Connectez vous à votre espace volontaire, accédez à "Mon profil"...`,
-  //   url: "https://support.selego.co/help/fr-fr/6-phase-2-mission-d-interet-general/40-je-consulte-les-pieces-justificatives-pour-une-pm",
-  // },
-  // {
-  //   title: "Je consulte mes missions réalisées",
-  //   body: `Les missions réalisées correspondent aux missions que vous avez déjà...`,
-  //   url: "https://support.selego.co/help/fr-fr/13-phase-2-mission-d-interet-general/38-je-consulte-mes-missions-realisees",
-  // },
+  {
+    title: "Je ne reçois pas les liens pour valider les contrats d'engagement",
+    body: `Comment fonctionne la validation d'un contrat ? La plateforme envoie...`,
+    url: "https://support.selego.co/help/fr-fr/6-phase-2-mission-d-interet-general/14-je-ne-recois-pas-les-liens-pour-valider-les-contrats-d-engagement",
+  },
+  {
+    title: "J'invite un nouvel utilisateur (référent, chef de centre)",
+    body: `Cette action vous permet d'inviter un nouvel utilisateur...`,
+    url: "https://support.selego.co/help/fr-fr/4-mon-compte/10-j-invite-un-nouvel-utilisateur-referent-chef-de-centre",
+  },
 ];
 
 export default () => {
