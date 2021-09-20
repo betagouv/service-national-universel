@@ -56,38 +56,29 @@ export default (props) => {
     <Container>
       <BackButton to={`/support`}>{"<"} Retour</BackButton>
       <Heading>
-        <h1>Demande #{props.match?.params?.id}</h1>
+        <h1>
+          Demande #{props.match?.params?.id} - {ticket?.title}
+        </h1>
+        <Details title="Crée le" content={ticket?.created_at && formatStringLongDate(ticket?.created_at)} />
       </Heading>
-      <Row style={{ marginBottom: "1rem" }}>
-        <Col md={4}>
-          <Box>
-            <Details title="Sujet" content={ticket?.title} />
-            <hr />
-            <Details title="Création" content={ticket?.created_at && formatStringLongDate(ticket?.created_at)} />
-            <Details title="Agent" />
-          </Box>
-        </Col>
-        <Col md={8}>
-          <div>
-            <Box style={{ marginBottom: "1rem", overflow: "hidden" }}>
-              <div style={{ overflowY: "scroll", height: "50vh" }}>
-                {ticket?.articles?.map((article, i) => (
-                  <Message key={i} from={article.from} date={article.created_at} content={article.body} />
-                ))}
-                <div ref={setMessageEnd} />
-              </div>
-            </Box>
-            <Box>
-              <InputContainer>
-                <input className="form-control" onChange={(e) => setMessage(e.target.value)} value={message} />
-                <LoadingButton onClick={send} disabled={!message}>
-                  Envoyer
-                </LoadingButton>
-              </InputContainer>
-            </Box>
+      <div>
+        <Box style={{ marginBottom: "1rem", overflow: "hidden" }}>
+          <div style={{ overflowY: "scroll", height: "50vh" }}>
+            {ticket?.articles?.map((article, i) => (
+              <Message key={i} from={article.from} date={article.created_at} content={article.body} />
+            ))}
+            <div ref={setMessageEnd} />
           </div>
-        </Col>
-      </Row>
+        </Box>
+        <Box>
+          <InputContainer>
+            <input className="form-control" onChange={(e) => setMessage(e.target.value)} value={message} />
+            <LoadingButton onClick={send} disabled={!message}>
+              Envoyer
+            </LoadingButton>
+          </InputContainer>
+        </Box>
+      </div>
     </Container>
   );
 };
@@ -132,13 +123,13 @@ const InputContainer = styled.div`
 `;
 const DetailContainer = styled.div`
   display: flex;
-  flex-direction: column;
-  padding: 0.5rem;
+  align-items: center;
 `;
 const DetailHeader = styled.div`
   color: #444;
   font-size: 0.8rem;
   font-weight: 600;
+  margin-right: 1rem;
 `;
 const DetailContent = styled.div`
   font-weight: 400;
@@ -181,10 +172,12 @@ const Box = styled.div`
 `;
 
 const Heading = styled(Container)`
-  margin-bottom: 3rem;
+  margin-bottom: 1.5rem;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex: 1;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: space-between;
   @media (max-width: 768px) {
     margin-bottom: 1rem;
   }
