@@ -169,7 +169,7 @@ const Box = styled.div`
   filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.05));
   border-radius: 8px;
   padding: 1rem;
-  margin: 1rem;
+  margin-bottom: 1rem;
 `;
 
 const Heading = styled(Container)`
