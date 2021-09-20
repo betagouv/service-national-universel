@@ -51,11 +51,16 @@ export default () => {
           <h2>Besoin d'aide&nbsp;?</h2>
           <p style={{ color: "#6B7280" }}>
             Vous souhaitez en savoir plus sur les phases de votre parcours volontaire ou sur le fonctionnement de votre espace&nbsp;? N'hésitez pas à consulter notre{" "}
-            <strong>base de connaissance</strong>&nbsp;!
+            <strong>
+              <a href="https://support.selego.co/help/fr-fr/3-volontaire" style={{ color: "#6B7280" }} target="_blank" rel="noopener noreferrer">
+                base de connaissance
+              </a>
+            </strong>
+            &nbsp;!
             <br /> Vous avez un problème technique ou souhaitez contacter un référent ? Contactez notre service de support.
           </p>
           <div className="buttons">
-            <LinkButton href="https://support.selego.co/help/fr-fr/3-volontaire" target="_blank">
+            <LinkButton href="https://support.selego.co/help/fr-fr/3-volontaire" target="_blank" rel="noopener noreferrer">
               Base de connaissance
             </LinkButton>
             <InternalLink to="/ticket">Contacter quelqu'un</InternalLink>
