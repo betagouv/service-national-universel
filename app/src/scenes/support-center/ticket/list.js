@@ -4,6 +4,7 @@ import { Col } from "reactstrap";
 import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
 import { Formik, Field } from "formik";
+import { NavLink } from "react-router-dom";
 
 import api from "../../../services/api";
 import { HeroContainer } from "../../../components/Content";
@@ -23,6 +24,7 @@ export default () => {
   }, []);
   return (
     <Container>
+      <BackButton to={`/support`}>{"<"} Retour</BackButton>
       <Heading>
         <h2>Contacter le support</h2>
         <p>Vous avez un problème technique, vous souhaitez en savoir plus sur votre situation, ou souhaitez contacter l'un de vos référents ?</p>
@@ -118,6 +120,14 @@ const Item = ({ title, name, value, handleChange, errors, touched, validate, typ
     </Col>
   );
 };
+
+const BackButton = styled(NavLink)`
+  color: #666;
+  cursor: pointer;
+  :hover {
+    text-decoration: underline;
+  }
+`;
 
 const Container = styled(HeroContainer)`
   display: flex;
