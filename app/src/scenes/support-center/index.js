@@ -66,8 +66,8 @@ export default () => {
             {articles.map((article) => (
               <div className="block" key={article.url}>
                 <h6>{article.title}</h6>
+                <p>{article.body}</p>
                 <p>
-                  {article.body}{" "}
                   <a className="block-link" href={article.url} target="_blank">
                     Lire la suite
                   </a>
