@@ -62,14 +62,6 @@ export default (props) => {
         <Details title="Crée le" content={ticket?.created_at && formatStringLongDate(ticket?.created_at)} />
       </Heading>
       <div>
-        <Box style={{ marginBottom: "1rem", overflow: "hidden" }}>
-          <div style={{ overflowY: "scroll", height: "50vh" }}>
-            {ticket?.articles?.map((article, i) => (
-              <Message key={i} from={article.from} date={article.created_at} content={article.body} />
-            ))}
-            <div ref={setMessageEnd} />
-          </div>
-        </Box>
         <Box>
           <InputContainer>
             <input className="form-control" onChange={(e) => setMessage(e.target.value)} value={message} />
@@ -77,6 +69,11 @@ export default (props) => {
               Envoyer
             </LoadingButton>
           </InputContainer>
+        </Box>
+        <Box>
+          {ticket?.articles?.reverse()?.map((article, i) => (
+            <Message key={i} from={article.from} date={article.created_at} content={article.body} />
+          ))}
         </Box>
       </div>
     </Container>
@@ -169,6 +166,7 @@ const Box = styled.div`
   filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.05));
   border-radius: 8px;
   padding: 1rem;
+  margin: 1rem;
 `;
 
 const Heading = styled(Container)`
