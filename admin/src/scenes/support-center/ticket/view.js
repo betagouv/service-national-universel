@@ -55,7 +55,9 @@ export default (props) => {
 
   return (
     <Container>
-      <BackButton to={`/support`}>{"<"} Retour</BackButton>
+      <div style={{ marginTop: "1rem" }}>
+        <BackButton to={`/support`}>{"<"} Retour</BackButton>
+      </div>
       <Heading>
         <h1>
           Demande #{props.match?.params?.id} - {ticket?.title}

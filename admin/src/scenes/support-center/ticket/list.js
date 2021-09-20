@@ -129,6 +129,7 @@ export const HeroContainer = styled.div`
 
 const BackButton = styled(NavLink)`
   color: #666;
+  margin-top: 1rem;
   cursor: pointer;
   :hover {
     text-decoration: underline;
