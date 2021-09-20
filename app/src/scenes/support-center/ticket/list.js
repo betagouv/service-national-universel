@@ -69,7 +69,6 @@ export default () => {
                 name="subject"
                 title="Sujet"
                 type="input"
-                placeholder="Ceci est mon sujet"
                 value={values.subject}
                 handleChange={handleChange}
                 validate={(v) => !v && requiredMessage}
@@ -80,7 +79,6 @@ export default () => {
                 name="message"
                 title="Mon message"
                 type="textarea"
-                placeholder="Ceci est mon message..."
                 value={values.message}
                 handleChange={handleChange}
                 validate={(v) => !v && requiredMessage}
