@@ -4,6 +4,7 @@ import { Container } from "reactstrap";
 import styled from "styled-components";
 import { Col, Row } from "reactstrap";
 import { toastr } from "react-redux-toastr";
+import { NavLink } from "react-router-dom";
 
 import api from "../../../services/api";
 import { translate, formatStringLongDate } from "../../../utils";
@@ -38,6 +39,7 @@ export default (props) => {
 
   return (
     <Container>
+      <BackButton to={`/support`}>{"<"} Retour</BackButton>
       <Heading>
         <h1>Demande #{props.match?.params?.id}</h1>
       </Heading>
@@ -97,6 +99,14 @@ const Details = ({ title, content }) => {
     <div />
   );
 };
+
+const BackButton = styled(NavLink)`
+  color: #666;
+  cursor: pointer;
+  :hover {
+    text-decoration: underline;
+  }
+`;
 
 const InputContainer = styled.div`
   display: flex;
