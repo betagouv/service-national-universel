@@ -3,10 +3,11 @@ import { NavLink } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
+import { formatDistanceToNow } from "date-fns";
 
 import { Hero, HeroContainer, Separator } from "../../components/Content";
-
-//! This component isn't finished.
+import tickets from "./tickets";
+import { fr } from "date-fns/locale";
 
 export default () => {
   const articles = [
@@ -32,12 +33,14 @@ export default () => {
         <section className="help-section">
           <h2>Besoin d'aide ?</h2>
           <p style={{ color: "#6B7280", }}>Vous souhaitez en savoir plus sur les phases de votre parcours volontaire ou sur le fonctionnement de votre espace ? N'hésitez pas à consulter notre <strong>base de connaissance</strong> !<br /> Vous avez un problème technique ou souhaitez contacter un référent ? Contactez notre service de support.</p>
-          <LinkButton href="https://support.selego.co/help/fr-fr" target="_blank">
-            Base de connaissance
-          </LinkButton>
-          <InternalLink to="/ticket">
-            Contacter quelqu'un
-          </InternalLink>
+          <div className="buttons">
+            <LinkButton href="https://support.selego.co/help/fr-fr" target="_blank">
+              Base de connaissance
+            </LinkButton>
+            <InternalLink to="/ticket">
+              Contacter quelqu'un
+            </InternalLink>
+          </div>
         </section>
         <Card>
           <h4 style={{ marginLeft: "0.5rem" }}>
@@ -53,6 +56,20 @@ export default () => {
           </div>
         </Card>
       </Container>
+      <List>
+        <section className="ticket titles">
+          <p>Numéro du ticket</p>
+          <p>Sujet</p>
+          <p className="ticket-date">Dernière mise à jour</p>
+        </section>
+        {tickets.reverse().map((ticket) => (
+          <NavLink to="/ticket-detail" key={ticket.id} className="ticket">
+            <p>{ticket.number}</p>
+            <p>{ticket.title}</p>
+            <p className="ticket-date">il y a {formatDistanceToNow(new Date(ticket.last_contact_at), { locale: fr })}</p>
+          </NavLink>
+        ))}
+      </List>
     </HeroContainer>
   )
 }
@@ -67,22 +84,34 @@ const Container = styled.div`
     text-align: center;
     margin: 0 20px;
   }
+  .buttons {
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    justify-content: center;
+    text-align: center;
+  }
   @media (min-width: 1024px) {
     flex-direction: row;
     align-items: flex-start;
-    justify-content: space-around;
+    justify-content: space-between;
+    margin: 0.5rem 1.5rem;
     .help-section {
       text-align: left;
+    }
+    .buttons {
+      grid-template-columns: 1fr 1fr;
+      grid-template-rows: 1fr;
     }
   }
 `;
 
 const LinkButton = styled.a`
+  max-width: 230px;
+  margin: 0.3rem;
   background-color: #5245cc;
   border: none;
   border-radius: 5px;
   padding: 12px 25px;
-  margin-right: 0.3rem;
   font-size: 14px;
   font-weight: 700;
   color: #fff;
@@ -93,11 +122,12 @@ const LinkButton = styled.a`
   }
 `;
 const InternalLink = styled(NavLink)`
+  max-width: 230px;
+  margin: 0.3rem;
   background-color: #5245cc;
   border: none;
   border-radius: 5px;
   padding: 12px 25px;
-  margin-left: 0.3rem;
   font-size: 14px;
   font-weight: 700;
   color: #fff;
@@ -110,6 +140,7 @@ const InternalLink = styled(NavLink)`
 
 const Card = styled.div`
   margin-top: 2rem;
+  min-width: 330px;
   .division {
     display: flex;
     flex-direction: column;
@@ -130,5 +161,32 @@ const Card = styled.div`
   }
   @media (min-width: 1024px) {
     margin-top: 0;
+  }
+`
+
+const List = styled.div`
+  background-color: #fff;
+  margin: 2rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  border-radius: 0.5rem;
+  overflow: hidden;
+  .ticket {
+    color: black;
+    padding: 1rem 1.5rem;
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    grid-template-rows: 1fr;
+  }
+  .ticket p {
+    margin: 0;
+  }
+  .ticket:nth-child(2n) {
+    background-color: #dce2e7;
+  }
+  .ticket-date {
+    justify-self: end;
+  }
+  .titles {
+    font-weight: bold;
   }
 `
