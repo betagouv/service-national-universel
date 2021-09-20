@@ -13,7 +13,7 @@ export default () => {
   const history = useHistory();
 
   //todo : fetch zammad categories (scopes)
-  const options = ["Assistance technique", "À propos de ma situation", "Contacter un référent"];
+  const options = ["Assistance technique", "Aide sur un cas particulier", "Autre"];
 
   useEffect(() => {
     (async () => {
