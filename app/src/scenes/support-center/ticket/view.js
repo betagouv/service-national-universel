@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { Container } from "reactstrap";
 import styled from "styled-components";
-import { Col, Row } from "reactstrap";
 import { toastr } from "react-redux-toastr";
 import { NavLink } from "react-router-dom";
+import { formatDistanceToNow } from "date-fns";
+import { fr } from "date-fns/locale";
 
 import api from "../../../services/api";
 import { formatStringLongDate } from "../../../utils";
@@ -71,9 +72,11 @@ export default (props) => {
           </InputContainer>
         </Box>
         <Box>
-          {ticket?.articles?.reverse()?.map((article, i) => (
-            <Message key={i} from={article.from} date={article.created_at} content={article.body} />
-          ))}
+          {ticket?.articles
+            ?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+            ?.map((article, i) => (
+              <Message key={i} from={article.from} date={`il y a ${formatDistanceToNow(new Date(article.created_at), { locale: fr })}`} content={article.body} />
+            ))}
         </Box>
       </div>
     </Container>
@@ -85,7 +88,7 @@ const Message = ({ from, date, content }) => {
     <MessageContainer>
       <MessageHeader>
         <MessageFrom>{from}</MessageFrom>
-        <MessageDate>{formatStringLongDate(date)}</MessageDate>
+        <MessageDate>{date}</MessageDate>
       </MessageHeader>
       <MessageContent dangerouslySetInnerHTML={{ __html: content }}></MessageContent>
     </MessageContainer>
