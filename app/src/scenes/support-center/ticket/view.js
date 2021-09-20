@@ -16,6 +16,7 @@ import LoadingButton from "../../../components/buttons/LoadingButton";
 export default (props) => {
   const [ticket, setTicket] = useState();
   const [message, setMessage] = useState();
+  const [messageEnd, setMessageEnd] = useState();
 
   const getTicket = async () => {
     const id = props.match?.params?.id;
@@ -26,6 +27,14 @@ export default (props) => {
   useEffect(() => {
     getTicket();
   }, []);
+
+  const scrollToBottom = () => {
+    messageEnd.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    if (messageEnd) scrollToBottom();
+  }, [messageEnd, ticket]);
 
   const send = async () => {
     if (!message) return;
@@ -55,10 +64,13 @@ export default (props) => {
         </Col>
         <Col md={8}>
           <div>
-            <Box style={{ marginBottom: "1rem" }}>
-              {ticket?.articles?.map((article, i) => (
-                <Message key={i} from={article.from} date={article.created_at} content={article.body} />
-              ))}
+            <Box style={{ marginBottom: "1rem", overflow: "hidden" }}>
+              <div style={{ overflowY: "scroll", height: "50vh" }}>
+                {ticket?.articles?.map((article, i) => (
+                  <Message key={i} from={article.from} date={article.created_at} content={article.body} />
+                ))}
+                <div ref={setMessageEnd} />
+              </div>
             </Box>
             <Box>
               <InputContainer>

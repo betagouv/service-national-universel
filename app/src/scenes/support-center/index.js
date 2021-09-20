@@ -194,20 +194,18 @@ const List = styled.div`
   border-radius: 0.5rem;
   overflow: hidden;
   .ticket {
+    border-bottom: 1px solid #f1f1f1;
     color: black;
     padding: 1rem 1.5rem;
     display: grid;
     grid-template-columns: 1fr 2fr 1fr;
     grid-template-rows: 1fr;
     :not(:first-child):hover {
-      background-color: #dce2e7 !important;
+      background-color: #f1f1f1 !important;
     }
   }
   .ticket p {
     margin: 0;
-  }
-  .ticket:nth-child(2n) {
-    background-color: #eee;
   }
   .ticket-date {
     justify-self: end;
