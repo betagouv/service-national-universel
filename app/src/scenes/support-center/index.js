@@ -89,13 +89,15 @@ export default () => {
           <p>Sujet</p>
           <p className="ticket-date">Dernière mise à jour</p>
         </section>
-        {userTickets?.reverse().map((ticket) => (
-          <NavLink to={`/ticket/${ticket.id}`} key={ticket.id} className="ticket">
-            <p>{ticket.id}</p>
-            <p>{ticket.title}</p>
-            <p className="ticket-date">il y a {formatDistanceToNow(new Date(ticket.last_contact_at || ticket.updated_at), { locale: fr })}</p>
-          </NavLink>
-        ))}
+        {userTickets
+          ?.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
+          .map((ticket) => (
+            <NavLink to={`/ticket/${ticket.id}`} key={ticket.id} className="ticket">
+              <p>{ticket.id}</p>
+              <p>{ticket.title}</p>
+              <p className="ticket-date">il y a {formatDistanceToNow(new Date(ticket.updated_at), { locale: fr })}</p>
+            </NavLink>
+          ))}
       </List>
     </HeroContainer>
   );
