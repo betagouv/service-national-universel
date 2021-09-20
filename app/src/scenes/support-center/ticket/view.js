@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { Container } from "reactstrap";
 import styled from "styled-components";
 import { Col, Row } from "reactstrap";
@@ -7,10 +6,8 @@ import { toastr } from "react-redux-toastr";
 import { NavLink } from "react-router-dom";
 
 import api from "../../../services/api";
-import { translate, formatStringLongDate } from "../../../utils";
+import { formatStringLongDate } from "../../../utils";
 import Loader from "../../../components/Loader";
-import Badge from "../../../components/Badge";
-import DomainThumb from "../../../components/DomainThumb";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 
 export default (props) => {
@@ -19,10 +16,15 @@ export default (props) => {
   const [messageEnd, setMessageEnd] = useState();
 
   const getTicket = async () => {
-    const id = props.match?.params?.id;
-    if (!id) return setTicket(null);
-    const { data } = await api.get(`/support-center/ticket/${id}`);
-    return setTicket(data);
+    try {
+      const id = props.match?.params?.id;
+      if (!id) return setTicket(null);
+      const { data, ok } = await api.get(`/support-center/ticket/${id}`);
+      if (data.error || !ok) return setTicket(null);
+      return setTicket(data);
+    } catch (e) {
+      setTicket(null);
+    }
   };
   useEffect(() => {
     getTicket();
@@ -61,7 +63,7 @@ export default (props) => {
           <Box>
             <Details title="Sujet" content={ticket?.title} />
             <hr />
-            <Details title="Création" content={formatStringLongDate(ticket?.created_at)} />
+            <Details title="Création" content={ticket?.created_at && formatStringLongDate(ticket?.created_at)} />
             <Details title="Agent" />
           </Box>
         </Col>

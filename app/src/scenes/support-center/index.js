@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
 import { formatDistanceToNow } from "date-fns";
 
-import { Hero, HeroContainer, Separator } from "../../components/Content";
-import tickets from "./tickets";
+import { HeroContainer } from "../../components/Content";
 import { fr } from "date-fns/locale";
 import API from "../../services/api";
+import Loader from "../../components/Loader";
 
 const articles = [
   {
@@ -89,9 +87,11 @@ export default () => {
           <p>Sujet</p>
           <p className="ticket-date">Dernière mise à jour</p>
         </section>
+        {!userTickets ? <Loader /> : null}
+        {userTickets?.length === 0 ? <div style={{ textAlign: "center", padding: "1rem", fontSize: "0.85rem" }}>Aucun ticket</div> : null}
         {userTickets
           ?.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
-          .map((ticket) => (
+          ?.map((ticket) => (
             <NavLink to={`/ticket/${ticket.id}`} key={ticket.id} className="ticket">
               <p>{ticket.id}</p>
               <p>{ticket.title}</p>

@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from "react";
-import { useSelector } from "react-redux";
+import React, { useEffect } from "react";
 import { Col } from "reactstrap";
 import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
@@ -12,7 +11,6 @@ import { HeroContainer } from "../../../components/Content";
 import ErrorMessage, { requiredMessage } from "../../inscription/components/errorMessage";
 
 export default () => {
-  const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
 
   //todo : fetch zammad categories (scopes)
