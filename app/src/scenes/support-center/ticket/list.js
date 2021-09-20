@@ -5,6 +5,7 @@ import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
 import { Formik, Field } from "formik";
 import { NavLink } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 
 import api from "../../../services/api";
 import { HeroContainer } from "../../../components/Content";
@@ -12,6 +13,7 @@ import ErrorMessage, { requiredMessage } from "../../inscription/components/erro
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
+  const history = useHistory();
 
   //todo : fetch zammad categories (scopes)
   const options = ["Assistance technique", "À propos de ma situation", "Contacter un référent"];
@@ -45,6 +47,7 @@ export default () => {
               });
               if (!ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(code));
               toastr.success("Ticket créé");
+              history.push("/support");
             } catch (e) {
               console.log(e);
               toastr.error("Oups, une erreur est survenue", translate(e.code));
