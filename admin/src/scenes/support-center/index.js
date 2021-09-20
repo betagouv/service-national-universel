@@ -54,7 +54,7 @@ export default () => {
             Vous rencontrez une difficulté, avez besoin d'assistance pour réaliser une action ou avez besoin d'informations supplémentaires sur la plateforme&nbsp;? N'hésitez pas à
             consulter notre{" "}
             <strong>
-              <a href="https://support.selego.co/help/fr-fr" style={{ color: "#6B7280" }} target="_blank" rel="noopener noreferrer">
+              <a href="https://support.selego.co/help/fr-fr/1-referent" style={{ color: "#6B7280" }} target="_blank" rel="noopener noreferrer">
                 base de connaissance
               </a>
             </strong>
@@ -62,7 +62,7 @@ export default () => {
             <br /> Vous avez un problème technique ? Contactez notre service de support.
           </p>
           <div className="buttons">
-            <LinkButton href="https://support.selego.co/help/fr-fr" target="_blank" rel="noopener noreferrer">
+            <LinkButton href="https://support.selego.co/help/fr-fr/1-referent" target="_blank" rel="noopener noreferrer">
               Base de connaissance
             </LinkButton>
             <InternalLink to="/ticket">Contacter quelqu'un</InternalLink>
