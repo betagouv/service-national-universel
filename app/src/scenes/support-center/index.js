@@ -31,12 +31,12 @@ export default () => {
       <Container>
         <section className="help-section">
           <h2>Besoin d'aide ?</h2>
-          <p style={{ color: "#6B7280", }}>Vous souhaitez en savoir plus sur les phases de votre parcours volontaire ou sur le fonctionnement de votre espace ? N'hésitez pas à consulter notre <strong>base de connaissance</strong> !<br /> Vous avez un problème technique ou souhaitez contacter un référent ? Ouvrez un ticket auprès de notre service de support.</p>
+          <p style={{ color: "#6B7280", }}>Vous souhaitez en savoir plus sur les phases de votre parcours volontaire ou sur le fonctionnement de votre espace ? N'hésitez pas à consulter notre <strong>base de connaissance</strong> !<br /> Vous avez un problème technique ou souhaitez contacter un référent ? Contactez notre service de support.</p>
           <LinkButton href="https://support.selego.co/help/fr-fr" target="_blank">
             Base de connaissance
           </LinkButton>
           <InternalLink to="/ticket">
-            Ouvrir un ticket
+            Contacter quelqu'un
           </InternalLink>
         </section>
         <Card>
@@ -116,6 +116,7 @@ const Card = styled.div`
     justify-content: space-between;
   }
   .block {
+    background-color: #fff;
     display: flex;
     flex-direction: column;
     padding: 1.3rem;
