@@ -14,7 +14,6 @@ router.get("/", passport.authenticate(["referent", "young"], { session: false })
       method: "GET",
       headers: { "Content-Type": "application/json", Authorization: ZAMMAD_TOKEN },
     });
-    if (!res.ok) console.log("OH NOOO...", res.error);
     const responseAsJson = await response.json();
     const dataUrl = responseAsJson.data.generateUrl;
 
@@ -25,15 +24,53 @@ router.get("/", passport.authenticate(["referent", "young"], { session: false })
   }
 });
 
+// Get the list of tickets with their articles.
+router.get("/ticket", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
+  try {
+    const email = req.user.email;
+    const customer_id = await zammad.getCustomerIdByEmail(email);
+    if (!customer_id) return res.status(401).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const response = await zammad.api("/tickets", { method: "GET", headers: { "X-On-Behalf-Of": email } });
+    const data = [];
+    if (response.length) {
+      for (const item of response) {
+        const articles = await zammad.api("/ticket_articles/by_ticket/" + item.id, { method: "GET", headers: { "X-On-Behalf-Of": email } });
+        data.push({ ...item, articles });
+      }
+    }
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+// Get one tickets with its articles.
+router.get("/ticket/:id", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
+  try {
+    const email = req.user.email;
+    const customer_id = await zammad.getCustomerIdByEmail(email);
+    if (!customer_id) return res.status(401).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const response = await zammad.api("/tickets/" + req.params.id, { method: "GET", headers: { "X-On-Behalf-Of": email } });
+    const articles = await zammad.api("/ticket_articles/by_ticket/" + req.params.id, { method: "GET", headers: { "X-On-Behalf-Of": email } });
+    const data = { ...response, articles };
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
 router.post("/ticket", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
     const { subject, type, message } = req.body;
-    // const email = "jeamichel@test.com";
     const email = req.user.email;
 
     const customer_id = await zammad.getCustomerIdByEmail(email);
+    console.log("OOOOO", customer_id, email);
     if (!customer_id) return res.status(401).send({ ok: false, code: ERRORS.NOT_FOUND });
     const response = await zammad.api("/tickets", {
+      headers: { "X-On-Behalf-Of": email },
       method: "POST",
       body: JSON.stringify({
         title: `${type} - ${subject}`,
