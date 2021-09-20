@@ -70,7 +70,7 @@ export default () => {
           <h4 style={{ marginLeft: "0.5rem" }}>Quelques articles pour vous aider&nbsp;:</h4>
           <div className="division">
             {articles.map((article) => (
-              <div className="block" key={article.url}>
+              <div className="block" key={article.url} onClick={() => window.open(article.url)}>
                 <h6>{article.title}</h6>
                 <p>{article.body}</p>
                 <p>
@@ -179,7 +179,11 @@ const Card = styled.div`
     flex-direction: column;
     padding: 1.3rem;
     margin: 0.5rem;
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 0 15px -3px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    :hover {
+      box-shadow: 0 0 15px 3px rgba(0, 0, 0, 0.2);
+    }
     border-radius: 0.5rem;
   }
   .block p,
