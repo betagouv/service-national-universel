@@ -26,6 +26,10 @@ export default (props) => {
   };
   useEffect(() => {
     getTicket();
+    const ping = setInterval(getTicket, 5000);
+    return () => {
+      clearInterval(ping);
+    };
   }, []);
 
   const scrollToBottom = () => {
