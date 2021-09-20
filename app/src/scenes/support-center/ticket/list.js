@@ -135,17 +135,15 @@ const BackButton = styled(NavLink)`
 const Container = styled(HeroContainer)`
   display: flex;
   margin-top: -1rem;
-  @media (max-width: 767px) {
-    flex-direction: column;
-  }
+  flex-direction: column;
 `;
 
 const Heading = styled.header`
-  padding: 3rem;
+  padding: 1.5rem;
   font-size: 3rem;
   flex: 1;
   p {
-    font-size: 1.5rem;
+    font-size: 1.2rem;
     color: #6b7280;
   }
   @media (max-width: 767px) {
@@ -191,12 +189,14 @@ const ContinueButton = styled.button`
 const Form = styled.div`
   display: flex;
   flex: 2;
-  padding: 3rem;
+  padding: 2rem;
   border-radius: 0.5rem;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   flex-direction: column;
   background-color: #fff;
+  margin: 0 auto;
+  width: clamp(700px, 80%, 1000px);
   @media (max-width: 767px) {
-    padding: 1rem;
+    width: 100%;
   }
 `;
