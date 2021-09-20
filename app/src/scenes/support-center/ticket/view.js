@@ -5,6 +5,7 @@ import { toastr } from "react-redux-toastr";
 import { NavLink } from "react-router-dom";
 import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
+import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
 import { formatStringLongDate } from "../../../utils";
@@ -14,7 +15,7 @@ import LoadingButton from "../../../components/buttons/LoadingButton";
 export default (props) => {
   const [ticket, setTicket] = useState();
   const [message, setMessage] = useState();
-  const [messageEnd, setMessageEnd] = useState();
+  const young = useSelector((state) => state.Auth.young);
 
   const getTicket = async () => {
     try {
@@ -34,14 +35,6 @@ export default (props) => {
       clearInterval(ping);
     };
   }, []);
-
-  const scrollToBottom = () => {
-    messageEnd.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(() => {
-    if (messageEnd) scrollToBottom();
-  }, [messageEnd, ticket]);
 
   const send = async () => {
     if (!message) return;
@@ -73,7 +66,12 @@ export default (props) => {
           {ticket?.articles
             ?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
             ?.map((article, i) => (
-              <Message key={i} from={article.from} date={`il y a ${formatDistanceToNow(new Date(article.created_at), { locale: fr })}`} content={article.body} />
+              <Message
+                key={i}
+                from={young.email === article.created_by ? "Moi" : article.from}
+                date={`il y a ${formatDistanceToNow(new Date(article.created_at), { locale: fr })}`}
+                content={article.body}
+              />
             ))}
         </Box>
       </div>
