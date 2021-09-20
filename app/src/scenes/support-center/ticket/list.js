@@ -1,13 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { Col } from "reactstrap";
 import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
 import { Formik, Field } from "formik";
 
-import api from "../../services/api";
-import { HeroContainer } from "../../components/Content";
-import ErrorMessage, { requiredMessage } from "../../scenes/inscription/components/errorMessage";
+import api from "../../../services/api";
+import { HeroContainer } from "../../../components/Content";
+import ErrorMessage, { requiredMessage } from "../../inscription/components/errorMessage";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
@@ -15,6 +15,12 @@ export default () => {
   //todo : fetch zammad categories (scopes)
   const options = ["Assistance technique", "À propos de ma situation", "Contacter un référent"];
 
+  useEffect(() => {
+    (async () => {
+      const { data } = await api.get(`/support-center/ticket`);
+      console.log({ data });
+    })();
+  }, []);
   return (
     <Container>
       <Heading>
