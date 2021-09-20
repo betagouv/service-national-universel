@@ -116,6 +116,9 @@ const Item = ({ title, name, value, handleChange, errors, touched, validate, typ
 const Container = styled(HeroContainer)`
   display: flex;
   margin-top: -1rem;
+  @media (max-width: 767px) {
+    flex-direction: column;
+  }
 `;
 
 const Heading = styled.header`
@@ -125,6 +128,14 @@ const Heading = styled.header`
   p {
     font-size: 1.5rem;
     color: #6b7280;
+  }
+  @media (max-width: 767px) {
+    padding: 1.2rem;
+    font-size: 1.1rem;
+    p {
+      font-size: 1rem;
+      color: #6b7280;
+    }
   }
 `;
 
@@ -166,4 +177,7 @@ const Form = styled.div`
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   flex-direction: column;
   background-color: #fff;
+  @media (max-width: 767px) {
+    padding: 1rem;
+  }
 `;
