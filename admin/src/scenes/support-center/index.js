@@ -9,19 +9,19 @@ import Loader from "../../components/Loader";
 
 const articles = [
   {
-    title: "Livret d'accueil Référent",
-    body: "Découvrez en quelques minutes les éléments de prise en main...",
+    title: "Phase 2 : le parcours d'une mig",
+    body: "",
+    url: "https://support.selego.co/help/fr-fr/16-comprendre-le-snu/5-phase-2-le-parcours-d-une-mig",
+  },
+  {
+    title: "Livret accueil référent",
+    body: `Découvrez en quelques minutes les éléments de prise en main...`,
     url: "https://support.selego.co/help/fr-fr/1-referent/24-livret-d-accueil-referent",
   },
   {
-    title: "Je ne reçois pas les liens pour valider les contrats d'engagement",
-    body: `Comment fonctionne la validation d'un contrat ? La plateforme envoie...`,
-    url: "https://support.selego.co/help/fr-fr/6-phase-2-mission-d-interet-general/14-je-ne-recois-pas-les-liens-pour-valider-les-contrats-d-engagement",
-  },
-  {
-    title: "J'invite un nouvel utilisateur (référent, chef de centre)",
-    body: `Cette action vous permet d'inviter un nouvel utilisateur...`,
-    url: "https://support.selego.co/help/fr-fr/4-mon-compte/10-j-invite-un-nouvel-utilisateur-referent-chef-de-centre",
+    title: "Livret accueil structure",
+    body: `Découvrez en quelques minutes les éléments de prise en main...`,
+    url: "https://support.selego.co/help/fr-fr/2-responsable-de-structure/26-livret-d-accueil-structure",
   },
 ];
 
