@@ -9,24 +9,39 @@ import { Hero, HeroContainer, Separator } from "../../components/Content";
 import tickets from "./tickets";
 import { fr } from "date-fns/locale";
 
+const articles = [
+  {
+    title: "Je cherche une mission",
+    body: `Depuis l'onglet "Mission d'intérêt général", cliquez sur la rubrique...`,
+    url: "https://support.selego.co/help/fr-fr/13-phase-2-mission-d-interet-general/33-je-cherche-une-mission-mig"
+  },
+  {
+    title: "Je modifie mon identifiant e-mail",
+    body: `Connectez vous à votre espace volontaire, accédez à "Mon profil"...`,
+    url: "https://support.selego.co/help/fr-fr/10-mon-compte/51-je-modifie-mon-identifiant-email"
+  },
+  {
+    title: "Je consulte mes missions réalisées",
+    body: `Les missions réalisées correspondent aux missions que vous avez déjà...`,
+    url: "https://support.selego.co/help/fr-fr/13-phase-2-mission-d-interet-general/38-je-consulte-mes-missions-realisees"
+  }
+];
+
 export default () => {
-  const articles = [
-    {
-      title: "Je cherche une mission",
-      body: `Depuis l'onglet "Mission d'intérêt général", cliquez sur la rubrique...`,
-      url: "https://support.selego.co/help/fr-fr/13-phase-2-mission-d-interet-general/33-je-cherche-une-mission-mig"
-    },
-    {
-      title: "Je modifie mon identifiant e-mail",
-      body: `Connectez vous à votre espace volontaire, accédez à "Mon profil"...`,
-      url: "https://support.selego.co/help/fr-fr/10-mon-compte/51-je-modifie-mon-identifiant-email"
-    },
-    {
-      title: "Je consulte mes missions réalisées",
-      body: `Les missions réalisées correspondent aux missions que vous avez déjà...`,
-      url: "https://support.selego.co/help/fr-fr/13-phase-2-mission-d-interet-general/38-je-consulte-mes-missions-realisees"
+  const [userTickets, setUserTickets] = useState(null);
+  useEffect(() => {
+    const fetchTickets = async () => {
+      try {
+        const response = await api.get("/support-center/ticket");
+        if (!response.ok) return console.log(response);
+        setUserTickets(response.data);
+        console.log(response.data);
+      } catch (error) {
+        console.log(error);
+      }
     }
-  ]
+  }, []);
+
   return (
     <HeroContainer>
       <Container>
