@@ -87,7 +87,7 @@ export default () => {
           <NavLink to={`/ticket/${ticket.id}`} key={ticket.id} className="ticket">
             <p>{ticket.id}</p>
             <p>{ticket.title}</p>
-            <p className="ticket-date">il y a {formatDistanceToNow(new Date(ticket.last_contact_at), { locale: fr })}</p>
+            <p className="ticket-date">il y a {formatDistanceToNow(new Date(ticket.last_contact_at || ticket.updated_at), { locale: fr })}</p>
           </NavLink>
         ))}
       </List>
