@@ -8,6 +8,7 @@ import { formatDistanceToNow } from "date-fns";
 import { Hero, HeroContainer, Separator } from "../../components/Content";
 import tickets from "./tickets";
 import { fr } from "date-fns/locale";
+import API from "../../services/api";
 
 const articles = [
   {
@@ -32,7 +33,7 @@ export default () => {
   useEffect(() => {
     const fetchTickets = async () => {
       try {
-        const response = await api.get("/support-center/ticket");
+        const response = await API.get("/support-center/ticket");
         if (!response.ok) return console.log(response);
         setUserTickets(response.data);
         console.log(response.data);
@@ -78,7 +79,7 @@ export default () => {
           <p>Sujet</p>
           <p className="ticket-date">Dernière mise à jour</p>
         </section>
-        {tickets.reverse().map((ticket) => (
+        {userTickets?.reverse().map((ticket) => (
           <NavLink to="/ticket-detail" key={ticket.id} className="ticket">
             <p>{ticket.number}</p>
             <p>{ticket.title}</p>
