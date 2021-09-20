@@ -40,6 +40,7 @@ export default () => {
         console.log(error);
       }
     }
+    fetchTickets();
   }, []);
 
   return (
