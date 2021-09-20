@@ -63,12 +63,14 @@ export default (props) => {
         <Details title="Crée le" content={ticket?.created_at && formatStringLongDate(ticket?.created_at)} />
       </Heading>
       <div>
-        <InputContainer>
-          <input placeholder="Mon message..." className="form-control" onChange={(e) => setMessage(e.target.value)} value={message} />
-          <LoadingButton onClick={send} disabled={!message}>
-            Envoyer
-          </LoadingButton>
-        </InputContainer>
+        <div>
+          <InputContainer>
+            <input placeholder="Mon message..." className="form-control" onChange={(e) => setMessage(e.target.value)} value={message} />
+            <LoadingButton onClick={send} disabled={!message}>
+              Envoyer
+            </LoadingButton>
+          </InputContainer>
+        </div>
         <Box>
           {ticket?.articles
             ?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
@@ -109,6 +111,7 @@ const Details = ({ title, content }) => {
 const BackButton = styled(NavLink)`
   color: #666;
   cursor: pointer;
+  margin-top: 1rem;
   :hover {
     text-decoration: underline;
   }

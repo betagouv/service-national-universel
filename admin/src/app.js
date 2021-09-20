@@ -29,6 +29,8 @@ import Center from "./scenes/centers";
 import Inscription from "./scenes/inscription";
 import MeetingPoint from "./scenes/meetingPoint";
 import Bug from "./scenes/bug";
+import SupportCenter from "./scenes/support-center";
+import Ticket from "./scenes/support-center/ticket";
 
 import Drawer from "./components/drawer";
 import Header from "./components/header";
@@ -124,6 +126,8 @@ const Home = () => {
           <RestrictedRoute path="/objectifs" component={Goal} />
           <RestrictedRoute path="/centre" component={Center} />
           <RestrictedRoute path="/point-de-rassemblement" component={MeetingPoint} />
+          <RestrictedRoute path="/support" component={SupportCenter} />
+          <RestrictedRoute path="/ticket" component={Ticket} />
           <RestrictedRoute path="/" component={renderDashboard} />
         </Switch>
       </ContentContainer>
