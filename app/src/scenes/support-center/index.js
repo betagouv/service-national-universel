@@ -48,20 +48,21 @@ export default () => {
     <HeroContainer>
       <Container>
         <section className="help-section">
-          <h2>Besoin d'aide ?</h2>
+          <h2>Besoin d'aide&nbsp;?</h2>
           <p style={{ color: "#6B7280" }}>
-            Vous souhaitez en savoir plus sur les phases de votre parcours volontaire ou sur le fonctionnement de votre espace ? N'hésitez pas à consulter notre{" "}
-            <strong>base de connaissance</strong> !<br /> Vous avez un problème technique ou souhaitez contacter un référent ? Contactez notre service de support.
+            Vous souhaitez en savoir plus sur les phases de votre parcours volontaire ou sur le fonctionnement de votre espace&nbsp;? N'hésitez pas à consulter notre{" "}
+            <strong>base de connaissance</strong>&nbsp;!
+            <br /> Vous avez un problème technique ou souhaitez contacter un référent ? Contactez notre service de support.
           </p>
           <div className="buttons">
-            <LinkButton href="https://support.selego.co/help/fr-fr" target="_blank">
+            <LinkButton href="https://support.selego.co/help/fr-fr/3-volontaire" target="_blank">
               Base de connaissance
             </LinkButton>
             <InternalLink to="/ticket">Contacter quelqu'un</InternalLink>
           </div>
         </section>
         <Card>
-          <h4 style={{ marginLeft: "0.5rem" }}>Quelques articles pour vous aider :</h4>
+          <h4 style={{ marginLeft: "0.5rem" }}>Quelques articles pour vous aider&nbsp;:</h4>
           <div className="division">
             {articles.map((article) => (
               <div className="block" key={article.url}>
