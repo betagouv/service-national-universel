@@ -160,8 +160,11 @@ async function sync(obj, type) {
     attributes.TYPE = type.toUpperCase();
     attributes.REGISTRED = !!attributes.REGISTRED_AT;
 
-    let listIds = attributes.TYPE === "YOUNG" ? [46] : [47];
+    let listIds = [];
+    if (attributes.TYPE === "YOUNG") listIds.push(46);
+    if (attributes.TYPE === "REFERENT") listIds.push(47);
     user.statusPhase1 === "WAITING_ACCEPTATION" && listIds.push(106);
+    ["referent_region", "referent_department"].includes(user.role) && listIds.push(147);
 
     delete attributes.EMAIL;
     delete attributes.PASSWORD;
