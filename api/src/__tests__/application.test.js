@@ -223,11 +223,15 @@ describe("Application", () => {
       passport.user = young;
 
       // Successful request
-      let res = await request(getAppHelper()).post(`/application/${application._id}/notify/new`).send({});
+      let res = await request(getAppHelper())
+        .post(`/application/${application._id}/notify/${SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION}`)
+        .send({});
       expect(res.status).toBe(200);
 
       // Failed request (not allowed)
-      res = await request(getAppHelper()).post(`/application/${secondApplication._id}/notify/new`).send({});
+      res = await request(getAppHelper())
+        .post(`/application/${secondApplication._id}/notify/${SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION}`)
+        .send({});
       expect(res.status).toBe(401);
 
       passport.user = previous;
