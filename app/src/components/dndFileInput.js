@@ -98,7 +98,7 @@ function isFileSupported(fileName) {
   const allowTypes = ["jpg", "jpeg", "png", "pdf"];
   const dotted = fileName.split(".");
   const type = dotted[dotted.length - 1];
-  if (!allowTypes.includes(type)) return false;
+  if (!allowTypes.includes(type.toLowerCase())) return false;
   return true;
 }
 
