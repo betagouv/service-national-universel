@@ -57,10 +57,12 @@ export default (props) => {
       </Heading>
       <div>
         <InputContainer>
-          <input placeholder="Mon message..." className="form-control" onChange={(e) => setMessage(e.target.value)} value={message} />
-          <LoadingButton onClick={send} disabled={!message}>
-            Envoyer
-          </LoadingButton>
+          <textarea row={2} placeholder="Mon message..." className="form-control" onChange={(e) => setMessage(e.target.value)} value={message} />
+          <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
+            <LoadingButton onClick={send} disabled={!message}>
+              Envoyer
+            </LoadingButton>
+          </div>
         </InputContainer>
         <Box>
           {ticket?.articles
@@ -115,6 +117,7 @@ const BackButton = styled(NavLink)`
 const InputContainer = styled.div`
   display: flex;
   flex-direction: row;
+  align-items: flex-end;
   padding: 0.5rem;
 `;
 const DetailContainer = styled.div`
