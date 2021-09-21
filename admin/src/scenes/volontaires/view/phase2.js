@@ -24,7 +24,6 @@ export default ({ young, onChange }) => {
     if (!young) return;
     const { ok, data, code } = await api.get(`/young/${young._id}/application`);
     if (!ok) return toastr.error("Oups, une erreur est survenue", code);
-    console.log(data);
     const hoursEstimated = data
       .filter((app) => [APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.IN_PROGRESS].includes(app.status))
       .reduce((acc, v) => (v.missionDurationEstimated ? acc + v.missionDurationEstimated : acc), 0);

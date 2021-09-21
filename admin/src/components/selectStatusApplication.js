@@ -63,6 +63,7 @@ export default ({ hit, options = [], callback }) => {
       const { ok, code, data } = await api.put("/application", { _id: application._id, status, missionDurationDone: duration });
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       setApplication(data);
+      await updateStatusPhase2();
       toastr.success("Mis à jour!");
       if (status === APPLICATION_STATUS.VALIDATED) {
         await api.post(`/application/${data._id}/notify/${SENDINBLUE_TEMPLATES.referent.YOUNG_VALIDATED}`);
@@ -76,6 +77,20 @@ export default ({ hit, options = [], callback }) => {
     } catch (e) {
       console.log(e);
       if (e.code !== "NO_TEMPLATE_FOUND") toastr.error("Oups, une erreur est survenue :", translate(e.code));
+    }
+  };
+
+  const updateStatusPhase2 = async () => {
+    const responseYoung = await api.get(`/referent/young/${application.youngId}`);
+    const responseAllApplication = await api.get(`/young/${application.youngId}/application`);
+    const hoursDone = responseAllApplication?.data
+      .filter((app) => app.status === APPLICATION_STATUS.DONE)
+      .reduce((acc, v) => (v.missionDurationDone ? acc + v.missionDurationDone : acc), 0);
+
+    if (hoursDone >= 84 && responseYoung?.data?.statusPhase2 !== "VALIDATED") {
+      await api.put(`/referent/young/${application.youngId}`, { statusPhase2: "VALIDATED" });
+    } else if (hoursDone < 84 && responseYoung?.data?.statusPhase2 === "VALIDATED") {
+      await api.put(`/referent/young/${application.youngId}`, { statusPhase2: "IN_PROGRESS" });
     }
   };
 
