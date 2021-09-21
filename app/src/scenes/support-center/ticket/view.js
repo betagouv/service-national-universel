@@ -75,24 +75,22 @@ export default (props) => {
 };
 
 const Message = ({ from, date, content, fromMe }) => {
-  return content && content.length ? (
+  if (!content || !content.length) return null;
+  return fromMe ? (
     <MessageContainer>
-      {fromMe ? (
-        <MessageBubble align={"right"} backgroundColor={colors.darkPurple}>
-          <MessageContent color="white" dangerouslySetInnerHTML={{ __html: content }}></MessageContent>
-          <MessageDate color="#ccc">{date}</MessageDate>
-        </MessageBubble>
-      ) : null}
-      {!fromMe ? (
-        <MessageBubble align={"left"} backgroundColor={colors.lightGrey} color="white">
-          <MessageFrom>{from}</MessageFrom>
-          <MessageContent dangerouslySetInnerHTML={{ __html: content }}></MessageContent>
-          <MessageDate>{date}</MessageDate>
-        </MessageBubble>
-      ) : null}
+      <MessageBubble align={"right"} backgroundColor={colors.darkPurple}>
+        <MessageContent color="white" dangerouslySetInnerHTML={{ __html: content }}></MessageContent>
+        <MessageDate color="#ccc">{date}</MessageDate>
+      </MessageBubble>
     </MessageContainer>
   ) : (
-    <div />
+    <MessageContainer>
+      <MessageFrom>{from}</MessageFrom>
+      <MessageBubble align={"left"} backgroundColor={colors.lightGrey} color="white">
+        <MessageContent dangerouslySetInnerHTML={{ __html: content }}></MessageContent>
+        <MessageDate>{date}</MessageDate>
+      </MessageBubble>
+    </MessageContainer>
   );
 };
 
@@ -153,7 +151,8 @@ const MessageBubble = styled.div`
 const MessageFrom = styled.div`
   color: #444;
   font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: 300;
+  margin-left: 0.5rem;
 `;
 const MessageDate = styled.div`
   color: ${({ color }) => color};
