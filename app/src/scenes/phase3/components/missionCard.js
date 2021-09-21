@@ -12,7 +12,7 @@ export default ({ mission, image }) => {
   const handleClick = () => {};
   return (
     <Card>
-      <Col md={8}>
+      <Col md={6} xl={8}>
         <div className="inner">
           <div className="thumb">
             <img src={image} />
@@ -28,9 +28,9 @@ export default ({ mission, image }) => {
           ))}
         </Tags>
       </Col>
-      <Col md={4}>
+      <Col md={6} xl={4}>
         <Button onClick={handleClick} target="_blank" href={mission.applicationUrl}>
-          Voir la mission sur <b>{mission.publisherName}</b>
+          Voir sur <b>{mission.publisherName}</b>
           <img src={require("../../../assets/external-link.svg")} height={15} color="white" />
         </Button>
       </Col>
@@ -60,7 +60,7 @@ const Card = styled(Row)`
       display: flex;
       justify-content: center;
       align-items: center;
-      @media (max-width: 768px) {
+      @media (max-width: 1000px) {
         height: 30px;
         width: 30px;
         margin-right: 10px;
@@ -70,7 +70,7 @@ const Card = styled(Row)`
         /* max-width: 100%; */
         height: 30px;
         width: 30px;
-        @media (max-width: 768px) {
+        @media (max-width: 1000px) {
           height: 18px;
           width: 18px;
         }
@@ -105,6 +105,7 @@ const Button = styled.a`
   white-space: nowrap;
   display: flex;
   justify-content: center;
+  width: clamp(193px, 100%, 350px);
   :hover {
     color: #fff;
     background-color: #0e9f6e;
