@@ -204,7 +204,7 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
     } else if (template === SENDINBLUE_TEMPLATES.young.REFUSE_APPLICATION) {
       emailTo = [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }];
       params = { ...params, message, cta: `${APP_URL}/mission` };
-    } else if (template === "new") {
+    } else if (template === SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION) {
       // when it is a new application, there are 2 possibilities
       if (mission.isMilitaryPreparation === "true") {
         const referentManagerPhase2 = await getReferentManagerPhase2(application.youngDepartment);
@@ -213,7 +213,7 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
         params = { ...params, cta: `${ADMIN_URL}/volontaire/${application.youngId}` };
       } else {
         emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
-        template = SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION;
+        template = SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION_MIG;
         params = { ...params, cta: `${ADMIN_URL}/volontaire` };
       }
     } else {

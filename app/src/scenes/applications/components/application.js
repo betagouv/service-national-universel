@@ -149,7 +149,7 @@ const Footer = ({ application, tutor, onChange }) => {
       let template;
       if (status === APPLICATION_STATUS.ABANDON) template = SENDINBLUE_TEMPLATES.referent.CANCEL_APPLICATION;
       if (status === APPLICATION_STATUS.CANCEL) template = SENDINBLUE_TEMPLATES.referent.CANCEL_APPLICATION;
-      if (status === APPLICATION_STATUS.WAITING_VALIDATION) template = "new";
+      if (status === APPLICATION_STATUS.WAITING_VALIDATION) template = SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION;
       if (template) await api.post(`/application/${application._id}/notify/${template}`);
       onChange(data);
     } catch (error) {

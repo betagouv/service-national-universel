@@ -200,7 +200,7 @@ describe("Application", () => {
       const mission = await createMissionHelper({ ...getNewMissionFixture(), tutorId: referent._id });
       const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission._id });
       for (const template of [
-        "new",
+        SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION,
         SENDINBLUE_TEMPLATES.referent.YOUNG_VALIDATED,
         SENDINBLUE_TEMPLATES.young.VALIDATE_APPLICATION,
         SENDINBLUE_TEMPLATES.referent.CANCEL_APPLICATION,
