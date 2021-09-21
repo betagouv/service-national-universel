@@ -48,29 +48,23 @@ export default () => {
                   Envoyer l'attestation de réalisation par mail {">"}
                 </MailAttestationButton>
               </p>
-              {/* {young.statusPhase1 === "DONE" && young.statusPhase2 === "VALIDATED" ? (
-              <>
-                <Separator />
-                <p>
-                  <strong>Attestation de réalisation du SNU</strong>
-                  <br />
-                  Télécharger votre attestation de réalisation du SNU
-                  <br />
-                  <DownloadAttestationButton
-                    style={{
-                      color: "#5949d0",
-                      textAlign: "left",
-                      fontSize: "1rem",
-                      cursor: "pointer",
-                    }}
-                    young={young}
-                    uri="snu"
-                  >
-                    Télécharger mon attestation {">"}
-                  </DownloadAttestationButton>
-                </p>
-              </>
-            ) : null} */}
+              {young.statusPhase1 === "DONE" && young.statusPhase2 === "VALIDATED" ? (
+                <>
+                  <Separator />
+                  <p>
+                    <strong>Attestation de réalisation du SNU</strong>
+                    <br />
+                    Télécharger votre attestation de réalisation du SNU
+                    <br />
+                    <DownloadAttestationButton young={young} uri="snu">
+                      Télécharger mon attestation {">"}
+                    </DownloadAttestationButton>
+                    <MailAttestationButton young={young} type="snu" template="certificate" placeholder="Attestation de réalisation de snu">
+                      Envoyer l'attestation de réalisation par mail {">"}
+                    </MailAttestationButton>
+                  </p>
+                </>
+              ) : null}
             </div>
             <div className="thumb" />
           </Hero>
