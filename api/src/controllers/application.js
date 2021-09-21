@@ -54,6 +54,32 @@ const updatePlacesMission = async (app) => {
   }
 };
 
+const getReferentManagerPhase2 = async (department) => {
+  // get the referent_department manager_phase2
+  let toReferent = await ReferentObject.findOne({
+    subRole: SUB_ROLES.manager_phase2,
+    role: ROLES.REFERENT_DEPARTMENT,
+    department,
+  });
+  // if not found, get the referent_region manager_phase2
+  if (!toReferent) {
+    toReferent = await ReferentObject.findOne({
+      subRole: SUB_ROLES.manager_phase2,
+      role: ROLES.REFERENT_REGION,
+      region: department2region[department],
+    });
+  }
+  // if not found, get the manager_department
+  if (!toReferent) {
+    toReferent = await ReferentObject.findOne({
+      subRole: SUB_ROLES.manager_department,
+      role: ROLES.REFERENT_DEPARTMENT,
+      department,
+    });
+  }
+  return toReferent;
+};
+
 router.post("/", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
   try {
     const { value, error } = validateNewApplication(req.body, req.user);
@@ -122,32 +148,6 @@ router.get("/:id", passport.authenticate("referent", { session: false }), async 
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
-
-const getReferentManagerPhase2 = async (department) => {
-  // get the referent_department manager_phase2
-  let toReferent = await ReferentObject.findOne({
-    subRole: SUB_ROLES.manager_phase2,
-    role: ROLES.REFERENT_DEPARTMENT,
-    department,
-  });
-  // if not found, get the referent_region manager_phase2
-  if (!toReferent) {
-    toReferent = await ReferentObject.findOne({
-      subRole: SUB_ROLES.manager_phase2,
-      role: ROLES.REFERENT_REGION,
-      region: department2region[department],
-    });
-  }
-  // if not found, get the manager_department
-  if (!toReferent) {
-    toReferent = await ReferentObject.findOne({
-      subRole: SUB_ROLES.manager_department,
-      role: ROLES.REFERENT_DEPARTMENT,
-      department,
-    });
-  }
-  return toReferent;
-};
 
 router.post("/notify/docs-military-preparation/:template", passport.authenticate("young", { session: false }), async (req, res) => {
   const { error, value: template } = Joi.string().required().validate(req.params.template);
