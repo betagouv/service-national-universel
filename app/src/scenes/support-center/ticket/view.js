@@ -56,7 +56,7 @@ export default (props) => {
       <div>
         <InputContainer>
           <textarea row={2} placeholder="Mon message..." className="form-control" onChange={(e) => setMessage(e.target.value)} value={message} />
-          <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
+          <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end", marginTop: "1rem" }}>
             <LoadingButton onClick={send} disabled={!message}>
               Envoyer
             </LoadingButton>
@@ -117,6 +117,9 @@ const InputContainer = styled.div`
   display: flex;
   flex-direction: row;
   align-items: flex-end;
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
   padding: 0.5rem;
 `;
 const DetailContainer = styled.div`
