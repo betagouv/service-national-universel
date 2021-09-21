@@ -208,7 +208,7 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
       // when it is a new application, there are 2 possibilities
       if (mission.isMilitaryPreparation === "true") {
         const referentManagerPhase2 = await getReferentManagerPhase2(application.youngDepartment);
-        emailTo = [{ name: `${referentManagerPhase2.firstName} ${referentManagerPhase2.lastName}`, referentManagerPhase2: referent.email }];
+        emailTo = [{ name: `${referentManagerPhase2.firstName} ${referentManagerPhase2.lastName}`, email: referentManagerPhase2.email }];
         template = SENDINBLUE_TEMPLATES.referent.NEW_MILITARY_PREPARATION_APPLICATION;
         params = { ...params, cta: `${ADMIN_URL}/volontaire/${application.youngId}` };
       } else {
