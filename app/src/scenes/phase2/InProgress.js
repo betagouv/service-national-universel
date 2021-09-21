@@ -2,20 +2,37 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { toastr } from "react-redux-toastr";
 
 import { HeroContainer, Hero, Content } from "../../components/Content";
 import api from "../../services/api";
+import { translate, APPLICATION_STATUS } from "../../utils";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
 
   const [referentManagerPhase2, setReferentManagerPhase2] = useState();
+  const [hoursDone, setHoursDone] = useState({});
+
   useEffect(() => {
     (async () => {
       const { ok, data } = await api.get(`/referent/manager_phase2/${young.department}`);
       if (ok) return setReferentManagerPhase2(data);
     })();
   }, []);
+
+  useEffect(() => {
+    getApplications();
+  }, []);
+
+  const getApplications = async () => {
+    if (!young) return;
+    const { ok, data, code } = await api.get(`/young/${young._id}/application`);
+    if (!ok) return toastr.error("Oups, une erreur est survenue", translate(code));
+    const hoursDone = data.filter((app) => app.status === APPLICATION_STATUS.DONE).reduce((acc, v) => (v.missionDurationDone ? acc + v.missionDurationDone : acc), 0);
+
+    return setHoursDone(hoursDone);
+  };
   const renderStep = () => {
     return (
       <>
@@ -33,6 +50,12 @@ export default () => {
               <p>
                 <strong>Vos missions d'intérêt général</strong>
                 <br />
+                {hoursDone >= 0 ? (
+                  <>
+                    Vous avez réalisé {hoursDone} heures de mission d'intérêt général
+                    <br />
+                  </>
+                ) : null}
                 <Link to="/mission">Trouver une mission {">"}</Link>
                 <br />
                 <Link to="/candidature">Suivez vos candidatures {">"}</Link>
