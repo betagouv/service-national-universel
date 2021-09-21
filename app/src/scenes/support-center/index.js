@@ -217,6 +217,7 @@ const List = styled.div`
   }
   .ticket p {
     margin: 0;
+    padding: 0.5rem;
   }
   .ticket-date {
     justify-self: end;
