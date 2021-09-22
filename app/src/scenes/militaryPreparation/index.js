@@ -226,8 +226,9 @@ const SubmitComponent = ({ young, loading, onClick, errors }) => (
 );
 
 const CardsContainer = styled.div`
+  padding: 1rem;
   display: grid;
-  grid-gap: 1rem;
+  grid-gap: 2rem;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
 `;
 
