@@ -167,8 +167,8 @@ export default () => {
                     "Mobilité aux alentours d'un de ses proches": data.mobilityNearRelative,
                     "Informations du proche":
                       data.mobilityNearRelative &&
-                      data.mobilityNearRelativeName + " - " + data.mobilityNearRelativeAddress + " - " + data.mobilityNearRelativeZip + " - " + data.mobilityNearRelativeCity,
-                    "Mode de transport": data.mobilityTransport?.map((t) => translate(t)),
+                      [data.mobilityNearRelativeName, data.mobilityNearRelativeAddress, data.mobilityNearRelativeZip, data.mobilityNearRelativeCity].filter((e) => e)?.join(", "),
+                    "Mode de transport": data.mobilityTransport?.map((t) => translate(t)).join(", "),
                     "Autre mode de transport": data.mobilityTransportOther,
                     "Format de mission": data.missionFormat,
                     "Engagement dans une structure en dehors du SNU": data.engaged,

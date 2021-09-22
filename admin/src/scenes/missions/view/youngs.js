@@ -81,7 +81,7 @@ export default ({ mission, applications }) => {
                       "Mobilité aux alentours de son établissement": data.young.mobilityNearSchool,
                       "Mobilité aux alentours de son domicile": data.young.mobilityNearHome,
                       "Mobilité aux alentours d'un de ses proches": data.young.mobilityNearRelative,
-                      "Mode de transport": data.young.mobilityTransport?.map((t) => translate(t)),
+                      "Mode de transport": data.young.mobilityTransport?.map((t) => translate(t)).join(", "),
                       "Autre mode de transport": data.young.mobilityTransportOther,
                       "Prénom représentant légal 1": data.young.parent1FirstName,
                       "Nom représentant légal 1": data.young.parent1LastName,
