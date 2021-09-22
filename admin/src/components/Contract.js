@@ -184,7 +184,7 @@ export default ({ young, admin }) => {
       missionAddress: mission.address || "",
       missionCity: mission.city || "",
       missionZip: mission.zip || "",
-      missionDuration: mission.duration || "",
+      missionDuration: mission.duration?.toString() || "",
       missionFrequence: mission.frequence || "",
       date: dateForDatePicker(new Date()),
       projectManagerFirstName: managerDepartment?.firstName || "",
