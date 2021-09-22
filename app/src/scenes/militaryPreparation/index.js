@@ -134,6 +134,7 @@ export default () => {
                       préparation militaire que vous effectuerez. Sans la fourniture de ces pièces, l’éligibilité de votre candidature ne pourra pas être étudiée."
               />
               <CardsContainer>
+                <SubmitComponent young={young} loading={isSubmitting} onClick={handleSubmit} errors={errors} />
                 <Row>
                   <Col md={6} xs={12} style={{ paddingBottom: "15px" }}>
                     <UploadCard
@@ -179,19 +180,7 @@ export default () => {
                     />
                   </Col>
                 </Row>
-                <Footer>
-                  {!young.statusMilitaryPreparationFiles ? (
-                    <LoadingButton loading={isSubmitting} onClick={handleSubmit}>
-                      Valider mon dossier
-                    </LoadingButton>
-                  ) : null}
-                  {["WAITING_CORRECTION", "WAITING_VALIDATION"].includes(young.statusMilitaryPreparationFiles) ? (
-                    <LoadingButton loading={isSubmitting} onClick={handleSubmit}>
-                      Mettre à jour mon dossier
-                    </LoadingButton>
-                  ) : null}
-                  {Object.keys(errors).length ? <h3>Vous ne pouvez pas envoyer votre dossier à vérifier car il manque des pièces requises.</h3> : null}
-                </Footer>
+                <SubmitComponent young={young} loading={isSubmitting} onClick={handleSubmit} errors={errors} />
               </CardsContainer>
             </>
           )}
@@ -208,14 +197,29 @@ export default () => {
   );
 };
 
+const SubmitComponent = ({ young, loading, onClick, errors }) => (
+  <Footer>
+    {!young.statusMilitaryPreparationFiles ? (
+      <LoadingButton loading={loading} onClick={onClick}>
+        Demander la validation de mon dossier
+      </LoadingButton>
+    ) : null}
+    {["WAITING_CORRECTION", "WAITING_VALIDATION"].includes(young.statusMilitaryPreparationFiles) ? (
+      <LoadingButton loading={loading} onClick={onClick}>
+        Mettre à jour et redemander la validation de mon dossier
+      </LoadingButton>
+    ) : null}
+    {Object.keys(errors).length ? <h3>Vous ne pouvez pas envoyer votre dossier à vérifier car il manque des pièces requises.</h3> : null}
+  </Footer>
+);
+
 const CardsContainer = styled.div`
   margin: 0 auto;
   max-width: 80rem;
 `;
 
 const Footer = styled.div`
-  margin-bottom: 2rem;
-  margin-top: 1rem;
+  margin: 1rem;
   display: flex;
   flex-direction: column;
   justify-content: center;
