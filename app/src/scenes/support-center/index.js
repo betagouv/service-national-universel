@@ -111,7 +111,7 @@ const Container = styled.div`
   .help-section {
     max-width: 500px;
     text-align: center;
-    margin: 0 20px;
+    margin: 0 0.5rem;
   }
   .buttons {
     display: grid;
@@ -201,6 +201,10 @@ const Card = styled.div`
 const List = styled.div`
   background-color: #fff;
   margin: 2rem;
+  @media (max-width: 1024px) {
+    margin: 0.5rem;
+  }
+
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   border-radius: 0.5rem;
   overflow: hidden;
@@ -217,6 +221,7 @@ const List = styled.div`
   }
   .ticket p {
     margin: 0;
+    padding: 0.5rem;
   }
   .ticket-date {
     justify-self: end;

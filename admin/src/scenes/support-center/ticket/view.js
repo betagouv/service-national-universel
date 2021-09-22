@@ -3,18 +3,17 @@ import { Container } from "reactstrap";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { NavLink } from "react-router-dom";
-import { formatDistanceToNow } from "date-fns";
-import { fr } from "date-fns/locale";
+import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
-import { formatStringLongDate } from "../../../utils";
+import { formatStringLongDate, colors } from "../../../utils";
 import Loader from "../../../components/Loader";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 
 export default (props) => {
   const [ticket, setTicket] = useState();
   const [message, setMessage] = useState();
-  const [messageEnd, setMessageEnd] = useState();
+  const user = useSelector((state) => state.Auth.user);
 
   const getTicket = async () => {
     try {
@@ -34,14 +33,6 @@ export default (props) => {
       clearInterval(ping);
     };
   }, []);
-
-  const scrollToBottom = () => {
-    messageEnd.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(() => {
-    if (messageEnd) scrollToBottom();
-  }, [messageEnd, ticket]);
 
   const send = async () => {
     if (!message) return;
@@ -65,19 +56,19 @@ export default (props) => {
         <Details title="Crée le" content={ticket?.created_at && formatStringLongDate(ticket?.created_at)} />
       </Heading>
       <div>
-        <div>
-          <InputContainer>
-            <input placeholder="Mon message..." className="form-control" onChange={(e) => setMessage(e.target.value)} value={message} />
+        <InputContainer>
+          <textarea row={2} placeholder="Mon message..." className="form-control" onChange={(e) => setMessage(e.target.value)} value={message} />
+          <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
             <LoadingButton onClick={send} disabled={!message}>
               Envoyer
             </LoadingButton>
-          </InputContainer>
-        </div>
+          </div>
+        </InputContainer>
         <Box>
           {ticket?.articles
             ?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
             ?.map((article, i) => (
-              <Message key={i} from={article.from} date={`il y a ${formatDistanceToNow(new Date(article.created_at), { locale: fr })}`} content={article.body} />
+              <Message key={i} fromMe={user.email === article.created_by} from={article.from} date={formatStringLongDate(article.created_at)} content={article.body} />
             ))}
         </Box>
       </div>
@@ -85,17 +76,23 @@ export default (props) => {
   );
 };
 
-const Message = ({ from, date, content }) => {
-  return content && content.length ? (
+const Message = ({ from, date, content, fromMe }) => {
+  if (!content || !content.length) return null;
+  return fromMe ? (
     <MessageContainer>
-      <MessageHeader>
-        <MessageFrom>{from}</MessageFrom>
-        <MessageDate>{date}</MessageDate>
-      </MessageHeader>
-      <MessageContent dangerouslySetInnerHTML={{ __html: content }}></MessageContent>
+      <MessageBubble align={"right"} backgroundColor={colors.darkPurple}>
+        <MessageContent color="white" dangerouslySetInnerHTML={{ __html: content }}></MessageContent>
+        <MessageDate color="#ccc">{date}</MessageDate>
+      </MessageBubble>
     </MessageContainer>
   ) : (
-    <div />
+    <MessageContainer>
+      <MessageFrom>{from}</MessageFrom>
+      <MessageBubble align={"left"} backgroundColor={colors.lightGrey} color="white">
+        <MessageContent dangerouslySetInnerHTML={{ __html: content }}></MessageContent>
+        <MessageDate>{date}</MessageDate>
+      </MessageBubble>
+    </MessageContainer>
   );
 };
 
@@ -122,6 +119,7 @@ const BackButton = styled(NavLink)`
 const InputContainer = styled.div`
   display: flex;
   flex-direction: row;
+  align-items: flex-end;
   padding: 0.5rem;
 `;
 const DetailContainer = styled.div`
@@ -142,28 +140,33 @@ const DetailContent = styled.div`
 const MessageContainer = styled.div`
   display: flex;
   flex-direction: column;
-  padding: 0.5rem;
-  border-bottom: 1px solid #eee;
+  padding: 0.2rem;
 `;
-const MessageHeader = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  margin-bottom: 0.2rem;
+const MessageBubble = styled.div`
+  max-width: 80%;
+  min-width: 20%;
+  padding: 0.5rem 1.5rem;
+  border-radius: 1rem;
+  background-color: ${({ backgroundColor }) => backgroundColor};
+  margin-left: ${({ align }) => (align === "right" ? "auto" : 0)};
+  margin-right: ${({ align }) => (align === "left" ? "auto" : 0)};
 `;
 const MessageFrom = styled.div`
   color: #444;
   font-size: 0.8rem;
-  font-weight: 600;
+  font-weight: 300;
+  margin-left: 0.5rem;
 `;
 const MessageDate = styled.div`
-  color: #666;
+  color: ${({ color }) => color};
   font-weight: 400;
-  font-size: 0.8rem;
+  font-size: 0.65rem;
+  text-align: right;
+  font-style: italic;
 `;
 const MessageContent = styled.div`
   font-weight: 400;
-  color: #666;
+  color: ${({ color }) => color};
 `;
 const Box = styled.div`
   width: ${(props) => props.width || 100}%;
