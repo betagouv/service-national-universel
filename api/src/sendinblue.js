@@ -109,6 +109,16 @@ async function deleteContact(id) {
 }
 
 /**
+ * https://developers.sendinblue.com/reference#deletecontact
+ * @param id {string|number} Email (urlencoded) OR ID of the contact
+ * @returns {Promise<void>}
+ */
+async function getContact(id) {
+  const identifier = typeof id === "string" ? encodeURIComponent(id) : id;
+  return await api(`/contacts/${identifier}`, { method: "GET" });
+}
+
+/**
  * https://developers.sendinblue.com/reference#updatecontact
  * @param id {string|number} Email (urlencoded) OR ID of the contact
  * @param attributes {object}
@@ -136,8 +146,8 @@ async function updateContact(id, { attributes, emailBlacklisted, smsBlacklisted,
   return true;
 }
 
-async function sync(obj, type) {
-  if (ENVIRONMENT !== "production") return console.log("no sync sendinblue");
+async function sync(obj, type, { force } = { force: false }) {
+  if (ENVIRONMENT !== "production" && !force) return console.log("no sync sendinblue");
   try {
     const user = JSON.parse(JSON.stringify(obj));
     if (!user) return console.log("ERROR WITH ", obj);
@@ -190,4 +200,4 @@ async function unsync(obj) {
   }
 }
 
-module.exports = { sync, unsync, sendEmail, sendTemplate, createContact, updateContact, deleteContact };
+module.exports = { api, sync, unsync, sendEmail, sendTemplate, createContact, updateContact, deleteContact, getContact };
