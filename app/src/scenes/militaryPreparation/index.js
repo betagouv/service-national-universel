@@ -14,11 +14,13 @@ import UploadCard from "./components/UploadCard";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import AlertBox from "../../components/AlertBox";
 import Loader from "../../components/Loader";
+import ModalConfirm from "../../components/modals/ModalConfirm";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
   const history = useHistory();
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
   const [applicationsToMilitaryPreparation, setApplicationsToMilitaryPreparation] = useState(null);
   const [referentManagerPhase2, setReferentManagerPhase2] = useState();
@@ -44,6 +46,40 @@ export default () => {
   };
 
   if (!applicationsToMilitaryPreparation) return <Loader />;
+
+  const onClickSubmit = (values, actions) => {
+    return setModal({
+      isOpen: true,
+      onConfirm: () => onSubmit(values),
+      onCancel: () => {
+        setModal({ isOpen: false, onConfirm: null });
+        actions.setSubmitting(false);
+      },
+      title: "Demande de validation de dossier",
+      message: "Je confirme avoir téléverser tous les documents demandés, et transmets mon dossier pour validation.",
+    });
+  };
+
+  const onSubmit = async (values) => {
+    try {
+      const { ok, code, data: young } = await api.put("/young", { statusMilitaryPreparationFiles: "WAITING_VALIDATION" });
+      if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+      dispatch(setYoung(young));
+      for (let i = 0; i < applicationsToMilitaryPreparation.length; i++) {
+        const app = applicationsToMilitaryPreparation[i];
+        if (app.status === "WAITING_VERIFICATION") continue;
+        const responseApplication = await api.put("/application", { _id: app._id, status: "WAITING_VERIFICATION" });
+        if (!responseApplication.ok) toastr.error(translate(responseApplication.code), "Une erreur s'est produite lors du traitement");
+      }
+      const responseNotification = await api.post(`/application/notify/docs-military-preparation/${SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_SUBMITTED}`);
+      if (!responseNotification.ok) return toastr.error(translate(responseNotification.code), "Une erreur s'est produite lors de l'envoie de la notification.");
+      toastr.success("Votre dossier a bien été transmis");
+      history.push("/");
+    } catch (e) {
+      console.log(e);
+      toastr.error("Erreur !");
+    }
+  };
 
   return (
     <>
@@ -98,31 +134,7 @@ export default () => {
         </Hero>
       </HeroContainer>
       {applicationsToMilitaryPreparation.length ? (
-        <Formik
-          initialValues={young}
-          validateOnChange={false}
-          validateOnBlur={false}
-          onSubmit={async (values) => {
-            try {
-              const { ok, code, data: young } = await api.put("/young", { statusMilitaryPreparationFiles: "WAITING_VALIDATION" });
-              if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
-              dispatch(setYoung(young));
-              for (let i = 0; i < applicationsToMilitaryPreparation.length; i++) {
-                const app = applicationsToMilitaryPreparation[i];
-                if (app.status === "WAITING_VERIFICATION") continue;
-                const responseApplication = await api.put("/application", { _id: app._id, status: "WAITING_VERIFICATION" });
-                if (!responseApplication.ok) toastr.error(translate(responseApplication.code), "Une erreur s'est produite lors du traitement");
-              }
-              const responseNotification = await api.post(`/application/notify/docs-military-preparation/${SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_SUBMITTED}`);
-              if (!responseNotification.ok) return toastr.error(translate(responseNotification.code), "Une erreur s'est produite lors de l'envoie de la notification.");
-              toastr.success("Votre dossier a bien été transmis");
-              history.push("/");
-            } catch (e) {
-              console.log(e);
-              toastr.error("Erreur !");
-            }
-          }}
-        >
+        <Formik initialValues={young} validateOnChange={false} validateOnBlur={false} onSubmit={onClickSubmit}>
           {({ values, handleChange, handleSubmit, errors, isSubmitting }) => (
             <>
               <AlertBox
@@ -183,6 +195,16 @@ export default () => {
           </Link>
         </NoResult>
       )}
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        onCancel={modal?.onCancel}
+        onConfirm={() => {
+          modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
     </>
   );
 };
