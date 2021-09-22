@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 
 import { HeroContainer, Hero, Content } from "../../components/Content";
 import api from "../../services/api";
+import { ENABLE_PM } from "../../utils";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
@@ -44,6 +45,14 @@ export default () => {
                 Consulter des milliers de missions disponibles pour la réalisation de votre phase 2, candidatez-y, classez vos choix et suivez vos candidatures
                 <br />
                 <Link to="/mission">Trouver une mission {">"}</Link>
+                {ENABLE_PM && (
+                  <>
+                    <br />
+                    <Link to="/ma-preparation-militaire">Ma préparation militaire {">"}</Link>
+                  </>
+                )}
+                <br />
+                <Link to="/candidature">Suivre mes candidatures {">"}</Link>
               </p>
             </div>
             <div className="thumb" />
