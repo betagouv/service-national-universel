@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 import Loader from "../../../components/Loader";
 
 import api from "../../../services/api";
-import { APPLICATION_STATUS, ENABLE_PM, SENDINBLUE_TEMPLATES } from "../../../utils";
+import { translate, APPLICATION_STATUS, ENABLE_PM, SENDINBLUE_TEMPLATES } from "../../../utils";
 
 import { toastr } from "react-redux-toastr";
 
