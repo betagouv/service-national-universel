@@ -69,14 +69,12 @@ const Card = styled.div`
   @media (max-width: 768px) {
     border-radius: 0;
   }
-  margin: 1rem;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   position: relative;
   overflow: hidden;
   display: flex;
   justify-content: space-between;
   background-color: #fff;
-  height: 100%;
 `;
 
 const Content = styled.div`

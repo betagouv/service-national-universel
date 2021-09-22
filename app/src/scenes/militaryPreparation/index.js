@@ -133,55 +133,45 @@ export default () => {
                       auxquelles vous postulez. Ces pièces seront conservées jusqu’à l’examen de votre candidature et, si votre candidature est acceptée, jusqu’à la fin de la
                       préparation militaire que vous effectuerez. Sans la fourniture de ces pièces, l’éligibilité de votre candidature ne pourra pas être étudiée."
               />
+              <SubmitComponent young={young} loading={isSubmitting} onClick={handleSubmit} errors={errors} />
               <CardsContainer>
-                <SubmitComponent young={young} loading={isSubmitting} onClick={handleSubmit} errors={errors} />
-                <Row>
-                  <Col md={6} xs={12} style={{ paddingBottom: "15px" }}>
-                    <UploadCard
-                      errors={errors}
-                      title="Pièce d'identité"
-                      subTitle="Déposez ici la copie d’une pièce d’identité en cours de validité (CNI, passeport)."
-                      values={values}
-                      name="militaryPreparationFilesIdentity"
-                      handleChange={handleChange}
-                    />
-                  </Col>
-                  <Col md={6} xs={12} style={{ paddingBottom: "15px" }}>
-                    <UploadCard
-                      errors={errors}
-                      title="Attestation de recensement"
-                      subTitle="Déposez ici la copie de votre attestation de recensement."
-                      subsubTitle="À défaut, à téléverser dès réception du document ou à apporter pour le 1er jour de la préparation militaire."
-                      values={values}
-                      name="militaryPreparationFilesCensus"
-                      handleChange={handleChange}
-                    />
-                  </Col>
-                  <Col md={6} xs={12} style={{ paddingBottom: "15px" }}>
-                    <UploadCard
-                      errors={errors}
-                      title="Autorisation parentale pour effectuer une préparation militaire"
-                      subTitle="Téléchargez puis téléversez le formulaire rempli par votre représentant légal consentant à votre participation à une préparation militaire."
-                      values={values}
-                      name="militaryPreparationFilesAuthorization"
-                      handleChange={handleChange}
-                      template="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Autorisation_parentale-preparation_militaire.pdf"
-                    />
-                  </Col>
-                  <Col md={6} xs={12} style={{ paddingBottom: "15px" }}>
-                    <UploadCard
-                      errors={errors}
-                      title="Certificat médical de non contre indication à la pratique sportive"
-                      subTitle="Téléchargez puis téléversez le formulaire rempli par votre médecin traitant certifiant l’absence de contre-indication à la pratique sportive."
-                      values={values}
-                      name="militaryPreparationFilesCertificate"
-                      handleChange={handleChange}
-                      template="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/certificat_medical.pdf"
-                    />
-                  </Col>
-                </Row>
-                <SubmitComponent young={young} loading={isSubmitting} onClick={handleSubmit} errors={errors} />
+                <UploadCard
+                  errors={errors}
+                  title="Pièce d'identité"
+                  subTitle="Déposez ici la copie d’une pièce d’identité en cours de validité (CNI, passeport)."
+                  values={values}
+                  name="militaryPreparationFilesIdentity"
+                  handleChange={handleChange}
+                />
+                <UploadCard
+                  errors={errors}
+                  title="Attestation de recensement"
+                  subTitle="Déposez ici la copie de votre attestation de recensement."
+                  subsubTitle="À défaut, à téléverser dès réception du document ou à apporter pour le 1er jour de la préparation militaire."
+                  values={values}
+                  name="militaryPreparationFilesCensus"
+                  handleChange={handleChange}
+                />
+                <UploadCard
+                  errors={errors}
+                  title="Autorisation parentale pour effectuer une préparation militaire"
+                  subTitle="Téléchargez puis téléversez le formulaire rempli par votre représentant légal consentant à votre participation à une préparation militaire."
+                  values={values}
+                  name="militaryPreparationFilesAuthorization"
+                  handleChange={handleChange}
+                  template="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Autorisation_parentale-preparation_militaire.pdf"
+                />
+                <UploadCard
+                  errors={errors}
+                  title="Certificat médical de non contre indication à la pratique sportive"
+                  subTitle="Téléchargez puis téléversez le formulaire rempli par votre médecin traitant certifiant l’absence de contre-indication à la pratique sportive."
+                  values={values}
+                  name="militaryPreparationFilesCertificate"
+                  handleChange={handleChange}
+                  template="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/certificat_medical.pdf"
+                />
               </CardsContainer>
+              <SubmitComponent young={young} loading={isSubmitting} onClick={handleSubmit} errors={errors} />
             </>
           )}
         </Formik>
@@ -214,8 +204,9 @@ const SubmitComponent = ({ young, loading, onClick, errors }) => (
 );
 
 const CardsContainer = styled.div`
-  margin: 0 auto;
-  max-width: 80rem;
+  display: grid;
+  grid-gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
 `;
 
 const Footer = styled.div`
