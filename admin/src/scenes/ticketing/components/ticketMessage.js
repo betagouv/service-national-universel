@@ -61,7 +61,7 @@ export default ({ ticketId }) => {
       <div>
         <Box>
           {ticket?.articles
-            ?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+            ?.sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
             ?.map((article, i) => (
               <Message key={i} fromMe={user.email === article.created_by} from={article.from} date={formatStringLongDate(article.created_at)} content={article.body} />
             ))}
