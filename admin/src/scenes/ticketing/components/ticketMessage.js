@@ -59,6 +59,13 @@ export default ({ ticketId }) => {
         <Details title="Crée le" content={ticket?.created_at && formatStringLongDate(ticket?.created_at)} />
       </Heading>
       <div>
+        <Box>
+          {ticket?.articles
+            ?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+            ?.map((article, i) => (
+              <Message key={i} fromMe={user.email === article.created_by} from={article.from} date={formatStringLongDate(article.created_at)} content={article.body} />
+            ))}
+        </Box>
         <InputContainer>
           <textarea row={2} placeholder="Mon message..." className="form-control" onChange={(e) => setMessage(e.target.value)} value={message} />
           <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
@@ -67,13 +74,6 @@ export default ({ ticketId }) => {
             </LoadingButton>
           </div>
         </InputContainer>
-        <Box>
-          {ticket?.articles
-            ?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-            ?.map((article, i) => (
-              <Message key={i} fromMe={user.email === article.created_by} from={article.from} date={formatStringLongDate(article.created_at)} content={article.body} />
-            ))}
-        </Box>
       </div>
     </Container>
   );
