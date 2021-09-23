@@ -9,12 +9,12 @@ export default () => {
   return (
     <NotifcationContainer>
       <Notification>
-        <MailCloseIcon color="#F8B951" style={{ margin: 0, padding: "5px" }} />
+        <MailCloseIcon color="#F1545B" style={{ margin: 0, padding: "5px" }} />
         <NotificationNumber>3</NotificationNumber> new&nbsp;tickets
       </Notification>
       <VL></VL>
       <Notification>
-        <MailOpenIcon color="#F1545B" style={{ margin: 0, padding: "5px" }} />
+        <MailOpenIcon color="#F8B951" style={{ margin: 0, padding: "5px" }} />
         <NotificationNumber>3</NotificationNumber> opened&nbsp;tickets
       </Notification>
       <VL></VL>
