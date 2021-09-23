@@ -42,7 +42,7 @@ export const NotifcationContainer = styled.div`
   width: fit-content;
 `;
 
-export const Notification = styled.p`
+export const Notification = styled.div`
   flex: 1;
   display: flex;
   padding: 10px;
