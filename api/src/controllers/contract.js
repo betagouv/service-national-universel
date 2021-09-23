@@ -16,6 +16,7 @@ const contractTemplate = require("../templates/contractPhase2");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 const { validateId, validateContract, validateOptionalId } = require("../utils/validator");
 const { serializeContract } = require("../utils/serializer");
+const { updateYoungPhase2Hours } = require("../utils");
 
 async function updateYoungStatusPhase2Contract(young) {
   const contracts = await ContractObject.find({ youngId: young._id });
@@ -220,12 +221,15 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
     const application = await ApplicationObject.findById(contract.applicationId);
     if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     application.contractId = contract._id;
+    // We have to update the application's mission duration.
+    application.missionDuration = contract.missionDuration;
     await application.save();
 
     // Update young status.
     const young = await YoungObject.findById(contract.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     await updateYoungStatusPhase2Contract(young);
+    await updateYoungPhase2Hours(young);
 
     return res.status(200).send({ ok: true, data: serializeContract(contract, req.user) });
   } catch (error) {

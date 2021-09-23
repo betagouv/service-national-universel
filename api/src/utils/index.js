@@ -337,6 +337,20 @@ const getYoungFromWaitingList = async (young) => {
   }
 };
 
+async function updateYoungPhase2Hours(young) {
+  const applications = await ApplicationObject.find({
+    youngId: young._id,
+    status: { $in: ["VALIDATED", "IN_PROGRESS", "DONE"] },
+  });
+  young.set({
+    numberHoursDone: applications.filter((application) => application.status === "DONE").reduce((acc, current) => acc + current.missionDuration, 0),
+    numberHoursEstimated: applications
+      .filter((application) => ["VALIDATED", "IN_PROGRESS"].includes(application.status))
+      .reduce((acc, current) => acc + current.missionDuration, 0),
+  });
+  await young.save();
+}
+
 function isYoung(user) {
   return user instanceof YoungModel;
 }
@@ -402,4 +416,5 @@ module.exports = {
   isReferent,
   inSevenDays,
   getBaseUrl,
+  updateYoungPhase2Hours,
 };

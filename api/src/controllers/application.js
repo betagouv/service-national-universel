@@ -14,6 +14,7 @@ const { validateUpdateApplication, validateNewApplication } = require("../utils/
 const { ADMIN_URL, APP_URL } = require("../config");
 const { SUB_ROLES, ROLES, SENDINBLUE_TEMPLATES, department2region } = require("snu-lib");
 const { serializeApplication } = require("../utils/serializer");
+const { updateYoungPhase2Hours } = require("../utils");
 
 const updateStatusPhase2 = async (app) => {
   const young = await YoungObject.findById(app.youngId);
@@ -118,6 +119,9 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false })
     const application = await ApplicationObject.findById(value._id);
     if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    const young = await YoungObject.findById(application.youngId);
+    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
     // A young can only update his own application.
     if (isYoung(req.user) && application.youngId.toString() !== req.user._id.toString()) {
       return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -128,6 +132,7 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false })
 
     await updateStatusPhase2(application);
     await updatePlacesMission(application);
+    await updateYoungPhase2Hours(young);
     res.status(200).send({ ok: true, data: serializeApplication(application) });
   } catch (error) {
     capture(error);
