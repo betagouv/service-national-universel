@@ -5,14 +5,14 @@ import styled from "styled-components";
 import api from "../../../services/api";
 
 export default ({ ticket }) => {
+  const [user, setUser] = useState([]);
 
-  const user  = "";
-  
   useEffect(() => {
     (async () => {
       if (!ticket?.articles.length) return;
       const email = ticket.articles[0].created_by;
-      const { data } = await api.get(`/`);
+      const { data } = await api.get(`/young?email=${email}`);
+      console.log("data", data);
     })();
   }, [ticket]);
 

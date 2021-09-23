@@ -34,8 +34,6 @@ const api = async (path, options = {}) => {
   });
 
   const contentType = res.headers.raw()["content-type"];
-
-    console.log("No json",res);
   if (contentType && contentType.length && contentType[0].includes("application/json")) return await res.json();
   return await res.text();
 };
