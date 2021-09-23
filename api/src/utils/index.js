@@ -347,13 +347,13 @@ async function updateYoungPhase2Hours(young) {
     phase2NumberHoursDone: String(
       applications
         .filter((application) => application.status === "DONE")
-        .map((application) => Number(application.missionDuration))
+        .map((application) => Number(application.missionDuration || 0))
         .reduce((acc, current) => acc + current, 0)
     ),
     phase2NumberHoursEstimated: String(
       applications
         .filter((application) => ["VALIDATED", "IN_PROGRESS"].includes(application.status))
-        .map((application) => Number(application.missionDuration))
+        .map((application) => Number(application.missionDuration || 0))
         .reduce((acc, current) => acc + current, 0)
     ),
   });
