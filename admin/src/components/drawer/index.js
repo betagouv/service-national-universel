@@ -1,72 +1,84 @@
-import React, { useEffect, useState } from "react";
-import { NavLink, Link } from "react-router-dom";
+import React, {useEffect, useState} from "react";
+import {NavLink, Link} from "react-router-dom";
 import styled from "styled-components";
-import { useSelector } from "react-redux";
-import { environment } from "../../config";
-import { ROLES, colors } from "../../utils";
+import {useSelector} from "react-redux";
+import {environment} from "../../config";
+import {ROLES, colors} from "../../utils";
+import MailOpenIcons from "../MailOpenIcons";
+import MailCloseIcons from "../MailCloseIcons";
 
-const DrawerTab = ({ title, to, onClick }) => (
+const DrawerTab = ({title, to, onClick}) => (
   <li onClick={onClick}>
     <NavLink to={to}>{title}</NavLink>
   </li>
 );
 
-function responsible({ user, onClick }) {
+function responsible({user, onClick}) {
   return (
     <>
-      <DrawerTab to={`/structure/${user.structureId}`} title="Ma structure" onClick={onClick} />
-      <DrawerTab to="/mission" title="Missions" onClick={onClick} />
-      <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
-    </>
-  );
-}
-function supervisor({ user, onClick }) {
-  return (
-    <>
-      <DrawerTab to="/structure" title="Structures" onClick={onClick} />
-      <DrawerTab to="/mission" title="Missions" onClick={onClick} />
-      <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
-      <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
+      <DrawerTab to={`/structure/${user.structureId}`} title="Ma structure" onClick={onClick}/>
+      <DrawerTab to="/mission" title="Missions" onClick={onClick}/>
+      <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick}/>
     </>
   );
 }
 
-function admin({ onClick }) {
+function supervisor({user, onClick}) {
   return (
     <>
-      <DrawerTab to="/structure" title="Structures" onClick={onClick} />
-      <DrawerTab to="/mission" title="Missions" onClick={onClick} />
-      <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
-      <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
-      <DrawerTab to="/inscription" title="Inscriptions" onClick={onClick} />
-      <DrawerTab to="/centre" title="Centres" onClick={onClick} />
-      <DrawerTab to="/point-de-rassemblement" title="Points de rassemblement" onClick={onClick} />
-      <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
-      <DrawerTab to="/objectifs" title="Objectifs" onClick={onClick} />
+      <DrawerTab to="/structure" title="Structures" onClick={onClick}/>
+      <DrawerTab to="/mission" title="Missions" onClick={onClick}/>
+      <DrawerTab to="/user" title="Utilisateurs" onClick={onClick}/>
+      <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick}/>
     </>
   );
 }
 
-function referent({ onClick }) {
+function admin({onClick}) {
   return (
     <>
-      <DrawerTab to="/structure" title="Structures" onClick={onClick} />
-      <DrawerTab to="/mission" title="Missions" onClick={onClick} />
-      <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
-      <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
-      <DrawerTab to="/inscription" title="Inscriptions" onClick={onClick} />
-      <DrawerTab to="/centre" title="Centres" onClick={onClick} />
-      <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
+      <DrawerTab to="/structure" title="Structures" onClick={onClick}/>
+      <DrawerTab to="/mission" title="Missions" onClick={onClick}/>
+      <DrawerTab to="/user" title="Utilisateurs" onClick={onClick}/>
+      <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick}/>
+      <DrawerTab to="/inscription" title="Inscriptions" onClick={onClick}/>
+      <DrawerTab to="/centre" title="Centres" onClick={onClick}/>
+      <DrawerTab to="/point-de-rassemblement" title="Points de rassemblement" onClick={onClick}/>
+      <DrawerTab to="/contenu" title="Contenus" onClick={onClick}/>
+      <DrawerTab to="/objectifs" title="Objectifs" onClick={onClick}/>
+      <li onClick={onClick}>
+        <NavLink to="/ticket">
+          <div style={{display: "flex", alignContent: "center"}}>
+            <div style={{display: "flex", justifyContent: "center", alignContent: "center"}}><p>Ticket</p></div>
+            <div><MailCloseIcons style={{background: "#FEB951",borderRadius: "0.5rem", paddingBottom: "0px", paddingTop: "0px" }}/></div>
+            <div><MailOpenIcons style={{background: "#F1545B",borderRadius: "0.5rem", paddingBottom: "0px", paddingTop: "0px" }}/></div>
+          </div>
+        </NavLink>
+      </li>
     </>
   );
 }
 
-function headCenter({ user, onClick }) {
+function referent({onClick}) {
   return (
     <>
-      <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
-      <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
-      <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
+      <DrawerTab to="/structure" title="Structures" onClick={onClick}/>
+      <DrawerTab to="/mission" title="Missions" onClick={onClick}/>
+      <DrawerTab to="/user" title="Utilisateurs" onClick={onClick}/>
+      <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick}/>
+      <DrawerTab to="/inscription" title="Inscriptions" onClick={onClick}/>
+      <DrawerTab to="/centre" title="Centres" onClick={onClick}/>
+      <DrawerTab to="/contenu" title="Contenus" onClick={onClick}/>
+    </>
+  );
+}
+
+function headCenter({user, onClick}) {
+  return (
+    <>
+      <DrawerTab to="/user" title="Utilisateurs" onClick={onClick}/>
+      <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick}/>
+      <DrawerTab to="/contenu" title="Contenus" onClick={onClick}/>
     </>
   );
 }
@@ -85,7 +97,7 @@ export default (props) => {
     }
   };
 
-  if (!user) return <div />;
+  if (!user) return <div/>;
 
   function getName() {
     if (user.role === ROLES.ADMIN) return "Espace modérateur";
@@ -107,21 +119,21 @@ export default (props) => {
     <Sidebar open={open} id="drawer">
       <Logo>
         <HeaderSideBar to="/">
-          <img src={require("../../assets/logo-snu.png")} height={38} />
+          <img src={require("../../assets/logo-snu.png")} height={38}/>
           {getName()}
-          <Burger onClick={handleClick} src={require("../../assets/burger.svg")} />
+          <Burger onClick={handleClick} src={require("../../assets/burger.svg")}/>
         </HeaderSideBar>
       </Logo>
       {environment !== "production" && environmentBannerVisible ? (
         <EnvironmentBanner onClick={() => setEnvironmentBannerVisible(false)}>{getTextEnvironmentBanner()}</EnvironmentBanner>
       ) : null}
       <ul>
-        <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />
-        {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick })}
-        {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick })}
-        {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick })}
-        {user.role === ROLES.ADMIN && admin({ onClick: handleClick })}
-        {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && referent({ onClick: handleClick })}
+        <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick}/>
+        {user.role === ROLES.HEAD_CENTER && headCenter({user, onClick: handleClick})}
+        {user.role === ROLES.SUPERVISOR && supervisor({user, onClick: handleClick})}
+        {user.role === ROLES.RESPONSIBLE && responsible({user, onClick: handleClick})}
+        {user.role === ROLES.ADMIN && admin({onClick: handleClick})}
+        {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && referent({onClick: handleClick})}
       </ul>
     </Sidebar>
   );
@@ -142,6 +154,7 @@ const EnvironmentBanner = styled.div`
   text-align: center;
   padding: 5px;
   cursor: pointer;
+
   :hover {
     opacity: 0.5;
   }
@@ -166,6 +179,7 @@ const Logo = styled.h1`
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 0;
   padding: 15px 20px 15px;
+
   a {
     display: flex;
     flex-direction: row;
@@ -178,6 +192,7 @@ const Logo = styled.h1`
     letter-spacing: 0.04em;
     text-decoration: none;
   }
+
   img {
     margin-right: 1rem;
     vertical-align: top;
@@ -188,8 +203,9 @@ const Sidebar = styled.div`
   ::-webkit-scrollbar {
     display: none;
   }
+
   @media (max-width: 1000px) {
-    transform: translateX(${({ open }) => (open ? 0 : "-105%")});
+    transform: translateX(${({open}) => (open ? 0 : "-105%")});
     opacity: 1;
     visibility: visible;
     height: 100vh;
@@ -208,8 +224,10 @@ const Sidebar = styled.div`
   min-width: 250px;
   overflow-y: auto;
   transition: 0.2s;
+
   ul {
     list-style: none;
+
     a {
       text-decoration: none;
       padding: 15px 20px;
@@ -219,26 +237,32 @@ const Sidebar = styled.div`
       font-size: 16px;
       border-bottom: 1px solid ${colors.transPurple};
       transition: 0.2s;
+
       i {
         font-size: 0.7rem;
       }
     }
+
     a:hover {
       background: ${colors.transPurple};
       box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.1);
     }
+
     a.active {
       font-weight: 700;
       background: ${colors.purple};
       box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.1);
     }
   }
+
   .has-child ul {
     display: none;
+
     a {
       padding-left: 40px;
     }
   }
+
   .has-child.open ul {
     display: block;
   }
