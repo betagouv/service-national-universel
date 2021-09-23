@@ -51,7 +51,7 @@ export default ({ ticketId }) => {
   if (ticket === null) return <Loader />;
 
   return (
-    <Container style={{ maxWidth: "600px", padding: 0 }}>
+    <Container style={{ padding: 0, backgroundColor: "#F1F5F9", border: "1px solid #E4E4E7" }}>
       <Heading>
         <h1>
           Demande #{ticket?.id} - {ticket?.title}
@@ -180,7 +180,7 @@ const Heading = styled(Container)`
   align-items: space-between;
   background-color: #fff;
   padding: 0.5rem;
-  border: 1px solid #E4E4E7;
+  border: 1px solid #e4e4e7;
   @media (max-width: 768px) {
     margin-bottom: 1rem;
   }
