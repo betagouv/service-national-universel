@@ -158,9 +158,9 @@ const TicketContainer = styled.div`
   display: flex;
   flex-direction: column;
   :not(:first-child):hover {
-    background-color: #f1f1f1 !important;
+    background-color: #f8f8f8 !important;
   }
-  ${({ active }) => (active ? "background-color: #e6e6fa !important;" : null)}
+  ${(props) => props.active && `background-color: #5245CC0C !important;`}
 `;
 
 const List = styled.div`
