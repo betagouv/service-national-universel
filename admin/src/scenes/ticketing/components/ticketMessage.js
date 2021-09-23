@@ -51,7 +51,7 @@ export default ({ ticketId }) => {
   if (ticket === null) return <Loader />;
 
   return (
-    <Container style={{ maxWidth: "600px" }}>
+    <Container style={{ maxWidth: "600px", padding: 0 }}>
       <Heading>
         <h1>
           Demande #{ticket?.id} - {ticket?.title}
@@ -173,18 +173,20 @@ const Box = styled.div`
 `;
 
 const Heading = styled(Container)`
-  margin-bottom: 1.5rem;
   display: flex;
   flex: 1;
   flex-direction: column;
   justify-content: flex-start;
   align-items: space-between;
+  background-color: #fff;
+  padding: 0.5rem;
+  border: 1px solid #E4E4E7;
   @media (max-width: 768px) {
     margin-bottom: 1rem;
   }
   h1 {
     color: #161e2e;
-    font-size: 2rem;
+    font-size: 1rem;
     font-weight: 700;
     padding-right: 3rem;
     @media (max-width: 768px) {
