@@ -1,24 +1,25 @@
 import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
-import MailCloseIcons from "../../../components/MailCloseIcons";
-import MailOpenIcons from "../../../components/MailOpenIcons";
+import MailCloseIcon from "../../../components/MailCloseIcon";
+import MailOpenIcon from "../../../components/MailOpenIcon";
+import SuccessIcon from "../../../components/SuccessIcon";
 
 export default () => {
   return (
     <NotifcationContainer>
       <Notification>
-        <MailCloseIcons color="#F8B951" style={{ margin: 0, padding: "5px" }} />
+        <MailCloseIcon color="#F8B951" style={{ margin: 0, padding: "5px" }} />
         <NotificationNumber>3</NotificationNumber> new&nbsp;tickets
       </Notification>
       <VL></VL>
       <Notification>
-        <MailOpenIcons color="#F1545B" style={{ margin: 0, padding: "5px" }} />
+        <MailOpenIcon color="#F1545B" style={{ margin: 0, padding: "5px" }} />
         <NotificationNumber>3</NotificationNumber> opened&nbsp;tickets
       </Notification>
       <VL></VL>
       <Notification>
-        <MailOpenIcons color="#6BC762" style={{ margin: 0, padding: "5px" }} />
+        <SuccessIcon color="#6BC762" style={{ margin: 0, padding: "5px" }} />
         <NotificationNumber>3</NotificationNumber> closed&nbsp;tickets
       </Notification>
     </NotifcationContainer>
@@ -41,7 +42,7 @@ export const NotifcationContainer = styled.div`
   width: fit-content;
 `;
 
-export const Notification = styled.p`
+export const Notification = styled.div`
   flex: 1;
   display: flex;
   padding: 10px;

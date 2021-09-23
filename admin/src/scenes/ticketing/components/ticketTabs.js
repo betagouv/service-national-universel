@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { formatDistanceToNow } from "date-fns";
 
-import { fr } from "date-fns/locale";
 import Loader from "../../../components/Loader";
+import { formatStringDate } from "../../../utils";
 
 import api from "../../../services/api";
 
@@ -54,11 +53,11 @@ export default ({ setTicket, selectedTicket }) => {
           })
           ?.map((ticket) => (
             <TicketContainer key={ticket.id} active={ticket.id === selectedTicket?.id} className="ticket" onClick={() => setTicket(ticket)}>
-              <div className="ticket-subject">
-                <p>{getFrom(ticket)}</p>
-                <p>{getDate(ticket)}</p>
-              </div>
-              <p className="ticket-text">{ticket.title}</p>
+              <TicketHeader>
+                <TicketFrom>{getFrom(ticket)}</TicketFrom>
+                <TicketDate>{formatStringDate(getDate(ticket))}</TicketDate>
+              </TicketHeader>
+              <TicketPreview>{ticket.title}</TicketPreview>
             </TicketContainer>
           ))}
       </List>
@@ -66,9 +65,28 @@ export default ({ setTicket, selectedTicket }) => {
   );
 };
 
+const TicketHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+`;
+const TicketFrom = styled.div`
+  color: #242526;
+  font-weight: 700;
+`;
+const TicketDate = styled.div`
+  color: #979797;
+  font-weight: 400;
+  font-size: 0.8rem;
+`;
+const TicketPreview = styled.div`
+  color: #242526;
+  font-size: 0.8rem;
+  font-weight: 400;
+`;
+
 const FilterContainer = styled.div`
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 0.5fr;
+  grid-template-columns: 1fr 1fr 1fr /*0.5fr*/;
   grid-template-rows: 1fr;
   padding: 0;
   border-bottom: 1px solid #f1f1f1;
@@ -77,7 +95,7 @@ const FilterContainer = styled.div`
 const TabItem = styled.div`
   padding: 0.75rem;
   position: relative;
-  font-size: 16px;
+  font-size: 0.8rem;
   color: #979797;
   cursor: pointer;
   text-align: center;
@@ -148,24 +166,4 @@ const TicketContainer = styled.div`
 const List = styled.div`
   background-color: #fff;
   overflow: hidden;
-  .active {
-    color: blue;
-  }
-  .ticket p {
-    margin: 0;
-  }
-  .ticket-subject {
-    display: flex;
-    justify-content: space-between;
-  }
-  .ticket-text {
-    color: gray;
-  }
-  .titles {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
-    grid-template-rows: 1fr;
-    font-weight: bold;
-    padding: 0;
-  }
 `;
