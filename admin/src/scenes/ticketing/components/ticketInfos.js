@@ -10,9 +10,9 @@ export default ({ ticket }) => {
   useEffect(() => {
     (async () => {
       if (!ticket?.articles.length) return;
-      const email = ticket.articles[0].created_by;
+      const email = "adolphie.laine14@yahoo.fr"; //ticket.articles[0].created_by;
       const { data } = await api.get(`/young?email=${email}`);
-      console.log("data", data);
+      setUser(data);
     })();
   }, [ticket]);
 

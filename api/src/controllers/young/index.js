@@ -522,10 +522,10 @@ router.delete("/:id", passport.authenticate("referent", { session: false }), asy
 router.get("/", passport.authenticate(["referent"], { session: false }), async (req, res) => {
   try {
     const email = req.query.email;
+    console.log("FIND EMIL", email);
     // const { error, value: id } = Joi.string().required().validate(req.query.email);
     // if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
     let data = await YoungObject.findOne({ email });
-    console.log("data", data);
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
