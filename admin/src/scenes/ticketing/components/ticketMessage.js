@@ -58,7 +58,7 @@ export default ({ ticketId }) => {
         </h1>
         <Details title="Crée le" content={ticket?.created_at && formatStringLongDate(ticket?.created_at)} />
       </Heading>
-      <div>
+      <div style={{ overflow: "scroll", "max-height": "50vh" }}>
         <Box>
           {ticket?.articles
             ?.sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
