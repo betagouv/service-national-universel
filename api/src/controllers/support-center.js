@@ -37,9 +37,9 @@ router.get("/ticket", passport.authenticate(["referent", "young"], { session: fa
         const articles = await zammad.api("/ticket_articles/by_ticket/" + item.id, { method: "GET", headers: { "X-On-Behalf-Of": email } });
         data.push({ ...item, articles });
       }
-      return res.status(200).send({ ok: true, data: response });
+      return res.status(200).send({ ok: true, data });
     }
-    return res.status(200).send({ ok: true, data });
+    return res.status(200).send({ ok: true, data: response });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
