@@ -5,6 +5,7 @@ const passwordValidator = require("password-validator");
 const YoungModel = require("../models/young");
 const CohesionCenterModel = require("../models/cohesionCenter");
 const MeetingPointModel = require("../models/meetingPoint");
+const ApplicationModel = require("../models/application");
 const ReferentModel = require("../models/referent");
 const { sendEmail } = require("../sendinblue");
 const path = require("path");
@@ -337,6 +338,28 @@ const getYoungFromWaitingList = async (young) => {
   }
 };
 
+async function updateYoungPhase2Hours(young) {
+  const applications = await ApplicationModel.find({
+    youngId: young._id,
+    status: { $in: ["VALIDATED", "IN_PROGRESS", "DONE"] },
+  });
+  young.set({
+    phase2NumberHoursDone: String(
+      applications
+        .filter((application) => application.status === "DONE")
+        .map((application) => Number(application.missionDuration))
+        .reduce((acc, current) => acc + current, 0)
+    ),
+    phase2NumberHoursEstimated: String(
+      applications
+        .filter((application) => ["VALIDATED", "IN_PROGRESS"].includes(application.status))
+        .map((application) => Number(application.missionDuration))
+        .reduce((acc, current) => acc + current, 0)
+    ),
+  });
+  await young.save();
+}
+
 function isYoung(user) {
   return user instanceof YoungModel;
 }
@@ -402,4 +425,5 @@ module.exports = {
   isReferent,
   inSevenDays,
   getBaseUrl,
+  updateYoungPhase2Hours,
 };

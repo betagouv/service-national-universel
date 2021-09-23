@@ -85,6 +85,12 @@ const Schema = new mongoose.Schema({
       description: "Région de la mission",
     },
   },
+  missionDuration: {
+    type: String,
+    documentation: {
+      description: "Durée de la mission pour cette candidature (peut-être différent de la durée initiale)",
+    },
+  },
 
   structureId: {
     type: String,
