@@ -11,7 +11,6 @@ import Loader from "../../../components/Loader";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 
 export default ({ ticketId }) => {
-
   const [ticket, setTicket] = useState();
 
   const [message, setMessage] = useState();
@@ -19,7 +18,8 @@ export default ({ ticketId }) => {
 
   const getTicket = async () => {
     try {
-      if (!ticketId) return ;//setTicket(null);
+      setTicket(null);
+      if (!ticketId) return; //setTicket(null);
       const { data, ok } = await api.get(`/support-center/ticket/${ticketId}`);
       if (data.error || !ok) return setTicket(null);
       return setTicket(data);
@@ -29,11 +29,12 @@ export default ({ ticketId }) => {
   };
 
   useEffect(() => {
+    getTicket()
     const ping = setInterval(getTicket, 5000);
     return () => {
       clearInterval(ping);
     };
-  }, []);
+  }, [ticketId]);
 
   const send = async () => {
     if (!message) return;
