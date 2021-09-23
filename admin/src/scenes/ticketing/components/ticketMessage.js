@@ -69,10 +69,10 @@ export default ({ ticketId }) => {
         </Box>
       </div>
       <InputContainer>
-        <textarea row={2} placeholder="Mon message..." className="form-control" onChange={(e) => setMessage(e.target.value)} value={message} />
+        <textarea row={2} placeholder="Mon message..." className="form-control" onChange={(e) => setMessage(e.target.value)} value={message} style={{border: "none", resize:"none"}}/>
         <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
-          <LoadingButton onClick={send} disabled={!message}>
-            Envoyer
+          <LoadingButton style={{background: "none"}} onClick={send} disabled={!message}>
+            <SendIcon/>
           </LoadingButton>
         </div>
       </InputContainer>
