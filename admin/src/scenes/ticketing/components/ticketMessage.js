@@ -12,7 +12,7 @@ import LoadingButton from "../../../components/buttons/LoadingButton";
 import SendIcon from "../../../components/SendIcon";
 
 export default ({ ticketId }) => {
-  const [ticket, setTicket] = useState();
+  const [ticket, setTicket] = useState(null);
   const [loading, setLoading] = useState(false);
 
   const [message, setMessage] = useState();
@@ -47,9 +47,8 @@ export default ({ ticketId }) => {
     getTicket();
   };
 
-  if (ticket === undefined) return <div>Selectionnez un ticket</div>;
-
   if (ticket === null) return <Loader />;
+  if (ticket === undefined) return <div>Selectionnez un ticket</div>;
 
   return (
     <Container style={{ padding: 0, backgroundColor: "#F1F5F9", border: "1px solid #E4E4E7" }}>
@@ -59,7 +58,7 @@ export default ({ ticketId }) => {
         </h1>
         <Details title="Crée le" content={ticket?.created_at && formatStringLongDate(ticket?.created_at)} />
       </Heading>
-      <div style={{ overflow: "scroll", "max-height": "50vh", display: "flex", flexDirection: "column-reverse" }}>
+      <div style={{ overflow: "scroll", maxHeight: "50vh", display: "flex", flexDirection: "column-reverse" }}>
         <Box>
           {ticket?.articles
             ?.sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
@@ -69,10 +68,17 @@ export default ({ ticketId }) => {
         </Box>
       </div>
       <InputContainer>
-        <textarea row={2} placeholder="Mon message..." className="form-control" onChange={(e) => setMessage(e.target.value)} value={message} style={{border: "none", resize:"none"}}/>
+        <textarea
+          row={2}
+          placeholder="Mon message..."
+          className="form-control"
+          onChange={(e) => setMessage(e.target.value)}
+          value={message}
+          style={{ border: "none", resize: "none" }}
+        />
         <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
-          <LoadingButton style={{background: "none"}} onClick={send} disabled={!message}>
-            <SendIcon/>
+          <LoadingButton style={{ background: "none" }} onClick={send} disabled={!message}>
+            <SendIcon />
           </LoadingButton>
         </div>
       </InputContainer>
