@@ -13,7 +13,7 @@ export default () => {
     <HeroContainer>
       <Header />
       <section>
-        <TicketTabs setTicket={setTicket} />
+        <TicketTabs setTicket={setTicket} ticket={ticket} />
         <TicketMessage ticketId={ticket?.id} />
         <Infos ticket={ticket} />
       </section>
@@ -23,7 +23,6 @@ export default () => {
 
 export const HeroContainer = styled.div`
   flex: 1;
-  padding: 1rem;
   section {
     display: flex;
   }

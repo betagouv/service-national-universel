@@ -38,7 +38,7 @@ const status = [
   },
 ];
 
-export default ({ setTicket }) => {
+export default ({ setTicket, ticket }) => {
   const [allOpen, setAllOpen] = useState(false);
   const [unread, setUnread] = useState(false);
   const [closed, setClosed] = useState(false);
@@ -50,6 +50,7 @@ export default ({ setTicket }) => {
     (async () => {
       const { data } = await api.get(`/support-center/ticket`);
       setTickets(data);
+      if (data.length) setTicket(data[0]);
     })();
   }, []);
 
@@ -122,8 +123,8 @@ export default ({ setTicket }) => {
 
 export const HeroContainer = styled.div`
   flex: 1;
-  padding: 1rem;
   max-width: 380px;
+  min-width: 380px;
   @media (max-width: 768px) {
     padding: 1rem 0;
   }
