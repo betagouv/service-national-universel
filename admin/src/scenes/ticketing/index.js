@@ -13,9 +13,9 @@ export default () => {
     <HeroContainer>
       <Header />
       <section>
-        <TicketTabs setSelectedTicket={setSelectedTicket} />
-        <TicketMessage />
-        <Infos user={user} />
+        <TicketTabs setTicket={setTicket} />
+        <TicketMessage ticket={ticket} />
+        <Infos />
       </section>
     </HeroContainer>
   );

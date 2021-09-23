@@ -5,50 +5,7 @@ import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import Loader from "../../../components/Loader";
 
-const tickets = [
-  {
-    id: 3434325,
-    name: "Jean-Michel",
-    text: "Test hehehe test",
-    status: "new",
-  },
-  {
-    id: 34354,
-    name: "Jean-Michel",
-    text: "Test hehehe test",
-    status: "ongoing",
-  },
-  {
-    id: 4545,
-    name: "Jean-Michel",
-    text: "Test hehehe test",
-    status: "ongoing",
-  },
-  {
-    id: 65755,
-    name: "Jean-Michel",
-    text: "Test hehehe test",
-    status: "closed",
-  },
-  {
-    id: 546456,
-    name: "Jean-Michel",
-    text: "Test hehehe test",
-    status: "closed",
-  },
-  {
-    id: 57657,
-    name: "Jean-Michel",
-    text: "Test hehehe test",
-    status: "closed",
-  },
-  {
-    id: 2443,
-    name: "Jean-Michel",
-    text: "Test hehehe test",
-    status: "closed",
-  },
-];
+import api from "../../../services/api";
 
 export default ({ setSelectedTicket }) => {
   const [allOpen, setAllOpen] = useState(false);
@@ -117,8 +74,8 @@ export default ({ setSelectedTicket }) => {
             <p>Fermés</p>
           </div>
         </section>
-        {!userTickets ? <Loader /> : null}
-        {userTickets?.length === 0 ? <div style={{ textAlign: "center", padding: "1rem", fontSize: "0.85rem" }}>Aucun ticket</div> : null}
+        {!tickets ? <Loader /> : null}
+        {tickets?.length === 0 ? <div style={{ textAlign: "center", padding: "1rem", fontSize: "0.85rem" }}>Aucun ticket</div> : null}
         {tickets?.map((ticket) => (
           <Link key={ticket.id} className="ticket">
             <div className="ticket-subject">
