@@ -13,7 +13,6 @@ export default ({ setTicket, selectedTicket }) => {
   useEffect(() => {
     (async () => {
       const { data } = await api.get(`/support-center/ticket`);
-      console.log({ data });
       setTickets(data);
       if (data.length) setTicket(data[0]);
     })();

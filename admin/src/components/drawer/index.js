@@ -1,5 +1,5 @@
-import React, {useEffect, useState} from "react";
-import {NavLink, Link} from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { NavLink, Link } from "react-router-dom";
 import styled from "styled-components";
 import {useSelector} from "react-redux";
 import {environment} from "../../config";
@@ -7,48 +7,52 @@ import {ROLES, colors} from "../../utils";
 import MailOpenIcon from "../MailOpenIcon";
 import MailCloseIcon from "../MailCloseIcon";
 
-const DrawerTab = ({title, to, onClick}) => (
+
+const DrawerTab = ({ title, to, onClick }) => (
   <li onClick={onClick}>
     <NavLink to={to}>{title}</NavLink>
   </li>
 );
 
-function responsible({user, onClick}) {
+function responsible({ user, onClick }) {
   return (
     <>
-      <DrawerTab to={`/structure/${user.structureId}`} title="Ma structure" onClick={onClick}/>
-      <DrawerTab to="/mission" title="Missions" onClick={onClick}/>
-      <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick}/>
+      <DrawerTab to={`/structure/${user.structureId}`} title="Ma structure" onClick={onClick} />
+      <DrawerTab to="/mission" title="Missions" onClick={onClick} />
+      <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
     </>
   );
 }
 
-function supervisor({user, onClick}) {
+function supervisor({ user, onClick }) {
   return (
     <>
-      <DrawerTab to="/structure" title="Structures" onClick={onClick}/>
-      <DrawerTab to="/mission" title="Missions" onClick={onClick}/>
-      <DrawerTab to="/user" title="Utilisateurs" onClick={onClick}/>
-      <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick}/>
+      <DrawerTab to="/structure" title="Structures" onClick={onClick} />
+      <DrawerTab to="/mission" title="Missions" onClick={onClick} />
+      <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
+      <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
     </>
   );
 }
 
-function admin({onClick}) {
+function admin({ onClick }) {
+  const tickets = useSelector((state) => state.Auth.tickets);
+  console.log("ticketsState", tickets);
+
   return (
     <>
-      <DrawerTab to="/structure" title="Structures" onClick={onClick}/>
-      <DrawerTab to="/mission" title="Missions" onClick={onClick}/>
-      <DrawerTab to="/user" title="Utilisateurs" onClick={onClick}/>
-      <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick}/>
-      <DrawerTab to="/inscription" title="Inscriptions" onClick={onClick}/>
-      <DrawerTab to="/centre" title="Centres" onClick={onClick}/>
-      <DrawerTab to="/point-de-rassemblement" title="Points de rassemblement" onClick={onClick}/>
-      <DrawerTab to="/contenu" title="Contenus" onClick={onClick}/>
-      <DrawerTab to="/objectifs" title="Objectifs" onClick={onClick}/>
+      <DrawerTab to="/structure" title="Structures" onClick={onClick} />
+      <DrawerTab to="/mission" title="Missions" onClick={onClick} />
+      <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
+      <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
+      <DrawerTab to="/inscription" title="Inscriptions" onClick={onClick} />
+      <DrawerTab to="/centre" title="Centres" onClick={onClick} />
+      <DrawerTab to="/point-de-rassemblement" title="Points de rassemblement" onClick={onClick} />
+      <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
+      <DrawerTab to="/objectifs" title="Objectifs" onClick={onClick} />
       <li onClick={onClick}>
         <NavLink to="/ticket">
-          <div style={{display: "flex", alignContent: "center", justifyContent: "space-between"}}>
+          <div style={{ display: "flex", alignContent: "center", justifyContent: "space-between" }}>
             <div>Ticket</div>
             <div style={{display: "flex"}}>
               <div style={{display: "flex", alignContent: "center", justifyContent: "center", background: "#F1545B", borderRadius: "0.5rem", marginRight: "10px", paddingRight: "8px", paddingLeft: "8px", width: "60px"}}>
@@ -58,6 +62,7 @@ function admin({onClick}) {
               <div style={{display: "flex", alignContent: "center", justifyContent: "center", background: "#FEB951", borderRadius: "0.5rem", marginRight: "10px", paddingRight: "8px", paddingLeft: "8px", width: "60px"}}>
                 <MailOpenIcon/>
                 <div style={{marginLeft: "4px"}}>3</div>
+
               </div>
             </div>
           </div>
@@ -67,26 +72,26 @@ function admin({onClick}) {
   );
 }
 
-function referent({onClick}) {
+function referent({ onClick }) {
   return (
     <>
-      <DrawerTab to="/structure" title="Structures" onClick={onClick}/>
-      <DrawerTab to="/mission" title="Missions" onClick={onClick}/>
-      <DrawerTab to="/user" title="Utilisateurs" onClick={onClick}/>
-      <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick}/>
-      <DrawerTab to="/inscription" title="Inscriptions" onClick={onClick}/>
-      <DrawerTab to="/centre" title="Centres" onClick={onClick}/>
-      <DrawerTab to="/contenu" title="Contenus" onClick={onClick}/>
+      <DrawerTab to="/structure" title="Structures" onClick={onClick} />
+      <DrawerTab to="/mission" title="Missions" onClick={onClick} />
+      <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
+      <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
+      <DrawerTab to="/inscription" title="Inscriptions" onClick={onClick} />
+      <DrawerTab to="/centre" title="Centres" onClick={onClick} />
+      <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
     </>
   );
 }
 
-function headCenter({user, onClick}) {
+function headCenter({ user, onClick }) {
   return (
     <>
-      <DrawerTab to="/user" title="Utilisateurs" onClick={onClick}/>
-      <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick}/>
-      <DrawerTab to="/contenu" title="Contenus" onClick={onClick}/>
+      <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
+      <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
+      <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
     </>
   );
 }
@@ -105,7 +110,7 @@ export default (props) => {
     }
   };
 
-  if (!user) return <div/>;
+  if (!user) return <div />;
 
   function getName() {
     if (user.role === ROLES.ADMIN) return "Espace modérateur";
@@ -127,21 +132,21 @@ export default (props) => {
     <Sidebar open={open} id="drawer">
       <Logo>
         <HeaderSideBar to="/">
-          <img src={require("../../assets/logo-snu.png")} height={38}/>
+          <img src={require("../../assets/logo-snu.png")} height={38} />
           {getName()}
-          <Burger onClick={handleClick} src={require("../../assets/burger.svg")}/>
+          <Burger onClick={handleClick} src={require("../../assets/burger.svg")} />
         </HeaderSideBar>
       </Logo>
       {environment !== "production" && environmentBannerVisible ? (
         <EnvironmentBanner onClick={() => setEnvironmentBannerVisible(false)}>{getTextEnvironmentBanner()}</EnvironmentBanner>
       ) : null}
       <ul>
-        <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick}/>
-        {user.role === ROLES.HEAD_CENTER && headCenter({user, onClick: handleClick})}
-        {user.role === ROLES.SUPERVISOR && supervisor({user, onClick: handleClick})}
-        {user.role === ROLES.RESPONSIBLE && responsible({user, onClick: handleClick})}
-        {user.role === ROLES.ADMIN && admin({onClick: handleClick})}
-        {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && referent({onClick: handleClick})}
+        <DrawerTab to="/dashboard" title="Tableau de bord" onClick={handleClick} />
+        {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick })}
+        {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick })}
+        {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick })}
+        {user.role === ROLES.ADMIN && admin({ onClick: handleClick })}
+        {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && referent({ onClick: handleClick })}
       </ul>
     </Sidebar>
   );
@@ -213,7 +218,7 @@ const Sidebar = styled.div`
   }
 
   @media (max-width: 1000px) {
-    transform: translateX(${({open}) => (open ? 0 : "-105%")});
+    transform: translateX(${({ open }) => (open ? 0 : "-105%")});
     opacity: 1;
     visibility: visible;
     height: 100vh;
