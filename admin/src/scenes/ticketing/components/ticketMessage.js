@@ -74,10 +74,10 @@ export default ({ ticketId }) => {
           className="form-control"
           onChange={(e) => setMessage(e.target.value)}
           value={message}
-          style={{ border: "none", resize: "none" }}
+          style={{ border: "none", resize: "none", borderRadius: "0px" }}
         />
-        <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
-          <LoadingButton style={{ background: "none" }} onClick={send} disabled={!message}>
+        <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", background: "white" }}>
+          <LoadingButton style={{ background: "none", height: "100%" }} onClick={send} disabled={!message}>
             <SendIcon />
           </LoadingButton>
         </div>
@@ -120,8 +120,7 @@ const Details = ({ title, content }) => {
 const InputContainer = styled.div`
   display: flex;
   flex-direction: row;
-  align-items: flex-end;
-  padding: 0.5rem;
+  align-items: stretch;
 `;
 const DetailContainer = styled.div`
   display: flex;
