@@ -69,7 +69,7 @@ export default ({ setTicket, selectedTicket }) => {
 
 const FilterContainer = styled.div`
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr 0.5fr;
+  grid-template-columns: 1fr 1fr 1fr /*0.5fr*/;
   grid-template-rows: 1fr;
   padding: 0;
   border-bottom: 1px solid #f1f1f1;
