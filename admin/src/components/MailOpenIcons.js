@@ -16,7 +16,7 @@ export default ({ ...props }) => (
 
 const MailContainer = styled.div`
   svg {
-    height: 20px;
+    height: 17px;
   }
   svg path {
     fill: ${({ color }) => `${color}`};

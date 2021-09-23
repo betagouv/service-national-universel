@@ -49,15 +49,15 @@ function admin({onClick}) {
       <li onClick={onClick}>
         <NavLink to="/ticket">
           <div style={{display: "flex", alignContent: "center", justifyContent: "space-between"}}>
-            <div style={{display: "flex", justifyContent: "center", alignContent: "center"}}><p>Ticket</p></div>
-            <div style={{display: "flex", flexDirection: "row"}}>
-              <div style={{display: "flex", justifyContent: "center", alignContent: "center", flexDirection: "row", background: "#FEB951", borderRadius: "0.5rem"}}>
+            <div>Ticket</div>
+            <div style={{display: "flex"}}>
+              <div style={{display: "flex", alignContent: "center", justifyContent: "center", background: "#FEB951", borderRadius: "0.5rem", marginRight: "10px", paddingRight: "8px", paddingLeft: "8px", width: "50px"}}>
                 <MailCloseIcons/>
-                <div style={{background: "red", textAlign: "center"}}><p>2</p></div>
+                <div style={{marginLeft: "4px"}}>2</div>
               </div>
-              <div style={{display: "flex", flexDirection: "row", background: "#F1545B", borderRadius: "0.5rem"}}>
+              <div style={{display: "flex", alignContent: "center", justifyContent: "center", background: "#F1545B", borderRadius: "0.5rem", marginRight: "10px", paddingRight: "8px", paddingLeft: "8px", width: "50px"}}>
                 <MailOpenIcons/>
-                <div>3</div>
+                <div style={{marginLeft: "4px"}}>3</div>
               </div>
             </div>
           </div>
