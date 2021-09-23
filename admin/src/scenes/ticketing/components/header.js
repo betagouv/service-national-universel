@@ -8,17 +8,17 @@ export default () => {
   return (
     <NotifcationContainer>
       <Notification>
-        <MailCloseIcons style={{ margin: 0, padding: "5px" }} />
+        <MailCloseIcons color="#F8B951" style={{ margin: 0, padding: "5px" }} />
         <NotificationNumber>3</NotificationNumber> new&nbsp;tickets
       </Notification>
       <VL></VL>
       <Notification>
-        <MailOpenIcons style={{ margin: 0, padding: "5px" }} />
+        <MailOpenIcons color="#F1545B" style={{ margin: 0, padding: "5px" }} />
         <NotificationNumber>3</NotificationNumber> opened&nbsp;tickets
       </Notification>
       <VL></VL>
       <Notification>
-        <MailOpenIcons style={{ margin: 0, padding: "5px" }} />
+        <MailOpenIcons color="#6BC762" style={{ margin: 0, padding: "5px" }} />
         <NotificationNumber>3</NotificationNumber> closed&nbsp;tickets
       </Notification>
     </NotifcationContainer>
@@ -47,11 +47,13 @@ export const Notification = styled.p`
   padding: 10px;
   margin: 0px;
   align-items: center;
+  color: #666667;
 `;
 
 export const NotificationNumber = styled.span`
   font-weight: bold;
   margin: 0 3px;
+  color: #242526;
 `;
 
 export const VL = styled.div`
