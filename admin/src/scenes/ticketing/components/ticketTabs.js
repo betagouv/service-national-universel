@@ -10,51 +10,61 @@ const tickets = [
     id: 3434325,
     name: "Jean-Michel",
     text: "Test hehehe test",
-    status: "new"
+    status: "new",
   },
   {
     id: 34354,
     name: "Jean-Michel",
     text: "Test hehehe test",
-    status: "ongoing"
+    status: "ongoing",
   },
   {
     id: 4545,
     name: "Jean-Michel",
     text: "Test hehehe test",
-    status: "ongoing"
+    status: "ongoing",
   },
   {
     id: 65755,
     name: "Jean-Michel",
     text: "Test hehehe test",
-    status: "closed"
+    status: "closed",
   },
   {
     id: 546456,
     name: "Jean-Michel",
     text: "Test hehehe test",
-    status: "closed"
+    status: "closed",
   },
   {
     id: 57657,
     name: "Jean-Michel",
     text: "Test hehehe test",
-    status: "closed"
+    status: "closed",
   },
   {
     id: 2443,
     name: "Jean-Michel",
     text: "Test hehehe test",
-    status: "closed"
+    status: "closed",
   },
-]
+];
 
 export default () => {
-  const [userTickets, setUserTickets] = useState(tickets);
+  // const [userTickets, setUserTickets] = useState(tickets);
   const [allOpen, setAllOpen] = useState(false);
   const [unread, setUnread] = useState(false);
   const [closed, setClosed] = useState(false);
+
+  const [tickets, setTickets] = useState([]);
+
+  useEffect(() => {
+    (async () => {
+      const { data } = await api.get(`/support-center/ticket`);
+      setTickets(data);
+    })();
+  }, []);
+
   // useEffect(() => {
   //   const fetchTickets = async () => {
   //     try {
@@ -77,11 +87,12 @@ export default () => {
     <HeroContainer>
       <List>
         <section className="ticket titles">
-          <div onClick={() => {
-            setAllOpen(true);
-            setClosed(false);
-            setUnread(false);
-          }}
+          <div
+            onClick={() => {
+              setAllOpen(true);
+              setClosed(false);
+              setUnread(false);
+            }}
             className={allOpen ? "active" : ""}
           >
             <p>Tous</p>
@@ -109,16 +120,15 @@ export default () => {
         </section>
         {!userTickets ? <Loader /> : null}
         {userTickets?.length === 0 ? <div style={{ textAlign: "center", padding: "1rem", fontSize: "0.85rem" }}>Aucun ticket</div> : null}
-        {userTickets
-          ?.map((ticket) => (
-            <Link key={ticket.id} className="ticket">
-              <div className="ticket-subject">
-                <p>{ticket.name}</p>
-                <p>{ticket.id}</p>
-              </div>
-              <p className="ticket-text">{ticket.text}</p>
-            </Link>
-          ))}
+        {tickets?.map((ticket) => (
+          <Link key={ticket.id} className="ticket">
+            <div className="ticket-subject">
+              <p>{ticket.name}</p>
+              <p>{ticket.id}</p>
+            </div>
+            <p className="ticket-text">{ticket.text}</p>
+          </Link>
+        ))}
       </List>
     </HeroContainer>
   );
