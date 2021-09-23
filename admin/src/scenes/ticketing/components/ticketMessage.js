@@ -9,7 +9,7 @@ import api from "../../../services/api";
 import { formatStringLongDate, colors } from "../../../utils";
 import Loader from "../../../components/Loader";
 import LoadingButton from "../../../components/buttons/LoadingButton";
-import SendIcon from "../../../components/SendIcon"
+import SendIcon from "../../../components/SendIcon";
 
 export default ({ ticketId }) => {
   const [ticket, setTicket] = useState();
@@ -67,15 +67,15 @@ export default ({ ticketId }) => {
               <Message key={i} fromMe={user.email === article.created_by} from={article.from} date={formatStringLongDate(article.created_at)} content={article.body} />
             ))}
         </Box>
-        <InputContainer>
-          <textarea row={2} placeholder="Mon message..." className="form-control" onChange={(e) => setMessage(e.target.value)} value={message} />
-          <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
-            <LoadingButton onClick={send} disabled={!message}>
-              Envoyer
-            </LoadingButton>
-          </div>
-        </InputContainer>
       </div>
+      <InputContainer>
+        <textarea row={2} placeholder="Mon message..." className="form-control" onChange={(e) => setMessage(e.target.value)} value={message} />
+        <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
+          <LoadingButton onClick={send} disabled={!message}>
+            Envoyer
+          </LoadingButton>
+        </div>
+      </InputContainer>
     </Container>
   );
 };
