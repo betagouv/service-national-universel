@@ -10,17 +10,17 @@ export default () => {
     <NotifcationContainer>
       <Notification>
         <MailCloseIcon color="#F1545B" style={{ margin: 0, padding: "5px" }} />
-        <NotificationNumber>3</NotificationNumber> new&nbsp;tickets
+        <NotificationNumber>3</NotificationNumber> nouveaux&nbsp;tickets
       </Notification>
       <VL></VL>
       <Notification>
         <MailOpenIcon color="#F8B951" style={{ margin: 0, padding: "5px" }} />
-        <NotificationNumber>3</NotificationNumber> opened&nbsp;tickets
+        <NotificationNumber>3</NotificationNumber>tickets&nbsp;ouverts
       </Notification>
       <VL></VL>
       <Notification>
         <SuccessIcon color="#6BC762" style={{ margin: 0, padding: "5px" }} />
-        <NotificationNumber>3</NotificationNumber> closed&nbsp;tickets
+        <NotificationNumber>3</NotificationNumber> tickets&nbsp;fermés
       </Notification>
     </NotifcationContainer>
   );
