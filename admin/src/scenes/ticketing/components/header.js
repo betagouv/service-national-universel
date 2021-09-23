@@ -3,6 +3,7 @@ import { NavLink } from "react-router-dom";
 import styled from "styled-components";
 import MailCloseIcons from "../../../components/MailCloseIcons";
 import MailOpenIcons from "../../../components/MailOpenIcons";
+import SuccessIcon from "../../../components/SuccessIcon";
 
 export default () => {
   return (
@@ -18,7 +19,7 @@ export default () => {
       </Notification>
       <VL></VL>
       <Notification>
-        <MailOpenIcons color="#6BC762" style={{ margin: 0, padding: "5px" }} />
+        <SuccessIcon color="#6BC762" style={{ margin: 0, padding: "5px" }} />
         <NotificationNumber>3</NotificationNumber> closed&nbsp;tickets
       </Notification>
     </NotifcationContainer>
