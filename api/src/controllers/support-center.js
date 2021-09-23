@@ -26,12 +26,14 @@ const { ERRORS } = require("../utils");
 // });
 
 // Get the list of tickets stats
-router.get("/ticket_states", passport.authenticate(["referent"], { session: false }), async (req, res) => {
+router.get("/ticket_overviews", passport.authenticate(["referent"], { session: false }), async (req, res) => {
   try {
     const email = req.user.email;
     const customer_id = await zammad.getCustomerIdByEmail(email);
     if (!customer_id) return res.status(401).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const response = await zammad.api("/tickets", { method: "GET", headers: { "X-On-Behalf-Of": email } });
+    // const response = await zammad.api("/ticket_overviews", { method: "GET", headers: { "X-On-Behalf-Of": email } });
+    const response = await zammad.api("/ticket_overviews", { method: "GET" });
+    console.log(response);
     return res.status(200).send({ ok: true, data: response });
   } catch (error) {
     capture(error);
