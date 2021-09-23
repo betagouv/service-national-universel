@@ -9,12 +9,11 @@ import Infos from "./components/ticketInfos";
 export default () => {
   const [ticket, setTicket] = useState(null);
 
-
   return (
     <HeroContainer>
       <Header />
       <section>
-        <TicketTabs setTicket={setTicket} />
+        <TicketTabs setTicket={setTicket} ticket={ticket} />
         <TicketMessage ticketId={ticket?.id} />
         <Infos ticket={ticket} />
       </section>

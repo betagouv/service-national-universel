@@ -7,7 +7,7 @@ import Loader from "../../../components/Loader";
 
 import api from "../../../services/api";
 
-export default ({ setTicket }) => {
+export default ({ setTicket, ticket }) => {
   const [allOpen, setAllOpen] = useState(false);
   const [unread, setUnread] = useState(false);
   const [closed, setClosed] = useState(false);
@@ -18,6 +18,7 @@ export default ({ setTicket }) => {
     (async () => {
       const { data } = await api.get(`/support-center/ticket`);
       setTickets(data);
+      if (data.length) setTicket(data[0]);
     })();
   }, []);
 
@@ -27,7 +28,6 @@ export default ({ setTicket }) => {
   };
 
   const getDate = (ticket) => {
-    console.log("ticket", ticket);
     return (ticket.created_at || "").slice(0, 10);
   };
 
