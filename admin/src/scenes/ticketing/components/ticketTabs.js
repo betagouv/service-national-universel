@@ -7,7 +7,7 @@ import Loader from "../../../components/Loader";
 
 import api from "../../../services/api";
 
-export default ({ setSelectedTicket }) => {
+export default ({ setTicket }) => {
   const [allOpen, setAllOpen] = useState(false);
   const [unread, setUnread] = useState(false);
   const [closed, setClosed] = useState(false);
@@ -69,13 +69,13 @@ export default ({ setSelectedTicket }) => {
         {!tickets ? <Loader /> : null}
         {tickets?.length === 0 ? <div style={{ textAlign: "center", padding: "1rem", fontSize: "0.85rem" }}>Aucun ticket</div> : null}
         {tickets?.map((ticket) => (
-          <Link key={ticket.id} className="ticket">
+          <div key={ticket.id} className="ticket" onClick={() => setTicket(ticket)}>
             <div className="ticket-subject">
               <p>{getFrom(ticket)}</p>
               <p>{getDate(ticket)}</p>
             </div>
             <p className="ticket-text">{ticket.title}</p>
-          </Link>
+          </div>
         ))}
       </List>
     </HeroContainer>

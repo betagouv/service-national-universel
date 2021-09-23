@@ -10,24 +10,25 @@ import { formatStringLongDate, colors } from "../../../utils";
 import Loader from "../../../components/Loader";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 
-export default (props) => {
+export default ({ ticketId }) => {
+
   const [ticket, setTicket] = useState();
+
   const [message, setMessage] = useState();
   const user = useSelector((state) => state.Auth.user);
 
   const getTicket = async () => {
     try {
-      const id = props.match?.params?.id;
-      if (!id) return setTicket(null);
-      const { data, ok } = await api.get(`/support-center/ticket/${id}`);
+      if (!ticketId) return ;//setTicket(null);
+      const { data, ok } = await api.get(`/support-center/ticket/${ticketId}`);
       if (data.error || !ok) return setTicket(null);
       return setTicket(data);
     } catch (e) {
       setTicket(null);
     }
   };
+
   useEffect(() => {
-    getTicket();
     const ping = setInterval(getTicket, 5000);
     return () => {
       clearInterval(ping);
@@ -36,19 +37,20 @@ export default (props) => {
 
   const send = async () => {
     if (!message) return;
-    const id = props.match?.params?.id;
-    const { data } = await api.put(`/support-center/ticket/${id}`, { message });
+    const { data } = await api.put(`/support-center/ticket/${ticketId}`, { message });
     setMessage("");
     getTicket();
   };
 
-  if (ticket === undefined) return <Loader />;
+  if (ticket === undefined) return <div>Selectionnez un ticket</div>;
+
+  if (ticket === null) return <Loader />;
 
   return (
     <Container style={{ maxWidth: "600px" }}>
       <Heading>
         <h1>
-          Demande #{props.match?.params?.id} - {ticket?.title}
+          Demande #{ticket?.id} - {ticket?.title}
         </h1>
         <Details title="Crée le" content={ticket?.created_at && formatStringLongDate(ticket?.created_at)} />
       </Heading>
