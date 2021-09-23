@@ -51,7 +51,7 @@ export default ({ ticketId }) => {
   if (ticket === null) return <Loader />;
 
   return (
-    <Container style={{ maxWidth: "600px", padding: 0 }}>
+    <Container style={{ padding: 0, backgroundColor: "#F1F5F9", border: "1px solid #E4E4E7" }}>
       <Heading>
         <h1>
           Demande #{ticket?.id} - {ticket?.title}
@@ -59,6 +59,13 @@ export default ({ ticketId }) => {
         <Details title="Crée le" content={ticket?.created_at && formatStringLongDate(ticket?.created_at)} />
       </Heading>
       <div>
+        <Box>
+          {ticket?.articles
+            ?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+            ?.map((article, i) => (
+              <Message key={i} fromMe={user.email === article.created_by} from={article.from} date={formatStringLongDate(article.created_at)} content={article.body} />
+            ))}
+        </Box>
         <InputContainer>
           <textarea row={2} placeholder="Mon message..." className="form-control" onChange={(e) => setMessage(e.target.value)} value={message} />
           <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
@@ -67,13 +74,6 @@ export default ({ ticketId }) => {
             </LoadingButton>
           </div>
         </InputContainer>
-        <Box>
-          {ticket?.articles
-            ?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-            ?.map((article, i) => (
-              <Message key={i} fromMe={user.email === article.created_by} from={article.from} date={formatStringLongDate(article.created_at)} content={article.body} />
-            ))}
-        </Box>
       </div>
     </Container>
   );
@@ -165,7 +165,6 @@ const MessageContent = styled.div`
 const Box = styled.div`
   width: ${(props) => props.width || 100}%;
   height: 100%;
-  background-color: #fff;
   filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.05));
   border-radius: 8px;
   padding: 1rem;
@@ -180,7 +179,7 @@ const Heading = styled(Container)`
   align-items: space-between;
   background-color: #fff;
   padding: 0.5rem;
-  border: 1px solid #E4E4E7;
+  border: 1px solid #e4e4e7;
   @media (max-width: 768px) {
     margin-bottom: 1rem;
   }
