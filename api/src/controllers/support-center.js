@@ -31,12 +31,13 @@ router.get("/ticket", passport.authenticate(["referent", "young"], { session: fa
     const customer_id = await zammad.getCustomerIdByEmail(email);
     if (!customer_id) return res.status(401).send({ ok: false, code: ERRORS.NOT_FOUND });
     const response = await zammad.api("/tickets", { method: "GET", headers: { "X-On-Behalf-Of": email } });
-    const data = [];
     if (response.length && req.query.withArticles) {
+      const data = [];
       for (const item of response) {
         const articles = await zammad.api("/ticket_articles/by_ticket/" + item.id, { method: "GET", headers: { "X-On-Behalf-Of": email } });
         data.push({ ...item, articles });
       }
+      return res.status(200).send({ ok: true, data: response });
     }
     return res.status(200).send({ ok: true, data });
   } catch (error) {
