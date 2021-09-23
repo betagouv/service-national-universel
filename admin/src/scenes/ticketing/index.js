@@ -9,13 +9,15 @@ import Infos from "./components/infos";
 export default () => {
   const [ticket, setTicket] = useState(null);
 
+  console.log("ticket",ticket.articles[0].created_by)
+
   return (
     <HeroContainer>
       <Header />
       <section>
         <TicketTabs setTicket={setTicket} />
         <TicketMessage ticketId={ticket?.id} />
-        <Infos />
+        <Infos ticket={ticket}/>
       </section>
     </HeroContainer>
   );

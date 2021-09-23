@@ -12,13 +12,14 @@ import LoadingButton from "../../../components/buttons/LoadingButton";
 
 export default ({ ticketId }) => {
   const [ticket, setTicket] = useState();
+  const [loading, setLoading] = useState(false);
 
   const [message, setMessage] = useState();
   const user = useSelector((state) => state.Auth.user);
 
   const getTicket = async () => {
     try {
-      setTicket(null);
+      // setTicket(null);
       if (!ticketId) return; //setTicket(null);
       const { data, ok } = await api.get(`/support-center/ticket/${ticketId}`);
       if (data.error || !ok) return setTicket(null);
@@ -29,7 +30,9 @@ export default ({ ticketId }) => {
   };
 
   useEffect(() => {
-    getTicket()
+    //  setLoading(true)
+    getTicket();
+    //  setLoading(false)
     const ping = setInterval(getTicket, 5000);
     return () => {
       clearInterval(ping);

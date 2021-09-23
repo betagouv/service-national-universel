@@ -1,24 +1,37 @@
-import React, {useEffect, useState} from "react";
-import {NavLink} from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { NavLink } from "react-router-dom";
 import styled from "styled-components";
 
-export default ({user}) => {
-  console.log(user)
+import api from "../../../services/api";
 
-  if (!user) return (
-    <HeroContainer>
-      <h4>Informations volontaire</h4>
-      <div>
-        <p>Veuiller sélectionner un ticket</p>
-      </div>
-    </HeroContainer>);
+export default ({ ticket }) => {
+  useEffect(() => {
+    (async () => {
+      if (!ticket?.articles.length) return;
+      const email = ticket.articles[0].created_by;
+      const { data } = await api.get(`/`);
+    })();
+  }, [ticket]);
+  console.log(user);
+
+  if (!user)
+    return (
+      <HeroContainer>
+        <h4>Informations volontaire</h4>
+        <div>
+          <p>Veuiller sélectionner un ticket</p>
+        </div>
+      </HeroContainer>
+    );
 
   return (
     <HeroContainer>
       <h4 className="title">Informations volontaire</h4>
       <div>
         <p className="subtitle">Nom complet :</p>
-        <p className="info">{user.firstName} {user.lastName}</p>
+        <p className="info">
+          {user.firstName} {user.lastName}
+        </p>
       </div>
       <div>
         <p className="subtitle">E-mail :</p>
@@ -44,7 +57,7 @@ export default ({user}) => {
         <p className="subtitle">Status phase 3 :</p>
         <p className="info">{user.phase3Status}</p>
       </div>
-      <div style={{display: "flex", justifyContent: "center", alignContent: "center"}}>
+      <div style={{ display: "flex", justifyContent: "center", alignContent: "center" }}>
         <button className="button">Résoudre le ticket</button>
       </div>
     </HeroContainer>
@@ -66,7 +79,7 @@ export const HeroContainer = styled.div`
     font-size: 1.125rem;
     line-height: 1.75rem;
   }
-  
+
   .subtitle {
     font-size: 0.75rem;
     line-height: 1rem;
@@ -79,12 +92,12 @@ export const HeroContainer = styled.div`
     line-height: 1.25rem;
     margin-bottom: 22px;
   }
-  
+
   .button {
     margin-top: 50px;
     padding: 10px;
     border-width: 0px;
-    background: #6BC762;
+    background: #6bc762;
     border-radius: 10px;
     width: 100%;
     color: white;
