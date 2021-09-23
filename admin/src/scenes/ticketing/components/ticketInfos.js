@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { toastr } from "react-redux-toastr";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
 
@@ -8,21 +9,23 @@ import translateState from "../../../utils/translateTickets";
 export default ({ ticket }) => {
   const [user, setUser] = useState([]);
 
-  // state_id :
-  // 1 = nouveau
-  // 2 = ouvert
-  // 3 = rappel en attente
-  // 4 = fermé
-  // 7 = clôture en attente
-
   useEffect(() => {
     (async () => {
       if (!ticket?.articles.length) return;
+      console.log(ticket);
       const email = "adolphie.laine14@yahoo.fr"; //ticket.articles[0].created_by;
       const { data } = await api.get(`/young?email=${email}`);
       setUser(data);
     })();
   }, [ticket]);
+
+  const resolveTicket = async () => {
+    const response = await api.put(`/support-center/ticket/${ticket.id}`, {
+      state: "closed",
+    });
+    if (!response.ok) console.log(response.status, "error");
+    if (response.ok) toastr.success('Ticket résolu !');
+  }
 
   if (!user)
     return (
@@ -74,7 +77,9 @@ export default ({ ticket }) => {
         <p className="info">{user.phase3Status}</p>
       </div>
       <div style={{ display: "flex", justifyContent: "center", alignContent: "center" }}>
-        <button className="button">Résoudre le ticket</button>
+        <button className="button"
+          onClick={resolveTicket}
+        >Résoudre le ticket</button>
       </div>
     </HeroContainer>
   );
