@@ -10,9 +10,6 @@ export default ({...props }) => (
 );
 
 const MailContainer = styled.div`
-  margin-left: auto;
-  padding: 7px 15px;
-  margin-left: 15px;
   svg {
     height: 20px;
   }

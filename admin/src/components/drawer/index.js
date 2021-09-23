@@ -51,9 +51,9 @@ function admin({onClick}) {
           <div style={{display: "flex", alignContent: "center", justifyContent: "space-between"}}>
             <div style={{display: "flex", justifyContent: "center", alignContent: "center"}}><p>Ticket</p></div>
             <div style={{display: "flex", flexDirection: "row"}}>
-              <div style={{display: "flex", flexDirection: "row", background: "#FEB951", borderRadius: "0.5rem"}}>
+              <div style={{display: "flex", justifyContent: "center", alignContent: "center", flexDirection: "row", background: "#FEB951", borderRadius: "0.5rem"}}>
                 <MailCloseIcons/>
-                <div>2</div>
+                <div style={{background: "red", textAlign: "center"}}><p>2</p></div>
               </div>
               <div style={{display: "flex", flexDirection: "row", background: "#F1545B", borderRadius: "0.5rem"}}>
                 <MailOpenIcons/>
