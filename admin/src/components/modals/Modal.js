@@ -45,6 +45,7 @@ export const Content = styled.div`
     margin-bottom: 1rem;
     color: ${colors.grey};
   }
+  input,
   textarea {
     padding: 1rem;
     line-height: 1.5;

@@ -34,6 +34,12 @@ export default () => {
               <p>
                 <strong>Vos missions d'intérêt général</strong>
                 <br />
+                {young.phase2NumberHoursDone ? (
+                  <>
+                    Vous avez réalisé {young.phase2NumberHoursDone} heures de mission d'intérêt général.
+                    <br />
+                  </>
+                ) : null}
                 <Link to="/preferences">Renseigner mes préférences {">"}</Link>
                 <br />
                 <Link to="/mission">Trouver une mission {">"}</Link>

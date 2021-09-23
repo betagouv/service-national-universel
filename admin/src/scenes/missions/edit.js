@@ -366,6 +366,16 @@ export default (props) => {
                         </Row>
                       </FormGroup>
                       <FormGroup>
+                        <label>Durée de la mission</label>
+                        <p style={{ color: "#a0aec1", fontSize: 12 }}>Saisissez un nombre d'heures prévisionnelles pour la réalisation de la mission</p>
+                        <Row>
+                          <Col>
+                            <Input name="duration" onChange={handleChange} value={values.duration} type="number" min={1} max={999} />
+                          </Col>
+                          <Col style={{ display: "flex", alignItems: "center" }}>heure(s)</Col>
+                        </Row>
+                      </FormGroup>
+                      <FormGroup>
                         <label>FRÉQUENCE ESTIMÉE DE LA MISSION</label>
                         <p style={{ color: "#a0aec1", fontSize: 12 }}>Par exemple, tous les mardis soirs, le samedi, tous les mercredis après-midi pendant un trimestre, etc.</p>
                         <Field

@@ -100,6 +100,7 @@ export default (props) => {
                   : "Aucune date renseignée"}
               </Legend>
               <Detail title="Fréquence" content={mission.frequence} />
+              {mission.duration ? <Detail title="Durée estimée" content={`${mission.duration} heure(s)`} /> : null}
               <Detail title="Période pour réaliser la mission" content={mission.period} />
               <Detail title="Lieu" content={[mission.address, mission.zip, mission.city, mission.department]} />
             </Wrapper>
