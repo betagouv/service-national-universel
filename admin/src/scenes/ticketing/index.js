@@ -23,7 +23,6 @@ export default () => {
 
 export const HeroContainer = styled.div`
   flex: 1;
-  padding: 1rem;
   section {
     display: flex;
   }
