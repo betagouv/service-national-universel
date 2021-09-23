@@ -1,27 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
 import styled from "styled-components";
 
-import { fr } from "date-fns/locale";
-import api from "../../services/api";
-import Loader from "../../components/Loader";
 import Header from "./components/header";
 import TicketTabs from "./components/ticketTabs";
 import TicketMessage from "./components/ticketMessage";
 import Infos from "./components/infos";
 
 export default () => {
-
   const [ticket, setTicket] = useState(null);
-
 
   return (
     <HeroContainer>
       <Header />
       <section>
-        <TicketTabs />
+        <TicketTabs setSelectedTicket={setSelectedTicket} />
         <TicketMessage />
-        <Infos />
+        <Infos user={user} />
       </section>
     </HeroContainer>
   );

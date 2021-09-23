@@ -50,8 +50,7 @@ const tickets = [
   },
 ];
 
-export default () => {
-  // const [userTickets, setUserTickets] = useState(tickets);
+export default ({ setSelectedTicket }) => {
   const [allOpen, setAllOpen] = useState(false);
   const [unread, setUnread] = useState(false);
   const [closed, setClosed] = useState(false);
