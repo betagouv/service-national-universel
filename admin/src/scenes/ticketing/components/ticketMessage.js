@@ -9,6 +9,7 @@ import api from "../../../services/api";
 import { formatStringLongDate, colors } from "../../../utils";
 import Loader from "../../../components/Loader";
 import LoadingButton from "../../../components/buttons/LoadingButton";
+import SendIcon from "../../../components/SendIcon"
 
 export default ({ ticketId }) => {
   const [ticket, setTicket] = useState();
