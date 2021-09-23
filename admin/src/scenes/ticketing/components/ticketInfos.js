@@ -3,9 +3,17 @@ import { NavLink } from "react-router-dom";
 import styled from "styled-components";
 
 import api from "../../../services/api";
+import translateState from "../../../utils/translateTickets";
 
 export default ({ ticket }) => {
   const [user, setUser] = useState([]);
+
+  // state_id :
+  // 1 = nouveau
+  // 2 = ouvert
+  // 3 = rappel en attente
+  // 4 = fermé
+  // 7 = clôture en attente
 
   useEffect(() => {
     (async () => {
@@ -29,6 +37,12 @@ export default ({ ticket }) => {
   return (
     <HeroContainer>
       <h4 className="title">Informations volontaire</h4>
+      <div>
+        <p className="subtitle">État du ticket :</p>
+        <p className="info">
+          {translateState(ticket?.state_id)}
+        </p>
+      </div>
       <div>
         <p className="subtitle">Nom complet :</p>
         <p className="info">
