@@ -48,10 +48,18 @@ function admin({onClick}) {
       <DrawerTab to="/objectifs" title="Objectifs" onClick={onClick}/>
       <li onClick={onClick}>
         <NavLink to="/ticket">
-          <div style={{display: "flex", alignContent: "center"}}>
+          <div style={{display: "flex", alignContent: "center", justifyContent: "space-between"}}>
             <div style={{display: "flex", justifyContent: "center", alignContent: "center"}}><p>Ticket</p></div>
-            <div><MailCloseIcons style={{background: "#FEB951",borderRadius: "0.5rem", paddingBottom: "0px", paddingTop: "0px" }}/></div>
-            <div><MailOpenIcons style={{background: "#F1545B",borderRadius: "0.5rem", paddingBottom: "0px", paddingTop: "0px" }}/></div>
+            <div style={{display: "flex", flexDirection: "row"}}>
+              <div style={{display: "flex", flexDirection: "row", background: "#FEB951", borderRadius: "0.5rem"}}>
+                <MailCloseIcons/>
+                <div>2</div>
+              </div>
+              <div style={{display: "flex", flexDirection: "row", background: "#F1545B", borderRadius: "0.5rem"}}>
+                <MailOpenIcons/>
+                <div>3</div>
+              </div>
+            </div>
           </div>
         </NavLink>
       </li>
