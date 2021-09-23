@@ -5,6 +5,9 @@ import styled from "styled-components";
 import api from "../../../services/api";
 
 export default ({ ticket }) => {
+
+  const user  = "";
+  
   useEffect(() => {
     (async () => {
       if (!ticket?.articles.length) return;
@@ -12,7 +15,6 @@ export default ({ ticket }) => {
       const { data } = await api.get(`/`);
     })();
   }, [ticket]);
-  console.log(user);
 
   if (!user)
     return (
