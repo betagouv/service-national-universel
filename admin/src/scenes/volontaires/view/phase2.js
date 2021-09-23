@@ -242,4 +242,6 @@ const HourTitle = styled.div`
   color: ${colors.grey};
   font-size: 0.8rem;
 `;
-const HourDetail = styled.div``;
+const HourDetail = styled.div`
+  font-size: 1.2rem;
+`;
