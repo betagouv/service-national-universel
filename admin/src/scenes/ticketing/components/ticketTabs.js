@@ -50,7 +50,7 @@ const tickets = [
   },
 ]
 
-export default () => {
+export default ({setSelectedTicket}) => {
   const [userTickets, setUserTickets] = useState(tickets);
   const [allOpen, setAllOpen] = useState(false);
   const [unread, setUnread] = useState(false);
@@ -111,7 +111,7 @@ export default () => {
         {userTickets?.length === 0 ? <div style={{ textAlign: "center", padding: "1rem", fontSize: "0.85rem" }}>Aucun ticket</div> : null}
         {userTickets
           ?.map((ticket) => (
-            <Link key={ticket.id} className="ticket">
+            <Link key={ticket.id} className="ticket" onClick={()=>setSelectedTicket(ticket)}>
               <div className="ticket-subject">
                 <p>{ticket.name}</p>
                 <p>{ticket.id}</p>
