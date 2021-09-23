@@ -24,8 +24,8 @@ export default ({ ticket }) => {
       state: "closed",
     });
     if (!response.ok) console.log(response.status, "error");
-    if (response.ok) toastr.success('Ticket résolu !');
-  }
+    if (response.ok) toastr.success("Ticket résolu !");
+  };
 
   if (!user)
     return (
@@ -39,12 +39,15 @@ export default ({ ticket }) => {
 
   return (
     <HeroContainer>
+      <div style={{ display: "flex", justifyContent: "center", alignContent: "center" }}>
+        <button className="button" onClick={resolveTicket}>
+          Résoudre le ticket
+        </button>
+      </div>
       <h4 className="title">Informations volontaire</h4>
       <div>
         <p className="subtitle">État du ticket :</p>
-        <p className="info">
-          {translateState(ticket?.state_id)}
-        </p>
+        <p className="info">{translateState(ticket?.state_id)}</p>
       </div>
       <div>
         <p className="subtitle">Nom complet :</p>
@@ -75,11 +78,6 @@ export default ({ ticket }) => {
       <div>
         <p className="subtitle">Status phase 3 :</p>
         <p className="info">{user.phase3Status}</p>
-      </div>
-      <div style={{ display: "flex", justifyContent: "center", alignContent: "center" }}>
-        <button className="button"
-          onClick={resolveTicket}
-        >Résoudre le ticket</button>
       </div>
     </HeroContainer>
   );
@@ -117,7 +115,7 @@ export const HeroContainer = styled.div`
   }
 
   .button {
-    margin-top: 50px;
+    margin-bottom: 1rem;
     padding: 10px;
     border-width: 0px;
     background: #6bc762;
