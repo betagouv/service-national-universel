@@ -4,12 +4,11 @@ import styled from "styled-components";
 import Header from "./components/header";
 import TicketTabs from "./components/ticketTabs";
 import TicketMessage from "./components/ticketMessage";
-import Infos from "./components/infos";
+import Infos from "./components/ticketInfos";
 
 export default () => {
   const [ticket, setTicket] = useState(null);
 
-  console.log("ticket",ticket.articles[0].created_by)
 
   return (
     <HeroContainer>
@@ -17,7 +16,7 @@ export default () => {
       <section>
         <TicketTabs setTicket={setTicket} />
         <TicketMessage ticketId={ticket?.id} />
-        <Infos ticket={ticket}/>
+        <Infos ticket={ticket} />
       </section>
     </HeroContainer>
   );
