@@ -308,7 +308,7 @@ const Schema = new mongoose.Schema({
     documentation: {
       description: "Sommes des heures de mission prévisionnelles",
     },
-  }
+  },
 
   // * phase 3 infos
   phase3StructureName: { type: String },
