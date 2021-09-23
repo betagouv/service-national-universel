@@ -366,7 +366,7 @@ const updateStatusPhase2 = async (young) => {
   const applications = await ApplicationModel.find({ youngId: young._id });
   young.set({ phase2ApplicationStatus: applications.map((e) => e.status) });
 
-  if (young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED || YOUNG_STATUS_PHASE2.WITHDRAWN) {
+  if (young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED || young.statusPhase2 === YOUNG_STATUS_PHASE2.WITHDRAWN) {
     // We do not change young status if phase 2 is already VALIDATED (2020 cohort or manual change) or WITHDRAWN.
     young.set({ statusPhase2: young.statusPhase2 });
   } else if (Number(young.phase2NumberHoursDone) >= 84) {
