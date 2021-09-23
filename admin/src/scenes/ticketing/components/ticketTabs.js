@@ -42,9 +42,10 @@ export default ({ setTicket, selectedTicket }) => {
           <TabItem onClick={() => setStateFilter(4)} isActive={stateFilter === 4}>
             Fermés
           </TabItem>
-          <TabItem onClick={() => setStateFilter("other")} isActive={stateFilter === "other"}>
+          {/* todo other filters */}
+          {/* <TabItem onClick={() => setStateFilter("other")} isActive={stateFilter === "other"}>
             X
-          </TabItem>
+          </TabItem> */}
         </FilterContainer>
         {!tickets ? <Loader /> : null}
         {tickets?.length === 0 ? <div style={{ textAlign: "center", padding: "1rem", fontSize: "0.85rem" }}>Aucun ticket</div> : null}
@@ -70,7 +71,6 @@ const FilterContainer = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 0.5fr;
   grid-template-rows: 1fr;
-  font-weight: bold;
   padding: 0;
   border-bottom: 1px solid #f1f1f1;
 `;
