@@ -12,7 +12,7 @@ export default ({ ...props }) => (
 
 const MailContainer = styled.div`
   svg {
-    height: 20px;
+    height: 22px;
   }
   svg polygon {
     fill: ${({ color }) => `${color}`};
