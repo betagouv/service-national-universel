@@ -7,10 +7,42 @@ import Loader from "../../../components/Loader";
 
 import api from "../../../services/api";
 
+const status = [
+  {
+    id: 1,
+    name: "new",
+  },
+  {
+    id: 2,
+    name: "open",
+  },
+  {
+    id: 3,
+    name: "pending reminder",
+  },
+  {
+    id: 4,
+    name: "closed",
+  },
+  {
+    id: 5,
+    name: "merged",
+  },
+  {
+    id: 6,
+    name: "removed",
+  },
+  {
+    id: 7,
+    name: "pending close",
+  },
+];
+
 export default ({ setTicket }) => {
   const [allOpen, setAllOpen] = useState(false);
   const [unread, setUnread] = useState(false);
   const [closed, setClosed] = useState(false);
+  const [stateFilter, setStateFilter] = useState();
 
   const [tickets, setTickets] = useState([]);
 
@@ -27,7 +59,6 @@ export default ({ setTicket }) => {
   };
 
   const getDate = (ticket) => {
-    console.log("ticket", ticket);
     return (ticket.created_at || "").slice(0, 10);
   };
 
@@ -40,6 +71,7 @@ export default ({ setTicket }) => {
               setAllOpen(true);
               setClosed(false);
               setUnread(false);
+              setStateFilter(null);
             }}
             className={allOpen ? "active" : ""}
           >
@@ -50,6 +82,7 @@ export default ({ setTicket }) => {
               setUnread(true);
               setAllOpen(false);
               setClosed(false);
+              setStateFilter(1);
             }}
             className={unread ? "active" : ""}
           >
@@ -60,6 +93,7 @@ export default ({ setTicket }) => {
               setUnread(false);
               setAllOpen(false);
               setClosed(true);
+              setStateFilter(4);
             }}
             className={closed ? "active" : ""}
           >
@@ -68,15 +102,19 @@ export default ({ setTicket }) => {
         </section>
         {!tickets ? <Loader /> : null}
         {tickets?.length === 0 ? <div style={{ textAlign: "center", padding: "1rem", fontSize: "0.85rem" }}>Aucun ticket</div> : null}
-        {tickets?.map((ticket) => (
-          <div key={ticket.id} className="ticket" onClick={() => setTicket(ticket)}>
-            <div className="ticket-subject">
-              <p>{getFrom(ticket)}</p>
-              <p>{getDate(ticket)}</p>
+        {tickets
+          ?.filter((ticket) => {
+            return !stateFilter || ticket?.state_id === stateFilter;
+          })
+          ?.map((ticket) => (
+            <div key={ticket.id} className="ticket" onClick={() => setTicket(ticket)}>
+              <div className="ticket-subject">
+                <p>{getFrom(ticket)}</p>
+                <p>{getDate(ticket)}</p>
+              </div>
+              <p className="ticket-text">{ticket.title}</p>
             </div>
-            <p className="ticket-text">{ticket.title}</p>
-          </div>
-        ))}
+          ))}
       </List>
     </HeroContainer>
   );
