@@ -7,43 +7,8 @@ import Loader from "../../../components/Loader";
 
 import api from "../../../services/api";
 
-const status = [
-  {
-    id: 1,
-    name: "new",
-  },
-  {
-    id: 2,
-    name: "open",
-  },
-  {
-    id: 3,
-    name: "pending reminder",
-  },
-  {
-    id: 4,
-    name: "closed",
-  },
-  {
-    id: 5,
-    name: "merged",
-  },
-  {
-    id: 6,
-    name: "removed",
-  },
-  {
-    id: 7,
-    name: "pending close",
-  },
-];
-
-export default ({ setTicket, ticket }) => {
-  const [allOpen, setAllOpen] = useState(true);
-  const [unread, setUnread] = useState(false);
-  const [closed, setClosed] = useState(false);
+export default ({ setTicket, selectedTicket }) => {
   const [stateFilter, setStateFilter] = useState();
-
   const [tickets, setTickets] = useState([]);
 
   useEffect(() => {
@@ -77,9 +42,10 @@ export default ({ setTicket, ticket }) => {
           <TabItem onClick={() => setStateFilter(4)} isActive={stateFilter === 4}>
             Fermés
           </TabItem>
-          <TabItem onClick={() => setStateFilter("other")} isActive={stateFilter === "other"}>
+          {/* todo other filters */}
+          {/* <TabItem onClick={() => setStateFilter("other")} isActive={stateFilter === "other"}>
             X
-          </TabItem>
+          </TabItem> */}
         </FilterContainer>
         {!tickets ? <Loader /> : null}
         {tickets?.length === 0 ? <div style={{ textAlign: "center", padding: "1rem", fontSize: "0.85rem" }}>Aucun ticket</div> : null}
@@ -88,13 +54,13 @@ export default ({ setTicket, ticket }) => {
             return !stateFilter || ticket?.state_id === stateFilter;
           })
           ?.map((ticket) => (
-            <div key={ticket.id} className="ticket" onClick={() => setTicket(ticket)}>
+            <TicketContainer key={ticket.id} active={ticket.id === selectedTicket?.id} className="ticket" onClick={() => setTicket(ticket)}>
               <div className="ticket-subject">
                 <p>{getFrom(ticket)}</p>
                 <p>{getDate(ticket)}</p>
               </div>
               <p className="ticket-text">{ticket.title}</p>
-            </div>
+            </TicketContainer>
           ))}
       </List>
     </HeroContainer>
@@ -105,8 +71,8 @@ const FilterContainer = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 0.5fr;
   grid-template-rows: 1fr;
-  font-weight: bold;
   padding: 0;
+  border-bottom: 1px solid #f1f1f1;
 `;
 
 const TabItem = styled.div`
@@ -167,22 +133,24 @@ export const Link = styled.div`
   }
 `;
 
+const TicketContainer = styled.div`
+  cursor: pointer;
+  border-bottom: 1px solid #f1f1f1;
+  color: black;
+  padding: 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  :not(:first-child):hover {
+    background-color: #f1f1f1 !important;
+  }
+  ${({ active }) => (active ? "background-color: #e6e6fa !important;" : null)}
+`;
+
 const List = styled.div`
   background-color: #fff;
   overflow: hidden;
   .active {
     color: blue;
-  }
-  .ticket {
-    cursor: pointer;
-    border-bottom: 1px solid #f1f1f1;
-    color: black;
-    padding: 1rem 1.5rem;
-    display: flex;
-    flex-direction: column;
-    :not(:first-child):hover {
-      background-color: #f1f1f1 !important;
-    }
   }
   .ticket p {
     margin: 0;
