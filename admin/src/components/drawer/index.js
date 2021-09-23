@@ -4,8 +4,8 @@ import styled from "styled-components";
 import {useSelector} from "react-redux";
 import {environment} from "../../config";
 import {ROLES, colors} from "../../utils";
-import MailOpenIcons from "../MailOpenIcons";
-import MailCloseIcons from "../MailCloseIcons";
+import MailOpenIcon from "../MailOpenIcon";
+import MailCloseIcon from "../MailCloseIcon";
 
 const DrawerTab = ({title, to, onClick}) => (
   <li onClick={onClick}>
@@ -52,11 +52,11 @@ function admin({onClick}) {
             <div>Ticket</div>
             <div style={{display: "flex"}}>
               <div style={{display: "flex", alignContent: "center", justifyContent: "center", background: "#FEB951", borderRadius: "0.5rem", marginRight: "10px", paddingRight: "8px", paddingLeft: "8px", width: "60px"}}>
-                <MailCloseIcons/>
+                <MailCloseIcon/>
                 <div style={{marginLeft: "4px"}}>2</div>
               </div>
               <div style={{display: "flex", alignContent: "center", justifyContent: "center", background: "#F1545B", borderRadius: "0.5rem", marginRight: "10px", paddingRight: "8px", paddingLeft: "8px", width: "60px"}}>
-                <MailOpenIcons/>
+                <MailOpenIcon/>
                 <div style={{marginLeft: "4px"}}>3</div>
               </div>
             </div>
