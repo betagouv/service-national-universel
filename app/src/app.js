@@ -40,6 +40,7 @@ import { SENTRY_URL, environment } from "./config";
 
 import "./index.css";
 import { YOUNG_STATUS, ENABLE_PM } from "./utils";
+import Zammad from "./components/Zammad";
 
 if (environment === "production") {
   Sentry.init({
@@ -80,6 +81,7 @@ export default () => {
   return (
     <Router>
       <ScrollToTop />
+      <Zammad />
       <div className="main">
         <Switch>
           <Route path="/bug" component={Bug} />
