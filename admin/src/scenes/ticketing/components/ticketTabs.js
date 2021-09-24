@@ -20,7 +20,7 @@ export default ({ setTicket, selectedTicket }) => {
 
   const getFrom = (ticket) => {
     if (!ticket.articles.length) return "";
-    return ticket.articles[1].from;
+    return ticket.articles[0].from;
   };
 
   const getDate = (ticket) => {
