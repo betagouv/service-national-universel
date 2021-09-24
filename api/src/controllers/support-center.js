@@ -87,7 +87,7 @@ router.put("/ticket/:id", passport.authenticate(["referent", "young"], { session
 
     if (message) {
       const response = await zammad.api("/ticket_articles", {
-        method: "PUT",
+        method: "POST",
         headers: { "X-On-Behalf-Of": email },
         body: JSON.stringify({
           ticket_id: req.params.id,

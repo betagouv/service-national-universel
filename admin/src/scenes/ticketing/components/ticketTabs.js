@@ -21,7 +21,6 @@ export default ({ setTicket, selectedTicket }) => {
 
   const getFrom = (ticket) => {
     if (!ticket.articles.length) return "";
-    console.log("ARTICLES", ticket.articles);
     return ticket.articles[0]?.from;
   };
 
