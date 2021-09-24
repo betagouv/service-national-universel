@@ -31,9 +31,7 @@ router.get("/ticket_overviews", passport.authenticate(["referent"], { session: f
     const email = req.user.email;
     const customer_id = await zammad.getCustomerIdByEmail(email);
     if (!customer_id) return res.status(401).send({ ok: false, code: ERRORS.NOT_FOUND });
-    // const response = await zammad.api("/ticket_overviews", { method: "GET", headers: { "X-On-Behalf-Of": email } });
     const response = await zammad.api("/ticket_overviews", { method: "GET" });
-    console.log(response);
     return res.status(200).send({ ok: true, data: response });
   } catch (error) {
     capture(error);
@@ -107,13 +105,12 @@ router.put("/ticket/:id", passport.authenticate(["referent", "young"], { session
         headers: { "X-On-Behalf-Of": email },
         body: JSON.stringify({
           id: req.params.id,
-          state
+          state,
         }),
       });
       if (!response.id) return res.status(400).send({ ok: false });
       return res.status(200).send({ ok: true, data: response });
     }
-
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
