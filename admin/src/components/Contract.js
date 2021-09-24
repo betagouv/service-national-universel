@@ -819,10 +819,12 @@ function SendContractLink({ contract, target }) {
   return (
     <CopyLink
       onClick={async () => {
+        const email = contract[target + "Email"];
+        if (!confirm("Souhaitez-vous renvoyer le mail avec le lien de validation du contrat d'engagement à " + email)) return;
         try {
           const { ok } = await api.post(`/contract/${contract._id}/send-email/${target}`);
           if (!ok) return toastr.error("Une erreur est survenue lors de l'envoi du mail");
-          toastr.success("L'email a bien été envoyé", contract[target + "Email"]);
+          toastr.success("L'email a bien été envoyé", email);
         } catch (e) {
           toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
         }
