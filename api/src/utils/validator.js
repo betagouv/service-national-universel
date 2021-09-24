@@ -24,7 +24,7 @@ function validateMission(mission) {
       domains: Joi.array().items(Joi.string().allow(null, "")),
       startAt: Joi.string().allow(null, ""),
       endAt: Joi.string().allow(null, ""),
-      duration: Joi.string().allow(null),
+      duration: Joi.string().allow(null, ""),
       format: Joi.string().allow(null, ""),
       frequence: Joi.string().allow(null, ""),
       period: Joi.array().items(Joi.string().allow(null, "")),

@@ -85,7 +85,7 @@ router.put("/:id", passport.authenticate("referent", { session: false }), async 
     if (!canModifyMission(req.user, mission)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { error: errorMission, value: checkedMission } = validateMission(req.body);
-    if (errorMission) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+    if (errorMission) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, errorMission });
 
     const oldStatus = mission.status;
     mission.set(checkedMission);

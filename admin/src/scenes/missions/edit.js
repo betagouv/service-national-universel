@@ -370,7 +370,7 @@ export default (props) => {
                         <p style={{ color: "#a0aec1", fontSize: 12 }}>Saisissez un nombre d'heures prévisionnelles pour la réalisation de la mission</p>
                         <Row>
                           <Col>
-                            <Input name="duration" onChange={handleChange} value={values.duration} type="number" min={1} max={999} />
+                            <Input name="duration" onChange={handleChange} value={values.duration} />
                           </Col>
                           <Col style={{ display: "flex", alignItems: "center" }}>heure(s)</Col>
                         </Row>
