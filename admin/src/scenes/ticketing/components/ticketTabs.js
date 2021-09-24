@@ -8,19 +8,21 @@ import api from "../../../services/api";
 
 export default ({ setTicket, selectedTicket }) => {
   const [stateFilter, setStateFilter] = useState();
-  const [tickets, setTickets] = useState([]);
+  const [tickets, setTickets] = useState(null);
 
   useEffect(() => {
     (async () => {
       const { data } = await api.get(`/support-center/ticket`);
       setTickets(data);
-      if (data.length) setTicket(data[0]);
+      if (data?.length) setTicket(data[0]);
     })();
+    if (tickets?.length) setTicket(data[0]);
   }, []);
 
   const getFrom = (ticket) => {
     if (!ticket.articles.length) return "";
-    return ticket.articles[1].from;
+    console.log("ARTICLES", ticket.articles);
+    return ticket.articles[0]?.from;
   };
 
   const getDate = (ticket) => {
@@ -139,6 +141,9 @@ export const HeroContainer = styled.div`
   background-color: white;
   max-width: 380px;
   min-width: 380px;
+  border-top: 1px solid #e4e4e7;
+  border-bottom: 1px solid #e4e4e7;
+  overflow: scroll;
   @media (max-width: 768px) {
     padding: 1rem 0;
   }
@@ -165,5 +170,4 @@ const TicketContainer = styled.div`
 
 const List = styled.div`
   background-color: #fff;
-  overflow: hidden;
 `;

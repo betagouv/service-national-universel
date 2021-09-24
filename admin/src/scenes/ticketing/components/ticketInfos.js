@@ -86,7 +86,8 @@ export default ({ ticket }) => {
 export const HeroContainer = styled.div`
   flex: 1;
   padding: 1rem;
-
+  border-top: 1px solid #e4e4e7;
+  border-bottom: 1px solid #e4e4e7;
   background-color: #fff;
   max-width: 300px;
   min-width: 300px;

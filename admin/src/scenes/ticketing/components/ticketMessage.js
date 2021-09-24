@@ -20,8 +20,8 @@ export default ({ ticketId }) => {
 
   const getTicket = async () => {
     try {
-      // setTicket(null);
-      if (!ticketId) return; //setTicket(null);
+      setTicket(null);
+      if (!ticketId) return; setTicket(null);
       const { data, ok } = await api.get(`/support-center/ticket/${ticketId}`);
       if (data.error || !ok) return setTicket(null);
       return setTicket(data);
@@ -31,9 +31,8 @@ export default ({ ticketId }) => {
   };
 
   useEffect(() => {
-    //  setLoading(true)
+    setLoading(false)
     getTicket();
-    //  setLoading(false)
     const ping = setInterval(getTicket, 5000);
     return () => {
       clearInterval(ping);
@@ -51,37 +50,39 @@ export default ({ ticketId }) => {
   if (ticket === undefined) return <div>Selectionnez un ticket</div>;
 
   return (
-    <Container style={{ padding: 0, backgroundColor: "#F1F5F9", border: "1px solid #E4E4E7" }}>
+    <Container style={{ padding: 0, backgroundColor: "#F1F5F9", border: "1px solid #E4E4E7", display: "flex", flexDirection: "column", maxHeight: "100%" }}>
       <Heading>
         <h1>
           Demande #{ticket?.id} - {ticket?.title}
         </h1>
         <Details title="Crée le" content={ticket?.created_at && formatStringLongDate(ticket?.created_at)} />
       </Heading>
-      <div style={{ overflow: "scroll", maxHeight: "50vh", display: "flex", flexDirection: "column-reverse" }}>
-        <Box>
-          {ticket?.articles
-            ?.sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
-            ?.map((article, i) => (
-              <Message key={i} fromMe={user.email === article.created_by} from={article.from} date={formatStringLongDate(article.created_at)} content={article.body} />
-            ))}
-        </Box>
-      </div>
-      <InputContainer>
-        <textarea
-          row={2}
-          placeholder="Mon message..."
-          className="form-control"
-          onChange={(e) => setMessage(e.target.value)}
-          value={message}
-          style={{ border: "none", resize: "none", borderRadius: "0px" }}
-        />
-        <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", background: "white" }}>
-          <LoadingButton style={{ background: "none", height: "100%" }} onClick={send} disabled={!message}>
-            <SendIcon />
-          </LoadingButton>
+      <section style={{ flexDirection: "column", justifyContent: "flex-end" }}>
+        <div style={{ overflow: "scroll", maxHeight: "50vh", display: "flex", flexDirection: "column-reverse" }}>
+          <Box>
+            {ticket?.articles
+              ?.sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+              ?.map((article, i) => (
+                <Message key={i} fromMe={user.email === article.created_by} from={article.from} date={formatStringLongDate(article.created_at)} content={article.body} />
+              ))}
+          </Box>
         </div>
-      </InputContainer>
+        <InputContainer>
+          <textarea
+            row={2}
+            placeholder="Mon message..."
+            className="form-control"
+            onChange={(e) => setMessage(e.target.value)}
+            value={message}
+            style={{ border: "none", resize: "none", borderRadius: "0px" }}
+          />
+          <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", background: "white" }}>
+            <LoadingButton style={{ background: "none", height: "100%" }} onClick={send} disabled={!message}>
+              <SendIcon />
+            </LoadingButton>
+          </div>
+        </InputContainer>
+      </section>
     </Container>
   );
 };
@@ -185,7 +186,7 @@ const Heading = styled(Container)`
   align-items: space-between;
   background-color: #fff;
   padding: 0.5rem;
-  border: 1px solid #e4e4e7;
+  border-bottom: 1px solid #e4e4e7;
   @media (max-width: 768px) {
     margin-bottom: 1rem;
   }

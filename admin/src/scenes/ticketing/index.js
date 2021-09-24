@@ -22,9 +22,10 @@ export default () => {
 };
 
 export const HeroContainer = styled.div`
-  flex: 1;
+  height: 900px;
   section {
     display: flex;
+    height: 92.5%;
   }
   @media (max-width: 768px) {
     padding: 1rem 0;
