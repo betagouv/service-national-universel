@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { adminURL } from "../config";
 import api from "../services/api";
+import { translate } from "../utils";
 
 function sendMessage(chat, message) {
   chat.send("chat_session_message", {
@@ -30,7 +31,7 @@ export default function Zammad() {
         target: $("#zammad-chat"),
       });
 
-      // Monkey patch Zammad.
+      // === Monkey patch Zammad ===
 
       // This send the user informations to zammad.
       chat.onConnectionEstablished = (data) => {
@@ -40,20 +41,26 @@ export default function Zammad() {
           if (young) {
             const info = [
               `🧑‍🎓 <a href="${adminURL}/volontaire/${young._id}">${young.firstName + " " + young.lastName}</a> ${young.email}`,
-              `🔋 Statut : <b>${young.status}</b> (phase1: ${young.statusPhase1} - phase2: ${young.statusPhase2} - phase3: ${young.statusPhase2} )`,
+              `🔋 Statut : <b>${translate(young.status)}</b> (phase1: ${translate(young.statusPhase1)} - phase2: ${translate(young.statusPhase2)} - phase3: ${translate(
+                young.statusPhase2
+              )} )`,
             ];
+            // We have to create a ticket before initializing first chat message
+            // because we have to include link.
             api
               .post("/support-center/ticket", {
                 subject: `${young.firstName} ${young.lastName} - ${new Date().toLocaleString()}`,
                 type: "💬 Chat",
-                message: "Chat initialisé", // "Chat initialisé", // "https://support.selego.co/#customer_chat/session/" + chat.sessionId,
+                message: "Chat initialisé",
               })
               .then((res) => {
                 chat.waitingForTicketAdditionalInformation = true;
                 chat.ticketId = res.data.id;
+                // Actually send the message when ticket is created
                 sendMessage(chat, [...info, `📝 Ticket : https://support.selego.co/#ticket/zoom/${res.data.id}`]);
               })
               .catch((e) => {
+                // We don't care about errors.
                 sendMessage(chat, [...info, `Échec de la création du ticket, il faut le créer manuellement`]);
               });
           } else {
@@ -84,7 +91,7 @@ export default function Zammad() {
         ZammadChat.prototype.receiveMessage.call(chat, data);
       };
 
-      // End of monkey patch
+      // === End of monkey patch ===
     });
   }, []);
 

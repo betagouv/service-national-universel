@@ -1,4 +1,3 @@
-import { translate } from "../../utils";
 export const authActions = {
   SETYOUNG: "SETYOUNG",
 };
