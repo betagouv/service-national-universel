@@ -17,6 +17,7 @@ const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 const { validateId, validateContract, validateOptionalId } = require("../utils/validator");
 const { serializeContract } = require("../utils/serializer");
 const { updateYoungPhase2Hours } = require("../utils");
+const Joi = require("joi");
 
 async function updateYoungStatusPhase2Contract(young) {
   const contracts = await ContractObject.find({ youngId: young._id });
@@ -232,6 +233,34 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
     await updateYoungPhase2Hours(young);
 
     return res.status(200).send({ ok: true, data: serializeContract(contract, req.user) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error: error.message });
+  }
+});
+
+// Send contract email
+router.post("/:id/send-email/:type", passport.authenticate(["referent"], { session: false }), async (req, res) => {
+  try {
+    const { error, value: id } = validateId(req.params.id);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, message: error.message });
+
+    const { error: typeError, value: type } = Joi.string()
+      .valid("projectManager", "structureManager", "parent1", "parent2", "young")
+      .required()
+      .validate(req.params.type);
+    if (typeError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, message: typeError.message });
+
+    const contract = await ContractObject.findById(id);
+    if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (type === "projectManager") await sendProjectManagerContractEmail(contract, false);
+    if (type === "structureManager") await sendStructureManagerContractEmail(contract, false);
+    if (type === "parent1") await sendParent1ContractEmail(contract, false);
+    if (type === "parent2") await sendParent2ContractEmail(contract, false);
+    if (type === "young") await sendYoungContractEmail(contract, false);
+
+    return res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error: error.message });
