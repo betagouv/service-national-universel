@@ -35,6 +35,7 @@ import Drawer from "./components/drawer";
 import Header from "./components/header";
 import Footer from "./components/footer";
 import Loader from "./components/Loader";
+import Zammad from "./components/Zammad";
 
 import api from "./services/api";
 
@@ -73,6 +74,7 @@ export default () => {
 
   return (
     <Router>
+      <Zammad />
       <div className="main">
         <Switch>
           <Route path="/validate" component={Validate} />
@@ -87,6 +89,7 @@ export default () => {
 
 const Home = () => {
   const user = useSelector((state) => state.Auth.user);
+
   const [menuVisible, setMenuVisible] = useState(false);
 
   const renderDashboard = () => {
