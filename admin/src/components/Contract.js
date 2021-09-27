@@ -241,15 +241,29 @@ export default ({ young, admin }) => {
           </div>
           <hr />
           <div style={{ display: "grid", gridAutoColumns: "1fr", gridAutoFlow: "column" }}>
-            <ContractStatusBadge title="Représentant de l'Etat" contract={contract} status={contract?.projectManagerStatus} token={contract?.projectManagerToken} />
-            <ContractStatusBadge title="Représentant structure" contract={contract} status={contract?.structureManagerStatus} token={contract?.structureManagerToken} />
+            <ContractStatusBadge
+              title="Représentant de l'Etat"
+              target="projectManager"
+              contract={contract}
+              status={contract?.projectManagerStatus}
+              token={contract?.projectManagerToken}
+            />
+            <ContractStatusBadge
+              title="Représentant structure"
+              target="structureManager"
+              contract={contract}
+              status={contract?.structureManagerStatus}
+              token={contract?.structureManagerToken}
+            />
             {!isYoungAdult ? (
               <>
-                <ContractStatusBadge title="Représentant légal 1" contract={contract} status={contract?.parent1Status} token={contract?.parent1Token} />
-                {young.parent2Email && <ContractStatusBadge title="Représentant légal 2" contract={contract} status={contract?.parent2Status} token={contract?.parent2Token} />}
+                <ContractStatusBadge title="Représentant légal 1" target="parent1" contract={contract} status={contract?.parent1Status} token={contract?.parent1Token} />
+                {young.parent2Email && (
+                  <ContractStatusBadge title="Représentant légal 2" target="parent2" contract={contract} status={contract?.parent2Status} token={contract?.parent2Token} />
+                )}
               </>
             ) : (
-              <ContractStatusBadge title="Volontaire" contract={contract} status={contract?.youngContractStatus} token={contract?.youngContractToken} />
+              <ContractStatusBadge title="Volontaire" target="young" contract={contract} status={contract?.youngContractStatus} token={contract?.youngContractToken} />
             )}
           </div>
         </Bloc>
@@ -800,12 +814,41 @@ function ContractStatusBadge({ title, ...rest }) {
     </div>
   );
 }
-function ContractStatusbadgeItem({ contract, status, token }) {
+
+function SendContractLink({ contract, target }) {
+  return (
+    <CopyLink
+      onClick={async () => {
+        const email = contract[target + "Email"];
+        if (!confirm("Souhaitez-vous renvoyer le mail avec le lien de validation du contrat d'engagement à " + email)) return;
+        try {
+          const { ok } = await api.post(`/contract/${contract._id}/send-email/${target}`);
+          if (!ok) return toastr.error("Une erreur est survenue lors de l'envoi du mail");
+          toastr.success("L'email a bien été envoyé", email);
+        } catch (e) {
+          toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
+        }
+      }}
+    >
+      ✉️ Renvoyer le lien par email
+    </CopyLink>
+  );
+}
+
+function ContractStatusbadgeItem({ contract, status, token, target }) {
   const user = useSelector((state) => state.Auth.user);
 
   if (contract?.invitationSent !== "true") return <Badge text="Pas encore envoyé" />;
   else if (status === "VALIDATED") return <Badge text="Validé" color={APPLICATION_STATUS_COLORS.VALIDATED} />;
-  else if (user.role !== ROLES.ADMIN) return <Badge text="En attente de validation" color={APPLICATION_STATUS_COLORS.WAITING_VALIDATION} />;
+  else if (user.role !== ROLES.ADMIN) {
+    return (
+      <>
+        <Badge text="En attente de validation" color={APPLICATION_STATUS_COLORS.WAITING_VALIDATION} />
+        <br />
+        <SendContractLink contract={contract} target={target} />
+      </>
+    );
+  }
   return (
     <>
       <Badge text="En attente de validation" color={APPLICATION_STATUS_COLORS.WAITING_VALIDATION} />
@@ -818,6 +861,8 @@ function ContractStatusbadgeItem({ contract, status, token }) {
       >
         Copier le lien de validation
       </CopyLink>
+      <br />
+      <SendContractLink contract={contract} target={target} />
     </>
   );
 }
