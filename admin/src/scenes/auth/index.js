@@ -5,7 +5,6 @@ import Reset from "./reset";
 import Forgot from "./forgot";
 import Signin from "./signin";
 import SignupInvite from "./signupInvite";
-import SignupStructure from "./signupStructure";
 import Signup from "./signup";
 import InvitationExpired from "./invitationexpired";
 
@@ -16,7 +15,6 @@ export default () => {
         <Route path="/auth/reset" component={Reset} />
         <Route path="/auth/forgot" component={Forgot} />
         <Route path="/auth/signup/invite" component={SignupInvite} />
-        <Route path="/auth/signup/structure" component={SignupStructure} />
         <Route path="/auth/signup" component={Signup} />
         <Route path="/auth/invitationexpired" component={InvitationExpired} />
         <Route path="/auth" component={Signin} />
