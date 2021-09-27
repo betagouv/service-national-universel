@@ -30,6 +30,7 @@ export default ({ value, onChange, onSend }) => {
       missionName: value.name,
       missionDepartment: value.department,
       missionRegion: value.region,
+      missionDuration: value.duration,
       structureId: value.structureId,
       tutorId: value.tutorId,
       tutorName: value.tutorName,

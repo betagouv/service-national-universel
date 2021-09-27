@@ -7,7 +7,7 @@ import { ReactiveBase } from "@appbaseio/reactivesearch";
 import { apiURL } from "../../../config";
 import api from "../../../services/api";
 import SelectStatusApplication from "../../../components/selectStatusApplication";
-import { APPLICATION_STATUS, formatStringDateTimezoneUTC, ES_NO_LIMIT } from "../../../utils";
+import { APPLICATION_STATUS, formatStringDateTimezoneUTC, ES_NO_LIMIT, translate } from "../../../utils";
 import { Link, useHistory } from "react-router-dom";
 import ProposalMission from "./proposalMission";
 import CreateMission from "./createMission";
@@ -16,6 +16,7 @@ import CrossSVG from "../../../assets/cross.svg";
 import Loader from "../../../components/Loader";
 import ContractLink from "../../../components/ContractLink";
 import ExportComponent from "../../../components/ExportXlsx";
+import ModalConfirmWithMessage from "../../../components/modals/ModalConfirmWithMessage";
 
 export default ({ young, onChangeApplication }) => {
   const [applications, setApplications] = useState(null);
@@ -121,6 +122,7 @@ export default ({ young, onChangeApplication }) => {
 
 const Hit = ({ hit, index, young, onChangeApplication }) => {
   const [mission, setMission] = useState();
+  const [modalDurationOpen, setModalDurationOpen] = useState(false);
   const history = useHistory();
   useEffect(() => {
     (async () => {
@@ -178,6 +180,42 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
             Contrat d'engagement &gt;
           </ContractLink>
         ) : null}
+        {["VALIDATED", "IN_PROGRESS", "DONE"].includes(hit.status) && (
+          <div>
+            <div style={{ textAlign: "center" }}>
+              {!hit.missionDuration ? (
+                <ModifyDurationLink onClick={() => setModalDurationOpen(true)}>Indiquer un nombre d'heure</ModifyDurationLink>
+              ) : (
+                <span>
+                  Durée : {hit.missionDuration}h - <ModifyDurationLink onClick={() => setModalDurationOpen(true)}>Modifier</ModifyDurationLink>
+                </span>
+              )}
+            </div>
+            <ModalConfirmWithMessage
+              isOpen={modalDurationOpen}
+              title="Validation de réalisation de mission"
+              message={`Merci de valider le nombre d'heures effectuées par ${hit.youngFirstName} pour la mission ${hit.missionName}.`}
+              type="number"
+              onChange={() => setModalDurationOpen(false)}
+              defaultInput={hit.missionDuration}
+              placeholder="Nombre d'heures"
+              onConfirm={async (duration) => {
+                try {
+                  const { ok, code } = await api.put("/application", { _id: hit._id, missionDuration: duration });
+                  if (!ok) {
+                    toastr.error("Une erreur s'est produite :", translate(code));
+                  } else {
+                    onChangeApplication();
+                    toastr.success("Mis à jour!");
+                  }
+                } catch (e) {
+                  toastr.error("Une erreur s'est produite :", translate(code));
+                }
+                setModalDurationOpen(false);
+              }}
+            />
+          </div>
+        )}
       </td>
     </tr>
   );
@@ -297,4 +335,11 @@ const Legend = styled.div`
   color: rgb(38, 42, 62);
   font-size: 1.3rem;
   font-weight: 500;
+`;
+
+const ModifyDurationLink = styled.span`
+  color: #007bff;
+  :hover {
+    text-decoration: underline;
+  }
 `;

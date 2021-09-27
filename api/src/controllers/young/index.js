@@ -343,6 +343,8 @@ router.put("/", passport.authenticate("young", { session: false }), async (req, 
 
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    delete value.firstName;
+    delete value.lastName;
     young.set(value);
     await young.save();
 
