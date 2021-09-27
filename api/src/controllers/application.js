@@ -14,27 +14,7 @@ const { validateUpdateApplication, validateNewApplication } = require("../utils/
 const { ADMIN_URL, APP_URL } = require("../config");
 const { SUB_ROLES, ROLES, SENDINBLUE_TEMPLATES, department2region } = require("snu-lib");
 const { serializeApplication } = require("../utils/serializer");
-const { updateYoungPhase2Hours } = require("../utils");
-
-const updateStatusPhase2 = async (app) => {
-  const young = await YoungObject.findById(app.youngId);
-  const applications = await ApplicationObject.find({ youngId: young._id });
-  young.set({ statusPhase2: "WAITING_REALISATION" });
-  young.set({ phase2ApplicationStatus: applications.map((e) => e.status) });
-  for (let application of applications) {
-    // if at least one application is DONE, phase 2 is validated
-    if (application.status === "DONE") {
-      young.set({ statusPhase2: "VALIDATED", phase: "CONTINUE" });
-      await young.save();
-      return;
-    }
-    // if at least one application is not ABANDON or CANCEL, phase 2 is in progress
-    if (["WAITING_VALIDATION", "VALIDATED", "IN_PROGRESS"].includes(application.status)) {
-      young.set({ statusPhase2: "IN_PROGRESS" });
-    }
-  }
-  await young.save();
-};
+const { updateYoungPhase2Hours, updateStatusPhase2 } = require("../utils");
 
 const updatePlacesMission = async (app) => {
   try {
@@ -102,7 +82,8 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false }
     }
 
     const data = await ApplicationObject.create(value);
-    await updateStatusPhase2(data);
+    await updateYoungPhase2Hours(young);
+    await updateStatusPhase2(young);
     await updatePlacesMission(data);
     return res.status(200).send({ ok: true, data: serializeApplication(data) });
   } catch (error) {
@@ -130,9 +111,10 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false })
     application.set(value);
     await application.save();
 
-    await updateStatusPhase2(application);
-    await updatePlacesMission(application);
     await updateYoungPhase2Hours(young);
+    await updateStatusPhase2(young);
+    await updatePlacesMission(application);
+
     res.status(200).send({ ok: true, data: serializeApplication(application) });
   } catch (error) {
     capture(error);
