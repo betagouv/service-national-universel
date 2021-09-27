@@ -87,7 +87,7 @@ export default function Zammad() {
               message: `https://support.selego.co/#customer_chat/session/${data.message.chat_session_id}`,
             })
             .then((res) => {
-              console.log("Ticket updated", res);
+              //
             });
         }
         ZammadChat.prototype.receiveMessage.call(chat, data);
