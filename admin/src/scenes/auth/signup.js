@@ -81,7 +81,9 @@ export default () => {
                     <form onSubmit={handleSubmit}>
                       <Subtitle style={{ color: "#6A7986", fontSize: "0.85rem" }}>CRÉEZ UN COMPTE RESPONSABLE DE STRUCTURE</Subtitle>
                       <StyledFormGroup>
-                        <label>ADRESSE EMAIL</label>
+                        <label>
+                          <span>*</span>ADRESSE EMAIL
+                        </label>
                         <InputField
                           validate={(v) => !validator.isEmail(v) && "Veuillez renseigner votre email"}
                           name="email"
@@ -96,7 +98,9 @@ export default () => {
                       <Row noGutters>
                         <Col>
                           <StyledFormGroup>
-                            <label htmlFor="firstName">Prénom</label>
+                            <label htmlFor="firstName">
+                              <span>*</span>Prénom
+                            </label>
                             <InputField
                               validate={(v) => validator.isEmpty(v) && "Ce champ est requis"}
                               name="firstName"
@@ -113,7 +117,9 @@ export default () => {
                         <div style={{ width: 10 }} />
                         <Col>
                           <StyledFormGroup>
-                            <label htmlFor="lastName">Nom</label>
+                            <label htmlFor="lastName">
+                              <span>*</span>Nom
+                            </label>
                             <InputField
                               validate={(v) => validator.isEmpty(v) && "Ce champ est requis"}
                               name="lastName"
@@ -128,11 +134,42 @@ export default () => {
                           </StyledFormGroup>
                         </Col>
                       </Row>
+                      <Row noGutters>
+                        <Col>
+                          <StyledFormGroup>
+                            <label htmlFor="phone">Téléphone</label>
+                            <InputField name="phone" type="tel" id="phone" value={values.phone} onChange={handleChange} placeholder="02 00 00 00 00" />
+                          </StyledFormGroup>
+                        </Col>
+                        <div style={{ width: 10 }} />
+                        <Col>
+                          <StyledFormGroup>
+                            <label htmlFor="mobile">Téléphone portable</label>
+                            <InputField name="mobile" type="tel" id="mobile" value={values.mobile} onChange={handleChange} placeholder="06 00 00 00 00" />
+                          </StyledFormGroup>
+                        </Col>
+                      </Row>
                       <StyledFormGroup>
-                        <label>Mot de passe</label>
+                        <label>
+                          <span>*</span>Mot de passe
+                        </label>
                         <p style={{ fontSize: 12, color: colors.grey }}>👉 Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole</p>
-                        <PasswordEye autoComplete="new-password" value={values.password} onChange={handleChange} />
+                        <PasswordEye autoComplete="new-password" value={values.password} onChange={handleChange} name="password" />
                         <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.password}</p>
+                      </StyledFormGroup>
+                      <StyledFormGroup>
+                        <label>
+                          <span>*</span>Confirmation mot de passe
+                        </label>
+                        <PasswordEye
+                          validate={() => values.password !== values.repassword && "Les mots de passe ne correspondent pas."}
+                          autoComplete="new-password"
+                          value={values.repassword}
+                          onChange={handleChange}
+                          name="repassword"
+                          placeholder="Confirmez votre mot de passe"
+                        />
+                        <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.repassword}</p>
                       </StyledFormGroup>
                       <Submit loading={isSubmitting} type="submit" color="primary">
                         Continuer
@@ -188,6 +225,11 @@ const StyledFormGroup = styled(FormGroup)`
     font-size: 10px;
     text-transform: uppercase;
     font-weight: 700;
+    > span {
+      color: red;
+      font-size: 10px;
+      margin-right: 5px;
+    }
   }
 `;
 
