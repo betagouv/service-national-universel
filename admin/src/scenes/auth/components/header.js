@@ -16,11 +16,11 @@ export default () => {
       </Logos>
       <ButtonContainer>
         <Button style={{ borderBottom: "1px solid #f1f1f1" }}>
-          <Link to="/auth">espace administrateur </Link>
+          <Link to="/auth">espace&nbsp;administrateur </Link>
         </Button>
         <Button>
           <a href="https://inscription.snu.gouv.fr/" target="_blank">
-            espace volontaire{" "}
+            espace&nbsp;volontaire
           </a>
         </Button>
       </ButtonContainer>
@@ -50,11 +50,10 @@ const Header = styled.div`
 const Logos = styled.div`
   display: flex;
   align-items: center;
-  margin: 24px;
   flex: 1;
   img {
     vertical-align: top;
-    margin-right: 40px;
+    padding: 0.2rem 1rem;
     height: 80px;
     @media (max-width: 768px) {
       height: 40px;
@@ -65,27 +64,24 @@ const Logos = styled.div`
   }
 `;
 
+const ButtonContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid #f1f1f1;
+`;
+
 const Button = styled.div`
   color: ${colors.grey};
   text-transform: uppercase;
   font-size: 0.8rem;
-  flex: 1;
-  width: 100%;
-  height: 100%;
-  padding: 1rem;
-  text-align: center;
+  display: flex;
   :hover {
     background-color: #f1f1f1;
   }
-`;
-
-const ButtonContainer = styled.div`
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  height: 100px;
-  border-left: 1px solid #f1f1f1;
+  border: 1px solid #f1f1f1;
   > * {
+    padding: 1rem;
     flex: 1;
+    text-align: center;
   }
 `;
