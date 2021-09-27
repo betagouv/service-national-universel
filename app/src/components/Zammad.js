@@ -78,6 +78,7 @@ export default function Zammad() {
       // When the first response is received, we got the internal chat ID,
       // so we can update the ticket that was created on session open.
       chat.receiveMessage = function (data) {
+        ZammadChat.prototype.receiveMessage.call(chat, data);
         if (chat.waitingForTicketAdditionalInformation && data?.message?.chat_session_id) {
           chat.waitingForTicketAdditionalInformation = false;
           api
@@ -88,7 +89,6 @@ export default function Zammad() {
               //
             });
         }
-        ZammadChat.prototype.receiveMessage.call(chat, data);
       };
 
       // === End of monkey patch ===
