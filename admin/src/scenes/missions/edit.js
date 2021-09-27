@@ -335,6 +335,9 @@ export default (props) => {
                         <label>
                           <span>*</span>DATES DE LA MISSION
                         </label>
+                        <p style={{ color: "#a0aec1", fontSize: 12 }}>
+                          3 semaines avant la date de fin indiquée ci-dessous, vous ne recevrez plus de candidatures. La mission sera considérée comme close.
+                        </p>
                         <Row>
                           <Col>
                             <Field
