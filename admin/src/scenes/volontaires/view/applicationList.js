@@ -209,7 +209,7 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
                     toastr.success("Mis à jour!");
                   }
                 } catch (e) {
-                  toastr.error("Une erreur s'est produite :", translate(code));
+                  toastr.error("Une erreur s'est produite :", translate(e?.code));
                 }
                 setModalDurationOpen(false);
               }}
