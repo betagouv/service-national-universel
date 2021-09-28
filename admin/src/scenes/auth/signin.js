@@ -34,7 +34,7 @@ export default () => {
       <Header />
       <AuthWrapper>
         <Thumb />
-        <LoginBox>
+        <LoginBox style={{ justifyContent: "center" }}>
           <div>
             <Title>Espace Administrateur</Title>
             <Subtitle>A destination des référents et des structures d’accueil</Subtitle>

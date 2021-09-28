@@ -14,7 +14,6 @@ import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import Header from "./components/header";
 import LoginBox from "./components/loginBox";
-import AuthWrapper from "./components/authWrapper";
 import Title from "./components/title";
 import Subtitle from "./components/subtitle";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
@@ -77,14 +76,18 @@ export default () => {
         {({ values, errors, touched, isSubmitting, handleChange, handleSubmit }) => {
           return (
             <AuthWrapper>
-              <Thumb />
-              <LoginBox>
-                <div>
-                  <Title>Inscrivez votre structure d'accueil</Title>
-                  <Subtitle style={{ color: colors.grey }}>A destination des structures souhaitant accueillir des volontaires</Subtitle>
-                  <hr />
+              <Title>Inscrivez votre structure d'accueil</Title>
+              <Subtitle style={{ color: colors.grey }}>A destination des structures souhaitant accueillir des volontaires</Subtitle>
+              <div>
+                <hr />
+                <Register>
+                  Vous avez déjà un compte ? <Link to="/auth">Connectez-vous</Link>
+                </Register>
+              </div>
+              <LoginBoxes>
+                <LoginBox>
                   <form onSubmit={handleSubmit}>
-                    <Subtitle style={{ color: "#6A7986", fontSize: "0.85rem" }}>CRÉEZ UN COMPTE RESPONSABLE DE STRUCTURE</Subtitle>
+                    <Subtitle style={{ color: "#6A7986", fontSize: "0.85rem" }}>INFORMATIONS SUR LE RESPONSABLE DE STRUCTURE</Subtitle>
                     <StyledFormGroup>
                       <label>
                         <span>*</span>ADRESSE EMAIL
@@ -175,7 +178,8 @@ export default () => {
                       <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.user?.repassword}</p>
                     </StyledFormGroup>
                   </form>
-                  <hr />
+                </LoginBox>
+                <LoginBox>
                   <form onSubmit={handleSubmit}>
                     <Subtitle style={{ color: "#6A7986", fontSize: "0.85rem" }}>INFORMATIONS SUR LA STRUCTURE</Subtitle>
                     <StyledFormGroup>
@@ -305,18 +309,12 @@ export default () => {
                       <InputField validate={(v) => !v && requiredMessage} value={values.structure.zip} onChange={handleChange} name="structure.zip" placeholder="44000" />
                       <ErrorMessage errors={errors} touched={touched} name="structure.zip" />
                     </StyledFormGroup>
-                    <Submit loading={isSubmitting} type="submit" color="primary">
-                      Continuer
-                    </Submit>
                   </form>
-                </div>
-                <div>
-                  <hr />
-                  <Register>
-                    Vous avez déjà un compte ? <Link to="/auth">Connectez-vous</Link>
-                  </Register>
-                </div>
-              </LoginBox>
+                </LoginBox>
+              </LoginBoxes>
+              <Submit loading={isSubmitting} type="submit" color="primary">
+                Continuer
+              </Submit>
             </AuthWrapper>
           );
         }}
@@ -413,8 +411,7 @@ const Submit = styled(LoadingButton)`
   padding: 0.5rem 3rem;
   border: 0;
   background-color: ${colors.purple};
-  margin-top: 30px;
-  margin-bottom: 30px;
+  margin-bottom: 1rem;
   border-radius: 10px;
   box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
   cursor: pointer;
@@ -428,4 +425,13 @@ const Submit = styled(LoadingButton)`
     opacity: 0.5;
     cursor: not-allowed;
   }
+`;
+
+const LoginBoxes = styled.div`
+  display: flex;
+`;
+const AuthWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 `;

@@ -7,7 +7,7 @@ const Title = styled.h1`
     font-size: 1.2rem;
   }
   font-weight: 700;
-  margin-bottom: 14px;
+  margin: 1rem 0;
 `;
 
 export default Title;
