@@ -22,7 +22,7 @@ const updatePlacesMission = async (app) => {
     const mission = await MissionObject.findById(app.missionId);
     const applications = await ApplicationObject.find({ missionId: mission._id });
     const placesTaken = applications.filter((application) => {
-      return ["VALIDATED", "IN_PROGRESS", "DONE", "ABANDON"].includes(application.status);
+      return ["VALIDATED", "IN_PROGRESS", "DONE"].includes(application.status);
     }).length;
     const placesLeft = Math.max(0, mission.placesTotal - placesTaken);
     if (mission.placesLeft !== placesLeft) {
