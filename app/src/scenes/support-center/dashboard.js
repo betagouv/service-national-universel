@@ -12,17 +12,17 @@ const articles = [
   {
     title: "Je cherche une mission",
     body: `Depuis l'onglet "Mission d'intérêt général", cliquez sur la rubrique...`,
-    url: "https://support.selego.co/help/fr-fr/13-phase-2-mission-d-interet-general/33-je-cherche-une-mission-mig",
+    url: "https://support.snu.gouv.fr/help/fr-fr/13-phase-2-mission-d-interet-general/33-je-cherche-une-mission-mig",
   },
   {
     title: "Je modifie mon identifiant e-mail",
     body: `Connectez vous à votre espace volontaire, accédez à "Mon profil"...`,
-    url: "https://support.selego.co/help/fr-fr/10-mon-compte/51-je-modifie-mon-identifiant-email",
+    url: "https://support.snu.gouv.fr/help/fr-fr/10-mon-compte/51-je-modifie-mon-identifiant-email",
   },
   {
     title: "Je consulte mes missions réalisées",
     body: `Les missions réalisées correspondent aux missions que vous avez déjà...`,
-    url: "https://support.selego.co/help/fr-fr/13-phase-2-mission-d-interet-general/38-je-consulte-mes-missions-realisees",
+    url: "https://support.snu.gouv.fr/help/fr-fr/13-phase-2-mission-d-interet-general/38-je-consulte-mes-missions-realisees",
   },
 ];
 
@@ -50,7 +50,7 @@ export default () => {
           <p style={{ color: "#6B7280" }}>
             Vous souhaitez en savoir plus sur les phases de votre parcours volontaire ou sur le fonctionnement de votre espace&nbsp;? N'hésitez pas à consulter notre{" "}
             <strong>
-              <a href="https://support.selego.co/help/fr-fr/3-volontaire" style={{ color: "#6B7280" }} target="_blank" rel="noopener noreferrer">
+              <a href="https://support.snu.gouv.fr/help/fr-fr/3-volontaire" style={{ color: "#6B7280" }} target="_blank" rel="noopener noreferrer">
                 base de connaissance
               </a>
             </strong>
@@ -58,7 +58,7 @@ export default () => {
             <br /> Vous avez un problème technique ou souhaitez contacter un référent ? Contactez notre service de support.
           </p>
           <div className="buttons">
-            <LinkButton href="https://support.selego.co/help/fr-fr/3-volontaire" target="_blank" rel="noopener noreferrer">
+            <LinkButton href="https://support.snu.gouv.fr/help/fr-fr/3-volontaire" target="_blank" rel="noopener noreferrer">
               Base de connaissance
             </LinkButton>
             <InternalLink to="/support/ticket">Contacter quelqu'un</InternalLink>
