@@ -57,7 +57,7 @@ export default function Zammad() {
                 chat.waitingForTicketAdditionalInformation = true;
                 chat.ticketId = res.data.id;
                 // Actually send the message when ticket is created
-                sendMessage(chat, [...info, `📝 Ticket : https://support.selego.co/#ticket/zoom/${res.data.id}`]);
+                sendMessage(chat, [...info, `📝 Ticket : https://support.snu.gouv.fr/#ticket/zoom/${res.data.id}`]);
               })
               .catch((e) => {
                 // We don't care about errors.
@@ -83,7 +83,7 @@ export default function Zammad() {
           chat.waitingForTicketAdditionalInformation = false;
           api
             .put(`/support-center/ticket/${chat.ticketId}`, {
-              message: `https://support.selego.co/#customer_chat/session/${data.message.chat_session_id}`,
+              message: `https://support.snu.gouv.fr/#customer_chat/session/${data.message.chat_session_id}`,
             })
             .then((res) => {
               //

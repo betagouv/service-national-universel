@@ -40,12 +40,11 @@ export default function Zammad() {
         if (isNew) {
           if (user) {
             const info = [
-              `🧑‍🏫 <a href="${adminURL}/user/${user._id}">${user.firstName + " " + user.lastName}</a> ${user.email} ${
-                translate(user.role) + (user.subRole ? ` (${translate(user.subRole)})` : "")
+              `🧑‍🏫 <a href="${adminURL}/user/${user._id}">${user.firstName + " " + user.lastName}</a> ${user.email} ${translate(user.role) + (user.subRole ? ` (${translate(user.subRole)})` : "")
               }`,
               (user.department || "") +
-                (user.department && user.structureId ? " | " : "") +
-                (user.structureId ? '<a href="' + adminURL + "/structure/" + user.structureId + '">Voir la structure</a>' : ""),
+              (user.department && user.structureId ? " | " : "") +
+              (user.structureId ? '<a href="' + adminURL + "/structure/" + user.structureId + '">Voir la structure</a>' : ""),
             ];
             // We have to create a ticket before initializing first chat message
             // because we have to include link.
@@ -59,7 +58,7 @@ export default function Zammad() {
                 chat.waitingForTicketAdditionalInformation = true;
                 chat.ticketId = res.data.id;
                 // Actually send the message when ticket is created
-                sendMessage(chat, [...info, `📝 Ticket : https://support.selego.co/#ticket/zoom/${res.data.id}`]);
+                sendMessage(chat, [...info, `📝 Ticket : https://support.snu.gouv.fr/#ticket/zoom/${res.data.id}`]);
               })
               .catch((e) => {
                 // We don't care about errors.
@@ -85,7 +84,7 @@ export default function Zammad() {
           chat.waitingForTicketAdditionalInformation = false;
           api
             .put(`/support-center/ticket/${chat.ticketId}`, {
-              message: `https://support.selego.co/#customer_chat/session/${data.message.chat_session_id}`,
+              message: `https://support.snu.gouv.fr/#customer_chat/session/${data.message.chat_session_id}`,
             })
             .then((res) => {
               //
