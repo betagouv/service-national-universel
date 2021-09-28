@@ -10,7 +10,18 @@ import ReactSelect from "react-select";
 import MultiSelect from "../../components/Multiselect";
 import AddressInput from "../../components/addressInput";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
-import { translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, MISSION_DOMAINS, PERIOD, dateForDatePicker, putLocation, ROLES, ENABLE_PM } from "../../utils";
+import {
+  translate,
+  MISSION_PERIOD_DURING_HOLIDAYS,
+  MISSION_PERIOD_DURING_SCHOOL,
+  MISSION_DOMAINS,
+  PERIOD,
+  dateForDatePicker,
+  putLocation,
+  ROLES,
+  ENABLE_PM,
+  ES_NO_LIMIT,
+} from "../../utils";
 import api from "../../services/api";
 import Invite from "../structure/components/invite";
 import Loader from "../../components/Loader";
@@ -42,7 +53,7 @@ export default (props) => {
   }
   async function initReferents() {
     if (!structure) return;
-    const body = { query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": structure._id } }] } } };
+    const body = { query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": structure._id } }] } }, size: ES_NO_LIMIT };
     const { responses } = await api.esQuery("referent", body);
     if (responses.length) {
       setReferents(responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
