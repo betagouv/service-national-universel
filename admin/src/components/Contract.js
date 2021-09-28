@@ -15,10 +15,12 @@ import { useParams } from "react-router";
 import Badge from "./Badge";
 import DownloadContractButton from "./buttons/DownloadContractButton";
 import LoadingButton from "./buttons/LoadingButton";
+import ModalConfirm from "./modals/ModalConfirm";
 
 export default ({ young, admin }) => {
   const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
   let { applicationId } = useParams();
   // manager_department
@@ -711,13 +713,18 @@ export default ({ young, admin }) => {
                     onClick={async () => {
                       if (contract?.invitationSent === "true") {
                         const confirmText =
-                          "Si vous enregistrez les modifications, les parties prenantes ayant validé recevront une notification et devront à nouveau valider le contrat d'engagment. De la même manière, les parties prenantes dont l'email a été modifié recevront également un email.";
-                        if (confirm(confirmText)) {
-                          const erroredFields = await validateForm();
-                          if (Object.keys(erroredFields).length) return toastr.error("Il y a des erreurs dans le formulaire");
-                          setFieldValue("sendMessage", true, false);
-                          handleSubmit();
-                        }
+                          "Si vous enregistrez les modifications, les parties prenantes ayant validé le contrat recevront une notification et devront à nouveau valider le contrat d'engagement. De la même manière, les parties prenantes dont l'email a été modifié recevront également un email.";
+                        setModal({
+                          isOpen: true,
+                          title: "Modification du contrat",
+                          message: confirmText,
+                          onConfirm: async () => {
+                            const erroredFields = await validateForm();
+                            if (Object.keys(erroredFields).length) return toastr.error("Il y a des erreurs dans le formulaire");
+                            setFieldValue("sendMessage", true, false);
+                            handleSubmit();
+                          },
+                        });
                       } else {
                         setFieldValue("sendMessage", false, false);
                         onSubmit(values);
@@ -763,6 +770,16 @@ export default ({ young, admin }) => {
           </DownloadAttestationButton>
         </div>
       ) : null}
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
     </>
   );
 };
@@ -816,22 +833,42 @@ function ContractStatusBadge({ title, ...rest }) {
 }
 
 function SendContractLink({ contract, target }) {
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+
   return (
-    <CopyLink
-      onClick={async () => {
-        const email = contract[target + "Email"];
-        if (!confirm("Souhaitez-vous renvoyer le mail avec le lien de validation du contrat d'engagement à " + email)) return;
-        try {
-          const { ok } = await api.post(`/contract/${contract._id}/send-email/${target}`);
-          if (!ok) return toastr.error("Une erreur est survenue lors de l'envoi du mail");
-          toastr.success("L'email a bien été envoyé", email);
-        } catch (e) {
-          toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
-        }
-      }}
-    >
-      ✉️ Renvoyer le lien par email
-    </CopyLink>
+    <>
+      <CopyLink
+        onClick={async () => {
+          try {
+            const email = contract[target + "Email"];
+            setModal({
+              isOpen: true,
+              title: "Envoie de contrat par mail",
+              message: "Souhaitez-vous renvoyer le mail avec le lien de validation du contrat d'engagement à " + email,
+              onConfirm: async () => {
+                const { ok } = await api.post(`/contract/${contract._id}/send-email/${target}`);
+                if (!ok) return toastr.error("Une erreur est survenue lors de l'envoi du mail");
+                toastr.success("L'email a bien été envoyé", email);
+              },
+            });
+          } catch (e) {
+            toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
+          }
+        }}
+      >
+        ✉️ Renvoyer le lien par email
+      </CopyLink>
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
+    </>
   );
 }
 
