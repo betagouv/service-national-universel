@@ -120,4 +120,16 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
   }
 });
 
+// Search for tickets via tags
+router.post("/ticket/search-by-tags", passport.authenticate(["referent"], { session: false }), async (req, res) => {
+  try {
+    const tags = req.body.tags.map((tag) => `tags:${tag}`).join("%20AND%20");
+    const response = await zammad.api(`/tickets/search?query=${tags}`, { method: "GET" });
+    return res.status(200).send({ ok: true, data: response });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
 module.exports = router;
