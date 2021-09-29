@@ -312,7 +312,7 @@ export default () => {
                   </form>
                 </LoginBox>
               </LoginBoxes>
-              <Submit loading={isSubmitting} type="submit" color="primary">
+              <Submit loading={isSubmitting} type="submit" color="primary" onClick={handleSubmit}>
                 Continuer
               </Submit>
             </AuthWrapper>
