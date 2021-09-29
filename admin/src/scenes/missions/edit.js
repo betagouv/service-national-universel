@@ -182,6 +182,8 @@ export default (props) => {
             values.location = await putLocation(values.city, values.zip);
           }
 
+          values.duration = values.duration.toString();
+
           const { ok, code, data: mission } = values._id ? await api.put(`/mission/${values._id}`, values) : await api.post("/mission", values);
 
           setLoadings({
@@ -384,7 +386,7 @@ export default (props) => {
                         <p style={{ color: "#a0aec1", fontSize: 12 }}>Saisissez un nombre d'heures prévisionnelles pour la réalisation de la mission</p>
                         <Row>
                           <Col>
-                            <Input name="duration" onChange={handleChange} value={values.duration} />
+                            <Input type="number" name="duration" onChange={handleChange} value={values.duration} />
                           </Col>
                           <Col style={{ display: "flex", alignItems: "center" }}>heure(s)</Col>
                         </Row>
