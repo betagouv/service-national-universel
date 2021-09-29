@@ -1049,8 +1049,10 @@ Schema.post("remove", function (doc) {
 });
 
 Schema.virtual("user").set(function (user) {
-  const { _id, role, department, region, email, firstName, lastName, model } = user;
-  this._user = { _id, role, department, region, email, firstName, lastName, model };
+  if (user) {
+    const { _id, role, department, region, email, firstName, lastName, model } = user;
+    this._user = { _id, role, department, region, email, firstName, lastName, model };
+  }
 });
 
 Schema.pre("save", function (next, params) {
