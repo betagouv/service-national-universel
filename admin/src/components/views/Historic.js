@@ -97,6 +97,15 @@ const Table = styled.table`
   th:first-child {
     padding-left: 25px;
   }
+
+  //each line (header included)
+  tr {
+    display: flex;
+    //each column
+    > * {
+      flex: 1;
+    }
+  }
   tbody tr {
     :hover {
       background-color: #e6ebfa;
