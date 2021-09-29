@@ -119,6 +119,7 @@ export default ({ young, admin }) => {
           });
       const { ok, code } = await api.post(`/contract`, {
         ...values,
+        missionDuration: values.missionDuration?.toString(),
         youngId: young._id,
         structureId: structure._id,
         applicationId: application._id,
@@ -430,7 +431,7 @@ export default ({ young, admin }) => {
                           jusqu’au
                           <ContractField name="missionEndAt" placeholder="jj/mm/yyyy" type="date" context={context} />
                           <br /> Le volontaire effectuera un total de
-                          <ContractField name="missionDuration" placeholder="nombre d'heure" context={context} />
+                          <ContractField name="missionDuration" placeholder="nombre d'heure" context={context} type="number" />
                           heures de MIG.
                         </div>
                         <h3>c) Conditions d’exercice des missions</h3>
