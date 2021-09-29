@@ -19,7 +19,7 @@ const { serializeContract } = require("../utils/serializer");
 const { updateYoungPhase2Hours, updateStatusPhase2 } = require("../utils");
 const Joi = require("joi");
 
-async function updateYoungStatusPhase2Contract(young) {
+async function updateYoungStatusPhase2Contract(young, fromUser) {
   const contracts = await ContractObject.find({ youngId: young._id });
   young.set({
     statusPhase2Contract: contracts.map((contract) => {
@@ -37,7 +37,7 @@ async function updateYoungStatusPhase2Contract(young) {
     }),
   });
 
-  await young.save();
+  await young.save({ fromUser });
 }
 
 async function createContract(data) {
@@ -229,7 +229,7 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
     // Update young status.
     const young = await YoungObject.findById(contract.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    await updateYoungStatusPhase2Contract(young);
+    await updateYoungStatusPhase2Contract(young, req.user);
     await updateYoungPhase2Hours(young);
     await updateStatusPhase2(young);
 
@@ -337,7 +337,7 @@ router.post("/token/:token", async (req, res) => {
     const young = await YoungObject.findById(data.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    await updateYoungStatusPhase2Contract(young);
+    await updateYoungStatusPhase2Contract(young, req.user);
 
     return res.status(200).send({ ok: true });
   } catch (error) {

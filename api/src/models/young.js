@@ -1049,7 +1049,13 @@ Schema.post("remove", function (doc) {
 });
 
 Schema.virtual("user").set(function (user) {
-  this._user = user;
+  const { _id, role, department, region, email, firstName, lastName, model } = user;
+  this._user = { _id, role, department, region, email, firstName, lastName, model };
+});
+
+Schema.pre("save", function (next, params) {
+  this.user = params?.fromUser;
+  next();
 });
 
 Schema.plugin(patchHistory, {
@@ -1058,7 +1064,7 @@ Schema.plugin(patchHistory, {
   trackOriginalValue: true,
   includes: {
     modelName: { type: String, required: true, default: MODELNAME },
-    user: { type: mongoose.Schema.Types.ObjectId, required: false, from: "_user" },
+    user: { type: Object, required: false, from: "_user" },
   },
   excludes: [
     "/password",
