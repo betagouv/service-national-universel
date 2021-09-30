@@ -4,12 +4,28 @@ import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { environment } from "../../config";
 import { ROLES, colors } from "../../utils";
+import MailOpenIcon from "../MailOpenIcon";
+import MailCloseIcon from "../MailCloseIcon";
 
 const DrawerTab = ({ title, to, onClick }) => (
   <li onClick={onClick}>
     <NavLink to={to}>{title}</NavLink>
   </li>
 );
+
+const DrawerTabWithIcons = ({ title, children, to, onClick }) => {
+  if (environment === "production") return <div />;
+  return (
+    <li onClick={onClick}>
+      <NavLink to={to}>
+        <div style={{ display: "flex", alignContent: "center", justifyContent: "space-between" }}>
+          <div>{title}</div>
+          <div style={{ display: "flex" }}>{children}</div>
+        </div>
+      </NavLink>
+    </li>
+  );
+};
 
 function responsible({ user, onClick }) {
   return (
@@ -20,6 +36,7 @@ function responsible({ user, onClick }) {
     </>
   );
 }
+
 function supervisor({ user, onClick }) {
   return (
     <>
@@ -32,6 +49,7 @@ function supervisor({ user, onClick }) {
 }
 
 function admin({ onClick }) {
+  const tickets = useSelector((state) => state.Auth.tickets);
   return (
     <>
       <DrawerTab to="/structure" title="Structures" onClick={onClick} />
@@ -43,6 +61,40 @@ function admin({ onClick }) {
       <DrawerTab to="/point-de-rassemblement" title="Points de rassemblement" onClick={onClick} />
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
       <DrawerTab to="/objectifs" title="Objectifs" onClick={onClick} />
+      <DrawerTabWithIcons to="/ticket" title="Tickets" onClick={onClick}>
+        <div
+          style={{
+            display: "flex",
+            alignContent: "center",
+            justifyContent: "center",
+            background: "#F1545B",
+            borderRadius: "0.5rem",
+            marginRight: "10px",
+            paddingRight: "8px",
+            paddingLeft: "8px",
+            width: "60px",
+          }}
+        >
+          <MailCloseIcon />
+          <div style={{ marginLeft: "4px" }}>2</div>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            alignContent: "center",
+            justifyContent: "center",
+            background: "#FEB951",
+            borderRadius: "0.5rem",
+            marginRight: "10px",
+            paddingRight: "8px",
+            paddingLeft: "8px",
+            width: "60px",
+          }}
+        >
+          <MailOpenIcon />
+          <div style={{ marginLeft: "4px" }}>3</div>
+        </div>
+      </DrawerTabWithIcons>
     </>
   );
 }
@@ -57,6 +109,40 @@ function referent({ onClick }) {
       <DrawerTab to="/inscription" title="Inscriptions" onClick={onClick} />
       <DrawerTab to="/centre" title="Centres" onClick={onClick} />
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
+      <DrawerTabWithIcons to="/ticket" title="Tickets" onClick={onClick}>
+        <div
+          style={{
+            display: "flex",
+            alignContent: "center",
+            justifyContent: "center",
+            background: "#F1545B",
+            borderRadius: "0.5rem",
+            marginRight: "10px",
+            paddingRight: "8px",
+            paddingLeft: "8px",
+            width: "60px",
+          }}
+        >
+          <MailCloseIcon />
+          <div style={{ marginLeft: "4px" }}>2</div>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            alignContent: "center",
+            justifyContent: "center",
+            background: "#FEB951",
+            borderRadius: "0.5rem",
+            marginRight: "10px",
+            paddingRight: "8px",
+            paddingLeft: "8px",
+            width: "60px",
+          }}
+        >
+          <MailOpenIcon />
+          <div style={{ marginLeft: "4px" }}>3</div>
+        </div>
+      </DrawerTabWithIcons>
     </>
   );
 }
@@ -142,6 +228,7 @@ const EnvironmentBanner = styled.div`
   text-align: center;
   padding: 5px;
   cursor: pointer;
+
   :hover {
     opacity: 0.5;
   }
@@ -166,6 +253,7 @@ const Logo = styled.h1`
   box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.1);
   margin-bottom: 0;
   padding: 15px 20px 15px;
+
   a {
     display: flex;
     flex-direction: row;
@@ -178,6 +266,7 @@ const Logo = styled.h1`
     letter-spacing: 0.04em;
     text-decoration: none;
   }
+
   img {
     margin-right: 1rem;
     vertical-align: top;
@@ -188,6 +277,7 @@ const Sidebar = styled.div`
   ::-webkit-scrollbar {
     display: none;
   }
+
   @media (max-width: 1000px) {
     transform: translateX(${({ open }) => (open ? 0 : "-105%")});
     opacity: 1;
@@ -208,8 +298,10 @@ const Sidebar = styled.div`
   min-width: 250px;
   overflow-y: auto;
   transition: 0.2s;
+
   ul {
     list-style: none;
+
     a {
       text-decoration: none;
       padding: 15px 20px;
@@ -219,26 +311,32 @@ const Sidebar = styled.div`
       font-size: 16px;
       border-bottom: 1px solid ${colors.transPurple};
       transition: 0.2s;
+
       i {
         font-size: 0.7rem;
       }
     }
+
     a:hover {
       background: ${colors.transPurple};
       box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.1);
     }
+
     a.active {
       font-weight: 700;
       background: ${colors.purple};
       box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.1);
     }
   }
+
   .has-child ul {
     display: none;
+
     a {
       padding-left: 40px;
     }
   }
+
   .has-child.open ul {
     display: block;
   }

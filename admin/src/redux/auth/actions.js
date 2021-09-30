@@ -1,6 +1,7 @@
 export const authActions = {
   SETUSER: "SETUSER",
   SETSTRUCTURE: "SETSTRUCTURE",
+  SETTICKETS: "SETTICKETS",
 };
 
 export function setUser(user) {
@@ -9,4 +10,8 @@ export function setUser(user) {
 
 export function setStructure(structure) {
   return { type: authActions.SETSTRUCTURE, structure };
+}
+
+export function setTickets(tickets) {
+  return { type: authActions.SETTICKETS, tickets };
 }
