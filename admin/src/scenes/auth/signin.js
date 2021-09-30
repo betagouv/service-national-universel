@@ -34,85 +34,83 @@ export default () => {
       <Header />
       <AuthWrapper>
         <Thumb />
-        <div>
-          <LoginBox>
-            <div>
-              <Title>Espace Administrateur</Title>
-              <Subtitle>A destination des référents et des structures d’accueil</Subtitle>
-              <Formik
-                initialValues={{ email: "", password: "" }}
-                onSubmit={async ({ email, password }, actions) => {
-                  try {
-                    const { user, token } = await api.post(`/referent/signin`, { email, password });
-                    if (token) api.setToken(token);
-                    if (user) {
-                      dispatch(setUser(user));
-                    }
-                  } catch (e) {
-                    console.log("ERROR", e);
-                    if (e && ["EMAIL_OR_PASSWORD_INVALID", "USER_NOT_EXISTS", "EMAIL_AND_PASSWORD_REQUIRED"].includes(e.code)) {
-                      return setUserIsValid(false);
-                    }
-                    if (e.code === "TOO_MANY_REQUESTS") {
-                      settooManyRequests(true);
-                    }
-                    toastr.error("Erreur détectée");
+        <LoginBox style={{ justifyContent: "center" }}>
+          <div>
+            <Title>Espace Administrateur</Title>
+            <Subtitle>A destination des référents et des structures d’accueil</Subtitle>
+            <Formik
+              initialValues={{ email: "", password: "" }}
+              onSubmit={async ({ email, password }, actions) => {
+                try {
+                  const { user, token } = await api.post(`/referent/signin`, { email, password });
+                  if (token) api.setToken(token);
+                  if (user) {
+                    dispatch(setUser(user));
                   }
-                  actions.setSubmitting(false);
-                }}
-              >
-                {({ values, errors, isSubmitting, handleChange, handleSubmit }) => {
-                  return (
-                    <form onSubmit={handleSubmit}>
-                      {!userIsValid && (
-                        <StyledFormGroup>
-                          <ErrorLogin>E-mail et/ou mot de passe incorrect(s)</ErrorLogin>
-                        </StyledFormGroup>
-                      )}
-                      {tooManyRequests && (
-                        <StyledFormGroup>
-                          <ErrorLogin>Vous avez atteint le maximum de tentatives de connexion autorisées. Réessayez dans une heure. </ErrorLogin>
-                        </StyledFormGroup>
-                      )}
+                } catch (e) {
+                  console.log("ERROR", e);
+                  if (e && ["EMAIL_OR_PASSWORD_INVALID", "USER_NOT_EXISTS", "EMAIL_AND_PASSWORD_REQUIRED"].includes(e.code)) {
+                    return setUserIsValid(false);
+                  }
+                  if (e.code === "TOO_MANY_REQUESTS") {
+                    settooManyRequests(true);
+                  }
+                  toastr.error("Erreur détectée");
+                }
+                actions.setSubmitting(false);
+              }}
+            >
+              {({ values, errors, isSubmitting, handleChange, handleSubmit }) => {
+                return (
+                  <form onSubmit={handleSubmit}>
+                    {!userIsValid && (
+                      <StyledFormGroup>
+                        <ErrorLogin>E-mail et/ou mot de passe incorrect(s)</ErrorLogin>
+                      </StyledFormGroup>
+                    )}
+                    {tooManyRequests && (
+                      <StyledFormGroup>
+                        <ErrorLogin>Vous avez atteint le maximum de tentatives de connexion autorisées. Réessayez dans une heure. </ErrorLogin>
+                      </StyledFormGroup>
+                    )}
 
-                      <StyledFormGroup>
-                        <div>
-                          <label htmlFor="email">E-mail</label>
-                          <InputField
-                            autoComplete="username"
-                            className="form-control"
-                            name="email"
-                            type="email"
-                            id="email"
-                            placeholder="Adresse e-mail"
-                            value={values.email}
-                            onChange={handleChange}
-                          />
-                        </div>
-                      </StyledFormGroup>
-                      <StyledFormGroup>
-                        <label htmlFor="password">Mot de passe</label>
-                        <PasswordEye autoComplete="current-password" value={values.password} onChange={handleChange} showError={false} />
-                      </StyledFormGroup>
-                      <Forgot>
-                        <Link to="/auth/forgot">Mot de passe perdu ?</Link>
-                      </Forgot>
-                      <Submit loading={isSubmitting} type="submit">
-                        Se connecter
-                      </Submit>
-                    </form>
-                  );
-                }}
-              </Formik>
-            </div>
-            <div>
-              <hr />
-              <Register>
-                Vous êtes une structure ? <Link to="/auth/signup">Publiez vos missions</Link>
-              </Register>
-            </div>
-          </LoginBox>
-        </div>
+                    <StyledFormGroup>
+                      <div>
+                        <label htmlFor="email">E-mail</label>
+                        <InputField
+                          autoComplete="username"
+                          className="form-control"
+                          name="email"
+                          type="email"
+                          id="email"
+                          placeholder="Adresse e-mail"
+                          value={values.email}
+                          onChange={handleChange}
+                        />
+                      </div>
+                    </StyledFormGroup>
+                    <StyledFormGroup>
+                      <label htmlFor="password">Mot de passe</label>
+                      <PasswordEye autoComplete="current-password" value={values.password} onChange={handleChange} showError={false} />
+                    </StyledFormGroup>
+                    <Forgot>
+                      <Link to="/auth/forgot">Mot de passe perdu ?</Link>
+                    </Forgot>
+                    <Submit loading={isSubmitting} type="submit">
+                      Se connecter
+                    </Submit>
+                  </form>
+                );
+              }}
+            </Formik>
+          </div>
+          <div>
+            <hr />
+            <Register>
+              Vous êtes une structure ? <Link to="/auth/signup">Publiez vos missions</Link>
+            </Register>
+          </div>
+        </LoginBox>
       </AuthWrapper>
     </div>
   );

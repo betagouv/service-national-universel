@@ -10,7 +10,18 @@ import ReactSelect from "react-select";
 import MultiSelect from "../../components/Multiselect";
 import AddressInput from "../../components/addressInput";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
-import { translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, MISSION_DOMAINS, PERIOD, dateForDatePicker, putLocation, ROLES, ENABLE_PM } from "../../utils";
+import {
+  translate,
+  MISSION_PERIOD_DURING_HOLIDAYS,
+  MISSION_PERIOD_DURING_SCHOOL,
+  MISSION_DOMAINS,
+  PERIOD,
+  dateForDatePicker,
+  putLocation,
+  ROLES,
+  ENABLE_PM,
+  ES_NO_LIMIT,
+} from "../../utils";
 import api from "../../services/api";
 import Invite from "../structure/components/invite";
 import Loader from "../../components/Loader";
@@ -42,7 +53,7 @@ export default (props) => {
   }
   async function initReferents() {
     if (!structure) return;
-    const body = { query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": structure._id } }] } } };
+    const body = { query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": structure._id } }] } }, size: ES_NO_LIMIT };
     const { responses } = await api.esQuery("referent", body);
     if (responses.length) {
       setReferents(responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
@@ -170,6 +181,8 @@ export default (props) => {
           if (!values.location || !values.location.lat || !values.location.lon) {
             values.location = await putLocation(values.city, values.zip);
           }
+
+          values.duration = values.duration.toString();
 
           const { ok, code, data: mission } = values._id ? await api.put(`/mission/${values._id}`, values) : await api.post("/mission", values);
 
@@ -335,6 +348,9 @@ export default (props) => {
                         <label>
                           <span>*</span>DATES DE LA MISSION
                         </label>
+                        <p style={{ color: "#a0aec1", fontSize: 12 }}>
+                          3 semaines avant la date de fin indiquée ci-dessous, vous ne recevrez plus de candidatures. La mission sera considérée comme close.
+                        </p>
                         <Row>
                           <Col>
                             <Field
@@ -363,6 +379,16 @@ export default (props) => {
                             />
                             <ErrorMessage errors={errors} touched={touched} name="endAt" />
                           </Col>
+                        </Row>
+                      </FormGroup>
+                      <FormGroup>
+                        <label>Durée de la mission</label>
+                        <p style={{ color: "#a0aec1", fontSize: 12 }}>Saisissez un nombre d'heures prévisionnelles pour la réalisation de la mission</p>
+                        <Row>
+                          <Col>
+                            <Input type="number" name="duration" onChange={handleChange} value={values.duration} />
+                          </Col>
+                          <Col style={{ display: "flex", alignItems: "center" }}>heure(s)</Col>
                         </Row>
                       </FormGroup>
                       <FormGroup>

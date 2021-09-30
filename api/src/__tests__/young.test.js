@@ -226,10 +226,10 @@ describe("Young", () => {
       expect(updatedYoung.statusPhase3).toEqual("WITHDRAWN");
     });
 
-    it("should update young name", async () => {
-      const { updatedYoung, response } = await selfUpdateYoung({ lastName: "HOP" });
+    it("should update young birthCountry", async () => {
+      const { updatedYoung, response } = await selfUpdateYoung({ birthCountry: "HOP" });
       expect(response.statusCode).toEqual(200);
-      expect(updatedYoung.lastName).toEqual("HOP");
+      expect(updatedYoung.birthCountry).toEqual("HOP");
     });
 
     it("should remove places when sending to cohesion center", async () => {

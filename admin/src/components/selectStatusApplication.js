@@ -15,6 +15,7 @@ export default ({ hit, options = [], callback }) => {
   const [application, setApplication] = useState(null);
   const [modalConfirm, setModalConfirm] = useState({ isOpen: false, onConfirm: null });
   const [modalRefuse, setModalRefuse] = useState({ isOpen: false, onConfirm: null });
+  const [modalDone, setModalDone] = useState({ isOpen: false, onConfirm: null });
 
   const user = useSelector((state) => state.Auth.user);
 
@@ -53,12 +54,13 @@ export default ({ hit, options = [], callback }) => {
 
   const handleClickStatus = (status) => {
     if (status === APPLICATION_STATUS.REFUSED) setModalRefuse({ isOpen: true });
+    else if (status === APPLICATION_STATUS.DONE) setModalDone({ isOpen: true });
     else setStatus(status);
   };
 
-  const setStatus = async (status, message) => {
+  const setStatus = async (status, message, duration) => {
     try {
-      const { ok, code, data } = await api.put("/application", { _id: application._id, status });
+      const { ok, code, data } = await api.put("/application", { _id: application._id, status, missionDuration: duration });
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       setApplication(data);
       toastr.success("Mis à jour!");
@@ -102,10 +104,23 @@ export default ({ hit, options = [], callback }) => {
         isOpen={modalRefuse.isOpen}
         title="Veuillez éditer le message ci-dessous pour préciser les raisons du refus avant de l'envoyer"
         message={`Une fois le message ci-dessous validé, il sera transmis par mail à ${application.youngFirstName} (${application.youngEmail}).`}
-        onChange={() => setModalRefuse({ isOpen: false, data: null })}
+        onChange={() => setModalRefuse({ isOpen: false, onConfirm: null })}
         onConfirm={(msg) => {
           setStatus(APPLICATION_STATUS.REFUSED, msg);
           setModalRefuse({ isOpen: false, onConfirm: null });
+        }}
+      />
+      <ModalConfirmWithMessage
+        isOpen={modalDone.isOpen}
+        title="Validation de réalisation de mission"
+        message={`Merci de valider le nombre d'heures effectuées par ${application.youngFirstName} pour la mission ${application.missionName}.`}
+        onChange={() => setModalDone({ isOpen: false, onConfirm: null })}
+        type="number"
+        defaultInput={application.missionDuration}
+        placeholder="Nombre d'heures"
+        onConfirm={(duration) => {
+          setStatus(APPLICATION_STATUS.DONE, null, duration);
+          setModalDone({ isOpen: false, onConfirm: null });
         }}
       />
       <ModalConfirm

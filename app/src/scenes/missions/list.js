@@ -32,7 +32,7 @@ export default () => {
             {
               range: {
                 endAt: {
-                  gt: "now",
+                  gte: "now+3w",
                 },
               },
             },
@@ -48,15 +48,6 @@ export default () => {
         },
       },
     };
-    if (young.cohort === "2021") {
-      query.query.bool.filter.push({
-        range: {
-          startAt: {
-            gte: "2021-07-02",
-          },
-        },
-      });
-    }
     if (young.location && !targetLocation)
       query.sort = [
         {

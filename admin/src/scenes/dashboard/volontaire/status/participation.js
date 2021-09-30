@@ -11,7 +11,7 @@ export default ({ data, filter, getLink }) => {
       <Subtitle>Participations au séjour de cohésion</Subtitle>
       <Row>
         <Col md={6} xl={3} k="cohesionStayPresence_true">
-          <Link to={getLink({ base: `/volontaire`, filter, filtersUrl: ['COHESION_PRESENCE=%5B"true"%5D'] })}>
+          <Link to={getLink({ base: `/volontaire`, filter, filtersUrl: ['STATUS=%5B"VALIDATED"%5D&COHESION_PRESENCE=%5B"true"%5D'] })}>
             <Card borderBottomColor="#6BC663">
               <CardTitle>Présent au séjour de cohésion</CardTitle>
               <CardValueWrapper>
@@ -25,7 +25,7 @@ export default ({ data, filter, getLink }) => {
           </Link>
         </Col>
         <Col md={6} xl={3} k="cohesionStayPresence_false">
-          <Link to={getLink({ base: `/volontaire`, filter, filtersUrl: ['COHESION_PRESENCE=%5B"false"%5D'] })}>
+          <Link to={getLink({ base: `/volontaire`, filter, filtersUrl: ['STATUS=%5B"VALIDATED"%5D&COHESION_PRESENCE=%5B"false"%5D'] })}>
             <Card borderBottomColor="#EF4036">
               <CardTitle>Absent au séjour de cohésion</CardTitle>
               <CardValueWrapper>

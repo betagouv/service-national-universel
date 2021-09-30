@@ -28,7 +28,7 @@ export default ({ status, statusPhase1, statusPhase2, statusPhase3, filter, getL
       </Row>
       <Row>
         <Col md={6} xl={4}>
-          <Link to={getLink({ base: `/volontaire`, filter, filtersUrl: ['STATUS_PHASE_1=%5B"DONE"%5D'] })}>
+          <Link to={getLink({ base: `/volontaire`, filter, filtersUrl: ['STATUS=%5B"VALIDATED"%5D&STATUS_PHASE_1=%5B"DONE"%5D'] })}>
             <Card borderBottomColor={YOUNG_STATUS_COLORS.VALIDATED}>
               <CardTitle>Ayant validé la Phase 1</CardTitle>
               <CardValueWrapper>
@@ -42,7 +42,7 @@ export default ({ status, statusPhase1, statusPhase2, statusPhase3, filter, getL
           </Link>
         </Col>
         <Col md={6} xl={4}>
-          <Link to={getLink({ base: `/volontaire`, filter, filtersUrl: ['STATUS_PHASE_2=%5B"VALIDATED"%5D'] })}>
+          <Link to={getLink({ base: `/volontaire`, filter, filtersUrl: ['STATUS=%5B"VALIDATED"%5D&STATUS_PHASE_2=%5B"VALIDATED"%5D'] })}>
             <Card borderBottomColor={YOUNG_STATUS_COLORS.VALIDATED}>
               <CardTitle>Ayant validé la Phase 2</CardTitle>
               <CardValueWrapper>

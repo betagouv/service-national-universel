@@ -90,8 +90,8 @@ export default () => {
                       Nom: data.lastName,
                       "Code centre": center.code || "",
                       "Nom du centre": center.name || "",
-                      "Présence au séjour": data.cohesionStayPresence || "",
-                      "Cas particulier qui valide sa JDC malgré son absence (oui/non)": "",
+                      "Présence au séjour de cohésion": data.cohesionStayPresence || "",
+                      "Cas particulier qui valide sa JDC malgré son absence au séjour de cohésion (oui/non)": "",
                       "Commentaires (Décrivez pourquoi)": "",
                     };
                   }}

@@ -147,6 +147,23 @@ describe("Application", () => {
 
       passport.user = previous;
     });
+
+    it.only("should update young phase2NumberHoursEstimated and phase2NumberHoursDone", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      for (const status of ["IN_PROGRESS", "IN_PROGRESS", "IN_PROGRESS", "VALIDATED", "VALIDATED", "DONE"]) {
+        const mission = await createMissionHelper(getNewMissionFixture());
+        const application = await createApplication({
+          ...getNewApplicationFixture(),
+          youngId: young._id,
+          missionId: mission._id,
+          missionDuration: "1",
+        });
+        const res = await request(getAppHelper()).put("/application").send({ priority: "1", status, _id: application._id.toString() });
+      }
+      const updatedYoung = await getYoungByIdHelper(young._id);
+      expect(updatedYoung.phase2NumberHoursEstimated).toBe("5");
+      expect(updatedYoung.phase2NumberHoursDone).toBe("1");
+    });
   });
 
   describe("GET /application/:id", () => {

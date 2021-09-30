@@ -7,7 +7,7 @@ const { dbConnect, dbClose } = require("./helpers/db");
 const getNewContractFixture = require("./fixtures/contract");
 const { getNewApplicationFixture } = require("./fixtures/application");
 const getNewYoungFixture = require("./fixtures/young");
-const { createApplication } = require("./helpers/application");
+const { createApplication, getApplicationByIdHelper } = require("./helpers/application");
 const { getYoungByIdHelper, createYoungHelper } = require("./helpers/young");
 const { expectContractToEqual, getContractByIdHelper, createContractHelper } = require("./helpers/contract");
 
@@ -102,6 +102,28 @@ describe("Structure", () => {
         expect(res.body.data.structureManagerToken).toBeTruthy();
         expect(res.body.data.parent2Token).toBeUndefined();
         expect(res.body.data.youngContractToken).toBeTruthy();
+      });
+
+      it("should update young phase2NumberHoursEstimated, phase2NumberHoursDone and missionDuration", async () => {
+        const young = await createYoungHelper(getNewYoungFixture());
+        const application = await createApplication({
+          ...getNewApplicationFixture(),
+          youngId: young._id,
+          status: "VALIDATED",
+        });
+        const contractFixture = getNewContractFixture();
+        contractFixture.youngId = young._id;
+        contractFixture.applicationId = application._id;
+        contractFixture.missionDuration = "65";
+        const res = await request(getAppHelper()).post("/contract").send(contractFixture);
+        expect(res.status).toBe(200);
+
+        const updatedYoung = await getYoungByIdHelper(young._id);
+        const updatedApplication = await getApplicationByIdHelper(application._id);
+        expect(updatedApplication.missionDuration).toBe("65");
+        expect(updatedApplication.status).toBe("VALIDATED");
+        expect(updatedYoung.phase2NumberHoursEstimated).toBe("65");
+        expect(updatedYoung.phase2NumberHoursDone).toBe("0");
       });
     });
   });
