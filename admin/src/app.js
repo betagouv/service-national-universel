@@ -66,7 +66,6 @@ export default () => {
         if (res.token) api.setToken(res.token);
         if (res.user) dispatch(setUser(res.user));
         const { data } = await api.get(`/support-center/ticket_overviews`);
-        console.log("data", data);
         dispatch(setTickets(data));
       } catch (e) {}
       setLoading(false);
