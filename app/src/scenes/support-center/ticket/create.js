@@ -17,9 +17,7 @@ export default () => {
 
   //todo : fetch zammad categories (scopes)
   const options = ["Assistance technique", "À propos de ma situation", "Contacter un référent"];
-  //todo : remplacer par les ids
-  //const coreTags = [`COHORTE_${young.cohort}`, `DEPARTEMENT_${young.department}`, `REGION_${young.region}`, `EMETTEUR_Volontaire`, `CANAL_Plateforme`,];
-  const [tags, setTags] = useState([]);
+  const tags = [`COHORTE_${young.cohort}`, `DEPARTEMENT_${young.department}`, `REGION_${young.region}`, `EMETTEUR_Volontaire`, `CANAL_Plateforme`,];
 
   useEffect(() => {
     (async () => {
@@ -45,14 +43,11 @@ export default () => {
               const { subject, type, message } = values;
               console.log('TAGS', tags);
               if (type === "Assistance technique") {
-                // AGENT_Startup_Technique
-                tags.push(70);
+                tags.push("AGENT_Startup_Technique");
               } else if (type === "À propos de ma situation") {
-                // AGENT_STARTUP_Support
-                tags.push(71);
+                tags.push("AGENT_STARTUP_Support");
               } else if (type === "Contacter un référent") {
-                // AGENT_Référent_Département
-                tags.push(69);
+                tags.push("AGENT_Référent_Département");
               }
               const { ok, code, data } = await api.post("/support-center/ticket", {
                 subject,

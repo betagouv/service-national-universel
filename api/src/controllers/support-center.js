@@ -110,7 +110,7 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
           // type:'note',
           internal: false,
         },
-        tags
+        tags: tags ? tags.join(",") : "",
       }),
     });
     if (!response.id) return res.status(400).send({ ok: false });
