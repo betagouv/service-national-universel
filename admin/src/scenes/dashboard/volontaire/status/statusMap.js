@@ -19,7 +19,7 @@ export default ({ sectionTitle, title, obj, filterName, colors, data, getLink, f
         {Object.values(obj).map((e) => {
           return (
             <Col md={6} xl={4} key={e}>
-              <Link to={getLink({ base: `/volontaire`, filter, filtersUrl: [`${filterName}=%5B"${e}"%5D`] })}>
+              <Link to={getLink({ base: `/volontaire`, filter, filtersUrl: [`STATUS=%5B"VALIDATED"%5D&${filterName}=%5B"${e}"%5D`] })}>
                 <Card borderBottomColor={colors[e]}>
                   <CardTitle>{translate(e)}</CardTitle>
                   <CardValueWrapper>

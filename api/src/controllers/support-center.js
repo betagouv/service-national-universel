@@ -39,21 +39,22 @@ router.get("/ticket_overviews", passport.authenticate(["referent"], { session: f
   }
 });
 
-// Get the list of tickets with their articles.
+// Get the list of tickets (with their articles when withArticles query param is provided).
 router.get("/ticket", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
     const email = req.user.email;
     const customer_id = await zammad.getCustomerIdByEmail(email);
     if (!customer_id) return res.status(401).send({ ok: false, code: ERRORS.NOT_FOUND });
     const response = await zammad.api("/tickets", { method: "GET", headers: { "X-On-Behalf-Of": email } });
-    const data = [];
-    if (response.length) {
+    if (response.length && req.query.withArticles) {
+      const data = [];
       for (const item of response) {
         const articles = await zammad.api("/ticket_articles/by_ticket/" + item.id, { method: "GET", headers: { "X-On-Behalf-Of": email } });
         data.push({ ...item, articles });
       }
+      return res.status(200).send({ ok: true, data });
     }
-    return res.status(200).send({ ok: true, data });
+    return res.status(200).send({ ok: true, data: response });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
@@ -142,6 +143,18 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
       }),
     });
     if (!response.id) return res.status(400).send({ ok: false });
+    return res.status(200).send({ ok: true, data: response });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+// Search for tickets via tags
+router.post("/ticket/search-by-tags", passport.authenticate(["referent"], { session: false }), async (req, res) => {
+  try {
+    const tags = req.body.tags.map((tag) => `tags:${tag}`).join("%20AND%20");
+    const response = await zammad.api(`/tickets/search?query=${tags}`, { method: "GET" });
     return res.status(200).send({ ok: true, data: response });
   } catch (error) {
     capture(error);

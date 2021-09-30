@@ -162,8 +162,8 @@ export default () => {
           <>
             <Title>Mon profil</Title>
             <FormRow>
-              <Item name="firstName" values={values} handleChange={handleChange} title="Prénom" />
-              <Item name="lastName" values={values} handleChange={handleChange} title="Nom" />
+              <Item name="firstName" values={values} handleChange={handleChange} title="Prénom" disabled />
+              <Item name="lastName" values={values} handleChange={handleChange} title="Nom" disabled />
               <Select
                 name="gender"
                 values={values}

@@ -15,10 +15,12 @@ import { useParams } from "react-router";
 import Badge from "./Badge";
 import DownloadContractButton from "./buttons/DownloadContractButton";
 import LoadingButton from "./buttons/LoadingButton";
+import ModalConfirm from "./modals/ModalConfirm";
 
 export default ({ young, admin }) => {
   const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
   let { applicationId } = useParams();
   // manager_department
@@ -117,6 +119,7 @@ export default ({ young, admin }) => {
           });
       const { ok, code } = await api.post(`/contract`, {
         ...values,
+        missionDuration: values.missionDuration?.toString(),
         youngId: young._id,
         structureId: structure._id,
         applicationId: application._id,
@@ -241,15 +244,29 @@ export default ({ young, admin }) => {
           </div>
           <hr />
           <div style={{ display: "grid", gridAutoColumns: "1fr", gridAutoFlow: "column" }}>
-            <ContractStatusBadge title="Représentant de l'Etat" contract={contract} status={contract?.projectManagerStatus} token={contract?.projectManagerToken} />
-            <ContractStatusBadge title="Représentant structure" contract={contract} status={contract?.structureManagerStatus} token={contract?.structureManagerToken} />
+            <ContractStatusBadge
+              title="Représentant de l'Etat"
+              target="projectManager"
+              contract={contract}
+              status={contract?.projectManagerStatus}
+              token={contract?.projectManagerToken}
+            />
+            <ContractStatusBadge
+              title="Représentant structure"
+              target="structureManager"
+              contract={contract}
+              status={contract?.structureManagerStatus}
+              token={contract?.structureManagerToken}
+            />
             {!isYoungAdult ? (
               <>
-                <ContractStatusBadge title="Représentant légal 1" contract={contract} status={contract?.parent1Status} token={contract?.parent1Token} />
-                {young.parent2Email && <ContractStatusBadge title="Représentant légal 2" contract={contract} status={contract?.parent2Status} token={contract?.parent2Token} />}
+                <ContractStatusBadge title="Représentant légal 1" target="parent1" contract={contract} status={contract?.parent1Status} token={contract?.parent1Token} />
+                {young.parent2Email && (
+                  <ContractStatusBadge title="Représentant légal 2" target="parent2" contract={contract} status={contract?.parent2Status} token={contract?.parent2Token} />
+                )}
               </>
             ) : (
-              <ContractStatusBadge title="Volontaire" contract={contract} status={contract?.youngContractStatus} token={contract?.youngContractToken} />
+              <ContractStatusBadge title="Volontaire" target="young" contract={contract} status={contract?.youngContractStatus} token={contract?.youngContractToken} />
             )}
           </div>
         </Bloc>
@@ -414,7 +431,7 @@ export default ({ young, admin }) => {
                           jusqu’au
                           <ContractField name="missionEndAt" placeholder="jj/mm/yyyy" type="date" context={context} />
                           <br /> Le volontaire effectuera un total de
-                          <ContractField name="missionDuration" placeholder="nombre d'heure" context={context} />
+                          <ContractField name="missionDuration" placeholder="nombre d'heure" context={context} type="number" />
                           heures de MIG.
                         </div>
                         <h3>c) Conditions d’exercice des missions</h3>
@@ -697,13 +714,18 @@ export default ({ young, admin }) => {
                     onClick={async () => {
                       if (contract?.invitationSent === "true") {
                         const confirmText =
-                          "Si vous enregistrez les modifications, les parties prenantes ayant validé recevront une notification et devront à nouveau valider le contrat d'engagment. De la même manière, les parties prenantes dont l'email a été modifié recevront également un email.";
-                        if (confirm(confirmText)) {
-                          const erroredFields = await validateForm();
-                          if (Object.keys(erroredFields).length) return toastr.error("Il y a des erreurs dans le formulaire");
-                          setFieldValue("sendMessage", true, false);
-                          handleSubmit();
-                        }
+                          "Si vous enregistrez les modifications, les parties prenantes ayant validé le contrat recevront une notification et devront à nouveau valider le contrat d'engagement. De la même manière, les parties prenantes dont l'email a été modifié recevront également un email.";
+                        setModal({
+                          isOpen: true,
+                          title: "Modification du contrat",
+                          message: confirmText,
+                          onConfirm: async () => {
+                            const erroredFields = await validateForm();
+                            if (Object.keys(erroredFields).length) return toastr.error("Il y a des erreurs dans le formulaire");
+                            setFieldValue("sendMessage", true, false);
+                            handleSubmit();
+                          },
+                        });
                       } else {
                         setFieldValue("sendMessage", false, false);
                         onSubmit(values);
@@ -749,6 +771,16 @@ export default ({ young, admin }) => {
           </DownloadAttestationButton>
         </div>
       ) : null}
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
     </>
   );
 };
@@ -800,12 +832,61 @@ function ContractStatusBadge({ title, ...rest }) {
     </div>
   );
 }
-function ContractStatusbadgeItem({ contract, status, token }) {
+
+function SendContractLink({ contract, target }) {
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+
+  return (
+    <>
+      <CopyLink
+        onClick={async () => {
+          try {
+            const email = contract[target + "Email"];
+            setModal({
+              isOpen: true,
+              title: "Envoie de contrat par mail",
+              message: "Souhaitez-vous renvoyer le mail avec le lien de validation du contrat d'engagement à " + email,
+              onConfirm: async () => {
+                const { ok } = await api.post(`/contract/${contract._id}/send-email/${target}`);
+                if (!ok) return toastr.error("Une erreur est survenue lors de l'envoi du mail");
+                toastr.success("L'email a bien été envoyé", email);
+              },
+            });
+          } catch (e) {
+            toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
+          }
+        }}
+      >
+        ✉️ Renvoyer le lien par email
+      </CopyLink>
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
+    </>
+  );
+}
+
+function ContractStatusbadgeItem({ contract, status, token, target }) {
   const user = useSelector((state) => state.Auth.user);
 
   if (contract?.invitationSent !== "true") return <Badge text="Pas encore envoyé" />;
   else if (status === "VALIDATED") return <Badge text="Validé" color={APPLICATION_STATUS_COLORS.VALIDATED} />;
-  else if (user.role !== ROLES.ADMIN) return <Badge text="En attente de validation" color={APPLICATION_STATUS_COLORS.WAITING_VALIDATION} />;
+  else if (user.role !== ROLES.ADMIN) {
+    return (
+      <>
+        <Badge text="En attente de validation" color={APPLICATION_STATUS_COLORS.WAITING_VALIDATION} />
+        <br />
+        <SendContractLink contract={contract} target={target} />
+      </>
+    );
+  }
   return (
     <>
       <Badge text="En attente de validation" color={APPLICATION_STATUS_COLORS.WAITING_VALIDATION} />
@@ -818,6 +899,8 @@ function ContractStatusbadgeItem({ contract, status, token }) {
       >
         Copier le lien de validation
       </CopyLink>
+      <br />
+      <SendContractLink contract={contract} target={target} />
     </>
   );
 }

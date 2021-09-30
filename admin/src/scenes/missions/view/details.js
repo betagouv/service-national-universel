@@ -23,6 +23,7 @@ export default ({ mission, structure, tutor }) => {
                 <Details title="Domaines" value={mission.domains.map((d) => translate(d)).join(", ")} />
                 <Details title="Début" value={formatStringDateTimezoneUTC(mission.startAt)} />
                 <Details title="Fin" value={formatStringDateTimezoneUTC(mission.endAt)} />
+                {mission.duration ? <Details title="Durée" value={`${mission.duration} heure(s)`} /> : null}
                 <Details title="Adresse" value={mission.address} />
                 <Details title="Ville" value={mission.city} />
                 <Details title="Code postal" value={mission.zip} />

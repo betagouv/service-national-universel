@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import styled from "styled-components";
 import { useSelector, useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
@@ -23,6 +23,14 @@ export default (props) => {
   const [status3, setStatus3] = useState(PHASE_STATUS.IN_COMING);
   const [activeTab, setActiveTab] = useState(DRAWER_TABS.HOME);
   const young = useSelector((state) => state.Auth.young);
+
+  const { pathname } = useLocation();
+  useEffect(() => {
+    if (pathname === "/") return setActiveTab(DRAWER_TABS.HOME);
+    if (pathname.indexOf("/phase1") !== -1) return setActiveTab(DRAWER_TABS.PHASE1);
+    if (pathname.indexOf("/phase2") !== -1) return setActiveTab(DRAWER_TABS.PHASE2);
+    if (pathname.indexOf("/phase3") !== -1) return setActiveTab(DRAWER_TABS.PHASE3);
+  }, [pathname]);
 
   useEffect(() => {
     setOpen(props.open);

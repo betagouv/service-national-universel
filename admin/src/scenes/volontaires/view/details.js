@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
-import { translate as t, isInRuralArea, ROLES, copyToClipboard } from "../../../utils";
+import { translate as t, isInRuralArea, ROLES, copyToClipboard, formatStringDate } from "../../../utils";
 import YoungView from "./wrapper";
 import api from "../../../services/api";
 import DownloadButton from "../../../components/buttons/DownloadButton";
@@ -26,8 +26,9 @@ export default ({ young }) => {
           <Row>
             <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
               <Bloc title="Informations générales">
-                <Details title="Sexe" value={t(young.gender)} />
                 <Details title="E-mail" value={young.email} copy />
+                <Details title="Date de naissance" value={formatStringDate(young.birthdateAt)} />
+                <Details title="Sexe" value={t(young.gender)} />
                 <Details title="Tel" value={young.phone} />
                 <Details title="Adresse" value={young.address} />
                 <Details title="Ville" value={young.city} />

@@ -5,6 +5,7 @@ const passwordValidator = require("password-validator");
 const YoungModel = require("../models/young");
 const CohesionCenterModel = require("../models/cohesionCenter");
 const MeetingPointModel = require("../models/meetingPoint");
+const ApplicationModel = require("../models/application");
 const ReferentModel = require("../models/referent");
 const { sendEmail } = require("../sendinblue");
 const path = require("path");
@@ -14,6 +15,7 @@ const sendinblue = require("../sendinblue");
 const { ADMIN_URL, APP_URL } = require("../config");
 const { CELLAR_ENDPOINT, CELLAR_KEYID, CELLAR_KEYSECRET, BUCKET_NAME, ENVIRONMENT } = require("../config");
 const { ROLES } = require("snu-lib/roles");
+const { YOUNG_STATUS_PHASE2 } = require("snu-lib/constants");
 
 // Set the number of requests allowed to 15 in a 1 hour window
 const signinLimiter = rateLimit({
@@ -337,6 +339,49 @@ const getYoungFromWaitingList = async (young) => {
   }
 };
 
+async function updateYoungPhase2Hours(young) {
+  const applications = await ApplicationModel.find({
+    youngId: young._id,
+    status: { $in: ["VALIDATED", "IN_PROGRESS", "DONE"] },
+  });
+  young.set({
+    phase2NumberHoursDone: String(
+      applications
+        .filter((application) => application.status === "DONE")
+        .map((application) => Number(application.missionDuration || 0))
+        .reduce((acc, current) => acc + current, 0)
+    ),
+    phase2NumberHoursEstimated: String(
+      applications
+        .filter((application) => ["VALIDATED", "IN_PROGRESS"].includes(application.status))
+        .map((application) => Number(application.missionDuration || 0))
+        .reduce((acc, current) => acc + current, 0)
+    ),
+  });
+  await young.save();
+}
+// This function should always be called after updateYoungPhase2Hours.
+// This could be refactored in one function.
+const updateStatusPhase2 = async (young) => {
+  const applications = await ApplicationModel.find({ youngId: young._id });
+  young.set({ phase2ApplicationStatus: applications.map((e) => e.status) });
+
+  if (young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED || young.statusPhase2 === YOUNG_STATUS_PHASE2.WITHDRAWN) {
+    // We do not change young status if phase 2 is already VALIDATED (2020 cohort or manual change) or WITHDRAWN.
+    young.set({ statusPhase2: young.statusPhase2 });
+  } else if (Number(young.phase2NumberHoursDone) >= 84) {
+    // We change young status to DONE if he has 84 hours of phase 2 done.
+    young.set({ statusPhase2: YOUNG_STATUS_PHASE2.VALIDATED });
+  } else if (Number(young.phase2NumberHoursEstimated)) {
+    // We change young status to IN_PROGRESS if he has estimated hours of phase 2.
+    young.set({ statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS });
+  } else {
+    // We change young status to WAITING_LIST if he has no estimated hours of phase 2.
+    young.set({ statusPhase2: YOUNG_STATUS_PHASE2.WAITING_REALISATION });
+  }
+  await young.save();
+};
+
 function isYoung(user) {
   return user instanceof YoungModel;
 }
@@ -402,4 +447,6 @@ module.exports = {
   isReferent,
   inSevenDays,
   getBaseUrl,
+  updateYoungPhase2Hours,
+  updateStatusPhase2,
 };

@@ -297,6 +297,19 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  phase2NumberHoursDone: {
+    type: String,
+    documentation: {
+      description: "Somme des heures de mission effectuées",
+    },
+  },
+  phase2NumberHoursEstimated: {
+    type: String,
+    documentation: {
+      description: "Sommes des heures de mission prévisionnelles",
+    },
+  },
+
   // * phase 3 infos
   phase3StructureName: { type: String },
   phase3MissionDomain: { type: String },
