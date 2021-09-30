@@ -15,23 +15,23 @@ export default function Association({ hit }) {
 
   return (
     <AssociationWrapper>
-      <AssociationHeader>
+      <AssociationHeader style={{ borderRadius: !show ? "10px" : "10px 10px 0 0" }}>
         {association.logo && (
           <div>
-            <img src={association.logo} alt={association.identite_nom} />
+            <img style={{ maxWidth: "150px", marginRight: "1.5rem" }} src={association.logo} alt={association.identite_nom} />
           </div>
         )}
         <AssociationHeaderMainInfo>
           <div>
             <AssociationTheme> {association.activites_lib_theme1}</AssociationTheme>
-            <AssociationName> {association.identite_nom}</AssociationName>
+            <AssociationName onClick={() => setShow(!show)}> {association.identite_nom}</AssociationName>
             <AssociationShortAddress>
               {association.coordonnees_adresse_code_postal} {association.coordonnees_adresse_commune}
             </AssociationShortAddress>
           </div>
-          <div>
+          <ChevronContainer>
             <Chevron style={{ transform: show && "rotate(180deg)" }} onClick={() => setShow(!show)} />
-          </div>
+          </ChevronContainer>
         </AssociationHeaderMainInfo>
         <ContactButtons>
           <ContactButton
@@ -101,9 +101,9 @@ export default function Association({ hit }) {
       </AssociationHeader>
       {show && (
         <AssociationBody>
-          <div>
+          <TabTitleContainer>
             {tabs.map((e) =>
-              tab === e ? (
+              tab !== e ? (
                 <TabTitle key={e} onClick={() => setTab(e)}>
                   {e}
                 </TabTitle>
@@ -113,76 +113,52 @@ export default function Association({ hit }) {
                 </TabTitleSelected>
               )
             )}
-          </div>
-          {tab === "Informations" && (
-            <TabInfo>
-              <div>
-                <b>Description</b>
-                <br />
-                <p>{association.description}</p>
-              </div>
-              <TabInfoAdditional>
+          </TabTitleContainer>
+          <TabContainer>
+            {tab === "Informations" && (
+              <TabInfo>
+                <div>
+                  <b>Description</b>
+                  <br />
+                  <div className="description">
+                    <Description description={association.description || association.activites_objet} />
+                  </div>
+                </div>
+                <TabInfoAdditional>
+                  {[
+                    { label: "Adresse", value: association.coordonnees_adresse_nom_complet },
+                    { label: "Statut juridique", value: association.statut_juridique || association.identite_lib_forme_juridique },
+                    { label: "SIREN", value: association.identite_id_siren || association.id_siren },
+                    { label: "RNA", value: association.id_rna },
+                  ]
+                    .filter((e) => e.value)
+                    .map((e) => (
+                      <div key={e.label}>
+                        <b style={{ marginRight: "1rem" }}>{e.label}</b>
+                        <span>{e.value}</span>
+                      </div>
+                    ))}
+                </TabInfoAdditional>
+              </TabInfo>
+            )}
+            {tab === "Contacts" && (
+              <TabContact>
                 {[
-                  { label: "ID SIREN", value: association.id_siren },
-                  { label: "ID RNA", value: association.id_siren },
-                  { label: "Statut juridique", value: association.statut_juridique },
-                  { label: "Adresse", value: association.coordonnees_adresse_nom_complet },
+                  { label: "Téléphone", value: (association.coordonnees_telephone || []).join(<br />) },
+                  { label: "Courriel", value: (association.coordonnees_courriel || []).join(<br />) },
+                  { label: "Liens", value: [association.url, association.linkedin, association.facebook, association.twitter, association.donation].filter((e) => e).join(<br />) },
                 ]
-                  .filter((e) => e.value)
+                  .filter((e) => e.value && e.value.length > 0)
                   .map((e) => (
                     <div key={e.label}>
-                      <b>{e.label}</b>
+                      <b style={{ marginRight: "1rem" }}>{e.label}</b>
                       <span>{e.value}</span>
                     </div>
                   ))}
-              </TabInfoAdditional>
-            </TabInfo>
-          )}
-          {tab === "Contacts" && (
-            <TabContact>
-              <div>
-                <table>
-                  <tr>
-                    <td>
-                      <b>Téléphone</b>
-                    </td>
-                    <td>
-                      {association.coordonnees_telephone.map((e) => {
-                        return <div>{e}</div>;
-                      })}
-                    </td>
-                  </tr>
-                  <tr>
-                    <td>
-                      <b>E-mail</b>
-                    </td>
-                    <td>
-                      {association.coordonnees_courriel.map((e) => {
-                        return <div>{e}</div>;
-                      })}
-                    </td>
-                  </tr>
-                </table>
-              </div>
-              <div>
-                <table>
-                  <tr>
-                    <td>
-                      <b>Liens</b>
-                    </td>
-                    <td>
-                      {[association.url, association.linkedin, association.facebook, association.twitter, association.donation]
-                        .filter((e) => e)
-                        .map((e) => {
-                          return <div>{e}</div>;
-                        })}
-                    </td>
-                  </tr>
-                </table>
-              </div>
-            </TabContact>
-          )}
-          {tab === "Missions" && <div></div>}
+              </TabContact>
+            )}
+            {tab === "Missions" && <div style={{ textAlign: "center", padding: "2rem", width: "100%" }}>Aucune mission référencée actuellement</div>}
+          </TabContainer>
         </AssociationBody>
       )}
     </AssociationWrapper>
@@ -190,23 +166,59 @@ export default function Association({ hit }) {
 }
 
 const AssociationWrapper = styled.div`
-  background: #ffffff;
-  box-shadow: 0px 15px 40px rgba(0, 0, 0, 0.1);
-  border-radius: 10px 10px 0px 0px;
   margin-bottom: 2rem;
-  padding: 1rem;
 `;
 const AssociationHeader = styled.div`
+  border-radius: 10px 10px 10px 10px;
+  box-shadow: 0px 15px 40px rgba(0, 0, 0, 0.1);
   display: flex;
+  align-items: center;
+  padding: 1rem;
+  background: #ffffff;
 `;
-const TabTitle = styled.div``;
-const TabTitleSelected = styled.div``;
+const ChevronContainer = styled.div`
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  > div {
+    cursor: pointer;
+  }
+`;
+const TabTitleContainer = styled.div`
+  display: flex;
+  margin-bottom: 1rem;
+  border-bottom: 1px #e5e7eb solid;
+`;
+const TabTitle = styled.div`
+  margin-right: 1rem;
+  cursor: pointer;
+  padding-bottom: 1rem;
+`;
+const TabTitleSelected = styled.div`
+  margin-right: 1rem;
+  cursor: pointer;
+  padding-bottom: 1rem;
+  font-weight: bold;
+  border-bottom: 2px #111111 solid;
+`;
+const TabContainer = styled.div`
+  min-height: 160px;
+  display: flex;
+  align-items: center;
+`;
 const AssociationBody = styled.div`
   background: #f9f8f6;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
   border-radius: 0px 0px 10px 10px;
+  padding: 1rem;
 `;
-const ContactButtons = styled.div``;
+const ContactButtons = styled.div`
+  display: flex;
+  align-items: center;
+  margin-left: auto;
+  border-left: 1px dashed rgba(0, 0, 0, 0.2);
+  padding-left: 1rem;
+`;
 const ContactButton = styled.button`
   background-color: transparent;
   border-radius: 50%;
@@ -218,13 +230,38 @@ const ContactButton = styled.button`
   }
 `;
 const AssociationHeaderMainInfo = styled.div`
-  border-right: 1px dashed rgba(0, 0, 0, 0.2);
   padding-right: 1rem;
-  margin-right: 1rem;
   display: flex;
+  width: 100%;
+  > div:first-child {
+    width: 100%;
+  }
 `;
-const TabInfo = styled.div``;
+
+function Description({ description }) {
+  return (description || "")
+    .replaceAll("", " •")
+    .replaceAll("« ", "« ")
+    .split(/\r\n|\r|\n/)
+    .map((line) => (
+      <div key={line} style={{ marginBottom: "6px" }}>
+        {line}
+      </div>
+    ));
+}
+
+const TabInfo = styled.div`
+  color: #696974;
+  div.description {
+    margin-top: 11px;
+    font-size: 14px;
+    line-height: 22px;
+    color: #696974;
+  }
+`;
 const TabInfoAdditional = styled.div`
+  margin-top: 2rem;
+  width: 100%;
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-gap: 1rem;
@@ -233,6 +270,8 @@ const TabContact = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
   grid-gap: 1rem;
+  width: 100%;
+  color: #696974;
 `;
 const AssociationTheme = styled.div`
   font-style: normal;
@@ -249,6 +288,10 @@ const AssociationName = styled.div`
   font-weight: 800;
   font-size: 20px;
   line-height: 24px;
+  cursor: pointer;
+  /* white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; */
 `;
 const AssociationShortAddress = styled.div`
   font-size: 13px;

@@ -4,7 +4,7 @@ const router = express.Router();
 const { ROLES } = require("snu-lib/roles");
 const { capture } = require("../sentry");
 const esClient = require("../es");
-const { ERRORS, isYoung } = require("../utils");
+const { ERRORS, isYoung, getSignedUrlForApiAssociation } = require("../utils");
 const StructureObject = require("../models/structure");
 const ApplicationObject = require("../models/application");
 const CohesionCenterObject = require("../models/cohesionCenter");
@@ -15,6 +15,7 @@ const {
   serializeStructures,
   serializeReferents,
   serializeApplications,
+  serializeHits,
 } = require("../utils/es-serializer");
 const AWS = require("aws-sdk");
 const { API_ASSOCIATION_ES_ENDPOINT, API_ASSOCIATION_AWS_ACCESS_KEY_ID, API_ASSOCIATION_AWS_SECRET_ACCESS_KEY } = require("../config");
@@ -89,8 +90,14 @@ router.post("/association/_msearch", passport.authenticate(["referent"], { sessi
     };
     const es = require("elasticsearch").Client(options);
 
-    const response = await es.msearch({ index: "association", body });
-    return res.status(200).send(response);
+    let response = await es.msearch({ index: "association", body });
+
+    return res.status(200).send(
+      serializeHits(response, (hit) => {
+        if (hit.logo) hit.logo = hit.logo && !hit.logo.startsWith("http") ? getSignedUrlForApiAssociation(hit.logo) : hit.logo;
+        return hit;
+      })
+    );
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, error });
