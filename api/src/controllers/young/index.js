@@ -124,7 +124,7 @@ router.post("/signup_invite", async (req, res) => {
     const token = jwt.sign({ _id: young.id }, config.secret, { expiresIn: "30d" });
     res.cookie("jwt", token, cookieOptions());
 
-    await young.save();
+    await young.save({ fromUser: req.user });
 
     return res.status(200).send({ data: serializeYoung(young, young), token, ok: true });
   } catch (error) {
@@ -180,7 +180,7 @@ router.post("/file/:key", passport.authenticate("young", { session: false }), as
       }
     }
     user.set({ [key]: names });
-    await user.save();
+    await user.save({ fromUser: req.user });
 
     return res.status(200).send({ data: names, ok: true });
   } catch (error) {
@@ -273,7 +273,7 @@ router.put("/validate_phase3/:young/:token", async (req, res) => {
     }
 
     data.set({ statusPhase3: "VALIDATED", phase3TutorNote: value.phase3TutorNote });
-    await data.save();
+    await data.save({ fromUser: req.user });
 
     return res.status(200).send({ ok: true, data: serializeYoung(data, data) });
   } catch (error) {
@@ -314,7 +314,7 @@ router.put("/:id/validate-mission-phase3", passport.authenticate("young", { sess
     values.phase3Token = crypto.randomBytes(20).toString("hex");
 
     young.set(values);
-    await young.save();
+    await young.save({ fromUser: req.user });
 
     const youngName = `${young.firstName} ${young.lastName}`;
     const toName = `${young.phase3TutorFirstName} ${young.phase3TutorLastName}`;
@@ -346,7 +346,7 @@ router.put("/", passport.authenticate("young", { session: false }), async (req, 
     delete value.firstName;
     delete value.lastName;
     young.set(value);
-    await young.save();
+    await young.save({ fromUser: req.user });
 
     // Check quartier prioritaires.
     if (value.zip && value.city && value.address) {
@@ -354,7 +354,7 @@ router.put("/", passport.authenticate("young", { session: false }), async (req, 
       if (qpv === true) young.set({ qpv: "true" });
       else if (qpv === false) young.set({ qpv: "false" });
       else young.set({ qpv: "" });
-      await young.save();
+      await young.save({ fromUser: req.user });
     }
 
     // if withdrawn, cascade withdrawn on every status
@@ -363,7 +363,7 @@ router.put("/", passport.authenticate("young", { session: false }), async (req, 
       (young.statusPhase1 !== "WITHDRAWN" || young.statusPhase2 !== "WITHDRAWN" || young.statusPhase3 !== "WITHDRAWN")
     ) {
       young.set({ statusPhase1: "WITHDRAWN", statusPhase2: "WITHDRAWN", statusPhase3: "WITHDRAWN" });
-      await young.save();
+      await young.save({ fromUser: req.user });
     }
 
     // if withdrawn from phase1 -> run the script that find a replacement for this young

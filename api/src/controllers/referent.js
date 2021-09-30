@@ -325,7 +325,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false }), 
     }
 
     young.set(newYoung);
-    await young.save();
+    await young.save({ fromUser: req.user });
 
     // if they had a cohesion center, we check if we need to update the places taken / left
     if (young.cohesionCenterId) {
@@ -520,7 +520,7 @@ router.post("/file/:key", passport.authenticate("referent", { session: false }),
       await uploadFile(`app/young/${young._id}/${key}/${name}`, resultingFile);
     }
     young.set({ [key]: names });
-    await young.save();
+    await young.save({ fromUser: req.user });
     return res.status(200).send({ data: names, ok: true });
   } catch (error) {
     capture(error);

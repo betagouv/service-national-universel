@@ -186,7 +186,7 @@ export default (props) => {
             </DrawerButton>
           ) : null} */}
           <DrawerButton>
-            <a href="https://www.snu.gouv.fr/foire-aux-questions-11" target="blank">
+            <a href="https://support.snu.gouv.fr/help/fr-fr/3-volontaire" target="blank">
               <div className="icon">
                 <svg fill="none" viewBox="0 0 24 24">
                   <path

@@ -1,4 +1,5 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { Col } from "reactstrap";
 import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
@@ -12,9 +13,10 @@ import ErrorMessage, { requiredMessage } from "../../inscription/components/erro
 
 export default () => {
   const history = useHistory();
-
+  const young = useSelector((state) => state.Auth.young);
   //todo : fetch zammad categories (scopes)
   const options = ["Assistance technique", "À propos de ma situation", "Contacter un référent"];
+  const tags = [`COHORTE_${young.cohort}`, `DEPARTEMENT_${young.department}`, `REGION_${young.region}`, `EMETTEUR_Volontaire`, `CANAL_Plateforme`,];
 
   useEffect(() => {
     (async () => {
@@ -31,17 +33,25 @@ export default () => {
       </Heading>
       <Form>
         <Formik
-          initialValues={{ type: "", subject: "", message: "" }}
+          initialValues={{ type: "", subject: "", message: "", tags: [] }}
           validateOnChange={false}
           validateOnBlur={false}
           onSubmit={async (values) => {
             // return console.log(values);
             try {
               const { subject, type, message } = values;
+              if (type === "Assistance technique") {
+                tags.push("AGENT_Startup_Technique");
+              } else if (type === "À propos de ma situation") {
+                tags.push("AGENT_STARTUP_Support");
+              } else if (type === "Contacter un référent") {
+                tags.push("AGENT_Référent_Département");
+              }
               const { ok, code, data } = await api.post("/support-center/ticket", {
                 subject,
                 type,
                 message,
+                tags
               });
               if (!ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(code));
               toastr.success("Ticket créé");
@@ -107,7 +117,7 @@ const Item = ({ title, name, value, handleChange, errors, touched, validate, typ
             Catégorie
           </option>
           {options?.map((option) => (
-            <option value={option} key={option}>
+            <option option value={option} key={option} >
               {option}
             </option>
           ))}
