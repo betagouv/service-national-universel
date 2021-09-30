@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { NavLink, Link } from "react-router-dom";
 import styled from "styled-components";
-import {useSelector} from "react-redux";
-import {environment} from "../../config";
-import {ROLES, colors} from "../../utils";
+import { useSelector } from "react-redux";
+import { environment } from "../../config";
+import { ROLES, colors } from "../../utils";
 import MailOpenIcon from "../MailOpenIcon";
 import MailCloseIcon from "../MailCloseIcon";
-
 
 const DrawerTab = ({ title, to, onClick }) => (
   <li onClick={onClick}>
@@ -37,8 +36,6 @@ function supervisor({ user, onClick }) {
 
 function admin({ onClick }) {
   const tickets = useSelector((state) => state.Auth.tickets);
-  console.log("ticketsState", tickets);
-
   return (
     <>
       <DrawerTab to="/structure" title="Structures" onClick={onClick} />
@@ -54,15 +51,38 @@ function admin({ onClick }) {
         <NavLink to="/ticket">
           <div style={{ display: "flex", alignContent: "center", justifyContent: "space-between" }}>
             <div>Ticket</div>
-            <div style={{display: "flex"}}>
-              <div style={{display: "flex", alignContent: "center", justifyContent: "center", background: "#F1545B", borderRadius: "0.5rem", marginRight: "10px", paddingRight: "8px", paddingLeft: "8px", width: "60px"}}>
-                <MailCloseIcon/>
-                <div style={{marginLeft: "4px"}}>2</div>
+            <div style={{ display: "flex" }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignContent: "center",
+                  justifyContent: "center",
+                  background: "#F1545B",
+                  borderRadius: "0.5rem",
+                  marginRight: "10px",
+                  paddingRight: "8px",
+                  paddingLeft: "8px",
+                  width: "60px",
+                }}
+              >
+                <MailCloseIcon />
+                <div style={{ marginLeft: "4px" }}>2</div>
               </div>
-              <div style={{display: "flex", alignContent: "center", justifyContent: "center", background: "#FEB951", borderRadius: "0.5rem", marginRight: "10px", paddingRight: "8px", paddingLeft: "8px", width: "60px"}}>
-                <MailOpenIcon/>
-                <div style={{marginLeft: "4px"}}>3</div>
-
+              <div
+                style={{
+                  display: "flex",
+                  alignContent: "center",
+                  justifyContent: "center",
+                  background: "#FEB951",
+                  borderRadius: "0.5rem",
+                  marginRight: "10px",
+                  paddingRight: "8px",
+                  paddingLeft: "8px",
+                  width: "60px",
+                }}
+              >
+                <MailOpenIcon />
+                <div style={{ marginLeft: "4px" }}>3</div>
               </div>
             </div>
           </div>
