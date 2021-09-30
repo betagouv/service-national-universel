@@ -21,12 +21,12 @@ export default ({ setTicket, selectedTicket }) => {
   const getTickets = async ({ region, department }) => {
     const tags = [];
     if (region) {
-      tags.push(`AGENT_REFERENT_REGION`);
+      tags.push(`AGENT_Référent_Région`);
       tags.push(`REGION_${region}`);
     }
     if (department) {
-      tags.push(`AGENT_REFERENT_DEPARTMENT`);
-      tags.push(`DEPARTMENT_${department}`);
+      tags.push(`AGENT_Référent_Département`);
+      tags.push(`DEPARETMENT_${department}`);
     }
     const { data } = await api.post(`/support-center/ticket/search-by-tags`, { tags });
     setTickets(data);
