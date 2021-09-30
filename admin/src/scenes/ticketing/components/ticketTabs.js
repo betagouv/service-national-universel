@@ -26,7 +26,7 @@ export default ({ setTicket, selectedTicket }) => {
     }
     if (department) {
       tags.push(`AGENT_Référent_Département`);
-      // tags.push(`DEPARTEMENT_${department}`)
+      tags.push(`DEPARTEMENT_${department}`);
     }
     const { data } = await api.post(`/support-center/ticket/search-by-tags?withArticles=true`, { tags });
     setTickets(data);

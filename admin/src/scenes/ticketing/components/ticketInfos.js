@@ -5,6 +5,7 @@ import styled from "styled-components";
 
 import api from "../../../services/api";
 import translateState from "../../../utils/translateTickets";
+import { translate } from "../../../utils";
 
 export default ({ ticket }) => {
   const [user, setUser] = useState([]);
@@ -68,15 +69,15 @@ export default ({ ticket }) => {
       </div>
       <div>
         <p className="subtitle">Status phase 1 :</p>
-        <p className="info">{user.phase1Status}</p>
+        <p className="info">{translate(user.statusPhase1)}</p>
       </div>
       <div>
         <p className="subtitle">Status phase 2 :</p>
-        <p className="info">{user.phase2Status}</p>
+        <p className="info">{translate(user.statusPhase2)}</p>
       </div>
       <div>
         <p className="subtitle">Status phase 3 :</p>
-        <p className="info">{user.phase3Status}</p>
+        <p className="info">{translate(user.statusPhase3)}</p>
       </div>
     </HeroContainer>
   );
