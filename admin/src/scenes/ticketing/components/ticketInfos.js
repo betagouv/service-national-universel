@@ -12,7 +12,7 @@ export default ({ ticket }) => {
   useEffect(() => {
     (async () => {
       if (!ticket?.articles?.length) return;
-      const email = "adolphie.laine14@yahoo.fr"; //ticket.articles[0].created_by;
+      const email = ticket.articles[0].created_by;
       const { data } = await api.get(`/young?email=${email}`);
       setUser(data);
     })();

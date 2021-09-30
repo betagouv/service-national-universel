@@ -21,19 +21,19 @@ export default ({ ticket: propTicket }) => {
     try {
       if (!ticket?.id) return;
       const { data, ok } = await api.get(`/support-center/ticket/${ticket?.id}`);
-      if (data.error || !ok) return setTicket(undefined);
+      if (data.error || !ok) return;
       return setTicket(data);
     } catch (e) {
-      setTicket(null);
+      setTicket(undefined);
     }
   };
 
   useEffect(() => {
     setTicket(propTicket);
-    const ping = setInterval(getTicket, 5000);
-    return () => {
-      clearInterval(ping);
-    };
+    // const ping = setInterval(getTicket, 5000);
+    // return () => {
+    //   clearInterval(ping);
+    // };
   }, [propTicket]);
 
   const send = async () => {
