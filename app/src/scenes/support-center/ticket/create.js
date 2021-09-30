@@ -14,7 +14,6 @@ import ErrorMessage, { requiredMessage } from "../../inscription/components/erro
 export default () => {
   const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
-
   //todo : fetch zammad categories (scopes)
   const options = ["Assistance technique", "À propos de ma situation", "Contacter un référent"];
   const tags = [`COHORTE_${young.cohort}`, `DEPARTEMENT_${young.department}`, `REGION_${young.region}`, `EMETTEUR_Volontaire`, `CANAL_Plateforme`,];
@@ -41,7 +40,6 @@ export default () => {
             // return console.log(values);
             try {
               const { subject, type, message } = values;
-              console.log('TAGS', tags);
               if (type === "Assistance technique") {
                 tags.push("AGENT_Startup_Technique");
               } else if (type === "À propos de ma situation") {
