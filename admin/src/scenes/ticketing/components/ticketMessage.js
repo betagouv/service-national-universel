@@ -20,10 +20,9 @@ export default ({ ticketId }) => {
 
   const getTicket = async () => {
     try {
-      setTicket(null);
-      if (!ticketId) return; setTicket(null);
+      if (!ticketId) return;
       const { data, ok } = await api.get(`/support-center/ticket/${ticketId}`);
-      if (data.error || !ok) return setTicket(null);
+      if (data.error || !ok) return setTicket(undefined);
       return setTicket(data);
     } catch (e) {
       setTicket(null);
@@ -31,7 +30,7 @@ export default ({ ticketId }) => {
   };
 
   useEffect(() => {
-    setLoading(false)
+    setLoading(false);
     getTicket();
     const ping = setInterval(getTicket, 5000);
     return () => {

@@ -1,22 +1,45 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
+import { useSelector } from "react-redux";
 
 import Loader from "../../../components/Loader";
-import { formatStringDate } from "../../../utils";
+import { formatStringDate, ROLES } from "../../../utils";
 
 import api from "../../../services/api";
 
 export default ({ setTicket, selectedTicket }) => {
   const [stateFilter, setStateFilter] = useState();
   const [tickets, setTickets] = useState(null);
+  const user = useSelector((state) => state.Auth.user);
+
+  const getAlltickets = async () => {
+    const { data } = await api.get(`/support-center/ticket?withArticles=true`);
+    setTickets(data);
+    if (data?.length) setTicket(data[0]);
+  };
+
+  const getTickets = async ({ region, department }) => {
+    const tags = [];
+    if (region) {
+      tags.push(`AGENT_REFERENT_REGION`);
+      tags.push(`REGION_${region}`);
+    }
+    if (department) {
+      tags.push(`AGENT_REFERENT_DEPARTMENT`);
+      tags.push(`DEPARTMENT_${department}`);
+    }
+    const { data } = await api.post(`/support-center/ticket/search-by-tags`, { tags });
+    setTickets(data);
+    if (data?.length) setTicket(data[0]);
+  };
 
   useEffect(() => {
-    (async () => {
-      const { data } = await api.get(`/support-center/ticket`);
-      setTickets(data);
-      if (data?.length) setTicket(data[0]);
-    })();
-    if (tickets?.length) setTicket(data[0]);
+    let ticketsFromZammad = [];
+    if (user.role === ROLES.ADMIN) ticketsFromZammad = getAlltickets();
+    else if (user.role === ROLES.REFERENT_DEPARTMENT) ticketsFromZammad = getTickets({ department: user.department });
+    else if (user.role === ROLES.REFERENT_REGION) ticketsFromZammad = getTickets({ department: user.department });
+
+    if (ticketsFromZammad?.length) setTicket(ticketsFromZammad[0]);
   }, []);
 
   const getFrom = (ticket) => {
@@ -46,21 +69,26 @@ export default ({ setTicket, selectedTicket }) => {
             X
           </TabItem> */}
         </FilterContainer>
-        {!tickets ? <Loader /> : null}
-        {tickets?.length === 0 ? <div style={{ textAlign: "center", padding: "1rem", fontSize: "0.85rem" }}>Aucun ticket</div> : null}
-        {tickets
-          ?.filter((ticket) => {
-            return !stateFilter || ticket?.state_id === stateFilter;
-          })
-          ?.map((ticket) => (
-            <TicketContainer key={ticket.id} active={ticket.id === selectedTicket?.id} className="ticket" onClick={() => setTicket(ticket)}>
-              <TicketHeader>
-                <TicketFrom>{getFrom(ticket)}</TicketFrom>
-                <TicketDate>{formatStringDate(getDate(ticket))}</TicketDate>
-              </TicketHeader>
-              <TicketPreview>{ticket.title}</TicketPreview>
-            </TicketContainer>
-          ))}
+        {!tickets ? (
+          <Loader />
+        ) : (
+          <>
+            {tickets?.length === 0 ? <div style={{ textAlign: "center", padding: "1rem", fontSize: "0.85rem" }}>Aucun ticket</div> : null}
+            {tickets
+              ?.filter((ticket) => {
+                return !stateFilter || ticket?.state_id === stateFilter;
+              })
+              ?.map((ticket) => (
+                <TicketContainer key={ticket.id} active={ticket.id === selectedTicket?.id} className="ticket" onClick={() => setTicket(ticket)}>
+                  <TicketHeader>
+                    <TicketFrom>{getFrom(ticket)}</TicketFrom>
+                    <TicketDate>{formatStringDate(getDate(ticket))}</TicketDate>
+                  </TicketHeader>
+                  <TicketPreview>{ticket.title}</TicketPreview>
+                </TicketContainer>
+              ))}
+          </>
+        )}
       </List>
     </HeroContainer>
   );

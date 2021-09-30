@@ -13,6 +13,17 @@ const DrawerTab = ({ title, to, onClick }) => (
   </li>
 );
 
+const DrawerTabWithIcons = ({ title, children, to, onClick }) => (
+  <li onClick={onClick}>
+    <NavLink to={to}>
+      <div style={{ display: "flex", alignContent: "center", justifyContent: "space-between" }}>
+        <div>{title}</div>
+        <div style={{ display: "flex" }}>{children}</div>
+      </div>
+    </NavLink>
+  </li>
+);
+
 function responsible({ user, onClick }) {
   return (
     <>
@@ -47,47 +58,40 @@ function admin({ onClick }) {
       <DrawerTab to="/point-de-rassemblement" title="Points de rassemblement" onClick={onClick} />
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
       <DrawerTab to="/objectifs" title="Objectifs" onClick={onClick} />
-      <li onClick={onClick}>
-        <NavLink to="/ticket">
-          <div style={{ display: "flex", alignContent: "center", justifyContent: "space-between" }}>
-            <div>Ticket</div>
-            <div style={{ display: "flex" }}>
-              <div
-                style={{
-                  display: "flex",
-                  alignContent: "center",
-                  justifyContent: "center",
-                  background: "#F1545B",
-                  borderRadius: "0.5rem",
-                  marginRight: "10px",
-                  paddingRight: "8px",
-                  paddingLeft: "8px",
-                  width: "60px",
-                }}
-              >
-                <MailCloseIcon />
-                <div style={{ marginLeft: "4px" }}>2</div>
-              </div>
-              <div
-                style={{
-                  display: "flex",
-                  alignContent: "center",
-                  justifyContent: "center",
-                  background: "#FEB951",
-                  borderRadius: "0.5rem",
-                  marginRight: "10px",
-                  paddingRight: "8px",
-                  paddingLeft: "8px",
-                  width: "60px",
-                }}
-              >
-                <MailOpenIcon />
-                <div style={{ marginLeft: "4px" }}>3</div>
-              </div>
-            </div>
-          </div>
-        </NavLink>
-      </li>
+      <DrawerTabWithIcons to="/ticket" title="Tickets" onClick={onClick}>
+        <div
+          style={{
+            display: "flex",
+            alignContent: "center",
+            justifyContent: "center",
+            background: "#F1545B",
+            borderRadius: "0.5rem",
+            marginRight: "10px",
+            paddingRight: "8px",
+            paddingLeft: "8px",
+            width: "60px",
+          }}
+        >
+          <MailCloseIcon />
+          <div style={{ marginLeft: "4px" }}>2</div>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            alignContent: "center",
+            justifyContent: "center",
+            background: "#FEB951",
+            borderRadius: "0.5rem",
+            marginRight: "10px",
+            paddingRight: "8px",
+            paddingLeft: "8px",
+            width: "60px",
+          }}
+        >
+          <MailOpenIcon />
+          <div style={{ marginLeft: "4px" }}>3</div>
+        </div>
+      </DrawerTabWithIcons>
     </>
   );
 }
@@ -102,6 +106,40 @@ function referent({ onClick }) {
       <DrawerTab to="/inscription" title="Inscriptions" onClick={onClick} />
       <DrawerTab to="/centre" title="Centres" onClick={onClick} />
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
+      <DrawerTabWithIcons to="/ticket" title="Tickets" onClick={onClick}>
+        <div
+          style={{
+            display: "flex",
+            alignContent: "center",
+            justifyContent: "center",
+            background: "#F1545B",
+            borderRadius: "0.5rem",
+            marginRight: "10px",
+            paddingRight: "8px",
+            paddingLeft: "8px",
+            width: "60px",
+          }}
+        >
+          <MailCloseIcon />
+          <div style={{ marginLeft: "4px" }}>2</div>
+        </div>
+        <div
+          style={{
+            display: "flex",
+            alignContent: "center",
+            justifyContent: "center",
+            background: "#FEB951",
+            borderRadius: "0.5rem",
+            marginRight: "10px",
+            paddingRight: "8px",
+            paddingLeft: "8px",
+            width: "60px",
+          }}
+        >
+          <MailOpenIcon />
+          <div style={{ marginLeft: "4px" }}>3</div>
+        </div>
+      </DrawerTabWithIcons>
     </>
   );
 }
