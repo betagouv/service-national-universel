@@ -50,7 +50,6 @@ export default ({ model, value }) => {
 };
 
 const Hit = ({ hit, model }) => {
-  // console.log(hit);
   return (
     <>
       {hit.ops?.map((e, i) => {
