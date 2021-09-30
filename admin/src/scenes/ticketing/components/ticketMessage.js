@@ -31,10 +31,10 @@ export default ({ ticket: propTicket }) => {
 
   useEffect(() => {
     updateTicket(propTicket?.id);
-    // const ping = setInterval(updateTicket, 5000);
-    // return () => {
-    //   clearInterval(ping);
-    // };
+    const ping = setInterval(() => updateTicket(propTicket?.id), 5000);
+    return () => {
+      clearInterval(ping);
+    };
   }, [propTicket]);
 
   const send = async () => {
