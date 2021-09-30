@@ -30,6 +30,7 @@ export default ({ model, value }) => {
         <Table>
           <thead>
             <tr>
+              <th>Acteur</th>
               <th>Opération</th>
               <th>Ancienne valeur</th>
               <th>Nouvelle valeur</th>
@@ -54,6 +55,7 @@ const Hit = ({ hit, model }) => {
       {hit.ops?.map((e, i) => {
         return (
           <tr key={i} style={{ borderBottom: i === hit.ops.length - 1 && "1px solid #ddd" }}>
+            <td>{hit.user && hit.user.firstName && hit.user.lastName ? `${hit.user.firstName} ${hit.user.lastName}` : "Non renseigné"}</td>
             <td>
               <Op>{`${translateOperationName(e.op)}`}</Op> : {`${translateModelFields(model, e.path.substring(1))}`}
             </td>
@@ -93,6 +95,15 @@ const Table = styled.table`
   td:first-child,
   th:first-child {
     padding-left: 25px;
+  }
+
+  //each line (header included)
+  tr {
+    display: flex;
+    //each column
+    > * {
+      flex: 1;
+    }
   }
   tbody tr {
     :hover {
