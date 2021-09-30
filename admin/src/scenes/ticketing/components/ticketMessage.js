@@ -11,17 +11,16 @@ import Loader from "../../../components/Loader";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 import SendIcon from "../../../components/SendIcon";
 
-export default ({ ticketId }) => {
-  const [ticket, setTicket] = useState(null);
-  const [loading, setLoading] = useState(false);
+export default ({ ticket: propTicket }) => {
+  const [ticket, setTicket] = useState(propTicket);
 
   const [message, setMessage] = useState();
   const user = useSelector((state) => state.Auth.user);
 
   const getTicket = async () => {
     try {
-      if (!ticketId) return;
-      const { data, ok } = await api.get(`/support-center/ticket/${ticketId}`);
+      if (!ticket?.id) return;
+      const { data, ok } = await api.get(`/support-center/ticket/${ticket?.id}`);
       if (data.error || !ok) return setTicket(undefined);
       return setTicket(data);
     } catch (e) {
@@ -30,17 +29,23 @@ export default ({ ticketId }) => {
   };
 
   useEffect(() => {
-    setLoading(false);
-    getTicket();
+    setTicket(propTicket);
     const ping = setInterval(getTicket, 5000);
     return () => {
       clearInterval(ping);
     };
-  }, [ticketId]);
+  }, [propTicket]);
 
   const send = async () => {
     if (!message) return;
-    const { data } = await api.put(`/support-center/ticket/${ticketId}`, { message });
+
+    // affect the ticket to the current user
+    const responseAutoAffect = await api.put(`/support-center/ticket/${ticket.id}/affect-user`);
+
+    // then send the message
+    const { data } = await api.put(`/support-center/ticket/${ticket.id}`, { message });
+
+    // reset ticket
     setMessage("");
     getTicket();
   };

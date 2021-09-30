@@ -79,7 +79,6 @@ router.get("/ticket/:id", passport.authenticate(["referent", "young"], { session
 
 // Update one ticket (add a response).
 router.put("/ticket/:id", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
-  console.log("body", req.body);
   const { message, state } = req.body;
   try {
     const email = req.user.email;
@@ -156,9 +155,38 @@ router.post("/ticket/search-by-tags", passport.authenticate(["referent"], { sess
     const tags = encodeURIComponent(req.body.tags.map((tag) => `tags:${tag}`).join(" AND "));
     const response = await zammad.api(`/tickets/search?query=${tags}`, { method: "GET" });
     if (response?.assets?.Ticket && Object.values(response?.assets?.Ticket).length) {
+      if (req.query.withArticles) {
+        const data = [];
+        for (const item of Object.values(response.assets.Ticket)) {
+          const articles = await zammad.api("/ticket_articles/by_ticket/" + item.id, { method: "GET" });
+          data.push({ ...item, articles });
+        }
+        return res.status(200).send({ ok: true, data });
+      }
       return res.status(200).send({ ok: true, data: Object.values(response.assets.Ticket) });
     }
     return res.status(200).send({ ok: true, data: [] });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+// affect a user to a ticket
+router.put("/ticket/:id/affect-user", passport.authenticate(["referent"], { session: false }), async (req, res) => {
+  try {
+    const email = req.user.email;
+    const owner_id = await zammad.getCustomerIdByEmail(email);
+    if (!owner_id) return res.status(401).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const response = await zammad.api(`/tickets/${req.params.id}`, {
+      method: "PUT",
+      body: JSON.stringify({
+        id: req.params.id,
+        owner_id,
+      }),
+    });
+    if (!response.id) return res.status(400).send({ ok: false });
+    return res.status(200).send({ ok: true, data: response });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });

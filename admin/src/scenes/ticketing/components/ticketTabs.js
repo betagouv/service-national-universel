@@ -26,9 +26,9 @@ export default ({ setTicket, selectedTicket }) => {
     }
     if (department) {
       tags.push(`AGENT_Référent_Département`);
-      tags.push(`DEPARETMENT_${department}`);
+      // tags.push(`DEPARTEMENT_${department}`)
     }
-    const { data } = await api.post(`/support-center/ticket/search-by-tags`, { tags });
+    const { data } = await api.post(`/support-center/ticket/search-by-tags?withArticles=true`, { tags });
     setTickets(data);
     if (data?.length) setTicket(data[0]);
   };
@@ -38,12 +38,10 @@ export default ({ setTicket, selectedTicket }) => {
     if (user.role === ROLES.ADMIN) ticketsFromZammad = getAlltickets();
     else if (user.role === ROLES.REFERENT_DEPARTMENT) ticketsFromZammad = getTickets({ department: user.department });
     else if (user.role === ROLES.REFERENT_REGION) ticketsFromZammad = getTickets({ department: user.department });
-
-    if (ticketsFromZammad?.length) setTicket(ticketsFromZammad[0]);
   }, []);
 
   const getFrom = (ticket) => {
-    if (!ticket.articles.length) return "";
+    if (!ticket.articles?.length) return "";
     return ticket.articles[0]?.from;
   };
 

@@ -14,7 +14,7 @@ export default () => {
       <Header />
       <section>
         <TicketTabs setTicket={setTicket} selectedTicket={ticket} />
-        <TicketMessage ticketId={ticket?.id} />
+        <TicketMessage ticket={ticket} />
         <Infos ticket={ticket} />
       </section>
     </HeroContainer>
