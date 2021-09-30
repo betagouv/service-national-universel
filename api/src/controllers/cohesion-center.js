@@ -100,7 +100,7 @@ router.post("/:centerId/assign-young/:youngId", passport.authenticate("referent"
       await sendAutoCancelMeetingPoint(young);
     }
 
-    await young.save();
+    await young.save({ fromUser: req.user });
 
     // await sendAutoAffectationMail(young, center);
 
@@ -151,7 +151,7 @@ router.post("/:centerId/assign-young-waiting-list/:youngId", passport.authentica
       cohesionCenterCity: center.city,
       cohesionCenterZip: center.zip,
     });
-    await young.save();
+    await young.save({ fromUser: req.user });
 
     center.waitingList.push(young._id);
     await center.save();

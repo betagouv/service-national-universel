@@ -40,7 +40,7 @@ router.put("/cancel", passport.authenticate("referent", { session: false }), asy
     const oldBus = await BusModel.findById(oldMeetingPoint?.busId);
 
     young.set({ meetingPointId: undefined, deplacementPhase1Autonomous: undefined });
-    await young.save();
+    await young.save({ fromUser: req.user });
 
     if (oldBus) await updatePlacesBus(oldBus);
 
@@ -85,7 +85,7 @@ router.put("/", passport.authenticate(["young", "referent"], { session: false })
     const oldBus = await BusModel.findById(oldMeetingPoint?.busId);
 
     young.set({ meetingPointId, deplacementPhase1Autonomous });
-    await young.save();
+    await young.save({ fromUser: req.user });
 
     if (bus) await updatePlacesBus(bus);
     if (oldBus) await updatePlacesBus(oldBus);
