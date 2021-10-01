@@ -118,7 +118,7 @@ export default function Association({ hit }) {
             {tab === "Informations" && (
               <TabInfo>
                 <div>
-                  <b>Description</b>
+                  <b style={{ textTransform: "uppercase" }}>Description</b>
                   <br />
                   <div className="description">
                     <Description description={association.description || association.activites_objet} />
@@ -134,7 +134,7 @@ export default function Association({ hit }) {
                     .filter((e) => e.value)
                     .map((e) => (
                       <div key={e.label}>
-                        <b style={{ marginRight: "1rem" }}>{e.label}</b>
+                        <b style={{ marginRight: "1rem", textTransform: "uppercase" }}>{e.label}</b>
                         <span>{e.value}</span>
                       </div>
                     ))}
@@ -146,12 +146,21 @@ export default function Association({ hit }) {
                 {[
                   { label: "Téléphone", value: association.coordonnees_telephone || [] },
                   { label: "Courriel", value: association.coordonnees_courriel || [] },
-                  { label: "Liens", value: [association.url, association.linkedin, association.facebook, association.twitter, association.donation].filter((e) => e) },
+                  {
+                    label: "Liens",
+                    value: [association.url, association.linkedin, association.facebook, association.twitter, association.donation]
+                      .filter((e) => e)
+                      .map((e) => (
+                        <a style={{ textDecoration: "underline" }} href="">
+                          {e}
+                        </a>
+                      )),
+                  },
                 ]
                   .filter((e) => e.value && e.value.length > 0)
                   .map((e) => (
                     <div key={e.label} style={{ display: "flex" }}>
-                      <div style={{ marginRight: "1rem" }}>
+                      <div style={{ marginRight: "1rem", textTransform: "uppercase" }}>
                         <b>{e.label}</b>
                       </div>
                       <div>
@@ -196,20 +205,22 @@ const TabTitleContainer = styled.div`
   border-bottom: 1px #e5e7eb solid;
 `;
 const TabTitle = styled.div`
-  margin-right: 1rem;
+  margin-right: 1.5rem;
   cursor: pointer;
   padding-bottom: 1rem;
 `;
 const TabTitleSelected = styled.div`
-  margin-right: 1rem;
+  margin-right: 1.5rem;
   cursor: pointer;
   padding-bottom: 1rem;
   font-weight: bold;
   border-bottom: 2px #111111 solid;
 `;
 const TabContainer = styled.div`
+  padding: 0.5rem 0;
   min-height: 160px;
   display: flex;
+  font-size: 13px;
   align-items: center;
 `;
 const AssociationBody = styled.div`
@@ -233,6 +244,7 @@ const ContactButton = styled.button`
   border: 1px solid #d7d7d7;
   margin: 0 0.5rem;
   &:hover {
+    background-color: #e7e7e7;
   }
 `;
 const AssociationHeaderMainInfo = styled.div`
@@ -260,7 +272,6 @@ const TabInfo = styled.div`
   color: #696974;
   div.description {
     margin-top: 11px;
-    font-size: 14px;
     line-height: 22px;
     color: #696974;
   }

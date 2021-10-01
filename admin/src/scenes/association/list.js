@@ -16,13 +16,11 @@ import ReactiveListComponent from "../../components/ReactiveListComponent";
 import Chevron from "../../components/Chevron";
 import Association from "./components/Association";
 
-// const FILTERS = ["SEARCH", "LEGAL_STATUS", "STATUS", "DEPARTMENT", "REGION", "CORPS", "WITH_NETWORK", "LOCATION", "MILITARY_PREPARATION"];
-const FILTERS = ["SEARCH", "REGION", "DEPARTMENT"];
+const FILTERS = ["SEARCH", "REGION", "DEPARTMENT", "DOMAIN"];
 
 export default () => {
   const [structure, setStructure] = useState(null);
   const [filterVisible, setFilterVisible] = useState(false);
-  const handleShowFilter = () => setFilterVisible(!filterVisible);
   const user = useSelector((state) => state.Auth.user);
   /*
   const getDefaultQuery = () =>
@@ -59,9 +57,18 @@ export default () => {
                 <DataSearch
                   showIcon={false}
                   defaultQuery={getDefaultQuery}
-                  placeholder="Rechercher par mots clés, ville, code postal..."
+                  placeholder="Rechercher par mots clés, nom, ville, description…"
                   componentId="SEARCH"
-                  dataField={["identite_nom"]}
+                  dataField={[
+                    "identite_nom^10",
+                    "identite_sigle^5",
+                    "coordonnees_adresse_commune^4",
+                    "description^4",
+                    "coordonnees_adresse_region^3",
+                    "activites_objet^2",
+                    "activites_lib_famille1^2",
+                    "coordonnees_adresse_departement^1",
+                  ]}
                   react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
                   style={{ flex: 1, marginRight: "1rem" }}
                   innerClass={{ input: "searchbox" }}
@@ -75,7 +82,21 @@ export default () => {
                   filters={FILTERS}
                   defaultValue={user.role === ROLES.REFERENT_DEPARTMENT ? [user.department] : []}
                 />
-                <Chevron color="#444" style={{ cursor: "pointer", transform: filterVisible && "rotate(180deg)" }} onClick={handleShowFilter} />
+                <MultiDropdownList
+                  defaultQuery={getDefaultQuery}
+                  className="dropdown-filter"
+                  placeholder="Domaine"
+                  componentId="DOMAIN"
+                  dataField="activites_lib_theme1.keyword"
+                  react={{ and: FILTERS.filter((e) => e !== "DOMAIN") }}
+                  renderItem={(e, count) => {
+                    return `${translate(e)} (${count})`;
+                  }}
+                  title=""
+                  URLParams={true}
+                  showSearch={false}
+                  renderLabel={(items) => getFilterLabel(items, "Domaine")}
+                />
               </FilterRow>
             </Filter>
             <ResultWrapper>
