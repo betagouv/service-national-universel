@@ -27,7 +27,13 @@ router.get("/ticket", passport.authenticate(["referent", "young"], { session: fa
     const email = req.user.email;
     const customer_id = await zammad.getCustomerIdByEmail(email);
     if (!customer_id) return res.status(401).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const response = await zammad.api("/tickets", { method: "GET", headers: { "X-On-Behalf-Of": email } });
+    if (isYoung(req.user)) {
+      groupId = 4;
+    } else {
+      groupId = 5;
+    }
+    let response = await zammad.api("/tickets", { method: "GET", headers: { "X-On-Behalf-Of": email } });
+    response = response.filter((ticket) => ticket.group_id === groupId);
     if (response.length && req.query.withArticles) {
       const data = [];
       for (const item of response) {
