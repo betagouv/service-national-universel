@@ -224,11 +224,8 @@ export default (props) => {
                     </div>
                   )}
                   <FormGroup>
-                    <label>
-                      <span>*</span>PRÉSENTATION SYNTHÉTIQUE DE LA STRUCTURE
-                    </label>
+                    <label>PRÉSENTATION SYNTHÉTIQUE DE LA STRUCTURE</label>
                     <Field
-                      validate={(v) => !v && requiredMessage}
                       name="description"
                       component="textarea"
                       rows={4}
@@ -236,7 +233,6 @@ export default (props) => {
                       onChange={handleChange}
                       placeholder="Décrivez en quelques mots votre structure"
                     />
-                    <ErrorMessage errors={errors} touched={touched} name="description" />
                   </FormGroup>
                   <FormGroup>
                     <label>NUMÉRO DE SIRET (SI DISPONIBLE)</label>
@@ -341,6 +337,7 @@ export default (props) => {
                 <Wrapper>
                   <BoxTitle>Lieu de la structure</BoxTitle>
                   <AddressInput
+                    required={false}
                     keys={{ city: "city", zip: "zip", address: "address", location: "location", department: "department", region: "region" }}
                     values={values}
                     handleChange={handleChange}

@@ -196,6 +196,10 @@ export default () => {
                       <ErrorMessage errors={errors} touched={touched} name="structure.name" />
                     </StyledFormGroup>
                     <StyledFormGroup>
+                      <label>DESCRIPTION DE LA STRUCTURE</label>
+                      <InputField as="textarea" value={values.structure.description} onChange={handleChange} name="structure.description" placeholder="Description..." />
+                    </StyledFormGroup>
+                    <StyledFormGroup>
                       <label>
                         <span>*</span>STATUT JURIDIQUE
                       </label>
@@ -313,7 +317,7 @@ export default () => {
                 </LoginBox>
               </LoginBoxes>
               <Submit loading={isSubmitting} type="submit" color="primary" onClick={handleSubmit}>
-                Continuer
+                S'inscrire
               </Submit>
             </AuthWrapper>
           );
