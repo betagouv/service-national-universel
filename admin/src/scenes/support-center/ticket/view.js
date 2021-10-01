@@ -71,7 +71,7 @@ export default (props) => {
             />
             <ButtonContainer>
               <LoadingButton color="white" onClick={send} disabled={!message}>
-                <SendIcon />
+                <SendIcon color={!message && "grey"} />
               </LoadingButton>
             </ButtonContainer>
           </InputContainer>
