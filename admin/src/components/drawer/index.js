@@ -49,7 +49,6 @@ function supervisor({ user, onClick }) {
 }
 
 function admin({ onClick }) {
-  const tickets = useSelector((state) => state.Auth.tickets);
   return (
     <>
       <DrawerTab to="/structure" title="Structures" onClick={onClick} />
