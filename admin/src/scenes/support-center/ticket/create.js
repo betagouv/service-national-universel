@@ -5,6 +5,7 @@ import styled from "styled-components";
 import { Formik, Field } from "formik";
 import { NavLink } from "react-router-dom";
 import { useHistory } from "react-router-dom";
+import LoadingButton from "../../../components/buttons/LoadingButton";
 
 import api from "../../../services/api";
 import ErrorMessage, { requiredMessage } from "../../../components/errorMessage";
@@ -85,7 +86,7 @@ export default () => {
                 touched={touched}
                 rows="5"
               />
-              <ContinueButton type="submit" style={{ marginLeft: 10 }} onClick={handleSubmit} disabled={isSubmitting}>
+              <ContinueButton type="submit" style={{ marginLeft: 10 }} onClick={handleSubmit} disabled={isSubmitting} loading={isSubmitting}>
                 Envoyer
               </ContinueButton>
             </>
@@ -167,7 +168,7 @@ const Label = styled.div`
   margin-bottom: 5px;
 `;
 
-const ContinueButton = styled.button`
+const ContinueButton = styled(LoadingButton)`
   @media (max-width: 767px) {
     margin: 1rem 0;
   }
