@@ -13,14 +13,15 @@ import SendIcon from "../../../components/SendIcon";
 
 export default ({ ticket: propTicket }) => {
   const [ticket, setTicket] = useState(propTicket);
-
   const [message, setMessage] = useState();
   const user = useSelector((state) => state.Auth.user);
 
-  const getTicket = async () => {
+  const updateTicket = async (id) => {
     try {
-      if (!ticket?.id) return;
-      const { data, ok } = await api.get(`/support-center/ticket/${ticket?.id}`);
+      if (!id) {
+        return console.log("no id");
+      }
+      const { data, ok } = await api.get(`/support-center/ticket/${id}`);
       if (data.error || !ok) return;
       return setTicket(data);
     } catch (e) {
@@ -29,25 +30,22 @@ export default ({ ticket: propTicket }) => {
   };
 
   useEffect(() => {
-    setTicket(propTicket);
-    // const ping = setInterval(getTicket, 5000);
-    // return () => {
-    //   clearInterval(ping);
-    // };
+    updateTicket(propTicket?.id);
+    const ping = setInterval(() => updateTicket(propTicket?.id), 5000);
+    return () => {
+      clearInterval(ping);
+    };
   }, [propTicket]);
 
   const send = async () => {
     if (!message) return;
 
-    // affect the ticket to the current user
-    const responseAutoAffect = await api.put(`/support-center/ticket/${ticket.id}/affect-user`);
-
     // then send the message
-    const { data } = await api.put(`/support-center/ticket/${ticket.id}`, { message });
+    const { data } = await api.put(`/support-center/ticket/${ticket?.id}`, { message });
 
-    // reset ticket
+    // reset ticket and input message
     setMessage("");
-    getTicket();
+    updateTicket(ticket?.id);
   };
 
   if (ticket === null) return <Loader />;

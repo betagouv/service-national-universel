@@ -30,7 +30,7 @@ import Inscription from "./scenes/inscription";
 import MeetingPoint from "./scenes/meetingPoint";
 import Bug from "./scenes/bug";
 import SupportCenter from "./scenes/support-center";
-import TicketCenter from "./scenes/ticketing";
+import Inbox from "./scenes/inbox";
 
 import Drawer from "./components/drawer";
 import Header from "./components/header";
@@ -65,8 +65,8 @@ export default () => {
         if (!res.ok || !res.user) return setLoading(false);
         if (res.token) api.setToken(res.token);
         if (res.user) dispatch(setUser(res.user));
-        const { data } = await api.get(`/support-center/ticket_overviews`);
-        dispatch(setTickets(data));
+        // const { data } = await api.get(`/support-center/ticket_overviews`);
+        // dispatch(setTickets(data));
       } catch (e) {}
       setLoading(false);
     }
@@ -132,7 +132,7 @@ const Home = () => {
           <RestrictedRoute path="/centre" component={Center} />
           <RestrictedRoute path="/point-de-rassemblement" component={MeetingPoint} />
           <RestrictedRoute path="/support" component={SupportCenter} />
-          <RestrictedRoute path="/ticket" component={TicketCenter} />
+          <RestrictedRoute path="/boite-de-reception" component={Inbox} />
           <RestrictedRoute path="/" component={renderDashboard} />
         </Switch>
       </ContentContainer>
