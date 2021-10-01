@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Container } from "reactstrap";
 import styled from "styled-components";
-import { toastr } from "react-redux-toastr";
 import { NavLink } from "react-router-dom";
 import { useSelector } from "react-redux";
 
@@ -57,16 +56,24 @@ export default (props) => {
         </Heading>
         <div>
           <Box>
-            {ticket?.articles
-              ?.map((article, i) => (
-                <Message key={i} fromMe={user.email === article.created_by} from={article.from} date={formatStringLongDate(article.created_at)} content={article.body} />
-              ))}
+            {ticket?.articles?.map((article, i) => (
+              <Message key={i} fromMe={user.email === article.created_by} from={article.from} date={formatStringLongDate(article.created_at)} content={article.body} />
+            ))}
           </Box>
           <InputContainer>
-            <textarea row={2} placeholder="Mon message..." className="form-control" onChange={(e) => setMessage(e.target.value)} value={message} style={{ border: "none", resize: "none", borderRadius: "0px" }} />
-            <LoadingButton onClick={send} disabled={!message} style={{ height: "100%", }}>
-              Envoyer
-            </LoadingButton>
+            <textarea
+              row={2}
+              placeholder="Mon message..."
+              className="form-control"
+              onChange={(e) => setMessage(e.target.value)}
+              value={message}
+              style={{ border: "none", resize: "none", borderRadius: "0px" }}
+            />
+            <ButtonContainer>
+              <LoadingButton color="white" onClick={send} disabled={!message}>
+                <SendIcon color={!message && "grey"} />
+              </LoadingButton>
+            </ButtonContainer>
           </InputContainer>
         </div>
       </div>
@@ -109,6 +116,11 @@ const InputContainer = styled.div`
   display: flex;
   flex-direction: row;
   align-items: stretch;
+  background-color: #fff;
+`;
+const ButtonContainer = styled.div`
+  flex-basis: 100px;
+  align-self: center;
 `;
 const DetailContainer = styled.div`
   display: flex;
@@ -158,12 +170,12 @@ const MessageContent = styled.div`
 `;
 const Box = styled.div`
   width: ${(props) => props.width || 100}%;
-  ${'' /* height: 100%; */}
+  ${"" /* height: 100%; */}
   filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.05));
   border-radius: 8px;
   padding: 1rem;
   max-height: 500px;
-  overflow: scroll;
+  overflow-y: scroll;
 `;
 
 const Heading = styled(Container)`
