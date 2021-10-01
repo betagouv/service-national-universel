@@ -18,7 +18,7 @@ const DrawerTabWithIcons = ({ title, children, to, onClick }) => {
   return (
     <li onClick={onClick}>
       <NavLink to={to}>
-        <div style={{ display: "flex", alignContent: "center", justifyContent: "space-between" }}>
+        <div style={{ display: "flex", alignContent: "center", justifyContent: "space-between", flexWrap: "wrap" }}>
           <div>{title}</div>
           <div style={{ display: "flex" }}>{children}</div>
         </div>
