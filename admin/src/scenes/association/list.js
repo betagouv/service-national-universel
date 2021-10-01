@@ -28,6 +28,22 @@ export default () => {
   const getDefaultQuery = () =>
     user.role === ROLES.SUPERVISOR ? { query: { bool: { filter: { term: { "networkId.keyword": user.structureId } } } } } : { query: { match_all: {} } };
 */
+  const getDefaultQuery = () => ({
+    query: {
+      bool: {
+        must: {
+          match_all: {},
+        },
+        should: ["url", "linkedin", "facebook", "twitter", "donation", "coordonnees_courriel", "coordonnees_telephone"].map((e) => ({
+          exists: {
+            field: e,
+            boost: 2,
+          },
+        })),
+      },
+    },
+  });
+
   return (
     <div>
       <ReactiveBase url={`${apiURL}/es`} app="association" headers={{ Authorization: `JWT ${api.getToken()}` }}>
@@ -42,6 +58,7 @@ export default () => {
               <FilterRow visible>
                 <DataSearch
                   showIcon={false}
+                  defaultQuery={getDefaultQuery}
                   placeholder="Rechercher par mots clés, ville, code postal..."
                   componentId="SEARCH"
                   dataField={["identite_nom"]}
@@ -65,6 +82,7 @@ export default () => {
               <ReactiveListComponent
                 react={{ and: FILTERS }}
                 paginationAt="bottom"
+                defaultQuery={getDefaultQuery}
                 renderResultStats={(e) => {
                   return (
                     <StatsResult>
@@ -76,7 +94,8 @@ export default () => {
                 onData={({ rawData }) => {
                   // if (rawData?.hits?.hits) setStructureIds(rawData.hits.hits.map((e) => e._id));
                 }}
-                dataField={"created_at"}
+                dataField={undefined}
+                sortBy={undefined}
                 render={({ data }) => {
                   return data.map((hit) => <Association hit={hit} key={hit._id} onClick={() => setStructure(hit)} selected={structure?._id === hit._id} />);
                 }}
