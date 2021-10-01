@@ -33,6 +33,7 @@ function responsible({ user, onClick }) {
       <DrawerTab to={`/structure/${user.structureId}`} title="Ma structure" onClick={onClick} />
       <DrawerTab to="/mission" title="Missions" onClick={onClick} />
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
+      {/* <DrawerTab to="/support" title="Centre d'aide" onClick={onClick} /> */}
     </>
   );
 }
@@ -44,6 +45,7 @@ function supervisor({ user, onClick }) {
       <DrawerTab to="/mission" title="Missions" onClick={onClick} />
       <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
+      {/* <DrawerTab to="/support" title="Centre d'aide" onClick={onClick} /> */}
     </>
   );
 }
@@ -60,7 +62,8 @@ function admin({ onClick }) {
       <DrawerTab to="/point-de-rassemblement" title="Points de rassemblement" onClick={onClick} />
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
       <DrawerTab to="/objectifs" title="Objectifs" onClick={onClick} />
-      <DrawerTabWithIcons to="/ticket" title="Tickets" onClick={onClick}>
+      {/* <DrawerTab to="/support" title="Centre d'aide" onClick={onClick} /> */}
+      <DrawerTabWithIcons to="/boite-de-reception" title="Boîte de reception" onClick={onClick}>
         <div
           style={{
             display: "flex",
@@ -108,7 +111,8 @@ function referent({ onClick }) {
       <DrawerTab to="/inscription" title="Inscriptions" onClick={onClick} />
       <DrawerTab to="/centre" title="Centres" onClick={onClick} />
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
-      <DrawerTabWithIcons to="/ticket" title="Tickets" onClick={onClick}>
+      {/* <DrawerTab to="/support" title="Centre d'aide" onClick={onClick} /> */}
+      <DrawerTabWithIcons to="/boite-de-reception" title="Boîte de reception" onClick={onClick}>
         <div
           style={{
             display: "flex",
@@ -152,6 +156,7 @@ function headCenter({ user, onClick }) {
       <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
+      {/* <DrawerTab to="/support" title="Centre d'aide" onClick={onClick} /> */}
     </>
   );
 }
