@@ -9,6 +9,7 @@ import api from "../../../services/api";
 import { formatStringLongDate, colors } from "../../../utils";
 import Loader from "../../../components/Loader";
 import LoadingButton from "../../../components/buttons/LoadingButton";
+import SendIcon from "../../../components/SendIcon";
 
 export default (props) => {
   const [ticket, setTicket] = useState();
@@ -47,28 +48,27 @@ export default (props) => {
   return (
     <Container>
       <BackButton to={`/support`}>{"<"} Retour</BackButton>
-      <Heading>
-        <h1>
-          Demande #{props.match?.params?.id} - {ticket?.title}
-        </h1>
-        <Details title="Crée le" content={ticket?.created_at && formatStringLongDate(ticket?.created_at)} />
-      </Heading>
-      <div>
-        <InputContainer>
-          <textarea row={2} placeholder="Mon message..." className="form-control" onChange={(e) => setMessage(e.target.value)} value={message} />
-          <div style={{ display: "flex", flexDirection: "column", justifyContent: "flex-end", marginTop: "1rem" }}>
-            <LoadingButton onClick={send} disabled={!message}>
+      <div style={{ border: "1px solid #e4e4e7", marginTop: "1rem" }}>
+        <Heading>
+          <h1>
+            Demande #{props.match?.params?.id} - {ticket?.title}
+          </h1>
+          <Details title="Crée le" content={ticket?.created_at && formatStringLongDate(ticket?.created_at)} />
+        </Heading>
+        <div>
+          <Box>
+            {ticket?.articles
+              ?.map((article, i) => (
+                <Message key={i} fromMe={young.email === article.created_by} from={article.from} date={formatStringLongDate(article.created_at)} content={article.body} />
+              ))}
+          </Box>
+          <InputContainer>
+            <textarea row={2} placeholder="Mon message..." className="form-control" onChange={(e) => setMessage(e.target.value)} value={message} style={{ border: "none", resize: "none", borderRadius: "0px" }} />
+            <LoadingButton onClick={send} disabled={!message} style={{ height: "100%", }}>
               Envoyer
             </LoadingButton>
-          </div>
-        </InputContainer>
-        <Box>
-          {ticket?.articles
-            ?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-            ?.map((article, i) => (
-              <Message key={i} fromMe={young.email === article.created_by} from={article.from} date={formatStringLongDate(article.created_at)} content={article.body} />
-            ))}
-        </Box>
+          </InputContainer>
+        </div>
       </div>
     </Container>
   );
@@ -105,22 +105,10 @@ const Details = ({ title, content }) => {
   );
 };
 
-const BackButton = styled(NavLink)`
-  color: #666;
-  cursor: pointer;
-  :hover {
-    text-decoration: underline;
-  }
-`;
-
 const InputContainer = styled.div`
   display: flex;
   flex-direction: row;
-  align-items: flex-end;
-  @media (max-width: 768px) {
-    flex-direction: column;
-  }
-  padding: 0.5rem;
+  align-items: stretch;
 `;
 const DetailContainer = styled.div`
   display: flex;
@@ -170,27 +158,29 @@ const MessageContent = styled.div`
 `;
 const Box = styled.div`
   width: ${(props) => props.width || 100}%;
-  height: 100%;
-  background-color: #fff;
+  ${'' /* height: 100%; */}
   filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.05));
   border-radius: 8px;
   padding: 1rem;
-  margin: 1rem 0;
+  max-height: 500px;
+  overflow: scroll;
 `;
 
 const Heading = styled(Container)`
-  margin-bottom: 1.5rem;
   display: flex;
   flex: 1;
   flex-direction: column;
   justify-content: flex-start;
   align-items: space-between;
+  background-color: #fff;
+  padding: 0.5rem;
+  border-bottom: 1px solid #e4e4e7;
   @media (max-width: 768px) {
     margin-bottom: 1rem;
   }
   h1 {
     color: #161e2e;
-    font-size: 2rem;
+    font-size: 1rem;
     font-weight: 700;
     padding-right: 3rem;
     @media (max-width: 768px) {
@@ -215,5 +205,13 @@ const Heading = styled(Container)`
       color: #6b7280;
       font-size: 0.75rem;
     }
+  }
+`;
+
+const BackButton = styled(NavLink)`
+  color: #666;
+  cursor: pointer;
+  :hover {
+    text-decoration: underline;
   }
 `;
