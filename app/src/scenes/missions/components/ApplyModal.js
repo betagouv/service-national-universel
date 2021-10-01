@@ -39,7 +39,12 @@ export default ({ value, onChange, onSend }) => {
     const { ok, data, code } = await api.post(`/application`, application);
     if (!ok) return toastr.error("Oups, une erreur est survenue lors de la candidature", code);
     const responseNotification = await api.post(`/application/${data._id}/notify/${SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION}`);
-    if (!responseNotification.ok) return toastr.error(translate(responseNotification.code), "Une erreur s'est produite lors de l'envoie de la notification.");
+    if (!responseNotification?.ok) return toastr.error(translate(responseNotification?.code), "Une erreur s'est produite avec le service de notification.");
+    if (ENABLE_PM && value.isMilitaryPreparation === "true") {
+      const responseNotificationYoung = await api.post(`/application/${data._id}/notify/${SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_REMINDER}`);
+      if (!responseNotificationYoung?.ok) return toastr.error(translate(responseNotificationYoung?.code), "Une erreur s'est produite avec le service de notification.");
+    }
+
     onSend();
   };
 
