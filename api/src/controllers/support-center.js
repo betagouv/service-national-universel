@@ -79,7 +79,7 @@ router.put("/ticket/:id", passport.authenticate(["referent", "young"], { session
           internal: false,
         }),
       });
-      if (!response.id) return res.status(400).send({ ok: false });
+      if (!response.id) return res.status(400).send({ ok: false, data: response });
       return res.status(200).send({ ok: true, data: response });
     } else if (state) {
       const response = await zammad.api(`/tickets/${req.params.id}`, {
