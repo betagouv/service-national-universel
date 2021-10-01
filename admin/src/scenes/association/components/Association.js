@@ -17,8 +17,8 @@ export default function Association({ hit }) {
     <AssociationWrapper>
       <AssociationHeader style={{ borderRadius: !show ? "10px" : "10px 10px 0 0" }}>
         {association.logo && (
-          <div>
-            <img style={{ maxWidth: "150px", marginRight: "1.5rem" }} src={association.logo} alt={association.identite_nom} />
+          <div style={{ minWidth: "165px" }}>
+            <img style={{ maxWidth: "150px", marginRight: "1.5rem", maxHeight: "100px" }} src={association.logo} alt={association.identite_nom} />
           </div>
         )}
         <AssociationHeaderMainInfo>
@@ -144,15 +144,21 @@ export default function Association({ hit }) {
             {tab === "Contacts" && (
               <TabContact>
                 {[
-                  { label: "Téléphone", value: (association.coordonnees_telephone || []).join(<br />) },
-                  { label: "Courriel", value: (association.coordonnees_courriel || []).join(<br />) },
-                  { label: "Liens", value: [association.url, association.linkedin, association.facebook, association.twitter, association.donation].filter((e) => e).join(<br />) },
+                  { label: "Téléphone", value: association.coordonnees_telephone || [] },
+                  { label: "Courriel", value: association.coordonnees_courriel || [] },
+                  { label: "Liens", value: [association.url, association.linkedin, association.facebook, association.twitter, association.donation].filter((e) => e) },
                 ]
                   .filter((e) => e.value && e.value.length > 0)
                   .map((e) => (
-                    <div key={e.label}>
-                      <b style={{ marginRight: "1rem" }}>{e.label}</b>
-                      <span>{e.value}</span>
+                    <div key={e.label} style={{ display: "flex" }}>
+                      <div style={{ marginRight: "1rem" }}>
+                        <b>{e.label}</b>
+                      </div>
+                      <div>
+                        {e.value.map((f) => (
+                          <div>{f}</div>
+                        ))}
+                      </div>
                     </div>
                   ))}
               </TabContact>
