@@ -16,6 +16,7 @@ export default ({ ticket }) => {
       const email = ticket.articles[0].created_by;
       const { data } = await api.get(`/young?email=${email}`);
       setUser(data);
+      console.log(data);
     })();
   }, [ticket]);
 
@@ -45,15 +46,14 @@ export default ({ ticket }) => {
         </button>
       </div>
       <h4 className="title">Informations volontaire</h4>
+      <div style={{ marginBottom: "1rem" }}>
+        <a href={`https://admin.snu.gouv.fr/volontaire/${user._id}`} className="name">
+          {user.firstName} {user.lastName}
+        </a>
+      </div>
       <div>
         <p className="subtitle">État du ticket :</p>
         <p className="info">{translateState(ticket?.state_id)}</p>
-      </div>
-      <div>
-        <p className="subtitle">Nom complet :</p>
-        <p className="info">
-          {user.firstName} {user.lastName}
-        </p>
       </div>
       <div>
         <p className="subtitle">E-mail :</p>
@@ -113,6 +113,11 @@ export const HeroContainer = styled.div`
     font-size: 0.875rem;
     line-height: 1.25rem;
     margin-bottom: 22px;
+  }
+
+  .name {
+    font-size: 1rem;
+    font-weight: bold;
   }
 
   .button {
