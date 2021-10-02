@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { toastr } from "react-redux-toastr";
-import { NavLink, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import styled from "styled-components";
 
 import api from "../../../services/api";
 import { ticketStateNameById } from "../../../utils/zammad";
-import { translate } from "../../../utils";
-import Loader from "../../../components/Loader";
+
+import Panel from "../../../scenes/volontaires/panel";
 
 export default ({ ticket }) => {
   const [user, setUser] = useState([]);
@@ -32,111 +32,45 @@ export default ({ ticket }) => {
 
   if (!user)
     return (
-      <HeroContainer>
-        <h4>Informations volontaire</h4>
+      <RightPanelContainer>
+        <RightPanelHeader>Informations volontaire</RightPanelHeader>
         <div>
           <p>Veuiller sélectionner un ticket</p>
         </div>
-      </HeroContainer>
+      </RightPanelContainer>
     );
 
   return (
-    <HeroContainer>
+    <RightPanelContainer>
       {ticket === null ? (
         <div />
       ) : (
         <>
-          {ticketStateNameById(ticket?.state_id) !== "fermé" ? (
-            <div style={{ display: "flex", justifyContent: "center", alignContent: "center" }}>
-              <button className="button" onClick={resolveTicket}>
-                Résoudre le ticket
-              </button>
-            </div>
-          ) : null}
-          <h4 className="title">Informations volontaire</h4>
-          <div style={{ marginBottom: "1rem" }}>
-            <a href={`https://admin.snu.gouv.fr/volontaire/${user._id}`} className="name">
-              {user.firstName} {user.lastName}
-            </a>
-          </div>
-          <div>
-            <p className="subtitle">État du ticket :</p>
-            <p className="info">{ticketStateNameById(ticket?.state_id)}</p>
-          </div>
-          <div>
-            <p className="subtitle">E-mail :</p>
-            <p className="info">{user.email}</p>
-          </div>
-          <div>
-            <p className="subtitle">Département :</p>
-            <p className="info">{user.department}</p>
-          </div>
-          <div>
-            <p className="subtitle">Centre de cohésion :</p>
-            <p className="info">{user.cohesionCenter}</p>
-          </div>
-          <div>
-            <p className="subtitle">Status phase 1 :</p>
-            <p className="info">{translate(user.statusPhase1)}</p>
-          </div>
-          <div>
-            <p className="subtitle">Status phase 2 :</p>
-            <p className="info">{translate(user.statusPhase2)}</p>
-          </div>
-          <div>
-            <p className="subtitle">Status phase 3 :</p>
-            <p className="info">{translate(user.statusPhase3)}</p>
-          </div>
+          <RightPanelHeader>
+            {ticketStateNameById(ticket?.state_id) !== "fermé" ? (
+              <div style={{ display: "flex", justifyContent: "center", alignContent: "center" }}>
+                <button className="button" onClick={resolveTicket}>
+                  Résoudre le ticket
+                </button>
+              </div>
+            ) : null}
+            <h4 className="title">Informations volontaire</h4>
+          </RightPanelHeader>
+          <PanelflatDesign value={user} hideCloseButton />
         </>
       )}
-    </HeroContainer>
+    </RightPanelContainer>
   );
 };
 
-export const HeroContainer = styled.div`
-  flex: 1;
-  padding: 1rem;
-  border-top: 1px solid #e4e4e7;
-  border-bottom: 1px solid #e4e4e7;
+const RightPanelContainer = styled.div`
   background-color: #fff;
-  max-width: 300px;
-  min-width: 300px;
-  @media (max-width: 768px) {
-    padding: 1rem 0;
-  }
+`;
 
-  .title {
-    font-style: normal;
-    font-weight: bold;
-    font-size: 1.125rem;
-    line-height: 1.75rem;
-  }
+const RightPanelHeader = styled.div`
+  padding: 1rem;
+`;
 
-  .subtitle {
-    font-size: 0.75rem;
-    line-height: 1rem;
-    color: #979797;
-    margin: 0px;
-  }
-
-  .info {
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-    margin-bottom: 22px;
-  }
-
-  .name {
-    font-size: 1rem;
-    font-weight: bold;
-  }
-
-  .button {
-    margin-bottom: 1rem;
-    padding: 10px;
-    border-width: 0px;
-    background: #6bc762;
-    border-radius: 10px;
-    width: 100%;
-    color: white;
-  }
+const PanelflatDesign = styled(Panel)`
+  box-shadow: none;
 `;
