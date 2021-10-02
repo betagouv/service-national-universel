@@ -131,7 +131,7 @@ const Home = () => {
           <RestrictedRoute path="/objectifs" component={Goal} />
           <RestrictedRoute path="/centre" component={Center} />
           <RestrictedRoute path="/point-de-rassemblement" component={MeetingPoint} />
-          <RestrictedRoute path="/support" component={SupportCenter} />
+          <RestrictedRoute path="/besoin-d-aide" component={SupportCenter} />
           <RestrictedRoute path="/boite-de-reception" component={Inbox} />
           <RestrictedRoute path="/" component={renderDashboard} />
         </Switch>

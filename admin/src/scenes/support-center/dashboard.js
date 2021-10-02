@@ -65,7 +65,7 @@ export default () => {
             <LinkButton href="https://support.snu.gouv.fr/help/fr-fr/1-referent" target="_blank" rel="noopener noreferrer">
               Base de connaissance
             </LinkButton>
-            <InternalLink to="/support/ticket">Contacter quelqu'un</InternalLink>
+            <InternalLink to="/besoin-d-aide/ticket">Contacter quelqu'un</InternalLink>
           </div>
         </section>
         <Card>
@@ -96,7 +96,7 @@ export default () => {
         {userTickets
           ?.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
           ?.map((ticket) => (
-            <NavLink to={`/support/ticket/${ticket.id}`} key={ticket.id} className="ticket">
+            <NavLink to={`/besoin-d-aide/ticket/${ticket.id}`} key={ticket.id} className="ticket">
               <p>{ticket.id}</p>
               <p>{ticket.title}</p>
               <p className="ticket-date">il y a {formatDistanceToNow(new Date(ticket.updated_at), { locale: fr })}</p>

@@ -24,7 +24,7 @@ export default () => {
   }, []);
   return (
     <Container>
-      <BackButton to={`/support`}>{"<"} Retour</BackButton>
+      <BackButton to={`/besoin-d-aide`}>{"<"} Retour</BackButton>
       <Heading>
         <h2>Contacter le support</h2>
         <p>Vous rencontrez une difficulté, avez besoin d'assistance pour réaliser une action ou avez besoin d'informations supplémentaires sur la plateforme ?</p>
@@ -45,7 +45,7 @@ export default () => {
               });
               if (!ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(code));
               toastr.success("Ticket créé");
-              history.push("/support");
+              history.push("/besoin-d-aide");
             } catch (e) {
               console.log(e);
               toastr.error("Oups, une erreur est survenue", translate(e.code));
