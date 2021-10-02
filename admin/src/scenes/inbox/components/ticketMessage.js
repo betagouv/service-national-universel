@@ -46,7 +46,11 @@ export default ({ ticket: propTicket }) => {
     if (!message) return;
 
     // then send the message
-    const { data } = await api.put(`/support-center/ticket/${ticket?.id}`, { message });
+    // todo : we may be able to reset the status in only one call
+    // but im not sure the POST for a message can take state in its body
+    const responseMessage = await api.put(`/support-center/ticket/${ticket?.id}`, { message });
+
+    const responseState = await api.put(`/support-center/ticket/${ticket?.id}`, { state: "open" });
 
     // reset ticket and input message
     setMessage("");
