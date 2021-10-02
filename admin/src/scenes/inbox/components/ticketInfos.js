@@ -4,8 +4,9 @@ import { NavLink, useHistory } from "react-router-dom";
 import styled from "styled-components";
 
 import api from "../../../services/api";
-import translateState from "../../../utils/translateTickets";
+import { ticketStateNameById } from "../../../utils/zammad";
 import { translate } from "../../../utils";
+import Loader from "../../../components/Loader";
 
 export default ({ ticket }) => {
   const [user, setUser] = useState([]);
@@ -17,7 +18,6 @@ export default ({ ticket }) => {
       const email = ticket.articles[0].created_by;
       const { data } = await api.get(`/young?email=${email}`);
       setUser(data);
-      console.log(data);
     })();
   }, [ticket]);
 
@@ -42,45 +42,53 @@ export default ({ ticket }) => {
 
   return (
     <HeroContainer>
-      <div style={{ display: "flex", justifyContent: "center", alignContent: "center" }}>
-        <button className="button" onClick={resolveTicket}>
-          Résoudre le ticket
-        </button>
-      </div>
-      <h4 className="title">Informations volontaire</h4>
-      <div style={{ marginBottom: "1rem" }}>
-        <a href={`https://admin.snu.gouv.fr/volontaire/${user._id}`} className="name">
-          {user.firstName} {user.lastName}
-        </a>
-      </div>
-      <div>
-        <p className="subtitle">État du ticket :</p>
-        <p className="info">{translateState(ticket?.state_id)}</p>
-      </div>
-      <div>
-        <p className="subtitle">E-mail :</p>
-        <p className="info">{user.email}</p>
-      </div>
-      <div>
-        <p className="subtitle">Département :</p>
-        <p className="info">{user.department}</p>
-      </div>
-      <div>
-        <p className="subtitle">Centre de cohésion :</p>
-        <p className="info">{user.cohesionCenter}</p>
-      </div>
-      <div>
-        <p className="subtitle">Status phase 1 :</p>
-        <p className="info">{translate(user.statusPhase1)}</p>
-      </div>
-      <div>
-        <p className="subtitle">Status phase 2 :</p>
-        <p className="info">{translate(user.statusPhase2)}</p>
-      </div>
-      <div>
-        <p className="subtitle">Status phase 3 :</p>
-        <p className="info">{translate(user.statusPhase3)}</p>
-      </div>
+      {ticket === null ? (
+        <Loader />
+      ) : (
+        <>
+          {ticketStateNameById(ticket?.state_id) !== "fermé" ? (
+            <div style={{ display: "flex", justifyContent: "center", alignContent: "center" }}>
+              <button className="button" onClick={resolveTicket}>
+                Résoudre le ticket
+              </button>
+            </div>
+          ) : null}
+          <h4 className="title">Informations volontaire</h4>
+          <div style={{ marginBottom: "1rem" }}>
+            <a href={`https://admin.snu.gouv.fr/volontaire/${user._id}`} className="name">
+              {user.firstName} {user.lastName}
+            </a>
+          </div>
+          <div>
+            <p className="subtitle">État du ticket :</p>
+            <p className="info">{ticketStateNameById(ticket?.state_id)}</p>
+          </div>
+          <div>
+            <p className="subtitle">E-mail :</p>
+            <p className="info">{user.email}</p>
+          </div>
+          <div>
+            <p className="subtitle">Département :</p>
+            <p className="info">{user.department}</p>
+          </div>
+          <div>
+            <p className="subtitle">Centre de cohésion :</p>
+            <p className="info">{user.cohesionCenter}</p>
+          </div>
+          <div>
+            <p className="subtitle">Status phase 1 :</p>
+            <p className="info">{translate(user.statusPhase1)}</p>
+          </div>
+          <div>
+            <p className="subtitle">Status phase 2 :</p>
+            <p className="info">{translate(user.statusPhase2)}</p>
+          </div>
+          <div>
+            <p className="subtitle">Status phase 3 :</p>
+            <p className="info">{translate(user.statusPhase3)}</p>
+          </div>
+        </>
+      )}
     </HeroContainer>
   );
 };
