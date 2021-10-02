@@ -16,7 +16,6 @@ export default ({ setTicket, selectedTicket }) => {
   const getAlltickets = async () => {
     const { data } = await api.get(`/support-center/ticket?withArticles=true`);
     setTickets(data);
-    if (data?.length) setTicket(data[0]);
   };
 
   const getTickets = async ({ region, department }) => {
@@ -31,7 +30,6 @@ export default ({ setTicket, selectedTicket }) => {
     }
     const { data } = await api.post(`/support-center/ticket/search-by-tags?withArticles=true`, { tags });
     setTickets(data);
-    if (data?.length) setTicket(data[0]);
   };
 
   useEffect(() => {
@@ -40,6 +38,12 @@ export default ({ setTicket, selectedTicket }) => {
     else if (user.role === ROLES.REFERENT_DEPARTMENT) ticketsFromZammad = getTickets({ department: user.department });
     else if (user.role === ROLES.REFERENT_REGION) ticketsFromZammad = getTickets({ department: user.department });
   }, []);
+
+  useEffect(() => {
+    const displayedTickets = tickets?.filter((ticket) => !stateFilter || ticket?.state_id === stateFilter);
+    if (displayedTickets?.length) setTicket(displayedTickets[0]);
+    else setTicket(null);
+  }, [stateFilter]);
 
   const getFrom = (ticket) => {
     if (!ticket.articles?.length) return "";

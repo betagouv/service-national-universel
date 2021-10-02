@@ -43,7 +43,7 @@ export default ({ ticket }) => {
   return (
     <HeroContainer>
       {ticket === null ? (
-        <Loader />
+        <div />
       ) : (
         <>
           {ticketStateNameById(ticket?.state_id) !== "fermé" ? (

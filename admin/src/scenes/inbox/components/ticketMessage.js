@@ -19,6 +19,7 @@ export default ({ ticket: propTicket }) => {
   const updateTicket = async (id) => {
     try {
       if (!id) {
+        setTicket(undefined);
         return console.log("no id");
       }
       const { data, ok } = await api.get(`/support-center/ticket/${id}`);
@@ -49,42 +50,47 @@ export default ({ ticket: propTicket }) => {
   };
 
   if (ticket === null) return <Loader />;
-  if (ticket === undefined) return <div>Selectionnez un ticket</div>;
 
   return (
     <Container style={{ padding: 0, backgroundColor: "#F1F5F9", border: "1px solid #E4E4E7", display: "flex", flexDirection: "column", maxHeight: "100%" }}>
-      <Heading>
-        <h1>
-          Demande #{ticket?.id} - {ticket?.title}
-        </h1>
-        <Details title="Crée le" content={ticket?.created_at && formatStringLongDate(ticket?.created_at)} />
-      </Heading>
-      <section style={{ flexDirection: "column", justifyContent: "flex-end" }}>
-        <div style={{ overflow: "scroll", maxHeight: "50vh", display: "flex", flexDirection: "column-reverse" }}>
-          <Box>
-            {ticket?.articles
-              ?.sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
-              ?.map((article, i) => (
-                <Message key={i} fromMe={user.email === article.created_by} from={article.from} date={formatStringLongDate(article.created_at)} content={article.body} />
-              ))}
-          </Box>
-        </div>
-        <InputContainer>
-          <textarea
-            row={2}
-            placeholder="Mon message..."
-            className="form-control"
-            onChange={(e) => setMessage(e.target.value)}
-            value={message}
-            style={{ border: "none", resize: "none", borderRadius: "0px" }}
-          />
-          <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", background: "white" }}>
-            <LoadingButton style={{ background: "none", height: "100%" }} onClick={send} disabled={!message}>
-              <SendIcon />
-            </LoadingButton>
-          </div>
-        </InputContainer>
-      </section>
+      {ticket === undefined ? (
+        <div>Selectionnez un ticket</div>
+      ) : (
+        <>
+          <Heading>
+            <h1>
+              Demande #{ticket?.id} - {ticket?.title}
+            </h1>
+            <Details title="Crée le" content={ticket?.created_at && formatStringLongDate(ticket?.created_at)} />
+          </Heading>
+          <section style={{ flexDirection: "column", justifyContent: "flex-end" }}>
+            <div style={{ overflow: "scroll", maxHeight: "50vh", display: "flex", flexDirection: "column-reverse" }}>
+              <Box>
+                {ticket?.articles
+                  ?.sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
+                  ?.map((article, i) => (
+                    <Message key={i} fromMe={user.email === article.created_by} from={article.from} date={formatStringLongDate(article.created_at)} content={article.body} />
+                  ))}
+              </Box>
+            </div>
+            <InputContainer>
+              <textarea
+                row={2}
+                placeholder="Mon message..."
+                className="form-control"
+                onChange={(e) => setMessage(e.target.value)}
+                value={message}
+                style={{ border: "none", resize: "none", borderRadius: "0px" }}
+              />
+              <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", background: "white" }}>
+                <LoadingButton style={{ background: "none", height: "100%" }} onClick={send} disabled={!message}>
+                  <SendIcon />
+                </LoadingButton>
+              </div>
+            </InputContainer>
+          </section>
+        </>
+      )}
     </Container>
   );
 };
@@ -173,7 +179,7 @@ const MessageContent = styled.div`
 `;
 const Box = styled.div`
   width: ${(props) => props.width || 100}%;
-  ${'' /* height: 100%; */}
+  ${"" /* height: 100%; */}
   filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.05));
   border-radius: 8px;
   padding: 1rem;
