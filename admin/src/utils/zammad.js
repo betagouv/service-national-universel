@@ -8,7 +8,9 @@ const ticketStates = {
 
 export const ticketStateNameById = (id) => ticketStates[id];
 export const ticketStateIdByName = (name) =>
-  Object.keys(ticketStates).reduce((ret, key) => {
-    ret[ticketStates[key]] = key;
-    return ret;
-  }, {})[name];
+  Number(
+    Object.keys(ticketStates).reduce((ret, key) => {
+      ret[ticketStates[key]] = key;
+      return ret;
+    }, {})[name]
+  );

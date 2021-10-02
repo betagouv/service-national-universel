@@ -4,11 +4,12 @@ import { useSelector } from "react-redux";
 
 import Loader from "../../../components/Loader";
 import { formatStringDate, ROLES } from "../../../utils";
+import { ticketStateIdByName } from "../../../utils/zammad";
 
 import api from "../../../services/api";
 
 export default ({ setTicket, selectedTicket }) => {
-  const [stateFilter, setStateFilter] = useState();
+  const [stateFilter, setStateFilter] = useState(ticketStateIdByName("nouveau"));
   const [tickets, setTickets] = useState(null);
   const user = useSelector((state) => state.Auth.user);
 
@@ -53,14 +54,17 @@ export default ({ setTicket, selectedTicket }) => {
     <HeroContainer>
       <List>
         <FilterContainer>
+          <TabItem onClick={() => setStateFilter(ticketStateIdByName("nouveau"))} isActive={stateFilter === ticketStateIdByName("nouveau")}>
+            Non&nbsp;lu(s)
+          </TabItem>
+          <TabItem onClick={() => setStateFilter(ticketStateIdByName("ouvert"))} isActive={stateFilter === ticketStateIdByName("ouvert")}>
+            Ouvert(s)
+          </TabItem>
+          <TabItem onClick={() => setStateFilter(ticketStateIdByName("fermé"))} isActive={stateFilter === ticketStateIdByName("fermé")}>
+            Fermé(s)
+          </TabItem>
           <TabItem onClick={() => setStateFilter()} isActive={!stateFilter}>
             Tous
-          </TabItem>
-          <TabItem onClick={() => setStateFilter(1)} isActive={stateFilter === 1}>
-            Non&nbsp;lus
-          </TabItem>
-          <TabItem onClick={() => setStateFilter(4)} isActive={stateFilter === 4}>
-            Fermés
           </TabItem>
           {/* todo other filters */}
           {/* <TabItem onClick={() => setStateFilter("other")} isActive={stateFilter === "other"}>
@@ -71,11 +75,11 @@ export default ({ setTicket, selectedTicket }) => {
           <Loader />
         ) : (
           <>
-            {tickets?.length === 0 ? <div style={{ textAlign: "center", padding: "1rem", fontSize: "0.85rem" }}>Aucun ticket</div> : null}
+            {tickets?.filter((ticket) => !stateFilter || ticket?.state_id === stateFilter)?.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "1rem", fontSize: "0.85rem" }}>Aucun ticket</div>
+            ) : null}
             {tickets
-              ?.filter((ticket) => {
-                return !stateFilter || ticket?.state_id === stateFilter;
-              })
+              ?.filter((ticket) => !stateFilter || ticket?.state_id === stateFilter)
               ?.sort((a, b) => {
                 return new Date(b.updated_at) - new Date(a.updated_at);
               })
@@ -115,14 +119,13 @@ const TicketPreview = styled.div`
 `;
 
 const FilterContainer = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr /*0.5fr*/;
-  grid-template-rows: 1fr;
+  display: flex;
   padding: 0;
   border-bottom: 1px solid #f1f1f1;
 `;
 
 const TabItem = styled.div`
+  flex: 1;
   padding: 0.75rem;
   position: relative;
   font-size: 0.8rem;
