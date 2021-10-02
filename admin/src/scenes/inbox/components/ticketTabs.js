@@ -76,6 +76,9 @@ export default ({ setTicket, selectedTicket }) => {
               ?.filter((ticket) => {
                 return !stateFilter || ticket?.state_id === stateFilter;
               })
+              ?.sort((a, b) => {
+                return new Date(b.updated_at) - new Date(a.updated_at);
+              })
               ?.map((ticket) => (
                 <TicketContainer key={ticket.id} active={ticket.id === selectedTicket?.id} className="ticket" onClick={() => setTicket(ticket)}>
                   <TicketHeader>
