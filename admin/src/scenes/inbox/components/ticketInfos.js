@@ -68,6 +68,15 @@ const RightPanelContainer = styled.div`
 
 const RightPanelHeader = styled.div`
   padding: 1rem;
+  .button {
+    margin-bottom: 1rem;
+    padding: 10px;
+    border-width: 0px;
+    background: #6bc762;
+    border-radius: 10px;
+    width: 100%;
+    color: white;
+  }
 `;
 
 const PanelflatDesign = styled(Panel)`
