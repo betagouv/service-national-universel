@@ -4,7 +4,10 @@ import { useSelector } from "react-redux";
 
 import Loader from "../../../components/Loader";
 import { formatStringDate, ROLES } from "../../../utils";
-import { ticketStateIdByName } from "../../../utils/zammad";
+import { ticketStateIdByName, ticketStateNameById } from "../../../utils/zammad";
+import MailCloseIcon from "../../../components/MailCloseIcon";
+import MailOpenIcon from "../../../components/MailOpenIcon";
+import SuccessIcon from "../../../components/SuccessIcon";
 
 import api from "../../../services/api";
 
@@ -54,6 +57,27 @@ export default ({ setTicket, selectedTicket }) => {
     return (ticket.created_at || "").slice(0, 10);
   };
 
+  const displayState = (state) => {
+    if (state === "ouvert")
+      return (
+        <StateContainer style={{ display: "flex" }}>
+          <MailOpenIcon color="#F8B951" style={{ margin: 0, padding: "5px" }} />
+        </StateContainer>
+      );
+    if (state === "fermé")
+      return (
+        <StateContainer>
+          <SuccessIcon color="#6BC762" style={{ margin: 0, padding: "5px" }} />
+        </StateContainer>
+      );
+    if (state === "nouveau")
+      return (
+        <StateContainer>
+          <MailCloseIcon color="#F1545B" style={{ margin: 0, padding: "5px" }} />
+        </StateContainer>
+      );
+  };
+
   return (
     <HeroContainer>
       <List>
@@ -89,11 +113,14 @@ export default ({ setTicket, selectedTicket }) => {
               })
               ?.map((ticket) => (
                 <TicketContainer key={ticket.id} active={ticket.id === selectedTicket?.id} className="ticket" onClick={() => setTicket(ticket)}>
-                  <TicketHeader>
-                    <TicketFrom>{getFrom(ticket)}</TicketFrom>
-                    <TicketDate>{formatStringDate(getDate(ticket))}</TicketDate>
-                  </TicketHeader>
-                  <TicketPreview>{ticket.title}</TicketPreview>
+                  {displayState(ticketStateNameById(ticket.state_id))}
+                  <TicketContent>
+                    <TicketHeader>
+                      <TicketFrom>{getFrom(ticket)}</TicketFrom>
+                      <TicketDate>{formatStringDate(getDate(ticket))}</TicketDate>
+                    </TicketHeader>
+                    <TicketPreview>{ticket.title}</TicketPreview>
+                  </TicketContent>
                 </TicketContainer>
               ))}
           </>
@@ -102,6 +129,11 @@ export default ({ setTicket, selectedTicket }) => {
     </HeroContainer>
   );
 };
+
+const StateContainer = styled.div`
+  display: flex;
+  align-items: center;
+`;
 
 const TicketHeader = styled.div`
   display: flex;
@@ -194,13 +226,19 @@ const TicketContainer = styled.div`
   cursor: pointer;
   border-bottom: 1px solid #f1f1f1;
   color: black;
-  padding: 1rem 1.5rem;
   display: flex;
-  flex-direction: column;
+  padding: 0 0.5rem;
   :not(:first-child):hover {
     background-color: #f8f8f8 !important;
   }
   ${(props) => props.active && `background-color: #5245CC0C !important;`}
+`;
+
+const TicketContent = styled.div`
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
 `;
 
 const List = styled.div`

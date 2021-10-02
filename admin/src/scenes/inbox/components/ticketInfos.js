@@ -46,16 +46,15 @@ export default ({ ticket }) => {
         <div />
       ) : (
         <>
-          <RightPanelHeader>
-            {ticketStateNameById(ticket?.state_id) !== "fermé" ? (
+          {ticketStateNameById(ticket?.state_id) !== "fermé" ? (
+            <RightPanelHeader>
               <div style={{ display: "flex", justifyContent: "center", alignContent: "center" }}>
                 <button className="button" onClick={resolveTicket}>
                   Résoudre le ticket
                 </button>
               </div>
-            ) : null}
-            <h4 className="title">Informations volontaire</h4>
-          </RightPanelHeader>
+            </RightPanelHeader>
+          ) : null}
           <PanelflatDesign value={user} hideCloseButton />
         </>
       )}

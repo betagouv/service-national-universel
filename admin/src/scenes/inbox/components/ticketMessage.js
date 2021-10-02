@@ -10,6 +10,10 @@ import { formatStringLongDate, colors } from "../../../utils";
 import Loader from "../../../components/Loader";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 import SendIcon from "../../../components/SendIcon";
+import { ticketStateNameById } from "../../../utils/zammad";
+import MailCloseIcon from "../../../components/MailCloseIcon";
+import MailOpenIcon from "../../../components/MailOpenIcon";
+import SuccessIcon from "../../../components/SuccessIcon";
 
 export default ({ ticket: propTicket }) => {
   const [ticket, setTicket] = useState(propTicket);
@@ -51,6 +55,30 @@ export default ({ ticket: propTicket }) => {
 
   if (ticket === null) return <Loader />;
 
+  const displayState = (state) => {
+    if (state === "ouvert")
+      return (
+        <StateContainer style={{ display: "flex" }}>
+          <MailOpenIcon color="#F8B951" style={{ margin: 0, padding: "5px" }} />
+          ouvert
+        </StateContainer>
+      );
+    if (state === "fermé")
+      return (
+        <StateContainer>
+          <SuccessIcon color="#6BC762" style={{ margin: 0, padding: "5px" }} />
+          fermé
+        </StateContainer>
+      );
+    if (state === "nouveau")
+      return (
+        <StateContainer>
+          <MailCloseIcon color="#F1545B" style={{ margin: 0, padding: "5px" }} />
+          nouveau
+        </StateContainer>
+      );
+  };
+
   return (
     <Container style={{ padding: 0, backgroundColor: "#F1F5F9", border: "1px solid #E4E4E7", display: "flex", flexDirection: "column", maxHeight: "100%" }}>
       {ticket === undefined ? (
@@ -58,10 +86,13 @@ export default ({ ticket: propTicket }) => {
       ) : (
         <>
           <Heading>
-            <h1>
-              Demande #{ticket?.id} - {ticket?.title}
-            </h1>
-            <Details title="Crée le" content={ticket?.created_at && formatStringLongDate(ticket?.created_at)} />
+            <div>
+              <h1>
+                Demande #{ticket?.id} - {ticket?.title}
+              </h1>
+              <Details title="Crée le" content={ticket?.created_at && formatStringLongDate(ticket?.created_at)} />
+            </div>
+            {displayState(ticketStateNameById(ticket?.state_id))}
           </Heading>
           <section style={{ flexDirection: "column", justifyContent: "flex-end" }}>
             <div style={{ overflow: "scroll", maxHeight: "50vh", display: "flex", flexDirection: "column-reverse" }}>
@@ -126,6 +157,11 @@ const Details = ({ title, content }) => {
   );
 };
 
+const StateContainer = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
 const InputContainer = styled.div`
   display: flex;
   flex-direction: row;
@@ -189,8 +225,7 @@ const Box = styled.div`
 const Heading = styled(Container)`
   display: flex;
   flex: 1;
-  flex-direction: column;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: space-between;
   background-color: #fff;
   padding: 0.5rem;
