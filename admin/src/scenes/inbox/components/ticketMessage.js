@@ -84,7 +84,7 @@ export default ({ ticket: propTicket }) => {
   };
 
   return (
-    <Container style={{ padding: 0, backgroundColor: "#F1F5F9", border: "1px solid #E4E4E7", display: "flex", flexDirection: "column", maxHeight: "100%" }}>
+    <Container style={{ padding: 0, backgroundColor: "#F1F5F9", border: "1px solid #E4E4E7", display: "flex", flexDirection: "column" }}>
       {ticket === undefined ? (
         <div>Selectionnez un ticket</div>
       ) : (
@@ -98,32 +98,33 @@ export default ({ ticket: propTicket }) => {
             </div>
             {displayState(ticketStateNameById(ticket?.state_id))}
           </Heading>
-          <section style={{ flexDirection: "column", justifyContent: "flex-end" }}>
-            <div style={{ overflow: "scroll", maxHeight: "50vh", display: "flex", flexDirection: "column-reverse" }}>
-              <Box>
-                {ticket?.articles
-                  ?.sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
-                  ?.map((article, i) => (
-                    <Message key={i} fromMe={user.email === article.created_by} from={article.from} date={formatStringLongDate(article.created_at)} content={article.body} />
-                  ))}
-              </Box>
+          <Messages>
+            {ticket?.articles
+              ?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+              ?.map((article, i) => (
+                <Message key={i} fromMe={user.email === article.created_by} from={article.from} date={formatStringLongDate(article.created_at)} content={article.body} />
+              ))}
+            {ticket?.articles
+              ?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+              ?.map((article, i) => (
+                <Message key={i} fromMe={user.email === article.created_by} from={article.from} date={formatStringLongDate(article.created_at)} content={article.body} />
+              ))}
+          </Messages>
+          <InputContainer>
+            <textarea
+              row={2}
+              placeholder="Mon message..."
+              className="form-control"
+              onChange={(e) => setMessage(e.target.value)}
+              value={message}
+              style={{ border: "none", resize: "none", borderRadius: "0px" }}
+            />
+            <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", background: "white" }}>
+              <LoadingButton style={{ background: "none", height: "100%" }} onClick={send} disabled={!message}>
+                <SendIcon />
+              </LoadingButton>
             </div>
-            <InputContainer>
-              <textarea
-                row={2}
-                placeholder="Mon message..."
-                className="form-control"
-                onChange={(e) => setMessage(e.target.value)}
-                value={message}
-                style={{ border: "none", resize: "none", borderRadius: "0px" }}
-              />
-              <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", background: "white" }}>
-                <LoadingButton style={{ background: "none", height: "100%" }} onClick={send} disabled={!message}>
-                  <SendIcon />
-                </LoadingButton>
-              </div>
-            </InputContainer>
-          </section>
+          </InputContainer>
         </>
       )}
     </Container>
@@ -161,6 +162,14 @@ const Details = ({ title, content }) => {
   );
 };
 
+const Messages = styled.div`
+  display: flex;
+  flex-direction: column-reverse;
+  overflow-y: scroll;
+  flex: 1;
+  padding: 0.5rem;
+`;
+
 const StateContainer = styled.div`
   display: flex;
   align-items: center;
@@ -170,6 +179,7 @@ const InputContainer = styled.div`
   display: flex;
   flex-direction: row;
   align-items: stretch;
+  flex: 0;
 `;
 const DetailContainer = styled.div`
   display: flex;
@@ -228,7 +238,7 @@ const Box = styled.div`
 
 const Heading = styled(Container)`
   display: flex;
-  flex: 1;
+  flex: 0;
   justify-content: space-between;
   align-items: space-between;
   background-color: #fff;

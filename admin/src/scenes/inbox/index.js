@@ -25,7 +25,7 @@ export default () => {
 
 export const HeroContainer = styled.div`
   height: calc(87vh + 3px);
-  section {
+  > section {
     display: flex;
     height: 92.5%;
   }

@@ -210,7 +210,7 @@ export const HeroContainer = styled.div`
   min-width: 380px;
   border-top: 1px solid #e4e4e7;
   border-bottom: 1px solid #e4e4e7;
-  overflow: scroll;
+  overflow-y: scroll;
   @media (max-width: 768px) {
     padding: 1rem 0;
   }
