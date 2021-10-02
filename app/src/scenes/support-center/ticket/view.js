@@ -47,7 +47,7 @@ export default (props) => {
 
   return (
     <Container>
-      <BackButton to={`/support`}>{"<"} Retour</BackButton>
+      <BackButton to={`/besoin-d-aide`}>{"<"} Retour</BackButton>
       <div style={{ border: "1px solid #e4e4e7", marginTop: "1rem" }}>
         <Heading>
           <h1>
@@ -57,14 +57,20 @@ export default (props) => {
         </Heading>
         <div>
           <Box>
-            {ticket?.articles
-              ?.map((article, i) => (
-                <Message key={i} fromMe={young.email === article.created_by} from={article.from} date={formatStringLongDate(article.created_at)} content={article.body} />
-              ))}
+            {ticket?.articles?.map((article, i) => (
+              <Message key={i} fromMe={young.email === article.created_by} from={article.from} date={formatStringLongDate(article.created_at)} content={article.body} />
+            ))}
           </Box>
           <InputContainer>
-            <textarea row={2} placeholder="Mon message..." className="form-control" onChange={(e) => setMessage(e.target.value)} value={message} style={{ border: "none", resize: "none", borderRadius: "0px" }} />
-            <LoadingButton onClick={send} disabled={!message} style={{ height: "100%", }}>
+            <textarea
+              row={2}
+              placeholder="Mon message..."
+              className="form-control"
+              onChange={(e) => setMessage(e.target.value)}
+              value={message}
+              style={{ border: "none", resize: "none", borderRadius: "0px" }}
+            />
+            <LoadingButton onClick={send} disabled={!message} style={{ height: "100%" }}>
               Envoyer
             </LoadingButton>
           </InputContainer>
@@ -158,7 +164,7 @@ const MessageContent = styled.div`
 `;
 const Box = styled.div`
   width: ${(props) => props.width || 100}%;
-  ${'' /* height: 100%; */}
+  ${"" /* height: 100%; */}
   filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.05));
   border-radius: 8px;
   padding: 1rem;

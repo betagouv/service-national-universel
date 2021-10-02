@@ -174,8 +174,8 @@ export default (props) => {
             </DiagorienteButton>
           )}
           {/* <DrawerButton>
-            <NavLink to="/support">
-              Centre d'aide
+            <NavLink to="/besoin-d-aide">
+              Besoin d'aide
             </NavLink>
           </DrawerButton> */}
           {/* {young.statusPhase1 === "DONE" && young.statusPhase2 === "VALIDATED" ? (

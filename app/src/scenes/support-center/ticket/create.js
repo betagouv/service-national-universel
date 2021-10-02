@@ -16,7 +16,7 @@ export default () => {
   const young = useSelector((state) => state.Auth.young);
   //todo : fetch zammad categories (scopes)
   const options = ["Assistance technique", "À propos de ma situation", "Contacter un référent"];
-  const tags = [`COHORTE_${young.cohort}`, `DEPARTEMENT_${young.department}`, `REGION_${young.region}`, `EMETTEUR_Volontaire`, `CANAL_Plateforme`,];
+  const tags = [`COHORTE_${young.cohort}`, `DEPARTEMENT_${young.department}`, `REGION_${young.region}`, `EMETTEUR_Volontaire`, `CANAL_Plateforme`];
 
   useEffect(() => {
     (async () => {
@@ -26,7 +26,7 @@ export default () => {
   }, []);
   return (
     <Container>
-      <BackButton to={`/support`}>{"<"} Retour</BackButton>
+      <BackButton to={`/besoin-d-aide`}>{"<"} Retour</BackButton>
       <Heading>
         <h2>Contacter le support</h2>
         <p>Vous avez un problème technique, vous souhaitez en savoir plus sur votre situation, ou souhaitez contacter l'un de vos référents ?</p>
@@ -51,11 +51,11 @@ export default () => {
                 subject,
                 type,
                 message,
-                tags
+                tags,
               });
               if (!ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(code));
               toastr.success("Ticket créé");
-              history.push("/support");
+              history.push("/besoin-d-aide");
             } catch (e) {
               console.log(e);
               toastr.error("Oups, une erreur est survenue", translate(e.code));
@@ -117,7 +117,7 @@ const Item = ({ title, name, value, handleChange, errors, touched, validate, typ
             Catégorie
           </option>
           {options?.map((option) => (
-            <option option value={option} key={option} >
+            <option option value={option} key={option}>
               {option}
             </option>
           ))}

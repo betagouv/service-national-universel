@@ -7,8 +7,8 @@ import View from "./view";
 export default () => {
   return (
     <Switch>
-      <Route path="/support/ticket/:id" component={View} />
-      <Route path="/support/ticket" component={Create} />
+      <Route path="/besoin-d-aide/ticket/:id" component={View} />
+      <Route path="/besoin-d-aide/ticket" component={Create} />
     </Switch>
   );
 };

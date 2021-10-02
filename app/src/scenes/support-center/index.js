@@ -7,8 +7,8 @@ import Ticket from "./ticket";
 export default () => {
   return (
     <Switch>
-      <Route path="/support/ticket" component={Ticket} />
-      <Route path="/support" component={Dashboard} />
+      <Route path="/besoin-d-aide/ticket" component={Ticket} />
+      <Route path="/besoin-d-aide" component={Dashboard} />
     </Switch>
   );
 };
