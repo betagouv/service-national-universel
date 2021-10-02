@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { toastr } from "react-redux-toastr";
-import { NavLink } from "react-router-dom";
+import { NavLink, useHistory } from "react-router-dom";
 import styled from "styled-components";
 
 import api from "../../../services/api";
@@ -9,6 +9,7 @@ import { translate } from "../../../utils";
 
 export default ({ ticket }) => {
   const [user, setUser] = useState([]);
+  const history = useHistory();
 
   useEffect(() => {
     (async () => {
@@ -26,6 +27,7 @@ export default ({ ticket }) => {
     });
     if (!response.ok) console.log(response.status, "error");
     if (response.ok) toastr.success("Ticket résolu !");
+    history.go(0);
   };
 
   if (!user)
