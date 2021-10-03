@@ -10,7 +10,7 @@ import Panel, { Info, Details } from "../../components/Panel";
 import Historic from "../../components/historic";
 import ContractLink from "../../components/ContractLink";
 
-export default ({ onChange, value, hideCloseButton = false }) => {
+export default ({ onChange, value }) => {
   const [referentManagerPhase2, setReferentManagerPhase2] = useState();
   const [young, setYoung] = useState(null);
 
@@ -38,7 +38,7 @@ export default ({ onChange, value, hideCloseButton = false }) => {
     <Panel>
       <div className="info">
         <div style={{ display: "flex" }}>
-          {!hideCloseButton ? <div className="close" onClick={onChange} /> : null}
+          <div className="close" onClick={onChange} />
           <div className="title">{`${young.firstName} ${young.lastName}`}</div>
         </div>
         <div>{t(young.gender)}</div>
