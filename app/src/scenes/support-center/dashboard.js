@@ -48,7 +48,9 @@ export default () => {
         <section className="help-section">
           <h2>Besoin d'aide&nbsp;?</h2>
           <div style={{ color: "#6B7280" }}>
-            Vous souhaitez en savoir plus sur les phases de votre parcours volontaire ou sur le fonctionnement de votre espace&nbsp;? N'hésitez pas à consulter notre{" "}
+            Vous souhaitez en savoir plus sur les phases de votre parcours volontaire ou sur le fonctionnement de votre espace&nbsp;?
+            <br />
+            N'hésitez pas à consulter notre{" "}
             <strong>
               <a href="https://support.snu.gouv.fr/help/fr-fr/3-volontaire" style={{ color: "#6B7280" }} target="_blank" rel="noopener noreferrer">
                 base de connaissance
@@ -63,7 +65,8 @@ export default () => {
           </div>
 
           <div style={{ color: "#6B7280" }}>
-            Vous avez un problème technique ou souhaitez contacter un référent ? Contactez notre <strong>service de support</strong>.
+            Vous n'avez pas trouvé de réponse à votre demande ?<br />
+            Contactez notre <strong>service de support</strong>.
           </div>
           <div className="buttons">
             <InternalLink to="/besoin-d-aide/ticket">Contacter quelqu'un</InternalLink>
