@@ -89,7 +89,6 @@ export default ({ ticket }) => {
           <Item title="Status phase 1" content={user.statusPhase1} />
           <Item title="Status phase 2" content={user.statusPhase2} />
           <Item title="Contact phase 2" content={referentManagerPhase2?.email || (referentManagerPhase2 !== undefined && "Non trouvé") || "Chargement..."} copy />
-
           <Item title="Status phase 3" content={user.statusPhase3} />
         </>
       )}
@@ -127,6 +126,7 @@ export const HeroContainer = styled.div`
   background-color: #fff;
   max-width: 300px;
   min-width: 300px;
+  overflow-y: scroll;
   @media (max-width: 768px) {
     padding: 1rem 0;
   }
