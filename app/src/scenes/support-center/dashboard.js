@@ -47,7 +47,7 @@ export default () => {
       <Container>
         <section className="help-section">
           <h2>Besoin d'aide&nbsp;?</h2>
-          <p style={{ color: "#6B7280" }}>
+          <div style={{ color: "#6B7280" }}>
             Vous souhaitez en savoir plus sur les phases de votre parcours volontaire ou sur le fonctionnement de votre espace&nbsp;? N'hésitez pas à consulter notre{" "}
             <strong>
               <a href="https://support.snu.gouv.fr/help/fr-fr/3-volontaire" style={{ color: "#6B7280" }} target="_blank" rel="noopener noreferrer">
@@ -55,12 +55,17 @@ export default () => {
               </a>
             </strong>
             &nbsp;!
-            <br /> Vous avez un problème technique ou souhaitez contacter un référent ? Contactez notre service de support.
-          </p>
+          </div>
           <div className="buttons">
             <LinkButton href="https://support.snu.gouv.fr/help/fr-fr/3-volontaire" target="_blank" rel="noopener noreferrer">
-              Base de connaissance
+              Trouver ma réponse
             </LinkButton>
+          </div>
+
+          <div style={{ color: "#6B7280" }}>
+            Vous avez un problème technique ou souhaitez contacter un référent ? Contactez notre <strong>service de support</strong>.
+          </div>
+          <div className="buttons">
             <InternalLink to="/besoin-d-aide/ticket">Contacter quelqu'un</InternalLink>
           </div>
         </section>
@@ -112,12 +117,9 @@ const Container = styled.div`
     max-width: 500px;
     text-align: center;
     margin: 0 0.5rem;
-  }
-  .buttons {
-    display: grid;
-    grid-template-rows: 1fr 1fr;
-    justify-content: center;
-    text-align: center;
+    .buttons {
+      margin: 1rem 0;
+    }
   }
   @media (min-width: 1024px) {
     flex-direction: row;
@@ -126,10 +128,6 @@ const Container = styled.div`
     margin: 0.5rem 1.5rem;
     .help-section {
       text-align: left;
-    }
-    .buttons {
-      grid-template-columns: 1fr 1fr;
-      grid-template-rows: 1fr;
     }
   }
 `;
