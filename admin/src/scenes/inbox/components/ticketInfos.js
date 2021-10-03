@@ -4,7 +4,7 @@ import { useHistory } from "react-router-dom";
 import styled from "styled-components";
 
 import api from "../../../services/api";
-import { ticketStateNameById } from "../../../utils/zammad";
+import { ticketStateNameById } from "../../../utils";
 
 import Panel from "../../../scenes/volontaires/panel";
 

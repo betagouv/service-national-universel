@@ -3,8 +3,7 @@ import styled from "styled-components";
 import { useSelector } from "react-redux";
 
 import Loader from "../../../components/Loader";
-import { formatStringDate, ROLES } from "../../../utils";
-import { ticketStateIdByName, ticketStateNameById } from "../../../utils/zammad";
+import { formatStringDate, ROLES, ticketStateIdByName, ticketStateNameById } from "../../../utils";
 import MailCloseIcon from "../../../components/MailCloseIcon";
 import MailOpenIcon from "../../../components/MailOpenIcon";
 import SuccessIcon from "../../../components/SuccessIcon";
