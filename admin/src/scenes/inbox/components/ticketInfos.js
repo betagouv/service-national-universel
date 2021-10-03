@@ -1,16 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { toastr } from "react-redux-toastr";
-import { NavLink, useHistory } from "react-router-dom";
+import { NavLink, Link, useHistory } from "react-router-dom";
 import styled from "styled-components";
 
+import PanelActionButton from "../../../components/buttons/PanelActionButton";
 import api from "../../../services/api";
-import { ticketStateNameById } from "../../../utils";
-import { translate } from "../../../utils";
+import { ticketStateNameById, copyToClipboard, translate } from "../../../utils";
 import Loader from "../../../components/Loader";
+import { appURL, adminURL } from "../../../config";
 
 export default ({ ticket }) => {
   const [user, setUser] = useState([]);
   const history = useHistory();
+  const [referentManagerPhase2, setReferentManagerPhase2] = useState();
 
   useEffect(() => {
     (async () => {
@@ -20,6 +22,16 @@ export default ({ ticket }) => {
       setUser(data);
     })();
   }, [ticket]);
+
+  useEffect(() => {
+    if (!user) return;
+    (async () => {
+      const { ok, data } = await api.get(`/referent/manager_phase2/${user.department}`);
+      if (ok) return setReferentManagerPhase2(data);
+      setReferentManagerPhase2(null);
+    })();
+    return () => setReferentManagerPhase2();
+  }, [user]);
 
   const resolveTicket = async () => {
     const response = await api.put(`/support-center/ticket/${ticket.id}`, {
@@ -55,41 +67,55 @@ export default ({ ticket }) => {
           ) : null}
           <h4 className="title">Informations volontaire</h4>
           <div style={{ marginBottom: "1rem" }}>
-            <a href={`https://admin.snu.gouv.fr/volontaire/${user._id}`} className="name">
+            <a href={`${adminURL}/volontaire/${user._id}`} className="name">
               {user.firstName} {user.lastName}
             </a>
           </div>
-          <div>
-            <p className="subtitle">État du ticket :</p>
-            <p className="info">{ticketStateNameById(ticket?.state_id)}</p>
+          <div style={{ display: "flex", flexWrap: "wrap" }}>
+            <Link to={`/volontaire/${user._id}`}>
+              <PanelActionButton icon="eye" title="Consulter" />
+            </Link>
+            <Link to={`/volontaire/${user._id}/edit`}>
+              <PanelActionButton icon="pencil" title="Modifier" />
+            </Link>
+            <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${user._id}`}>
+              <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
+            </a>
           </div>
-          <div>
-            <p className="subtitle">E-mail :</p>
-            <p className="info">{user.email}</p>
-          </div>
-          <div>
-            <p className="subtitle">Département :</p>
-            <p className="info">{user.department}</p>
-          </div>
-          <div>
-            <p className="subtitle">Centre de cohésion :</p>
-            <p className="info">{user.cohesionCenter}</p>
-          </div>
-          <div>
-            <p className="subtitle">Status phase 1 :</p>
-            <p className="info">{translate(user.statusPhase1)}</p>
-          </div>
-          <div>
-            <p className="subtitle">Status phase 2 :</p>
-            <p className="info">{translate(user.statusPhase2)}</p>
-          </div>
-          <div>
-            <p className="subtitle">Status phase 3 :</p>
-            <p className="info">{translate(user.statusPhase3)}</p>
-          </div>
+          <Item title="E-mail" content={user.email} copy />
+          <Item title="Département" content={user.department} />
+          <Item title="Région" content={user.region} />
+          <Item title="Centre de cohésion" content={user.cohesionCenterName} />
+          <Item title="Status phase 1" content={user.statusPhase1} />
+          <Item title="Status phase 2" content={user.statusPhase2} />
+          <Item title="Contact phase 2" content={referentManagerPhase2?.email || (referentManagerPhase2 !== undefined && "Non trouvé") || "Chargement..."} copy />
+
+          <Item title="Status phase 3" content={user.statusPhase3} />
         </>
       )}
     </HeroContainer>
+  );
+};
+
+const Item = ({ title, content, copy = false }) => {
+  if (!content) return null;
+  return (
+    <div>
+      <p className="subtitle">{title}&nbsp;:</p>
+      <p className="info">
+        {translate(content)}
+        {copy ? (
+          <div
+            className="icon"
+            icon={require(`../../../assets/copy.svg`)}
+            onClick={() => {
+              copyToClipboard(content);
+              toastr.success(`'${title}' a été copié dans le presse papier.`);
+            }}
+          />
+        ) : null}
+      </p>
+    </div>
   );
 };
 
@@ -120,9 +146,20 @@ export const HeroContainer = styled.div`
   }
 
   .info {
+    display: flex;
     font-size: 0.875rem;
     line-height: 1.25rem;
     margin-bottom: 22px;
+    .icon {
+      cursor: pointer;
+      margin: 0 0.5rem;
+      width: 15px;
+      height: 15px;
+      background: ${`url(${require("../../../assets/copy.svg")})`};
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 15px 15px;
+    }
   }
 
   .name {
