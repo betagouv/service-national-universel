@@ -11,6 +11,8 @@ router.post("/", passport.authenticate("referent", { session: false }), async (r
     const { error, value: event } = validateEvent(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
 
+    //  fjdsjfdjfds
+
     await EventObject.create({ ...event, userId: req.user.id, userType: isYoung(req.user) ? "young" : "referent" });
     return res.status(200).send({ ok: true });
   } catch (error) {
