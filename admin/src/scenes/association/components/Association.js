@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import api from "../../../services/api";
 
 import styled from "styled-components";
 
@@ -12,6 +13,18 @@ export default function Association({ hit }) {
   const [tab, setTab] = useState("Informations");
   const missions = false;
   const association = hit;
+
+  async function sendEventToBackend(action, associationId) {
+    try {
+      await api.post("/event", {
+        category: "ASSOCIATION",
+        action,
+        value: associationId,
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  }
 
   return (
     <AssociationWrapper>
@@ -38,6 +51,7 @@ export default function Association({ hit }) {
             onClick={() => {
               setShow(true);
               setTab("Contacts");
+              sendEventToBackend("CONTACT_CLICK", association.id);
             }}
           >
             <svg width="16" height="17" viewBox="0 0 16 17" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -51,6 +65,7 @@ export default function Association({ hit }) {
             onClick={() => {
               setShow(true);
               setTab("Contacts");
+              sendEventToBackend("CONTACT_CLICK", association.id);
             }}
           >
             <svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -64,6 +79,7 @@ export default function Association({ hit }) {
             onClick={() => {
               setShow(true);
               setTab("Contacts");
+              sendEventToBackend("CONTACT_CLICK", association.id);
             }}
           >
             <svg width="21" height="21" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -87,6 +103,7 @@ export default function Association({ hit }) {
             onClick={() => {
               setShow(true);
               setTab("Contacts");
+              sendEventToBackend("CONTACT_CLICK", association.id);
             }}
           >
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -104,7 +121,15 @@ export default function Association({ hit }) {
           <TabTitleContainer>
             {tabs.map((e) =>
               tab !== e ? (
-                <TabTitle key={e} onClick={() => setTab(e)}>
+                <TabTitle
+                  key={e}
+                  onClick={() => {
+                    setTab(e);
+                    if (e === "Contacts") {
+                      sendEventToBackend("CONTACT_CLICK", association.id);
+                    }
+                  }}
+                >
                   {e}
                 </TabTitle>
               ) : (
@@ -235,6 +260,9 @@ const ContactButtons = styled.div`
   margin-left: auto;
   border-left: 1px dashed rgba(0, 0, 0, 0.2);
   padding-left: 1rem;
+  @media (max-width: 768px) {
+    display: none;
+  }
 `;
 const ContactButton = styled.button`
   background-color: transparent;
