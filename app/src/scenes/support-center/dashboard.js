@@ -7,6 +7,7 @@ import { HeroContainer } from "../../components/Content";
 import { fr } from "date-fns/locale";
 import API from "../../services/api";
 import Loader from "../../components/Loader";
+import { ticketStateNameById } from "../../utils";
 
 const articles = [
   {
@@ -47,21 +48,29 @@ export default () => {
       <Container>
         <section className="help-section">
           <h2>Besoin d'aide&nbsp;?</h2>
-          <p style={{ color: "#6B7280" }}>
-            Vous souhaitez en savoir plus sur les phases de votre parcours volontaire ou sur le fonctionnement de votre espace&nbsp;? N'hésitez pas à consulter notre{" "}
+          <div style={{ color: "#6B7280" }}>
+            Vous souhaitez en savoir plus sur les phases de votre parcours volontaire ou sur le fonctionnement de votre espace&nbsp;?
+            <br />
+            N'hésitez pas à consulter notre{" "}
             <strong>
               <a href="https://support.snu.gouv.fr/help/fr-fr/3-volontaire" style={{ color: "#6B7280" }} target="_blank" rel="noopener noreferrer">
                 base de connaissance
               </a>
             </strong>
             &nbsp;!
-            <br /> Vous avez un problème technique ou souhaitez contacter un référent ? Contactez notre service de support.
-          </p>
+          </div>
           <div className="buttons">
             <LinkButton href="https://support.snu.gouv.fr/help/fr-fr/3-volontaire" target="_blank" rel="noopener noreferrer">
-              Base de connaissance
+              Trouver ma réponse
             </LinkButton>
-            <InternalLink to="/support/ticket">Contacter quelqu'un</InternalLink>
+          </div>
+
+          <div style={{ color: "#6B7280" }}>
+            Vous n'avez pas trouvé de réponse à votre demande ?<br />
+            Contactez notre <strong>service de support</strong>.
+          </div>
+          <div className="buttons">
+            <InternalLink to="/besoin-d-aide/ticket">Contacter quelqu'un</InternalLink>
           </div>
         </section>
         <Card>
@@ -81,10 +90,12 @@ export default () => {
           </div>
         </Card>
       </Container>
+      <h4 style={{ marginLeft: "0.5rem" }}>Mes conversations en cours</h4>
       <List>
         <section className="ticket titles">
           <p>Numéro du ticket</p>
           <p>Sujet</p>
+          <p>État</p>
           <p className="ticket-date">Dernière mise à jour</p>
         </section>
         {!userTickets ? <Loader /> : null}
@@ -92,9 +103,10 @@ export default () => {
         {userTickets
           ?.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
           ?.map((ticket) => (
-            <NavLink to={`/support/ticket/${ticket.id}`} key={ticket.id} className="ticket">
+            <NavLink to={`/besoin-d-aide/ticket/${ticket.id}`} key={ticket.id} className="ticket">
               <p>{ticket.id}</p>
               <p>{ticket.title}</p>
+              <p>{ticketStateNameById(ticket.state_id)}</p>
               <p className="ticket-date">il y a {formatDistanceToNow(new Date(ticket.updated_at), { locale: fr })}</p>
             </NavLink>
           ))}
@@ -112,12 +124,9 @@ const Container = styled.div`
     max-width: 500px;
     text-align: center;
     margin: 0 0.5rem;
-  }
-  .buttons {
-    display: grid;
-    grid-template-rows: 1fr 1fr;
-    justify-content: center;
-    text-align: center;
+    .buttons {
+      margin: 1rem 0;
+    }
   }
   @media (min-width: 1024px) {
     flex-direction: row;
@@ -126,10 +135,6 @@ const Container = styled.div`
     margin: 0.5rem 1.5rem;
     .help-section {
       text-align: left;
-    }
-    .buttons {
-      grid-template-columns: 1fr 1fr;
-      grid-template-rows: 1fr;
     }
   }
 `;
@@ -213,7 +218,7 @@ const List = styled.div`
     color: black;
     padding: 1rem 1.5rem;
     display: grid;
-    grid-template-columns: 1fr 2fr 1fr;
+    grid-template-columns: 1fr 2fr 1fr 1fr;
     grid-template-rows: 1fr;
     :not(:first-child):hover {
       background-color: #f1f1f1 !important;

@@ -1,29 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
+
 const { capture } = require("../sentry");
 const zammad = require("../zammad");
-const { ZAMMAD_TOKEN, ZAMMAD_URL } = require("../config");
-
-const fetch = require("node-fetch");
-const { ERRORS } = require("../utils");
-
-// PAS ouf cette route
-// router.get("/", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
-//   try {
-//     const res = await fetch(`${ZAMMAD_URL}/api/v1/users`, {
-//       method: "GET",
-//       headers: { "Content-Type": "application/json", Authorization: ZAMMAD_TOKEN },
-//     });
-//     const responseAsJson = await response.json();
-//     const dataUrl = responseAsJson.data.generateUrl;
-
-//     return res.status(200).send({ ok: true, data: { url: dataUrl } });
-//   } catch (error) {
-//     capture(error);
-//     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
-//   }
-// });
+const { ERRORS, isYoung } = require("../utils");
+const { ZAMMAD_GROUP } = require("snu-lib/constants");
 
 // Get the list of tickets stats
 router.get("/ticket_overviews", passport.authenticate(["referent"], { session: false }), async (req, res) => {
@@ -45,7 +27,13 @@ router.get("/ticket", passport.authenticate(["referent", "young"], { session: fa
     const email = req.user.email;
     const customer_id = await zammad.getCustomerIdByEmail(email);
     if (!customer_id) return res.status(401).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const response = await zammad.api("/tickets", { method: "GET", headers: { "X-On-Behalf-Of": email } });
+    if (isYoung(req.user)) {
+      groupId = 4;
+    } else {
+      groupId = 5;
+    }
+    let response = await zammad.api("/tickets", { method: "GET", headers: { "X-On-Behalf-Of": email } });
+    response = response?.filter((ticket) => ticket.group_id === groupId && ticket.created_by_id === customer_id);
     if (response.length && req.query.withArticles) {
       const data = [];
       for (const item of response) {
@@ -97,7 +85,7 @@ router.put("/ticket/:id", passport.authenticate(["referent", "young"], { session
           internal: false,
         }),
       });
-      if (!response.id) return res.status(400).send({ ok: false });
+      if (!response.id) return res.status(400).send({ ok: false, data: response });
       return res.status(200).send({ ok: true, data: response });
     } else if (state) {
       const response = await zammad.api(`/tickets/${req.params.id}`, {
@@ -125,12 +113,23 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
 
     const customer_id = await zammad.getCustomerIdByEmail(email);
     if (!customer_id) return res.status(401).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    // default ?
+    let group = "";
+    if (req.body.group && ZAMMAD_GROUP.includes(req.body.group)) {
+      group = req.body.group;
+    } else if (isYoung(req.user)) {
+      group = ZAMMAD_GROUP.YOUNG;
+    } else {
+      group = ZAMMAD_GROUP.REFERENT;
+    }
+
     const response = await zammad.api("/tickets", {
       headers: { "X-On-Behalf-Of": email },
       method: "POST",
       body: JSON.stringify({
         title: `${type} - ${subject}`,
-        group: "Users",
+        group,
         customer_id,
         customer: email,
         article: {
@@ -167,27 +166,6 @@ router.post("/ticket/search-by-tags", passport.authenticate(["referent"], { sess
       return res.status(200).send({ ok: true, data: Object.values(response.assets.Ticket) });
     }
     return res.status(200).send({ ok: true, data: [] });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
-  }
-});
-
-// affect a user to a ticket
-router.put("/ticket/:id/affect-user", passport.authenticate(["referent"], { session: false }), async (req, res) => {
-  try {
-    const email = req.user.email;
-    const owner_id = await zammad.getCustomerIdByEmail(email);
-    if (!owner_id) return res.status(401).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const response = await zammad.api(`/tickets/${req.params.id}`, {
-      method: "PUT",
-      body: JSON.stringify({
-        id: req.params.id,
-        owner_id,
-      }),
-    });
-    if (!response.id) return res.status(400).send({ ok: false });
-    return res.status(200).send({ ok: true, data: response });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });

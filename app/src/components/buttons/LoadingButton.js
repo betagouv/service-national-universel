@@ -25,7 +25,6 @@ const VioletButtonHeader = styled(Button)`
   border-radius: 5px;
   padding: 7px 30px;
   margin: 0;
-  margin-left: 1rem;
   font-size: 14px;
   font-weight: 700;
   color: #fff;

@@ -166,7 +166,6 @@ class api {
           headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}` },
           body: typeof body === "string" ? body : JSON.stringify(body),
         });
-
         const res = await response.json();
         if (response.status !== 200) {
           return reject(res);

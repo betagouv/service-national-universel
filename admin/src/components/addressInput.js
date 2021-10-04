@@ -9,7 +9,7 @@ import validator from "validator";
 
 const NORESULTMESSAGE = "Rentrer manuellement l'adresse";
 
-export default ({ keys, values, handleChange, errors, touched }) => {
+export default ({ keys, values, handleChange, errors, touched, required = true }) => {
   const [str, setStr] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [noResultMode, setNoResultMode] = useState(false);
@@ -91,7 +91,7 @@ export default ({ keys, values, handleChange, errors, touched }) => {
         <Col md={6} style={{ marginTop: 15 }}>
           <Label>Adresse auto-complétée</Label>
           <Field
-            validate={(v) => !v && requiredMessage}
+            validate={(v) => required && !v && requiredMessage}
             disabled={!noResultMode}
             className="form-control"
             placeholder="Adresse"
@@ -110,7 +110,7 @@ export default ({ keys, values, handleChange, errors, touched }) => {
               <Label>Département</Label>
               <Field
                 as="select"
-                validate={(v) => !v && requiredMessage}
+                validate={(v) => required && !v && requiredMessage}
                 disabled={!noResultMode}
                 className="form-control"
                 placeholder="Département"
@@ -137,7 +137,7 @@ export default ({ keys, values, handleChange, errors, touched }) => {
               <Label>Région</Label>
               <Field
                 as="select"
-                validate={(v) => !v && requiredMessage}
+                validate={(v) => required && !v && requiredMessage}
                 disabled={!noResultMode}
                 className="form-control"
                 placeholder="Région"
@@ -166,7 +166,7 @@ export default ({ keys, values, handleChange, errors, touched }) => {
             <Col md={6}>
               <Label>Ville</Label>
               <Field
-                validate={(v) => !v && requiredMessage}
+                validate={(v) => required && !v && requiredMessage}
                 disabled={!noResultMode}
                 className="form-control"
                 placeholder="Ville"
@@ -182,7 +182,9 @@ export default ({ keys, values, handleChange, errors, touched }) => {
             <Col md={6}>
               <Label>Code postal</Label>
               <Field
-                validate={(v) => (!v && requiredMessage) || (!validator.isPostalCode(v, "FR") && "Ce champ est au mauvais format. Exemples de format attendu : 44000, 08300")}
+                validate={(v) =>
+                  required && ((!v && requiredMessage) || (!validator.isPostalCode(v, "FR") && "Ce champ est au mauvais format. Exemples de format attendu : 44000, 08300"))
+                }
                 disabled={!noResultMode}
                 className="form-control"
                 placeholder="Code postal"

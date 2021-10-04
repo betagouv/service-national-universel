@@ -5,6 +5,7 @@ import styled from "styled-components";
 import { Formik, Field } from "formik";
 import { NavLink } from "react-router-dom";
 import { useHistory } from "react-router-dom";
+import LoadingButton from "../../../components/buttons/LoadingButton";
 
 import api from "../../../services/api";
 import ErrorMessage, { requiredMessage } from "../../../components/errorMessage";
@@ -23,7 +24,7 @@ export default () => {
   }, []);
   return (
     <Container>
-      <BackButton to={`/support`}>{"<"} Retour</BackButton>
+      <BackButton to={`/besoin-d-aide`}>{"<"} Retour</BackButton>
       <Heading>
         <h2>Contacter le support</h2>
         <p>Vous rencontrez une difficulté, avez besoin d'assistance pour réaliser une action ou avez besoin d'informations supplémentaires sur la plateforme ?</p>
@@ -44,7 +45,7 @@ export default () => {
               });
               if (!ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(code));
               toastr.success("Ticket créé");
-              history.push("/support");
+              history.push("/besoin-d-aide");
             } catch (e) {
               console.log(e);
               toastr.error("Oups, une erreur est survenue", translate(e.code));
@@ -85,7 +86,7 @@ export default () => {
                 touched={touched}
                 rows="5"
               />
-              <ContinueButton type="submit" style={{ marginLeft: 10 }} onClick={handleSubmit} disabled={isSubmitting}>
+              <ContinueButton type="submit" style={{ marginLeft: 10 }} onClick={handleSubmit} disabled={isSubmitting} loading={isSubmitting}>
                 Envoyer
               </ContinueButton>
             </>
@@ -167,7 +168,7 @@ const Label = styled.div`
   margin-bottom: 5px;
 `;
 
-const ContinueButton = styled.button`
+const ContinueButton = styled(LoadingButton)`
   @media (max-width: 767px) {
     margin: 1rem 0;
   }
