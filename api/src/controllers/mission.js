@@ -19,7 +19,7 @@ const { sendTemplate } = require("../sendinblue");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { APP_URL } = require("../config");
 
-const updateApplication = async (mission) => {
+const updateApplication = async (mission, fromUser) => {
   if (![MISSION_STATUS.CANCEL, MISSION_STATUS.ARCHIVED, MISSION_STATUS.REFUSED].includes(mission.status))
     return console.log(`no need to update applications, new status for mission ${mission._id} is ${mission.status}`);
   const applications = await ApplicationObject.find({
@@ -48,7 +48,7 @@ const updateApplication = async (mission) => {
         break;
     }
     application.set({ status: APPLICATION_STATUS.CANCEL, statusComment });
-    await application.save();
+    await application.save({ fromUser });
 
     await sendTemplate(SENDINBLUE_TEMPLATES.young.MISSION_CANCEL, {
       emailTo: [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }],
@@ -92,7 +92,7 @@ router.put("/:id", passport.authenticate("referent", { session: false }), async 
     await mission.save({ fromUser: req.user });
 
     // if there is a status change, update the application
-    if (oldStatus !== mission.status) await updateApplication(mission);
+    if (oldStatus !== mission.status) await updateApplication(mission, req.user);
 
     res.status(200).send({ ok: true, data: mission });
   } catch (error) {
@@ -183,7 +183,7 @@ router.put("/:id/structure/:structureId", passport.authenticate("referent", { se
     const applications = await ApplicationObject.find({ missionId: checkedId });
     for (const application of applications) {
       application.set({ structureId: structure._id });
-      await application.save();
+      await application.save({ fromUser: req.user });
     }
 
     return res.status(200).send({ ok: true, data: serializeMission(mission) });

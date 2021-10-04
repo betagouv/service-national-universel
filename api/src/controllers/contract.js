@@ -224,7 +224,7 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
     application.contractId = contract._id;
     // We have to update the application's mission duration.
     application.missionDuration = contract.missionDuration;
-    await application.save();
+    await application.save({ fromUser: req.user });
 
     // Update young status.
     const young = await YoungObject.findById(contract.youngId);

@@ -63,7 +63,7 @@ async function updateTutorNameInMissionsAndApplications(tutor, fromUser) {
       if (applications && applications.length) {
         for (let application of applications) {
           application.set({ tutorId: mission.tutorId, tutorName: `${tutor.firstName} ${tutor.lastName}` });
-          await application.save();
+          await application.save({ fromUser });
         }
       }
     }

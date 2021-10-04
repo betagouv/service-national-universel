@@ -109,7 +109,7 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false })
     }
 
     application.set(value);
-    await application.save();
+    await application.save({ fromUser: req.user });
 
     await updateYoungPhase2Hours(young);
     await updateStatusPhase2(young);
