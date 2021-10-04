@@ -174,7 +174,7 @@ router.put("/:id/structure/:structureId", passport.authenticate("referent", { se
 
       const referent = await ReferentObject.findById(mission.tutorId);
       referent.set({ structureId: structure._id });
-      await referent.save();
+      await referent.save({ fromUser: req.user });
     }
 
     mission.set({ structureId: structure._id, structureName: structure.name });

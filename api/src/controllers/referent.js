@@ -229,7 +229,7 @@ router.post("/signup_retry", async (req, res) => {
     const department = referent.department;
     const structureName = referent.structureId ? (await StructureModel.findById(referent.structureId)).name : "";
 
-    await referent.save();
+    await referent.save({ fromUser: req.user });
     await sendTemplate(SENDINBLUE_TEMPLATES.invitationReferent[referent.role], {
       emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
       params: { cta, cohesionCenterName, structureName, region, department, fromName, toName },
@@ -281,7 +281,7 @@ router.post("/signup_invite", async (req, res) => {
     const token = jwt.sign({ _id: referent.id }, config.secret, { expiresIn: "30d" });
     res.cookie("jwt", token, cookieOptions());
 
-    await referent.save();
+    await referent.save({ fromUser: req.user });
     await updateTutorNameInMissionsAndApplications(referent, req.user);
 
     return res.status(200).send({ data: serializeReferent(referent, referent), token, ok: true });
@@ -627,7 +627,7 @@ router.put("/:id", passport.authenticate("referent", { session: false }), async 
     if (!canUpdateReferent(req.user, referent, value)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     referent.set(value);
-    await referent.save();
+    await referent.save({ fromUser: req.user });
     await updateTutorNameInMissionsAndApplications(referent, req.user);
     res.status(200).send({ ok: true, data: referent });
   } catch (error) {
@@ -663,7 +663,7 @@ router.put("/:id/structure/:structureId", passport.authenticate("referent", { se
     const missions = await MissionModel.find({ tutorId: referent._id });
     if (missions.length > 0) return res.status(405).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     referent.set({ structureId: structure._id, role: ROLES.RESPONSIBLE });
-    await referent.save();
+    await referent.save({ fromUser: req.user });
     return res.status(200).send({ ok: true, data: referent });
   } catch (error) {
     capture(error);

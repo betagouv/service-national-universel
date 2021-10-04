@@ -174,12 +174,25 @@ Schema.post("remove", function (doc) {
   sendinblue.unsync(doc);
 });
 
+Schema.virtual("user").set(function (user) {
+  if (user) {
+    const { _id, role, department, region, email, firstName, lastName, model } = user;
+    this._user = { _id, role, department, region, email, firstName, lastName, model };
+  }
+});
+
+Schema.pre("save", function (next, params) {
+  this.user = params?.fromUser;
+  next();
+});
+
 Schema.plugin(patchHistory, {
   mongoose,
   name: `${MODELNAME}Patches`,
   trackOriginalValue: true,
   includes: {
     modelName: { type: String, required: true, default: MODELNAME },
+    user: { type: Object, required: false, from: "_user" },
   },
   excludes: ["/password", "/lastLoginAt", "/forgotPasswordResetToken", "/forgotPasswordResetExpires", "/invitationToken", "/invitationExpires"],
 });
