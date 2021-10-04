@@ -137,6 +137,7 @@ const Message = ({ from, date, content, fromMe, internal }) => {
   return fromMe ? (
     <MessageContainer>
       <MessageBubble internal={internal} align={"right"} backgroundColor={internal ? "gold" : colors.darkPurple}>
+        {internal ? <MessageNote>note interne</MessageNote> : null}
         <MessageContent color="white" dangerouslySetInnerHTML={{ __html: content }}></MessageContent>
         <MessageDate color="#ccc">{date}</MessageDate>
       </MessageBubble>
@@ -145,6 +146,7 @@ const Message = ({ from, date, content, fromMe, internal }) => {
     <MessageContainer>
       <MessageFrom>{from}</MessageFrom>
       <MessageBubble internal={internal} align={"left"} backgroundColor={internal ? "gold" : colors.lightGrey} color="white">
+        {internal ? <MessageNote>note interne</MessageNote> : null}
         <MessageContent dangerouslySetInnerHTML={{ __html: content }}></MessageContent>
         <MessageDate>{date}</MessageDate>
       </MessageBubble>
@@ -206,7 +208,7 @@ const MessageBubble = styled.div`
   max-width: 80%;
   min-width: 20%;
   padding: 0.5rem 1.5rem;
-  border-radius: ${({ internal }) => (internal ? "0" : "1rem")};
+  border-radius: ${({ internal }) => (internal ? "0.2rem" : "1rem")};
   background-color: ${({ backgroundColor }) => backgroundColor};
   margin-left: ${({ align }) => (align === "right" ? "auto" : 0)};
   margin-right: ${({ align }) => (align === "left" ? "auto" : 0)};
@@ -216,6 +218,13 @@ const MessageFrom = styled.div`
   font-size: 0.8rem;
   font-weight: 300;
   margin-left: 0.5rem;
+`;
+const MessageNote = styled.div`
+  color: #a37502;
+  font-weight: 400;
+  font-size: 0.65rem;
+  text-align: right;
+  font-style: italic;
 `;
 const MessageDate = styled.div`
   color: ${({ color }) => color};

@@ -69,10 +69,10 @@ export default ({ ticket }) => {
             {user.firstName} {user.lastName}
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", marginBottom: "1rem" }}>
-            <Link to={`/volontaire/${user._id}`}>
+            <Link to={`/volontaire/${user._id}`} target="_blank" rel="noopener noreferrer">
               <PanelActionButton icon="eye" title="Consulter" />
             </Link>
-            <Link to={`/volontaire/${user._id}/edit`}>
+            <Link to={`/volontaire/${user._id}/edit`} target="_blank" rel="noopener noreferrer">
               <PanelActionButton icon="pencil" title="Modifier" />
             </Link>
             <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${user._id}`}>
@@ -91,6 +91,9 @@ export default ({ ticket }) => {
           <hr />
           <Item title="Statut phase 2" content={user.statusPhase2} />
           <Item title="Contact phase 2" content={referentManagerPhase2?.email || (referentManagerPhase2 !== undefined && "Non trouvé") || "Chargement..."} copy />
+          <Link to={`/volontaire/${user._id}/phase2`} target="_blank" rel="noopener noreferrer">
+            <PanelActionButton icon="eye" title="Consulter les candidatures" />
+          </Link>
           <hr />
           <Item title="Statut phase 3" content={user.statusPhase3} />
         </>
