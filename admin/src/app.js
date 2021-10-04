@@ -30,6 +30,7 @@ import Inscription from "./scenes/inscription";
 import MeetingPoint from "./scenes/meetingPoint";
 import Bug from "./scenes/bug";
 import SupportCenter from "./scenes/support-center";
+import Association from "./scenes/association";
 import Inbox from "./scenes/inbox";
 
 import Drawer from "./components/drawer";
@@ -131,6 +132,7 @@ const Home = () => {
           <RestrictedRoute path="/objectifs" component={Goal} />
           <RestrictedRoute path="/centre" component={Center} />
           <RestrictedRoute path="/point-de-rassemblement" component={MeetingPoint} />
+          <RestrictedRoute path="/association" component={Association} />
           <RestrictedRoute path="/besoin-d-aide" component={SupportCenter} />
           <RestrictedRoute path="/boite-de-reception" component={Inbox} />
           <RestrictedRoute path="/" component={renderDashboard} />

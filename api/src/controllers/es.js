@@ -4,7 +4,7 @@ const router = express.Router();
 const { ROLES } = require("snu-lib/roles");
 const { capture } = require("../sentry");
 const esClient = require("../es");
-const { ERRORS, isYoung } = require("../utils");
+const { ERRORS, isYoung, getSignedUrlForApiAssociation } = require("../utils");
 const StructureObject = require("../models/structure");
 const ApplicationObject = require("../models/application");
 const CohesionCenterObject = require("../models/cohesionCenter");
@@ -15,7 +15,10 @@ const {
   serializeStructures,
   serializeReferents,
   serializeApplications,
+  serializeHits,
 } = require("../utils/es-serializer");
+const AWS = require("aws-sdk");
+const { API_ASSOCIATION_ES_ENDPOINT, API_ASSOCIATION_AWS_ACCESS_KEY_ID, API_ASSOCIATION_AWS_SECRET_ACCESS_KEY } = require("../config");
 
 // Routes accessible for youngs and referent
 router.post("/mission/_msearch", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
@@ -68,6 +71,33 @@ router.post("/school/_msearch", passport.authenticate(["young"], { session: fals
     const { body } = req;
     const response = await esClient.msearch({ index: "school", body });
     return res.status(200).send(serializeSchools(response.body));
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, error });
+  }
+});
+
+router.post("/association/_msearch", passport.authenticate(["referent"], { session: false }), async (req, res) => {
+  try {
+    const { body } = req;
+    const options = {
+      hosts: `https://${API_ASSOCIATION_ES_ENDPOINT}`,
+      connectionClass: require("http-aws-es"),
+      awsConfig: new AWS.Config({
+        region: "eu-west-3",
+        credentials: new AWS.Credentials(API_ASSOCIATION_AWS_ACCESS_KEY_ID, API_ASSOCIATION_AWS_SECRET_ACCESS_KEY),
+      }),
+    };
+    const es = require("elasticsearch").Client(options);
+
+    let response = await es.msearch({ index: "association", body });
+
+    return res.status(200).send(
+      serializeHits(response, (hit) => {
+        if (hit.logo) hit.logo = hit.logo && !hit.logo.startsWith("http") ? getSignedUrlForApiAssociation(hit.logo) : hit.logo;
+        return hit;
+      })
+    );
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, error });

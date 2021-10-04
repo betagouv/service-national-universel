@@ -87,4 +87,5 @@ module.exports = {
   serializeStructures,
   serializeReferents,
   serializeApplications,
+  serializeHits,
 };
