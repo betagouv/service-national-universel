@@ -101,12 +101,14 @@ export default ({ ticket: propTicket }) => {
             {ticket?.articles
               ?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
               ?.map((article, i) => (
-                <Message key={i} fromMe={user.email === article.created_by} from={article.from} date={formatStringLongDate(article.created_at)} content={article.body} />
-              ))}
-            {ticket?.articles
-              ?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-              ?.map((article, i) => (
-                <Message key={i} fromMe={user.email === article.created_by} from={article.from} date={formatStringLongDate(article.created_at)} content={article.body} />
+                <Message
+                  internal={article.internal}
+                  key={i}
+                  fromMe={user.email === article.created_by}
+                  from={article.from}
+                  date={formatStringLongDate(article.created_at)}
+                  content={article.body}
+                />
               ))}
           </Messages>
           <InputContainer>
@@ -130,11 +132,11 @@ export default ({ ticket: propTicket }) => {
   );
 };
 
-const Message = ({ from, date, content, fromMe }) => {
+const Message = ({ from, date, content, fromMe, internal }) => {
   if (!content || !content.length) return null;
   return fromMe ? (
     <MessageContainer>
-      <MessageBubble align={"right"} backgroundColor={colors.darkPurple}>
+      <MessageBubble internal={internal} align={"right"} backgroundColor={internal ? "gold" : colors.darkPurple}>
         <MessageContent color="white" dangerouslySetInnerHTML={{ __html: content }}></MessageContent>
         <MessageDate color="#ccc">{date}</MessageDate>
       </MessageBubble>
@@ -142,7 +144,7 @@ const Message = ({ from, date, content, fromMe }) => {
   ) : (
     <MessageContainer>
       <MessageFrom>{from}</MessageFrom>
-      <MessageBubble align={"left"} backgroundColor={colors.lightGrey} color="white">
+      <MessageBubble internal={internal} align={"left"} backgroundColor={internal ? "gold" : colors.lightGrey} color="white">
         <MessageContent dangerouslySetInnerHTML={{ __html: content }}></MessageContent>
         <MessageDate>{date}</MessageDate>
       </MessageBubble>
@@ -204,7 +206,7 @@ const MessageBubble = styled.div`
   max-width: 80%;
   min-width: 20%;
   padding: 0.5rem 1.5rem;
-  border-radius: 1rem;
+  border-radius: ${({ internal }) => (internal ? "0" : "1rem")};
   background-color: ${({ backgroundColor }) => backgroundColor};
   margin-left: ${({ align }) => (align === "right" ? "auto" : 0)};
   margin-right: ${({ align }) => (align === "left" ? "auto" : 0)};
