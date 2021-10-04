@@ -176,7 +176,7 @@ export default function Association({ hit }) {
                     value: [association.url, association.linkedin, association.facebook, association.twitter, association.donation]
                       .filter((e) => e)
                       .map((e) => (
-                        <a style={{ textDecoration: "underline" }} href="">
+                        <a style={{ textDecoration: "underline" }} href={e}>
                           {e}
                         </a>
                       )),
