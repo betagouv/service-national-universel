@@ -10,17 +10,17 @@ export default ({ overview }) => {
     <NotifcationContainer>
       <Notification>
         <MailCloseIcon color="#F1545B" style={{ margin: 0, padding: "5px" }} />
-        <NotificationNumber>{overview[ticketStateIdByName("nouveau")] || 0}</NotificationNumber> nouveaux&nbsp;tickets
+        <NotificationNumber>{overview[ticketStateIdByName("nouveau")] || 0}</NotificationNumber>non&nbsp;lu(s)
       </Notification>
       <VL></VL>
       <Notification>
         <MailOpenIcon color="#F8B951" style={{ margin: 0, padding: "5px" }} />
-        <NotificationNumber>{overview[ticketStateIdByName("ouvert")] || 0}</NotificationNumber>tickets&nbsp;ouverts
+        <NotificationNumber>{overview[ticketStateIdByName("ouvert")] || 0}</NotificationNumber>ouvert(s)
       </Notification>
       <VL></VL>
       <Notification>
         <SuccessIcon color="#6BC762" style={{ margin: 0, padding: "5px" }} />
-        <NotificationNumber>{overview[ticketStateIdByName("fermé")] || 0}</NotificationNumber> tickets&nbsp;fermés
+        <NotificationNumber>{overview[ticketStateIdByName("fermé")] || 0}</NotificationNumber>fermé(s)
       </Notification>
     </NotifcationContainer>
   );

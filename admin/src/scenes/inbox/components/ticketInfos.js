@@ -5,7 +5,7 @@ import styled from "styled-components";
 
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
 import api from "../../../services/api";
-import { ticketStateNameById, copyToClipboard, translate } from "../../../utils";
+import { ticketStateNameById, copyToClipboard, translate, getAge, formatDateFRTimezoneUTC } from "../../../utils";
 import Loader from "../../../components/Loader";
 import { appURL, adminURL } from "../../../config";
 
@@ -61,17 +61,14 @@ export default ({ ticket }) => {
           {ticketStateNameById(ticket?.state_id) !== "fermé" ? (
             <div style={{ display: "flex", justifyContent: "center", alignContent: "center" }}>
               <button className="button" onClick={resolveTicket}>
-                Résoudre le ticket
+                Fermer la demande
               </button>
             </div>
           ) : null}
-          <h4 className="title">Informations volontaire</h4>
-          <div style={{ marginBottom: "1rem" }}>
-            <a href={`${adminURL}/volontaire/${user._id}`} className="name">
-              {user.firstName} {user.lastName}
-            </a>
+          <div className="name">
+            {user.firstName} {user.lastName}
           </div>
-          <div style={{ display: "flex", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", flexWrap: "wrap", marginBottom: "1rem" }}>
             <Link to={`/volontaire/${user._id}`}>
               <PanelActionButton icon="eye" title="Consulter" />
             </Link>
@@ -82,14 +79,20 @@ export default ({ ticket }) => {
               <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
             </a>
           </div>
+          <hr />
+          {user.birthdateAt && <Item title="Date de naissance" content={`Né(e) le ${formatDateFRTimezoneUTC(user.birthdateAt)} • ${getAge(user.birthdateAt)} ans`} />}
+          <Item title="Cohorte" content={user.cohort} />
           <Item title="E-mail" content={user.email} copy />
           <Item title="Département" content={user.department} />
           <Item title="Région" content={user.region} />
+          <hr />
+          <Item title="Statut phase 1" content={user.statusPhase1} />
           <Item title="Centre de cohésion" content={user.cohesionCenterName} />
-          <Item title="Status phase 1" content={user.statusPhase1} />
-          <Item title="Status phase 2" content={user.statusPhase2} />
+          <hr />
+          <Item title="Statut phase 2" content={user.statusPhase2} />
           <Item title="Contact phase 2" content={referentManagerPhase2?.email || (referentManagerPhase2 !== undefined && "Non trouvé") || "Chargement..."} copy />
-          <Item title="Status phase 3" content={user.statusPhase3} />
+          <hr />
+          <Item title="Statut phase 3" content={user.statusPhase3} />
         </>
       )}
     </HeroContainer>
@@ -149,7 +152,7 @@ export const HeroContainer = styled.div`
     display: flex;
     font-size: 0.875rem;
     line-height: 1.25rem;
-    margin-bottom: 22px;
+    margin-bottom: 1rem;
     .icon {
       cursor: pointer;
       margin: 0 0.5rem;

@@ -11,7 +11,7 @@ import SuccessIcon from "../../../components/SuccessIcon";
 import api from "../../../services/api";
 
 export default ({ setTicket, selectedTicket, setOverview }) => {
-  const [stateFilter, setStateFilter] = useState(ticketStateIdByName("nouveau"));
+  const [stateFilter, setStateFilter] = useState();
   const [tickets, setTickets] = useState(null);
   const user = useSelector((state) => state.Auth.user);
 
@@ -87,6 +87,9 @@ export default ({ setTicket, selectedTicket, setOverview }) => {
     <HeroContainer>
       <List>
         <FilterContainer>
+          <TabItem onClick={() => setStateFilter()} isActive={!stateFilter}>
+            Tous
+          </TabItem>
           <TabItem onClick={() => setStateFilter(ticketStateIdByName("nouveau"))} isActive={stateFilter === ticketStateIdByName("nouveau")}>
             Non&nbsp;lu(s)
           </TabItem>
@@ -95,9 +98,6 @@ export default ({ setTicket, selectedTicket, setOverview }) => {
           </TabItem>
           <TabItem onClick={() => setStateFilter(ticketStateIdByName("fermé"))} isActive={stateFilter === ticketStateIdByName("fermé")}>
             Fermé(s)
-          </TabItem>
-          <TabItem onClick={() => setStateFilter()} isActive={!stateFilter}>
-            Tous
           </TabItem>
           {/* todo other filters */}
           {/* <TabItem onClick={() => setStateFilter("other")} isActive={stateFilter === "other"}>
