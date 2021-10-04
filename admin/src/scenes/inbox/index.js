@@ -10,12 +10,13 @@ import { environment } from "../../config";
 export default () => {
   if (environment === "production") return <div />;
   const [ticket, setTicket] = useState(null);
+  const [overview, setOverview] = useState({});
 
   return (
     <HeroContainer>
-      <Header />
+      <Header overview={overview} />
       <section>
-        <TicketTabs setTicket={setTicket} selectedTicket={ticket} />
+        <TicketTabs setOverview={setOverview} setTicket={setTicket} selectedTicket={ticket} />
         <TicketMessage ticket={ticket} />
         <Infos ticket={ticket} />
       </section>

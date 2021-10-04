@@ -1,26 +1,26 @@
-import React, { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
+import React from "react";
 import styled from "styled-components";
 import MailCloseIcon from "../../../components/MailCloseIcon";
 import MailOpenIcon from "../../../components/MailOpenIcon";
 import SuccessIcon from "../../../components/SuccessIcon";
+import { ticketStateIdByName } from "../../../utils";
 
-export default () => {
+export default ({ overview }) => {
   return (
     <NotifcationContainer>
       <Notification>
         <MailCloseIcon color="#F1545B" style={{ margin: 0, padding: "5px" }} />
-        <NotificationNumber>3</NotificationNumber> nouveaux&nbsp;tickets
+        <NotificationNumber>{overview[ticketStateIdByName("nouveau")] || 0}</NotificationNumber> nouveaux&nbsp;tickets
       </Notification>
       <VL></VL>
       <Notification>
         <MailOpenIcon color="#F8B951" style={{ margin: 0, padding: "5px" }} />
-        <NotificationNumber>3</NotificationNumber>tickets&nbsp;ouverts
+        <NotificationNumber>{overview[ticketStateIdByName("ouvert")] || 0}</NotificationNumber>tickets&nbsp;ouverts
       </Notification>
       <VL></VL>
       <Notification>
         <SuccessIcon color="#6BC762" style={{ margin: 0, padding: "5px" }} />
-        <NotificationNumber>3</NotificationNumber> tickets&nbsp;fermés
+        <NotificationNumber>{overview[ticketStateIdByName("fermé")] || 0}</NotificationNumber> tickets&nbsp;fermés
       </Notification>
     </NotifcationContainer>
   );
@@ -35,7 +35,7 @@ export const NotifcationContainer = styled.div`
   }
   /* white */
   background: #ffffff;
-  /* sgadow */
+  /* shadow */
   box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
   border-radius: 8px;
 

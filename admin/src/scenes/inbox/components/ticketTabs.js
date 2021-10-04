@@ -10,7 +10,7 @@ import SuccessIcon from "../../../components/SuccessIcon";
 
 import api from "../../../services/api";
 
-export default ({ setTicket, selectedTicket }) => {
+export default ({ setTicket, selectedTicket, setOverview }) => {
   const [stateFilter, setStateFilter] = useState(ticketStateIdByName("nouveau"));
   const [tickets, setTickets] = useState(null);
   const user = useSelector((state) => state.Auth.user);
@@ -31,6 +31,12 @@ export default ({ setTicket, selectedTicket }) => {
       tags.push(`DEPARTEMENT_${department}`);
     }
     const { data } = await api.post(`/support-center/ticket/search-by-tags?withArticles=true`, { tags });
+
+    const ticketNotification = data.reduce((prev, curr) => {
+      prev[curr.state_id] = (prev[curr.state_id] || 0) + 1;
+      return prev;
+    }, {});
+    setOverview(ticketNotification);
     setTickets(data);
   };
 
