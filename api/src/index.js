@@ -38,6 +38,7 @@ app.use("/referent", require("./controllers/referent"));
 app.use("/application", require("./controllers/application"));
 app.use("/contract", require("./controllers/contract"));
 app.use("/program", require("./controllers/program"));
+app.use("/event", require("./controllers/event"));
 app.use("/inscription-goal", require("./controllers/inscription-goal"));
 app.use("/department-service", require("./controllers/department-service"));
 app.use("/waiting-list", require("./controllers/waiting-list"));

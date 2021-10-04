@@ -13,7 +13,16 @@ const fs = require("fs");
 const rateLimit = require("express-rate-limit");
 const sendinblue = require("../sendinblue");
 const { ADMIN_URL, APP_URL } = require("../config");
-const { CELLAR_ENDPOINT, CELLAR_KEYID, CELLAR_KEYSECRET, BUCKET_NAME, ENVIRONMENT } = require("../config");
+const {
+  CELLAR_ENDPOINT,
+  CELLAR_KEYID,
+  CELLAR_KEYSECRET,
+  BUCKET_NAME,
+  ENVIRONMENT,
+  API_ASSOCIATION_CELLAR_ENDPOINT,
+  API_ASSOCIATION_CELLAR_KEYID,
+  API_ASSOCIATION_CELLAR_KEYSECRET,
+} = require("../config");
 const { ROLES } = require("snu-lib/roles");
 const { YOUNG_STATUS_PHASE2 } = require("snu-lib/constants");
 
@@ -89,6 +98,18 @@ function getSignedUrl(path) {
   const s3bucket = new AWS.S3({ endpoint: CELLAR_ENDPOINT, accessKeyId: CELLAR_KEYID, secretAccessKey: CELLAR_KEYSECRET });
   return s3bucket.getSignedUrl("getObject", {
     Bucket: BUCKET_NAME,
+    Key: path,
+  });
+}
+
+function getSignedUrlForApiAssociation(path) {
+  const s3bucket = new AWS.S3({
+    endpoint: API_ASSOCIATION_CELLAR_ENDPOINT,
+    accessKeyId: API_ASSOCIATION_CELLAR_KEYID,
+    secretAccessKey: API_ASSOCIATION_CELLAR_KEYSECRET,
+  });
+  return s3bucket.getSignedUrl("getObject", {
+    Bucket: "association",
     Key: path,
   });
 }
@@ -449,4 +470,5 @@ module.exports = {
   getBaseUrl,
   updateYoungPhase2Hours,
   updateStatusPhase2,
+  getSignedUrlForApiAssociation,
 };

@@ -509,6 +509,16 @@ function validateReferent(referent) {
     .validate(referent, { stripUnknown: true });
 }
 
+function validateEvent(event) {
+  return Joi.object()
+    .keys({
+      category: Joi.string().allow(null, ""),
+      action: Joi.string().allow(null, ""),
+      value: Joi.string().allow(null, ""),
+    })
+    .validate(event, { stripUnknown: true });
+}
+
 function validateSelf(referent) {
   // Referents can not update their role.
   return Joi.object()
@@ -549,4 +559,5 @@ module.exports = {
   validateWaitingList,
   validateContract,
   validateOptionalId,
+  validateEvent,
 };
