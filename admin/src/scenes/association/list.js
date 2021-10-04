@@ -1,31 +1,22 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 
 import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
 import styled from "styled-components";
 
 import api from "../../services/api";
 import { apiURL } from "../../config";
-import { translate, corpsEnUniforme, formatLongDateFR, ES_NO_LIMIT, ROLES, getFilterLabel, colors } from "../../utils";
-import VioletButton from "../../components/buttons/VioletButton";
+import { translate, ES_NO_LIMIT, ROLES, getFilterLabel } from "../../utils";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
-import { Filter, FilterRow, ResultTable, Table, Header, Title, MultiLine } from "../../components/list";
-import Badge from "../../components/Badge";
+import { Filter, FilterRow, Header, Title } from "../../components/list";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
-import Chevron from "../../components/Chevron";
 import Association from "./components/Association";
 
 const FILTERS = ["SEARCH", "REGION", "DEPARTMENT", "DOMAIN"];
 
 export default () => {
   const [structure, setStructure] = useState(null);
-  const [filterVisible, setFilterVisible] = useState(false);
   const user = useSelector((state) => state.Auth.user);
-  /*
-  const getDefaultQuery = () =>
-    user.role === ROLES.SUPERVISOR ? { query: { bool: { filter: { term: { "networkId.keyword": user.structureId } } } } } : { query: { match_all: {} } };
-*/
   const getDefaultQuery = () => ({
     query: {
       bool: {
