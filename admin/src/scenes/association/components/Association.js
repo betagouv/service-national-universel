@@ -1,11 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import api from "../../../services/api";
 
 import styled from "styled-components";
 
 import Chevron from "../../../components/Chevron";
-
-// const FILTERS = ["SEARCH", "LEGAL_STATUS", "STATUS", "DEPARTMENT", "REGION", "CORPS", "WITH_NETWORK", "LOCATION", "MILITARY_PREPARATION"];
 
 export default function Association({ hit }) {
   const tabs = ["Informations", "Contacts", "Missions"];
