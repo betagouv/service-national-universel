@@ -7,29 +7,53 @@ import { ticketStateIdByName } from "../../../utils";
 
 export default ({ overview }) => {
   return (
-    <NotifcationContainer>
-      <Notification>
-        <MailCloseIcon color="#F1545B" style={{ margin: 0, padding: "5px" }} />
-        <NotificationNumber>{overview[ticketStateIdByName("nouveau")] || 0}</NotificationNumber>non&nbsp;lu(s)
-      </Notification>
-      <VL></VL>
-      <Notification>
-        <MailOpenIcon color="#F8B951" style={{ margin: 0, padding: "5px" }} />
-        <NotificationNumber>{overview[ticketStateIdByName("ouvert")] || 0}</NotificationNumber>ouvert(s)
-      </Notification>
-      <VL></VL>
-      <Notification>
-        <SuccessIcon color="#6BC762" style={{ margin: 0, padding: "5px" }} />
-        <NotificationNumber>{overview[ticketStateIdByName("fermé")] || 0}</NotificationNumber>fermé(s)
-      </Notification>
-    </NotifcationContainer>
+    <HeaderContainer>
+      <NotifcationContainer>
+        <Notification>
+          <MailCloseIcon color="#F1545B" style={{ margin: 0, padding: "5px" }} />
+          <NotificationNumber>{overview[ticketStateIdByName("nouveau")] || 0}</NotificationNumber>non&nbsp;lu(s)
+        </Notification>
+        <VL></VL>
+        <Notification>
+          <MailOpenIcon color="#F8B951" style={{ margin: 0, padding: "5px" }} />
+          <NotificationNumber>{overview[ticketStateIdByName("ouvert")] || 0}</NotificationNumber>ouvert(s)
+        </Notification>
+        <VL></VL>
+        <Notification>
+          <SuccessIcon color="#6BC762" style={{ margin: 0, padding: "5px" }} />
+          <NotificationNumber>{overview[ticketStateIdByName("fermé")] || 0}</NotificationNumber>fermé(s)
+        </Notification>
+      </NotifcationContainer>
+      <div style={{ display: "flex", justifyContent: "center", alignContent: "center" }}>
+        <a href="https://support.snu.gouv.fr/help/fr-fr" className="button" target="_blank">
+          Base de connaissance
+        </a>
+      </div>
+    </HeaderContainer>
   );
 };
 
-export const NotifcationContainer = styled.div`
-  flex: 1;
+const HeaderContainer = styled.div`
   display: flex;
-  margin: 1rem;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  .button {
+    padding: 10px;
+    border-width: 0px;
+    background: #5245cc;
+    border-radius: 10px;
+    width: 100%;
+    color: white;
+    :hover {
+      color: #fff;
+      background: #463bad;
+    }
+  }
+`;
+
+export const NotifcationContainer = styled.div`
+  display: flex;
   @media (max-width: 768px) {
     padding: 1rem 0;
   }
