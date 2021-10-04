@@ -89,7 +89,7 @@ router.put("/:id", passport.authenticate("referent", { session: false }), async 
 
     const oldStatus = mission.status;
     mission.set(checkedMission);
-    await mission.save();
+    await mission.save({ fromUser: req.user });
 
     // if there is a status change, update the application
     if (oldStatus !== mission.status) await updateApplication(mission);
@@ -178,7 +178,7 @@ router.put("/:id/structure/:structureId", passport.authenticate("referent", { se
     }
 
     mission.set({ structureId: structure._id, structureName: structure.name });
-    await mission.save();
+    await mission.save({ fromUser: req.user });
 
     const applications = await ApplicationObject.find({ missionId: checkedId });
     for (const application of applications) {

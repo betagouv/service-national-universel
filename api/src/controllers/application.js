@@ -16,7 +16,7 @@ const { SUB_ROLES, ROLES, SENDINBLUE_TEMPLATES, department2region } = require("s
 const { serializeApplication } = require("../utils/serializer");
 const { updateYoungPhase2Hours, updateStatusPhase2 } = require("../utils");
 
-const updatePlacesMission = async (app) => {
+const updatePlacesMission = async (app, fromUser) => {
   try {
     // Get all application for the mission
     const mission = await MissionObject.findById(app.missionId);
@@ -28,7 +28,7 @@ const updatePlacesMission = async (app) => {
     if (mission.placesLeft !== placesLeft) {
       console.log(`Mission ${mission.id}: total ${mission.placesTotal}, left from ${mission.placesLeft} to ${placesLeft}`);
       mission.set({ placesLeft });
-      await mission.save();
+      await mission.save({ fromUser });
     }
   } catch (e) {
     console.log(e);
@@ -84,7 +84,7 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false }
     const data = await ApplicationObject.create(value);
     await updateYoungPhase2Hours(young);
     await updateStatusPhase2(young);
-    await updatePlacesMission(data);
+    await updatePlacesMission(data, req.user);
     return res.status(200).send({ ok: true, data: serializeApplication(data) });
   } catch (error) {
     capture(error);
@@ -113,7 +113,7 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false })
 
     await updateYoungPhase2Hours(young);
     await updateStatusPhase2(young);
-    await updatePlacesMission(application);
+    await updatePlacesMission(application, req.user);
 
     res.status(200).send({ ok: true, data: serializeApplication(application) });
   } catch (error) {

@@ -49,7 +49,7 @@ const {
   canSigninAs,
 } = require("snu-lib/roles");
 
-async function updateTutorNameInMissionsAndApplications(tutor) {
+async function updateTutorNameInMissionsAndApplications(tutor, fromUser) {
   if (!tutor || !tutor.firstName || !tutor.lastName) return;
 
   const missions = await MissionModel.find({ tutorId: tutor._id });
@@ -57,7 +57,7 @@ async function updateTutorNameInMissionsAndApplications(tutor) {
   if (missions && missions.length) {
     for (let mission of missions) {
       mission.set({ tutorName: `${tutor.firstName} ${tutor.lastName}` });
-      await mission.save();
+      await mission.save({ fromUser });
       // ... and update each application
       const applications = await ApplicationModel.find({ missionId: mission._id });
       if (applications && applications.length) {
@@ -189,7 +189,7 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
     referentProperties.invitationExpires = inSevenDays();
 
     const referent = await ReferentModel.create(referentProperties);
-    await updateTutorNameInMissionsAndApplications(referent);
+    await updateTutorNameInMissionsAndApplications(referent, req.user);
 
     const cta = `${config.ADMIN_URL}/auth/signup/invite?token=${invitation_token}`;
     const fromName = `${req.user.firstName} ${req.user.lastName}`;
@@ -282,7 +282,7 @@ router.post("/signup_invite", async (req, res) => {
     res.cookie("jwt", token, cookieOptions());
 
     await referent.save();
-    await updateTutorNameInMissionsAndApplications(referent);
+    await updateTutorNameInMissionsAndApplications(referent, req.user);
 
     return res.status(200).send({ data: serializeReferent(referent, referent), token, ok: true });
   } catch (error) {
@@ -628,7 +628,7 @@ router.put("/:id", passport.authenticate("referent", { session: false }), async 
 
     referent.set(value);
     await referent.save();
-    await updateTutorNameInMissionsAndApplications(referent);
+    await updateTutorNameInMissionsAndApplications(referent, req.user);
     res.status(200).send({ ok: true, data: referent });
   } catch (error) {
     capture(error);
@@ -644,7 +644,7 @@ router.put("/", passport.authenticate("referent", { session: false }), async (re
     if (!user) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     user.set(value);
     await user.save();
-    await updateTutorNameInMissionsAndApplications(user);
+    await updateTutorNameInMissionsAndApplications(user, req.user);
     res.status(200).send({ ok: true, data: user });
   } catch (error) {
     capture(error);
