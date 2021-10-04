@@ -8,7 +8,6 @@ import Infos from "./components/ticketInfos";
 import { environment } from "../../config";
 
 export default () => {
-  if (environment === "production") return <div />;
   const [ticket, setTicket] = useState(null);
 
   return (
