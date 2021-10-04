@@ -14,6 +14,11 @@ import MailCloseIcon from "../../../components/MailCloseIcon";
 import MailOpenIcon from "../../../components/MailOpenIcon";
 import SuccessIcon from "../../../components/SuccessIcon";
 
+const updateHeightElement = (e) => {
+  e.target.style.height = "inherit";
+  e.target.style.height = `${e.target.scrollHeight}px`;
+};
+
 export default ({ ticket: propTicket }) => {
   const [ticket, setTicket] = useState(propTicket);
   const [message, setMessage] = useState();
@@ -116,9 +121,11 @@ export default ({ ticket: propTicket }) => {
               row={2}
               placeholder="Mon message..."
               className="form-control"
-              onChange={(e) => setMessage(e.target.value)}
+              onChange={(e) => {
+                setMessage(e.target.value);
+                updateHeightElement(e);
+              }}
               value={message}
-              style={{ border: "none", resize: "none", borderRadius: "0px" }}
             />
             <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", background: "white" }}>
               <LoadingButton style={{ background: "none", height: "100%" }} onClick={send} disabled={!message}>
@@ -183,6 +190,13 @@ const InputContainer = styled.div`
   flex-direction: row;
   align-items: stretch;
   flex: 0;
+  textarea {
+    resize: none;
+    overflow: none;
+    min-height: 50px;
+    max-height: 300px;
+    border: none;
+  }
 `;
 const DetailContainer = styled.div`
   display: flex;
