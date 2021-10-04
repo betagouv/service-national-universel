@@ -82,7 +82,7 @@ router.put("/:id", passport.authenticate("referent", { session: false }), async 
     if (errorStructure) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error: errorStructure });
 
     structure.set(checkedStructure);
-    await structure.save();
+    await structure.save({ fromUser: req.user });
     await updateNetworkName(structure);
     await updateMissionStructureName(structure);
     await updateResponsibleAndSupervisorRole(structure);
