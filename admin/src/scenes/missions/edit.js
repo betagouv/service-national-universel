@@ -182,7 +182,7 @@ export default (props) => {
             values.location = await putLocation(values.city, values.zip);
           }
 
-          values.duration = values.duration.toString();
+          values.duration = values.duration?.toString();
 
           const { ok, code, data: mission } = values._id ? await api.put(`/mission/${values._id}`, values) : await api.post("/mission", values);
 
