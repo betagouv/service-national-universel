@@ -15,6 +15,7 @@ const YoungObject = require("../../models/young");
 const ReferentModel = require("../../models/referent");
 const CohesionCenterObject = require("../../models/cohesionCenter");
 const ApplicationModel = require("../../models/application");
+const ContractModel = require("../../models/contract");
 const MissionModel = require("../../models/mission");
 const AuthObject = require("../../auth");
 const YoungAuth = new AuthObject(YoungObject);
@@ -511,6 +512,46 @@ router.delete("/:id", passport.authenticate("referent", { session: false }), asy
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (!canDeleteYoung(req.user, young)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const applications = await ApplicationModel.find({ youngId: id });
+    for (let i = 0; i < applications.length; i++) {
+      applications[i].youngFirstName = "Compte";
+      applications[i].youngLastName = "Supprime";
+      applications[i].youngEmail = undefined;
+      applications[i].youngBirthdateAt = undefined;
+      applications[i].youngCity = undefined;
+      applications[i].youngDepartment = undefined;
+      await applications[i].save();
+    }
+
+    const contracts = await ContractModel.find({ youngId: id });
+    for (let i = 0; i < contracts.length; i++) {
+      contracts[i].youngFirstName = "Compte";
+      contracts[i].youngLastName = "Supprime";
+      [
+        "youngEmail",
+        "youngBirthdate",
+        "youngAddress",
+        "youngCity",
+        "youngDepartment",
+        "youngPhone",
+        "parent1FirstName",
+        "parent1LastName",
+        "parent1Address",
+        "parent1City",
+        "parent1Department",
+        "parent1Phone",
+        "parent1Email",
+        "parent2FirstName",
+        "parent2LastName",
+        "parent2Address",
+        "parent2City",
+        "parent2Department",
+        "parent2Phone",
+        "parent2Email",
+      ].forEach((el) => (contracts[i][el] = undefined));
+      await contracts[i].save();
+    }
 
     await young.remove();
     console.log(`Young ${id} has been deleted`);
