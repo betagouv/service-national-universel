@@ -108,6 +108,12 @@ const Schema = new mongoose.Schema({
       description: "Statut du volontaire lié à la seconde phase",
     },
   },
+  statusPhase2UpdatedAt: {
+    type: Date,
+    documentation: {
+      description: "Date de dernière modification du statut lié à la seconde phase",
+    },
+  },
   statusPhase2Contract: {
     type: [String],
     default: [],
