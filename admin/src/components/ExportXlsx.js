@@ -2,13 +2,13 @@ import React, { useState, useEffect, useRef } from "react";
 import { ReactiveComponent } from "@appbaseio/reactivesearch";
 import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
-import { translate, ES_NO_LIMIT } from "../utils";
+import { ES_NO_LIMIT } from "../utils";
 import LoadingButton from "./buttons/LoadingButton";
 import ModalConfirm from "./modals/ModalConfirm";
 import api from "../services/api";
 import dayjs from "dayjs";
 
-export default function ExportComponent({ title, exportTitle, index, react, transform, defaultQuery = () => ({ query: { query: { match_all: {} } }, size: ES_NO_LIMIT }) }) {
+export default function ExportComponent({ title, exportTitle, index, react, transform, defaultQuery = () => ({ query: { query: { match_all: {} } } }) }) {
   const [exporting, setExporting] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const query = useRef(defaultQuery().query);
@@ -77,7 +77,6 @@ function Loading({ onFinish, loading, exportTitle, transform, currentQuery, inde
   const [data, setData] = useState([]);
 
   const [run, setRun] = useState(false);
-  console.log("render", Date.now(), status);
 
   useEffect(() => {
     if (loading === false) setRun(true);
@@ -85,6 +84,7 @@ function Loading({ onFinish, loading, exportTitle, transform, currentQuery, inde
 
   useEffect(() => {
     if (!run) return;
+
     if (!status) {
       setStatus(STATUS_LOADING);
     } else if (status === STATUS_LOADING) {
