@@ -119,7 +119,7 @@ async function toArrayOfArray(results, transform) {
 }
 
 async function getAllResults(index, query) {
-  const result = await api.post("/es/export", { query, index });
+  const result = await api.post(`/es/${index}/export`, { query, index });
   if (!result.data.length) return [];
   return result.data;
 }
