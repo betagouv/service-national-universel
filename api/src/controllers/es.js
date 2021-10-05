@@ -355,10 +355,10 @@ router.post("/meetingpoint/:action(_msearch|export)", passport.authenticate(["re
     }
 
     if (req.params.action === "export") {
-      const response = await allRecords("meetingpoint", applyFilterOnQuery(req.body.query, filter));
+      const response = await allRecords("meetingpoint", req.body.query));
       return res.status(200).send({ ok: true, data: response });
     } else {
-      const response = await esClient.msearch({ index: "meetingpoint", body: withFilterForMSearch(body) });
+      const response = await esClient.msearch({ index: "meetingpoint", body: body });
       return res.status(200).send(response.body);
     }
   } catch (error) {
