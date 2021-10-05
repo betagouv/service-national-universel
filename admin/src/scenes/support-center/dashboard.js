@@ -6,6 +6,7 @@ import { formatDistanceToNow } from "date-fns";
 import { fr } from "date-fns/locale";
 import api from "../../services/api";
 import Loader from "../../components/Loader";
+import { ticketStateNameById } from "../../utils";
 
 const articles = [
   {
@@ -31,15 +32,11 @@ export default () => {
     const fetchTickets = async () => {
       try {
         const response = await api.get("/support-center/ticket");
-        if (!response.ok) {
-          setUserTickets([]);
-          return console.log(response);
-        }
+        if (!response.ok) return setUserTickets([]);
         setUserTickets(response.data);
         console.log(response.data);
       } catch (error) {
         setUserTickets([]);
-        console.log(error);
       }
     };
     fetchTickets();
@@ -50,21 +47,24 @@ export default () => {
       <Container>
         <section className="help-section">
           <h2>Besoin d'aide&nbsp;?</h2>
-          <p style={{ color: "#6B7280" }}>
-            Vous rencontrez une difficulté, avez besoin d'assistance pour réaliser une action ou avez besoin d'informations supplémentaires sur la plateforme&nbsp;? N'hésitez pas à
-            consulter notre{" "}
+          <div style={{ color: "#6B7280" }}>
+            Vous rencontrez une difficulté, avez besoin d'assistance pour réaliser une action ou avez besoin d'informations supplémentaires sur la plateforme&nbsp;?
+            <br />
+            N'hésitez pas à consulter notre{" "}
             <strong>
               <a href="https://support.snu.gouv.fr/help/fr-fr/1-referent" style={{ color: "#6B7280" }} target="_blank" rel="noopener noreferrer">
                 base de connaissance
               </a>
             </strong>
             &nbsp;!
-            <br /> Vous avez un problème technique ? Contactez notre service de support.
-          </p>
+          </div>
           <div className="buttons">
             <LinkButton href="https://support.snu.gouv.fr/help/fr-fr/1-referent" target="_blank" rel="noopener noreferrer">
               Base de connaissance
             </LinkButton>
+          </div>
+          <div style={{ color: "#6B7280" }}>Vous avez un problème technique ? Contactez notre service de support.</div>
+          <div className="buttons">
             <InternalLink to="/besoin-d-aide/ticket">Contacter quelqu'un</InternalLink>
           </div>
         </section>
@@ -85,10 +85,12 @@ export default () => {
           </div>
         </Card>
       </Container>
+      <h4 style={{ marginLeft: "0.5rem" }}>Mes conversations en cours</h4>
       <List>
         <section className="ticket titles">
           <p>Numéro du ticket</p>
           <p>Sujet</p>
+          <p>Etat</p>
           <p className="ticket-date">Dernière mise à jour</p>
         </section>
         {!userTickets ? <Loader /> : null}
@@ -97,8 +99,9 @@ export default () => {
           ?.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
           ?.map((ticket) => (
             <NavLink to={`/besoin-d-aide/ticket/${ticket.id}`} key={ticket.id} className="ticket">
-              <p>{ticket.id}</p>
+              <p>{ticket.number}</p>
               <p>{ticket.title}</p>
+              <p>{ticketStateNameById(ticket.state_id)}</p>
               <p className="ticket-date">il y a {formatDistanceToNow(new Date(ticket.updated_at), { locale: fr })}</p>
             </NavLink>
           ))}
@@ -124,12 +127,9 @@ const Container = styled.div`
     max-width: 500px;
     text-align: center;
     margin: 0 20px;
-  }
-  .buttons {
-    display: grid;
-    grid-template-rows: 1fr 1fr;
-    justify-content: center;
-    text-align: center;
+    .buttons {
+      margin: 1rem 0;
+    }
   }
   @media (min-width: 1024px) {
     flex-direction: row;
@@ -138,10 +138,6 @@ const Container = styled.div`
     margin: 0.5rem 1.5rem;
     .help-section {
       text-align: left;
-    }
-    .buttons {
-      grid-template-columns: 1fr 1fr;
-      grid-template-rows: 1fr;
     }
   }
 `;
@@ -221,7 +217,7 @@ const List = styled.div`
     color: black;
     padding: 1rem 1.5rem;
     display: grid;
-    grid-template-columns: 1fr 2fr 1fr;
+    grid-template-columns: 1fr 2fr 1fr 1fr;
     grid-template-rows: 1fr;
     :not(:first-child):hover {
       background-color: #f1f1f1 !important;

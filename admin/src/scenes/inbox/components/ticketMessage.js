@@ -96,7 +96,7 @@ export default ({ ticket: propTicket }) => {
           <Heading>
             <div>
               <h1>
-                Demande #{ticket?.id} - {ticket?.title}
+                Demande #{ticket?.number} - {ticket?.title}
               </h1>
               <Details title="Crée le" content={ticket?.created_at && formatStringLongDate(ticket?.created_at)} />
             </div>

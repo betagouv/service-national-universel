@@ -4,7 +4,6 @@ import styled from "styled-components";
 
 export default ({ loading, children, disabled, ...rest }) => (
   <VioletButtonHeader
-    {...rest}
     disabled={loading || disabled}
     style={{
       display: "flex",
@@ -13,6 +12,7 @@ export default ({ loading, children, disabled, ...rest }) => (
       opacity: loading ? 0.7 : 1,
       cursor: loading || disabled ? "not-allowed" : "pointer",
     }}
+    {...rest}
   >
     {loading && <Spinner size="sm" style={{ borderWidth: "0.1em" }} />}
     {!loading && children}
@@ -27,6 +27,11 @@ const VioletButtonHeader = styled(Button)`
   margin: 0;
   font-size: 14px;
   font-weight: 700;
-  color: #fff;
-  ${({ disabled }) => (!disabled ? ":hover {background: #372f78 !important;}" : null)}
+  color: ${({ textColor }) => (textColor ? `${textColor}` : `#fff`)} !important;
+  cursor: pointer;
+  ${({ disabled, color }) => (!disabled && !color ? `:hover {background: ${colors.darkPurple};}` : null)}
+  ${({ color }) => (color ? `background-color: ${color};}` : `background-color: ${colors.purple};`)}
+    &:hover {
+    box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.5);
+  }
 `;

@@ -6,10 +6,18 @@ import { NavLink } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
-import { formatStringLongDate, colors } from "../../../utils";
+import { formatStringLongDate, colors, ticketStateNameById } from "../../../utils";
 import Loader from "../../../components/Loader";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 import SendIcon from "../../../components/SendIcon";
+import MailCloseIcon from "../../../components/MailCloseIcon";
+import MailOpenIcon from "../../../components/MailOpenIcon";
+import SuccessIcon from "../../../components/SuccessIcon";
+
+const updateHeightElement = (e) => {
+  e.target.style.height = "inherit";
+  e.target.style.height = `${e.target.scrollHeight}px`;
+};
 
 export default (props) => {
   const [ticket, setTicket] = useState();
@@ -45,36 +53,67 @@ export default (props) => {
 
   if (ticket === undefined) return <Loader />;
 
+  const displayState = (state) => {
+    if (state === "ouvert")
+      return (
+        <StateContainer style={{ display: "flex" }}>
+          <MailOpenIcon color="#F8B951" style={{ margin: 0, padding: "5px" }} />
+          ouvert
+        </StateContainer>
+      );
+    if (state === "fermé")
+      return (
+        <StateContainer>
+          <SuccessIcon color="#6BC762" style={{ margin: 0, padding: "5px" }} />
+          fermé
+        </StateContainer>
+      );
+    if (state === "nouveau")
+      return (
+        <StateContainer>
+          <MailCloseIcon color="#F1545B" style={{ margin: 0, padding: "5px" }} />
+          nouveau
+        </StateContainer>
+      );
+  };
+
   return (
     <Container>
-      <BackButton to={`/besoin-d-aide`}>{"<"} Retour</BackButton>
-      <div style={{ border: "1px solid #e4e4e7", marginTop: "1rem" }}>
+      <BackButtonContainer>
+        <BackButton to={`/besoin-d-aide`}>{"<"} Retour</BackButton>
+      </BackButtonContainer>
+      <div style={{ padding: 0, display: "flex", flexDirection: "column", height: "calc(100vh - 180px)" }}>
         <Heading>
-          <h1>
-            Demande #{props.match?.params?.id} - {ticket?.title}
-          </h1>
-          <Details title="Crée le" content={ticket?.created_at && formatStringLongDate(ticket?.created_at)} />
+          <div>
+            <h1>
+              Demande #{ticket?.number} - {ticket?.title}
+            </h1>
+            <Details title="Crée le" content={ticket?.created_at && formatStringLongDate(ticket?.created_at)} />
+          </div>
+          {displayState(ticketStateNameById(ticket?.state_id))}
         </Heading>
-        <div>
-          <Box>
-            {ticket?.articles?.map((article, i) => (
-              <Message key={i} fromMe={young.email === article.created_by} from={article.from} date={formatStringLongDate(article.created_at)} content={article.body} />
-            ))}
-          </Box>
-          <InputContainer>
-            <textarea
-              row={2}
-              placeholder="Mon message..."
-              className="form-control"
-              onChange={(e) => setMessage(e.target.value)}
-              value={message}
-              style={{ border: "none", resize: "none", borderRadius: "0px" }}
-            />
-            <LoadingButton onClick={send} disabled={!message} style={{ height: "100%" }}>
-              Envoyer
+        <Messages>
+          {ticket?.articles?.map((article, i) => (
+            <Message key={i} fromMe={young.email === article.created_by} from={article.from} date={formatStringLongDate(article.created_at)} content={article.body} />
+          ))}
+        </Messages>
+        <InputContainer>
+          <textarea
+            row={2}
+            placeholder="Mon message..."
+            className="form-control"
+            onChange={(e) => {
+              setMessage(e.target.value);
+              updateHeightElement(e);
+            }}
+            value={message}
+          />
+          <ButtonContainer>
+            <LoadingButton onClick={send} disabled={!message} color="white">
+              <SendIcon color={!message && "grey"} />
             </LoadingButton>
-          </InputContainer>
-        </div>
+          </ButtonContainer>
+        </InputContainer>
       </div>
     </Container>
   );
@@ -111,10 +150,37 @@ const Details = ({ title, content }) => {
   );
 };
 
+const Messages = styled.div`
+  display: flex;
+  flex-direction: column-reverse;
+  overflow-y: scroll;
+  flex: 1;
+  padding: 0.5rem;
+  background-color: #f1f5f9;
+  border-left: 1px solid #e4e4e7;
+`;
+
+const StateContainer = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
 const InputContainer = styled.div`
   display: flex;
   flex-direction: row;
   align-items: stretch;
+  background-color: #fff;
+  textarea {
+    resize: none;
+    overflow: none;
+    min-height: 50px;
+    max-height: 300px;
+    border: none;
+  }
+`;
+const ButtonContainer = styled.div`
+  flex-basis: 100px;
+  align-self: center;
 `;
 const DetailContainer = styled.div`
   display: flex;
@@ -162,24 +228,14 @@ const MessageContent = styled.div`
   font-weight: 400;
   color: ${({ color }) => color};
 `;
-const Box = styled.div`
-  width: ${(props) => props.width || 100}%;
-  ${"" /* height: 100%; */}
-  filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.05));
-  border-radius: 8px;
-  padding: 1rem;
-  max-height: 500px;
-  overflow: scroll;
-`;
 
 const Heading = styled(Container)`
   display: flex;
-  flex: 1;
-  flex-direction: column;
-  justify-content: flex-start;
+  flex: 0;
+  justify-content: space-between;
   align-items: space-between;
   background-color: #fff;
-  padding: 0.5rem;
+  padding: 1rem;
   border-bottom: 1px solid #e4e4e7;
   @media (max-width: 768px) {
     margin-bottom: 1rem;
@@ -212,6 +268,10 @@ const Heading = styled(Container)`
       font-size: 0.75rem;
     }
   }
+`;
+
+const BackButtonContainer = styled.div`
+  padding: 0.5rem 0;
 `;
 
 const BackButton = styled(NavLink)`
