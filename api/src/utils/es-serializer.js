@@ -1,4 +1,8 @@
 function serializeHits(body, callback) {
+  // In case body is already an array of records.
+  if (Array.isArray(body) && body[0]?._id) {
+    return body.map(callback);
+  }
   return {
     ...body,
     responses:

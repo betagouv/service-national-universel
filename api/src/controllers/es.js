@@ -49,7 +49,7 @@ router.post("/mission/:action(_msearch|export)", passport.authenticate(["young",
 
     if (req.params.action === "export") {
       const response = await allRecords(req.body.index, applyFilterOnQuery(req.body.query, filter));
-      return res.status(200).send({ ok: true, data: response });
+      return res.status(200).send({ ok: true, data: serializeMissions(response) });
     } else {
       const response = await esClient.msearch({ index: "mission", body: withFilterForMSearch(body, filter) });
       return res.status(200).send(serializeMissions(response.body));
@@ -127,7 +127,7 @@ router.post("/young/:action(_msearch|export)", passport.authenticate(["referent"
 
     if (req.params.action === "export") {
       const response = await allRecords(req.body.index, applyFilterOnQuery(req.body.query, filter));
-      return res.status(200).send({ ok: true, data: response });
+      return res.status(200).send({ ok: true, data: serializeYoungs(response) });
     } else {
       const response = await esClient.msearch({ index: "young", body: withFilterForMSearch(body, filter) });
       return res.status(200).send(serializeYoungs(response.body));
@@ -172,7 +172,7 @@ router.post("/cohesionyoung/:id/:action(_msearch|export)", passport.authenticate
 
     if (req.params.action === "export") {
       const response = await allRecords(req.body.index, applyFilterOnQuery(req.body.query, filter));
-      return res.status(200).send({ ok: true, data: response });
+      return res.status(200).send({ ok: true, data: serializeYoungs(response) });
     } else {
       const response = await esClient.msearch({ index: "young", body: withFilterForMSearch(body, filter) });
       return res.status(200).send(serializeYoungs(response.body));
@@ -210,7 +210,7 @@ router.post("/structure/:action(_msearch|export)", passport.authenticate(["refer
 
     if (req.params.action === "export") {
       const response = await allRecords(req.body.index, applyFilterOnQuery(req.body.query, filter));
-      return res.status(200).send({ ok: true, data: response });
+      return res.status(200).send({ ok: true, data: serializeStructures(response) });
     } else {
       const response = await esClient.msearch({ index: "structure", body: withFilterForMSearch(body, filter) });
       return res.status(200).send(serializeStructures(response.body));
@@ -276,7 +276,7 @@ router.post("/referent/:action(_msearch|export)", passport.authenticate(["refere
     }
     if (req.params.action === "export") {
       const response = await allRecords(req.body.index, applyFilterOnQuery(req.body.query, filter));
-      return res.status(200).send({ ok: true, data: response });
+      return res.status(200).send({ ok: true, data: serializeReferents(response) });
     } else {
       const response = await esClient.msearch({ index: "referent", body: withFilterForMSearch(body, filter) });
       return res.status(200).send(serializeReferents(response.body));
@@ -310,7 +310,7 @@ router.post("/application/:action(_msearch|export)", passport.authenticate(["ref
 
     if (req.params.action === "export") {
       const response = await allRecords(req.body.index, applyFilterOnQuery(req.body.query, filter));
-      return res.status(200).send({ ok: true, data: response });
+      return res.status(200).send({ ok: true, data: serializeApplications(response) });
     } else {
       const response = await esClient.msearch({ index: "application", body: withFilterForMSearch(body, filter) });
       return res.status(200).send(serializeApplications(response.body));
