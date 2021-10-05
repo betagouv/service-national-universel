@@ -42,7 +42,8 @@ export default ({ center, updateCenter }) => {
               <div style={{ display: "flex" }}>
                 <ExportComponent
                   title="Exporter les volontaires"
-                  collection="volontaire"
+                  exportTitle="Volontaire"
+                  index="young"
                   react={{ and: FILTERS }}
                   transform={(data) => {
                     let meetingPoint = {};

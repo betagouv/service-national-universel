@@ -18,6 +18,7 @@ const {
   serializeHits,
 } = require("../utils/es-serializer");
 const AWS = require("aws-sdk");
+const { allRecords } = require("../es/utils");
 const { API_ASSOCIATION_ES_ENDPOINT, API_ASSOCIATION_AWS_ACCESS_KEY_ID, API_ASSOCIATION_AWS_SECRET_ACCESS_KEY } = require("../config");
 
 // Routes accessible for youngs and referent
@@ -340,6 +341,16 @@ router.post("/meetingpoint/_msearch", passport.authenticate(["referent"], { sess
 
     const response = await esClient.msearch({ index: "meetingpoint", body });
     return res.status(200).send(response.body);
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, error });
+  }
+});
+
+router.post("/export", passport.authenticate(["referent"], { session: false }), async (req, res) => {
+  try {
+    const response = await allRecords(req.body.index, req.body.query);
+    return res.status(200).send({ ok: true, data: response });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, error });

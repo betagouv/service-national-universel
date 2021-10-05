@@ -1,14 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { ReactiveComponent } from "@appbaseio/reactivesearch";
 import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
 import { translate, ES_NO_LIMIT } from "../utils";
 import LoadingButton from "./buttons/LoadingButton";
 import ModalConfirm from "./modals/ModalConfirm";
+import api from "../services/api";
 
 export default function ExportComponent({
   title,
-  collection,
+  exportTitle,
+  index,
   react,
   transform,
   transformAll = null,
@@ -16,6 +18,7 @@ export default function ExportComponent({
 }) {
   const [exporting, setExporting] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+  const query = useRef(defaultQuery().query);
 
   const onClick = () => {
     setModal({
@@ -33,15 +36,21 @@ export default function ExportComponent({
         defaultQuery={defaultQuery}
         componentId="EXPORT"
         react={react}
-        render={({ setQuery, data, loading }) => {
+        onQueryChange={(prev, next) => {
+          query.current = next.query;
+        }}
+        render={(props) => {
+          const { setQuery, data, loading } = props;
           return (
             <Loading
               setQuery={setQuery}
+              currentQuery={query.current}
               transformAll={transformAll}
               data={data}
               loading={loading}
               onFinish={() => setExporting(false)}
-              collection={collection}
+              index={index}
+              exportTitle={exportTitle}
               transform={transform}
             />
           );
@@ -67,12 +76,11 @@ export default function ExportComponent({
   );
 }
 
-function Loading({ onFinish, collection, data, loading, transform, transformAll }) {
+function Loading({ onFinish, loading, exportTitle, transform, transformAll, currentQuery, index }) {
   const [run, setRun] = useState(false);
   useEffect(() => {
     if (loading === false) setRun(true);
   }, [loading]);
-
   useEffect(() => {
     if (run) {
       const d = new Date();
@@ -82,20 +90,26 @@ function Loading({ onFinish, collection, data, loading, transform, transformAll 
       const minutes = ("0" + d.getMinutes()).slice(-2);
       const hours = ("0" + d.getHours()).slice(-2);
       const secondes = ("0" + d.getSeconds()).slice(-2);
-      const fileName = `${collection}_${year}${month}${date}_${hours}h${minutes}m${secondes}s.xlsx`;
+      const fileName = `${exportTitle}_${year}${month}${date}_${hours}h${minutes}m${secondes}s.xlsx`;
 
-      exportData(fileName, data, transform, transformAll);
-      onFinish();
+      getAllResults(index, transform, transformAll, currentQuery).then((csv) => {
+        exportData(fileName, csv);
+        onFinish();
+      });
     }
   }, [run]);
 
-  return <LoadingButton loading={loading}></LoadingButton>;
+  return <LoadingButton loading={loading || run}></LoadingButton>;
 }
 
-async function exportData(fileName, entities, transform, transformAll) {
-  if (!entities.length) return;
+async function getAllResults(collection, transform, transformAll, currentQuery) {
+  const result = await api.post("/es/export", {
+    query: currentQuery,
+    index: collection,
+  });
+  if (!result.data.length) return;
 
-  const data = transformAll ? await transformAll(entities) : entities;
+  const data = transformAll ? await transformAll(result.data) : result.data;
 
   let columns = Object.keys(objectWithMostFields(data.map((e) => (transform ? transform(e) : e))));
   const csv = [];
@@ -108,13 +122,10 @@ async function exportData(fileName, entities, transform, transformAll) {
     const arr = columns.map((key) => translate(obj[key]) || "");
     csv.push(arr);
   }
+  return csv;
+}
 
-  // console.log(csv);
-  // const result = XLSX.utils.aoa_to_sheet(csv);
-  // const wb = XLSX.utils.book_new();
-  // XLSX.utils.book_append_sheet(wb, result, "test");
-  // XLSX.writeFile(wb, fileName);
-
+async function exportData(fileName, csv) {
   const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
   const fileExtension = ".xlsx";
   const ws = XLSX.utils.aoa_to_sheet(csv);

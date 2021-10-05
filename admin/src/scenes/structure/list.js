@@ -68,7 +68,8 @@ export default () => {
                 <ExportComponent
                   title="Exporter les structures"
                   defaultQuery={getExportQuery}
-                  collection="structure"
+                  exportTitle="Structure"
+                  index="structure"
                   react={{ and: FILTERS }}
                   transformAll={async (data) => {
                     const structureIds = [...new Set(data.map((item) => item._id).filter((e) => e))];

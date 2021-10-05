@@ -44,7 +44,8 @@ export default () => {
                 <ExportComponent
                   title="Exporter les inscriptions"
                   defaultQuery={getExportQuery}
-                  collection="candidature"
+                  exportTitle="Candidature"
+                  index="young"
                   react={{ and: FILTERS }}
                   transform={(data) => {
                     return {

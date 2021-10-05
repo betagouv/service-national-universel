@@ -52,7 +52,8 @@ export default ({ mission, applications }) => {
                 <ExportComponent
                   title="Exporter les volontaires"
                   defaultQuery={getExportQuery}
-                  collection="volontaire"
+                  exportTitle="Volontaire"
+                  index="young"
                   react={{ and: FILTERS }}
                   transformAll={async (data) => {
                     const youngIds = [...new Set(data.map((item) => item.youngId))];

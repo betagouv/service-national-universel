@@ -68,7 +68,8 @@ export default () => {
               <ExportComponent
                 title="Exporter les missions"
                 defaultQuery={getExportQuery}
-                collection="mission"
+                exportTitle="Mission"
+                index="mission"
                 react={{ and: FILTERS }}
                 transformAll={async (data) => {
                   const tutorIds = [...new Set(data.map((item) => item.tutorId).filter((e) => e))];

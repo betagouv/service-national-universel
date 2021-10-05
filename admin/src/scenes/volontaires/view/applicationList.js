@@ -62,7 +62,8 @@ export default ({ young, onChangeApplication }) => {
           <ExportComponent
             defaultQuery={getExportQuery}
             title="Exporter les candidatures"
-            collection={`candidatures-${young.firstName}-${young.lastName}`}
+            exportTitle={`candidatures-${young.firstName}-${young.lastName}`}
+            index="application"
             transform={(data) => {
               return {
                 _id: data._id,
