@@ -31,7 +31,6 @@ export default function ExportComponent({ title, exportTitle, index, react, tran
         react={react}
         onQueryChange={(prev, next) => {
           query.current = next.query;
-          console.log(next);
         }}
         render={(props) => {
           const { setQuery, data, loading } = props;
