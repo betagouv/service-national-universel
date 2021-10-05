@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { ReactiveComponent } from "@appbaseio/reactivesearch";
 import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
-import { ES_NO_LIMIT } from "../utils";
 import LoadingButton from "./buttons/LoadingButton";
 import ModalConfirm from "./modals/ModalConfirm";
 import api from "../services/api";
