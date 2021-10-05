@@ -21,6 +21,7 @@ const updateHeightElement = (e) => {
 
 export default (props) => {
   const [ticket, setTicket] = useState();
+  const [sending, setSending] = useState(false);
   const [message, setMessage] = useState();
   const young = useSelector((state) => state.Auth.young);
 
@@ -44,11 +45,13 @@ export default (props) => {
   }, []);
 
   const send = async () => {
-    if (!message) return;
+    setSending(true);
+    if (!message) return setSending(false);
     const id = props.match?.params?.id;
     const { data } = await api.put(`/support-center/ticket/${id}`, { message });
     setMessage("");
     getTicket();
+    setSending(false);
   };
 
   if (ticket === undefined) return <Loader />;
@@ -93,9 +96,11 @@ export default (props) => {
           {displayState(ticketStateNameById(ticket?.state_id))}
         </Heading>
         <Messages>
-          {ticket?.articles?.map((article, i) => (
-            <Message key={i} fromMe={young.email === article.created_by} from={article.from} date={formatStringLongDate(article.created_at)} content={article.body} />
-          ))}
+          {ticket?.articles
+            ?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+            ?.map((article, i) => (
+              <Message key={i} fromMe={young.email === article.created_by} from={article.from} date={formatStringLongDate(article.created_at)} content={article.body} />
+            ))}
         </Messages>
         <InputContainer>
           <textarea
@@ -109,7 +114,7 @@ export default (props) => {
             value={message}
           />
           <ButtonContainer>
-            <LoadingButton onClick={send} disabled={!message} color="white">
+            <LoadingButton onClick={send} disabled={!message || sending} color="white">
               <SendIcon color={!message && "grey"} />
             </LoadingButton>
           </ButtonContainer>
