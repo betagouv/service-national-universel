@@ -7,7 +7,7 @@ import { ReactiveBase } from "@appbaseio/reactivesearch";
 import { apiURL } from "../../../config";
 import api from "../../../services/api";
 import SelectStatusApplication from "../../../components/selectStatusApplication";
-import { APPLICATION_STATUS, formatStringDateTimezoneUTC, ES_NO_LIMIT, translate } from "../../../utils";
+import { APPLICATION_STATUS, formatStringDateTimezoneUTC, ES_NO_LIMIT, translate, SENDINBLUE_TEMPLATES } from "../../../utils";
 import { Link, useHistory } from "react-router-dom";
 import ProposalMission from "./proposalMission";
 import CreateMission from "./createMission";
@@ -17,6 +17,7 @@ import Loader from "../../../components/Loader";
 import ContractLink from "../../../components/ContractLink";
 import ExportComponent from "../../../components/ExportXlsx";
 import ModalConfirmWithMessage from "../../../components/modals/ModalConfirmWithMessage";
+import ModalConfirm from "../../../components/modals/ModalConfirm";
 
 export default ({ young, onChangeApplication }) => {
   const [applications, setApplications] = useState(null);
@@ -123,6 +124,8 @@ export default ({ young, onChangeApplication }) => {
 const Hit = ({ hit, index, young, onChangeApplication }) => {
   const [mission, setMission] = useState();
   const [modalDurationOpen, setModalDurationOpen] = useState(false);
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+
   const history = useHistory();
   useEffect(() => {
     (async () => {
@@ -216,6 +219,40 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
             />
           </div>
         )}
+        {hit.status === "WAITING_VALIDATION" && (
+          <React.Fragment>
+            <CopyLink
+              onClick={async () => {
+                try {
+                  setModal({
+                    isOpen: true,
+                    title: "Renvoyer un mail",
+                    message: "Souhaitez-vous renvoyer un mail à la structure ? ",
+                    onConfirm: async () => {
+                      const responseNotification = await api.post(`/application/${application._id}/notify/${SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION}`);
+                      if (!responseNotification?.ok) return toastr.error(translate(responseNotification?.code), "Une erreur s'est produite avec le service de notification.");
+                      toastr.success("L'email a bien été envoyé");
+                    },
+                  });
+                } catch (e) {
+                  toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
+                }
+              }}
+            >
+              ✉️ Renvoyer un mail à la structure
+            </CopyLink>
+            <ModalConfirm
+              isOpen={modal?.isOpen}
+              title={modal?.title}
+              message={modal?.message}
+              onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+              onConfirm={() => {
+                modal?.onConfirm();
+                setModal({ isOpen: false, onConfirm: null });
+              }}
+            />
+          </React.Fragment>
+        )}
       </td>
     </tr>
   );
@@ -248,6 +285,21 @@ const Icon = styled.img`
   height: 18px;
   font-size: 18px;
   cursor: pointer;
+`;
+
+const CopyLink = styled.button`
+  background: none;
+  color: rgb(81, 69, 205);
+  font-size: 0.8rem;
+  font-style: italic;
+  margin: 0 auto;
+  display: block;
+  border: none;
+  :hover {
+    outline: none;
+    text-decoration: underline;
+  }
+  padding: 0;
 `;
 
 const NoResult = styled.div`
