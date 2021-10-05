@@ -32,7 +32,7 @@ export default () => {
             {
               range: {
                 endAt: {
-                  gte: "now+3w",
+                  gte: "now",
                 },
               },
             },
