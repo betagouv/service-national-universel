@@ -6,7 +6,8 @@ import { Col, Row } from "reactstrap";
 import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
-import { translate, APPLICATION_STATUS_COLORS, APPLICATION_STATUS, getAge, SENDINBLUE_TEMPLATES } from "../../../utils";
+import { translate, APPLICATION_STATUS_COLORS, APPLICATION_STATUS, getAge, SENDINBLUE_TEMPLATES, ENABLE_PM } from "../../../utils";
+import { appURL } from "../../../config";
 import Badge from "../../../components/Badge";
 import DomainThumb from "../../../components/DomainThumb";
 import DownloadContractButton from "../../../components/buttons/DownloadContractButton";
@@ -145,13 +146,27 @@ const Footer = ({ application, tutor, onChange }) => {
 
   const setStatus = async (status) => {
     try {
+      if (ENABLE_PM && application?.mission?.isMilitaryPreparation === "true") status = APPLICATION_STATUS.WAITING_VERIFICATION;
       const { data } = await api.put(`/application`, { _id: application._id, status });
       let template;
       if (status === APPLICATION_STATUS.ABANDON) template = SENDINBLUE_TEMPLATES.referent.CANCEL_APPLICATION;
       if (status === APPLICATION_STATUS.CANCEL) template = SENDINBLUE_TEMPLATES.referent.CANCEL_APPLICATION;
-      if (status === APPLICATION_STATUS.WAITING_VALIDATION) template = SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION;
+      if (status === APPLICATION_STATUS.WAITING_VALIDATION || status === APPLICATION_STATUS.WAITING_VERIFICATION) template = SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION;
       if (template) await api.post(`/application/${application._id}/notify/${template}`);
+      if (ENABLE_PM && application?.mission?.isMilitaryPreparation === "true") {
+        const responseNotificationYoung = await api.post(`/application/${application._id}/notify/${SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_REMINDER}`);
+        if (!responseNotificationYoung?.ok) toastr.error(translate(responseNotificationYoung?.code), "Une erreur s'est produite avec le service de notification.");
+      }
       onChange(data);
+      if (ENABLE_PM && application?.mission?.isMilitaryPreparation === "true") {
+        setModal({
+          isOpen: true,
+          title: "Félications, votre candidature a bien été enregistrée.",
+          message: "Merci de téléverser vos pièces dans « Ma préparation militaire »",
+          onConfirm: () => window.open(`${appURL}/ma-preparation-militaire`),
+          confirmText: "Je renseigne mes documents",
+        });
+      }
     } catch (error) {
       console.log(error);
     }
@@ -253,6 +268,7 @@ const Footer = ({ application, tutor, onChange }) => {
         isOpen={modal?.isOpen}
         title={modal?.title}
         message={modal?.message}
+        confirmText={modal?.confirmText}
         onCancel={() => setModal({ isOpen: false, onConfirm: null })}
         onConfirm={() => {
           modal?.onConfirm();
