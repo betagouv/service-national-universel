@@ -23,6 +23,7 @@ export default ({ ticket: propTicket }) => {
   const [ticket, setTicket] = useState(propTicket);
   const [message, setMessage] = useState();
   const user = useSelector((state) => state.Auth.user);
+  const [sending, setSending] = useState(false);
 
   const updateTicket = async (id) => {
     try {
@@ -47,7 +48,8 @@ export default ({ ticket: propTicket }) => {
   }, [propTicket]);
 
   const send = async () => {
-    if (!message) return;
+    setSending(true);
+    if (!message) return setSending(false);
 
     // then send the message
     // todo : we may be able to reset the status in only one call
@@ -59,6 +61,7 @@ export default ({ ticket: propTicket }) => {
     // reset ticket and input message
     setMessage("");
     updateTicket(ticket?.id);
+    setSending(false);
   };
 
   if (ticket === null) return <Loader />;
@@ -96,7 +99,7 @@ export default ({ ticket: propTicket }) => {
           <Heading>
             <div>
               <h1>
-                Demande #{ticket?.id} - {ticket?.title}
+                Demande #{ticket?.number} - {ticket?.title}
               </h1>
               <Details title="Crée le" content={ticket?.created_at && formatStringLongDate(ticket?.created_at)} />
             </div>
@@ -128,7 +131,7 @@ export default ({ ticket: propTicket }) => {
               value={message}
             />
             <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", background: "white" }}>
-              <LoadingButton style={{ background: "none", height: "100%" }} onClick={send} disabled={!message}>
+              <LoadingButton style={{ background: "none", height: "100%" }} onClick={send} disabled={!message || sending}>
                 <SendIcon />
               </LoadingButton>
             </div>

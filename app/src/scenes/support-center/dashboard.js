@@ -35,7 +35,6 @@ export default () => {
         const response = await API.get("/support-center/ticket");
         if (!response.ok) return console.log(response);
         setUserTickets(response.data);
-        console.log(response.data);
       } catch (error) {
         console.log(error);
       }
@@ -104,7 +103,7 @@ export default () => {
           ?.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
           ?.map((ticket) => (
             <NavLink to={`/besoin-d-aide/ticket/${ticket.id}`} key={ticket.id} className="ticket">
-              <p>{ticket.id}</p>
+              <p>{ticket.number}</p>
               <p>{ticket.title}</p>
               <p>{ticketStateNameById(ticket.state_id)}</p>
               <p className="ticket-date">il y a {formatDistanceToNow(new Date(ticket.updated_at), { locale: fr })}</p>
