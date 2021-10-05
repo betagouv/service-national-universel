@@ -53,49 +53,49 @@ export default ({ mission, applications }) => {
                   title="Exporter les volontaires"
                   defaultQuery={getExportQuery}
                   exportTitle="Volontaire"
-                  index="young"
+                  index="application"
                   react={{ and: FILTERS }}
-                  transformAll={async (data) => {
+                  transform={async (data) => {
+                    let all = data;
                     const youngIds = [...new Set(data.map((item) => item.youngId))];
                     if (youngIds?.length) {
                       const { responses } = await api.esQuery("young", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: youngIds } } });
                       if (responses.length) {
                         const youngs = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-                        return data.map((item) => ({ ...item, young: youngs.find((e) => e._id === item.youngId) || {} }));
+                        all = data.map((item) => ({ ...item, young: youngs.find((e) => e._id === item.youngId) || {} }));
                       }
                     }
-                    return data;
-                  }}
-                  transform={(data) => {
-                    return {
-                      _id: data._id,
-                      Cohorte: data.youngCohort,
-                      Prénom: data.youngFirstName,
-                      Nom: data.youngLastName,
-                      Email: data.youngEmail,
-                      Téléphone: data.young.phone,
-                      "Adresse du volontaire": data.young.address,
-                      "Code postal du volontaire": data.young.zip,
-                      "Ville du volontaire": data.young.city,
-                      "Département du volontaire": data.young.department,
-                      "Région du volontaire": data.young.region,
-                      "Mobilité aux alentours de son établissement": data.young.mobilityNearSchool,
-                      "Mobilité aux alentours de son domicile": data.young.mobilityNearHome,
-                      "Mobilité aux alentours d'un de ses proches": data.young.mobilityNearRelative,
-                      "Mode de transport": data.young.mobilityTransport?.map((t) => translate(t)).join(", "),
-                      "Autre mode de transport": data.young.mobilityTransportOther,
-                      "Prénom représentant légal 1": data.young.parent1FirstName,
-                      "Nom représentant légal 1": data.young.parent1LastName,
-                      "Email représentant légal 1": data.young.parent1Email,
-                      "Téléphone représentant légal 1": data.young.parent1Phone,
-                      "Choix - Ordre de la candidature": data.priority,
-                      "Nom de la mission": data.missionName,
-                      "Département de la mission": data.missionDepartment,
-                      "Région de la mission": data.missionRegion,
-                      "Candidature créée lé": data.createdAt,
-                      "Candidature mise à jour le": data.updatedAt,
-                      "Statut de la candidature": data.status,
-                    };
+                    return all.map((data) => {
+                      return {
+                        _id: data._id,
+                        Cohorte: data.youngCohort,
+                        Prénom: data.youngFirstName,
+                        Nom: data.youngLastName,
+                        Email: data.youngEmail,
+                        Téléphone: data.young.phone,
+                        "Adresse du volontaire": data.young.address,
+                        "Code postal du volontaire": data.young.zip,
+                        "Ville du volontaire": data.young.city,
+                        "Département du volontaire": data.young.department,
+                        "Région du volontaire": data.young.region,
+                        "Mobilité aux alentours de son établissement": translate(data.young.mobilityNearSchool),
+                        "Mobilité aux alentours de son domicile": translate(data.young.mobilityNearHome),
+                        "Mobilité aux alentours d'un de ses proches": translate(data.young.mobilityNearRelative),
+                        "Mode de transport": data.young.mobilityTransport?.map((t) => translate(t)).join(", "),
+                        "Autre mode de transport": data.young.mobilityTransportOther,
+                        "Prénom représentant légal 1": data.young.parent1FirstName,
+                        "Nom représentant légal 1": data.young.parent1LastName,
+                        "Email représentant légal 1": data.young.parent1Email,
+                        "Téléphone représentant légal 1": data.young.parent1Phone,
+                        "Choix - Ordre de la candidature": data.priority,
+                        "Nom de la mission": data.missionName,
+                        "Département de la mission": data.missionDepartment,
+                        "Région de la mission": data.missionRegion,
+                        "Candidature créée lé": data.createdAt,
+                        "Candidature mise à jour le": data.updatedAt,
+                        "Statut de la candidature": translate(data.status),
+                      };
+                    });
                   }}
                 />
               </div>

@@ -6,16 +6,9 @@ import { translate, ES_NO_LIMIT } from "../utils";
 import LoadingButton from "./buttons/LoadingButton";
 import ModalConfirm from "./modals/ModalConfirm";
 import api from "../services/api";
+import dayjs from "dayjs";
 
-export default function ExportComponent({
-  title,
-  exportTitle,
-  index,
-  react,
-  transform,
-  transformAll = null,
-  defaultQuery = () => ({ query: { query: { match_all: {} } }, size: ES_NO_LIMIT }),
-}) {
+export default function ExportComponent({ title, exportTitle, index, react, transform, defaultQuery = () => ({ query: { query: { match_all: {} } }, size: ES_NO_LIMIT }) }) {
   const [exporting, setExporting] = useState(false);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const query = useRef(defaultQuery().query);
@@ -33,11 +26,12 @@ export default function ExportComponent({
   if (exporting) {
     return (
       <ReactiveComponent
-        defaultQuery={defaultQuery}
+        defaultQuery={() => ({ ...defaultQuery(), size: 1 })}
         componentId="EXPORT"
         react={react}
         onQueryChange={(prev, next) => {
           query.current = next.query;
+          console.log(next);
         }}
         render={(props) => {
           const { setQuery, data, loading } = props;
@@ -45,7 +39,6 @@ export default function ExportComponent({
             <Loading
               setQuery={setQuery}
               currentQuery={query.current}
-              transformAll={transformAll}
               data={data}
               loading={loading}
               onFinish={() => setExporting(false)}
@@ -76,53 +69,59 @@ export default function ExportComponent({
   );
 }
 
-function Loading({ onFinish, loading, exportTitle, transform, transformAll, currentQuery, index }) {
+function Loading({ onFinish, loading, exportTitle, transform, currentQuery, index }) {
+  const STATUS_LOADING = "Récupération des données";
+  const STATUS_TRANSFORM = "Mise en forme";
+  const STATUS_EXPORT = "Création du fichier";
+  const [status, setStatus] = useState(null);
+  const [data, setData] = useState([]);
+
   const [run, setRun] = useState(false);
+  console.log("render", Date.now(), status);
+
   useEffect(() => {
     if (loading === false) setRun(true);
   }, [loading]);
+
   useEffect(() => {
-    if (run) {
-      const d = new Date();
-      const date = ("0" + d.getDate()).slice(-2);
-      const month = ("0" + (d.getMonth() + 1)).slice(-2);
-      const year = d.getFullYear();
-      const minutes = ("0" + d.getMinutes()).slice(-2);
-      const hours = ("0" + d.getHours()).slice(-2);
-      const secondes = ("0" + d.getSeconds()).slice(-2);
-      const fileName = `${exportTitle}_${year}${month}${date}_${hours}h${minutes}m${secondes}s.xlsx`;
-
-      getAllResults(index, transform, transformAll, currentQuery).then((csv) => {
-        exportData(fileName, csv);
-        onFinish();
+    if (!run) return;
+    if (!status) {
+      setStatus(STATUS_LOADING);
+    } else if (status === STATUS_LOADING) {
+      getAllResults(index, currentQuery).then((results) => {
+        setData(results);
+        setStatus(STATUS_TRANSFORM);
       });
-    }
-  }, [run]);
+    } else if (status === STATUS_TRANSFORM) {
+      toArrayOfArray(data, transform).then((results) => {
+        setData(results);
+        setStatus(STATUS_EXPORT);
+      });
+    } else if (status === STATUS_EXPORT) {
+      const fileName = `${exportTitle}_${dayjs().format("YYYY-MM-DD_HH[h]mm[m]ss[s]")}.xlsx`;
 
-  return <LoadingButton loading={loading || run}></LoadingButton>;
+      exportData(fileName, data);
+      onFinish();
+    }
+  }, [run, status]);
+
+  return (
+    <div>
+      <LoadingButton loading={loading || run} loadingText={status}></LoadingButton>
+    </div>
+  );
 }
 
-async function getAllResults(collection, transform, transformAll, currentQuery) {
-  const result = await api.post("/es/export", {
-    query: currentQuery,
-    index: collection,
-  });
-  if (!result.data.length) return;
+async function toArrayOfArray(results, transform) {
+  const data = transform ? await transform(results) : results;
+  let columns = Object.keys(data[0]);
+  return [columns, ...data.map((item) => Object.values(item))];
+}
 
-  const data = transformAll ? await transformAll(result.data) : result.data;
-
-  let columns = Object.keys(objectWithMostFields(data.map((e) => (transform ? transform(e) : e))));
-  const csv = [];
-
-  // Add a first line with query parameters.
-  csv.push(columns);
-
-  for (let j = 0; j < data.length; j++) {
-    const obj = transform ? transform(data[j]) : data[j];
-    const arr = columns.map((key) => translate(obj[key]) || "");
-    csv.push(arr);
-  }
-  return csv;
+async function getAllResults(index, query) {
+  const result = await api.post("/es/export", { query, index });
+  if (!result.data.length) return [];
+  return result.data;
 }
 
 async function exportData(fileName, csv) {
@@ -133,17 +132,4 @@ async function exportData(fileName, csv) {
   const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
   const resultData = new Blob([excelBuffer], { type: fileType });
   FileSaver.saveAs(resultData, fileName + fileExtension);
-}
-
-function objectWithMostFields(objArr) {
-  const maxKeys = {};
-
-  objArr.map((obj) => {
-    Object.keys(obj).map((e) => {
-      if (!maxKeys.hasOwnProperty(e)) {
-        maxKeys[e] = obj[e];
-      }
-    });
-  });
-  return maxKeys;
 }
