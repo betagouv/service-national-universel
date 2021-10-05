@@ -76,7 +76,7 @@ export default () => {
               <ExportComponent
                 title="Exporter les volontaires"
                 defaultQuery={getExportQuery}
-                exportTitle="Volontaire"
+                exportTitle="Volontaires"
                 index="young"
                 react={{ and: FILTERS }}
                 transform={(all) => {

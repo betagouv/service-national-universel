@@ -39,7 +39,7 @@ export default () => {
               <ExportComponent
                 title="Exporter les centres"
                 defaultQuery={getExportQuery}
-                exportTitle="Centre_de_cohesion"
+                exportTitle="Centres_de_cohesion"
                 index="cohesioncenter"
                 react={{ and: FILTERS }}
                 transform={(all) => {

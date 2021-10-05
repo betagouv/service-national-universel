@@ -52,7 +52,7 @@ export default ({ mission, applications }) => {
                 <ExportComponent
                   title="Exporter les volontaires"
                   defaultQuery={getExportQuery}
-                  exportTitle="Volontaire"
+                  exportTitle="Volontaires"
                   index="application"
                   react={{ and: FILTERS }}
                   transform={async (data) => {

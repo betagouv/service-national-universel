@@ -68,7 +68,7 @@ export default () => {
               <ExportComponent
                 title="Exporter les missions"
                 defaultQuery={getExportQuery}
-                exportTitle="Mission"
+                exportTitle="Missions"
                 index="mission"
                 react={{ and: FILTERS }}
                 transform={async (data) => {

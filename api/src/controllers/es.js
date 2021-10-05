@@ -48,7 +48,7 @@ router.post("/mission/:action(_msearch|export)", passport.authenticate(["young",
     if (user.role === ROLES.HEAD_CENTER) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     if (req.params.action === "export") {
-      const response = await allRecords(req.body.index, applyFilterOnQuery(req.body.query, filter));
+      const response = await allRecords("mission", applyFilterOnQuery(req.body.query, filter));
       return res.status(200).send({ ok: true, data: serializeMissions(response) });
     } else {
       const response = await esClient.msearch({ index: "mission", body: withFilterForMSearch(body, filter) });
@@ -89,7 +89,7 @@ router.post("/young/:action(_msearch|export)", passport.authenticate(["referent"
     const { user, body } = req;
     if (user.role === ROLES.ADMIN) {
       if (req.params.action === "export") {
-        const response = await allRecords(req.body.index, req.body.query);
+        const response = await allRecords("young", req.body.query);
         return res.status(200).send({ ok: true, data: response });
       } else {
         const response = await esClient.msearch({ index: "young", body });
@@ -126,7 +126,7 @@ router.post("/young/:action(_msearch|export)", passport.authenticate(["referent"
     if (user.role === ROLES.REFERENT_DEPARTMENT) filter.push({ term: { "department.keyword": user.department } });
 
     if (req.params.action === "export") {
-      const response = await allRecords(req.body.index, applyFilterOnQuery(req.body.query, filter));
+      const response = await allRecords("young", applyFilterOnQuery(req.body.query, filter));
       return res.status(200).send({ ok: true, data: serializeYoungs(response) });
     } else {
       const response = await esClient.msearch({ index: "young", body: withFilterForMSearch(body, filter) });
@@ -171,7 +171,7 @@ router.post("/cohesionyoung/:id/:action(_msearch|export)", passport.authenticate
     ];
 
     if (req.params.action === "export") {
-      const response = await allRecords(req.body.index, applyFilterOnQuery(req.body.query, filter));
+      const response = await allRecords("young", applyFilterOnQuery(req.body.query, filter));
       return res.status(200).send({ ok: true, data: serializeYoungs(response) });
     } else {
       const response = await esClient.msearch({ index: "young", body: withFilterForMSearch(body, filter) });
@@ -209,7 +209,7 @@ router.post("/structure/:action(_msearch|export)", passport.authenticate(["refer
     if (user.role === ROLES.HEAD_CENTER) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     if (req.params.action === "export") {
-      const response = await allRecords(req.body.index, applyFilterOnQuery(req.body.query, filter));
+      const response = await allRecords("structure", applyFilterOnQuery(req.body.query, filter));
       return res.status(200).send({ ok: true, data: serializeStructures(response) });
     } else {
       const response = await esClient.msearch({ index: "structure", body: withFilterForMSearch(body, filter) });
@@ -275,7 +275,7 @@ router.post("/referent/:action(_msearch|export)", passport.authenticate(["refere
       });
     }
     if (req.params.action === "export") {
-      const response = await allRecords(req.body.index, applyFilterOnQuery(req.body.query, filter));
+      const response = await allRecords("referent", applyFilterOnQuery(req.body.query, filter));
       return res.status(200).send({ ok: true, data: serializeReferents(response) });
     } else {
       const response = await esClient.msearch({ index: "referent", body: withFilterForMSearch(body, filter) });
@@ -309,7 +309,7 @@ router.post("/application/:action(_msearch|export)", passport.authenticate(["ref
     if (user.role === ROLES.HEAD_CENTER) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     if (req.params.action === "export") {
-      const response = await allRecords(req.body.index, applyFilterOnQuery(req.body.query, filter));
+      const response = await allRecords("application", applyFilterOnQuery(req.body.query, filter));
       return res.status(200).send({ ok: true, data: serializeApplications(response) });
     } else {
       const response = await esClient.msearch({ index: "application", body: withFilterForMSearch(body, filter) });
@@ -334,7 +334,7 @@ router.post("/cohesioncenter/:action(_msearch|export)", passport.authenticate(["
     }
 
     if (req.params.action === "export") {
-      const response = await allRecords(req.body.index, applyFilterOnQuery(req.body.query, filter));
+      const response = await allRecords("cohesioncenter", applyFilterOnQuery(req.body.query, filter));
       return res.status(200).send({ ok: true, data: response });
     } else {
       const response = await esClient.msearch({ index: "cohesioncenter", body: withFilterForMSearch(body, filter) });
@@ -355,7 +355,7 @@ router.post("/meetingpoint/:action(_msearch|export)", passport.authenticate(["re
     }
 
     if (req.params.action === "export") {
-      const response = await allRecords(req.body.index, applyFilterOnQuery(req.body.query, filter));
+      const response = await allRecords("meetingpoint", applyFilterOnQuery(req.body.query, filter));
       return res.status(200).send({ ok: true, data: response });
     } else {
       const response = await esClient.msearch({ index: "meetingpoint", body: withFilterForMSearch(body) });

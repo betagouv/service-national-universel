@@ -81,7 +81,7 @@ export default () => {
                 <ExportComponent
                   title="Export pour les cas particuliers"
                   defaultQuery={getExportQuery}
-                  exportTitle="volontaires_cas_particuliers"
+                  exportTitle="Volontaires_cas_particuliers"
                   index="young"
                   react={{ and: FILTERS }}
                   transform={(all) => {
@@ -102,7 +102,7 @@ export default () => {
                 <ExportComponent
                   defaultQuery={getExportQuery}
                   title="Exporter les volontaires"
-                  exportTitle="Volontaire"
+                  exportTitle="Volontaires"
                   index="young"
                   react={{ and: FILTERS }}
                   transform={(all) => {

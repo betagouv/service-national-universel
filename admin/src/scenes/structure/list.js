@@ -68,7 +68,7 @@ export default () => {
                 <ExportComponent
                   title="Exporter les structures"
                   defaultQuery={getExportQuery}
-                  exportTitle="Structure"
+                  exportTitle="Structures"
                   index="structure"
                   react={{ and: FILTERS }}
                   transform={async (data) => {

@@ -64,7 +64,7 @@ export default () => {
               </div>
               <ExportComponent
                 title="Exporter les utilisateurs"
-                exportTitle="Utilisateur"
+                exportTitle="Utilisateurs"
                 index="referent"
                 defaultQuery={getExportQuery}
                 react={{ and: FILTERS }}

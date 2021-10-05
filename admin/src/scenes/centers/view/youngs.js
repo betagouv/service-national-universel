@@ -40,12 +40,10 @@ export default ({ center, updateCenter }) => {
           <ReactiveBase url={`${apiURL}/es`} app={`cohesionyoung/${center._id}`} headers={{ Authorization: `JWT ${api.getToken()}` }}>
             <div style={{ float: "right", marginBottom: "1.5rem", marginRight: "1.5rem" }}>
               <div style={{ display: "flex" }}>
-                {/*
-                 FIX ME!!!!!!
                 <ExportComponent
                   title="Exporter les volontaires"
-                  exportTitle="Volontaire"
-                  index="young"
+                  exportTitle="Volontaires_centre"
+                  index={`cohesionyoung/${center._id}`}
                   react={{ and: FILTERS }}
                   transform={(all) => {
                     return all.map((data) => {
@@ -166,7 +164,7 @@ export default ({ center, updateCenter }) => {
                       };
                     });
                   }}
-                />*/}
+                />
                 <DownloadAllAttestation cohesionCenterId={center._id}>
                   <div>Exporter les attestations</div>
                 </DownloadAllAttestation>
