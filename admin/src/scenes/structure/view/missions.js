@@ -35,7 +35,7 @@ export default ({ structure }) => {
             <Table>
               <thead>
                 <tr>
-                  <th width="40%">Volontaire</th>
+                  <th width="40%">Mission</th>
                   <th>Dates</th>
                   <th>Places</th>
                   <th width="20%">Statut pour la mission</th>
