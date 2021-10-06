@@ -45,9 +45,9 @@ export default () => {
   return (
     <HeroContainer>
       <Container>
-        <section className="help-section">
-          <h2>Besoin d'aide&nbsp;?</h2>
-          <div style={{ color: "#6B7280" }}>
+        <h2 style={{ marginLeft: "0.5rem" }}>Besoin d'aide&nbsp;?</h2>
+        <div className="help-section">
+          <div className="help-section-text" style={{ color: "#6B7280" }}>
             Vous souhaitez en savoir plus sur les phases de votre parcours volontaire ou sur le fonctionnement de votre espace&nbsp;?
             <br />
             N'hésitez pas à consulter notre{" "}
@@ -60,35 +60,35 @@ export default () => {
           </div>
           <div className="buttons">
             <LinkButton href="https://support.snu.gouv.fr/help/fr-fr/3-volontaire" target="_blank" rel="noopener noreferrer">
-              Trouver ma réponse
+              Trouver&nbsp;ma&nbsp;réponse
             </LinkButton>
           </div>
-
-          <div style={{ color: "#6B7280" }}>
+        </div>
+        <div className="help-section">
+          <div className="help-section-text" style={{ color: "#6B7280" }}>
             Vous n'avez pas trouvé de réponse à votre demande ?<br />
             Contactez notre <strong>service de support</strong>.
           </div>
           <div className="buttons">
-            <InternalLink to="/besoin-d-aide/ticket">Contacter quelqu'un</InternalLink>
+            <InternalLink to="/besoin-d-aide/ticket">Contacter&nbsp;quelqu'un</InternalLink>
           </div>
-        </section>
-        <Card>
-          <h4 style={{ marginLeft: "0.5rem" }}>Quelques articles pour vous aider&nbsp;:</h4>
-          <div className="division">
-            {articles.map((article) => (
-              <div className="block" key={article.url} onClick={() => window.open(article.url)}>
-                <h6>{article.title}</h6>
-                <p>{article.body}</p>
-                <p>
-                  <a className="block-link" href={article.url} target="_blank">
-                    Lire la suite
-                  </a>
-                </p>
-              </div>
-            ))}
-          </div>
-        </Card>
+        </div>
       </Container>
+      <h4 style={{ marginLeft: "0.5rem" }}>Quelques articles pour vous aider&nbsp;:</h4>
+      <Articles>
+        {articles.map((article) => (
+          <div className="block" key={article.url} onClick={() => window.open(article.url)}>
+            <h6>{article.title}</h6>
+            <p>{article.body}</p>
+            <p>
+              <a className="block-link" href={article.url} target="_blank">
+                Lire la suite
+              </a>
+            </p>
+          </div>
+        ))}
+      </Articles>
+      <hr />
       <h4 style={{ marginLeft: "0.5rem" }}>Mes conversations en cours</h4>
       <List>
         <section className="ticket titles">
@@ -117,23 +117,25 @@ export default () => {
 const Container = styled.div`
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
   .help-section {
-    max-width: 500px;
-    text-align: center;
-    margin: 0 0.5rem;
+    padding: 0.5rem;
+    display: flex;
+    justify-content: space-between;
     .buttons {
       margin: 1rem 0;
+      flex: 1;
     }
   }
-  @media (min-width: 1024px) {
-    flex-direction: row;
-    align-items: flex-start;
-    justify-content: space-between;
-    margin: 0.5rem 1.5rem;
+  .help-section-text {
+    flex: 3;
+  }
+  @media (max-width: 1024px) {
     .help-section {
-      text-align: left;
+      flex-direction: column;
+      align-items: center;
+    }
+    .help-section-text {
+      text-align: center;
     }
   }
 `;
@@ -171,16 +173,15 @@ const InternalLink = styled(NavLink)`
   }
 `;
 
-const Card = styled.div`
-  margin-top: 2rem;
+const Articles = styled.div`
   min-width: 330px;
-  .division {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
   .block {
     background-color: #fff;
+    flex: 1;
+    flex-basis: 230px;
     display: flex;
     flex-direction: column;
     padding: 1.3rem;
@@ -197,18 +198,10 @@ const Card = styled.div`
     margin: 0;
     font-size: 0.9rem;
   }
-  @media (min-width: 1024px) {
-    margin-top: 0;
-  }
 `;
 
 const List = styled.div`
   background-color: #fff;
-  margin: 2rem;
-  @media (max-width: 1024px) {
-    margin: 0.5rem;
-  }
-
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   border-radius: 0.5rem;
   overflow: hidden;
