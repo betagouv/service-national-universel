@@ -60,7 +60,7 @@ export default () => {
             <br />
             N'hésitez pas à consulter notre{" "}
             <strong>
-              <a href="https://support.snu.gouv.fr/help/fr-fr/3-volontaire" style={{ color: "#6B7280" }} target="_blank" rel="noopener noreferrer">
+              <a className="link" href="https://support.snu.gouv.fr/help/fr-fr/3-volontaire" target="_blank" rel="noopener noreferrer">
                 base de connaissance
               </a>
             </strong>
@@ -75,7 +75,13 @@ export default () => {
         <div className="help-section">
           <div className="help-section-text" style={{ color: "#6B7280" }}>
             Vous n'avez pas trouvé de réponse à votre demande ?<br />
-            Contactez notre <strong>service de support</strong>.
+            Contactez notre{" "}
+            <strong>
+              <NavLink className="link" to="/besoin-d-aide/ticket">
+                service de support
+              </NavLink>
+            </strong>
+            .
           </div>
           <div className="buttons">
             <InternalLink to="/besoin-d-aide/ticket">Contacter&nbsp;quelqu'un</InternalLink>
@@ -138,6 +144,12 @@ const Container = styled.div`
   }
   .help-section-text {
     flex: 3;
+  }
+  .link {
+    color: #6b7280;
+    :hover {
+      text-decoration: underline;
+    }
   }
   @media (max-width: 1024px) {
     .help-section {
