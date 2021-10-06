@@ -66,7 +66,14 @@ router.post("/", passport.authenticate("referent", { session: false }), async (r
   try {
     const { error, value: checkedMission } = validateMission(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+
     const data = await MissionObject.create(checkedMission);
+
+    const referentDepartment = await UserObject.findOne().and([{ role: "referent_department" }, { department: checkedMission.department }]);
+    await sendTemplate(SENDINBLUE_TEMPLATES.referent.NEW_MISSION, {
+      emailTo: [{ name: `${referentDepartment.firstName} ${referentDepartment.lastName}`, email: referentDepartment.email }],
+    });
+
     return res.status(200).send({ ok: true, data: serializeMission(data) });
   } catch (error) {
     capture(error);
