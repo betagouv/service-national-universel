@@ -30,6 +30,7 @@ import Consentement from "./consentement";
 import ConsentementImage from "./consentement-image";
 import ConsentementPCR from "./consentement-pcr";
 import InformationsSupplementaires from "./informations-supplementaires";
+import MilitaryPreparation from "./military-preparation";
 import JDC from "./JDC";
 import CohesionCenter from "./cohesion-center";
 import MeetingPoint from "./meeting-point";
@@ -124,6 +125,12 @@ export default (props) => {
             <Row>
               {values.cohort === "2020" ? <JDC values={values} handleChange={handleChange} /> : null}
               {user.role === ROLES.ADMIN ? <InformationsSupplementaires values={values} handleChange={handleChange} /> : null}
+            </Row>
+            <Row>
+              <InterTitle>Préparation Militaire</InterTitle>
+            </Row>
+            <Row>
+              <MilitaryPreparation values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
             </Row>
             <TitleWrapper>
               <DeleteButton young={young} />
