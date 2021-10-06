@@ -15,23 +15,8 @@ export default ({ setTicket, selectedTicket, setOverview }) => {
   const [tickets, setTickets] = useState(null);
   const user = useSelector((state) => state.Auth.user);
 
-  const getAlltickets = async () => {
-    const { data } = await api.get(`/support-center/ticket?withArticles=true`);
-    setTickets(data);
-  };
-
-  const getTickets = async ({ region, department }) => {
-    const tags = [];
-    if (region) {
-      tags.push(`AGENT_Référent_Région`);
-      tags.push(`REGION_${region}`);
-    }
-    if (department) {
-      tags.push(`AGENT_Référent_Département`);
-      tags.push(`DEPARTEMENT_${department}`);
-    }
+  const getTickets = async (tags) => {
     const { data } = await api.post(`/support-center/ticket/search-by-tags?withArticles=true`, { tags });
-
     const ticketNotification = data.reduce((prev, curr) => {
       prev[curr.state_id] = (prev[curr.state_id] || 0) + 1;
       return prev;
@@ -41,10 +26,11 @@ export default ({ setTicket, selectedTicket, setOverview }) => {
   };
 
   useEffect(() => {
-    let ticketsFromZammad = [];
-    if (user.role === ROLES.ADMIN) ticketsFromZammad = getAlltickets();
-    else if (user.role === ROLES.REFERENT_DEPARTMENT) ticketsFromZammad = getTickets({ department: user.department });
-    else if (user.role === ROLES.REFERENT_REGION) ticketsFromZammad = getTickets({ department: user.department });
+    let tags = [];
+    if (user.role === ROLES.ADMIN) tags.push(["AGENT_Startup_Support"]);
+    else if (user.role === ROLES.REFERENT_DEPARTMENT) tags.push(["AGENT_Référent_Département", `DEPARTEMENT_${user.department}`]);
+    else if (user.role === ROLES.REFERENT_REGION) tags.push(["AGENT_Référent_Région", `DEPARTEMENT_${user.region}`]);
+    if (tags.length) getTickets(tags);
   }, []);
 
   useEffect(() => {

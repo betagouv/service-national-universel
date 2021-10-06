@@ -16,7 +16,7 @@ export default () => {
   const young = useSelector((state) => state.Auth.young);
   //todo : fetch zammad categories (scopes)
   const options = ["Assistance technique", "À propos de ma situation", "Contacter un référent"];
-  const tags = [`COHORTE_${young.cohort}`, `DEPARTEMENT_${young.department}`, `REGION_${young.region}`, `EMETTEUR_Volontaire`, `CANAL_Plateforme`];
+  const tags = [`COHORTE_${young.cohort}`, `DEPARTEMENT_${young.department}`, `REGION_${young.region}`, `EMETTEUR_Volontaire`, `CANAL_Plateforme`, `AGENT_Startup_Support`];
 
   useEffect(() => {
     (async () => {
