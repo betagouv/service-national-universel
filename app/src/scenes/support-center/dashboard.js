@@ -53,7 +53,7 @@ export default () => {
   return (
     <HeroContainer>
       <Container>
-        <h2 style={{ marginLeft: "0.5rem" }}>Besoin d'aide&nbsp;?</h2>
+        <h4 style={{ marginLeft: "0.5rem" }}>Besoin d'aide&nbsp;?</h4>
         <div className="help-section">
           <div className="help-section-text" style={{ color: "#6B7280" }}>
             Vous souhaitez en savoir plus sur les phases de votre parcours volontaire ou sur le fonctionnement de votre espace&nbsp;?

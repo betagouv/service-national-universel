@@ -26,9 +26,9 @@ export default () => {
   }, []);
   return (
     <Container>
-      <BackButton to={`/besoin-d-aide`}>{"<"} Retour</BackButton>
+      <BackButton to={`/besoin-d-aide`}>{"<"} Retour à l'accueil</BackButton>
       <Heading>
-        <h2>Contacter le support</h2>
+        <h4>Contacter quelqu'un</h4>
         <p>Vous avez un problème technique, vous souhaitez en savoir plus sur votre situation, ou souhaitez contacter l'un de vos référents ?</p>
       </Heading>
       <Form>
@@ -145,16 +145,22 @@ const Container = styled(HeroContainer)`
 `;
 
 const Heading = styled.header`
-  padding: 1.5rem;
   font-size: 3rem;
-  flex: 1;
+  display: flex;
+  padding: 2rem;
+  flex-direction: column;
+  margin: 0 auto;
+  width: clamp(700px, 80%, 1000px);
+  @media (max-width: 767px) {
+    width: 100%;
+  }
+
   p {
-    font-size: 1.2rem;
+    font-size: 1rem;
     color: #6b7280;
   }
   @media (max-width: 767px) {
     padding: 1.2rem;
-    font-size: 1.1rem;
     p {
       font-size: 1rem;
       color: #6b7280;
