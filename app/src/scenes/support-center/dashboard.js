@@ -2,10 +2,11 @@ import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
 import { formatDistanceToNow } from "date-fns";
+import { useSelector } from "react-redux";
 
 import { HeroContainer } from "../../components/Content";
 import { fr } from "date-fns/locale";
-import API from "../../services/api";
+import api from "../../services/api";
 import Loader from "../../components/Loader";
 import { ticketStateNameById } from "../../utils";
 
@@ -29,10 +30,12 @@ const articles = [
 
 export default () => {
   const [userTickets, setUserTickets] = useState(null);
+  const young = useSelector((state) => state.Auth.young);
+
   useEffect(() => {
     const fetchTickets = async () => {
       try {
-        const response = await API.get("/support-center/ticket");
+        const response = await api.get("/support-center/ticket?withArticles=true");
         if (!response.ok) return console.log(response);
         setUserTickets(response.data);
       } catch (error) {
@@ -41,6 +44,11 @@ export default () => {
     };
     fetchTickets();
   }, []);
+
+  const getLastContactName = (array) => {
+    const lastTicketFromAgent = array?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))?.find((e) => e.created_by !== young.email);
+    return lastTicketFromAgent?.from;
+  };
 
   return (
     <HeroContainer>
@@ -92,8 +100,9 @@ export default () => {
       <h4 style={{ marginLeft: "0.5rem" }}>Mes conversations en cours</h4>
       <List>
         <section className="ticket titles">
-          <p>Numéro du ticket</p>
+          <p>Nº demande</p>
           <p>Sujet</p>
+          <p>Contact</p>
           <p>État</p>
           <p className="ticket-date">Dernière mise à jour</p>
         </section>
@@ -105,6 +114,7 @@ export default () => {
             <NavLink to={`/besoin-d-aide/ticket/${ticket.id}`} key={ticket.id} className="ticket">
               <p>{ticket.number}</p>
               <p>{ticket.title}</p>
+              <p>{getLastContactName(ticket?.articles)}</p>
               <p>{ticketStateNameById(ticket.state_id)}</p>
               <p className="ticket-date">il y a {formatDistanceToNow(new Date(ticket.updated_at), { locale: fr })}</p>
             </NavLink>
@@ -210,7 +220,7 @@ const List = styled.div`
     color: black;
     padding: 1rem 1.5rem;
     display: grid;
-    grid-template-columns: 1fr 2fr 1fr 1fr;
+    grid-template-columns: 1fr 2fr 1fr 1fr 1fr;
     grid-template-rows: 1fr;
     :not(:first-child):hover {
       background-color: #f1f1f1 !important;
