@@ -133,32 +133,33 @@ export default ({ onChange, value }) => {
           <Info title="Structure">
             <div className="detail">
               <div className="detail-title">Nom :</div>
+              <div className="detail-text">{structure.name}</div>
               <Link to={`/structure/${structure._id}`}>
-                <div className="detail-text">{structure.name}</div>
+                <IconLink />
               </Link>
             </div>
             <Details title="Région" value={structure?.region} />
             <Details title="Dép." value={structure?.department} />
             <Details title="Référent Dép." value={referentDepartment?.email} copy />
-            {structureTeam.length ? null : (
-              <div className="detail">
-                <div className="detail-title">Équipe :</div>
+            <div className="detail" style={{ alignItems: "flex-start" }}>
+              <div className="detail-title">Équipe :</div>
+              {!structureTeam.length ? (
                 <div className="detail-text">Aucun compte trouvé</div>
-              </div>
-            )}
-            {structureTeam.map((referent, index) =>
-              index === 0 ? (
-                <div className="detail" key={referent._id}>
-                  <div className="detail-title">Équipe :</div>
-                  <TeamUser referent={referent} />
-                </div>
               ) : (
-                <div className="detail" key={referent._id}>
-                  <div className="detail-title"></div>
-                  <TeamUser referent={referent} />
+                <div className="detail-text">
+                  <ul>
+                    {structureTeam.map((referent, index) => (
+                      <TeamMember key={referent._id}>
+                        {`${referent.firstName} ${referent.lastName}`}
+                        <Link to={`/user/${referent._id}`}>
+                          <IconLink />
+                        </Link>
+                      </TeamMember>
+                    ))}
+                  </ul>
                 </div>
-              )
-            )}
+              )}
+            </div>
             <Details title="Missions dispo." value={missionsInfo.count} />
             <Details title="Places restantes" value={missionsInfo.placesLeft} />
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", marginTop: "10px" }}>
@@ -179,15 +180,6 @@ export default ({ onChange, value }) => {
     </Panel>
   );
 };
-const TeamUser = ({ referent }) => {
-  return (
-    <Link to={`/user/${referent._id}`} key={referent._id}>
-      <div className="detail-text" key={referent._id}>
-        <div>{`${referent.firstName} ${referent.lastName}`}</div>
-      </div>
-    </Link>
-  );
-};
 
 const Button = styled.button`
   margin: 0 0.5rem;
@@ -199,23 +191,6 @@ const Button = styled.button`
   font-weight: 400;
   cursor: pointer;
   background-color: #fff;
-  &.btn-blue {
-    color: #646b7d;
-    border: 1px solid #dcdfe6;
-    :hover {
-      color: rgb(49, 130, 206);
-      border-color: rgb(193, 218, 240);
-      background-color: rgb(234, 243, 250);
-    }
-  }
-  &.btn-red {
-    border: 1px solid #f6cccf;
-    color: rgb(206, 90, 90);
-    :hover {
-      border-color: rgb(240, 218, 218);
-      background-color: rgb(250, 230, 230);
-    }
-  }
   &.btn-missions {
     color: #646b7d;
     border: 1px solid #dcdfe6;
@@ -227,4 +202,19 @@ const Button = styled.button`
       background-color: rgb(234, 243, 250);
     }
   }
+`;
+
+const IconLink = styled.div`
+  margin: 0 0.5rem;
+  width: 18px;
+  height: 18px;
+  background: ${`url(${require("../../assets/link.svg")})`};
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 15px 15px;
+`;
+
+const TeamMember = styled.li`
+  display: flex;
+  align-items: center;
 `;
