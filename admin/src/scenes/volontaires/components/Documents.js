@@ -3,7 +3,7 @@ import styled from "styled-components";
 export default styled.div`
   margin-left: 1rem;
   margin-right: 1rem;
-  margin-top: 3rem;
+  margin-top: 1rem;
   h4 {
     font-size: 1rem;
     font-weight: 500;
