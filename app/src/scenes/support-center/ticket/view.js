@@ -15,8 +15,8 @@ import MailOpenIcon from "../../../components/MailOpenIcon";
 import SuccessIcon from "../../../components/SuccessIcon";
 
 const updateHeightElement = (e) => {
-  e.target.style.height = "inherit";
-  e.target.style.height = `${e.target.scrollHeight}px`;
+  e.style.height = "inherit";
+  e.style.height = `${e.scrollHeight}px`;
 };
 
 export default (props) => {
@@ -24,6 +24,7 @@ export default (props) => {
   const [sending, setSending] = useState(false);
   const [message, setMessage] = useState();
   const young = useSelector((state) => state.Auth.young);
+  const inputRef = React.useRef();
 
   const getTicket = async () => {
     try {
@@ -50,6 +51,7 @@ export default (props) => {
     const id = props.match?.params?.id;
     const { data } = await api.put(`/support-center/ticket/${id}`, { message });
     setMessage("");
+    updateHeightElement(inputRef?.current);
     getTicket();
     setSending(false);
   };
@@ -104,18 +106,19 @@ export default (props) => {
         </Messages>
         <InputContainer>
           <textarea
+            ref={inputRef}
             row={2}
             placeholder="Mon message..."
             className="form-control"
             onChange={(e) => {
               setMessage(e.target.value);
-              updateHeightElement(e);
+              updateHeightElement(e.target);
             }}
             value={message}
           />
           <ButtonContainer>
             <LoadingButton onClick={send} disabled={!message || sending} color="white">
-              <SendIcon color={!message && "grey"} />
+              <SendIcon color={!message ? "grey" : null} />
             </LoadingButton>
           </ButtonContainer>
         </InputContainer>
