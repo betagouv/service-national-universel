@@ -223,20 +223,20 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
           <React.Fragment>
             <CopyLink
               onClick={async () => {
-                try {
-                  setModal({
-                    isOpen: true,
-                    title: "Renvoyer un mail",
-                    message: "Souhaitez-vous renvoyer un mail à la structure ? ",
-                    onConfirm: async () => {
-                      const responseNotification = await api.post(`/application/${application._id}/notify/${SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION}`);
+                setModal({
+                  isOpen: true,
+                  title: "Renvoyer un mail",
+                  message: "Souhaitez-vous renvoyer un mail à la structure ? ",
+                  onConfirm: async () => {
+                    try {
+                      const responseNotification = await api.post(`/application/${hit._id}/notify/${SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION}`);
                       if (!responseNotification?.ok) return toastr.error(translate(responseNotification?.code), "Une erreur s'est produite avec le service de notification.");
                       toastr.success("L'email a bien été envoyé");
-                    },
-                  });
-                } catch (e) {
-                  toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
-                }
+                    } catch (e) {
+                      toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
+                    }
+                  },
+                });
               }}
             >
               ✉️ Renvoyer un mail à la structure
