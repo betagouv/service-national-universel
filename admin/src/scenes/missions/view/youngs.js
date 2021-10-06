@@ -181,7 +181,8 @@ const Hit = ({ hit, onClick, onChangeApplication, selected }) => {
         <MultiLine>
           <h2>{`${hit.youngFirstName} ${hit.youngLastName}`}</h2>
           <p>
-            {hit.youngBirthdateAt ? `${getAge(hit.youngBirthdateAt)} ans` : null} {`• ${hit.youngCity || ""} (${hit.youngDepartment || ""})`}
+            {hit.youngBirthdateAt ? `${getAge(hit.youngBirthdateAt)} ans` : null}
+            {hit.youngCity || hit.youngDepartment ? `• ${hit.youngCity || ""} (${hit.youngDepartment || ""})` : null}
           </p>
         </MultiLine>
       </td>
