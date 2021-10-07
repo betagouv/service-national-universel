@@ -226,7 +226,7 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
                 setModal({
                   isOpen: true,
                   title: "Renvoyer un mail",
-                  message: "Souhaitez-vous renvoyer un mail à la structure ? ",
+                  message: "Souhaitez-vous renvoyer un mail à la structure ?",
                   onConfirm: async () => {
                     try {
                       const responseNotification = await api.post(`/application/${hit._id}/notify/${SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION}`);
