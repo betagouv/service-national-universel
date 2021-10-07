@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
-import { formatDistanceToNow } from "date-fns";
+import relativeTime from "dayjs/plugin/relativeTime";
+import dayjs from "dayjs";
+import "dayjs/locale/fr";
 import { useSelector } from "react-redux";
 
-import { fr } from "date-fns/locale";
 import api from "../../services/api";
 import Loader from "../../components/Loader";
 import { ticketStateNameById, colors } from "../../utils";
@@ -33,6 +34,8 @@ const articles = [
 export default () => {
   const [userTickets, setUserTickets] = useState(null);
   const user = useSelector((state) => state.Auth.user);
+
+  dayjs.extend(relativeTime).locale("fr");
 
   useEffect(() => {
     const fetchTickets = async () => {
@@ -149,7 +152,7 @@ export default () => {
               <p>{ticket.title}</p>
               <p>{getLastContactName(ticket?.articles)}</p>
               <p>{displayState(ticketStateNameById(ticket.state_id))}</p>
-              <p className="ticket-date">il y a {formatDistanceToNow(new Date(ticket.updated_at), { locale: fr })}</p>
+              <p className="ticket-date">{dayjs(new Date(ticket.updated_at)).fromNow()}</p>
             </NavLink>
           ))}
       </List>
