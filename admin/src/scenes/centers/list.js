@@ -39,27 +39,30 @@ export default () => {
               <ExportComponent
                 title="Exporter les centres"
                 defaultQuery={getExportQuery}
-                collection="cohesioncenter"
+                exportTitle="Centres_de_cohesion"
+                index="cohesioncenter"
                 react={{ and: FILTERS }}
-                transform={(data) => {
-                  return {
-                    Nom: data.name,
-                    Code: data.code,
-                    Pays: data.country,
-                    COR: data.COR,
-                    Adresse: data.address,
-                    Ville: data.city,
-                    "Code Postal": data.zip,
-                    "N˚ Département": data.departmentCode,
-                    Département: data.department,
-                    Région: data.region,
-                    "Places total": data.placesTotal,
-                    "Places disponibles": data.placesLeft,
-                    "Tenues livrées": data.outfitDelivered,
-                    Observations: data.observations,
-                    "Créé lé": formatLongDateFR(data.createdAt),
-                    "Mis à jour le": formatLongDateFR(data.updatedAt),
-                  };
+                transform={(all) => {
+                  return all.map((data) => {
+                    return {
+                      Nom: data.name,
+                      Code: data.code,
+                      Pays: data.country,
+                      COR: data.COR,
+                      Adresse: data.address,
+                      Ville: data.city,
+                      "Code Postal": data.zip,
+                      "N˚ Département": data.departmentCode,
+                      Département: data.department,
+                      Région: data.region,
+                      "Places total": data.placesTotal,
+                      "Places disponibles": data.placesLeft,
+                      "Tenues livrées": data.outfitDelivered,
+                      Observations: data.observations,
+                      "Créé lé": formatLongDateFR(data.createdAt),
+                      "Mis à jour le": formatLongDateFR(data.updatedAt),
+                    };
+                  });
                 }}
               />
               {user.role === ROLES.ADMIN ? (

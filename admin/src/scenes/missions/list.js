@@ -68,50 +68,51 @@ export default () => {
               <ExportComponent
                 title="Exporter les missions"
                 defaultQuery={getExportQuery}
-                collection="mission"
+                exportTitle="Missions"
+                index="mission"
                 react={{ and: FILTERS }}
-                transformAll={async (data) => {
+                transform={async (data) => {
+                  let all = data;
                   const tutorIds = [...new Set(data.map((item) => item.tutorId).filter((e) => e))];
                   if (tutorIds?.length) {
                     const { responses } = await api.esQuery("referent", { size: ES_NO_LIMIT, query: { ids: { type: "_doc", values: tutorIds } } });
                     if (responses.length) {
                       const tutors = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-                      return data.map((item) => ({ ...item, tutor: tutors?.find((e) => e._id === item.tutorId) }));
+                      all = data.map((item) => ({ ...item, tutor: tutors?.find((e) => e._id === item.tutorId) }));
                     }
                   }
-                  return data;
-                }}
-                transform={(data) => {
-                  return {
-                    _id: data._id,
-                    "Titre de la mission": data.name,
-                    Description: data.description,
-                    "Id de la structure": data.structureId,
-                    "Nom de la structure": data.structureName,
-                    "Id du tuteur": data.tutorId,
-                    "Nom du tuteur": data.tutor?.lastName,
-                    "Prénom du tuteur": data.tutor?.firstName,
-                    "Email du tuteur": data.tutor?.email,
-                    "Téléphone du tuteur": data.tutor?.mobile ? data.tutor?.mobile : data.tutor?.phone,
-                    "Liste des domaines de la mission": data.domains?.map(translate)?.join(", "),
-                    "Date du début": formatDateFRTimezoneUTC(data.startAt),
-                    "Date de fin": formatDateFRTimezoneUTC(data.endAt),
-                    Format: data.format,
-                    Fréquence: data.frequence,
-                    Période: data.period?.map(translate)?.join(", "),
-                    "Places total": data.placesTotal,
-                    "Places disponibles": data.placesLeft,
-                    "Actions concrètes confiées au(x) volontaire(s)": data.actions,
-                    "Contraintes spécifiques": data.contraintes,
-                    Adresse: data.address,
-                    "Code postal": data.zip,
-                    Ville: data.city,
-                    Département: data.department,
-                    Région: data.region,
-                    Statut: data.status,
-                    "Créé lé": formatLongDateFR(data.createdAt),
-                    "Mis à jour le": formatLongDateFR(data.updatedAt),
-                  };
+                  return all.map((data) => {
+                    return {
+                      _id: data._id,
+                      "Titre de la mission": data.name,
+                      Description: data.description,
+                      "Id de la structure": data.structureId,
+                      "Nom de la structure": data.structureName,
+                      "Id du tuteur": data.tutorId,
+                      "Nom du tuteur": data.tutor?.lastName,
+                      "Prénom du tuteur": data.tutor?.firstName,
+                      "Email du tuteur": data.tutor?.email,
+                      "Téléphone du tuteur": data.tutor?.mobile ? data.tutor?.mobile : data.tutor?.phone,
+                      "Liste des domaines de la mission": data.domains?.map(translate)?.join(", "),
+                      "Date du début": formatDateFRTimezoneUTC(data.startAt),
+                      "Date de fin": formatDateFRTimezoneUTC(data.endAt),
+                      Format: translate(data.format),
+                      Fréquence: data.frequence,
+                      Période: data.period?.map(translate)?.join(", "),
+                      "Places total": data.placesTotal,
+                      "Places disponibles": data.placesLeft,
+                      "Actions concrètes confiées au(x) volontaire(s)": data.actions,
+                      "Contraintes spécifiques": data.contraintes,
+                      Adresse: data.address,
+                      "Code postal": data.zip,
+                      Ville: data.city,
+                      Département: data.department,
+                      Région: data.region,
+                      Statut: translate(data.status),
+                      "Créé lé": formatLongDateFR(data.createdAt),
+                      "Mis à jour le": formatLongDateFR(data.updatedAt),
+                    };
+                  });
                 }}
               />
             </Header>

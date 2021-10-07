@@ -64,40 +64,43 @@ export default () => {
               </div>
               <ExportComponent
                 title="Exporter les utilisateurs"
-                collection="user"
+                exportTitle="Utilisateurs"
+                index="referent"
                 defaultQuery={getExportQuery}
                 react={{ and: FILTERS }}
-                transform={(data) => {
-                  let structure = {};
-                  if (data.structureId && structures) {
-                    structure = structures.find((s) => s._id === data.structureId);
-                    if (!structure) structure = {};
-                  }
-                  let service = {};
-                  if (data.role === ROLES.REFERENT_DEPARTMENT && services) {
-                    service = services.find((s) => s.department === data.department);
-                    if (!service) service = {};
-                  }
-                  return {
-                    _id: data._id,
-                    Prénom: data.firstName,
-                    Nom: data.lastName,
-                    Email: data.email,
-                    Rôle: data.role,
-                    Fonction: data.subRole,
-                    Téléphone: data.phone,
-                    Portable: data.mobile,
-                    Département: data.department,
-                    Région: data.region,
-                    Structure: structure?.name,
-                    "Nom de la direction du service départemental": service?.directionName,
-                    "Adresse du service départemental": service?.address + service?.complementAddress,
-                    "Code Postal du service départemental": service?.zip,
-                    "Ville du service départemental": service?.city,
-                    "Créé lé": formatLongDateFR(data.createdAt),
-                    "Mis à jour le": formatLongDateFR(data.updatedAt),
-                    "Dernière connexion le": formatLongDateFR(data.lastLoginAt),
-                  };
+                transform={(all) => {
+                  return all.map((data) => {
+                    let structure = {};
+                    if (data.structureId && structures) {
+                      structure = structures.find((s) => s._id === data.structureId);
+                      if (!structure) structure = {};
+                    }
+                    let service = {};
+                    if (data.role === ROLES.REFERENT_DEPARTMENT && services) {
+                      service = services.find((s) => s.department === data.department);
+                      if (!service) service = {};
+                    }
+                    return {
+                      _id: data._id,
+                      Prénom: data.firstName,
+                      Nom: data.lastName,
+                      Email: data.email,
+                      Rôle: data.role,
+                      Fonction: data.subRole,
+                      Téléphone: data.phone,
+                      Portable: data.mobile,
+                      Département: data.department,
+                      Région: data.region,
+                      Structure: structure?.name,
+                      "Nom de la direction du service départemental": service?.directionName,
+                      "Adresse du service départemental": service?.address + service?.complementAddress,
+                      "Code Postal du service départemental": service?.zip,
+                      "Ville du service départemental": service?.city,
+                      "Créé lé": formatLongDateFR(data.createdAt),
+                      "Mis à jour le": formatLongDateFR(data.updatedAt),
+                      "Dernière connexion le": formatLongDateFR(data.lastLoginAt),
+                    };
+                  });
                 }}
               />
             </Header>

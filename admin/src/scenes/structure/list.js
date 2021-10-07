@@ -68,9 +68,11 @@ export default () => {
                 <ExportComponent
                   title="Exporter les structures"
                   defaultQuery={getExportQuery}
-                  collection="structure"
+                  exportTitle="Structures"
+                  index="structure"
                   react={{ and: FILTERS }}
-                  transformAll={async (data) => {
+                  transform={async (data) => {
+                    let all = data;
                     const structureIds = [...new Set(data.map((item) => item._id).filter((e) => e))];
                     if (structureIds?.length) {
                       const { responses } = await api.esQuery("referent", {
@@ -79,48 +81,47 @@ export default () => {
                       });
                       if (responses.length) {
                         const referents = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-                        return data.map((item) => ({ ...item, team: referents?.filter((e) => e.structureId === item._id) }));
+                        all = data.map((item) => ({ ...item, team: referents?.filter((e) => e.structureId === item._id) }));
                       }
                     }
-                    return data;
-                  }}
-                  transform={(data) => {
-                    return {
-                      _id: data._id,
-                      "Nom de la structure": data.name,
-                      "Numéro de SIRET": data.siret,
-                      Description: data.description,
-                      "Site internet": data.website,
-                      Facebook: data.facebook,
-                      Twitter: data.twitter,
-                      Instagram: data.instagram,
-                      Statut: data.status,
-                      "Taille d'équipe": data.team?.length,
-                      "Membre 1 - Prénom": data.team[0]?.firstName,
-                      "Membre 1 - Nom": data.team[0]?.lastName,
-                      "Membre 1 - Email": data.team[0]?.email,
-                      "Membre 2 - Prénom": data.team[1]?.firstName,
-                      "Membre 2 - Nom": data.team[1]?.lastName,
-                      "Membre 2 - Email": data.team[1]?.email,
-                      "Membre 3 - Prénom": data.team[2]?.firstName,
-                      "Membre 3 - Nom": data.team[2]?.lastName,
-                      "Membre 3 - Email": data.team[2]?.email,
-                      "Est une tête de réseau": data.isNetwork,
-                      "Nom de la tête de réseau": data.networkName,
-                      "Statut juridique": data.legalStatus,
-                      "Type d'association": data.associationTypes,
-                      "Type de structure publique": data.structurePubliqueType,
-                      "Type de service de l'état": data.structurePubliqueEtatType,
-                      "Type de structure privée": data.structurePriveeType,
-                      "Adresse de la structure": data.address,
-                      "Code postal de la structure": data.zip,
-                      "Ville de la structure": data.city,
-                      "Département de la structure": data.department,
-                      "Région de la structure": data.region,
-                      "Pays de la structure": data.country,
-                      "Créé lé": formatLongDateFR(data.createdAt),
-                      "Mis à jour le": formatLongDateFR(data.updatedAt),
-                    };
+                    return all.map((data) => {
+                      return {
+                        _id: data._id,
+                        "Nom de la structure": data.name,
+                        "Numéro de SIRET": data.siret,
+                        Description: data.description,
+                        "Site internet": data.website,
+                        Facebook: data.facebook,
+                        Twitter: data.twitter,
+                        Instagram: data.instagram,
+                        Statut: translate(data.status),
+                        "Taille d'équipe": data.team?.length,
+                        "Membre 1 - Prénom": data.team[0]?.firstName,
+                        "Membre 1 - Nom": data.team[0]?.lastName,
+                        "Membre 1 - Email": data.team[0]?.email,
+                        "Membre 2 - Prénom": data.team[1]?.firstName,
+                        "Membre 2 - Nom": data.team[1]?.lastName,
+                        "Membre 2 - Email": data.team[1]?.email,
+                        "Membre 3 - Prénom": data.team[2]?.firstName,
+                        "Membre 3 - Nom": data.team[2]?.lastName,
+                        "Membre 3 - Email": data.team[2]?.email,
+                        "Est une tête de réseau": translate(data.isNetwork),
+                        "Nom de la tête de réseau": data.networkName,
+                        "Statut juridique": translate(data.legalStatus),
+                        "Type d'association": data.associationTypes,
+                        "Type de structure publique": data.structurePubliqueType,
+                        "Type de service de l'état": data.structurePubliqueEtatType,
+                        "Type de structure privée": data.structurePriveeType,
+                        "Adresse de la structure": data.address,
+                        "Code postal de la structure": data.zip,
+                        "Ville de la structure": data.city,
+                        "Département de la structure": data.department,
+                        "Région de la structure": data.region,
+                        "Pays de la structure": data.country,
+                        "Créé lé": formatLongDateFR(data.createdAt),
+                        "Mis à jour le": formatLongDateFR(data.updatedAt),
+                      };
+                    });
                   }}
                 />
               </div>
