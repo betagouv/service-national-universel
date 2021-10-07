@@ -8,7 +8,7 @@ import { HeroContainer } from "../../components/Content";
 import { fr } from "date-fns/locale";
 import api from "../../services/api";
 import Loader from "../../components/Loader";
-import { ticketStateNameById } from "../../utils";
+import { ticketStateNameById, colors } from "../../utils";
 
 const articles = [
   {
@@ -102,7 +102,7 @@ export default () => {
           </div>
         ))}
       </Articles>
-      <hr />
+      <hr style={{ margin: "2rem" }} />
       <h4 style={{ marginLeft: "0.5rem" }}>Mes conversations en cours</h4>
       <List>
         <section className="ticket titles">
@@ -206,6 +206,7 @@ const Articles = styled.div`
     flex-basis: 230px;
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
     padding: 1.3rem;
     margin: 0.5rem;
     box-shadow: 0 0 15px -3px rgba(0, 0, 0, 0.1);
@@ -219,6 +220,12 @@ const Articles = styled.div`
   .block a {
     margin: 0;
     font-size: 0.9rem;
+  }
+  .block-link {
+    color: ${colors.purple};
+    :hover {
+      text-decoration: underline;
+    }
   }
 `;
 
