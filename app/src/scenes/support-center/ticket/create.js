@@ -16,14 +16,8 @@ export default () => {
   const young = useSelector((state) => state.Auth.young);
   //todo : fetch zammad categories (scopes)
   const options = ["Assistance technique", "À propos de ma situation", "Contacter un référent"];
-  const tags = [`COHORTE_${young.cohort}`, `DEPARTEMENT_${young.department}`, `REGION_${young.region}`, `EMETTEUR_Volontaire`, `CANAL_Plateforme`, `AGENT_Startup_Support`];
+  const defaultTags = [`COHORTE_${young.cohort}`, `DEPARTEMENT_${young.department}`, `REGION_${young.region}`, `EMETTEUR_Volontaire`, `CANAL_Plateforme`, `AGENT_Startup_Support`];
 
-  useEffect(() => {
-    (async () => {
-      const { data } = await api.get(`/support-center/ticket`);
-      console.log({ data });
-    })();
-  }, []);
   return (
     <Container>
       <BackButton to={`/besoin-d-aide`}>{"<"} Retour à l'accueil</BackButton>
@@ -33,19 +27,19 @@ export default () => {
       </Heading>
       <Form>
         <Formik
-          initialValues={{ type: "", subject: "", message: "", tags: [] }}
+          initialValues={{ type: "", subject: "", message: "", tags: defaultTags }}
           validateOnChange={false}
           validateOnBlur={false}
           onSubmit={async (values) => {
             // return console.log(values);
             try {
-              const { subject, type, message } = values;
+              const { subject, type, message, tags } = values;
               if (type === "Assistance technique") {
                 tags.push("AGENT_Startup_Technique");
               } else if (type === "À propos de ma situation") {
                 tags.push("AGENT_STARTUP_Support");
               } else if (type === "Contacter un référent") {
-                tags.push("AGENT_Référent_Département");
+                // tags.push("AGENT_Référent_Département");
               }
               const { ok, code, data } = await api.post("/support-center/ticket", {
                 subject,

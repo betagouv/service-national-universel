@@ -37,7 +37,6 @@ export default () => {
         const response = await api.get("/support-center/ticket?withArticles=true");
         if (!response.ok) return setUserTickets([]);
         setUserTickets(response.data);
-        console.log(response.data);
       } catch (error) {
         setUserTickets([]);
       }

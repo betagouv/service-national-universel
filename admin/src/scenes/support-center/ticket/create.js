@@ -5,43 +5,51 @@ import styled from "styled-components";
 import { Formik, Field } from "formik";
 import { NavLink } from "react-router-dom";
 import { useHistory } from "react-router-dom";
-import LoadingButton from "../../../components/buttons/LoadingButton";
+import { useSelector } from "react-redux";
 
+import LoadingButton from "../../../components/buttons/LoadingButton";
 import api from "../../../services/api";
 import ErrorMessage, { requiredMessage } from "../../../components/errorMessage";
+import { ROLES } from "../../../utils";
 
 export default () => {
   const history = useHistory();
+  const user = useSelector((state) => state.Auth.user);
 
   //todo : fetch zammad categories (scopes)
   const options = ["Assistance technique", "Aide sur un cas particulier", "Autre"];
+  const defaultTags = [`DEPARTEMENT_${user.department}`, `REGION_${user.region}`, `CANAL_Plateforme`, `AGENT_Startup_Support`];
+  if ([ROLES.ADMIN].includes(user.role)) defaultTags.push("EMETTEUR_Admin");
+  if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) defaultTags.push("EMETTEUR_Référent");
+  if ([ROLES.RESPONSABLE, ROLES.SUPERVISOR].includes(user.role)) defaultTags.push("EMETTEUR_Structure");
 
-  useEffect(() => {
-    (async () => {
-      const { data } = await api.get(`/support-center/ticket`);
-      console.log({ data });
-    })();
-  }, []);
   return (
     <Container>
-      <BackButton to={`/besoin-d-aide`}>{"<"} Retour</BackButton>
+      <BackButton to={`/besoin-d-aide`}>{"<"} Retour à l'accueil</BackButton>
       <Heading>
-        <h2>Contacter le support</h2>
+        <h4>Contacter quelqu'un</h4>
         <p>Vous rencontrez une difficulté, avez besoin d'assistance pour réaliser une action ou avez besoin d'informations supplémentaires sur la plateforme ?</p>
       </Heading>
       <Form>
         <Formik
-          initialValues={{ type: "", subject: "", message: "" }}
+          initialValues={{ type: "", subject: "", message: "", tags: defaultTags }}
           validateOnChange={false}
           validateOnBlur={false}
           onSubmit={async (values) => {
-            // return console.log(values);
             try {
-              const { subject, type, message } = values;
+              const { subject, type, message, tags } = values;
+              if (type === "Assistance technique") {
+                tags.push("AGENT_Startup_Technique");
+              } else if (type === "Aide sur un cas particulier") {
+                // tags.push("AGENT_Startup_Support");
+              } else if (type === "Autre") {
+                // tags.push("AGENT_Startup_Support");
+              }
               const { ok, code, data } = await api.post("/support-center/ticket", {
                 subject,
                 type,
                 message,
+                tags,
               });
               if (!ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(code));
               toastr.success("Ticket créé");
@@ -144,16 +152,22 @@ const Container = styled(HeroContainer)`
 `;
 
 const Heading = styled.header`
-  padding: 1.5rem;
   font-size: 3rem;
-  flex: 1;
+  display: flex;
+  padding: 2rem;
+  flex-direction: column;
+  margin: 0 auto;
+  width: clamp(700px, 80%, 1000px);
+  @media (max-width: 767px) {
+    width: 100%;
+  }
+
   p {
-    font-size: 1.2rem;
+    font-size: 1rem;
     color: #6b7280;
   }
   @media (max-width: 767px) {
     padding: 1.2rem;
-    font-size: 1.1rem;
     p {
       font-size: 1rem;
       color: #6b7280;
