@@ -6,6 +6,7 @@ const express = require("express");
 const cookieParser = require("cookie-parser");
 const fileUpload = require("express-fileupload");
 const helmet = require("helmet");
+const logger = require("morgan");
 require("./mongo");
 
 const { PORT, APP_URL, ADMIN_URL, ENVIRONMENT } = require("./config.js");
@@ -18,6 +19,10 @@ if (process.env.NODE_ENV !== "test") {
 
 const app = express();
 app.use(helmet());
+
+if (ENVIRONMENT === "development") {
+  app.use(logger("dev"));
+}
 
 const origin = [APP_URL, ADMIN_URL];
 app.use(cors({ credentials: true, origin }));
