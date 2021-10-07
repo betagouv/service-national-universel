@@ -15,6 +15,7 @@ import ModalConfirm from "../../components/modals/ModalConfirm";
 import ModalConfirmWithMessage from "../../components/modals/ModalConfirmWithMessage";
 import api from "../../services/api";
 import { setYoung } from "../../redux/auth/actions";
+import QuestionMark from "../../assets/QuestionMark";
 
 export default (props) => {
   const [open, setOpen] = useState();
@@ -153,9 +154,9 @@ export default (props) => {
             <SubMenuPhase3 young={young} handleClick={handleClick} />
           </Item>
         </MainNav>
-        <ul className="subNav"></ul>
         <MyNav>
-          {/* <li>
+          <div>
+            {/* <li>
           <NavLink to="/documents">
             <div className="icon">
               <svg fill="none" viewBox="0 0 24 24">
@@ -165,6 +166,20 @@ export default (props) => {
             Mes documents
           </NavLink>
         </li> */}
+            <HelpButton to="/besoin-d-aide" />
+            {/* {young.statusPhase1 === "DONE" && young.statusPhase2 === "VALIDATED" ? (
+            <DrawerButton>
+              <DownloadAttestationButton young={young} uri="snu">
+                Télécharger mon attestation SNU
+              </DownloadAttestationButton>
+            </DrawerButton>
+          ) : null} */}
+            {young.status === YOUNG_STATUS.VALIDATED ? (
+              <DrawerButton>
+                <DeleteAccountButton young={young} />
+              </DrawerButton>
+            ) : null}
+          </div>
           {isDiagorienteReady() && (
             <DiagorienteButton>
               <NavLink to="/diagoriente" onClick={(event) => handleClick(event, DRAWER_TABS.HOME)}>
@@ -173,41 +188,23 @@ export default (props) => {
               </NavLink>
             </DiagorienteButton>
           )}
-          <DrawerButton>
-            <NavLink to="/besoin-d-aide">Besoin d'aide</NavLink>
-          </DrawerButton>
-          {/* {young.statusPhase1 === "DONE" && young.statusPhase2 === "VALIDATED" ? (
-            <DrawerButton>
-              <DownloadAttestationButton young={young} uri="snu">
-                Télécharger mon attestation SNU
-              </DownloadAttestationButton>
-            </DrawerButton>
-          ) : null} */}
-          <DrawerButton>
-            <a href="https://support.snu.gouv.fr/help/fr-fr/3-volontaire" target="blank">
-              <div className="icon">
-                <svg fill="none" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  ></path>
-                </svg>
-              </div>
-              Foire aux questions
-            </a>
-          </DrawerButton>
-          {young.status === YOUNG_STATUS.VALIDATED ? (
-            <DrawerButton>
-              <DeleteAccountButton young={young} />
-            </DrawerButton>
-          ) : null}
         </MyNav>
       </Sidebar>
     </>
   );
 };
+
+const HelpButton = ({ to }) => (
+  <div className="help-button-container">
+    <NavLink className="help-button" to={to}>
+      <QuestionMark className="icon" />
+      <div className="help-button-text">
+        <div className="help-button-text-primary">Besoin d'aide ?</div>
+        <div className="help-button-text-secondary">Tutoriels, contacts</div>
+      </div>
+    </NavLink>
+  </div>
+);
 
 const DeleteAccountButton = ({ young }) => {
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
@@ -264,6 +261,8 @@ const DeleteAccountButton = ({ young }) => {
 };
 
 const Sidebar = styled.div`
+  display: flex;
+  flex-direction: column;
   ::-webkit-scrollbar {
     display: none;
   }
@@ -393,6 +392,10 @@ const MainNav = styled.ul`
 `;
 
 const MyNav = styled.ul`
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex: 1;
   margin-top: 25px;
   padding-top: 1rem;
   border-top: 1px solid #42389d;
@@ -403,6 +406,43 @@ const MyNav = styled.ul`
     font-size: 0.75rem;
     padding: 12px 15px;
     border-radius: 6px;
+  }
+  .help-button-container {
+    margin: 0.5rem;
+    justify-content: center;
+    display: flex;
+    .help-button {
+      border: 1px solid #7786cf;
+      border-radius: 0.3rem;
+      padding: 0.5rem;
+      align-items: center;
+      display: flex;
+      .icon {
+        height: 1.5rem;
+        width: 1.5rem;
+        color: #7786cf;
+        margin-right: 0.5rem;
+      }
+      .help-button-text {
+        color: white;
+        text-align: center;
+        .help-button-text-primary {
+          font-weight: 400;
+          font-size: 0.9rem;
+        }
+        .help-button-text-secondary {
+          font-weight: 300;
+          font-size: 0.6rem;
+        }
+      }
+      :hover {
+        background: #7786cf;
+        cursor: pointer;
+        .icon {
+          color: #fff;
+        }
+      }
+    }
   }
 `;
 
