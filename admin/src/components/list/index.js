@@ -114,8 +114,6 @@ export const ResultTable = styled.div`
     background-repeat: no-repeat;
     background-position-x: 100%;
     background-position-y: 5px;
-    border: 1px solid #dfdfdf;
-    border-radius: 2px;
     margin-right: 2rem;
     position: absolute;
     top: 0.5rem;
