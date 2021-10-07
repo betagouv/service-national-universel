@@ -9,6 +9,9 @@ import { fr } from "date-fns/locale";
 import api from "../../services/api";
 import Loader from "../../components/Loader";
 import { ticketStateNameById, colors } from "../../utils";
+import MailCloseIcon from "../../components/MailCloseIcon";
+import MailOpenIcon from "../../components/MailOpenIcon";
+import SuccessIcon from "../../components/SuccessIcon";
 
 const articles = [
   {
@@ -48,6 +51,30 @@ export default () => {
   const getLastContactName = (array) => {
     const lastTicketFromAgent = array?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))?.find((e) => e.created_by !== young.email);
     return lastTicketFromAgent?.from;
+  };
+
+  const displayState = (state) => {
+    if (state === "ouvert")
+      return (
+        <StateContainer style={{ display: "flex" }}>
+          <MailOpenIcon color="#F8B951" style={{ margin: 0, padding: "5px" }} />
+          {state}
+        </StateContainer>
+      );
+    if (state === "fermé")
+      return (
+        <StateContainer>
+          <SuccessIcon color="#6BC762" style={{ margin: 0, padding: "5px" }} />
+          {state}
+        </StateContainer>
+      );
+    if (state === "nouveau")
+      return (
+        <StateContainer>
+          <MailCloseIcon color="#F1545B" style={{ margin: 0, padding: "5px" }} />
+          {state}
+        </StateContainer>
+      );
   };
 
   return (
@@ -121,7 +148,7 @@ export default () => {
               <p>{ticket.number}</p>
               <p>{ticket.title}</p>
               <p>{getLastContactName(ticket?.articles)}</p>
-              <p>{ticketStateNameById(ticket.state_id)}</p>
+              <p>{displayState(ticketStateNameById(ticket.state_id))}</p>
               <p className="ticket-date">il y a {formatDistanceToNow(new Date(ticket.updated_at), { locale: fr })}</p>
             </NavLink>
           ))}
@@ -129,6 +156,11 @@ export default () => {
     </HeroContainer>
   );
 };
+
+const StateContainer = styled.div`
+  display: flex;
+  align-items: center;
+`;
 
 const Container = styled.div`
   display: flex;
