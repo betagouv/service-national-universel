@@ -393,7 +393,7 @@ const updateStatusPhase2 = async (young) => {
   } else if (Number(young.phase2NumberHoursDone) >= 84) {
     // We change young status to DONE if he has 84 hours of phase 2 done.
     young.set({ statusPhase2: YOUNG_STATUS_PHASE2.VALIDATED });
-  } else if (Number(young.phase2NumberHoursEstimated)) {
+  } else if (Number(young.phase2NumberHoursEstimated) || Number(young.phase2NumberHoursDone)) {
     // We change young status to IN_PROGRESS if he has estimated hours of phase 2.
     young.set({ statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS });
   } else {
