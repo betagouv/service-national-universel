@@ -8,10 +8,6 @@ import Documents from "../components/Documents";
 import DndFileInput from "../../../components/dndFileInput";
 
 export default ({ values, handleChange, handleSubmit }) => {
-  useEffect(() => {
-    console.log(values);
-  }, []);
-
   const files = [
     { name: "militaryPreparationFilesIdentity", placeholder: "Pièce d’identité en cours de validité (CNI, passeport)" },
     { name: "militaryPreparationFilesCensus", placeholder: "Attestation de recensement" },
