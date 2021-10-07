@@ -157,7 +157,6 @@ const Bloc = ({ children, title, borderBottom, borderRight, borderLeft, disabled
 };
 
 const Details = ({ title, value, children }) => {
-  // if (!value) return <div />;
   if (typeof value === "function") value = value();
   return (
     <div className="detail">
@@ -192,20 +191,6 @@ const Wrapper = styled.div`
     font-size: 13px;
     color: #798399;
     margin-top: 1rem;
-  }
-`;
-
-const SeeMore = styled.div`
-  cursor: pointer;
-  color: #5245cc;
-  font-size: 0.9rem;
-  font-weight: 400;
-  text-transform: uppercase;
-  text-align: center;
-  padding: 1rem;
-  border-top: 2px solid #f4f5f7;
-  > * {
-    margin: 0.25rem;
   }
 `;
 const HourTitle = styled.div`
