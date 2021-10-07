@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 
-import { translate, ROLES, ES_NO_LIMIT } from "../../utils";
+import { translate, ROLES, ES_NO_LIMIT, copyToClipboard } from "../../utils";
 import api from "../../services/api";
 import { setUser } from "../../redux/auth/actions";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
@@ -30,8 +30,8 @@ export default ({ onChange, value }) => {
   if (!value) return <div />;
   const [structure, setStructure] = useState();
   const [missionsInfo, setMissionsInfo] = useState({ count: "-", placesTotal: "-" });
-  const [referentDepartment, setReferentDepartment] = useState();
-  const [structureTeam, setStructureTeam] = useState([]);
+  const [referentsDepartment, setReferentsDepartment] = useState([]);
+  const [teamMembers, setTeamMembers] = useState([]);
   const user = useSelector((state) => state.Auth.user);
   const dispatch = useDispatch();
   const history = useHistory();
@@ -39,8 +39,8 @@ export default ({ onChange, value }) => {
   useEffect(() => {
     setStructure(null);
     setMissionsInfo({ count: "-", placesTotal: "-" });
-    setStructureTeam([]);
-
+    setTeamMembers([]);
+    setReferentsDepartment([]);
     (async () => {
       if (!value.structureId) return;
       const { ok, data, code } = await api.get(`/structure/${value.structureId}`);
@@ -70,7 +70,7 @@ export default ({ onChange, value }) => {
         size: ES_NO_LIMIT,
       });
       if (referentResponses.length) {
-        setStructureTeam(referentResponses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
+        setTeamMembers(referentResponses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
       }
     })();
 
@@ -80,7 +80,7 @@ export default ({ onChange, value }) => {
         query: { bool: { must: { match_all: {} }, filter: [{ term: { "department.keyword": structure.department } }, { term: { "role.keyword": "referent_department" } }] } },
       });
       if (referentDepartementResponses.length) {
-        setReferentDepartment({ _id: referentDepartementResponses[0].hits.hits[0]._id, ...referentDepartementResponses[0].hits.hits[0]._source });
+        setReferentsDepartment(referentDepartementResponses[0].hits.hits.map((e) => ({ _id: e._id, ...e._source })));
       }
     })();
   }, [structure]);
@@ -140,18 +140,39 @@ export default ({ onChange, value }) => {
             </div>
             <Details title="Région" value={structure?.region} />
             <Details title="Dép." value={structure?.department} />
-            <Details title="Référent Dép." value={referentDepartment?.email} copy />
+            <div className="detail" style={{ alignItems: "flex-start" }}>
+              <div className="detail-title">Référents Dép. :</div>
+              {!referentsDepartment.length ? (
+                <div className="detail-text">Aucun référent trouvé</div>
+              ) : (
+                <div className="detail-text">
+                  <ul>
+                    {referentsDepartment.map((referent) => (
+                      <li key={referent._id} style={{ display: "flex", alignItems: "center" }}>
+                        {referent.email}
+                        <IconCopy
+                          onClick={() => {
+                            copyToClipboard(referent.email);
+                            toastr.success(`'${referent.email}' a été copié dans le presse papier.`);
+                          }}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
             <div className="detail" style={{ alignItems: "flex-start" }}>
               <div className="detail-title">Équipe :</div>
-              {!structureTeam.length ? (
+              {!teamMembers.length ? (
                 <div className="detail-text">Aucun compte trouvé</div>
               ) : (
                 <div className="detail-text">
                   <ul>
-                    {structureTeam.map((referent, index) => (
-                      <TeamMember key={referent._id}>
-                        {`${referent.firstName} ${referent.lastName}`}
-                        <Link to={`/user/${referent._id}`}>
+                    {teamMembers.map((member) => (
+                      <TeamMember key={member._id}>
+                        {`${member.firstName} ${member.lastName}`}
+                        <Link to={`/user/${member._id}`}>
                           <IconLink />
                         </Link>
                       </TeamMember>
@@ -209,6 +230,17 @@ const IconLink = styled.div`
   width: 18px;
   height: 18px;
   background: ${`url(${require("../../assets/link.svg")})`};
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 15px 15px;
+`;
+
+const IconCopy = styled.div`
+  cursor: pointer;
+  margin: 0 0.5rem;
+  width: 15px;
+  height: 15px;
+  background: ${`url(${require("../../assets/copy.svg")})`};
   background-repeat: no-repeat;
   background-position: center;
   background-size: 15px 15px;
