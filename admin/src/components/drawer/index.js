@@ -54,7 +54,8 @@ function responsible({ user, onClick }) {
       <DrawerTab to={`/structure/${user.structureId}`} title="Ma structure" onClick={onClick} />
       <DrawerTab to="/mission" title="Missions" onClick={onClick} />
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
-      {/* <DrawerTab to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} /> */}
+      <BlankSeparator />
+      <HelpButton to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} />
     </>
   );
 }
@@ -66,7 +67,8 @@ function supervisor({ user, onClick }) {
       <DrawerTab to="/mission" title="Missions" onClick={onClick} />
       <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
-      {/* <DrawerTab to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} /> */}
+      <BlankSeparator />
+      <HelpButton to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} />
     </>
   );
 }
@@ -118,7 +120,7 @@ function admin({ onClick }) {
         </div>
       </DrawerTabWithIcons>
       <BlankSeparator />
-      {environment !== "production" ? <HelpButton to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} /> : null}
+      <HelpButton to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} />
     </>
   );
 }
@@ -133,7 +135,6 @@ function referent({ onClick }) {
       <DrawerTab to="/inscription" title="Inscriptions" onClick={onClick} />
       <DrawerTab to="/centre" title="Centres" onClick={onClick} />
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
-      {/* <DrawerTab to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} /> */}
       <DrawerTabWithIcons to="/boite-de-reception" title="Boîte de reception" onClick={onClick}>
         <div
           style={{
@@ -168,6 +169,8 @@ function referent({ onClick }) {
           <div style={{ marginLeft: "4px" }}>3</div>
         </div>
       </DrawerTabWithIcons>
+      <BlankSeparator />
+      <HelpButton to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} />
     </>
   );
 }
@@ -178,7 +181,8 @@ function headCenter({ user, onClick }) {
       <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />
       <DrawerTab to="/volontaire" title="Volontaires" onClick={onClick} />
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
-      {/* <DrawerTab to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} /> */}
+      <BlankSeparator />
+      <HelpButton to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} />
     </>
   );
 }
