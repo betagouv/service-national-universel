@@ -5,7 +5,8 @@
   "main": "index.js",
   "engines": {
     "node": "^14.14",
-    "npm": "^7.6"
+    "npm": "^7.6",
+    "yarn": "🍎 This project uses NPM, please do not use YARN. 🍎"
   },
   "scripts": {
     "dev": "nodemon ./src/index.js",
