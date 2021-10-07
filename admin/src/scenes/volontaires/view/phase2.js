@@ -53,7 +53,9 @@ export default ({ young, onChange }) => {
         <Box>
           <Row>
             <Col md={12}>
-              <Bloc title="Préférences de missions renseignées par le volontaire" borderBottom></Bloc>
+              <Bloc borderBottom>
+                <BoxTitle style={{ marginBottom: 0 }}>Préférences de missions renseignées par le volontaire</BoxTitle>
+              </Bloc>
             </Col>
             <Col
               md={6}
