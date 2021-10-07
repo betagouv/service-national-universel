@@ -50,10 +50,12 @@ export default ({ young, onChange }) => {
           </Row>
         </Box>
         {ENABLE_PM && <Phase2MilitaryPreparation young={young} />}
-        <ToggleBox>
+        <Box>
           <Row>
             <Col md={12}>
-              <Bloc title="Préférences de missions renseignées par le volontaire" borderBottom></Bloc>
+              <Bloc borderBottom>
+                <BoxTitle style={{ marginBottom: 0 }}>Préférences de missions renseignées par le volontaire</BoxTitle>
+              </Bloc>
             </Col>
             <Col
               md={6}
@@ -71,6 +73,20 @@ export default ({ young, onChange }) => {
                   ) : null}
                 </Details>
               </Bloc>
+              <Bloc>
+                <Details title="Format préféré" value={t(young.missionFormat)} />
+                <Details title="Engagement parallèle">
+                  <div>
+                    <span style={{ fontWeight: 600 }}>{t(young.engaged)}</span>&nbsp;({young.engagedDescription})
+                  </div>
+                  <div style={{ marginLeft: "1rem", fontStyle: "italic" }}></div>
+                </Details>
+                <Details title="Précision additonnelles">
+                  <div style={{ fontStyle: "italic" }}>{young.desiredLocation}</div>
+                </Details>
+              </Bloc>
+            </Col>
+            <Col md={6}>
               <Bloc>
                 <Details title="Période privilégiée">
                   <div style={{ fontWeight: 600 }}>{t(young.period)}</div>
@@ -98,20 +114,8 @@ export default ({ young, onChange }) => {
                 </Details>
               </Bloc>
             </Col>
-            <Col md={6}>
-              <Bloc>
-                <Details title="Format préféré" value={t(young.missionFormat)} />
-                <Details title="Engagement parallèle">
-                  <div style={{ fontWeight: 600 }}>{t(young.engaged)}</div>
-                  <div style={{ marginLeft: "1rem", fontStyle: "italic" }}>{young.engagedDescription}</div>
-                </Details>
-                <Details title="Précision additonnelles">
-                  <div style={{ fontStyle: "italic" }}>{young.desiredLocation}</div>
-                </Details>
-              </Bloc>
-            </Col>
           </Row>
-        </ToggleBox>
+        </Box>
         <Box>
           <ApplicationList young={young} onChangeApplication={onChange} />
         </Box>
@@ -143,9 +147,11 @@ const Bloc = ({ children, title, borderBottom, borderRight, borderLeft, disabled
       }}
     >
       <Wrapper>
-        <div style={{ display: "flex" }}>
-          <BoxTitle>{title}</BoxTitle>
-        </div>
+        {title && (
+          <div style={{ display: "flex" }}>
+            <BoxTitle>{title}</BoxTitle>
+          </div>
+        )}
         {children}
       </Wrapper>
     </Row>
@@ -153,7 +159,6 @@ const Bloc = ({ children, title, borderBottom, borderRight, borderLeft, disabled
 };
 
 const Details = ({ title, value, children }) => {
-  // if (!value) return <div />;
   if (typeof value === "function") value = value();
   return (
     <div className="detail">
@@ -168,48 +173,15 @@ const Details = ({ title, value, children }) => {
   );
 };
 
-const ToggleBox = ({ children }) => {
-  const [hide, setHide] = useState(true);
-  const toggle = () => {
-    setHide(!hide);
-  };
-  return (
-    <>
-      <Box hide={hide} style={{ borderBottomLeftRadius: 0, borderBottomRightRadius: 0, marginBottom: 0 }}>
-        {children}
-      </Box>
-      <Box style={{ borderTopLeftRadius: 0, borderTopRightRadius: 0, marginTop: 0 }}>
-        <SeeMore onClick={toggle}>
-          {hide ? (
-            <>
-              Voir plus
-              <svg width="9" height="7" viewBox="0 0 9 7" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M-5.2078e-08 1.69141L4.5 6.5L9 1.69141L7.88505 0.5L4.5 4.11719L1.11495 0.5L-5.2078e-08 1.69141Z" fill="#5245CC" />
-              </svg>
-            </>
-          ) : (
-            <>
-              Voir Moins
-              <svg width="10" height="7" viewBox="0 0 10 7" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M9.5 5.30859L5 0.5L0.5 5.30859L1.61495 6.5L5 2.88281L8.38505 6.5L9.5 5.30859Z" fill="#5245CC" />
-              </svg>
-            </>
-          )}
-        </SeeMore>
-      </Box>
-    </>
-  );
-};
-
 const Wrapper = styled.div`
-  padding: 3rem;
+  padding: 1rem 2rem;
   width: 100%;
   .detail {
     display: flex;
     align-items: flex-start;
+    margin: 0.5rem 0;
     font-size: 14px;
     text-align: left;
-    margin-top: 1rem;
     &-title {
       color: #798399;
     }
@@ -221,20 +193,6 @@ const Wrapper = styled.div`
     font-size: 13px;
     color: #798399;
     margin-top: 1rem;
-  }
-`;
-
-const SeeMore = styled.div`
-  cursor: pointer;
-  color: #5245cc;
-  font-size: 0.9rem;
-  font-weight: 400;
-  text-transform: uppercase;
-  text-align: center;
-  padding: 1rem;
-  border-top: 2px solid #f4f5f7;
-  > * {
-    margin: 0.25rem;
   }
 `;
 const HourTitle = styled.div`
