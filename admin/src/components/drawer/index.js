@@ -6,11 +6,32 @@ import { environment } from "../../config";
 import { ROLES, colors } from "../../utils";
 import MailOpenIcon from "../MailOpenIcon";
 import MailCloseIcon from "../MailCloseIcon";
+import QuestionMark from "../../assets/QuestionMark";
 
 const DrawerTab = ({ title, to, onClick }) => (
   <li onClick={onClick}>
     <NavLink to={to}>{title}</NavLink>
   </li>
+);
+
+const BlankSeparator = () => (
+  <li
+    style={{
+      height: "1.5rem",
+    }}
+  />
+);
+
+const HelpButton = ({ onClick, to }) => (
+  <div className="help-button-container" onClick={onClick}>
+    <NavLink className="help-button" to={to}>
+      <QuestionMark className="icon" />
+      <div className="help-button-text">
+        <div className="help-button-text-primary">Besoin d'aide ?</div>
+        <div className="help-button-text-secondary">Tutoriels, contacts</div>
+      </div>
+    </NavLink>
+  </div>
 );
 
 const DrawerTabWithIcons = ({ title, children, to, onClick }) => {
@@ -62,7 +83,6 @@ function admin({ onClick }) {
       <DrawerTab to="/point-de-rassemblement" title="Points de rassemblement" onClick={onClick} />
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
       <DrawerTab to="/objectifs" title="Objectifs" onClick={onClick} />
-      {environment !== "production" ? <DrawerTab to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} /> : null}
       <DrawerTabWithIcons to="/boite-de-reception" title="Boîte de reception" onClick={onClick}>
         <div
           style={{
@@ -97,6 +117,8 @@ function admin({ onClick }) {
           <div style={{ marginLeft: "4px" }}>3</div>
         </div>
       </DrawerTabWithIcons>
+      <BlankSeparator />
+      {environment !== "production" ? <HelpButton to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} /> : null}
     </>
   );
 }
@@ -330,6 +352,42 @@ const Sidebar = styled.div`
       font-weight: 700;
       background: ${colors.purple};
       box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.1);
+    }
+    .help-button-container {
+      justify-content: center;
+      display: flex;
+      .help-button {
+        border: 1px solid #7786cf;
+        border-radius: 0.3rem;
+        padding: 0.5rem;
+        align-items: center;
+        display: flex;
+        .icon {
+          height: 1.5rem;
+          width: 1.5rem;
+          color: #7786cf;
+          margin-right: 0.5rem;
+        }
+        .help-button-text {
+          color: white;
+          text-align: center;
+          .help-button-text-primary {
+            font-weight: 400;
+            font-size: 0.9rem;
+          }
+          .help-button-text-secondary {
+            font-weight: 300;
+            font-size: 0.6rem;
+          }
+        }
+        :hover {
+          background: #7786cf;
+          cursor: pointer;
+          .icon {
+            color: #fff;
+          }
+        }
+      }
     }
   }
 
