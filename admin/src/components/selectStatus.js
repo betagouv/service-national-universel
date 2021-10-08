@@ -77,7 +77,9 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
     const prevStatus = young.status;
     young.historic.push({ phase, userName: `${user.firstName} ${user.lastName}`, userId: user._id, status, note });
     young[statusName] = status;
-    young.lastStatusAt = Date.now();
+    const now = new Date();
+    young.lastStatusAt = now.toISOString();
+    if (statusName === "statusPhase2") young.statusPhase2UpdatedAt = now.toISOString();
     if (status === "WITHDRAWN" && note) young.withdrawnMessage = note;
     if (status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INTEREST_MISSION) young.phase = YOUNG_PHASE.CONTINUE;
     try {
