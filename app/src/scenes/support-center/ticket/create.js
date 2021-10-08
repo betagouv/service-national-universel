@@ -10,13 +10,13 @@ import { useHistory } from "react-router-dom";
 import api from "../../../services/api";
 import { HeroContainer } from "../../../components/Content";
 import ErrorMessage, { requiredMessage } from "../../inscription/components/errorMessage";
+import { SelectTag, step1, step2Technical, step2Question } from "./worflow";
 
 export default () => {
   const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
-  //todo : fetch zammad categories (scopes)
   const options = ["Assistance technique", "À propos de ma situation", "Contacter un référent"];
-  const defaultTags = [`COHORTE_${young.cohort}`, `DEPARTEMENT_${young.department}`, `REGION_${young.region}`, `EMETTEUR_Volontaire`, `CANAL_Plateforme`, `AGENT_Startup_Support`];
+  const tags = [`COHORTE_${young.cohort}`, `DEPARTEMENT_${young.department}`, `REGION_${young.region}`, `EMETTEUR_Volontaire`, `CANAL_Plateforme`, `AGENT_Startup_Support`];
 
   return (
     <Container>
@@ -27,25 +27,18 @@ export default () => {
       </Heading>
       <Form>
         <Formik
-          initialValues={{ type: "", subject: "", message: "", tags: defaultTags }}
+          initialValues={{ step1: "", step1Tags: [], step2: "", step2Tags: [], type: "", subject: "", message: "" }}
           validateOnChange={false}
           validateOnBlur={false}
           onSubmit={async (values) => {
-            // return console.log(values);
+            return console.log(values);
             try {
-              const { subject, type, message, tags } = values;
-              if (type === "Assistance technique") {
-                tags.push("AGENT_Startup_Technique");
-              } else if (type === "À propos de ma situation") {
-                tags.push("AGENT_STARTUP_Support");
-              } else if (type === "Contacter un référent") {
-                // tags.push("AGENT_Référent_Département");
-              }
+              const { subject, type, message, step1Tags, step2Tags } = values;
               const { ok, code, data } = await api.post("/support-center/ticket", {
-                subject,
-                type,
+                subject: step2,
+                type: step1,
                 message,
-                tags,
+                tags: [...tags, ...step1Tags, ...step2Tags],
               });
               if (!ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(code));
               toastr.success("Ticket créé");
@@ -58,27 +51,13 @@ export default () => {
         >
           {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
             <>
-              <Item
-                name="type"
-                title="Ma demande"
-                type="select"
-                value={values.type}
-                handleChange={handleChange}
-                validate={(v) => !v && requiredMessage}
-                errors={errors}
-                touched={touched}
-                options={options}
-              />
-              <Item
-                name="subject"
-                title="Sujet"
-                type="input"
-                value={values.subject}
-                handleChange={handleChange}
-                validate={(v) => !v && requiredMessage}
-                errors={errors}
-                touched={touched}
-              />
+              <SelectTag name="step1" options={step1} title={"Ma demande"} selectPlaceholder={"Choisir la catégorie"} handleChange={handleChange} value={values.step1} />
+              {values.step1 === "TECHNICAL" ? (
+                <SelectTag name="step2" options={step2Technical} title={"Sujet"} selectPlaceholder={"Choisir le sujet"} handleChange={handleChange} value={values.step2} />
+              ) : null}
+              {values.step1 === "QUESTION" ? (
+                <SelectTag name="step2" options={step2Question} title={"Sujet"} selectPlaceholder={"Choisir le sujet"} handleChange={handleChange} value={values.step2} />
+              ) : null}
               <Item
                 name="message"
                 title="Mon message"
@@ -111,7 +90,7 @@ const Item = ({ title, name, value, handleChange, errors, touched, validate, typ
             Catégorie
           </option>
           {options?.map((option) => (
-            <option option value={option} key={option}>
+            <option value={option} key={option}>
               {option}
             </option>
           ))}
