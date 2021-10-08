@@ -32,7 +32,6 @@ export default () => {
     }
     const fetchTickets = async () => {
       try {
-        console.log("USER ROLE", user.role);
         const response = await api.get("/support-center/ticket?withArticles=true");
         if (!response.ok) return setUserTickets([]);
         setUserTickets(response.data);
@@ -158,7 +157,7 @@ export const ArticlesBlock = ({ articles }) => (
       </div>
     ))}
   </Articles>
-)
+);
 
 const StateContainer = styled.div`
   display: flex;
