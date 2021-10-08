@@ -23,8 +23,8 @@ export default () => {
             </a>
           </li>
           <li>
-            <a href="https://www.snu.gouv.fr/nous-contacter-35" target="_blank">
-              Nous contacter
+            <a href="https://www.snu.gouv.fr/besoin-d-aide" target="_blank">
+              Besoin d'aide
             </a>
           </li>
           <li>
