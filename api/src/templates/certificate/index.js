@@ -43,9 +43,9 @@ const phase2 = (young) => {
   let d = young.statusPhase2UpdatedAt;
   if (!d) {
     // 31 mars 2021
-    if (young.cohort === "2019") d = new Date(2021, 02, 31);
+    if (young.cohort === "2019") d = new Date(2021, 2, 31);
     // 17 juin 2021
-    else if (young.cohort === "2020") d = new Date(2021, 05, 17);
+    else if (young.cohort === "2020") d = new Date(2021, 5, 17);
     else d = new Date();
   }
   const html = fs.readFileSync(path.resolve(__dirname, "./phase2.html"), "utf8");
