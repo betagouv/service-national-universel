@@ -40,7 +40,14 @@ const phase1 = (young) => {
 };
 
 const phase2 = (young) => {
-  const d = young.statusPhase2UpdatedAt || new Date();
+  let d = young.statusPhase2UpdatedAt;
+  if (!d) {
+    // 31 mars 2021
+    if (young.cohort === "2019") d = new Date(2021, 02, 31);
+    // 17 juin 2021
+    else if (young.cohort === "2020") d = new Date(2021, 05, 17);
+    else d = new Date();
+  }
   const html = fs.readFileSync(path.resolve(__dirname, "./phase2.html"), "utf8");
   return html
     .replace(/{{FIRST_NAME}}/g, young.firstName)
