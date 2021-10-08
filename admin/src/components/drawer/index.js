@@ -360,6 +360,7 @@ const Sidebar = styled.div`
     .help-button-container {
       justify-content: center;
       display: flex;
+      margin-bottom: 1rem;
       .help-button {
         border: 1px solid #7786cf;
         border-radius: 0.3rem;
