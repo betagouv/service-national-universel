@@ -109,19 +109,24 @@ export const ResultTable = styled.div`
     }
   }
   select.sort-options {
-    background: none; // remove the arrows added by sortOptions
+    background: transparent;
+    background-image: url("data:image/svg+xml;utf8,<svg fill='black' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
+    background-repeat: no-repeat;
+    background-position-x: 100%;
+    background-position-y: 5px;
+    margin-right: 2rem;
     position: absolute;
     top: 0.5rem;
     left: 0.5rem;
     outline: 0;
-    background-color: #fff;
+    background-color: #f7fafc;
     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.05);
     border: 0;
     border-radius: 6px;
     padding: 0.2rem 0.5rem 0.2rem 0.5rem;
     font-size: 0.7rem;
     color: #242526;
-    min-width: 150px;
+    min-width: 215px;
     cursor: pointer;
   }
 `;
