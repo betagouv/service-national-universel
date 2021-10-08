@@ -40,7 +40,7 @@ const phase1 = (young) => {
 };
 
 const phase2 = (young) => {
-  const d = new Date();
+  const d = young.statusPhase2UpdatedAt || new Date();
   const html = fs.readFileSync(path.resolve(__dirname, "./phase2.html"), "utf8");
   return html
     .replace(/{{FIRST_NAME}}/g, young.firstName)

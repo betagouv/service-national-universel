@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
-import { formatDistanceToNow } from "date-fns";
+import relativeTime from "dayjs/plugin/relativeTime";
+import dayjs from "dayjs";
+import "dayjs/locale/fr";
 import { useSelector } from "react-redux";
 
-import { fr } from "date-fns/locale";
 import api from "../../services/api";
 import Loader from "../../components/Loader";
 import { ticketStateNameById, colors } from "../../utils";
@@ -18,6 +19,8 @@ export default () => {
   const [articles, setArticles] = useState(null);
   const [link, setLink] = useState(null);
   const user = useSelector((state) => state.Auth.user);
+
+  dayjs.extend(relativeTime).locale("fr");
 
   useEffect(() => {
     if (user.role === "responsible" || user.role === "supervisor") {
@@ -74,39 +77,40 @@ export default () => {
   return (
     <HeroContainer>
       <Container>
-        <h4 style={{ marginLeft: "0.5rem" }}>Besoin d'aide&nbsp;?</h4>
-
+        <h4 style={{ marginLeft: "0.5rem", textAlign: "center" }}>Besoin d'aide&nbsp;?</h4>
         <div className="help-section">
-          <div className="help-section-text" style={{ color: "#6B7280" }}>
-            Vous rencontrez une difficulté, avez besoin d'assistance pour réaliser une action ou avez besoin d'informations supplémentaires sur la plateforme&nbsp;?
-            <br />
-            N'hésitez pas à consulter notre{" "}
-            <strong>
-              <a className="link" href={`https://support.snu.gouv.fr/help/fr-fr/${link}`} target="_blank" rel="noopener noreferrer">
-                base de connaissance
-              </a>
-            </strong>
-            &nbsp;!
+          <div className="help-section-block">
+            <div className="help-section-text" style={{ color: "#6B7280" }}>
+              Vous rencontrez une difficulté, avez besoin d'assistance pour réaliser une action ou avez besoin d'informations sur la plateforme&nbsp;?
+              <br />
+              N'hésitez pas à consulter notre{" "}
+              <strong>
+                <a className="link" href="https://support.snu.gouv.fr/help/fr-fr/1-referent" target="_blank" rel="noopener noreferrer">
+                  base de connaissance
+                </a>
+              </strong>
+              &nbsp;!
+            </div>
+            <div className="buttons">
+              <LinkButton href="https://support.snu.gouv.fr/help/fr-fr/1-referent" target="_blank" rel="noopener noreferrer">
+                Trouver&nbsp;ma&nbsp;réponse
+              </LinkButton>
+            </div>
           </div>
-          <div className="buttons">
-            <LinkButton href={`https://support.snu.gouv.fr/help/fr-fr/${link}`} target="_blank" rel="noopener noreferrer">
-              Trouver&nbsp;ma&nbsp;réponse
-            </LinkButton>
-          </div>
-        </div>
-        <div className="help-section">
-          <div className="help-section-text" style={{ color: "#6B7280" }}>
-            Vous n'avez pas trouvé de réponse à votre demande ?<br />
-            Contactez notre{" "}
-            <strong>
-              <NavLink className="link" to="/besoin-d-aide/ticket">
-                service de support
-              </NavLink>
-            </strong>
-            .
-          </div>
-          <div className="buttons">
-            <InternalLink to="/besoin-d-aide/ticket">Contacter&nbsp;quelqu'un</InternalLink>
+          <div className="help-section-block">
+            <div className="help-section-text" style={{ color: "#6B7280" }}>
+              Vous n'avez pas trouvé de réponse à votre demande ?<br />
+              Contactez notre{" "}
+              <strong>
+                <NavLink className="link" to="/besoin-d-aide/ticket">
+                  service de support
+                </NavLink>
+              </strong>
+              .
+            </div>
+            <div className="buttons">
+              <InternalLink to="/besoin-d-aide/ticket">Contacter&nbsp;quelqu'un</InternalLink>
+            </div>
           </div>
         </div>
       </Container>
@@ -132,7 +136,7 @@ export default () => {
               <p>{ticket.title}</p>
               <p>{getLastContactName(ticket?.articles)}</p>
               <p>{displayState(ticketStateNameById(ticket.state_id))}</p>
-              <p className="ticket-date">il y a {formatDistanceToNow(new Date(ticket.updated_at), { locale: fr })}</p>
+              <p className="ticket-date">{dayjs(new Date(ticket.updated_at)).fromNow()}</p>
             </NavLink>
           ))}
       </List>
@@ -177,15 +181,20 @@ const Container = styled.div`
   flex-direction: column;
   .help-section {
     padding: 0.5rem;
-    display: flex;
-    justify-content: space-between;
+    margin-bottom: 1rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr;
     .buttons {
       margin: 1rem 0;
       flex: 1;
     }
   }
-  .help-section-text {
-    flex: 3;
+
+  .help-section-block {
+    display: grid;
+    grid-template-rows: 2fr 1fr;
+    text-align: center;
   }
   .link {
     color: #6b7280;
