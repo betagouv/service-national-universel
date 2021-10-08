@@ -12,32 +12,27 @@ import { ticketStateNameById, colors } from "../../utils";
 import MailCloseIcon from "../../components/MailCloseIcon";
 import MailOpenIcon from "../../components/MailOpenIcon";
 import SuccessIcon from "../../components/SuccessIcon";
-
-const articles = [
-  {
-    title: "Phase 2 : le parcours d'une mig",
-    body: "",
-    url: "https://support.snu.gouv.fr/help/fr-fr/16-comprendre-le-snu/5-phase-2-le-parcours-d-une-mig",
-  },
-  {
-    title: "Livret accueil référent",
-    body: `Découvrez en quelques minutes les éléments de prise en main...`,
-    url: "https://support.snu.gouv.fr/help/fr-fr/1-referent/24-livret-d-accueil-referent",
-  },
-  {
-    title: "Livret accueil structure",
-    body: `Découvrez en quelques minutes les éléments de prise en main...`,
-    url: "https://support.snu.gouv.fr/help/fr-fr/2-responsable-de-structure/26-livret-d-accueil-structure",
-  },
-];
+import { referentArticles, adminArticles, structureArticles } from "./articles";
 
 export default () => {
   const [userTickets, setUserTickets] = useState(null);
+  const [articles, setArticles] = useState(null);
+  const [link, setLink] = useState(null);
   const user = useSelector((state) => state.Auth.user);
 
   dayjs.extend(relativeTime).locale("fr");
 
   useEffect(() => {
+    if (user.role === "responsible" || user.role === "supervisor") {
+      setArticles(structureArticles);
+      setLink("2-responsable-de-structure");
+    } else if (user.role === "referent_department" || user.role === "referent_region") {
+      setArticles(referentArticles);
+      setLink("1-referent");
+    } else {
+      setArticles(adminArticles);
+      setLink("");
+    }
     const fetchTickets = async () => {
       try {
         const response = await api.get("/support-center/ticket?withArticles=true");
@@ -120,19 +115,7 @@ export default () => {
         </div>
       </Container>
       <h4 style={{ marginLeft: "0.5rem" }}>Quelques articles pour vous aider&nbsp;:</h4>
-      <Articles>
-        {articles.map((article) => (
-          <div className="block" key={article.url} onClick={() => window.open(article.url)}>
-            <h6>{article.title}</h6>
-            <p>{article.body}</p>
-            <p>
-              <a className="block-link" href={article.url} target="_blank">
-                Lire la suite
-              </a>
-            </p>
-          </div>
-        ))}
-      </Articles>
+      <ArticlesBlock articles={articles} />
       <hr style={{ margin: "2rem" }} />
       <h4 style={{ marginLeft: "0.5rem" }}>Mes conversations en cours</h4>
       <List>
@@ -160,6 +143,25 @@ export default () => {
     </HeroContainer>
   );
 };
+
+export const ArticlesBlock = ({ articles }) => (
+  <Articles>
+    {articles?.map((article) => (
+      <div className="block" key={article.url} onClick={() => window.open(article.url)}>
+        <div className="block-title">
+          <p>{article.emoji}</p>
+          <h6>{article.title}</h6>
+        </div>
+        <p>{article.body}</p>
+        <p>
+          <a className="block-link" href={article.url} target="_blank">
+            Lire la suite
+          </a>
+        </p>
+      </div>
+    ))}
+  </Articles>
+);
 
 const StateContainer = styled.div`
   display: flex;
@@ -264,6 +266,12 @@ const Articles = styled.div`
       box-shadow: 0 0 15px 3px rgba(0, 0, 0, 0.2);
     }
     border-radius: 0.5rem;
+  }
+  .block-title {
+    display: flex;
+  }
+  .block-title h6 {
+    padding-left: 0.8rem;
   }
   .block p,
   .block a {
