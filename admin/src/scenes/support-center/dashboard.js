@@ -16,15 +16,19 @@ import { referentArticles, adminArticles, structureArticles } from "./articles";
 export default () => {
   const [userTickets, setUserTickets] = useState(null);
   const [articles, setArticles] = useState(null);
+  const [link, setLink] = useState(null);
   const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
-    if (user.role === ("responsible" || "supervisor")) {
+    if (user.role === "responsible" || user.role === "supervisor") {
       setArticles(structureArticles);
-    } else if (user.role === ("referent_department" || "referent_region")) {
+      setLink("2-responsable-de-structure");
+    } else if (user.role === "referent_department" || user.role === "referent_region") {
       setArticles(referentArticles);
+      setLink("1-referent");
     } else {
       setArticles(adminArticles);
+      setLink("");
     }
     const fetchTickets = async () => {
       try {
@@ -79,14 +83,14 @@ export default () => {
             <br />
             N'hésitez pas à consulter notre{" "}
             <strong>
-              <a className="link" href="https://support.snu.gouv.fr/help/fr-fr/1-referent" target="_blank" rel="noopener noreferrer">
+              <a className="link" href={`https://support.snu.gouv.fr/help/fr-fr/${link}`} target="_blank" rel="noopener noreferrer">
                 base de connaissance
               </a>
             </strong>
             &nbsp;!
           </div>
           <div className="buttons">
-            <LinkButton href="https://support.snu.gouv.fr/help/fr-fr/1-referent" target="_blank" rel="noopener noreferrer">
+            <LinkButton href={`https://support.snu.gouv.fr/help/fr-fr/${link}`} target="_blank" rel="noopener noreferrer">
               Trouver&nbsp;ma&nbsp;réponse
             </LinkButton>
           </div>
