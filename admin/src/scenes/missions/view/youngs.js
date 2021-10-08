@@ -109,7 +109,7 @@ export default ({ mission, applications }) => {
                       showIcon={false}
                       placeholder="Rechercher par prénom, nom, email"
                       componentId="SEARCH"
-                      dataField={["youngEmail.keyword", "youngFirstName", "youngLastName"]}
+                      dataField={["youngEmail", "youngFirstName", "youngLastName"]}
                       react={{ and: FILTERS.filter((e) => e !== "SEARCH") }}
                       // fuzziness={2}
                       style={{ flex: 1, marginRight: "1rem" }}
