@@ -62,7 +62,7 @@ export default () => {
               <>
                 <TitleWrapper>
                   <Title>
-                    <span>{`${user.firstName} ${user.lastName}`}</span>
+                    <span style={{ marginRight: "1rem" }}>{`${user.firstName} ${user.lastName}`}</span>
                     <Badge text={translate(user.role)} />
                   </Title>
                 </TitleWrapper>
@@ -381,9 +381,6 @@ const Title = styled.h2`
   font-size: 1.5rem;
   display: flex;
   align-items: center;
-  span {
-    margin-right: 1rem;
-  }
 `;
 
 const BoxTitle = styled.div`
