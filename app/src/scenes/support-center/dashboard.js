@@ -27,9 +27,9 @@ const articles = [
     url: "https://support.snu.gouv.fr/help/fr-fr/13-phase-2-mission-d-interet-general/33-je-cherche-une-mission-mig",
   },
   {
-    title: "Comment se déroule ma phase 3",
+    title: "Comment se déroule ma phase 3 ?",
     emoji: "🌟",
-    body: `Optionnelle, la phase 3 vous permet de poursuivre votre parcours SNU...`,
+    body: `Optionnelle, la phase 3 vous permet de poursuivre votre...`,
     url: "https://support.snu.gouv.fr/help/fr-fr/14-phase-3-l-engagement/61-comment-se-deroule-ma-phase-3",
   },
 ];
@@ -258,7 +258,7 @@ const Articles = styled.div`
     display: flex;
   }
   .block-title h6 {
-    padding-left: 0.5rem;
+    padding-left: 0.8rem;
   }
   .block p,
   .block a {
