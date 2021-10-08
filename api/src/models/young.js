@@ -1084,7 +1084,7 @@ Schema.plugin(patchHistory, {
     "/phase3Token",
   ],
 });
-Schema.plugin(mongooseElastic(esClient), MODELNAME);
+Schema.plugin(mongooseElastic(esClient, { ignore: ["historic"] }), MODELNAME);
 
 const OBJ = mongoose.model(MODELNAME, Schema);
 module.exports = OBJ;
