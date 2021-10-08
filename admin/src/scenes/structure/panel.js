@@ -6,24 +6,28 @@ import { Link } from "react-router-dom";
 import { useHistory } from "react-router-dom";
 
 import api from "../../services/api";
-import { translate } from "../../utils";
+import { translate, ES_NO_LIMIT } from "../../utils";
 import Team from "./components/Team";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
 import Panel, { Info, Details } from "../../components/Panel";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 
 export default ({ onChange, value }) => {
-  const [missionsInfo, setMissionsInfo] = useState({ count: "-", placesTotal: "-" });
+  const [missions, setMissions] = useState({ count: "-", placesTotal: "-", placesLeft: "-", all: [] });
   const [referents, setReferents] = useState([]);
   const [parentStructure, setParentStructure] = useState(null);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
   const history = useHistory();
   useEffect(() => {
+    setMissions({ count: "-", placesTotal: "-", placesLeft: "-", all: [] });
+    setReferents([]);
+
     if (!value) return;
     (async () => {
       const { responses: missionResponses } = await api.esQuery("mission", {
         query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": value._id } }] } },
+        size: ES_NO_LIMIT,
       });
       const { responses: referentResponses } = await api.esQuery("referent", {
         query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": value._id } }] } },
@@ -40,10 +44,11 @@ export default ({ onChange, value }) => {
         setParentStructure(null);
       }
       if (missionResponses.length) {
-        setMissionsInfo({
+        setMissions({
           count: missionResponses[0].hits.hits.length,
           placesTotal: missionResponses[0].hits.hits.reduce((acc, e) => acc + e._source.placesTotal, 0),
           placesLeft: missionResponses[0].hits.hits.reduce((acc, e) => acc + e._source.placesLeft, 0),
+          all: missionResponses[0].hits.hits.slice(0, 10).map((el) => ({ id: el._id, ...el._source })),
         });
       }
       if (referentResponses.length) {
@@ -112,25 +117,19 @@ export default ({ onChange, value }) => {
         <Details title="Siret" value={value.siret} />
         <Details title="Vitrine" value={<SocialIcons value={value} />} />
       </Info>
-      <Info title={`Missions (${missionsInfo.count})`}>
-        <p style={{ color: "#999" }}>Cette structure a {missionsInfo.count} missions disponibles</p>
-        <table>
-          <tbody>
-            <tr>
-              <td style={{ fontSize: "2.5rem", paddingRight: "10px" }}>{missionsInfo.placesLeft}</td>
-              <td>
-                <b>Places restantes</b>
-                <br />
-                <span style={{ color: "#999" }}>
-                  {" "}
-                  {missionsInfo.placesTotal - missionsInfo.placesLeft} / {missionsInfo.placesTotal}
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <Info title={`Missions (${missions.count})`}>
+        <p style={{ color: "#999" }}>Cette structure a {missions.placesLeft} places restantes.</p>
+        {missions.all.map((mission) => (
+          <div className="detail" key={mission.id}>
+            <MissionName className="detail-title">{mission.name}</MissionName>
+            <div className="detail-text">{translate(mission.status)}</div>
+            <Link to={`/mission/${mission.id}`}>
+              <IconLink />
+            </Link>
+          </div>
+        ))}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-          {missionsInfo.count > 0 ? (
+          {missions.count > 0 ? (
             <Link to={`/structure/${value._id}/missions`}>
               <Button className="btn-missions">Consulter toutes ses missions</Button>
             </Link>
@@ -164,8 +163,25 @@ const Subtitle = styled.div`
   font-size: 0.9rem;
 `;
 
-const Button = styled.button`
+const MissionName = styled.div`
+  width: 100px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+`;
+
+const IconLink = styled.div`
   margin: 0 0.5rem;
+  width: 18px;
+  height: 18px;
+  background: ${`url(${require("../../assets/link.svg")})`};
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 15px 15px;
+`;
+
+const Button = styled.button`
+  margin: 1rem 0.5rem 0 0.5rem;
   align-self: flex-start;
   border-radius: 4px;
   padding: 5px;
