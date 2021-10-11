@@ -26,7 +26,7 @@ export default ({
       {subsubTitle ? <SubSubTitle>{subsubTitle}</SubSubTitle> : null}
       {template ? (
         <TemplateLink href={template} target="_blank">
-          Télécharger le modèle
+          Télécharger le modèle obligatoire
         </TemplateLink>
       ) : null}
       <DndFileInput
@@ -56,11 +56,15 @@ export default ({
 
 const TemplateLink = styled.a`
   font-size: 0.9rem;
-  color: #5145cd;
+  color: #fff;
+  background-color: #5147e4;
+  border-radius: 10px;
   cursor: pointer;
   margin-bottom: 0.5rem;
+  padding: 0.5rem 3rem;
   :hover {
     text-decoration: underline;
+    color: #fff;
   }
 `;
 
