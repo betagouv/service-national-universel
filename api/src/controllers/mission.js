@@ -11,7 +11,7 @@ const StructureObject = require("../models/structure");
 const ReferentObject = require("../models/referent");
 const { ERRORS, isYoung } = require("../utils/index.js");
 const { validateId, validateMission } = require("../utils/validator");
-const { canModifyMission } = require("snu-lib/roles");
+const { canModifyMission, ROLES } = require("snu-lib/roles");
 const { MISSION_STATUS, APPLICATION_STATUS } = require("snu-lib/constants");
 const { serializeMission, serializeApplication } = require("../utils/serializer");
 const patches = require("./patches");
@@ -69,10 +69,13 @@ router.post("/", passport.authenticate("referent", { session: false }), async (r
 
     const data = await MissionObject.create(checkedMission);
 
-    const referentDepartment = await UserObject.findOne().and([{ role: "referent_department" }, { department: checkedMission.department }]);
+    const referentDepartment = await UserObject.findOne({ role: ROLES.REFERENT_DEPARTMENT, department: checkedMission.department });
     if (referentDepartment) {
       await sendTemplate(SENDINBLUE_TEMPLATES.referent.NEW_MISSION, {
         emailTo: [{ name: `${referentDepartment.firstName} ${referentDepartment.lastName}`, email: referentDepartment.email }],
+        params: {
+          cta: `${APP_URL}/mission/${data._id}`,
+        },
       });
     }
 
