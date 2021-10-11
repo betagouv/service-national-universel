@@ -281,9 +281,11 @@ const SocialMedia = () => {
   return (
     <IconsBar>
       {medias.map((el, index) => (
-        <Icon key={index} onClick={() => window.open(el.link, "_blank").focus()} width="24" height="24" viewBox="0 0 24 24">
-          <path d={el.svg}></path>
-        </Icon>
+        <IconContainer key={index} onClick={() => window.open(el.link, "_blank").focus()}>
+          <svg width="24" height="24" viewBox="0 0 24 24">
+            <path d={el.svg}></path>
+          </svg>
+        </IconContainer>
       ))}
     </IconsBar>
   );
@@ -293,12 +295,25 @@ const IconsBar = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 0.5rem;
 `;
 
-const Icon = styled.svg`
-  margin: 1rem;
-  fill: white;
+const IconContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  border-radius: 99999px;
   cursor: pointer;
+  > svg {
+    fill: white;
+  }
+  :hover {
+    background-color: white;
+    > svg {
+      fill: #362f78;
+    }
+  }
 `;
 
 const Sidebar = styled.div`
