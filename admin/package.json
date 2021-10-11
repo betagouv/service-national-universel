@@ -75,8 +75,8 @@
     "xlsx": "^0.17.0"
   },
   "engines": {
-    "node": "^14.14",
-    "npm": "^7.6",
+    "node": "^16.10",
+    "npm": "^8.0",
     "yarn": "🍎 This project uses NPM, please do not use YARN. 🍎"
   }
 }
