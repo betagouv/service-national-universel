@@ -17,7 +17,7 @@ const { serializeMission, serializeApplication } = require("../utils/serializer"
 const patches = require("./patches");
 const { sendTemplate } = require("../sendinblue");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
-const { APP_URL } = require("../config");
+const { APP_URL, ADMIN_URL } = require("../config");
 
 const updateApplication = async (mission, fromUser) => {
   if (![MISSION_STATUS.CANCEL, MISSION_STATUS.ARCHIVED, MISSION_STATUS.REFUSED].includes(mission.status))
@@ -74,7 +74,7 @@ router.post("/", passport.authenticate("referent", { session: false }), async (r
       await sendTemplate(SENDINBLUE_TEMPLATES.referent.NEW_MISSION, {
         emailTo: [{ name: `${referentDepartment.firstName} ${referentDepartment.lastName}`, email: referentDepartment.email }],
         params: {
-          cta: `${APP_URL}/mission/${data._id}`,
+          cta: `${ADMIN_URL}/mission/${data._id}`,
         },
       });
     }
