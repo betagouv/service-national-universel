@@ -5,6 +5,7 @@ import { toastr } from "react-redux-toastr";
 import DndFileInput from "../../../components/dndFileInput";
 import api from "../../../services/api";
 import ErrorMessage from "../../../components/ErrorMessage";
+import LoadingButton from "../../../components/buttons/LoadingButton";
 
 export default ({
   values,
@@ -25,9 +26,9 @@ export default ({
       <SubTitle>{subTitle}</SubTitle>
       {subsubTitle ? <SubSubTitle>{subsubTitle}</SubSubTitle> : null}
       {template ? (
-        <TemplateLink href={template} target="_blank">
+        <LoadingButton style={{ marginBottom: "0.5rem" }} onClick={() => window.open(template, "_blank").focus()}>
           Télécharger le modèle obligatoire
-        </TemplateLink>
+        </LoadingButton>
       ) : null}
       <DndFileInput
         optional
@@ -53,20 +54,6 @@ export default ({
     </Content>
   </Card>
 );
-
-const TemplateLink = styled.a`
-  font-size: 0.9rem;
-  color: #fff;
-  background-color: #5147e4;
-  border-radius: 10px;
-  cursor: pointer;
-  margin-bottom: 0.5rem;
-  padding: 0.5rem 3rem;
-  :hover {
-    text-decoration: underline;
-    color: #fff;
-  }
-`;
 
 const Card = styled.div`
   border-radius: 0.5rem;
