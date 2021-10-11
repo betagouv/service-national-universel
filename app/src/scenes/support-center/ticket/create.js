@@ -15,7 +15,6 @@ import { SelectTag, step1, step2Technical, step2Question } from "./worflow";
 export default () => {
   const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
-  const options = ["Assistance technique", "À propos de ma situation", "Contacter un référent"];
   const tags = [`COHORTE_${young.cohort}`, `DEPARTEMENT_${young.department}`, `REGION_${young.region}`, `EMETTEUR_Volontaire`, `CANAL_Plateforme`, `AGENT_Startup_Support`];
 
   return (
@@ -27,18 +26,16 @@ export default () => {
       </Heading>
       <Form>
         <Formik
-          initialValues={{ step1: "", step1Tags: [], step2: "", step2Tags: [], type: "", subject: "", message: "" }}
+          initialValues={{ step1: null, step2: null, message: "" }}
           validateOnChange={false}
           validateOnBlur={false}
           onSubmit={async (values) => {
-            return console.log(values);
             try {
-              const { subject, type, message, step1Tags, step2Tags } = values;
+              const { message, step1, step2 } = values;
               const { ok, code, data } = await api.post("/support-center/ticket", {
-                subject: step2,
-                type: step1,
+                title: `${step1?.label} - ${step2?.label}`,
                 message,
-                tags: [...tags, ...step1Tags, ...step2Tags],
+                tags: [...new Set([...tags, ...step1?.tags, ...step2?.tags])], // we use this dirty hack to remove duplicates
               });
               if (!ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(code));
               toastr.success("Ticket créé");
@@ -51,12 +48,33 @@ export default () => {
         >
           {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
             <>
-              <SelectTag name="step1" options={step1} title={"Ma demande"} selectPlaceholder={"Choisir la catégorie"} handleChange={handleChange} value={values.step1} />
-              {values.step1 === "TECHNICAL" ? (
-                <SelectTag name="step2" options={step2Technical} title={"Sujet"} selectPlaceholder={"Choisir le sujet"} handleChange={handleChange} value={values.step2} />
+              <SelectTag
+                name="step1"
+                options={Object.values(step1)}
+                title={"Ma demande"}
+                selectPlaceholder={"Choisir la catégorie"}
+                handleChange={handleChange}
+                value={values?.step1?.id}
+              />
+              {values.step1?.id === "TECHNICAL" ? (
+                <SelectTag
+                  name="step2"
+                  options={Object.values(step2Technical)}
+                  title={"Sujet"}
+                  selectPlaceholder={"Choisir le sujet"}
+                  handleChange={handleChange}
+                  value={values.step2?.id}
+                />
               ) : null}
-              {values.step1 === "QUESTION" ? (
-                <SelectTag name="step2" options={step2Question} title={"Sujet"} selectPlaceholder={"Choisir le sujet"} handleChange={handleChange} value={values.step2} />
+              {values.step1?.id === "QUESTION" ? (
+                <SelectTag
+                  name="step2"
+                  options={Object.values(step2Question)}
+                  title={"Sujet"}
+                  selectPlaceholder={"Choisir le sujet"}
+                  handleChange={handleChange}
+                  value={values.step2?.id}
+                />
               ) : null}
               <Item
                 name="message"

@@ -108,7 +108,7 @@ router.put("/ticket/:id", passport.authenticate(["referent", "young"], { session
 // Create a new ticket
 router.post("/ticket", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
   try {
-    const { subject, type, message, tags } = req.body;
+    const { subject, type, message, tags, title } = req.body;
     const email = req.user.email;
 
     const customer_id = await zammad.getCustomerIdByEmail(email);
@@ -128,7 +128,7 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
       headers: { "X-On-Behalf-Of": email },
       method: "POST",
       body: JSON.stringify({
-        title: `${type} - ${subject}`,
+        title: title || `${type} - ${subject}`,
         group,
         customer_id,
         customer: email,
