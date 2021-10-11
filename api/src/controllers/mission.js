@@ -62,7 +62,7 @@ const updateApplication = async (mission, fromUser) => {
 // todo : add canCreateOrUpdateMission()
 // if admin or referent from the same area or responsoble or supervisor
 // if structure is validated
-router.post("/", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: checkedMission } = validateMission(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
@@ -74,7 +74,7 @@ router.post("/", passport.authenticate("referent", { session: false }), async (r
   }
 });
 
-router.put("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error: errorId, value: checkedId } = validateId(req.params.id);
     if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
@@ -101,7 +101,7 @@ router.put("/:id", passport.authenticate("referent", { session: false }), async 
   }
 });
 
-router.get("/:id", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
+router.get("/:id", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: checkedId } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error });
@@ -135,9 +135,13 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
   }
 });
 
-router.get("/:id/patches", passport.authenticate("referent", { session: false }), async (req, res) => await patches.get(req, res, MissionObject));
+router.get(
+  "/:id/patches",
+  passport.authenticate("referent", { session: false, failWithError: true }),
+  async (req, res) => await patches.get(req, res, MissionObject)
+);
 
-router.get("/:id/application", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.get("/:id/application", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = Joi.string().required().validate(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
@@ -157,7 +161,7 @@ router.get("/:id/application", passport.authenticate("referent", { session: fals
 });
 
 // Change the structure of a mission.
-router.put("/:id/structure/:structureId", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.put("/:id/structure/:structureId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error: errorId, value: checkedId } = validateId(req.params.id);
     const { error: errorStructureId, value: checkedStructureId } = validateId(req.params.structureId);
@@ -193,7 +197,7 @@ router.put("/:id/structure/:structureId", passport.authenticate("referent", { se
   }
 });
 
-router.delete("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: checkedId } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error });

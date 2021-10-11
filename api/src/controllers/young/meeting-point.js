@@ -11,7 +11,7 @@ const { ERRORS, updatePlacesBus, isYoung } = require("../../utils");
 const { serializeMeetingPoint, serializeYoung } = require("../../utils/serializer");
 const { validateId } = require("../../utils/validator");
 
-router.get("/", passport.authenticate(["referent"], { session: false }), async (req, res) => {
+router.get("/", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
@@ -28,7 +28,7 @@ router.get("/", passport.authenticate(["referent"], { session: false }), async (
   }
 });
 
-router.put("/cancel", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.put("/cancel", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
@@ -51,7 +51,7 @@ router.put("/cancel", passport.authenticate("referent", { session: false }), asy
   }
 });
 
-router.put("/", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
+router.put("/", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
       meetingPointId: Joi.string().optional(),

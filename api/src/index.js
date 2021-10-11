@@ -24,6 +24,18 @@ if (ENVIRONMENT === "development") {
   app.use(logger("dev"));
 }
 
+function handleError(err, req, res, next) {
+  var output = {
+    error: {
+      name: err.name,
+      message: err.message,
+      text: err.toString(),
+    },
+  };
+  var statusCode = err.status || 500;
+  res.status(statusCode).json(output);
+}
+
 const origin = [APP_URL, ADMIN_URL];
 app.use(cors({ credentials: true, origin }));
 app.use(bodyParser.json());
@@ -53,6 +65,7 @@ app.use("/meeting-point", require("./controllers/meeting-point"));
 app.use("/diagoriente", require("./controllers/diagoriente"));
 app.use("/bus", require("./controllers/bus"));
 app.use("/support-center", require("./controllers/support-center"));
+app.use(handleError);
 
 app.get("/", async (req, res) => {
   const d = new Date();

@@ -61,7 +61,7 @@ const getReferentManagerPhase2 = async (department) => {
   return toReferent;
 };
 
-router.post("/", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
+router.post("/", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { value, error } = validateNewApplication(req.body, req.user);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
@@ -92,7 +92,7 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false }
   }
 });
 
-router.put("/", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
+router.put("/", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { value, error } = validateUpdateApplication(req.body, req.user);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
@@ -122,7 +122,7 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false })
   }
 });
 
-router.get("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.get("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = Joi.string().required().validate(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
@@ -136,21 +136,25 @@ router.get("/:id", passport.authenticate("referent", { session: false }), async 
   }
 });
 
-router.post("/notify/docs-military-preparation/:template", passport.authenticate("young", { session: false }), async (req, res) => {
-  const { error, value: template } = Joi.string().required().validate(req.params.template);
-  if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+router.post(
+  "/notify/docs-military-preparation/:template",
+  passport.authenticate("young", { session: false, failWithError: true }),
+  async (req, res) => {
+    const { error, value: template } = Joi.string().required().validate(req.params.template);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
-  const toReferent = await getReferentManagerPhase2(req.user.department);
-  if (!toReferent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const toReferent = await getReferentManagerPhase2(req.user.department);
+    if (!toReferent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-  const mail = await sendTemplate(parseInt(template), {
-    emailTo: [{ name: `${toReferent.firstName} ${toReferent.lastName}`, email: toReferent.email }],
-    params: { cta: `${ADMIN_URL}/volontaire/${req.user._id}/phase2`, youngFirstName: req.user.firstName, youngLastName: req.user.lastName },
-  });
-  return res.status(200).send({ ok: true, data: mail });
-});
+    const mail = await sendTemplate(parseInt(template), {
+      emailTo: [{ name: `${toReferent.firstName} ${toReferent.lastName}`, email: toReferent.email }],
+      params: { cta: `${ADMIN_URL}/volontaire/${req.user._id}/phase2`, youngFirstName: req.user.firstName, youngLastName: req.user.lastName },
+    });
+    return res.status(200).send({ ok: true, data: mail });
+  }
+);
 
-router.post("/:id/notify/:template", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
+router.post("/:id/notify/:template", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
