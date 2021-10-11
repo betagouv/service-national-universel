@@ -6,7 +6,8 @@ import { Link } from "react-router-dom";
 import { useHistory } from "react-router-dom";
 
 import api from "../../services/api";
-import { translate, ES_NO_LIMIT } from "../../utils";
+import { translate, ES_NO_LIMIT, MISSION_STATUS_COLORS } from "../../utils";
+import Badge from "../../components/Badge";
 import Team from "./components/Team";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
 import Panel, { Info, Details } from "../../components/Panel";
@@ -120,12 +121,14 @@ export default ({ onChange, value }) => {
       <Info title={`Missions (${missions.count})`}>
         <p style={{ color: "#999" }}>Cette structure a {missions.placesLeft} places restantes.</p>
         {missions.all.map((mission) => (
-          <div className="detail" key={mission.id}>
+          <div className="detail" key={mission.id} style={{ justifyContent: "space-between", alignItems: "center" }}>
             <MissionName className="detail-title">{mission.name}</MissionName>
-            <div className="detail-text">{translate(mission.status)}</div>
-            <Link to={`/mission/${mission.id}`}>
-              <IconLink />
-            </Link>
+            <div style={{ display: "flex", alignItems: "center", whiteSpace: "nowrap" }}>
+              <Badge text={translate(mission.status)} color={MISSION_STATUS_COLORS[mission.status]} />
+              <Link to={`/mission/${mission.id}`}>
+                <IconLink />
+              </Link>
+            </div>
           </div>
         ))}
         <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
@@ -164,7 +167,6 @@ const Subtitle = styled.div`
 `;
 
 const MissionName = styled.div`
-  width: 100px;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
