@@ -88,6 +88,7 @@ export default function Association({ hit }) {
               setShow(true);
               setTab("Contacts");
               sendEventToBackend("CONTACT_CLICK", association.id);
+              if (association.coordonnees_courriel.length > 0) window.open(`mailto:${association.coordonnees_courriel[0]}`);
             }}
           >
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
