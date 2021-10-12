@@ -296,6 +296,7 @@ const IconsBar = styled.div`
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  margin: 1rem 0;
 `;
 
 const IconContainer = styled.div`
