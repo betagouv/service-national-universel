@@ -256,6 +256,7 @@ const Bloc = ({ children, title, titleRight, borderBottom, borderRight, borderLe
 
 const Line = styled.div`
   display: flex;
+  flex-wrap: wrap;
 `;
 
 const Wrapper = styled.div`

@@ -10,7 +10,6 @@ const SIZE = 1000;
 let startTime = new Date();
 
 const fetchData = (requestOptions, batch = 0) => {
-  console.log("BATCH", batch);
   fetch(`https://api.api-engagement.beta.gouv.fr/v0/mission?skip=${batch * SIZE}&limit=${SIZE}`, requestOptions)
     .then((response) => response.json())
     .then((result) => sync(result))
@@ -21,7 +20,6 @@ const fetchData = (requestOptions, batch = 0) => {
 const sync = async (result) => {
   if (!result.ok) return console.log("ERROR", result);
   for (let i = 0; i < result.data.length; i++) {
-    i % 100 === 0 && console.log(i);
     const t = result.data[i];
     t.lastSyncAt = Date.now();
     const m = await MissionApiModel.findById(t._id);
@@ -37,7 +35,7 @@ const sync = async (result) => {
 };
 
 const cleanData = async () => {
-  console.log("CLEAN");
+  capture("CLEANING OUTDATED MISSIONS API ENGAGEMENT");
   try {
     await MissionApiModel.deleteMany({ lastSyncAt: { $lte: startTime } });
   } catch (error) {

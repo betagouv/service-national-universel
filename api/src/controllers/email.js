@@ -88,7 +88,7 @@ router.post("/", ipAllowListMiddleware, async (req, res) => {
   }
 });
 
-router.get("/", passport.authenticate(["referent"], { session: false }), async (req, res) => {
+router.get("/", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: email } = Joi.string().lowercase().trim().email().required().validate(req.query.email);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, message: error.message });

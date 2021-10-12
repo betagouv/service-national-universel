@@ -22,46 +22,50 @@ const { allRecords } = require("../es/utils");
 const { API_ASSOCIATION_ES_ENDPOINT, API_ASSOCIATION_AWS_ACCESS_KEY_ID, API_ASSOCIATION_AWS_SECRET_ACCESS_KEY } = require("../config");
 
 // Routes accessible for youngs and referent
-router.post("/mission/:action(_msearch|export)", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
-  try {
-    const { user, body } = req;
-    const filter = [];
+router.post(
+  "/mission/:action(_msearch|export)",
+  passport.authenticate(["young", "referent"], { session: false, failWithError: true }),
+  async (req, res) => {
+    try {
+      const { user, body } = req;
+      const filter = [];
 
-    // A young can only see validated missions.
-    if (isYoung(user)) filter.push({ term: { "status.keyword": "VALIDATED" } });
+      // A young can only see validated missions.
+      if (isYoung(user)) filter.push({ term: { "status.keyword": "VALIDATED" } });
 
-    // A responsible cans only see their structure's missions.
-    if (user.role === ROLES.RESPONSIBLE) {
-      if (!user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      filter.push({ terms: { "structureId.keyword": [user.structureId] } });
+      // A responsible cans only see their structure's missions.
+      if (user.role === ROLES.RESPONSIBLE) {
+        if (!user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        filter.push({ terms: { "structureId.keyword": [user.structureId] } });
+      }
+
+      // A supervisor can only see their structures' missions.
+      if (user.role === ROLES.SUPERVISOR) {
+        if (!user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        const data = await StructureObject.find({ $or: [{ networkId: String(user.structureId) }, { _id: String(user.structureId) }] });
+        // const data = await StructureObject.find({ networkId: user.structureId });
+        filter.push({ terms: { "structureId.keyword": data.map((e) => e._id.toString()) } });
+      }
+
+      // A head center can not see missions.
+      if (user.role === ROLES.HEAD_CENTER) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+      if (req.params.action === "export") {
+        const response = await allRecords("mission", applyFilterOnQuery(req.body.query, filter));
+        return res.status(200).send({ ok: true, data: serializeMissions(response) });
+      } else {
+        const response = await esClient.msearch({ index: "mission", body: withFilterForMSearch(body, filter) });
+        return res.status(200).send(serializeMissions(response.body));
+      }
+    } catch (error) {
+      capture(error);
+      res.status(500).send({ ok: false, error: error.message });
     }
-
-    // A supervisor can only see their structures' missions.
-    if (user.role === ROLES.SUPERVISOR) {
-      if (!user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      const data = await StructureObject.find({ $or: [{ networkId: String(user.structureId) }, { _id: String(user.structureId) }] });
-      // const data = await StructureObject.find({ networkId: user.structureId });
-      filter.push({ terms: { "structureId.keyword": data.map((e) => e._id.toString()) } });
-    }
-
-    // A head center can not see missions.
-    if (user.role === ROLES.HEAD_CENTER) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    if (req.params.action === "export") {
-      const response = await allRecords("mission", applyFilterOnQuery(req.body.query, filter));
-      return res.status(200).send({ ok: true, data: serializeMissions(response) });
-    } else {
-      const response = await esClient.msearch({ index: "mission", body: withFilterForMSearch(body, filter) });
-      return res.status(200).send(serializeMissions(response.body));
-    }
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, error: error.message });
   }
-});
+);
 
 // Routes accessible by young only
-router.post("/missionapi/_msearch", passport.authenticate(["young"], { session: false }), async (req, res) => {
+router.post("/missionapi/_msearch", passport.authenticate(["young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { body } = req;
     const response = await esClient.msearch({ index: "missionapi", body });
@@ -72,7 +76,7 @@ router.post("/missionapi/_msearch", passport.authenticate(["young"], { session: 
   }
 });
 
-router.post("/school/_msearch", passport.authenticate(["young"], { session: false }), async (req, res) => {
+router.post("/school/_msearch", passport.authenticate(["young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { body } = req;
     const response = await esClient.msearch({ index: "school", body });
@@ -84,7 +88,7 @@ router.post("/school/_msearch", passport.authenticate(["young"], { session: fals
 });
 
 // Routes accessible by referents only
-router.post("/young/:action(_msearch|export)", passport.authenticate(["referent"], { session: false }), async (req, res) => {
+router.post("/young/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { user, body } = req;
     if (user.role === ROLES.ADMIN) {
@@ -139,51 +143,55 @@ router.post("/young/:action(_msearch|export)", passport.authenticate(["referent"
 });
 
 // cohesionyoung is a special index, so we need to use the index "young" and specify a center ID.
-router.post("/cohesionyoung/:id/:action(_msearch|export)", passport.authenticate(["referent"], { session: false }), async (req, res) => {
-  try {
-    const { user, body } = req;
+router.post(
+  "/cohesionyoung/:id/:action(_msearch|export)",
+  passport.authenticate(["referent"], { session: false, failWithError: true }),
+  async (req, res) => {
+    try {
+      const { user, body } = req;
 
-    if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER].includes(user.role)) {
-      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
-    if (user.role === ROLES.REFERENT_REGION) {
-      const centers = await CohesionCenterObject.find({ region: user.region });
-      if (!centers.map((e) => e._id.toString()).includes(req.params.id)) {
+      if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER].includes(user.role)) {
         return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
-    }
 
-    if (user.role === ROLES.REFERENT_DEPARTMENT) {
-      const centers = await CohesionCenterObject.find({ department: user.department });
-      if (!centers.map((e) => e._id.toString()).includes(req.params.id)) {
-        return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      if (user.role === ROLES.REFERENT_REGION) {
+        const centers = await CohesionCenterObject.find({ region: user.region });
+        if (!centers.map((e) => e._id.toString()).includes(req.params.id)) {
+          return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        }
       }
-    }
 
-    const filter = [
-      {
-        bool: {
-          filter: [{ terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } }, { term: { cohesionCenterId: req.params.id } }],
-          must_not: [{ term: { "statusPhase1.keyword": "WAITING_LIST" } }],
+      if (user.role === ROLES.REFERENT_DEPARTMENT) {
+        const centers = await CohesionCenterObject.find({ department: user.department });
+        if (!centers.map((e) => e._id.toString()).includes(req.params.id)) {
+          return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        }
+      }
+
+      const filter = [
+        {
+          bool: {
+            filter: [{ terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } }, { term: { cohesionCenterId: req.params.id } }],
+            must_not: [{ term: { "statusPhase1.keyword": "WAITING_LIST" } }],
+          },
         },
-      },
-    ];
+      ];
 
-    if (req.params.action === "export") {
-      const response = await allRecords("young", applyFilterOnQuery(req.body.query, filter));
-      return res.status(200).send({ ok: true, data: serializeYoungs(response) });
-    } else {
-      const response = await esClient.msearch({ index: "young", body: withFilterForMSearch(body, filter) });
-      return res.status(200).send(serializeYoungs(response.body));
+      if (req.params.action === "export") {
+        const response = await allRecords("young", applyFilterOnQuery(req.body.query, filter));
+        return res.status(200).send({ ok: true, data: serializeYoungs(response) });
+      } else {
+        const response = await esClient.msearch({ index: "young", body: withFilterForMSearch(body, filter) });
+        return res.status(200).send(serializeYoungs(response.body));
+      }
+    } catch (error) {
+      capture(error);
+      res.status(500).send({ ok: false, error });
     }
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, error });
   }
-});
+);
 
-router.post("/structure/:action(_msearch|export)", passport.authenticate(["referent"], { session: false }), async (req, res) => {
+router.post("/structure/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { body, user } = req;
     const filter = [];
@@ -220,7 +228,7 @@ router.post("/structure/:action(_msearch|export)", passport.authenticate(["refer
     res.status(500).send({ ok: false, error });
   }
 });
-router.post("/referent/:action(_msearch|export)", passport.authenticate(["referent"], { session: false }), async (req, res) => {
+router.post("/referent/:action(_msearch|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { user, body } = req;
     let filter = [];
@@ -287,87 +295,99 @@ router.post("/referent/:action(_msearch|export)", passport.authenticate(["refere
   }
 });
 
-router.post("/application/:action(_msearch|export)", passport.authenticate(["referent"], { session: false }), async (req, res) => {
-  try {
-    const { user, body } = req;
-    const filter = [];
+router.post(
+  "/application/:action(_msearch|export)",
+  passport.authenticate(["referent"], { session: false, failWithError: true }),
+  async (req, res) => {
+    try {
+      const { user, body } = req;
+      const filter = [];
 
-    // A responsible cans only see their structure's applications.
-    if (user.role === ROLES.RESPONSIBLE) {
-      if (!user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      filter.push({ terms: { "structureId.keyword": [user.structureId] } });
+      // A responsible cans only see their structure's applications.
+      if (user.role === ROLES.RESPONSIBLE) {
+        if (!user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        filter.push({ terms: { "structureId.keyword": [user.structureId] } });
+      }
+
+      // A supervisor can only see their structures' applications.
+      if (user.role === ROLES.SUPERVISOR) {
+        if (!user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        const data = await StructureObject.find({ $or: [{ networkId: String(user.structureId) }, { _id: String(user.structureId) }] });
+        filter.push({ terms: { "structureId.keyword": data.map((e) => e._id.toString()) } });
+      }
+
+      // A head center can not see applications.
+      if (user.role === ROLES.HEAD_CENTER) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+      if (req.params.action === "export") {
+        const response = await allRecords("application", applyFilterOnQuery(req.body.query, filter));
+        return res.status(200).send({ ok: true, data: serializeApplications(response) });
+      } else {
+        const response = await esClient.msearch({ index: "application", body: withFilterForMSearch(body, filter) });
+        return res.status(200).send(serializeApplications(response.body));
+      }
+    } catch (error) {
+      capture(error);
+      res.status(500).send({ ok: false, error });
     }
-
-    // A supervisor can only see their structures' applications.
-    if (user.role === ROLES.SUPERVISOR) {
-      if (!user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      const data = await StructureObject.find({ $or: [{ networkId: String(user.structureId) }, { _id: String(user.structureId) }] });
-      filter.push({ terms: { "structureId.keyword": data.map((e) => e._id.toString()) } });
-    }
-
-    // A head center can not see applications.
-    if (user.role === ROLES.HEAD_CENTER) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    if (req.params.action === "export") {
-      const response = await allRecords("application", applyFilterOnQuery(req.body.query, filter));
-      return res.status(200).send({ ok: true, data: serializeApplications(response) });
-    } else {
-      const response = await esClient.msearch({ index: "application", body: withFilterForMSearch(body, filter) });
-      return res.status(200).send(serializeApplications(response.body));
-    }
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, error });
   }
-});
+);
 
-router.post("/cohesioncenter/:action(_msearch|export)", passport.authenticate(["referent"], { session: false }), async (req, res) => {
-  try {
-    const { user, body } = req;
-    let filter = [];
+router.post(
+  "/cohesioncenter/:action(_msearch|export)",
+  passport.authenticate(["referent"], { session: false, failWithError: true }),
+  async (req, res) => {
+    try {
+      const { user, body } = req;
+      let filter = [];
 
-    if (user.role === ROLES.REFERENT_REGION) filter.push({ term: { "region.keyword": user.region } });
-    if (user.role === ROLES.REFERENT_DEPARTMENT) filter.push({ term: { "department.keyword": user.department } });
+      if (user.role === ROLES.REFERENT_REGION) filter.push({ term: { "region.keyword": user.region } });
+      if (user.role === ROLES.REFERENT_DEPARTMENT) filter.push({ term: { "department.keyword": user.department } });
 
-    if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER].includes(user.role)) {
-      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER].includes(user.role)) {
+        return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+
+      if (req.params.action === "export") {
+        const response = await allRecords("cohesioncenter", applyFilterOnQuery(req.body.query, filter));
+        return res.status(200).send({ ok: true, data: response });
+      } else {
+        const response = await esClient.msearch({ index: "cohesioncenter", body: withFilterForMSearch(body, filter) });
+        return res.status(200).send(response.body);
+      }
+    } catch (error) {
+      capture(error);
+      res.status(500).send({ ok: false, error });
     }
-
-    if (req.params.action === "export") {
-      const response = await allRecords("cohesioncenter", applyFilterOnQuery(req.body.query, filter));
-      return res.status(200).send({ ok: true, data: response });
-    } else {
-      const response = await esClient.msearch({ index: "cohesioncenter", body: withFilterForMSearch(body, filter) });
-      return res.status(200).send(response.body);
-    }
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, error });
   }
-});
+);
 
-router.post("/meetingpoint/:action(_msearch|export)", passport.authenticate(["referent"], { session: false }), async (req, res) => {
-  try {
-    const { user, body } = req;
+router.post(
+  "/meetingpoint/:action(_msearch|export)",
+  passport.authenticate(["referent"], { session: false, failWithError: true }),
+  async (req, res) => {
+    try {
+      const { user, body } = req;
 
-    if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER].includes(user.role)) {
-      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER].includes(user.role)) {
+        return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+
+      if (req.params.action === "export") {
+        const response = await allRecords("meetingpoint", req.body.query);
+        return res.status(200).send({ ok: true, data: response });
+      } else {
+        const response = await esClient.msearch({ index: "meetingpoint", body: body });
+        return res.status(200).send(response.body);
+      }
+    } catch (error) {
+      capture(error);
+      res.status(500).send({ ok: false, error });
     }
-
-    if (req.params.action === "export") {
-      const response = await allRecords("meetingpoint", req.body.query);
-      return res.status(200).send({ ok: true, data: response });
-    } else {
-      const response = await esClient.msearch({ index: "meetingpoint", body: body });
-      return res.status(200).send(response.body);
-    }
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, error });
   }
-});
+);
 
-router.post("/association/_msearch", passport.authenticate(["referent"], { session: false }), async (req, res) => {
+router.post("/association/_msearch", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { body } = req;
     const options = {
