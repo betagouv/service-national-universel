@@ -38,10 +38,12 @@ const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 
 router.post("/signin", signinLimiter, (req, res) => YoungAuth.signin(req, res));
 router.post("/logout", (req, res) => YoungAuth.logout(req, res));
-router.get("/signin_token", passport.authenticate("young", { session: false }), (req, res) => YoungAuth.signinToken(req, res));
+router.get("/signin_token", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.signinToken(req, res));
 router.post("/forgot_password", async (req, res) => YoungAuth.forgotPassword(req, res, `${config.APP_URL}/auth/reset`));
 router.post("/forgot_password_reset", async (req, res) => YoungAuth.forgotPasswordReset(req, res));
-router.post("/reset_password", passport.authenticate("young", { session: false }), async (req, res) => YoungAuth.resetPassword(req, res));
+router.post("/reset_password", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) =>
+  YoungAuth.resetPassword(req, res)
+);
 
 router.post("/signup", async (req, res) => {
   try {
@@ -133,7 +135,7 @@ router.post("/signup_invite", async (req, res) => {
   }
 });
 
-router.post("/file/:key", passport.authenticate("young", { session: false }), async (req, res) => {
+router.post("/file/:key", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     const rootKeys = ["cniFiles", "highSkilledActivityProofFiles", "parentConsentmentFiles", "autoTestPCRFiles", "imageRightFiles"];
     const militaryKeys = [
@@ -204,7 +206,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.post("/invite", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.post("/invite", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = validateYoung(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
@@ -282,9 +284,13 @@ router.put("/validate_phase3/:young/:token", async (req, res) => {
   }
 });
 
-router.get("/:id/patches", passport.authenticate("referent", { session: false }), async (req, res) => await patches.get(req, res, YoungObject));
+router.get(
+  "/:id/patches",
+  passport.authenticate("referent", { session: false, failWithError: true }),
+  async (req, res) => await patches.get(req, res, YoungObject)
+);
 
-router.put("/:id/validate-mission-phase3", passport.authenticate("young", { session: false }), async (req, res) => {
+router.put("/:id/validate-mission-phase3", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
@@ -336,7 +342,7 @@ router.put("/:id/validate-mission-phase3", passport.authenticate("young", { sess
   }
 });
 
-router.put("/", passport.authenticate("young", { session: false }), async (req, res) => {
+router.put("/", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = validateYoung(req.body, req.user);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
@@ -386,7 +392,7 @@ router.put("/", passport.authenticate("young", { session: false }), async (req, 
 
 //todo : add operation unauthorized:
 // taking a user and a target, check if the user can send the template to the target
-router.post("/:id/email/:template", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.post("/:id/email/:template", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
@@ -420,7 +426,7 @@ router.post("/:id/email/:template", passport.authenticate("referent", { session:
   }
 });
 
-router.get("/:id/application", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
+router.get("/:id/application", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = Joi.string().required().validate(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
@@ -502,7 +508,7 @@ router.post("/france-connect/user-info", async (req, res) => {
 });
 
 // Delete one user (only admin can delete user)
-router.delete("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
@@ -521,7 +527,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false }), asy
   }
 });
 
-router.get("/", passport.authenticate(["referent"], { session: false }), async (req, res) => {
+router.get("/", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const email = req.query.email;
     // const { error, value: id } = Joi.string().required().validate(req.query.email);

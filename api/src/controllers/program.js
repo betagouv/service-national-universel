@@ -8,7 +8,7 @@ const { ERRORS } = require("../utils");
 const { validateId, validateString, validateProgram } = require("../utils/validator");
 const { ROLES, canCreateOrUpdateProgram } = require("snu-lib/roles");
 
-router.post("/", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: checkedProgram } = validateProgram(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
@@ -21,7 +21,7 @@ router.post("/", passport.authenticate("referent", { session: false }), async (r
   }
 });
 
-router.put("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error: errorProgram, value: checkedProgram } = validateProgram(req.body);
     const { error: errorId, value: checkedId } = validateId(req.params.id);
@@ -39,7 +39,7 @@ router.put("/:id", passport.authenticate("referent", { session: false }), async 
   }
 });
 
-router.get("/:id", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
+router.get("/:id", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: checkedId } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error });
@@ -52,7 +52,7 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
   }
 });
 
-router.get("/", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
+router.get("/", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     let data = [];
     if (req.user.role === ROLES.ADMIN) data = await ProgramObject.find({});
@@ -70,7 +70,7 @@ router.get("/", passport.authenticate(["referent", "young"], { session: false })
   }
 });
 
-router.delete("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: checkedId } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error });

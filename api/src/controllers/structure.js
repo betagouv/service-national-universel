@@ -68,7 +68,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.put("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error: errorId, value: checkedId } = validateId(req.params.id);
     if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error: errorId });
@@ -93,7 +93,7 @@ router.put("/:id", passport.authenticate("referent", { session: false }), async 
   }
 });
 
-router.get("/networks", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.get("/networks", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const data = await StructureObject.find({ isNetwork: "true" }).sort("name");
     return res.status(200).send({ ok: true, data: serializeArray(data, req.user, serializeStructure) });
@@ -103,7 +103,7 @@ router.get("/networks", passport.authenticate("referent", { session: false }), a
   }
 });
 
-router.get("/:id/children", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.get("/:id/children", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error: errorId, value: checkedId } = validateId(req.params.id);
     if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: errorId });
@@ -119,7 +119,7 @@ router.get("/:id/children", passport.authenticate("referent", { session: false }
   }
 });
 
-router.get("/:id/mission", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.get("/:id/mission", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: checkedId } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error });
@@ -134,9 +134,13 @@ router.get("/:id/mission", passport.authenticate("referent", { session: false })
   }
 });
 
-router.get("/:id/patches", passport.authenticate("referent", { session: false }), async (req, res) => await patches.get(req, res, StructureObject));
+router.get(
+  "/:id/patches",
+  passport.authenticate("referent", { session: false, failWithError: true }),
+  async (req, res) => await patches.get(req, res, StructureObject)
+);
 
-router.get("/:id", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
+router.get("/:id", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error: errorId, value: checkedId } = validateId(req.params.id);
     if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: errorId });
@@ -151,7 +155,7 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
   }
 });
 
-router.get("/", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.get("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const data = await StructureObject.find({});
     return res.status(200).send({ ok: true, data: serializeArray(data, req.user, serializeStructure) });
@@ -161,7 +165,7 @@ router.get("/", passport.authenticate("referent", { session: false }), async (re
   }
 });
 
-router.delete("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error: errorId, value: checkedId } = validateId(req.params.id);
     if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: errorId });

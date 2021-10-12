@@ -7,7 +7,7 @@ const BusModel = require("../models/bus");
 const { ERRORS } = require("../utils");
 const { serializeBus } = require("../utils/serializer");
 
-router.get("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.get("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = Joi.string().required().validate(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
