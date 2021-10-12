@@ -11,6 +11,7 @@ export default function Association({ hit }) {
   const [tab, setTab] = useState("Informations");
   const missions = false;
   const association = hit;
+  const associationLinks = [association.url, association.linkedin, association.facebook, association.twitter, association.donation].filter((e) => e);
 
   async function sendEventToBackend(action, associationId) {
     try {
@@ -157,14 +158,12 @@ export default function Association({ hit }) {
                   { label: "Téléphone", value: association.coordonnees_telephone || [] },
                   { label: "Courriel", value: association.coordonnees_courriel || [] },
                   {
-                    label: "Liens",
-                    value: [association.url, association.linkedin, association.facebook, association.twitter, association.donation]
-                      .filter((e) => e)
-                      .map((e) => (
-                        <a style={{ textDecoration: "underline" }} href={e}>
-                          {e}
-                        </a>
-                      )),
+                    label: associationLinks.length > 1 ? "Liens" : "Lien",
+                    value: associationLinks.map((e) => (
+                      <a style={{ textDecoration: "underline" }} href={e}>
+                        {e}
+                      </a>
+                    )),
                   },
                 ]
                   .filter((e) => e.value && e.value.length > 0)
