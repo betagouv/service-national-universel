@@ -269,9 +269,12 @@ const Articles = styled.div`
   }
   .block-title {
     display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
   }
   .block-title h6 {
     padding-left: 0.8rem;
+    margin: 0;
   }
   .block p,
   .block a {
