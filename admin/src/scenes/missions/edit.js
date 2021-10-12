@@ -138,7 +138,6 @@ export default (props) => {
           actions: "",
           justifications: "",
           contraintes: "",
-          departement: "",
           tuteur: "",
           startAt: dateForDatePicker(Date.now()),
           endAt: dateForDatePicker(Date.now() + 1000 * 60 * 60 * 24 * 7),

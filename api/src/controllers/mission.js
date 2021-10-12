@@ -11,13 +11,13 @@ const StructureObject = require("../models/structure");
 const ReferentObject = require("../models/referent");
 const { ERRORS, isYoung } = require("../utils/index.js");
 const { validateId, validateMission } = require("../utils/validator");
-const { canModifyMission } = require("snu-lib/roles");
+const { canModifyMission, ROLES } = require("snu-lib/roles");
 const { MISSION_STATUS, APPLICATION_STATUS } = require("snu-lib/constants");
 const { serializeMission, serializeApplication } = require("../utils/serializer");
 const patches = require("./patches");
 const { sendTemplate } = require("../sendinblue");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
-const { APP_URL } = require("../config");
+const { APP_URL, ADMIN_URL } = require("../config");
 
 const updateApplication = async (mission, fromUser) => {
   if (![MISSION_STATUS.CANCEL, MISSION_STATUS.ARCHIVED, MISSION_STATUS.REFUSED].includes(mission.status))
@@ -66,7 +66,19 @@ router.post("/", passport.authenticate("referent", { session: false }), async (r
   try {
     const { error, value: checkedMission } = validateMission(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+
     const data = await MissionObject.create(checkedMission);
+
+    const referentDepartment = await UserObject.findOne({ role: ROLES.REFERENT_DEPARTMENT, department: checkedMission.department });
+    if (referentDepartment) {
+      await sendTemplate(SENDINBLUE_TEMPLATES.referent.NEW_MISSION, {
+        emailTo: [{ name: `${referentDepartment.firstName} ${referentDepartment.lastName}`, email: referentDepartment.email }],
+        params: {
+          cta: `${ADMIN_URL}/mission/${data._id}`,
+        },
+      });
+    }
+
     return res.status(200).send({ ok: true, data: serializeMission(data) });
   } catch (error) {
     capture(error);
