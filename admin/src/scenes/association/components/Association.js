@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import api from "../../../services/api";
 
 import styled from "styled-components";
+import { toastr } from "react-redux-toastr";
 
 import Chevron from "../../../components/Chevron";
 
@@ -9,8 +10,55 @@ export default function Association({ hit }) {
   const tabs = ["Informations", "Contacts", "Missions"];
   const [show, setShow] = useState(false);
   const [tab, setTab] = useState("Informations");
-  const missions = false;
+  const [missionsInfo, setMissionsInfo] = useState([]);
   const association = hit;
+
+  useEffect(() => {
+    (async () => {
+      var myHeaders = new Headers();
+      myHeaders.append("Content-Type", "application/json");
+
+      var raw = JSON.stringify({
+        query: {
+          bool: {
+            must: [
+              {
+                multi_match: {
+                  query: association.id_rna,
+                  fields: ["associationRna", "organizationRNA"],
+                },
+              },
+              {
+                match: {
+                  deleted: "no",
+                },
+              },
+            ],
+          },
+        },
+      });
+
+      try {
+        const res = await fetch("https://api.api-engagement.beta.gouv.fr/v0/mission/search", {
+          method: "POST",
+          headers: myHeaders,
+          body: raw,
+          redirect: "follow",
+        }).then((response) => response.json());
+
+        if (res.hits.hits.length > 0) {
+          setMissionsInfo({
+            countMissions: res.hits.hits.length,
+            countPlaces: res.hits.hits.reduce((prev, curr) => (curr._source.places ? prev + curr._source.places : 0), 0),
+            missions: res.hits.hits.map((el) => ({ id: el._id, ...el._source })),
+          });
+        }
+      } catch (err) {
+        console.log(err);
+        toastr.error("Erreur lors de la récupération des missions");
+      }
+    })();
+  }, []);
 
   async function sendEventToBackend(action, associationId) {
     try {
@@ -112,7 +160,23 @@ export default function Association({ hit }) {
             </svg>
           </ContactButton>
         </ContactButtons>
-        {missions && <div>Bouton missions</div>}
+        <MissionButton
+          style={{ marginLeft: "2rem" }}
+          onClick={() => {
+            setShow(true);
+            setTab("Missions");
+            sendEventToBackend("MISSIONS_CLICK", association.id);
+          }}
+        >
+          {missionsInfo.countMissions ? (
+            <>
+              <div className="title">{missionsInfo.countMissions} mission(s) disponible(s)</div>
+              <div className="subtitle">{missionsInfo.countPlaces} volontaire(s) recherché(s)</div>
+            </>
+          ) : (
+            <div className="title">Aucune mission disponible</div>
+          )}
+        </MissionButton>
       </AssociationHeader>
       {show && (
         <AssociationBody>
@@ -195,13 +259,85 @@ export default function Association({ hit }) {
                   ))}
               </TabContact>
             )}
-            {tab === "Missions" && <div style={{ textAlign: "center", padding: "2rem", width: "100%" }}>Aucune mission référencée actuellement</div>}
+            {tab === "Missions" && (
+              <TabMissions>
+                {!missionsInfo.countMissions ? (
+                  <p style={{ textAlign: "center", padding: "2rem", width: "100%", margin: 0 }}>Aucune mission référencée actuellement</p>
+                ) : (
+                  missionsInfo.missions.map((mission) => (
+                    <MissionInfo>
+                      <div className="wrapper">
+                        <b className="category">Mission</b>
+                        <p className="description">{mission.description.trim()}</p>
+                      </div>
+                      <div className="wrapper">
+                        <b className="category">Disponibilité(s)</b>
+                        <p className="description">{mission.places} places restantes</p>
+                      </div>
+                      <MissionButton style={{ maginInline: "auto" }} onClick={() => window.open(mission.applicationUrl, "_blank").focus()}>
+                        <div className="title">Consulter</div>
+                      </MissionButton>
+                    </MissionInfo>
+                  ))
+                )}
+              </TabMissions>
+            )}
           </TabContainer>
         </AssociationBody>
       )}
     </AssociationWrapper>
   );
 }
+
+const MissionButton = styled.div`
+  border: solid 1px #dcdcdc;
+  background-color: #fff;
+  border-radius: 10px;
+  white-space: nowrap;
+  padding: 0.5rem 2rem;
+  margin: auto;
+  text-align: center;
+  cursor: pointer;
+  &:hover {
+    background-color: #e7e7e7;
+  }
+  .title {
+    margin: 0;
+    font-weight: 500;
+    color: #111;
+  }
+  .subtitle {
+    margin: 0;
+    font-size: 0.75rem;
+    color: #a7a7b0;
+  }
+`;
+
+const TabMissions = styled.div`
+  width: 100%;
+  color: #696974;
+`;
+
+const MissionInfo = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 0.25fr 0.25fr;
+  grid-gap: 1rem;
+  align-items: center;
+  border-bottom: 1px dashed rgba(0, 0, 0, 0.2);
+  padding: 2rem 0;
+  .category {
+    text-transform: uppercase;
+  }
+  .description {
+    margin: 1rem 0 0;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .wrapper {
+    min-width: 0;
+  }
+`;
 
 const AssociationWrapper = styled.div`
   margin-bottom: 2rem;
@@ -250,7 +386,7 @@ const AssociationBody = styled.div`
   background: #f9f8f6;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
   border-radius: 0px 0px 10px 10px;
-  padding: 1rem;
+  padding: 1rem 1rem 2rem;
 `;
 const ContactButtons = styled.div`
   display: flex;
