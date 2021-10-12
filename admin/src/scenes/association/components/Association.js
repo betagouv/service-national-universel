@@ -386,7 +386,7 @@ const AssociationBody = styled.div`
   background: #f9f8f6;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
   border-radius: 0px 0px 10px 10px;
-  padding: 1rem;
+  padding: 1rem 1rem 2rem;
 `;
 const ContactButtons = styled.div`
   display: flex;
