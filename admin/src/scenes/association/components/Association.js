@@ -65,6 +65,7 @@ export default function Association({ hit }) {
               setShow(true);
               setTab("Contacts");
               sendEventToBackend("CONTACT_CLICK", association.id);
+              window.open(association.url, "_blank").focus();
             }}
           >
             <svg width="21" height="21" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
