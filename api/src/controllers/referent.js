@@ -407,7 +407,7 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
     try {
       const { mime } = await FileType.fromBuffer(decryptedBuffer);
       mimeFromFile = mime;
-    } catch (e) {}
+    } catch (e) { }
 
     return res.status(200).send({
       data: Buffer.from(decryptedBuffer, "base64"),
@@ -449,7 +449,7 @@ router.get("/youngFile/:youngId/military-preparation/:key/:fileName", passport.a
     try {
       const { mime } = await FileType.fromBuffer(decryptedBuffer);
       mimeFromFile = mime;
-    } catch (e) {}
+    } catch (e) { }
 
     return res.status(200).send({
       data: Buffer.from(decryptedBuffer, "base64"),
@@ -558,6 +558,19 @@ router.get("/:id", passport.authenticate("referent", { session: false }), async 
 
     if (!canViewReferent(req.user, referent)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     return res.status(200).send({ ok: true, data: serializeReferent(referent, req.user) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+router.get("/", passport.authenticate(["referent"], { session: false }), async (req, res) => {
+  try {
+    const email = req.query.email;
+    console.log("email", email);
+    let data = await ReferentModel.findOne({ email });
+    console.log("Data", data);
+    return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });

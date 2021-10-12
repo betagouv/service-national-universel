@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { toastr } from "react-redux-toastr";
+import { useSelector } from "react-redux";
 import { NavLink, Link, useHistory } from "react-router-dom";
 import styled from "styled-components";
 
@@ -11,6 +12,7 @@ import { appURL, adminURL } from "../../../config";
 
 export default ({ ticket }) => {
   const [user, setUser] = useState([]);
+  const currentUser = useSelector((state) => state.Auth.user);
   const history = useHistory();
   const [referentManagerPhase2, setReferentManagerPhase2] = useState();
 
@@ -20,6 +22,10 @@ export default ({ ticket }) => {
       const email = ticket.articles[0].created_by;
       const { data } = await api.get(`/young?email=${email}`);
       setUser(data);
+      if (!data) {
+        const response = await api.get(`/referent?email=${email}`);
+        setUser(response.data);
+      }
     })();
   }, [ticket]);
 
@@ -61,7 +67,7 @@ export default ({ ticket }) => {
           {ticketStateNameById(ticket?.state_id) !== "fermé" ? (
             <div style={{ display: "flex", justifyContent: "center", alignContent: "center" }}>
               <button className="button" onClick={resolveTicket}>
-                Fermer la demande
+                Archiver la demande
               </button>
             </div>
           ) : null}
@@ -69,10 +75,10 @@ export default ({ ticket }) => {
             {user.firstName} {user.lastName}
           </div>
           <div style={{ display: "flex", flexWrap: "wrap", marginBottom: "1rem" }}>
-            <Link to={`/volontaire/${user._id}`} target="_blank" rel="noopener noreferrer">
+            <Link to={user.role ? `/user/${user._id}` : `/volontaire/${user._id}`} target="_blank" rel="noopener noreferrer">
               <PanelActionButton icon="eye" title="Consulter" />
             </Link>
-            <Link to={`/volontaire/${user._id}/edit`} target="_blank" rel="noopener noreferrer">
+            <Link to={user.role ? `/user/${user._id}/edit` : `/volontaire/${user._id}/edit`} target="_blank" rel="noopener noreferrer">
               <PanelActionButton icon="pencil" title="Modifier" />
             </Link>
             <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${user._id}`}>
@@ -80,22 +86,34 @@ export default ({ ticket }) => {
             </a>
           </div>
           <hr />
-          {user.birthdateAt && <Item title="Date de naissance" content={`Né(e) le ${formatDateFRTimezoneUTC(user.birthdateAt)} • ${getAge(user.birthdateAt)} ans`} />}
-          <Item title="Cohorte" content={user.cohort} />
-          <Item title="E-mail" content={user.email} copy />
-          <Item title="Département" content={user.department} />
-          <Item title="Région" content={user.region} />
-          <hr />
-          <Item title="Statut phase 1" content={user.statusPhase1} />
-          <Item title="Centre de cohésion" content={user.cohesionCenterName} />
-          <hr />
-          <Item title="Statut phase 2" content={user.statusPhase2} />
-          <Item title="Contact phase 2" content={referentManagerPhase2?.email || (referentManagerPhase2 !== undefined && "Non trouvé") || "Chargement..."} copy />
-          <Link to={`/volontaire/${user._id}/phase2`} target="_blank" rel="noopener noreferrer">
-            <PanelActionButton icon="eye" title="Consulter les candidatures" />
-          </Link>
-          <hr />
-          <Item title="Statut phase 3" content={user.statusPhase3} />
+          {user.role ? (
+            <>
+              <Item title="E-mail" content={user.email} copy />
+              <Item title="Fonction" content={user.role} copy />
+              <Item title="Département" content={user.department} />
+              <Item title="Région" content={user.region} />
+              <hr />
+            </>
+          ) : (
+            <>
+              {user.birthdateAt && <Item title="Date de naissance" content={`Né(e) le ${formatDateFRTimezoneUTC(user.birthdateAt)} • ${getAge(user.birthdateAt)} ans`} />}
+              <Item title="Cohorte" content={user.cohort} />
+              <Item title="E-mail" content={user.email} copy />
+              <Item title="Département" content={user.department} />
+              <Item title="Région" content={user.region} />
+              <hr />
+              <Item title="Statut phase 1" content={user.statusPhase1} />
+              <Item title="Centre de cohésion" content={user.cohesionCenterName} />
+              <hr />
+              <Item title="Statut phase 2" content={user.statusPhase2} />
+              <Item title="Contact phase 2" content={referentManagerPhase2?.email || (referentManagerPhase2 !== undefined && "Non trouvé") || "Chargement..."} copy />
+              <Link to={`/volontaire/${user._id}/phase2`} target="_blank" rel="noopener noreferrer">
+                <PanelActionButton icon="eye" title="Consulter les candidatures" />
+              </Link>
+              <hr />
+              <Item title="Statut phase 3" content={user.statusPhase3} />
+            </>
+          )}
         </>
       )}
     </HeroContainer>

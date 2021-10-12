@@ -78,7 +78,7 @@ export default ({ ticket: propTicket }) => {
       return (
         <StateContainer>
           <SuccessIcon color="#6BC762" style={{ margin: 0, padding: "5px" }} />
-          fermé
+          archivé
         </StateContainer>
       );
     if (state === "nouveau")
@@ -192,7 +192,8 @@ const InputContainer = styled.div`
   display: flex;
   flex-direction: row;
   align-items: stretch;
-  flex: 0;
+  height: 100px;
+  ${'' /* flex: 0; */}
   textarea {
     resize: none;
     overflow: none;
