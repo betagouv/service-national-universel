@@ -172,4 +172,21 @@ router.post("/ticket/search-by-tags", passport.authenticate(["referent"], { sess
   }
 });
 
+// Get the tags of one specific ticket
+router.get("/tags/:ticketId", passport.authenticate(["referent"], { session: false }), async (req, res) => {
+  try {
+    const ticketId = req.params.ticketId;
+    console.log("id", ticketId);
+    const response = await zammad.api(`/tags?object=Ticket&o_id=${ticketId}`, { method: "GET" });
+    console.log("RESPONSE", response.tags);
+    if (!response.tags) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+    return res.status(200).send({ ok: true, tags: response.tags });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
 module.exports = router;

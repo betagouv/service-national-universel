@@ -91,7 +91,7 @@ export default ({ setTicket, selectedTicket, setOverview }) => {
             X
           </TabItem> */}
         </FilterContainer>
-        {/* <>
+        <>
           {ticketExample?.filter((ticket) => !stateFilter || ticket?.state_id === stateFilter)?.length === 0 ? (
             <div style={{ textAlign: "center", padding: "1rem", fontSize: "0.85rem" }}>Aucun ticket</div>
           ) : null}
@@ -112,7 +112,7 @@ export default ({ setTicket, selectedTicket, setOverview }) => {
                 </TicketContent>
               </TicketContainer>
             ))}
-        </> */}
+        </>
         {!tickets ? (
           <Loader />
         ) : (

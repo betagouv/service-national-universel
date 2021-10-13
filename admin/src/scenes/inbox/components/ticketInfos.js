@@ -12,7 +12,7 @@ import { appURL, adminURL } from "../../../config";
 
 export default ({ ticket }) => {
   const [user, setUser] = useState([]);
-  const currentUser = useSelector((state) => state.Auth.user);
+  const [tag, setTag] = useState("");
   const history = useHistory();
   const [referentManagerPhase2, setReferentManagerPhase2] = useState();
 
@@ -20,11 +20,21 @@ export default ({ ticket }) => {
     (async () => {
       if (!ticket?.articles?.length) return;
       const email = ticket.articles[0].created_by;
-      const { data } = await api.get(`/young?email=${email}`);
-      setUser(data);
-      if (!data) {
+      const { tags } = await api.get(`/support-center/tags/${ticket.id}`);
+      if (tags?.includes("EMETTEUR_Volontaire")) {
+        const { data } = await api.get(`/young?email=${email}`);
+        setUser(data);
+        setTag("EMETTEUR_Volontaire");
+        console.log("1", data);
+      } else if (tags?.find(tag => tag.includes("EMETTEUR"))) {
         const response = await api.get(`/referent?email=${email}`);
         setUser(response.data);
+        setTag("EMETTEUR_other");
+        console.log("2", response.data);
+      } else {
+        const response = await api.get(`/referent?email=${email}`);
+        setUser(response.data);
+        console.log("3", response.data);
       }
     })();
   }, [ticket]);
@@ -47,6 +57,54 @@ export default ({ ticket }) => {
     if (response.ok) toastr.success("Ticket résolu !");
     history.go(0);
   };
+
+  const renderInfos = () => {
+    if (tag === "EMETTEUR_Volontaire") {
+      console.log("1", tag);
+      return (
+        <>
+          {user.birthdateAt && <Item title="Date de naissance" content={`Né(e) le ${formatDateFRTimezoneUTC(user.birthdateAt)} • ${getAge(user.birthdateAt)} ans`} />}
+          <Item title="Cohorte" content={user.cohort} />
+          <Item title="E-mail" content={user.email} copy />
+          <Item title="Département" content={user.department} />
+          <Item title="Région" content={user.region} />
+          <hr />
+          <Item title="Statut phase 1" content={user.statusPhase1} />
+          <Item title="Centre de cohésion" content={user.cohesionCenterName} />
+          <hr />
+          <Item title="Statut phase 2" content={user.statusPhase2} />
+          <Item title="Contact phase 2" content={referentManagerPhase2?.email || (referentManagerPhase2 !== undefined && "Non trouvé") || "Chargement..."} copy />
+          <Link to={`/volontaire/${user._id}/phase2`} target="_blank" rel="noopener noreferrer">
+            <PanelActionButton icon="eye" title="Consulter les candidatures" />
+          </Link>
+          <hr />
+          <Item title="Statut phase 3" content={user.statusPhase3} />
+        </>
+      )
+    } else if (tag === "EMETTEUR_other") {
+      console.log("2", tag);
+      return (
+        <>
+          <Item title="E-mail" content={user.email} copy />
+          <Item title="Fonction" content={user.role} copy />
+          <Item title="Département" content={user.department} />
+          <Item title="Région" content={user.region} />
+          <hr />
+        </>
+      )
+    } else {
+      console.log("3", tag);
+      return (
+        <>
+          <Item title="E-mail" content={user.email} copy />
+          <Item title="Fonction" content={user.role} copy />
+          <Item title="Département" content={user.department} />
+          <Item title="Région" content={user.region} />
+          <hr />
+        </>
+      )
+    }
+  }
 
   if (!user)
     return (
@@ -86,34 +144,7 @@ export default ({ ticket }) => {
             </a>
           </div>
           <hr />
-          {user.role ? (
-            <>
-              <Item title="E-mail" content={user.email} copy />
-              <Item title="Fonction" content={user.role} copy />
-              <Item title="Département" content={user.department} />
-              <Item title="Région" content={user.region} />
-              <hr />
-            </>
-          ) : (
-            <>
-              {user.birthdateAt && <Item title="Date de naissance" content={`Né(e) le ${formatDateFRTimezoneUTC(user.birthdateAt)} • ${getAge(user.birthdateAt)} ans`} />}
-              <Item title="Cohorte" content={user.cohort} />
-              <Item title="E-mail" content={user.email} copy />
-              <Item title="Département" content={user.department} />
-              <Item title="Région" content={user.region} />
-              <hr />
-              <Item title="Statut phase 1" content={user.statusPhase1} />
-              <Item title="Centre de cohésion" content={user.cohesionCenterName} />
-              <hr />
-              <Item title="Statut phase 2" content={user.statusPhase2} />
-              <Item title="Contact phase 2" content={referentManagerPhase2?.email || (referentManagerPhase2 !== undefined && "Non trouvé") || "Chargement..."} copy />
-              <Link to={`/volontaire/${user._id}/phase2`} target="_blank" rel="noopener noreferrer">
-                <PanelActionButton icon="eye" title="Consulter les candidatures" />
-              </Link>
-              <hr />
-              <Item title="Statut phase 3" content={user.statusPhase3} />
-            </>
-          )}
+          {renderInfos()}
         </>
       )}
     </HeroContainer>

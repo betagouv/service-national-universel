@@ -1,6 +1,7 @@
 import React from "react";
 import { Container } from "reactstrap";
 import styled from "styled-components";
+import { adminURL } from "../config";
 
 export default () => {
   return (
@@ -23,7 +24,7 @@ export default () => {
             </a>
           </li>
           <li>
-            <a href="https://admin.snu.gouv.fr/besoin-d-aide" target="_blank">
+            <a href={`${adminURL}/besoin-d-aide`} target="_blank">
               Besoin d'aide
             </a>
           </li>
