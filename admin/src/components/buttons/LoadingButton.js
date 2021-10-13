@@ -41,9 +41,13 @@ const VioletButtonHeader = styled(Button)`
   font-weight: 700;
   color: ${({ textColor }) => (textColor ? `${textColor}` : `#fff`)} !important;
   cursor: pointer;
-  ${({ disabled, color }) => (!disabled && !color ? `:hover {background: ${colors.darkPurple};}` : null)}
-  ${({ color }) => (color ? `background-color: ${color};}` : `background-color: ${colors.purple};`)}
+  ${({ disabled, color }) => (!disabled && !color ? `:hover {background: ${colors.darkPurple} !important;}` : null)}
+  ${({ color }) => (color ? `background-color: ${color} !important;` : `background-color: ${colors.purple} !important;`)}
   &:hover {
     box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.5);
+  }
+  :focus {
+    outline: ${({ color }) => (color ? color : colors.purple)} auto 1px;
+    outline-offset: 2px;
   }
 `;
