@@ -79,6 +79,17 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       });
     }
 
+    if (data.status === MISSION_STATUS.WAITING_VALIDATION) {
+      const responsible = await UserObject.findById(checkedMission.tutorId);
+      if (responsible)
+        await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_WAITING_VALIDATION, {
+          emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
+          params: {
+            missionName: checkedMission.name,
+          },
+        });
+    }
+
     return res.status(200).send({ ok: true, data: serializeMission(data) });
   } catch (error) {
     capture(error);
@@ -104,7 +115,19 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     await mission.save({ fromUser: req.user });
 
     // if there is a status change, update the application
-    if (oldStatus !== mission.status) await updateApplication(mission, req.user);
+    if (oldStatus !== mission.status) {
+      await updateApplication(mission, req.user);
+      if (mission.status === MISSION_STATUS.WAITING_VALIDATION) {
+        const responsible = await UserObject.findById(mission.tutorId);
+        if (responsible)
+          await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_WAITING_VALIDATION, {
+            emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
+            params: {
+              missionName: mission.name,
+            },
+          });
+      }
+    }
 
     res.status(200).send({ ok: true, data: mission });
   } catch (error) {
