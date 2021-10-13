@@ -8,6 +8,31 @@ const { ERRORS, isYoung } = require("../utils");
 const { ZAMMAD_GROUP } = require("snu-lib/constants");
 const { ticketStateIdByName } = require("snu-lib/zammad");
 
+async function checkStateTicket({ state_id, created_by_id, updated_by_id, id }, email) {
+  if (state_id === ticketStateIdByName("fermé")) {
+    const response = await zammad.api(`/tickets/${id}`, {
+      method: "PUT",
+      headers: { "X-On-Behalf-Of": email },
+      body: JSON.stringify({
+        id: id,
+        state: "open",
+      }),
+    });
+    if (!response.id) return { ok: false, response };
+  } else if (state_id === ticketStateIdByName("nouveau") && created_by_id !== updated_by_id) {
+    const response = await zammad.api(`/tickets/${id}`, {
+      method: "PUT",
+      headers: { "X-On-Behalf-Of": email },
+      body: JSON.stringify({
+        id: id,
+        state: "open",
+      }),
+    });
+    if (!response.id) return { ok: false, response };
+  }
+  return { ok: true };
+}
+
 // Get the list of tickets stats
 router.get("/ticket_overviews", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -68,14 +93,13 @@ router.get("/ticket/:id", passport.authenticate(["referent", "young"], { session
 
 // Update one ticket (add a response).
 router.put("/ticket/:id", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
-  const { message, state, current_state_id } = req.body;
+  const { message, ticket, state } = req.body;
   try {
     const email = req.user.email;
     const customer_id = await zammad.getCustomerIdByEmail(email);
     if (!customer_id) return res.status(401).send({ ok: false, code: ERRORS.NOT_FOUND });
-
     if (message) {
-      const response_message = await zammad.api("/ticket_articles", {
+      const response = await zammad.api("/ticket_articles", {
         method: "POST",
         headers: { "X-On-Behalf-Of": email },
         body: JSON.stringify({
@@ -87,19 +111,12 @@ router.put("/ticket/:id", passport.authenticate(["referent", "young"], { session
         }),
       });
 
-      if (current_state_id !== ticketStateIdByName("ouvert")) {
-        await zammad.api(`/tickets/${req.params.id}`, {
-          method: "PUT",
-          headers: { "X-On-Behalf-Of": email },
-          body: JSON.stringify({
-            id: req.params.id,
-            state: "open",
-          }),
-        });
-      }
+      if (!response.id) return res.status(400).send({ ok: false, data: response });
 
-      if (!response_message.id) return res.status(400).send({ ok: false, data: response_message });
-      return res.status(200).send({ ok: true, data: response_message });
+      const stateTicket = await checkStateTicket(ticket, email);
+      if (!stateTicket.ok) return res.status(400).send({ ok: false, data: stateTicket.response });
+
+      if (stateTicket) return res.status(200).send({ ok: true, data: response });
     } else if (state) {
       const response = await zammad.api(`/tickets/${req.params.id}`, {
         method: "PUT",
