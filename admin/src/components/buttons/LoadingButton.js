@@ -29,25 +29,23 @@ export default ({ loading, children, disabled, loadingText, ...rest }) => {
 };
 
 const VioletButtonHeader = styled(Button)`
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  border: none;
-  border-radius: 5px;
-  padding: 7px 30px;
-  margin: 0;
-  margin-left: 1rem;
-  font-size: 14px;
-  font-weight: 700;
-  color: ${({ textColor }) => (textColor ? `${textColor}` : `#fff`)} !important;
-  cursor: pointer;
-  ${({ disabled, color }) => (!disabled && !color ? `:hover {background: ${colors.darkPurple} !important;}` : null)}
-  ${({ color }) => (color ? `background-color: ${color} !important;` : `background-color: ${colors.purple} !important;`)}
+  && {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border: none;
+    border-radius: 5px;
+    padding: 7px 30px;
+    margin: 0;
+    margin-left: 1rem;
+    font-size: 14px;
+    font-weight: 700;
+    color: ${({ textColor }) => (textColor ? `${textColor}` : `#fff`)} !important;
+    cursor: pointer;
+    ${({ disabled, color }) => (!disabled && !color ? `:hover {background: ${colors.darkPurple};}` : null)}
+    ${({ color }) => (color ? `background-color: ${color};` : `background-color: ${colors.purple};`)}
   &:hover {
-    box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.5);
-  }
-  :focus {
-    outline: ${({ color }) => (color ? color : colors.purple)} auto 1px;
-    outline-offset: 2px;
+      box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.5);
+    }
   }
 `;
