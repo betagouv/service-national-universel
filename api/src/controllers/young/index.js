@@ -523,10 +523,9 @@ router.delete("/:id", passport.authenticate("referent", { session: false }), asy
 
 router.get("/", passport.authenticate(["referent"], { session: false }), async (req, res) => {
   try {
-    const email = req.query.email;
-    const { error } = Joi.string().required().email().validate(req.query.email);
+    const { error, value } = Joi.string().required().email().validate(req.query.email);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
-    let data = await YoungObject.findOne({ email });
+    let data = await YoungObject.findOne({ email: value });
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);

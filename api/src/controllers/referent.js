@@ -566,10 +566,9 @@ router.get("/:id", passport.authenticate("referent", { session: false }), async 
 
 router.get("/", passport.authenticate(["referent"], { session: false }), async (req, res) => {
   try {
-    const email = req.query.email;
     const { error, value } = Joi.string().required().email().validate(req.query.email);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
-    let data = await ReferentModel.findOne({ email });
+    let data = await ReferentModel.findOne({ email: value });
     return res.status(200).send({ ok: true, data: serializeReferent(data, req.user) });
   } catch (error) {
     capture(error);

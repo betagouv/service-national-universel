@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
+const Joi = require("joi");
 
 const { capture } = require("../sentry");
 const zammad = require("../zammad");
@@ -173,11 +174,11 @@ router.post("/ticket/search-by-tags", passport.authenticate(["referent"], { sess
 });
 
 // Get the tags of one specific ticket
-router.get("/tags/:ticketId", passport.authenticate(["referent"], { session: false }), async (req, res) => {
+router.get("/ticket/:ticketId/tags", passport.authenticate(["referent"], { session: false }), async (req, res) => {
   try {
-    const ticketId = req.params.ticketId;
-    console.log("id", ticketId);
-    const response = await zammad.api(`/tags?object=Ticket&o_id=${ticketId}`, { method: "GET" });
+    const { error, value } = Joi.string().required().validate(req.params.ticketId);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+    const response = await zammad.api(`/tags?object=Ticket&o_id=${value}`, { method: "GET" });
     if (!response.tags) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }

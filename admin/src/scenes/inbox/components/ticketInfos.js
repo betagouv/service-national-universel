@@ -20,7 +20,7 @@ export default ({ ticket }) => {
     (async () => {
       if (!ticket?.articles?.length) return;
       const email = ticket.articles[0].created_by;
-      const { tags } = await api.get(`/support-center/tags/${ticket.id}`);
+      const { tags } = await api.get(`/support-center/ticket/${ticket.id}/tags`);
       if (tags?.includes("EMETTEUR_Volontaire")) {
         const { data } = await api.get(`/young?email=${email}`);
         setUser(data);
