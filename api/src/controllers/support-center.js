@@ -8,7 +8,7 @@ const { ERRORS, isYoung } = require("../utils");
 const { ZAMMAD_GROUP } = require("snu-lib/constants");
 const { ticketStateIdByName } = require("snu-lib/zammad");
 
-async function checkStateTicket({ state_id, created_by_id, updated_by_id, id }, email) {
+async function checkStateTicket({ state_id, created_by_id, updated_by_id, id, email }) {
   if (state_id === ticketStateIdByName("fermé")) {
     const response = await zammad.api(`/tickets/${id}`, {
       method: "PUT",
@@ -113,7 +113,13 @@ router.put("/ticket/:id", passport.authenticate(["referent", "young"], { session
 
       if (!response.id) return res.status(400).send({ ok: false, data: response });
 
-      const stateTicket = await checkStateTicket(ticket, email);
+      const stateTicket = await checkStateTicket({
+        id: req.params.id,
+        state_id: ticket.state_id,
+        created_by_id: ticket.created_by_id,
+        updated_by_id: response.updated_by_id,
+        email,
+      });
       if (!stateTicket.ok) return res.status(400).send({ ok: false, data: stateTicket.response });
 
       if (stateTicket) return res.status(200).send({ ok: true, data: response });
