@@ -7,7 +7,7 @@ const CohesionCenterModel = require("../models/cohesionCenter");
 const MeetingPointModel = require("../models/meetingPoint");
 const ApplicationModel = require("../models/application");
 const ReferentModel = require("../models/referent");
-const { sendEmail } = require("../sendinblue");
+const { sendEmail, sendTemplate } = require("../sendinblue");
 const path = require("path");
 const fs = require("fs");
 const rateLimit = require("express-rate-limit");
@@ -24,7 +24,7 @@ const {
   API_ASSOCIATION_CELLAR_KEYSECRET,
 } = require("../config");
 const { ROLES } = require("snu-lib/roles");
-const { YOUNG_STATUS_PHASE2 } = require("snu-lib/constants");
+const { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 
 // Set the number of requests allowed to 15 in a 1 hour window
 const signinLimiter = rateLimit({
@@ -396,6 +396,12 @@ const updateStatusPhase2 = async (young) => {
   } else if (Number(young.phase2NumberHoursDone) >= 84) {
     // We change young status to DONE if he has 84 hours of phase 2 done.
     young.set({ statusPhase2: YOUNG_STATUS_PHASE2.VALIDATED });
+    await sendTemplate(SENDINBLUE_TEMPLATES.young.PHASE_2_VALIDATED, {
+      emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+      params: {
+        cta: `${APP_URL}/phase2`,
+      },
+    });
   } else if (Number(young.phase2NumberHoursEstimated) || Number(young.phase2NumberHoursDone)) {
     // We change young status to IN_PROGRESS if he has estimated hours of phase 2.
     young.set({ statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS });
