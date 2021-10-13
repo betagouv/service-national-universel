@@ -1,8 +1,8 @@
 import React from "react";
-import { Spinner, Button } from "reactstrap";
+import { Spinner } from "reactstrap";
 
 export default ({ loading, children, disabled, ...rest }) => (
-  <Button
+  <button
     {...rest}
     disabled={loading || disabled}
     style={{
@@ -15,5 +15,5 @@ export default ({ loading, children, disabled, ...rest }) => (
   >
     {loading && <Spinner size="sm" style={{ borderWidth: "0.1em" }} />}
     {!loading && children}
-  </Button>
+  </button>
 );
