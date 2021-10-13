@@ -6,6 +6,7 @@ const { capture } = require("../sentry");
 const zammad = require("../zammad");
 const { ERRORS, isYoung } = require("../utils");
 const { ZAMMAD_GROUP } = require("snu-lib/constants");
+const { ticketStateIdByName } = require("snu-lib/zammad");
 
 // Get the list of tickets stats
 router.get("/ticket_overviews", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
@@ -67,7 +68,7 @@ router.get("/ticket/:id", passport.authenticate(["referent", "young"], { session
 
 // Update one ticket (add a response).
 router.put("/ticket/:id", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
-  const { message, state, state_id } = req.body;
+  const { message, state, current_state_id } = req.body;
   try {
     const email = req.user.email;
     const customer_id = await zammad.getCustomerIdByEmail(email);
@@ -86,7 +87,7 @@ router.put("/ticket/:id", passport.authenticate(["referent", "young"], { session
         }),
       });
 
-      if (state_id === 4) {
+      if (current_state_id !== ticketStateIdByName("ouvert")) {
         await zammad.api(`/tickets/${req.params.id}`, {
           method: "PUT",
           headers: { "X-On-Behalf-Of": email },

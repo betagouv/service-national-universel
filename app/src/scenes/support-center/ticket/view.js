@@ -49,7 +49,7 @@ export default (props) => {
     setSending(true);
     if (!message) return setSending(false);
     const id = props.match?.params?.id;
-    const { data } = await api.put(`/support-center/ticket/${id}`, { message, state_id: ticket.state_id });
+    const { data } = await api.put(`/support-center/ticket/${id}`, { message, current_state_id: ticket.state_id });
     setMessage("");
     updateHeightElement(inputRef?.current);
     getTicket();
