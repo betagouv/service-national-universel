@@ -3,13 +3,14 @@ import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactive
 import { useHistory } from "react-router-dom";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
+import { useSelector } from "react-redux";
 
 import { apiURL } from "../../../config";
 import SelectStatusApplication from "../../../components/selectStatusApplication";
 import api from "../../../services/api";
 import MissionView from "./wrapper";
 import Panel from "../../volontaires/panel";
-import { formatStringLongDate, getFilterLabel, translate, getAge, ES_NO_LIMIT, colors, SENDINBLUE_TEMPLATES } from "../../../utils";
+import { formatStringLongDate, getFilterLabel, translate, getAge, ES_NO_LIMIT, colors, SENDINBLUE_TEMPLATES, ROLES } from "../../../utils";
 import Loader from "../../../components/Loader";
 import ContractLink from "../../../components/ContractLink";
 import ExportComponent from "../../../components/ExportXlsx";
@@ -179,6 +180,7 @@ export default ({ mission, applications }) => {
 
 const Hit = ({ hit, onClick, onChangeApplication, selected }) => {
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+  const user = useSelector((state) => state.Auth.user);
 
   const history = useHistory();
   return (
@@ -205,7 +207,7 @@ const Hit = ({ hit, onClick, onChangeApplication, selected }) => {
             Contrat d'engagement &gt;
           </ContractLink>
         ) : null}
-        {hit.status === "WAITING_VALIDATION" && (
+        {hit.status === "WAITING_VALIDATION" && [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(user.role) && (
           <React.Fragment>
             <CopyLink
               onClick={async () => {
