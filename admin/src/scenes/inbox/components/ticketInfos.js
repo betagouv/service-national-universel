@@ -25,16 +25,13 @@ export default ({ ticket }) => {
         const { data } = await api.get(`/young?email=${email}`);
         setUser(data);
         setTag("EMETTEUR_Volontaire");
-        console.log("1", data);
       } else if (tags?.find(tag => tag.includes("EMETTEUR"))) {
         const response = await api.get(`/referent?email=${email}`);
         setUser(response.data);
         setTag("EMETTEUR_other");
-        console.log("2", response.data);
       } else {
         const response = await api.get(`/referent?email=${email}`);
         setUser(response.data);
-        console.log("3", response.data);
       }
     })();
   }, [ticket]);
@@ -60,51 +57,65 @@ export default ({ ticket }) => {
 
   const renderInfos = () => {
     if (tag === "EMETTEUR_Volontaire") {
-      console.log("1", tag);
       return (
         <>
-          {user.birthdateAt && <Item title="Date de naissance" content={`Né(e) le ${formatDateFRTimezoneUTC(user.birthdateAt)} • ${getAge(user.birthdateAt)} ans`} />}
-          <Item title="Cohorte" content={user.cohort} />
-          <Item title="E-mail" content={user.email} copy />
-          <Item title="Département" content={user.department} />
-          <Item title="Région" content={user.region} />
-          <hr />
-          <Item title="Statut phase 1" content={user.statusPhase1} />
-          <Item title="Centre de cohésion" content={user.cohesionCenterName} />
-          <hr />
-          <Item title="Statut phase 2" content={user.statusPhase2} />
-          <Item title="Contact phase 2" content={referentManagerPhase2?.email || (referentManagerPhase2 !== undefined && "Non trouvé") || "Chargement..."} copy />
-          <Link to={`/volontaire/${user._id}/phase2`} target="_blank" rel="noopener noreferrer">
-            <PanelActionButton icon="eye" title="Consulter les candidatures" />
-          </Link>
-          <hr />
-          <Item title="Statut phase 3" content={user.statusPhase3} />
+          <div style={{ display: "flex", flexWrap: "wrap", marginBottom: "1rem" }}>
+            <Link to={`/volontaire/${user._id}`} target="_blank" rel="noopener noreferrer">
+              <PanelActionButton icon="eye" title="Consulter" />
+            </Link>
+            <Link to={`/volontaire/${user._id}/edit`} target="_blank" rel="noopener noreferrer">
+              <PanelActionButton icon="pencil" title="Modifier" />
+            </Link>
+            <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${user._id}`}>
+              <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
+            </a>
+          </div>
+          <>
+            {user.birthdateAt && <Item title="Date de naissance" content={`Né(e) le ${formatDateFRTimezoneUTC(user.birthdateAt)} • ${getAge(user.birthdateAt)} ans`} />}
+            <Item title="Cohorte" content={user.cohort} />
+            <Item title="E-mail" content={user.email} copy />
+            <Item title="Département" content={user.department} />
+            <Item title="Région" content={user.region} />
+            <hr />
+            <Item title="Statut phase 1" content={user.statusPhase1} />
+            <Item title="Centre de cohésion" content={user.cohesionCenterName} />
+            <hr />
+            <Item title="Statut phase 2" content={user.statusPhase2} />
+            <Item title="Contact phase 2" content={referentManagerPhase2?.email || (referentManagerPhase2 !== undefined && "Non trouvé") || "Chargement..."} copy />
+            <Link to={`/volontaire/${user._id}/phase2`} target="_blank" rel="noopener noreferrer">
+              <PanelActionButton icon="eye" title="Consulter les candidatures" />
+            </Link>
+            <hr />
+            <Item title="Statut phase 3" content={user.statusPhase3} />
+          </>
         </>
-      )
-    } else if (tag === "EMETTEUR_other") {
-      console.log("2", tag);
-      return (
-        <>
-          <Item title="E-mail" content={user.email} copy />
-          <Item title="Fonction" content={user.role} copy />
-          <Item title="Département" content={user.department} />
-          <Item title="Région" content={user.region} />
-          <hr />
-        </>
-      )
+      );
     } else {
-      console.log("3", tag);
       return (
         <>
-          <Item title="E-mail" content={user.email} copy />
-          <Item title="Fonction" content={user.role} copy />
-          <Item title="Département" content={user.department} />
-          <Item title="Région" content={user.region} />
+          <div style={{ display: "flex", flexWrap: "wrap", marginBottom: "1rem" }}>
+            <Link to={`/user/${user._id}`} target="_blank" rel="noopener noreferrer">
+              <PanelActionButton icon="eye" title="Consulter" />
+            </Link>
+            <Link to={`/user/${user._id}/edit`} target="_blank" rel="noopener noreferrer">
+              <PanelActionButton icon="pencil" title="Modifier" />
+            </Link>
+            <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${user._id}`}>
+              <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
+            </a>
+          </div>
           <hr />
+          <>
+            <Item title="E-mail" content={user.email} copy />
+            <Item title="Fonction" content={user.role} copy />
+            <Item title="Département" content={user.department} />
+            <Item title="Région" content={user.region} />
+            <hr />
+          </>
         </>
-      )
-    }
-  }
+      );
+    };
+  };
 
   if (!user)
     return (
@@ -132,18 +143,6 @@ export default ({ ticket }) => {
           <div className="name">
             {user.firstName} {user.lastName}
           </div>
-          <div style={{ display: "flex", flexWrap: "wrap", marginBottom: "1rem" }}>
-            <Link to={user.role ? `/user/${user._id}` : `/volontaire/${user._id}`} target="_blank" rel="noopener noreferrer">
-              <PanelActionButton icon="eye" title="Consulter" />
-            </Link>
-            <Link to={user.role ? `/user/${user._id}/edit` : `/volontaire/${user._id}/edit`} target="_blank" rel="noopener noreferrer">
-              <PanelActionButton icon="pencil" title="Modifier" />
-            </Link>
-            <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${user._id}`}>
-              <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
-            </a>
-          </div>
-          <hr />
           {renderInfos()}
         </>
       )}

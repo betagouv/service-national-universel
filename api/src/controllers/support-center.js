@@ -178,7 +178,6 @@ router.get("/tags/:ticketId", passport.authenticate(["referent"], { session: fal
     const ticketId = req.params.ticketId;
     console.log("id", ticketId);
     const response = await zammad.api(`/tags?object=Ticket&o_id=${ticketId}`, { method: "GET" });
-    console.log("RESPONSE", response.tags);
     if (!response.tags) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }

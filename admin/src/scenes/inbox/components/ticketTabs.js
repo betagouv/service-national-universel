@@ -7,7 +7,6 @@ import { formatStringDate, ROLES, ticketStateIdByName, ticketStateNameById } fro
 import MailCloseIcon from "../../../components/MailCloseIcon";
 import MailOpenIcon from "../../../components/MailOpenIcon";
 import SuccessIcon from "../../../components/SuccessIcon";
-import ticketExample from "../ticketExample";
 
 import api from "../../../services/api";
 
@@ -91,28 +90,6 @@ export default ({ setTicket, selectedTicket, setOverview }) => {
             X
           </TabItem> */}
         </FilterContainer>
-        <>
-          {ticketExample?.filter((ticket) => !stateFilter || ticket?.state_id === stateFilter)?.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "1rem", fontSize: "0.85rem" }}>Aucun ticket</div>
-          ) : null}
-          {ticketExample
-            ?.filter((ticket) => !stateFilter || ticket?.state_id === stateFilter)
-            ?.sort((a, b) => {
-              return new Date(b.updated_at) - new Date(a.updated_at);
-            })
-            ?.map((ticket) => (
-              <TicketContainer key={ticket.id} active={ticket.id === selectedTicket?.id} className="ticket" onClick={() => setTicket(ticket)}>
-                {displayState(ticketStateNameById(ticket.state_id))}
-                <TicketContent>
-                  <TicketHeader>
-                    <TicketFrom>{getFrom(ticket)}</TicketFrom>
-                    <TicketDate>{formatStringDate(getDate(ticket))}</TicketDate>
-                  </TicketHeader>
-                  <TicketPreview>{ticket.title}</TicketPreview>
-                </TicketContent>
-              </TicketContainer>
-            ))}
-        </>
         {!tickets ? (
           <Loader />
         ) : (
