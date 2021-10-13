@@ -1,19 +1,22 @@
 import React, { useState } from "react";
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import { useHistory } from "react-router-dom";
+import styled from "styled-components";
+import { toastr } from "react-redux-toastr";
 
 import { apiURL } from "../../../config";
 import SelectStatusApplication from "../../../components/selectStatusApplication";
 import api from "../../../services/api";
 import MissionView from "./wrapper";
 import Panel from "../../volontaires/panel";
-import { formatStringLongDate, getFilterLabel, translate, getAge, ES_NO_LIMIT, colors } from "../../../utils";
+import { formatStringLongDate, getFilterLabel, translate, getAge, ES_NO_LIMIT, colors, SENDINBLUE_TEMPLATES } from "../../../utils";
 import Loader from "../../../components/Loader";
 import ContractLink from "../../../components/ContractLink";
 import ExportComponent from "../../../components/ExportXlsx";
 import { DepartmentFilter } from "../../../components/filters";
 import { Filter, FilterRow, ResultTable, Table, MultiLine } from "../../../components/list";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
+import ModalConfirm from "../../../components/modals/ModalConfirm";
 
 const FILTERS = ["SEARCH", "STATUS", "DEPARTMENT"];
 
@@ -175,6 +178,8 @@ export default ({ mission, applications }) => {
 };
 
 const Hit = ({ hit, onClick, onChangeApplication, selected }) => {
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+
   const history = useHistory();
   return (
     <tr style={{ backgroundColor: (selected && "#e6ebfa") || (hit.status === "WITHDRAWN" && colors.extraLightGrey) }} onClick={onClick}>
@@ -200,7 +205,56 @@ const Hit = ({ hit, onClick, onChangeApplication, selected }) => {
             Contrat d'engagement &gt;
           </ContractLink>
         ) : null}
+        {hit.status === "WAITING_VALIDATION" && (
+          <React.Fragment>
+            <CopyLink
+              onClick={async () => {
+                setModal({
+                  isOpen: true,
+                  title: "Renvoyer un mail",
+                  message: "Souhaitez-vous renvoyer un mail à la structure ?",
+                  onConfirm: async () => {
+                    try {
+                      const responseNotification = await api.post(`/application/${hit._id}/notify/${SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION}`);
+                      if (!responseNotification?.ok) return toastr.error(translate(responseNotification?.code), "Une erreur s'est produite avec le service de notification.");
+                      toastr.success("L'email a bien été envoyé");
+                    } catch (e) {
+                      toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
+                    }
+                  },
+                });
+              }}
+            >
+              ✉️ Renvoyer un mail à la structure
+            </CopyLink>
+            <ModalConfirm
+              isOpen={modal?.isOpen}
+              title={modal?.title}
+              message={modal?.message}
+              onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+              onConfirm={() => {
+                modal?.onConfirm();
+                setModal({ isOpen: false, onConfirm: null });
+              }}
+            />
+          </React.Fragment>
+        )}
       </td>
     </tr>
   );
 };
+
+const CopyLink = styled.button`
+  background: none;
+  color: rgb(81, 69, 205);
+  font-size: 0.8rem;
+  font-style: italic;
+  margin: 0 auto;
+  display: block;
+  border: none;
+  :hover {
+    outline: none;
+    text-decoration: underline;
+  }
+  padding: 0;
+`;
