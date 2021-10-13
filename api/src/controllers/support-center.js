@@ -128,7 +128,7 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
       headers: { "X-On-Behalf-Of": email },
       method: "POST",
       body: JSON.stringify({
-        title: title || `${type} - ${subject}`,
+        title: `📝 ${title}` || `📝 ${type} - ${subject}`,
         group,
         customer_id,
         customer: email,

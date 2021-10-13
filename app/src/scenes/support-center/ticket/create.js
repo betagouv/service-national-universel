@@ -33,7 +33,7 @@ export default () => {
             try {
               const { message, step1, step2 } = values;
               const { ok, code, data } = await api.post("/support-center/ticket", {
-                title: `${step1?.label} - ${step2?.label}`,
+                title: `📝 ${step1?.label} - ${step2?.label}`,
                 message,
                 tags: [...new Set([...tags, ...step1?.tags, ...step2?.tags])], // we use this dirty hack to remove duplicates
               });
