@@ -12,50 +12,49 @@ const clean = async () => {
   const cursor = await Mission.find({ endAt: { $lt: Date.now() }, status: "VALIDATED" }).cursor();
   await cursor.eachAsync(async function (mission) {
     countAutoArchived++;
-    // console.log(`${mission._id} ${mission.name} auto archived.`);
-    // mission.set({ status: "ARCHIVED" });
-    // await mission.save();
+    console.log(`${mission._id} ${mission.name} archived.`);
+    mission.set({ status: "ARCHIVED" });
+    await mission.save();
 
     // notify structure
-
-    // if (mission.tutorId) {
-    //   const responsible = await Referent.findById(mission.tutorId);
-    // }
-    // if (responsible)
-    //   await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_ARCHIVED, {
-    //     emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
-    //     params: {
-    //       missionName: mission.name,
-    //       cta: `https://admin.snu.gouv.fr/mission/${mission._id}/youngs`,
-    //     },
-    //   });
+    if (mission.tutorId) {
+      const responsible = await Referent.findById(mission.tutorId);
+      if (responsible)
+        await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_ARCHIVED, {
+          emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
+          params: {
+            missionName: mission.name,
+            cta: `${ADMIN_URL}/mission/${mission._id}/youngs`,
+          },
+        });
+    }
   });
-  captureMessage(`${Date.now()} - ${countAutoArchived} missions has been archived`);
+  console.log(`${Date.now()} - ${countAutoArchived} missions has been archived`);
 };
 
 const notify1Week = async () => {
   console.log({ ADMIN_URL });
   let countNotice = 0;
   const now = Date.now();
-  const cursor = await Mission.find({ endAt: { $lte: addDays(now, 7), $gte: addDays(now, 7) }, status: "VALIDATED" }).cursor();
+  const cursor = await Mission.find({ endAt: { $lte: addDays(now, 8), $gte: addDays(now, 7) }, status: "VALIDATED" }).cursor();
   await cursor.eachAsync(async function (mission) {
     countNotice++;
     console.log(`${mission._id} ${mission.name} : 1 week notice.`);
     console.log(`${mission._id} ${mission.name} : endAt ${mission.endAt}`);
 
     // notify structure
-    // if (mission.tutorId) {
-    //   const responsible = await Referent.findById(mission.tutorId);
-    //   if (responsible)
-    //     await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_ARCHIVED_1_WEEK_NOTICE, {
-    //       emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
-    //       params: {
-    //         missionName: mission.name,
-    //         ctaMission: `${ADMIN_URL}/mission/${mission._id}`,
-    //         ctaYoungMission: `${ADMIN_URL}/mission/${mission._id}/youngs`,
-    //       },
-    //     });
-    // }
+    if (mission.tutorId) {
+      const responsible = await Referent.findById(mission.tutorId);
+      if (responsible)
+        await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_ARCHIVED_1_WEEK_NOTICE, {
+          emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
+          params: {
+            missionName: mission.name,
+            ctaMission: `${ADMIN_URL}/mission/${mission._id}`,
+            ctaYoungMission: `${ADMIN_URL}/mission/${mission._id}/youngs`,
+          },
+        });
+    }
   });
   console.log(`${Date.now()} - ${countNotice} missions has been noticed`);
 };
