@@ -69,10 +69,13 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 
     const data = await MissionObject.create(checkedMission);
 
-    const referentDepartment = await UserObject.findOne({ role: ROLES.REFERENT_DEPARTMENT, department: checkedMission.department });
-    if (referentDepartment) {
+    const referentsDepartment = await UserObject.find({
+      department: checkedMission.department,
+      subRole: { $in: ["manager_department_phase2", "manager_phase2"] },
+    });
+    if (referentsDepartment?.length) {
       await sendTemplate(SENDINBLUE_TEMPLATES.referent.NEW_MISSION, {
-        emailTo: [{ name: `${referentDepartment.firstName} ${referentDepartment.lastName}`, email: referentDepartment.email }],
+        emailTo: referentsDepartment?.map((referent) => ({ name: `${referent.firstName} ${referent.lastName}`, email: referent.email })),
         params: {
           cta: `${ADMIN_URL}/mission/${data._id}`,
         },
