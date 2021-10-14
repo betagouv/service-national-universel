@@ -11,6 +11,7 @@ export default function Association({ hit }) {
   const [tab, setTab] = useState("Informations");
   const missions = false;
   const association = hit;
+  const associationLinks = [association.url, association.linkedin, association.facebook, association.twitter, association.donation].filter((e) => e);
 
   async function sendEventToBackend(action, associationId) {
     try {
@@ -64,20 +65,7 @@ export default function Association({ hit }) {
               setShow(true);
               setTab("Contacts");
               sendEventToBackend("CONTACT_CLICK", association.id);
-            }}
-          >
-            <svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M7.18712 9.74667C8.17287 10.7467 9.36561 11.5187 10.6816 12.0086L12.4618 10.5919C12.5146 10.5556 12.5772 10.5361 12.6413 10.5361C12.7054 10.5361 12.7679 10.5556 12.8207 10.5919L16.1263 12.7217C16.2518 12.7971 16.358 12.9007 16.4366 13.0243C16.5152 13.1478 16.5639 13.288 16.579 13.4336C16.5942 13.5792 16.5752 13.7264 16.5237 13.8635C16.4721 14.0005 16.3894 14.1237 16.2821 14.2233L14.7332 15.7533C14.5114 15.9725 14.2388 16.1333 13.9397 16.2215C13.6406 16.3097 13.3243 16.3224 13.0191 16.2586C9.97427 15.6298 7.16782 14.157 4.92045 12.0086C2.72296 9.83887 1.2023 7.07807 0.542951 4.06111C0.477816 3.76061 0.491411 3.44837 0.582418 3.15467C0.673425 2.86096 0.838759 2.59575 1.0624 2.38472L2.66795 0.835832C2.76731 0.733732 2.88847 0.655432 3.02238 0.606794C3.15628 0.558156 3.29945 0.540442 3.44117 0.554978C3.58289 0.569513 3.71949 0.615921 3.84073 0.690728C3.96198 0.765534 4.06472 0.8668 4.14128 0.986943L6.34184 4.25C6.3798 4.30124 6.40028 4.36332 6.40028 4.42708C6.40028 4.49085 6.3798 4.55293 6.34184 4.60417L4.89212 6.34667C5.39531 7.63628 6.17927 8.7977 7.18712 9.74667Z"
-                fill="#696974"
-              />
-            </svg>
-          </ContactButton>
-          <ContactButton
-            onClick={() => {
-              setShow(true);
-              setTab("Contacts");
-              sendEventToBackend("CONTACT_CLICK", association.id);
+              window.open(association.url, "_blank").focus();
             }}
           >
             <svg width="21" height="21" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -102,6 +90,7 @@ export default function Association({ hit }) {
               setShow(true);
               setTab("Contacts");
               sendEventToBackend("CONTACT_CLICK", association.id);
+              if (association.coordonnees_courriel.length > 0) window.open(`mailto:${association.coordonnees_courriel[0]}`);
             }}
           >
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -170,14 +159,12 @@ export default function Association({ hit }) {
                   { label: "Téléphone", value: association.coordonnees_telephone || [] },
                   { label: "Courriel", value: association.coordonnees_courriel || [] },
                   {
-                    label: "Liens",
-                    value: [association.url, association.linkedin, association.facebook, association.twitter, association.donation]
-                      .filter((e) => e)
-                      .map((e) => (
-                        <a style={{ textDecoration: "underline" }} href={e}>
-                          {e}
-                        </a>
-                      )),
+                    label: associationLinks.length > 1 ? "Liens" : "Lien",
+                    value: associationLinks.map((e) => (
+                      <a style={{ textDecoration: "underline" }} href={e}>
+                        {e}
+                      </a>
+                    )),
                   },
                 ]
                   .filter((e) => e.value && e.value.length > 0)

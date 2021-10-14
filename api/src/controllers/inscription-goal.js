@@ -9,7 +9,7 @@ const YoungModel = require("../models/young");
 const { ERRORS } = require("../utils");
 
 // Update all inscription goals
-router.post("/", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   // Validate params.
   const { error, value: inscriptionsGoals } = Joi.array()
     .items({
@@ -33,7 +33,7 @@ router.post("/", passport.authenticate("referent", { session: false }), async (r
   }
 });
 
-router.get("/", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.get("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const data = await InscriptionGoalModel.find({});
     return res.status(200).send({ ok: true, data });
@@ -43,7 +43,7 @@ router.get("/", passport.authenticate("referent", { session: false }), async (re
   }
 });
 
-router.get("/:department/current", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.get("/:department/current", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   const { error, value } = Joi.object({ department: Joi.string().required() }).unknown().validate(req.params);
   if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
   try {

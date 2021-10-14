@@ -9,7 +9,7 @@ const { ERRORS, isYoung } = require("../utils");
 const { ZAMMAD_GROUP } = require("snu-lib/constants");
 
 // Get the list of tickets stats
-router.get("/ticket_overviews", passport.authenticate(["referent"], { session: false }), async (req, res) => {
+router.get("/ticket_overviews", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const email = req.user.email;
     const customer_id = await zammad.getCustomerIdByEmail(email);
@@ -23,7 +23,7 @@ router.get("/ticket_overviews", passport.authenticate(["referent"], { session: f
 });
 
 // Get the list of tickets (with their articles when withArticles query param is provided).
-router.get("/ticket", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
+router.get("/ticket", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const email = req.user.email;
     const customer_id = await zammad.getCustomerIdByEmail(email);
@@ -51,7 +51,7 @@ router.get("/ticket", passport.authenticate(["referent", "young"], { session: fa
 });
 
 // Get one tickets with its articles.
-router.get("/ticket/:id", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
+router.get("/ticket/:id", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const email = req.user.email;
     const customer_id = await zammad.getCustomerIdByEmail(email);
@@ -67,7 +67,7 @@ router.get("/ticket/:id", passport.authenticate(["referent", "young"], { session
 });
 
 // Update one ticket (add a response).
-router.put("/ticket/:id", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
+router.put("/ticket/:id", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   const { message, state } = req.body;
   try {
     const email = req.user.email;
@@ -107,9 +107,9 @@ router.put("/ticket/:id", passport.authenticate(["referent", "young"], { session
 });
 
 // Create a new ticket
-router.post("/ticket", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
+router.post("/ticket", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { subject, type, message, tags } = req.body;
+    const { subject, type, message, tags, title } = req.body;
     const email = req.user.email;
 
     const customer_id = await zammad.getCustomerIdByEmail(email);
@@ -125,11 +125,13 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
       group = ZAMMAD_GROUP.REFERENT;
     }
 
+    const ticketTitle = title || `${type} - ${subject}`;
+
     const response = await zammad.api("/tickets", {
       headers: { "X-On-Behalf-Of": email },
       method: "POST",
       body: JSON.stringify({
-        title: `${type} - ${subject}`,
+        title: `📝 ${ticketTitle}`,
         group,
         customer_id,
         customer: email,
@@ -151,7 +153,7 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
 });
 
 // Search for tickets via tags
-router.post("/ticket/search-by-tags", passport.authenticate(["referent"], { session: false }), async (req, res) => {
+router.post("/ticket/search-by-tags", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const tags = encodeURIComponent(req.body.tags.map((tag) => `tags:${tag}`).join(" AND "));
     const response = await zammad.api(`/tickets/search?query=${tags}`, { method: "GET" });

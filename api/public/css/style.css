@@ -10,7 +10,7 @@ img.bg {
   height: auto;
 
   /* Set up positioning */
-  position: relative;
+  position: fixed;
   z-index: -1;
 }
 

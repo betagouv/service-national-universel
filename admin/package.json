@@ -38,8 +38,8 @@
   },
   "dependencies": {
     "@appbaseio/reactivesearch": "^3.14.0",
-    "@sentry/react": "^6.11.0",
-    "@sentry/tracing": "^6.11.0",
+    "@sentry/react": "^6.13.3",
+    "@sentry/tracing": "^6.13.3",
     "babel-loader": "^8.2.2",
     "bootstrap": "^4.5.2",
     "core-js": "^3.12.1",
@@ -75,8 +75,8 @@
     "xlsx": "^0.17.0"
   },
   "engines": {
-    "node": "^14.14",
-    "npm": "^7.6",
+    "node": "^16.10",
+    "npm": "^8.0",
     "yarn": "🍎 This project uses NPM, please do not use YARN. 🍎"
   }
 }

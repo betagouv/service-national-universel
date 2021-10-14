@@ -6,7 +6,7 @@ const { capture } = require("../sentry");
 const fetch = require("node-fetch");
 const { ERRORS } = require("../utils");
 
-router.get("/generateUrl", passport.authenticate("young", { session: false }), async (req, res) => {
+router.get("/generateUrl", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     let url = process.env.DIAGORIENTE_URL;
     let options = {
@@ -25,7 +25,7 @@ router.get("/generateUrl", passport.authenticate("young", { session: false }), a
   }
 });
 
-router.get("/getCard", passport.authenticate("young", { session: false }), async (req, res) => {
+router.get("/getCard", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
     let url = process.env.DIAGORIENTE_URL;
     let options = {

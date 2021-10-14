@@ -26,7 +26,7 @@ const Joi = require("joi");
 const { serializeCohesionCenter, serializeYoung, serializeReferent } = require("../utils/serializer");
 const { validateNewCohesionCenter, validateUpdateCohesionCenter } = require("../utils/validator");
 
-router.post("/refresh/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.post("/refresh/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = Joi.string().required().validate(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
@@ -42,7 +42,7 @@ router.post("/refresh/:id", passport.authenticate("referent", { session: false }
   }
 });
 
-router.post("/", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = validateNewCohesionCenter(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
@@ -57,7 +57,7 @@ router.post("/", passport.authenticate("referent", { session: false }), async (r
   }
 });
 
-router.post("/:centerId/assign-young/:youngId", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.post("/:centerId/assign-young/:youngId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({ youngId: Joi.string().required(), centerId: Joi.string().required() })
       .unknown()
@@ -130,40 +130,44 @@ router.post("/:centerId/assign-young/:youngId", passport.authenticate("referent"
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
-router.post("/:centerId/assign-young-waiting-list/:youngId", passport.authenticate("referent", { session: false }), async (req, res) => {
-  try {
-    const { error, value } = Joi.object({ youngId: Joi.string().required(), centerId: Joi.string().required() })
-      .unknown()
-      .validate({ ...req.params }, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+router.post(
+  "/:centerId/assign-young-waiting-list/:youngId",
+  passport.authenticate("referent", { session: false, failWithError: true }),
+  async (req, res) => {
+    try {
+      const { error, value } = Joi.object({ youngId: Joi.string().required(), centerId: Joi.string().required() })
+        .unknown()
+        .validate({ ...req.params }, { stripUnknown: true });
+      if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
-    const { youngId, centerId } = value;
-    const young = await YoungModel.findById(youngId);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const center = await CohesionCenterModel.findById(centerId);
-    if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      const { youngId, centerId } = value;
+      const young = await YoungModel.findById(youngId);
+      if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      const center = await CohesionCenterModel.findById(centerId);
+      if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    // update youngs infos
-    young.set({
-      statusPhase1: "WAITING_LIST",
-      cohesionCenterId: center._id,
-      cohesionCenterName: center.name,
-      cohesionCenterCity: center.city,
-      cohesionCenterZip: center.zip,
-    });
-    await young.save({ fromUser: req.user });
+      // update youngs infos
+      young.set({
+        statusPhase1: "WAITING_LIST",
+        cohesionCenterId: center._id,
+        cohesionCenterName: center.name,
+        cohesionCenterCity: center.city,
+        cohesionCenterZip: center.zip,
+      });
+      await young.save({ fromUser: req.user });
 
-    center.waitingList.push(young._id);
-    await center.save();
+      center.waitingList.push(young._id);
+      await center.save();
 
-    return res.status(200).send({ data: serializeCohesionCenter(center), ok: true });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+      return res.status(200).send({ data: serializeCohesionCenter(center), ok: true });
+    } catch (error) {
+      capture(error);
+      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    }
   }
-});
+);
 
-router.get("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.get("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = Joi.string().required().validate(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
@@ -178,7 +182,7 @@ router.get("/:id", passport.authenticate("referent", { session: false }), async 
   }
 });
 
-router.get("/:id/head", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.get("/:id/head", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = Joi.string().required().validate(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
@@ -195,7 +199,7 @@ router.get("/:id/head", passport.authenticate("referent", { session: false }), a
   }
 });
 
-router.get("/", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.get("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const data = await CohesionCenterModel.find({});
     return res.status(200).send({ ok: true, data: data.map(serializeCohesionCenter) });
@@ -204,7 +208,7 @@ router.get("/", passport.authenticate("referent", { session: false }), async (re
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
-router.get("/young/:youngId", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
+router.get("/young/:youngId", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = Joi.string().required().validate(req.params.youngId);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
@@ -225,7 +229,7 @@ router.get("/young/:youngId", passport.authenticate(["referent", "young"], { ses
   }
 });
 
-router.put("/", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.put("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: newCenter } = validateUpdateCohesionCenter(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
@@ -248,7 +252,7 @@ router.put("/", passport.authenticate("referent", { session: false }), async (re
   }
 });
 
-router.delete("/:id", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = Joi.string().required().validate(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
@@ -268,7 +272,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false }), asy
   }
 });
 
-router.post("/:id/certificate", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.post("/:id/certificate", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   const { error, value: id } = Joi.string().required().validate(req.params.id);
   if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 

@@ -208,7 +208,7 @@ async function sendContractEmail(contract, options) {
 }
 
 // Create or update contract.
-router.post("/", passport.authenticate(["referent"], { session: false }), async (req, res) => {
+router.post("/", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error: idError, value: id } = validateOptionalId(req.body._id);
     if (idError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, message: idError.message });
@@ -241,7 +241,7 @@ router.post("/", passport.authenticate(["referent"], { session: false }), async 
 });
 
 // Send contract email
-router.post("/:id/send-email/:type", passport.authenticate(["referent"], { session: false }), async (req, res) => {
+router.post("/:id/send-email/:type", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: id } = validateId(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, message: error.message });
@@ -268,7 +268,7 @@ router.post("/:id/send-email/:type", passport.authenticate(["referent"], { sessi
   }
 });
 
-router.get("/:id", passport.authenticate(["referent", "young"], { session: false }), async (req, res) => {
+router.get("/:id", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error: idError, value: id } = validateId(req.params.id);
     if (idError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, message: idError.message });
@@ -346,7 +346,7 @@ router.post("/token/:token", async (req, res) => {
   }
 });
 
-router.post("/:id/download", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
+router.post("/:id/download", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error: idError, value: id } = validateId(req.params.id);
     if (idError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, message: idError.message });

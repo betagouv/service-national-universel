@@ -16,19 +16,22 @@ import SuccessIcon from "../../components/SuccessIcon";
 
 const articles = [
   {
-    title: "Je cherche une mission",
-    body: `Depuis l'onglet "Mission d'intérêt général", cliquez sur la rubrique...`,
+    title: "Code de la route",
+    emoji: "🚗",
+    body: `L’accès à la plateforme en ligne d’apprentissage du code de la route...`,
+    url: "https://support.snu.gouv.fr/help/fr-fr/3-volontaire/21-prise-en-charge-du-e-learning-et-de-l-examen-du-code-de-la-route",
+  },
+  {
+    title: "Je cherche une MIG",
+    emoji: "🔍",
+    body: `Depuis l'onglet Mission d'intérêt général, cliquez sur la rubrique...`,
     url: "https://support.snu.gouv.fr/help/fr-fr/13-phase-2-mission-d-interet-general/33-je-cherche-une-mission-mig",
   },
   {
-    title: "Je modifie mon identifiant e-mail",
-    body: `Connectez vous à votre espace volontaire, accédez à "Mon profil"...`,
-    url: "https://support.snu.gouv.fr/help/fr-fr/10-mon-compte/51-je-modifie-mon-identifiant-email",
-  },
-  {
-    title: "Je consulte mes missions réalisées",
-    body: `Les missions réalisées correspondent aux missions que vous avez déjà...`,
-    url: "https://support.snu.gouv.fr/help/fr-fr/13-phase-2-mission-d-interet-general/38-je-consulte-mes-missions-realisees",
+    title: "Comment se déroule ma phase 3 ?",
+    emoji: "🌟",
+    body: `Optionnelle, la phase 3 vous permet de poursuivre votre...`,
+    url: "https://support.snu.gouv.fr/help/fr-fr/14-phase-3-l-engagement/61-comment-se-deroule-ma-phase-3",
   },
 ];
 
@@ -124,7 +127,10 @@ export default () => {
       <Articles>
         {articles.map((article) => (
           <div className="block" key={article.url} onClick={() => window.open(article.url)}>
-            <h6>{article.title}</h6>
+            <div className="block-title">
+              <p>{article.emoji}</p>
+              <h6>{article.title}</h6>
+            </div>
             <p>{article.body}</p>
             <p>
               <a className="block-link" href={article.url} target="_blank">
@@ -259,6 +265,15 @@ const Articles = styled.div`
       box-shadow: 0 0 15px 3px rgba(0, 0, 0, 0.2);
     }
     border-radius: 0.5rem;
+  }
+  .block-title {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+  .block-title h6 {
+    padding-left: 0.8rem;
+    margin: 0;
   }
   .block p,
   .block a {

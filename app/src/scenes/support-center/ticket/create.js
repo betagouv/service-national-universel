@@ -10,13 +10,12 @@ import { useHistory } from "react-router-dom";
 import api from "../../../services/api";
 import { HeroContainer } from "../../../components/Content";
 import ErrorMessage, { requiredMessage } from "../../inscription/components/errorMessage";
+import { SelectTag, step1, step2Technical, step2Question } from "./worflow";
 
 export default () => {
   const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
-  //todo : fetch zammad categories (scopes)
-  const options = ["Assistance technique", "À propos de ma situation", "Contacter un référent"];
-  const defaultTags = [`COHORTE_${young.cohort}`, `DEPARTEMENT_${young.department}`, `REGION_${young.region}`, `EMETTEUR_Volontaire`, `CANAL_Plateforme`, `AGENT_Startup_Support`];
+  const tags = [`COHORTE_${young.cohort}`, `DEPARTEMENT_${young.department}`, `REGION_${young.region}`, `EMETTEUR_Volontaire`, `CANAL_Plateforme`, `AGENT_Startup_Support`];
 
   return (
     <Container>
@@ -27,25 +26,16 @@ export default () => {
       </Heading>
       <Form>
         <Formik
-          initialValues={{ type: "", subject: "", message: "", tags: defaultTags }}
+          initialValues={{ step1: null, step2: null, message: "" }}
           validateOnChange={false}
           validateOnBlur={false}
           onSubmit={async (values) => {
-            // return console.log(values);
             try {
-              const { subject, type, message, tags } = values;
-              if (type === "Assistance technique") {
-                tags.push("AGENT_Startup_Technique");
-              } else if (type === "À propos de ma situation") {
-                tags.push("AGENT_STARTUP_Support");
-              } else if (type === "Contacter un référent") {
-                // tags.push("AGENT_Référent_Département");
-              }
+              const { message, step1, step2 } = values;
               const { ok, code, data } = await api.post("/support-center/ticket", {
-                subject,
-                type,
+                title: `${step1?.label} - ${step2?.label}`,
                 message,
-                tags,
+                tags: [...new Set([...tags, ...step1?.tags, ...step2?.tags])], // we use this dirty hack to remove duplicates
               });
               if (!ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(code));
               toastr.success("Ticket créé");
@@ -58,27 +48,34 @@ export default () => {
         >
           {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
             <>
-              <Item
-                name="type"
-                title="Ma demande"
-                type="select"
-                value={values.type}
+              <SelectTag
+                name="step1"
+                options={Object.values(step1)}
+                title={"Ma demande"}
+                selectPlaceholder={"Choisir la catégorie"}
                 handleChange={handleChange}
-                validate={(v) => !v && requiredMessage}
-                errors={errors}
-                touched={touched}
-                options={options}
+                value={values?.step1?.id}
               />
-              <Item
-                name="subject"
-                title="Sujet"
-                type="input"
-                value={values.subject}
-                handleChange={handleChange}
-                validate={(v) => !v && requiredMessage}
-                errors={errors}
-                touched={touched}
-              />
+              {values.step1?.id === "TECHNICAL" ? (
+                <SelectTag
+                  name="step2"
+                  options={Object.values(step2Technical)}
+                  title={"Sujet"}
+                  selectPlaceholder={"Choisir le sujet"}
+                  handleChange={handleChange}
+                  value={values.step2?.id}
+                />
+              ) : null}
+              {values.step1?.id === "QUESTION" ? (
+                <SelectTag
+                  name="step2"
+                  options={Object.values(step2Question)}
+                  title={"Sujet"}
+                  selectPlaceholder={"Choisir le sujet"}
+                  handleChange={handleChange}
+                  value={values.step2?.id}
+                />
+              ) : null}
               <Item
                 name="message"
                 title="Mon message"
@@ -111,7 +108,7 @@ const Item = ({ title, name, value, handleChange, errors, touched, validate, typ
             Catégorie
           </option>
           {options?.map((option) => (
-            <option option value={option} key={option}>
+            <option value={option} key={option}>
               {option}
             </option>
           ))}

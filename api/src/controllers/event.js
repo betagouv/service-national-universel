@@ -6,7 +6,7 @@ const EventObject = require("../models/event");
 const { ERRORS, isYoung } = require("../utils");
 const { validateEvent } = require("../utils/validator");
 
-router.post("/", passport.authenticate("referent", { session: false }), async (req, res) => {
+router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value: event } = validateEvent(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });

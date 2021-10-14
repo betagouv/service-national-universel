@@ -51,7 +51,7 @@ function getMailParams(type, template, young) {
   // if (type === "convocation" && template === "cohesion") return { object: "", message: "" };
 }
 
-router.post("/:type/:template", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
+router.post("/:type/:template", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({ id: Joi.string().required(), type: Joi.string().required(), template: Joi.string().required() })
       .unknown()
@@ -81,43 +81,47 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
     res.status(500).send({ ok: false, e, code: ERRORS.SERVER_ERROR });
   }
 });
-router.post("/:type/:template/send-email", passport.authenticate(["young", "referent"], { session: false }), async (req, res) => {
-  try {
-    const { error, value } = Joi.object({ id: Joi.string().required(), type: Joi.string().required(), template: Joi.string().required() })
-      .unknown()
-      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    const { id, type, template, fileName } = value;
+router.post(
+  "/:type/:template/send-email",
+  passport.authenticate(["young", "referent"], { session: false, failWithError: true }),
+  async (req, res) => {
+    try {
+      const { error, value } = Joi.object({ id: Joi.string().required(), type: Joi.string().required(), template: Joi.string().required() })
+        .unknown()
+        .validate({ ...req.params, ...req.body }, { stripUnknown: true });
+      if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      const { id, type, template, fileName } = value;
 
-    const young = await YoungObject.findById(id);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      const young = await YoungObject.findById(id);
+      if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    // A young can only send to them their own documents.
-    if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
-      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      // A young can only send to them their own documents.
+      if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
+        return res.status(401).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+      if (isReferent(req.user) && !canSendFileByMail(req.user, young)) {
+        return res.status(401).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+
+      // Create html
+      const html = await getHtmlTemplate(type, template, young);
+      const { object, message } = getMailParams(type, template, young);
+      if (!html) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      const buffer = await renderFromHtml(html, type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 });
+      const content = buffer.toString("base64");
+
+      const mail = await sendTemplate(SENDINBLUE_TEMPLATES.young.DOCUMENT, {
+        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+        attachment: [{ content, name: fileName }],
+        params: { object, message },
+      });
+      res.status(200).send({ ok: true, data: mail });
+    } catch (e) {
+      capture(e);
+      res.status(500).send({ ok: false, e, code: ERRORS.SERVER_ERROR });
     }
-    if (isReferent(req.user) && !canSendFileByMail(req.user, young)) {
-      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-    }
-
-    // Create html
-    const html = await getHtmlTemplate(type, template, young);
-    const { object, message } = getMailParams(type, template, young);
-    if (!html) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    const buffer = await renderFromHtml(html, type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 });
-    const content = buffer.toString("base64");
-
-    const mail = await sendTemplate(SENDINBLUE_TEMPLATES.young.DOCUMENT, {
-      emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-      attachment: [{ content, name: fileName }],
-      params: { object, message },
-    });
-    res.status(200).send({ ok: true, data: mail });
-  } catch (e) {
-    capture(e);
-    res.status(500).send({ ok: false, e, code: ERRORS.SERVER_ERROR });
   }
-});
+);
 
 module.exports = router;
