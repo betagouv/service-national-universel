@@ -124,11 +124,13 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
       group = ZAMMAD_GROUP.REFERENT;
     }
 
+    const ticketTitle = title || `${type} - ${subject}`;
+
     const response = await zammad.api("/tickets", {
       headers: { "X-On-Behalf-Of": email },
       method: "POST",
       body: JSON.stringify({
-        title: `📝 ${title}` || `📝 ${type} - ${subject}`,
+        title: `📝 ${ticketTitle}`,
         group,
         customer_id,
         customer: email,
