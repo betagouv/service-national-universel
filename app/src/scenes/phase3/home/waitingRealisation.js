@@ -19,7 +19,7 @@ export default () => {
   useEffect(() => {
     (async () => {
       const { data, ok, code } = await api.get("/program");
-      if (!ok) return toastr.error("nope");
+      if (!ok) return toastr.error("Une erreur est survenue.");
       setPrograms(data);
     })();
   }, []);
