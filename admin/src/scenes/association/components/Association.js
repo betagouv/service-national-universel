@@ -2,64 +2,15 @@ import React, { useState, useEffect } from "react";
 import api from "../../../services/api";
 
 import styled from "styled-components";
-import { toastr } from "react-redux-toastr";
 
 import Chevron from "../../../components/Chevron";
 
-export default function Association({ hit }) {
+export default function Association({ hit, missionsInfo }) {
   const tabs = ["Informations", "Contacts", "Missions"];
   const [show, setShow] = useState(false);
   const [tab, setTab] = useState("Informations");
-  const [missionsInfo, setMissionsInfo] = useState([]);
   const association = hit;
   const associationLinks = [association.url, association.linkedin, association.facebook, association.twitter, association.donation].filter((e) => e);
-
-  useEffect(() => {
-    (async () => {
-      var myHeaders = new Headers();
-      myHeaders.append("Content-Type", "application/json");
-
-      var raw = JSON.stringify({
-        query: {
-          bool: {
-            must: [
-              {
-                multi_match: {
-                  query: association.id_rna,
-                  fields: ["associationRna", "organizationRNA"],
-                },
-              },
-              {
-                match: {
-                  deleted: "no",
-                },
-              },
-            ],
-          },
-        },
-      });
-
-      try {
-        const res = await fetch("https://api.api-engagement.beta.gouv.fr/v0/mission/search", {
-          method: "POST",
-          headers: myHeaders,
-          body: raw,
-          redirect: "follow",
-        }).then((response) => response.json());
-
-        if (res.hits.hits.length > 0) {
-          setMissionsInfo({
-            countMissions: res.hits.hits.length,
-            countPlaces: res.hits.hits.reduce((prev, curr) => (curr._source.places ? prev + curr._source.places : 0), 0),
-            missions: res.hits.hits.map((el) => ({ id: el._id, ...el._source })),
-          });
-        }
-      } catch (err) {
-        console.log(err);
-        toastr.error("Erreur lors de la récupération des missions");
-      }
-    })();
-  }, []);
 
   async function sendEventToBackend(action, associationId) {
     try {
