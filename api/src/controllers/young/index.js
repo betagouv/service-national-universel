@@ -197,7 +197,7 @@ router.post("/", async (req, res) => {
     const { error, value } = validateYoung(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
-    const young = await YoungObject.create(value);
+    const young = await YoungObject.create({ ...value, fromUser: req.user });
     return res.status(200).send({ young: serializeYoung(young, young), ok: true });
   } catch (error) {
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.YOUNG_ALREADY_REGISTERED });
@@ -216,7 +216,7 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
     obj.invitationToken = invitation_token;
     obj.invitationExpires = inSevenDays(); // 7 days
 
-    const young = await YoungObject.create(obj);
+    const young = await YoungObject.create({ ...obj, fromUser: req.user });
 
     const toName = `${young.firstName} ${young.lastName}`;
     const cta = `${config.APP_URL}/auth/signup/invite?token=${invitation_token}`;
