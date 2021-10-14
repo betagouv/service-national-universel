@@ -45,8 +45,8 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
   // });
 
   // everyday at 02:00 UTC
-  cron.schedule(EVERY_MINUTE, () => {
+  cron.schedule("0 8 * * *", () => {
     // missionOutdated.handler();
-    missionOutdated.handlerNotice1Week();
+    // missionOutdated.handlerNotice1Week();
   });
 }
