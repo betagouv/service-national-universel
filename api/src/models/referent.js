@@ -174,6 +174,17 @@ Schema.post("remove", function (doc) {
   sendinblue.unsync(doc);
 });
 
+//Sync with Zammad
+Schema.post("save", function (doc) {
+  zammad.sync(doc, MODELNAME);
+});
+Schema.post("findOneAndUpdate", function (doc) {
+  zammad.sync(doc, MODELNAME);
+});
+Schema.post("remove", function (doc) {
+  zammad.unsync(doc);
+});
+
 Schema.virtual("user").set(function (user) {
   if (user) {
     const { _id, role, department, region, email, firstName, lastName, model } = user;
