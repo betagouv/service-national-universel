@@ -108,7 +108,7 @@ router.put("/ticket/:id", passport.authenticate(["referent", "young"], { session
 // Create a new ticket
 router.post("/ticket", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { subject, type, message, tags } = req.body;
+    const { subject, type, message, tags, title } = req.body;
     const email = req.user.email;
 
     const customer_id = await zammad.getCustomerIdByEmail(email);
@@ -124,11 +124,13 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
       group = ZAMMAD_GROUP.REFERENT;
     }
 
+    const ticketTitle = title || `${type} - ${subject}`;
+
     const response = await zammad.api("/tickets", {
       headers: { "X-On-Behalf-Of": email },
       method: "POST",
       body: JSON.stringify({
-        title: `${type} - ${subject}`,
+        title: `📝 ${ticketTitle}`,
         group,
         customer_id,
         customer: email,
