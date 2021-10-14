@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Col } from "reactstrap";
 import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
@@ -8,7 +8,7 @@ import { useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { translate } from "../../../utils";
 
-import { SelectTag, types, subjects } from "./workflow";
+import { SelectTag, typesReferent, subjectsReferent, typesAdmin, subjectsAdmin, typesStructure, subjectsStructure } from "./workflow";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 import api from "../../../services/api";
 import ErrorMessage, { requiredMessage } from "../../../components/errorMessage";
@@ -18,11 +18,30 @@ export default () => {
   const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
 
-  //todo : fetch zammad categories (scopes)
-  const tags = [`DEPARTEMENT_${user.department}`, `REGION_${user.region}`, `CANAL_Plateforme`, `AGENT_Startup_Support`];
+  const [typesList, setTypeList] = useState([]);
+  const [subjectsList, setSubjectsList] = useState([]);
+
+  useEffect(() => {
+    if (!user) return;
+    if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) {
+      setTypeList(typesReferent);
+      setSubjectsList(subjectsReferent);
+    } else if ([ROLES.ADMIN].includes(user.role)) {
+      setTypeList(typesAdmin);
+      setSubjectsList(subjectsAdmin);
+    } else if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user.role)) {
+      setTypeList(typesStructure);
+      setSubjectsList(subjectsStructure);
+    }
+  }, [user]);
+
+  // set the default tags for the user
+  const tags = [`CANAL_Plateforme`, `AGENT_Startup_Support`];
+  if (user.department) tags.push(`DEPARTEMENT_${user.department}`);
+  if (user.region) tags.push(`REGION_${user.region}`);
   if ([ROLES.ADMIN].includes(user.role)) tags.push("EMETTEUR_Admin");
   if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) tags.push("EMETTEUR_Référent");
-  if ([ROLES.RESPONSABLE, ROLES.SUPERVISOR].includes(user.role)) tags.push("EMETTEUR_Structure");
+  if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role)) tags.push("EMETTEUR_Structure");
 
   return (
     <Container>
@@ -39,10 +58,19 @@ export default () => {
           onSubmit={async (values) => {
             try {
               const { subject, type, message } = values;
+              const computedTags = [...tags];
+              if (type?.tags) computedTags.push(...type?.tags);
+              if (subject?.tags && type?.id !== "OTHER") computedTags.push(...subject?.tags);
+              // for testing without feed zammad with test data
+              return console.log({
+                title: `${type?.label} - ${subject?.label}`,
+                message,
+                tags: [...new Set([...computedTags])],
+              });
               const { ok, code, data } = await api.post("/support-center/ticket", {
                 title: `${type?.label} - ${subject?.label}`,
                 message,
-                tags: [...new Set([...tags, ...type?.tags, ...subject?.tags])],
+                tags: [...new Set([...computedTags])],
               });
               if (!ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(code));
               toastr.success("Ticket créé");
@@ -57,7 +85,7 @@ export default () => {
             <>
               <SelectTag
                 name="type"
-                options={Object.values(types)}
+                options={Object.values(typesList)}
                 title={"Ma demande"}
                 selectPlaceholder={"Choisir la catégorie"}
                 handleChange={handleChange}
@@ -69,16 +97,16 @@ export default () => {
                   souhaitez joindre des pièces envoyez votre demande à contact@snu.gouv.fr
                 </p>
               )} */}
-              {values.type?.id && (
+              {values.type?.id && values.type?.id !== "OTHER" ? (
                 <SelectTag
                   name="subject"
-                  options={Object.values(subjects).filter((e) => e.parentId === values?.type?.id)}
+                  options={Object.values(subjectsList).filter((e) => e.parentId === values?.type?.id)}
                   title={"Sujet"}
                   selectPlaceholder={"Choisir le sujet"}
                   handleChange={handleChange}
                   value={values.subject?.id}
                 />
-              )}
+              ) : null}
               <Item
                 name="message"
                 title="Mon message"
