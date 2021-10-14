@@ -285,6 +285,9 @@ const MissionButton = styled.div`
   margin: auto;
   text-align: center;
   cursor: pointer;
+  @media (max-width: 1240px) {
+    display: none;
+  }
   &:hover {
     background-color: #e7e7e7;
   }
