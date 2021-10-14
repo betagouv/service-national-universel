@@ -1,4 +1,4 @@
-require("dotenv").config({ path: "./../../.env-prod" });
+require("dotenv").config({ path: "./../../.env-staging" });
 require("../mongo");
 const { capture, captureMessage } = require("../sentry");
 const Mission = require("../models/mission");
@@ -34,31 +34,30 @@ const clean = async () => {
 };
 
 const notify1Week = async () => {
+  console.log({ ADMIN_URL });
   let countNotice = 0;
   const now = Date.now();
   const cursor = await Mission.find({ endAt: { $lte: addDays(now, 7), $gte: addDays(now, 7) }, status: "VALIDATED" }).cursor();
   await cursor.eachAsync(async function (mission) {
     countNotice++;
-    // console.log(`${mission._id} ${mission.name} : 1 week notice.`);
-    // console.log(`${mission._id} ${mission.name} : endAt ${mission.endAt}`);
+    console.log(`${mission._id} ${mission.name} : 1 week notice.`);
+    console.log(`${mission._id} ${mission.name} : endAt ${mission.endAt}`);
 
     // notify structure
     // if (mission.tutorId) {
     //   const responsible = await Referent.findById(mission.tutorId);
-    //   if (responsible) tutorFound["oui"] = (tutorFound["oui"] || 0) + 1;
-    //   else tutorFound["non"] = (tutorFound["non"] || 0) + 1;
+    //   if (responsible)
+    //     await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_ARCHIVED_1_WEEK_NOTICE, {
+    //       emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
+    //       params: {
+    //         missionName: mission.name,
+    //         ctaMission: `${ADMIN_URL}/mission/${mission._id}`,
+    //         ctaYoungMission: `${ADMIN_URL}/mission/${mission._id}/youngs`,
+    //       },
+    //     });
     // }
-    // if (responsible)
-    //   await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_ARCHIVED_1_WEEK_NOTICE, {
-    //     emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
-    //     params: {
-    //       missionName: mission.name,
-    //       ctaMission: `https://admin.snu.gouv.fr/mission/${mission._id}`,
-    //       ctaYoungMission: `https://admin.snu.gouv.fr/mission/${mission._id}/youngs`,
-    //     },
-    //   });
   });
-  captureMessage(`${Date.now()} - ${countNotice} missions has been noticed`);
+  console.log(`${Date.now()} - ${countNotice} missions has been noticed`);
 };
 
 exports.handler = async () => {
