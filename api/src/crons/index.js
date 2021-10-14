@@ -6,6 +6,7 @@ const { sendRecapDepartmentTuesday, sendRecapDepartmentThursday } = require("./m
 const apiEngagement = require("./syncApiEngagement");
 const { capture } = require("../sentry");
 const autoAffectationCohesionCenter = require("./autoAffectationCohesionCenter");
+const missionOutdated = require("./missionOutdated");
 
 // dev : */5 * * * * * (every 5 secs)
 // prod : 0 8 * * 1 (every monday at 0800)
@@ -42,4 +43,10 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
   // cron.schedule(EVERY_HOUR, () => {
   //   autoAffectationCohesionCenter.handler();
   // });
+
+  // everyday at 02:00 UTC
+  cron.schedule(EVERY_MINUTE, () => {
+    missionOutdated.handler();
+    missionOutdated.handlerNotice1Week();
+  });
 }
