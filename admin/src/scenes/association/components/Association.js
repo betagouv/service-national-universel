@@ -159,7 +159,9 @@ export default function Association({ hit }) {
         >
           {missionsInfo.countMissions ? (
             <>
-              <div className="title">{missionsInfo.countMissions} mission(s) disponible(s)</div>
+              <div className="title">
+                {missionsInfo.countMissions} mission{missionsInfo.countMissions > 1 && "s"} disponible{missionsInfo.countMissions > 1 && "s"}
+              </div>
               <div className="subtitle">{missionsInfo.countPlaces} volontaire(s) recherché(s)</div>
             </>
           ) : (
