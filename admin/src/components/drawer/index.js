@@ -35,7 +35,6 @@ const HelpButton = ({ onClick, to }) => (
 );
 
 const DrawerTabWithIcons = ({ title, children, to, onClick }) => {
-  if (environment === "production") return <div />;
   return (
     <li onClick={onClick}>
       <NavLink to={to}>
@@ -86,7 +85,7 @@ function admin({ onClick }) {
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
       <DrawerTab to="/objectifs" title="Objectifs" onClick={onClick} />
       <DrawerTabWithIcons to="/boite-de-reception" title="Boîte de reception" onClick={onClick}>
-        <div
+        {/* <div
           style={{
             display: "flex",
             alignContent: "center",
@@ -117,7 +116,7 @@ function admin({ onClick }) {
         >
           <MailOpenIcon />
           <div style={{ marginLeft: "4px" }}>3</div>
-        </div>
+        </div> */}
       </DrawerTabWithIcons>
       <BlankSeparator />
       <HelpButton to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} />
@@ -136,7 +135,7 @@ function referent({ onClick }) {
       <DrawerTab to="/centre" title="Centres" onClick={onClick} />
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
       <DrawerTabWithIcons to="/boite-de-reception" title="Boîte de reception" onClick={onClick}>
-        <div
+        {/* <div
           style={{
             display: "flex",
             alignContent: "center",
@@ -167,7 +166,7 @@ function referent({ onClick }) {
         >
           <MailOpenIcon />
           <div style={{ marginLeft: "4px" }}>3</div>
-        </div>
+        </div> */}
       </DrawerTabWithIcons>
       <BlankSeparator />
       <HelpButton to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} />
