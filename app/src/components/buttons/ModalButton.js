@@ -31,29 +31,25 @@ export default ({ primary, secondary, loading, children, disabled, ...rest }) =>
       }}
       disabled={loading || disabled}
     >
-      <Button>
-        {loading && <Spinner size="sm" style={{ borderWidth: "0.1em" }} />}
-        {!loading && children}
-      </Button>
+      {loading && <Spinner size="sm" style={{ borderWidth: "0.1em" }} />}
+      {!loading && children}
     </VioletButtonHeader>
   );
 };
 
-const VioletButtonHeader = styled.div`
-  .btn-secondary {
-    border: none;
-    border-radius: 5px;
-    padding: 7px 30px;
-    margin: 0.3rem;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    background-color: #fff;
-    min-width: 80%;
-    max-width: 80%;
-    box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);
-    :hover {
-      box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.6);
-    }
+const VioletButtonHeader = styled(Button)`
+  border: none;
+  border-radius: 5px;
+  padding: 7px 30px;
+  margin: 0.3rem;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  background-color: #fff !important;
+  min-width: 80%;
+  max-width: 80%;
+  box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);
+  :hover {
+    box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.6);
   }
 `;
