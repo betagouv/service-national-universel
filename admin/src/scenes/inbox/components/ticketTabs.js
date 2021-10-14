@@ -29,7 +29,7 @@ export default ({ setTicket, selectedTicket, setOverview }) => {
     let tags = [];
     if (user.role === ROLES.ADMIN) tags.push(["AGENT_Startup_Support"]);
     else if (user.role === ROLES.REFERENT_DEPARTMENT) tags.push(["AGENT_Référent_Département", `DEPARTEMENT_${user.department}`]);
-    else if (user.role === ROLES.REFERENT_REGION) tags.push(["AGENT_Référent_Région", `DEPARTEMENT_${user.region}`]);
+    else if (user.role === ROLES.REFERENT_REGION) tags.push(["AGENT_Référent_Région", `REGION_${user.region}`]);
     if (tags.length) getTickets(tags);
   }, []);
 

@@ -39,7 +39,7 @@ export const step1 = {
   QUESTION: {
     id: "QUESTION",
     label: "J'ai une question",
-    tags: ["TAG_question", "AGENT_Startup_Support"],
+    tags: ["TAG_question", "AGENT_Startup_Support", "AGENT_Référent_Département", "AGENT_Référent_Région"],
   },
 };
 
