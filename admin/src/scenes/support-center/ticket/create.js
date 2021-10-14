@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useRef, useState } from "react";
 import { Col } from "reactstrap";
 import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
@@ -73,6 +73,11 @@ export default () => {
                 touched={touched}
                 options={options}
               />
+              {(user.role === "referent_department" || user.role === "referent_region") && values.type === "Aide sur un cas particulier" && (
+                <p className="refNote">
+                  Pour vous aider à résoudre ce cas particulier, merci de nous transmettre toutes les informations nécessaires à la compréhension de cette situation. Si vous souhaitez joindre des pièces envoyez votre demande à contact@snu.gouv.fr
+                </p>
+              )}
               <Item
                 name="subject"
                 title="Sujet"
@@ -215,6 +220,12 @@ const Form = styled.div`
   background-color: #fff;
   margin: 0 auto;
   width: clamp(700px, 80%, 1000px);
+  .refNote {
+    margin-top: 0.5rem;
+    color: grey;
+    text-align: center;
+    max-width: 920px;
+  }
   @media (max-width: 767px) {
     width: 100%;
   }

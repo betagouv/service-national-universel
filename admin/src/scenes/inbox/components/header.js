@@ -21,7 +21,7 @@ export default ({ overview }) => {
         <VL></VL>
         <Notification>
           <SuccessIcon color="#6BC762" style={{ margin: 0, padding: "5px" }} />
-          <NotificationNumber>{overview[ticketStateIdByName("fermé")] || 0}</NotificationNumber>fermé(s)
+          <NotificationNumber>{overview[ticketStateIdByName("fermé")] || 0}</NotificationNumber>archivé(s)
         </Notification>
       </NotifcationContainer>
       <div style={{ display: "flex", justifyContent: "center", alignContent: "center" }}>

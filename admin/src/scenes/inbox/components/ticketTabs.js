@@ -83,7 +83,7 @@ export default ({ setTicket, selectedTicket, setOverview }) => {
             Ouvert(s)
           </TabItem>
           <TabItem onClick={() => setStateFilter(ticketStateIdByName("fermé"))} isActive={stateFilter === ticketStateIdByName("fermé")}>
-            Fermé(s)
+            Archivé(s)
           </TabItem>
           {/* todo other filters */}
           {/* <TabItem onClick={() => setStateFilter("other")} isActive={stateFilter === "other"}>

@@ -411,7 +411,7 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
     try {
       const { mime } = await FileType.fromBuffer(decryptedBuffer);
       mimeFromFile = mime;
-    } catch (e) {}
+    } catch (e) { }
 
     return res.status(200).send({
       data: Buffer.from(decryptedBuffer, "base64"),
@@ -571,6 +571,18 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
 
     if (!canViewReferent(req.user, referent)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     return res.status(200).send({ ok: true, data: serializeReferent(referent, req.user) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+router.get("/", passport.authenticate(["referent"], { session: false }), async (req, res) => {
+  try {
+    const { error, value } = Joi.string().required().email().validate(req.query.email);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+    let data = await ReferentModel.findOne({ email: value });
+    return res.status(200).send({ ok: true, data: serializeReferent(data, req.user) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
