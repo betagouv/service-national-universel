@@ -82,7 +82,7 @@ export default () => {
   return (
     <HeroContainer>
       <Container>
-        <h4 style={{ marginLeft: "0.5rem", textAlign: "center" }}>Besoin d'aide&nbsp;?</h4>
+        <h4 style={{ textAlign: "center" }}>Besoin d'aide&nbsp;?</h4>
         <div className="help-section">
           <div className="help-section-block">
             <div className="help-section-text" style={{ color: "#6B7280" }}>
