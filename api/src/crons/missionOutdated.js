@@ -36,7 +36,7 @@ const notify1Week = async () => {
   console.log({ ADMIN_URL });
   let countNotice = 0;
   const now = Date.now();
-  const cursor = await Mission.find({ endAt: { $lte: addDays(now, 8), $gte: addDays(now, 7) }, status: "VALIDATED" }).cursor();
+  const cursor = await Mission.find({ endAt: { $lt: addDays(now, 8), $gte: addDays(now, 7) }, status: "VALIDATED" }).cursor();
   await cursor.eachAsync(async function (mission) {
     countNotice++;
     console.log(`${mission._id} ${mission.name} : 1 week notice.`);
