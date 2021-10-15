@@ -166,7 +166,6 @@ Schema.methods.comparePassword = async function (p) {
 
 //Sync with Sendinblue & Zammad
 Schema.post("save", function (doc) {
-  console.log(`Post -> save - begin ...`);
   sendinblue.sync(doc, MODELNAME);
   zammad.sync(doc, MODELNAME);
 });

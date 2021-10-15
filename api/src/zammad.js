@@ -41,18 +41,14 @@ async function sync(obj, type) {
   try {
     if (ENVIRONMENT !== "production") return;
     let role;
-    switch (type) {
-      case "referent":
-        role = ROLE.REFERENT;
-        break;
-      case "responsible":
-        role = ROLE.STRUCTURE;
-        break;
-      default:
-        role = ROLE.VOLONTAIRE;
+    if (type === "referent") {
+      role = ROLE.REFERENT;
+    } else if (type === "responsible") {
+      role = ROLE.STRUCTURE;
+    } else {
+      role = ROLE.VOLONTAIRE;
     }
     const res = await api(`/users/search?query=email:${obj.email}&limit=1`, { method: "GET" });
-    console.log("IN SYNC : res", res);
     if (!res.length) {
       //create a user
       await api("/users", {
