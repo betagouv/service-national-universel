@@ -22,6 +22,7 @@ export default () => {
 
   useEffect(() => {
     (async () => {
+      if (associations.length === 0) return;
       const rnas = associations.map((a) => a._source.id_rna);
       const raw = JSON.stringify({
         query: {
