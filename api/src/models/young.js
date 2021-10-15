@@ -1047,22 +1047,14 @@ Schema.methods.comparePassword = async function (p) {
 //Sync with sendinblue
 Schema.post("save", function (doc) {
   sendinblue.sync(doc, MODELNAME);
+  zammad.sync(doc, MODELNAME);
 });
 Schema.post("findOneAndUpdate", function (doc) {
   sendinblue.sync(doc, MODELNAME);
+  zammad.sync(doc, MODELNAME);
 });
 Schema.post("remove", function (doc) {
   sendinblue.unsync(doc);
-});
-
-//Sync with Zammad
-Schema.post("save", function (doc) {
-  zammad.sync(doc, MODELNAME);
-});
-Schema.post("findOneAndUpdate", function (doc) {
-  zammad.sync(doc, MODELNAME);
-});
-Schema.post("remove", function (doc) {
   zammad.unsync(doc);
 });
 

@@ -40,9 +40,19 @@ const api = async (path, options = {}) => {
 async function sync(obj, type) {
   try {
     if (ENVIRONMENT !== "production") return;
-    const role = type === "referent" ? ROLE.REFERENT : ROLE.VOLONTAIRE;
+    let role;
+    switch (type) {
+      case "referent":
+        role = ROLE.REFERENT;
+        break;
+      case "responsible":
+        role = ROLE.STRUCTURE;
+        break;
+      default:
+        role = ROLE.VOLONTAIRE;
+    }
     const res = await api(`/users/search?query=email:${obj.email}&limit=1`, { method: "GET" });
-    console.log("res", res);
+    console.log("IN SYNC : res", res);
     if (!res.length) {
       //create a user
       await api("/users", {
@@ -50,6 +60,7 @@ async function sync(obj, type) {
         body: JSON.stringify({ email: obj.email, firstname: obj.firstName, lastname: obj.lastName, role_ids: [role] }),
       });
     } else {
+      //Update a user
       await api(`/users/${res[0].id}`, {
         method: "PUT",
         body: JSON.stringify({ email: obj.email, firstname: obj.firstName, lastname: obj.lastName, role_ids: [role] }),
