@@ -80,7 +80,7 @@ export default ({ application, index }) => {
               </TagContainer>
             </Col>
           </Card>
-          {contract && contract?.invitationSent && (
+          {(value.status === "VALIDATED" || value.status === "IN_PROGRESS" || value.status === "DONE") && contract && contract?.invitationSent && (
             <>
               <hr />
               {contractHasAllValidation(contract, young) ? (
