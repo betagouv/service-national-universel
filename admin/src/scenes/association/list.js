@@ -78,7 +78,6 @@ export default () => {
           };
         }
       }
-      console.log(result);
       setMissionsInfo(result);
     })();
   }, [associations]);
