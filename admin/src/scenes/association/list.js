@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 
 import { useSelector } from "react-redux";
@@ -16,10 +16,72 @@ import Association from "./components/Association";
 const FILTERS = ["SEARCH", "REGION", "DEPARTMENT", "DOMAIN"];
 
 export default () => {
-  const [structure, setStructure] = useState(null);
+  const [associations, setAssociations] = useState([]);
   const [missionsInfo, setMissionsInfo] = useState({});
-
   const user = useSelector((state) => state.Auth.user);
+
+  useEffect(() => {
+    (async () => {
+      const rnas = associations.map((a) => a._source.id_rna);
+      const raw = JSON.stringify({
+        query: {
+          bool: {
+            must: [
+              {
+                bool: {
+                  should: [
+                    {
+                      terms: { "associationRna.keyword": rnas },
+                    },
+                    {
+                      terms: { "organizationRNA.keyword": rnas },
+                    },
+                  ],
+                },
+              },
+              { match: { deleted: "no" } },
+            ],
+          },
+        },
+        size: ES_NO_LIMIT,
+      });
+
+      const result = {};
+
+      try {
+        const res = await fetch("https://api.api-engagement.beta.gouv.fr/v0/mission/search", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: raw,
+          redirect: "follow",
+        }).then((response) => response.json());
+
+        if (res.hits?.hits?.length > 0) {
+          for (const association of associations) {
+            const hits = res.hits.hits.filter((e) => e._source.associationRna === association._source.id_rna || e._source.organizationRNA === association._source.id_rna);
+            result[association._id] = {
+              countMissions: hits.length,
+              countPlaces: hits.reduce((prev, curr) => (curr._source.places ? prev + curr._source.places : 0), 0),
+              missions: hits.map((el) => ({ id: el._id, ...el._source })),
+            };
+          }
+        }
+      } catch (err) {
+        console.log(err);
+        toastr.error("Erreur lors de la récupération des missions");
+        for (const association of associations) {
+          result[association._id] = {
+            countMissions: 0,
+            countPlaces: 0,
+            missions: [],
+          };
+        }
+      }
+      console.log(result);
+      setMissionsInfo(result);
+    })();
+  }, [associations]);
+
   const getDefaultQuery = () => ({
     query: {
       bool: {
@@ -35,54 +97,6 @@ export default () => {
       },
     },
   });
-
-  const getMissionsInfo = async (association) => {
-    var myHeaders = new Headers();
-    myHeaders.append("Content-Type", "application/json");
-
-    var raw = JSON.stringify({
-      query: {
-        bool: {
-          must: [
-            {
-              multi_match: {
-                query: association._source.id_rna,
-                fields: ["associationRna", "organizationRNA"],
-              },
-            },
-            {
-              match: {
-                deleted: "no",
-              },
-            },
-          ],
-        },
-      },
-    });
-
-    try {
-      const res = await fetch("https://api.api-engagement.beta.gouv.fr/v0/mission/search", {
-        method: "POST",
-        headers: myHeaders,
-        body: raw,
-        redirect: "follow",
-      }).then((response) => response.json());
-
-      if (res.hits.hits.length > 0) {
-        return {
-          [association._id]: {
-            countMissions: res.hits.hits.length,
-            countPlaces: res.hits.hits.reduce((prev, curr) => (curr._source.places ? prev + curr._source.places : 0), 0),
-            missions: res.hits.hits.map((el) => ({ id: el._id, ...el._source })),
-          },
-        };
-      }
-    } catch (err) {
-      console.log(err);
-      toastr.error("Erreur lors de la récupération des missions");
-      return {};
-    }
-  };
 
   return (
     <div>
@@ -155,13 +169,7 @@ export default () => {
                   );
                 }}
                 onData={async ({ rawData }) => {
-                  // if (rawData?.hits?.hits) setStructureIds(rawData.hits.hits.map((e) => e._id));
-                  if (rawData?.hits?.hits) {
-                    rawData.hits.hits.forEach(async (association) => {
-                      const associationMissions = await getMissionsInfo(association);
-                      setMissionsInfo((prevState) => ({ ...prevState, ...associationMissions }));
-                    });
-                  }
+                  if (rawData?.hits?.hits) setAssociations(rawData.hits.hits);
                 }}
                 dataField={undefined}
                 sortBy={undefined}
@@ -177,8 +185,6 @@ export default () => {
                         }
                       }
                       key={hit._id}
-                      onClick={() => setStructure(hit)}
-                      selected={structure?._id === hit._id}
                     />
                   ));
                 }}
