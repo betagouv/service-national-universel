@@ -113,7 +113,9 @@ export default function Association({ hit, missionsInfo }) {
               <div className="title">
                 {missionsInfo.countMissions} mission{missionsInfo.countMissions > 1 && "s"} disponible{missionsInfo.countMissions > 1 && "s"}
               </div>
-              <div className="subtitle">{missionsInfo.countPlaces} volontaire(s) recherché(s)</div>
+              <div className="subtitle">
+                {missionsInfo.countPlaces} volontaire{missionsInfo.countPlaces > 1 && "s"} recherché{missionsInfo.countPlaces > 1 && "s"}
+              </div>
             </>
           ) : (
             <div className="title">Aucune mission disponible</div>
@@ -205,14 +207,14 @@ export default function Association({ hit, missionsInfo }) {
                   <p style={{ textAlign: "center", padding: "2rem", width: "100%", margin: 0 }}>Aucune mission référencée actuellement</p>
                 ) : (
                   missionsInfo.missions.map((mission) => (
-                    <MissionInfo>
+                    <MissionInfo key={mission.id}>
                       <div className="wrapper">
                         <b className="category">Mission</b>
                         <p className="description">{mission.description.trim()}</p>
                       </div>
                       <div className="wrapper">
-                        <b className="category">Disponibilité(s)</b>
-                        <p className="description">{mission.places} places restantes</p>
+                        <b className="category">Disponibilité{mission.places > 1 && "s"}</b>
+                        <p className="description">{mission.places || 0} places restantes</p>
                       </div>
                       <MissionButton style={{ maginInline: "auto" }} onClick={() => window.open(mission.applicationUrl, "_blank").focus()}>
                         <div className="title">Consulter</div>
