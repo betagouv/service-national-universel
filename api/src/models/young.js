@@ -1058,15 +1058,15 @@ Schema.post("remove", function (doc) {
   zammad.unsync(doc);
 });
 
-Schema.virtual("user").set(function (user) {
-  if (user) {
-    const { _id, role, department, region, email, firstName, lastName, model } = user;
+Schema.virtual("fromUser").set(function (fromUser) {
+  if (fromUser) {
+    const { _id, role, department, region, email, firstName, lastName, model } = fromUser;
     this._user = { _id, role, department, region, email, firstName, lastName, model };
   }
 });
 
 Schema.pre("save", function (next, params) {
-  this.user = params?.fromUser;
+  this.fromUser = params?.fromUser;
   next();
 });
 
