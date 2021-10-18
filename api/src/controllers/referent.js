@@ -411,7 +411,7 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
     try {
       const { mime } = await FileType.fromBuffer(decryptedBuffer);
       mimeFromFile = mime;
-    } catch (e) { }
+    } catch (e) {}
 
     return res.status(200).send({
       data: Buffer.from(decryptedBuffer, "base64"),

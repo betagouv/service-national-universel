@@ -28,11 +28,10 @@ export default ({ ticket: propTicket }) => {
   const updateTicket = async (id) => {
     try {
       if (!id) {
-        setTicket(undefined);
-        return console.log("no id");
+        return setTicket(undefined);
       }
       const { data, ok } = await api.get(`/support-center/ticket/${id}`);
-      if (data.error || !ok) return;
+      if (data.error || !ok) return setTicket(propTicket);
       return setTicket(data);
     } catch (e) {
       setTicket(undefined);
@@ -221,7 +220,7 @@ const MessageContainer = styled.div`
   padding: 0.2rem;
 `;
 const MessageBubble = styled.div`
-  max-width: 80%;
+  max-width: 60%;
   min-width: 20%;
   padding: 0.5rem 1.5rem;
   border-radius: ${({ internal }) => (internal ? "0.2rem" : "1rem")};
