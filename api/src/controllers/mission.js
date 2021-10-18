@@ -67,7 +67,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     const { error, value: checkedMission } = validateMission(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
 
-    const data = await MissionObject.create(checkedMission);
+    const data = await MissionObject.create({ ...checkedMission, fromUser: req.user });
 
     const referentsDepartment = await UserObject.find({
       department: checkedMission.department,
