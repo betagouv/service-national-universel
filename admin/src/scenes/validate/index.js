@@ -27,7 +27,6 @@ export default () => {
       try {
         const { ok, data, code } = await api.get(`/young/validate_phase3/${young_id}/${token}`);
         if (!ok) return;
-        if (data.phase3Token !== token) return;
         setYoung(data);
       } catch (e) {
         console.log(e);
