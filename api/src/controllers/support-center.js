@@ -7,6 +7,32 @@ const { capture } = require("../sentry");
 const zammad = require("../zammad");
 const { ERRORS, isYoung } = require("../utils");
 const { ZAMMAD_GROUP } = require("snu-lib/constants");
+const { ticketStateIdByName } = require("snu-lib/zammad");
+
+async function checkStateTicket({ state_id, created_by_id, updated_by_id, id, email }) {
+  if (state_id === ticketStateIdByName("fermé")) {
+    const response = await zammad.api(`/tickets/${id}`, {
+      method: "PUT",
+      headers: { "X-On-Behalf-Of": email },
+      body: JSON.stringify({
+        id: id,
+        state: "open",
+      }),
+    });
+    if (!response.id) return { ok: false, response };
+  } else if (state_id === ticketStateIdByName("nouveau") && created_by_id !== updated_by_id) {
+    const response = await zammad.api(`/tickets/${id}`, {
+      method: "PUT",
+      headers: { "X-On-Behalf-Of": email },
+      body: JSON.stringify({
+        id: id,
+        state: "open",
+      }),
+    });
+    if (!response.id) return { ok: false, response };
+  }
+  return { ok: true };
+}
 
 // Get the list of tickets stats
 router.get("/ticket_overviews", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
@@ -68,12 +94,11 @@ router.get("/ticket/:id", passport.authenticate(["referent", "young"], { session
 
 // Update one ticket (add a response).
 router.put("/ticket/:id", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
-  const { message, state } = req.body;
+  const { message, ticket, state } = req.body;
   try {
     const email = req.user.email;
     const customer_id = await zammad.getCustomerIdByEmail(email);
     if (!customer_id) return res.status(401).send({ ok: false, code: ERRORS.NOT_FOUND });
-
     if (message) {
       const response = await zammad.api("/ticket_articles", {
         method: "POST",
@@ -86,8 +111,19 @@ router.put("/ticket/:id", passport.authenticate(["referent", "young"], { session
           internal: false,
         }),
       });
+
       if (!response.id) return res.status(400).send({ ok: false, data: response });
-      return res.status(200).send({ ok: true, data: response });
+
+      const stateTicket = await checkStateTicket({
+        id: req.params.id,
+        state_id: ticket.state_id,
+        created_by_id: ticket.created_by_id,
+        updated_by_id: response.updated_by_id,
+        email,
+      });
+      if (!stateTicket.ok) return res.status(400).send({ ok: false, data: stateTicket.response });
+
+      if (stateTicket) return res.status(200).send({ ok: true, data: response });
     } else if (state) {
       const response = await zammad.api(`/tickets/${req.params.id}`, {
         method: "PUT",
