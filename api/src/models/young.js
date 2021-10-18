@@ -1061,6 +1061,11 @@ Schema.virtual("fromUser").set(function (fromUser) {
   }
 });
 
+Schema.pre("save", function (next, params) {
+  this.fromUser = params?.fromUser;
+  next();
+});
+
 Schema.plugin(patchHistory, {
   mongoose,
   name: `${MODELNAME}Patches`,
