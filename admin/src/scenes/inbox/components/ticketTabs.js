@@ -41,7 +41,7 @@ export default ({ setTicket, selectedTicket, setOverview }) => {
 
   const getFrom = (ticket) => {
     if (!ticket.articles?.length) return "";
-    return ticket.articles[0]?.from;
+    return ticket.articles[0].from.split("<")[0];
   };
 
   const getDate = (ticket) => {
