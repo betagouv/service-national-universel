@@ -128,7 +128,7 @@ export default ({ ticket: propTicket }) => {
               value={message}
             />
             <div style={{ display: "flex", flexDirection: "column", justifyContent: "center", background: "white" }}>
-              <LoadingButton style={{ background: "none", height: "100%" }} onClick={send} disabled={!message || sending}>
+              <LoadingButton color="transparent" style={{ height: "100%" }} onClick={send} disabled={!message || sending}>
                 <SendIcon />
               </LoadingButton>
             </div>

@@ -38,7 +38,7 @@ export default ({ primary, secondary, loading, children, disabled, ...rest }) =>
 };
 
 const VioletButtonHeader = styled(Button)`
-  border: none;
+  border: 0;
   border-radius: 5px;
   padding: 7px 30px;
   margin: 0.3rem;
