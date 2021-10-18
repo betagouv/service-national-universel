@@ -222,7 +222,7 @@ const MessageContainer = styled.div`
   padding: 0.2rem;
 `;
 const MessageBubble = styled.div`
-  max-width: 80%;
+  max-width: 60%;
   min-width: 20%;
   padding: 0.5rem 1.5rem;
   border-radius: ${({ internal }) => (internal ? "0.2rem" : "1rem")};
