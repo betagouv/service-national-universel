@@ -21,7 +21,7 @@ export default ({ showMessage = true, location }) => {
           <h3>Ouvertes jusqu'au 30 avril 2021</h3>
         </Title>
       ) : null}
-      <AvatarContainer to={{ pathname: "/auth/login", search: location.search }}>
+      <AvatarContainer to={{ pathname: "/auth/login", search: location?.search }}>
         <Avatar src={require("../../../assets/avatar.jpg")} />
         <AvatarText>connexion</AvatarText>
       </AvatarContainer>
