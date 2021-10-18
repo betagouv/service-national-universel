@@ -146,19 +146,17 @@ const Footer = ({ application, tutor, onChange }) => {
 
   const setStatus = async (status) => {
     try {
-      if (ENABLE_PM && application?.mission?.isMilitaryPreparation === "true") status = APPLICATION_STATUS.WAITING_VERIFICATION;
       const { data } = await api.put(`/application`, { _id: application._id, status });
       let template;
       if (status === APPLICATION_STATUS.ABANDON) template = SENDINBLUE_TEMPLATES.referent.CANCEL_APPLICATION;
       if (status === APPLICATION_STATUS.CANCEL) template = SENDINBLUE_TEMPLATES.referent.CANCEL_APPLICATION;
       if (status === APPLICATION_STATUS.WAITING_VALIDATION || status === APPLICATION_STATUS.WAITING_VERIFICATION) template = SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION;
       if (template) await api.post(`/application/${application._id}/notify/${template}`);
-      if (ENABLE_PM && application?.mission?.isMilitaryPreparation === "true") {
+
+      // if its a new application for a military preparation, we need to send a notification to the young to inform them that they need to upload their documents
+      if (ENABLE_PM && application?.mission?.isMilitaryPreparation === "true" && status === APPLICATION_STATUS.WAITING_VERIFICATION) {
         const responseNotificationYoung = await api.post(`/application/${application._id}/notify/${SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_REMINDER}`);
         if (!responseNotificationYoung?.ok) toastr.error(translate(responseNotificationYoung?.code), "Une erreur s'est produite avec le service de notification.");
-      }
-      onChange(data);
-      if (ENABLE_PM && application?.mission?.isMilitaryPreparation === "true") {
         setModal({
           isOpen: true,
           title: "Félications, votre candidature a bien été enregistrée.",
@@ -167,6 +165,7 @@ const Footer = ({ application, tutor, onChange }) => {
           confirmText: "Je renseigne mes documents",
         });
       }
+      onChange(data);
     } catch (error) {
       console.log(error);
     }
@@ -248,7 +247,11 @@ const Footer = ({ application, tutor, onChange }) => {
                   isOpen: true,
                   title: `Accepter la proposition de mission "${application.missionName}"`,
                   message: "Êtes vous sûr de vouloir accepter cette offre ?",
-                  onConfirm: () => setStatus(APPLICATION_STATUS.WAITING_VALIDATION),
+                  onConfirm: () => {
+                    let status = APPLICATION_STATUS.WAITING_VALIDATION;
+                    if (ENABLE_PM && application?.mission?.isMilitaryPreparation === "true") status = APPLICATION_STATUS.WAITING_VERIFICATION;
+                    setStatus(status);
+                  },
                 })
               }
             >
