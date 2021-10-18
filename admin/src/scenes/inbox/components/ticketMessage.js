@@ -19,8 +19,8 @@ const updateHeightElement = (e) => {
   e.target.style.height = `${e.target.scrollHeight}px`;
 };
 
-export default ({ ticket: propTicket }) => {
-  const [ticket, setTicket] = useState(propTicket);
+export default ({ ticket }) => {
+  const [currentTicket, setCurrentTicket] = useState(ticket);
   const [message, setMessage] = useState();
   const user = useSelector((state) => state.Auth.user);
   const [sending, setSending] = useState(false);
@@ -28,24 +28,27 @@ export default ({ ticket: propTicket }) => {
   const updateTicket = async (id) => {
     try {
       if (!id) {
-        setTicket(undefined);
+        setCurrentTicket(undefined);
         return console.log("no id");
       }
       const { data, ok } = await api.get(`/support-center/ticket/${id}`);
-      if (data.error || !ok) return;
-      return setTicket(data);
+      console.log("DATA ?", data);
+      if (data.error || !ok) return setCurrentTicket(ticket);
+      return setCurrentTicket(data);
     } catch (e) {
-      setTicket(undefined);
+      setCurrentTicket(undefined);
     }
   };
 
   useEffect(() => {
-    updateTicket(propTicket?.id);
-    const ping = setInterval(() => updateTicket(propTicket?.id), 5000);
+    console.log("TICKET MESSAGE", ticket);
+    console.log("TICKET MESSAGE CURRENT", currentTicket);
+    updateTicket(ticket?.id);
+    const ping = setInterval(() => updateTicket(ticket?.id), 5000);
     return () => {
       clearInterval(ping);
     };
-  }, [propTicket]);
+  }, [ticket]);
 
   const send = async () => {
     setSending(true);
@@ -54,17 +57,17 @@ export default ({ ticket: propTicket }) => {
     // then send the message
     // todo : we may be able to reset the status in only one call
     // but im not sure the POST for a message can take state in its body
-    const responseMessage = await api.put(`/support-center/ticket/${ticket?.id}`, { message });
+    const responseMessage = await api.put(`/support-center/ticket/${currentTicket?.id}`, { message });
 
-    const responseState = await api.put(`/support-center/ticket/${ticket?.id}`, { state: "open" });
+    const responseState = await api.put(`/support-center/ticket/${currentTicket?.id}`, { state: "open" });
 
     // reset ticket and input message
     setMessage("");
-    updateTicket(ticket?.id);
+    updateTicket(currentTicket?.id);
     setSending(false);
   };
 
-  if (ticket === null) return <Loader />;
+  if (currentTicket === null) return <Loader />;
 
   const displayState = (state) => {
     if (state === "ouvert")
@@ -92,21 +95,21 @@ export default ({ ticket: propTicket }) => {
 
   return (
     <Container style={{ padding: 0, backgroundColor: "#F1F5F9", border: "1px solid #E4E4E7", display: "flex", flexDirection: "column" }}>
-      {ticket === undefined ? (
+      {currentTicket === undefined ? (
         <div>Selectionnez un ticket</div>
       ) : (
         <>
           <Heading>
             <div>
               <h1>
-                Demande #{ticket?.number} - {ticket?.title}
+                Demande #{currentTicket?.number} - {currentTicket?.title}
               </h1>
-              <Details title="Crée le" content={ticket?.created_at && formatStringLongDate(ticket?.created_at)} />
+              <Details title="Crée le" content={currentTicket?.created_at && formatStringLongDate(currentTicket?.created_at)} />
             </div>
-            {displayState(ticketStateNameById(ticket?.state_id))}
+            {displayState(ticketStateNameById(currentTicket?.state_id))}
           </Heading>
           <Messages>
-            {ticket?.articles
+            {currentTicket?.articles
               ?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
               ?.map((article, i) => (
                 <Message
