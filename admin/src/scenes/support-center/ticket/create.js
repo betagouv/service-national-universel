@@ -61,19 +61,15 @@ export default () => {
               const computedTags = [...tags];
               if (type?.tags) computedTags.push(...type?.tags);
               if (subject?.tags && type?.id !== "OTHER") computedTags.push(...subject?.tags);
-              // for testing without feed zammad with test data
-              return console.log({
-                title: `${type?.label} - ${subject?.label}`,
-                message,
-                tags: [...new Set([...computedTags])],
-              });
+              let title = type?.label;
+              if (subject?.label && type?.id !== "OTHER") title += ` - ${subject?.label}`;
               const { ok, code, data } = await api.post("/support-center/ticket", {
-                title: `${type?.label} - ${subject?.label}`,
+                title,
                 message,
                 tags: [...new Set([...computedTags])],
               });
               if (!ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(code));
-              toastr.success("Ticket créé");
+              toastr.success("Demande envoyée");
               history.push("/besoin-d-aide");
             } catch (e) {
               console.log(e);

@@ -120,7 +120,7 @@ export default () => {
       <h4 style={{ marginLeft: "0.5rem" }}>Mes conversations en cours</h4>
       <List>
         <section className="ticket titles">
-          <p>Numéro du ticket</p>
+          <p>Nº demande</p>
           <p>Sujet</p>
           <p>Contact</p>
           <p>Etat</p>
