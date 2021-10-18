@@ -4,6 +4,7 @@ const mongooseElastic = require("@selego/mongoose-elastic");
 const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../es");
 const sendinblue = require("../sendinblue");
+const zammad = require("../zammad");
 
 const MODELNAME = "young";
 
@@ -1046,12 +1047,15 @@ Schema.methods.comparePassword = async function (p) {
 //Sync with sendinblue
 Schema.post("save", function (doc) {
   sendinblue.sync(doc, MODELNAME);
+  zammad.sync(doc, MODELNAME);
 });
 Schema.post("findOneAndUpdate", function (doc) {
   sendinblue.sync(doc, MODELNAME);
+  zammad.sync(doc, MODELNAME);
 });
 Schema.post("remove", function (doc) {
   sendinblue.unsync(doc);
+  zammad.unsync(doc);
 });
 
 Schema.virtual("user").set(function (user) {

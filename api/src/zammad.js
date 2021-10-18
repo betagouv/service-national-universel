@@ -37,22 +37,29 @@ const api = async (path, options = {}) => {
   return await res.text();
 };
 
-async function sync(obj, type) {
+async function sync(doc, modelName) {
   try {
     if (ENVIRONMENT !== "production") return;
-    const role = type === "referent" ? ROLE.REFERENT : ROLE.VOLONTAIRE;
-    const res = await api(`/users/search?query=email:${obj.email}&limit=1`, { method: "GET" });
-    console.log("res", res);
+    let role;
+    if (doc.role === "referent") {
+      role = ROLE.REFERENT;
+    } else if (doc.role === "responsible") {
+      role = ROLE.STRUCTURE;
+    } else {
+      role = ROLE.VOLONTAIRE;
+    }
+    const res = await api(`/users/search?query=email:${doc.email}&limit=1`, { method: "GET" });
     if (!res.length) {
       //create a user
       await api("/users", {
         method: "POST",
-        body: JSON.stringify({ email: obj.email, firstname: obj.firstName, lastname: obj.lastName, role_ids: [role] }),
+        body: JSON.stringify({ email: doc.email, firstname: doc.firstName, lastname: doc.lastName, role_ids: [role] }),
       });
     } else {
+      //Update a user
       await api(`/users/${res[0].id}`, {
         method: "PUT",
-        body: JSON.stringify({ email: obj.email, firstname: obj.firstName, lastname: obj.lastName, role_ids: [role] }),
+        body: JSON.stringify({ email: doc.email, firstname: doc.firstName, lastname: doc.lastName, role_ids: [role] }),
       });
     }
   } catch (e) {
