@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 
 import { useSelector } from "react-redux";
 import styled from "styled-components";
+import { toastr } from "react-redux-toastr";
 
 import api from "../../services/api";
 import { apiURL } from "../../config";
@@ -15,8 +16,72 @@ import Association from "./components/Association";
 const FILTERS = ["SEARCH", "REGION", "DEPARTMENT", "DOMAIN"];
 
 export default () => {
-  const [structure, setStructure] = useState(null);
+  const [associations, setAssociations] = useState([]);
+  const [missionsInfo, setMissionsInfo] = useState({});
   const user = useSelector((state) => state.Auth.user);
+
+  useEffect(() => {
+    (async () => {
+      if (associations.length === 0) return;
+      const rnas = associations.map((a) => a._source.id_rna);
+      const raw = JSON.stringify({
+        query: {
+          bool: {
+            must: [
+              {
+                bool: {
+                  should: [
+                    {
+                      terms: { "associationRna.keyword": rnas },
+                    },
+                    {
+                      terms: { "organizationRNA.keyword": rnas },
+                    },
+                  ],
+                },
+              },
+              { match: { deleted: "no" } },
+            ],
+          },
+        },
+        size: ES_NO_LIMIT,
+      });
+
+      const result = {};
+
+      try {
+        const res = await fetch("https://api.api-engagement.beta.gouv.fr/v0/mission/search", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: raw,
+          redirect: "follow",
+        }).then((response) => response.json());
+
+        if (res.hits?.hits?.length > 0) {
+          for (const association of associations) {
+            const hits = res.hits.hits.filter((e) => e._source.associationRna === association._source.id_rna || e._source.organizationRNA === association._source.id_rna);
+            result[association._id] = {
+              countMissions: hits.length,
+              countPlaces: hits.reduce((prev, curr) => (curr._source.places ? prev + curr._source.places : 0), 0),
+              missions: hits.map((el) => ({ id: el._id, ...el._source })),
+            };
+          }
+        }
+      } catch (err) {
+        console.log(err);
+        toastr.error("Erreur lors de la récupération des missions");
+        for (const association of associations) {
+          result[association._id] = {
+            countMissions: 0,
+            countPlaces: 0,
+            missions: [],
+          };
+        }
+      }
+      setMissionsInfo(result);
+    })();
+  }, [associations]);
+
   const getDefaultQuery = () => ({
     query: {
       bool: {
@@ -103,13 +168,25 @@ export default () => {
                     </StatsResult>
                   );
                 }}
-                onData={({ rawData }) => {
-                  // if (rawData?.hits?.hits) setStructureIds(rawData.hits.hits.map((e) => e._id));
+                onData={async ({ rawData }) => {
+                  if (rawData?.hits?.hits) setAssociations(rawData.hits.hits);
                 }}
                 dataField={undefined}
                 sortBy={undefined}
                 render={({ data }) => {
-                  return data.map((hit) => <Association hit={hit} key={hit._id} onClick={() => setStructure(hit)} selected={structure?._id === hit._id} />);
+                  return data.map((hit) => (
+                    <Association
+                      hit={hit}
+                      missionsInfo={
+                        missionsInfo[hit._id] || {
+                          countMissions: 0,
+                          countPlaces: 0,
+                          missions: [],
+                        }
+                      }
+                      key={hit._id}
+                    />
+                  ));
                 }}
               />
             </ResultWrapper>
