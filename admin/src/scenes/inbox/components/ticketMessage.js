@@ -28,7 +28,7 @@ export default ({ ticket: propTicket }) => {
   const updateTicket = async (id) => {
     try {
       if (!id) {
-        setTicket(undefined);
+        return setTicket(undefined);
       }
       const { data, ok } = await api.get(`/support-center/ticket/${id}`);
       if (data.error || !ok) return setTicket(propTicket);
