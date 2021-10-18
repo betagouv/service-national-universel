@@ -45,7 +45,7 @@ const VioletButtonHeader = styled(Button)`
   font-size: 14px;
   font-weight: 700;
   cursor: pointer;
-  background-color: #fff !important;
+  background-color: #fff;
   min-width: 80%;
   max-width: 80%;
   box-shadow: 0px 1px 5px rgba(0, 0, 0, 0.1);
