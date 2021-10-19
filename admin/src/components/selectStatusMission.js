@@ -126,8 +126,8 @@ export default ({ hit, options = [], callback = () => {} }) => {
       <ModalConfirmWithMessage
         isOpen={modalConfirmWithMessage.isOpen}
         title="Annuler la mission"
-        message="Veuillez précisez le motif d'annulation ci-dessous avant de valider."
-        onChange={() => setModalConfirmWithMessage({ isOpen: false, data: null })}
+        message="Veuillez précisez le motif d'annulation ci-dessous avant de valider. Un mail sera envoyé à tous les jeunes dont la candidature n'a pas été validée ou refusée."
+        onChange={() => setModalConfirmWithMessage({ isOpen: false, onConfirm: null })}
         onConfirm={(statusComment) => {
           modalConfirmWithMessage?.onConfirm(statusComment);
           setModalConfirmWithMessage({ isOpen: false, onConfirm: null });
