@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Col } from "reactstrap";
 import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
@@ -6,7 +6,9 @@ import { Formik, Field } from "formik";
 import { NavLink } from "react-router-dom";
 import { useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { translate } from "../../../utils";
 
+import { SelectTag, typesReferent, subjectsReferent, typesAdmin, subjectsAdmin, typesStructure, subjectsStructure } from "./workflow";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 import api from "../../../services/api";
 import ErrorMessage, { requiredMessage } from "../../../components/errorMessage";
@@ -16,12 +18,30 @@ export default () => {
   const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
 
-  //todo : fetch zammad categories (scopes)
-  const options = ["Assistance technique", "Aide sur un cas particulier", "Autre"];
-  const defaultTags = [`DEPARTEMENT_${user.department}`, `REGION_${user.region}`, `CANAL_Plateforme`, `AGENT_Startup_Support`];
-  if ([ROLES.ADMIN].includes(user.role)) defaultTags.push("EMETTEUR_Admin");
-  if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) defaultTags.push("EMETTEUR_Référent");
-  if ([ROLES.RESPONSABLE, ROLES.SUPERVISOR].includes(user.role)) defaultTags.push("EMETTEUR_Structure");
+  const [typesList, setTypeList] = useState([]);
+  const [subjectsList, setSubjectsList] = useState([]);
+
+  useEffect(() => {
+    if (!user) return;
+    if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) {
+      setTypeList(typesReferent);
+      setSubjectsList(subjectsReferent);
+    } else if ([ROLES.ADMIN].includes(user.role)) {
+      setTypeList(typesAdmin);
+      setSubjectsList(subjectsAdmin);
+    } else if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user.role)) {
+      setTypeList(typesStructure);
+      setSubjectsList(subjectsStructure);
+    }
+  }, [user]);
+
+  // set the default tags for the user
+  const tags = [`CANAL_Plateforme`, `AGENT_Startup_Support`];
+  if (user.department) tags.push(`DEPARTEMENT_${user.department}`);
+  if (user.region) tags.push(`REGION_${user.region}`);
+  if ([ROLES.ADMIN].includes(user.role)) tags.push("EMETTEUR_Admin");
+  if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) tags.push("EMETTEUR_Référent");
+  if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role)) tags.push("EMETTEUR_Structure");
 
   return (
     <Container>
@@ -32,27 +52,29 @@ export default () => {
       </Heading>
       <Form>
         <Formik
-          initialValues={{ type: "", subject: "", message: "", tags: defaultTags }}
+          initialValues={{ type: null, subject: null, message: "" }}
           validateOnChange={false}
           validateOnBlur={false}
           onSubmit={async (values) => {
             try {
-              const { subject, type, message, tags } = values;
-              if (type === "Assistance technique") {
-                tags.push("AGENT_Startup_Technique");
-              } else if (type === "Aide sur un cas particulier") {
-                // tags.push("AGENT_Startup_Support");
-              } else if (type === "Autre") {
-                // tags.push("AGENT_Startup_Support");
-              }
+              const { subject, type, message } = values;
+
+              // add the default tags
+              const computedTags = [...tags];
+              // add the type tag
+              if (type?.tags) computedTags.push(...type?.tags);
+              // if needed, add the subject tag (we do not add the subject tag if the type is "Autre")
+              if (subject?.tags && type?.id !== "OTHER") computedTags.push(...subject?.tags);
+
+              let title = type?.label;
+              if (subject?.label && type?.id !== "OTHER") title += ` - ${subject?.label}`;
               const { ok, code, data } = await api.post("/support-center/ticket", {
-                subject,
-                type,
+                title,
                 message,
-                tags,
+                tags: [...new Set([...computedTags])], // dirty hack to remove duplicates
               });
               if (!ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(code));
-              toastr.success("Ticket créé");
+              toastr.success("Demande envoyée");
               history.push("/besoin-d-aide");
             } catch (e) {
               console.log(e);
@@ -62,32 +84,34 @@ export default () => {
         >
           {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
             <>
-              <Item
+              <SelectTag
                 name="type"
-                title="Ma demande"
-                type="select"
-                value={values.type}
+                options={Object.values(typesList)}
+                title={"Ma demande"}
+                selectPlaceholder={"Choisir la catégorie"}
                 handleChange={handleChange}
-                validate={(v) => !v && requiredMessage}
+                value={values?.type?.id}
                 errors={errors}
                 touched={touched}
-                options={options}
               />
-              {(user.role === "referent_department" || user.role === "referent_region") && values.type === "Aide sur un cas particulier" && (
+              {values.type?.id === typesReferent.SPECIAL_CASE.id ? (
                 <p className="refNote">
-                  Pour vous aider à résoudre ce cas particulier, merci de nous transmettre toutes les informations nécessaires à la compréhension de cette situation. Si vous souhaitez joindre des pièces envoyez votre demande à contact@snu.gouv.fr
+                  Pour vous aider à résoudre ce cas particulier, merci de nous transmettre toutes les informations nécessaires à la compréhension de cette situation. Si vous
+                  souhaitez joindre des pièces envoyez votre demande à <a href="mailto:contact@snu.gouv.fr">contact@snu.gouv.fr</a>
                 </p>
-              )}
-              <Item
-                name="subject"
-                title="Sujet"
-                type="input"
-                value={values.subject}
-                handleChange={handleChange}
-                validate={(v) => !v && requiredMessage}
-                errors={errors}
-                touched={touched}
-              />
+              ) : null}
+              {values.type?.id && values.type?.id !== "OTHER" ? (
+                <SelectTag
+                  name="subject"
+                  options={Object.values(subjectsList).filter((e) => e.parentId === values?.type?.id)}
+                  title={"Sujet"}
+                  selectPlaceholder={"Choisir le sujet"}
+                  handleChange={handleChange}
+                  value={values.subject?.id}
+                  errors={errors}
+                  touched={touched}
+                />
+              ) : null}
               <Item
                 name="message"
                 title="Mon message"
@@ -225,6 +249,10 @@ const Form = styled.div`
     color: grey;
     text-align: center;
     max-width: 920px;
+    a {
+      color: #5145cd;
+      text-decoration: underline;
+    }
   }
   @media (max-width: 767px) {
     width: 100%;
