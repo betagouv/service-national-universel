@@ -10,12 +10,14 @@ import MailCorrectionMission from "../scenes/missions/components/MailCorrectionM
 import MailRefusedMission from "../scenes/missions/components/MailRefusedMission";
 import Chevron from "./Chevron";
 import ModalConfirm from "./modals/ModalConfirm";
+import ModalConfirmWithMessage from "./modals/ModalConfirmWithMessage";
 
 export default ({ hit, options = [], callback = () => {} }) => {
   const [waitingCorrectionModal, setWaitingCorrectionModal] = useState(false);
   const [refusedModal, setRefusedModal] = useState(false);
   const [mission, setMission] = useState(null);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+  const [modalConfirmWithMessage, setModalConfirmWithMessage] = useState({ isOpen: false, onConfirm: null });
   const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
@@ -34,23 +36,30 @@ export default ({ hit, options = [], callback = () => {} }) => {
   if (user.role === ROLES.ADMIN || user.role === ROLES.REFERENT_DEPARTMENT || user.role === ROLES.REFERENT_REGION) options = Object.keys(MISSION_STATUS);
 
   const onClickStatus = (status) => {
-    setModal({
-      isOpen: true,
-      onConfirm: () => onConfirmStatus(status),
-      title: `Changement de statut de mission`,
-      message: `Êtes-vous sûr(e) de vouloir modifier le statut de cette mission de "${translate(mission.status)}" à "${translate(status)}" ?`,
-    });
+    if (status === MISSION_STATUS.CANCEL) {
+      setModalConfirmWithMessage({
+        isOpen: true,
+        onConfirm: (statusComment) => onConfirmStatus(status, statusComment),
+      });
+    } else {
+      setModal({
+        isOpen: true,
+        onConfirm: () => onConfirmStatus(status),
+        title: `Changement de statut de mission`,
+        message: `Êtes-vous sûr(e) de vouloir modifier le statut de cette mission de "${translate(mission.status)}" à "${translate(status)}" ?`,
+      });
+    }
   };
 
-  const onConfirmStatus = (status) => {
+  const onConfirmStatus = (status, statusComment = "") => {
     if (status === MISSION_STATUS.WAITING_CORRECTION && mission.tutorId) return setWaitingCorrectionModal(true);
     if (status === MISSION_STATUS.REFUSED && mission.tutorId) return setRefusedModal(true);
-    setStatus(status);
+    setStatus(status, statusComment);
   };
 
-  const setStatus = async (status) => {
+  const setStatus = async (status, statusComment = "") => {
     try {
-      const { ok, code, data: newMission } = await api.put(`/mission/${mission._id}`, { status });
+      const { ok, code, data: newMission } = await api.put(`/mission/${mission._id}`, { status, statusComment });
 
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       setMission(newMission);
@@ -112,6 +121,16 @@ export default ({ hit, options = [], callback = () => {} }) => {
         onConfirm={() => {
           modal?.onConfirm();
           setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
+      <ModalConfirmWithMessage
+        isOpen={modalConfirmWithMessage.isOpen}
+        title="Annuler la mission"
+        message="Veuillez précisez le motif d'annulation ci-dessous avant de valider."
+        onChange={() => setModalConfirmWithMessage({ isOpen: false, data: null })}
+        onConfirm={(statusComment) => {
+          modalConfirmWithMessage?.onConfirm(statusComment);
+          setModalConfirmWithMessage({ isOpen: false, onConfirm: null });
         }}
       />
     </>

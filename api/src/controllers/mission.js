@@ -54,6 +54,7 @@ const updateApplication = async (mission, fromUser) => {
       emailTo: [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }],
       params: {
         cta: `${APP_URL}/mission`,
+        message: mission.statusComment,
       },
     });
   }

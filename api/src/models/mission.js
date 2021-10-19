@@ -149,6 +149,14 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  statusComment: {
+    type: String,
+    default: "",
+    documentation: {
+      description: "Commentaire sur le statut de la mission",
+    },
+  },
+
   // structure_id: { type: String, required: true },
   // referent_id: { type: String, required: true },
   tutorId: {
