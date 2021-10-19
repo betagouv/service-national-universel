@@ -157,6 +157,8 @@ const Footer = ({ application, tutor, onChange }) => {
       if (ENABLE_PM && application?.mission?.isMilitaryPreparation === "true" && status === APPLICATION_STATUS.WAITING_VERIFICATION) {
         const responseNotificationYoung = await api.post(`/application/${application._id}/notify/${SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_REMINDER}`);
         if (!responseNotificationYoung?.ok) toastr.error(translate(responseNotificationYoung?.code), "Une erreur s'est produite avec le service de notification.");
+        const responseUpdateYoung = await api.put("/young", { statusMilitaryPreparationFiles: "WAITING_UPLOAD" });
+        if (!responseUpdateYoung?.ok) toastr.error(translate(responseUpdateYoung?.code), "Une erreur s'est produite lors de la mise à jour de votre profil.");
         setModal({
           isOpen: true,
           title: "Félications, votre candidature a bien été enregistrée.",
