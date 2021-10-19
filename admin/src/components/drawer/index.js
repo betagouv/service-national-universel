@@ -73,6 +73,8 @@ function supervisor({ user, onClick }) {
 }
 
 function admin({ onClick }) {
+  const newTickets = useSelector((state) => state.Tickets.new);
+  const openedTickets = useSelector((state) => state.Tickets.open);
   return (
     <>
       <DrawerTab to="/structure" title="Structures" onClick={onClick} />
@@ -85,8 +87,8 @@ function admin({ onClick }) {
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
       <DrawerTab to="/objectifs" title="Objectifs" onClick={onClick} />
       <DrawerTab to="/association" title="Annuaire des associations" onClick={onClick} />
-      <DrawerTabWithIcons to="/boite-de-reception" title="Boîte de reception" onClick={onClick}>
-        {/* <div
+      <DrawerTabWithIcons to="/boite-de-reception" title="Boîte de réception" onClick={onClick}>
+        <div
           style={{
             display: "flex",
             alignContent: "center",
@@ -100,7 +102,7 @@ function admin({ onClick }) {
           }}
         >
           <MailCloseIcon />
-          <div style={{ marginLeft: "4px" }}>2</div>
+          <div style={{ marginLeft: "4px" }}>{newTickets}</div>
         </div>
         <div
           style={{
@@ -116,8 +118,8 @@ function admin({ onClick }) {
           }}
         >
           <MailOpenIcon />
-          <div style={{ marginLeft: "4px" }}>3</div>
-        </div> */}
+          <div style={{ marginLeft: "4px" }}>{openedTickets}</div>
+        </div>
       </DrawerTabWithIcons>
       <BlankSeparator />
       <HelpButton to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} />
@@ -126,6 +128,8 @@ function admin({ onClick }) {
 }
 
 function referent({ onClick }) {
+  const newTickets = useSelector((state) => state.Tickets.new);
+  const openedTickets = useSelector((state) => state.Tickets.open);
   return (
     <>
       <DrawerTab to="/structure" title="Structures" onClick={onClick} />
@@ -136,8 +140,8 @@ function referent({ onClick }) {
       <DrawerTab to="/centre" title="Centres" onClick={onClick} />
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
       <DrawerTab to="/association" title="Annuaire des associations" onClick={onClick} />
-      <DrawerTabWithIcons to="/boite-de-reception" title="Boîte de reception" onClick={onClick}>
-        {/* <div
+      <DrawerTabWithIcons to="/boite-de-reception" title="Boîte de réception" onClick={onClick}>
+        <div
           style={{
             display: "flex",
             alignContent: "center",
@@ -151,7 +155,7 @@ function referent({ onClick }) {
           }}
         >
           <MailCloseIcon />
-          <div style={{ marginLeft: "4px" }}>2</div>
+          <div style={{ marginLeft: "4px" }}>{newTickets}</div>
         </div>
         <div
           style={{
@@ -167,8 +171,8 @@ function referent({ onClick }) {
           }}
         >
           <MailOpenIcon />
-          <div style={{ marginLeft: "4px" }}>3</div>
-        </div> */}
+          <div style={{ marginLeft: "4px" }}>{openedTickets}</div>
+        </div>
       </DrawerTabWithIcons>
       <BlankSeparator />
       <HelpButton to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} />
