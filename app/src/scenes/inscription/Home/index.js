@@ -8,12 +8,12 @@ import { Carousel } from "react-responsive-carousel";
 import MobileView from "./MobileView";
 import DesktopView from "./DesktopView";
 
-export default ({}) => {
+export default ({ location }) => {
   const history = useHistory();
 
   return (
     <div>
-      <Header />
+      <Header location={location} />
       <Wrapper>
         <TitleContainer>
           <TopTitle className="mobileOnly">inscription 2021</TopTitle>
