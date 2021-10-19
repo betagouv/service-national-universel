@@ -92,12 +92,12 @@ export default () => {
                 handleChange={handleChange}
                 value={values?.type?.id}
               />
-              {/* {(user.role === "referent_department" || user.role === "referent_region") && values.type === "Aide sur un cas particulier" && (
+              {values.type?.id === typesReferent.SPECIAL_CASE.id ? (
                 <p className="refNote">
                   Pour vous aider à résoudre ce cas particulier, merci de nous transmettre toutes les informations nécessaires à la compréhension de cette situation. Si vous
                   souhaitez joindre des pièces envoyez votre demande à contact@snu.gouv.fr
                 </p>
-              )} */}
+              ) : null}
               {values.type?.id && values.type?.id !== "OTHER" ? (
                 <SelectTag
                   name="subject"
