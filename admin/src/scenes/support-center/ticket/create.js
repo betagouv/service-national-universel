@@ -58,15 +58,20 @@ export default () => {
           onSubmit={async (values) => {
             try {
               const { subject, type, message } = values;
+
+              // add the default tags
               const computedTags = [...tags];
+              // add the type tag
               if (type?.tags) computedTags.push(...type?.tags);
+              // if needed, add the subject tag (we do not add the subject tag if the type is "Autre")
               if (subject?.tags && type?.id !== "OTHER") computedTags.push(...subject?.tags);
+
               let title = type?.label;
               if (subject?.label && type?.id !== "OTHER") title += ` - ${subject?.label}`;
               const { ok, code, data } = await api.post("/support-center/ticket", {
                 title,
                 message,
-                tags: [...new Set([...computedTags])],
+                tags: [...new Set([...computedTags])], // dirty hack to remove duplicates
               });
               if (!ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(code));
               toastr.success("Demande envoyée");
