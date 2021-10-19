@@ -2,8 +2,9 @@ import React from "react";
 import { Col } from "reactstrap";
 import styled from "styled-components";
 import { Field } from "formik";
+import ErrorMessage, { requiredMessage } from "../../../components/errorMessage";
 
-export const SelectTag = ({ options, name, value, title, selectPlaceholder, handleChange }) => {
+export const SelectTag = ({ options, name, value, title, selectPlaceholder, handleChange, errors, touched }) => {
   return (
     <Col style={{ marginTop: 20 }}>
       <Label>{title}</Label>
@@ -16,6 +17,7 @@ export const SelectTag = ({ options, name, value, title, selectPlaceholder, hand
           const value = options.find((o) => o.id === e.target.value);
           handleChange({ target: { name, value } });
         }}
+        validate={(v) => !v && requiredMessage}
       >
         <option value="" disabled>
           {selectPlaceholder}
@@ -26,6 +28,7 @@ export const SelectTag = ({ options, name, value, title, selectPlaceholder, hand
           </option>
         ))}
       </Field>
+      {errors && <ErrorMessage errors={errors} touched={touched} name={name} />}
     </Col>
   );
 };

@@ -91,6 +91,8 @@ export default () => {
                 selectPlaceholder={"Choisir la catégorie"}
                 handleChange={handleChange}
                 value={values?.type?.id}
+                errors={errors}
+                touched={touched}
               />
               {values.type?.id === typesReferent.SPECIAL_CASE.id ? (
                 <p className="refNote">
@@ -106,6 +108,8 @@ export default () => {
                   selectPlaceholder={"Choisir le sujet"}
                   handleChange={handleChange}
                   value={values.subject?.id}
+                  errors={errors}
+                  touched={touched}
                 />
               ) : null}
               <Item
