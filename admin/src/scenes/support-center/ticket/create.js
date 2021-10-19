@@ -95,7 +95,7 @@ export default () => {
               {values.type?.id === typesReferent.SPECIAL_CASE.id ? (
                 <p className="refNote">
                   Pour vous aider à résoudre ce cas particulier, merci de nous transmettre toutes les informations nécessaires à la compréhension de cette situation. Si vous
-                  souhaitez joindre des pièces envoyez votre demande à contact@snu.gouv.fr
+                  souhaitez joindre des pièces envoyez votre demande à <a href="mailto:contact@snu.gouv.fr">contact@snu.gouv.fr</a>
                 </p>
               ) : null}
               {values.type?.id && values.type?.id !== "OTHER" ? (
@@ -245,6 +245,10 @@ const Form = styled.div`
     color: grey;
     text-align: center;
     max-width: 920px;
+    a {
+      color: #5145cd;
+      text-decoration: underline;
+    }
   }
   @media (max-width: 767px) {
     width: 100%;
