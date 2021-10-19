@@ -180,7 +180,7 @@ export const subjectsStructure = {
     parentId: "QUESTION",
     id: "MISSION",
     label: "Ma mission",
-    tags: ["TAG_Fiche mission"],
+    tags: ["TAG_Fiche_mission"],
   },
   QUESTION_CONTRACT: {
     parentId: "QUESTION",
