@@ -277,6 +277,11 @@ router.put("/validate_phase3/:young/:token", async (req, res) => {
     data.set({ statusPhase3: "VALIDATED", phase3TutorNote: value.phase3TutorNote });
     await data.save({ fromUser: req.user });
 
+    await sendTemplate(SENDINBLUE_TEMPLATES.young.VALIDATE_PHASE3, {
+      emailTo: [{ name: `${data.firstName} ${data.lastName}`, email: data.email }],
+      params: { cta: `${config.APP_URL}/phase3` },
+    });
+
     return res.status(200).send({ ok: true, data: serializeYoung(data, data) });
   } catch (error) {
     capture(error);

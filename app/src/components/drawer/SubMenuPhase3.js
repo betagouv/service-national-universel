@@ -16,11 +16,6 @@ export default ({ young, handleClick }) => {
             </NavLink>
           </li>
           <li>
-            <DownloadAttestationButton class="subNav-item" young={young} uri="3">
-              Télécharger mon attestation
-            </DownloadAttestationButton>
-          </li>
-          <li>
             <NavLink to="/les-programmes" onClick={(event) => handleClick(event, DRAWER_TABS.PHASE3, "les-programmes")}>
               Les possibilités d'engagement
             </NavLink>
