@@ -1006,7 +1006,7 @@ const Schema = new mongoose.Schema({
   },
   statusMilitaryPreparationFiles: {
     type: String,
-    enum: ["VALIDATED", "WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED"],
+    enum: ["VALIDATED", "WAITING_VALIDATION", "WAITING_CORRECTION", "REFUSED", "WAITING_UPLOAD"],
   },
 
   // TODO : clean interests
