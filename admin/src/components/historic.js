@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { translate, formatStringAndDateLong, YOUNG_STATUS_COLORS, colors } from "../utils";
+import { translate, formatStringLongDate, YOUNG_STATUS_COLORS, colors } from "../utils";
 import Badge from "../components/Badge";
 
 export default ({ value }) => {
@@ -31,7 +31,7 @@ const HistoricItem = ({ item }) => {
       <div className="history-detail">
         {item.note ? <Note value={item.note} /> : null}
         <div>
-          {getLabel()} • le {formatStringAndDateLong(item.createdAt)}
+          {getLabel()} • le {formatStringLongDate(item.createdAt)}
         </div>
       </div>
     </Item>

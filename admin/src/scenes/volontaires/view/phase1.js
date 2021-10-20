@@ -5,7 +5,7 @@ import { Formik } from "formik";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-import { translate, YOUNG_STATUS_COLORS, formatStringAndDateLong, FORCE_DISABLED_ASSIGN_COHESION_CENTER, confirmMessageChangePhase1Presence, ROLES, colors } from "../../../utils";
+import { translate, YOUNG_STATUS_COLORS, formatStringLongDate, FORCE_DISABLED_ASSIGN_COHESION_CENTER, confirmMessageChangePhase1Presence, ROLES, colors } from "../../../utils";
 import WrapperPhase1 from "./wrapper";
 import api from "../../../services/api";
 import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
@@ -106,7 +106,7 @@ export default (props) => {
       return (
         <>
           <p>
-            {young.firstName} doit confirmer sa participation au séjour de cohésion avant le <b>{formatStringAndDateLong(young.autoAffectationPhase1ExpiresAt)}</b>.
+            {young.firstName} doit confirmer sa participation au séjour de cohésion avant le <b>{formatStringLongDate(young.autoAffectationPhase1ExpiresAt)}</b>.
           </p>
           <Details title="Centre" to={`/centre/${young.cohesionCenterId}`} value={young.cohesionCenterName} />
           <Details title="Ville" value={young.cohesionCenterCity} />
