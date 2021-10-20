@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { connect } from 'react-redux';
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
@@ -11,7 +10,7 @@ import SuccessIcon from "../../../components/SuccessIcon";
 
 import api from "../../../services/api";
 
-const TicketTabs = ({ setTicket, selectedTicket, setOverview, dispatchTickets }) => {
+export default ({ setTicket, selectedTicket, setOverview }) => {
   const [stateFilter, setStateFilter] = useState();
   const [tickets, setTickets] = useState(null);
   const user = useSelector((state) => state.Auth.user);
@@ -22,7 +21,6 @@ const TicketTabs = ({ setTicket, selectedTicket, setOverview, dispatchTickets })
       prev[curr.state_id] = (prev[curr.state_id] || 0) + 1;
       return prev;
     }, {});
-    dispatchTickets(data);
     setOverview(ticketNotification);
     setTickets(data);
   };
@@ -122,25 +120,6 @@ const TicketTabs = ({ setTicket, selectedTicket, setOverview, dispatchTickets })
     </HeroContainer>
   );
 };
-
-const mapDispatchToProps = (dispatch) => ({
-  dispatchTickets: (tickets) => {
-    const newTickets = tickets?.filter((ticket) => ticket.state_id === 1);
-    const openedTickets = tickets?.filter((ticket) => ticket.state_id === 2);
-    dispatch({
-      type: 'FETCH_TICKETS',
-      payload: {
-        tickets,
-        new: newTickets.length,
-        open: openedTickets.length,
-      }
-    })
-  }
-})
-
-let container = connect(null, mapDispatchToProps)(TicketTabs);
-
-export default container;
 
 const StateContainer = styled.div`
   display: flex;

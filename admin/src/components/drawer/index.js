@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { NavLink, Link } from "react-router-dom";
 import styled from "styled-components";
-import { useSelector } from "react-redux";
+import { useSelector, connect } from "react-redux";
 import { environment } from "../../config";
 import { ROLES, colors } from "../../utils";
 import MailOpenIcon from "../MailOpenIcon";
 import MailCloseIcon from "../MailCloseIcon";
 import QuestionMark from "../../assets/QuestionMark";
+import api from "../../services/api";
 
 const DrawerTab = ({ title, to, onClick }) => (
   <li onClick={onClick}>
@@ -72,9 +73,7 @@ function supervisor({ user, onClick }) {
   );
 }
 
-function admin({ onClick }) {
-  const newTickets = useSelector((state) => state.Tickets.new);
-  const openedTickets = useSelector((state) => state.Tickets.open);
+function admin({ onClick, newTickets, openedTickets }) {
   return (
     <>
       <DrawerTab to="/structure" title="Structures" onClick={onClick} />
@@ -127,9 +126,8 @@ function admin({ onClick }) {
   );
 }
 
-function referent({ onClick }) {
-  const newTickets = useSelector((state) => state.Tickets.new);
-  const openedTickets = useSelector((state) => state.Tickets.open);
+function referent({ onClick, newTickets, openedTickets }) {
+
   return (
     <>
       <DrawerTab to="/structure" title="Structures" onClick={onClick} />
@@ -192,13 +190,28 @@ function headCenter({ user, onClick }) {
   );
 }
 
-export default (props) => {
+const Drawer = ({ dispatchTickets }, props) => {
   const user = useSelector((state) => state.Auth.user);
+  const newTickets = useSelector((state) => state.Tickets.new);
+  const openedTickets = useSelector((state) => state.Tickets.open);
   const [open, setOpen] = useState();
   const [environmentBannerVisible, setEnvironmentBannerVisible] = useState(true);
   useEffect(() => {
     setOpen(props.open);
   }, [props.open]);
+
+  useEffect(() => {
+    let tags = [];
+    if (user?.role === ROLES.ADMIN) tags.push(["AGENT_Startup_Support"]);
+    else if (user?.role === ROLES.REFERENT_DEPARTMENT) tags.push(["AGENT_Référent_Département", `DEPARTEMENT_${user.department}`]);
+    else if (user?.role === ROLES.REFERENT_REGION) tags.push(["AGENT_Référent_Région", `REGION_${user.region}`]);
+
+    const getTickets = async (tags) => {
+      const { data } = await api.post(`/support-center/ticket/search-by-tags?withArticles=true`, { tags });
+      dispatchTickets(data);
+    };
+    if (tags.length) getTickets(tags);
+  }, []);
 
   const handleClick = () => {
     if (open) {
@@ -241,12 +254,31 @@ export default (props) => {
         {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick })}
         {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick })}
         {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick })}
-        {user.role === ROLES.ADMIN && admin({ onClick: handleClick })}
-        {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && referent({ onClick: handleClick })}
+        {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets })}
+        {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && referent({ onClick: handleClick, newTickets, openedTickets })}
       </ul>
     </Sidebar>
   );
 };
+
+const mapDispatchToProps = (dispatch) => ({
+  dispatchTickets: (tickets) => {
+    const newTickets = tickets?.filter((ticket) => ticket.state_id === 1);
+    const openedTickets = tickets?.filter((ticket) => ticket.state_id === 2);
+    dispatch({
+      type: 'FETCH_TICKETS',
+      payload: {
+        tickets,
+        new: newTickets.length,
+        open: openedTickets.length,
+      }
+    })
+  }
+})
+
+let container = connect(null, mapDispatchToProps)(Drawer);
+
+export default container;
 
 const HeaderSideBar = styled(Link)`
   display: flex;
