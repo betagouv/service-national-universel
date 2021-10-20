@@ -256,6 +256,40 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
             />
           </React.Fragment>
         )}
+        {hit.status === "WAITING_VERIFICATION" && (
+          <React.Fragment>
+            <CopyLink
+              onClick={async () => {
+                setModal({
+                  isOpen: true,
+                  title: "Envoyer un rappel",
+                  message: "Souhaitez-vous envoyer un mail au jeune pour lui rappeler de remplir les documents pour la préparation militaire ?",
+                  onConfirm: async () => {
+                    try {
+                      const responseNotification = await api.post(`/application/${hit._id}/notify/${SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_REMINDER}`);
+                      if (!responseNotification?.ok) return toastr.error(translate(responseNotification?.code), "Une erreur s'est produite avec le service de notification.");
+                      toastr.success("L'email a bien été envoyé");
+                    } catch (e) {
+                      toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
+                    }
+                  },
+                });
+              }}
+            >
+              ✉️ Envoyer un rappel au jeune
+            </CopyLink>
+            <ModalConfirm
+              isOpen={modal?.isOpen}
+              title={modal?.title}
+              message={modal?.message}
+              onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+              onConfirm={() => {
+                modal?.onConfirm();
+                setModal({ isOpen: false, onConfirm: null });
+              }}
+            />
+          </React.Fragment>
+        )}
       </td>
     </tr>
   );
