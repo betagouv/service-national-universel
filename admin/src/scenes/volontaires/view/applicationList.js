@@ -263,7 +263,7 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
                 setModal({
                   isOpen: true,
                   title: "Envoyer un rappel",
-                  message: "Souhaitez-vous envoyer un mail au jeune pour lui rappeler de remplir les documents pour la préparation militaire ?",
+                  message: "Souhaitez-vous envoyer un mail au volontaire pour lui rappeler de remplir les documents pour la préparation militaire ?",
                   onConfirm: async () => {
                     try {
                       const responseNotification = await api.post(`/application/${hit._id}/notify/${SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_REMINDER}`);
