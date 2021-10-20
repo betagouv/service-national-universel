@@ -14,7 +14,18 @@ import SelectStatus from "../../components/selectStatus";
 import api from "../../services/api";
 import { apiURL, appURL } from "../../config";
 import Panel from "./panel";
-import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS, isInRuralArea, formatDateFRTimezoneUTC, formatLongDateFR, ES_NO_LIMIT, ROLES, colors } from "../../utils";
+import {
+  translate,
+  getFilterLabel,
+  formatStringAndDateLong,
+  YOUNG_STATUS,
+  isInRuralArea,
+  formatDateFRTimezoneUTC,
+  formatLongDateFR,
+  ES_NO_LIMIT,
+  ROLES,
+  colors,
+} from "../../utils";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
 const FILTERS = ["SEARCH", "STATUS", "REGION", "DEPARTMENT", "SCHOOL"];
@@ -224,7 +235,7 @@ const Hit = ({ hit, index, onClick, selected }) => {
           <h2>
             {hit.firstName} {hit.lastName}
           </h2>
-          <p>{`Statut mis à jour ${diff} • ${formatStringLongDate(hit.lastStatusAt)}`}</p>
+          <p>{`Statut mis à jour ${diff} • ${formatStringAndDateLong(hit.lastStatusAt)}`}</p>
         </MultiLine>
       </td>
       <td style={{ textAlign: "center" }} onClick={(e) => e.stopPropagation()}>
