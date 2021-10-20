@@ -10,7 +10,7 @@ import SelectStatusApplication from "../../../components/selectStatusApplication
 import api from "../../../services/api";
 import MissionView from "./wrapper";
 import Panel from "../../volontaires/panel";
-import { formatStringAndDateLong, getFilterLabel, translate, getAge, ES_NO_LIMIT, colors, SENDINBLUE_TEMPLATES, ROLES } from "../../../utils";
+import { formatStringLongDate, getFilterLabel, translate, getAge, ES_NO_LIMIT, colors, SENDINBLUE_TEMPLATES, ROLES } from "../../../utils";
 import Loader from "../../../components/Loader";
 import ContractLink from "../../../components/ContractLink";
 import ExportComponent from "../../../components/ExportXlsx";
@@ -194,7 +194,7 @@ const Hit = ({ hit, onClick, onChangeApplication, selected }) => {
         </MultiLine>
       </td>
       <td>
-        <div>{formatStringAndDateLong(hit.createdAt)}</div>
+        <div>{formatStringLongDate(hit.createdAt)}</div>
       </td>
       <td onClick={(e) => e.stopPropagation()}>
         <SelectStatusApplication hit={hit} callback={onChangeApplication} />

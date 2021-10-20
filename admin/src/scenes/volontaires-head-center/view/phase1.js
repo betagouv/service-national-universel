@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { Formik } from "formik";
 import { Link } from "react-router-dom";
 
-import { translate, YOUNG_PHASE, YOUNG_STATUS_COLORS, confirmMessageChangePhase1Presence, formatStringAndDateLong, ROLES } from "../../../utils";
+import { translate, YOUNG_PHASE, YOUNG_STATUS_COLORS, confirmMessageChangePhase1Presence, formatStringLongDate, ROLES } from "../../../utils";
 import WrapperPhase1 from "./wrapper";
 import api from "../../../services/api";
 import { Box, BoxTitle } from "../../../components/box";
@@ -74,7 +74,7 @@ export default (props) => {
       return (
         <>
           <p>
-            {young.firstName} doit confirmer sa participation au séjour de cohésion avant le <b>{formatStringAndDateLong(young.autoAffectationPhase1ExpiresAt)}</b>.
+            {young.firstName} doit confirmer sa participation au séjour de cohésion avant le <b>{formatStringLongDate(young.autoAffectationPhase1ExpiresAt)}</b>.
           </p>
           <Details title="Centre" value={young.cohesionCenterName} />
           <Details title="Ville" value={young.cohesionCenterCity} />

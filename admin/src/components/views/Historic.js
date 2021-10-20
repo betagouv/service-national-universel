@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 
-import { formatStringAndDateLong, translateOperationName, translateModelFields, translate } from "../../utils";
+import { formatStringLongDate, translateOperationName, translateModelFields, translate } from "../../utils";
 import Loader from "../../components/Loader";
 import api from "../../services/api";
 
@@ -61,7 +61,7 @@ const Hit = ({ hit, model }) => {
             </td>
             <td>{translate(JSON.stringify(e.originalValue)?.replace(/"/g, "")) || "-"}</td>
             <td>{translate(JSON.stringify(e.value)?.replace(/"/g, "")) || "-"}</td>
-            <td>{formatStringAndDateLong(hit.date)}</td>
+            <td>{formatStringLongDate(hit.date)}</td>
           </tr>
         );
       })}
