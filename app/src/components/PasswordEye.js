@@ -6,17 +6,18 @@ import { getPasswordErrorMessage } from "../utils";
 import EyeOpen from "../assets/eye.svg";
 import EyeClose from "../assets/eye-slash.svg";
 
-export default ({ value, onChange }) => {
+export default ({ value, onChange, autoComplete = "new-password", placeholder = "Tapez votre mot de passe", name = "password", validate = () => {} }) => {
   const [passwordText, setPasswordText] = useState(false);
 
   return (
     <ContainerPassword>
       <InputField
-        placeholder="Tapez votre mot de passe"
+        placeholder={placeholder}
         className="form-control"
-        validate={(v) => getPasswordErrorMessage(v)}
+        validate={(v) => validate(v) || getPasswordErrorMessage(v)}
         type={passwordText ? "text" : "password"}
-        name="password"
+        autoComplete={autoComplete}
+        name={name}
         value={value}
         onChange={onChange}
       />

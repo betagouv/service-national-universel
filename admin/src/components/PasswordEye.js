@@ -14,7 +14,7 @@ export default ({ value, onChange, showError = true, autoComplete = "new-passwor
       <InputField
         placeholder={placeholder}
         className="form-control"
-        validate={(v) => validate() || (showError && getPasswordErrorMessage(v))}
+        validate={(v) => validate(v) || (showError && getPasswordErrorMessage(v))}
         type={passwordText ? "text" : "password"}
         autoComplete={autoComplete}
         name={name}

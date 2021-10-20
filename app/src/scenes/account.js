@@ -12,6 +12,7 @@ import { getPasswordErrorMessage, translate, putLocation } from "../utils";
 import validator from "validator";
 import AddressInput from "../components/addressInput";
 import ModalConfirm from "../components/modals/ModalConfirm";
+import PasswordEye from "../components/PasswordEye";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
@@ -98,43 +99,32 @@ export default () => {
           <>
             <Title>Mot de passe</Title>
             <hr />
-
-            <div style={{ marginLeft: -15 }}>
-              <Item
+            <Item required name="password" title="Actuel" errors={errors} touched={touched}>
+              <PasswordEye
                 type="password"
-                name="password"
-                values={values}
-                handleChange={handleChange}
-                title="Actuel"
-                validate={(v) => !v && requiredMessage}
-                errors={errors}
-                touched={touched}
-              />
-            </div>
-            <div style={{ marginLeft: -15 }}>
-              <Item
-                type="password"
-                name="newPassword"
-                values={values}
-                handleChange={handleChange}
-                title="Nouveau"
-                errors={errors}
-                touched={touched}
                 validate={getPasswordErrorMessage}
+                placeholder=""
+                name="password"
+                validate={(v) => !v && requiredMessage}
+                value={values.password}
+                onChange={handleChange}
               />
-            </div>
-            <div style={{ marginLeft: -15 }}>
-              <Item
+            </Item>
+            <Item required name="newPassword" title="Nouveau" errors={errors} touched={touched}>
+              <PasswordEye type="password" validate={getPasswordErrorMessage} placeholder="" name="newPassword" value={values.newPassword} onChange={handleChange} />
+            </Item>
+            <Item required name="verifyPassword" title="Confirmer" errors={errors} touched={touched}>
+              <PasswordEye
                 type="password"
-                name="verifyPassword"
-                values={values}
-                handleChange={handleChange}
                 title="Confirmer"
+                placeholder=""
                 validate={(v) => (!v && requiredMessage) || (v !== values.newPassword && "Les mots de passe renseignés ne sont pas identiques")}
-                errors={errors}
-                touched={touched}
+                name="verifyPassword"
+                value={values.verifyPassword}
+                onChange={handleChange}
               />
-            </div>
+            </Item>
+            <div style={{ marginLeft: -15 }}></div>
             <ContinueButton onClick={handleSubmit} disabled={isSubmitting} style={{ margin: "2rem 0" }}>
               Valider mon nouveau mot de passe
             </ContinueButton>
@@ -279,11 +269,11 @@ export default () => {
   );
 };
 
-const Item = ({ title, name, values, handleChange, errors, touched, validate, type, ...props }) => {
+const Item = ({ title, name, values, handleChange, errors, touched, validate, type, children, ...props }) => {
   return (
     <Col md={4} style={{ marginTop: 20 }}>
       <Label>{title}</Label>
-      <Field type={type} className="form-control" name={name} value={values[name]} onChange={handleChange} validate={validate} {...props} />
+      {children || <Field type={type} className="form-control" name={name} value={values[name]} onChange={handleChange} validate={validate} {...props} />}
       {errors && <ErrorMessage errors={errors} touched={touched} name={name} />}
     </Col>
   );
