@@ -14,6 +14,7 @@ import Badge from "../../components/Badge";
 import Error, { requiredMessage } from "../../components/errorMessage";
 import { Box, BoxContent } from "../../components/box";
 import { translate, ROLES, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE, getPasswordErrorMessage } from "../../utils";
+import PasswordEye from "../../components/PasswordEye";
 
 export default () => {
   const user = useSelector((state) => state.Auth.user);
@@ -214,39 +215,31 @@ export default () => {
                   <p>Modifier votre mot de passe</p>
                 </BoxTitle>
                 <BoxContent direction="column">
-                  <Item
-                    required
-                    type="password"
-                    name="password"
-                    values={values}
-                    handleChange={handleChange}
-                    title="Actuel"
-                    validate={(v) => !v && requiredMessage}
-                    errors={errors}
-                    touched={touched}
-                  />
-                  <Item
-                    required
-                    type="password"
-                    name="newPassword"
-                    values={values}
-                    handleChange={handleChange}
-                    title="Nouveau"
-                    errors={errors}
-                    touched={touched}
-                    validate={getPasswordErrorMessage}
-                  />
-                  <Item
-                    required
-                    type="password"
-                    name="verifyPassword"
-                    values={values}
-                    handleChange={handleChange}
-                    title="Confirmer"
-                    validate={(v) => (!v && requiredMessage) || (v !== values.newPassword && "Les mots de passe renseignés ne sont pas identiques")}
-                    errors={errors}
-                    touched={touched}
-                  />
+                  <Item required name="password" title="Actuel" errors={errors} touched={touched}>
+                    <PasswordEye
+                      type="password"
+                      validate={getPasswordErrorMessage}
+                      placeholder=""
+                      name="password"
+                      validate={(v) => !v && requiredMessage}
+                      value={values.password}
+                      onChange={handleChange}
+                    />
+                  </Item>
+                  <Item required name="newPassword" title="Nouveau" errors={errors} touched={touched}>
+                    <PasswordEye type="password" validate={getPasswordErrorMessage} placeholder="" name="newPassword" value={values.newPassword} onChange={handleChange} />
+                  </Item>
+                  <Item required name="verifyPassword" title="Confirmer" errors={errors} touched={touched}>
+                    <PasswordEye
+                      type="password"
+                      title="Confirmer"
+                      placeholder=""
+                      validate={(v) => (!v && requiredMessage) || (v !== values.newPassword && "Les mots de passe renseignés ne sont pas identiques")}
+                      name="verifyPassword"
+                      value={values.verifyPassword}
+                      onChange={handleChange}
+                    />
+                  </Item>
                   <Row>
                     <Col md={6}>
                       <SaveBtn onClick={handleSubmit} disabled={isSubmitting} style={{ margin: "2rem 0" }}>
@@ -284,14 +277,14 @@ const Select = ({ title, name, values, onChange, disabled, errors, touched, vali
   );
 };
 
-const Item = ({ title, values, name, handleChange, disabled, required, errors, touched, type, validate }) => {
+const Item = ({ title, values, name, handleChange, disabled, required, errors, touched, type, validate, children }) => {
   return (
     <FormGroup>
       <label>
         {required && <span>*</span>}
         {title}
       </label>
-      <Field disabled={disabled} className="form-control" value={translate(values[name])} name={name} onChange={handleChange} type={type} validate={validate} />
+      {children || <Field disabled={disabled} className="form-control" value={translate(values[name])} name={name} onChange={handleChange} type={type} validate={validate} />}
       {errors && touched && <Error errors={errors} touched={touched} name={name} />}
     </FormGroup>
   );
