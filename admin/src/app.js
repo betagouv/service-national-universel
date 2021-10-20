@@ -5,7 +5,6 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 import * as Sentry from "@sentry/react";
 import { Integrations } from "@sentry/tracing";
-
 import styled from "styled-components";
 
 import { setUser, setStructure, setTickets } from "./redux/auth/actions";
