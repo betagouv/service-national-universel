@@ -19,22 +19,24 @@ const { serializeContract } = require("../utils/serializer");
 const { updateYoungPhase2Hours, updateStatusPhase2 } = require("../utils");
 const Joi = require("joi");
 
+function checkStatusContract(contract) {
+  if (!contract.invitationSent || contract.invitationSent === "false") return "DRAFT";
+  // To find if everybody has validated we count actual tokens and number of validated. It should be improved later.
+  const tokenKeys = ["parent1Token", "parent2Token", "projectManagerToken", "structureManagerToken", "youngContractToken"];
+  const tokenCount = tokenKeys.reduce((acc, current) => (Boolean(contract[current]) ? acc + 1 : acc), 0);
+  const validateKeys = ["parent1Status", "parent2Status", "projectManagerStatus", "structureManagerStatus", "youngContractStatus"];
+  const validatedCount = validateKeys.reduce((acc, current) => (contract[current] === "VALIDATED" ? acc + 1 : acc), 0);
+  if (validatedCount >= tokenCount) {
+    return "VALIDATED";
+  } else {
+    return "SENT";
+  }
+}
+
 async function updateYoungStatusPhase2Contract(young, fromUser) {
   const contracts = await ContractObject.find({ youngId: young._id });
   young.set({
-    statusPhase2Contract: contracts.map((contract) => {
-      if (!contract.invitationSent || contract.invitationSent === "false") return "DRAFT";
-      // To find if everybody has validated we count actual tokens and number of validated. It should be improved later.
-      const tokenKeys = ["parent1Token", "parent2Token", "projectManagerToken", "structureManagerToken", "youngContractToken"];
-      const tokenCount = tokenKeys.reduce((acc, current) => (Boolean(contract[current]) ? acc + 1 : acc), 0);
-      const validateKeys = ["parent1Status", "parent2Status", "projectManagerStatus", "structureManagerStatus", "youngContractStatus"];
-      const validatedCount = validateKeys.reduce((acc, current) => (contract[current] === "VALIDATED" ? acc + 1 : acc), 0);
-      if (validatedCount >= tokenCount) {
-        return "VALIDATED";
-      } else {
-        return "SENT";
-      }
-    }),
+    statusPhase2Contract: contracts.map((contract) => checkStatusContract(contract)),
   });
 
   await young.save({ fromUser });
@@ -338,6 +340,19 @@ router.post("/token/:token", async (req, res) => {
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     await updateYoungStatusPhase2Contract(young, req.user);
+
+    if (checkStatusContract(data) === "VALIDATED") {
+      let emailTo = [{ name: `${young.firstName} ${young.lastName}`, email: young.email }];
+
+      if (young.parent1FirstName && young.parent1LastName && young.parent1Email) {
+        emailTo.push({ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email });
+      }
+      if (young.parent2FirstName && young.parent2LastName && young.parent2Email) {
+        emailTo.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
+      }
+
+      await sendTemplate(SENDINBLUE_TEMPLATES.young.CONTRACT_VALIDATED, { emailTo, params: { cta: `${APP_URL}/candidature` } });
+    }
 
     return res.status(200).send({ ok: true });
   } catch (error) {
