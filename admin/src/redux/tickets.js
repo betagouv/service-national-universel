@@ -1,5 +1,5 @@
 const initialState = {
-  tickets: [],
+  tickets: null,
   new: 0,
   open: 0,
 };
