@@ -1,12 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { NavLink, Link } from "react-router-dom";
 import styled from "styled-components";
-import { useSelector } from "react-redux";
+import { useSelector, connect } from "react-redux";
 import { environment } from "../../config";
 import { ROLES, colors } from "../../utils";
 import MailOpenIcon from "../MailOpenIcon";
 import MailCloseIcon from "../MailCloseIcon";
 import QuestionMark from "../../assets/QuestionMark";
+import api from "../../services/api";
+import { totalNewTickets, totalOpenedTickets } from "../../utils";
 
 const DrawerTab = ({ title, to, onClick }) => (
   <li onClick={onClick}>
@@ -72,7 +74,7 @@ function supervisor({ user, onClick }) {
   );
 }
 
-function admin({ onClick }) {
+function admin({ onClick, newTickets, openedTickets, tickets }) {
   return (
     <>
       <DrawerTab to="/structure" title="Structures" onClick={onClick} />
@@ -85,39 +87,46 @@ function admin({ onClick }) {
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
       <DrawerTab to="/objectifs" title="Objectifs" onClick={onClick} />
       <DrawerTab to="/association" title="Annuaire des associations" onClick={onClick} />
-      <DrawerTabWithIcons to="/boite-de-reception" title="Boîte de reception" onClick={onClick}>
-        {/* <div
-          style={{
-            display: "flex",
-            alignContent: "center",
-            justifyContent: "center",
-            background: "#F1545B",
-            borderRadius: "0.5rem",
-            marginRight: "10px",
-            paddingRight: "8px",
-            paddingLeft: "8px",
-            width: "60px",
-          }}
-        >
-          <MailCloseIcon />
-          <div style={{ marginLeft: "4px" }}>2</div>
-        </div>
-        <div
-          style={{
-            display: "flex",
-            alignContent: "center",
-            justifyContent: "center",
-            background: "#FEB951",
-            borderRadius: "0.5rem",
-            marginRight: "10px",
-            paddingRight: "8px",
-            paddingLeft: "8px",
-            width: "60px",
-          }}
-        >
-          <MailOpenIcon />
-          <div style={{ marginLeft: "4px" }}>3</div>
-        </div> */}
+      <DrawerTabWithIcons to="/boite-de-reception" title="Boîte de réception" onClick={onClick}>
+        {!tickets ? (
+          <div>
+          </div>
+        ) : (
+          <>
+            <div
+              style={{
+                display: "flex",
+                alignContent: "center",
+                justifyContent: "center",
+                background: "#F1545B",
+                borderRadius: "0.5rem",
+                marginRight: "10px",
+                paddingRight: "8px",
+                paddingLeft: "8px",
+                width: "60px",
+              }}
+            >
+              <MailCloseIcon />
+              <div style={{ marginLeft: "4px" }}>{newTickets}</div>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                alignContent: "center",
+                justifyContent: "center",
+                background: "#FEB951",
+                borderRadius: "0.5rem",
+                marginRight: "10px",
+                paddingRight: "8px",
+                paddingLeft: "8px",
+                width: "60px",
+              }}
+            >
+              <MailOpenIcon />
+              <div style={{ marginLeft: "4px" }}>{openedTickets}</div>
+            </div>
+          </>
+        )}
       </DrawerTabWithIcons>
       <BlankSeparator />
       <HelpButton to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} />
@@ -125,7 +134,8 @@ function admin({ onClick }) {
   );
 }
 
-function referent({ onClick }) {
+function referent({ onClick, newTickets, openedTickets, tickets }) {
+
   return (
     <>
       <DrawerTab to="/structure" title="Structures" onClick={onClick} />
@@ -136,39 +146,46 @@ function referent({ onClick }) {
       <DrawerTab to="/centre" title="Centres" onClick={onClick} />
       <DrawerTab to="/contenu" title="Contenus" onClick={onClick} />
       <DrawerTab to="/association" title="Annuaire des associations" onClick={onClick} />
-      <DrawerTabWithIcons to="/boite-de-reception" title="Boîte de reception" onClick={onClick}>
-        {/* <div
-          style={{
-            display: "flex",
-            alignContent: "center",
-            justifyContent: "center",
-            background: "#F1545B",
-            borderRadius: "0.5rem",
-            marginRight: "10px",
-            paddingRight: "8px",
-            paddingLeft: "8px",
-            width: "60px",
-          }}
-        >
-          <MailCloseIcon />
-          <div style={{ marginLeft: "4px" }}>2</div>
-        </div>
-        <div
-          style={{
-            display: "flex",
-            alignContent: "center",
-            justifyContent: "center",
-            background: "#FEB951",
-            borderRadius: "0.5rem",
-            marginRight: "10px",
-            paddingRight: "8px",
-            paddingLeft: "8px",
-            width: "60px",
-          }}
-        >
-          <MailOpenIcon />
-          <div style={{ marginLeft: "4px" }}>3</div>
-        </div> */}
+      <DrawerTabWithIcons to="/boite-de-reception" title="Boîte de réception" onClick={onClick}>
+        {!tickets ? (
+          <div>
+          </div>
+        ) : (
+          <>
+            <div
+              style={{
+                display: "flex",
+                alignContent: "center",
+                justifyContent: "center",
+                background: "#F1545B",
+                borderRadius: "0.5rem",
+                marginRight: "10px",
+                paddingRight: "8px",
+                paddingLeft: "8px",
+                width: "60px",
+              }}
+            >
+              <MailCloseIcon />
+              <div style={{ marginLeft: "4px" }}>{newTickets}</div>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                alignContent: "center",
+                justifyContent: "center",
+                background: "#FEB951",
+                borderRadius: "0.5rem",
+                marginRight: "10px",
+                paddingRight: "8px",
+                paddingLeft: "8px",
+                width: "60px",
+              }}
+            >
+              <MailOpenIcon />
+              <div style={{ marginLeft: "4px" }}>{openedTickets}</div>
+            </div>
+          </>
+        )}
       </DrawerTabWithIcons>
       <BlankSeparator />
       <HelpButton to="/besoin-d-aide" title="Besoin d'aide" onClick={onClick} />
@@ -188,13 +205,29 @@ function headCenter({ user, onClick }) {
   );
 }
 
-export default (props) => {
+const Drawer = ({ dispatchTickets }, props) => {
   const user = useSelector((state) => state.Auth.user);
+  const newTickets = useSelector((state) => state.Tickets.new);
+  const openedTickets = useSelector((state) => state.Tickets.open);
+  const tickets = useSelector((state) => state.Tickets.tickets);
   const [open, setOpen] = useState();
   const [environmentBannerVisible, setEnvironmentBannerVisible] = useState(true);
   useEffect(() => {
     setOpen(props.open);
   }, [props.open]);
+
+  useEffect(() => {
+    let tags = [];
+    if (user?.role === ROLES.ADMIN) tags.push(["AGENT_Startup_Support"]);
+    else if (user?.role === ROLES.REFERENT_DEPARTMENT) tags.push(["AGENT_Référent_Département", `DEPARTEMENT_${user.department}`]);
+    else if (user?.role === ROLES.REFERENT_REGION) tags.push(["AGENT_Référent_Région", `REGION_${user.region}`]);
+
+    const getTickets = async (tags) => {
+      const { data } = await api.post(`/support-center/ticket/search-by-tags?withArticles=true`, { tags });
+      dispatchTickets(data);
+    };
+    if (tags.length) getTickets(tags);
+  }, []);
 
   const handleClick = () => {
     if (open) {
@@ -237,12 +270,29 @@ export default (props) => {
         {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick })}
         {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick })}
         {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick })}
-        {user.role === ROLES.ADMIN && admin({ onClick: handleClick })}
-        {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && referent({ onClick: handleClick })}
+        {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, tickets })}
+        {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && referent({ onClick: handleClick, newTickets, openedTickets, tickets })}
       </ul>
     </Sidebar>
   );
 };
+
+const mapDispatchToProps = (dispatch) => ({
+  dispatchTickets: (tickets) => {
+    dispatch({
+      type: 'FETCH_TICKETS',
+      payload: {
+        tickets,
+        new: totalNewTickets(tickets),
+        open: totalOpenedTickets(tickets),
+      }
+    })
+  }
+})
+
+let container = connect(null, mapDispatchToProps)(Drawer);
+
+export default container;
 
 const HeaderSideBar = styled(Link)`
   display: flex;
