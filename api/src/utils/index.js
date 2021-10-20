@@ -429,6 +429,29 @@ const getBaseUrl = () => {
   return "http://localhost:8080";
 };
 
+async function syncInfoYoungMission({ young, mission }) {
+  if (young && Object.keys(young).length !== 0) {
+    const applications = await ApplicationModel.find({ youngId: young._id });
+    for (const application of applications) {
+      application.youngEmail = young.email;
+      application.youngBirthdateAt = young.birthdateAt;
+      application.youngCity = young.city;
+      application.youngDepartment = young.department;
+      application.youngCohort = young.cohort;
+      await application.save();
+    }
+  } else if (mission && Object.keys(mission).length !== 0) {
+    const applications = await ApplicationModel.find({ missionId: mission._id });
+    for (const application of applications) {
+      application.missionName = mission.name;
+      application.missionDepartment = mission.department;
+      application.missionRegion = mission.region;
+      application.missionDuration = mission.duration;
+      await application.save();
+    }
+  }
+}
+
 const ERRORS = {
   SERVER_ERROR: "SERVER_ERROR",
   NOT_FOUND: "NOT_FOUND",
@@ -480,4 +503,5 @@ module.exports = {
   updateYoungPhase2Hours,
   updateStatusPhase2,
   getSignedUrlForApiAssociation,
+  syncInfoYoungMission,
 };

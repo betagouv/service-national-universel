@@ -27,6 +27,7 @@ const {
   ERRORS,
   inSevenDays,
   isYoung,
+  syncInfoYoungMission,
 } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
 const { cookieOptions, JWT_MAX_AGE } = require("../../cookie-options");
@@ -368,6 +369,8 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
       application.youngCohort = value.cohort;
       await application.save();
     }
+
+    await syncInfoYoungMission({ young });
 
     // Check quartier prioritaires.
     if (value.zip && value.city && value.address) {

@@ -31,6 +31,7 @@ const {
   ERRORS,
   isYoung,
   inSevenDays,
+  syncInfoYoungMission,
 } = require("../utils");
 const { validateId, validateSelf, validateYoung, validateReferent } = require("../utils/validator");
 const { serializeYoung, serializeReferent } = require("../utils/serializer");
@@ -331,15 +332,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     young.set(newYoung);
     await young.save({ fromUser: req.user });
 
-    const applications = await ApplicationModel.find({ youngId: id });
-    for (const application of applications) {
-      application.youngEmail = value.email;
-      application.youngBirthdateAt = value.birthdateAt;
-      application.youngCity = value.city;
-      application.youngDepartment = value.department;
-      application.youngCohort = value.cohort;
-      await application.save();
-    }
+    await syncInfoYoungMission({ young });
 
     // if they had a cohesion center, we check if we need to update the places taken / left
     if (young.cohesionCenterId) {
