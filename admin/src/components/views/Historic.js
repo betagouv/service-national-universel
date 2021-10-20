@@ -59,8 +59,8 @@ const Hit = ({ hit, model }) => {
             <td>
               <Op>{`${translateOperationName(e.op)}`}</Op> : {`${translateModelFields(model, e.path.substring(1))}`}
             </td>
-            <td>{translate(JSON.stringify(e.originalValue)?.replace(/"/g, "")) || "-"}</td>
-            <td>{translate(JSON.stringify(e.value)?.replace(/"/g, "")) || "-"}</td>
+            <td>{formatStringLongDate(translate(JSON.stringify(e.originalValue)?.replace(/"/g, ""))) || "-"}</td>
+            <td>{formatStringLongDate(translate(JSON.stringify(e.value)?.replace(/"/g, ""))) || "-"}</td>
             <td>{formatStringLongDate(hit.date)}</td>
           </tr>
         );
