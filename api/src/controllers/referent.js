@@ -331,6 +331,16 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     young.set(newYoung);
     await young.save({ fromUser: req.user });
 
+    const applications = await ApplicationModel.find({ youngId: id });
+    for (const application of applications) {
+      application.youngEmail = value.email;
+      application.youngBirthdateAt = value.birthdateAt;
+      application.youngCity = value.city;
+      application.youngDepartment = value.department;
+      application.youngCohort = value.cohort;
+      await application.save();
+    }
+
     // if they had a cohesion center, we check if we need to update the places taken / left
     if (young.cohesionCenterId) {
       const center = await CohesionCenterModel.findById(young.cohesionCenterId);

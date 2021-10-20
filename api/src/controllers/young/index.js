@@ -359,6 +359,16 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     young.set(value);
     await young.save({ fromUser: req.user });
 
+    const applications = await ApplicationModel.find({ youngId: req.user._id });
+    for (const application of applications) {
+      application.youngEmail = value.email;
+      application.youngBirthdateAt = value.birthdateAt;
+      application.youngCity = value.city;
+      application.youngDepartment = value.department;
+      application.youngCohort = value.cohort;
+      await application.save();
+    }
+
     // Check quartier prioritaires.
     if (value.zip && value.city && value.address) {
       const qpv = await getQPV(value.zip, value.city, value.address);
