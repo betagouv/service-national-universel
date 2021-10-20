@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import { useSelector } from "react-redux";
+import { useHistory } from "react-router-dom";
 
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import ExportComponent from "../../components/ExportXlsx";
@@ -478,11 +479,11 @@ const Hit = ({ hit, onClick, selected }) => {
           </p>
         </MultiLine>
       </td>
-      <td>
-        <Badge minify text={hit.cohort} tooltipText={`Cohorte ${hit.cohort}`} />
-        <BadgePhase text="Phase 1" value={hit.statusPhase1} />
-        <BadgePhase text="Phase 2" value={hit.statusPhase2} />
-        <BadgePhase text="Phase 3" value={hit.statusPhase3} />
+      <td onClick={(e) => e.stopPropagation()}>
+        <Badge minify text={hit.cohort} tooltipText={`Cohorte ${hit.cohort}`} style={{ cursor: "default" }} />
+        <BadgePhase text="Phase 1" value={hit.statusPhase1} redirect={`/volontaire/${hit._id}/phase1`} />
+        <BadgePhase text="Phase 2" value={hit.statusPhase2} redirect={`/volontaire/${hit._id}/phase2`} />
+        <BadgePhase text="Phase 3" value={hit.statusPhase3} redirect={`/volontaire/${hit._id}/phase3`} />
         {hit.status === "WITHDRAWN" ? <Badge minify text="Désisté" color={YOUNG_STATUS_COLORS.WITHDRAWN} tooltipText={translate(hit.status)} /> : null}
       </td>
       <td onClick={(e) => e.stopPropagation()}>
@@ -492,9 +493,20 @@ const Hit = ({ hit, onClick, selected }) => {
   );
 };
 
-const BadgePhase = ({ text, value }) => (
-  <Badge minify text={text} tooltipText={translate(value)} minTooltipText={`${text}: ${translate(value)}`} color={YOUNG_STATUS_COLORS[value]} />
-);
+const BadgePhase = ({ text, value, redirect }) => {
+  const history = useHistory();
+
+  return (
+    <Badge
+      onClick={() => history.push(redirect)}
+      minify
+      text={text}
+      tooltipText={translate(value)}
+      minTooltipText={`${text}: ${translate(value)}`}
+      color={YOUNG_STATUS_COLORS[value]}
+    />
+  );
+};
 
 const Action = ({ hit }) => {
   const user = useSelector((state) => state.Auth.user);
