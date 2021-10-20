@@ -7,7 +7,7 @@ import { useHistory } from "react-router-dom";
 import { Link } from "react-router-dom";
 
 import { setUser } from "../../redux/auth/actions";
-import { translate, getFilterLabel, formatLongDateFR, formatStringLongDate, ES_NO_LIMIT, ROLES } from "../../utils";
+import { translate, getFilterLabel, formatLongDateFR, formatStringAndDateLong, ES_NO_LIMIT, ROLES } from "../../utils";
 import api from "../../services/api";
 import { apiURL } from "../../config";
 import Panel from "./panel";
@@ -196,8 +196,8 @@ const Hit = ({ hit, onClick, user, selected }) => {
         </MultiLine>
       </td>
       <td>{hit.role && <Badge text={translate(hit.role)} />}</td>
-      <td>{formatStringLongDate(hit.createdAt)}</td>
-      <td>{formatStringLongDate(hit.lastLoginAt)}</td>
+      <td>{formatStringAndDateLong(hit.createdAt)}</td>
+      <td>{formatStringAndDateLong(hit.lastLoginAt)}</td>
       {[ROLES.ADMIN, ROLES.SUPERVISOR].includes(user.role) && (
         <td onClick={(e) => e.stopPropagation()}>
           <Action hit={hit} />

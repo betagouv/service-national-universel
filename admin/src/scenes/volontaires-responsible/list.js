@@ -14,7 +14,7 @@ import Loader from "../../components/Loader";
 import Chevron from "../../components/Chevron";
 import ContractLink from "../../components/ContractLink";
 import { Filter, FilterRow, ResultTable, Table, Header, Title } from "../../components/list";
-import { translate, getFilterLabel, formatStringLongDate, formatStringDateTimezoneUTC, getAge, ES_NO_LIMIT, ROLES } from "../../utils";
+import { translate, getFilterLabel, formatStringAndDateLong, formatStringDateTimezoneUTC, getAge, ES_NO_LIMIT, ROLES } from "../../utils";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 
 const FILTERS = ["SEARCH", "STATUS", "PHASE", "COHORT", "MISSIONS", "TUTOR"];
@@ -235,7 +235,7 @@ const Hit = ({ hit, onClick, selected, mission }) => {
             <h2>
               <span>CHOIX {hit.priority}</span> : {hit.missionName}
             </h2>
-            <p>{formatStringLongDate(hit.createdAt)}</p>
+            <p>{formatStringAndDateLong(hit.createdAt)}</p>
           </div>
         </TeamMember>
       </td>

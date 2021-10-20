@@ -6,7 +6,7 @@ import { NavLink } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
-import { formatStringLongDate, colors, ticketStateNameById } from "../../../utils";
+import { formatStringAndDateLong, colors, ticketStateNameById } from "../../../utils";
 import Loader from "../../../components/Loader";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 import SendIcon from "../../../components/SendIcon";
@@ -93,7 +93,7 @@ export default (props) => {
             <h1>
               Demande #{ticket?.number} - {ticket?.title}
             </h1>
-            <Details title="Crée le" content={ticket?.created_at && formatStringLongDate(ticket?.created_at)} />
+            <Details title="Crée le" content={ticket?.created_at && formatStringAndDateLong(ticket?.created_at)} />
           </div>
           {displayState(ticketStateNameById(ticket?.state_id))}
         </Heading>
@@ -101,7 +101,7 @@ export default (props) => {
           {ticket?.articles
             ?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
             ?.map((article, i) => (
-              <Message key={i} fromMe={young.email === article.created_by} from={article.from} date={formatStringLongDate(article.created_at)} content={article.body} />
+              <Message key={i} fromMe={young.email === article.created_by} from={article.from} date={formatStringAndDateLong(article.created_at)} content={article.body} />
             ))}
         </Messages>
         <InputContainer>
