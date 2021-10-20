@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Link, useHistory } from "react-router-dom";
 
-import { YOUNG_SITUATIONS, YOUNG_PHASE, translate as t, YOUNG_STATUS, isInRuralArea, getAge, formatDateFRTimezoneUTC, formatStringLongDate } from "../../utils";
+import { YOUNG_SITUATIONS, YOUNG_PHASE, translate as t, YOUNG_STATUS, isInRuralArea, getAge, formatDateFRTimezoneUTC, formatStringAndDateLong } from "../../utils";
 import { appURL } from "../../config";
 import api from "../../services/api";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
@@ -58,7 +58,7 @@ export default ({ onChange, value }) => {
         <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`}>
           <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
         </a>
-        <Details title="Vu(e) le" value={formatStringLongDate(young.lastLoginAt)} />
+        <Details title="Vu(e) le" value={formatStringAndDateLong(young.lastLoginAt)} />
       </div>
       {young.status === YOUNG_STATUS.WITHDRAWN ? (
         <Info title="Motif du désistement">

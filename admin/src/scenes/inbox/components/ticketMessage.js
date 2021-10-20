@@ -6,7 +6,7 @@ import { NavLink } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
-import { formatStringLongDate, colors, ticketStateNameById } from "../../../utils";
+import { formatStringAndDateLong, colors, ticketStateNameById } from "../../../utils";
 import Loader from "../../../components/Loader";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 import SendIcon from "../../../components/SendIcon";
@@ -98,7 +98,7 @@ export default ({ ticket: propTicket }) => {
               <h1>
                 Demande #{ticket?.number} - {ticket?.title}
               </h1>
-              <Details title="Crée le" content={ticket?.created_at && formatStringLongDate(ticket?.created_at)} />
+              <Details title="Crée le" content={ticket?.created_at && formatStringAndDateLong(ticket?.created_at)} />
             </div>
             {displayState(ticketStateNameById(ticket?.state_id))}
           </Heading>
@@ -111,7 +111,7 @@ export default ({ ticket: propTicket }) => {
                   key={i}
                   fromMe={user.email === article.created_by}
                   from={article.from}
-                  date={formatStringLongDate(article.created_at)}
+                  date={formatStringAndDateLong(article.created_at)}
                   content={article.body}
                 />
               ))}
@@ -190,7 +190,7 @@ const InputContainer = styled.div`
   flex-direction: row;
   align-items: stretch;
   height: 100px;
-  ${'' /* flex: 0; */}
+  ${"" /* flex: 0; */}
   textarea {
     resize: none;
     overflow: none;
