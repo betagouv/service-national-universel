@@ -227,15 +227,4 @@ router.get("/ticket/:ticketId/tags", passport.authenticate(["referent"], { sessi
   }
 });
 
-router.post("/ticket/update", async (req, res) => {
-  try {
-    console.log("!!------------| WEBHOOK START |------------!!", req.body);
-    console.log("!!------------| WEBHOOK END |------------!!");
-    return res.status(200).send({ ok: true, data: [] });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
-  }
-});
-
 module.exports = router;
