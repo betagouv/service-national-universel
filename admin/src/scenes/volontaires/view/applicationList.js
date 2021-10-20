@@ -256,7 +256,7 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
             />
           </React.Fragment>
         )}
-        {hit.status === "WAITING_VERIFICATION" && (
+        {hit.status === "WAITING_VERIFICATION" && (!young.statusMilitaryPreparationFiles || young.statusMilitaryPreparationFiles === "WAITING_UPLOAD") ? (
           <React.Fragment>
             <CopyLink
               onClick={async () => {
@@ -289,7 +289,7 @@ const Hit = ({ hit, index, young, onChangeApplication }) => {
               }}
             />
           </React.Fragment>
-        )}
+        ) : null}
       </td>
     </tr>
   );
