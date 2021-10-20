@@ -261,7 +261,7 @@ const Hit = ({ hit, onClick, onChangeApplication, selected }) => {
                 });
               }}
             >
-              ✉️ Envoyer un rappel au jeune
+              ✉️ Envoyer un rappel au volontaire
             </CopyLink>
             <ModalConfirm
               isOpen={modal?.isOpen}
