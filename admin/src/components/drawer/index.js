@@ -6,9 +6,10 @@ import { environment } from "../../config";
 import { ROLES, colors } from "../../utils";
 import MailOpenIcon from "../MailOpenIcon";
 import MailCloseIcon from "../MailCloseIcon";
+import SuccessIcon from "../SuccessIcon";
 import QuestionMark from "../../assets/QuestionMark";
 import api from "../../services/api";
-import { totalNewTickets, totalOpenedTickets } from "../../utils";
+import { totalNewTickets, totalOpenedTickets, totalClosedTickets } from "../../utils";
 
 const DrawerTab = ({ title, to, onClick }) => (
   <li onClick={onClick}>
@@ -74,7 +75,26 @@ function supervisor({ user, onClick }) {
   );
 }
 
-function admin({ onClick, newTickets, openedTickets, tickets }) {
+// function IconContainer({ background }) {
+//   return (
+//     <div
+//       style={{
+//         display: "flex",
+//         alignContent: "center",
+//         justifyContent: "center",
+//         background: `${background}`,
+//         borderRadius: "0.5rem",
+//         marginRight: "10px",
+//         paddingRight: "8px",
+//         paddingLeft: "8px",
+//         width: "60px",
+//       }}
+//     >
+//     </div>
+//   );
+// };
+
+function admin({ onClick, newTickets, openedTickets, closedTickets, tickets }) {
   return (
     <>
       <DrawerTab to="/structure" title="Structures" onClick={onClick} />
@@ -93,38 +113,18 @@ function admin({ onClick, newTickets, openedTickets, tickets }) {
           </div>
         ) : (
           <>
-            <div
-              style={{
-                display: "flex",
-                alignContent: "center",
-                justifyContent: "center",
-                background: "#F1545B",
-                borderRadius: "0.5rem",
-                marginRight: "10px",
-                paddingRight: "8px",
-                paddingLeft: "8px",
-                width: "60px",
-              }}
-            >
+            <IconContainer style={{ background: "#F1545B" }}>
               <MailCloseIcon />
               <div style={{ marginLeft: "4px" }}>{newTickets}</div>
-            </div>
-            <div
-              style={{
-                display: "flex",
-                alignContent: "center",
-                justifyContent: "center",
-                background: "#FEB951",
-                borderRadius: "0.5rem",
-                marginRight: "10px",
-                paddingRight: "8px",
-                paddingLeft: "8px",
-                width: "60px",
-              }}
-            >
+            </IconContainer>
+            <IconContainer style={{ background: "#FEB951" }}>
               <MailOpenIcon />
               <div style={{ marginLeft: "4px" }}>{openedTickets}</div>
-            </div>
+            </IconContainer>
+            <IconContainer style={{ background: "#6BC762" }}>
+              <SuccessIcon color="#FFF" />
+              <div style={{ marginLeft: "4px" }}>{closedTickets}</div>
+            </IconContainer>
           </>
         )}
       </DrawerTabWithIcons>
@@ -134,7 +134,7 @@ function admin({ onClick, newTickets, openedTickets, tickets }) {
   );
 }
 
-function referent({ onClick, newTickets, openedTickets, tickets }) {
+function referent({ onClick, newTickets, openedTickets, closedTickets, tickets }) {
 
   return (
     <>
@@ -152,38 +152,18 @@ function referent({ onClick, newTickets, openedTickets, tickets }) {
           </div>
         ) : (
           <>
-            <div
-              style={{
-                display: "flex",
-                alignContent: "center",
-                justifyContent: "center",
-                background: "#F1545B",
-                borderRadius: "0.5rem",
-                marginRight: "10px",
-                paddingRight: "8px",
-                paddingLeft: "8px",
-                width: "60px",
-              }}
-            >
+            <IconContainer style={{ background: "#F1545B" }}>
               <MailCloseIcon />
               <div style={{ marginLeft: "4px" }}>{newTickets}</div>
-            </div>
-            <div
-              style={{
-                display: "flex",
-                alignContent: "center",
-                justifyContent: "center",
-                background: "#FEB951",
-                borderRadius: "0.5rem",
-                marginRight: "10px",
-                paddingRight: "8px",
-                paddingLeft: "8px",
-                width: "60px",
-              }}
-            >
+            </IconContainer>
+            <IconContainer style={{ background: "#FEB951" }}>
               <MailOpenIcon />
               <div style={{ marginLeft: "4px" }}>{openedTickets}</div>
-            </div>
+            </IconContainer>
+            <IconContainer style={{ background: "#6BC762" }}>
+              <SuccessIcon color="#FFF" />
+              <div style={{ marginLeft: "4px" }}>{closedTickets}</div>
+            </IconContainer>
           </>
         )}
       </DrawerTabWithIcons>
@@ -205,10 +185,11 @@ function headCenter({ user, onClick }) {
   );
 }
 
-const Drawer = ({ dispatchTickets }, props) => {
+const Drawer = (props) => {
   const user = useSelector((state) => state.Auth.user);
   const newTickets = useSelector((state) => state.Tickets.new);
   const openedTickets = useSelector((state) => state.Tickets.open);
+  const closedTickets = useSelector((state) => state.Tickets.closed);
   const tickets = useSelector((state) => state.Tickets.tickets);
   const [open, setOpen] = useState();
   const [environmentBannerVisible, setEnvironmentBannerVisible] = useState(true);
@@ -224,7 +205,7 @@ const Drawer = ({ dispatchTickets }, props) => {
 
     const getTickets = async (tags) => {
       const { data } = await api.post(`/support-center/ticket/search-by-tags?withArticles=true`, { tags });
-      dispatchTickets(data);
+      props.dispatchTickets(data);
     };
     if (tags.length) getTickets(tags);
   }, []);
@@ -270,8 +251,8 @@ const Drawer = ({ dispatchTickets }, props) => {
         {user.role === ROLES.HEAD_CENTER && headCenter({ user, onClick: handleClick })}
         {user.role === ROLES.SUPERVISOR && supervisor({ user, onClick: handleClick })}
         {user.role === ROLES.RESPONSIBLE && responsible({ user, onClick: handleClick })}
-        {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, tickets })}
-        {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && referent({ onClick: handleClick, newTickets, openedTickets, tickets })}
+        {user.role === ROLES.ADMIN && admin({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
+        {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && referent({ onClick: handleClick, newTickets, openedTickets, closedTickets, tickets })}
       </ul>
     </Sidebar>
   );
@@ -285,6 +266,7 @@ const mapDispatchToProps = (dispatch) => ({
         tickets,
         new: totalNewTickets(tickets),
         open: totalOpenedTickets(tickets),
+        closed: totalClosedTickets(tickets),
       }
     })
   }
@@ -299,6 +281,17 @@ const HeaderSideBar = styled(Link)`
   @media (max-width: 1550px) {
     flex-direction: column;
   }
+`;
+
+const IconContainer = styled.div`
+  display: flex;
+  align-content: center;
+  justify-content: center;
+  border-radius: 0.5rem;
+  margin-right: 10px;
+  padding-right: 8px,
+  padding-left: 8px;
+  width: 60px;
 `;
 
 const EnvironmentBanner = styled.div`
