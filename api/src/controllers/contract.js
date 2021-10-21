@@ -341,6 +341,7 @@ router.post("/token/:token", async (req, res) => {
 
     await updateYoungStatusPhase2Contract(young, req.user);
 
+    // notify the young and parents when the contract has been validated by everyone.
     if (checkStatusContract(data) === "VALIDATED") {
       let emailTo = [{ name: `${young.firstName} ${young.lastName}`, email: young.email }];
 
@@ -351,7 +352,10 @@ router.post("/token/:token", async (req, res) => {
         emailTo.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
       }
 
-      await sendTemplate(SENDINBLUE_TEMPLATES.young.CONTRACT_VALIDATED, { emailTo, params: { cta: `${APP_URL}/candidature` } });
+      await sendTemplate(SENDINBLUE_TEMPLATES.young.CONTRACT_VALIDATED, {
+        emailTo,
+        params: { missionName: data.missionName, cta: `${APP_URL}/candidature` },
+      });
     }
 
     return res.status(200).send({ ok: true });
