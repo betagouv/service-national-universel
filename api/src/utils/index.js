@@ -446,7 +446,6 @@ async function updateApplicationsWithYoungOrMission({ young, mission }) {
       application.missionName = mission.name;
       application.missionDepartment = mission.department;
       application.missionRegion = mission.region;
-      application.missionDuration = mission.duration;
       await application.save();
     }
   }
