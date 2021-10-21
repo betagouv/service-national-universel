@@ -71,7 +71,7 @@ export default ({ filter }) => {
       return true;
     }
     const { data, ok, code } = await api.get("/inscription-goal");
-    if (!ok) return toastr.error("nope");
+    if (!ok) return toastr.error("Une erreur s'est produite.");
     setInscriptionGoals(
       departmentList.map((d) => data.filter(filterByRegionAndDepartement).find((e) => e.department === d) || { department: d, region: department2region[d], max: null })
     );
