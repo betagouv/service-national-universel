@@ -9,7 +9,7 @@ const UserObject = require("../models/referent");
 const ApplicationObject = require("../models/application");
 const StructureObject = require("../models/structure");
 const ReferentObject = require("../models/referent");
-const { ERRORS, isYoung, syncInfoYoungMission } = require("../utils/index.js");
+const { ERRORS, isYoung, updateApplicationsWithYoungOrMission } = require("../utils/index.js");
 const { validateId, validateMission } = require("../utils/validator");
 const { canModifyMission, ROLES } = require("snu-lib/roles");
 const { MISSION_STATUS, APPLICATION_STATUS } = require("snu-lib/constants");
@@ -117,7 +117,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     mission.set(checkedMission);
     await mission.save({ fromUser: req.user });
 
-    await syncInfoYoungMission({ mission });
+    await updateApplicationsWithYoungOrMission({ mission });
 
     // if there is a status change, update the application
     if (oldStatus !== mission.status) {

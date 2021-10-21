@@ -429,7 +429,7 @@ const getBaseUrl = () => {
   return "http://localhost:8080";
 };
 
-async function syncInfoYoungMission({ young, mission }) {
+async function updateApplicationsWithYoungOrMission({ young, mission }) {
   if (young && Object.keys(young).length !== 0) {
     const applications = await ApplicationModel.find({ youngId: young._id });
     for (const application of applications) {
@@ -503,5 +503,5 @@ module.exports = {
   updateYoungPhase2Hours,
   updateStatusPhase2,
   getSignedUrlForApiAssociation,
-  syncInfoYoungMission,
+  updateApplicationsWithYoungOrMission,
 };
