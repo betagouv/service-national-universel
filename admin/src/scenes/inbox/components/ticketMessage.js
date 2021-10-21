@@ -105,6 +105,8 @@ export default ({ ticket: propTicket }) => {
           <Messages>
             {ticket?.articles
               ?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+              // for now, we hide the internal notes
+              ?.filter((article) => !article.internal)
               ?.map((article, i) => (
                 <Message
                   internal={article.internal}
@@ -190,7 +192,7 @@ const InputContainer = styled.div`
   flex-direction: row;
   align-items: stretch;
   height: 100px;
-  ${'' /* flex: 0; */}
+  ${"" /* flex: 0; */}
   textarea {
     resize: none;
     overflow: none;
