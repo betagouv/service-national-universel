@@ -21,7 +21,6 @@ export default ({ setTicket, selectedTicket }) => {
       prev[curr.state_id] = (prev[curr.state_id] || 0) + 1;
       return prev;
     }, {});
-    console.log("NOTIF", ticketNotification);
     setTickets(data);
   };
 
