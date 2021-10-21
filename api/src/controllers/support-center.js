@@ -8,6 +8,7 @@ const zammad = require("../zammad");
 const { ERRORS, isYoung } = require("../utils");
 const { ZAMMAD_GROUP } = require("snu-lib/constants");
 const { ticketStateIdByName } = require("snu-lib/zammad");
+const { sendTemplate } = require("../sendinblue");
 
 async function checkStateTicket({ state_id, created_by_id, updated_by_id, id, email }) {
   if (state_id === ticketStateIdByName("fermé")) {
@@ -221,6 +222,25 @@ router.get("/ticket/:ticketId/tags", passport.authenticate(["referent"], { sessi
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
     return res.status(200).send({ ok: true, tags: response.tags });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+router.post("/ticket/update", async (req, res) => {
+  try {
+    console.log("!!------------| WEBHOOK START | ------------!!", req.body);
+    console.log("!!------------| WEBHOOK END | ------------!!");
+    const ticket = req.body.ticket;
+    if (ticket.updated_at !== user) {
+      sendTemplate(208, {
+        params: {
+
+        }
+      });
+    }
+    return res.status(200).send({ ok: true, data: [] });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
