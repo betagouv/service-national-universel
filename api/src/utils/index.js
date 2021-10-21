@@ -433,6 +433,8 @@ async function updateApplicationsWithYoungOrMission({ young, mission }) {
   if (young && Object.keys(young).length !== 0) {
     const applications = await ApplicationModel.find({ youngId: young._id });
     for (const application of applications) {
+      application.youngFirstName = young.firstName;
+      application.youngLastName = young.lastName;
       application.youngEmail = young.email;
       application.youngBirthdateAt = young.birthdateAt;
       application.youngCity = young.city;
