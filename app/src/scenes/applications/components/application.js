@@ -195,7 +195,7 @@ const Footer = ({ application, tutor, onChange }) => {
                   isOpen: true,
                   title: `Abandonner la mission "${application.missionName}"`,
                   message:
-                    "Êtes vous sûr de vouloir modifier cette candidature ?\nAttention cette action est irréversible, vous ne pourrez pas de nouveau candidater à cette mission.",
+                    "Êtes vous sûr de vouloir abandonner cette candidature ?\nAttention cette action est irréversible, vous ne pourrez pas de nouveau candidater à cette mission.",
                   onConfirm: () => setStatus(APPLICATION_STATUS.ABANDON),
                 })
               }
@@ -217,7 +217,7 @@ const Footer = ({ application, tutor, onChange }) => {
                   isOpen: true,
                   title: `Annuler la candidature à la mission "${application.missionName}"`,
                   message:
-                    "Êtes vous sûr de vouloir modifier cette candidature ?\nAttention cette action est irréversible, vous ne pourrez pas de nouveau candidater à cette mission.",
+                    "Êtes vous sûr de vouloir annuler cette candidature ?\nAttention cette action est irréversible, vous ne pourrez pas de nouveau candidater à cette mission.",
                   onConfirm: () => setStatus(APPLICATION_STATUS.CANCEL),
                 })
               }
