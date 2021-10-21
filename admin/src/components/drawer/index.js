@@ -75,25 +75,6 @@ function supervisor({ user, onClick }) {
   );
 }
 
-// function IconContainer({ background }) {
-//   return (
-//     <div
-//       style={{
-//         display: "flex",
-//         alignContent: "center",
-//         justifyContent: "center",
-//         background: `${background}`,
-//         borderRadius: "0.5rem",
-//         marginRight: "10px",
-//         paddingRight: "8px",
-//         paddingLeft: "8px",
-//         width: "60px",
-//       }}
-//     >
-//     </div>
-//   );
-// };
-
 function admin({ onClick, newTickets, openedTickets, closedTickets, tickets }) {
   return (
     <>
