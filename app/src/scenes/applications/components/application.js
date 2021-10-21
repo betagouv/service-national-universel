@@ -4,6 +4,7 @@ import styled from "styled-components";
 import { Draggable } from "react-beautiful-dnd";
 import { Col, Row } from "reactstrap";
 import { useSelector } from "react-redux";
+import { toastr } from "react-redux-toastr";
 
 import api from "../../../services/api";
 import { translate, APPLICATION_STATUS_COLORS, APPLICATION_STATUS, getAge, SENDINBLUE_TEMPLATES, ENABLE_PM } from "../../../utils";
