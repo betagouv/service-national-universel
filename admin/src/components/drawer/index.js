@@ -205,7 +205,7 @@ function headCenter({ user, onClick }) {
   );
 }
 
-const Drawer = ({ dispatchTickets }, props) => {
+const Drawer = (props) => {
   const user = useSelector((state) => state.Auth.user);
   const newTickets = useSelector((state) => state.Tickets.new);
   const openedTickets = useSelector((state) => state.Tickets.open);
@@ -224,7 +224,7 @@ const Drawer = ({ dispatchTickets }, props) => {
 
     const getTickets = async (tags) => {
       const { data } = await api.post(`/support-center/ticket/search-by-tags?withArticles=true`, { tags });
-      dispatchTickets(data);
+      props.dispatchTickets(data);
     };
     if (tags.length) getTickets(tags);
   }, []);
