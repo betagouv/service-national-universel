@@ -16,12 +16,16 @@ export default ({ setTicket, selectedTicket }) => {
   const user = useSelector((state) => state.Auth.user);
 
   const getTickets = async (tags) => {
-    const { data } = await api.post(`/support-center/ticket/search-by-tags?withArticles=true`, { tags });
-    const ticketNotification = data.reduce((prev, curr) => {
-      prev[curr.state_id] = (prev[curr.state_id] || 0) + 1;
-      return prev;
-    }, {});
-    setTickets(data);
+    try {
+      const { data } = await api.post(`/support-center/ticket/search-by-tags?withArticles=true`, { tags });
+      const ticketNotification = data.reduce((prev, curr) => {
+        prev[curr.state_id] = (prev[curr.state_id] || 0) + 1;
+        return prev;
+      }, {});
+      setTickets(data);
+    } catch (err) {
+      console.log("Oups, une erreur s'est produite.");
+    }
   };
 
   useEffect(() => {

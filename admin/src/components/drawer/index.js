@@ -90,7 +90,7 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets }) {
       <DrawerTab to="/association" title="Annuaire des associations" onClick={onClick} />
       <DrawerTabWithIcons to="/boite-de-reception" title="Boîte de réception" onClick={onClick}>
         {!tickets ? (
-          <div></div>
+          <div />
         ) : (
           <>
             <IconContainer style={{ background: "#F1545B" }}>
@@ -127,7 +127,7 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets }
       <DrawerTab to="/association" title="Annuaire des associations" onClick={onClick} />
       <DrawerTabWithIcons to="/boite-de-reception" title="Boîte de réception" onClick={onClick}>
         {!tickets ? (
-          <div></div>
+          <div />
         ) : (
           <>
             <IconContainer style={{ background: "#F1545B" }}>
@@ -176,16 +176,20 @@ const Drawer = (props) => {
   }, [props.open]);
 
   useEffect(() => {
-    let tags = [];
-    if (user?.role === ROLES.ADMIN) tags.push(["AGENT_Startup_Support"]);
-    else if (user?.role === ROLES.REFERENT_DEPARTMENT) tags.push(["AGENT_Référent_Département", `DEPARTEMENT_${user.department}`]);
-    else if (user?.role === ROLES.REFERENT_REGION) tags.push(["AGENT_Référent_Région", `REGION_${user.region}`]);
+    try {
+      let tags = [];
+      if (user?.role === ROLES.ADMIN) tags.push(["AGENT_Startup_Support"]);
+      else if (user?.role === ROLES.REFERENT_DEPARTMENT) tags.push(["AGENT_Référent_Département", `DEPARTEMENT_${user.department}`]);
+      else if (user?.role === ROLES.REFERENT_REGION) tags.push(["AGENT_Référent_Région", `REGION_${user.region}`]);
 
-    const getTickets = async (tags) => {
-      const { data } = await api.post(`/support-center/ticket/search-by-tags?withArticles=true`, { tags });
-      props.dispatchTickets(data);
-    };
-    if (tags.length) getTickets(tags);
+      const getTickets = async (tags) => {
+        const { data } = await api.post(`/support-center/ticket/search-by-tags?withArticles=true`, { tags });
+        props.dispatchTickets(data);
+      };
+      if (tags.length) getTickets(tags);
+    } catch (e) {
+      console.log("Oups, une erreur s'est produite.");
+    }
   }, []);
 
   const handleClick = () => {
