@@ -211,7 +211,7 @@ export default () => {
 
 const SubmitComponent = ({ young, loading, onClick, errors }) => (
   <Footer>
-    {!young.statusMilitaryPreparationFiles ? (
+    {!young.statusMilitaryPreparationFiles || young.statusMilitaryPreparationFiles === "WAITING_UPLOAD" ? (
       <LoadingButton loading={loading} onClick={onClick}>
         Demander la validation de mon dossier
       </LoadingButton>
