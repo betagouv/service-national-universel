@@ -1,4 +1,4 @@
-const colors = {
+export const colors = {
   purple: "#5145cd",
   transPurple: "#5145cd66",
   darkPurple: "#382F79",
@@ -18,7 +18,7 @@ const colors = {
   black: "#111111",
 };
 
-const PHASE_STATUS_COLOR = {
+export const PHASE_STATUS_COLOR = {
   VALIDATED: colors.green,
   DONE: colors.green,
   CANCEL: colors.orange,
@@ -28,7 +28,7 @@ const PHASE_STATUS_COLOR = {
   WAITING_ACCEPTATION: colors.yellow,
 };
 
-const APPLICATION_STATUS_COLORS = {
+export const APPLICATION_STATUS_COLORS = {
   WAITING_VALIDATION: colors.orange,
   WAITING_VERIFICATION: colors.orange,
   WAITING_ACCEPTATION: colors.yellow,
@@ -40,7 +40,7 @@ const APPLICATION_STATUS_COLORS = {
   ABANDON: colors.red,
 };
 
-const YOUNG_STATUS_COLORS = {
+export const YOUNG_STATUS_COLORS = {
   WAITING_VALIDATION: colors.orange,
   WAITING_CORRECTION: colors.yellow,
   VALIDATED: colors.green,
@@ -57,7 +57,7 @@ const YOUNG_STATUS_COLORS = {
   DELETED: colors.black,
 };
 
-const MISSION_STATUS_COLORS = {
+export const MISSION_STATUS_COLORS = {
   WAITING_VALIDATION: colors.orange,
   WAITING_CORRECTION: colors.yellow,
   VALIDATED: colors.green,
@@ -67,25 +67,15 @@ const MISSION_STATUS_COLORS = {
   ARCHIVED: colors.lightGrey,
 };
 
-const STRUCTURE_STATUS_COLORS = {
+export const STRUCTURE_STATUS_COLORS = {
   WAITING_VALIDATION: colors.orange,
   WAITING_CORRECTION: colors.yellow,
   VALIDATED: colors.green,
   DRAFT: colors.lightGold,
 };
 
-const CONTRACT_STATUS_COLORS = {
+export const CONTRACT_STATUS_COLORS = {
   DRAFT: colors.yellow,
   SENT: colors.orange,
   VALIDATED: colors.green,
-};
-
-module.exports = {
-  PHASE_STATUS_COLOR,
-  APPLICATION_STATUS_COLORS,
-  YOUNG_STATUS_COLORS,
-  MISSION_STATUS_COLORS,
-  STRUCTURE_STATUS_COLORS,
-  CONTRACT_STATUS_COLORS,
-  colors,
 };

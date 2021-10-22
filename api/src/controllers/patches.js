@@ -1,7 +1,7 @@
 const Joi = require("joi");
 const { capture } = require("../sentry");
 const { ERRORS } = require("../utils");
-const { canViewPatchesHistory } = require("snu-lib/roles");
+const { canViewPatchesHistory } = require("snu-lib");
 
 const get = async (req, res, model) => {
   try {

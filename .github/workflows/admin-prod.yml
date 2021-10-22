@@ -53,6 +53,11 @@ jobs:
         run: |
           rm -rf .git
 
+      - name: Install lib
+        run: |
+          npm --prefix lib i
+          npm run tsc
+
       - name: Add lib into current folder
         run: |
           cp -Rf ./lib ./admin/snu-lib

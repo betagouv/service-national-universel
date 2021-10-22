@@ -1,4 +1,4 @@
-const ROLES = {
+export const ROLES = {
   ADMIN: "admin",
   REFERENT_DEPARTMENT: "referent_department",
   REFERENT_REGION: "referent_region",
@@ -7,7 +7,7 @@ const ROLES = {
   HEAD_CENTER: "head_center",
 };
 
-const SUB_ROLES = {
+export const SUB_ROLES = {
   manager_department: "manager_department",
   assistant_manager_department: "assistant_manager_department",
   manager_phase2: "manager_phase2",
@@ -17,10 +17,10 @@ const SUB_ROLES = {
   none: "",
 };
 
-const ROLES_LIST = Object.values(ROLES);
-const SUB_ROLES_LIST = Object.values(SUB_ROLES);
+export const ROLES_LIST = Object.values(ROLES);
+export const SUB_ROLES_LIST = Object.values(SUB_ROLES);
 
-function canInviteUser(actorRole, targetRole) {
+export function canInviteUser(actorRole, targetRole) {
   // Admins can invite any user
   if (actorRole === ROLES.ADMIN) return true;
 
@@ -51,15 +51,15 @@ function canInviteUser(actorRole, targetRole) {
   }
 }
 
-function canDeleteStructure(actor, target) {
+export function canDeleteStructure(actor, target) {
   return actor.role === ROLES.ADMIN;
 }
 
-function canDeleteYoung(actor, target) {
+export function canDeleteYoung(actor, target) {
   return actor.role === ROLES.ADMIN;
 }
 
-function canDeleteReferent(actor, target) {
+export function canDeleteReferent(actor, target) {
   if (actor.role === ROLES.ADMIN) return true;
   // https://trello.com/c/Wv2TrQnQ/383-admin-ajouter-onglet-utilisateurs-pour-les-r%C3%A9f%C3%A9rents
   if (actor.role === ROLES.REFERENT_REGION) {
@@ -80,14 +80,14 @@ function canDeleteReferent(actor, target) {
   return false;
 }
 
-function canViewPatchesHistory(actor) {
+export function canViewPatchesHistory(actor) {
   return actor.role === ROLES.ADMIN;
 }
-function canViewEmailHistory(actor) {
+export function canViewEmailHistory(actor) {
   return actor.role === ROLES.ADMIN;
 }
 
-function canViewReferent(actor, target) {
+export function canViewReferent(actor, target) {
   const isAdminOrReferent = [
     ROLES.ADMIN,
     ROLES.REFERENT_DEPARTMENT,
@@ -100,7 +100,7 @@ function canViewReferent(actor, target) {
   return isAdminOrReferent || isResponsibleModifyingResponsible;
 }
 
-function canUpdateReferent(actor, originalTarget, modifiedTarget) {
+export function canUpdateReferent(actor, originalTarget, modifiedTarget) {
   const isAdmin = actor.role === ROLES.ADMIN;
   const isResponsibleModifyingResponsibleWithoutChangingRole =
     // Is responsible...
@@ -130,7 +130,7 @@ function canUpdateReferent(actor, originalTarget, modifiedTarget) {
   return authorized;
 }
 
-function canViewYoungMilitaryPreparationFile(actor, target) {
+export function canViewYoungMilitaryPreparationFile(actor, target) {
   const isAdmin = actor.role === ROLES.ADMIN;
   const isReferentDepartmentFromTargetDepartment =
     actor.role === ROLES.REFERENT_DEPARTMENT &&
@@ -144,7 +144,7 @@ function canViewYoungMilitaryPreparationFile(actor, target) {
   return authorized;
 }
 
-function canCreateOrUpdateCohesionCenter(actor) {
+export function canCreateOrUpdateCohesionCenter(actor) {
   return [
     ROLES.ADMIN,
     ROLES.REFERENT_DEPARTMENT,
@@ -152,7 +152,7 @@ function canCreateOrUpdateCohesionCenter(actor) {
   ].includes(actor.role);
 }
 
-function canModifyMission(user, mission) {
+export function canModifyMission(user, mission) {
   return !(
     (user.role === ROLES.REFERENT_DEPARTMENT &&
       user.department !== mission.department) ||
@@ -160,7 +160,7 @@ function canModifyMission(user, mission) {
   );
 }
 
-function canCreateOrUpdateProgram(user, program) {
+export function canCreateOrUpdateProgram(user, program) {
   const isAdminOrReferent = [
     ROLES.ADMIN,
     ROLES.REFERENT_DEPARTMENT,
@@ -175,7 +175,7 @@ function canCreateOrUpdateProgram(user, program) {
     )
   );
 }
-function canModifyStructure(user, structure) {
+export function canModifyStructure(user, structure) {
   const isAdmin = user.role === ROLES.ADMIN;
   const isReferentRegionFromSameRegion =
     user.role === ROLES.REFERENT_REGION && user.region === structure.region;
@@ -197,7 +197,7 @@ function canModifyStructure(user, structure) {
   );
 }
 
-function isReferentOrAdmin(user) {
+export function isReferentOrAdmin(user) {
   return [
     ROLES.ADMIN,
     ROLES.REFERENT_DEPARTMENT,
@@ -205,15 +205,15 @@ function isReferentOrAdmin(user) {
   ].includes(user.role);
 }
 
-const FORCE_DISABLED_ASSIGN_COHESION_CENTER = true;
-const canAssignCohesionCenter = (user) =>
+export const FORCE_DISABLED_ASSIGN_COHESION_CENTER = true;
+export const canAssignCohesionCenter = (user) =>
   !FORCE_DISABLED_ASSIGN_COHESION_CENTER && isReferentOrAdmin(user);
 
-const FORCE_DISABLED_ASSIGN_MEETING_POINT = true;
-const canAssignMeetingPoint = (user) =>
+export const FORCE_DISABLED_ASSIGN_MEETING_POINT = true;
+export const canAssignMeetingPoint = (user) =>
   !FORCE_DISABLED_ASSIGN_MEETING_POINT && isReferentOrAdmin(user);
 
-const canSigninAs = (actor, target) => {
+export const canSigninAs = (actor, target) => {
   const isAdmin = actor.role === ROLES.ADMIN;
   const isReferentRegionFromSameRegion =
     actor.role === ROLES.REFERENT_REGION && actor.region === target.region;
@@ -229,7 +229,7 @@ const canSigninAs = (actor, target) => {
   );
 };
 
-const canSendFileByMail = (actor, target) => {
+export const canSendFileByMail = (actor, target) => {
   const isAdmin = actor.role === ROLES.ADMIN;
   const isReferentRegionFromSameRegion =
     actor.role === ROLES.REFERENT_REGION && actor.region === target.region;
@@ -241,31 +241,4 @@ const canSendFileByMail = (actor, target) => {
     isReferentRegionFromSameRegion ||
     isReferentDepartmentFromSameDepartment
   );
-};
-
-module.exports = {
-  ROLES,
-  SUB_ROLES,
-  ROLES_LIST,
-  SUB_ROLES_LIST,
-  canInviteUser,
-  canDeleteYoung,
-  canDeleteReferent,
-  canViewPatchesHistory,
-  canViewEmailHistory,
-  canViewReferent,
-  canUpdateReferent,
-  canViewYoungMilitaryPreparationFile,
-  canCreateOrUpdateCohesionCenter,
-  canModifyMission,
-  canCreateOrUpdateProgram,
-  isReferentOrAdmin,
-  FORCE_DISABLED_ASSIGN_COHESION_CENTER,
-  FORCE_DISABLED_ASSIGN_MEETING_POINT,
-  canAssignCohesionCenter,
-  canAssignMeetingPoint,
-  canModifyStructure,
-  canDeleteStructure,
-  canSigninAs,
-  canSendFileByMail,
 };

@@ -21,7 +21,7 @@ const {
   getBaseUrl,
 } = require("../utils");
 const renderFromHtml = require("../htmlToPdf");
-const { ROLES, canCreateOrUpdateCohesionCenter } = require("snu-lib/roles");
+const { ROLES, canCreateOrUpdateCohesionCenter } = require("snu-lib");
 const Joi = require("joi");
 const { serializeCohesionCenter, serializeYoung, serializeReferent } = require("../utils/serializer");
 const { validateNewCohesionCenter, validateUpdateCohesionCenter } = require("../utils/validator");

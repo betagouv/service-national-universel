@@ -11,3 +11,5 @@ api/coverage
 .vscode
 .env
 .cache_ggshield
+/node_modules
+/lib/lib

@@ -1,4 +1,4 @@
-const translate = (value) => {
+export const translate = (value) => {
   switch (value) {
     case "NONE":
       return "Aucun";
@@ -247,8 +247,4 @@ const translate = (value) => {
     default:
       return value;
   }
-};
-
-module.exports = {
-  translate,
 };

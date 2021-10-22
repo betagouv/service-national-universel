@@ -39,6 +39,11 @@ jobs:
         with:
           mongodb-version: '4.0'
 
+      - name: Install lib
+        run: |
+          npm --prefix lib i
+          npm run tsc
+
       - name: Add lib into current folder
         run: |
           cp -Rf ./lib ./api/snu-lib

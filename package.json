@@ -1,0 +1,20 @@
+{
+  "name": "service-national-universel",
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "concurrently -c bgMagenta,bgGreen,bgYellow,bgBlue -n admin,app,api,lib \"npm --prefix admin run dev\" \"npm --prefix app run dev\" \"npm --prefix api run dev\" \"npm --prefix lib run tsc -- --watch\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/betagouv/service-national-universel.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/betagouv/service-national-universel/issues"
+  },
+  "homepage": "https://github.com/betagouv/service-national-universel#readme",
+  "dependencies": {
+    "concurrently": "^6.3.0"
+  }
+}

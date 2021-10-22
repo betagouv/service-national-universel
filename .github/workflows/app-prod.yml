@@ -58,6 +58,11 @@ jobs:
           cp -Rf ./lib ./app/snu-lib
           sed -i 's/file:\.\.\/lib/file:.\/snu-lib/' ./app/package.json
 
+      - name: Install lib
+        run: |
+          npm --prefix lib i
+          npm run tsc
+
       - name: Push
         working-directory: ${{ env.SUBFOLDER_NAME }}
         run: |

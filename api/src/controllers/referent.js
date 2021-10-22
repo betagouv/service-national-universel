@@ -35,9 +35,9 @@ const {
 const { validateId, validateSelf, validateYoung, validateReferent } = require("../utils/validator");
 const { serializeYoung, serializeReferent } = require("../utils/serializer");
 const { cookieOptions, JWT_MAX_AGE } = require("../cookie-options");
-const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
-const { department2region } = require("snu-lib/region-and-departments");
 const {
+  SENDINBLUE_TEMPLATES,
+  department2region,
   ROLES_LIST,
   canInviteUser,
   canDeleteReferent,
@@ -47,7 +47,7 @@ const {
   canUpdateReferent,
   canViewYoungMilitaryPreparationFile,
   canSigninAs,
-} = require("snu-lib/roles");
+} = require("snu-lib");
 
 async function updateTutorNameInMissionsAndApplications(tutor, fromUser) {
   if (!tutor || !tutor.firstName || !tutor.lastName) return;

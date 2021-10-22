@@ -1,5 +1,5 @@
 const faker = require("faker");
-const { ROLES } = require("snu-lib/roles");
+const { ROLES } = require("snu-lib");
 
 faker.locale = "fr";
 

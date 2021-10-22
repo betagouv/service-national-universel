@@ -15,7 +15,7 @@ const { getYoungsHelper, createYoungHelper, notExistingYoungId, deleteYoungByEma
 //cohesion center
 const { getNewCohesionCenterFixture } = require("./fixtures/cohesionCenter");
 const { createCohesionCenter, getCohesionCenterById } = require("./helpers/cohesionCenter");
-const { ROLES } = require("snu-lib/roles");
+const { ROLES } = require("snu-lib");
 
 jest.mock("../sendinblue", () => ({
   ...jest.requireActual("../sendinblue"),

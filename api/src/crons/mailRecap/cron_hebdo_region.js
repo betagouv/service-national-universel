@@ -6,7 +6,7 @@ const { sendEmail } = require("../../sendinblue");
 const ReferentModel = require("../../models/referent");
 const { regionListTest, regionList, getDataInscriptions, getDataStructure } = require("../utils");
 const { capture } = require("../../sentry");
-const { ROLES } = require("snu-lib/roles");
+const { ROLES } = require("snu-lib");
 
 const arr = regionList;
 

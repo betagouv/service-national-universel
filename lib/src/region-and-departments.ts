@@ -1,4 +1,4 @@
-const putLocation = async (city, zip) => {
+export const putLocation = async (city, zip) => {
   // try with municipality = city + zip
   const responseMunicipality = await fetch(
     `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(
@@ -56,7 +56,7 @@ const putLocation = async (city, zip) => {
   };
 };
 
-const departmentLookUp = {
+export const departmentLookUp = {
   "01": "Ain",
   "02": "Aisne",
   "03": "Allier",
@@ -165,19 +165,19 @@ const departmentLookUp = {
   988: "Nouvelle-Calédonie",
 };
 
-const departmentList = Object.values(departmentLookUp);
+export const departmentList = Object.values(departmentLookUp);
 
-const getDepartmentNumber = (d) =>
+export const getDepartmentNumber = (d) =>
   Object.keys(departmentLookUp).find((key) => departmentLookUp[key] === d);
 
-const getDepartmentByZip = (zip) => {
+export const getDepartmentByZip = (zip) => {
   if (!zip) return;
   if (zip.length !== 5) return;
   const departmentCode = zip.substr(0, 2);
   return departmentLookUp[departmentCode];
 };
 
-const getRegionByZip = (zip) => {
+export const getRegionByZip = (zip) => {
   if (!zip) return;
   if (zip.length !== 5) return;
   const departmentCode = zip.substr(0, 2);
@@ -185,7 +185,7 @@ const getRegionByZip = (zip) => {
   return department2region[department];
 };
 
-const regionList = [
+export const regionList = [
   "Auvergne-Rhône-Alpes",
   "Bourgogne-Franche-Comté",
   "Bretagne",
@@ -213,7 +213,7 @@ const regionList = [
   "Nouvelle-Calédonie",
 ];
 
-const department2region = {
+export const department2region = {
   Ain: "Auvergne-Rhône-Alpes",
   Aisne: "Hauts-de-France",
   Allier: "Auvergne-Rhône-Alpes",
@@ -325,7 +325,7 @@ const department2region = {
   "Nouvelle-Calédonie": "Nouvelle-Calédonie",
 };
 
-const region2department = {
+export const region2department = {
   "Auvergne-Rhône-Alpes": [
     "Ain",
     "Allier",
@@ -442,16 +442,4 @@ const region2department = {
   "Wallis-et-Futuna": ["Wallis-et-Futuna"],
   "Polynésie française": ["Polynésie française"],
   "Nouvelle-Calédonie": ["Nouvelle-Calédonie"],
-};
-
-module.exports = {
-  departmentLookUp,
-  departmentList,
-  getDepartmentNumber,
-  regionList,
-  department2region,
-  region2department,
-  putLocation,
-  getDepartmentByZip,
-  getRegionByZip,
 };

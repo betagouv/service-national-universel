@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
-import { YOUNG_STATUS_PHASE1 } from "snu-lib/constants";
+import { YOUNG_STATUS_PHASE1 } from "snu-lib";
 import { HeroContainer, Hero } from "../../components/Content";
 import ImageRight from "./ImageRight";
 import AutoTest from "./AutoTest";

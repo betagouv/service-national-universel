@@ -10,7 +10,7 @@ const { ERRORS } = require("../utils");
 const { sendTemplate } = require("../sendinblue");
 const { capture } = require("../sentry");
 const EmailObject = require("../models/email");
-const { canViewEmailHistory } = require("snu-lib/roles");
+const { canViewEmailHistory } = require("snu-lib");
 const { serializeEmail } = require("../utils/serializer");
 
 function ipAllowListMiddleware(req, res, next) {

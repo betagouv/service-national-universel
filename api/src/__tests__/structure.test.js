@@ -14,7 +14,7 @@ const { createMissionHelper, getMissionByIdHelper, deleteMissionByIdHelper } = r
 const getNewMissionFixture = require("./fixtures/mission");
 const getNewReferentFixture = require("./fixtures/referent");
 const { createReferentHelper, getReferentByIdHelper } = require("./helpers/referent");
-const { ROLES } = require("snu-lib/roles");
+const { ROLES } = require("snu-lib");
 
 jest.mock("../sendinblue", () => ({
   ...jest.requireActual("../sendinblue"),

@@ -33,8 +33,8 @@ const { cookieOptions, JWT_MAX_AGE } = require("../../cookie-options");
 const { validateYoung, validateId, validateFirstName } = require("../../utils/validator");
 const patches = require("../patches");
 const { serializeYoung, serializeApplication } = require("../../utils/serializer");
-const { canDeleteYoung } = require("snu-lib/roles");
-const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
+const { canDeleteYoung } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 
 router.post("/signin", signinLimiter, (req, res) => YoungAuth.signin(req, res));
 router.post("/logout", (req, res) => YoungAuth.logout(req, res));

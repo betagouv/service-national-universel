@@ -6,7 +6,7 @@ const { capture } = require("../sentry");
 const ProgramObject = require("../models/program");
 const { ERRORS } = require("../utils");
 const { validateId, validateString, validateProgram } = require("../utils/validator");
-const { ROLES, canCreateOrUpdateProgram } = require("snu-lib/roles");
+const { ROLES, canCreateOrUpdateProgram } = require("snu-lib");
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {

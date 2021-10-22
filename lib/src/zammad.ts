@@ -1,39 +1,31 @@
-const ticketStates = {
-  1: "nouveau",
+export const ticketStates = {
+  1: "nouveaxxu",
   2: "ouvert",
   3: "rappel en attente",
   4: "fermé",
   7: "clôture en attente",
 };
 
-const ticketStateNameById = (id) => ticketStates[id];
-const ticketStateIdByName = (name) =>
+export const ticketStateNameById = (id) => ticketStates[id];
+export const ticketStateIdByName = (name) =>
   Number(
     Object.keys(ticketStates).reduce((ret, key) => {
       ret[ticketStates[key]] = key;
       return ret;
     }, {})[name]
   );
-const totalOpenedTickets = (tickets) => {
+export const totalOpenedTickets = (tickets) => {
   return (tickets || []).filter(
     (ticket) => (ticket || {}).state_id === ticketStateIdByName("ouvert")
   ).length;
 };
-const totalNewTickets = (tickets) => {
+export const totalNewTickets = (tickets) => {
   return (tickets || []).filter(
     (ticket) => (ticket || {}).state_id === ticketStateIdByName("nouveau")
   ).length;
 };
-const totalClosedTickets = (tickets) => {
+export const totalClosedTickets = (tickets) => {
   return (tickets || []).filter(
     (ticket) => (ticket || {}).state_id === ticketStateIdByName("fermé")
   ).length;
-};
-
-module.exports = {
-  ticketStateNameById,
-  ticketStateIdByName,
-  totalOpenedTickets,
-  totalNewTickets,
-  totalClosedTickets,
 };

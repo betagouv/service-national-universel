@@ -6,8 +6,8 @@ const Joi = require("joi");
 const { capture } = require("../sentry");
 const zammad = require("../zammad");
 const { ERRORS, isYoung } = require("../utils");
-const { ZAMMAD_GROUP } = require("snu-lib/constants");
-const { ticketStateIdByName } = require("snu-lib/zammad");
+const { ZAMMAD_GROUP } = require("snu-lib");
+const { ticketStateIdByName } = require("snu-lib");
 
 async function checkStateTicket({ state_id, created_by_id, updated_by_id, id, email }) {
   if (state_id === ticketStateIdByName("fermé")) {

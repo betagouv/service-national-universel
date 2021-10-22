@@ -10,8 +10,8 @@ const certificate = require("../../templates/certificate");
 const form = require("../../templates/form");
 const convocation = require("../../templates/convocation");
 const { sendTemplate } = require("../../sendinblue");
-const { canSendFileByMail } = require("snu-lib/roles");
-const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
+const { canSendFileByMail } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 
 function getHtmlTemplate(type, template, young) {
   if (type === "certificate" && template === "1") return certificate.phase1(young);

@@ -23,8 +23,8 @@ const {
   API_ASSOCIATION_CELLAR_KEYID,
   API_ASSOCIATION_CELLAR_KEYSECRET,
 } = require("../config");
-const { ROLES } = require("snu-lib/roles");
-const { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
+const { ROLES } = require("snu-lib");
+const { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES } = require("snu-lib");
 
 // Set the number of requests allowed to 15 in a 1 hour window
 const signinLimiter = rateLimit({

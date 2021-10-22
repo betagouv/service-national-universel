@@ -28,7 +28,7 @@ const { getNewApplicationFixture } = require("./fixtures/application");
 const { createApplication, getApplicationsHelper } = require("./helpers/application");
 const { createMissionHelper, getMissionsHelper } = require("./helpers/mission");
 const getNewMissionFixture = require("./fixtures/mission");
-const { SUB_ROLES, ROLES } = require("snu-lib/roles");
+const { SUB_ROLES, ROLES } = require("snu-lib");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 const VALID_PASSWORD = faker.internet.password(16, false, /^[a-z]*$/, "AZ12/+");
 
