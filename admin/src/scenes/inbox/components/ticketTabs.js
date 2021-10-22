@@ -10,7 +10,7 @@ import SuccessIcon from "../../../components/SuccessIcon";
 
 import api from "../../../services/api";
 
-export default ({ setTicket, selectedTicket, setOverview }) => {
+export default ({ setTicket, selectedTicket }) => {
   const [stateFilter, setStateFilter] = useState();
   const [tickets, setTickets] = useState(null);
   const user = useSelector((state) => state.Auth.user);
@@ -21,7 +21,6 @@ export default ({ setTicket, selectedTicket, setOverview }) => {
       prev[curr.state_id] = (prev[curr.state_id] || 0) + 1;
       return prev;
     }, {});
-    setOverview(ticketNotification);
     setTickets(data);
   };
 
