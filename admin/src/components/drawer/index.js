@@ -90,8 +90,7 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets }) {
       <DrawerTab to="/association" title="Annuaire des associations" onClick={onClick} />
       <DrawerTabWithIcons to="/boite-de-reception" title="Boîte de réception" onClick={onClick}>
         {!tickets ? (
-          <div>
-          </div>
+          <div></div>
         ) : (
           <>
             <IconContainer style={{ background: "#F1545B" }}>
@@ -116,7 +115,6 @@ function admin({ onClick, newTickets, openedTickets, closedTickets, tickets }) {
 }
 
 function referent({ onClick, newTickets, openedTickets, closedTickets, tickets }) {
-
   return (
     <>
       <DrawerTab to="/structure" title="Structures" onClick={onClick} />
@@ -129,8 +127,7 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets }
       <DrawerTab to="/association" title="Annuaire des associations" onClick={onClick} />
       <DrawerTabWithIcons to="/boite-de-reception" title="Boîte de réception" onClick={onClick}>
         {!tickets ? (
-          <div>
-          </div>
+          <div></div>
         ) : (
           <>
             <IconContainer style={{ background: "#F1545B" }}>
@@ -242,16 +239,16 @@ const Drawer = (props) => {
 const mapDispatchToProps = (dispatch) => ({
   dispatchTickets: (tickets) => {
     dispatch({
-      type: 'FETCH_TICKETS',
+      type: "FETCH_TICKETS",
       payload: {
         tickets,
         new: totalNewTickets(tickets),
         open: totalOpenedTickets(tickets),
         closed: totalClosedTickets(tickets),
-      }
-    })
-  }
-})
+      },
+    });
+  },
+});
 
 let container = connect(null, mapDispatchToProps)(Drawer);
 
@@ -270,7 +267,7 @@ const IconContainer = styled.div`
   justify-content: center;
   border-radius: 0.5rem;
   margin-right: 10px;
-  padding-right: 8px,
+  padding-right: 8px;
   padding-left: 8px;
   width: 60px;
 `;
