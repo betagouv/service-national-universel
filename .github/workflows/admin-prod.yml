@@ -56,7 +56,7 @@ jobs:
       - name: Install lib
         run: |
           npm --prefix lib i
-          npm run tsc
+          npm --prefix lib run tsc
 
       - name: Add lib into current folder
         run: |
