@@ -329,10 +329,10 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       newYoung = { ...newYoung, statusPhase1: "NOT_DONE" };
     }
 
+    await updateApplicationsWithYoungOrMission({ young, newYoung });
+
     young.set(newYoung);
     await young.save({ fromUser: req.user });
-
-    await updateApplicationsWithYoungOrMission({ young });
 
     // if they had a cohesion center, we check if we need to update the places taken / left
     if (young.cohesionCenterId) {

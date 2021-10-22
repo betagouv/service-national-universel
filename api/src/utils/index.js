@@ -429,29 +429,48 @@ const getBaseUrl = () => {
   return "http://localhost:8080";
 };
 
-async function updateApplicationsWithYoungOrMission({ young, mission }) {
+async function updateApplicationsWithYoungOrMission({ young, newYoung, mission, newMission }) {
   if (young && Object.keys(young).length !== 0) {
+    const noNeedToUpdate = isObjectKeysIsEqual(young, newYoung, ["firstName", "lastName", "email", "birthdateAt", "city", "department", "cohort"]);
+    console.log(noNeedToUpdate);
+    if (noNeedToUpdate) return;
+
     const applications = await ApplicationModel.find({ youngId: young._id });
     for (const application of applications) {
-      application.youngFirstName = young.firstName;
-      application.youngLastName = young.lastName;
-      application.youngEmail = young.email;
-      application.youngBirthdateAt = young.birthdateAt;
-      application.youngCity = young.city;
-      application.youngDepartment = young.department;
-      application.youngCohort = young.cohort;
+      application.youngFirstName = newYoung.firstName;
+      application.youngLastName = newYoung.lastName;
+      application.youngEmail = newYoung.email;
+      application.youngBirthdateAt = newYoung.birthdateAt;
+      application.youngCity = newYoung.city;
+      application.youngDepartment = newYoung.department;
+      application.youngCohort = newYoung.cohort;
       await application.save();
+      console.log("Update Application");
     }
   } else if (mission && Object.keys(mission).length !== 0) {
+    const noNeedToUpdate = isObjectKeysIsEqual(mission, newMission, ["name", "department", "region"]);
+    console.log(noNeedToUpdate);
+    if (noNeedToUpdate) return;
+
     const applications = await ApplicationModel.find({ missionId: mission._id });
     for (const application of applications) {
-      application.missionName = mission.name;
-      application.missionDepartment = mission.department;
-      application.missionRegion = mission.region;
+      application.missionName = newMission.name;
+      application.missionDepartment = newMission.department;
+      application.missionRegion = newMission.region;
       await application.save();
+      console.log("Update Application");
     }
   }
 }
+
+const isObjectKeysIsEqual = (object, newObject, keys) => {
+  for (const key of keys) {
+    if (object[key] !== newObject[key]) {
+      return false;
+    }
+  }
+  return true;
+};
 
 const ERRORS = {
   SERVER_ERROR: "SERVER_ERROR",

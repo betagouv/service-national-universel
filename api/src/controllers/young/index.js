@@ -355,12 +355,14 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
 
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    await updateApplicationsWithYoungOrMission({ young, newYoung: value });
+
     delete value.firstName;
     delete value.lastName;
+
     young.set(value);
     await young.save({ fromUser: req.user });
-
-    await updateApplicationsWithYoungOrMission({ young });
 
     // Check quartier prioritaires.
     if (value.zip && value.city && value.address) {

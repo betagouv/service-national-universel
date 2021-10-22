@@ -113,11 +113,11 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     const { error: errorMission, value: checkedMission } = validateMission(req.body);
     if (errorMission) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error: errorMission });
 
+    await updateApplicationsWithYoungOrMission({ mission, newMission: checkedMission });
+
     const oldStatus = mission.status;
     mission.set(checkedMission);
     await mission.save({ fromUser: req.user });
-
-    await updateApplicationsWithYoungOrMission({ mission });
 
     // if there is a status change, update the application
     if (oldStatus !== mission.status) {
