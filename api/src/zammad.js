@@ -41,10 +41,12 @@ async function sync(doc, modelName) {
   try {
     if (ENVIRONMENT !== "production") return;
     let role;
-    if (doc.role === "referent") {
+    if (doc.role === "referent" || doc.role === "referent_department" || doc.role === "referent_region") {
       role = ROLE.REFERENT;
-    } else if (doc.role === "responsible") {
+    } else if (doc.role === "responsible" || doc.role === "supervisor") {
       role = ROLE.STRUCTURE;
+    } else if (doc.role === "admin") {
+      role = ROLE.ADMIN;
     } else {
       role = ROLE.VOLONTAIRE;
     }
