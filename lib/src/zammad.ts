@@ -1,5 +1,5 @@
 export const ticketStates = {
-  1: "nouveaxxu",
+  1: "nouveau",
   2: "ouvert",
   3: "rappel en attente",
   4: "fermé",
