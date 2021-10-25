@@ -236,6 +236,9 @@ router.post("/ticket/update", async (req, res) => {
     const article = req.body.article;
     if (!ticket) return;
     if (!article) return;
+    console.log("|------- CREATED BY ------|", ticket.created_by.email);
+    console.log("|------- UPDATED BY ------|", article.created_by.updated_by);
+    console.log("|------- UPDATED BY EMAIL ------|", article.created_by.email);
     if (article.created_by.updated_by !== ticket.created_by.email) {
       const webhookObject = {
         email: ticket.created_by.email,
