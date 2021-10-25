@@ -13,21 +13,6 @@ app.use(
   })
 );
 
-app.use(function (req, res, next) {
-  if (req.headers.host === "moncompte.snu.gouv.fr") {
-    res.redirect(301, "https://inscription.snu.gouv.fr/auth");
-  } else {
-    next();
-  }
-});
-
-app.use(
-  forceDomain({
-    hostname: "inscription.snu.gouv.fr",
-    protocol: "https",
-    excludeRule: /[a-zA-Z0-9-]+\.cleverapps\.io/,
-  })
-);
 app.use(hsts({ maxAge: 31536000, includeSubDomains: true, preload: true }));
 app.use(express.static(path.join(__dirname, "../build")));
 

@@ -14,7 +14,7 @@ if (environment === "staging") {
 if (environment === "production") {
   apiURL = "https://api.snu.gouv.fr";
   adminURL = "https://admin.snu.gouv.fr";
-  appURL = "https://inscription.snu.gouv.fr";
+  appURL = "https://moncompte.snu.gouv.fr";
 }
 
 const S3PREFIX = "";
