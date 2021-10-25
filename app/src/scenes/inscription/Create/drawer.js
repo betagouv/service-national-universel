@@ -41,15 +41,6 @@ export default ({ step }) => {
               </a>
             </Logos>
           </Header>
-          <a onClick={() => history.push("/inscription/coordonnees")}>
-            <div className="icon">
-              <img src={require("../../../assets/logo-snu.png")} height={36} />
-            </div>
-            <div style={{ color: "white" }}>
-              Inscription
-              <span>En cours</span>
-            </div>
-          </a>
           <ul className="stepNav">
             <Element status={getStatus(STEPS.PROFIL)}>
               <a onClick={() => handleClick(STEPS.PROFIL)}>Mon profil</a>
@@ -262,7 +253,7 @@ const MainNav = styled.ul`
     }
   }
   .stepNav {
-    padding-left: 80px;
+    padding-left: 35px;
     a {
       cursor: pointer;
       display: block;
@@ -270,6 +261,7 @@ const MainNav = styled.ul`
       position: relative;
       margin-bottom: 20px;
       padding-left: 25px;
+      font-size: 14px;
       :hover {
         color: #fff;
         font-weight: 600;
