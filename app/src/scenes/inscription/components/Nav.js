@@ -6,7 +6,6 @@ import { Link, useHistory } from "react-router-dom";
 import api from "../../../services/api";
 import { setYoung } from "../../../redux/auth/actions";
 import { STEPS } from "../utils";
-import ProgressBar from "../../../components/ProgressBar";
 
 export default ({ step }) => {
   const history = useHistory();
@@ -60,29 +59,55 @@ export default ({ step }) => {
       </HeaderNav>
       <Topbar>
         <Element status={getStatus(STEPS.PROFIL)} onClick={() => handleClick(STEPS.PROFIL)}>
-          <a>Mon profil</a>
+          <a>
+            <span className="icon">
+              <span>01</span>
+            </span>
+            <span className="text">Profil</span>
+          </a>
         </Element>
         <Element status={getStatus(STEPS.COORDONNEES)} onClick={() => handleClick(STEPS.COORDONNEES)}>
-          <a>Coordonnées</a>
+          <a>
+            <span className="icon">
+              <span>02</span>
+            </span>
+            <span className="text">Coordonnées</span>
+          </a>
         </Element>
         <Element status={getStatus(STEPS.PARTICULIERES)} onClick={() => handleClick(STEPS.PARTICULIERES)}>
           <a>
-            Situations <br />
-            particulières
+            <span className="icon">
+              <span>03</span>
+            </span>
+            <span className="text">
+              Situations <br />
+              particulières
+            </span>
           </a>
         </Element>
         <Element status={getStatus(STEPS.REPRESENTANTS)} onClick={() => handleClick(STEPS.REPRESENTANTS)}>
           <a>
-            Représentants <br />
-            légaux
+            <span className="icon">
+              <span>04</span>
+            </span>
+            <span className="text">
+              Représentants <br />
+              légaux
+            </span>
           </a>
         </Element>
         <Element status={getStatus(STEPS.CONSENTEMENTS)} onClick={() => handleClick(STEPS.CONSENTEMENTS)}>
-          <a>Consentements</a>
+          <a>
+            <span className="icon">
+              <span>05</span>
+            </span>
+            <span className="text">Consentements</span>
+          </a>
         </Element>
-        <Element onClick={() => handleClick(STEPS.DONE)} />
+        <Element onClick={() => handleClick(STEPS.DONE)} style={{ flexGrow: 0 }}>
+          <div className="logo" />
+        </Element>
       </Topbar>
-      <ProgressBar backgroundColor="#5850ec" backgroundColorCompleted="#fff" completed={((currentIndex * 100) / (Object.keys(STEPS).length - 1)).toFixed(0)} />
     </>
   );
 };
@@ -131,7 +156,7 @@ const Topbar = styled.ul`
   background-color: #fff;
   list-style: none;
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
   width: 100%;
   border-radius: 6px;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
@@ -145,10 +170,6 @@ const Topbar = styled.ul`
   scrollbar-width: none; /* Firefox */
   max-width: 1270px;
   margin: 0 auto 0.5rem;
-  @media (max-width: 1240px) {
-    box-shadow: none;
-    background-color: transparent;
-  }
 `;
 
 const Element = styled.li`
@@ -157,98 +178,74 @@ const Element = styled.li`
   display: flex;
   align-items: center;
   cursor: pointer;
-  :not(:last-child)::after {
-    content: "";
-    display: block;
-    height: 100%;
-    width: 20px;
-    background: url(${require("../../../assets/big-angle.svg")}) center top no-repeat;
-    background-size: cover;
-    position: absolute;
-    top: 0;
-    right: 0;
-  }
-  :last-child {
+
+  .logo {
     font-size: 0;
-    padding: 0;
+    margin: 15px;
     background: url(${require("../../../assets/logo-snu.png")}) center no-repeat;
     background-size: contain;
     height: 35px;
     width: 35px;
-    margin: auto auto;
-    @media (max-width: 1240px) {
-      margin: 0;
-    }
-    flex: 0 0 3rem;
+    -webkit-filter: ${(props) => {
+      if (props.status === "inprogress" || props.status === "done") return "";
+      return "grayscale(100%)";
+    }};
+    filter: ${(props) => {
+      if (props.status === "inprogress" || props.status === "done") return "";
+      return "grayscale(100%)";
+    }};
+    opacity: ${(props) => {
+      if (props.status === "inprogress" || props.status === "done") return "";
+      return "0.4";
+    }};
   }
+
   a {
     text-decoration: none;
     font-size: 14px;
     line-height: 1.2;
     font-weight: ${(props) => {
-      if (props.status === "inprogress") return "500";
-      return "300";
+      if (props.status === "inprogress" || props.status === "done") return "600";
+      return "400";
     }};
     color: ${(props) => {
       if (props.status === "todo") return "#949ca8!important";
-      if (props.status === "inprogress") return "#584FEC!important";
+      if (props.status === "inprogress") return "#362F78!important";
       if (props.status === "done") return "black!important";
       return "";
     }};
 
     position: relative;
-    display: block;
-    padding: 15px;
-    padding-left: 50px;
+    display: flex;
+    align-items: center;
+    padding: 5px;
     z-index: 2;
     cursor: pointer;
-
-    ::before {
-      content: "";
-      display: block;
-      border: ${(props) => {
-        if (props.status === "todo") return "2px solid #949ca8";
-        if (props.status === "inprogress") return "2px solid #5850ec";
-        if (props.status === "done") return "2px solid #5850ec";
-        return "";
-      }};
+    .icon {
       background-color: ${(props) => {
-        if (props.status === "todo") return "white";
-        if (props.status === "inprogress") return "white";
-        if (props.status === "done") return "#5850ec";
+        if (props.status === "inprogress" || props.status === "todo") return "#fff";
+        if (props.status === "done") return "#362f78";
         return "";
       }};
-      height: 25px;
-      width: 25px;
+      color: ${(props) => {
+        if (props.status === "todo") return "#7A808C";
+        if (props.status === "inprogress") return "#362f78";
+        if (props.status === "done") return "#fff";
+        return "";
+      }};
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       border-radius: 50%;
-      position: absolute;
-      left: 15px;
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 1;
-    }
-    ::after {
-      content: "";
-      display: block;
-      height: 7px;
-      width: 11px;
-
-      border-bottom: ${(props) => {
-        if (props.status === "done") return "2px solid white";
-        if (props.status === "inprogress") return "2px solid #5850ec";
-        if (props.status === "todo") return "2px solid #949ca8";
+      border: 2px solid;
+      border-color: ${(props) => {
+        if (props.status === "done" || props.status === "inprogress") return "#362f78";
+        if (props.status === "todo") return "#D3D7DB";
+        return "";
       }};
-      border-left: ${(props) => {
-        if (props.status === "done") return "2px solid white";
-        if (props.status === "inprogress") return "2px solid #5850ec";
-        if (props.status === "todo") return "2px solid #949ca8";
-      }};
-
-      transform: translateY(-50%) rotate(-45deg);
-      position: absolute;
-      left: 22px;
-      top: 48%;
-      z-index: 2;
+      margin: 10px;
     }
     &.done {
       color: #000;
@@ -275,66 +272,9 @@ const Element = styled.li`
     }
   }
 
-  @media (max-width: 1400px) {
-    a {
-      font-size: 12px;
-      padding-left: 45px;
-      ::before {
-        left: 12px;
-      }
-      ::after {
-        left: 19px;
-      }
-    }
-  }
-
   @media (max-width: 1240px) {
-    align-items: flex-start;
-    :not(:last-child)::after {
-      background: #949ca8;
-      height: 2px;
-      width: 100%;
-      left: 20px;
-      top: 18px;
-      transform: translateY(-50%);
-    }
-    a {
-      max-width: 3rem;
-      padding: 45px 5px 0 5px;
-      text-align: center;
-      color: ${(props) => {
-        if (props.status === "inprogress") return "#584FEC!important";
-        return "transparent!important";
-      }};
-      ::before {
-        top: 5px;
-        left: 50%;
-        transform: translateX(-50%);
-        height: 25px;
-        width: 25px;
-        background-color: rgb(244, 245, 247);
-      }
-      ::after {
-        top: 13px;
-        left: 50%;
-        transform: translateX(-50%) rotate(-45deg);
-        height: 6px;
-        width: 10px;
-        border-bottom: ${(props) => {
-          if (props.status === "done") return "2px solid #5850ec";
-        }};
-        border-left: ${(props) => {
-          if (props.status === "done") return "2px solid #5850ec";
-        }};
-      }
-    }
-  }
-  @media (max-width: 414px) {
-    :last-child {
-      flex: 0 0 2.5rem;
-    }
-    a {
-      max-width: 2.5rem;
+    .text {
+      display: none;
     }
   }
 `;
