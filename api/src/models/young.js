@@ -110,7 +110,6 @@ const Schema = new mongoose.Schema({
   },
   statusPhase1MotifDetail: {
     type: String,
-    default: "",
     documentation: {
       description: "Détail du motif du statut du volontaire lié à la première phase",
     },
