@@ -79,10 +79,7 @@ export default ({ step }) => {
             <span className="icon">
               <span>03</span>
             </span>
-            <span className="text">
-              Situations <br />
-              particulières
-            </span>
+            <span className="text">Situations particulières</span>
           </a>
         </Element>
         <Element status={getStatus(STEPS.REPRESENTANTS)} onClick={() => handleClick(STEPS.REPRESENTANTS)}>
@@ -90,10 +87,7 @@ export default ({ step }) => {
             <span className="icon">
               <span>04</span>
             </span>
-            <span className="text">
-              Représentants <br />
-              légaux
-            </span>
+            <span className="text">Représentants légaux</span>
           </a>
         </Element>
         <Element status={getStatus(STEPS.CONSENTEMENTS)} onClick={() => handleClick(STEPS.CONSENTEMENTS)}>
