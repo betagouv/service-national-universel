@@ -259,9 +259,9 @@ const sendAutoAffectationMail = async (nextYoung, center) => {
       .replace(/{{centerName}}/, center.name)
       .replace(/{{centerAddress}}/, center.address + " " + center.zip + " " + center.city)
       .replace(/{{centerDepartement}}/, center.department)
-      .replace(/{{ctaAccept}}/, "https://inscription.snu.gouv.fr/auth/login?redirect=phase1")
-      .replace(/{{ctaDocuments}}/, "https://inscription.snu.gouv.fr/auth/login?redirect=phase1")
-      .replace(/{{ctaWithdraw}}/, "https://inscription.snu.gouv.fr/auth/login?redirect=phase1"),
+      .replace(/{{ctaAccept}}/, "https://moncompte.snu.gouv.fr/auth/login?redirect=phase1")
+      .replace(/{{ctaDocuments}}/, "https://moncompte.snu.gouv.fr/auth/login?redirect=phase1")
+      .replace(/{{ctaWithdraw}}/, "https://moncompte.snu.gouv.fr/auth/login?redirect=phase1"),
     { cc }
   );
 };
