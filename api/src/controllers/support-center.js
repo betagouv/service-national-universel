@@ -9,6 +9,7 @@ const { ERRORS, isYoung } = require("../utils");
 const { ZAMMAD_GROUP } = require("snu-lib/constants");
 const { ticketStateIdByName } = require("snu-lib/zammad");
 const { sendTemplate } = require("../sendinblue");
+const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 
 async function checkStateTicket({ state_id, created_by_id, updated_by_id, id, email }) {
   if (state_id === ticketStateIdByName("fermé")) {
@@ -233,11 +234,14 @@ router.post("/ticket/update", async (req, res) => {
     console.log("!!------------| WEBHOOK START | ------------!!", req.body);
     console.log("!!------------| WEBHOOK END | ------------!!");
     const ticket = req.body.ticket;
-    if (ticket.updated_at !== user) {
-      sendTemplate(208, {
+    const article = req.body.article;
+    if (ticket.updated_by !== ticket.created_by.email) {
+      sendTemplate(SENDINBLUE_TEMPLATES.young.ANSWER_RECEIVED, {
+        emailTo: [{ name: `${ticket.created_by.firstname} ${ticket.created_by.lastname}`, email: ticket.created_by.email }],
         params: {
-
-        }
+          cta: `${APP_URL}/besoin-d-aide`,
+          message: article.body,
+        },
       });
     }
     return res.status(200).send({ ok: true, data: [] });
