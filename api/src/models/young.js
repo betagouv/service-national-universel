@@ -103,7 +103,6 @@ const Schema = new mongoose.Schema({
   },
   statusPhase1Motif: {
     type: String,
-    default: "",
     enum: ["ILLNESS", "DEATH", "ADMINISTRATION_CANCEL", "OTHER"],
     documentation: {
       description: "Motif du statut du volontaire lié à la première phase",
