@@ -21,7 +21,7 @@ export default () => {
   const renderStep = () => {
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE) return <Done />;
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED) return <Affected />;
-    if (young.statusPhase1 === YOUNG_STATUS_PHASE1.CANCEL && young.cohesion2020Step !== "DONE") return <Cancel />;
+    if ((young.statusPhase1 === YOUNG_STATUS_PHASE1.CANCEL && young.cohesion2020Step !== "DONE") || young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED) return <Cancel />;
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) return <NotDone />;
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_ACCEPTATION) return <WaitingAcceptation />;
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION) return <WaitingAffectation />;

@@ -9,7 +9,7 @@ export default () => {
       <Hero>
         <Content>
           <h1>
-            <strong>{young.firstName},</strong> votre séjour a été annulé suite à la crise sanitaire !
+            <strong>{young.firstName},</strong> vous avez été dispensé de séjour de cohésion
           </h1>
           <div style={{ marginTop: "1rem", fontStyle: "italic" }}>
             Si vous n'avez pas réalisé votre JDC, nous vous invitons à vous inscrire sur{" "}

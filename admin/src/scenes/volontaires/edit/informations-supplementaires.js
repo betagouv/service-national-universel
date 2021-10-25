@@ -1,9 +1,10 @@
 import React from "react";
 import { Col } from "reactstrap";
 
-import { translate, YOUNG_PHASE, YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3 } from "../../../utils";
+import { translate, YOUNG_PHASE, YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE1_MOTIF, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3 } from "../../../utils";
 import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import Select from "../components/Select";
+import Item from "../components/Item";
 
 export default ({ values, handleChange }) => (
   <Col md={6} style={{ marginBottom: "20px" }}>
@@ -30,6 +31,18 @@ export default ({ values, handleChange }) => (
           title="Statut Phase 1"
           options={Object.keys(YOUNG_STATUS_PHASE1).map((s) => ({ value: s, label: translate(s) }))}
         />
+        {values.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED && (
+          <Select
+            name="statusPhase1Motif"
+            values={values}
+            handleChange={handleChange}
+            title="Motif du statut Phase 1"
+            options={Object.keys(YOUNG_STATUS_PHASE1_MOTIF).map((s) => ({ value: s, label: translate(s) }))}
+          />
+        )}
+        {values.statusPhase1Motif === YOUNG_STATUS_PHASE1_MOTIF.OTHER && (
+          <Item title="Détail du motif de dispense" values={values} name="statusPhase1MotifDetail" handleChange={handleChange} />
+        )}
         <Select
           name="statusPhase2"
           values={values}
