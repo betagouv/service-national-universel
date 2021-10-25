@@ -232,16 +232,28 @@ router.get("/ticket/:ticketId/tags", passport.authenticate(["referent"], { sessi
 
 router.post("/ticket/update", async (req, res) => {
   try {
-    console.log("!!------------| WEBHOOK START | ------------!!", req.body);
-    console.log("!!------------| WEBHOOK END | ------------!!");
     const ticket = req.body.ticket;
     const article = req.body.article;
-    if (ticket.updated_by !== ticket.created_by.email) {
+    if (!ticket) return;
+    if (!article) return;
+    if (article.created_by.updated_by !== ticket.created_by.email) {
+      const webhookObject = {
+        email: ticket.created_by.email,
+        firstname: ticket.created_by.firstname,
+        lastname: ticket.created_by.lastname,
+        body: article.body
+      };
+      const { error, value } = Joi.object({ email: Joi.string().email().required(), body: Joi.string().required(), firstname: Joi.string().required(), lastname: Joi.string().required(), })
+        .unknown()
+        .validate(webhookObject);
+      if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      const { email, firstname, lastname, body } = value;
+      console.log("|--------- EMAIL ---------|", email);
       sendTemplate(SENDINBLUE_TEMPLATES.young.ANSWER_RECEIVED, {
-        emailTo: [{ name: `${ticket.created_by.firstname} ${ticket.created_by.lastname}`, email: "chloe@selego.co" }],
+        emailTo: [{ name: `${firstname} ${lastname}`, email: "chloe@selego.co" }],
         params: {
           cta: `${APP_URL}/besoin-d-aide`,
-          message: article.body,
+          message: body,
         },
       });
     }
