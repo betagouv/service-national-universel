@@ -76,7 +76,7 @@ export default (props) => {
           <Details title="Code&nbsp;Postal" value={young.cohesionCenterZip} />
         </>
       );
-    if (young.statusPhase1 === "CANCEL" && young.cohesion2020Step !== "DONE") return <p>Le séjour de cohésion a été annulé.</p>;
+    if ((young.statusPhase1 === "CANCEL" || young.statusPhase1 === "EXEMPTED") && young.cohesion2020Step !== "DONE") return <p>Le séjour de cohésion a été annulé.</p>;
     if (young.statusPhase1 === "AFFECTED")
       return (
         <>
