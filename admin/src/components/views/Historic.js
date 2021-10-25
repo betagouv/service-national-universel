@@ -53,14 +53,17 @@ const Hit = ({ hit, model }) => {
   return (
     <>
       {hit.ops?.map((e, i) => {
+        const originalValue = translate(JSON.stringify(e.originalValue)?.replace(/"/g, ""));
+        const value = translate(JSON.stringify(e.value)?.replace(/"/g, ""));
+
         return (
           <tr key={i} style={{ borderBottom: i === hit.ops.length - 1 && "1px solid #ddd" }}>
             <td>{hit.user && hit.user.firstName && hit.user.lastName ? `${hit.user.firstName} ${hit.user.lastName}` : "Non renseigné"}</td>
             <td>
               <Op>{`${translateOperationName(e.op)}`}</Op> : {`${translateModelFields(model, e.path.substring(1))}`}
             </td>
-            <td>{translate(JSON.stringify(e.originalValue)?.replace(/"/g, "")) || "-"}</td>
-            <td>{translate(JSON.stringify(e.value)?.replace(/"/g, "")) || "-"}</td>
+            <td>{(Date.parse(originalValue) ? formatStringLongDate(originalValue) : originalValue) || "-"}</td>
+            <td>{(Date.parse(value) ? formatStringLongDate(value) : value) || "-"}</td>
             <td>{formatStringLongDate(hit.date)}</td>
           </tr>
         );

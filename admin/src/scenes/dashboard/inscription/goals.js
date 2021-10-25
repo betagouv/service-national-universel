@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Col, Row } from "reactstrap";
 import { YOUNG_STATUS_COLORS, departmentList, department2region } from "../../../utils";
 import { CardArrow, Card, CardTitle, CardValueWrapper, CardValue } from "../../../components/dashboard";
+import { toastr } from "react-redux-toastr";
 
 import api from "../../../services/api";
 
@@ -70,7 +71,7 @@ export default ({ filter }) => {
       return true;
     }
     const { data, ok, code } = await api.get("/inscription-goal");
-    if (!ok) return toastr.error("nope");
+    if (!ok) return toastr.error("Une erreur s'est produite.");
     setInscriptionGoals(
       departmentList.map((d) => data.filter(filterByRegionAndDepartement).find((e) => e.department === d) || { department: d, region: department2region[d], max: null })
     );

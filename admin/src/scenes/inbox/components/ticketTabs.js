@@ -10,19 +10,18 @@ import SuccessIcon from "../../../components/SuccessIcon";
 
 import api from "../../../services/api";
 
-export default ({ setTicket, selectedTicket, setOverview }) => {
+export default ({ setTicket, selectedTicket }) => {
   const [stateFilter, setStateFilter] = useState();
   const [tickets, setTickets] = useState(null);
   const user = useSelector((state) => state.Auth.user);
 
   const getTickets = async (tags) => {
-    const { data } = await api.post(`/support-center/ticket/search-by-tags?withArticles=true`, { tags });
-    const ticketNotification = data.reduce((prev, curr) => {
-      prev[curr.state_id] = (prev[curr.state_id] || 0) + 1;
-      return prev;
-    }, {});
-    setOverview(ticketNotification);
-    setTickets(data);
+    try {
+      const { data } = await api.post(`/support-center/ticket/search-by-tags?withArticles=true`, { tags });
+      setTickets(data);
+    } catch (err) {
+      console.log("Oups, une erreur s'est produite.");
+    }
   };
 
   useEffect(() => {

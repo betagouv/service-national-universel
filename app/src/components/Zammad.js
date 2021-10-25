@@ -16,7 +16,7 @@ export default function Zammad() {
   const young = useSelector((state) => state.Auth.young);
 
   useEffect(() => {
-    if (!window) return;
+    if (!window || !window.$) return;
 
     window.$(function () {
       if (typeof ZammadChat === "undefined") return;

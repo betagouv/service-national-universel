@@ -16,7 +16,7 @@ export default function Zammad() {
   const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
-    if (!window) return;
+    if (!window || !window.$) return;
 
     window.$(function () {
       if (typeof ZammadChat === "undefined") return;
@@ -40,11 +40,12 @@ export default function Zammad() {
         if (isNew) {
           if (user) {
             const info = [
-              `🧑‍🏫 <a href="${adminURL}/user/${user._id}">${user.firstName + " " + user.lastName}</a> ${user.email} ${translate(user.role) + (user.subRole ? ` (${translate(user.subRole)})` : "")
+              `🧑‍🏫 <a href="${adminURL}/user/${user._id}">${user.firstName + " " + user.lastName}</a> ${user.email} ${
+                translate(user.role) + (user.subRole ? ` (${translate(user.subRole)})` : "")
               }`,
               (user.department || "") +
-              (user.department && user.structureId ? " | " : "") +
-              (user.structureId ? '<a href="' + adminURL + "/structure/" + user.structureId + '">Voir la structure</a>' : ""),
+                (user.department && user.structureId ? " | " : "") +
+                (user.structureId ? '<a href="' + adminURL + "/structure/" + user.structureId + '">Voir la structure</a>' : ""),
             ];
             // We have to create a ticket before initializing first chat message
             // because we have to include link.

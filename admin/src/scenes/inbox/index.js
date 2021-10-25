@@ -9,13 +9,12 @@ import { environment } from "../../config";
 
 export default () => {
   const [ticket, setTicket] = useState(null);
-  const [overview, setOverview] = useState({});
 
   return (
     <HeroContainer>
-      <Header overview={overview} />
+      <Header />
       <section>
-        <TicketTabs setOverview={setOverview} setTicket={setTicket} selectedTicket={ticket} />
+        <TicketTabs setTicket={setTicket} selectedTicket={ticket} />
         <TicketMessage ticket={ticket} />
         <Infos ticket={ticket} />
       </section>

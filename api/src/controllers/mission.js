@@ -53,7 +53,9 @@ const updateApplication = async (mission, fromUser) => {
     await sendTemplate(SENDINBLUE_TEMPLATES.young.MISSION_CANCEL, {
       emailTo: [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }],
       params: {
-        cta: `${APP_URL}/mission`,
+        cta: `${APP_URL}/phase2`,
+        missionName: mission.name,
+        message: mission.statusComment,
       },
     });
   }

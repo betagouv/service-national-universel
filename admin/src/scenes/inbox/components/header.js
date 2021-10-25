@@ -4,24 +4,28 @@ import MailCloseIcon from "../../../components/MailCloseIcon";
 import MailOpenIcon from "../../../components/MailOpenIcon";
 import SuccessIcon from "../../../components/SuccessIcon";
 import { ticketStateIdByName } from "../../../utils";
+import { useSelector } from "react-redux";
 
-export default ({ overview }) => {
+export default () => {
+  const openedTickets = useSelector((state) => state.Tickets.open);
+  const newTickets = useSelector((state) => state.Tickets.new);
+  const closedTickets = useSelector((state) => state.Tickets.closed);
   return (
     <HeaderContainer>
       <NotifcationContainer>
         <Notification>
           <MailCloseIcon color="#F1545B" style={{ margin: 0, padding: "5px" }} />
-          <NotificationNumber>{overview[ticketStateIdByName("nouveau")] || 0}</NotificationNumber>non&nbsp;lu(s)
+          <NotificationNumber>{newTickets}</NotificationNumber>non&nbsp;lu(s)
         </Notification>
         <VL></VL>
         <Notification>
           <MailOpenIcon color="#F8B951" style={{ margin: 0, padding: "5px" }} />
-          <NotificationNumber>{overview[ticketStateIdByName("ouvert")] || 0}</NotificationNumber>ouvert(s)
+          <NotificationNumber>{openedTickets}</NotificationNumber>ouvert(s)
         </Notification>
         <VL></VL>
         <Notification>
           <SuccessIcon color="#6BC762" style={{ margin: 0, padding: "5px" }} />
-          <NotificationNumber>{overview[ticketStateIdByName("fermé")] || 0}</NotificationNumber>archivé(s)
+          <NotificationNumber>{closedTickets}</NotificationNumber>archivé(s)
         </Notification>
       </NotifcationContainer>
       <div style={{ display: "flex", justifyContent: "center", alignContent: "center" }}>
