@@ -5,15 +5,17 @@ const router = express.Router({ mergeParams: true });
 const { capture } = require("../../sentry");
 const renderFromHtml = require("../../htmlToPdf");
 const YoungObject = require("../../models/young");
+const ContractObject = require("../../models/contract");
 const { ERRORS, isYoung, isReferent } = require("../../utils");
 const certificate = require("../../templates/certificate");
 const form = require("../../templates/form");
 const convocation = require("../../templates/convocation");
+const contractPhase2 = require("../../templates/contractPhase2");
 const { sendTemplate } = require("../../sendinblue");
 const { canSendFileByMail } = require("snu-lib/roles");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 
-function getHtmlTemplate(type, template, young) {
+function getHtmlTemplate(type, template, young, contract = undefined) {
   if (type === "certificate" && template === "1") return certificate.phase1(young);
   if (type === "certificate" && template === "2") return certificate.phase2(young);
   if (type === "certificate" && template === "3") return certificate.phase3(young);
@@ -21,9 +23,10 @@ function getHtmlTemplate(type, template, young) {
   if (type === "form" && template === "imageRight") return form.imageRight(young);
   if (type === "form" && template === "autotestPCR") return form.autotestPCR(young);
   if (type === "convocation" && template === "cohesion") return convocation.cohesion(young);
+  if (type === "contract" && template === "2") return contractPhase2.render(contract);
 }
 
-function getMailParams(type, template, young) {
+function getMailParams(type, template, young, contract = undefined) {
   if (type === "certificate" && template === "1")
     return {
       object: `Attestation de fin de phase 1 de ${young.firstName}`,
@@ -43,6 +46,11 @@ function getMailParams(type, template, young) {
     return {
       object: `Attestation de réalisation du SNU de ${young.firstName}`,
       message: `Vous trouverez en pièce-jointe de ce mail l'attestation de réalisation du SNU.`,
+    };
+  if (type === "contract" && template === "2")
+    return {
+      object: `Contrat de la mission ${contract.missionName}`,
+      message: `Vous trouverez en pièce-jointe de ce mail le contract de la mission ${contract.missionName}.`,
     };
 
   //todo: add other templates
@@ -103,10 +111,18 @@ router.post(
         return res.status(401).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
 
+      if (type === "contract") {
+        const contract_id = req.query.contract_id;
+        if (!contract_id) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+        contract = await ContractObject.findById(contract_id);
+        if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      }
+
       // Create html
-      const html = await getHtmlTemplate(type, template, young);
-      const { object, message } = getMailParams(type, template, young);
+      const html = await getHtmlTemplate(type, template, young, contract);
       if (!html) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      const { object, message } = getMailParams(type, template, young, contract);
 
       const buffer = await renderFromHtml(html, type === "certificate" ? { landscape: true } : { format: "A4", margin: 0 });
       const content = buffer.toString("base64");
