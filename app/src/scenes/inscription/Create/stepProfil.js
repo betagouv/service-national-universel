@@ -37,8 +37,8 @@ export default () => {
         validateOnBlur={false}
         onSubmit={async (values) => {
           try {
-            const { firstName, lastName, email, password } = values;
-            const { user, token, code, ok } = await api.post(`/young/signup`, { firstName, lastName, email, password });
+            const { firstName, lastName, email, password, birthdateAt } = values;
+            const { user, token, code, ok } = await api.post(`/young/signup`, { firstName, lastName, email, password, birthdateAt });
             if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             if (token) api.setToken(token);
 
@@ -59,7 +59,11 @@ export default () => {
             history.push("/inscription/coordonnees");
           } catch (e) {
             console.log(e);
-            if (e.code === "USER_ALREADY_REGISTERED") return toastr.error("Cet email est déjà utilisé.", "Merci de vous connecter pour continuer votre inscription.");
+            if (e.code === "USER_ALREADY_REGISTERED")
+              return toastr.error("Un dossier a déjà été inscrit sur la plateforme avec ces informations.", "Si vous ne vous souvenez plus de votre identifiant, cliquez ici.", {
+                timeOut: 10000,
+                onToastrClick: () => window.open(`https://www.snu.gouv.fr/foire-aux-questions-11`, "_blank").focus(),
+              });
             toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code) || e.message);
             Sentry.captureException(e);
           }
