@@ -432,7 +432,6 @@ const getBaseUrl = () => {
 async function updateApplicationsWithYoungOrMission({ young, newYoung, mission, newMission }) {
   if (young && Object.keys(young).length !== 0) {
     const noNeedToUpdate = isObjectKeysIsEqual(young, newYoung, ["firstName", "lastName", "email", "birthdateAt", "city", "department", "cohort"]);
-    console.log(noNeedToUpdate);
     if (noNeedToUpdate) return;
 
     const applications = await ApplicationModel.find({ youngId: young._id });
@@ -465,7 +464,7 @@ async function updateApplicationsWithYoungOrMission({ young, newYoung, mission, 
 
 const isObjectKeysIsEqual = (object, newObject, keys) => {
   for (const key of keys) {
-    if (object[key] !== newObject[key]) {
+    if (object[key]?.toString() !== newObject[key]?.toString()) {
       return false;
     }
   }
