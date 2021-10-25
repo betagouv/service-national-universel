@@ -237,7 +237,7 @@ router.post("/ticket/update", async (req, res) => {
     const article = req.body.article;
     if (ticket.updated_by !== ticket.created_by.email) {
       sendTemplate(SENDINBLUE_TEMPLATES.young.ANSWER_RECEIVED, {
-        emailTo: [{ name: `${ticket.created_by.firstname} ${ticket.created_by.lastname}`, email: ticket.created_by.email }],
+        emailTo: [{ name: `${ticket.created_by.firstname} ${ticket.created_by.lastname}`, email: "chloe@selego.co" }],
         params: {
           cta: `${APP_URL}/besoin-d-aide`,
           message: article.body,
