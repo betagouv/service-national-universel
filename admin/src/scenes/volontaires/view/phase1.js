@@ -89,7 +89,7 @@ export default (props) => {
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED) {
       return (
         <p>
-          Vous avez été dispensé de séjour de cohésion au motif suivant :
+          Le volontaire a été dispensé de séjour de cohésion au motif suivant :
           {young.statusPhase1Motif === YOUNG_STATUS_PHASE1_MOTIF.OTHER ? ` ${young.statusPhase1MotifDetail}` : ` ${translate(young.statusPhase1Motif)}`}
         </p>
       );
