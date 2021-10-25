@@ -5,7 +5,17 @@ import { Formik } from "formik";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-import { translate, YOUNG_STATUS_COLORS, formatStringLongDate, FORCE_DISABLED_ASSIGN_COHESION_CENTER, confirmMessageChangePhase1Presence, ROLES, colors } from "../../../utils";
+import {
+  translate,
+  YOUNG_STATUS_COLORS,
+  YOUNG_STATUS_PHASE1,
+  YOUNG_STATUS_PHASE1_MOTIF,
+  formatStringLongDate,
+  FORCE_DISABLED_ASSIGN_COHESION_CENTER,
+  confirmMessageChangePhase1Presence,
+  ROLES,
+  colors,
+} from "../../../utils";
 import WrapperPhase1 from "./wrapper";
 import api from "../../../services/api";
 import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
@@ -76,6 +86,14 @@ export default (props) => {
           <Details title="Code&nbsp;Postal" value={young.cohesionCenterZip} />
         </>
       );
+    if (young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED) {
+      return (
+        <p>
+          Le volontaire a été dispensé de séjour de cohésion au motif suivant :
+          {young.statusPhase1Motif === YOUNG_STATUS_PHASE1_MOTIF.OTHER ? ` ${young.statusPhase1MotifDetail}` : ` ${translate(young.statusPhase1Motif)}`}
+        </p>
+      );
+    }
     if ((young.statusPhase1 === "CANCEL" || young.statusPhase1 === "EXEMPTED") && young.cohesion2020Step !== "DONE") return <p>Le séjour de cohésion a été annulé.</p>;
     if (young.statusPhase1 === "AFFECTED")
       return (
