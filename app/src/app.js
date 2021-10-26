@@ -55,9 +55,6 @@ export default () => {
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
   useEffect(() => {
-    if (window.location.href.includes("inscription.snu.gouv.fr")) {
-      window.location.href = "https://moncompte.snu.gouv.fr" + window.location.pathname;
-    }
     const params = queryString.parse(location.search);
     const { utm_source, utm_medium, utm_campaign } = params;
     const sessionProperties = {};
