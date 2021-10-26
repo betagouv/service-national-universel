@@ -249,7 +249,7 @@ router.post("/ticket/update", async (req, res) => {
       if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       const { email, firstname, lastname, body } = value;
       sendTemplate(SENDINBLUE_TEMPLATES.young.ANSWER_RECEIVED, {
-        emailTo: [{ name: `${firstname} ${lastname}`, email: "chloe@selego.co" }],
+        emailTo: [{ name: `${firstname} ${lastname}`, email }],
         params: {
           cta: ticket.created_by.role[0] === "Volontaire" ? `${APP_URL}/besoin-d-aide` : `${ADMIN_URL}/besoin-d-aide`,
           message: body,
