@@ -6,8 +6,9 @@ import FormRow from "./FormRow";
 import FormLabel from "./FormLabel";
 import FormRadioLabel from "./FormRadioLabel";
 import ErrorMessage, { requiredMessage } from "../../scenes/inscription/components/errorMessage";
+import styled from "styled-components";
 
-export default ({ title, children, name, values, handleChange, errors, touched }) => (
+export default ({ title, children, name, values, handleChange, errors, touched, childrenField }) => (
   <FormRow>
     <Col md={4}>
       <FormLabel>
@@ -15,16 +16,21 @@ export default ({ title, children, name, values, handleChange, errors, touched }
         {children}
       </FormLabel>
     </Col>
-    <Col>
-      <FormRadioLabel>
+    <Col md={8} style={{ display: "flex", alignItems: "center" }}>
+      <FormRadioLabelStyled>
         <Field validate={(v) => !v && requiredMessage} type="radio" name={name} value="false" checked={values[name] === "false"} onChange={handleChange} />
         Non
-      </FormRadioLabel>
-      <FormRadioLabel>
+      </FormRadioLabelStyled>
+      <FormRadioLabelStyled>
         <Field validate={(v) => !v && requiredMessage} type="radio" name={name} value="true" checked={values[name] === "true"} onChange={handleChange} />
         Oui
-      </FormRadioLabel>
+      </FormRadioLabelStyled>
       <ErrorMessage errors={errors} touched={touched} name={name} />
     </Col>
+    {childrenField}
   </FormRow>
 );
+
+const FormRadioLabelStyled = styled(FormRadioLabel)`
+  margin-right: 30px;
+`;
