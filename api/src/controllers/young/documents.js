@@ -15,7 +15,7 @@ const { sendTemplate } = require("../../sendinblue");
 const { canSendFileByMail } = require("snu-lib/roles");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib/constants");
 
-function getHtmlTemplate(type, template, young, contract = undefined) {
+function getHtmlTemplate(type, template, young, contract) {
   if (type === "certificate" && template === "1") return certificate.phase1(young);
   if (type === "certificate" && template === "2") return certificate.phase2(young);
   if (type === "certificate" && template === "3") return certificate.phase3(young);
@@ -23,10 +23,10 @@ function getHtmlTemplate(type, template, young, contract = undefined) {
   if (type === "form" && template === "imageRight") return form.imageRight(young);
   if (type === "form" && template === "autotestPCR") return form.autotestPCR(young);
   if (type === "convocation" && template === "cohesion") return convocation.cohesion(young);
-  if (type === "contract" && template === "2") return contractPhase2.render(contract);
+  if (type === "contract" && template === "2" && contract) return contractPhase2.render(contract);
 }
 
-function getMailParams(type, template, young, contract = undefined) {
+function getMailParams(type, template, young, contract) {
   if (type === "certificate" && template === "1")
     return {
       object: `Attestation de fin de phase 1 de ${young.firstName}`,
@@ -47,7 +47,7 @@ function getMailParams(type, template, young, contract = undefined) {
       object: `Attestation de réalisation du SNU de ${young.firstName}`,
       message: `Vous trouverez en pièce-jointe de ce mail l'attestation de réalisation du SNU.`,
     };
-  if (type === "contract" && template === "2")
+  if (type === "contract" && template === "2" && contract)
     return {
       object: `Contrat de la mission ${contract.missionName}`,
       message: `Vous trouverez en pièce-jointe de ce mail le contract de la mission ${contract.missionName}.`,
@@ -94,11 +94,16 @@ router.post(
   passport.authenticate(["young", "referent"], { session: false, failWithError: true }),
   async (req, res) => {
     try {
-      const { error, value } = Joi.object({ id: Joi.string().required(), type: Joi.string().required(), template: Joi.string().required() })
+      const { error, value } = Joi.object({
+        id: Joi.string().required(),
+        type: Joi.string().required(),
+        template: Joi.string().required(),
+        contract_id: Joi.string(),
+      })
         .unknown()
         .validate({ ...req.params, ...req.body }, { stripUnknown: true });
       if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-      const { id, type, template, fileName } = value;
+      const { id, type, template, fileName, contract_id } = value;
 
       const young = await YoungObject.findById(id);
       if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -111,8 +116,8 @@ router.post(
         return res.status(401).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
 
+      let contract;
       if (type === "contract") {
-        const contract_id = req.query.contract_id;
         if (!contract_id) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
         contract = await ContractObject.findById(contract_id);
