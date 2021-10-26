@@ -68,7 +68,7 @@ router.post("/signup", async (req, res) => {
     if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
 
     const countDocuments = await YoungObject.countDocuments({ lastName, firstName, birthdateAt });
-    if (userExist > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+    if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
 
     const user = await YoungObject.create({ password, email, firstName, lastName, birthdateAt });
     const token = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });
