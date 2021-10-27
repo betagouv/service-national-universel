@@ -788,6 +788,13 @@ const Schema = new mongoose.Schema({
       description: "Le volontaire pratique une activité de haut niveau",
     },
   },
+  highSkilledActivityInSameDepartment: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le volontaire pratique une activité de haut niveau et souhaite etre affecté dans son département pour la phase 1",
+    },
+  },
   highSkilledActivityType: {
     type: String,
     documentation: {

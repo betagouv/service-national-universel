@@ -120,12 +120,9 @@ export default () => {
                 }
               />
             )}
-            <FormLegend>
-              Activités de haut niveau (sport, musique, etc.)
-              <p>pour laquelle une participation à un concours, une audition, une compétition est prévue pendant le séjour de cohésion</p>
-            </FormLegend>
+            <FormLegend>Sportif de haut niveau inscrit sur liste ministerielle</FormLegend>
             <FormRadioLabelTrueFalse
-              title="Pratiquez-vous une activité de haut-niveau (sport, musique, théâtre...) ?"
+              title="Etes-vous sportif de haut niveau inscrit sur liste ministérielle ?"
               name="highSkilledActivity"
               values={values}
               handleChange={handleChange}
@@ -135,26 +132,14 @@ export default () => {
 
             {values["highSkilledActivity"] === "true" && (
               <>
-                <FormRow align="center">
-                  <Col md={4}>
-                    <Label>Activités de haut-niveau</Label>
-                  </Col>
-                  <Col>
-                    <Field
-                      placeholder="Sélectionnez votre activité"
-                      as="select"
-                      className="form-control"
-                      validate={(v) => !v && requiredMessage}
-                      name="highSkilledActivityType"
-                      value={values.highSkilledActivityType}
-                      onChange={handleChange}
-                      style={{ width: "400px" }}
-                    >
-                      <option label=""></option>
-                    </Field>
-                    <ErrorMessage errors={errors} touched={touched} name="highSkilledActivityType" />
-                  </Col>
-                </FormRow>
+                <FormRadioLabelTrueFalse
+                  title="Souhaitez-vous être affecté(e) dans votre département de résidence ?"
+                  name="highSkilledActivityInSameDepartment"
+                  values={values}
+                  handleChange={handleChange}
+                  errors={errors}
+                  touched={touched}
+                />
               </>
             )}
             <FormFooter values={values} handleSubmit={handleSubmit} errors={errors} />

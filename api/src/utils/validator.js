@@ -403,6 +403,7 @@ function validateYoung(young, user) {
     specificAmenagment: Joi.string().allow(null, ""),
     specificAmenagmentType: Joi.string().allow(null, ""),
     highSkilledActivity: Joi.string().allow(null, ""),
+    highSkilledActivityInSameDepartment: Joi.string().allow(null, ""),
     highSkilledActivityType: Joi.string().allow(null, ""),
     highSkilledActivityProofFiles: Joi.array().items(Joi.string().allow(null, "")),
     parentConsentment: Joi.string().allow(null, ""),
