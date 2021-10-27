@@ -11,6 +11,7 @@ const { ticketStateIdByName } = require("snu-lib/zammad");
 const { sendTemplate } = require("../sendinblue");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { APP_URL, ADMIN_URL } = require("../config");
+const zammadAuth = require("../middlewares/zammadAuth");
 
 async function checkStateTicket({ state_id, created_by_id, updated_by_id, id, email }) {
   if (state_id === ticketStateIdByName("fermé")) {
@@ -230,7 +231,7 @@ router.get("/ticket/:ticketId/tags", passport.authenticate(["referent"], { sessi
   }
 });
 
-router.post("/ticket/update", async (req, res) => {
+router.post("/ticket/update", zammadAuth, async (req, res) => {
   try {
     if (req["user-agent"] !== "Zammad User Agent") return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const ticket = req.body.ticket;
