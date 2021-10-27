@@ -8,7 +8,7 @@ import FormRadioLabel from "./FormRadioLabel";
 import ErrorMessage, { requiredMessage } from "../../scenes/inscription/components/errorMessage";
 import styled from "styled-components";
 
-export default ({ title, children, name, values, handleChange, errors, touched, childrenField }) => (
+export default ({ title, children, name, values, handleChange, errors, touched }) => (
   <FormRow>
     <Col md={4}>
       <FormLabel>
@@ -27,7 +27,6 @@ export default ({ title, children, name, values, handleChange, errors, touched, 
       </FormRadioLabelStyled>
       <ErrorMessage errors={errors} touched={touched} name={name} />
     </Col>
-    {childrenField}
   </FormRow>
 );
 
