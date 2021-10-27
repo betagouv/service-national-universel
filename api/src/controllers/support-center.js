@@ -232,13 +232,11 @@ router.get("/ticket/:ticketId/tags", passport.authenticate(["referent"], { sessi
 
 router.post("/ticket/update", async (req, res) => {
   try {
+    console.log("|------- REQUEST -------|", req);
     const ticket = req.body.ticket;
     const article = req.body.article;
     if (!ticket) return;
     if (!article) return;
-    console.log("|------- CREATED BY ------|", ticket.created_by.email);
-    console.log("|------- UPDATED BY ------|", article.created_by.updated_by);
-    console.log("|------- UPDATED BY EMAIL ------|", article.created_by.email);
     if (article.created_by.updated_by !== ticket.created_by.email) {
       const webhookObject = {
         email: ticket.created_by.email,
@@ -251,7 +249,6 @@ router.post("/ticket/update", async (req, res) => {
         .validate(webhookObject);
       if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       const { email, firstname, lastname, body } = value;
-      console.log("|--------- EMAIL ---------|", email);
       sendTemplate(SENDINBLUE_TEMPLATES.young.ANSWER_RECEIVED, {
         emailTo: [{ name: `${firstname} ${lastname}`, email: "chloe@selego.co" }],
         params: {
