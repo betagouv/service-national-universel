@@ -232,8 +232,7 @@ router.get("/ticket/:ticketId/tags", passport.authenticate(["referent"], { sessi
 
 router.post("/ticket/update", async (req, res) => {
   try {
-    console.log("|------- REQUEST -------|", JSON.stringify(req));
-    console.log("|------- REQUEST HEADERS -------|", JSON.stringify(req.headers));
+    console.log("|------- REQUEST -------|", req.headers['x-forwarded-for']);
     const ticket = req.body.ticket;
     const article = req.body.article;
     if (!ticket) return;
