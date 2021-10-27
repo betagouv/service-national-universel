@@ -32,10 +32,12 @@ export default () => {
     <Wrapper>
       <Heading>
         <h2>Situations particulières</h2>
-        <p>Complétez les informations ci-dessous</p>
-        <a target="blank" href="https://apicivique.s3.eu-west-3.amazonaws.com/Note_relative_aux_situations_particulie%CC%80res.pdf">
-          En savoir plus
-        </a>
+        <p style={{ color: "#6B7280" }}>
+          Complétez les informations ci-dessous{" "}
+          <a target="blank" href="https://apicivique.s3.eu-west-3.amazonaws.com/Note_relative_aux_situations_particulie%CC%80res.pdf">
+            En savoir plus
+          </a>
+        </p>
       </Heading>
       <Formik
         initialValues={young}
@@ -86,160 +88,53 @@ export default () => {
                 </a>
               </div>
             </FormRadioLabelTrueFalse>
-            {(values["ppsBeneficiary"] === "true" || values["handicap"] === "true") && (
-              <>
-                <FormRadioLabelTrueFalse
-                  title="Etes-vous suivi par une structure médicosociale ?"
-                  name="medicosocialStructure"
-                  values={values}
-                  handleChange={handleChange}
-                  errors={errors}
-                  touched={touched}
-                />
-                {values["medicosocialStructure"] === "true" && (
-                  <>
-                    <FormRow align="center">
-                      <Col md={4}>
-                        <Label>Nom de la structure</Label>
-                      </Col>
-                      <Col>
-                        <Field
-                          class="form-control"
-                          validate={(v) => !v && requiredMessage}
-                          placeholder="Nom de la structure"
-                          name="medicosocialStructureName"
-                          value={values.medicosocialStructureName}
-                          onChange={handleChange}
-                        />
-                        <ErrorMessage errors={errors} touched={touched} name="medicosocialStructureName" />
-                      </Col>
-                    </FormRow>
-                    <FormRow>
-                      <Col md={4}>
-                        <Label>Localisation de la structure</Label>
-                      </Col>
-                      <Col>
-                        <Row>
-                          <Col md={12} style={{ marginTop: 15 }}>
-                            <Label>Rechercher</Label>
-                            <AddressInput
-                              keys={{
-                                city: "medicosocialStructureCity",
-                                zip: "medicosocialStructureZip",
-                                address: "medicosocialStructureAddress",
-                                location: "medicosocialStructureLocation",
-                                department: "medicosocialStructureDepartment",
-                                region: "medicosocialStructureRegion",
-                              }}
-                              values={values}
-                              handleChange={handleChange}
-                              errors={errors}
-                              touched={touched}
-                            />
-                          </Col>
-                        </Row>
-                      </Col>
-                    </FormRow>
-                  </>
-                )}
-              </>
-            )}
             {(values["ppsBeneficiary"] === "true" || values["paiBeneficiary"] === "true" || values["handicap"] === "true") && (
               <>
                 <FormRadioLabelTrueFalse
-                  title="Avez-vous besoin d'un aménagement spécifique pour la réalisation du séjour de cohésion ?"
+                  title="Avez-vous besoin d'un aménagement spécifique ?"
                   name="specificAmenagment"
                   values={values}
                   handleChange={handleChange}
                   errors={errors}
                   touched={touched}
-                >
-                  <div className="info">Affectation à proximité du domicile, participation de jour uniquement, activités sportives adaptées, ...</div>
-                  {values["specificAmenagment"] === "true" && (
-                    <div className="info" style={{ marginTop: "1rem" }}>
-                      Le chef de centre vous contactera pour les aménagements nécessaires à votre séjour de cohésion.
-                    </div>
-                  )}
-                </FormRadioLabelTrueFalse>
-
-                {values["specificAmenagment"] === "true" && (
-                  <FormRow align="center">
-                    <Col md={4}>
-                      <Label>Précisez-en la nature</Label>
-                    </Col>
-                    <Col>
-                      <Field
-                        placeholder="Affectation à proximité du domicile, participation de jour uniquement, activités sportives adaptées, etc."
-                        className="form-control"
-                        validate={(v) => !v && requiredMessage}
-                        name="specificAmenagmentType"
-                        value={values.specificAmenagmentType}
-                        onChange={handleChange}
-                      />
-                      <ErrorMessage errors={errors} touched={touched} name="specificAmenagmentType" />
-                    </Col>
-                  </FormRow>
-                )}
+                />
+                <FormRadioLabelTrueFalse
+                  title="Souhaitez-vous être affecté(e) dans votre département de résidence ?"
+                  name="handicapInSameDepartment"
+                  values={values}
+                  handleChange={handleChange}
+                  errors={errors}
+                  touched={touched}
+                />
+                <FormRadioLabelTrueFalse
+                  title="Avez-vous besoin d’un aménagement pour mobilité réduite ?"
+                  name="reducedMobilityAccess"
+                  values={values}
+                  handleChange={handleChange}
+                  errors={errors}
+                  touched={touched}
+                />
               </>
             )}
-            <FormLegend>
-              Activités de haut niveau (sport, musique, etc.)
-              <p>pour laquelle une participation à un concours, une audition, une compétition est prévue pendant le séjour de cohésion</p>
-            </FormLegend>
+            <FormLegend>Sportif de haut niveau inscrit sur liste ministerielle</FormLegend>
             <FormRadioLabelTrueFalse
-              title="Pratiquez-vous une activité de haut-niveau (sport, musique, théâtre...) ?"
+              title="Etes-vous sportif de haut niveau inscrit sur liste ministérielle ?"
               name="highSkilledActivity"
               values={values}
               handleChange={handleChange}
               errors={errors}
               touched={touched}
             />
-
             {values["highSkilledActivity"] === "true" && (
               <>
-                <FormRow align="center">
-                  <Col md={4}>
-                    <Label>Nature de l'activité de haut-niveau</Label>
-                  </Col>
-                  <Col>
-                    <Field
-                      placeholder="sport, musique, etc."
-                      className="form-control"
-                      validate={(v) => !v && requiredMessage}
-                      name="highSkilledActivityType"
-                      value={values.highSkilledActivityType}
-                      onChange={handleChange}
-                    />
-                    <ErrorMessage errors={errors} touched={touched} name="highSkilledActivityType" />
-                  </Col>
-                </FormRow>
-                <FormRow>
-                  <Col md={4}>
-                    <Label>En cas de compétition, concours, audition ... prévu(e) pendant le séjour de cohésion, déposez ici votre convocation - justificatif d'engagement</Label>
-                  </Col>
-                  <Col>
-                    <DndFileInput
-                      optional
-                      value={values.highSkilledActivityProofFiles}
-                      name="highSkilledActivityProofFiles"
-                      onChange={async (e) => {
-                        let { ok, data, code } = await api.uploadFile("/young/file/highSkilledActivityProofFiles", e.target.files);
-                        if (code === "FILE_CORRUPTED") {
-                          return toastr.error(
-                            "Le fichier semble corrompu",
-                            "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
-                            { timeOut: 0 }
-                          );
-                        }
-
-                        if (!ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
-                        handleChange({ target: { value: data, name: "highSkilledActivityProofFiles" } });
-                        toastr.success("Fichier téléversé");
-                      }}
-                    />
-                    <ErrorMessage errors={errors} touched={touched} name="highSkilledActivityProofFiles" />
-                  </Col>
-                </FormRow>
+                <FormRadioLabelTrueFalse
+                  title="Souhaitez-vous être affecté(e) dans votre département de résidence ?"
+                  name="highSkilledActivityInSameDepartment"
+                  values={values}
+                  handleChange={handleChange}
+                  errors={errors}
+                  touched={touched}
+                />
               </>
             )}
             <FormFooter values={values} handleSubmit={handleSubmit} errors={errors} />
