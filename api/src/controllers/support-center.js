@@ -232,10 +232,11 @@ router.get("/ticket/:ticketId/tags", passport.authenticate(["referent"], { sessi
 
 router.post("/ticket/update", async (req, res) => {
   try {
+    if (req["user-agent"] !== "Zammad User Agent") return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const ticket = req.body.ticket;
     const article = req.body.article;
-    if (!ticket) return;
-    if (!article) return;
+    if (!ticket) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!article) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     if (article.created_by.email !== ticket.created_by.email) {
       const webhookObject = {
         email: ticket.created_by.email,
