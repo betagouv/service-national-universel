@@ -383,6 +383,8 @@ function validateYoung(young, user) {
       .allow(null),
     parent2FromFranceConnect: Joi.string().allow(null, ""),
     handicap: Joi.string().allow(null, ""),
+    handicapInSameDepartment: Joi.string().allow(null, ""),
+    reducedMobilityAccess: Joi.string().allow(null, ""),
     ppsBeneficiary: Joi.string().allow(null, ""),
     paiBeneficiary: Joi.string().allow(null, ""),
     medicosocialStructure: Joi.string().allow(null, ""),
