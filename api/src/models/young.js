@@ -684,15 +684,27 @@ const Schema = new mongoose.Schema({
   handicap: {
     type: String,
     enum: ["true", "false"],
-    default: "false",
     documentation: {
       description: "Le volontaire a un handicap",
+    },
+  },
+  handicapInSameDepartment: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le volontaire souhaite être affecté dans son département",
+    },
+  },
+  reducedMobilityAccess: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le volontaire a besoin d’un aménagement pour mobilité réduite",
     },
   },
   ppsBeneficiary: {
     type: String,
     enum: ["true", "false"],
-    default: "false",
     documentation: {
       description: "le volontaire bénéficie d'un PPS (projet personnalisé de scolarisation)",
     },
@@ -700,7 +712,6 @@ const Schema = new mongoose.Schema({
   paiBeneficiary: {
     type: String,
     enum: ["true", "false"],
-    default: "false",
     documentation: {
       description: "Le volontaire bénéficie d'un PAI (projet d'accueil individualisé)",
     },

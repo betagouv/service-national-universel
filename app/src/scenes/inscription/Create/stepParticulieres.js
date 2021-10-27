@@ -89,36 +89,32 @@ export default () => {
               </div>
             </FormRadioLabelTrueFalse>
             {(values["ppsBeneficiary"] === "true" || values["paiBeneficiary"] === "true" || values["handicap"] === "true") && (
-              <FormRadioLabelTrueFalse
-                title="Avez-vous besoin d'un aménagement spécifique ?"
-                name="specificAmenagment"
-                values={values}
-                handleChange={handleChange}
-                errors={errors}
-                touched={touched}
-                childrenField={
-                  values["specificAmenagment"] === "true" && (
-                    <>
-                      <Col md={4} />
-                      <Col md={8}>
-                        <Field
-                          placeholder="Sélectionnez un type d'aménagement"
-                          className="form-control"
-                          as="select"
-                          validate={(v) => !v && requiredMessage}
-                          name="specificAmenagmentType"
-                          value={values.specificAmenagmentType}
-                          onChange={handleChange}
-                          style={{ width: "400px" }}
-                        >
-                          <option label=""></option>
-                        </Field>
-                        <ErrorMessage errors={errors} touched={touched} name="specificAmenagmentType" />
-                      </Col>
-                    </>
-                  )
-                }
-              />
+              <>
+                <FormRadioLabelTrueFalse
+                  title="Avez-vous besoin d'un aménagement spécifique ?"
+                  name="specificAmenagment"
+                  values={values}
+                  handleChange={handleChange}
+                  errors={errors}
+                  touched={touched}
+                />
+                <FormRadioLabelTrueFalse
+                  title="Souhaitez-vous être affecté(e) dans votre département de résidence ?"
+                  name="handicapInSameDepartment"
+                  values={values}
+                  handleChange={handleChange}
+                  errors={errors}
+                  touched={touched}
+                />
+                <FormRadioLabelTrueFalse
+                  title="Avez-vous besoin d’un aménagement pour mobilité réduite ?"
+                  name="reducedMobilityAccess"
+                  values={values}
+                  handleChange={handleChange}
+                  errors={errors}
+                  touched={touched}
+                />
+              </>
             )}
             <FormLegend>Sportif de haut niveau inscrit sur liste ministerielle</FormLegend>
             <FormRadioLabelTrueFalse
