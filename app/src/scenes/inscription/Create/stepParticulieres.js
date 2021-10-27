@@ -129,7 +129,6 @@ export default () => {
               errors={errors}
               touched={touched}
             />
-
             {values["highSkilledActivity"] === "true" && (
               <>
                 <FormRadioLabelTrueFalse
