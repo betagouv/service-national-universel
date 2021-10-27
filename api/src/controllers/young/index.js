@@ -52,6 +52,7 @@ router.post("/signup", async (req, res) => {
       firstName: validateFirstName().trim().required(),
       lastName: Joi.string().uppercase().trim().required(),
       password: Joi.string().required(),
+      birthdateAt: Joi.string().trim().required(),
     })
       .unknown()
       .validate(req.body);
@@ -63,10 +64,13 @@ router.post("/signup", async (req, res) => {
       return res.status(400).send({ ok: false, code: error.toString() });
     }
 
-    const { password, email, lastName, firstName } = value;
+    const { password, email, lastName, firstName, birthdateAt } = value;
     if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
 
-    const user = await YoungObject.create({ password, email, firstName, lastName });
+    const countDocuments = await YoungObject.countDocuments({ lastName, firstName, birthdateAt });
+    if (countDocuments > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+
+    const user = await YoungObject.create({ password, email, firstName, lastName, birthdateAt });
     const token = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });
     res.cookie("jwt", token, cookieOptions());
 
