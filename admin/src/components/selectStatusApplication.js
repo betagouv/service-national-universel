@@ -11,6 +11,41 @@ import Chevron from "./Chevron";
 import ModalConfirmWithMessage from "./modals/ModalConfirmWithMessage";
 import ModalConfirm from "./modals/ModalConfirm";
 
+const lookUpAuthorizedStatus = ({ status, role }) => {
+  if ([ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(role)) {
+    return [
+      APPLICATION_STATUS.WAITING_ACCEPTATION,
+      APPLICATION_STATUS.WAITING_VERIFICATION,
+      APPLICATION_STATUS.WAITING_VALIDATION,
+      APPLICATION_STATUS.VALIDATED,
+      APPLICATION_STATUS.IN_PROGRESS,
+      APPLICATION_STATUS.DONE,
+      APPLICATION_STATUS.CANCEL,
+      APPLICATION_STATUS.ABANDON,
+      APPLICATION_STATUS.REFUSED,
+    ];
+  } else {
+    switch (status) {
+      case APPLICATION_STATUS.WAITING_ACCEPTATION:
+        return [APPLICATION_STATUS.REFUSED, APPLICATION_STATUS.CANCEL];
+      case APPLICATION_STATUS.WAITING_VALIDATION:
+        return [APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.REFUSED, APPLICATION_STATUS.CANCEL];
+      case APPLICATION_STATUS.VALIDATED:
+        return [APPLICATION_STATUS.IN_PROGRESS, APPLICATION_STATUS.DONE, APPLICATION_STATUS.ABANDON];
+      case APPLICATION_STATUS.IN_PROGRESS:
+        return [APPLICATION_STATUS.DONE, APPLICATION_STATUS.ABANDON, APPLICATION_STATUS.CANCEL];
+      case APPLICATION_STATUS.REFUSED:
+      case APPLICATION_STATUS.CANCEL:
+      case APPLICATION_STATUS.DONE:
+      case APPLICATION_STATUS.WAITING_VERIFICATION:
+      case APPLICATION_STATUS.ABANDON:
+        return [];
+      default:
+        return [];
+    }
+  }
+};
+
 export default ({ hit, options = [], callback }) => {
   const [application, setApplication] = useState(null);
   const [modalConfirm, setModalConfirm] = useState({ isOpen: false, onConfirm: null });
@@ -30,19 +65,7 @@ export default ({ hit, options = [], callback }) => {
 
   if (!application) return <i style={{ color: colors.darkPurple }}>Chargement...</i>;
 
-  options = [APPLICATION_STATUS.IN_PROGRESS, APPLICATION_STATUS.DONE, APPLICATION_STATUS.ABANDON];
-  if (application.status === APPLICATION_STATUS.WAITING_VALIDATION) options = [APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.REFUSED, APPLICATION_STATUS.CANCEL];
-  if ([ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role))
-    options = [
-      APPLICATION_STATUS.WAITING_VALIDATION,
-      APPLICATION_STATUS.WAITING_VERIFICATION,
-      APPLICATION_STATUS.VALIDATED,
-      APPLICATION_STATUS.REFUSED,
-      APPLICATION_STATUS.CANCEL,
-      APPLICATION_STATUS.IN_PROGRESS,
-      APPLICATION_STATUS.DONE,
-      APPLICATION_STATUS.ABANDON,
-    ];
+  options = lookUpAuthorizedStatus({ status: application.status, role: user.role });
 
   const onClickStatus = (status) => {
     setModalConfirm({

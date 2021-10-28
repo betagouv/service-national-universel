@@ -79,14 +79,18 @@ describe("Young", () => {
     it("should return 400 when password does not match requirments", async () => {
       const fixture = getNewYoungFixture();
       const email = fixture.email.toLowerCase();
-      res = await request(getAppHelper()).post("/young/signup").send({ email, password: "bar", firstName: "foo", lastName: "bar" });
+      res = await request(getAppHelper())
+        .post("/young/signup")
+        .send({ email, password: "bar", firstName: "foo", lastName: "bar", birthdateAt: fixture.birthdateAt });
       expect(res.status).toBe(400);
     });
 
     it("should return 200", async () => {
       const fixture = getNewYoungFixture();
       const email = fixture.email.toLowerCase();
-      res = await request(getAppHelper()).post("/young/signup").send({ email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar" });
+      res = await request(getAppHelper())
+        .post("/young/signup")
+        .send({ email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar", birthdateAt: fixture.birthdateAt });
       expect(res.status).toBe(200);
       expect(res.body.token).toBeTruthy();
     });
@@ -95,7 +99,7 @@ describe("Young", () => {
       const fixture = getNewYoungFixture();
       res = await request(getAppHelper())
         .post("/young/signup")
-        .send({ email: fixture.email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar" });
+        .send({ email: fixture.email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar", birthdateAt: fixture.birthdateAt });
       expect(res.body.user.firstName).toBe("Foo");
       expect(res.body.user.lastName).toBe("BAR");
       expect(res.body.user.email).toBe(fixture.email.toLowerCase());
@@ -105,7 +109,9 @@ describe("Young", () => {
       const fixture = getNewYoungFixture();
       const email = fixture.email.toLowerCase();
       await createYoungHelper({ ...fixture, email });
-      res = await request(getAppHelper()).post("/young/signup").send({ email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar" });
+      res = await request(getAppHelper())
+        .post("/young/signup")
+        .send({ email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar", birthdateAt: fixture.birthdateAt });
       expect(res.status).toBe(409);
     });
   });

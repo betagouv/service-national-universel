@@ -101,6 +101,19 @@ const Schema = new mongoose.Schema({
       description: "Statut du volontaire lié à la première phase",
     },
   },
+  statusPhase1Motif: {
+    type: String,
+    enum: ["ILLNESS", "DEATH", "ADMINISTRATION_CANCEL", "OTHER"],
+    documentation: {
+      description: "Motif du statut du volontaire lié à la première phase",
+    },
+  },
+  statusPhase1MotifDetail: {
+    type: String,
+    documentation: {
+      description: "Détail du motif du statut du volontaire lié à la première phase",
+    },
+  },
   statusPhase2: {
     type: String,
     default: "WAITING_REALISATION",
@@ -671,15 +684,27 @@ const Schema = new mongoose.Schema({
   handicap: {
     type: String,
     enum: ["true", "false"],
-    default: "false",
     documentation: {
       description: "Le volontaire a un handicap",
+    },
+  },
+  handicapInSameDepartment: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le volontaire souhaite être affecté dans son département",
+    },
+  },
+  reducedMobilityAccess: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le volontaire a besoin d’un aménagement pour mobilité réduite",
     },
   },
   ppsBeneficiary: {
     type: String,
     enum: ["true", "false"],
-    default: "false",
     documentation: {
       description: "le volontaire bénéficie d'un PPS (projet personnalisé de scolarisation)",
     },
@@ -687,7 +712,6 @@ const Schema = new mongoose.Schema({
   paiBeneficiary: {
     type: String,
     enum: ["true", "false"],
-    default: "false",
     documentation: {
       description: "Le volontaire bénéficie d'un PAI (projet d'accueil individualisé)",
     },
@@ -773,6 +797,13 @@ const Schema = new mongoose.Schema({
     enum: ["true", "false"],
     documentation: {
       description: "Le volontaire pratique une activité de haut niveau",
+    },
+  },
+  highSkilledActivityInSameDepartment: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le volontaire pratique une activité de haut niveau et souhaite etre affecté dans son département pour la phase 1",
     },
   },
   highSkilledActivityType: {

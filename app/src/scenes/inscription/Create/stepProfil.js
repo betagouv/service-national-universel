@@ -37,8 +37,8 @@ export default () => {
         validateOnBlur={false}
         onSubmit={async (values) => {
           try {
-            const { firstName, lastName, email, password } = values;
-            const { user, token, code, ok } = await api.post(`/young/signup`, { firstName, lastName, email, password });
+            const { firstName, lastName, email, password, birthdateAt } = values;
+            const { user, token, code, ok } = await api.post(`/young/signup`, { firstName, lastName, email, password, birthdateAt });
             if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             if (token) api.setToken(token);
 
@@ -59,7 +59,11 @@ export default () => {
             history.push("/inscription/coordonnees");
           } catch (e) {
             console.log(e);
-            if (e.code === "USER_ALREADY_REGISTERED") return toastr.error("Cet email est déjà utilisé.", "Merci de vous connecter pour continuer votre inscription.");
+            if (e.code === "USER_ALREADY_REGISTERED")
+              return toastr.error("Un dossier a déjà été inscrit sur la plateforme avec ces informations.", "Si vous ne vous souvenez plus de votre identifiant, cliquez ici.", {
+                timeOut: 10000,
+                onToastrClick: () => window.open(`https://www.snu.gouv.fr/foire-aux-questions-11`, "_blank").focus(),
+              });
             toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code) || e.message);
             Sentry.captureException(e);
           }
@@ -114,11 +118,11 @@ export default () => {
                   hidden
                   validate={(v) => {
                     if (!v) return requiredMessage;
-                    const from = new Date(2003, 6, 2); // -1 because months are from 0 to 11
-                    const to = new Date(2006, 3, 20);
+                    const from = new Date(2004, 1, 26); // -1 because months are from 0 to 11
+                    const to = new Date(2007, 6, 3);
                     const [y, m, d] = v.substring(0, 10).split("-");
                     const check = new Date(Date.UTC(parseInt(y), parseInt(m - 1), parseInt(d)));
-                    return (check < from || check > to) && "Vous n'avez pas l'âge requis pour vous inscrire au SNU";
+                    return (check < from || check > to) && "Au moment du séjour, vous devez avoir 15 révolu et moins de 18 ans";
                   }}
                   name="birthdateAt"
                   value={values.birthdateAt}

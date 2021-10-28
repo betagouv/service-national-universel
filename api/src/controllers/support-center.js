@@ -239,6 +239,7 @@ router.post("/ticket/update", zammadAuth, async (req, res) => {
     if (!ticket) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     if (!article) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     if (article.created_by.email !== ticket.created_by.email) {
+
       const webhookObject = {
         email: ticket.created_by.email,
         firstname: ticket.created_by.firstname,
