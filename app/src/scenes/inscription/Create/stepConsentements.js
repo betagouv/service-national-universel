@@ -18,24 +18,14 @@ import { translate, YOUNG_PHASE, YOUNG_STATUS } from "../../../utils";
 export default () => {
   const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
+  const isPlural = useSelector((state) => state.Auth.young?.parent1Status && state.Auth.young?.parent2Status);
   const [clickedRules, setClickedRules] = useState(false);
+
   const dispatch = useDispatch();
   if (!young) {
     history.push("/inscription/profil");
     return <div />;
   }
-
-  const isPlural = () => {
-    return young.parent1Status && young.parent2Status;
-  };
-
-  const isParentFromFranceConnect = () => {
-    if (young.parent1Status && young.parent2Status) {
-      return young.parent1FromFranceConnect === "true" && young.parent2FromFranceConnect === "true";
-    } else {
-      return young.parent1FromFranceConnect === "true";
-    }
-  };
 
   return (
     <Wrapper>
@@ -92,43 +82,18 @@ export default () => {
               </Col>
 
               <Col>
-                {!isParentFromFranceConnect() && (
-                  <>
-                    <div style={{ fontWeight: 400, fontSize: 14, margin: "0.8rem" }}>
-                      Merci de télécharger le consentement du ou des representants légaux{" "}
-                      <a
-                        style={{ color: "#5145cd", textDecoration: "underline" }}
-                        href="https://apicivique.s3.eu-west-3.amazonaws.com/SNU_-_Consentement_repre%CC%81sentant(s)_le%CC%81gal(aux).pdf"
-                        target="blank"
-                      >
-                        ci-joint
-                      </a>{" "}
-                      , le compléter, le dater, le signer, le photographier ou le scanner et le déposer ici.
-                    </div>
-                    <DndFileInput
-                      placeholder="le consentement du ou des representants légaux"
-                      errorMessage="Vous devez téléverser le consentement du ou des representants légaux."
-                      name="parentConsentmentFiles"
-                      value={values.parentConsentmentFiles}
-                      onChange={async (e) => {
-                        let { data: files, ok, code } = await api.uploadFile("/young/file/parentConsentmentFiles", e.target.files);
-
-                        if (code === "FILE_CORRUPTED") {
-                          return toastr.error(
-                            "Le fichier semble corrompu",
-                            "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
-                            { timeOut: 0 }
-                          );
-                        }
-
-                        if (!ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
-                        handleChange({ target: { value: files, name: "parentConsentmentFiles" } });
-                        toastr.success("Fichier téléversé");
-                      }}
-                    />
-                    <ErrorMessage errors={errors} touched={touched} name="parentConsentmentFiles" />
-                  </>
-                )}
+                <SubTitle style={{ marginTop: 0 }}>
+                  {isPlural ? (
+                    <>
+                      <span style={{ fontWeight: "normal" }}>Nous,</span>{" "}
+                      {`${young.parent1FirstName} ${young.parent1LastName} et ${young.parent2FirstName} ${young.parent2LastName}`}
+                    </>
+                  ) : (
+                    <>
+                      <span style={{ fontWeight: "normal" }}>Je,</span> {`${young.parent1FirstName} ${young.parent1LastName}`}
+                    </>
+                  )}
+                </SubTitle>
                 <RadioLabel style={{ marginBottom: 3 }}>
                   <Field
                     validate={(v) => !v && requiredMessage}
@@ -139,9 +104,9 @@ export default () => {
                     onChange={handleChange}
                   />
                   <div>
-                    {isPlural()
-                      ? "Nous confirmons être titulaires de l'autorité parentale/ les représentants légaux de"
-                      : "Je confirme être titulaire de l'autorité parentale/ le représentant légal de"}
+                    {isPlural
+                      ? "confirmons être titulaires de l'autorité parentale/ les représentants légaux de"
+                      : "confirme être titulaire de l'autorité parentale/ le représentant légal de"}
                     <strong>{` ${young.firstName} ${young.lastName}`}</strong>
                   </div>
                 </RadioLabel>
@@ -156,9 +121,27 @@ export default () => {
                     onChange={handleChange}
                   />
                   <div>
-                    {isPlural() ? "Nous autorisons" : "J'autorise"}
+                    {isPlural ? "autorisons" : "autorise"}
                     <strong>{` ${young.firstName} ${young.lastName}`}</strong> à participer à la session 2021 du Service National Universel qui comprend la participation au séjour
                     de cohésion puis la réalisation d'une mission d'intérêt général
+                  </div>
+                </RadioLabel>
+                <RadioLabel style={{ marginBottom: 3 }}>
+                  <Field
+                    validate={(v) => !v && requiredMessage}
+                    value="true"
+                    checked={values.parentConsentment6}
+                    type="checkbox"
+                    name="parentConsentment6"
+                    onChange={handleChange}
+                  />
+                  <div>
+                    <div>
+                      {isPlural ? "acceptons " : "accepte "}
+                      la collecte et le traitement des données personnelles de <strong>{` ${young.firstName} ${young.lastName}`}</strong> par l'administration dans le cadre de
+                      l'inscription au SNU.
+                    </div>
+                    <a>En savoir plus {">"}</a>
                   </div>
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="parentConsentment2" />
@@ -172,7 +155,10 @@ export default () => {
                     name="parentConsentment3"
                     onChange={handleChange}
                   />
-                  <div>{isPlural() ? "Nous nous engageons" : "Je m’engage"} à renseigner le consentement relatif aux droits à l’image* avant le début du séjour de cohésion.</div>
+                  <div>
+                    {isPlural ? "Nous nous engageons" : "Je m’engage"} à renseigner le consentement relatif aux droits à l'image* et à l'utilisation d'autotest COVID*{" "}
+                    <b>avant le début du séjour de cohésion.</b>
+                  </div>
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="parentConsentment3" />
                 <RadioLabel>
@@ -185,8 +171,8 @@ export default () => {
                     onChange={handleChange}
                   />
                   <div>
-                    {isPlural() ? "Nous nous engageons" : "Je m’engage"} à transmettre avant le <b>4 juin 2021</b>, la fiche sanitaire* ainsi que les documents médicaux et
-                    justificatifs nécessaires.
+                    {isPlural ? "Nous nous engageons" : "Je m’engage"} à transmettre la fiche sanitaire* ainsi que les documents médicaux et justificatifs nécessaires
+                    <b> deux semaines avant mon départ en séjour de cohésion.</b>
                   </div>
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="parentConsentment4" />
@@ -199,12 +185,12 @@ export default () => {
                     name="parentConsentment5"
                     onChange={handleChange}
                   />
-                  <div>{isPlural() ? "Nous nous engageons" : "Je m’engage"} à ce que mon enfant soit à jour de ses vaccinations obligatoires*.</div>
+                  <div>{isPlural ? "Nous nous engageons" : "Je m’engage"} à ce que mon enfant soit à jour de ses vaccinations obligatoires*.</div>
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="parentConsentment5" />
                 <div style={{ fontWeight: 400, fontSize: 14, margin: "0.8rem" }}>
-                  * Les informations relatives au formulaire du droit à l'image, à la fiche de sanitaire et aux vaccinations seront disponibles dès la confirmation de l'inscription
-                  dans l'espace personnel de <strong>{young.firstName}</strong>.
+                  * Les informations relatives au formulaire du droit à l'image, à l'utilisation d'autotest COVID, à la fiche de sanitaire et aux vaccinations seront disponibles
+                  dès la confirmation de l'inscription dans l'espace personnel de <strong>{young.firstName}</strong>.
                 </div>
               </Col>
             </FormRow>
@@ -219,7 +205,7 @@ export default () => {
                 <RadioLabel>
                   <Field validate={(v) => !v && requiredMessage} value="true" checked={values.consentment1} type="checkbox" name="consentment1" onChange={handleChange} />
                   <div>
-                    m’engage, sous le contrôle de mon représentant légal, à effectuer à la session 2021 du Service National Universel qui comprend la participation au séjour de
+                    m’engage, sous le contrôle de mon représentant légal, à effectuer à la session 2022 du Service National Universel qui comprend la participation au séjour de
                     cohésion puis la réalisation d'une mission d'intérêt général.
                   </div>
                 </RadioLabel>
@@ -227,16 +213,8 @@ export default () => {
                 <RadioLabel>
                   <Field validate={(v) => !v && requiredMessage} value="true" checked={values.consentment2} type="checkbox" name="consentment2" onChange={handleChange} />
                   <div>
-                    atteste avoir pris connaissance du règlement intérieur{" "}
-                    <a
-                      onClick={() => setClickedRules(true)}
-                      target="blank"
-                      style={{ color: "#5145cd", textDecoration: "underline" }}
-                      href="https://apicivique.s3.eu-west-3.amazonaws.com/SNU_-_Re%CC%81glement_inte%CC%81rieur.pdf"
-                    >
-                      ci-joint
-                    </a>{" "}
-                    des centres SNU et m’engage à en respecter toutes les dispositions.
+                    <div>accepte la collecte et le traitement de mes données personnelles par l'administration dans le cadre de l'inscription au SNU.</div>
+                    <a>En savoir plus {">"}</a>
                   </div>
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="consentment2" />
@@ -264,7 +242,7 @@ const Heading = styled.div`
     font-weight: 700;
   }
   p {
-    color: #161e2e;
+    color: #6b7280;
     font-size: 1rem;
   }
 `;
@@ -284,7 +262,7 @@ const RadioLabel = styled.label`
     width: 100%;
   }
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   color: #374151;
   font-size: 14px;
   margin-top: 15px;
@@ -296,6 +274,7 @@ const RadioLabel = styled.label`
   input {
     cursor: pointer;
     margin-right: 12px;
+    margin-top: 3px;
     width: 15px;
     height: 15px;
     min-width: 15px;
