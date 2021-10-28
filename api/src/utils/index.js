@@ -464,7 +464,7 @@ async function updateApplicationsWithYoungOrMission({ young, newYoung, mission, 
 
 const isObjectKeysIsEqual = (object, newObject, keys) => {
   for (const key of keys) {
-    if (object[key]?.toString() !== newObject[key]?.toString()) {
+    if (object[key] !== newObject[key] && Date.parse(object[key]) !== Date.parse(newObject[key])) {
       return false;
     }
   }
