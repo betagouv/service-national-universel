@@ -86,7 +86,7 @@ export default ({ keys, values, handleChange, errors, touched, departAndRegionVi
             <Label>Pays</Label>
             <Field
               as="select"
-              validate={(v) => required && !v && requiredMessage}
+              validate={(v) => !v && requiredMessage}
               className="form-control"
               placeholder="Pays"
               name={keys.country}
