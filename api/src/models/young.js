@@ -832,6 +832,13 @@ const Schema = new mongoose.Schema({
   },
 
   // * Consentements
+  dataProcessingConsentmentFiles: {
+    type: [String],
+    default: [],
+    documentation: {
+      description: "Fichier : Formulaire de consentement au traitement des données personnelles",
+    },
+  },
   parentConsentment: {
     type: String,
     enum: ["true", "false"],

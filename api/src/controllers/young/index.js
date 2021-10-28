@@ -141,7 +141,14 @@ router.post("/signup_invite", async (req, res) => {
 
 router.post("/file/:key", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
-    const rootKeys = ["cniFiles", "highSkilledActivityProofFiles", "parentConsentmentFiles", "autoTestPCRFiles", "imageRightFiles"];
+    const rootKeys = [
+      "cniFiles",
+      "highSkilledActivityProofFiles",
+      "parentConsentmentFiles",
+      "autoTestPCRFiles",
+      "imageRightFiles",
+      "dataProcessingConsentmentFiles",
+    ];
     const militaryKeys = [
       "militaryPreparationFilesIdentity",
       "militaryPreparationFilesCensus",
