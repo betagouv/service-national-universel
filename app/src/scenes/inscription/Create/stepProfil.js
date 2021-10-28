@@ -107,7 +107,7 @@ export default () => {
               </Col>
               <Col>
                 <FieldWithWidth
-                  width="400px"
+                  maxWidth="400px"
                   placeholder="Prénom"
                   className="form-control"
                   validate={(v) => !v && requiredMessage}
@@ -124,7 +124,7 @@ export default () => {
               </Col>
               <Col>
                 <FieldWithWidth
-                  width="400px"
+                  maxWidth="400px"
                   placeholder="Nom"
                   className="form-control"
                   validate={(v) => !v && requiredMessage}
@@ -168,7 +168,7 @@ export default () => {
               </Col>
               <Col md={8}>
                 <FieldWithWidth
-                  width="400px"
+                  maxWidth="400px"
                   placeholder="xxx@exemple.com"
                   className="form-control"
                   validate={(v) => (!v && requiredMessage) || (!validator.isEmail(v) && "Ce champs est au mauvais format")}
@@ -185,7 +185,7 @@ export default () => {
               </Col>
               <Col md={8}>
                 <FieldWithWidth
-                  width="400px"
+                  maxWidth="400px"
                   placeholder="xxx@exemple.com"
                   className="form-control"
                   validate={(v) => (!v && requiredMessage) || (v !== values.email && "Les emails renseignés ne sont pas identiques")}
@@ -232,7 +232,7 @@ export default () => {
                   {values.birthCountry !== "France" && (
                     <div>
                       <FieldWithWidth
-                        width="195px"
+                        maxWidth="195px"
                         placeholder="Pays de naissance"
                         className="form-control"
                         validate={(v) => !v && requiredMessage}
@@ -246,7 +246,7 @@ export default () => {
                   )}
                   <div>
                     <FieldWithWidth
-                      width="195px"
+                      maxWidth="195px"
                       placeholder="Ville de naissance"
                       className="form-control"
                       validate={(v) => !v && requiredMessage}
@@ -259,7 +259,7 @@ export default () => {
                   {values.birthCountry === "France" && (
                     <div>
                       <FieldWithWidth
-                        width="195px"
+                        maxWidth="195px"
                         placeholder="Code postal"
                         className="form-control"
                         validate={(v) => !v && requiredMessage}
@@ -409,7 +409,7 @@ const TextUnderField = styled.div`
 `;
 
 const FieldWithWidth = styled(Field)`
-  max-width: ${({ width }) => width};
+  max-width: ${({ maxWidth }) => maxWidth};
 `;
 
 const FlexGroup = styled.div`
