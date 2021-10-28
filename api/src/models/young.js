@@ -42,6 +42,18 @@ const Schema = new mongoose.Schema({
       description: "Pays de naissance",
     },
   },
+  birthCity: {
+    type: String,
+    documentation: {
+      description: "La ville de naissance du volontaire",
+    },
+  },
+  birthCityZip: {
+    type: String,
+    documentation: {
+      description: "Le code postal de la ville de naissance du volontaire",
+    },
+  },
   email: {
     type: String,
     required: true,
