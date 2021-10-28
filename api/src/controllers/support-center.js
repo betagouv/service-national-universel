@@ -63,9 +63,7 @@ router.get("/ticket", passport.authenticate(["referent", "young"], { session: fa
       groupId = 5;
     }
     let response = await zammad.api(`/tickets/search?query=${email}`);
-    //console.log("GET TICKETS 1", response.assets.Ticket);
     response = Object.values(response?.assets?.Ticket).filter((ticket) => ticket.created_by_id === customer_id);
-    //console.log("GET TICKETS 2", response);
     if (response.length && req.query.withArticles) {
       const data = [];
       for (const item of response) {
