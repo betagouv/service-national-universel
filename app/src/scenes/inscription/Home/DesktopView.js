@@ -6,6 +6,7 @@ export default () => {
     <Wrapper>
       <Points backgroundColor="#fff">
         <div className="points-title">Conditions d'inscription</div>
+
         <ul>
           <li>
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="rgb(49,196,141)" aria-hidden="true">
@@ -37,8 +38,6 @@ export default () => {
             </FAQ>
           </li>
         </ul>
-      </Points>
-      <Points>
         <ul>
           <li>
             <Infos>
@@ -109,13 +108,14 @@ const Points = styled.div`
   flex: 1;
   background-color: ${({ backgroundColor }) => (backgroundColor ? backgroundColor : "transparent")};
   .points-title {
-    text-align: left;
+    margin-top: 1.5rem;
     text-transform: uppercase;
     display: inline-block;
     padding: 2rem 20px;
-    color: #ef4036;
-    font-size: 0.8rem;
-    font-weight: 400;
+    color: #32257F;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 1px;
   }
   li {
     color: #32267f;
