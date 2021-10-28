@@ -116,10 +116,15 @@ function SendContractByMail({ young, contractId }) {
 
   const onConfirm = async () => {
     setLoading(true);
-    const { ok, code } = await api.post(`/young/${young._id}/documents/contract/2/send-email?contract_id=${contractId}`);
-    setLoading(false);
-    if (ok) return toastr.success(`Document envoyé à ${young.email}`);
-    else return toastr.error("Erreur lors de l'envoie du document", translate(code));
+    try {
+      const { ok, code } = await api.post(`/young/${young._id}/documents/contract/2/send-email?contract_id=${contractId}`);
+      setLoading(false);
+      if (ok) return toastr.success(`Document envoyé à ${young.email}`);
+      else return toastr.error("Erreur lors de l'envoie du document", translate(code));
+    } catch (e) {
+      toastr.error("Erreur lors de l'envoie du document");
+      console.log(e);
+    }
   };
 
   return (

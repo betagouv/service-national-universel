@@ -101,7 +101,7 @@ router.post(
         contract_id: Joi.string(),
       })
         .unknown()
-        .validate({ ...req.params, ...req.body }, { stripUnknown: true });
+        .validate({ ...req.params, ...req.body, ...req.query }, { stripUnknown: true });
       if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       const { id, type, template, fileName, contract_id } = value;
 
