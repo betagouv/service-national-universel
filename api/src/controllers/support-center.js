@@ -233,7 +233,6 @@ router.get("/ticket/:ticketId/tags", passport.authenticate(["referent"], { sessi
 
 router.post("/ticket/update", zammadAuth, async (req, res) => {
   try {
-    if (req["user-agent"] !== "Zammad User Agent") return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const ticket = req.body.ticket;
     const article = req.body.article;
     if (!ticket) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
