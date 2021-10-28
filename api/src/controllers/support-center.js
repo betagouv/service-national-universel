@@ -11,6 +11,7 @@ const { ticketStateIdByName } = require("snu-lib/zammad");
 const { sendTemplate } = require("../sendinblue");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { APP_URL, ADMIN_URL } = require("../config");
+const zammadAuth = require("../middlewares/zammadAuth");
 
 async function checkStateTicket({ state_id, created_by_id, updated_by_id, id, email }) {
   if (state_id === ticketStateIdByName("fermé")) {
@@ -230,14 +231,14 @@ router.get("/ticket/:ticketId/tags", passport.authenticate(["referent"], { sessi
   }
 });
 
-router.post("/ticket/update", async (req, res) => {
+router.post("/ticket/update", zammadAuth, async (req, res) => {
   try {
-    console.log("|------- REQUEST -------|", req.headers['x-forwarded-for']);
     const ticket = req.body.ticket;
     const article = req.body.article;
-    if (!ticket) return;
-    if (!article) return;
-    if (article.created_by.updated_by !== ticket.created_by.email) {
+    if (!ticket) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!article) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (article.created_by.email !== ticket.created_by.email) {
+
       const webhookObject = {
         email: ticket.created_by.email,
         firstname: ticket.created_by.firstname,
@@ -250,9 +251,9 @@ router.post("/ticket/update", async (req, res) => {
       if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       const { email, firstname, lastname, body } = value;
       sendTemplate(SENDINBLUE_TEMPLATES.young.ANSWER_RECEIVED, {
-        emailTo: [{ name: `${firstname} ${lastname}`, email: "chloe@selego.co" }],
+        emailTo: [{ name: `${firstname} ${lastname}`, email }],
         params: {
-          cta: `${APP_URL}/besoin-d-aide`,
+          cta: ticket.created_by.role[0] === "Volontaire" ? `${APP_URL}/besoin-d-aide` : `${ADMIN_URL}/besoin-d-aide`,
           message: body,
         },
       });
