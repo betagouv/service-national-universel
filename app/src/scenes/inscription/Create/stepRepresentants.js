@@ -7,7 +7,7 @@ import { toastr } from "react-redux-toastr";
 import validator from "validator";
 import { useHistory } from "react-router-dom";
 
-import AddressInput from "../../../components/addressInput";
+import AddressInput from "../../../components/addressInputV2";
 import api from "../../../services/api";
 import { setYoung } from "../../../redux/auth/actions";
 import ErrorMessage, { requiredMessage } from "../components/errorMessage";
@@ -37,6 +37,9 @@ const Parent = ({ id = 1, values, errors, touched, handleChange }) => {
             informations manuellement ci-dessous.
           </p>
           <FranceConnectButton callback={getFranceConnectCallback(id)} beforeRedirect={() => handleSave()} />
+          <p>
+            L'identification via <b>FranceConnect</b> dispense de signature numérique du consentement du ou des représentants légaux.
+          </p>
         </Col>
       </FormRow>
     );
@@ -46,47 +49,51 @@ const Parent = ({ id = 1, values, errors, touched, handleChange }) => {
   }
   return (
     <>
-      <FormLegend>Représentant légal n°{id}</FormLegend>
-      <FranceConnectZone handleSave={() => handleSave()} id={id} />
+      <FormLegend>
+        Représentant légal n°{id}
+        <FranceConnectZone handleSave={() => handleSave()} id={id} />
+      </FormLegend>
 
       <FormRow>
         <Col md={4}>
           <Label>Je suis</Label>
         </Col>
         <Col>
-          <RadioLabel>
-            <Field
-              validate={(v) => !v && requiredMessage}
-              type="radio"
-              name={`parent${id}Status`}
-              onChange={handleChange}
-              value="mother"
-              checked={values[`parent${id}Status`] === "mother"}
-            />
-            La mère
-          </RadioLabel>
-          <RadioLabel>
-            <Field
-              validate={(v) => !v && requiredMessage}
-              type="radio"
-              name={`parent${id}Status`}
-              onChange={handleChange}
-              value="father"
-              checked={values[`parent${id}Status`] === "father"}
-            />
-            Le père
-          </RadioLabel>
-          <RadioLabel>
-            <Field
-              validate={(v) => !v && requiredMessage}
-              type="radio"
-              name={`parent${id}Status`}
-              onChange={handleChange}
-              value="representant"
-              checked={values[`parent${id}Status`] === "representant"}
-            />
-            Le représentant légal
-          </RadioLabel>
+          <Inline>
+            <RadioLabel>
+              <Field
+                validate={(v) => !v && requiredMessage}
+                type="radio"
+                name={`parent${id}Status`}
+                onChange={handleChange}
+                value="mother"
+                checked={values[`parent${id}Status`] === "mother"}
+              />
+              La mère
+            </RadioLabel>
+            <RadioLabel>
+              <Field
+                validate={(v) => !v && requiredMessage}
+                type="radio"
+                name={`parent${id}Status`}
+                onChange={handleChange}
+                value="father"
+                checked={values[`parent${id}Status`] === "father"}
+              />
+              Le père
+            </RadioLabel>
+            <RadioLabel>
+              <Field
+                validate={(v) => !v && requiredMessage}
+                type="radio"
+                name={`parent${id}Status`}
+                onChange={handleChange}
+                value="representant"
+                checked={values[`parent${id}Status`] === "representant"}
+              />
+              Le représentant légal
+            </RadioLabel>
+          </Inline>
           <ErrorMessage errors={errors} touched={touched} name={`parent${id}Status`} />
         </Col>
       </FormRow>
@@ -97,7 +104,7 @@ const Parent = ({ id = 1, values, errors, touched, handleChange }) => {
         <Col>
           <Field
             validate={(v) => !v && requiredMessage}
-            placeholder={`Prénom du parent ${id}`}
+            placeholder={`Prénom du représentant légal numéro ${id}`}
             name={`parent${id}FirstName`}
             value={values[`parent${id}FirstName`]}
             onChange={handleChange}
@@ -114,7 +121,7 @@ const Parent = ({ id = 1, values, errors, touched, handleChange }) => {
         <Col>
           <Field
             validate={(v) => !v && requiredMessage}
-            placeholder={`Nom du parent ${id}`}
+            placeholder={`Nom du représentant légal numéro ${id}`}
             name={`parent${id}LastName`}
             value={values[`parent${id}LastName`]}
             onChange={handleChange}
@@ -131,7 +138,7 @@ const Parent = ({ id = 1, values, errors, touched, handleChange }) => {
         <Col>
           <Field
             validate={(v) => (!v && requiredMessage) || (!validator.isEmail(v) && "Ce champs est au mauvais format")}
-            placeholder={`Email du parent ${id}`}
+            placeholder={`Email du représentant légal numéro ${id}`}
             type="email"
             name={`parent${id}Email`}
             value={values[`parent${id}Email`]}
@@ -148,7 +155,7 @@ const Parent = ({ id = 1, values, errors, touched, handleChange }) => {
         <Col>
           <Field
             validate={(v) => (!v && requiredMessage) || (!validator.isMobilePhone(v) && "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX")}
-            placeholder={`Téléphone du parent ${id}`}
+            placeholder={`Téléphone du représentant légal numéro ${id}`}
             type="tel"
             name={`parent${id}Phone`}
             value={values[`parent${id}Phone`]}
@@ -163,53 +170,53 @@ const Parent = ({ id = 1, values, errors, touched, handleChange }) => {
           <Label>Lieu de résidence</Label>
         </Col>
         <Col>
-          <RadioLabel>
-            <Field
-              validate={(v) => !v && requiredMessage}
-              className="form-control"
-              type="radio"
-              name={`parent${id}OwnAddress`}
-              value="false"
-              checked={values[`parent${id}OwnAddress`] === "false"}
-              onChange={handleChange}
-            />
-            Identique à celle du volontaire
-          </RadioLabel>
-          <RadioLabel>
-            <Field
-              validate={(v) => !v && requiredMessage}
-              className="form-control"
-              type="radio"
-              name={`parent${id}OwnAddress`}
-              value="true"
-              checked={values[`parent${id}OwnAddress`] === "true"}
-              onChange={handleChange}
-            />
-            Différente de celle du volontaire
-          </RadioLabel>
+          <Inline>
+            <RadioLabel>
+              <Field
+                validate={(v) => !v && requiredMessage}
+                className="form-control"
+                type="radio"
+                name={`parent${id}OwnAddress`}
+                value="false"
+                checked={values[`parent${id}OwnAddress`] === "false"}
+                onChange={handleChange}
+              />
+              Identique à celle du volontaire
+            </RadioLabel>
+            <RadioLabel>
+              <Field
+                validate={(v) => !v && requiredMessage}
+                className="form-control"
+                type="radio"
+                name={`parent${id}OwnAddress`}
+                value="true"
+                checked={values[`parent${id}OwnAddress`] === "true"}
+                onChange={handleChange}
+              />
+              Différente de celle du volontaire
+            </RadioLabel>
+          </Inline>
           <ErrorMessage errors={errors} touched={touched} name={`parent${id}OwnAddress`} />
           {values[`parent${id}OwnAddress`] === "true" && (
             <FormRow>
-              <Col>
-                <Row>
-                  <Col md={12} style={{ marginTop: 15 }}>
-                    <Label>Rechercher</Label>
-                    <AddressInput
-                      keys={{
-                        city: `parent${id}City`,
-                        zip: `parent${id}Zip`,
-                        address: `parent${id}Address`,
-                        location: `parent${id}Location`,
-                        department: `parent${id}Department`,
-                        region: `parent${id}Region`,
-                      }}
-                      values={values}
-                      handleChange={handleChange}
-                      errors={errors}
-                      touched={touched}
-                    />
-                  </Col>
-                </Row>
+              <Col md={12} style={{ marginTop: 15 }}>
+                <AddressInput
+                  keys={{
+                    city: `parent${id}City`,
+                    zip: `parent${id}Zip`,
+                    address: `parent${id}Address`,
+                    location: `parent${id}Location`,
+                    department: `parent${id}Department`,
+                    region: `parent${id}Region`,
+                    country: `parent${id}Country`,
+                  }}
+                  values={values}
+                  handleChange={handleChange}
+                  errors={errors}
+                  touched={touched}
+                  countryVisible
+                />
+                <ErrorMessage errors={errors} touched={touched} name={`parent${id}OwnAddress`} />
               </Col>
             </FormRow>
           )}
@@ -266,7 +273,7 @@ export default () => {
           <>
             <Parent id={1} values={values} handleChange={handleChange} errors={errors} touched={touched} />
             <FormRow>
-              <Col md={{ offset: 4 }} style={{ padding: "45px 20px" }}>
+              <Col md={4} style={{ padding: "20px 0" }}>
                 <BorderButton
                   onClick={() => {
                     setIsParent2Visible(!isParent2Visible);
@@ -297,6 +304,11 @@ export default () => {
   );
 };
 
+const Inline = styled.div`
+  display: flex;
+  align-items: center;
+`;
+
 const Wrapper = styled.div`
   padding: 40px;
   @media (max-width: 768px) {
@@ -311,9 +323,10 @@ const Heading = styled.div`
     font-weight: 700;
   }
   p {
-    color: #161e2e;
-    font-size: 1rem;
-    margin: 0;
+    color: #6b7280;
+    margin-bottom: 0;
+    font-size: 16px;
+    font-weight: 400;
   }
 `;
 
@@ -327,13 +340,10 @@ const RadioLabel = styled.label`
   align-items: center;
   color: #374151;
   font-size: 14px;
-  margin-bottom: 15px;
-  :last-child {
-    margin-bottom: 0;
-  }
+  margin-right: 15px;
   input {
     cursor: pointer;
-    margin-right: 12px;
+    margin-right: 5px;
     width: 15px;
     height: 15px;
     min-width: 15px;
@@ -343,7 +353,7 @@ const RadioLabel = styled.label`
 
 const BorderButton = styled.button`
   color: #5145cd;
-  border: 1px solid #5145cd;
+  border: 1px solid #d1d5db;
   padding: 12px 25px;
   background-color: transparent;
   outline: 0;
@@ -351,5 +361,6 @@ const BorderButton = styled.button`
   font-weight: 500;
   :hover {
     background-color: #f9fafb;
+    border: 1px solid #5145cd;
   }
 `;
