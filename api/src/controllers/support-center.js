@@ -8,6 +8,9 @@ const zammad = require("../zammad");
 const { ERRORS, isYoung } = require("../utils");
 const { ZAMMAD_GROUP } = require("snu-lib/constants");
 const { ticketStateIdByName } = require("snu-lib/zammad");
+const { sendTemplate } = require("../sendinblue");
+const { SENDINBLUE_TEMPLATES } = require("snu-lib");
+const { APP_URL, ADMIN_URL } = require("../config");
 
 async function checkStateTicket({ state_id, created_by_id, updated_by_id, id, email }) {
   if (state_id === ticketStateIdByName("fermé")) {
@@ -221,6 +224,43 @@ router.get("/ticket/:ticketId/tags", passport.authenticate(["referent"], { sessi
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
     return res.status(200).send({ ok: true, tags: response.tags });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+router.post("/ticket/update", async (req, res) => {
+  try {
+    const ticket = req.body.ticket;
+    const article = req.body.article;
+    if (!ticket) return;
+    if (!article) return;
+    console.log("|------- CREATED BY ------|", ticket.created_by.email);
+    console.log("|------- UPDATED BY ------|", article.created_by.updated_by);
+    console.log("|------- UPDATED BY EMAIL ------|", article.created_by.email);
+    if (article.created_by.updated_by !== ticket.created_by.email) {
+      const webhookObject = {
+        email: ticket.created_by.email,
+        firstname: ticket.created_by.firstname,
+        lastname: ticket.created_by.lastname,
+        body: article.body
+      };
+      const { error, value } = Joi.object({ email: Joi.string().email().required(), body: Joi.string().required(), firstname: Joi.string().required(), lastname: Joi.string().required(), })
+        .unknown()
+        .validate(webhookObject);
+      if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      const { email, firstname, lastname, body } = value;
+      console.log("|--------- EMAIL ---------|", email);
+      sendTemplate(SENDINBLUE_TEMPLATES.young.ANSWER_RECEIVED, {
+        emailTo: [{ name: `${firstname} ${lastname}`, email: "chloe@selego.co" }],
+        params: {
+          cta: `${APP_URL}/besoin-d-aide`,
+          message: body,
+        },
+      });
+    }
+    return res.status(200).send({ ok: true, data: [] });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });

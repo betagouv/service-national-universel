@@ -1,0 +1,26 @@
+name: ✨ Demande de correctif
+title: "fix: "
+description: Proposer une nouvelle fonctionnalité/correctif pour améliorer la plateform du SNU !
+labels: [enhancement]
+body:
+  - type: textarea
+    id: description-bug
+    attributes:
+      label: Fonctionnalité liée à un problème ?
+      description: Une description claire et concise du manque.
+    validations:
+      required: false
+  - type: textarea
+    id: description
+    attributes:
+      label: Fonctionnalité
+      description: Une description claire et concise de la fonctionnalité souhaitée ou de la solution alternative.
+    validations:
+      required: true
+  - type: textarea
+    id: comment
+    attributes:
+      label: Commentaires
+      description: Ajoutez un commentaire
+    validations:
+      required: false

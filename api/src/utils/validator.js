@@ -270,6 +270,8 @@ function validateYoung(young, user) {
     phase: Joi.string().allow(null, ""),
     status: Joi.string().allow(null, ""),
     statusPhase1: Joi.string().allow(null, ""),
+    statusPhase1Motif: Joi.string().allow(null, ""),
+    statusPhase1MotifDetail: Joi.string().allow(null, ""),
     statusPhase2: Joi.string().allow(null, ""),
     statusPhase2UpdatedAt: Joi.string().allow(null, ""),
     statusPhase2Contract: Joi.array().items(Joi.string().allow(null, "")),

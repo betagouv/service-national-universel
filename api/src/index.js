@@ -36,7 +36,7 @@ function handleError(err, req, res, next) {
   res.status(statusCode).json(output);
 }
 
-const origin = [APP_URL, ADMIN_URL];
+const origin = [APP_URL, ADMIN_URL, "https://inscription.snu.gouv.fr"];
 app.use(cors({ credentials: true, origin }));
 app.use(bodyParser.json());
 app.use(bodyParser.text({ type: "application/x-ndjson" }));
