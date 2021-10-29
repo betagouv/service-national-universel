@@ -30,14 +30,34 @@ export default ({ location }) => {
         <CardsContainer>
           <CardTitle>Une aventure en trois phases</CardTitle>
           <div className="desktop">
-            <CardPhase upText="phase 1" title="Le séjour de cohésion" downText="3 sessions possibles en février, juin et juillet 2022" />
-            <CardPhase upText="phase 2" title="La mission d'intérêt général" downText="84 heures à réaliser au cours de l'année suivant le séjour de cohésion" />
-            <CardPhase upText="phase 3 - facultative" title="L'engagement" downText="Mission facultative de 3 mois minimum" />
+            <CardPhase
+              upText="phase 1"
+              title="Le séjour de cohésion"
+              downText="3 sessions possibles en février, juin et juillet 2022"
+              to="https://www.snu.gouv.fr/le-sejour-de-cohesion-26"
+            />
+            <CardPhase
+              upText="phase 2"
+              title="La mission d'intérêt général"
+              downText="84 heures à réaliser au cours de l'année suivant le séjour de cohésion"
+              to="https://www.snu.gouv.fr/la-mission-d-interet-general-27"
+            />
+            <CardPhase upText="phase 3 - facultative" title="L'engagement" downText="Mission facultative de 3 mois minimum" to="https://www.snu.gouv.fr/l-engagement-28" />
           </div>
           <Carousel className="mobile" showThumbs={false} showStatus={false} showArrows={true}>
-            <CardPhase upText="phase 1" title="Le séjour de cohésion" downText="3 sessions possibles en février, juin et juillet 2022" />
-            <CardPhase upText="phase 2" title="La mission d'intérêt général" downText="84 heures à réaliser au cours de l'année suivant le séjour de cohésion" />
-            <CardPhase upText="phase 3 - facultative" title="L'engagement" downText="Mission facultative de 3 mois minimum" />
+            <CardPhase
+              upText="phase 1"
+              title="Le séjour de cohésion"
+              downText="3 sessions possibles en février, juin et juillet 2022"
+              to="https://www.snu.gouv.fr/le-sejour-de-cohesion-26"
+            />
+            <CardPhase
+              upText="phase 2"
+              title="La mission d'intérêt général"
+              downText="84 heures à réaliser au cours de l'année suivant le séjour de cohésion"
+              to="https://www.snu.gouv.fr/la-mission-d-interet-general-27"
+            />
+            <CardPhase upText="phase 3 - facultative" title="L'engagement" downText="Mission facultative de 3 mois minimum" to="https://www.snu.gouv.fr/l-engagement-28" />
           </Carousel>
           <StartButtonContainer className="desktop desktopButton">
             <StartButton>Inscription&nbsp;à&nbsp;partir&nbsp;du&nbsp;8&nbsp;novembre&nbsp;2021</StartButton>
@@ -115,9 +135,9 @@ const CardsContainer = styled.div`
   }
 `;
 
-const CardPhase = ({ upText, title, downText, color }) => {
+const CardPhase = ({ upText, title, downText, color, to }) => {
   return (
-    <Card href="https://support.snu.gouv.fr/help/fr-fr/3-volontaire/70-les-phases-du-snu" target="_blank">
+    <Card href={to} target="_blank">
       <div>
         <CardUpText>{upText}</CardUpText>
         <CardText>{title}</CardText>
@@ -187,7 +207,7 @@ const StartButton = styled.div`
   padding: 1rem 1.5rem;
   text-transform: uppercase;
   color: #fff;
-  background-color: #9A9A9A;
+  background-color: #9a9a9a;
   font-weight: 500;
   font-size: 1rem;
   letter-spacing: 0.03em;
