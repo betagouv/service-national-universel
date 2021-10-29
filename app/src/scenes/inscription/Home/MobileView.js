@@ -7,27 +7,33 @@ export default () => {
       <div className="points-title">Conditions d'inscription</div>
       <ul>
         <li>
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="rgb(49,196,141)" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-          </svg>
+          <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="20" height="20" rx="10" fill="#32267F" fill-opacity=".06" /><path d="M8.644 13.843l-3.487-3.487a.536.536 0 010-.758l.759-.759c.21-.21.549-.21.758 0l2.349 2.349 5.03-5.03c.21-.21.55-.21.76 0l.758.758c.21.21.21.549 0 .758l-6.169 6.169c-.21.21-.549.21-.758 0z" fill="#32267F" /></svg>
           <div>
-            Je suis né(e) entre le <strong> 2 juillet 2003</strong> et le <strong> 20 avril 2006</strong> *
+            Je suis disponible sur l'un des séjours de cohésion 2022, à savoir :
+            <p>
+              <strong className="section_dates_bullet">•</strong> Du <strong>13 au 25 février 2022*</strong>
+            </p>
+            <p>
+              <strong className="section_dates_bullet">•</strong> Du <strong>12 au 24 juin 2022</strong>
+            </p>
+            <p>
+              <strong className="section_dates_bullet">•</strong> Du <strong>3 au 15 juillet 2022</strong>
+            </p>
+            <p>
+              *Si vous êtes scolarisé(e) en zone B ou C, vous bénéficierez d’une autorisation d’absence de votre établissement scolaire
+            </p>
           </div>
         </li>
         <li>
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="rgb(49,196,141)" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-          </svg>
+          <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="20" height="20" rx="10" fill="#32267F" fill-opacity=".06" /><path d="M8.644 13.843l-3.487-3.487a.536.536 0 010-.758l.759-.759c.21-.21.549-.21.758 0l2.349 2.349 5.03-5.03c.21-.21.55-.21.76 0l.758.758c.21.21.21.549 0 .758l-6.169 6.169c-.21.21-.549.21-.758 0z" fill="#32267F" /></svg>
           <div>
             Je suis de <strong> nationalité française</strong>
           </div>
         </li>
         <li>
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="rgb(49,196,141)" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-          </svg>
+          <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="20" height="20" rx="10" fill="#32267F" fill-opacity=".06" /><path d="M8.644 13.843l-3.487-3.487a.536.536 0 010-.758l.759-.759c.21-.21.549-.21.758 0l2.349 2.349 5.03-5.03c.21-.21.55-.21.76 0l.758.758c.21.21.21.549 0 .758l-6.169 6.169c-.21.21-.549.21-.758 0z" fill="#32267F" /></svg>
           <div>
-            Je suis disponible du <strong>21 juin</strong> au <strong>2 juillet 2021</strong>
+            J’aurai <strong>15, 16 ou 17 ans</strong> au moment de mon séjour de cohésion
           </div>
         </li>
         <li style={{ padding: 0 }}>
@@ -42,17 +48,6 @@ export default () => {
               • Une <b>pièce d'identité</b> (Carte Nationale d'Identité ou Passeport)
               <br />• L'accord de votre ou vos <b>représentants légaux</b>
             </div>
-          </Infos>
-        </li>
-        <li>
-          <Infos>
-            * Vous êtes scolarisé(e) en <b>classe de seconde</b> et né(e) après le 20 avril 2006 ?<br />
-            Une procédure dérogatoire vous permet de vous inscrire !<br />
-            <a href="https://apicivique.s3.eu-west-3.amazonaws.com/SNU+Dossier+Inscriptions+De%CC%81rogatoires+2021.pdf" target="_blank">
-              Voici le lien du formulaire à <b>imprimer et remplir</b>.
-            </a>
-            <br />
-            Merci de renvoyer le formulaire rempli à <a href="mailto:contact@snu.gouv.fr">contact@snu.gouv.fr</a>
           </Infos>
         </li>
       </ul>
@@ -91,9 +86,10 @@ const Points = styled.div`
     text-transform: uppercase;
     display: inline-block;
     padding: 5px 20px;
-    color: #ef4036;
-    font-size: 0.8rem;
-    font-weight: 400;
+    color: #32257F;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 1px;
   }
   li {
     color: #32267f;

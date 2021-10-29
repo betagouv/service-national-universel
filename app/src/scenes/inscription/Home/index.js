@@ -16,7 +16,7 @@ export default ({ location }) => {
       <Header location={location} />
       <Wrapper>
         <TitleContainer>
-          <TopTitle className="mobileOnly">inscription 2021</TopTitle>
+          <TopTitle className="mobileOnly">inscription 2022</TopTitle>
           <Title>Participez au SNU</Title>
           <PlayButton href="https://www.youtube.com/watch?v=rE-8fe9xPDo" target="_blank">
             <svg width="20" height="26" viewBox="0 0 20 26" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -30,24 +30,24 @@ export default ({ location }) => {
         <CardsContainer>
           <CardTitle>Une aventure en trois phases</CardTitle>
           <div className="desktop">
-            <CardPhase upText="phase 1" title="Le séjour de cohésion" downText="Du 21 juin au 2 juillet 2021" />
+            <CardPhase upText="phase 1" title="Le séjour de cohésion" downText="3 sessions possibles en février, juin et juillet 2022" />
             <CardPhase upText="phase 2" title="La mission d'intérêt général" downText="84 heures à réaliser au cours de l'année suivant le séjour de cohésion" />
             <CardPhase upText="phase 3 - facultative" title="L'engagement" downText="Mission facultative de 3 mois minimum" />
           </div>
           <Carousel className="mobile" showThumbs={false} showStatus={false} showArrows={true}>
-            <CardPhase upText="phase 1" title="Le séjour de cohésion" downText="Du 21 juin au 2 juillet 2021" />
+            <CardPhase upText="phase 1" title="Le séjour de cohésion" downText="3 sessions possibles en février, juin et juillet 2022" />
             <CardPhase upText="phase 2" title="La mission d'intérêt général" downText="84 heures à réaliser au cours de l'année suivant le séjour de cohésion" />
             <CardPhase upText="phase 3 - facultative" title="L'engagement" downText="Mission facultative de 3 mois minimum" />
           </Carousel>
           <StartButtonContainer className="desktop">
-            <StartButton onClick={() => history.push("/inscription/profil")}>Commencer&nbsp;l'inscription</StartButton>
+            <StartButton>Inscription&nbsp;à&nbsp;partir&nbsp;du&nbsp;8&nbsp;novembre&nbsp;2021</StartButton>
           </StartButtonContainer>
         </CardsContainer>
         <MobileView />
         <DesktopView />
       </Wrapper>
       <StartButtonContainer className="mobile">
-        <StartButton onClick={() => history.push("/inscription/profil")}>Commencer&nbsp;l'inscription</StartButton>
+        <StartButton>Inscription&nbsp;à&nbsp;partir&nbsp;du&nbsp;8&nbsp;novembre&nbsp;2021</StartButton>
       </StartButtonContainer>
     </div>
   );
@@ -187,16 +187,11 @@ const StartButton = styled.div`
   padding: 1rem 1.5rem;
   text-transform: uppercase;
   color: #fff;
-  background-color: #61c091;
+  background-color: #9A9A9A;
   font-weight: 500;
   font-size: 1rem;
-  cursor: pointer;
   letter-spacing: 0.03em;
   border-radius: 30px;
-  :hover {
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-    color: #fff;
-  }
   &.mobile {
     border: 3px #51b081 solid;
   }
