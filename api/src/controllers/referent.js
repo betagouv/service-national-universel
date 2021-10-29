@@ -31,6 +31,7 @@ const {
   ERRORS,
   isYoung,
   inSevenDays,
+  updateApplicationsWithYoungOrMission,
 } = require("../utils");
 const { validateId, validateSelf, validateYoung, validateReferent } = require("../utils/validator");
 const { serializeYoung, serializeReferent } = require("../utils/serializer");
@@ -331,6 +332,8 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     ) {
       newYoung = { ...newYoung, statusPhase1: "NOT_DONE" };
     }
+
+    await updateApplicationsWithYoungOrMission({ young, newYoung });
 
     young.set(newYoung);
     await young.save({ fromUser: req.user });

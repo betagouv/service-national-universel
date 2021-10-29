@@ -27,6 +27,7 @@ const {
   ERRORS,
   inSevenDays,
   isYoung,
+  updateApplicationsWithYoungOrMission,
 } = require("../../utils");
 const { sendTemplate } = require("../../sendinblue");
 const { cookieOptions, JWT_MAX_AGE } = require("../../cookie-options");
@@ -365,8 +366,12 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
 
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    await updateApplicationsWithYoungOrMission({ young, newYoung: value });
+
     delete value.firstName;
     delete value.lastName;
+
     young.set(value);
     await young.save({ fromUser: req.user });
 
