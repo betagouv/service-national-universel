@@ -251,10 +251,12 @@ router.post("/ticket/update", zammadAuth, async (req, res) => {
         .validate(webhookObject);
       if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       const { email, firstname, lastname, body } = value;
+      console.log("|----- TICKET ROLE -----|", ticket?.created_by);
+      const cta = ticket?.created_by?.role?.includes("Volontaire") ? `${APP_URL}/besoin-d-aide` : `${ADMIN_URL}/besoin-d-aide`
       sendTemplate(SENDINBLUE_TEMPLATES.young.ANSWER_RECEIVED, {
         emailTo: [{ name: `${firstname} ${lastname}`, email }],
         params: {
-          cta: ticket.created_by.role[0] === "Volontaire" ? `${APP_URL}/besoin-d-aide` : `${ADMIN_URL}/besoin-d-aide`,
+          cta,
           message: body,
         },
       });
