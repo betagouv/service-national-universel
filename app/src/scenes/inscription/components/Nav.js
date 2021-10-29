@@ -12,15 +12,6 @@ export default ({ step }) => {
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
 
-  const currentIndex = Object.keys(STEPS).indexOf(step);
-
-  const getStatus = (s) => {
-    if (s === step) return "inprogress";
-    const stepIndex = Object.keys(STEPS).indexOf(s);
-    if (stepIndex > currentIndex) return "todo";
-    return "done";
-  };
-
   const logout = async () => {
     try {
       await api.post(`/young/logout`);
@@ -41,6 +32,42 @@ export default ({ step }) => {
     return history.push(`/inscription/${s.toLowerCase()}`);
   };
 
+  const Step = ({ stepId, stepName, stepNumber }) => {
+    const currentIndex = Object.keys(STEPS).indexOf(step);
+
+    const status = (() => {
+      if (stepId === step) return "inprogress";
+      const stepIndex = Object.keys(STEPS).indexOf(stepId);
+      if (stepIndex > currentIndex) return "todo";
+      return "done";
+    })();
+
+    if (window.innerWidth > 1240) {
+      return (
+        <>
+          <Element status={status} onClick={() => handleClick(stepId)}>
+            <a>
+              <span className="icon">
+                <span>0{stepNumber}</span>
+              </span>
+              {status === "inprogress" && <span className="text">{stepName}</span>}
+            </a>
+          </Element>
+          <Divider status={status} />
+        </>
+      );
+    }
+    if (status !== "inprogress") return <></>;
+    return (
+      <MobileElement>
+        <span className="icon">
+          <span>{stepNumber}/6</span>
+        </span>
+        <span className="text">{stepName}</span>
+      </MobileElement>
+    );
+  };
+
   return (
     <>
       <HeaderNav>
@@ -58,54 +85,12 @@ export default ({ step }) => {
         )}
       </HeaderNav>
       <Topbar>
-        <Element status={getStatus(STEPS.PROFIL)} onClick={() => handleClick(STEPS.PROFIL)}>
-          <a>
-            <span className="icon">
-              <span>01</span>
-            </span>
-            <span className="text">Profil</span>
-          </a>
-        </Element>
-        <Element status={getStatus(STEPS.COORDONNEES)} onClick={() => handleClick(STEPS.COORDONNEES)}>
-          <a>
-            <span className="icon">
-              <span>02</span>
-            </span>
-            <span className="text">Coordonnées</span>
-          </a>
-        </Element>
-        <Element status={getStatus(STEPS.PARTICULIERES)} onClick={() => handleClick(STEPS.PARTICULIERES)}>
-          <a>
-            <span className="icon">
-              <span>03</span>
-            </span>
-            <span className="text">Situations particulières</span>
-          </a>
-        </Element>
-        <Element status={getStatus(STEPS.REPRESENTANTS)} onClick={() => handleClick(STEPS.REPRESENTANTS)}>
-          <a>
-            <span className="icon">
-              <span>04</span>
-            </span>
-            <span className="text">Représentants légaux</span>
-          </a>
-        </Element>
-        <Element status={getStatus(STEPS.CONSENTEMENTS)} onClick={() => handleClick(STEPS.CONSENTEMENTS)}>
-          <a>
-            <span className="icon">
-              <span>05</span>
-            </span>
-            <span className="text">Consentements</span>
-          </a>
-        </Element>
-        <Element status={getStatus(STEPS.DOCUMENTS)} onClick={() => handleClick(STEPS.DOCUMENTS)}>
-          <a>
-            <span className="icon">
-              <span>06</span>
-            </span>
-            <span className="text">Pièces justificatives</span>
-          </a>
-        </Element>
+        <Step stepId={STEPS.PROFIL} stepName="Profil" stepNumber="1" />
+        <Step stepId={STEPS.COORDONNEES} stepName="Coordonnées" stepNumber="2" />
+        <Step stepId={STEPS.PARTICULIERES} stepName="Situations particulières" stepNumber="3" />
+        <Step stepId={STEPS.REPRESENTANTS} stepName="Représentants légaux" stepNumber="4" />
+        <Step stepId={STEPS.CONSENTEMENTS} stepName="Consentements" stepNumber="5" />
+        <Step stepId={STEPS.DOCUMENTS} stepName="Pièces justificatives" stepNumber="6" />
         <Element onClick={() => handleClick(STEPS.DONE)} style={{ flexGrow: 0 }}>
           <div className="logo" />
         </Element>
@@ -113,6 +98,17 @@ export default ({ step }) => {
     </>
   );
 };
+
+const Divider = styled.div`
+  flex-grow: 1;
+  border-bottom: 2px solid;
+  border-color: ${(props) => {
+    if (props.status === "done") return "#362F78";
+    return "#7F8591";
+  }};
+  margin: 5px;
+  align-self: center;
+`;
 
 const HeaderNav = styled.div`
   display: flex;
@@ -174,8 +170,37 @@ const Topbar = styled.ul`
   margin: 0 auto 0.5rem;
 `;
 
+const MobileElement = styled.li`
+  flex-grow: 1;
+  align-self: center;
+  margin: 15px;
+  display: flex;
+  align-items: center;
+
+  font-weight: 600;
+  color: #362f78;
+  margin: 0;
+
+  .icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 3px solid;
+    border-color: #362f78;
+    margin: 10px;
+  }
+`;
+
 const Element = styled.li`
   flex: 1;
+  flex-grow: ${(props) => {
+    if (props.status === "inprogress") return "1";
+    return "0";
+  }};
   position: relative;
   display: flex;
   align-items: center;
