@@ -98,6 +98,14 @@ export default ({ step }) => {
             <span className="text">Consentements</span>
           </a>
         </Element>
+        <Element status={getStatus(STEPS.DOCUMENTS)} onClick={() => handleClick(STEPS.DOCUMENTS)}>
+          <a>
+            <span className="icon">
+              <span>06</span>
+            </span>
+            <span className="text">Pièces justificatives</span>
+          </a>
+        </Element>
         <Element onClick={() => handleClick(STEPS.DONE)} style={{ flexGrow: 0 }}>
           <div className="logo" />
         </Element>

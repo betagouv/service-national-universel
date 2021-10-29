@@ -410,6 +410,7 @@ function validateYoung(young, user) {
     highSkilledActivityInSameDepartment: Joi.string().allow(null, ""),
     highSkilledActivityType: Joi.string().allow(null, ""),
     highSkilledActivityProofFiles: Joi.array().items(Joi.string().allow(null, "")),
+    dataProcessingConsentmentFiles: Joi.array().items(Joi.string().allow(null, "")),
     parentConsentment: Joi.string().allow(null, ""),
     parentConsentmentFiles: Joi.array().items(Joi.string().allow(null, "")),
     parentConsentmentFilesCompliant: Joi.string().allow(null, ""),

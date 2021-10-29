@@ -57,6 +57,9 @@ export default ({ step }) => {
             <Element status={getStatus(STEPS.CONSENTEMENTS)}>
               <a onClick={() => handleClick(STEPS.CONSENTEMENTS)}>Consentements</a>
             </Element>
+            <Element status={getStatus(STEPS.DOCUMENTS)}>
+              <a onClick={() => handleClick(STEPS.DOCUMENTS)}>Pièces justificatives</a>
+            </Element>
           </ul>
         </li>
       </MainNav>
