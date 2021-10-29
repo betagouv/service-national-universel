@@ -42,18 +42,29 @@ export default ({ step }) => {
       return "done";
     })();
 
+    if (window.innerWidth > 1240) {
+      return (
+        <>
+          <Element status={status} onClick={() => handleClick(stepId)}>
+            <a>
+              <span className="icon">
+                <span>0{stepNumber}</span>
+              </span>
+              {status === "inprogress" && <span className="text">{stepName}</span>}
+            </a>
+          </Element>
+          <Divider status={status} />
+        </>
+      );
+    }
+    if (status !== "inprogress") return <></>;
     return (
-      <>
-        <Element status={status} onClick={() => handleClick(stepId)}>
-          <a>
-            <span className="icon">
-              <span>{stepNumber}</span>
-            </span>
-            {status === "inprogress" && <span className="text">{stepName}</span>}
-          </a>
-        </Element>
-        <Divider status={status} />
-      </>
+      <MobileElement>
+        <span className="icon">
+          <span>{stepNumber}/6</span>
+        </span>
+        <span className="text">{stepName}</span>
+      </MobileElement>
     );
   };
 
@@ -74,12 +85,12 @@ export default ({ step }) => {
         )}
       </HeaderNav>
       <Topbar>
-        <Step stepId={STEPS.PROFIL} stepName="Profil" stepNumber="01" />
-        <Step stepId={STEPS.COORDONNEES} stepName="Coordonnées" stepNumber="02" />
-        <Step stepId={STEPS.PARTICULIERES} stepName="Situations particulières" stepNumber="03" />
-        <Step stepId={STEPS.REPRESENTANTS} stepName="Représentants légaux" stepNumber="04" />
-        <Step stepId={STEPS.CONSENTEMENTS} stepName="Consentements" stepNumber="05" />
-        <Step stepId={STEPS.DOCUMENTS} stepName="Pièces justificatives" stepNumber="06" />
+        <Step stepId={STEPS.PROFIL} stepName="Profil" stepNumber="1" />
+        <Step stepId={STEPS.COORDONNEES} stepName="Coordonnées" stepNumber="2" />
+        <Step stepId={STEPS.PARTICULIERES} stepName="Situations particulières" stepNumber="3" />
+        <Step stepId={STEPS.REPRESENTANTS} stepName="Représentants légaux" stepNumber="4" />
+        <Step stepId={STEPS.CONSENTEMENTS} stepName="Consentements" stepNumber="5" />
+        <Step stepId={STEPS.DOCUMENTS} stepName="Pièces justificatives" stepNumber="6" />
         <Element onClick={() => handleClick(STEPS.DONE)} style={{ flexGrow: 0 }}>
           <div className="logo" />
         </Element>
@@ -157,6 +168,31 @@ const Topbar = styled.ul`
   scrollbar-width: none; /* Firefox */
   max-width: 1270px;
   margin: 0 auto 0.5rem;
+`;
+
+const MobileElement = styled.li`
+  flex-grow: 1;
+  align-self: center;
+  margin: 15px;
+  display: flex;
+  align-items: center;
+
+  font-weight: 600;
+  color: #362f78;
+  margin: 0;
+
+  .icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 3px solid;
+    border-color: #362f78;
+    margin: 10px;
+  }
 `;
 
 const Element = styled.li`
