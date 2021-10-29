@@ -89,7 +89,7 @@ export default ({ application, index }) => {
                 <div style={{ marginLeft: "1rem", fontSize: "0.9rem", fontWeight: "500", marginBottom: "1rem" }}>
                   <ContractInfoContainer>
                     <DownloadContractButton children={"Télécharger le contrat"} young={young} uri={contract._id} />
-                    <SendContractByMail young={young} contractId={contract._id} />
+                    <SendContractByMail young={young} contractId={contract._id} missionName={contract.missionName} />
                   </ContractInfoContainer>
                 </div>
               ) : (
@@ -110,14 +110,16 @@ export default ({ application, index }) => {
   );
 };
 
-function SendContractByMail({ young, contractId }) {
+function SendContractByMail({ young, contractId, missionName }) {
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [loading, setLoading] = useState(false);
 
   const onConfirm = async () => {
     setLoading(true);
     try {
-      const { ok, code } = await api.post(`/young/${young._id}/documents/contract/2/send-email?contract_id=${contractId}`);
+      const { ok, code } = await api.post(`/young/${young._id}/documents/contract/2/send-email?contract_id=${contractId}`, {
+        fileName: `contrat ${young.firstName} ${young.lastName} - ${missionName}.pdf`,
+      });
       setLoading(false);
       if (ok) return toastr.success(`Document envoyé à ${young.email}`);
       else return toastr.error("Erreur lors de l'envoie du document", translate(code));
