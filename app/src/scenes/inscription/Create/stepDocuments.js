@@ -173,7 +173,7 @@ export default () => {
 const AlerteInfo = ({ children }) => (
   <div style={{ display: "flex", color: "#32257f", backgroundColor: "#edecfc", padding: "1rem", borderRadius: "6px" }}>
     <InfoIcon color="#32257F" style={{ flex: "none" }} />
-    <div style={{ marginLeft: "5px" }}>{children}</div>
+    <div style={{ fontSize: ".9rem", marginLeft: "5px" }}>{children}</div>
   </div>
 );
 
