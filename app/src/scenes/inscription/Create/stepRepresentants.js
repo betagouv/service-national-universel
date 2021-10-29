@@ -33,8 +33,8 @@ const Parent = ({ id = 1, values, errors, touched, handleChange }) => {
       <FormRow>
         <Col>
           <p>
-            En tant que représentant légal n°1, vous pouvez utiliser ce bouton pour vous identifier avec FranceConnect et récupérer vos données personnelles (nom, prénom et email),
-            ou remplir les informations manuellement ci-dessous.
+            En tant que représentant légal n°{id}, vous pouvez utiliser ce bouton pour vous identifier avec FranceConnect et récupérer vos données personnelles (nom, prénom et
+            email), ou remplir les informations manuellement ci-dessous.
           </p>
           <FranceConnectButton callback={getFranceConnectCallback(id)} beforeRedirect={() => handleSave()} />
           <p>
