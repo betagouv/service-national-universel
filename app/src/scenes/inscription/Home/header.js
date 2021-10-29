@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 
-export default ({ showMessage = true, location }) => {
+export default ({ location }) => {
   return (
     <Header>
       <Logos>
@@ -13,14 +13,6 @@ export default ({ showMessage = true, location }) => {
           <img src={require("../../../assets/logo-snu.png")} />
         </a>
       </Logos>
-      {showMessage ? (
-        <Title className="mobileHide">
-          <h1>
-            Inscriptions <span>au Service National Universel</span>
-          </h1>
-          <h3>Ouvertes jusqu'au 30 avril 2021</h3>
-        </Title>
-      ) : null}
       <AvatarContainer to={{ pathname: "/auth/login", search: location?.search }}>
         <Avatar src={require("../../../assets/avatar.jpg")} />
         <AvatarText>connexion</AvatarText>

@@ -16,7 +16,7 @@ export default ({ location }) => {
       <Header location={location} />
       <Wrapper>
         <TitleContainer>
-          <TopTitle className="mobileOnly">inscription 2021</TopTitle>
+          <TopTitle className="mobileOnly">inscription 2022</TopTitle>
           <Title>Participez au SNU</Title>
           <PlayButton href="https://www.youtube.com/watch?v=rE-8fe9xPDo" target="_blank">
             <svg width="20" height="26" viewBox="0 0 20 26" fill="none" xmlns="http://www.w3.org/2000/svg">
