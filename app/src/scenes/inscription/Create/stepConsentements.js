@@ -122,7 +122,7 @@ export default () => {
                   />
                   <div>
                     {isPlural ? "autorisons" : "autorise"}
-                    <strong>{` ${young.firstName} ${young.lastName}`}</strong> à participer à la session 2021 du Service National Universel qui comprend la participation au séjour
+                    <strong>{` ${young.firstName} ${young.lastName}`}</strong> à participer à la session 2022 du Service National Universel qui comprend la participation au séjour
                     de cohésion puis la réalisation d'une mission d'intérêt général
                   </div>
                 </RadioLabel>
