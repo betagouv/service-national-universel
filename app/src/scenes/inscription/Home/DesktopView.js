@@ -44,7 +44,7 @@ export default () => {
             </div>
             <div className="section_conditions">
               <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="20" height="20" rx="10" fill="#32267F" fill-opacity=".06" /><path d="M8.644 13.843l-3.487-3.487a.536.536 0 010-.758l.759-.759c.21-.21.549-.21.758 0l2.349 2.349 5.03-5.03c.21-.21.55-.21.76 0l.758.758c.21.21.21.549 0 .758l-6.169 6.169c-.21.21-.549.21-.758 0z" fill="#32267F" /></svg>
-              <p>Je suis de nationalité française</p>
+              <p>Je suis de <strong>nationalité française</strong></p>
             </div>
           </Section>
         </GridContainer>
@@ -61,7 +61,7 @@ export default () => {
           </Section>
           <Section className="bottom_section">
             <svg width="40" height="40" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="8" fill="#32257F" /><path d="M16.228 17c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M29 20a9 9 0 11-18 0 9 9 0 0118 0z" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
-            <FAQ href="https://www.snu.gouv.fr/foire-aux-questions-11" target="blank">
+            <FAQ href="https://support.snu.gouv.fr/help/fr-fr/16-comprendre-le-snu" target="blank">
               <p><strong>Besoin d'aide ?</strong></p>
               <p>Toutes les réponses à vos questions</p>
             </FAQ>
@@ -124,10 +124,8 @@ const Points = styled.div`
     svg {
       margin-right: 10px;
     }
-  .first_container {
-    box-shadow: 0px 14px 14px rgba(0, 0, 0, 0.5);
-  }
   .second_container {
+    box-shadow: inset 0 10px 14px rgba(0, 0, 0, 0.08);
     background: #F8F8F8;
   }
   .button {

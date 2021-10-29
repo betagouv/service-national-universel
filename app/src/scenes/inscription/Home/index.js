@@ -39,7 +39,7 @@ export default ({ location }) => {
             <CardPhase upText="phase 2" title="La mission d'intérêt général" downText="84 heures à réaliser au cours de l'année suivant le séjour de cohésion" />
             <CardPhase upText="phase 3 - facultative" title="L'engagement" downText="Mission facultative de 3 mois minimum" />
           </Carousel>
-          <StartButtonContainer className="desktop">
+          <StartButtonContainer className="desktop desktopButton">
             <StartButton>Inscription&nbsp;à&nbsp;partir&nbsp;du&nbsp;8&nbsp;novembre&nbsp;2021</StartButton>
           </StartButtonContainer>
         </CardsContainer>
@@ -47,7 +47,7 @@ export default ({ location }) => {
         <DesktopView />
       </Wrapper>
       <StartButtonContainer className="mobile">
-        <StartButton>Inscription&nbsp;à&nbsp;partir&nbsp;du&nbsp;8&nbsp;novembre&nbsp;2021</StartButton>
+        <StartButton>Inscription à partir du 8 novembre 2021</StartButton>
       </StartButtonContainer>
     </div>
   );
@@ -117,7 +117,7 @@ const CardsContainer = styled.div`
 
 const CardPhase = ({ upText, title, downText, color }) => {
   return (
-    <Card>
+    <Card href="https://support.snu.gouv.fr/help/fr-fr/3-volontaire/70-les-phases-du-snu" target="_blank">
       <div>
         <CardUpText>{upText}</CardUpText>
         <CardText>{title}</CardText>
@@ -127,7 +127,7 @@ const CardPhase = ({ upText, title, downText, color }) => {
   );
 };
 
-const Card = styled.div`
+const Card = styled.a`
   padding: 1rem 1rem 2rem 1rem;
   display: flex;
   width: 100%;
@@ -192,6 +192,11 @@ const StartButton = styled.div`
   font-size: 1rem;
   letter-spacing: 0.03em;
   border-radius: 30px;
+  width: 411px;
+  @media (max-width: 420px) {
+    width: 300px;
+    text-align: center;
+  }
   &.mobile {
     border: 3px #51b081 solid;
   }
