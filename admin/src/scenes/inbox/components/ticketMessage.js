@@ -191,12 +191,11 @@ const InputContainer = styled.div`
   display: flex;
   flex-direction: row;
   align-items: stretch;
-  height: 100px;
-  ${"" /* flex: 0; */}
+  flex: 0;
   textarea {
     resize: none;
     overflow: none;
-    min-height: 50px;
+    min-height: 100px;
     max-height: 300px;
     border: none;
   }
