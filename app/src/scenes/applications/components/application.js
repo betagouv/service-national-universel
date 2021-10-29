@@ -124,6 +124,7 @@ function SendContractByMail({ young, contractId, missionName }) {
       if (ok) return toastr.success(`Document envoyé à ${young.email}`);
       else return toastr.error("Erreur lors de l'envoie du document", translate(code));
     } catch (e) {
+      setLoading(false);
       toastr.error("Erreur lors de l'envoie du document");
       console.log(e);
     }
