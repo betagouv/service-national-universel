@@ -444,7 +444,7 @@ async function updateApplicationsWithYoungOrMission({ young, newYoung, mission, 
       application.youngDepartment = newYoung.department;
       application.youngCohort = newYoung.cohort;
       await application.save();
-      console.log("Update Application");
+      console.log(`Update application ${application._id}`);
     }
   } else if (mission && Object.keys(mission).length !== 0) {
     const noNeedToUpdate = isObjectKeysIsEqual(mission, newMission, ["name", "department", "region"]);
@@ -457,7 +457,7 @@ async function updateApplicationsWithYoungOrMission({ young, newYoung, mission, 
       application.missionDepartment = newMission.department;
       application.missionRegion = newMission.region;
       await application.save();
-      console.log("Update Application");
+      console.log(`Update application ${application._id}`);
     }
   }
 }
