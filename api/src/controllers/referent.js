@@ -204,6 +204,7 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
       emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
       params: { cta, cohesionCenterName, structureName, region, department, fromName, toName },
     });
+
     return res.status(200).send({ data: serializeReferent(referent, req.user), ok: true });
   } catch (error) {
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
