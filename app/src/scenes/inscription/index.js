@@ -46,7 +46,7 @@ export default () => {
   if (environment === "production")
     return (
       <Switch>
-        <Route path="/inscription" component={HomeClosed} />
+        <Route path="/inscription" component={Home} />
       </Switch>
     );
   else
