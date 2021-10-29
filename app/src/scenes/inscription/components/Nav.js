@@ -238,6 +238,7 @@ const Element = styled.li`
       width: 40px;
       height: 40px;
       display: flex;
+      flex-shrink: 0;
       align-items: center;
       justify-content: center;
       border-radius: 50%;
