@@ -43,6 +43,7 @@
     "babel-loader": "^8.2.2",
     "bootstrap": "^4.5.2",
     "core-js": "^3.12.1",
+    "countries-list": "^2.6.1",
     "dayjs": "^1.10.7",
     "express": "^4.17.1",
     "forcedomain": "^2.2.2",

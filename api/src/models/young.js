@@ -593,6 +593,12 @@ const Schema = new mongoose.Schema({
       description: "Région du parent 1",
     },
   },
+  parent1Country: {
+    type: String,
+    documentation: {
+      description: "Pays du parent 1",
+    },
+  },
   parent1Location: {
     lat: { type: Number },
     lon: { type: Number },
@@ -677,6 +683,12 @@ const Schema = new mongoose.Schema({
     type: String,
     documentation: {
       description: "Région du parent 2",
+    },
+  },
+  parent2Country: {
+    type: String,
+    documentation: {
+      description: "Pays du parent 2",
     },
   },
   parent2Location: {
