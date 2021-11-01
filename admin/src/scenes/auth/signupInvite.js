@@ -11,6 +11,7 @@ import { setUser } from "../../redux/auth/actions";
 
 import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
+import PasswordEye from "../../components/PasswordEye";
 import Header from "./components/header";
 
 import { translate, ROLES, colors } from "../../utils";
@@ -62,7 +63,7 @@ export default () => {
         <LoginBox>
           <Title>{title}</Title>
           <Formik
-            initialValues={{ firstName: newuser.firstName, lastName: newuser.lastName, email: newuser.email, password: "" }}
+            initialValues={{ firstName: newuser.firstName, lastName: newuser.lastName, email: newuser.email, password: "", repassword: "" }}
             onSubmit={async (values, actions) => {
               try {
                 const { data: user, token, code, ok } = await api.post(`/referent/signup_invite`, { ...values, invitationToken });
@@ -135,19 +136,27 @@ export default () => {
                     </Col>
                   </Row>
                   <StyledFormGroup>
-                    <label htmlFor="password">Mot de passe</label>
-                    <InputField
-                      validate={(v) => validator.isEmpty(v) && "Ce champ est requis"}
-                      autoComplete="new-password"
-                      name="password"
-                      type="password"
-                      id="repassword"
-                      value={values.password}
-                      onChange={handleChange}
-                      placeholder="Choisissez votre mot de passe"
-                      haserror={errors.password}
-                    />
+                    <label htmlFor="password">
+                      <span>*</span>Mot de passe
+                    </label>
+                    <p style={{ fontSize: 12, color: colors.grey }}>👉 Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole</p>
+                    <PasswordEye autoComplete="new-password" value={values.password} onChange={handleChange} name="password" id="password" />
                     <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.password}</p>
+                  </StyledFormGroup>
+                  <StyledFormGroup>
+                    <label htmlFor="repassword">
+                      <span>*</span>Confirmation mot de passe
+                    </label>
+                    <PasswordEye
+                      validate={() => values.password !== values.repassword && "Les mots de passe ne correspondent pas."}
+                      autoComplete="new-password"
+                      value={values.repassword}
+                      onChange={handleChange}
+                      name="repassword"
+                      id="repassword"
+                      placeholder="Confirmez votre mot de passe"
+                    />
+                    <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.repassword}</p>
                   </StyledFormGroup>
                   <Submit loading={isSubmitting} type="submit" color="primary">
                     Activer mon compte
