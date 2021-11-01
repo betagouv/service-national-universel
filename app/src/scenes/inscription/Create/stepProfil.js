@@ -148,8 +148,8 @@ export default () => {
                   hidden
                   validate={(v) => {
                     if (!v) return requiredMessage;
-                    const from = new Date(2004, 1, 26); // -1 because months are from 0 to 11
-                    const to = new Date(2007, 6, 3);
+                    const from = new Date(2004, 1, 25); // -1 because months are from 0 to 11
+                    const to = new Date(2007, 6, 4);
                     const [y, m, d] = v.substring(0, 10).split("-");
                     const check = new Date(Date.UTC(parseInt(y), parseInt(m - 1), parseInt(d)));
                     return (check < from || check > to) && "Au moment du séjour, vous devez avoir 15 révolu et moins de 18 ans";
