@@ -49,7 +49,7 @@ export default () => {
             const { ok, code, data: young } = await api.put("/young", values);
             if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             dispatch(setYoung(young));
-            history.push("/inscription/done");
+            history.push("/inscription/availability");
           } catch (e) {
             console.log(e);
             toastr.error("Erreur !");
