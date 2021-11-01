@@ -8,7 +8,7 @@ import ErrorMessage, { requiredMessage } from "../scenes/inscription/components/
 
 const NORESULTMESSAGE = "Rentrer manuellement l'adresse";
 
-export default ({ keys, values, handleChange, errors, touched, departAndRegionVisible = true }) => {
+export default ({ keys, values, handleChange, errors, touched, departAndRegionVisible = true, placeholder = "Commencez à tapez votre adresse" }) => {
   const [str, setStr] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [noResultMode, setNoResultMode] = useState(false);
@@ -83,7 +83,7 @@ export default ({ keys, values, handleChange, errors, touched, departAndRegionVi
             onSuggestionSelected={onSuggestionSelected}
             renderSuggestion={renderSuggestion}
             inputProps={{
-              placeholder: "Commencez à tapez votre adresse",
+              placeholder: `${placeholder}`,
               value: str,
               onChange: (event, { newValue }) => setStr(newValue),
               className: "form-control",
