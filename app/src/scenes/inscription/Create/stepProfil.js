@@ -345,7 +345,10 @@ export default () => {
                     name="RGPD"
                     onChange={(e) => handleChange({ target: { name: e.target.name, value: e.target.checked ? "true" : "false" } })}
                   />
-                  J'ai pris connaissance des modalités de traitement de mes données personnelles
+                  J'ai pris connaissance des&nbsp;
+                  <a href="https://www.snu.gouv.fr/donnees-personnelles-et-cookies-23" target="_blank">
+                    modalités de traitement de mes données personnelles
+                  </a>
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="RGPD" />
               </div>

@@ -136,7 +136,7 @@ export default () => {
               </Col>
               <Col>
                 <>
-                  <DownloadFormButton url="" />
+                  <DownloadFormButton url="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Accord_collecte_et_traitement_des_donnees_des_moins_de_15_ans.pdf" />
                   <DndFileInput
                     placeholder="le formulaire complété"
                     errorMessage="Vous devez téléverser le formulaire complété."

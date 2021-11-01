@@ -141,7 +141,9 @@ export default () => {
                       la collecte et le traitement des données personnelles de <strong>{` ${young.firstName} ${young.lastName}`}</strong> par l'administration dans le cadre de
                       l'inscription au SNU.
                     </div>
-                    <a>En savoir plus {">"}</a>
+                    <a href="https://www.cnil.fr/fr/recommandation-4-rechercher-le-consentement-dun-parent-pour-les-mineurs-de-moins-de-15-ans" target="_blank">
+                      En savoir plus {">"}
+                    </a>
                   </div>
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="parentConsentment2" />
@@ -214,7 +216,9 @@ export default () => {
                   <Field validate={(v) => !v && requiredMessage} value="true" checked={values.consentment2} type="checkbox" name="consentment2" onChange={handleChange} />
                   <div>
                     <div>accepte la collecte et le traitement de mes données personnelles par l'administration dans le cadre de l'inscription au SNU.</div>
-                    <a>En savoir plus {">"}</a>
+                    <a href="https://www.cnil.fr/fr/recommandation-4-rechercher-le-consentement-dun-parent-pour-les-mineurs-de-moins-de-15-ans" target="_blank">
+                      En savoir plus {">"}
+                    </a>
                   </div>
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="consentment2" />
