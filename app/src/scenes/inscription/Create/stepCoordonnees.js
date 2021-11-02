@@ -181,27 +181,29 @@ export default () => {
                 </Row>
               </Col>
             </FormRow>
-            <FormRow>
-              <Col md={4}>
-                <Label>Identité et adresse de l'hébergeur en France</Label>
-                <Infos>
-                  <svg width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" clipRule="evenodd" d="M16 8A8 8 0 110 8a8 8 0 0116 0zM9 4a1 1 0 11-2 0 1 1 0 012 0zM7 7a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2V8a1 1 0 00-1-1H7z" fill="#32257F" /></svg>
-                  <p>Proche chez qui vous séjournerez le temps de la réalisation de votre SNU (lieu de départ/retour pour le séjour et de réalisation de la MIG).</p>
-                </Infos>
-                <Note>
-                  A noter : l’hébergement chez un proche en France ainsi que le transport entre votre lieu de résidence et celui de votre hébergeur sont à votre charge.
-                </Note>
-              </Col>
-              <Col>
-                <HostAddressInput
-                  keys={{ hostLastName: "hostLastName", hostFirstName: "hostFirstName", hostCity: "hostCity", hostZip: "hostZip", hostAddress: "hostAddress", hostLocation: "hostLocation", link: "link" }}
-                  values={values}
-                  handleChange={handleChange}
-                  errors={errors}
-                  touched={touched}
-                />
-              </Col>
-            </FormRow>
+            {values.countryVisible === "true" && (
+              <FormRow>
+                <Col md={4}>
+                  <Label>Identité et adresse de l'hébergeur en France</Label>
+                  <Infos>
+                    <svg width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" clipRule="evenodd" d="M16 8A8 8 0 110 8a8 8 0 0116 0zM9 4a1 1 0 11-2 0 1 1 0 012 0zM7 7a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2V8a1 1 0 00-1-1H7z" fill="#32257F" /></svg>
+                    <p>Proche chez qui vous séjournerez le temps de la réalisation de votre SNU (lieu de départ/retour pour le séjour et de réalisation de la MIG).</p>
+                  </Infos>
+                  <Note>
+                    A noter : l’hébergement chez un proche en France ainsi que le transport entre votre lieu de résidence et celui de votre hébergeur sont à votre charge.
+                  </Note>
+                </Col>
+                <Col>
+                  <HostAddressInput
+                    keys={{ lastName: "hostLastName", firstName: "hostFirstName", city: "hostCity", zip: "hostZip", address: "hostAddress", location: "hostLocation", link: "link" }}
+                    values={values}
+                    handleChange={handleChange}
+                    errors={errors}
+                    touched={touched}
+                  />
+                </Col>
+              </FormRow>
+            )}
             <FormRow>
               <Col md={4}>
                 <Label>Situation</Label>
