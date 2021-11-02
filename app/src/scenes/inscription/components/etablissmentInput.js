@@ -24,46 +24,46 @@ export default ({ handleChange, values, keys }) => {
   return (
     <Row>
       <Col md={12} style={{ marginTop: 15 }}>
+        <Input style={{ maxWidth: 500 }} name="schoolType" placeholder="Commencez à taper la ville de l'établissement..." onChange={(event) => {
+          getSuggestions(event.target.value);
+        }} />
+        <Field
+          style={{ marginTop: "1rem" }}
+          as="select"
+          className="form-control"
+          placeholder="Sélectionnez votre établissement"
+          name={keys.schoolName}
+          value={values[keys.schoolName] || "Sélectionnez votre établissement"}
+          onChange={(e) => {
+            const value = e.target.value;
+            handleChange({ target: { name: keys.schoolName, value } });
+          }}
+        >
+          {hits?.map((hit) => (
+            <option key={hit._id} value={hit.name2}>
+              {`${hit.name2}, ${hit.postcode} ${hit.city}`}
+            </option>
+          ))}
+        </Field>
+        <Field
+          style={{ marginTop: "1rem" }}
+          as="select"
+          className="form-control"
+          placeholder="Sélectionnez votre classe"
+          name={keys.schoolRank}
+          value={values[keys.schoolRank]}
+          onChange={(e) => {
+            const value = e.target.value;
+            handleChange({ target: { name: keys.schoolRank, value } });
+          }}
+        >
+          {["Seconde", "1ère", "Terminale"].map((rank) => (
+            <option key={rank} value={rank}>
+              {`${rank}`}
+            </option>
+          ))}
+        </Field>
       </Col>
-      <Input style={{ maxWidth: 500 }} name="schoolType" placeholder="Commencez à taper la ville de l'établissement..." onChange={(event) => {
-        getSuggestions(event.target.value);
-      }} />
-      <Field
-        style={{ marginTop: "1rem" }}
-        as="select"
-        className="form-control"
-        placeholder="Sélectionnez votre établissement"
-        name={keys.schoolName}
-        value={values[keys.schoolName] || "Sélectionnez votre établissement"}
-        onChange={(e) => {
-          const value = e.target.value;
-          handleChange({ target: { name: keys.schoolName, value } });
-        }}
-      >
-        {hits?.map((hit) => (
-          <option key={hit._id} value={hit.name2}>
-            {`${hit.name2}, ${hit.postcode} ${hit.city}`}
-          </option>
-        ))}
-      </Field>
-      <Field
-        style={{ marginTop: "1rem" }}
-        as="select"
-        className="form-control"
-        placeholder="Sélectionnez votre classe"
-        name={keys.schoolRank}
-        value={values[keys.schoolRank]}
-        onChange={(e) => {
-          const value = e.target.value;
-          handleChange({ target: { name: keys.schoolRank, value } });
-        }}
-      >
-        {["Seconde", "1ère", "Terminale"].map((rank) => (
-          <option key={rank} value={rank}>
-            {`${rank}`}
-          </option>
-        ))}
-      </Field>
     </Row>
   );
 };
