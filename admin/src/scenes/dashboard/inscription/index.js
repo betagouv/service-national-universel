@@ -25,7 +25,7 @@ export default () => {
   const user = useSelector((state) => state.Auth.user);
 
   function updateFilter(n) {
-    setFilter({ ...(filter || { status: Object.keys(YOUNG_STATUS), region: "", department: "", cohort: "2021" }), ...n });
+    setFilter({ ...(filter || { status: Object.keys(YOUNG_STATUS), region: "", department: "", cohort: filter?.cohort || "2021" }), ...n });
   }
 
   useEffect(() => {
@@ -51,22 +51,28 @@ export default () => {
               <FiltersList>
                 <FilterRegion updateFilter={updateFilter} filter={filter} />
                 <FilterDepartment updateFilter={updateFilter} filter={filter} />
-                <FilterWrapper>
-                  <YearPicker
-                    options={[
-                      { key: "2019", label: "2019" },
-                      { key: "2020", label: "2020" },
-                      { key: "2021", label: "2021" },
-                      { key: "", label: "Toutes" },
-                    ]}
-                    onChange={(cohort) => updateFilter({ cohort })}
-                    value={filter.cohort}
-                  />
-                </FilterWrapper>
               </FiltersList>
             </>
           ) : null}
         </Col>
+        {filter ? (
+          <Col md={12}>
+            <FilterWrapper style={{ display: "flex", alignItems: "flex-end", flexDirection: "column" }}>
+              <YearPicker
+                options={[
+                  { key: "2019", label: "2019" },
+                  { key: "2020", label: "2020" },
+                  { key: "2021", label: "2021" },
+                  { key: "Février 2022", label: "Février 2022" },
+                  { key: "Juin 2022", label: "Juin 2022" },
+                  { key: "Juillet 2022", label: "Juillet 2022" },
+                ]}
+                onChange={(cohort) => updateFilter({ cohort })}
+                value={filter.cohort}
+              />
+            </FilterWrapper>
+          </Col>
+        ) : null}
       </Row>
       {filter && (
         <>

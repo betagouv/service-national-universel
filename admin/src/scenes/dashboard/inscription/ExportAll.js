@@ -6,10 +6,11 @@ import { departmentLookUp, department2region } from "../../../utils";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 import api from "../../../services/api";
 
+// TODO (fix): Export not only for 2021.
 export default () => {
   const [loading, setLoading] = useState(false);
   async function run() {
-    const { data: inscriptionGoal } = await api.get("/inscription-goal");
+    const { data: inscriptionGoal } = await api.get("/inscription-goal/2021");
     setLoading(true);
     const lines = [];
 
