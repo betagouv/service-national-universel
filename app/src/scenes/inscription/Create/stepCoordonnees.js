@@ -18,7 +18,6 @@ import HostAddressInput from "../../../components/hostAddressInput";
 import Etablissement from "../components/etablissmentInput";
 import { translate } from "../../../utils";
 import FormFooter from "../../../components/form/FormFooter";
-import ModalConfirm from "../../../components/modals/ModalConfirm";
 
 export default () => {
   const history = useHistory();
@@ -66,14 +65,7 @@ export default () => {
         initialValues={young}
         validateOnChange={false}
         validateOnBlur={false}
-        onSubmit={(values) =>
-          setModal({
-            isOpen: true,
-            title: "Pièce d'identité",
-            message: "Avez-vous bien pensé à téléverser le RECTO et le VERSO de votre pièce d'identité ?",
-            onConfirm: () => onSubmit(values),
-          })
-        }
+        onSubmit={(values) => onSubmit(values)}
       >
         {({ values, handleChange, handleSubmit, errors, touched }) => (
           <>
@@ -144,7 +136,7 @@ export default () => {
                         type="radio"
                         name="countryVisible"
                         value="false"
-                        checked={values.countryVisible === false}
+                        checked={values.countryVisible === "false"}
                         onChange={handleChange}
                       />
                       Je réside en France
@@ -158,7 +150,7 @@ export default () => {
                         type="radio"
                         name="countryVisible"
                         value="true"
-                        checked={values.countryVisible === true}
+                        checked={values.countryVisible === "true"}
                         onChange={handleChange}
                       />
                       Je réside à l'étranger
@@ -171,7 +163,7 @@ export default () => {
                     <AddressInputV2
                       keys={{ city: "city", zip: "zip", address: "address", location: "location", department: "department", region: "region", country: "country" }}
                       values={values}
-                      countryVisible={values.countryVisible}
+                      countryVisible={values.countryVisible === "true"}
                       departAndRegionVisible={false}
                       handleChange={handleChange}
                       errors={errors}
@@ -181,27 +173,29 @@ export default () => {
                 </Row>
               </Col>
             </FormRow>
-            <FormRow>
-              <Col md={4}>
-                <Label>Identité et adresse de l'hébergeur en France</Label>
-                <Infos>
-                  <svg width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" clipRule="evenodd" d="M16 8A8 8 0 110 8a8 8 0 0116 0zM9 4a1 1 0 11-2 0 1 1 0 012 0zM7 7a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2V8a1 1 0 00-1-1H7z" fill="#32257F" /></svg>
-                  <p>Proche chez qui vous séjournerez le temps de la réalisation de votre SNU (lieu de départ/retour pour le séjour et de réalisation de la MIG).</p>
-                </Infos>
-                <Note>
-                  A noter : l’hébergement chez un proche en France ainsi que le transport entre votre lieu de résidence et celui de votre hébergeur sont à votre charge.
-                </Note>
-              </Col>
-              <Col>
-                <HostAddressInput
-                  keys={{ lastName: "hostLastName", firstName: "hostFirstName", city: "hostCity", zip: "hostZip", address: "hostAddress", location: "hostLocation", link: "link" }}
-                  values={values}
-                  handleChange={handleChange}
-                  errors={errors}
-                  touched={touched}
-                />
-              </Col>
-            </FormRow>
+            {values.countryVisible === "true" && (
+              <FormRow>
+                <Col md={4}>
+                  <Label>Identité et adresse de l'hébergeur en France</Label>
+                  <Infos>
+                    <svg width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" clipRule="evenodd" d="M16 8A8 8 0 110 8a8 8 0 0116 0zM9 4a1 1 0 11-2 0 1 1 0 012 0zM7 7a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2V8a1 1 0 00-1-1H7z" fill="#32257F" /></svg>
+                    <p>Proche chez qui vous séjournerez le temps de la réalisation de votre SNU (lieu de départ/retour pour le séjour et de réalisation de la MIG).</p>
+                  </Infos>
+                  <Note>
+                    A noter : l’hébergement chez un proche en France ainsi que le transport entre votre lieu de résidence et celui de votre hébergeur sont à votre charge.
+                  </Note>
+                </Col>
+                <Col>
+                  <HostAddressInput
+                    keys={{ hostLastName: "hostLastName", hostFirstName: "hostFirstName", hostCity: "hostCity", hostZip: "hostZip", hostAddress: "hostAddress", hostLocation: "hostLocation", link: "link" }}
+                    values={values}
+                    handleChange={handleChange}
+                    errors={errors}
+                    touched={touched}
+                  />
+                </Col>
+              </FormRow>
+            )}
             <FormRow>
               <Col md={4}>
                 <Label>Situation</Label>
@@ -468,16 +462,6 @@ export default () => {
           </>
         )}
       </Formik>
-      <ModalConfirm
-        isOpen={modal?.isOpen}
-        title={modal?.title}
-        message={modal?.message}
-        onCancel={() => setModal({ isOpen: false, onConfirm: null })}
-        onConfirm={() => {
-          modal?.onConfirm();
-          setModal({ isOpen: false, onConfirm: null });
-        }}
-      />
     </Wrapper>
   );
 };
