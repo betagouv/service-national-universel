@@ -144,7 +144,7 @@ export default () => {
                         type="radio"
                         name="countryVisible"
                         value="false"
-                        checked={values.countryVisible === false}
+                        checked={values.countryVisible === "false"}
                         onChange={handleChange}
                       />
                       Je réside en France
@@ -158,7 +158,7 @@ export default () => {
                         type="radio"
                         name="countryVisible"
                         value="true"
-                        checked={values.countryVisible === true}
+                        checked={values.countryVisible === "true"}
                         onChange={handleChange}
                       />
                       Je réside à l'étranger
@@ -171,7 +171,7 @@ export default () => {
                     <AddressInputV2
                       keys={{ city: "city", zip: "zip", address: "address", location: "location", department: "department", region: "region", country: "country" }}
                       values={values}
-                      countryVisible={values.countryVisible}
+                      countryVisible={values.countryVisible === "true"}
                       departAndRegionVisible={false}
                       handleChange={handleChange}
                       errors={errors}
@@ -194,7 +194,7 @@ export default () => {
               </Col>
               <Col>
                 <HostAddressInput
-                  keys={{ lastName: "hostLastName", firstName: "hostFirstName", city: "hostCity", zip: "hostZip", address: "hostAddress", location: "hostLocation", link: "link" }}
+                  keys={{ hostLastName: "hostLastName", hostFirstName: "hostFirstName", hostCity: "hostCity", hostZip: "hostZip", hostAddress: "hostAddress", hostLocation: "hostLocation", link: "link" }}
                   values={values}
                   handleChange={handleChange}
                   errors={errors}
