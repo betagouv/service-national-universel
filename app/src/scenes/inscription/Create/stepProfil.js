@@ -182,7 +182,7 @@ export default () => {
                       checked={values.birthCountry === "France"}
                       onChange={handleChange}
                     />
-                    Je suis née en France
+                    Je suis né.e en France
                   </RadioLabel>
                   <RadioLabel>
                     <Field
@@ -194,7 +194,7 @@ export default () => {
                       checked={values.birthCountry !== "France"}
                       onChange={handleChange}
                     />
-                    Je suis née à l'étranger
+                    Je suis né.e à l'étranger
                   </RadioLabel>
                 </FlexGroup>
                 <FlexGroup style={{ marginTop: "15px" }}>
