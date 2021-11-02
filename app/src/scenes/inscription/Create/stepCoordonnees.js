@@ -144,7 +144,7 @@ export default () => {
                         type="radio"
                         name="countryVisible"
                         value="false"
-                        checked={values.countryVisible === false}
+                        checked={values.countryVisible === "false"}
                         onChange={handleChange}
                       />
                       Je réside en France
@@ -158,7 +158,7 @@ export default () => {
                         type="radio"
                         name="countryVisible"
                         value="true"
-                        checked={values.countryVisible === true}
+                        checked={values.countryVisible === "true"}
                         onChange={handleChange}
                       />
                       Je réside à l'étranger
@@ -171,7 +171,7 @@ export default () => {
                     <AddressInputV2
                       keys={{ city: "city", zip: "zip", address: "address", location: "location", department: "department", region: "region", country: "country" }}
                       values={values}
-                      countryVisible={values.countryVisible}
+                      countryVisible={values.countryVisible === "true"}
                       departAndRegionVisible={false}
                       handleChange={handleChange}
                       errors={errors}
@@ -203,7 +203,6 @@ export default () => {
                   />
                 </Col>
               </FormRow>
-
             )}
             <FormRow>
               <Col md={4}>

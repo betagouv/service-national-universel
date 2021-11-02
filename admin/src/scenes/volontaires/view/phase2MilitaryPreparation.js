@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 
-import { translate as t, APPLICATION_STATUS_COLORS, SENDINBLUE_TEMPLATES } from "../../../utils";
+import { translate, APPLICATION_STATUS_COLORS, SENDINBLUE_TEMPLATES } from "../../../utils";
 import Badge from "../../../components/Badge";
 import { Box, BoxTitle, Separator } from "../../../components/box";
 import DownloadButton from "../../../components/buttons/DownloadButton";
@@ -67,7 +67,7 @@ export default ({ young }) => {
       }
     } catch (e) {
       console.error(e);
-      toastr.error("Une erreur est survenue", t(e.code));
+      toastr.error("Une erreur est survenue", translate(e.code));
     }
     //Refresh
     history.go(0);
@@ -163,14 +163,14 @@ export default ({ young }) => {
       <Box>
         <Bloc
           title="Documents - Préparation militaire"
-          titleRight={<Badge text={t(young.statusMilitaryPreparationFiles)} color={APPLICATION_STATUS_COLORS[young.statusMilitaryPreparationFiles]} />}
+          titleRight={<Badge text={translate(young.statusMilitaryPreparationFiles)} color={APPLICATION_STATUS_COLORS[young.statusMilitaryPreparationFiles]} />}
         >
           {applicationsToMilitaryPreparation.map((a, i) => (
             <div key={i}>
               <LinkStyled href={`/mission/${a.missionId}`} target="_blank">
                 {a?.mission?.name || a.missionName}
               </LinkStyled>
-              <Badge text={t(a.status)} color={APPLICATION_STATUS_COLORS[a.status]} />
+              <Badge text={translate(a.status)} color={APPLICATION_STATUS_COLORS[a.status]} />
             </div>
           ))}
           <Line>
