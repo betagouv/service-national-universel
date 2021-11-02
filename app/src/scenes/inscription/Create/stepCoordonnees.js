@@ -307,8 +307,7 @@ export default () => {
                       YOUNG_SITUATIONS.APPRENTICESHIP,
                     ].includes(values.situation) && (
                         <div style={{ marginBottom: "10px" }}>
-                          <RadioLabel style={{ fontWeight: "bold" }}>Trouver votre établissement</RadioLabel>
-                          <Etablissement values={values} handleChange={handleChange} />
+                          <Etablissement values={values} handleChange={handleChange} keys={{ schoolName: "schoolName", schoolRank: "schoolRank" }} />
                         </div>
                       )}
                   </>
