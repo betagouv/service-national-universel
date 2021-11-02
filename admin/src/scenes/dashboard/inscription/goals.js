@@ -8,15 +8,15 @@ import api from "../../../services/api";
 
 export default ({ filter }) => {
   const [total2020Affected, setTotal2020Affected] = useState();
-  const [total2021Validated, setTotal2021Validated] = useState();
+  const [totalValidated, setTotalValidated] = useState();
   const [inscriptionGoals, setInscriptionGoals] = useState();
   const goal = useMemo(
     () => inscriptionGoals && inscriptionGoals.reduce((acc, current) => acc + (current.max && !isNaN(Number(current.max)) ? Number(current.max) : 0), 0),
     [inscriptionGoals]
   );
   const totalInscription = useMemo(() => {
-    return Number(total2020Affected || 0) + Number(total2021Validated || 0);
-  }, [total2020Affected, total2021Validated]);
+    return Number((filter.cohort === "2021" && total2020Affected) || 0) + Number(totalValidated || 0);
+  }, [total2020Affected, totalValidated]);
   const percent = useMemo(() => {
     if (!goal || !totalInscription) return 0;
     return Math.round((totalInscription / (goal || 1)) * 100);
@@ -39,9 +39,9 @@ export default ({ filter }) => {
     }
   }
 
-  async function fetch2021Validated() {
+  async function fetchValidated() {
     const body = {
-      query: { bool: { must: { match_all: {} }, filter: [{ term: { "cohort.keyword": "2021" } }, { term: { "status.keyword": "VALIDATED" } }] } },
+      query: { bool: { must: { match_all: {} }, filter: [{ term: { "cohort.keyword": filter.cohort } }, { term: { "status.keyword": "VALIDATED" } }] } },
       aggs: { status: { terms: { field: "status.keyword" } } },
       size: 0,
     };
@@ -52,14 +52,14 @@ export default ({ filter }) => {
     const { responses } = await api.esQuery("young", body);
     if (responses.length) {
       const m = api.getAggregations(responses[0]);
-      setTotal2021Validated(m.VALIDATED || 0);
+      setTotalValidated(m.VALIDATED || 0);
     }
   }
 
   useEffect(() => {
     (async () => {
       fetch2020Affected();
-      fetch2021Validated();
+      fetchValidated();
       getInscriptionGoals(filter.region, filter.department);
     })();
   }, [JSON.stringify(filter)]);
@@ -70,7 +70,7 @@ export default ({ filter }) => {
       if (region) return e.region === region;
       return true;
     }
-    const { data, ok, code } = await api.get("/inscription-goal");
+    const { data, ok, code } = await api.get("/inscription-goal/" + filter.cohort);
     if (!ok) return toastr.error("Une erreur s'est produite.");
     setInscriptionGoals(
       departmentList.map((d) => data.filter(filterByRegionAndDepartement).find((e) => e.department === d) || { department: d, region: department2region[d], max: null })
@@ -90,13 +90,13 @@ export default ({ filter }) => {
           </Card>
         </Col>
         <Col md={4}>
-          <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS} style={{ padding: "22px 15px 6px" }}>
-            <CardTitle>Nombre d'inscrits *</CardTitle>
+          <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS} style={filter.cohort === "2021" ? { padding: "22px 15px 6px" } : {}}>
+            <CardTitle>Nombre d'inscrits {filter.cohort === "2021" && "*"}</CardTitle>
             <CardValueWrapper>
               <CardValue>{totalInscription || "0"}</CardValue>
               <CardArrow />
             </CardValueWrapper>
-            <div style={{ fontSize: "10px", color: "#888" }}>* 2021 validés et 2020 affectés</div>
+            {filter.cohort === "2021" && <div style={{ fontSize: "10px", color: "#888" }}>* 2021 validés et 2020 affectés</div>}
           </Card>
         </Col>
         <Col md={4}>
