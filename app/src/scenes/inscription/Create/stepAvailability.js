@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 
 import { useSelector, useDispatch } from "react-redux";
@@ -10,20 +10,54 @@ import BackIcon from "../../../components/BackIcon";
 export default () => {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
+  const [indexAvailability, setIndexAvailability] = useState(0);
 
   if (!young) {
     history.push("/inscription/profil");
     return <div />;
   }
 
+  const availability = [
+    {
+      month: "Février",
+      excludedGrade: ["1ere", "Terminale"],
+      excludedZip: ["975", "974", "976", "984", "987", "986", "988"],
+      includedBirthdate: { begin: "02/25/2004", end: "02/14/2007" },
+    },
+    {
+      month: "Juin",
+      excludedGrade: ["1ere", "Terminale"],
+      excludedZip: [],
+      includedBirthdate: { begin: "06/24/2004", end: "06/13/2007" },
+    },
+    {
+      month: "Juillet",
+      excludedGrade: [],
+      excludedZip: [],
+      includedBirthdate: { begin: "07/15/2004", end: "07/04/2007" },
+    },
+  ].filter((el) => {
+    if (el.excludedGrade.includes(young.grade)) return false;
+    else if (el.excludedZip.includes(young.zip)) return false;
+    else if (
+      new Date(el.includedBirthdate.begin).getTime() <= new Date(young.birthdateAt).getTime() &&
+      new Date(young.birthdateAt).getTime() <= new Date(el.includedBirthdate.end).getTime()
+    ) {
+      return true;
+    }
+    return false;
+  });
+
   return (
     <>
       <Container>
         <Info>
-          <div className="back">
-            <BackIcon color="#9CA3AF" style={{ marginRight: "7px" }} />
-            <p>Session de Février</p>
-          </div>
+          {availability[indexAvailability - 1] && (
+            <div className="back" onClick={() => setIndexAvailability(indexAvailability - 1)}>
+              <BackIcon color="#9CA3AF" style={{ marginRight: "7px" }} />
+              <p>Session de {availability[indexAvailability - 1].month}</p>
+            </div>
+          )}
           <h3>Séjour de cohésion à venir</h3>
           <h1>Etes-vous disponible du 13 au 25 février 2022 ?</h1>
           <AlerteInfo>
@@ -32,9 +66,13 @@ export default () => {
           </AlerteInfo>
           <div class="btns">
             <Button backgroundColor="#4f46e5" dark>
-              Je suis disponible pour la session de février
+              Je suis disponible pour la session de {availability[indexAvailability].month}
             </Button>
-            <Button borderColor="#D1D5DB">Non je ne suis pas disponible</Button>
+            {availability[indexAvailability + 1] && (
+              <Button onClick={() => setIndexAvailability(indexAvailability + 1)} borderColor="#D1D5DB">
+                Non je ne suis pas disponible
+              </Button>
+            )}
           </div>
         </Info>
         <div className="thumb" />
@@ -54,7 +92,7 @@ const Info = styled.div`
   flex: 1.5;
   padding: 5rem;
   @media (max-width: 768px) {
-    padding: 1rem 0;
+    padding: 1.5rem;
   }
 
   h1 {
@@ -78,6 +116,9 @@ const Info = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
+    @media (max-width: 768px) {
+      flex-direction: column;
+    }
   }
 
   .back {
@@ -85,6 +126,8 @@ const Info = styled.div`
     align-items: center;
     color: #6b7280;
     margin-bottom: 2rem;
+    cursor: pointer;
+    width: fit-content;
   }
 `;
 
@@ -97,24 +140,30 @@ const Button = styled.div`
   box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.05);
   border-radius: 6px;
   width: fit-content;
+  cursor: pointer;
+  text-align: center;
 
   &:last-child {
     margin-right: 0rem;
+  }
+
+  @media (max-width: 768px) {
+    margin: 1rem 0rem 0rem 0rem;
   }
 `;
 
 const Container = styled.div`
   display: flex;
 
-  .thumb {
-    min-height: 400px;
-    @media (max-width: 768px) {
-      min-height: 0;
+  @media (min-width: 768px) {
+    .thumb {
+      min-height: 400px;
+      ${({ thumbImage = HERO_IMAGES_LIST[Math.floor(Math.random() * HERO_IMAGES_LIST.length)] }) =>
+        `background: url(${require(`../../../assets/${thumbImage}`)}) no-repeat center;`}
+      background-size: cover;
+      flex: 1;
+      -webkit-clip-path: polygon(15% 0, 0 100%, 100% 100%, 100% 0);
+      clip-path: polygon(15% 0, 0 100%, 100% 100%, 100% 0);
     }
-    ${({ thumbImage = HERO_IMAGES_LIST[Math.floor(Math.random() * HERO_IMAGES_LIST.length)] }) => `background: url(${require(`../../../assets/${thumbImage}`)}) no-repeat center;`}
-    background-size: cover;
-    flex: 1;
-    -webkit-clip-path: polygon(15% 0, 0 100%, 100% 100%, 100% 0);
-    clip-path: polygon(15% 0, 0 100%, 100% 100%, 100% 0);
   }
 `;
