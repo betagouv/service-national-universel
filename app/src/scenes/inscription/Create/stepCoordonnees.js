@@ -18,7 +18,6 @@ import HostAddressInput from "../../../components/hostAddressInput";
 import Etablissement from "../components/etablissmentInput";
 import { translate } from "../../../utils";
 import FormFooter from "../../../components/form/FormFooter";
-import ModalConfirm from "../../../components/modals/ModalConfirm";
 
 export default () => {
   const history = useHistory();
@@ -66,14 +65,7 @@ export default () => {
         initialValues={young}
         validateOnChange={false}
         validateOnBlur={false}
-        onSubmit={(values) =>
-          setModal({
-            isOpen: true,
-            title: "Pièce d'identité",
-            message: "Avez-vous bien pensé à téléverser le RECTO et le VERSO de votre pièce d'identité ?",
-            onConfirm: () => onSubmit(values),
-          })
-        }
+        onSubmit={(values) => onSubmit(values)}
       >
         {({ values, handleChange, handleSubmit, errors, touched }) => (
           <>
@@ -195,7 +187,8 @@ export default () => {
                 </Col>
                 <Col>
                   <HostAddressInput
-                    keys={{ lastName: "hostLastName", firstName: "hostFirstName", city: "hostCity", zip: "hostZip", address: "hostAddress", location: "hostLocation", link: "link" }}
+                    keys={{ hostLastName: "hostLastName", hostFirstName: "hostFirstName", hostCity: "hostCity", hostZip: "hostZip", hostAddress: "hostAddress", hostLocation: "hostLocation", link: "link" }}
+
                     values={values}
                     handleChange={handleChange}
                     errors={errors}
@@ -309,8 +302,7 @@ export default () => {
                       YOUNG_SITUATIONS.APPRENTICESHIP,
                     ].includes(values.situation) && (
                         <div style={{ marginBottom: "10px" }}>
-                          <RadioLabel style={{ fontWeight: "bold" }}>Trouver votre établissement</RadioLabel>
-                          <Etablissement values={values} handleChange={handleChange} />
+                          <Etablissement values={values} handleChange={handleChange} keys={{ schoolName: "schoolName", schoolRank: "schoolRank" }} />
                         </div>
                       )}
                   </>
@@ -471,16 +463,6 @@ export default () => {
           </>
         )}
       </Formik>
-      <ModalConfirm
-        isOpen={modal?.isOpen}
-        title={modal?.title}
-        message={modal?.message}
-        onCancel={() => setModal({ isOpen: false, onConfirm: null })}
-        onConfirm={() => {
-          modal?.onConfirm();
-          setModal({ isOpen: false, onConfirm: null });
-        }}
-      />
     </Wrapper>
   );
 };
