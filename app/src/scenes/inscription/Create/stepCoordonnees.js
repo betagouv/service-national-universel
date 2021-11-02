@@ -188,6 +188,7 @@ export default () => {
                 <Col>
                   <HostAddressInput
                     keys={{ hostLastName: "hostLastName", hostFirstName: "hostFirstName", hostCity: "hostCity", hostZip: "hostZip", hostAddress: "hostAddress", hostLocation: "hostLocation", link: "link" }}
+
                     values={values}
                     handleChange={handleChange}
                     errors={errors}
