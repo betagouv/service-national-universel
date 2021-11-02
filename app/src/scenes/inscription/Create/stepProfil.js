@@ -166,41 +166,6 @@ export default () => {
                 <ErrorMessage errors={errors} touched={touched} name="birthdateAt" />
               </Col>
             </FormRow>
-            <FormRow align="center">
-              <Col md={4}>
-                <Label>Votre e-mail</Label>
-              </Col>
-              <Col md={8}>
-                <FieldWithWidth
-                  maxWidth="400px"
-                  placeholder="xxx@exemple.com"
-                  className="form-control"
-                  validate={(v) => (!v && requiredMessage) || (!validator.isEmail(v) && "Ce champs est au mauvais format")}
-                  type="email"
-                  name="email"
-                  value={values.email}
-                  onChange={handleChange}
-                />
-                <ErrorMessage errors={errors} touched={touched} name="email" />
-                <TextUnderField style={{ marginBottom: "15px" }}>Cette adresse vous servira d'identifiant de connexion, notez le bien.</TextUnderField>
-              </Col>
-              <Col md={4}>
-                <Label>Confirmez votre email</Label>
-              </Col>
-              <Col md={8}>
-                <FieldWithWidth
-                  maxWidth="400px"
-                  placeholder="xxx@exemple.com"
-                  className="form-control"
-                  validate={(v) => (!v && requiredMessage) || (v !== values.email && "Les emails renseignés ne sont pas identiques")}
-                  type="email"
-                  name="newEmail"
-                  value={values.newEmail}
-                  onChange={handleChange}
-                />
-                <ErrorMessage errors={errors} touched={touched} name="newEmail" />
-              </Col>
-            </FormRow>
             <FormRow>
               <Col md={4}>
                 <Label>Lieu de naissance</Label>
@@ -276,6 +241,41 @@ export default () => {
                     </div>
                   )}
                 </FlexGroup>
+              </Col>
+            </FormRow>
+            <FormRow align="center">
+              <Col md={4}>
+                <Label>Votre e-mail</Label>
+              </Col>
+              <Col md={8}>
+                <FieldWithWidth
+                  maxWidth="400px"
+                  placeholder="xxx@exemple.com"
+                  className="form-control"
+                  validate={(v) => (!v && requiredMessage) || (!validator.isEmail(v) && "Ce champs est au mauvais format")}
+                  type="email"
+                  name="email"
+                  value={values.email}
+                  onChange={handleChange}
+                />
+                <ErrorMessage errors={errors} touched={touched} name="email" />
+                <TextUnderField style={{ marginBottom: "15px" }}>Cette adresse vous servira d'identifiant de connexion, notez le bien.</TextUnderField>
+              </Col>
+              <Col md={4}>
+                <Label>Confirmez votre email</Label>
+              </Col>
+              <Col md={8}>
+                <FieldWithWidth
+                  maxWidth="400px"
+                  placeholder="xxx@exemple.com"
+                  className="form-control"
+                  validate={(v) => (!v && requiredMessage) || (v !== values.email && "Les emails renseignés ne sont pas identiques")}
+                  type="email"
+                  name="newEmail"
+                  value={values.newEmail}
+                  onChange={handleChange}
+                />
+                <ErrorMessage errors={errors} touched={touched} name="newEmail" />
               </Col>
             </FormRow>
             <FormRow align="center">
