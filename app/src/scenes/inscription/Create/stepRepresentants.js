@@ -19,7 +19,7 @@ import FormLegend from "../../../components/form/FormLegend";
 import FormRow from "../../../components/form/FormRow";
 import FormFooter from "../../../components/form/FormFooter";
 
-const Parent = ({ id = 1, values, errors, touched, handleChange }) => {
+const Parent = ({ id = 1, values, errors, touched, handleChange, validateField }) => {
   const isParentFromFranceConnect = values[`parent${id}FromFranceConnect`] === "true";
 
   function FranceConnectZone({ id, handleSave }) {
@@ -215,6 +215,7 @@ const Parent = ({ id = 1, values, errors, touched, handleChange }) => {
                   errors={errors}
                   touched={touched}
                   countryVisible
+                  validateField={validateField}
                 />
                 <ErrorMessage errors={errors} touched={touched} name={`parent${id}OwnAddress`} />
               </Col>
@@ -269,9 +270,9 @@ export default () => {
           }
         }}
       >
-        {({ values, handleChange, handleSubmit, isSubmitting, submitForm, errors, touched }) => (
+        {({ values, handleChange, handleSubmit, isSubmitting, submitForm, errors, touched, validateField }) => (
           <>
-            <Parent id={1} values={values} handleChange={handleChange} errors={errors} touched={touched} />
+            <Parent id={1} values={values} handleChange={handleChange} errors={errors} touched={touched} validateField={validateField} />
             <FormRow>
               <Col md={4} style={{ padding: "20px 0" }}>
                 <BorderButton
