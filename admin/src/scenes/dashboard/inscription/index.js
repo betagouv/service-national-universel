@@ -66,7 +66,6 @@ export default () => {
                   { key: "Février 2022", label: "Février 2022" },
                   { key: "Juin 2022", label: "Juin 2022" },
                   { key: "Juillet 2022", label: "Juillet 2022" },
-                  { key: "", label: "Toutes" },
                 ]}
                 onChange={(cohort) => updateFilter({ cohort })}
                 value={filter.cohort}
