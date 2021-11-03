@@ -126,6 +126,7 @@ export default () => {
                     de cohésion puis la réalisation d'une mission d'intérêt général
                   </div>
                 </RadioLabel>
+                <ErrorMessage errors={errors} touched={touched} name="parentConsentment2" />
                 <RadioLabel style={{ marginBottom: 3 }}>
                   <Field
                     validate={(v) => !v && requiredMessage}
@@ -146,7 +147,7 @@ export default () => {
                     </a>
                   </div>
                 </RadioLabel>
-                <ErrorMessage errors={errors} touched={touched} name="parentConsentment2" />
+                <ErrorMessage errors={errors} touched={touched} name="parentConsentment6" />
                 <SubTitle>Pour la participation au séjour de cohésion</SubTitle>
                 <RadioLabel style={{ marginBottom: 3 }}>
                   <Field
@@ -202,7 +203,9 @@ export default () => {
                     name="parentConsentment5"
                     onChange={handleChange}
                   />
-                  <div>{isPlural ? "Nous nous engageons" : "Je m’engage"} à ce que mon enfant soit à jour de ses vaccinations obligatoires*.</div>
+                  <div>
+                    {isPlural ? "Nous nous engageons" : "Je m’engage"} à ce que {young.firstName} {young.lastName} soit à jour de ses vaccinations obligatoires*.
+                  </div>
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="parentConsentment6" />
                 <div style={{ fontWeight: 400, fontSize: 14, margin: "0.8rem" }}>
@@ -222,7 +225,7 @@ export default () => {
                 <RadioLabel>
                   <Field validate={(v) => !v && requiredMessage} value="true" checked={values.consentment1} type="checkbox" name="consentment1" onChange={handleChange} />
                   <div>
-                    suis volontaire, sous le contrôle de mon représentant légal, pour effectuer à la session 2022 du Service National Universel qui comprend la participation au séjour de
+                    suis volontaire, sous le contrôle de {isPlural ? "mes représentants légaux" : "mon représentant légal"}, pour effectuer à la session 2022 du Service National Universel qui comprend la participation au séjour de
                     cohésion puis la réalisation d'une mission d'intérêt général.
                   </div>
                 </RadioLabel>

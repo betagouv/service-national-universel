@@ -291,7 +291,7 @@ export default () => {
                     delete values.parent2Location;
                   }}
                 >
-                  {!isParent2Visible ? "Ajouter" : "Retirer"} un représentant légal
+                  {!isParent2Visible ? "Ajouter" : "Retirer"} le représentant légal nº2
                 </BorderButton>
               </Col>
             </FormRow>
