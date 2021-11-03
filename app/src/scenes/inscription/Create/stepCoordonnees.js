@@ -7,23 +7,22 @@ import { toastr } from "react-redux-toastr";
 import validator from "validator";
 import { useHistory } from "react-router-dom";
 
-import DndFileInput from "../../../components/dndFileInput";
 import ErrorMessage, { requiredMessage } from "../components/errorMessage";
 import { setYoung } from "../../../redux/auth/actions";
 import api from "../../../services/api";
-import { saveYoung, STEPS, YOUNG_SITUATIONS } from "../utils";
+import { STEPS, YOUNG_SITUATIONS } from "../utils";
 import FormRow from "../../../components/form/FormRow";
 import AddressInputV2 from "../../../components/addressInputV2";
 import HostAddressInput from "../../../components/hostAddressInput";
 import Etablissement from "../components/etablissmentInput";
 import { translate } from "../../../utils";
 import FormFooter from "../../../components/form/FormFooter";
+import InfoIcon from "../../../components/InfoIcon";
 
 export default () => {
   const history = useHistory();
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
-  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
   if (!young) {
     history.push("/inscription/profil");
@@ -31,7 +30,6 @@ export default () => {
   }
 
   const cleanSchoolInformation = (v) => {
-    delete v.schoolName;
     delete v.schoolType;
     delete v.schoolAddress;
     delete v.schoolComplementAdresse;
@@ -40,14 +38,40 @@ export default () => {
     delete v.schoolDepartment;
     delete v.schoolLocation;
     delete v.schoolId;
+    v.schoolName = "";
+    v.grade = "";
+  };
+
+  const cleanHostInformation = (v) => {
+    delete v.hostLastName;
+    delete v.hostFirstName;
+    delete v.hostCity;
+    delete v.hostZip;
+    delete v.hostAddress;
+    delete v.link;
+  };
+
+  const cleanSituation = (v) => {
+    delete v.situation;
+    delete v.employed;
+    delete v.schoolType;
+    delete v.schoolAddress;
+    delete v.schoolComplementAdresse;
+    delete v.schoolZip;
+    delete v.schoolCity;
+    delete v.schoolDepartment;
+    delete v.schoolLocation;
+    delete v.schoolId;
+    v.schoolName = "";
+    v.grade = "";
   };
 
   const onSubmit = async (values) => {
     try {
       values.inscriptionStep = STEPS.PARTICULIERES;
-      const { ok, code, data: young } = await api.put("/young", values);
+      const { ok, code, data } = await api.put("/young", values);
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
-      dispatch(setYoung(young));
+      dispatch(setYoung(data));
       history.push("/inscription/particulieres");
     } catch (e) {
       console.log(e);
@@ -61,12 +85,7 @@ export default () => {
         <h2>Complétez les coordonnées du volontaire</h2>
         <p>Renseignez ci-dessous vos coordonnées personnelles</p>
       </Heading>
-      <Formik
-        initialValues={young}
-        validateOnChange={false}
-        validateOnBlur={false}
-        onSubmit={(values) => onSubmit(values)}
-      >
+      <Formik initialValues={young} validateOnChange={false} validateOnBlur={false} onSubmit={(values) => onSubmit(values)}>
         {({ values, handleChange, handleSubmit, errors, touched }) => (
           <>
             <FormRow>
@@ -134,10 +153,11 @@ export default () => {
                         validate={(v) => !v && requiredMessage}
                         className="form-control"
                         type="radio"
-                        name="countryVisible"
-                        value="false"
-                        checked={values.countryVisible === "false"}
+                        name="country"
+                        value="France"
+                        checked={values.country === "France"}
                         onChange={handleChange}
+                        onClick={() => cleanHostInformation(values)}
                       />
                       Je réside en France
                     </RadioLabel>
@@ -148,10 +168,10 @@ export default () => {
                         validate={(v) => !v && requiredMessage}
                         className="form-control"
                         type="radio"
-                        name="countryVisible"
-                        value="true"
-                        checked={values.countryVisible === "true"}
+                        name="country"
+                        checked={values.country !== "France"}
                         onChange={handleChange}
+                        onClick={() => cleanHostInformation(values)}
                       />
                       Je réside à l'étranger
                     </RadioLabel>
@@ -163,7 +183,7 @@ export default () => {
                     <AddressInputV2
                       keys={{ city: "city", zip: "zip", address: "address", location: "location", department: "department", region: "region", country: "country" }}
                       values={values}
-                      countryVisible={values.countryVisible === "true"}
+                      countryVisible={values.country !== "France"}
                       departAndRegionVisible={false}
                       handleChange={handleChange}
                       errors={errors}
@@ -173,12 +193,12 @@ export default () => {
                 </Row>
               </Col>
             </FormRow>
-            {values.countryVisible === "true" && (
+            {values.country !== "France" && (
               <FormRow>
                 <Col md={4}>
                   <Label>Identité et adresse de l'hébergeur en France</Label>
                   <Infos>
-                    <svg width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" clipRule="evenodd" d="M16 8A8 8 0 110 8a8 8 0 0116 0zM9 4a1 1 0 11-2 0 1 1 0 012 0zM7 7a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2V8a1 1 0 00-1-1H7z" fill="#32257F" /></svg>
+                    <InfoIcon color="#32257F" />
                     <p>Proche chez qui vous séjournerez le temps de la réalisation de votre SNU (lieu de départ/retour pour le séjour et de réalisation de la MIG).</p>
                   </Infos>
                   <Note>
@@ -187,8 +207,14 @@ export default () => {
                 </Col>
                 <Col>
                   <HostAddressInput
-                    keys={{ hostLastName: "hostLastName", hostFirstName: "hostFirstName", hostCity: "hostCity", hostZip: "hostZip", hostAddress: "hostAddress", hostLocation: "hostLocation", link: "link" }}
-
+                    keys={{
+                      hostLastName: "hostLastName",
+                      hostFirstName: "hostFirstName",
+                      hostCity: "hostCity",
+                      hostZip: "hostZip",
+                      hostAddress: "hostAddress",
+                      link: "link",
+                    }}
                     values={values}
                     handleChange={handleChange}
                     errors={errors}
@@ -209,10 +235,11 @@ export default () => {
                       validate={(v) => !v && requiredMessage}
                       className="form-control"
                       type="radio"
-                      name="inSchool"
-                      value="yes"
-                      checked={values.inSchool === "yes"}
+                      name="schooled"
+                      value="true"
+                      checked={values.schooled === "true"}
                       onChange={handleChange}
+                      onClick={() => cleanSituation(values)}
                     />
                     Oui
                   </RadioLabel>
@@ -221,15 +248,16 @@ export default () => {
                       validate={(v) => !v && requiredMessage}
                       className="form-control"
                       type="radio"
-                      name="inSchool"
-                      value="no"
-                      checked={values.inSchool === "no"}
+                      name="schooled"
+                      value="false"
+                      checked={values.schooled === "false"}
                       onChange={handleChange}
+                      onClick={() => cleanSituation(values)}
                     />
                     Non
                   </RadioLabel>
                 </div>
-                {values.inSchool === "yes" && (
+                {values.schooled === "true" && (
                   <>
                     <RadioLabel style={{ fontWeight: "bold" }}>Précisez: </RadioLabel>
                     <div style={{ marginLeft: "1rem" }}>
@@ -301,13 +329,13 @@ export default () => {
                       YOUNG_SITUATIONS.SPECIALIZED_SCHOOL,
                       YOUNG_SITUATIONS.APPRENTICESHIP,
                     ].includes(values.situation) && (
-                        <div style={{ marginBottom: "10px" }}>
-                          <Etablissement values={values} handleChange={handleChange} keys={{ schoolName: "schoolName", schoolRank: "schoolRank" }} />
-                        </div>
-                      )}
+                      <div style={{ marginBottom: "10px" }}>
+                        <Etablissement values={values} handleChange={handleChange} errors={errors} touched={touched} keys={{ schoolName: "schoolName", grade: "grade" }} />
+                      </div>
+                    )}
                   </>
                 )}
-                {values.inSchool === "no" && (
+                {values.schooled === "false" && (
                   <>
                     <RadioLabel style={{ fontWeight: "bold" }}>Je suis en emploi: </RadioLabel>
                     <div style={{ marginLeft: "1rem" }}>
@@ -316,10 +344,11 @@ export default () => {
                           validate={(v) => !v && requiredMessage}
                           className="form-control"
                           type="radio"
-                          name="employment"
-                          value="yes"
-                          checked={values.employment === "yes"}
+                          name="employed"
+                          value="true"
+                          checked={values.employed === "true"}
                           onChange={handleChange}
+                          onClick={() => delete values.situation}
                         />
                         Oui
                       </RadioLabel>
@@ -328,15 +357,17 @@ export default () => {
                           validate={(v) => !v && requiredMessage}
                           className="form-control"
                           type="radio"
-                          name="employment"
-                          value="no"
-                          checked={values.employment === "no"}
+                          name="employed"
+                          value="false"
+                          checked={values.employed === "false"}
                           onChange={handleChange}
+                          onClick={() => delete values.situation}
                         />
                         Non
                       </RadioLabel>
+                      <ErrorMessage errors={errors} touched={touched} name="employed" />
                     </div>
-                    {values.employment === "yes" && (
+                    {values.employed === "true" && (
                       <>
                         <RadioLabel style={{ fontWeight: "bold" }}>Précisez : </RadioLabel>
                         <div style={{ marginLeft: "1rem" }}>
@@ -395,7 +426,7 @@ export default () => {
                         </div>
                       </>
                     )}
-                    {values.employment === "no" && (
+                    {values.employed === "false" && (
                       <>
                         <RadioLabel style={{ fontWeight: "bold" }}>Je suis sans activité: </RadioLabel>
                         <div style={{ marginLeft: "1rem" }}>
@@ -503,7 +534,7 @@ const Infos = styled.section`
   align-items: flex-start;
   background: rgba(79, 70, 229, 0.1);
   padding: 1rem;
-  color: #32257F;
+  color: #32257f;
   border-radius: 6px;
   svg {
     margin-top: 4px;
@@ -513,7 +544,7 @@ const Infos = styled.section`
 const Note = styled.p`
   margin-top: 1rem;
   padding: 0.2rem;
-  color: #6B7280;
+  color: #6b7280;
 `;
 
 const RadioLabel = styled.label`

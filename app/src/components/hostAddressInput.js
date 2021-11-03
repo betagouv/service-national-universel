@@ -5,9 +5,10 @@ import { Field } from "formik";
 import ErrorMessage, { requiredMessage } from "../scenes/inscription/components/errorMessage";
 
 export default ({ keys, values, handleChange, errors, touched }) => {
-
-
   useEffect(() => {
+    // init value
+    values[keys.link] = "Parent";
+
     if (document.getElementsByTagName) {
       const inputElements = document.getElementsByTagName("input");
       for (let i = 0; inputElements[i]; i++) inputElements[i].setAttribute("autocomplete", "novalue");
