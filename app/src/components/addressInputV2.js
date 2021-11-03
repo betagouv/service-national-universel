@@ -113,7 +113,7 @@ export default ({ keys, values, handleChange, errors, touched, departAndRegionVi
               onSuggestionSelected={onSuggestionSelected}
               renderSuggestion={renderSuggestion}
               inputProps={{
-                placeholder: "Commencez à tapez votre adresse",
+                placeholder: "Commencez à taper votre adresse",
                 value: str,
                 onChange: (event, { newValue }) => setStr(newValue),
                 className: "form-control",

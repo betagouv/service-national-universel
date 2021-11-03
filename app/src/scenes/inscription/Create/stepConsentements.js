@@ -210,8 +210,8 @@ export default () => {
                 <RadioLabel>
                   <Field validate={(v) => !v && requiredMessage} value="true" checked={values.consentment1} type="checkbox" name="consentment1" onChange={handleChange} />
                   <div>
-                    m’engage, sous le contrôle de {isPlural ? "mes représentants légaux" : "mon représentant légal"} , à effectuer à la session 2022 du Service National Universel
-                    qui comprend la participation au séjour de cohésion puis la réalisation d'une mission d'intérêt général.
+                    m’engage, sous le contrôle de {isPlural ? "mes représentants légaux" : "mon représentant légal"} , à effectuer la session 2022 du Service National Universel qui
+                    comprend la participation au séjour de cohésion puis la réalisation d'une mission d'intérêt général.
                   </div>
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="consentment1" />
