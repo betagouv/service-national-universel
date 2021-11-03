@@ -13,13 +13,12 @@ import { STEPS } from "../utils";
 import FormRow from "../../../components/form/FormRow";
 import FormFooter from "../../../components/form/FormFooter";
 import api from "../../../services/api";
-import { translate, YOUNG_PHASE, YOUNG_STATUS } from "../../../utils";
+import { translate } from "../../../utils";
 
 export default () => {
   const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
   const isPlural = useSelector((state) => state.Auth.young?.parent1Status && state.Auth.young?.parent2Status);
-  const [clickedRules, setClickedRules] = useState(false);
 
   const dispatch = useDispatch();
   if (!young) {
@@ -51,19 +50,7 @@ export default () => {
             console.log(values);
             values.parentConsentment = "true";
             values.consentment = "true";
-            if (values.status !== YOUNG_STATUS.WAITING_VALIDATION) {
-              values.status = YOUNG_STATUS.WAITING_VALIDATION;
-              values.lastStatusAt = Date.now();
-              values.historic.push({
-                phase: YOUNG_PHASE.INSCRIPTION,
-                createdAt: Date.now(),
-                userName: `${values.firstName} ${values.lastName}`,
-                userId: values._id,
-                status: YOUNG_STATUS.WAITING_VALIDATION,
-                note: "",
-              });
-            }
-            values.inscriptionStep = STEPS.DONE;
+            values.inscriptionStep = STEPS.DOCUMENTS;
             const { ok, code, data: young } = await api.put("/young", values);
             if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             dispatch(setYoung(young));

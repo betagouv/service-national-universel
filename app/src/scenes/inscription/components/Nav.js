@@ -91,6 +91,7 @@ export default ({ step }) => {
         <Step stepId={STEPS.REPRESENTANTS} stepName="Représentants légaux" stepNumber="4" />
         <Step stepId={STEPS.CONSENTEMENTS} stepName="Consentements" stepNumber="5" />
         <Step stepId={STEPS.DOCUMENTS} stepName="Pièces justificatives" stepNumber="6" />
+        <Step stepId={STEPS.AVAILABILITY} stepName="Disponibilités" stepNumber="7" />
         <Element onClick={() => handleClick(STEPS.DONE)} style={{ flexGrow: 0 }}>
           <div className="logo" />
         </Element>

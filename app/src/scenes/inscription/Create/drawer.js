@@ -60,8 +60,8 @@ export default ({ step }) => {
             <Element status={getStatus(STEPS.DOCUMENTS)}>
               <a onClick={() => handleClick(STEPS.DOCUMENTS)}>Pièces justificatives</a>
             </Element>
-            <Element status={getStatus(STEPS.DONE)}>
-              <a onClick={() => handleClick(STEPS.DONE)}>Disponibilités</a>
+            <Element status={getStatus(STEPS.AVAILABILITY)}>
+              <a onClick={() => handleClick(STEPS.AVAILABILITY)}>Disponibilités</a>
             </Element>
           </ul>
         </li>
