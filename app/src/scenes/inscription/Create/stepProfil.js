@@ -75,7 +75,7 @@ export default () => {
             console.log(e);
             if (e.code === "USER_ALREADY_REGISTERED")
               return toastr.error("Un dossier a déjà été inscrit sur la plateforme avec ces informations.", "Si vous ne vous souvenez plus de votre identifiant, cliquez ici.", {
-                timeOut: 10000,
+                timeOut: 30000,
                 onToastrClick: () => window.open(`https://www.snu.gouv.fr/foire-aux-questions-11`, "_blank").focus(),
               });
             toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code) || e.message);
@@ -152,7 +152,7 @@ export default () => {
                     const to = new Date(2007, 6, 4);
                     const [y, m, d] = v.substring(0, 10).split("-");
                     const check = new Date(Date.UTC(parseInt(y), parseInt(m - 1), parseInt(d)));
-                    return (check < from || check > to) && "Au moment du séjour, vous devez avoir 15 révolu et moins de 18 ans";
+                    return (check < from || check > to) && "Au moment du séjour, vous devez avoir 15 ans révolu et moins de 18 ans";
                   }}
                   name="birthdateAt"
                   value={values.birthdateAt}
