@@ -83,7 +83,7 @@ export default () => {
           }
         }}
       >
-        {({ values, handleChange, handleSubmit, setFieldValue, isSubmitting, submitForm, errors, touched }) => (
+        {({ values, handleChange, handleSubmit, setFieldValue, isSubmitting, submitForm, errors, touched, validateField }) => (
           <>
             <FormRow>
               <Col md={4}>
@@ -256,7 +256,10 @@ export default () => {
                   type="email"
                   name="email"
                   value={values.email}
-                  onChange={handleChange}
+                  onChange={(el) => {
+                    handleChange(el);
+                    validateField("email");
+                  }}
                 />
                 <ErrorMessage errors={errors} touched={touched} name="email" />
                 <TextUnderField style={{ marginBottom: "15px" }}>Cette adresse vous servira d'identifiant de connexion, notez le bien.</TextUnderField>
@@ -273,7 +276,10 @@ export default () => {
                   type="email"
                   name="newEmail"
                   value={values.newEmail}
-                  onChange={handleChange}
+                  onChange={(el) => {
+                    handleChange(el);
+                    validateField("newEmail");
+                  }}
                 />
                 <ErrorMessage errors={errors} touched={touched} name="newEmail" />
               </Col>
@@ -291,7 +297,10 @@ export default () => {
                     type={passwordText ? "text" : "password"}
                     name="password"
                     value={values.password}
-                    onChange={handleChange}
+                    onChange={(el) => {
+                      handleChange(el);
+                      validateField("password");
+                    }}
                   />
                   <EyeIcon src={passwordText ? EyeClose : EyeOpen} onClick={() => setPasswordText(!passwordText)} />
                 </ContainerPass>
@@ -315,7 +324,10 @@ export default () => {
                     onChange={handleChange}
                     name="verifyPassword"
                     value={values.verifyPassword}
-                    onChange={handleChange}
+                    onChange={(el) => {
+                      handleChange(el);
+                      validateField("verifyPassword");
+                    }}
                   />
                   <EyeIcon src={passwordText ? EyeClose : EyeOpen} onClick={() => setPasswordText(!passwordText)} />
                 </ContainerPass>
