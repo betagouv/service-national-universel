@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { Col } from "reactstrap";
 import { Field, Formik } from "formik";
@@ -13,10 +13,9 @@ import { STEPS } from "../utils";
 import FormRow from "../../../components/form/FormRow";
 import FormFooter from "../../../components/form/FormFooter";
 import api from "../../../services/api";
-import { translate } from "../../../utils";
+import { translate, getAge } from "../../../utils";
 
 export default () => {
-  const [age, setAge] = useState(null);
   const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
   const isPlural = useSelector((state) => state.Auth.young?.parent1Status && state.Auth.young?.parent2Status);
@@ -27,11 +26,6 @@ export default () => {
     history.push("/inscription/profil");
     return <div />;
   }
-
-  useEffect(async () => {
-    const year = new Date(young.birthdateAt);
-    setAge(2021 - year);
-  }, [])
 
   return (
     <Wrapper>
@@ -123,7 +117,7 @@ export default () => {
                   </div>
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="parentConsentment2" />
-                {age < 15 && (
+                {getAge(young.birthdateAt) < 15 && (
                   <>
                     <RadioLabel style={{ marginBottom: 3 }}>
                       <Field
@@ -230,7 +224,7 @@ export default () => {
                   </div>
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="consentment1" />
-                {age < 15 && (
+                {getAge(young.birthdateAt) < 15 && (
                   <>
                     <RadioLabel>
                       <Field validate={(v) => !v && requiredMessage} value="true" checked={values.consentment2} type="checkbox" name="consentment2" onChange={handleChange} />
