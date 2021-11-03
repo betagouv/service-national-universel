@@ -10,7 +10,7 @@ import { setYoung } from "../../../redux/auth/actions";
 import { STEPS } from "../utils";
 import InfoIcon from "../../../components/InfoIcon";
 import BackIcon from "../../../components/BackIcon";
-import { translate } from "../../../utils";
+import { translate, YOUNG_STATUS } from "../../../utils";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
@@ -59,7 +59,11 @@ export default () => {
 
   const submit = async (cohort) => {
     try {
-      const { ok, code, data: young } = await api.put("/young", { ...young, cohort, inscriptionStep: STEPS.DONE });
+      let status = young.status;
+      if (status !== YOUNG_STATUS.WAITING_VALIDATION) {
+        status = YOUNG_STATUS.WAITING_VALIDATION;
+      }
+      const { ok, code, data: young } = await api.put("/young", { ...young, status, cohort, inscriptionStep: STEPS.DONE });
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       dispatch(setYoung(young));
       history.push("/inscription/done");
