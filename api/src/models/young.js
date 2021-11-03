@@ -174,7 +174,7 @@ const Schema = new mongoose.Schema({
   inscriptionStep: {
     type: String,
     default: "COORDONNEES", // if the young is created, it passed the first step, so default is COORDONNEES
-    enum: ["PROFIL", "COORDONNEES", "PARTICULIERES", "REPRESENTANTS", "CONSENTEMENTS", "MOTIVATIONS", "DONE"],
+    enum: ["PROFIL", "COORDONNEES", "PARTICULIERES", "REPRESENTANTS", "CONSENTEMENTS", "MOTIVATIONS", "AVAILABILITY", "DONE"],
     documentation: {
       description: "Étape du tunnel d'inscription",
     },
@@ -413,6 +413,12 @@ const Schema = new mongoose.Schema({
       description: "Région du volontaire",
     },
   },
+  country: {
+    type: String,
+    documentation: {
+      description: "Pays de résidence du volontaire",
+    },
+  },
   location: {
     lat: { type: Number },
     lon: { type: Number },
@@ -516,6 +522,15 @@ const Schema = new mongoose.Schema({
     type: String,
     documentation: {
       description: "Identifiant de l'établissement du volontaire",
+    },
+  },
+
+  // * Situations pro
+  employed: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le volontaire est employé",
     },
   },
 
@@ -704,12 +719,57 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  // * Hébergeur
+  hostLastName: {
+    type: String,
+    documentation: {
+      description: "Nom de l'hébergeur",
+    },
+  },
+  hostFirstName: {
+    type: String,
+    documentation: {
+      description: "Prénom de l'hébergeur",
+    },
+  },
+  hostCity: {
+    type: String,
+    documentation: {
+      description: "Ville de l'hébergeur",
+    },
+  },
+  hostZip: {
+    type: String,
+    documentation: {
+      description: "Code postale de la ville de l'hébergeur",
+    },
+  },
+  hostAddress: {
+    type: String,
+    documentation: {
+      description: "Adresse de l'hébergeur",
+    },
+  },
+  hostRelationship: {
+    type: String,
+    documentation: {
+      description: "Lien de l'hébergeur avec le volontaire",
+    },
+  },
+
   // * Situations particulières
   handicap: {
     type: String,
     enum: ["true", "false"],
     documentation: {
       description: "Le volontaire a un handicap",
+    },
+  },
+  allergies: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le volontaire a des allergies",
     },
   },
   handicapInSameDepartment: {
@@ -804,7 +864,6 @@ const Schema = new mongoose.Schema({
   specificAmenagment: {
     type: String,
     enum: ["true", "false"],
-    default: "false",
     documentation: {
       description: "Le volontaire a besoin d'aménagements spécifiques",
     },

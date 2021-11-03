@@ -18,6 +18,7 @@ import { YOUNG_STATUS, YOUNG_PHASE } from "../../../utils";
 import EyeOpen from "../../../assets/eye.svg";
 import EyeClose from "../../../assets/eye-slash.svg";
 import FormFooter from "../../../components/form/FormFooter";
+import { STEPS } from "../utils";
 
 export default () => {
   const [passwordText, setPasswordText] = useState(false);
@@ -57,18 +58,7 @@ export default () => {
             const { user, token, code, ok } = await api.post(`/young/signup`, { firstName, lastName, email, password, birthdateAt });
             if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             if (token) api.setToken(token);
-
             const newValues = { ...values, ...user };
-            newValues.historic = [
-              {
-                phase: YOUNG_PHASE.INSCRIPTION,
-                createdAt: Date.now(),
-                userName: `${newValues.firstName} ${newValues.lastName}`,
-                userId: newValues._id,
-                status: YOUNG_STATUS.IN_PROGRESS,
-                note: "",
-              },
-            ];
             const { ok: okPut, code: codePut, data: young } = await api.put("/young", newValues);
             if (!okPut) return toastr.error("Une erreur s'est produite :", codePut);
             dispatch(setYoung(young));
@@ -87,7 +77,7 @@ export default () => {
           }
         }}
       >
-        {({ values, handleChange, handleSubmit, setFieldValue, isSubmitting, submitForm, errors, touched }) => (
+        {({ values, handleChange, handleSubmit, setFieldValue, isSubmitting, submitForm, errors, touched, validateField }) => (
           <>
             <FormRow>
               <Col md={4}>
@@ -260,7 +250,10 @@ export default () => {
                   type="email"
                   name="email"
                   value={values.email}
-                  onChange={handleChange}
+                  onChange={(el) => {
+                    handleChange(el);
+                    validateField("email");
+                  }}
                 />
                 <ErrorMessage errors={errors} touched={touched} name="email" />
                 <TextUnderField style={{ marginBottom: "15px" }}>Cette adresse vous servira d'identifiant de connexion, notez le bien.</TextUnderField>
@@ -277,7 +270,10 @@ export default () => {
                   type="email"
                   name="newEmail"
                   value={values.newEmail}
-                  onChange={handleChange}
+                  onChange={(el) => {
+                    handleChange(el);
+                    validateField("newEmail");
+                  }}
                 />
                 <ErrorMessage errors={errors} touched={touched} name="newEmail" />
               </Col>
@@ -295,7 +291,10 @@ export default () => {
                     type={passwordText ? "text" : "password"}
                     name="password"
                     value={values.password}
-                    onChange={handleChange}
+                    onChange={(el) => {
+                      handleChange(el);
+                      validateField("password");
+                    }}
                   />
                   <EyeIcon src={passwordText ? EyeClose : EyeOpen} onClick={() => setPasswordText(!passwordText)} />
                 </ContainerPass>
@@ -319,7 +318,10 @@ export default () => {
                     onChange={handleChange}
                     name="verifyPassword"
                     value={values.verifyPassword}
-                    onChange={handleChange}
+                    onChange={(el) => {
+                      handleChange(el);
+                      validateField("verifyPassword");
+                    }}
                   />
                   <EyeIcon src={passwordText ? EyeClose : EyeOpen} onClick={() => setPasswordText(!passwordText)} />
                 </ContainerPass>
@@ -340,7 +342,7 @@ export default () => {
                   J'ai lu et j'accepte les Conditions Générales d'Utilisation (CGU) de la plateforme du Service national universel
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="CGU" />
-                <RadioLabel>
+                <RadioLabel style={{ marginTop: "0.5rem" }}>
                   <Field
                     validate={(v) => (!v || v === "false") && "Vous devez accepter les modalités de traitement pour continuer."}
                     value="true"
@@ -349,10 +351,12 @@ export default () => {
                     name="RGPD"
                     onChange={(e) => handleChange({ target: { name: e.target.name, value: e.target.checked ? "true" : "false" } })}
                   />
-                  J'ai pris connaissance des&nbsp;
-                  <a href="https://www.snu.gouv.fr/donnees-personnelles-et-cookies-23" target="_blank">
-                    modalités de traitement de mes données personnelles
-                  </a>
+                  <p style={{ marginBottom: "0" }}>
+                    J'ai pris connaissance des{' '}
+                    <a href="https://www.snu.gouv.fr/donnees-personnelles-et-cookies-23" target="_blank">
+                      modalités de traitement de mes données personnelles
+                    </a>
+                  </p>
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="RGPD" />
               </div>
@@ -367,7 +371,6 @@ export default () => {
 
 const ContainerPass = styled.div`
   position: relative;
-  width: 400px;
   input {
     padding-right: 40px !important;
   }

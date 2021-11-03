@@ -23,7 +23,7 @@ export default ({ keys, values, handleChange, errors, touched, departAndRegionVi
       const inputElements = document.getElementsByTagName("input");
       for (let i = 0; inputElements[i]; i++) inputElements[i].setAttribute("autocomplete", "novalue");
     }
-    handleChange({ target: { name: keys.country, value: "France" } });
+    if (!values[keys.country]) handleChange({ target: { name: keys.country, value: "France" } });
   }, []);
 
   useEffect(() => {

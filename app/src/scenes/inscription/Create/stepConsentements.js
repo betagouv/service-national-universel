@@ -13,13 +13,12 @@ import { STEPS } from "../utils";
 import FormRow from "../../../components/form/FormRow";
 import FormFooter from "../../../components/form/FormFooter";
 import api from "../../../services/api";
-import { translate, YOUNG_PHASE, YOUNG_STATUS } from "../../../utils";
+import { translate } from "../../../utils";
 
 export default () => {
   const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
   const isPlural = useSelector((state) => state.Auth.young?.parent1Status && state.Auth.young?.parent2Status);
-  const [clickedRules, setClickedRules] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const dispatch = useDispatch();
@@ -52,19 +51,7 @@ export default () => {
           try {
             values.parentConsentment = "true";
             values.consentment = "true";
-            if (values.status !== YOUNG_STATUS.WAITING_VALIDATION) {
-              values.status = YOUNG_STATUS.WAITING_VALIDATION;
-              values.lastStatusAt = Date.now();
-              values.historic.push({
-                phase: YOUNG_PHASE.INSCRIPTION,
-                createdAt: Date.now(),
-                userName: `${values.firstName} ${values.lastName}`,
-                userId: values._id,
-                status: YOUNG_STATUS.WAITING_VALIDATION,
-                note: "",
-              });
-            }
-            values.inscriptionStep = STEPS.DONE;
+            values.inscriptionStep = STEPS.DOCUMENTS;
             const { ok, code, data: young } = await api.put("/young", values);
             if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             dispatch(setYoung(young));
@@ -177,8 +164,8 @@ export default () => {
                     onChange={handleChange}
                   />
                   <div>
-                    {isPlural ? "Nous nous engageons" : "Je m’engage"} à transmettre la fiche sanitaire* ainsi que les documents médicaux et justificatifs nécessaires
-                    <b> deux semaines avant son départ en séjour de cohésion.</b>
+                    {isPlural ? "Nous nous engageons" : "Je m’engage"} à renseigner l'utilisation d'autotest COVID*
+                    <b> avant le début du séjour de cohésion.</b>
                   </div>
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="parentConsentment4" />
@@ -192,10 +179,25 @@ export default () => {
                     onChange={handleChange}
                   />
                   <div>
-                    {isPlural ? "Nous nous engageons" : "Je m’engage"} à ce que {young.firstName} {young.lastName} soit à jour de ses vaccinations obligatoires*.
+                    {isPlural ? "Nous nous engageons" : "Je m’engage"} à remettre la fiche sanitaire* ainsi que les documents médicaux et justificatifs nécessaires
+                    <b> à l'arrivée au centre de séjour de cohésion.</b>
                   </div>
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="parentConsentment5" />
+                <RadioLabel>
+                  <Field
+                    validate={(v) => !v && requiredMessage}
+                    value="true"
+                    checked={values.parentConsentment7}
+                    type="checkbox"
+                    name="parentConsentment7"
+                    onChange={handleChange}
+                  />
+                  <div>
+                    {isPlural ? "Nous nous engageons" : "Je m’engage"} à ce que {young.firstName} {young.lastName} soit à jour de ses vaccinations obligatoires*.
+                  </div>
+                </RadioLabel>
+                <ErrorMessage errors={errors} touched={touched} name="parentConsentment7" />
                 <div style={{ fontWeight: 400, fontSize: 14, margin: "0.8rem" }}>
                   * Les informations relatives au formulaire du droit à l'image, à l'utilisation d'autotest COVID, à la fiche de sanitaire et aux vaccinations seront disponibles
                   dès la confirmation de l'inscription dans l'espace personnel de <strong>{young.firstName}</strong>.
@@ -213,9 +215,9 @@ export default () => {
                 <RadioLabel>
                   <Field validate={(v) => !v && requiredMessage} value="true" checked={values.consentment1} type="checkbox" name="consentment1" onChange={handleChange} />
                   <div>
-                    m’engage, sous le contrôle de {isPlural ? "mes représentants légaux" : "mon représentant légal"} , à effectuer la session 2022 du Service National Universel qui
-                    comprend la participation au séjour de cohésion puis la réalisation d'une mission d'intérêt général.
-                  </div>
+                    suis volontaire, sous le contrôle de {isPlural ? "mes représentants légaux" : "mon représentant légal"}, pour effectuer à la session 2022 du Service National
+                    Universel qui comprend la participation au séjour de cohésion puis la réalisation d'une mission d'intérêt général.
+                   </div>
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="consentment1" />
                 <RadioLabel>
