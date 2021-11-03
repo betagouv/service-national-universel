@@ -29,10 +29,8 @@ export default () => {
   }
 
   useEffect(async () => {
-    console.log("YOUNG", young);
     const year = new Date(young.birthdateAt);
     setAge(2021 - year);
-    console.log("YOUNG birthdate", year.getFullYear());
   }, [])
 
   return (
