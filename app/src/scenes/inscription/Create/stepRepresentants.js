@@ -238,6 +238,7 @@ export default () => {
   const young = useSelector((state) => state.Auth.young);
   const [isParent2Visible, setIsParent2Visible] = useState(false);
   const [initialValues, setInitialValues] = useState(young);
+  const [loading, setLoading] = useState(false);
 
   const hasParent2Infos = () => {
     return young && (young.parent2Status || young.parent2FirstName || young.parent2LastName || young.parent2Email || young.parent2Phone);
@@ -263,6 +264,7 @@ export default () => {
         validateOnChange={false}
         validateOnBlur={false}
         onSubmit={async (values) => {
+          setLoading(true);
           try {
             values.inscriptionStep = STEPS.CONSENTEMENTS;
             const { ok, code, data: young } = await api.put("/young", values);
@@ -272,6 +274,8 @@ export default () => {
           } catch (e) {
             console.log(e);
             toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code));
+          } finally {
+            setLoading(false);
           }
         }}
       >
@@ -302,7 +306,7 @@ export default () => {
               </Col>
             </FormRow>
             {isParent2Visible ? <Parent id={2} values={values} handleChange={handleChange} errors={errors} touched={touched} validateField={validateField} /> : null}
-            <FormFooter values={values} handleSubmit={handleSubmit} errors={errors} />
+            <FormFooter loading={loading} values={values} handleSubmit={handleSubmit} errors={errors} />
           </>
         )}
       </Formik>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { useSelector, useDispatch } from "react-redux";
 
@@ -20,6 +20,7 @@ export default () => {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
   const dispatch = useDispatch();
+  const [loading, setLoading] = useState(false);
 
   if (!young) {
     history.push("/inscription/profil");
@@ -43,7 +44,10 @@ export default () => {
 
       <Formik
         initialValues={young}
+        validateOnChange={false}
+        validateOnBlur={false}
         onSubmit={async (values) => {
+          setLoading(true);
           try {
             values.inscriptionStep = STEPS.AVAILABILITY;
             const { ok, code, data: young } = await api.put("/young", values);
@@ -53,6 +57,8 @@ export default () => {
           } catch (e) {
             console.log(e);
             toastr.error("Erreur !");
+          } finally {
+            setLoading(false);
           }
         }}
       >
@@ -162,7 +168,7 @@ export default () => {
                 </>
               </Col>
             </FormRow>
-            <FormFooter values={values} handleSubmit={handleSubmit} errors={errors} />
+            <FormFooter loading={loading} values={values} handleSubmit={handleSubmit} errors={errors} />
           </>
         )}
       </Formik>

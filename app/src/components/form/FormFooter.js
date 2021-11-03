@@ -1,12 +1,13 @@
 import React from "react";
 import { useDispatch } from "react-redux";
 import styled from "styled-components";
+import { Spinner } from "reactstrap";
 
 import { setYoung } from "../../redux/auth/actions";
 import { saveYoung } from "../../scenes/inscription/utils";
 import { APP_URL } from "../../config";
 
-export default ({ values, handleSubmit, errors, secondButton = "save" }) => {
+export default ({ values, handleSubmit, errors, secondButton = "save", loading }) => {
   const dispatch = useDispatch();
 
   const handleSave = async () => {
@@ -23,7 +24,7 @@ export default ({ values, handleSubmit, errors, secondButton = "save" }) => {
       <Footer>
         <ButtonContainer>
           {secondButton === "save" ? <SecondButton onClick={handleSave}>Enregistrer</SecondButton> : <SecondButton onClick={handleBackToHome}>Retour</SecondButton>}
-          <ContinueButton onClick={handleSubmit}>Continuer</ContinueButton>
+          <ContinueButton onClick={handleSubmit}> {loading ? <Spinner size="sm" style={{ borderWidth: "0.1em" }} /> : "Continuer"}</ContinueButton>
         </ButtonContainer>
       </Footer>
       {Object.keys(errors).filter((key) => errors[key]).length ? (
@@ -59,6 +60,7 @@ const ButtonContainer = styled.div`
 `;
 
 const ContinueButton = styled.button`
+  min-width: 110px;
   color: #fff;
   background-color: #5145cd;
   padding: 9px 20px;

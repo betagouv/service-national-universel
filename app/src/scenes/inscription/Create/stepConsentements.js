@@ -19,6 +19,7 @@ export default () => {
   const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
   const isPlural = useSelector((state) => state.Auth.young?.parent1Status && state.Auth.young?.parent2Status);
+  const [loading, setLoading] = useState(false);
 
   const dispatch = useDispatch();
   if (!young) {
@@ -46,8 +47,8 @@ export default () => {
         validateOnChange={false}
         validateOnBlur={false}
         onSubmit={async (values) => {
+          setLoading(true);
           try {
-            console.log(values);
             values.parentConsentment = "true";
             values.consentment = "true";
             values.inscriptionStep = STEPS.DOCUMENTS;
@@ -58,6 +59,8 @@ export default () => {
           } catch (e) {
             console.log(e);
             toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code));
+          } finally {
+            setLoading(false);
           }
         }}
       >
@@ -229,7 +232,7 @@ export default () => {
                 <ErrorMessage errors={errors} touched={touched} name="consentment2" />
               </Col>
             </FormRow>
-            <FormFooter values={values} handleSubmit={handleSubmit} errors={errors} />
+            <FormFooter loading={loading} values={values} handleSubmit={handleSubmit} errors={errors} />
           </>
         )}
       </Formik>
