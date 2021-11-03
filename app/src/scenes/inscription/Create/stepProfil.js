@@ -56,7 +56,7 @@ export default () => {
             const { user, token, code, ok } = await api.post(`/young/signup`, { firstName, lastName, email, password, birthdateAt });
             if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             if (token) api.setToken(token);
-            const newValues = { ...values, ...user, inscriptionStep: STEPS.COORDONNEES };
+            const newValues = { ...values, ...user };
             const { ok: okPut, code: codePut, data: young } = await api.put("/young", newValues);
             if (!okPut) return toastr.error("Une erreur s'est produite :", codePut);
             dispatch(setYoung(young));
