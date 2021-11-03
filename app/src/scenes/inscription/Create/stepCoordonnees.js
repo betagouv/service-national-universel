@@ -7,11 +7,10 @@ import { toastr } from "react-redux-toastr";
 import validator from "validator";
 import { useHistory } from "react-router-dom";
 
-import DndFileInput from "../../../components/dndFileInput";
 import ErrorMessage, { requiredMessage } from "../components/errorMessage";
 import { setYoung } from "../../../redux/auth/actions";
 import api from "../../../services/api";
-import { saveYoung, STEPS, YOUNG_SITUATIONS } from "../utils";
+import { STEPS, YOUNG_SITUATIONS } from "../utils";
 import FormRow from "../../../components/form/FormRow";
 import AddressInputV2 from "../../../components/addressInputV2";
 import HostAddressInput from "../../../components/hostAddressInput";
@@ -23,7 +22,6 @@ export default () => {
   const history = useHistory();
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
-  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
   if (!young) {
     history.push("/inscription/profil");
@@ -61,12 +59,7 @@ export default () => {
         <h2>Complétez les coordonnées du volontaire</h2>
         <p>Renseignez ci-dessous vos coordonnées personnelles</p>
       </Heading>
-      <Formik
-        initialValues={young}
-        validateOnChange={false}
-        validateOnBlur={false}
-        onSubmit={(values) => onSubmit(values)}
-      >
+      <Formik initialValues={young} validateOnChange={false} validateOnBlur={false} onSubmit={(values) => onSubmit(values)}>
         {({ values, handleChange, handleSubmit, errors, touched }) => (
           <>
             <FormRow>
@@ -178,7 +171,14 @@ export default () => {
                 <Col md={4}>
                   <Label>Identité et adresse de l'hébergeur en France</Label>
                   <Infos>
-                    <svg width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" clipRule="evenodd" d="M16 8A8 8 0 110 8a8 8 0 0116 0zM9 4a1 1 0 11-2 0 1 1 0 012 0zM7 7a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2V8a1 1 0 00-1-1H7z" fill="#32257F" /></svg>
+                    <svg width="16" height="16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path
+                        fillRule="evenodd"
+                        clipRule="evenodd"
+                        d="M16 8A8 8 0 110 8a8 8 0 0116 0zM9 4a1 1 0 11-2 0 1 1 0 012 0zM7 7a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2V8a1 1 0 00-1-1H7z"
+                        fill="#32257F"
+                      />
+                    </svg>
                     <p>Proche chez qui vous séjournerez le temps de la réalisation de votre SNU (lieu de départ/retour pour le séjour et de réalisation de la MIG).</p>
                   </Infos>
                   <Note>
@@ -187,8 +187,15 @@ export default () => {
                 </Col>
                 <Col>
                   <HostAddressInput
-                    keys={{ hostLastName: "hostLastName", hostFirstName: "hostFirstName", hostCity: "hostCity", hostZip: "hostZip", hostAddress: "hostAddress", hostLocation: "hostLocation", link: "link" }}
-
+                    keys={{
+                      hostLastName: "hostLastName",
+                      hostFirstName: "hostFirstName",
+                      hostCity: "hostCity",
+                      hostZip: "hostZip",
+                      hostAddress: "hostAddress",
+                      hostLocation: "hostLocation",
+                      link: "link",
+                    }}
                     values={values}
                     handleChange={handleChange}
                     errors={errors}
@@ -202,7 +209,7 @@ export default () => {
                 <Label>Situation</Label>
               </Col>
               <Col>
-                <RadioLabel style={{ fontWeight: "bold" }}>Je suis scolarisé :</RadioLabel>
+                <RadioLabel style={{ fontWeight: "bold" }}>Je suis scolarisé(e) :</RadioLabel>
                 <div style={{ marginLeft: "1rem" }}>
                   <RadioLabel>
                     <Field
@@ -301,10 +308,10 @@ export default () => {
                       YOUNG_SITUATIONS.SPECIALIZED_SCHOOL,
                       YOUNG_SITUATIONS.APPRENTICESHIP,
                     ].includes(values.situation) && (
-                        <div style={{ marginBottom: "10px" }}>
-                          <Etablissement values={values} handleChange={handleChange} keys={{ schoolName: "schoolName", schoolRank: "schoolRank" }} />
-                        </div>
-                      )}
+                      <div style={{ marginBottom: "10px" }}>
+                        <Etablissement values={values} handleChange={handleChange} keys={{ schoolName: "schoolName", schoolRank: "schoolRank" }} />
+                      </div>
+                    )}
                   </>
                 )}
                 {values.inSchool === "no" && (
@@ -503,7 +510,7 @@ const Infos = styled.section`
   align-items: flex-start;
   background: rgba(79, 70, 229, 0.1);
   padding: 1rem;
-  color: #32257F;
+  color: #32257f;
   border-radius: 6px;
   svg {
     margin-top: 4px;
@@ -513,7 +520,7 @@ const Infos = styled.section`
 const Note = styled.p`
   margin-top: 1rem;
   padding: 0.2rem;
-  color: #6B7280;
+  color: #6b7280;
 `;
 
 const RadioLabel = styled.label`

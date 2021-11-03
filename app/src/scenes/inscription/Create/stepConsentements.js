@@ -227,7 +227,7 @@ export default () => {
                   <div>
                     suis volontaire, sous le contrôle de {isPlural ? "mes représentants légaux" : "mon représentant légal"}, pour effectuer à la session 2022 du Service National
                     Universel qui comprend la participation au séjour de cohésion puis la réalisation d'une mission d'intérêt général.
-                  </div>
+                   </div>
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="consentment1" />
                 <RadioLabel>
