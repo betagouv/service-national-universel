@@ -864,7 +864,6 @@ const Schema = new mongoose.Schema({
   specificAmenagment: {
     type: String,
     enum: ["true", "false"],
-    default: "false",
     documentation: {
       description: "Le volontaire a besoin d'aménagements spécifiques",
     },
