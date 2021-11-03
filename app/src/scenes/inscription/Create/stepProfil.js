@@ -363,7 +363,6 @@ export default () => {
 
 const ContainerPass = styled.div`
   position: relative;
-  width: 400px;
   input {
     padding-right: 40px !important;
   }
