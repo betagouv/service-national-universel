@@ -338,7 +338,7 @@ export default () => {
                   J'ai lu et j'accepte les Conditions Générales d'Utilisation (CGU) de la plateforme du Service national universel
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="CGU" />
-                <RadioLabel>
+                <RadioLabel style={{ marginTop: "0.5rem" }}>
                   <Field
                     validate={(v) => (!v || v === "false") && "Vous devez accepter les modalités de traitement pour continuer."}
                     value="true"
@@ -347,10 +347,12 @@ export default () => {
                     name="RGPD"
                     onChange={(e) => handleChange({ target: { name: e.target.name, value: e.target.checked ? "true" : "false" } })}
                   />
-                  J'ai pris connaissance des&nbsp;
-                  <a href="https://www.snu.gouv.fr/donnees-personnelles-et-cookies-23" target="_blank">
-                    modalités de traitement de mes données personnelles
-                  </a>
+                  <p style={{ marginBottom: "0" }}>
+                    J'ai pris connaissance des{' '}
+                    <a href="https://www.snu.gouv.fr/donnees-personnelles-et-cookies-23" target="_blank">
+                      modalités de traitement de mes données personnelles
+                    </a>
+                  </p>
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="RGPD" />
               </div>
