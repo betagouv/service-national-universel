@@ -712,6 +712,13 @@ const Schema = new mongoose.Schema({
       description: "Le volontaire a un handicap",
     },
   },
+  allergies: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le volontaire a un handicap",
+    },
+  },
   handicapInSameDepartment: {
     type: String,
     enum: ["true", "false"],

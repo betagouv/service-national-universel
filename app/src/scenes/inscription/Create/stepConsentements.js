@@ -175,25 +175,10 @@ export default () => {
                   />
                   <div>
                     {isPlural ? "Nous nous engageons" : "Je m’engage"} à renseigner l'utilisation d'autotest COVID*
-                    <b> avant le début de mon séjour de cohésion.</b>
+                    <b> avant le début du séjour de cohésion.</b>
                   </div>
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="parentConsentment4" />
-                <RadioLabel>
-                  <Field
-                    validate={(v) => !v && requiredMessage}
-                    value="true"
-                    checked={values.parentConsentment4}
-                    type="checkbox"
-                    name="parentConsentment4"
-                    onChange={handleChange}
-                  />
-                  <div>
-                    {isPlural ? "Nous nous engageons" : "Je m’engage"} à remettre la fiche sanitaire* ainsi que les documents médicaux et justificatifs nécessaires
-                    <b> à mon arrivée au centre de séjour de cohésion.</b>
-                  </div>
-                </RadioLabel>
-                <ErrorMessage errors={errors} touched={touched} name="parentConsentment5" />
                 <RadioLabel>
                   <Field
                     validate={(v) => !v && requiredMessage}
@@ -204,10 +189,25 @@ export default () => {
                     onChange={handleChange}
                   />
                   <div>
+                    {isPlural ? "Nous nous engageons" : "Je m’engage"} à remettre la fiche sanitaire* ainsi que les documents médicaux et justificatifs nécessaires
+                    <b> à l'arrivée au centre de séjour de cohésion.</b>
+                  </div>
+                </RadioLabel>
+                <ErrorMessage errors={errors} touched={touched} name="parentConsentment5" />
+                <RadioLabel>
+                  <Field
+                    validate={(v) => !v && requiredMessage}
+                    value="true"
+                    checked={values.parentConsentment7}
+                    type="checkbox"
+                    name="parentConsentment7"
+                    onChange={handleChange}
+                  />
+                  <div>
                     {isPlural ? "Nous nous engageons" : "Je m’engage"} à ce que {young.firstName} {young.lastName} soit à jour de ses vaccinations obligatoires*.
                   </div>
                 </RadioLabel>
-                <ErrorMessage errors={errors} touched={touched} name="parentConsentment6" />
+                <ErrorMessage errors={errors} touched={touched} name="parentConsentment7" />
                 <div style={{ fontWeight: 400, fontSize: 14, margin: "0.8rem" }}>
                   * Les informations relatives au formulaire du droit à l'image, à l'utilisation d'autotest COVID, à la fiche de sanitaire et aux vaccinations seront disponibles
                   dès la confirmation de l'inscription dans l'espace personnel de <strong>{young.firstName}</strong>.
@@ -225,8 +225,8 @@ export default () => {
                 <RadioLabel>
                   <Field validate={(v) => !v && requiredMessage} value="true" checked={values.consentment1} type="checkbox" name="consentment1" onChange={handleChange} />
                   <div>
-                    suis volontaire, sous le contrôle de {isPlural ? "mes représentants légaux" : "mon représentant légal"}, pour effectuer à la session 2022 du Service National Universel qui comprend la participation au séjour de
-                    cohésion puis la réalisation d'une mission d'intérêt général.
+                    suis volontaire, sous le contrôle de {isPlural ? "mes représentants légaux" : "mon représentant légal"}, pour effectuer à la session 2022 du Service National
+                    Universel qui comprend la participation au séjour de cohésion puis la réalisation d'une mission d'intérêt général.
                   </div>
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="consentment1" />
