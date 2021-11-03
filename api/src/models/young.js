@@ -413,6 +413,12 @@ const Schema = new mongoose.Schema({
       description: "Région du volontaire",
     },
   },
+  country: {
+    type: String,
+    documentation: {
+      description: "Pays de résidence du volontaire",
+    },
+  },
   location: {
     lat: { type: Number },
     lon: { type: Number },
@@ -516,6 +522,15 @@ const Schema = new mongoose.Schema({
     type: String,
     documentation: {
       description: "Identifiant de l'établissement du volontaire",
+    },
+  },
+
+  // * Situations pro
+  employed: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le volontaire est employé",
     },
   },
 
@@ -701,6 +716,44 @@ const Schema = new mongoose.Schema({
     default: "false",
     documentation: {
       description: "Le parent 2 s'est identifié via France Connect",
+    },
+  },
+
+  // * Hébergeur
+  hostLastName: {
+    type: String,
+    documentation: {
+      description: "Nom de l'hébergeur",
+    },
+  },
+  hostFirstName: {
+    type: String,
+    documentation: {
+      description: "Prénom de l'hébergeur",
+    },
+  },
+  hostCity: {
+    type: String,
+    documentation: {
+      description: "Ville de l'hébergeur",
+    },
+  },
+  hostZip: {
+    type: String,
+    documentation: {
+      description: "Code postale de la ville de l'hébergeur",
+    },
+  },
+  hostAddress: {
+    type: String,
+    documentation: {
+      description: "Adresse de l'hébergeur",
+    },
+  },
+  hostRelationship: {
+    type: String,
+    documentation: {
+      description: "Lien de l'hébergeur avec le volontaire",
     },
   },
 
