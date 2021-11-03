@@ -86,7 +86,7 @@ export default () => {
         <p>Renseignez ci-dessous vos coordonnées personnelles</p>
       </Heading>
       <Formik initialValues={young} validateOnChange={false} validateOnBlur={false} onSubmit={(values) => onSubmit(values)}>
-        {({ values, handleChange, handleSubmit, errors, touched }) => (
+        {({ values, handleChange, handleSubmit, errors, touched, validateField }) => (
           <>
             <FormRow>
               <Col md={4}>
@@ -136,7 +136,10 @@ export default () => {
                   type="tel"
                   name="phone"
                   value={values.phone}
-                  onChange={handleChange}
+                  onChange={(el) => {
+                    handleChange(el);
+                    validateField("phone");
+                  }}
                 />
                 <ErrorMessage errors={errors} touched={touched} name="phone" />
               </Col>

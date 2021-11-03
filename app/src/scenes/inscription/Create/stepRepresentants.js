@@ -19,7 +19,7 @@ import FormLegend from "../../../components/form/FormLegend";
 import FormRow from "../../../components/form/FormRow";
 import FormFooter from "../../../components/form/FormFooter";
 
-const Parent = ({ id = 1, values, errors, touched, handleChange }) => {
+const Parent = ({ id = 1, values, errors, touched, handleChange, validateField }) => {
   const isParentFromFranceConnect = values[`parent${id}FromFranceConnect`] === "true";
 
   function FranceConnectZone({ id, handleSave }) {
@@ -142,7 +142,10 @@ const Parent = ({ id = 1, values, errors, touched, handleChange }) => {
             type="email"
             name={`parent${id}Email`}
             value={values[`parent${id}Email`]}
-            onChange={handleChange}
+            onChange={(el) => {
+              handleChange(el);
+              validateField(`parent${id}Email`);
+            }}
             className="form-control"
           />
           <ErrorMessage errors={errors} touched={touched} name={`parent${id}Email`} />
@@ -159,7 +162,10 @@ const Parent = ({ id = 1, values, errors, touched, handleChange }) => {
             type="tel"
             name={`parent${id}Phone`}
             value={values[`parent${id}Phone`]}
-            onChange={handleChange}
+            onChange={(el) => {
+              handleChange(el);
+              validateField(`parent${id}Phone`);
+            }}
             className="form-control"
           />
           <ErrorMessage errors={errors} touched={touched} name={`parent${id}Phone`} />
@@ -269,9 +275,9 @@ export default () => {
           }
         }}
       >
-        {({ values, handleChange, handleSubmit, isSubmitting, submitForm, errors, touched }) => (
+        {({ values, handleChange, handleSubmit, isSubmitting, submitForm, errors, touched, validateField }) => (
           <>
-            <Parent id={1} values={values} handleChange={handleChange} errors={errors} touched={touched} />
+            <Parent id={1} values={values} handleChange={handleChange} errors={errors} touched={touched} validateField={validateField} />
             <FormRow>
               <Col md={4} style={{ padding: "20px 0" }}>
                 <BorderButton
@@ -295,7 +301,7 @@ export default () => {
                 </BorderButton>
               </Col>
             </FormRow>
-            {isParent2Visible ? <Parent id={2} values={values} handleChange={handleChange} errors={errors} touched={touched} /> : null}
+            {isParent2Visible ? <Parent id={2} values={values} handleChange={handleChange} errors={errors} touched={touched} validateField={validateField} /> : null}
             <FormFooter values={values} handleSubmit={handleSubmit} errors={errors} />
           </>
         )}

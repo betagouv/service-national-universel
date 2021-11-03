@@ -26,7 +26,9 @@ export default ({ values, handleSubmit, errors, secondButton = "save" }) => {
           <ContinueButton onClick={handleSubmit}>Continuer</ContinueButton>
         </ButtonContainer>
       </Footer>
-      {Object.keys(errors).length ? <ErrorText>Vous ne pouvez pas passer à l'étape suivante car tous les champs ne sont pas correctement renseignés.</ErrorText> : null}
+      {Object.keys(errors).filter((key) => errors[key]).length ? (
+        <ErrorText>Vous ne pouvez pas passer à l'étape suivante car tous les champs ne sont pas correctement renseignés.</ErrorText>
+      ) : null}
     </>
   );
 };
