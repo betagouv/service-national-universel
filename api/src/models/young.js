@@ -716,7 +716,7 @@ const Schema = new mongoose.Schema({
     type: String,
     enum: ["true", "false"],
     documentation: {
-      description: "Le volontaire a un handicap",
+      description: "Le volontaire a des allergies",
     },
   },
   handicapInSameDepartment: {
