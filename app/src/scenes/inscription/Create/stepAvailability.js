@@ -6,6 +6,7 @@ import { useHistory } from "react-router-dom";
 
 import api from "../../../services/api";
 import { HERO_IMAGES_LIST } from "../../../utils";
+import { setYoung } from "../../../redux/auth/actions";
 import { STEPS } from "../utils";
 import InfoIcon from "../../../components/InfoIcon";
 import BackIcon from "../../../components/BackIcon";
@@ -14,6 +15,7 @@ import { translate } from "../../../utils";
 export default () => {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
+  const dispatch = useDispatch();
   const [indexAvailability, setIndexAvailability] = useState(0);
 
   if (!young) {
