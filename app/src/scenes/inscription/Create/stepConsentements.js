@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { Col } from "reactstrap";
 import { Field, Formik } from "formik";
@@ -13,7 +13,7 @@ import { STEPS } from "../utils";
 import FormRow from "../../../components/form/FormRow";
 import FormFooter from "../../../components/form/FormFooter";
 import api from "../../../services/api";
-import { translate } from "../../../utils";
+import { translate, getAge } from "../../../utils";
 
 export default () => {
   const history = useHistory();
@@ -117,27 +117,31 @@ export default () => {
                   </div>
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="parentConsentment2" />
-                <RadioLabel style={{ marginBottom: 3 }}>
-                  <Field
-                    validate={(v) => !v && requiredMessage}
-                    value="true"
-                    checked={values.parentConsentment6}
-                    type="checkbox"
-                    name="parentConsentment6"
-                    onChange={handleChange}
-                  />
-                  <div>
-                    <div>
-                      {isPlural ? "acceptons " : "accepte "}
-                      la collecte et le traitement des données personnelles de <strong>{` ${young.firstName} ${young.lastName}`}</strong> par l'administration dans le cadre de
-                      l'inscription au SNU.
-                    </div>
-                    <a href="https://www.cnil.fr/fr/recommandation-4-rechercher-le-consentement-dun-parent-pour-les-mineurs-de-moins-de-15-ans" target="_blank">
-                      En savoir plus {">"}
-                    </a>
-                  </div>
-                </RadioLabel>
-                <ErrorMessage errors={errors} touched={touched} name="parentConsentment6" />
+                {getAge(young.birthdateAt) < 15 && (
+                  <>
+                    <RadioLabel style={{ marginBottom: 3 }}>
+                      <Field
+                        validate={(v) => !v && requiredMessage}
+                        value="true"
+                        checked={values.parentConsentment6}
+                        type="checkbox"
+                        name="parentConsentment6"
+                        onChange={handleChange}
+                      />
+                      <div>
+                        <div>
+                          {isPlural ? "acceptons " : "accepte "}
+                          la collecte et le traitement des données personnelles de <strong>{` ${young.firstName} ${young.lastName}`}</strong> par l'administration dans le cadre de
+                          l'inscription au SNU.
+                        </div>
+                        <a href="https://www.cnil.fr/fr/recommandation-4-rechercher-le-consentement-dun-parent-pour-les-mineurs-de-moins-de-15-ans" target="_blank">
+                          En savoir plus {">"}
+                        </a>
+                      </div>
+                    </RadioLabel>
+                    <ErrorMessage errors={errors} touched={touched} name="parentConsentment6" />
+                  </>
+                )}
                 <SubTitle>Pour la participation au séjour de cohésion</SubTitle>
                 <RadioLabel style={{ marginBottom: 3 }}>
                   <Field
@@ -217,19 +221,23 @@ export default () => {
                   <div>
                     suis volontaire, sous le contrôle de {isPlural ? "mes représentants légaux" : "mon représentant légal"}, pour effectuer à la session 2022 du Service National
                     Universel qui comprend la participation au séjour de cohésion puis la réalisation d'une mission d'intérêt général.
-                   </div>
-                </RadioLabel>
-                <ErrorMessage errors={errors} touched={touched} name="consentment1" />
-                <RadioLabel>
-                  <Field validate={(v) => !v && requiredMessage} value="true" checked={values.consentment2} type="checkbox" name="consentment2" onChange={handleChange} />
-                  <div>
-                    <div>accepte la collecte et le traitement de mes données personnelles par l'administration dans le cadre de l'inscription au SNU.</div>
-                    <a href="https://www.cnil.fr/fr/recommandation-4-rechercher-le-consentement-dun-parent-pour-les-mineurs-de-moins-de-15-ans" target="_blank">
-                      En savoir plus {">"}
-                    </a>
                   </div>
                 </RadioLabel>
-                <ErrorMessage errors={errors} touched={touched} name="consentment2" />
+                <ErrorMessage errors={errors} touched={touched} name="consentment1" />
+                {getAge(young.birthdateAt) < 15 && (
+                  <>
+                    <RadioLabel>
+                      <Field validate={(v) => !v && requiredMessage} value="true" checked={values.consentment2} type="checkbox" name="consentment2" onChange={handleChange} />
+                      <div>
+                        <div>accepte la collecte et le traitement de mes données personnelles par l'administration dans le cadre de l'inscription au SNU.</div>
+                        <a href="https://www.cnil.fr/fr/recommandation-4-rechercher-le-consentement-dun-parent-pour-les-mineurs-de-moins-de-15-ans" target="_blank">
+                          En savoir plus {">"}
+                        </a>
+                      </div>
+                    </RadioLabel>
+                    <ErrorMessage errors={errors} touched={touched} name="consentment2" />
+                  </>
+                )}
               </Col>
             </FormRow>
             <FormFooter loading={loading} values={values} handleSubmit={handleSubmit} errors={errors} />

@@ -174,7 +174,7 @@ const Schema = new mongoose.Schema({
   inscriptionStep: {
     type: String,
     default: "COORDONNEES", // if the young is created, it passed the first step, so default is COORDONNEES
-    enum: ["PROFIL", "COORDONNEES", "PARTICULIERES", "REPRESENTANTS", "CONSENTEMENTS", "MOTIVATIONS", "AVAILABILITY", "DONE"],
+    enum: ["PROFIL", "COORDONNEES", "PARTICULIERES", "REPRESENTANTS", "CONSENTEMENTS", "MOTIVATIONS", "AVAILABILITY", "DONE", "DOCUMENTS"],
     documentation: {
       description: "Étape du tunnel d'inscription",
     },
