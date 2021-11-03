@@ -8,8 +8,8 @@ import { Link } from "react-router-dom";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
-  const is2021 = young.cohort === "2021";
-  const [showAlert, setShowAlert] = useState(!is2021);
+  const is2020 = young.cohort === "2020";
+  const [showAlert, setShowAlert] = useState(!is2020);
 
   return (
     <HeroContainer>
