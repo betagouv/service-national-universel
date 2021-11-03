@@ -23,6 +23,7 @@ import { STEPS } from "../utils";
 export default () => {
   const [passwordText, setPasswordText] = useState(false);
   const dispatch = useDispatch();
+  const [loading, setLoading] = useState(false);
   const young = useSelector((state) => state.Auth.young) || {
     frenchNationality: "false",
     firstName: "",
@@ -51,6 +52,7 @@ export default () => {
         validateOnChange={false}
         validateOnBlur={false}
         onSubmit={async (values) => {
+          setLoading(true);
           try {
             const { firstName, lastName, email, password, birthdateAt } = values;
             const { user, token, code, ok } = await api.post(`/young/signup`, { firstName, lastName, email, password, birthdateAt });
@@ -70,6 +72,8 @@ export default () => {
               });
             toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code) || e.message);
             Sentry.captureException(e);
+          } finally {
+            setLoading(false);
           }
         }}
       >
@@ -338,7 +342,7 @@ export default () => {
                   J'ai lu et j'accepte les Conditions Générales d'Utilisation (CGU) de la plateforme du Service national universel
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="CGU" />
-                <RadioLabel>
+                <RadioLabel style={{ marginTop: "0.5rem" }}>
                   <Field
                     validate={(v) => (!v || v === "false") && "Vous devez accepter les modalités de traitement pour continuer."}
                     value="true"
@@ -347,15 +351,17 @@ export default () => {
                     name="RGPD"
                     onChange={(e) => handleChange({ target: { name: e.target.name, value: e.target.checked ? "true" : "false" } })}
                   />
-                  J'ai pris connaissance des&nbsp;
-                  <a href="https://www.snu.gouv.fr/donnees-personnelles-et-cookies-23" target="_blank">
-                    modalités de traitement de mes données personnelles
-                  </a>
+                  <p style={{ marginBottom: "0" }}>
+                    J'ai pris connaissance des{' '}
+                    <a href="https://www.snu.gouv.fr/donnees-personnelles-et-cookies-23" target="_blank">
+                      modalités de traitement de mes données personnelles
+                    </a>
+                  </p>
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="RGPD" />
               </div>
             </FormRow>
-            <FormFooter secondButton="back" values={values} handleSubmit={handleSubmit} errors={errors} />
+            <FormFooter loading={loading} secondButton="back" values={values} handleSubmit={handleSubmit} errors={errors} />
           </>
         )}
       </Formik>
@@ -365,7 +371,6 @@ export default () => {
 
 const ContainerPass = styled.div`
   position: relative;
-  width: 400px;
   input {
     padding-right: 40px !important;
   }
