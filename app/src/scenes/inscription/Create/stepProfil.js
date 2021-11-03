@@ -22,6 +22,7 @@ import FormFooter from "../../../components/form/FormFooter";
 export default () => {
   const [passwordText, setPasswordText] = useState(false);
   const dispatch = useDispatch();
+  const [loading, setLoading] = useState(false);
   const young = useSelector((state) => state.Auth.young) || {
     frenchNationality: "false",
     firstName: "",
@@ -50,6 +51,7 @@ export default () => {
         validateOnChange={false}
         validateOnBlur={false}
         onSubmit={async (values) => {
+          setLoading(true);
           try {
             const { firstName, lastName, email, password, birthdateAt } = values;
             const { user, token, code, ok } = await api.post(`/young/signup`, { firstName, lastName, email, password, birthdateAt });
@@ -80,6 +82,8 @@ export default () => {
               });
             toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code) || e.message);
             Sentry.captureException(e);
+          } finally {
+            setLoading(false);
           }
         }}
       >
@@ -353,7 +357,7 @@ export default () => {
                 <ErrorMessage errors={errors} touched={touched} name="RGPD" />
               </div>
             </FormRow>
-            <FormFooter secondButton="back" values={values} handleSubmit={handleSubmit} errors={errors} />
+            <FormFooter loading={loading} secondButton="back" values={values} handleSubmit={handleSubmit} errors={errors} />
           </>
         )}
       </Formik>

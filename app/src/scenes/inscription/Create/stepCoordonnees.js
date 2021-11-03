@@ -22,6 +22,7 @@ export default () => {
   const history = useHistory();
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
+  const [loading, setLoading] = useState(false);
 
   if (!young) {
     history.push("/inscription/profil");
@@ -41,6 +42,7 @@ export default () => {
   };
 
   const onSubmit = async (values) => {
+    setLoading(true);
     try {
       values.inscriptionStep = STEPS.PARTICULIERES;
       const { ok, code, data: young } = await api.put("/young", values);
@@ -50,6 +52,8 @@ export default () => {
     } catch (e) {
       console.log(e);
       toastr.error("Erreur !");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -466,7 +470,7 @@ export default () => {
                 <ErrorMessage errors={errors} touched={touched} name="situation" />
               </Col>
             </FormRow>
-            <FormFooter values={values} handleSubmit={handleSubmit} errors={errors} />
+            <FormFooter loading={loading} values={values} handleSubmit={handleSubmit} errors={errors} />
           </>
         )}
       </Formik>

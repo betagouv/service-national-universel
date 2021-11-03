@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { Row, Col } from "reactstrap";
 import { Field, Formik } from "formik";
@@ -18,6 +18,7 @@ export default () => {
   const history = useHistory();
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
+  const [loading, setLoading] = useState(false);
 
   if (!young) {
     history.push("/inscription/profil");
@@ -40,6 +41,7 @@ export default () => {
         validateOnChange={false}
         validateOnBlur={false}
         onSubmit={async (values) => {
+          setLoading(true);
           try {
             values.inscriptionStep = STEPS.REPRESENTANTS;
             const { ok, code, data: young } = await api.put("/young", values);
@@ -49,6 +51,8 @@ export default () => {
           } catch (e) {
             console.log(e);
             toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code));
+          } finally {
+            setLoading(false);
           }
         }}
       >
@@ -133,7 +137,7 @@ export default () => {
                 />
               </>
             )}
-            <FormFooter values={values} handleSubmit={handleSubmit} errors={errors} />
+            <FormFooter loading={loading} values={values} handleSubmit={handleSubmit} errors={errors} />
           </>
         )}
       </Formik>
