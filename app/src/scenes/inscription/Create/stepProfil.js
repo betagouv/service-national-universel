@@ -18,6 +18,7 @@ import { YOUNG_STATUS, YOUNG_PHASE } from "../../../utils";
 import EyeOpen from "../../../assets/eye.svg";
 import EyeClose from "../../../assets/eye-slash.svg";
 import FormFooter from "../../../components/form/FormFooter";
+import { STEPS } from "../utils";
 
 export default () => {
   const [passwordText, setPasswordText] = useState(false);
@@ -55,18 +56,7 @@ export default () => {
             const { user, token, code, ok } = await api.post(`/young/signup`, { firstName, lastName, email, password, birthdateAt });
             if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             if (token) api.setToken(token);
-
-            const newValues = { ...values, ...user };
-            newValues.historic = [
-              {
-                phase: YOUNG_PHASE.INSCRIPTION,
-                createdAt: Date.now(),
-                userName: `${newValues.firstName} ${newValues.lastName}`,
-                userId: newValues._id,
-                status: YOUNG_STATUS.IN_PROGRESS,
-                note: "",
-              },
-            ];
+            const newValues = { ...values, ...user, inscriptionStep: STEPS.COORDONNEES };
             const { ok: okPut, code: codePut, data: young } = await api.put("/young", newValues);
             if (!okPut) return toastr.error("Une erreur s'est produite :", codePut);
             dispatch(setYoung(young));
