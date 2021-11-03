@@ -14,20 +14,13 @@ export default () => {
 
   useEffect(() => {
     console.log("STATUS", young.status);
+    console.log("STATUS", young);
   }, []);
 
-  // const renderStep = () => {
-  //   if (young.status === YOUNG_STATUS.WITHDRAWN) return <Withdrawn />;
-  //   if (young.status === YOUNG_STATUS.WAITING_CORRECTION) return <WaitingCorrection />;
-  //   if (young.status === YOUNG_STATUS.WAITING_VALIDATION) return <WaitingValidation />;
-  //   if (young.status === YOUNG_STATUS.WAITING_LIST) return <WaitingList />;
-  //   if (young.status === YOUNG_STATUS.REFUSED) return <Refused />;
-  //   return <Default />;
-  // };
   const renderStep = () => {
     if (young.status === YOUNG_STATUS.WITHDRAWN) return <Withdrawn />;
     if (young.status === YOUNG_STATUS.WAITING_CORRECTION) return <WaitingCorrection />;
-    if (young.status === YOUNG_STATUS.WAITING_VALIDATION) return <Default />;
+    if (young.status === YOUNG_STATUS.WAITING_VALIDATION) return <WaitingValidation />;
     if (young.status === YOUNG_STATUS.WAITING_LIST) return <WaitingList />;
     if (young.status === YOUNG_STATUS.REFUSED) return <Refused />;
     return <Default />;
