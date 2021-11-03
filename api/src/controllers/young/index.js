@@ -367,7 +367,7 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     const young = await YoungObject.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    await updateApplicationsWithYoungOrMission({ young, newYoung: value });
+    // await updateApplicationsWithYoungOrMission({ young, newYoung: value });
 
     delete value.firstName;
     delete value.lastName;

@@ -214,6 +214,7 @@ export default () => {
                       hostZip: "hostZip",
                       hostAddress: "hostAddress",
                       hostRelationship: "hostRelationship",
+                      hostLocation: "hostLocation",
                     }}
                     values={values}
                     handleChange={handleChange}
@@ -228,7 +229,7 @@ export default () => {
                 <Label>Situation</Label>
               </Col>
               <Col>
-                <RadioLabel style={{ fontWeight: "bold" }}>Je suis scolarisé :</RadioLabel>
+                <RadioLabel style={{ fontWeight: "bold" }}>Je suis scolarisé(e) :</RadioLabel>
                 <div style={{ marginLeft: "1rem" }}>
                   <RadioLabel>
                     <Field

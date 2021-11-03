@@ -334,7 +334,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       newYoung = { ...newYoung, statusPhase1: "NOT_DONE" };
     }
 
-    await updateApplicationsWithYoungOrMission({ young, newYoung });
+    // await updateApplicationsWithYoungOrMission({ young, newYoung });
 
     young.set(newYoung);
     await young.save({ fromUser: req.user });
