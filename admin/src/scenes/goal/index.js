@@ -10,19 +10,22 @@ import PlusSVG from "../../assets/plus.svg";
 import CrossSVG from "../../assets/cross.svg";
 import { region2department, departmentList, department2region } from "../../utils";
 
+import YearPicker from "../dashboard/components/YearPicker";
 export default () => {
   const [inscriptionGoals, setInscriptionGoals] = useState();
   const [loading, setLoading] = useState(false);
   const [blocsOpened, setBlocsOpened] = useState([]);
+  const [cohort, setCohort] = useState("2021");
 
   const getInscriptionGoals = async () => {
-    const { data, ok, code } = await api.get("/inscription-goal");
-    if (!ok) return toastr.error("nope");
+    if (!cohort) return;
+    const { data, ok } = await api.get(`/inscription-goal/${cohort}`);
+    if (!ok) return toastr.error("Impossible de charger les objectifs d'inscription");
     setInscriptionGoals(departmentList.map((d) => data.find((e) => e.department === d) || { department: d, region: department2region[d], max: null }));
   };
   useEffect(() => {
     getInscriptionGoals();
-  }, []);
+  }, [cohort]);
 
   if (!inscriptionGoals) return <Loader />;
 
@@ -36,13 +39,27 @@ export default () => {
           loading={loading}
           onClick={async () => {
             setLoading(true);
-            await api.post("/inscription-goal", inscriptionGoals);
+            await api.post(`/inscription-goal/${cohort}`, inscriptionGoals);
             setLoading(false);
           }}
         >
           Enregistrer
         </LoadingButton>
       </Header>
+      <div style={{ marginLeft: "2rem", display: "flex" }}>
+        {cohort ? (
+          <YearPicker
+            options={[
+              { key: "2021", label: "2021" },
+              { key: "Février 2022", label: "Février 2022" },
+              { key: "Juin 2022", label: "Juin 2022" },
+              { key: "Juillet 2022", label: "Juillet 2022" },
+            ]}
+            onChange={(c) => setCohort(c)}
+            value={cohort}
+          />
+        ) : null}
+      </div>
       <div style={{ flex: "2 1 0%", position: "relative", padding: "3rem" }}>
         {Object.entries(region2department).map(([region, departements]) => {
           const total = inscriptionGoals

@@ -8,11 +8,7 @@ import { toastr } from "react-redux-toastr";
 
 import { setYoung } from "../../../redux/auth/actions";
 import api from "../../../services/api";
-import ErrorMessage, { requiredMessage } from "../components/errorMessage";
-import AddressInput from "../../../components/addressInput";
-import DndFileInput from "../../../components/dndFileInput";
 import FormLegend from "../../../components/form/FormLegend";
-import FormRow from "../../../components/form/FormRow";
 import { STEPS } from "../utils";
 import { translate } from "../../../utils";
 import FormFooter from "../../../components/form/FormFooter";

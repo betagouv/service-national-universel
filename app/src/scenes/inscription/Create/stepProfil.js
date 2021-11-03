@@ -75,7 +75,7 @@ export default () => {
             console.log(e);
             if (e.code === "USER_ALREADY_REGISTERED")
               return toastr.error("Un dossier a déjà été inscrit sur la plateforme avec ces informations.", "Si vous ne vous souvenez plus de votre identifiant, cliquez ici.", {
-                timeOut: 10000,
+                timeOut: 30000,
                 onToastrClick: () => window.open(`https://www.snu.gouv.fr/foire-aux-questions-11`, "_blank").focus(),
               });
             toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code) || e.message);
@@ -148,11 +148,11 @@ export default () => {
                   hidden
                   validate={(v) => {
                     if (!v) return requiredMessage;
-                    const from = new Date(2004, 1, 26); // -1 because months are from 0 to 11
-                    const to = new Date(2007, 6, 3);
+                    const from = new Date(2004, 1, 25); // -1 because months are from 0 to 11
+                    const to = new Date(2007, 6, 4);
                     const [y, m, d] = v.substring(0, 10).split("-");
                     const check = new Date(Date.UTC(parseInt(y), parseInt(m - 1), parseInt(d)));
-                    return (check < from || check > to) && "Au moment du séjour, vous devez avoir 15 révolu et moins de 18 ans";
+                    return (check < from || check > to) && "Au moment du séjour, vous devez avoir 15 ans révolu et moins de 18 ans";
                   }}
                   name="birthdateAt"
                   value={values.birthdateAt}
@@ -164,41 +164,6 @@ export default () => {
                   }}
                 />
                 <ErrorMessage errors={errors} touched={touched} name="birthdateAt" />
-              </Col>
-            </FormRow>
-            <FormRow align="center">
-              <Col md={4}>
-                <Label>Votre e-mail</Label>
-              </Col>
-              <Col md={8}>
-                <FieldWithWidth
-                  maxWidth="400px"
-                  placeholder="xxx@exemple.com"
-                  className="form-control"
-                  validate={(v) => (!v && requiredMessage) || (!validator.isEmail(v) && "Ce champs est au mauvais format")}
-                  type="email"
-                  name="email"
-                  value={values.email}
-                  onChange={handleChange}
-                />
-                <ErrorMessage errors={errors} touched={touched} name="email" />
-                <TextUnderField style={{ marginBottom: "15px" }}>Cette adresse vous servira d'identifiant de connexion, notez le bien.</TextUnderField>
-              </Col>
-              <Col md={4}>
-                <Label>Confirmez votre email</Label>
-              </Col>
-              <Col md={8}>
-                <FieldWithWidth
-                  maxWidth="400px"
-                  placeholder="xxx@exemple.com"
-                  className="form-control"
-                  validate={(v) => (!v && requiredMessage) || (v !== values.email && "Les emails renseignés ne sont pas identiques")}
-                  type="email"
-                  name="newEmail"
-                  value={values.newEmail}
-                  onChange={handleChange}
-                />
-                <ErrorMessage errors={errors} touched={touched} name="newEmail" />
               </Col>
             </FormRow>
             <FormRow>
@@ -217,7 +182,7 @@ export default () => {
                       checked={values.birthCountry === "France"}
                       onChange={handleChange}
                     />
-                    Je suis née en France
+                    Je suis né.e en France
                   </RadioLabel>
                   <RadioLabel>
                     <Field
@@ -229,7 +194,7 @@ export default () => {
                       checked={values.birthCountry !== "France"}
                       onChange={handleChange}
                     />
-                    Je suis née à l'étranger
+                    Je suis né.e à l'étranger
                   </RadioLabel>
                 </FlexGroup>
                 <FlexGroup style={{ marginTop: "15px" }}>
@@ -276,6 +241,41 @@ export default () => {
                     </div>
                   )}
                 </FlexGroup>
+              </Col>
+            </FormRow>
+            <FormRow align="center">
+              <Col md={4}>
+                <Label>Votre e-mail</Label>
+              </Col>
+              <Col md={8}>
+                <FieldWithWidth
+                  maxWidth="400px"
+                  placeholder="xxx@exemple.com"
+                  className="form-control"
+                  validate={(v) => (!v && requiredMessage) || (!validator.isEmail(v) && "Ce champs est au mauvais format")}
+                  type="email"
+                  name="email"
+                  value={values.email}
+                  onChange={handleChange}
+                />
+                <ErrorMessage errors={errors} touched={touched} name="email" />
+                <TextUnderField style={{ marginBottom: "15px" }}>Cette adresse vous servira d'identifiant de connexion, notez le bien.</TextUnderField>
+              </Col>
+              <Col md={4}>
+                <Label>Confirmez votre email</Label>
+              </Col>
+              <Col md={8}>
+                <FieldWithWidth
+                  maxWidth="400px"
+                  placeholder="xxx@exemple.com"
+                  className="form-control"
+                  validate={(v) => (!v && requiredMessage) || (v !== values.email && "Les emails renseignés ne sont pas identiques")}
+                  type="email"
+                  name="newEmail"
+                  value={values.newEmail}
+                  onChange={handleChange}
+                />
+                <ErrorMessage errors={errors} touched={touched} name="newEmail" />
               </Col>
             </FormRow>
             <FormRow align="center">
@@ -345,7 +345,10 @@ export default () => {
                     name="RGPD"
                     onChange={(e) => handleChange({ target: { name: e.target.name, value: e.target.checked ? "true" : "false" } })}
                   />
-                  J'ai pris connaissance des modalités de traitement de mes données personnelles
+                  J'ai pris connaissance des&nbsp;
+                  <a href="https://www.snu.gouv.fr/donnees-personnelles-et-cookies-23" target="_blank">
+                    modalités de traitement de mes données personnelles
+                  </a>
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="RGPD" />
               </div>

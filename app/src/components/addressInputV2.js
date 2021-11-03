@@ -83,12 +83,11 @@ export default ({ keys, values, handleChange, errors, touched, departAndRegionVi
       <Row>
         {countryVisible && (
           <Col md={addressInFrance ? 4 : 12}>
-            <Label>Pays</Label>
             <Field
               as="select"
               validate={(v) => !v && requiredMessage}
               className="form-control"
-              placeholder="Pays"
+              placeholder="Sélectionnez votre pays de résidence"
               name={keys.country}
               value={values[keys.country]}
               onChange={(e) => {
@@ -106,7 +105,6 @@ export default ({ keys, values, handleChange, errors, touched, departAndRegionVi
         )}
         {addressInFrance && (
           <Col md={countryVisible ? 8 : 12}>
-            <Label>Rechercher</Label>
             <Autosuggest
               suggestions={suggestions}
               onSuggestionsFetchRequested={onSuggestionsFetchRequested}
@@ -124,12 +122,11 @@ export default ({ keys, values, handleChange, errors, touched, departAndRegionVi
           </Col>
         )}
         <Col md={12} style={{ marginTop: 15 }}>
-          <Label>Adresse</Label>
           <Field
             validate={(v) => !v && requiredMessage}
             disabled={addressInFrance && !noResultMode}
             className="form-control"
-            placeholder="Adresse"
+            placeholder="Renseignez votre adresse"
             name={keys.address}
             value={values[keys.address]}
             onChange={(e) => {
@@ -140,7 +137,6 @@ export default ({ keys, values, handleChange, errors, touched, departAndRegionVi
           <ErrorMessage errors={errors} touched={touched} name={keys.address} />
         </Col>
         <Col md={6} style={{ marginTop: 15 }}>
-          <Label>Ville</Label>
           <Field
             validate={(v) => !v && requiredMessage}
             disabled={addressInFrance && !noResultMode}
@@ -156,7 +152,6 @@ export default ({ keys, values, handleChange, errors, touched, departAndRegionVi
           <ErrorMessage errors={errors} touched={touched} name={keys.city} />
         </Col>
         <Col md={6} style={{ marginTop: 15 }}>
-          <Label>Code postal</Label>
           <Field
             validate={(v) => !v && requiredMessage}
             disabled={addressInFrance && !noResultMode}
