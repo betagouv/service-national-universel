@@ -45,7 +45,7 @@ export default () => {
         initialValues={young}
         onSubmit={async (values) => {
           try {
-            values.inscriptionStep = STEPS.DONE;
+            values.inscriptionStep = STEPS.AVAILABILITY;
             const { ok, code, data: young } = await api.put("/young", values);
             if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             dispatch(setYoung(young));

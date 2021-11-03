@@ -1,11 +1,15 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-
+import { toastr } from "react-redux-toastr";
 import { useSelector, useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
+
+import api from "../../../services/api";
 import { HERO_IMAGES_LIST } from "../../../utils";
+import { STEPS } from "../utils";
 import InfoIcon from "../../../components/InfoIcon";
 import BackIcon from "../../../components/BackIcon";
+import { translate } from "../../../utils";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
@@ -23,18 +27,21 @@ export default () => {
       excludedGrade: ["1ere", "Terminale"],
       excludedZip: ["975", "974", "976", "984", "987", "986", "988"],
       includedBirthdate: { begin: "02/25/2004", end: "02/14/2007" },
+      id: "Février 2022",
     },
     {
       month: "Juin",
       excludedGrade: ["1ere", "Terminale"],
       excludedZip: [],
       includedBirthdate: { begin: "06/24/2004", end: "06/13/2007" },
+      id: "Juin 2022",
     },
     {
       month: "Juillet",
       excludedGrade: [],
       excludedZip: [],
       includedBirthdate: { begin: "07/15/2004", end: "07/04/2007" },
+      id: "Juillet 2022",
     },
   ].filter((el) => {
     if (el.excludedGrade.includes(young.grade)) return false;
@@ -47,6 +54,18 @@ export default () => {
     }
     return false;
   });
+
+  const submit = async (cohort) => {
+    try {
+      const { ok, code, data: young } = await api.put("/young", { ...young, cohort, inscriptionStep: STEPS.DONE });
+      if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+      dispatch(setYoung(young));
+      history.push("/inscription/done");
+    } catch (e) {
+      console.log(e);
+      toastr.error("Erreur !");
+    }
+  };
 
   return (
     <>
@@ -65,7 +84,7 @@ export default () => {
             zone B ou C.
           </AlerteInfo>
           <div class="btns">
-            <Button backgroundColor="#4f46e5" dark>
+            <Button backgroundColor="#4f46e5" dark onClick={() => submit(availability[indexAvailability].id)}>
               Je suis disponible pour la session de {availability[indexAvailability].month}
             </Button>
             {availability[indexAvailability + 1] && (
