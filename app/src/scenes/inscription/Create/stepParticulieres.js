@@ -29,10 +29,11 @@ export default () => {
       <Heading>
         <h2>Situations particulières</h2>
         <p style={{ color: "#6B7280" }}>
-          Complétez les informations ci-dessous{" "}
-          <a target="blank" href="https://apicivique.s3.eu-west-3.amazonaws.com/Note_relative_aux_situations_particulie%CC%80res.pdf">
-            En savoir plus
-          </a>
+          Complétez les informations ci-dessous.
+        </p>
+        <p style={{ color: "#6B7280" }}>
+          Il est important de signaler dès l'inscription toute situation nécessitant une vigilance particulière ou des aménagements spécifiques : situation de handicap, allergies, intolérance alimentaire, projet d'accueil individualisé (PAI), sport de haut niveau, etc. <br />
+          En fonction des situations signalées, un responsable en charge du séjour de cohésion ou de la mission d'intérêt général prendra contact avec le volontaire et ses représentants légaux.
         </p>
       </Heading>
       <Formik
@@ -54,7 +55,12 @@ export default () => {
       >
         {({ values, handleChange, handleSubmit, isSubmitting, submitForm, errors, touched }) => (
           <>
-            <FormLegend>Handicap et pathologies chroniques</FormLegend>
+            <FormLegend style={{ paddingBottom: "0" }}>Handicap et pathologies chroniques</FormLegend>
+            <div>
+              <a target="blank" href="https://apicivique.s3.eu-west-3.amazonaws.com/Note_relative_aux_situations_particulie%CC%80res.pdf">
+                En savoir plus
+              </a>
+            </div>
             <FormRadioLabelTrueFalse title="Etes-vous en situation de handicap ?" name="handicap" values={values} handleChange={handleChange} errors={errors} touched={touched} />
             <FormRadioLabelTrueFalse
               title="Etes-vous bénéficiaire d’un projet personnalisé de scolarisation (PPS)"
@@ -88,15 +94,8 @@ export default () => {
               <>
                 <FormRadioLabelTrueFalse
                   title="Avez-vous besoin d'un aménagement spécifique ?"
+                  children="(accompagnement professionnel, participation de jour, activités adaptées...)"
                   name="specificAmenagment"
-                  values={values}
-                  handleChange={handleChange}
-                  errors={errors}
-                  touched={touched}
-                />
-                <FormRadioLabelTrueFalse
-                  title="Souhaitez-vous être affecté(e) dans votre département de résidence ?"
-                  name="handicapInSameDepartment"
                   values={values}
                   handleChange={handleChange}
                   errors={errors}
@@ -110,8 +109,17 @@ export default () => {
                   errors={errors}
                   touched={touched}
                 />
+                <FormRadioLabelTrueFalse
+                  title="Souhaitez-vous être affecté(e) dans votre département de résidence ?"
+                  name="handicapInSameDepartment"
+                  values={values}
+                  handleChange={handleChange}
+                  errors={errors}
+                  touched={touched}
+                />
               </>
             )}
+            <FormRadioLabelTrueFalse title="Etes-vous en situation d'allergies ou d'intolérances alimentaires nécessitant la mise en place de mesures adaptées ?" name="allergies" values={values} handleChange={handleChange} errors={errors} touched={touched} />
             <FormLegend>Sportif de haut niveau inscrit sur liste ministerielle</FormLegend>
             <FormRadioLabelTrueFalse
               title="Etes-vous sportif de haut niveau inscrit sur liste ministérielle ?"
@@ -124,7 +132,7 @@ export default () => {
             {values["highSkilledActivity"] === "true" && (
               <>
                 <FormRadioLabelTrueFalse
-                  title="Souhaitez-vous être affecté(e) dans votre département de résidence ?"
+                  title="Avez-vous besoin d'être affecté(e) dans votre département de résidence ?"
                   name="highSkilledActivityInSameDepartment"
                   values={values}
                   handleChange={handleChange}
@@ -143,6 +151,13 @@ export default () => {
 
 const Wrapper = styled.div`
   padding: 40px;
+  a {
+    color: #5145cd;
+    margin-top: 5px;
+    font-size: 0.875rem;
+    font-weight: 400;
+    text-decoration: underline;
+  }
   @media (max-width: 768px) {
     padding: 22px;
   }
@@ -153,13 +168,6 @@ const Heading = styled.div`
     color: #161e2e;
     font-size: 1.8rem;
     font-weight: 700;
-  }
-  a {
-    color: #5145cd;
-    margin-top: 5px;
-    font-size: 0.875rem;
-    font-weight: 400;
-    text-decoration: underline;
   }
   p {
     color: #161e2e;
