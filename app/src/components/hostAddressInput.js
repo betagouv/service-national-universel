@@ -7,7 +7,7 @@ import ErrorMessage, { requiredMessage } from "../scenes/inscription/components/
 export default ({ keys, values, handleChange, errors, touched }) => {
   useEffect(() => {
     // init value
-    values[keys.link] = "Parent";
+    values[keys.hostRelationship] = "Parent";
 
     if (document.getElementsByTagName) {
       const inputElements = document.getElementsByTagName("input");
@@ -58,16 +58,16 @@ export default ({ keys, values, handleChange, errors, touched }) => {
             validate={(v) => !v && requiredMessage}
             className="form-control"
             placeholder="Précisez votre lien avec l'hébergeur"
-            name={keys.link}
-            value={values[keys.link]}
+            name={keys.hostRelationship}
+            value={values[keys.hostRelationship]}
             onChange={(e) => {
               const value = e.target.value;
-              handleChange({ target: { name: keys.link, value } });
+              handleChange({ target: { name: keys.hostRelationship, value } });
             }}
           >
-            {["Parent", "ami de la famille", "etc"].map((link) => (
-              <option key={link} value={link}>
-                {`${link}`}
+            {["Parent", "ami de la famille", "etc"].map((e) => (
+              <option key={e} value={e}>
+                {e}
               </option>
             ))}
           </Field>

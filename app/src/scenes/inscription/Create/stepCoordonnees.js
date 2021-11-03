@@ -48,7 +48,7 @@ export default () => {
     delete v.hostCity;
     delete v.hostZip;
     delete v.hostAddress;
-    delete v.link;
+    delete v.hostRelationship;
   };
 
   const cleanSituation = (v) => {
@@ -213,7 +213,7 @@ export default () => {
                       hostCity: "hostCity",
                       hostZip: "hostZip",
                       hostAddress: "hostAddress",
-                      link: "link",
+                      hostRelationship: "hostRelationship",
                     }}
                     values={values}
                     handleChange={handleChange}

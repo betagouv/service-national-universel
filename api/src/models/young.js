@@ -750,7 +750,7 @@ const Schema = new mongoose.Schema({
       description: "Adresse de l'hébergeur",
     },
   },
-  link: {
+  hostRelationship: {
     type: String,
     documentation: {
       description: "Lien de l'hébergeur avec le volontaire",
