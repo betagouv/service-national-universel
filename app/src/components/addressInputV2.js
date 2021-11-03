@@ -23,7 +23,7 @@ export default ({ keys, values, handleChange, errors, touched, departAndRegionVi
       const inputElements = document.getElementsByTagName("input");
       for (let i = 0; inputElements[i]; i++) inputElements[i].setAttribute("autocomplete", "novalue");
     }
-    handleChange({ target: { name: keys.country, value: "France" } });
+    if (!values[keys.country]) handleChange({ target: { name: keys.country, value: "France" } });
   }, []);
 
   useEffect(() => {
@@ -113,7 +113,7 @@ export default ({ keys, values, handleChange, errors, touched, departAndRegionVi
               onSuggestionSelected={onSuggestionSelected}
               renderSuggestion={renderSuggestion}
               inputProps={{
-                placeholder: "Commencez à tapez votre adresse",
+                placeholder: "Commencez à taper votre adresse",
                 value: str,
                 onChange: (event, { newValue }) => setStr(newValue),
                 className: "form-control",

@@ -12,8 +12,7 @@ export default ({ title, children, name, values, handleChange, errors, touched }
   <FormRow>
     <Col md={4}>
       <FormLabel>
-        {title}
-        {children}
+        {title} <p style={{ fontSize: "0.7rem" }}>{children}</p>
       </FormLabel>
     </Col>
     <Col md={8} style={{ display: "flex", alignItems: "center" }}>

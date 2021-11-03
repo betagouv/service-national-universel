@@ -138,10 +138,10 @@ export default () => {
                   hidden
                   validate={(v) => {
                     if (!v) return requiredMessage;
-                    const from = new Date(2004, 1, 25); // -1 because months are from 0 to 11
-                    const to = new Date(2007, 6, 4);
+                    const from = new Date(2004, 1, 25, 0, 0, 0); // -1 because months are from 0 to 11
+                    const to = new Date(2007, 6, 4, 0, 0, 0);
                     const [y, m, d] = v.substring(0, 10).split("-");
-                    const check = new Date(Date.UTC(parseInt(y), parseInt(m - 1), parseInt(d)));
+                    const check = new Date(parseInt(y), parseInt(m - 1), parseInt(d), 0, 0, 0);
                     return (check < from || check > to) && "Au moment du séjour, vous devez avoir 15 ans révolu et moins de 18 ans";
                   }}
                   name="birthdateAt"
@@ -172,7 +172,7 @@ export default () => {
                       checked={values.birthCountry === "France"}
                       onChange={handleChange}
                     />
-                    Je suis né.e en France
+                    Je suis né(e) en France
                   </RadioLabel>
                   <RadioLabel>
                     <Field
@@ -184,7 +184,7 @@ export default () => {
                       checked={values.birthCountry !== "France"}
                       onChange={handleChange}
                     />
-                    Je suis né.e à l'étranger
+                    Je suis né(e) à l'étranger
                   </RadioLabel>
                 </FlexGroup>
                 <FlexGroup style={{ marginTop: "15px" }}>
