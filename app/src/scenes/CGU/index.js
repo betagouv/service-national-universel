@@ -203,6 +203,8 @@ const Header = styled.header`
 `;
 
 const Container = styled.div`
+  margin: 0 auto;
+  max-width: 1000px;
   padding: 1rem 3rem;
   h3 {
     font-size: 1.4rem;
