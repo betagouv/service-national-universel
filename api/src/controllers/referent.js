@@ -346,6 +346,8 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     }
     res.status(200).send({ ok: true, data: young });
   } catch (error) {
+    if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });
+
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
