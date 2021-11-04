@@ -12,7 +12,7 @@ router.get("/availability/2022", passport.authenticate("young", { session: false
   let sessions = [
     {
       month: "Février",
-      excludedGrade: ["1ere", "Terminale"],
+      excludedGrade: ["3eme", "Terminale"],
       excludedZip: ["975", "974", "976", "984", "987", "986", "988"],
       includedBirthdate: { begin: "02/25/2004", end: "02/14/2007" },
       stringDate: "13 au 25 février 2022",
@@ -22,7 +22,7 @@ router.get("/availability/2022", passport.authenticate("young", { session: false
     },
     {
       month: "Juin",
-      excludedGrade: ["1ere", "Terminale"],
+      excludedGrade: ["3eme", "1ere", "Terminale"],
       excludedZip: [],
       includedBirthdate: { begin: "06/24/2004", end: "06/13/2007" },
       stringDate: "12 au 24 juin 2022",
