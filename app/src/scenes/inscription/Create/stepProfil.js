@@ -261,8 +261,6 @@ export default () => {
                     placeholder="xxx@exemple.com"
                     className="form-control"
                     validate={(v) => {
-                      console.log("🚀 ~ file: stepProfil.js ~ line 252 ~ !v", !v);
-                      console.log("🚀 ~ file: stepProfil.js ~ line 251 ~ v", v);
                       return (!v && requiredMessage) || (!validator.isEmail(v) && "Ce champs est au mauvais format");
                     }}
                     type="email"
