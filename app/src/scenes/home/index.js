@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useSelector } from "react-redux";
 
 import { YOUNG_STATUS } from "../../utils";
@@ -9,7 +9,6 @@ import Default from "./default";
 import Withdrawn from "./withdrawn";
 import WaitingList from "./waitingList";
 import Validated from "./validated";
-import Reinscription from "./reinscription";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young) || {};
