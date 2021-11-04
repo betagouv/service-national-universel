@@ -62,7 +62,7 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
 
     setLoading(false);
     if (arr.length > 0) setSuggestion({ ok: true, status: "FOUND", ...arr[0] });
-    else setSuggestion({ ok: true, status: "NOTFOUND" });
+    else addressVerifiedHelpers.setValue(true);
   };
 
   // keys is not defined at first load ??
@@ -183,6 +183,7 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
           </Col>
         </Row>
       )}
+      {console.log(errors)}
     </Wrapper>
   );
 };
