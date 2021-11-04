@@ -17,6 +17,7 @@ router.get("/availability/2022", passport.authenticate("young", { session: false
       includedBirthdate: { begin: "02/25/2004", end: "02/14/2007" },
       stringDate: "13 au 25 février 2022",
       info: "Vous bénéficierez d'une autorisation d'absence de votre établissement scolaire pour la semaine de cours à laquelle vous n'assisteriez pas, si vous êtes scolarisé(e) en zone B ou C.",
+      buffer: 1.15,
       id: "Février 2022",
     },
     {
@@ -26,6 +27,7 @@ router.get("/availability/2022", passport.authenticate("young", { session: false
       includedBirthdate: { begin: "06/24/2004", end: "06/13/2007" },
       stringDate: "12 au 24 juin 2022",
       info: "Veuillez vous assurer d'être disponible sur l'ensemble de la période.",
+      buffer: 1.25,
       id: "Juin 2022",
     },
     {
@@ -35,11 +37,12 @@ router.get("/availability/2022", passport.authenticate("young", { session: false
       includedBirthdate: { begin: "07/15/2004", end: "07/04/2007" },
       stringDate: "3 au 15 juillet 2022",
       info: "Veuillez vous assurer d'être disponible sur l'ensemble de la période.",
+      buffer: 1.25,
       id: "Juillet 2022",
     },
   ].filter((el) => {
     if (el.excludedGrade.includes(young.grade)) return false;
-    else if (el.excludedZip.includes(young.zip)) return false;
+    else if (el.excludedZip.some((e) => new RegExp(`^${young.zip}`).test(e))) return false;
     else if (
       new Date(el.includedBirthdate.begin).getTime() <= new Date(young.birthdateAt).getTime() &&
       new Date(young.birthdateAt).getTime() <= new Date(el.includedBirthdate.end).getTime()
@@ -57,9 +60,13 @@ router.get("/availability/2022", passport.authenticate("young", { session: false
         continue;
       }
 
-      const nbYoung = await YoungModel.find({ department: young.department, cohort: session.id }).count();
-      const ratio = Math.floor(data.max * 1.15) / nbYoung;
+      const nbYoung = await YoungModel.find({ department: young.department, cohort: session.id, status: { $ne: "REFUSED" } }).count();
+      if (nbYoung === 0) {
+        session.goalReached = false;
+        continue;
+      }
 
+      const ratio = Math.floor(data.max * session.buffer) / nbYoung;
       if (ratio >= 1) session.goalReached = true;
       else session.goalReached = false;
     }
