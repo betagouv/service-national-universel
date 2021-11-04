@@ -8,21 +8,10 @@ import { Link } from "react-router-dom";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
-  const is2020 = young.cohort === "2020";
-  const [showAlert, setShowAlert] = useState(!is2020);
-
   return (
     <HeroContainer>
       <Hero>
-        {showAlert && (
-          <Alert color="#31c48d">
-            <div className="text">
-              <strong>INSCRIPTION VALIDÉE</strong>
-            </div>
-            <img src={require("../../assets/close.svg")} height={15} onClick={() => setShowAlert(false)} />
-          </Alert>
-        )}
-        <Content showAlert={showAlert}>
+        <Content>
           <h1>
             <strong>{young.firstName},</strong> ravis de vous retrouver !
           </h1>

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { HeroContainer, Hero, Content, Alert, Separator, WhiteButton } from "../../components/Content";
 import { YOUNG_STATUS } from "../../utils";
+import styled from "styled-components";
 import { isEndOfInscriptionManagement2021 } from "snu-lib";
 
 export default () => {
@@ -15,38 +16,45 @@ export default () => {
         {showAlert && (
           <Alert>
             <div className="text">
-              <strong>INSCRIPTION EN COURS DE VALIDATION</strong>
+              <strong>INSCRIPTION EN ATTENTE DE VALIDATION</strong>
             </div>
             <img src={require("../../assets/close.svg")} height={15} onClick={() => setShowAlert(false)} />
           </Alert>
         )}
         <Content showAlert={showAlert}>
           <h1>
-            <strong>{young.firstName},</strong> bienvenue dans votre espace personnel.
+            <strong>{young.firstName},</strong> bienvenue sur votre compte volontaire.
           </h1>
-          <p>
-            Votre inscription a bien été enregistrée et est <b style={{ color: "#5145cd" }}>en cours de validation</b> par l'administration. Vous serez prochainement informé(e) par
-            e-mail de l'avancement de votre candidature.
-          </p>
-          {young.status === YOUNG_STATUS.WAITING_VALIDATION && !isEndOfInscriptionManagement2021() ? (
+          <IconContainer>
+            <svg width="48" height="48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0 24C0 10.745 10.745 0 24 0s24 10.745 24 24-10.745 24-24 24S0 37.255 0 24z" fill="#D1FAE5" /><path d="M17 25l4 4 10-10" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            <p style={{ color: "#000" }}>
+              <strong>
+                Merci, votre inscription a bien été enregistrée.
+              </strong>
+              <br />
+              Votre dossier est en cours de traitement par l'administration.
+            </p>
+          </IconContainer>
+          <p>Vous recevrez prochainement un e-mail de no-reply@snu.gouv.fr vous informant de l'avancement de votre inscription.</p>
+          {young.status === YOUNG_STATUS.WAITING_VALIDATION && isEndOfInscriptionManagement2021() ? (
             <>
-              <p>Vous pouvez cependant continuer à éditer les informations renseignées lors de votre inscription.</p>
+              <p>Vous pouvez consulter les informations renseignées dans votre dossier jusqu'à validation de votre inscription.</p>
               <Link to="/inscription/coordonnees">
-                <WhiteButton>Editer mes informations d'inscription</WhiteButton>
+                <WhiteButton>Revenir à mon dossier d'inscription</WhiteButton>
               </Link>
             </>
           ) : null}
-          <Separator />
-          <p style={{ fontSize: "1.125rem" }}>
-            Si vous avez la moindre question, trouvez toutes les réponses à vos questions en consultant la{" "}
-            <a href="https://www.snu.gouv.fr/foire-aux-questions-11" target="blank" style={{ color: "#5145cd" }}>
-              FAQ
-            </a>{" "}
-            du SNU.
-          </p>
         </Content>
         <div className="thumb" />
       </Hero>
     </HeroContainer>
   );
 };
+
+const IconContainer = styled.div`
+  display: flex;
+  margin-top: 2.5rem;
+  svg {
+    min-width: 4rem
+  }
+`;
