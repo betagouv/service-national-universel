@@ -320,6 +320,7 @@ function validateYoung(young, user) {
     populationDensity: Joi.string().allow(null, ""),
     department: Joi.string().allow(null, ""),
     region: Joi.string().allow(null, ""),
+    country: Joi.string().allow(null, ""),
     location: Joi.object()
       .keys({
         lat: Joi.number().allow(null),
@@ -327,6 +328,12 @@ function validateYoung(young, user) {
       })
       .allow(null),
     qpv: Joi.string().allow(null, ""),
+    hostLastName: Joi.string().allow(null, ""),
+    hostFirstName: Joi.string().allow(null, ""),
+    hostCity: Joi.string().allow(null, ""),
+    hostZip: Joi.string().allow(null, ""),
+    hostAddress: Joi.string().allow(null, ""),
+    hostRelationship: Joi.string().allow(null, ""),
     situation: Joi.string().allow(null, ""),
     grade: Joi.string().allow(null, ""),
     schoolCertification: Joi.string().allow(null, ""),
@@ -346,6 +353,7 @@ function validateYoung(young, user) {
       })
       .allow(null),
     schoolId: Joi.string().allow(null, ""),
+    employed: Joi.string().allow(null, ""),
     parent1Status: Joi.string().allow(null, ""),
     parent1FirstName: Joi.string().allow(null, ""),
     parent1LastName: Joi.string().allow(null, ""),
@@ -384,6 +392,7 @@ function validateYoung(young, user) {
       })
       .allow(null),
     parent2FromFranceConnect: Joi.string().allow(null, ""),
+    allergies: Joi.string().allow(null, ""),
     handicap: Joi.string().allow(null, ""),
     handicapInSameDepartment: Joi.string().allow(null, ""),
     reducedMobilityAccess: Joi.string().allow(null, ""),

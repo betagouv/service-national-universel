@@ -52,6 +52,7 @@ function getNewYoungFixture() {
     populationDensity: "DENSE",
     department: faker.address.state(),
     region: faker.address.country(),
+    country: "France",
     location: {
       lat: Number(faker.address.latitude()),
       lon: Number(faker.address.longitude()),

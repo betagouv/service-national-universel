@@ -47,6 +47,14 @@ const Parent = ({ id = 1, values, errors, touched, handleChange, validateField }
   async function handleSave() {
     await saveYoung(values);
   }
+
+  useEffect(() => {
+    if (values[`parent${id}Email`]) validateField(`parent${id}Email`);
+  }, [values[`parent${id}Email`]]);
+  useEffect(() => {
+    if (values[`parent${id}Phone`]) validateField(`parent${id}Phone`);
+  }, [values[`parent${id}Phone`]]);
+
   return (
     <>
       <FormLegend>
@@ -233,6 +241,7 @@ export default () => {
   const young = useSelector((state) => state.Auth.young);
   const [isParent2Visible, setIsParent2Visible] = useState(false);
   const [initialValues, setInitialValues] = useState(young);
+  const [loading, setLoading] = useState(false);
 
   const hasParent2Infos = () => {
     return young && (young.parent2Status || young.parent2FirstName || young.parent2LastName || young.parent2Email || young.parent2Phone);
@@ -258,6 +267,7 @@ export default () => {
         validateOnChange={false}
         validateOnBlur={false}
         onSubmit={async (values) => {
+          setLoading(true);
           try {
             values.inscriptionStep = STEPS.CONSENTEMENTS;
             const { ok, code, data: young } = await api.put("/young", values);
@@ -267,6 +277,8 @@ export default () => {
           } catch (e) {
             console.log(e);
             toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code));
+          } finally {
+            setLoading(false);
           }
         }}
       >
@@ -292,12 +304,12 @@ export default () => {
                     delete values.parent2Location;
                   }}
                 >
-                  {!isParent2Visible ? "Ajouter" : "Retirer"} un représentant légal
+                  {!isParent2Visible ? "Ajouter" : "Retirer"} le représentant légal nº2
                 </BorderButton>
               </Col>
             </FormRow>
-            {isParent2Visible ? <Parent id={2} values={values} handleChange={handleChange} errors={errors} touched={touched} /> : null}
-            <FormFooter values={values} handleSubmit={handleSubmit} errors={errors} />
+            {isParent2Visible ? <Parent id={2} values={values} handleChange={handleChange} errors={errors} touched={touched} validateField={validateField} /> : null}
+            <FormFooter loading={loading} values={values} handleSubmit={handleSubmit} errors={errors} />
           </>
         )}
       </Formik>

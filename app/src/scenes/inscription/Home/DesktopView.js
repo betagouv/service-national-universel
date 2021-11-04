@@ -10,10 +10,14 @@ export default () => {
           <Section>
             <ul>
               <li className="section_year">
-                <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="20" height="20" rx="10" fill="#32267F" fill-opacity=".06" /><path d="M8.644 13.843l-3.487-3.487a.536.536 0 010-.758l.759-.759c.21-.21.549-.21.758 0l2.349 2.349 5.03-5.03c.21-.21.55-.21.76 0l.758.758c.21.21.21.549 0 .758l-6.169 6.169c-.21.21-.549.21-.758 0z" fill="#32267F" /></svg>
-                <p>
-                  Je suis disponible sur l'un des séjours de cohésion 2022, à savoir :
-                </p>
+                <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect width="20" height="20" rx="10" fill="#32267F" fill-opacity=".06" />
+                  <path
+                    d="M8.644 13.843l-3.487-3.487a.536.536 0 010-.758l.759-.759c.21-.21.549-.21.758 0l2.349 2.349 5.03-5.03c.21-.21.55-.21.76 0l.758.758c.21.21.21.549 0 .758l-6.169 6.169c-.21.21-.549.21-.758 0z"
+                    fill="#32267F"
+                  />
+                </svg>
+                <p>Je suis disponible sur l'un des séjours de cohésion 2022, à savoir :</p>
               </li>
               <li className="section_dates">
                 <p>
@@ -31,26 +35,43 @@ export default () => {
                 </p>
               </li>
               <li className="section_precision">
-                <p>
-                  *Si vous êtes scolarisé(e) en zone B ou C, vous bénéficierez d’une autorisation d’absence de votre établissement scolaire
-                </p>
+                <p>*Si vous êtes scolarisé(e) en classe de 2nde, vous pourrez vous voir délivrer une autorisation d’absence par votre établissement scolaire.</p>
               </li>
             </ul>
           </Section>
           <Section>
             <div className="section_conditions">
-              <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="20" height="20" rx="10" fill="#32267F" fill-opacity=".06" /><path d="M8.644 13.843l-3.487-3.487a.536.536 0 010-.758l.759-.759c.21-.21.549-.21.758 0l2.349 2.349 5.03-5.03c.21-.21.55-.21.76 0l.758.758c.21.21.21.549 0 .758l-6.169 6.169c-.21.21-.549.21-.758 0z" fill="#32267F" /></svg>
-              <p>J’aurai <strong>15, 16 ou 17 ans</strong> au moment de mon séjour de cohésion</p>
+              <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="20" height="20" rx="10" fill="#32267F" fill-opacity=".06" />
+                <path
+                  d="M8.644 13.843l-3.487-3.487a.536.536 0 010-.758l.759-.759c.21-.21.549-.21.758 0l2.349 2.349 5.03-5.03c.21-.21.55-.21.76 0l.758.758c.21.21.21.549 0 .758l-6.169 6.169c-.21.21-.549.21-.758 0z"
+                  fill="#32267F"
+                />
+              </svg>
+              <p>
+                J’aurai <strong>15, 16 ou 17 ans</strong> au moment de mon séjour de cohésion
+              </p>
             </div>
             <div className="section_conditions">
-              <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="20" height="20" rx="10" fill="#32267F" fill-opacity=".06" /><path d="M8.644 13.843l-3.487-3.487a.536.536 0 010-.758l.759-.759c.21-.21.549-.21.758 0l2.349 2.349 5.03-5.03c.21-.21.55-.21.76 0l.758.758c.21.21.21.549 0 .758l-6.169 6.169c-.21.21-.549.21-.758 0z" fill="#32267F" /></svg>
-              <p>Je suis de <strong>nationalité française</strong></p>
+              <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect width="20" height="20" rx="10" fill="#32267F" fill-opacity=".06" />
+                <path
+                  d="M8.644 13.843l-3.487-3.487a.536.536 0 010-.758l.759-.759c.21-.21.549-.21.758 0l2.349 2.349 5.03-5.03c.21-.21.55-.21.76 0l.758.758c.21.21.21.549 0 .758l-6.169 6.169c-.21.21-.549.21-.758 0z"
+                  fill="#32267F"
+                />
+              </svg>
+              <p>
+                Je suis de <strong>nationalité française</strong>
+              </p>
             </div>
           </Section>
         </GridContainer>
         <GridContainer className="second_container">
           <Section className="third_section bottom_section">
-            <svg width="40" height="40" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="8" fill="#32257F" /><path d="M21 24h-1v-4h-1l2 4zm-1-8h.01H20zm9 4a9 9 0 11-18 0 9 9 0 0118 0z" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            <svg width="40" height="40" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="40" height="40" rx="8" fill="#32257F" />
+              <path d="M21 24h-1v-4h-1l2 4zm-1-8h.01H20zm9 4a9 9 0 11-18 0 9 9 0 0118 0z" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
             <Infos>
               <p>Pour compléter l'inscription en quelques minutes, il vous faudra :</p>
               <p>
@@ -60,9 +81,20 @@ export default () => {
             </Infos>
           </Section>
           <Section className="bottom_section">
-            <svg width="40" height="40" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="40" height="40" rx="8" fill="#32257F" /><path d="M16.228 17c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M29 20a9 9 0 11-18 0 9 9 0 0118 0z" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            <svg width="40" height="40" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect width="40" height="40" rx="8" fill="#32257F" />
+              <path
+                d="M16.228 17c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M29 20a9 9 0 11-18 0 9 9 0 0118 0z"
+                stroke="#fff"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              />
+            </svg>
             <FAQ href="https://support.snu.gouv.fr/help/fr-fr/16-comprendre-le-snu" target="blank">
-              <p><strong>Besoin d'aide ?</strong></p>
+              <p>
+                <strong>Besoin d'aide ?</strong>
+              </p>
               <p>Toutes les réponses à vos questions</p>
             </FAQ>
           </Section>
@@ -106,7 +138,7 @@ const Points = styled.div`
     text-transform: uppercase;
     display: inline-block;
     padding: 2rem 20px;
-    color: #32257F;
+    color: #32257f;
     font-size: 0.9rem;
     font-weight: 700;
     letter-spacing: 1px;
@@ -118,15 +150,15 @@ const Points = styled.div`
     justify-content: flex-start;
   }
   p {
-      text-align: left;
-      margin-bottom: 0;
-    }
-    svg {
-      margin-right: 10px;
-    }
+    text-align: left;
+    margin-bottom: 0;
+  }
+  svg {
+    margin-right: 10px;
+  }
   .second_container {
     box-shadow: inset 0 10px 14px rgba(0, 0, 0, 0.08);
-    background: #F8F8F8;
+    background: #f8f8f8;
   }
   .button {
     text-transform: uppercase;
@@ -149,7 +181,7 @@ const GridContainer = styled.div`
   display: grid;
   grid-template-columns: 1fr 1fr;
   .third_section {
-    border-right: 0.5px solid #DFDFDF;
+    border-right: 0.5px solid #dfdfdf;
   }
   .bottom_section {
     display: flex;
@@ -164,8 +196,8 @@ const GridContainer = styled.div`
 
 const Section = styled.div`
   ul {
-    border-top: 0.5px solid #DFDFDF;
-    border-right: 0.5px solid #DFDFDF;
+    border-top: 0.5px solid #dfdfdf;
+    border-right: 0.5px solid #dfdfdf;
   }
   .section_year {
     padding: 1rem 3rem;
@@ -181,7 +213,7 @@ const Section = styled.div`
     margin-right: 5px;
   }
   .section_conditions {
-    border-top: 0.5px solid #DFDFDF;
+    border-top: 0.5px solid #dfdfdf;
     padding: 2rem 3rem;
     display: flex;
     align-items: center;

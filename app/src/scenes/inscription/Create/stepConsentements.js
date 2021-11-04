@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { Col } from "reactstrap";
 import { Field, Formik } from "formik";
@@ -13,13 +13,13 @@ import { STEPS } from "../utils";
 import FormRow from "../../../components/form/FormRow";
 import FormFooter from "../../../components/form/FormFooter";
 import api from "../../../services/api";
-import { translate, YOUNG_PHASE, YOUNG_STATUS } from "../../../utils";
+import { translate, getAge } from "../../../utils";
 
 export default () => {
   const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
   const isPlural = useSelector((state) => state.Auth.young?.parent1Status && state.Auth.young?.parent2Status);
-  const [clickedRules, setClickedRules] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const dispatch = useDispatch();
   if (!young) {
@@ -47,23 +47,11 @@ export default () => {
         validateOnChange={false}
         validateOnBlur={false}
         onSubmit={async (values) => {
+          setLoading(true);
           try {
-            console.log(values);
             values.parentConsentment = "true";
             values.consentment = "true";
-            if (values.status !== YOUNG_STATUS.WAITING_VALIDATION) {
-              values.status = YOUNG_STATUS.WAITING_VALIDATION;
-              values.lastStatusAt = Date.now();
-              values.historic.push({
-                phase: YOUNG_PHASE.INSCRIPTION,
-                createdAt: Date.now(),
-                userName: `${values.firstName} ${values.lastName}`,
-                userId: values._id,
-                status: YOUNG_STATUS.WAITING_VALIDATION,
-                note: "",
-              });
-            }
-            values.inscriptionStep = STEPS.DONE;
+            values.inscriptionStep = STEPS.DOCUMENTS;
             const { ok, code, data: young } = await api.put("/young", values);
             if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             dispatch(setYoung(young));
@@ -71,6 +59,8 @@ export default () => {
           } catch (e) {
             console.log(e);
             toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code));
+          } finally {
+            setLoading(false);
           }
         }}
       >
@@ -126,25 +116,32 @@ export default () => {
                     de cohésion puis la réalisation d'une mission d'intérêt général
                   </div>
                 </RadioLabel>
-                <RadioLabel style={{ marginBottom: 3 }}>
-                  <Field
-                    validate={(v) => !v && requiredMessage}
-                    value="true"
-                    checked={values.parentConsentment6}
-                    type="checkbox"
-                    name="parentConsentment6"
-                    onChange={handleChange}
-                  />
-                  <div>
-                    <div>
-                      {isPlural ? "acceptons " : "accepte "}
-                      la collecte et le traitement des données personnelles de <strong>{` ${young.firstName} ${young.lastName}`}</strong> par l'administration dans le cadre de
-                      l'inscription au SNU.
-                    </div>
-                    <a>En savoir plus {">"}</a>
-                  </div>
-                </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="parentConsentment2" />
+                {getAge(young.birthdateAt) < 15 && (
+                  <>
+                    <RadioLabel style={{ marginBottom: 3 }}>
+                      <Field
+                        validate={(v) => !v && requiredMessage}
+                        value="true"
+                        checked={values.parentConsentment6}
+                        type="checkbox"
+                        name="parentConsentment6"
+                        onChange={handleChange}
+                      />
+                      <div>
+                        <div>
+                          {isPlural ? "acceptons " : "accepte "}
+                          la collecte et le traitement des données personnelles de <strong>{` ${young.firstName} ${young.lastName}`}</strong> par l'administration dans le cadre de
+                          l'inscription au SNU.
+                        </div>
+                        <a href="https://www.cnil.fr/fr/recommandation-4-rechercher-le-consentement-dun-parent-pour-les-mineurs-de-moins-de-15-ans" target="_blank">
+                          En savoir plus {">"}
+                        </a>
+                      </div>
+                    </RadioLabel>
+                    <ErrorMessage errors={errors} touched={touched} name="parentConsentment6" />
+                  </>
+                )}
                 <SubTitle>Pour la participation au séjour de cohésion</SubTitle>
                 <RadioLabel style={{ marginBottom: 3 }}>
                   <Field
@@ -171,8 +168,8 @@ export default () => {
                     onChange={handleChange}
                   />
                   <div>
-                    {isPlural ? "Nous nous engageons" : "Je m’engage"} à transmettre la fiche sanitaire* ainsi que les documents médicaux et justificatifs nécessaires
-                    <b> deux semaines avant mon départ en séjour de cohésion.</b>
+                    {isPlural ? "Nous nous engageons" : "Je m’engage"} à renseigner l'utilisation d'autotest COVID*
+                    <b> avant le début du séjour de cohésion.</b>
                   </div>
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="parentConsentment4" />
@@ -185,9 +182,26 @@ export default () => {
                     name="parentConsentment5"
                     onChange={handleChange}
                   />
-                  <div>{isPlural ? "Nous nous engageons" : "Je m’engage"} à ce que mon enfant soit à jour de ses vaccinations obligatoires*.</div>
+                  <div>
+                    {isPlural ? "Nous nous engageons" : "Je m’engage"} à remettre la fiche sanitaire* ainsi que les documents médicaux et justificatifs nécessaires
+                    <b> à l'arrivée au centre de séjour de cohésion.</b>
+                  </div>
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="parentConsentment5" />
+                <RadioLabel>
+                  <Field
+                    validate={(v) => !v && requiredMessage}
+                    value="true"
+                    checked={values.parentConsentment7}
+                    type="checkbox"
+                    name="parentConsentment7"
+                    onChange={handleChange}
+                  />
+                  <div>
+                    {isPlural ? "Nous nous engageons" : "Je m’engage"} à ce que {young.firstName} {young.lastName} soit à jour de ses vaccinations obligatoires*.
+                  </div>
+                </RadioLabel>
+                <ErrorMessage errors={errors} touched={touched} name="parentConsentment7" />
                 <div style={{ fontWeight: 400, fontSize: 14, margin: "0.8rem" }}>
                   * Les informations relatives au formulaire du droit à l'image, à l'utilisation d'autotest COVID, à la fiche de sanitaire et aux vaccinations seront disponibles
                   dès la confirmation de l'inscription dans l'espace personnel de <strong>{young.firstName}</strong>.
@@ -205,22 +219,28 @@ export default () => {
                 <RadioLabel>
                   <Field validate={(v) => !v && requiredMessage} value="true" checked={values.consentment1} type="checkbox" name="consentment1" onChange={handleChange} />
                   <div>
-                    m’engage, sous le contrôle de mon représentant légal, à effectuer à la session 2022 du Service National Universel qui comprend la participation au séjour de
-                    cohésion puis la réalisation d'une mission d'intérêt général.
+                    suis volontaire, sous le contrôle de {isPlural ? "mes représentants légaux" : "mon représentant légal"}, pour effectuer à la session 2022 du Service National
+                    Universel qui comprend la participation au séjour de cohésion puis la réalisation d'une mission d'intérêt général.
                   </div>
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="consentment1" />
-                <RadioLabel>
-                  <Field validate={(v) => !v && requiredMessage} value="true" checked={values.consentment2} type="checkbox" name="consentment2" onChange={handleChange} />
-                  <div>
-                    <div>accepte la collecte et le traitement de mes données personnelles par l'administration dans le cadre de l'inscription au SNU.</div>
-                    <a>En savoir plus {">"}</a>
-                  </div>
-                </RadioLabel>
-                <ErrorMessage errors={errors} touched={touched} name="consentment2" />
+                {getAge(young.birthdateAt) < 15 && (
+                  <>
+                    <RadioLabel>
+                      <Field validate={(v) => !v && requiredMessage} value="true" checked={values.consentment2} type="checkbox" name="consentment2" onChange={handleChange} />
+                      <div>
+                        <div>accepte la collecte et le traitement de mes données personnelles par l'administration dans le cadre de l'inscription au SNU.</div>
+                        <a href="https://www.cnil.fr/fr/recommandation-4-rechercher-le-consentement-dun-parent-pour-les-mineurs-de-moins-de-15-ans" target="_blank">
+                          En savoir plus {">"}
+                        </a>
+                      </div>
+                    </RadioLabel>
+                    <ErrorMessage errors={errors} touched={touched} name="consentment2" />
+                  </>
+                )}
               </Col>
             </FormRow>
-            <FormFooter values={values} handleSubmit={handleSubmit} errors={errors} />
+            <FormFooter loading={loading} values={values} handleSubmit={handleSubmit} errors={errors} />
           </>
         )}
       </Formik>

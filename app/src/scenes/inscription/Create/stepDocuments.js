@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { useSelector, useDispatch } from "react-redux";
 
@@ -15,11 +15,13 @@ import api from "../../../services/api";
 import FormFooter from "../../../components/form/FormFooter";
 import { STEPS } from "../utils";
 import { setYoung } from "../../../redux/auth/actions";
+import { getAge } from "../../../utils";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
   const dispatch = useDispatch();
+  const [loading, setLoading] = useState(false);
 
   if (!young) {
     history.push("/inscription/profil");
@@ -43,16 +45,21 @@ export default () => {
 
       <Formik
         initialValues={young}
+        validateOnChange={false}
+        validateOnBlur={false}
         onSubmit={async (values) => {
+          setLoading(true);
           try {
-            values.inscriptionStep = STEPS.DONE;
+            values.inscriptionStep = STEPS.AVAILABILITY;
             const { ok, code, data: young } = await api.put("/young", values);
             if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             dispatch(setYoung(young));
-            history.push("/inscription/done");
+            history.push("/inscription/availability");
           } catch (e) {
             console.log(e);
             toastr.error("Erreur !");
+          } finally {
+            setLoading(false);
           }
         }}
       >
@@ -64,105 +71,105 @@ export default () => {
                 <AlerteInfo>Carte nationale d'identité RECTO-VERSO ou passeport dans un format lisible</AlerteInfo>
               </Col>
               <Col>
-                {!isParentFromFranceConnect() && (
-                  <>
-                    <DndFileInput
-                      placeholder="votre pièce d'identité* (recto-verso)"
-                      errorMessage="Vous devez téléverser votre pièce d'identité"
-                      value={values.cniFiles}
-                      name="cniFiles"
-                      onChange={async (e) => {
-                        const res = await api.uploadFile("/young/file/cniFiles", e.target.files);
+                <DndFileInput
+                  placeholder="votre pièce d'identité* (recto-verso)"
+                  errorMessage="Vous devez téléverser votre pièce d'identité"
+                  value={values.cniFiles}
+                  name="cniFiles"
+                  onChange={async (e) => {
+                    const res = await api.uploadFile("/young/file/cniFiles", e.target.files);
 
-                        if (res.code === "FILE_CORRUPTED") {
-                          return toastr.error(
-                            "Le fichier semble corrompu",
-                            "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
-                            { timeOut: 0 }
-                          );
-                        }
-                        if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
-                        // We update it instant ( because the bucket is updated instant )
-                        toastr.success("Fichier téléversé");
-                        handleChange({ target: { value: res.data, name: "cniFiles" } });
-                      }}
-                    />
-                    <ErrorMessage errors={errors} touched={touched} name="parentConsentmentFiles" />
-                  </>
-                )}
+                    if (res.code === "FILE_CORRUPTED") {
+                      return toastr.error(
+                        "Le fichier semble corrompu",
+                        "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
+                        { timeOut: 0 }
+                      );
+                    }
+                    if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
+                    // We update it instant ( because the bucket is updated instant )
+                    toastr.success("Fichier téléversé");
+                    handleChange({ target: { value: res.data, name: "cniFiles" } });
+                  }}
+                />
+                <ErrorMessage errors={errors} touched={touched} name="cniFiles" />
               </Col>
             </FormRow>
             {!isParentFromFranceConnect() && (
-              <FormRow>
-                <Col md={4}>
-                  <Label>Consentement du ou des représentant légaux</Label>
-                  <AlerteInfo>
-                    Merci de télécharger le consentement du ou des representants légaux, le compléter, le dater, le signer, le photographier ou le scanner et le déposer ici.
-                  </AlerteInfo>
-                </Col>
-                <Col>
-                  <>
-                    <DownloadFormButton url="https://apicivique.s3.eu-west-3.amazonaws.com/SNU_-_Consentement_repre%CC%81sentant(s)_le%CC%81gal(aux).pdf" />
-                    <DndFileInput
-                      placeholder="le formulaire complété"
-                      errorMessage="Vous devez téléverser le formulaire complété."
-                      name="parentConsentmentFiles"
-                      value={values.parentConsentmentFiles}
-                      onChange={async (e) => {
-                        let { data: files, ok, code } = await api.uploadFile("/young/file/parentConsentmentFiles", e.target.files);
+              <>
+                <FormRow>
+                  <Col md={4}>
+                    <Label>Consentement du ou des représentant légaux</Label>
+                    <AlerteInfo>
+                      Merci de télécharger le consentement du ou des representants légaux, le compléter, le dater, le signer, le photographier ou le scanner et le déposer ici.
+                    </AlerteInfo>
+                  </Col>
+                  <Col>
+                    <>
+                      <DownloadFormButton url="https://apicivique.s3.eu-west-3.amazonaws.com/SNU_-_Consentement_repre%CC%81sentant(s)_le%CC%81gal(aux).pdf" />
+                      <DndFileInput
+                        placeholder="le formulaire complété"
+                        errorMessage="Vous devez téléverser le formulaire complété."
+                        name="parentConsentmentFiles"
+                        value={values.parentConsentmentFiles}
+                        onChange={async (e) => {
+                          let { data: files, ok, code } = await api.uploadFile("/young/file/parentConsentmentFiles", e.target.files);
 
-                        if (code === "FILE_CORRUPTED") {
-                          return toastr.error(
-                            "Le fichier semble corrompu",
-                            "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
-                            { timeOut: 0 }
-                          );
-                        }
+                          if (code === "FILE_CORRUPTED") {
+                            return toastr.error(
+                              "Le fichier semble corrompu",
+                              "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
+                              { timeOut: 0 }
+                            );
+                          }
 
-                        if (!ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
-                        handleChange({ target: { value: files, name: "parentConsentmentFiles" } });
-                        toastr.success("Fichier téléversé");
-                      }}
-                    />
-                    <ErrorMessage errors={errors} touched={touched} name="parentConsentmentFiles" />
-                  </>
-                </Col>
-              </FormRow>
+                          if (!ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
+                          handleChange({ target: { value: files, name: "parentConsentmentFiles" } });
+                          toastr.success("Fichier téléversé");
+                        }}
+                      />
+                      <ErrorMessage errors={errors} touched={touched} name="parentConsentmentFiles" />
+                    </>
+                  </Col>
+                </FormRow>
+                {getAge(young.birthdateAt) < 15 && (
+                  <FormRow>
+                    <Col md={4}>
+                      <Label>Accord à la collecte et au traitement des données personnelles des moins de 15 ans</Label>
+                      <AlerteInfo>Merci de télécharger l'accord, le compléter, le dater, le signer, le photographier ou le scanner et le déposer ici.</AlerteInfo>
+                    </Col>
+                    <Col>
+                      <>
+                        <DownloadFormButton url="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Accord_collecte_et_traitement_des_donnees_des_moins_de_15_ans.pdf" />
+                        <DndFileInput
+                          placeholder="le formulaire complété"
+                          errorMessage="Vous devez téléverser le formulaire complété."
+                          name="dataProcessingConsentmentFiles"
+                          value={values.dataProcessingConsentmentFiles}
+                          onChange={async (e) => {
+                            let { data: files, ok, code } = await api.uploadFile("/young/file/dataProcessingConsentmentFiles", e.target.files);
+
+                            if (code === "FILE_CORRUPTED") {
+                              return toastr.error(
+                                "Le fichier semble corrompu",
+                                "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
+                                { timeOut: 0 }
+                              );
+                            }
+
+                            if (!ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
+                            handleChange({ target: { value: files, name: "dataProcessingConsentmentFiles" } });
+                            toastr.success("Fichier téléversé");
+                          }}
+                        />
+                        <ErrorMessage errors={errors} touched={touched} name="dataProcessingConsentmentFiles" />
+                      </>
+                    </Col>
+                  </FormRow>
+                )}
+              </>
             )}
-            <FormRow>
-              <Col md={4}>
-                <Label>Accord à la collecte et au traitement des données personnelles des moins de 15 ans</Label>
-                <AlerteInfo>Merci de télécharger l'accord, le compléter, le dater, le signer, le photographier ou le scanner et le déposer ici.</AlerteInfo>
-              </Col>
-              <Col>
-                <>
-                  <DownloadFormButton url="" />
-                  <DndFileInput
-                    placeholder="le formulaire complété"
-                    errorMessage="Vous devez téléverser le formulaire complété."
-                    name="dataProcessingConsentmentFiles"
-                    value={values.dataProcessingConsentmentFiles}
-                    onChange={async (e) => {
-                      let { data: files, ok, code } = await api.uploadFile("/young/file/dataProcessingConsentmentFiles", e.target.files);
-
-                      if (code === "FILE_CORRUPTED") {
-                        return toastr.error(
-                          "Le fichier semble corrompu",
-                          "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
-                          { timeOut: 0 }
-                        );
-                      }
-
-                      if (!ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
-                      handleChange({ target: { value: files, name: "dataProcessingConsentmentFiles" } });
-                      toastr.success("Fichier téléversé");
-                    }}
-                  />
-                  <ErrorMessage errors={errors} touched={touched} name="dataProcessingConsentmentFiles" />
-                </>
-              </Col>
-            </FormRow>
-            <FormFooter values={values} handleSubmit={handleSubmit} errors={errors} />
+            <FormFooter loading={loading} values={values} handleSubmit={handleSubmit} errors={errors} />
           </>
         )}
       </Formik>
