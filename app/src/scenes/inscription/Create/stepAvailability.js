@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { useSelector, useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
+import { Spinner } from "reactstrap";
 
 import api from "../../../services/api";
 import { HERO_IMAGES_LIST } from "../../../utils";
@@ -17,53 +18,28 @@ export default () => {
   const history = useHistory();
   const dispatch = useDispatch();
   const [indexAvailability, setIndexAvailability] = useState(0);
+  const [availability, setAvailability] = useState();
 
   if (!young) {
     history.push("/inscription/profil");
     return <div />;
   }
 
-  const availability = [
-    {
-      month: "Février",
-      excludedGrade: ["1ere", "Terminale"],
-      excludedZip: ["975", "974", "976", "984", "987", "986", "988"],
-      includedBirthdate: { begin: "02/25/2004", end: "02/14/2007" },
-      id: "Février 2022",
-    },
-    {
-      month: "Juin",
-      excludedGrade: ["1ere", "Terminale"],
-      excludedZip: [],
-      includedBirthdate: { begin: "06/24/2004", end: "06/13/2007" },
-      id: "Juin 2022",
-    },
-    {
-      month: "Juillet",
-      excludedGrade: [],
-      excludedZip: [],
-      includedBirthdate: { begin: "07/15/2004", end: "07/04/2007" },
-      id: "Juillet 2022",
-    },
-  ].filter((el) => {
-    if (el.excludedGrade.includes(young.grade)) return false;
-    else if (el.excludedZip.includes(young.zip)) return false;
-    else if (
-      new Date(el.includedBirthdate.begin).getTime() <= new Date(young.birthdateAt).getTime() &&
-      new Date(young.birthdateAt).getTime() <= new Date(el.includedBirthdate.end).getTime()
-    ) {
-      return true;
-    }
-    return false;
-  });
+  useEffect(() => {
+    (async () => {
+      const { ok, code, data } = await api.get(`/cohort-session/availability/2022`);
+      setAvailability([]);
+      if (!ok) {
+        toastr.error("Oups, une erreur est survenue", code);
+      } else {
+        setAvailability(data);
+      }
+    })();
+  }, []);
 
   const submit = async (cohort) => {
     try {
-      let status = young.status;
-      if (status !== YOUNG_STATUS.WAITING_VALIDATION) {
-        status = YOUNG_STATUS.WAITING_VALIDATION;
-      }
-      const { ok, code, data: young } = await api.put("/young", { ...young, status, cohort, inscriptionStep: STEPS.DONE });
+      const { ok, code, data: young } = await api.put("/young", { ...young, status: YOUNG_STATUS.WAITING_VALIDATION, cohort, inscriptionStep: STEPS.DONE });
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       dispatch(setYoung(young));
       history.push("/inscription/done");
@@ -75,33 +51,42 @@ export default () => {
 
   return (
     <>
-      <Container>
-        <Info>
-          {availability[indexAvailability - 1] && (
-            <div className="back" onClick={() => setIndexAvailability(indexAvailability - 1)}>
-              <BackIcon color="#9CA3AF" style={{ marginRight: "7px" }} />
-              <p>Session de {availability[indexAvailability - 1].month}</p>
-            </div>
+      {!availability ? (
+        <div style={{ padding: "1rem", width: "fit-content", marginInline: "auto" }}>
+          <Spinner size="xl" style={{ width: "4rem", height: "4rem", color: "#362F78" }} />
+        </div>
+      ) : (
+        <Container>
+          {availability?.length === 0 ? (
+            <Info>Aucune session n'est disponible pour le moment</Info>
+          ) : (
+            <>
+              <Info>
+                {availability[indexAvailability - 1] && (
+                  <div className="back" onClick={() => setIndexAvailability(indexAvailability - 1)}>
+                    <BackIcon color="#9CA3AF" style={{ marginRight: "7px" }} />
+                    <p>Session de {availability[indexAvailability - 1].month}</p>
+                  </div>
+                )}
+                <h3>Séjour de cohésion à venir</h3>
+                <h1>Etes-vous disponible du {availability[indexAvailability].stringDate} ?</h1>
+                <AlerteInfo>{availability[indexAvailability].info}</AlerteInfo>
+                <div className="btns">
+                  <Button backgroundColor="#4f46e5" dark onClick={() => submit(availability[indexAvailability].id)}>
+                    Je suis disponible pour la session de {availability[indexAvailability].month}
+                  </Button>
+                  {availability[indexAvailability + 1] && (
+                    <Button onClick={() => setIndexAvailability(indexAvailability + 1)} borderColor="#D1D5DB">
+                      Non je ne suis pas disponible
+                    </Button>
+                  )}
+                </div>
+              </Info>
+              <div className="thumb" />
+            </>
           )}
-          <h3>Séjour de cohésion à venir</h3>
-          <h1>Etes-vous disponible du 13 au 25 février 2022 ?</h1>
-          <AlerteInfo>
-            Vous bénéficierez d'une autorisation d'absence de votre établissement scolaire pour la semaine de cours à laquelle vous n'assistierez pas, si vous êtes scolarisé(e) en
-            zone B ou C.
-          </AlerteInfo>
-          <div class="btns">
-            <Button backgroundColor="#4f46e5" dark onClick={() => submit(availability[indexAvailability].id)}>
-              Je suis disponible pour la session de {availability[indexAvailability].month}
-            </Button>
-            {availability[indexAvailability + 1] && (
-              <Button onClick={() => setIndexAvailability(indexAvailability + 1)} borderColor="#D1D5DB">
-                Non je ne suis pas disponible
-              </Button>
-            )}
-          </div>
-        </Info>
-        <div className="thumb" />
-      </Container>
+        </Container>
+      )}
     </>
   );
 };
