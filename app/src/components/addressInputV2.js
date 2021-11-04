@@ -116,22 +116,6 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
             <ErrorMessage errors={errors} touched={touched} name={keys.address} />
           </Col>
           <Col md={6} style={{ marginTop: 15 }}>
-            <Label>Ville</Label>
-            <Field
-              validate={(v) => !v && requiredMessage}
-              className="form-control"
-              placeholder="Ville"
-              name={keys.city}
-              value={values[keys.city]}
-              onChange={(e) => {
-                const value = e.target.value;
-                handleChange({ target: { name: keys.city, value } });
-                addressVerifiedHelpers.setValue(false);
-              }}
-            />
-            <ErrorMessage errors={errors} touched={touched} name={keys.city} />
-          </Col>
-          <Col md={6} style={{ marginTop: 15 }}>
             <Label>Code postal</Label>
             <Field
               validate={(v) => !v && requiredMessage}
@@ -146,6 +130,22 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
               }}
             />
             <ErrorMessage errors={errors} touched={touched} name={keys.zip} />
+          </Col>
+          <Col md={6} style={{ marginTop: 15 }}>
+            <Label>Ville</Label>
+            <Field
+              validate={(v) => !v && requiredMessage}
+              className="form-control"
+              placeholder="Ville"
+              name={keys.city}
+              value={values[keys.city]}
+              onChange={(e) => {
+                const value = e.target.value;
+                handleChange({ target: { name: keys.city, value } });
+                addressVerifiedHelpers.setValue(false);
+              }}
+            />
+            <ErrorMessage errors={errors} touched={touched} name={keys.city} />
           </Col>
           {addressInFrance ? (
             <>
