@@ -71,32 +71,28 @@ export default () => {
                 <AlerteInfo>Carte nationale d'identité RECTO-VERSO ou passeport dans un format lisible</AlerteInfo>
               </Col>
               <Col>
-                {!isParentFromFranceConnect() && (
-                  <>
-                    <DndFileInput
-                      placeholder="votre pièce d'identité* (recto-verso)"
-                      errorMessage="Vous devez téléverser votre pièce d'identité"
-                      value={values.cniFiles}
-                      name="cniFiles"
-                      onChange={async (e) => {
-                        const res = await api.uploadFile("/young/file/cniFiles", e.target.files);
+                <DndFileInput
+                  placeholder="votre pièce d'identité* (recto-verso)"
+                  errorMessage="Vous devez téléverser votre pièce d'identité"
+                  value={values.cniFiles}
+                  name="cniFiles"
+                  onChange={async (e) => {
+                    const res = await api.uploadFile("/young/file/cniFiles", e.target.files);
 
-                        if (res.code === "FILE_CORRUPTED") {
-                          return toastr.error(
-                            "Le fichier semble corrompu",
-                            "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
-                            { timeOut: 0 }
-                          );
-                        }
-                        if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
-                        // We update it instant ( because the bucket is updated instant )
-                        toastr.success("Fichier téléversé");
-                        handleChange({ target: { value: res.data, name: "cniFiles" } });
-                      }}
-                    />
-                    <ErrorMessage errors={errors} touched={touched} name="parentConsentmentFiles" />
-                  </>
-                )}
+                    if (res.code === "FILE_CORRUPTED") {
+                      return toastr.error(
+                        "Le fichier semble corrompu",
+                        "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
+                        { timeOut: 0 }
+                      );
+                    }
+                    if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
+                    // We update it instant ( because the bucket is updated instant )
+                    toastr.success("Fichier téléversé");
+                    handleChange({ target: { value: res.data, name: "cniFiles" } });
+                  }}
+                />
+                <ErrorMessage errors={errors} touched={touched} name="parentConsentmentFiles" />
               </Col>
             </FormRow>
             {!isParentFromFranceConnect() && (
