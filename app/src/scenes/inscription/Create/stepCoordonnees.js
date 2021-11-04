@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { Row, Col } from "reactstrap";
 import { Field, Formik } from "formik";
@@ -90,417 +90,420 @@ export default () => {
         <p>Renseignez ci-dessous vos coordonnées personnelles</p>
       </Heading>
       <Formik initialValues={young} validateOnChange={false} validateOnBlur={false} onSubmit={(values) => onSubmit(values)}>
-        {({ values, handleChange, handleSubmit, errors, touched, validateField }) => (
-          <>
-            <FormRow>
-              <Col md={4}>
-                <Label>Genre</Label>
-              </Col>
-              <Col>
-                <RadioLabel>
+        {({ values, handleChange, handleSubmit, errors, touched, validateField }) => {
+          useEffect(() => {
+            if (values.phone) validateField("phone");
+          }, [values.phone]);
+
+          return (
+            <>
+              <FormRow>
+                <Col md={4}>
+                  <Label>Genre</Label>
+                </Col>
+                <Col>
+                  <RadioLabel>
+                    <Field
+                      validate={(v) => !v && requiredMessage}
+                      className="form-control"
+                      type="radio"
+                      name="gender"
+                      value="female"
+                      checked={values.gender === "female"}
+                      onChange={handleChange}
+                    />
+                    Femme
+                  </RadioLabel>
+                </Col>
+                <Col>
+                  <RadioLabel>
+                    <Field
+                      validate={(v) => !v && requiredMessage}
+                      className="form-control"
+                      type="radio"
+                      name="gender"
+                      value="male"
+                      checked={values.gender === "male"}
+                      onChange={handleChange}
+                    />
+                    Homme
+                  </RadioLabel>
+                  <ErrorMessage errors={errors} touched={touched} name="gender" />
+                </Col>
+              </FormRow>
+              <FormRow align="center">
+                <Col md={4}>
+                  <Label>Votre téléphone</Label>
+                </Col>
+                <Col>
                   <Field
-                    validate={(v) => !v && requiredMessage}
+                    placeholder="Téléphone"
                     className="form-control"
-                    type="radio"
-                    name="gender"
-                    value="female"
-                    checked={values.gender === "female"}
+                    validate={(v) =>
+                      (!v && requiredMessage) || (!validator.isMobilePhone(v) && "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX")
+                    }
+                    type="tel"
+                    name="phone"
+                    value={values.phone}
                     onChange={handleChange}
                   />
-                  Femme
-                </RadioLabel>
-              </Col>
-              <Col>
-                <RadioLabel>
-                  <Field
-                    validate={(v) => !v && requiredMessage}
-                    className="form-control"
-                    type="radio"
-                    name="gender"
-                    value="male"
-                    checked={values.gender === "male"}
-                    onChange={handleChange}
-                  />
-                  Homme
-                </RadioLabel>
-                <ErrorMessage errors={errors} touched={touched} name="gender" />
-              </Col>
-            </FormRow>
-            <FormRow align="center">
-              <Col md={4}>
-                <Label>Votre téléphone</Label>
-              </Col>
-              <Col>
-                <Field
-                  placeholder="Téléphone"
-                  className="form-control"
-                  validate={(v) =>
-                    (!v && requiredMessage) || (!validator.isMobilePhone(v) && "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX")
-                  }
-                  type="tel"
-                  name="phone"
-                  value={values.phone}
-                  onChange={(el) => {
-                    handleChange(el);
-                    validateField("phone");
-                  }}
-                />
-                <ErrorMessage errors={errors} touched={touched} name="phone" />
-              </Col>
-            </FormRow>
-            <FormRow>
-              <Col md={4}>
-                <Label>Lieu de résidence</Label>
-              </Col>
-              <Col>
-                <Row>
-                  <Col>
-                    <RadioLabel>
-                      <Field
-                        validate={(v) => !v && requiredMessage}
-                        className="form-control"
-                        type="radio"
-                        name="country"
-                        value="France"
-                        checked={values.country === "France"}
-                        onChange={handleChange}
-                        onClick={() => cleanHostInformation(values)}
+                  <ErrorMessage errors={errors} touched={touched} name="phone" />
+                </Col>
+              </FormRow>
+              <FormRow>
+                <Col md={4}>
+                  <Label>Lieu de résidence</Label>
+                </Col>
+                <Col>
+                  <Row>
+                    <Col>
+                      <RadioLabel>
+                        <Field
+                          validate={(v) => !v && requiredMessage}
+                          className="form-control"
+                          type="radio"
+                          name="country"
+                          value="France"
+                          checked={values.country === "France"}
+                          onChange={handleChange}
+                          onClick={() => cleanHostInformation(values)}
+                        />
+                        Je réside en France
+                      </RadioLabel>
+                    </Col>
+                    <Col>
+                      <RadioLabel>
+                        <Field
+                          validate={(v) => !v && requiredMessage}
+                          className="form-control"
+                          type="radio"
+                          name="country"
+                          checked={values.country !== "France"}
+                          onChange={handleChange}
+                          onClick={() => cleanHostInformation(values)}
+                        />
+                        Je réside à l'étranger
+                      </RadioLabel>
+                    </Col>
+                    <ErrorMessage errors={errors} touched={touched} name="countryVisible" />
+                  </Row>
+                  <Row>
+                    <Col md={12} style={{ marginTop: 15 }}>
+                      <AddressInputV2
+                        keys={{ city: "city", zip: "zip", address: "address", location: "location", department: "department", region: "region", country: "country" }}
+                        values={values}
+                        countryVisible={values.country !== "France"}
+                        departAndRegionVisible={false}
+                        handleChange={handleChange}
+                        errors={errors}
+                        touched={touched}
                       />
-                      Je réside en France
-                    </RadioLabel>
+                    </Col>
+                  </Row>
+                </Col>
+              </FormRow>
+              {values.country !== "France" && (
+                <FormRow>
+                  <Col md={4}>
+                    <Label>Identité et adresse de l'hébergeur en France</Label>
+                    <Infos>
+                      <InfoIcon color="#32257F" />
+                      <p>Proche chez qui vous séjournerez le temps de la réalisation de votre SNU (lieu de départ/retour pour le séjour et de réalisation de la MIG).</p>
+                    </Infos>
+                    <Note>
+                      A noter : l’hébergement chez un proche en France ainsi que le transport entre votre lieu de résidence et celui de votre hébergeur sont à votre charge.
+                    </Note>
                   </Col>
                   <Col>
-                    <RadioLabel>
-                      <Field
-                        validate={(v) => !v && requiredMessage}
-                        className="form-control"
-                        type="radio"
-                        name="country"
-                        checked={values.country !== "France"}
-                        onChange={handleChange}
-                        onClick={() => cleanHostInformation(values)}
-                      />
-                      Je réside à l'étranger
-                    </RadioLabel>
-                  </Col>
-                  <ErrorMessage errors={errors} touched={touched} name="countryVisible" />
-                </Row>
-                <Row>
-                  <Col md={12} style={{ marginTop: 15 }}>
-                    <AddressInputV2
-                      keys={{ city: "city", zip: "zip", address: "address", location: "location", department: "department", region: "region", country: "country" }}
+                    <HostAddressInput
+                      keys={{
+                        hostLastName: "hostLastName",
+                        hostFirstName: "hostFirstName",
+                        hostCity: "hostCity",
+                        hostZip: "hostZip",
+                        hostAddress: "hostAddress",
+                        hostRelationship: "hostRelationship",
+                        hostLocation: "hostLocation",
+                      }}
                       values={values}
-                      countryVisible={values.country !== "France"}
-                      departAndRegionVisible={false}
                       handleChange={handleChange}
                       errors={errors}
                       touched={touched}
                     />
                   </Col>
-                </Row>
-              </Col>
-            </FormRow>
-            {values.country !== "France" && (
+                </FormRow>
+              )}
               <FormRow>
                 <Col md={4}>
-                  <Label>Identité et adresse de l'hébergeur en France</Label>
-                  <Infos>
-                    <InfoIcon color="#32257F" />
-                    <p>Proche chez qui vous séjournerez le temps de la réalisation de votre SNU (lieu de départ/retour pour le séjour et de réalisation de la MIG).</p>
-                  </Infos>
-                  <Note>
-                    A noter : l’hébergement chez un proche en France ainsi que le transport entre votre lieu de résidence et celui de votre hébergeur sont à votre charge.
-                  </Note>
+                  <Label>Situation</Label>
                 </Col>
                 <Col>
-                  <HostAddressInput
-                    keys={{
-                      hostLastName: "hostLastName",
-                      hostFirstName: "hostFirstName",
-                      hostCity: "hostCity",
-                      hostZip: "hostZip",
-                      hostAddress: "hostAddress",
-                      hostRelationship: "hostRelationship",
-                      hostLocation: "hostLocation",
-                    }}
-                    values={values}
-                    handleChange={handleChange}
-                    errors={errors}
-                    touched={touched}
-                  />
+                  <RadioLabel style={{ fontWeight: "bold" }}>Je suis scolarisé(e) :</RadioLabel>
+                  <div style={{ marginLeft: "1rem" }}>
+                    <RadioLabel>
+                      <Field
+                        validate={(v) => !v && requiredMessage}
+                        className="form-control"
+                        type="radio"
+                        name="schooled"
+                        value="true"
+                        checked={values.schooled === "true"}
+                        onChange={handleChange}
+                        onClick={() => cleanSituation(values)}
+                      />
+                      Oui
+                    </RadioLabel>
+                    <RadioLabel>
+                      <Field
+                        validate={(v) => !v && requiredMessage}
+                        className="form-control"
+                        type="radio"
+                        name="schooled"
+                        value="false"
+                        checked={values.schooled === "false"}
+                        onChange={handleChange}
+                        onClick={() => cleanSituation(values)}
+                      />
+                      Non
+                    </RadioLabel>
+                  </div>
+                  {values.schooled === "true" && (
+                    <>
+                      <RadioLabel style={{ fontWeight: "bold" }}>Précisez: </RadioLabel>
+                      <div style={{ marginLeft: "1rem" }}>
+                        <RadioLabel>
+                          <Field
+                            validate={(v) => !v && requiredMessage}
+                            className="form-control"
+                            type="radio"
+                            name="situation"
+                            value={YOUNG_SITUATIONS.GENERAL_SCHOOL}
+                            checked={values.situation === YOUNG_SITUATIONS.GENERAL_SCHOOL}
+                            onChange={handleChange}
+                          />
+                          en enseignement général ou technologique
+                        </RadioLabel>
+                        <RadioLabel>
+                          <Field
+                            validate={(v) => !v && requiredMessage}
+                            className="form-control"
+                            type="radio"
+                            name="situation"
+                            value={YOUNG_SITUATIONS.PROFESSIONAL_SCHOOL}
+                            checked={values.situation === YOUNG_SITUATIONS.PROFESSIONAL_SCHOOL}
+                            onChange={handleChange}
+                          />
+                          en enseignement professionnel
+                        </RadioLabel>
+                        <RadioLabel>
+                          <Field
+                            validate={(v) => !v && requiredMessage}
+                            className="form-control"
+                            type="radio"
+                            name="situation"
+                            value={YOUNG_SITUATIONS.AGRICULTURAL_SCHOOL}
+                            checked={values.situation === YOUNG_SITUATIONS.AGRICULTURAL_SCHOOL}
+                            onChange={handleChange}
+                          />
+                          en lycée agricole
+                        </RadioLabel>
+                        <RadioLabel>
+                          <Field
+                            validate={(v) => !v && requiredMessage}
+                            className="form-control"
+                            type="radio"
+                            name="situation"
+                            value={YOUNG_SITUATIONS.SPECIALIZED_SCHOOL}
+                            checked={values.situation === YOUNG_SITUATIONS.SPECIALIZED_SCHOOL}
+                            onChange={handleChange}
+                          />
+                          en établissement spécialisé
+                        </RadioLabel>
+                        <RadioLabel>
+                          <Field
+                            validate={(v) => !v && requiredMessage}
+                            className="form-control"
+                            type="radio"
+                            name="situation"
+                            value={YOUNG_SITUATIONS.APPRENTICESHIP}
+                            checked={values.situation === YOUNG_SITUATIONS.APPRENTICESHIP}
+                            onChange={handleChange}
+                          />
+                          en apprentissage
+                        </RadioLabel>
+                      </div>
+                      {[
+                        YOUNG_SITUATIONS.GENERAL_SCHOOL,
+                        YOUNG_SITUATIONS.PROFESSIONAL_SCHOOL,
+                        YOUNG_SITUATIONS.AGRICULTURAL_SCHOOL,
+                        YOUNG_SITUATIONS.SPECIALIZED_SCHOOL,
+                        YOUNG_SITUATIONS.APPRENTICESHIP,
+                      ].includes(values.situation) && (
+                        <div style={{ marginBottom: "10px" }}>
+                          <Etablissement values={values} handleChange={handleChange} errors={errors} touched={touched} keys={{ schoolName: "schoolName", grade: "grade" }} />
+                        </div>
+                      )}
+                    </>
+                  )}
+                  {values.schooled === "false" && (
+                    <>
+                      <RadioLabel style={{ fontWeight: "bold" }}>Je suis en emploi: </RadioLabel>
+                      <div style={{ marginLeft: "1rem" }}>
+                        <RadioLabel>
+                          <Field
+                            validate={(v) => !v && requiredMessage}
+                            className="form-control"
+                            type="radio"
+                            name="employed"
+                            value="true"
+                            checked={values.employed === "true"}
+                            onChange={handleChange}
+                            onClick={() => delete values.situation}
+                          />
+                          Oui
+                        </RadioLabel>
+                        <RadioLabel>
+                          <Field
+                            validate={(v) => !v && requiredMessage}
+                            className="form-control"
+                            type="radio"
+                            name="employed"
+                            value="false"
+                            checked={values.employed === "false"}
+                            onChange={handleChange}
+                            onClick={() => delete values.situation}
+                          />
+                          Non
+                        </RadioLabel>
+                        <ErrorMessage errors={errors} touched={touched} name="employed" />
+                      </div>
+                      {values.employed === "true" && (
+                        <>
+                          <RadioLabel style={{ fontWeight: "bold" }}>Précisez : </RadioLabel>
+                          <div style={{ marginLeft: "1rem" }}>
+                            <RadioLabel>
+                              <Field
+                                onClick={() => cleanSchoolInformation(values)}
+                                validate={(v) => !v && requiredMessage}
+                                className="form-control"
+                                type="radio"
+                                name="situation"
+                                value={YOUNG_SITUATIONS.EMPLOYEE}
+                                checked={values.situation === YOUNG_SITUATIONS.EMPLOYEE}
+                                onChange={handleChange}
+                              />
+                              salarié(e)
+                            </RadioLabel>
+                            <RadioLabel>
+                              <Field
+                                onClick={() => cleanSchoolInformation(values)}
+                                validate={(v) => !v && requiredMessage}
+                                className="form-control"
+                                type="radio"
+                                name="situation"
+                                value={YOUNG_SITUATIONS.INDEPENDANT}
+                                checked={values.situation === YOUNG_SITUATIONS.INDEPENDANT}
+                                onChange={handleChange}
+                              />
+                              indépendant(e)
+                            </RadioLabel>
+                            <RadioLabel>
+                              <Field
+                                onClick={() => cleanSchoolInformation(values)}
+                                validate={(v) => !v && requiredMessage}
+                                className="form-control"
+                                type="radio"
+                                name="situation"
+                                value={YOUNG_SITUATIONS.SELF_EMPLOYED}
+                                checked={values.situation === YOUNG_SITUATIONS.SELF_EMPLOYED}
+                                onChange={handleChange}
+                              />
+                              auto-entrepreneur
+                            </RadioLabel>
+                            <RadioLabel>
+                              <Field
+                                onClick={() => cleanSchoolInformation(values)}
+                                validate={(v) => !v && requiredMessage}
+                                className="form-control"
+                                type="radio"
+                                name="situation"
+                                value={YOUNG_SITUATIONS.ADAPTED_COMPANY}
+                                checked={values.situation === YOUNG_SITUATIONS.ADAPTED_COMPANY}
+                                onChange={handleChange}
+                              />
+                              en ESAT, CAT ou en entreprise adaptée
+                            </RadioLabel>
+                          </div>
+                        </>
+                      )}
+                      {values.employed === "false" && (
+                        <>
+                          <RadioLabel style={{ fontWeight: "bold" }}>Je suis sans activité: </RadioLabel>
+                          <div style={{ marginLeft: "1rem" }}>
+                            <RadioLabel>
+                              <Field
+                                onClick={() => cleanSchoolInformation(values)}
+                                validate={(v) => !v && requiredMessage}
+                                className="form-control"
+                                type="radio"
+                                name="situation"
+                                value={YOUNG_SITUATIONS.POLE_EMPLOI}
+                                checked={values.situation === YOUNG_SITUATIONS.POLE_EMPLOI}
+                                onChange={handleChange}
+                              />
+                              inscrit(e) à Pôle emploi
+                            </RadioLabel>
+                            <RadioLabel>
+                              <Field
+                                onClick={() => cleanSchoolInformation(values)}
+                                validate={(v) => !v && requiredMessage}
+                                className="form-control"
+                                type="radio"
+                                name="situation"
+                                value={YOUNG_SITUATIONS.MISSION_LOCALE}
+                                checked={values.situation === YOUNG_SITUATIONS.MISSION_LOCALE}
+                                onChange={handleChange}
+                              />
+                              inscrit(e) à la Mission locale
+                            </RadioLabel>
+                            <RadioLabel>
+                              <Field
+                                onClick={() => cleanSchoolInformation(values)}
+                                validate={(v) => !v && requiredMessage}
+                                className="form-control"
+                                type="radio"
+                                name="situation"
+                                value={YOUNG_SITUATIONS.CAP_EMPLOI}
+                                checked={values.situation === YOUNG_SITUATIONS.CAP_EMPLOI}
+                                onChange={handleChange}
+                              />
+                              inscrit(e) à Cap emploi
+                            </RadioLabel>
+                            <RadioLabel>
+                              <Field
+                                onClick={() => cleanSchoolInformation(values)}
+                                validate={(v) => !v && requiredMessage}
+                                className="form-control"
+                                type="radio"
+                                name="situation"
+                                value={YOUNG_SITUATIONS.NOTHING}
+                                checked={values.situation === YOUNG_SITUATIONS.NOTHING}
+                                onChange={handleChange}
+                              />
+                              inscrit(e) nulle part
+                            </RadioLabel>
+                          </div>
+                        </>
+                      )}
+                    </>
+                  )}
+                  <ErrorMessage errors={errors} touched={touched} name="situation" />
                 </Col>
               </FormRow>
-            )}
-            <FormRow>
-              <Col md={4}>
-                <Label>Situation</Label>
-              </Col>
-              <Col>
-                <RadioLabel style={{ fontWeight: "bold" }}>Je suis scolarisé(e) :</RadioLabel>
-                <div style={{ marginLeft: "1rem" }}>
-                  <RadioLabel>
-                    <Field
-                      validate={(v) => !v && requiredMessage}
-                      className="form-control"
-                      type="radio"
-                      name="schooled"
-                      value="true"
-                      checked={values.schooled === "true"}
-                      onChange={handleChange}
-                      onClick={() => cleanSituation(values)}
-                    />
-                    Oui
-                  </RadioLabel>
-                  <RadioLabel>
-                    <Field
-                      validate={(v) => !v && requiredMessage}
-                      className="form-control"
-                      type="radio"
-                      name="schooled"
-                      value="false"
-                      checked={values.schooled === "false"}
-                      onChange={handleChange}
-                      onClick={() => cleanSituation(values)}
-                    />
-                    Non
-                  </RadioLabel>
-                </div>
-                {values.schooled === "true" && (
-                  <>
-                    <RadioLabel style={{ fontWeight: "bold" }}>Précisez: </RadioLabel>
-                    <div style={{ marginLeft: "1rem" }}>
-                      <RadioLabel>
-                        <Field
-                          validate={(v) => !v && requiredMessage}
-                          className="form-control"
-                          type="radio"
-                          name="situation"
-                          value={YOUNG_SITUATIONS.GENERAL_SCHOOL}
-                          checked={values.situation === YOUNG_SITUATIONS.GENERAL_SCHOOL}
-                          onChange={handleChange}
-                        />
-                        en enseignement général ou technologique
-                      </RadioLabel>
-                      <RadioLabel>
-                        <Field
-                          validate={(v) => !v && requiredMessage}
-                          className="form-control"
-                          type="radio"
-                          name="situation"
-                          value={YOUNG_SITUATIONS.PROFESSIONAL_SCHOOL}
-                          checked={values.situation === YOUNG_SITUATIONS.PROFESSIONAL_SCHOOL}
-                          onChange={handleChange}
-                        />
-                        en enseignement professionnel
-                      </RadioLabel>
-                      <RadioLabel>
-                        <Field
-                          validate={(v) => !v && requiredMessage}
-                          className="form-control"
-                          type="radio"
-                          name="situation"
-                          value={YOUNG_SITUATIONS.AGRICULTURAL_SCHOOL}
-                          checked={values.situation === YOUNG_SITUATIONS.AGRICULTURAL_SCHOOL}
-                          onChange={handleChange}
-                        />
-                        en lycée agricole
-                      </RadioLabel>
-                      <RadioLabel>
-                        <Field
-                          validate={(v) => !v && requiredMessage}
-                          className="form-control"
-                          type="radio"
-                          name="situation"
-                          value={YOUNG_SITUATIONS.SPECIALIZED_SCHOOL}
-                          checked={values.situation === YOUNG_SITUATIONS.SPECIALIZED_SCHOOL}
-                          onChange={handleChange}
-                        />
-                        en établissement spécialisé
-                      </RadioLabel>
-                      <RadioLabel>
-                        <Field
-                          validate={(v) => !v && requiredMessage}
-                          className="form-control"
-                          type="radio"
-                          name="situation"
-                          value={YOUNG_SITUATIONS.APPRENTICESHIP}
-                          checked={values.situation === YOUNG_SITUATIONS.APPRENTICESHIP}
-                          onChange={handleChange}
-                        />
-                        en apprentissage
-                      </RadioLabel>
-                    </div>
-                    {[
-                      YOUNG_SITUATIONS.GENERAL_SCHOOL,
-                      YOUNG_SITUATIONS.PROFESSIONAL_SCHOOL,
-                      YOUNG_SITUATIONS.AGRICULTURAL_SCHOOL,
-                      YOUNG_SITUATIONS.SPECIALIZED_SCHOOL,
-                      YOUNG_SITUATIONS.APPRENTICESHIP,
-                    ].includes(values.situation) && (
-                      <div style={{ marginBottom: "10px" }}>
-                        <Etablissement values={values} handleChange={handleChange} errors={errors} touched={touched} keys={{ schoolName: "schoolName", grade: "grade" }} />
-                      </div>
-                    )}
-                  </>
-                )}
-                {values.schooled === "false" && (
-                  <>
-                    <RadioLabel style={{ fontWeight: "bold" }}>Je suis en emploi: </RadioLabel>
-                    <div style={{ marginLeft: "1rem" }}>
-                      <RadioLabel>
-                        <Field
-                          validate={(v) => !v && requiredMessage}
-                          className="form-control"
-                          type="radio"
-                          name="employed"
-                          value="true"
-                          checked={values.employed === "true"}
-                          onChange={handleChange}
-                          onClick={() => delete values.situation}
-                        />
-                        Oui
-                      </RadioLabel>
-                      <RadioLabel>
-                        <Field
-                          validate={(v) => !v && requiredMessage}
-                          className="form-control"
-                          type="radio"
-                          name="employed"
-                          value="false"
-                          checked={values.employed === "false"}
-                          onChange={handleChange}
-                          onClick={() => delete values.situation}
-                        />
-                        Non
-                      </RadioLabel>
-                      <ErrorMessage errors={errors} touched={touched} name="employed" />
-                    </div>
-                    {values.employed === "true" && (
-                      <>
-                        <RadioLabel style={{ fontWeight: "bold" }}>Précisez : </RadioLabel>
-                        <div style={{ marginLeft: "1rem" }}>
-                          <RadioLabel>
-                            <Field
-                              onClick={() => cleanSchoolInformation(values)}
-                              validate={(v) => !v && requiredMessage}
-                              className="form-control"
-                              type="radio"
-                              name="situation"
-                              value={YOUNG_SITUATIONS.EMPLOYEE}
-                              checked={values.situation === YOUNG_SITUATIONS.EMPLOYEE}
-                              onChange={handleChange}
-                            />
-                            salarié(e)
-                          </RadioLabel>
-                          <RadioLabel>
-                            <Field
-                              onClick={() => cleanSchoolInformation(values)}
-                              validate={(v) => !v && requiredMessage}
-                              className="form-control"
-                              type="radio"
-                              name="situation"
-                              value={YOUNG_SITUATIONS.INDEPENDANT}
-                              checked={values.situation === YOUNG_SITUATIONS.INDEPENDANT}
-                              onChange={handleChange}
-                            />
-                            indépendant(e)
-                          </RadioLabel>
-                          <RadioLabel>
-                            <Field
-                              onClick={() => cleanSchoolInformation(values)}
-                              validate={(v) => !v && requiredMessage}
-                              className="form-control"
-                              type="radio"
-                              name="situation"
-                              value={YOUNG_SITUATIONS.SELF_EMPLOYED}
-                              checked={values.situation === YOUNG_SITUATIONS.SELF_EMPLOYED}
-                              onChange={handleChange}
-                            />
-                            auto-entrepreneur
-                          </RadioLabel>
-                          <RadioLabel>
-                            <Field
-                              onClick={() => cleanSchoolInformation(values)}
-                              validate={(v) => !v && requiredMessage}
-                              className="form-control"
-                              type="radio"
-                              name="situation"
-                              value={YOUNG_SITUATIONS.ADAPTED_COMPANY}
-                              checked={values.situation === YOUNG_SITUATIONS.ADAPTED_COMPANY}
-                              onChange={handleChange}
-                            />
-                            en ESAT, CAT ou en entreprise adaptée
-                          </RadioLabel>
-                        </div>
-                      </>
-                    )}
-                    {values.employed === "false" && (
-                      <>
-                        <RadioLabel style={{ fontWeight: "bold" }}>Je suis sans activité: </RadioLabel>
-                        <div style={{ marginLeft: "1rem" }}>
-                          <RadioLabel>
-                            <Field
-                              onClick={() => cleanSchoolInformation(values)}
-                              validate={(v) => !v && requiredMessage}
-                              className="form-control"
-                              type="radio"
-                              name="situation"
-                              value={YOUNG_SITUATIONS.POLE_EMPLOI}
-                              checked={values.situation === YOUNG_SITUATIONS.POLE_EMPLOI}
-                              onChange={handleChange}
-                            />
-                            inscrit(e) à Pôle emploi
-                          </RadioLabel>
-                          <RadioLabel>
-                            <Field
-                              onClick={() => cleanSchoolInformation(values)}
-                              validate={(v) => !v && requiredMessage}
-                              className="form-control"
-                              type="radio"
-                              name="situation"
-                              value={YOUNG_SITUATIONS.MISSION_LOCALE}
-                              checked={values.situation === YOUNG_SITUATIONS.MISSION_LOCALE}
-                              onChange={handleChange}
-                            />
-                            inscrit(e) à la Mission locale
-                          </RadioLabel>
-                          <RadioLabel>
-                            <Field
-                              onClick={() => cleanSchoolInformation(values)}
-                              validate={(v) => !v && requiredMessage}
-                              className="form-control"
-                              type="radio"
-                              name="situation"
-                              value={YOUNG_SITUATIONS.CAP_EMPLOI}
-                              checked={values.situation === YOUNG_SITUATIONS.CAP_EMPLOI}
-                              onChange={handleChange}
-                            />
-                            inscrit(e) à Cap emploi
-                          </RadioLabel>
-                          <RadioLabel>
-                            <Field
-                              onClick={() => cleanSchoolInformation(values)}
-                              validate={(v) => !v && requiredMessage}
-                              className="form-control"
-                              type="radio"
-                              name="situation"
-                              value={YOUNG_SITUATIONS.NOTHING}
-                              checked={values.situation === YOUNG_SITUATIONS.NOTHING}
-                              onChange={handleChange}
-                            />
-                            inscrit(e) nulle part
-                          </RadioLabel>
-                        </div>
-                      </>
-                    )}
-                  </>
-                )}
-                <ErrorMessage errors={errors} touched={touched} name="situation" />
-              </Col>
-            </FormRow>
-            <FormFooter loading={loading} values={values} handleSubmit={handleSubmit} errors={errors} />
-          </>
-        )}
+              <FormFooter loading={loading} values={values} handleSubmit={handleSubmit} errors={errors} />
+            </>
+          );
+        }}
       </Formik>
     </Wrapper>
   );
