@@ -65,9 +65,16 @@ export default ({ keys, values, handleChange, errors, touched }) => {
               handleChange({ target: { name: keys.hostRelationship, value } });
             }}
           >
-            {["Parent", "ami de la famille", "etc"].map((e) => (
-              <option key={e} value={e}>
-                {e}
+            {[
+              { label: "Parent", value: "Parent" },
+              { label: "Frère/Soeur", value: "Frere/Soeur" },
+              { label: "Grand-parent", value: "Grand-parent" },
+              { label: "Oncle/Tante", value: "Oncle/Tante" },
+              { label: "Ami de la famille", value: "Ami de la famille" },
+              { label: "Autre", value: "Autre" },
+            ].map((e) => (
+              <option key={e.value} value={e.value}>
+                {e.label}
               </option>
             ))}
           </Field>
