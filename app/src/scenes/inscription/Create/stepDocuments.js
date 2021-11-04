@@ -92,7 +92,7 @@ export default () => {
                     handleChange({ target: { value: res.data, name: "cniFiles" } });
                   }}
                 />
-                <ErrorMessage errors={errors} touched={touched} name="parentConsentmentFiles" />
+                <ErrorMessage errors={errors} touched={touched} name="cniFiles" />
               </Col>
             </FormRow>
             {!isParentFromFranceConnect() && (
