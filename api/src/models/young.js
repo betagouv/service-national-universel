@@ -83,8 +83,8 @@ const Schema = new mongoose.Schema({
   },
   cohort: {
     type: String,
-    default: "2021",
-    enum: ["Juillet 2022", "Juin 2022", "Février 2022", "2021", "2020", "2019"],
+    default: "2022",
+    enum: ["Juillet 2022", "Juin 2022", "Février 2022", "2022", "2021", "2020", "2019"],
     documentation: {
       description: "Cohorte",
     },
