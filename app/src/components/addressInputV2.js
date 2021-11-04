@@ -11,7 +11,10 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
   const [suggestion, setSuggestion] = useState({});
   const [addressInFrance, setAddressInFrance] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [addressVerified, addressVerifiedMeta, addressVerifiedHelpers] = useField({ name: "addressVerified", validate: (v) => !v && "Il est obligatoire de vérifiée l'adresse" });
+  const [addressVerified, addressVerifiedMeta, addressVerifiedHelpers] = useField({
+    name: "addressVerified",
+    validate: (v) => !v && addressInFrance && "Il est obligatoire de vérifiée l'adresse",
+  });
 
   useEffect(() => {
     if (document.getElementsByTagName) {
@@ -22,8 +25,9 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
   }, []);
 
   useEffect(() => {
-    setAddressInFrance(values[keys.country] === "France");
-    addressVerifiedHelpers.setValue(values[keys.country] !== "France");
+    setAddressInFrance(values[keys.country] === undefined || values[keys.country] === "France");
+    if (values[keys.country] === undefined) addressVerifiedHelpers.setValue(false);
+    else if (values[keys.country] !== "France") addressVerifiedHelpers.setValue(true);
   }, [values[keys.country]]);
 
   const onSuggestionSelected = () => {
@@ -153,7 +157,7 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
                 ) : (
                   <div style={{ display: "flex", color: "#32257f", backgroundColor: "#edecfc", padding: "1rem", borderRadius: "6px", width: "100%", marginTop: "10px" }}>
                     <InfoIcon color="#32257F" style={{ flex: "none" }} />
-                    <div style={{ fontSize: ".9rem", marginLeft: "5px" }}>Votre adresse a été vérifiée</div>
+                    <div style={{ fontSize: ".9rem", marginLeft: "5px" }}>L'adresse a été vérifiée</div>
                   </div>
                 )}
               </Col>
@@ -164,7 +168,7 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
       ) : (
         <Row>
           <Col md={12} style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-            <b style={{ marginBottom: "16px" }}>Est-ce que c'est votre adresse ?</b>
+            <b style={{ marginBottom: "16px" }}>Est-ce que c'est la bonne adresse ?</b>
             <p>{suggestion.properties.name}</p>
             <p>{`${suggestion.properties.postcode}, ${suggestion.properties.city}`}</p>
             <p>France</p>
