@@ -77,293 +77,300 @@ export default () => {
           }
         }}
       >
-        {({ values, handleChange, handleSubmit, setFieldValue, isSubmitting, submitForm, errors, touched, validateField }) => (
-          <>
-            <FormRow>
-              <Col md={4}>
-                <Label>Votre nationalité</Label>
-              </Col>
-              <Col>
-                <RadioLabel>
-                  <Field
-                    validate={(v) => (!v || v === "false") && "Vous devez être de nationalité française pour vous inscrire au SNU."}
-                    value="true"
-                    checked={values.frenchNationality === "true"}
-                    type="checkbox"
-                    name="frenchNationality"
-                    onChange={(e) => handleChange({ target: { name: e.target.name, value: e.target.checked ? "true" : "false" } })}
-                  />
-                  Française
-                </RadioLabel>
-                <ErrorMessage errors={errors} touched={touched} name="frenchNationality" />
-                <TextUnderField>Seuls les citoyens français peuvent participer au Service National Universel</TextUnderField>
-              </Col>
-            </FormRow>
-            <FormRow align="center">
-              <Col md={4}>
-                <Label>Votre prénom</Label>
-              </Col>
-              <Col>
-                <FieldWithWidth
-                  maxWidth="400px"
-                  placeholder="Prénom"
-                  className="form-control"
-                  validate={(v) => !v && requiredMessage}
-                  name="firstName"
-                  value={values.firstName}
-                  onChange={handleChange}
-                />
-                <ErrorMessage errors={errors} touched={touched} name="firstName" />
-              </Col>
-            </FormRow>
-            <FormRow align="center">
-              <Col md={4}>
-                <Label>Votre nom</Label>
-              </Col>
-              <Col>
-                <FieldWithWidth
-                  maxWidth="400px"
-                  placeholder="Nom"
-                  className="form-control"
-                  validate={(v) => !v && requiredMessage}
-                  name="lastName"
-                  value={values.lastName}
-                  onChange={handleChange}
-                />
-                <ErrorMessage errors={errors} touched={touched} name="lastName" />
-              </Col>
-            </FormRow>
-            <FormRow align="center">
-              <Col md={4}>
-                <Label>Date de naissance</Label>
-              </Col>
-              <Col>
-                <Field
-                  hidden
-                  validate={(v) => {
-                    if (!v) return requiredMessage;
-                    const from = new Date(2004, 1, 25, 0, 0, 0); // -1 because months are from 0 to 11
-                    const to = new Date(2007, 6, 4, 0, 0, 0);
-                    const [y, m, d] = v.substring(0, 10).split("-");
-                    const check = new Date(parseInt(y), parseInt(m - 1), parseInt(d), 0, 0, 0);
-                    return (check < from || check > to) && "Au moment du séjour, vous devez avoir 15 ans révolu et moins de 18 ans";
-                  }}
-                  name="birthdateAt"
-                  value={values.birthdateAt}
-                />
-                <DateInput
-                  value={values.birthdateAt}
-                  onChange={(date) => {
-                    handleChange({ target: { value: date, name: "birthdateAt" } });
-                  }}
-                />
-                <ErrorMessage errors={errors} touched={touched} name="birthdateAt" />
-              </Col>
-            </FormRow>
-            <FormRow>
-              <Col md={4}>
-                <Label>Lieu de naissance</Label>
-              </Col>
-              <Col>
-                <FlexGroup>
+        {({ values, handleChange, handleSubmit, setFieldValue, isSubmitting, submitForm, errors, touched, validateField }) => {
+          useEffect(() => {
+            if (values.email) validateField("email");
+          }, [values.email]);
+          useEffect(() => {
+            if (values.newEmail) validateField("newEmail");
+          }, [values.newEmail]);
+          useEffect(() => {
+            if (values.password) validateField("password");
+          }, [values.password]);
+          useEffect(() => {
+            if (values.verifyPassword) validateField("verifyPassword");
+          }, [values.verifyPassword]);
+
+          return (
+            <>
+              <FormRow>
+                <Col md={4}>
+                  <Label>Votre nationalité</Label>
+                </Col>
+                <Col>
                   <RadioLabel>
                     <Field
-                      validate={(v) => !v && requiredMessage}
-                      className="form-control"
-                      type="radio"
-                      name="birthCountry"
-                      value="France"
-                      checked={values.birthCountry === "France"}
-                      onChange={handleChange}
+                      validate={(v) => (!v || v === "false") && "Vous devez être de nationalité française pour vous inscrire au SNU."}
+                      value="true"
+                      checked={values.frenchNationality === "true"}
+                      type="checkbox"
+                      name="frenchNationality"
+                      onChange={(e) => handleChange({ target: { name: e.target.name, value: e.target.checked ? "true" : "false" } })}
                     />
-                    Je suis né(e) en France
+                    Française
                   </RadioLabel>
-                  <RadioLabel>
-                    <Field
-                      validate={(v) => !v && requiredMessage}
-                      className="form-control"
-                      type="radio"
-                      name="birthCountry"
-                      value=""
-                      checked={values.birthCountry !== "France"}
-                      onChange={handleChange}
-                    />
-                    Je suis né(e) à l'étranger
-                  </RadioLabel>
-                </FlexGroup>
-                <FlexGroup style={{ marginTop: "15px" }}>
-                  {values.birthCountry !== "France" && (
-                    <div>
-                      <FieldWithWidth
-                        maxWidth="195px"
-                        placeholder="Pays de naissance"
-                        className="form-control"
-                        validate={(v) => !v && requiredMessage}
-                        name="birthCountry"
-                        value={values.birthCountry}
-                        onChange={handleChange}
-                        style={{ marginRight: "10px" }}
-                      />
-                      <ErrorMessage errors={errors} touched={touched} name="birthCountry" />
-                    </div>
-                  )}
-                  <div>
-                    <FieldWithWidth
-                      maxWidth="195px"
-                      placeholder="Ville de naissance"
-                      className="form-control"
-                      validate={(v) => !v && requiredMessage}
-                      name="birthCity"
-                      value={values.birthCity}
-                      onChange={handleChange}
-                    />
-                    <ErrorMessage errors={errors} touched={touched} name="birthCity" />
-                  </div>
-                  {values.birthCountry === "France" && (
-                    <div>
-                      <FieldWithWidth
-                        maxWidth="195px"
-                        placeholder="Code postal"
-                        className="form-control"
-                        validate={(v) => !v && requiredMessage}
-                        name="birthCityZip"
-                        value={values.birthCityZip}
-                        onChange={handleChange}
-                        style={{ marginLeft: "10px" }}
-                      />
-                      <ErrorMessage errors={errors} touched={touched} name="birthCityZip" />
-                    </div>
-                  )}
-                </FlexGroup>
-              </Col>
-            </FormRow>
-            <FormRow align="center">
-              <Col md={4}>
-                <Label>Votre e-mail</Label>
-              </Col>
-              <Col md={8}>
-                <FieldWithWidth
-                  maxWidth="400px"
-                  placeholder="xxx@exemple.com"
-                  className="form-control"
-                  validate={(v) => (!v && requiredMessage) || (!validator.isEmail(v) && "Ce champs est au mauvais format")}
-                  type="email"
-                  name="email"
-                  value={values.email}
-                  onChange={(el) => {
-                    handleChange(el);
-                    validateField("email");
-                  }}
-                />
-                <ErrorMessage errors={errors} touched={touched} name="email" />
-                <TextUnderField style={{ marginBottom: "15px" }}>Cette adresse vous servira d'identifiant de connexion, notez le bien.</TextUnderField>
-              </Col>
-              <Col md={4}>
-                <Label>Confirmez votre email</Label>
-              </Col>
-              <Col md={8}>
-                <FieldWithWidth
-                  maxWidth="400px"
-                  placeholder="xxx@exemple.com"
-                  className="form-control"
-                  validate={(v) => (!v && requiredMessage) || (v !== values.email && "Les emails renseignés ne sont pas identiques")}
-                  type="email"
-                  name="newEmail"
-                  value={values.newEmail}
-                  onChange={(el) => {
-                    handleChange(el);
-                    validateField("newEmail");
-                  }}
-                />
-                <ErrorMessage errors={errors} touched={touched} name="newEmail" />
-              </Col>
-            </FormRow>
-            <FormRow align="center">
-              <Col md={4}>
-                <Label>Choisissez un mot de passe</Label>
-              </Col>
-              <Col md={8}>
-                <ContainerPass>
-                  <Field
-                    placeholder="Tapez votre mot de passe"
+                  <ErrorMessage errors={errors} touched={touched} name="frenchNationality" />
+                  <TextUnderField>Seuls les citoyens français peuvent participer au Service National Universel</TextUnderField>
+                </Col>
+              </FormRow>
+              <FormRow align="center">
+                <Col md={4}>
+                  <Label>Votre prénom</Label>
+                </Col>
+                <Col>
+                  <FieldWithWidth
+                    maxWidth="400px"
+                    placeholder="Prénom"
                     className="form-control"
-                    validate={(v) => getPasswordErrorMessage(v)}
-                    type={passwordText ? "text" : "password"}
-                    name="password"
-                    value={values.password}
-                    onChange={(el) => {
-                      handleChange(el);
-                      validateField("password");
-                    }}
-                  />
-                  <EyeIcon src={passwordText ? EyeClose : EyeOpen} onClick={() => setPasswordText(!passwordText)} />
-                </ContainerPass>
-                <ErrorMessage errors={errors} touched={touched} name="password" />
-                <TextUnderField style={{ marginBottom: "15px" }}>
-                  Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole
-                </TextUnderField>
-              </Col>
-              <Col md={4}>
-                <Label>Confirmez le mot de passe</Label>
-              </Col>
-              <Col md={8}>
-                <ContainerPass>
-                  <Field
-                    placeholder="Confirmer votre mot de passe"
-                    className="form-control"
-                    validate={(v) => (!v && requiredMessage) || (v !== values.password && "Les mots de passe renseignés ne sont pas identiques")}
-                    type={passwordText ? "text" : "password"}
-                    name="password"
-                    value={values.password}
+                    validate={(v) => !v && requiredMessage}
+                    name="firstName"
+                    value={values.firstName}
                     onChange={handleChange}
-                    name="verifyPassword"
-                    value={values.verifyPassword}
-                    onChange={(el) => {
-                      handleChange(el);
-                      validateField("verifyPassword");
+                  />
+                  <ErrorMessage errors={errors} touched={touched} name="firstName" />
+                </Col>
+              </FormRow>
+              <FormRow align="center">
+                <Col md={4}>
+                  <Label>Votre nom</Label>
+                </Col>
+                <Col>
+                  <FieldWithWidth
+                    maxWidth="400px"
+                    placeholder="Nom"
+                    className="form-control"
+                    validate={(v) => !v && requiredMessage}
+                    name="lastName"
+                    value={values.lastName}
+                    onChange={handleChange}
+                  />
+                  <ErrorMessage errors={errors} touched={touched} name="lastName" />
+                </Col>
+              </FormRow>
+              <FormRow align="center">
+                <Col md={4}>
+                  <Label>Date de naissance</Label>
+                </Col>
+                <Col>
+                  <Field
+                    hidden
+                    validate={(v) => {
+                      if (!v) return requiredMessage;
+                      const from = new Date(2004, 1, 25, 0, 0, 0); // -1 because months are from 0 to 11
+                      const to = new Date(2007, 6, 4, 0, 0, 0);
+                      const [y, m, d] = v.substring(0, 10).split("-");
+                      const check = new Date(parseInt(y), parseInt(m - 1), parseInt(d), 0, 0, 0);
+                      return (check < from || check > to) && "Au moment du séjour, vous devez avoir 15 ans révolu et moins de 18 ans";
+                    }}
+                    name="birthdateAt"
+                    value={values.birthdateAt}
+                  />
+                  <DateInput
+                    value={values.birthdateAt}
+                    onChange={(date) => {
+                      handleChange({ target: { value: date, name: "birthdateAt" } });
                     }}
                   />
-                  <EyeIcon src={passwordText ? EyeClose : EyeOpen} onClick={() => setPasswordText(!passwordText)} />
-                </ContainerPass>
-                <ErrorMessage errors={errors} touched={touched} name="verifyPassword" />
-              </Col>
-            </FormRow>
-            <FormRow>
-              <div style={{ marginLeft: "15px" }}>
-                <RadioLabel>
-                  <Field
-                    validate={(v) => (!v || v === "false") && "Vous devez accepter les CGU pour continuer."}
-                    value="true"
-                    checked={values.CGU === "true"}
-                    type="checkbox"
-                    name="CGU"
-                    onChange={(e) => handleChange({ target: { name: e.target.name, value: e.target.checked ? "true" : "false" } })}
+                  <ErrorMessage errors={errors} touched={touched} name="birthdateAt" />
+                </Col>
+              </FormRow>
+              <FormRow>
+                <Col md={4}>
+                  <Label>Lieu de naissance</Label>
+                </Col>
+                <Col>
+                  <FlexGroup>
+                    <RadioLabel>
+                      <Field
+                        validate={(v) => !v && requiredMessage}
+                        className="form-control"
+                        type="radio"
+                        name="birthCountry"
+                        value="France"
+                        checked={values.birthCountry === "France"}
+                        onChange={handleChange}
+                      />
+                      Je suis né(e) en France
+                    </RadioLabel>
+                    <RadioLabel>
+                      <Field
+                        validate={(v) => !v && requiredMessage}
+                        className="form-control"
+                        type="radio"
+                        name="birthCountry"
+                        value=""
+                        checked={values.birthCountry !== "France"}
+                        onChange={handleChange}
+                      />
+                      Je suis né(e) à l'étranger
+                    </RadioLabel>
+                  </FlexGroup>
+                  <FlexGroup style={{ marginTop: "15px" }}>
+                    {values.birthCountry !== "France" && (
+                      <div>
+                        <FieldWithWidth
+                          maxWidth="195px"
+                          placeholder="Pays de naissance"
+                          className="form-control"
+                          validate={(v) => !v && requiredMessage}
+                          name="birthCountry"
+                          value={values.birthCountry}
+                          onChange={handleChange}
+                          style={{ marginRight: "10px" }}
+                        />
+                        <ErrorMessage errors={errors} touched={touched} name="birthCountry" />
+                      </div>
+                    )}
+                    <div>
+                      <FieldWithWidth
+                        maxWidth="195px"
+                        placeholder="Ville de naissance"
+                        className="form-control"
+                        validate={(v) => !v && requiredMessage}
+                        name="birthCity"
+                        value={values.birthCity}
+                        onChange={handleChange}
+                      />
+                      <ErrorMessage errors={errors} touched={touched} name="birthCity" />
+                    </div>
+                    {values.birthCountry === "France" && (
+                      <div>
+                        <FieldWithWidth
+                          maxWidth="195px"
+                          placeholder="Code postal"
+                          className="form-control"
+                          validate={(v) => !v && requiredMessage}
+                          name="birthCityZip"
+                          value={values.birthCityZip}
+                          onChange={handleChange}
+                          style={{ marginLeft: "10px" }}
+                        />
+                        <ErrorMessage errors={errors} touched={touched} name="birthCityZip" />
+                      </div>
+                    )}
+                  </FlexGroup>
+                </Col>
+              </FormRow>
+              <FormRow align="center">
+                <Col md={4}>
+                  <Label>Votre e-mail</Label>
+                </Col>
+                <Col md={8}>
+                  <FieldWithWidth
+                    maxWidth="400px"
+                    placeholder="xxx@exemple.com"
+                    className="form-control"
+                    validate={(v) => {
+                      console.log("🚀 ~ file: stepProfil.js ~ line 252 ~ !v", !v);
+                      console.log("🚀 ~ file: stepProfil.js ~ line 251 ~ v", v);
+                      return (!v && requiredMessage) || (!validator.isEmail(v) && "Ce champs est au mauvais format");
+                    }}
+                    type="email"
+                    name="email"
+                    value={values.email}
+                    onChange={handleChange}
                   />
-                  J'ai lu et j'accepte les Conditions Générales d'Utilisation (CGU) de la plateforme du Service national universel
-                </RadioLabel>
-                <ErrorMessage errors={errors} touched={touched} name="CGU" />
-                <RadioLabel style={{ marginTop: "0.5rem" }}>
-                  <Field
-                    validate={(v) => (!v || v === "false") && "Vous devez accepter les modalités de traitement pour continuer."}
-                    value="true"
-                    checked={values.RGPD === "true"}
-                    type="checkbox"
-                    name="RGPD"
-                    onChange={(e) => handleChange({ target: { name: e.target.name, value: e.target.checked ? "true" : "false" } })}
+                  <ErrorMessage errors={errors} touched={touched} name="email" />
+                  <TextUnderField style={{ marginBottom: "15px" }}>Cette adresse vous servira d'identifiant de connexion, notez le bien.</TextUnderField>
+                </Col>
+                <Col md={4}>
+                  <Label>Confirmez votre email</Label>
+                </Col>
+                <Col md={8}>
+                  <FieldWithWidth
+                    maxWidth="400px"
+                    placeholder="xxx@exemple.com"
+                    className="form-control"
+                    validate={(v) => (!v && requiredMessage) || (v !== values.email && "Les emails renseignés ne sont pas identiques")}
+                    type="email"
+                    name="newEmail"
+                    value={values.newEmail}
+                    onChange={handleChange}
                   />
-                  <p style={{ marginBottom: "0" }}>
-                    J'ai pris connaissance des{' '}
-                    <a href="https://www.snu.gouv.fr/donnees-personnelles-et-cookies-23" target="_blank">
-                      modalités de traitement de mes données personnelles
-                    </a>
-                  </p>
-                </RadioLabel>
-                <ErrorMessage errors={errors} touched={touched} name="RGPD" />
-              </div>
-            </FormRow>
-            <FormFooter loading={loading} secondButton="back" values={values} handleSubmit={handleSubmit} errors={errors} />
-          </>
-        )}
+                  <ErrorMessage errors={errors} touched={touched} name="newEmail" />
+                </Col>
+              </FormRow>
+              <FormRow align="center">
+                <Col md={4}>
+                  <Label>Choisissez un mot de passe</Label>
+                </Col>
+                <Col md={8}>
+                  <ContainerPass>
+                    <Field
+                      placeholder="Tapez votre mot de passe"
+                      className="form-control"
+                      validate={(v) => getPasswordErrorMessage(v)}
+                      type={passwordText ? "text" : "password"}
+                      name="password"
+                      value={values.password}
+                      onChange={handleChange}
+                    />
+                    <EyeIcon src={passwordText ? EyeClose : EyeOpen} onClick={() => setPasswordText(!passwordText)} />
+                  </ContainerPass>
+                  <ErrorMessage errors={errors} touched={touched} name="password" />
+                  <TextUnderField style={{ marginBottom: "15px" }}>
+                    Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole
+                  </TextUnderField>
+                </Col>
+                <Col md={4}>
+                  <Label>Confirmez le mot de passe</Label>
+                </Col>
+                <Col md={8}>
+                  <ContainerPass>
+                    <Field
+                      placeholder="Confirmer votre mot de passe"
+                      className="form-control"
+                      validate={(v) => (!v && requiredMessage) || (v !== values.password && "Les mots de passe renseignés ne sont pas identiques")}
+                      type={passwordText ? "text" : "password"}
+                      name="password"
+                      value={values.password}
+                      onChange={handleChange}
+                      name="verifyPassword"
+                      value={values.verifyPassword}
+                      onChange={handleChange}
+                    />
+                    <EyeIcon src={passwordText ? EyeClose : EyeOpen} onClick={() => setPasswordText(!passwordText)} />
+                  </ContainerPass>
+                  <ErrorMessage errors={errors} touched={touched} name="verifyPassword" />
+                </Col>
+              </FormRow>
+              <FormRow>
+                <div style={{ marginLeft: "15px" }}>
+                  <RadioLabel>
+                    <Field
+                      validate={(v) => (!v || v === "false") && "Vous devez accepter les CGU pour continuer."}
+                      value="true"
+                      checked={values.CGU === "true"}
+                      type="checkbox"
+                      name="CGU"
+                      onChange={(e) => handleChange({ target: { name: e.target.name, value: e.target.checked ? "true" : "false" } })}
+                    />
+                    J'ai lu et j'accepte les Conditions Générales d'Utilisation (CGU) de la plateforme du Service national universel
+                  </RadioLabel>
+                  <ErrorMessage errors={errors} touched={touched} name="CGU" />
+                  <RadioLabel style={{ marginTop: "0.5rem" }}>
+                    <Field
+                      validate={(v) => (!v || v === "false") && "Vous devez accepter les modalités de traitement pour continuer."}
+                      value="true"
+                      checked={values.RGPD === "true"}
+                      type="checkbox"
+                      name="RGPD"
+                      onChange={(e) => handleChange({ target: { name: e.target.name, value: e.target.checked ? "true" : "false" } })}
+                    />
+                    <p style={{ marginBottom: "0" }}>
+                      J'ai pris connaissance des{" "}
+                      <a href="https://www.snu.gouv.fr/donnees-personnelles-et-cookies-23" target="_blank">
+                        modalités de traitement de mes données personnelles
+                      </a>
+                    </p>
+                  </RadioLabel>
+                  <ErrorMessage errors={errors} touched={touched} name="RGPD" />
+                </div>
+              </FormRow>
+              <FormFooter loading={loading} secondButton="back" values={values} handleSubmit={handleSubmit} errors={errors} />
+            </>
+          );
+        }}
       </Formik>
     </Wrapper>
   );

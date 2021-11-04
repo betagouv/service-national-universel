@@ -47,6 +47,14 @@ const Parent = ({ id = 1, values, errors, touched, handleChange, validateField }
   async function handleSave() {
     await saveYoung(values);
   }
+
+  useEffect(() => {
+    if (values[`parent${id}Email`]) validateField(`parent${id}Email`);
+  }, [values[`parent${id}Email`]]);
+  useEffect(() => {
+    if (values[`parent${id}Phone`]) validateField(`parent${id}Phone`);
+  }, [values[`parent${id}Phone`]]);
+
   return (
     <>
       <FormLegend>
@@ -142,10 +150,7 @@ const Parent = ({ id = 1, values, errors, touched, handleChange, validateField }
             type="email"
             name={`parent${id}Email`}
             value={values[`parent${id}Email`]}
-            onChange={(el) => {
-              handleChange(el);
-              validateField(`parent${id}Email`);
-            }}
+            onChange={handleChange}
             className="form-control"
           />
           <ErrorMessage errors={errors} touched={touched} name={`parent${id}Email`} />
@@ -162,10 +167,7 @@ const Parent = ({ id = 1, values, errors, touched, handleChange, validateField }
             type="tel"
             name={`parent${id}Phone`}
             value={values[`parent${id}Phone`]}
-            onChange={(el) => {
-              handleChange(el);
-              validateField(`parent${id}Phone`);
-            }}
+            onChange={handleChange}
             className="form-control"
           />
           <ErrorMessage errors={errors} touched={touched} name={`parent${id}Phone`} />
