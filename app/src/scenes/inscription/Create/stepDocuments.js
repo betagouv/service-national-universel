@@ -106,7 +106,7 @@ export default () => {
                   </Col>
                   <Col>
                     <>
-                      <DownloadFormButton url="https://apicivique.s3.eu-west-3.amazonaws.com/SNU_-_Consentement_repre%CC%81sentant(s)_le%CC%81gal(aux).pdf" />
+                      <DownloadFormButton url="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Consentement_du_representant_legal_2022.pdf" />
                       <DndFileInput
                         placeholder="le formulaire complété"
                         errorMessage="Vous devez téléverser le formulaire complété."
