@@ -24,6 +24,11 @@ export default () => {
             </a>
           </li>
           <li>
+            <a href={`${adminURL}/conditions-generales-utilisation`} target="_blank">
+              Conditions générales d'utilisation
+            </a>
+          </li>
+          <li>
             <a href={`${adminURL}/besoin-d-aide`} target="_blank">
               Besoin d'aide
             </a>
