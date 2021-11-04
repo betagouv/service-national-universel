@@ -60,7 +60,11 @@ router.get("/availability/2022", passport.authenticate("young", { session: false
         continue;
       }
 
-      const nbYoung = await YoungModel.find({ department: young.department, cohort: session.id, status: { $ne: "REFUSED" } }).count();
+      const nbYoung = await YoungModel.find({
+        department: young.department,
+        cohort: session.id,
+        status: { $nin: ["REFUSED", "IN_PROGRESS", "WITHDRAWN", "DELETED"] },
+      }).count();
       if (nbYoung === 0) {
         session.goalReached = false;
         continue;
