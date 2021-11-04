@@ -8,7 +8,6 @@ import validator from "validator";
 import { toastr } from "react-redux-toastr";
 import DateInput from "../components/dateInput";
 import * as Sentry from "@sentry/react";
-import { appURL } from "../../../config";
 
 import { getPasswordErrorMessage, translate } from "../../../utils";
 import ErrorMessage, { requiredMessage } from "../components/errorMessage";
@@ -286,53 +285,90 @@ export default () => {
                     value={values.newEmail}
                     onChange={handleChange}
                   />
-                  <EyeIcon src={passwordText ? EyeClose : EyeOpen} onClick={() => setPasswordText(!passwordText)} />
-                </ContainerPass>
-                <ErrorMessage errors={errors} touched={touched} name="verifyPassword" />
-              </Col>
-            </FormRow>
-            <FormRow>
-              <div style={{ marginLeft: "15px" }}>
-                <RadioLabel>
-                  <Field
-                    validate={(v) => (!v || v === "false") && "Vous devez accepter les CGU pour continuer."}
-                    value="true"
-                    checked={values.CGU === "true"}
-                    type="checkbox"
-                    name="CGU"
-                    onChange={(e) => handleChange({ target: { name: e.target.name, value: e.target.checked ? "true" : "false" } })}
-                  />
-                  <p style={{ marginBottom: "0" }}>
-                    J'ai lu et j'accepte les{' '}
-                    <a href={`${appURL}/conditions-generales-utilisation`} target="_blank">
-                      Conditions générales d'utilisation{' '}
-                    </a>
-                    de la plateforme du Service national universel
-                  </p>
-                </RadioLabel>
-                <ErrorMessage errors={errors} touched={touched} name="CGU" />
-                <RadioLabel style={{ marginTop: "0.5rem" }}>
-                  <Field
-                    validate={(v) => (!v || v === "false") && "Vous devez accepter les modalités de traitement pour continuer."}
-                    value="true"
-                    checked={values.RGPD === "true"}
-                    type="checkbox"
-                    name="RGPD"
-                    onChange={(e) => handleChange({ target: { name: e.target.name, value: e.target.checked ? "true" : "false" } })}
-                  />
-                  <p style={{ marginBottom: "0" }}>
-                    J'ai pris connaissance des{' '}
-                    <a href="https://www.snu.gouv.fr/donnees-personnelles-et-cookies-23" target="_blank">
-                      modalités de traitement de mes données personnelles
-                    </a>
-                  </p>
-                </RadioLabel>
-                <ErrorMessage errors={errors} touched={touched} name="RGPD" />
-              </div>
-            </FormRow>
-            <FormFooter loading={loading} secondButton="back" values={values} handleSubmit={handleSubmit} errors={errors} />
-          </>
-        )}
+                  <ErrorMessage errors={errors} touched={touched} name="newEmail" />
+                </Col>
+              </FormRow>
+              <FormRow align="center">
+                <Col md={4}>
+                  <Label>Choisissez un mot de passe</Label>
+                </Col>
+                <Col md={8}>
+                  <ContainerPass>
+                    <Field
+                      placeholder="Tapez votre mot de passe"
+                      className="form-control"
+                      validate={(v) => getPasswordErrorMessage(v)}
+                      type={passwordText ? "text" : "password"}
+                      name="password"
+                      value={values.password}
+                      onChange={handleChange}
+                    />
+                    <EyeIcon src={passwordText ? EyeClose : EyeOpen} onClick={() => setPasswordText(!passwordText)} />
+                  </ContainerPass>
+                  <ErrorMessage errors={errors} touched={touched} name="password" />
+                  <TextUnderField style={{ marginBottom: "15px" }}>
+                    Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole
+                  </TextUnderField>
+                </Col>
+                <Col md={4}>
+                  <Label>Confirmez le mot de passe</Label>
+                </Col>
+                <Col md={8}>
+                  <ContainerPass>
+                    <Field
+                      placeholder="Confirmer votre mot de passe"
+                      className="form-control"
+                      validate={(v) => (!v && requiredMessage) || (v !== values.password && "Les mots de passe renseignés ne sont pas identiques")}
+                      type={passwordText ? "text" : "password"}
+                      name="password"
+                      value={values.password}
+                      onChange={handleChange}
+                      name="verifyPassword"
+                      value={values.verifyPassword}
+                      onChange={handleChange}
+                    />
+                    <EyeIcon src={passwordText ? EyeClose : EyeOpen} onClick={() => setPasswordText(!passwordText)} />
+                  </ContainerPass>
+                  <ErrorMessage errors={errors} touched={touched} name="verifyPassword" />
+                </Col>
+              </FormRow>
+              <FormRow>
+                <div style={{ marginLeft: "15px" }}>
+                  <RadioLabel>
+                    <Field
+                      validate={(v) => (!v || v === "false") && "Vous devez accepter les CGU pour continuer."}
+                      value="true"
+                      checked={values.CGU === "true"}
+                      type="checkbox"
+                      name="CGU"
+                      onChange={(e) => handleChange({ target: { name: e.target.name, value: e.target.checked ? "true" : "false" } })}
+                    />
+                    J'ai lu et j'accepte les Conditions Générales d'Utilisation (CGU) de la plateforme du Service national universel
+                  </RadioLabel>
+                  <ErrorMessage errors={errors} touched={touched} name="CGU" />
+                  <RadioLabel style={{ marginTop: "0.5rem" }}>
+                    <Field
+                      validate={(v) => (!v || v === "false") && "Vous devez accepter les modalités de traitement pour continuer."}
+                      value="true"
+                      checked={values.RGPD === "true"}
+                      type="checkbox"
+                      name="RGPD"
+                      onChange={(e) => handleChange({ target: { name: e.target.name, value: e.target.checked ? "true" : "false" } })}
+                    />
+                    <p style={{ marginBottom: "0" }}>
+                      J'ai pris connaissance des{" "}
+                      <a href="https://www.snu.gouv.fr/donnees-personnelles-et-cookies-23" target="_blank">
+                        modalités de traitement de mes données personnelles
+                      </a>
+                    </p>
+                  </RadioLabel>
+                  <ErrorMessage errors={errors} touched={touched} name="RGPD" />
+                </div>
+              </FormRow>
+              <FormFooter loading={loading} secondButton="back" values={values} handleSubmit={handleSubmit} errors={errors} />
+            </>
+          );
+        }}
       </Formik>
     </Wrapper>
   );
