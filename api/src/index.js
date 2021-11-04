@@ -57,6 +57,7 @@ app.use("/contract", require("./controllers/contract"));
 app.use("/program", require("./controllers/program"));
 app.use("/event", require("./controllers/event"));
 app.use("/inscription-goal", require("./controllers/inscription-goal"));
+app.use("/cohort", require("./controllers/cohort"));
 app.use("/department-service", require("./controllers/department-service"));
 app.use("/waiting-list", require("./controllers/waiting-list"));
 app.use("/cohesion-center", require("./controllers/cohesion-center"));
