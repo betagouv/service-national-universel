@@ -41,6 +41,8 @@ export default () => {
           parentConsentment3: young.parentConsentment,
           parentConsentment4: young.parentConsentment,
           parentConsentment5: young.parentConsentment,
+          parentConsentment6: young.parentConsentment,
+          parentConsentment7: young.parentConsentment,
           consentment1: young.consentment,
           consentment2: young.consentment,
         }}
