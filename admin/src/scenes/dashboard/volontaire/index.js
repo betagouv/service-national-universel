@@ -48,7 +48,9 @@ export default () => {
                       { key: "2019", label: "2019" },
                       { key: "2020", label: "2020" },
                       { key: "2021", label: "2021" },
-                      { key: "2022", label: "2022" },
+                      { key: "Février 2022", label: "Février 2022" },
+                      { key: "Juin 2022", label: "Juin 2022" },
+                      { key: "Juillet 2022", label: "Juillet 2022" },
                       { key: "", label: "Toutes" },
                     ]}
                     onChange={(cohort) => updateFilter({ cohort })}
