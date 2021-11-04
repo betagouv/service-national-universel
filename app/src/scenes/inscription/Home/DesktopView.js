@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import { appURL } from "../../../config";
 
 export default () => {
   return (
@@ -91,7 +92,7 @@ export default () => {
                 stroke-linejoin="round"
               />
             </svg>
-            <FAQ href="https://support.snu.gouv.fr/help/fr-fr/16-comprendre-le-snu" target="blank">
+            <FAQ href={`${appURL}/public-besoin-d-aide`} target="blank">
               <p>
                 <strong>Besoin d'aide ?</strong>
               </p>
