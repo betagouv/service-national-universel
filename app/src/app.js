@@ -34,6 +34,7 @@ import Footer from "./components/footer";
 import MilitaryPreparation from "./scenes/militaryPreparation";
 import Engagement from "./scenes/engagement";
 import Bug from "./scenes/bug";
+import CGU from "./scenes/CGU";
 
 import api from "./services/api";
 import { SENTRY_URL, environment } from "./config";
@@ -129,6 +130,7 @@ const Espace = () => {
             <Route path="/cohesion" component={Cohesion} />
             <Route path="/diagoriente" component={Diagoriente} />
             <Route path="/besoin-d-aide" component={SupportCenter} />
+            <Route path="/conditions-generales-utilisation" component={CGU} />
             {ENABLE_PM && <Route path="/ma-preparation-militaire" component={MilitaryPreparation} />}
             <Route path="/" component={Home} />
           </Switch>

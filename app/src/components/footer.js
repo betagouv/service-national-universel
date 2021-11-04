@@ -14,6 +14,11 @@ export default () => {
             </a>
           </li>
           <li>
+            <a href={`${appURL}/conditions-generales-utilisation`} target="_blank">
+              Conditions générales d'utilisation
+            </a>
+          </li>
+          <li>
             <a href="https://www.snu.gouv.fr/accessibilite-du-site-24" target="_blank">
               Accessibilité
             </a>
