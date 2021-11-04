@@ -8,6 +8,7 @@ import validator from "validator";
 import { toastr } from "react-redux-toastr";
 import DateInput from "../components/dateInput";
 import * as Sentry from "@sentry/react";
+import { appURL } from "../../../config";
 
 import { getPasswordErrorMessage, translate } from "../../../utils";
 import ErrorMessage, { requiredMessage } from "../components/errorMessage";
@@ -339,7 +340,13 @@ export default () => {
                     name="CGU"
                     onChange={(e) => handleChange({ target: { name: e.target.name, value: e.target.checked ? "true" : "false" } })}
                   />
-                  J'ai lu et j'accepte les Conditions Générales d'Utilisation (CGU) de la plateforme du Service national universel
+                  <p style={{ marginBottom: "0" }}>
+                    J'ai lu et j'accepte les{' '}
+                    <a href={`${appURL}/conditions-generales-utilisation`} target="_blank">
+                      Conditions générales d'utilisation{' '}
+                    </a>
+                    de la plateforme du Service national universel
+                  </p>
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="CGU" />
                 <RadioLabel style={{ marginTop: "0.5rem" }}>

@@ -86,6 +86,7 @@ export default () => {
       <div className="main">
         <Switch>
           <Route path="/bug" component={Bug} />
+          <Route path="/conditions-generales-utilisation" component={CGU} />
           <Route path="/validate-contract/done" component={ContractDone} />
           <Route path="/validate-contract" component={Contract} />
           <Route path="/inscription" component={Inscription} />
@@ -130,7 +131,6 @@ const Espace = () => {
             <Route path="/cohesion" component={Cohesion} />
             <Route path="/diagoriente" component={Diagoriente} />
             <Route path="/besoin-d-aide" component={SupportCenter} />
-            <Route path="/conditions-generales-utilisation" component={CGU} />
             {ENABLE_PM && <Route path="/ma-preparation-militaire" component={MilitaryPreparation} />}
             <Route path="/" component={Home} />
           </Switch>
