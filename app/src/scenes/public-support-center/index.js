@@ -35,7 +35,7 @@ export default () => {
         <div className="help-section">
           <div className="help-section-block">
             <div className="help-section-text" style={{ color: "#6B7280" }}>
-              Vous souhaitez en savoir plus sur les phases de votre parcours volontaire ou sur le fonctionnement de votre espace&nbsp;?
+              Vous souhaitez en savoir plus sur les phases du Service National Universel ou sur les autres formes d'engagement&nbsp;?
               N'hésitez pas à consulter notre{" "}
               <strong>
                 <a className="link" href="https://support.snu.gouv.fr/help/fr-fr/3-volontaire" target="_blank" rel="noopener noreferrer">
@@ -77,7 +77,7 @@ export default () => {
             <div className="help-section-text" style={{ color: "#6B7280" }}>
               N'hésitez pas à <strong>contacter notre service de support</strong>, nous vous répondrons dans les plus brefs délais !
             </div>
-            <div className="buttons">
+            <div className="zammad-container">
               <ZammadButton />
             </div>
           </div>
@@ -95,6 +95,10 @@ const Container = styled.div`
     margin: 1rem auto;
     max-width: 600px;
     .buttons {
+      margin: 0.8rem 0;
+      flex: 1;
+    }
+    .zammad-container {
       flex: 1;
     }
   }
@@ -120,7 +124,7 @@ const Container = styled.div`
   }
 `;
 
-const LinkButton = styled.button`
+const LinkButton = styled.a`
   max-width: 230px;
   margin: 0.3rem;
   background-color: #5245cc;
