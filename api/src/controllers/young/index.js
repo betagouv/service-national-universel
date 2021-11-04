@@ -168,7 +168,7 @@ router.post("/file/:key", passport.authenticate("young", { session: false, failW
     const {
       error: namesError,
       value: { names },
-    } = Joi.object({ names: Joi.array().items(Joi.string().required()).required() }).validate(JSON.parse(body), { stripUnknown: true });
+    } = Joi.object({ names: Joi.array().items(Joi.string()).required() }).validate(JSON.parse(body), { stripUnknown: true });
     if (namesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: namesError.message });
 
     const user = await YoungObject.findById(req.user._id);
