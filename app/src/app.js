@@ -42,6 +42,7 @@ import { SENTRY_URL, environment } from "./config";
 import "./index.css";
 import { YOUNG_STATUS, ENABLE_PM } from "./utils";
 import Zammad from "./components/Zammad";
+import zammadPublicForm from "./scenes/zammad-public-form";
 
 if (environment === "production") {
   Sentry.init({
@@ -86,6 +87,7 @@ export default () => {
       <div className="main">
         <Switch>
           <Route path="/bug" component={Bug} />
+          <Route path="/zammad-public-form" component={zammadPublicForm} />
           <Route path="/conditions-generales-utilisation" component={CGU} />
           <Route path="/validate-contract/done" component={ContractDone} />
           <Route path="/validate-contract" component={Contract} />
