@@ -27,7 +27,7 @@ export default () => {
 
   useEffect(() => {
     (async () => {
-      const { ok, code, data } = await api.get(`/cohort/availability/2022`);
+      const { ok, code, data } = await api.get(`/cohort-session/availability/2022`);
       setAvailability([]);
       if (!ok) {
         toastr.error("Oups, une erreur est survenue", code);
@@ -58,7 +58,7 @@ export default () => {
       ) : (
         <Container>
           {availability?.length === 0 ? (
-            <Info>Aucune session est disponible pour le moment</Info>
+            <Info>Aucune session n'est disponible pour le moment</Info>
           ) : (
             <>
               <Info>

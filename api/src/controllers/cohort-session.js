@@ -9,14 +9,14 @@ const { ERRORS } = require("../utils");
 
 router.get("/availability/2022", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   const young = req.user;
-  let cohorts = [
+  let sessions = [
     {
       month: "Février",
       excludedGrade: ["1ere", "Terminale"],
       excludedZip: ["975", "974", "976", "984", "987", "986", "988"],
       includedBirthdate: { begin: "02/25/2004", end: "02/14/2007" },
       stringDate: "13 au 25 février 2022",
-      info: "Vous bénéficierez d'une autorisation d'absence de votre établissement scolaire pour la semaine de cours à laquelle vous n'assistierez pas, si vous êtes scolarisé(e) en zone B ou C.",
+      info: "Vous bénéficierez d'une autorisation d'absence de votre établissement scolaire pour la semaine de cours à laquelle vous n'assisteriez pas, si vous êtes scolarisé(e) en zone B ou C.",
       id: "Février 2022",
     },
     {
@@ -50,21 +50,21 @@ router.get("/availability/2022", passport.authenticate("young", { session: false
   });
 
   try {
-    for (cohort of cohorts) {
-      const goal = await InscriptionGoalModel.findOne({ department: young.department, cohort: cohort.id });
+    for (session of sessions) {
+      const goal = await InscriptionGoalModel.findOne({ department: young.department, cohort: session.id });
       if (!goal || !goal.max) {
-        cohort.goalReached = false;
+        session.goalReached = false;
         continue;
       }
 
-      const nbYoung = await YoungModel.find({ department: young.department, cohort: cohort.id }).count();
+      const nbYoung = await YoungModel.find({ department: young.department, cohort: session.id }).count();
       const ratio = Math.floor(data.max * 1.15) / nbYoung;
 
-      if (ratio >= 1) cohort.goalReached = true;
-      else cohort.goalReached = false;
+      if (ratio >= 1) session.goalReached = true;
+      else session.goalReached = false;
     }
 
-    return res.send({ ok: true, data: cohorts });
+    return res.send({ ok: true, data: sessions });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
