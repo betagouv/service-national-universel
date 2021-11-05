@@ -1,7 +1,8 @@
 // https://api-adresse.data.gouv.fr/search/?q=nante&type=municipality
 import Autosuggest from "react-autosuggest";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
+import api from "../services/api";
 
 const NORESULTMESSAGE = "Aucun résultat trouvé";
 

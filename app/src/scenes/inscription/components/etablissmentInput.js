@@ -58,7 +58,7 @@ export default ({ handleChange, values, keys, errors, touched }) => {
               Sélectionner votre établissement scolaire
             </option>
             {hits?.map((hit) => (
-              <option key={hit._id} value={hit.uai}>
+              <option key={hit._id} value={hit._id}>
                 {`${hit.fullName}, ${hit.postcode} ${hit.city}`}
               </option>
             ))}
