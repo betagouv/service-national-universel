@@ -413,7 +413,7 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
 
 //todo : add operation unauthorized:
 // taking a user and a target, check if the user can send the template to the target
-router.post("/:id/email/:template", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/:id/email/:template", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
@@ -430,9 +430,13 @@ router.post("/:id/email/:template", passport.authenticate("referent", { session:
 
     const young = await YoungObject.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
+      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
 
     let cta = config.APP_URL;
     if (template === SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_CORRECTION) cta = `${config.APP_URL}/ma-preparation-militaire`;
+    if (template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED) cta = `${config.APP_URL}/inscription/coordonnees`;
 
     await sendTemplate(template, {
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
