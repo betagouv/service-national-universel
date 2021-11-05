@@ -44,6 +44,10 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
     handleChange({ target: { name: keys.address, value: suggestion.properties.name } });
     handleChange({ target: { name: keys.location, value: { lon: suggestion.geometry.coordinates[0], lat: suggestion.geometry.coordinates[1] } } });
 
+    if (keys.cityCode) {
+      handleChange({ target: { name: keys.cityCode, value: suggestion.properties.citycode } });
+    }
+
     setSuggestion({});
     addressVerifiedHelpers.setValue(true);
     addressVerifiedHelpers.setError("");
