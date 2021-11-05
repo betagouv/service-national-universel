@@ -2,7 +2,6 @@
 import Autosuggest from "react-autosuggest";
 import React, { useState } from "react";
 import styled from "styled-components";
-import debounce from "lodash.debounce";
 
 const NORESULTMESSAGE = "Aucun résultat trouvé";
 
@@ -33,9 +32,11 @@ export default function SchoolCityTypeahead(props) {
         const res = await response.json();
         return setSuggestions(res.map((item) => ({ label: item.nom, postcode: item.codesPostaux.find((code) => code === text) })));
       } else if (text && !text.trim().match(/^[0-9]{1,5}$/)) {
-        let url = `https://geo.api.gouv.fr/communes?nom=${text}&boost=population`;
+        let url;
         if (text.trim().match(/[0-9]{5}$/)) {
           url = `https://geo.api.gouv.fr/communes?codePostal=${text.trim().replace(/^.*([0-9]{5})$/, "$1")}&nom=${text.trim().replace(/^(.*)[0-9]{5}$/, "$1")}&boost=population`;
+        } else {
+          url = `https://geo.api.gouv.fr/communes?nom=${text}&boost=population`;
         }
         const response = await fetch(url, {
           mode: "cors",
