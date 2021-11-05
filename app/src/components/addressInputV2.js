@@ -13,7 +13,7 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
   const [loading, setLoading] = useState(false);
   const [addressVerified, addressVerifiedMeta, addressVerifiedHelpers] = useField({
     name: "addressVerified",
-    validate: (v) => !v && addressInFrance && "Il est obligatoire de vérifiée l'adresse",
+    validate: (v) => !v && addressInFrance && "Il est obligatoire de vérifier l'adresse",
   });
 
   useEffect(() => {

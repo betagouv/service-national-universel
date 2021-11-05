@@ -13,7 +13,6 @@ import api from "../../../services/api";
 import { STEPS, YOUNG_SITUATIONS } from "../utils";
 import FormRow from "../../../components/form/FormRow";
 import AddressInputV2 from "../../../components/addressInputV2";
-import HostAddressInput from "../../../components/hostAddressInput";
 import Etablissement from "../components/etablissmentInput";
 import { translate } from "../../../utils";
 import FormFooter from "../../../components/form/FormFooter";
