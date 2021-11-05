@@ -5,12 +5,20 @@ import { Field } from "formik";
 import ErrorMessage, { requiredMessage } from "../components/errorMessage";
 
 import api from "../../../services/api";
+import SchoolCityTypeahead from "../../../components/SchoolCityTypeahead";
 
 export default ({ handleChange, values, keys, errors, touched }) => {
   const [hits, setHits] = useState([]);
 
   const getSuggestions = async (text) => {
-    const { responses } = await api.esQuery("school", { query: { multi_match: { query: text, type: "most_fields", fields: "city" } } });
+    const { responses } = await api.esQuery("school", {
+      query: {
+        bool: {
+          must: { match_all: {} },
+          filter: [{ term: { "city.keyword": text } }, { term: { "version.keyword": "2" } }],
+        },
+      },
+    });
     setHits(responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
     return hits;
   };
@@ -25,14 +33,19 @@ export default ({ handleChange, values, keys, errors, touched }) => {
   return (
     <Row>
       <Col md={12} style={{ marginTop: 15 }}>
-        <Input
+        <SchoolCityTypeahead
+          onChange={(e) => {
+            getSuggestions(e);
+          }}
+        />
+        {/* <Input
           style={{ maxWidth: 500 }}
           name="schoolType"
           placeholder="Commencez à taper la ville de l'établissement..."
           onChange={(event) => {
             getSuggestions(event.target.value);
           }}
-        />
+        />*/}
         {hits.length === 0 && !values[keys.schoolName] && <ErrorMessage errors={errors} touched={touched} name={keys.schoolName} />}
         <div style={{ display: hits.length > 0 || values[keys.schoolName] ? "block" : "none" }}>
           <Field
@@ -51,8 +64,8 @@ export default ({ handleChange, values, keys, errors, touched }) => {
               Sélectionner votre établissement scolaire
             </option>
             {hits?.map((hit) => (
-              <option key={hit._id} value={hit.name2}>
-                {`${hit.name2}, ${hit.postcode} ${hit.city}`}
+              <option key={hit._id} value={hit.fullName}>
+                {`${hit.fullName}, ${hit.postcode} ${hit.city}`}
               </option>
             ))}
             {hits.length === 0 && <option value={values[keys.schoolName]}>{values[keys.schoolName]}</option>}
