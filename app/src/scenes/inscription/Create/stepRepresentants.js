@@ -12,7 +12,6 @@ import api from "../../../services/api";
 import { setYoung } from "../../../redux/auth/actions";
 import ErrorMessage, { requiredMessage } from "../components/errorMessage";
 import FranceConnectButton from "../components/FranceConnectButton";
-import { environment } from "../../../config";
 import { saveYoung, STEPS } from "../utils";
 import { translate } from "../../../utils";
 import FormLegend from "../../../components/form/FormLegend";
@@ -207,7 +206,7 @@ const Parent = ({ id = 1, values, errors, touched, handleChange, validateField }
           <ErrorMessage errors={errors} touched={touched} name={`parent${id}OwnAddress`} />
           {values[`parent${id}OwnAddress`] === "true" && (
             <FormRow>
-              <Col md={12} style={{ marginTop: 15 }}>
+              <Col md={12}>
                 <AddressInput
                   keys={{
                     city: `parent${id}City`,
@@ -223,6 +222,7 @@ const Parent = ({ id = 1, values, errors, touched, handleChange, validateField }
                   errors={errors}
                   touched={touched}
                   countryVisible
+                  validateField={validateField}
                 />
                 <ErrorMessage errors={errors} touched={touched} name={`parent${id}OwnAddress`} />
               </Col>
@@ -301,6 +301,7 @@ export default () => {
                     delete values.parent2City;
                     delete values.parent2Department;
                     delete values.parent2Location;
+                    delete values.parent2Country;
                   }}
                 >
                   {!isParent2Visible ? "Ajouter" : "Retirer"} le représentant légal nº2
