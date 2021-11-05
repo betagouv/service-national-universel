@@ -24,6 +24,7 @@ export default ({ handleChange, values, keys, errors, touched }) => {
           filter: [{ term: { "city.keyword": city } }, { term: { "postcode.keyword": postcode } }, { term: { "version.keyword": "2" } }],
         },
       },
+      size: 100,
     });
     setHits(responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
     if (hits.length) setManual(false);
@@ -101,7 +102,7 @@ export default ({ handleChange, values, keys, errors, touched }) => {
                 </option>
                 {hits?.map((hit) => (
                   <option key={hit._id} value={hit._id}>
-                    {`${hit.fullName}, ${hit.postcode} ${hit.city}`}
+                    {hit.fullName}
                   </option>
                 ))}
                 {hits.length === 0 && <option value={values[keys.schoolName]}>{values[keys.schoolName]}</option>}
