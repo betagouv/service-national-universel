@@ -9,6 +9,8 @@ import SchoolCityTypeahead from "../../../components/SchoolCityTypeahead";
 
 export default ({ handleChange, values, keys, errors, touched }) => {
   const [hits, setHits] = useState([]);
+  const [manual, setManual] = useState(false);
+  const [showManualButton, setShowManualButton] = useState(false);
 
   const getSuggestions = async (text) => {
     if (!text.includes(" - ")) return [];
@@ -50,35 +52,60 @@ export default ({ handleChange, values, keys, errors, touched }) => {
       <Col md={12} style={{ marginTop: 15 }}>
         <SchoolCityTypeahead
           onChange={(e) => {
+            if (e !== "") {
+              setTimeout(() => {
+                setShowManualButton(true);
+              }, 5000);
+            }
             handleChange({ target: { name: keys.schoolId, value: "" } });
             getSuggestions(e);
           }}
         />
         {hits.length === 0 && !values[keys.schoolId] && <ErrorMessage errors={errors} touched={touched} name={keys.schoolName} />}
         <div style={{ display: hits.length > 0 || values[keys.schoolId] ? "block" : "none" }}>
-          <Field
-            style={{ marginTop: "1rem" }}
-            as="select"
-            className="form-control"
-            name={keys.schoolId}
-            value={values[keys.schoolId]}
-            validate={(v) => !v && requiredMessage}
-            onChange={(e) => {
-              const value = e.target.value;
-              handleChange({ target: { name: keys.schoolId, value } });
-            }}
-          >
-            <option key="" value="" disabled>
-              Sélectionner votre établissement scolaire
-            </option>
-            {hits?.map((hit) => (
-              <option key={hit._id} value={hit._id}>
-                {`${hit.fullName}, ${hit.postcode} ${hit.city}`}
-              </option>
-            ))}
-            {hits.length === 0 && <option value={values[keys.schoolName]}>{values[keys.schoolName]}</option>}
-          </Field>
-          <ErrorMessage errors={errors} touched={touched} name={keys.schoolId} />
+          {manual && (
+            <>
+              <Field
+                placeholder="Nom de l'établissement"
+                className="form-control"
+                validate={(v) => !v && requiredMessage}
+                name={keys.schoolName}
+                value={values[keys.schoolName]}
+                onChange={handleChange}
+              />
+              <ErrorMessage errors={errors} touched={touched} name={keys.schoolName} />
+            </>
+          )}
+          {!manual && (
+            <>
+              <Field
+                style={{ marginTop: "1rem" }}
+                as="select"
+                className="form-control"
+                name={keys.schoolId}
+                value={values[keys.schoolId]}
+                validate={(v) => !v && requiredMessage}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  handleChange({ target: { name: keys.schoolId, value } });
+                  handleChange({ target: { name: keys.schoolName, value: hits.find((i) => i._id === value).fullName } });
+                }}
+              >
+                <option key="" value="" disabled>
+                  Sélectionner votre établissement scolaire
+                </option>
+                {hits?.map((hit) => (
+                  <option key={hit._id} value={hit._id}>
+                    {`${hit.fullName}, ${hit.postcode} ${hit.city}`}
+                  </option>
+                ))}
+                {hits.length === 0 && <option value={values[keys.schoolName]}>{values[keys.schoolName]}</option>}
+              </Field>
+
+              <ErrorMessage errors={errors} touched={touched} name={keys.schoolName} />
+            </>
+          )}
+
           <Field
             style={{ marginTop: "1rem" }}
             as="select"
@@ -112,6 +139,18 @@ export default ({ handleChange, values, keys, errors, touched }) => {
           </Field>
           <ErrorMessage errors={errors} touched={touched} name={keys.grade} />
         </div>
+        {showManualButton && (
+          <div
+            style={{ fontSize: "0.75rem" }}
+            onClick={() => {
+              handleChange({ target: { name: keys.schoolName, value: "" } });
+              handleChange({ target: { name: keys.schoolId, value: "" } });
+              setManual(true);
+            }}
+          >
+            Je ne trouve pas mon établissement
+          </div>
+        )}
       </Col>
     </Row>
   );
