@@ -436,8 +436,8 @@ router.post("/:id/email/:template", passport.authenticate(["young", "referent"],
     }
 
     let buttonCta = cta || config.APP_URL;
-    if (template === SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_CORRECTION) cta = `${config.APP_URL}/ma-preparation-militaire`;
-    if (template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED) cta = `${config.APP_URL}/inscription/coordonnees`;
+    if (template === SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_CORRECTION) buttonCta = `${config.APP_URL}/ma-preparation-militaire`;
+    if (template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED) buttonCta = `${config.APP_URL}/inscription/coordonnees`;
 
     await sendTemplate(template, {
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
