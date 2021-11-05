@@ -422,11 +422,12 @@ router.post("/:id/email/:template", passport.authenticate(["young", "referent"],
       prevStatus: Joi.string().allow(null, ""),
       missionName: Joi.string().allow(null, ""),
       structureName: Joi.string().allow(null, ""),
+      cta: Joi.string().allow(null, ""),
     })
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
-    const { id, template, message, prevStatus, missionName, structureName } = value;
+    const { id, template, message, prevStatus, missionName, structureName, cta } = value;
 
     const young = await YoungObject.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -434,13 +435,13 @@ router.post("/:id/email/:template", passport.authenticate(["young", "referent"],
       return res.status(401).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
-    let cta = config.APP_URL;
+    let buttonCta = cta || config.APP_URL;
     if (template === SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_CORRECTION) cta = `${config.APP_URL}/ma-preparation-militaire`;
     if (template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED) cta = `${config.APP_URL}/inscription/coordonnees`;
 
     await sendTemplate(template, {
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-      params: { firstName: young.firstName, lastName: young.lastName, cta, message, missionName, structureName },
+      params: { firstName: young.firstName, lastName: young.lastName, cta: buttonCta, message, missionName, structureName },
     });
 
     return res.status(200).send({ ok: true });

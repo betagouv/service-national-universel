@@ -11,6 +11,7 @@ import api from "../../../services/api";
 import ErrorMessage, { requiredMessage } from "../components/errorMessage";
 import { translate } from "../../../utils";
 import { setYoung } from "../../../redux/auth/actions";
+import { appURL } from "../../../config";
 
 export default () => {
   const history = useHistory();
@@ -41,7 +42,7 @@ export default () => {
               if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
               toastr.success("Enregistré");
               dispatch(setYoung(data));
-              await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_VALIDATION}`);
+              await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_VALIDATION}`, { cta: `${appURL}/auth` });
               history.push("/");
             } catch (e) {
               console.log(e);
