@@ -12,6 +12,7 @@ export default ({ handleChange, values, keys, errors, touched }) => {
 
   const getSuggestions = async (text) => {
     if (!text.includes(" - ")) return [];
+
     const [city, postcode] = text.split(" - ");
     const { responses } = await api.esQuery("school", {
       query: {
@@ -26,6 +27,18 @@ export default ({ handleChange, values, keys, errors, touched }) => {
   };
 
   useEffect(() => {
+    (async () => {
+      if (values[keys.schoolId]) {
+        const { responses } = await api.esQuery("school", {
+          query: { ids: { values: [values[keys.schoolId]] } },
+        });
+        setHits(responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
+        return hits;
+      }
+    })();
+  }, [values[keys.schoolId]]);
+
+  useEffect(() => {
     if (document.getElementsByTagName) {
       const inputElements = document.getElementsByTagName("input");
       for (let i = 0; inputElements[i]; i++) inputElements[i].setAttribute("autocomplete", "novalue");
@@ -37,6 +50,7 @@ export default ({ handleChange, values, keys, errors, touched }) => {
       <Col md={12} style={{ marginTop: 15 }}>
         <SchoolCityTypeahead
           onChange={(e) => {
+            handleChange({ target: { name: keys.schoolId, value: "" } });
             getSuggestions(e);
           }}
         />
@@ -64,7 +78,7 @@ export default ({ handleChange, values, keys, errors, touched }) => {
             ))}
             {hits.length === 0 && <option value={values[keys.schoolName]}>{values[keys.schoolName]}</option>}
           </Field>
-          <ErrorMessage errors={errors} touched={touched} name={keys.schoolName} />
+          <ErrorMessage errors={errors} touched={touched} name={keys.schoolId} />
           <Field
             style={{ marginTop: "1rem" }}
             as="select"
