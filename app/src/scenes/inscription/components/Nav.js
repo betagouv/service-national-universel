@@ -61,7 +61,9 @@ export default ({ step }) => {
     return (
       <MobileElement>
         <span className="icon">
-          <span>{stepNumber}/6</span>
+          <span>
+            {stepNumber}/{STEPS.length - 1}
+          </span>
         </span>
         <span className="text">{stepName}</span>
       </MobileElement>
