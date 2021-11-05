@@ -6,7 +6,7 @@ import { Field, Formik } from "formik";
 import { toastr } from "react-redux-toastr";
 import { Spinner } from "reactstrap";
 
-import { HERO_IMAGES_LIST } from "../../../utils";
+import { HERO_IMAGES_LIST, SENDINBLUE_TEMPLATES, YOUNG_STATUS } from "../../../utils";
 import api from "../../../services/api";
 import ErrorMessage, { requiredMessage } from "../components/errorMessage";
 import { translate } from "../../../utils";
@@ -37,10 +37,11 @@ export default () => {
             setLoading(true);
             try {
               values.informationAccuracy = "true";
-              const { ok, code, data } = await api.put("/young", values);
+              const { ok, code, data } = await api.put("/young", { ...values, status: YOUNG_STATUS.WAITING_VALIDATION });
               if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
               toastr.success("Enregistré");
               dispatch(setYoung(data));
+              await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_VALIDATION}`);
               history.push("/");
             } catch (e) {
               console.log(e);
