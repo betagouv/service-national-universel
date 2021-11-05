@@ -98,7 +98,7 @@ export default () => {
           }, [values.verifyPassword]);
           useEffect(() => {
             (async () => {
-              if (values.birthCityZip.length === 5) {
+              if (values.birthCityZip?.length === 5) {
                 const response = await fetch(`https://api-adresse.data.gouv.fr/search/?type=municipality&autocomplete=0&q=${values.birthCityZip}`, {
                   mode: "cors",
                   method: "GET",
