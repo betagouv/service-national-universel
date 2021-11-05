@@ -35,6 +35,7 @@ import MilitaryPreparation from "./scenes/militaryPreparation";
 import Engagement from "./scenes/engagement";
 import Bug from "./scenes/bug";
 import CGU from "./scenes/CGU";
+import PublicSupport from "./scenes/public-support-center";
 
 import api from "./services/api";
 import { SENTRY_URL, environment } from "./config";
@@ -87,6 +88,7 @@ export default () => {
         <Switch>
           <Route path="/bug" component={Bug} />
           <Route path="/conditions-generales-utilisation" component={CGU} />
+          <Route path="/public-besoin-d-aide" component={PublicSupport} />
           <Route path="/validate-contract/done" component={ContractDone} />
           <Route path="/validate-contract" component={Contract} />
           <Route path="/inscription" component={Inscription} />
