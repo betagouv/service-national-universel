@@ -11,6 +11,7 @@ export default ({ handleChange, values, keys, errors, touched }) => {
   const [hits, setHits] = useState([]);
   const [manual, setManual] = useState(false);
   const [showManualButton, setShowManualButton] = useState(false);
+  const [emptySearch, setEmptySearch] = useState(false);
 
   const getSuggestions = async (text) => {
     if (!text.includes(" - ")) return [];
@@ -25,12 +26,14 @@ export default ({ handleChange, values, keys, errors, touched }) => {
       },
     });
     setHits(responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
+    if (hits.length) setManual(false);
     return hits;
   };
 
   useEffect(() => {
     (async () => {
-      if (values[keys.schoolId]) {
+      if (emptySearch && values[keys.schoolId]) {
+        console.log(emptySearch);
         const { responses } = await api.esQuery("school", {
           query: { ids: { values: [values[keys.schoolId]] } },
         });
@@ -38,7 +41,7 @@ export default ({ handleChange, values, keys, errors, touched }) => {
         return hits;
       }
     })();
-  }, [values[keys.schoolId]]);
+  }, [values[keys.schoolId], emptySearch]);
 
   useEffect(() => {
     if (document.getElementsByTagName) {
@@ -57,14 +60,15 @@ export default ({ handleChange, values, keys, errors, touched }) => {
                 setShowManualButton(true);
               }, 5000);
             }
+            setEmptySearch(!e?.length);
             handleChange({ target: { name: keys.schoolId, value: "" } });
             getSuggestions(e);
           }}
         />
         {hits.length === 0 && !values[keys.schoolId] && <ErrorMessage errors={errors} touched={touched} name={keys.schoolName} />}
-        <div style={{ display: hits.length > 0 || values[keys.schoolId] ? "block" : "none" }}>
+        <div>
           {manual && (
-            <>
+            <div>
               <Field
                 placeholder="Nom de l'établissement"
                 className="form-control"
@@ -74,10 +78,10 @@ export default ({ handleChange, values, keys, errors, touched }) => {
                 onChange={handleChange}
               />
               <ErrorMessage errors={errors} touched={touched} name={keys.schoolName} />
-            </>
+            </div>
           )}
           {!manual && (
-            <>
+            <div style={{ display: hits.length > 0 || values[keys.schoolId] ? "block" : "none" }}>
               <Field
                 style={{ marginTop: "1rem" }}
                 as="select"
@@ -103,54 +107,58 @@ export default ({ handleChange, values, keys, errors, touched }) => {
               </Field>
 
               <ErrorMessage errors={errors} touched={touched} name={keys.schoolName} />
-            </>
+            </div>
           )}
 
-          <Field
-            style={{ marginTop: "1rem" }}
-            as="select"
-            className="form-control"
-            name={keys.grade}
-            value={values[keys.grade]}
-            validate={(v) => !v && requiredMessage}
-            onChange={(e) => {
-              const value = e.target.value;
-              handleChange({ target: { name: keys.grade, value } });
-            }}
-          >
-            <option key="" value="" disabled>
-              Sélectionner votre niveau scolaire
-            </option>
-            {[
-              { label: "3ème", value: "3eme" },
-              { label: "2nd", value: "2nd" },
-              { label: "1ère", value: "1ere" },
-              { label: "1ère année CAP", value: "1ere CAP" },
-              { label: "Terminale", value: "Terminale" },
-              { label: "Terminale CAP", value: "Terminale CAP" },
-              { label: "SEGPA", value: "SEGPA" },
-              { label: "Classe relais", value: "Classe relais" },
-              { label: "Autre", value: "Autre" },
-            ].map((rank) => (
-              <option key={rank.value} value={rank.value}>
-                {`${rank.label}`}
+          <div style={{ display: manual || hits.length > 0 || values[keys.schoolId] ? "block" : "none" }}>
+            <Field
+              style={{ marginTop: "1rem" }}
+              as="select"
+              className="form-control"
+              name={keys.grade}
+              value={values[keys.grade]}
+              validate={(v) => !v && requiredMessage}
+              onChange={(e) => {
+                const value = e.target.value;
+                handleChange({ target: { name: keys.grade, value } });
+              }}
+            >
+              <option key="" value="" disabled>
+                Sélectionner votre niveau scolaire
               </option>
-            ))}
-          </Field>
-          <ErrorMessage errors={errors} touched={touched} name={keys.grade} />
-        </div>
-        {showManualButton && (
-          <div
-            style={{ fontSize: "0.75rem" }}
-            onClick={() => {
-              handleChange({ target: { name: keys.schoolName, value: "" } });
-              handleChange({ target: { name: keys.schoolId, value: "" } });
-              setManual(true);
-            }}
-          >
-            Je ne trouve pas mon établissement
+              {[
+                { label: "3ème", value: "3eme" },
+                { label: "2nd", value: "2nd" },
+                { label: "1ère", value: "1ere" },
+                { label: "1ère année CAP", value: "1ere CAP" },
+                { label: "Terminale", value: "Terminale" },
+                { label: "Terminale CAP", value: "Terminale CAP" },
+                { label: "SEGPA", value: "SEGPA" },
+                { label: "Classe relais", value: "Classe relais" },
+                { label: "Autre", value: "Autre" },
+              ].map((rank) => (
+                <option key={rank.value} value={rank.value}>
+                  {`${rank.label}`}
+                </option>
+              ))}
+            </Field>
+            <ErrorMessage errors={errors} touched={touched} name={keys.grade} />
           </div>
-        )}
+        </div>
+        <div style={{ fontSize: "0.75rem", display: "flex", justifyContent: "flex-end", minHeight: "18px" }}>
+          {showManualButton && (
+            <span
+              style={{ cursor: "pointer", color: "#007bff" }}
+              onClick={() => {
+                handleChange({ target: { name: keys.schoolName, value: "" } });
+                handleChange({ target: { name: keys.schoolId, value: "" } });
+                setManual(true);
+              }}
+            >
+              Je ne trouve pas mon établissement
+            </span>
+          )}
+        </div>
       </Col>
     </Row>
   );
