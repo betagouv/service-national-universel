@@ -16,7 +16,7 @@ router.get("/availability/2022", passport.authenticate("young", { session: false
       excludedZip: ["975", "974", "976", "984", "987", "986", "988"],
       includedBirthdate: { begin: "02/25/2004", end: "02/14/2007" },
       stringDate: "13 au 25 février 2022",
-      info: "Vous bénéficierez d'une autorisation d'absence de votre établissement scolaire pour la semaine de cours à laquelle vous n'assisteriez pas, si vous êtes scolarisé(e) en zone B ou C.",
+      info: "Si besoin, les élèves de seconde désireux de participer au séjour de février pourront se voir délivrer une autorisation d’absence par leur établissement scolaire (établissements relevant du ministère de l’éducation nationale, de la jeunesse et des sports).",
       buffer: 1.15,
       id: "Février 2022",
     },

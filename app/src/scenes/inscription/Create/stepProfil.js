@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { Row, Col } from "reactstrap";
+import { Col } from "reactstrap";
 import { Field, Formik } from "formik";
 import { useSelector, useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
@@ -9,22 +9,21 @@ import { toastr } from "react-redux-toastr";
 import DateInput from "../components/dateInput";
 import * as Sentry from "@sentry/react";
 
-import { getPasswordErrorMessage, translate } from "../../../utils";
+import { getPasswordErrorMessage, translate, SENDINBLUE_TEMPLATES } from "../../../utils";
 import ErrorMessage, { requiredMessage } from "../components/errorMessage";
 import { setYoung } from "../../../redux/auth/actions";
 import FormRow from "../../../components/form/FormRow";
 import api from "../../../services/api";
-import { YOUNG_STATUS, YOUNG_PHASE } from "../../../utils";
 import EyeOpen from "../../../assets/eye.svg";
 import EyeClose from "../../../assets/eye-slash.svg";
 import FormFooter from "../../../components/form/FormFooter";
-import { STEPS } from "../utils";
 import { appURL } from "../../../config";
 
 export default () => {
   const [passwordText, setPasswordText] = useState(false);
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
+  const [suggestions, setSuggestions] = useState([]);
   const young = useSelector((state) => state.Auth.young) || {
     frenchNationality: "false",
     firstName: "",
@@ -63,6 +62,7 @@ export default () => {
             const { ok: okPut, code: codePut, data: young } = await api.put("/young", newValues);
             if (!okPut) return toastr.error("Une erreur s'est produite :", codePut);
             dispatch(setYoung(young));
+            await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED}`);
             history.push("/inscription/coordonnees");
           } catch (e) {
             console.log(e);
@@ -91,6 +91,19 @@ export default () => {
           useEffect(() => {
             if (values.verifyPassword) validateField("verifyPassword");
           }, [values.verifyPassword]);
+          useEffect(() => {
+            (async () => {
+              if (values.birthCityZip.length === 5) {
+                const response = await fetch(`https://api-adresse.data.gouv.fr/search/?type=municipality&autocomplete=0&q=${values.birthCityZip}`, {
+                  mode: "cors",
+                  method: "GET",
+                  headers: { "Content-Type": "application/json" },
+                });
+                const res = await response.json();
+                setSuggestions(res.features.map((item) => item.properties.name));
+              }
+            })();
+          }, [values.birthCityZip]);
 
           return (
             <>
@@ -180,7 +193,7 @@ export default () => {
                   <Label>Lieu de naissance</Label>
                 </Col>
                 <Col>
-                  <FlexGroup>
+                  <FlexGroup style={{ flexWrap: "wrap" }}>
                     <RadioLabel>
                       <Field
                         validate={(v) => !v && requiredMessage}
@@ -208,45 +221,68 @@ export default () => {
                   </FlexGroup>
                   <FlexGroup style={{ marginTop: "15px" }}>
                     {values.birthCountry !== "France" && (
-                      <div>
-                        <FieldWithWidth
-                          maxWidth="195px"
-                          placeholder="Pays de naissance"
-                          className="form-control"
-                          validate={(v) => !v && requiredMessage}
-                          name="birthCountry"
-                          value={values.birthCountry}
-                          onChange={handleChange}
-                          style={{ marginRight: "10px" }}
-                        />
-                        <ErrorMessage errors={errors} touched={touched} name="birthCountry" />
-                      </div>
+                      <>
+                        <div>
+                          <FieldWithWidth
+                            maxWidth="195px"
+                            placeholder="Pays de naissance"
+                            className="form-control"
+                            validate={(v) => !v && requiredMessage}
+                            name="birthCountry"
+                            value={values.birthCountry}
+                            onChange={handleChange}
+                            style={{ marginRight: "10px" }}
+                          />
+                          <ErrorMessage errors={errors} touched={touched} name="birthCountry" />
+                        </div>
+                        <div>
+                          <FieldWithWidth
+                            maxWidth="195px"
+                            placeholder="Ville de naissance"
+                            className="form-control"
+                            validate={(v) => !v && requiredMessage}
+                            name="birthCity"
+                            value={values.birthCity}
+                            onChange={handleChange}
+                          />
+                          <ErrorMessage errors={errors} touched={touched} name="birthCity" />
+                        </div>
+                      </>
                     )}
-                    <div>
-                      <FieldWithWidth
-                        maxWidth="195px"
-                        placeholder="Ville de naissance"
-                        className="form-control"
-                        validate={(v) => !v && requiredMessage}
-                        name="birthCity"
-                        value={values.birthCity}
-                        onChange={handleChange}
-                      />
-                      <ErrorMessage errors={errors} touched={touched} name="birthCity" />
-                    </div>
                     {values.birthCountry === "France" && (
-                      <div>
-                        <FieldWithWidth
-                          maxWidth="195px"
-                          placeholder="Code postal"
-                          className="form-control"
-                          validate={(v) => !v && requiredMessage}
-                          name="birthCityZip"
-                          value={values.birthCityZip}
-                          onChange={handleChange}
-                          style={{ marginLeft: "10px" }}
-                        />
-                        <ErrorMessage errors={errors} touched={touched} name="birthCityZip" />
+                      <div style={{ display: "flex", flexWrap: "wrap" }}>
+                        <div>
+                          <FieldWithWidth
+                            maxWidth="195px"
+                            placeholder="Code postal"
+                            className="form-control"
+                            validate={(v) => !v && requiredMessage}
+                            name="birthCityZip"
+                            value={values.birthCityZip}
+                            onChange={handleChange}
+                            style={{ marginRight: "10px" }}
+                          />
+                          <ErrorMessage errors={errors} touched={touched} name="birthCityZip" />
+                        </div>
+                        <div>
+                          <Field
+                            as="select"
+                            validate={(v) => !v && requiredMessage}
+                            disabled={values.birthCityZip.length !== 5}
+                            className="form-control"
+                            name="birthCity"
+                            value={values.birthCity}
+                            onChange={handleChange}
+                          >
+                            <option selected={values.birthCity === undefined || values.birthCity === ""}>Ville de naissance</option>
+                            {suggestions.map((el) => (
+                              <option key={el} value={el}>
+                                {el}
+                              </option>
+                            ))}
+                          </Field>
+                          <ErrorMessage errors={errors} touched={touched} name="birthCity" />
+                        </div>
                       </div>
                     )}
                   </FlexGroup>
@@ -448,10 +484,8 @@ const RadioLabel = styled.label`
   align-items: center;
   color: #374151;
   font-size: 14px;
-  margin-bottom: 0;
-  :last-child {
-    margin-left: 12px;
-  }
+  margin-bottom: 0.5rem;
+  margin-right: 0.5rem;
   input {
     cursor: pointer;
     margin-right: 12px;

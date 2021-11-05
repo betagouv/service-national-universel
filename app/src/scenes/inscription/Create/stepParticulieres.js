@@ -29,12 +29,12 @@ export default () => {
     <Wrapper>
       <Heading>
         <h2>Situations particulières</h2>
+        <p style={{ color: "#6B7280" }}>Complétez les informations ci-dessous.</p>
         <p style={{ color: "#6B7280" }}>
-          Complétez les informations ci-dessous.
-        </p>
-        <p style={{ color: "#6B7280" }}>
-          Il est important de signaler dès l'inscription toute situation nécessitant une vigilance particulière ou des aménagements spécifiques : situation de handicap, allergies, intolérance alimentaire, projet d'accueil individualisé (PAI), sport de haut niveau, etc. <br />
-          En fonction des situations signalées, un responsable en charge du séjour de cohésion ou de la mission d'intérêt général prendra contact avec le volontaire et ses représentants légaux.
+          Il est important de signaler dès l'inscription toute situation nécessitant une vigilance particulière ou des aménagements spécifiques : situation de handicap, allergies,
+          intolérance alimentaire, projet d'accueil individualisé (PAI), sport de haut niveau, etc. <br />
+          En fonction des situations signalées, un responsable en charge du séjour de cohésion ou de la mission d'intérêt général prendra contact avec le volontaire et ses
+          représentants légaux.
         </p>
       </Heading>
       <Formik
@@ -61,7 +61,7 @@ export default () => {
           <>
             <FormLegend style={{ paddingBottom: "0" }}>Handicap et pathologies chroniques</FormLegend>
             <div>
-              <a target="blank" href="https://apicivique.s3.eu-west-3.amazonaws.com/Note_relative_aux_situations_particulie%CC%80res.pdf">
+              <a target="blank" href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Note_relative_aux_situations_particulieres.pdf">
                 En savoir plus
               </a>
             </div>
@@ -114,7 +114,7 @@ export default () => {
                   touched={touched}
                 />
                 <FormRadioLabelTrueFalse
-                  title="Souhaitez-vous être affecté(e) dans votre département de résidence ?"
+                  title="Avez-vous besoin d'être affecté(e) dans votre département de résidence ?"
                   name="handicapInSameDepartment"
                   values={values}
                   handleChange={handleChange}
@@ -123,7 +123,14 @@ export default () => {
                 />
               </>
             )}
-            <FormRadioLabelTrueFalse title="Etes-vous en situation d'allergies ou d'intolérances alimentaires nécessitant la mise en place de mesures adaptées ?" name="allergies" values={values} handleChange={handleChange} errors={errors} touched={touched} />
+            <FormRadioLabelTrueFalse
+              title="Etes-vous en situation d'allergies ou d'intolérances alimentaires nécessitant la mise en place de mesures adaptées ?"
+              name="allergies"
+              values={values}
+              handleChange={handleChange}
+              errors={errors}
+              touched={touched}
+            />
             <FormLegend>Sportif de haut niveau inscrit sur liste ministerielle</FormLegend>
             <FormRadioLabelTrueFalse
               title="Etes-vous sportif de haut niveau inscrit sur liste ministérielle ?"

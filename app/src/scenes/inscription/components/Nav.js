@@ -6,6 +6,7 @@ import { Link, useHistory } from "react-router-dom";
 import api from "../../../services/api";
 import { setYoung } from "../../../redux/auth/actions";
 import { STEPS } from "../utils";
+import BackIcon from "../../../components/BackIcon";
 
 export default ({ step }) => {
   const history = useHistory();
@@ -22,22 +23,31 @@ export default ({ step }) => {
     // window.location.href = "/";
   };
 
-  const handleClick = (s) => {
-    if (s === step || !young) return; //click on same step or not connected
+  const canGoToStep = (s) => {
+    if (s === step || !young) return false; //click on same step or not connected
 
     const stepIndex = Object.keys(STEPS).indexOf(s);
     const limitIndex = Object.keys(STEPS).indexOf(young.inscriptionStep);
-    if (limitIndex < stepIndex) return;
+
+    if (stepIndex >= Object.keys(STEPS).length - 1 || stepIndex < 0) return false;
+    if (limitIndex < stepIndex) return false;
+
+    return true;
+  };
+
+  const handleClick = (s) => {
+    if (!canGoToStep(s)) return;
 
     return history.push(`/inscription/${s.toLowerCase()}`);
   };
 
   const Step = ({ stepId, stepName, stepNumber }) => {
-    const currentIndex = Object.keys(STEPS).indexOf(step);
+    const STEPSKeys = Object.keys(STEPS);
+    const currentIndex = STEPSKeys.indexOf(step);
 
     const status = (() => {
       if (stepId === step) return "inprogress";
-      const stepIndex = Object.keys(STEPS).indexOf(stepId);
+      const stepIndex = STEPSKeys.indexOf(stepId);
       if (stepIndex > currentIndex) return "todo";
       return "done";
     })();
@@ -57,14 +67,28 @@ export default ({ step }) => {
         </>
       );
     }
+
     if (status !== "inprogress") return <></>;
+
+    const nextStepID = STEPSKeys[currentIndex + 1];
+    const previousStepID = STEPSKeys[currentIndex - 1];
     return (
-      <MobileElement>
-        <span className="icon">
-          <span>{stepNumber}/6</span>
-        </span>
-        <span className="text">{stepName}</span>
-      </MobileElement>
+      <>
+        <MobileNavigation style={{ marginLeft: "10px", opacity: previousStepID ? 1 : 0.4 }} onClick={() => handleClick(previousStepID)} disabled={!previousStepID}>
+          <BackIcon fill="#362F78" />
+        </MobileNavigation>
+        <MobileCurrentStep>
+          <span className="icon">
+            <span>
+              {stepNumber} / {STEPSKeys.length - 1}
+            </span>
+          </span>
+          {/* <span className="text">{stepName}</span> */}
+        </MobileCurrentStep>
+        <MobileNavigation style={{ transform: "rotate(180deg)", marginRight: "10px" }} disabled={!nextStepID || !canGoToStep(nextStepID)} onClick={() => handleClick(nextStepID)}>
+          <BackIcon fill="#362F78" />
+        </MobileNavigation>
+      </>
     );
   };
 
@@ -92,9 +116,11 @@ export default ({ step }) => {
         <Step stepId={STEPS.CONSENTEMENTS} stepName="Consentements" stepNumber="5" />
         <Step stepId={STEPS.DOCUMENTS} stepName="Pièces justificatives" stepNumber="6" />
         <Step stepId={STEPS.AVAILABILITY} stepName="Disponibilités" stepNumber="7" />
-        <Element onClick={() => handleClick(STEPS.DONE)} style={{ flexGrow: 0 }}>
-          <div className="logo" />
-        </Element>
+        {window.innerWidth > 1240 && (
+          <Element onClick={() => handleClick(STEPS.DONE)} style={{ flexGrow: 0 }}>
+            <div className="logo" />
+          </Element>
+        )}
       </Topbar>
     </>
   );
@@ -171,13 +197,13 @@ const Topbar = styled.ul`
   margin: 0 auto 0.5rem;
 `;
 
-const MobileElement = styled.li`
+const MobileCurrentStep = styled.li`
   flex-grow: 1;
+  justify-content: center;
   align-self: center;
   margin: 15px;
   display: flex;
   align-items: center;
-
   font-weight: 600;
   color: #362f78;
   margin: 0;
@@ -189,11 +215,14 @@ const MobileElement = styled.li`
     flex-shrink: 0;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
-    border: 3px solid;
-    border-color: #362f78;
     margin: 10px;
   }
+`;
+
+const MobileNavigation = styled.li`
+  margin-block: auto;
+  cursor: pointer;
+  opacity: ${(props) => (props.disabled ? 0.4 : 1)};
 `;
 
 const Element = styled.li`

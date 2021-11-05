@@ -366,6 +366,7 @@ function validateYoung(young, user) {
     parent1City: Joi.string().allow(null, ""),
     parent1Department: Joi.string().allow(null, ""),
     parent1Region: Joi.string().allow(null, ""),
+    parent1Country: Joi.string().allow(null, ""),
     parent1Location: Joi.object()
       .keys({
         lat: Joi.number().allow(null),
@@ -385,6 +386,7 @@ function validateYoung(young, user) {
     parent2City: Joi.string().allow(null, ""),
     parent2Department: Joi.string().allow(null, ""),
     parent2Region: Joi.string().allow(null, ""),
+    parent2Country: Joi.string().allow(null, ""),
     parent2Location: Joi.object()
       .keys({
         lat: Joi.number().allow(null),

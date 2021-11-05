@@ -13,7 +13,6 @@ import api from "../../../services/api";
 import { STEPS, YOUNG_SITUATIONS } from "../utils";
 import FormRow from "../../../components/form/FormRow";
 import AddressInputV2 from "../../../components/addressInputV2";
-import HostAddressInput from "../../../components/hostAddressInput";
 import Etablissement from "../components/etablissmentInput";
 import { translate } from "../../../utils";
 import FormFooter from "../../../components/form/FormFooter";
@@ -99,7 +98,7 @@ export default () => {
             <>
               <FormRow>
                 <Col md={4}>
-                  <Label>Genre</Label>
+                  <Label>Sexe</Label>
                 </Col>
                 <Col>
                   <RadioLabel>
@@ -155,51 +154,26 @@ export default () => {
                   <Label>Lieu de résidence</Label>
                 </Col>
                 <Col>
-                  <Row>
-                    <Col>
-                      <RadioLabel>
-                        <Field
-                          validate={(v) => !v && requiredMessage}
-                          className="form-control"
-                          type="radio"
-                          name="country"
-                          value="France"
-                          checked={values.country === "France"}
-                          onChange={handleChange}
-                          onClick={() => cleanHostInformation(values)}
-                        />
-                        Je réside en France
-                      </RadioLabel>
-                    </Col>
-                    <Col>
-                      <RadioLabel>
-                        <Field
-                          validate={(v) => !v && requiredMessage}
-                          className="form-control"
-                          type="radio"
-                          name="country"
-                          checked={values.country !== "France"}
-                          onChange={handleChange}
-                          onClick={() => cleanHostInformation(values)}
-                        />
-                        Je réside à l'étranger
-                      </RadioLabel>
-                    </Col>
-                    <ErrorMessage errors={errors} touched={touched} name="countryVisible" />
-                  </Row>
-                  <Row>
-                    <Col md={12} style={{ marginTop: 15 }}>
-                      <AddressInputV2
-                        keys={{ city: "city", zip: "zip", address: "address", location: "location", department: "department", region: "region", country: "country" }}
-                        values={values}
-                        countryVisible={values.country !== "France"}
-                        departAndRegionVisible={false}
-                        handleChange={handleChange}
-                        errors={errors}
-                        touched={touched}
-                      />
-                    </Col>
-                  </Row>
+                  <AddressInputV2
+                    keys={{
+                      country: "country",
+                      city: "city",
+                      zip: "zip",
+                      address: "address",
+                      location: "location",
+                      department: "department",
+                      region: "region",
+                      country: "country",
+                    }}
+                    values={values}
+                    countryVisible={values.country !== "France"}
+                    departAndRegionVisible={false}
+                    handleChange={handleChange}
+                    errors={errors}
+                    touched={touched}
+                    countryVisible
+                    validateField={validateField}
+                  />
                 </Col>
               </FormRow>
               {values.country !== "France" && (
@@ -215,20 +189,70 @@ export default () => {
                     </Note>
                   </Col>
                   <Col>
-                    <HostAddressInput
+                    <SecondLabel>Nom de l'hébergeur</SecondLabel>
+                    <Row>
+                      <Col>
+                        <Field
+                          placeholder="Nom de l'hébergeur"
+                          className="form-control"
+                          validate={(v) => !v && requiredMessage}
+                          name="hostLastName"
+                          value={values.hostLastName}
+                          onChange={handleChange}
+                        />
+                        <ErrorMessage errors={errors} touched={touched} name="hostLastName" />
+                      </Col>
+                      <Col>
+                        <Field
+                          placeholder="Prénom de l'hébergeur"
+                          className="form-control"
+                          validate={(v) => !v && requiredMessage}
+                          name="hostFirstName"
+                          value={values.hostFirstName}
+                          onChange={handleChange}
+                        />
+                        <ErrorMessage errors={errors} touched={touched} name="hostFirstName" />
+                      </Col>
+                    </Row>
+                    <SecondLabel style={{ marginTop: 15 }}>Lien avec l'hébergeur</SecondLabel>
+                    <Field
+                      as="select"
+                      validate={(v) => !v && requiredMessage}
+                      className="form-control"
+                      name="hostRelationship"
+                      value={values.hostRelationship}
+                      onChange={handleChange}
+                    >
+                      <option selected={values.hostRelationship === undefined || values.hostRelationship === ""} disabled>
+                        Précisez votre lien avec l'hébergeur
+                      </option>
+                      {[
+                        { label: "Parent", value: "Parent" },
+                        { label: "Frère/Soeur", value: "Frere/Soeur" },
+                        { label: "Grand-parent", value: "Grand-parent" },
+                        { label: "Oncle/Tante", value: "Oncle/Tante" },
+                        { label: "Ami de la famille", value: "Ami de la famille" },
+                        { label: "Autre", value: "Autre" },
+                      ].map((e) => (
+                        <option key={e.value} value={e.value}>
+                          {e.label}
+                        </option>
+                      ))}
+                    </Field>
+                    <ErrorMessage errors={errors} touched={touched} name="hostRelationship" />
+                    <AddressInputV2
                       keys={{
-                        hostLastName: "hostLastName",
-                        hostFirstName: "hostFirstName",
-                        hostCity: "hostCity",
-                        hostZip: "hostZip",
-                        hostAddress: "hostAddress",
-                        hostRelationship: "hostRelationship",
-                        hostLocation: "hostLocation",
+                        city: "hostCity",
+                        zip: "hostZip",
+                        address: "hostAddress",
+                        location: "hostLocation",
                       }}
                       values={values}
+                      departAndRegionVisible={false}
                       handleChange={handleChange}
                       errors={errors}
                       touched={touched}
+                      validateField={validateField}
                     />
                   </Col>
                 </FormRow>
@@ -339,10 +363,10 @@ export default () => {
                         YOUNG_SITUATIONS.SPECIALIZED_SCHOOL,
                         YOUNG_SITUATIONS.APPRENTICESHIP,
                       ].includes(values.situation) && (
-                        <div style={{ marginBottom: "10px" }}>
-                          <Etablissement values={values} handleChange={handleChange} errors={errors} touched={touched} keys={{ schoolName: "schoolName", grade: "grade" }} />
-                        </div>
-                      )}
+                          <div style={{ marginBottom: "10px" }}>
+                            <Etablissement values={values} handleChange={handleChange} errors={errors} touched={touched} keys={{ schoolName: "schoolName", grade: "grade" }} />
+                          </div>
+                        )}
                     </>
                   )}
                   {values.schooled === "false" && (
@@ -575,4 +599,10 @@ const RadioLabel = styled.label`
     min-width: 15px;
     min-height: 15px;
   }
+`;
+
+const SecondLabel = styled.div`
+  color: #374151;
+  font-size: 14px;
+  margin-bottom: 10px;
 `;
