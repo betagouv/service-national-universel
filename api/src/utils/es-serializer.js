@@ -39,6 +39,7 @@ function serializeSchools(body) {
       name2: hit.name2,
       type: hit.type,
       fullName: hit.fullName,
+      uai: hit.uai,
     };
   });
 }

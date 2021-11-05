@@ -40,26 +40,26 @@ export default ({ handleChange, values, keys, errors, touched }) => {
             getSuggestions(e);
           }}
         />
-        {hits.length === 0 && !values[keys.schoolName] && <ErrorMessage errors={errors} touched={touched} name={keys.schoolName} />}
-        <div style={{ display: hits.length > 0 || values[keys.schoolName] ? "block" : "none" }}>
+        {hits.length === 0 && !values[keys.schoolId] && <ErrorMessage errors={errors} touched={touched} name={keys.schoolName} />}
+        <div style={{ display: hits.length > 0 || values[keys.schoolId] ? "block" : "none" }}>
           <Field
             style={{ marginTop: "1rem" }}
             as="select"
             className="form-control"
-            name={keys.schoolName}
-            value={values[keys.schoolName]}
+            name={keys.schoolId}
+            value={values[keys.schoolId]}
             validate={(v) => !v && requiredMessage}
             onChange={(e) => {
               const value = e.target.value;
-              handleChange({ target: { name: keys.schoolName, value } });
+              handleChange({ target: { name: keys.schoolId, value } });
             }}
           >
             <option key="" value="" disabled>
               Sélectionner votre établissement scolaire
             </option>
             {hits?.map((hit) => (
-              <option key={hit._id} value={hit.fullName}>
-                {`${hit.fullName}, ${hit.postcode} ${hit.city}`}
+              <option key={hit._id} value={hit.uai}>
+                {`${hit.fullName}, ${hit.postcode} ${hit.city} ${hit.uai}`}
               </option>
             ))}
             {hits.length === 0 && <option value={values[keys.schoolName]}>{values[keys.schoolName]}</option>}

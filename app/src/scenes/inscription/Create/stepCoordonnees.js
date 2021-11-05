@@ -37,7 +37,7 @@ export default () => {
     delete v.schoolCity;
     delete v.schoolDepartment;
     delete v.schoolLocation;
-    delete v.schoolId;
+    v.schoolId;
     v.schoolName = "";
     v.grade = "";
   };
@@ -364,7 +364,13 @@ export default () => {
                         YOUNG_SITUATIONS.APPRENTICESHIP,
                       ].includes(values.situation) && (
                         <div style={{ marginBottom: "10px" }}>
-                          <Etablissement values={values} handleChange={handleChange} errors={errors} touched={touched} keys={{ schoolName: "schoolName", grade: "grade" }} />
+                          <Etablissement
+                            values={values}
+                            handleChange={handleChange}
+                            errors={errors}
+                            touched={touched}
+                            keys={{ schoolName: "schoolName", grade: "grade", schoolId: "schoolId" }}
+                          />
                         </div>
                       )}
                     </>
