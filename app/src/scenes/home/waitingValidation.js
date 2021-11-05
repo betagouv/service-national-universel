@@ -22,7 +22,7 @@ export default () => {
           </Alert>
         )}
         <Content showAlert={showAlert}>
-          <h1>
+          <h1 style={{ marginTop: "1.5rem" }}>
             <strong>{young.firstName},</strong> bienvenue sur votre compte volontaire.
           </h1>
           <IconContainer>
@@ -56,5 +56,12 @@ const IconContainer = styled.div`
   margin-top: 2.5rem;
   svg {
     min-width: 4rem
+  }
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: center;
+    svg {
+      margin-bottom: 1rem;
+    }
   }
 `;

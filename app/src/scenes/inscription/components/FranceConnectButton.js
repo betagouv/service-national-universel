@@ -18,7 +18,7 @@ export default ({ callback, beforeRedirect }) => {
   }
 
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: "1rem", margin: "1rem" }}>
+    <div style={{ display: "flex", alignItems: "center", gap: "1rem", margin: "1rem", flexWrap: "wrap" }}>
       <div style={{ cursor: "pointer", marginBottom: "8px" }} onClick={redirectToFranceConnect} onMouseEnter={() => setHover(true)} onMouseLeave={() => setHover(false)}>
         {hover ? <ImageHovered /> : <Image />}
       </div>

@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "webpack serve --port 8082 --mode development --config webpack.dev.config.js --progress --liveReload --open --hot --inline",
+    "mobile": "webpack serve --port 8082 --mode development --config webpack.dev.config.js --progress --liveReload --open --hot --inline --host 0.0.0.0",
     "start": "node server/index.js",
     "install": "node src/build-only-on-clevercloud.js",
     "build": "node --max-old-space-size=3000 node_modules/webpack/bin/webpack.js"

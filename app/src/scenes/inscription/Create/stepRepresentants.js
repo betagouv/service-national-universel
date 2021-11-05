@@ -57,7 +57,7 @@ const Parent = ({ id = 1, values, errors, touched, handleChange, validateField }
   return (
     <>
       <FormLegend>
-        Représentant légal n°{id}
+        <h5>Représentant légal n°{id}</h5>
         <FranceConnectZone handleSave={() => handleSave()} id={id} />
       </FormLegend>
 
@@ -320,6 +320,9 @@ export default () => {
 const Inline = styled.div`
   display: flex;
   align-items: center;
+  @media (max-width: 420px) {
+    flex-wrap: wrap;
+  }
 `;
 
 const Wrapper = styled.div`

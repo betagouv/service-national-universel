@@ -98,7 +98,7 @@ export default () => {
             <>
               <FormRow>
                 <Col md={4}>
-                  <Label>Genre</Label>
+                  <Label>Sexe</Label>
                 </Col>
                 <Col>
                   <RadioLabel>

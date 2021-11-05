@@ -431,6 +431,7 @@ function validateYoung(young, user) {
     imageRightFiles: Joi.array().items(Joi.string().allow(null, "")),
     autoTestPCR: Joi.string().allow(null, ""),
     autoTestPCRFiles: Joi.array().items(Joi.string().allow(null, "")),
+    informationAccuracy: Joi.string().allow(null, ""),
     jdc: Joi.string().allow(null, ""),
     motivations: Joi.string().allow(null, ""),
     domains: Joi.array().items(Joi.string().allow(null, "")),

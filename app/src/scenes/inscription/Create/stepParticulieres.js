@@ -114,7 +114,7 @@ export default () => {
                   touched={touched}
                 />
                 <FormRadioLabelTrueFalse
-                  title="Souhaitez-vous être affecté(e) dans votre département de résidence ?"
+                  title="Avez-vous besoin d'être affecté(e) dans votre département de résidence ?"
                   name="handicapInSameDepartment"
                   values={values}
                   handleChange={handleChange}
