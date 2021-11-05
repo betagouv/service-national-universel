@@ -11,11 +11,13 @@ export default ({ handleChange, values, keys, errors, touched }) => {
   const [hits, setHits] = useState([]);
 
   const getSuggestions = async (text) => {
+    if (!text.includes(" - ")) return [];
+    const [city, postcode] = text.split(" - ");
     const { responses } = await api.esQuery("school", {
       query: {
         bool: {
           must: { match_all: {} },
-          filter: [{ term: { "city.keyword": text } }, { term: { "version.keyword": "2" } }],
+          filter: [{ term: { "city.keyword": city } }, { term: { "postcode.keyword": postcode } }, { term: { "version.keyword": "2" } }],
         },
       },
     });
@@ -38,14 +40,6 @@ export default ({ handleChange, values, keys, errors, touched }) => {
             getSuggestions(e);
           }}
         />
-        {/* <Input
-          style={{ maxWidth: 500 }}
-          name="schoolType"
-          placeholder="Commencez à taper la ville de l'établissement..."
-          onChange={(event) => {
-            getSuggestions(event.target.value);
-          }}
-        />*/}
         {hits.length === 0 && !values[keys.schoolName] && <ErrorMessage errors={errors} touched={touched} name={keys.schoolName} />}
         <div style={{ display: hits.length > 0 || values[keys.schoolName] ? "block" : "none" }}>
           <Field

@@ -14,7 +14,7 @@ export default function SchoolCityTypeahead(props) {
   const onSuggestionsClearRequested = () => setSuggestions([]);
   const onSuggestionSelected = (event, { suggestion }) => {};
   const renderSuggestion = (suggestion) => <div>{suggestion !== "noresult" ? suggestionText(suggestion) : NORESULTMESSAGE}</div>;
-  const getSuggestionValue = (suggestion) => (suggestion !== "noresult" ? suggestion.label : "");
+  const getSuggestionValue = (suggestion) => (suggestion !== "noresult" ? `${suggestion.label} - ${suggestion.postcode}` : "");
   const suggestionText = (suggestion) => (
     <>
       <b>{suggestion.label}</b> - {suggestion.postcode}
@@ -90,6 +90,10 @@ export default function SchoolCityTypeahead(props) {
 const Wrapper = styled.div`
   .react-autosuggest__container {
     position: relative;
+    > input {
+      width: 100%;
+      max-width: 100%;
+    }
   }
   .react-autosuggest__suggestions-list {
     position: absolute;
