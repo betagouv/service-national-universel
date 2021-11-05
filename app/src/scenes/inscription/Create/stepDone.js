@@ -1,192 +1,186 @@
-import React, { useEffect } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useHistory } from "react-router-dom";
-import { Formik } from "formik";
+import { useHistory } from "react-router-dom";
+import { Field, Formik } from "formik";
 import { toastr } from "react-redux-toastr";
-import { Input } from "reactstrap";
+import { Spinner } from "reactstrap";
 
-import { translate } from "../../../utils";
+import { HERO_IMAGES_LIST, SENDINBLUE_TEMPLATES, YOUNG_STATUS } from "../../../utils";
 import api from "../../../services/api";
+import ErrorMessage, { requiredMessage } from "../components/errorMessage";
+import { translate } from "../../../utils";
 import { setYoung } from "../../../redux/auth/actions";
+import { appURL } from "../../../config";
 
 export default () => {
-  const dispatch = useDispatch();
   const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
+  const dispatch = useDispatch();
+  const [loading, setLoading] = useState(false);
 
   if (!young) {
     history.push("/inscription/profil");
     return <div />;
   }
   return (
-    <Wrapper>
-      <Logo>
-        <svg height={64} width={64} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#057a55" aria-hidden="true">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-        </svg>
-      </Logo>
-      <h2>Merci {young.firstName}</h2>
-      <p>
-        Bravo, votre inscription a bien été enregistrée. Votre candidature est en cours de traitement.
-        <br />
-        Vous serez prochainement contacté(e) par e-mail.
-        <br />
-        Vous pouvez continuer à éditer vos informations personnelles jusqu'à la validation de votre inscription.
-      </p>
-      <Footer>
-        <ButtonContainer>
-          <Button to="/">Accéder à mon espace volontaire</Button>
-        </ButtonContainer>
-      </Footer>
-      <Separator />
-      <Optional>Optionnel</Optional>
-      <h2>Vos motivations pour le SNU</h2>
-      <p>Exprimez en quelques mots pourquoi vous souhaitez participer au Service National Universel</p>
-      <Formik
-        initialValues={young}
-        onSubmit={async (values) => {
-          try {
-            const { ok, code, data } = await api.put("/young", values);
-            if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
-            toastr.success("Enregistré");
-            dispatch(setYoung(data));
-          } catch (e) {
-            console.log(e);
-            toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code));
-          }
-        }}
-      >
-        {({ values, handleChange, handleSubmit }) => (
-          <>
-            <Input type="textarea" rows={10} placeholder="Vos motivations en quelques mots ..." name="motivations" value={values.motivations} onChange={handleChange} />
-            <Footer>
-              <ButtonContainer>
-                <SaveButton onClick={handleSubmit}>Enregistrer</SaveButton>
-              </ButtonContainer>
-            </Footer>
-          </>
-        )}
-      </Formik>
-    </Wrapper>
+    <Container>
+      <Info>
+        <h3>INSCRIPTION AU SNU</h3>
+        <h1>Vous y êtes presque !</h1>
+        <p>Vous êtes sur le point de soumettre votre dossier à l'administration du SNU.</p>
+
+        <Formik
+          initialValues={young}
+          validateOnChange={false}
+          validateOnBlur={false}
+          onSubmit={async (values) => {
+            setLoading(true);
+            try {
+              values.informationAccuracy = "true";
+              const { ok, code, data } = await api.put("/young", { ...values, status: YOUNG_STATUS.WAITING_VALIDATION });
+              if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
+              toastr.success("Enregistré");
+              dispatch(setYoung(data));
+              await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_VALIDATION}`, { cta: `${appURL}/auth` });
+              history.push("/");
+            } catch (e) {
+              console.log(e);
+              toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code));
+            } finally {
+              setLoading(false);
+            }
+          }}
+        >
+          {({ values, handleChange, handleSubmit, errors, touched }) => (
+            <>
+              <RadioLabel>
+                <Field
+                  validate={(v) => !v && requiredMessage}
+                  value={"true"}
+                  checked={values.informationAccuracy}
+                  type="checkbox"
+                  name="informationAccuracy"
+                  onChange={handleChange}
+                />
+                <div>
+                  Je, <b>{`${young.firstName} ${young.lastName}`}</b>, certifie l'exactitude des renseignements fournis
+                </div>
+              </RadioLabel>
+
+              <ErrorMessage errors={errors} touched={touched} name="informationAccuracy" />
+
+              <ContinueButton onClick={handleSubmit}>
+                {loading ? <Spinner size="sm" style={{ borderWidth: "0.1em" }} /> : "Je valide mon dossier d'inscription au SNU"}
+              </ContinueButton>
+            </>
+          )}
+        </Formik>
+      </Info>
+      <div className="thumb" />
+    </Container>
   );
 };
 
-const Logo = styled.div`
-  width: 7rem;
-  height: 7rem;
-  border-radius: 50%;
-  background-color: #def7ec;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  img {
-    color: #057a55;
-  }
-`;
-
-const Wrapper = styled.div`
-  display: flex;
-  max-width: 48rem;
-  padding: 40px 0px;
+const Info = styled.div`
+  flex: 1.5;
+  padding: 5rem;
   @media (max-width: 768px) {
-    padding: 22px;
+    padding: 1.5rem;
   }
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  margin: auto;
-  margin-bottom: 30px;
-  h2 {
-    color: #161e2e;
-    font-size: 1.8rem;
-    font-weight: 700;
-    margin: 20px;
-  }
-  p {
-    text-align: center;
-    color: #6b7280;
-    font-size: 1rem;
-  }
-`;
 
-const Footer = styled.div`
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  h1 {
+    color: #111827;
+    font-size: 2rem;
+    margin-block: 0.5rem 2rem;
+  }
+
   h3 {
-    border: 1px solid #fc8181;
-    border-radius: 0.25em;
-    margin-top: 1em;
-    background-color: #fff5f5;
-    color: #c53030;
-    font-weight: 400;
-    font-size: 12px;
-    padding: 1em;
+    text-transform: uppercase;
+    color: #4f46e5;
+    letter-spacing: 0.05em;
+    font-size: 16px;
+  }
+
+  p {
+    font-size: 1.1rem;
+    color: #909090;
+    margin: 0;
+  }
+
+  .btns {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    @media (max-width: 768px) {
+      flex-direction: column;
+    }
+  }
+
+  .back {
+    display: flex;
+    align-items: center;
+    color: #6b7280;
+    margin-bottom: 2rem;
+    cursor: pointer;
+    width: fit-content;
   }
 `;
 
-const ButtonContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
-
-const Button = styled(Link)`
+const ContinueButton = styled.button`
+  min-width: 110px;
   color: #fff;
   background-color: #5145cd;
   padding: 9px 20px;
   border: 0;
   outline: 0;
   border-radius: 6px;
-  font-weight: 500;
-  font-size: 20px;
-  margin-right: 10px;
   margin-top: 40px;
   display: block;
-  text-align: center;
   outline: 0;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   :hover {
     opacity: 0.9;
-    color: #fff;
   }
 `;
 
-const Optional = styled.div`
-  font-weight: 400;
-  color: #6b7280;
-  padding-top: 5px;
-  font-size: 2rem;
+const Container = styled.div`
+  display: flex;
+
+  @media (min-width: 768px) {
+    .thumb {
+      min-height: 400px;
+      ${({ thumbImage = HERO_IMAGES_LIST[Math.floor(Math.random() * HERO_IMAGES_LIST.length)] }) =>
+        `background: url(${require(`../../../assets/${thumbImage}`)}) no-repeat center;`}
+      background-size: cover;
+      flex: 1;
+      -webkit-clip-path: polygon(15% 0, 0 100%, 100% 100%, 100% 0);
+      clip-path: polygon(15% 0, 0 100%, 100% 100%, 100% 0);
+    }
+  }
 `;
 
-const SaveButton = styled.button`
+const RadioLabel = styled.label`
+  div {
+    width: 100%;
+  }
+  display: flex;
+  align-items: flex-start;
   color: #374151;
-  background-color: #f9fafb;
-  padding: 9px 20px;
-  border: 0;
-  outline: 0;
-  border-radius: 6px;
-  font-weight: 500;
-  font-size: 20px;
-  margin-right: 10px;
-  margin-top: 40px;
-  display: block;
-  width: 140px;
-  outline: 0;
-  border-width: 1px;
-  border-color: transparent;
-
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  :hover {
-    opacity: 0.9;
+  font-size: 14px;
+  margin-top: 2rem;
+  margin-bottom: 0px;
+  text-align: left;
+  :last-child {
+    margin-bottom: 0;
   }
-`;
-const Separator = styled.hr`
-  margin: 2.5rem 0;
-  height: 1px;
-  border-style: none;
-  background-color: #e5e7eb;
-  width: 100%;
+  input {
+    cursor: pointer;
+    margin-right: 12px;
+    margin-top: 3px;
+    width: 15px;
+    height: 15px;
+    min-width: 15px;
+    min-height: 15px;
+  }
 `;
