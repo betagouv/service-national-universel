@@ -3,7 +3,7 @@ import styled from "styled-components";
 
 export default ({ ...props }) => (
   <BackContainer {...props}>
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
+    <svg width="16" height="10" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
       <path
         fillRule="evenodd"
         clipRule="evenodd"
@@ -14,8 +14,9 @@ export default ({ ...props }) => (
 );
 
 const BackContainer = styled.div`
+  display: flex;
   svg {
-    height: 17px;
+    height: 10px;
   }
   svg path {
     fill: ${({ color }) => `${color}`};
