@@ -98,7 +98,7 @@ export default () => {
             <>
               <FormRow>
                 <Col md={4}>
-                  <Label>Genre</Label>
+                  <Label>Sexe</Label>
                 </Col>
                 <Col>
                   <RadioLabel>
@@ -363,10 +363,10 @@ export default () => {
                         YOUNG_SITUATIONS.SPECIALIZED_SCHOOL,
                         YOUNG_SITUATIONS.APPRENTICESHIP,
                       ].includes(values.situation) && (
-                        <div style={{ marginBottom: "10px" }}>
-                          <Etablissement values={values} handleChange={handleChange} errors={errors} touched={touched} keys={{ schoolName: "schoolName", grade: "grade" }} />
-                        </div>
-                      )}
+                          <div style={{ marginBottom: "10px" }}>
+                            <Etablissement values={values} handleChange={handleChange} errors={errors} touched={touched} keys={{ schoolName: "schoolName", grade: "grade" }} />
+                          </div>
+                        )}
                     </>
                   )}
                   {values.schooled === "false" && (

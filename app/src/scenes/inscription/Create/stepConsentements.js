@@ -119,6 +119,20 @@ export default () => {
                   </div>
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="parentConsentment2" />
+                <RadioLabel style={{ marginBottom: 3 }}>
+                  <Field
+                    validate={(v) => !v && requiredMessage}
+                    value="true"
+                    checked={values.parentConsentment7}
+                    type="checkbox"
+                    name="parentConsentment7"
+                    onChange={handleChange}
+                  />
+                  <div>
+                    {isPlural ? "nous engageons" : "m'engage"}à renseigner le consentement relatif aux droits à l'image* <strong>avant le début du séjour de cohésion</strong>
+                  </div>
+                </RadioLabel>
+                <ErrorMessage errors={errors} touched={touched} name="parentConsentment7" />
                 {getAge(young.birthdateAt) < 15 && (
                   <>
                     <RadioLabel style={{ marginBottom: 3 }}>
@@ -155,8 +169,7 @@ export default () => {
                     onChange={handleChange}
                   />
                   <div>
-                    {isPlural ? "Nous nous engageons" : "Je m’engage"} à renseigner l'utilisation d'autotest COVID*{" "}
-                    <b>avant le début du séjour de cohésion.</b>
+                    {isPlural ? "nous engageons" : "m’engage"} à renseigner l'utilisation d'autotest COVID* <b>avant le début du séjour de cohésion.</b>
                   </div>
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="parentConsentment3" />
@@ -170,7 +183,7 @@ export default () => {
                     onChange={handleChange}
                   />
                   <div>
-                    {isPlural ? "Nous nous engageons" : "Je m’engage"} à remettre sous pli confidentiel la fiche sanitaire* ainsi que les documents médicaux et justificatifs nécessaires
+                    {isPlural ? "nous engageons" : "m’engage"} à remettre sous pli confidentiel la fiche sanitaire* ainsi que les documents médicaux et justificatifs nécessaires
                     <b> à mon arrivée au centre de séjour de cohésion.</b>
                   </div>
                 </RadioLabel>
@@ -185,7 +198,8 @@ export default () => {
                     onChange={handleChange}
                   />
                   <div>
-                    {isPlural ? "Nous nous engageons" : "Je m’engage"} à ce que <strong>{` ${young.firstName} ${young.lastName}`}</strong> soit à jour de ses vaccinations obligatoires*, c'est-à-dire anti-diphtérie, tétanos et poliomyélite (DTP), et pour les volontaires résidents Guyan, la fièvre jaune.
+                    {isPlural ? "nous engageons" : "m’engage"} à ce que <strong>{` ${young.firstName} ${young.lastName}`}</strong> soit à jour de ses vaccinations obligatoires*,
+                    c'est-à-dire anti-diphtérie, tétanos et poliomyélite (DTP), et pour les volontaires résidents de Guyane, la fièvre jaune.
                   </div>
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="parentConsentment5" />
@@ -206,8 +220,14 @@ export default () => {
                 <RadioLabel>
                   <Field validate={(v) => !v && requiredMessage} value="true" checked={values.consentment1} type="checkbox" name="consentment1" onChange={handleChange} />
                   <div>
-                    suis volontaire, sous le contrôle de {isPlural ? `${young.parent1FirstName} ${young.parent1LastName} et ${young.parent2FirstName} ${young.parent2LastName}` : `${young.parent1FirstName} ${young.parent1LastName}`}, pour effectuer à la session 2022 du Service National
-                    Universel qui comprend la participation au séjour de cohésion puis la réalisation d'une mission d'intérêt général.
+                    suis volontaire, sous le contrôle de{" "}
+                    <strong>
+                      {isPlural
+                        ? `${young.parent1FirstName} ${young.parent1LastName} et ${young.parent2FirstName} ${young.parent2LastName}`
+                        : `${young.parent1FirstName} ${young.parent1LastName}`}
+                    </strong>
+                    , pour effectuer la session 2022 du Service National Universel qui comprend la participation au séjour de cohésion puis la réalisation d'une mission d'intérêt
+                    général.
                   </div>
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="consentment1" />
