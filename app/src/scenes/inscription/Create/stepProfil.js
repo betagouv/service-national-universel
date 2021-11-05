@@ -67,10 +67,15 @@ export default () => {
           } catch (e) {
             console.log(e);
             if (e.code === "USER_ALREADY_REGISTERED")
-              return toastr.error("Un dossier a déjà été inscrit sur la plateforme avec ces informations.", "Si vous ne vous souvenez plus de votre identifiant, cliquez ici.", {
-                timeOut: 30000,
-                onToastrClick: () => window.open(`https://www.snu.gouv.fr/foire-aux-questions-11`, "_blank").focus(),
-              });
+              return toastr.error(
+                "Vous avez déjà un compte sur la plateforme SNU, renseigné avec ces informations (prénom, nom et date de naissance).",
+                "Si vous ne vous souvenez plus de votre identifiant (email), cliquez ici.",
+                {
+                  timeOut: 30000,
+                  onToastrClick: () =>
+                    window.open(`https://support.snu.gouv.fr/help/fr-fr/24-questions-frequemment-posees/178-comment-recuperer-mon-identifiant`, "_blank").focus(),
+                }
+              );
             toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code) || e.message);
             Sentry.captureException(e);
           } finally {

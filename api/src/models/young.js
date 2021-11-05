@@ -965,6 +965,13 @@ const Schema = new mongoose.Schema({
       description: "Fichier : Formulaire de consentement d'autotest PCR",
     },
   },
+  informationAccuracy: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le volontaire certifie l'exactitude des renseignements fournis",
+    },
+  },
 
   // * JDC
   jdc: {
