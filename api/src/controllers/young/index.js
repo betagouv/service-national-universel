@@ -10,7 +10,7 @@ const Joi = require("joi");
 const config = require("../../config");
 const { capture } = require("../../sentry");
 const { encrypt } = require("../../cryptoUtils");
-const { getQPV } = require("../../qpv");
+const { getQPV, getDensity } = require("../../geo");
 const YoungObject = require("../../models/young");
 const ReferentModel = require("../../models/referent");
 const CohesionCenterObject = require("../../models/cohesionCenter");
@@ -381,6 +381,13 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
       if (qpv === true) young.set({ qpv: "true" });
       else if (qpv === false) young.set({ qpv: "false" });
       else young.set({ qpv: "" });
+      await young.save({ fromUser: req.user });
+    }
+
+    // Check quartier prioritaires.
+    if (value.cityCode) {
+      const populationDensity = await getDensity(value.cityCode);
+      young.set({ populationDensity });
       await young.save({ fromUser: req.user });
     }
 

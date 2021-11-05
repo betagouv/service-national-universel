@@ -2,6 +2,7 @@ const fetch = require("node-fetch");
 const querystring = require("querystring");
 const { capture } = require("./sentry");
 const { QPV_USERNAME, QPV_PASSWORD } = require("./config");
+const AreaModel = require("../models/area");
 
 const url = "https://wsa.sig.ville.gouv.fr/service/georeferenceur.json";
 
@@ -49,4 +50,17 @@ async function getQPV(postcode, commune, adresse) {
   });
 }
 
-module.exports = { getQPV };
+async function getDensity(cityCode) {
+  if (!cityCode) {
+    console.log("City Code is not set");
+    return "";
+  }
+  const area = await AreaModel.findOne({ cityCode });
+  if (!area) {
+    console.log(`cityCode not found ${cityCode}`);
+    return "";
+  }
+  return area.density;
+}
+
+module.exports = { getQPV, getDensity };
