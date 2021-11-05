@@ -59,7 +59,7 @@ export default ({ handleChange, values, keys, errors, touched }) => {
             </option>
             {hits?.map((hit) => (
               <option key={hit._id} value={hit.uai}>
-                {`${hit.fullName}, ${hit.postcode} ${hit.city} ${hit.uai}`}
+                {`${hit.fullName}, ${hit.postcode} ${hit.city}`}
               </option>
             ))}
             {hits.length === 0 && <option value={values[keys.schoolName]}>{values[keys.schoolName]}</option>}
