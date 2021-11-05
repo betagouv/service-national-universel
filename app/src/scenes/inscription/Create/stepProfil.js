@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { Row, Col } from "reactstrap";
+import { Col } from "reactstrap";
 import { Field, Formik } from "formik";
 import { useSelector, useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
@@ -9,16 +9,14 @@ import { toastr } from "react-redux-toastr";
 import DateInput from "../components/dateInput";
 import * as Sentry from "@sentry/react";
 
-import { getPasswordErrorMessage, translate } from "../../../utils";
+import { getPasswordErrorMessage, translate, SENDINBLUE_TEMPLATES } from "../../../utils";
 import ErrorMessage, { requiredMessage } from "../components/errorMessage";
 import { setYoung } from "../../../redux/auth/actions";
 import FormRow from "../../../components/form/FormRow";
 import api from "../../../services/api";
-import { YOUNG_STATUS, YOUNG_PHASE } from "../../../utils";
 import EyeOpen from "../../../assets/eye.svg";
 import EyeClose from "../../../assets/eye-slash.svg";
 import FormFooter from "../../../components/form/FormFooter";
-import { STEPS } from "../utils";
 import { appURL } from "../../../config";
 
 export default () => {
@@ -63,6 +61,7 @@ export default () => {
             const { ok: okPut, code: codePut, data: young } = await api.put("/young", newValues);
             if (!okPut) return toastr.error("Une erreur s'est produite :", codePut);
             dispatch(setYoung(young));
+            await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED}`);
             history.push("/inscription/coordonnees");
           } catch (e) {
             console.log(e);
