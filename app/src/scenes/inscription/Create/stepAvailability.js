@@ -58,7 +58,18 @@ export default () => {
       ) : (
         <Container>
           {availability?.length === 0 ? (
-            <Info>Aucune session n'est disponible pour le moment</Info>
+            <>
+              <Info>
+                <h3>INSCRIPTION NON-RECEVABLE</h3>
+                <h1>Malheureusement votre situation ne vous permet pas de participer à la session 2022 du SNU.</h1>
+                <div className="btns">
+                  <Button onClick={() => history.push("/les-programmes")} borderColor="#D1D5DB">
+                    Consulter d'autres dispositifs d'engagement
+                  </Button>
+                </div>
+              </Info>
+              <div className="thumb" />
+            </>
           ) : (
             <>
               <Info>
