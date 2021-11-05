@@ -54,6 +54,13 @@ const IconContainer = styled.div`
   svg {
     min-width: 4rem
   }
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: center;
+    svg {
+      margin-bottom: 1rem;
+    }
+  }
 `;
 const InfoContainer = styled.a`
   display: flex;
