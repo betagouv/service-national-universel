@@ -80,10 +80,10 @@ export default ({ step }) => {
         <MobileCurrentStep>
           <span className="icon">
             <span>
-              {stepNumber}/{STEPSKeys.length - 1}
+              {stepNumber} / {STEPSKeys.length - 1}
             </span>
           </span>
-          <span className="text">{stepName}</span>
+          {/* <span className="text">{stepName}</span> */}
         </MobileCurrentStep>
         <MobileNavigation style={{ transform: "rotate(180deg)", marginRight: "10px" }} disabled={!nextStepID || !canGoToStep(nextStepID)} onClick={() => handleClick(nextStepID)}>
           <BackIcon fill="#362F78" />
@@ -204,7 +204,6 @@ const MobileCurrentStep = styled.li`
   margin: 15px;
   display: flex;
   align-items: center;
-
   font-weight: 600;
   color: #362f78;
   margin: 0;
@@ -216,9 +215,6 @@ const MobileCurrentStep = styled.li`
     flex-shrink: 0;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
-    border: 3px solid;
-    border-color: #362f78;
     margin: 10px;
   }
 `;
