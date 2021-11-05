@@ -70,6 +70,7 @@ export default ({ handleChange, values, keys, errors, touched }) => {
           {manual && (
             <div>
               <Field
+                style={{ marginTop: "1rem" }}
                 placeholder="Nom de l'établissement"
                 className="form-control"
                 validate={(v) => !v && requiredMessage}
