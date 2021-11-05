@@ -194,7 +194,7 @@ export default () => {
                   <Label>Lieu de naissance</Label>
                 </Col>
                 <Col>
-                  <FlexGroup>
+                  <FlexGroup style={{ flexWrap: "wrap" }}>
                     <RadioLabel>
                       <Field
                         validate={(v) => !v && requiredMessage}
@@ -251,7 +251,7 @@ export default () => {
                       </>
                     )}
                     {values.birthCountry === "France" && (
-                      <>
+                      <div style={{ display: "flex", flexWrap: "wrap" }}>
                         <div>
                           <FieldWithWidth
                             maxWidth="195px"
@@ -261,6 +261,7 @@ export default () => {
                             name="birthCityZip"
                             value={values.birthCityZip}
                             onChange={handleChange}
+                            style={{ marginRight: "10px" }}
                           />
                           <ErrorMessage errors={errors} touched={touched} name="birthCityZip" />
                         </div>
@@ -273,7 +274,6 @@ export default () => {
                             name="birthCity"
                             value={values.birthCity}
                             onChange={handleChange}
-                            style={{ marginLeft: "10px" }}
                           >
                             <option selected={values.birthCity === undefined || values.birthCity === ""}>Ville de naissance</option>
                             {suggestions.map((el) => (
@@ -284,7 +284,7 @@ export default () => {
                           </Field>
                           <ErrorMessage errors={errors} touched={touched} name="birthCity" />
                         </div>
-                      </>
+                      </div>
                     )}
                   </FlexGroup>
                 </Col>
@@ -485,10 +485,8 @@ const RadioLabel = styled.label`
   align-items: center;
   color: #374151;
   font-size: 14px;
-  margin-bottom: 0;
-  :last-child {
-    margin-left: 12px;
-  }
+  margin-bottom: 0.5rem;
+  margin-right: 0.5rem;
   input {
     cursor: pointer;
     margin-right: 12px;
