@@ -396,7 +396,7 @@ const Schema = new mongoose.Schema({
   },
   populationDensity: {
     type: String,
-    enum: ["TRES PEU DENSE", "PEU DENSE", "INTERMEDIAIRE", "DENSE"],
+    enum: ["TRES PEU DENSE", "PEU DENSE", "INTERMEDIAIRE", "DENSE", ""],
     documentation: {
       description: "tres peu dense, peu dense, intermediaire, tres dense",
     },
