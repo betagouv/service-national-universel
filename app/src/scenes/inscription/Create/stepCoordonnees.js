@@ -21,7 +21,25 @@ import InfoIcon from "../../../components/InfoIcon";
 export default () => {
   const history = useHistory();
   const dispatch = useDispatch();
-  const young = useSelector((state) => state.Auth.young);
+  const young = (() => {
+    let tempYoung = JSON.parse(JSON.stringify(useSelector((state) => state.Auth.young)));
+
+    if (!tempYoung) return tempYoung;
+
+    if (tempYoung.foreignCountry) {
+      tempYoung.hostCountry = tempYoung.country;
+      tempYoung.hostCity = tempYoung.city;
+      tempYoung.hostZip = tempYoung.zip;
+      tempYoung.hostAddress = tempYoung.address;
+
+      tempYoung.country = tempYoung.foreignCountry;
+      tempYoung.city = tempYoung.foreignCity;
+      tempYoung.zip = tempYoung.foreignZip;
+      tempYoung.address = tempYoung.foreignAddress;
+    }
+    return tempYoung;
+  })();
+
   const [loading, setLoading] = useState(false);
 
   if (!young) {
@@ -68,9 +86,25 @@ export default () => {
 
   const onSubmit = async (values) => {
     setLoading(true);
+    let tempYoung = JSON.parse(JSON.stringify(values));
+
+    if (tempYoung.country !== "France") {
+      tempYoung.foreignAddress = tempYoung.address;
+      tempYoung.foreignCity = tempYoung.city;
+      tempYoung.foreignZip = tempYoung.zip;
+      tempYoung.foreignCountry = tempYoung.country;
+      tempYoung.country = "France";
+      tempYoung.city = tempYoung.hostCity;
+      tempYoung.zip = tempYoung.hostZip;
+      tempYoung.address = tempYoung.hostAddress;
+      tempYoung.location = tempYoung.hostLocation;
+      tempYoung.department = tempYoung.hostDepartment;
+      tempYoung.region = tempYoung.hostRegion;
+    }
+
     try {
-      values.inscriptionStep = STEPS.PARTICULIERES;
-      const { ok, code, data } = await api.put("/young", values);
+      tempYoung.inscriptionStep = STEPS.PARTICULIERES;
+      const { ok, code, data } = await api.put("/young", tempYoung);
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       dispatch(setYoung(data));
       history.push("/inscription/particulieres");
@@ -163,11 +197,8 @@ export default () => {
                       location: "location",
                       department: "department",
                       region: "region",
-                      country: "country",
                     }}
                     values={values}
-                    countryVisible={values.country !== "France"}
-                    departAndRegionVisible={false}
                     handleChange={handleChange}
                     errors={errors}
                     touched={touched}
@@ -363,10 +394,10 @@ export default () => {
                         YOUNG_SITUATIONS.SPECIALIZED_SCHOOL,
                         YOUNG_SITUATIONS.APPRENTICESHIP,
                       ].includes(values.situation) && (
-                          <div style={{ marginBottom: "10px" }}>
-                            <Etablissement values={values} handleChange={handleChange} errors={errors} touched={touched} keys={{ schoolName: "schoolName", grade: "grade" }} />
-                          </div>
-                        )}
+                        <div style={{ marginBottom: "10px" }}>
+                          <Etablissement values={values} handleChange={handleChange} errors={errors} touched={touched} keys={{ schoolName: "schoolName", grade: "grade" }} />
+                        </div>
+                      )}
                     </>
                   )}
                   {values.schooled === "false" && (

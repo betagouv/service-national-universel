@@ -367,56 +367,56 @@ const Schema = new mongoose.Schema({
   address: {
     type: String,
     documentation: {
-      description: "Adresse du volontaire",
+      description: "Adresse pendant le snu du volontaire",
     },
   },
   complementAddress: {
     type: String,
     documentation: {
-      description: "Complément d'adresse du volontaire",
+      description: "Complément d'adresse pendant le snu du volontaire",
     },
   },
   zip: {
     type: String,
     documentation: {
-      description: "Code postal du volontaire",
+      description: "Code postal pendant le snu du volontaire",
     },
   },
   city: {
     type: String,
     documentation: {
-      description: "Ville du volontaire",
+      description: "Ville pendant le snu du volontaire",
     },
   },
   cityCode: {
     type: String,
     documentation: {
-      description: "Code insee de la ville",
+      description: "Code pendant le snu insee de la ville",
     },
   },
   populationDensity: {
     type: String,
     enum: ["TRES PEU DENSE", "PEU DENSE", "INTERMEDIAIRE", "DENSE"],
     documentation: {
-      description: "tres peu dense, peu dense, intermediaire, tres dense",
+      description: "Densité de la ville  pendant le snu du volontaire",
     },
   },
   department: {
     type: String,
     documentation: {
-      description: "Département du volontaire",
+      description: "Département pendant le snu du volontaire",
     },
   },
   region: {
     type: String,
     documentation: {
-      description: "Région du volontaire",
+      description: "Région pendant le snu du volontaire",
     },
   },
   country: {
     type: String,
     documentation: {
-      description: "Pays de résidence du volontaire",
+      description: "Pays de résidence pendant le snu du volontaire",
     },
   },
   location: {
@@ -428,7 +428,7 @@ const Schema = new mongoose.Schema({
     enum: ["true", "false", ""],
     default: "",
     documentation: {
-      description: "Le volontaire est dans un Quarier Prioritaire",
+      description: "Le volontaire est dans un Quarier Prioritaire pendant le snu",
     },
   },
   populationDensity: {
@@ -436,6 +436,30 @@ const Schema = new mongoose.Schema({
     default: "",
     documentation: {
       description: "Densité de population du domicile du volontaire (ZRR - zone rurale)",
+    },
+  },
+  foreignAddress: {
+    type: String,
+    documentation: {
+      description: "Adresse à l'étranger du volontaire",
+    },
+  },
+  foreignCity: {
+    type: String,
+    documentation: {
+      description: "Ville à l'étranger du volontaire",
+    },
+  },
+  foreignZip: {
+    type: String,
+    documentation: {
+      description: "Code postal à l'étranger du volontaire",
+    },
+  },
+  foreignCountry: {
+    type: String,
+    documentation: {
+      description: "Pays à l'étranger du volontaire",
     },
   },
 
@@ -730,24 +754,6 @@ const Schema = new mongoose.Schema({
     type: String,
     documentation: {
       description: "Prénom de l'hébergeur",
-    },
-  },
-  hostCity: {
-    type: String,
-    documentation: {
-      description: "Ville de l'hébergeur",
-    },
-  },
-  hostZip: {
-    type: String,
-    documentation: {
-      description: "Code postale de la ville de l'hébergeur",
-    },
-  },
-  hostAddress: {
-    type: String,
-    documentation: {
-      description: "Adresse de l'hébergeur",
     },
   },
   hostRelationship: {
