@@ -109,9 +109,15 @@ const Wrapper = styled.div`
   }
   .react-autosuggest__suggestions-list li {
     cursor: pointer;
-    padding: 7px 10px;
+    font-size: 14px;
+    padding: 5px 7px;
+    color: #777;
     :hover {
       background-color: #f3f3f3;
+    }
+    b {
+      font-weight: 500;
+      color: #000;
     }
   }
   .react-autosuggest__suggestion--highlighted {
