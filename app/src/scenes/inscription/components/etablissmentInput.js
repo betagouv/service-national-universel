@@ -95,7 +95,7 @@ export default ({ handleChange, values, keys, errors, touched }) => {
                 onChange={(e) => {
                   const value = e.target.value;
                   handleChange({ target: { name: keys.schoolId, value } });
-                  handleChange({ target: { name: keys.schoolName, value: hits.find((i) => i._id === value).fullName } });
+                  handleChange({ target: { name: keys.schoolName, value: hits?.find((i) => i._id === value)?.fullName || "" } });
                 }}
               >
                 <option key="" value="" disabled>
