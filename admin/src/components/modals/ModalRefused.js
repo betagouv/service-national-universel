@@ -14,9 +14,9 @@ export default ({ isOpen, value, onChange, onSend }) => {
 
   useEffect(() => {
     setMessage(`Bonjour ${value.firstName} ${value.lastName},
-Votre candidature au SNU a bien été étudiée par l'équipe de votre département.
+Votre dossier d'inscription au SNU a bien été étudiée par l'équipe de votre département.
 
-Nous n'avons malheureusement pu donner suite à votre candidature au Service Nationale Universel édition 2021.
+Nous n'avons malheureusement pu donner suite à votre dossier d'inscription à la prochaine édition du Service Nationale Universel.
 En voici les principales raisons :
 -
 -
