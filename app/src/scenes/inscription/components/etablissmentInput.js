@@ -34,7 +34,6 @@ export default ({ handleChange, values, keys, errors, touched }) => {
   useEffect(() => {
     (async () => {
       if (emptySearch && values[keys.schoolId]) {
-        console.log(emptySearch);
         const { responses } = await api.esQuery("school", {
           query: { ids: { values: [values[keys.schoolId]] } },
         });
