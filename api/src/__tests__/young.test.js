@@ -193,7 +193,7 @@ describe("Young", () => {
 
     it("should update QPV to true", async () => {
       const { updatedYoung, response } = await selfUpdateYoung({
-        zip: "qpvShouldWork",
+        zip: "geoShouldWork",
         city: "foo",
         address: "bar",
       });
