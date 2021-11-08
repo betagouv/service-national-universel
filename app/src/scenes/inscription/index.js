@@ -19,8 +19,10 @@ import Home from "./Home/index.js";
 import { STEPS } from "./utils";
 import { isInscription2021Closed, isEndOfInscriptionManagement2021 } from "../../utils";
 import { environment } from "../../config";
+import HelpButton from "../../components/buttons/HelpButton";
 
 const Step = ({ step }) => {
+  const young = useSelector((state) => state.Auth.young);
   function renderStep(step) {
     if (step === STEPS.COORDONNEES) return <Coordonnees />;
     if (step === STEPS.PARTICULIERES) return <Particulieres />;
@@ -37,14 +39,15 @@ const Step = ({ step }) => {
       <Content>
         <Nav step={step} />
         <Wrapper>{renderStep(step)}</Wrapper>
+        <div className="help-button-container">
+          <HelpButton to={young ? `/besoin-d-aide` : `/public-besoin-d-aide`} color="#362f78" />
+        </div>
       </Content>
     </div>
   );
 };
 
 export default () => {
-  const young = useSelector((state) => state.Auth.young);
-
   return (
     <Switch>
       <Route path="/inscription/profil" component={() => <Step step={STEPS.PROFIL} />} />
@@ -64,7 +67,13 @@ export default () => {
 const Content = styled.div`
   padding: 1rem;
   margin-left: 320px;
+  .help-button-container {
+    display: none;
+  }
   @media (max-width: 768px) {
+    .help-button-container {
+    display: block;
+  }
     margin-left: 0;
   }
 `;
