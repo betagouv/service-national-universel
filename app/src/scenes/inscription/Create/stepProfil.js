@@ -73,7 +73,7 @@ export default () => {
                 {
                   timeOut: 30000,
                   onToastrClick: () =>
-                    window.open(`https://support.snu.gouv.fr/help/fr-fr/24-questions-frequemment-posees/178-comment-recuperer-mon-identifiant`, "_blank").focus(),
+                    window.open(`https://support.snu.gouv.fr/help/fr-fr/24-questions-frequemment-posees/178-comment-recuperer-mon-identifiant`, "_blank")?.focus(),
                 }
               );
             toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code) || e.message);
