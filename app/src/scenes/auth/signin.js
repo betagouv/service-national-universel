@@ -16,7 +16,6 @@ import Submit from "./components/Submit";
 import Register from "./components/Register";
 import ErrorLogin from "./components/ErrorLogin";
 import ModalInProgress from "../../components/modals/ModalInProgress";
-import { isInscription2021Closed } from "../../utils";
 import { toastr } from "react-redux-toastr";
 
 export default () => {
@@ -52,12 +51,8 @@ export default () => {
             try {
               const { user: young, token } = await api.post(`/young/signin`, { email, password });
               if (young) {
-                if (young.status === "IN_PROGRESS" && isInscription2021Closed()) {
-                  setModal("inProgress");
-                } else {
-                  if (token) api.setToken(token);
-                  dispatch(setYoung(young));
-                }
+                if (token) api.setToken(token);
+                dispatch(setYoung(young));
               }
             } catch (e) {
               console.log("e", e);
@@ -123,14 +118,12 @@ export default () => {
             );
           }}
         </Formik>
-        {!isInscription2021Closed() && (
-          <>
-            <Title>
-              <span>Vous n'êtes pas encore inscrit ?</span>
-            </Title>
-            <Register to="/inscription/profil">Commencer l'inscription</Register>
-          </>
-        )}
+        <>
+          <Title>
+            <span>Vous n'êtes pas encore inscrit ?</span>
+          </Title>
+          <Register to="/inscription/profil">Commencer l'inscription</Register>
+        </>
       </LoginBox>
     </div>
   );

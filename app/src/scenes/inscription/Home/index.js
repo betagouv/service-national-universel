@@ -60,14 +60,14 @@ export default ({ location }) => {
             <CardPhase upText="phase 3 - facultative" title="L'engagement" downText="Mission facultative de 3 mois minimum" to="https://www.snu.gouv.fr/l-engagement-28" />
           </Carousel>
           <StartButtonContainer className="desktop desktopButton">
-            <StartButton>Inscription&nbsp;à&nbsp;partir&nbsp;du&nbsp;8&nbsp;novembre&nbsp;2021</StartButton>
+            <StartButton onClick={() => history.push("/inscription/profil")}>Commencer&nbsp;l'inscription</StartButton>
           </StartButtonContainer>
         </CardsContainer>
         <MobileView />
         <DesktopView />
       </Wrapper>
       <StartButtonContainer className="mobile">
-        <StartButton>Inscription à partir du 8 novembre 2021</StartButton>
+        <StartButton onClick={() => history.push("/inscription/profil")}>Commencer&nbsp;l'inscription</StartButton>
       </StartButtonContainer>
     </div>
   );
@@ -207,15 +207,15 @@ const StartButton = styled.div`
   padding: 1rem 1.5rem;
   text-transform: uppercase;
   color: #fff;
-  background-color: #9a9a9a;
+  background-color: #61c091;
   font-weight: 500;
   font-size: 1rem;
+  cursor: pointer;
   letter-spacing: 0.03em;
   border-radius: 30px;
-  width: 411px;
-  @media (max-width: 420px) {
-    width: 300px;
-    text-align: center;
+  :hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    color: #fff;
   }
   &.mobile {
     border: 3px #51b081 solid;

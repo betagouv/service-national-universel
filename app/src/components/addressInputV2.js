@@ -3,9 +3,11 @@ import styled from "styled-components";
 import { Row, Col } from "reactstrap";
 import { Field, useField } from "formik";
 import ErrorMessage, { requiredMessage } from "../scenes/inscription/components/errorMessage";
-import { countries } from "countries-list";
 import InfoIcon from "./InfoIcon";
 import { Spinner } from "reactstrap";
+import countries from "i18n-iso-countries";
+countries.registerLocale(require("i18n-iso-countries/langs/fr.json"));
+const countriesList = countries.getNames("fr", { select: "official" });
 
 export default ({ keys, values, handleChange, errors, touched, validateField, countryVisible = false }) => {
   const [suggestion, setSuggestion] = useState({});
@@ -95,9 +97,9 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
                   handleChange({ target: { name: keys.country, value } });
                 }}
               >
-                {Object.keys(countries).map((country_id) => (
-                  <option key={country_id} value={countries[country_id].name}>
-                    {`${countries[country_id].emoji} ${countries[country_id].name}`}
+                {Object.keys(countriesList).map((country_id) => (
+                  <option key={country_id} value={countriesList[country_id]}>
+                    {countriesList[country_id]}
                   </option>
                 ))}
               </Field>

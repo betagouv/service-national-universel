@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "webpack serve --port 8081 --mode development --config webpack.dev.config.js --progress --liveReload --open --hot --inline",
+    "mobile": "webpack serve --port 8081 --mode development --config webpack.dev.config.js --progress --liveReload --open --hot --inline --host 0.0.0.0",
     "start": "node server/index.js",
     "install": "node src/build-only-on-clevercloud.js",
     "build": "node --max-old-space-size=3000 node_modules/webpack/bin/webpack.js"
@@ -43,13 +44,13 @@
     "babel-loader": "^8.2.2",
     "bootstrap": "^4.5.2",
     "core-js": "^3.12.1",
-    "countries-list": "^2.6.1",
     "dayjs": "^1.10.7",
     "express": "^4.17.1",
     "forcedomain": "^2.2.2",
     "formik": "^2.1.5",
     "helmet": "^4.6.0",
     "hsts": "^2.2.0",
+    "i18n-iso-countries": "^6.8.0",
     "isomorphic-fetch": "^3.0.0",
     "less": "^4.1.0",
     "less-loader": "^7.2.1",
@@ -72,7 +73,7 @@
     "regenerator-runtime": "^0.13.7",
     "snu-lib": "file:../lib",
     "styled-components": "^5.3.0",
-    "validator": "^13.5.2"
+    "validator": "^13.7.0"
   },
   "engines": {
     "node": "^16.10",
