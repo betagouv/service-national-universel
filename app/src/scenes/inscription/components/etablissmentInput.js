@@ -26,7 +26,7 @@ export default ({ handleChange, values, keys, errors, touched }) => {
       },
       size: 100,
     });
-    setHits(responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
+    setHits(responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })).sort((a, b) => a.fullName.localeCompare(b.fullName)));
     if (hits.length) setManual(false);
     return hits;
   };
@@ -34,7 +34,6 @@ export default ({ handleChange, values, keys, errors, touched }) => {
   useEffect(() => {
     (async () => {
       if (emptySearch && values[keys.schoolId]) {
-        console.log(emptySearch);
         const { responses } = await api.esQuery("school", {
           query: { ids: { values: [values[keys.schoolId]] } },
         });
@@ -54,6 +53,7 @@ export default ({ handleChange, values, keys, errors, touched }) => {
   return (
     <Row>
       <Col md={12} style={{ marginTop: 15 }}>
+        <Label>Ville et code postal de l'établissement</Label>
         <SchoolCityTypeahead
           onChange={(e) => {
             if (e !== "") {
@@ -66,12 +66,13 @@ export default ({ handleChange, values, keys, errors, touched }) => {
             getSuggestions(e);
           }}
         />
+
         {hits.length === 0 && !values[keys.schoolId] && <ErrorMessage errors={errors} touched={touched} name={keys.schoolName} />}
         <div>
           {manual && (
             <div>
+              <Label>Nom de l'établissement</Label>
               <Field
-                style={{ marginTop: "1rem" }}
                 placeholder="Nom de l'établissement"
                 className="form-control"
                 validate={(v) => !v && requiredMessage}
@@ -84,8 +85,8 @@ export default ({ handleChange, values, keys, errors, touched }) => {
           )}
           {!manual && (
             <div style={{ display: hits.length > 0 || values[keys.schoolId] ? "block" : "none" }}>
+              <Label>Nom de l'établissement</Label>
               <Field
-                style={{ marginTop: "1rem" }}
                 as="select"
                 className="form-control"
                 name={keys.schoolId}
@@ -94,7 +95,7 @@ export default ({ handleChange, values, keys, errors, touched }) => {
                 onChange={(e) => {
                   const value = e.target.value;
                   handleChange({ target: { name: keys.schoolId, value } });
-                  handleChange({ target: { name: keys.schoolName, value: hits.find((i) => i._id === value).fullName } });
+                  handleChange({ target: { name: keys.schoolName, value: hits?.find((i) => i._id === value)?.fullName || "" } });
                 }}
               >
                 <option key="" value="" disabled>
@@ -113,8 +114,8 @@ export default ({ handleChange, values, keys, errors, touched }) => {
           )}
 
           <div style={{ display: manual || hits.length > 0 || values[keys.schoolId] ? "block" : "none" }}>
+            <Label>Niveau scolaire</Label>
             <Field
-              style={{ marginTop: "1rem" }}
               as="select"
               className="form-control"
               name={keys.grade}
@@ -157,7 +158,7 @@ export default ({ handleChange, values, keys, errors, touched }) => {
                 setManual(true);
               }}
             >
-              Je ne trouve pas mon établissement
+              Je n'ai pas trouvé pas mon établissement
             </span>
           )}
         </div>
@@ -165,3 +166,10 @@ export default ({ handleChange, values, keys, errors, touched }) => {
     </Row>
   );
 };
+
+const Label = styled.div`
+  color: #374151;
+  font-size: 14px;
+  margin-bottom: 0.5rem;
+  margin-top: 1rem;
+`;

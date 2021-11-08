@@ -15,6 +15,7 @@ const Schema = new mongoose.Schema(
     city: { type: String },
     department: { type: String },
     type: { type: String },
+    country: { type: String, default: "France" },
     apiAdressObject: mongoose.Schema.Types.Mixed,
     csvObject: mongoose.Schema.Types.Mixed,
   },

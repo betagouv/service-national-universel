@@ -1,8 +1,7 @@
 // https://api-adresse.data.gouv.fr/search/?q=nante&type=municipality
 import Autosuggest from "react-autosuggest";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
-import api from "../services/api";
 
 const NORESULTMESSAGE = "Aucun résultat trouvé";
 
@@ -49,9 +48,7 @@ export default function SchoolCityTypeahead(props) {
         for (const item of res) {
           for (const cp of item.codesPostaux) {
             if (text.trim().match(/[0-9]{1,5}$/)) {
-              console.log("BOUM", text);
               if (cp.startsWith(text.trim().replace(/^.*[^0-9]([0-9]{1,5})$/, "$1"))) {
-                console.log(cp, text);
                 s.push({ label: item.nom, postcode: cp });
               }
             } else {
@@ -111,9 +108,15 @@ const Wrapper = styled.div`
   }
   .react-autosuggest__suggestions-list li {
     cursor: pointer;
-    padding: 7px 10px;
+    font-size: 14px;
+    padding: 5px 7px;
+    color: #777;
     :hover {
       background-color: #f3f3f3;
+    }
+    b {
+      font-weight: 500;
+      color: #000;
     }
   }
   .react-autosuggest__suggestion--highlighted {

@@ -12,13 +12,10 @@ import Documents from "./Create/stepDocuments";
 import Availability from "./Create/stepAvailability";
 import Done from "./Create/stepDone";
 import Drawer from "./Create/drawer";
-import HomeClosed from "./Home/closed";
 import { useSelector } from "react-redux";
 
 import Home from "./Home/index.js";
 import { STEPS } from "./utils";
-import { isInscription2021Closed, isEndOfInscriptionManagement2021 } from "../../utils";
-import { environment } from "../../config";
 import HelpButton from "../../components/buttons/HelpButton";
 
 const Step = ({ step }) => {

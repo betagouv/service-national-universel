@@ -163,7 +163,6 @@ export default () => {
                       location: "location",
                       department: "department",
                       region: "region",
-                      country: "country",
                     }}
                     values={values}
                     countryVisible={values.country !== "France"}
@@ -363,16 +362,16 @@ export default () => {
                         YOUNG_SITUATIONS.SPECIALIZED_SCHOOL,
                         YOUNG_SITUATIONS.APPRENTICESHIP,
                       ].includes(values.situation) && (
-                        <div style={{ marginBottom: "10px" }}>
-                          <Etablissement
-                            values={values}
-                            handleChange={handleChange}
-                            errors={errors}
-                            touched={touched}
-                            keys={{ schoolName: "schoolName", grade: "grade", schoolId: "schoolId" }}
-                          />
-                        </div>
-                      )}
+                          <div style={{ marginBottom: "10px" }}>
+                            <Etablissement
+                              values={values}
+                              handleChange={handleChange}
+                              errors={errors}
+                              touched={touched}
+                              keys={{ schoolName: "schoolName", grade: "grade", schoolId: "schoolId" }}
+                            />
+                          </div>
+                        )}
                     </>
                   )}
                   {values.schooled === "false" && (
