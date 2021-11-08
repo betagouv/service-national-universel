@@ -49,9 +49,7 @@ export default function SchoolCityTypeahead(props) {
         for (const item of res) {
           for (const cp of item.codesPostaux) {
             if (text.trim().match(/[0-9]{1,5}$/)) {
-              console.log("BOUM", text);
               if (cp.startsWith(text.trim().replace(/^.*[^0-9]([0-9]{1,5})$/, "$1"))) {
-                console.log(cp, text);
                 s.push({ label: item.nom, postcode: cp });
               }
             } else {
