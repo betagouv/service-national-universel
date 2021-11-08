@@ -46,6 +46,7 @@
     "core-js": "^3.12.1",
     "dayjs": "^1.10.7",
     "express": "^4.17.1",
+    "fetch-retry": "^5.0.1",
     "forcedomain": "^2.2.2",
     "formik": "^2.1.5",
     "helmet": "^4.6.0",
