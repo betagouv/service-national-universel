@@ -1,8 +1,10 @@
 import React from "react";
+import { NavLink } from "react-router-dom";
 import styled from "styled-components";
 import { STEPS } from "../utils";
 import { useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
+import QuestionMark from "../../../assets/QuestionMark";
 
 export default ({ step }) => {
   const history = useHistory();
@@ -66,9 +68,22 @@ export default ({ step }) => {
           </ul>
         </li>
       </MainNav>
+      <HelpButton to={young ? `/besoin-d-aide` : `/public-besoin-d-aide`} />
     </Sidebar>
   );
 };
+
+const HelpButton = ({ to }) => (
+  <div className="help-button-container">
+    <NavLink className="help-button" to={to}>
+      <QuestionMark className="icon" />
+      <div className="help-button-text">
+        <div className="help-button-text-primary">Besoin d'aide ?</div>
+        <div className="help-button-text-secondary">Tutoriels, contacts</div>
+      </div>
+    </NavLink>
+  </div>
+);
 
 const Logos = styled.div`
   cursor: pointer;
@@ -100,6 +115,9 @@ const Sidebar = styled.div`
   z-index: 1;
   transition: 0.2s;
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   @media (max-width: 768px) {
     display: none;
   }
@@ -117,6 +135,43 @@ const Sidebar = styled.div`
       margin-right: 20px;
       svg {
         stroke: #8da2fb;
+      }
+    }
+  }
+  .help-button-container {
+    margin: 2rem auto;
+    justify-content: center;
+    display: flex;
+    .help-button {
+      border: 1px solid #7786cf;
+      border-radius: 0.3rem;
+      padding: 0.5rem;
+      align-items: center;
+      display: flex;
+      .icon {
+        height: 1.5rem;
+        width: 1.5rem;
+        color: #7786cf;
+        margin-right: 0.5rem;
+      }
+      .help-button-text {
+        color: white;
+        text-align: center;
+        .help-button-text-primary {
+          font-weight: 400;
+          font-size: 0.9rem;
+        }
+        .help-button-text-secondary {
+          font-weight: 300;
+          font-size: 0.6rem;
+        }
+      }
+      :hover {
+        background: #7786cf;
+        cursor: pointer;
+        .icon {
+          color: #fff;
+        }
       }
     }
   }

@@ -60,12 +60,13 @@ const articles = [
     body: `La Journée de Défense et Citoyenneté (JDC) est obligatoire pour tous...`,
     url: "https://support.snu.gouv.fr/help/fr-fr/24-questions-frequemment-posees/159-journee-defense-et-citoyennete-jdc",
   },
-  {
+  //! Ne pas supprimer, article en cours
+  /* {
     title: "Je m'identifie via FranceConnect",
     emoji: "🌐",
     body: `Article en cours de rédaction`,
     url: "https://support.snu.gouv.fr/help/fr-fr/24-questions-frequemment-posees/160-je-m-identifie-via-franceconnect",
-  },
+  }, */
 ];
 
 export default () => {
