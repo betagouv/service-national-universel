@@ -23,10 +23,6 @@ export function getPasswordErrorMessage(v) {
   }
 }
 
-export function isInscription2021Closed() {
-  return new Date() > new Date("2021", "04", "01");
-}
-
 const permissionApp = (y) => {
   if (!y) false;
   return y?.status !== YOUNG_STATUS.REFUSED && y?.status !== YOUNG_STATUS.WITHDRAWN;
