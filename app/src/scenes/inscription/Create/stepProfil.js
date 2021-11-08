@@ -99,7 +99,7 @@ export default () => {
           useEffect(() => {
             (async () => {
               if (values.birthCityZip?.length === 5) {
-                const response = await fetch(`https://api-adresse.data.gouv.fr/search/?type=municipality&autocomplete=0&q=${values.birthCityZip}`, {
+                const response = await fetch(`https://api-adresse.data.gouv.fr/search/?type=municipality&limit=-1&autocomplete=0&q=${values.birthCityZip}`, {
                   mode: "cors",
                   method: "GET",
                   headers: { "Content-Type": "application/json" },
@@ -273,7 +273,7 @@ export default () => {
                           <Field
                             as="select"
                             validate={(v) => !v && requiredMessage}
-                            disabled={values.birthCityZip.length !== 5}
+                            disabled={values.birthCityZip?.length !== 5}
                             className="form-control"
                             name="birthCity"
                             value={values.birthCity}
