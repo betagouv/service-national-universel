@@ -99,13 +99,13 @@ export default () => {
           useEffect(() => {
             (async () => {
               if (values.birthCityZip?.length === 5) {
-                const response = await fetch(`https://api-adresse.data.gouv.fr/search/?type=municipality&limit=-1&autocomplete=0&q=${values.birthCityZip}`, {
+                const response = await fetch(`https://geo.api.gouv.fr/communes?codePostal=${values.birthCityZip}`, {
                   mode: "cors",
                   method: "GET",
                   headers: { "Content-Type": "application/json" },
                 });
                 const res = await response.json();
-                setSuggestions(res.features.map((item) => item.properties.name));
+                setSuggestions(res.map((item) => item.nom));
               }
             })();
           }, [values.birthCityZip]);
