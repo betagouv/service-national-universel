@@ -5,7 +5,7 @@ import { Spinner } from "reactstrap";
 
 import { setYoung } from "../../redux/auth/actions";
 import { saveYoung } from "../../scenes/inscription/utils";
-import { APP_URL } from "../../config";
+import { appURL } from "../../config";
 
 export default ({ values, handleSubmit, errors, secondButton = "save", loading }) => {
   const dispatch = useDispatch();
@@ -16,7 +16,7 @@ export default ({ values, handleSubmit, errors, secondButton = "save", loading }
   };
 
   const handleBackToHome = async () => {
-    window.location.href = APP_URL;
+    window.location.href = appURL;
   };
 
   return (
