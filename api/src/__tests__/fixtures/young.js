@@ -58,7 +58,6 @@ function getNewYoungFixture() {
       lon: Number(faker.address.longitude()),
     },
     qpv: "false",
-    populationDensity: "12",
     situation: "Etudiant",
     grade: "",
     schoolCertification: "false",

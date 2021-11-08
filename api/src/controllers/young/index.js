@@ -385,7 +385,7 @@ router.put("/", passport.authenticate("young", { session: false, failWithError: 
     }
 
     // Check quartier prioritaires.
-    if (value.cityCode && value.populationDensity) {
+    if (value.cityCode) {
       const populationDensity = await getDensity(value.cityCode);
       young.set({ populationDensity });
       await young.save({ fromUser: req.user });
