@@ -25,7 +25,10 @@ export default () => {
             <p>
               <strong>•</strong> Du <strong>3 au 15 juillet 2022</strong>
             </p>
-            <p className="note">*Si vous êtes scolarisé(e) en classe de 2nde, vous pourrez vous voir délivrer une autorisation d’absence par votre établissement scolaire.</p>
+            <p className="note">
+              * Pour les élèves de 2nde et de 1ère scolarisés dans un établissement relevant du ministère de l’éducation nationale, de la jeunesse et des sports, l’inscription est
+              possible y compris dans le cas où une semaine du séjour de cohésion se déroule sur le temps scolaire.
+            </p>
           </div>
         </li>
         <li>
