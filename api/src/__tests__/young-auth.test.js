@@ -254,7 +254,7 @@ describe("Young", () => {
       expect(res.body.code).toBe("PASSWORD_TOKEN_EXPIRED_OR_INVALID");
     });
 
-    it("should return 403 when new password is identical as last password", async () => {
+    it("should return 401 when new password is identical as last password", async () => {
       const fixture = getNewYoungFixture();
       const token = await crypto.randomBytes(20).toString("hex");
       const young = await createYoungHelper({
@@ -265,7 +265,7 @@ describe("Young", () => {
         password: VALID_PASSWORD,
       });
       const res = await request(getAppHelper()).post("/young/forgot_password_reset").send({ password: VALID_PASSWORD, token });
-      expect(res.status).toBe(403);
+      expect(res.status).toBe(401);
     });
 
     it("should return return 200 otherwise", async () => {
