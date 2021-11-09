@@ -281,7 +281,7 @@ const SocialMedia = () => {
   return (
     <IconsBar>
       {medias.map((el, index) => (
-        <IconContainer key={index} onClick={() => window.open(el.link, "_blank").focus()}>
+        <IconContainer key={index} onClick={() => window.open(el.link, "_blank")?.focus()}>
           <svg width="24" height="24" viewBox="0 0 24 24">
             <path d={el.svg}></path>
           </svg>

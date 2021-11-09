@@ -163,8 +163,6 @@ export default () => {
                       location: "location",
                       department: "department",
                       region: "region",
-                      country: "country",
-                      cityCode: "cityCode",
                     }}
                     values={values}
                     countryVisible={values.country !== "France"}
@@ -247,6 +245,8 @@ export default () => {
                         zip: "hostZip",
                         address: "hostAddress",
                         location: "hostLocation",
+                        department: "hostDepartment",
+                        region: "hostRegion",
                       }}
                       values={values}
                       departAndRegionVisible={false}

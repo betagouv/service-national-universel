@@ -743,6 +743,18 @@ const Schema = new mongoose.Schema({
       description: "Adresse de l'hébergeur",
     },
   },
+  hostDepartment: {
+    type: String,
+    documentation: {
+      description: "Departement de l'hébergeur",
+    },
+  },
+  hostRegion: {
+    type: String,
+    documentation: {
+      description: "Région de l'hébergeur",
+    },
+  },
   hostRelationship: {
     type: String,
     documentation: {

@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { Row, Col } from "reactstrap";
 import { Field, useField } from "formik";
 import ErrorMessage, { requiredMessage } from "../scenes/inscription/components/errorMessage";
+import { department2region, departmentLookUp } from "../utils";
 import InfoIcon from "./InfoIcon";
 import { Spinner } from "reactstrap";
 import countries from "i18n-iso-countries";
@@ -45,6 +46,8 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
     handleChange({ target: { name: keys.zip, value: suggestion.properties.postcode } });
     handleChange({ target: { name: keys.address, value: suggestion.properties.name } });
     handleChange({ target: { name: keys.location, value: { lon: suggestion.geometry.coordinates[0], lat: suggestion.geometry.coordinates[1] } } });
+    handleChange({ target: { name: keys.department, value: departmentLookUp[depart] } });
+    handleChange({ target: { name: keys.region, value: department2region[departmentLookUp[depart]] } });
 
     if (keys.cityCode) {
       handleChange({ target: { name: keys.cityCode, value: suggestion.properties.citycode } });

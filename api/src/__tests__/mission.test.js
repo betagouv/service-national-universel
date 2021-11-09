@@ -56,16 +56,16 @@ describe("Mission", () => {
       const res = await request(getAppHelper()).put("/mission/" + notExisitingMissionId);
       expect(res.statusCode).toEqual(404);
     });
-    it("should return 401 if user can not update mission", async () => {
+    it("should return 403 if user can not update mission", async () => {
       const mission = await createMissionHelper({ ...getNewMissionFixture(), department: "hop", region: "hop" });
       const passport = require("passport");
       passport.user.role = ROLES.REFERENT_DEPARTMENT;
       let res = await request(getAppHelper()).put("/mission/" + mission._id);
-      expect(res.statusCode).toEqual(401);
+      expect(res.statusCode).toEqual(403);
 
       passport.user.role = ROLES.REFERENT_REGION;
       res = await request(getAppHelper()).put("/mission/" + mission._id);
-      expect(res.statusCode).toEqual(401);
+      expect(res.statusCode).toEqual(403);
 
       passport.user.role = ROLES.ADMIN;
     });
@@ -195,14 +195,14 @@ describe("Mission", () => {
       const res = await request(getAppHelper()).get(`/mission/${notExisitingMissionId}/patches`).send();
       expect(res.statusCode).toEqual(404);
     });
-    it("should return 401 if not admin", async () => {
+    it("should return 403 if not admin", async () => {
       const mission = await createMissionHelper(getNewMissionFixture());
       mission.name = "MY NEW NAME";
       await mission.save();
       const passport = require("passport");
       passport.user.role = ROLES.RESPONSIBLE;
       const res = await request(getAppHelper()).get(`/mission/${mission._id}/patches`).send();
-      expect(res.status).toBe(401);
+      expect(res.status).toBe(403);
       passport.user.role = ROLES.ADMIN;
     });
     it("should return 200 if mission found with patches", async () => {

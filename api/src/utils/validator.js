@@ -333,6 +333,8 @@ function validateYoung(young, user) {
     hostCity: Joi.string().allow(null, ""),
     hostZip: Joi.string().allow(null, ""),
     hostAddress: Joi.string().allow(null, ""),
+    hostDepartment: Joi.string().allow(null, ""),
+    hostRegion: Joi.string().allow(null, ""),
     hostRelationship: Joi.string().allow(null, ""),
     situation: Joi.string().allow(null, ""),
     grade: Joi.string().allow(null, ""),

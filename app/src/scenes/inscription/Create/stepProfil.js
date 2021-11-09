@@ -73,7 +73,7 @@ export default () => {
                 {
                   timeOut: 30000,
                   onToastrClick: () =>
-                    window.open(`https://support.snu.gouv.fr/help/fr-fr/24-questions-frequemment-posees/178-comment-recuperer-mon-identifiant`, "_blank").focus(),
+                    window.open(`https://support.snu.gouv.fr/help/fr-fr/24-questions-frequemment-posees/178-comment-recuperer-mon-identifiant`, "_blank")?.focus(),
                 }
               );
             toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code) || e.message);
@@ -99,13 +99,13 @@ export default () => {
           useEffect(() => {
             (async () => {
               if (values.birthCityZip?.length === 5) {
-                const response = await fetch(`https://api-adresse.data.gouv.fr/search/?type=municipality&autocomplete=0&q=${values.birthCityZip}`, {
+                const response = await fetch(`https://geo.api.gouv.fr/communes?codePostal=${values.birthCityZip}`, {
                   mode: "cors",
                   method: "GET",
                   headers: { "Content-Type": "application/json" },
                 });
                 const res = await response.json();
-                setSuggestions(res.features.map((item) => item.properties.name));
+                setSuggestions(res.map((item) => item.nom));
               }
             })();
           }, [values.birthCityZip]);
@@ -273,7 +273,7 @@ export default () => {
                           <Field
                             as="select"
                             validate={(v) => !v && requiredMessage}
-                            disabled={values.birthCityZip.length !== 5}
+                            disabled={values.birthCityZip?.length !== 5}
                             className="form-control"
                             name="birthCity"
                             value={values.birthCity}

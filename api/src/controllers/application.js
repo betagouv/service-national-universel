@@ -78,7 +78,7 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
 
     // A young can only update create their own applications.
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
-      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
     const data = await ApplicationObject.create(value);
@@ -105,7 +105,7 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false, f
 
     // A young can only update his own application.
     if (isYoung(req.user) && application.youngId.toString() !== req.user._id.toString()) {
-      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     application.set(value);
@@ -175,7 +175,7 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (isYoung(req.user) && req.user._id.toString() !== application.youngId) {
-      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     let template = defaultTemplate;

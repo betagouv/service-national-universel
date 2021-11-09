@@ -76,7 +76,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     const structure = await StructureObject.findById(checkedId);
     if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canModifyStructure(req.user, structure)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canModifyStructure(req.user, structure)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { error: errorStructure, value: checkedStructure } = validateStructure(req.body);
     if (errorStructure) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error: errorStructure });
@@ -171,7 +171,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: errorId });
 
     const structure = await StructureObject.findById(checkedId);
-    if (!canDeleteStructure(req.user, structure)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canDeleteStructure(req.user, structure)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     await structure.remove();
     console.log(`Structure ${req.params.id} has been deleted by ${req.user._id}`);

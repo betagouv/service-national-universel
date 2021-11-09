@@ -60,11 +60,11 @@ describe("Email", () => {
     });
     it("should should reject invalid IP", async () => {
       const res = await request(getAppHelper()).post("/email").set("x-forwarded-for", "1.2.3.4").send({ subject: "hello", email: "foo@bar.fr" });
-      expect(res.status).toBe(401);
+      expect(res.status).toBe(403);
     });
     it("should reject when no IP", async () => {
       const res = await request(getAppHelper()).post("/email").send({ subject: "hello", email: "foo@bar.fr" });
-      expect(res.status).toBe(401);
+      expect(res.status).toBe(403);
     });
   });
   describe("GET /email", () => {
@@ -86,7 +86,7 @@ describe("Email", () => {
       for (const role of Object.values(unauthorizedRoles)) {
         passport.user.role = role;
         let res = await request(getAppHelper()).get("/email?email=test@example.org");
-        expect(res.statusCode).toEqual(401);
+        expect(res.statusCode).toEqual(403);
       }
       passport.user.role = ADMIN;
       res = await request(getAppHelper()).get("/email?email=test@example.org");

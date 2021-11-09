@@ -74,14 +74,14 @@ describe("Young", () => {
       const res = await request(getAppHelper()).get(`/young/${notExistingYoungId}/patches`).send();
       expect(res.statusCode).toEqual(404);
     });
-    it("should return 401 if not admin", async () => {
+    it("should return 403 if not admin", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
       young.firstName = "MY NEW NAME";
       await young.save();
       const passport = require("passport");
       passport.user.role = ROLES.RESPONSIBLE;
       const res = await request(getAppHelper()).get(`/young/${young._id}/patches`).send();
-      expect(res.status).toBe(401);
+      expect(res.status).toBe(403);
       passport.user.role = ROLES.ADMIN;
     });
     it("should return 200 if young found with patches", async () => {
@@ -134,7 +134,7 @@ describe("Young", () => {
       const previous = passport.user;
       passport.user = me;
       const res = await request(getAppHelper()).put(`/young/${they._id}/validate-mission-phase3`).send();
-      expect(res.statusCode).toEqual(401);
+      expect(res.statusCode).toEqual(403);
       passport.user = previous;
     });
   });
@@ -479,7 +479,7 @@ describe("Young", () => {
 
       // Failed request (not allowed)
       res = await request(getAppHelper()).get("/young/" + secondYoung._id + "/application");
-      expect(res.status).toBe(401);
+      expect(res.status).toBe(403);
 
       passport.user = previous;
     });

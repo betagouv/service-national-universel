@@ -170,7 +170,7 @@ describe("Structure", () => {
 
       passport.user = previous;
     });
-    it("should return 401 when young tries to see a contract from someone else", async () => {
+    it("should return 403 when young tries to see a contract from someone else", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
       const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id });
       const contract = await createContractHelper({ ...getNewContractFixture(), youngId: young._id, applicationId: application._id });
@@ -182,7 +182,7 @@ describe("Structure", () => {
       passport.user = secondYoung;
 
       const res = await request(getAppHelper()).get(`/contract/${contract._id}`).send();
-      expect(res.status).toBe(401);
+      expect(res.status).toBe(403);
 
       passport.user = previous;
     });
@@ -271,7 +271,7 @@ describe("Structure", () => {
       expect(resDownload.status).toBe(200);
     });
 
-    it("should return 401 when young tries to see a contract from someone else", async () => {
+    it("should return 403 when young tries to see a contract from someone else", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
       const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id });
       const contract = await createContractHelper({ ...getNewContractFixture(), youngId: young._id, applicationId: application._id });
@@ -283,7 +283,7 @@ describe("Structure", () => {
       passport.user = secondYoung;
 
       const resDownload = await request(getAppHelper()).post(`/contract/${contract._id}/download`).send();
-      expect(resDownload.status).toBe(401);
+      expect(resDownload.status).toBe(403);
       passport.user = previous;
     });
 

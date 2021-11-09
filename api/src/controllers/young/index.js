@@ -331,7 +331,7 @@ router.put("/:id/validate-mission-phase3", passport.authenticate("young", { sess
 
     // young can only update their own mission phase3.
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
-      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
     const { id, ...values } = value;
     values.phase3Token = crypto.randomBytes(20).toString("hex");
@@ -439,7 +439,7 @@ router.post("/:id/email/:template", passport.authenticate(["young", "referent"],
     const young = await YoungObject.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
-      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
     let buttonCta = cta || config.APP_URL;
@@ -465,7 +465,7 @@ router.get("/:id/application", passport.authenticate(["referent", "young"], { se
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
     if (isYoung(req.user) && req.user._id.toString() !== id) {
-      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     let data = await ApplicationModel.find({ youngId: id });
@@ -528,7 +528,7 @@ router.post("/france-connect/user-info", async (req, res) => {
   const token = await tokenResponse.json();
 
   if (!token["access_token"] || !token["id_token"]) {
-    return res.sendStatus(401, token);
+    return res.sendStatus(403, token);
   }
 
   // … then get user info.
@@ -549,7 +549,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     const young = await YoungObject.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canDeleteYoung(req.user, young)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canDeleteYoung(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     await young.remove();
     console.log(`Young ${id} has been deleted`);
