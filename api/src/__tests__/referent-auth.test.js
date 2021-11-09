@@ -34,14 +34,14 @@ describe("Referent", () => {
       res = await request(getAppHelper()).post("/referent/signin").send({ password: "foo" });
       expect(res.status).toBe(400);
     });
-    it("should return 401 when user does not exists", async () => {
+    it("should return 403 when user does not exists", async () => {
       const res = await request(getAppHelper()).post("/referent/signin").send({ email: "foo@bar.fr", password: "bar" });
-      expect(res.status).toBe(401);
+      expect(res.status).toBe(403);
     });
-    it("should return 401 if password does not match", async () => {
+    it("should return 403 if password does not match", async () => {
       const user = await createReferentHelper({ ...getNewReferentFixture(), password: "bar" });
       const res = await request(getAppHelper()).post("/referent/signin").send({ email: user.email, password: "foo" });
-      expect(res.status).toBe(401);
+      expect(res.status).toBe(403);
     });
     it("should return 200 and a token when user exists and password match", async () => {
       const fixture = getNewReferentFixture();

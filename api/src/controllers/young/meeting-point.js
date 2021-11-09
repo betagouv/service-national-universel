@@ -68,7 +68,7 @@ router.put("/", passport.authenticate(["young", "referent"], { session: false, f
 
     // A young can only update their own meeting points.
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
-      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
     let bus = null;
