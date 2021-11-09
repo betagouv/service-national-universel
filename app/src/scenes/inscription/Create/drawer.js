@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
 import { STEPS } from "../utils";
@@ -9,6 +9,10 @@ import HelpButton from "../../../components/buttons/HelpButton";
 export default ({ step }) => {
   const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
+
+  useEffect(() => {
+
+  }, [young]);
 
   const currentIndex = Object.keys(STEPS).indexOf(step);
 
@@ -68,7 +72,7 @@ export default ({ step }) => {
           </ul>
         </li>
       </MainNav>
-      <HelpButton to={young ? `/besoin-d-aide` : `/public-besoin-d-aide`} />
+      <HelpButton to="/public-besoin-d-aide" />
     </Sidebar>
   );
 };
@@ -105,23 +109,6 @@ const Sidebar = styled.div`
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   @media (max-width: 768px) {
     display: none;
-  }
-  a {
-    font-size: 12px;
-    /* color: #b4c6fc; */
-    color: #fff;
-    display: flex;
-    align-items: center;
-    font-weight: 500;
-    text-transform: uppercase;
-    .icon {
-      height: 24px;
-      width: 24px;
-      margin-right: 20px;
-      svg {
-        stroke: #8da2fb;
-      }
-    }
   }
 `;
 
@@ -198,6 +185,23 @@ const Element = styled.li`
 `;
 
 const MainNav = styled.ul`
+  a {
+    font-size: 12px;
+    /* color: #b4c6fc; */
+    color: #fff;
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+    text-transform: uppercase;
+    .icon {
+      height: 24px;
+      width: 24px;
+      margin-right: 20px;
+      svg {
+        stroke: #8da2fb;
+      }
+    }
+  }
   > li {
     background-size: 20px;
     padding-left: 0;

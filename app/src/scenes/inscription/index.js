@@ -12,14 +12,12 @@ import Documents from "./Create/stepDocuments";
 import Availability from "./Create/stepAvailability";
 import Done from "./Create/stepDone";
 import Drawer from "./Create/drawer";
-import { useSelector } from "react-redux";
 
 import Home from "./Home/index.js";
 import { STEPS } from "./utils";
 import HelpButton from "../../components/buttons/HelpButton";
 
 const Step = ({ step }) => {
-  const young = useSelector((state) => state.Auth.young);
   function renderStep(step) {
     if (step === STEPS.COORDONNEES) return <Coordonnees />;
     if (step === STEPS.PARTICULIERES) return <Particulieres />;
@@ -37,7 +35,7 @@ const Step = ({ step }) => {
         <Nav step={step} />
         <Wrapper>{renderStep(step)}</Wrapper>
         <div className="help-button-container">
-          <HelpButton to={young ? `/besoin-d-aide` : `/public-besoin-d-aide`} color="#362f78" />
+          <HelpButton to="/public-besoin-d-aide" color="#362f78" />
         </div>
       </Content>
     </div>
