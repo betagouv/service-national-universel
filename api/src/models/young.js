@@ -192,7 +192,6 @@ const Schema = new mongoose.Schema({
   // Inscription status message
   inscriptionCorrectionMessage: {
     type: String,
-    default: "",
     documentation: {
       description: "Message envoyé au volontaire dans le cas où son inscription nécessite des corrections.",
     }
