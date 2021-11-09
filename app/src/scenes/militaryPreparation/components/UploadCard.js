@@ -26,7 +26,7 @@ export default ({
       <SubTitle>{subTitle}</SubTitle>
       {subsubTitle ? <SubSubTitle>{subsubTitle}</SubSubTitle> : null}
       {template ? (
-        <LoadingButton style={{ marginBottom: "0.5rem" }} onClick={() => window.open(template, "_blank").focus()}>
+        <LoadingButton style={{ marginBottom: "0.5rem" }} onClick={() => window.open(template, "_blank")?.focus()}>
           Télécharger le modèle obligatoire
         </LoadingButton>
       ) : null}

@@ -195,7 +195,7 @@ const DownloadFormButton = ({ url }) => (
       boxShadow: "0px 1px 2px rgba(0, 0, 0, 0.05)",
       margin: "20px 0",
     }}
-    onClick={() => window.open(url, "_blank").focus()}
+    onClick={() => window.open(url, "_blank")?.focus()}
   >
     Télécharger le formulaire à compléter
   </div>
