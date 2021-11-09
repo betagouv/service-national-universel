@@ -25,7 +25,6 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
       for (let i = 0; inputElements[i]; i++) inputElements[i].setAttribute("autocomplete", "novalue");
     }
     if (!values[keys.country]) handleChange({ target: { name: keys.country, value: "France" } });
-    if (values[keys.country] && values[keys.city] && values[keys.zip] && values[keys.address]) addressVerifiedHelpers.setValue(true);
   }, []);
 
   useEffect(() => {
