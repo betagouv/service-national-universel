@@ -30,7 +30,7 @@ router.get("/:department", passport.authenticate(["referent", "young"], { sessio
     const { error, value: department } = Joi.string().required().validate(req.params.department);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
-    if (isYoung(req.user) && req.user.department !== department) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (isYoung(req.user) && req.user.department !== department) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const data = await DepartmentServiceModel.findOne({ department });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });

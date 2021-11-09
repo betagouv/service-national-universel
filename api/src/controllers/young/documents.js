@@ -72,7 +72,7 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
 
     // A young can only download their own documents.
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
-      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
     // Create html
@@ -110,10 +110,10 @@ router.post(
 
       // A young can only send to them their own documents.
       if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
-        return res.status(401).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
       if (isReferent(req.user) && !canSendFileByMail(req.user, young)) {
-        return res.status(401).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
 
       let contract;
