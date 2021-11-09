@@ -514,6 +514,12 @@ const Schema = new mongoose.Schema({
       description: "Région de l'établissement du volontaire",
     },
   },
+  schoolCountry: {
+    type: String,
+    documentation: {
+      description: "Pays de l'établissement du volontaire",
+    },
+  },
   schoolLocation: {
     lat: { type: Number },
     lon: { type: Number },
