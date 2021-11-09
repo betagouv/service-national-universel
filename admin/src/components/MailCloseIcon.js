@@ -3,7 +3,7 @@ import styled from "styled-components";
 
 export default ({ ...props }) => (
   <MailContainer {...props}>
-    <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
         d="M1.60254 4.70715L8.00014 7.90555L14.3977 4.70715C14.3741 4.29951 14.1954 3.91634 13.8984 3.63613C13.6014 3.35592 13.2085 3.19988 12.8001 3.19995H3.20014C2.79181 3.19988 2.3989 3.35592 2.10188 3.63613C1.80487 3.91634 1.62622 4.29951 1.60254 4.70715Z"
         fill="white"

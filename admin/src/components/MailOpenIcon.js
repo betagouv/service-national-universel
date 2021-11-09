@@ -3,7 +3,7 @@ import styled from "styled-components";
 
 export default ({ ...props }) => (
   <MailContainer {...props}>
-    <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
         fillRule="evenodd"
         clipRule="evenodd"
@@ -16,7 +16,7 @@ export default ({ ...props }) => (
 
 const MailContainer = styled.div`
   svg {
-    height: 17px;
+    height: 20px;
   }
   svg path {
     fill: ${({ color }) => `${color}`};
