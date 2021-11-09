@@ -245,6 +245,8 @@ export default () => {
                         zip: "hostZip",
                         address: "hostAddress",
                         location: "hostLocation",
+                        department: "hostDepartment",
+                        region: "hostRegion",
                       }}
                       values={values}
                       departAndRegionVisible={false}
@@ -362,16 +364,16 @@ export default () => {
                         YOUNG_SITUATIONS.SPECIALIZED_SCHOOL,
                         YOUNG_SITUATIONS.APPRENTICESHIP,
                       ].includes(values.situation) && (
-                          <div style={{ marginBottom: "10px" }}>
-                            <Etablissement
-                              values={values}
-                              handleChange={handleChange}
-                              errors={errors}
-                              touched={touched}
-                              keys={{ schoolName: "schoolName", grade: "grade", schoolId: "schoolId" }}
-                            />
-                          </div>
-                        )}
+                        <div style={{ marginBottom: "10px" }}>
+                          <Etablissement
+                            values={values}
+                            handleChange={handleChange}
+                            errors={errors}
+                            touched={touched}
+                            keys={{ schoolName: "schoolName", grade: "grade", schoolId: "schoolId" }}
+                          />
+                        </div>
+                      )}
                     </>
                   )}
                   {values.schooled === "false" && (
