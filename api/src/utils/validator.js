@@ -280,6 +280,8 @@ function validateYoung(young, user) {
     statusPhase3: Joi.string().allow(null, ""),
     lastStatusAt: Joi.alternatives().try(Joi.string().allow(null, ""), Joi.number().allow(null)),
     withdrawnMessage: Joi.string().allow(null, ""),
+    inscriptionCorrectionMessage: Joi.string().allow(null, ""),
+    inscriptionRefusedMessage: Joi.string().allow(null, ""),
     inscriptionStep: Joi.string().allow(null, ""),
     cohesion2020Step: Joi.string().allow(null, ""),
     historic: Joi.array().items(Joi.any().allow(null, "")),

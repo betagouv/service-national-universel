@@ -309,15 +309,6 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
 
     let { __v, ...newYoung } = value;
 
-    // if inscription status message, set the message
-    if (req.body.inscriptionCorrectionMessage) {
-      newYoung = { ...newYoung, inscriptionCorrectionMessage: req.body.inscriptionCorrectionMessage };
-    };
-
-    if (req.body.inscriptionRefusedMessage) {
-      newYoung = { ...newYoung, inscriptionRefusedMessage: req.body.inscriptionRefusedMessage };
-    };
-
     // if withdrawn, cascade withdrawn on every status
     if (
       newYoung.status === "WITHDRAWN" &&
@@ -430,7 +421,7 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
     try {
       const { mime } = await FileType.fromBuffer(decryptedBuffer);
       mimeFromFile = mime;
-    } catch (e) { }
+    } catch (e) {}
 
     return res.status(200).send({
       data: Buffer.from(decryptedBuffer, "base64"),
@@ -476,7 +467,7 @@ router.get(
       try {
         const { mime } = await FileType.fromBuffer(decryptedBuffer);
         mimeFromFile = mime;
-      } catch (e) { }
+      } catch (e) {}
 
       return res.status(200).send({
         data: Buffer.from(decryptedBuffer, "base64"),
