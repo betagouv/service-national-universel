@@ -39,9 +39,9 @@ export default () => {
 
   const submit = async (cohort) => {
     try {
-      const { ok, code, data: young } = await api.put("/young", { ...young, cohort, inscriptionStep: STEPS.DONE });
-      if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
-      dispatch(setYoung(young));
+      const { ok, code, data } = await api.put("/young", { ...young, cohort, inscriptionStep: STEPS.DONE });
+      if (!ok || !data?._id) return toastr.error("Une erreur s'est produite :", translate(code));
+      dispatch(setYoung(data));
       history.push("/inscription/done");
     } catch (e) {
       console.log(e);
