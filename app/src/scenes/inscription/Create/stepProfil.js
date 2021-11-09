@@ -59,10 +59,10 @@ export default () => {
             if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             if (token) api.setToken(token);
             const newValues = { ...values, ...user };
-            const { ok: okPut, code: codePut, data: young } = await api.put("/young", newValues);
-            if (!okPut) return toastr.error("Une erreur s'est produite :", codePut);
-            dispatch(setYoung(young));
-            await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED}`);
+            const { ok: okPut, code: codePut, data } = await api.put("/young", newValues);
+            if (!okPut || !data?._id) return toastr.error("Une erreur s'est produite :", codePut);
+            dispatch(setYoung(data));
+            await api.post(`/young/${data._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED}`);
             history.push("/inscription/coordonnees");
           } catch (e) {
             console.log(e);

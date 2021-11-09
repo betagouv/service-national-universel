@@ -45,9 +45,9 @@ export default () => {
           setLoading(true);
           try {
             values.inscriptionStep = STEPS.REPRESENTANTS;
-            const { ok, code, data: young } = await api.put("/young", values);
-            if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
-            dispatch(setYoung(young));
+            const { ok, code, data } = await api.put("/young", values);
+            if (!ok || !data?._id) return toastr.error("Une erreur s'est produite :", translate(code));
+            dispatch(setYoung(data));
             history.push("/inscription/representants");
           } catch (e) {
             console.log(e);
