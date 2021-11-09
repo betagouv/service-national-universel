@@ -90,7 +90,7 @@ describe("Email", () => {
       }
       passport.user.role = ADMIN;
       res = await request(getAppHelper()).get("/email?email=test@example.org");
-      expect(res.statusCode).toEqual(403);
+      expect(res.statusCode).toEqual(200);
     });
   });
 });
