@@ -281,7 +281,7 @@ const SocialMedia = () => {
   return (
     <IconsBar>
       {medias.map((el, index) => (
-        <a href={el.link} target="_blank" style={{ decoration: "none", borderRadius: "99999px", padding: "0" }}>
+        <a href={el.link} target="_blank" style={{ decoration: "none", borderRadius: "100%", padding: "0" }}>
           <IconContainer>
             <svg width="24" height="24" viewBox="0 0 24 24">
               <path d={el.svg}></path>
