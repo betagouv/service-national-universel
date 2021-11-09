@@ -198,7 +198,6 @@ const Schema = new mongoose.Schema({
   },
   inscriptionRefusedMessage: {
     type: String,
-    default: "",
     documentation: {
       description: "Message envoyé au volontaire dans le cas où son inscription est refusée.",
     }
