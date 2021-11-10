@@ -42,7 +42,7 @@ router.get("/availability/2022", passport.authenticate("young", { session: false
     },
   ].filter((el) => {
     if (el.excludedGrade.includes(young.grade)) return false;
-    else if (el.excludedZip.some((e) => new RegExp(`^${young.zip}`).test(e))) return false;
+    else if (el.excludedZip.some((e) => new RegExp(`^${e}`).test(young.zip))) return false;
     else if (
       new Date(el.includedBirthdate.begin).getTime() <= new Date(young.birthdateAt).getTime() &&
       new Date(young.birthdateAt).getTime() <= new Date(el.includedBirthdate.end).getTime()
