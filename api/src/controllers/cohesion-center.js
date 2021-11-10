@@ -47,7 +47,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     const { error, value } = validateNewCohesionCenter(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
-    if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const data = await CohesionCenterModel.create(value);
     return res.status(200).send({ ok: true, data: serializeCohesionCenter(data) });
@@ -219,7 +219,7 @@ router.get("/young/:youngId", passport.authenticate(["referent", "young"], { ses
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (isYoung(req.user) && req.user._id.toString() !== id) {
-      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     return res.status(200).send({ ok: true, data: serializeCohesionCenter(data) });
@@ -234,7 +234,7 @@ router.put("/", passport.authenticate("referent", { session: false, failWithErro
     const { error, value: newCenter } = validateUpdateCohesionCenter(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
-    if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const center = await CohesionCenterModel.findById(newCenter._id);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -257,7 +257,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     const { error, value: id } = Joi.string().required().validate(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
-    if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const center = await CohesionCenterModel.findById(id);
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });

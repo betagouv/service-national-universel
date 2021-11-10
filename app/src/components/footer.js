@@ -2,8 +2,10 @@ import React from "react";
 import { Container } from "reactstrap";
 import styled from "styled-components";
 import { appURL } from "../config";
+import { useSelector } from "react-redux";
 
 export default () => {
+  const young = useSelector((state) => state.Auth.young);
   return (
     <Footer>
       <Container>
@@ -24,7 +26,12 @@ export default () => {
             </a>
           </li>
           <li>
-            <a href={`${appURL}/besoin-d-aide`} target="_blank">
+            <a href={`${appURL}/conditions-generales-utilisation`} target="_blank">
+              Conditions générales d'utilisation
+            </a>
+          </li>
+          <li>
+            <a href={young ? `${appURL}/besoin-d-aide` : `${appURL}/public-besoin-d-aide`} target="_blank">
               Besoin d'aide
             </a>
           </li>

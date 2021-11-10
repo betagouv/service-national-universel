@@ -13,14 +13,14 @@ export default ({ isOpen, value, onChange, onSend }) => {
 
   useEffect(() => {
     setMessage(`Bonjour ${value.firstName} ${value.lastName},
-Votre candidature au SNU a bien été étudiée par l'équipe de votre département.
+Votre dossier d'inscription a été vérifié et est en attente de correction de votre part.
 
-Il nous manque les éléments suivants pour compléter votre dossier :
+Pour finaliser votre inscription au SNU, merci de suivre les éléments renseignés par votre référent SNU :
 -
 -
 -
 
-Merci de vous reconnecter à votre compte pour apporter les modifications demandées avant le 5 mai au soir. Passé cette date, plus aucune modification ne pourra être apportée et votre candidature ne pourra être retenue.`);
+Merci de vous reconnecter à votre compte pour apporter les modifications demandées.`);
   }, [value]);
 
   if (!value) return <div />;
@@ -28,6 +28,7 @@ Merci de vous reconnecter à votre compte pour apporter les modifications demand
   const send = async () => {
     setSending(true);
     await api.post(`/young/${value._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_CORRECTION}`, { message });
+    await api.put(`/referent/young/${value._id}`, { inscriptionCorrectionMessage: message });
     toastr.success("Email envoyé !");
     onSend(message);
   };

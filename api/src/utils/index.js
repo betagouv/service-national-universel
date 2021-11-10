@@ -259,9 +259,9 @@ const sendAutoAffectationMail = async (nextYoung, center) => {
       .replace(/{{centerName}}/, center.name)
       .replace(/{{centerAddress}}/, center.address + " " + center.zip + " " + center.city)
       .replace(/{{centerDepartement}}/, center.department)
-      .replace(/{{ctaAccept}}/, "https://inscription.snu.gouv.fr/auth/login?redirect=phase1")
-      .replace(/{{ctaDocuments}}/, "https://inscription.snu.gouv.fr/auth/login?redirect=phase1")
-      .replace(/{{ctaWithdraw}}/, "https://inscription.snu.gouv.fr/auth/login?redirect=phase1"),
+      .replace(/{{ctaAccept}}/, "https://moncompte.snu.gouv.fr/auth/login?redirect=phase1")
+      .replace(/{{ctaDocuments}}/, "https://moncompte.snu.gouv.fr/auth/login?redirect=phase1")
+      .replace(/{{ctaWithdraw}}/, "https://moncompte.snu.gouv.fr/auth/login?redirect=phase1"),
     { cc }
   );
 };
@@ -429,6 +429,48 @@ const getBaseUrl = () => {
   return "http://localhost:8080";
 };
 
+async function updateApplicationsWithYoungOrMission({ young, newYoung, mission, newMission }) {
+  if (young && Object.keys(young).length !== 0) {
+    const noNeedToUpdate = isObjectKeysIsEqual(young, newYoung, ["firstName", "lastName", "email", "birthdateAt", "city", "department", "cohort"]);
+    if (noNeedToUpdate) return;
+
+    const applications = await ApplicationModel.find({ youngId: young._id });
+    for (const application of applications) {
+      application.youngFirstName = newYoung.firstName;
+      application.youngLastName = newYoung.lastName;
+      application.youngEmail = newYoung.email;
+      application.youngBirthdateAt = newYoung.birthdateAt;
+      application.youngCity = newYoung.city;
+      application.youngDepartment = newYoung.department;
+      application.youngCohort = newYoung.cohort;
+      await application.save();
+      console.log(`Update application ${application._id}`);
+    }
+  } else if (mission && Object.keys(mission).length !== 0) {
+    const noNeedToUpdate = isObjectKeysIsEqual(mission, newMission, ["name", "department", "region"]);
+    console.log(noNeedToUpdate);
+    if (noNeedToUpdate) return;
+
+    const applications = await ApplicationModel.find({ missionId: mission._id });
+    for (const application of applications) {
+      application.missionName = newMission.name;
+      application.missionDepartment = newMission.department;
+      application.missionRegion = newMission.region;
+      await application.save();
+      console.log(`Update application ${application._id}`);
+    }
+  }
+}
+
+const isObjectKeysIsEqual = (object, newObject, keys) => {
+  for (const key of keys) {
+    if (object[key] !== newObject[key] && Date.parse(object[key]) !== Date.parse(newObject[key])) {
+      return false;
+    }
+  }
+  return true;
+};
+
 const ERRORS = {
   SERVER_ERROR: "SERVER_ERROR",
   NOT_FOUND: "NOT_FOUND",
@@ -450,6 +492,7 @@ const ERRORS = {
   PASSWORD_INVALID: "PASSWORD_INVALID",
   EMAIL_INVALID: "EMAIL_INVALID",
   EMAIL_AND_PASSWORD_REQUIRED: "EMAIL_AND_PASSWORD_REQUIRED",
+  EMAIL_ALREADY_USED: "EMAIL_ALREADY_USED",
   PASSWORDS_NOT_MATCH: "PASSWORDS_NOT_MATCH",
   USER_NOT_EXISTS: "USER_NOT_EXISTS",
   NEW_PASSWORD_IDENTICAL_PASSWORD: "NEW_PASSWORD_IDENTICAL_PASSWORD",
@@ -480,4 +523,5 @@ module.exports = {
   updateYoungPhase2Hours,
   updateStatusPhase2,
   getSignedUrlForApiAssociation,
+  updateApplicationsWithYoungOrMission,
 };

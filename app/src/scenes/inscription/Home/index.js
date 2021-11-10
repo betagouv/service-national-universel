@@ -16,7 +16,7 @@ export default ({ location }) => {
       <Header location={location} />
       <Wrapper>
         <TitleContainer>
-          <TopTitle className="mobileOnly">inscription 2021</TopTitle>
+          <TopTitle className="mobileOnly">inscription 2022</TopTitle>
           <Title>Participez au SNU</Title>
           <PlayButton href="https://www.youtube.com/watch?v=rE-8fe9xPDo" target="_blank">
             <svg width="20" height="26" viewBox="0 0 20 26" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -30,16 +30,36 @@ export default ({ location }) => {
         <CardsContainer>
           <CardTitle>Une aventure en trois phases</CardTitle>
           <div className="desktop">
-            <CardPhase upText="phase 1" title="Le séjour de cohésion" downText="Du 21 juin au 2 juillet 2021" />
-            <CardPhase upText="phase 2" title="La mission d'intérêt général" downText="84 heures à réaliser au cours de l'année suivant le séjour de cohésion" />
-            <CardPhase upText="phase 3 - facultative" title="L'engagement" downText="Mission facultative de 3 mois minimum" />
+            <CardPhase
+              upText="phase 1"
+              title="Le séjour de cohésion"
+              downText="3 sessions possibles en février, juin et juillet 2022"
+              to="https://www.snu.gouv.fr/le-sejour-de-cohesion-26"
+            />
+            <CardPhase
+              upText="phase 2"
+              title="La mission d'intérêt général"
+              downText="84 heures à réaliser au cours de l'année suivant le séjour de cohésion"
+              to="https://www.snu.gouv.fr/la-mission-d-interet-general-27"
+            />
+            <CardPhase upText="phase 3 - facultative" title="L'engagement" downText="Mission facultative de 3 mois minimum" to="https://www.snu.gouv.fr/l-engagement-28" />
           </div>
           <Carousel className="mobile" showThumbs={false} showStatus={false} showArrows={true}>
-            <CardPhase upText="phase 1" title="Le séjour de cohésion" downText="Du 21 juin au 2 juillet 2021" />
-            <CardPhase upText="phase 2" title="La mission d'intérêt général" downText="84 heures à réaliser au cours de l'année suivant le séjour de cohésion" />
-            <CardPhase upText="phase 3 - facultative" title="L'engagement" downText="Mission facultative de 3 mois minimum" />
+            <CardPhase
+              upText="phase 1"
+              title="Le séjour de cohésion"
+              downText="3 sessions possibles en février, juin et juillet 2022"
+              to="https://www.snu.gouv.fr/le-sejour-de-cohesion-26"
+            />
+            <CardPhase
+              upText="phase 2"
+              title="La mission d'intérêt général"
+              downText="84 heures à réaliser au cours de l'année suivant le séjour de cohésion"
+              to="https://www.snu.gouv.fr/la-mission-d-interet-general-27"
+            />
+            <CardPhase upText="phase 3 - facultative" title="L'engagement" downText="Mission facultative de 3 mois minimum" to="https://www.snu.gouv.fr/l-engagement-28" />
           </Carousel>
-          <StartButtonContainer className="desktop">
+          <StartButtonContainer className="desktop desktopButton">
             <StartButton onClick={() => history.push("/inscription/profil")}>Commencer&nbsp;l'inscription</StartButton>
           </StartButtonContainer>
         </CardsContainer>
@@ -115,9 +135,9 @@ const CardsContainer = styled.div`
   }
 `;
 
-const CardPhase = ({ upText, title, downText, color }) => {
+const CardPhase = ({ upText, title, downText, color, to }) => {
   return (
-    <Card>
+    <Card href={to} target="_blank">
       <div>
         <CardUpText>{upText}</CardUpText>
         <CardText>{title}</CardText>
@@ -127,7 +147,7 @@ const CardPhase = ({ upText, title, downText, color }) => {
   );
 };
 
-const Card = styled.div`
+const Card = styled.a`
   padding: 1rem 1rem 2rem 1rem;
   display: flex;
   width: 100%;

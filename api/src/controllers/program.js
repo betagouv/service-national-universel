@@ -12,7 +12,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
   try {
     const { error, value: checkedProgram } = validateProgram(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
-    if (!canCreateOrUpdateProgram(req.user, checkedProgram)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canCreateOrUpdateProgram(req.user, checkedProgram)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const data = await ProgramObject.create(checkedProgram);
     return res.status(200).send({ ok: true, data });
   } catch (error) {
@@ -26,7 +26,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     const { error: errorProgram, value: checkedProgram } = validateProgram(req.body);
     const { error: errorId, value: checkedId } = validateId(req.params.id);
     if (errorProgram || errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
-    if (!canCreateOrUpdateProgram(req.user, checkedProgram)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canCreateOrUpdateProgram(req.user, checkedProgram)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     let obj = checkedProgram;
     const data = await ProgramObject.findById(checkedId);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });

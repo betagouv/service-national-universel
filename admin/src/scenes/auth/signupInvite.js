@@ -11,6 +11,7 @@ import { setUser } from "../../redux/auth/actions";
 
 import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
+import PasswordEye from "../../components/PasswordEye";
 import Header from "./components/header";
 
 import { translate, ROLES, colors } from "../../utils";
@@ -59,109 +60,115 @@ export default () => {
       <Header />
       <AuthWrapper>
         <Thumb />
-        <div>
-          <LoginBox>
-            <Title>{title}</Title>
-            <Formik
-              initialValues={{ firstName: newuser.firstName, lastName: newuser.lastName, email: newuser.email, password: "" }}
-              onSubmit={async (values, actions) => {
-                try {
-                  const { data: user, token, code, ok } = await api.post(`/referent/signup_invite`, { ...values, invitationToken });
-                  actions.setSubmitting(false);
-                  if (ok && token) api.setToken(token);
-                  if (ok && user) dispatch(setUser(user));
-                } catch (e) {
-                  actions.setSubmitting(false);
-                  console.log("e", e);
-                  if (e.code === "PASSWORD_NOT_VALIDATED")
-                    return toastr.error(
-                      "Mot de passe incorrect",
-                      "Votre mot de passe doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole",
-                      { timeOut: 10000 }
-                    );
-                  if (e.code === "USER_ALREADY_REGISTERED") return toastr.error("Votre compte est déja activé. Veuillez vous connecter", { timeOut: 10000 });
-                  return toastr.error("Problème", translate(e.code));
-                }
-              }}
-            >
-              {({ values, errors, isSubmitting, handleChange, handleSubmit }) => {
-                return (
-                  <form onSubmit={handleSubmit}>
-                    <StyledFormGroup>
-                      <label>ADRESSE EMAIL</label>
-                      <InputField
-                        validate={(v) => !validator.isEmail(v) && "Veuillez renseigner votre email"}
-                        name="email"
-                        type="email"
-                        value={values.email}
-                        onChange={handleChange}
-                        placeholder="Email"
-                        haserror={errors.email}
-                      />
-                      <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.email}</p>
-                    </StyledFormGroup>
-                    <Row noGutters>
-                      <Col>
-                        <StyledFormGroup>
-                          <label htmlFor="firstName">Prénom</label>
-                          <InputField
-                            validate={(v) => validator.isEmpty(v) && "Ce champ est requis"}
-                            name="firstName"
-                            type="name"
-                            id="firstName"
-                            value={values.firstName}
-                            onChange={handleChange}
-                            placeholder="Prénom"
-                            haserror={errors.firstName}
-                          />
-                          <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.firstName}</p>
-                        </StyledFormGroup>
-                      </Col>
-                      <div style={{ width: 10 }} />
-                      <Col>
-                        <StyledFormGroup>
-                          <label htmlFor="lastName">Nom</label>
-                          <InputField
-                            validate={(v) => validator.isEmpty(v) && "Ce champ est requis"}
-                            name="lastName"
-                            type="lastName"
-                            id="lastName"
-                            value={values.lastName}
-                            onChange={handleChange}
-                            placeholder="Nom"
-                            haserror={errors.lastName}
-                          />
-                          <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.lastName}</p>
-                        </StyledFormGroup>
-                      </Col>
-                    </Row>
-                    <StyledFormGroup>
-                      <label htmlFor="password">Mot de passe</label>
-                      <InputField
-                        validate={(v) => validator.isEmpty(v) && "Ce champ est requis"}
-                        autoComplete="new-password"
-                        name="password"
-                        type="password"
-                        id="repassword"
-                        value={values.password}
-                        onChange={handleChange}
-                        placeholder="Choisissez votre mot de passe"
-                        haserror={errors.password}
-                      />
-                      <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.password}</p>
-                    </StyledFormGroup>
-                    <Submit loading={isSubmitting} type="submit" color="primary">
-                      Activer mon compte
-                    </Submit>
-                    <Account>
-                      Vous avez déjà un compte ? <Link to="/auth/signin">Connectez-vous</Link>
-                    </Account>
-                  </form>
-                );
-              }}
-            </Formik>
-          </LoginBox>
-        </div>
+        <LoginBox>
+          <Title>{title}</Title>
+          <Formik
+            initialValues={{ firstName: newuser.firstName, lastName: newuser.lastName, email: newuser.email, password: "", repassword: "" }}
+            onSubmit={async (values, actions) => {
+              try {
+                const { data: user, token, code, ok } = await api.post(`/referent/signup_invite`, { ...values, invitationToken });
+                actions.setSubmitting(false);
+                if (ok && token) api.setToken(token);
+                if (ok && user) dispatch(setUser(user));
+              } catch (e) {
+                actions.setSubmitting(false);
+                console.log("e", e);
+                if (e.code === "PASSWORD_NOT_VALIDATED")
+                  return toastr.error(
+                    "Mot de passe incorrect",
+                    "Votre mot de passe doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole",
+                    { timeOut: 10000 }
+                  );
+                if (e.code === "USER_ALREADY_REGISTERED") return toastr.error("Votre compte est déja activé. Veuillez vous connecter", { timeOut: 10000 });
+                return toastr.error("Problème", translate(e.code));
+              }
+            }}
+          >
+            {({ values, errors, isSubmitting, handleChange, handleSubmit }) => {
+              return (
+                <form onSubmit={handleSubmit}>
+                  <StyledFormGroup>
+                    <label>ADRESSE EMAIL</label>
+                    <InputField
+                      validate={(v) => !validator.isEmail(v) && "Veuillez renseigner votre email"}
+                      name="email"
+                      type="email"
+                      value={values.email}
+                      onChange={handleChange}
+                      placeholder="Email"
+                      haserror={errors.email}
+                    />
+                    <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.email}</p>
+                  </StyledFormGroup>
+                  <Row noGutters>
+                    <Col>
+                      <StyledFormGroup>
+                        <label htmlFor="firstName">Prénom</label>
+                        <InputField
+                          validate={(v) => validator.isEmpty(v) && "Ce champ est requis"}
+                          name="firstName"
+                          type="name"
+                          id="firstName"
+                          value={values.firstName}
+                          onChange={handleChange}
+                          placeholder="Prénom"
+                          haserror={errors.firstName}
+                        />
+                        <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.firstName}</p>
+                      </StyledFormGroup>
+                    </Col>
+                    <div style={{ width: 10 }} />
+                    <Col>
+                      <StyledFormGroup>
+                        <label htmlFor="lastName">Nom</label>
+                        <InputField
+                          validate={(v) => validator.isEmpty(v) && "Ce champ est requis"}
+                          name="lastName"
+                          type="lastName"
+                          id="lastName"
+                          value={values.lastName}
+                          onChange={handleChange}
+                          placeholder="Nom"
+                          haserror={errors.lastName}
+                        />
+                        <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.lastName}</p>
+                      </StyledFormGroup>
+                    </Col>
+                  </Row>
+                  <StyledFormGroup>
+                    <label htmlFor="password">
+                      <span>*</span>Mot de passe
+                    </label>
+                    <p style={{ fontSize: 12, color: colors.grey }}>👉 Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole</p>
+                    <PasswordEye autoComplete="new-password" value={values.password} onChange={handleChange} name="password" id="password" />
+                    <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.password}</p>
+                  </StyledFormGroup>
+                  <StyledFormGroup>
+                    <label htmlFor="repassword">
+                      <span>*</span>Confirmation mot de passe
+                    </label>
+                    <PasswordEye
+                      validate={() => values.password !== values.repassword && "Les mots de passe ne correspondent pas."}
+                      autoComplete="new-password"
+                      value={values.repassword}
+                      onChange={handleChange}
+                      name="repassword"
+                      id="repassword"
+                      placeholder="Confirmez votre mot de passe"
+                    />
+                    <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.repassword}</p>
+                  </StyledFormGroup>
+                  <Submit loading={isSubmitting} type="submit" color="primary">
+                    Activer mon compte
+                  </Submit>
+                  <Account>
+                    Vous avez déjà un compte ? <Link to="/auth/signin">Connectez-vous</Link>
+                  </Account>
+                </form>
+              );
+            }}
+          </Formik>
+        </LoginBox>
       </AuthWrapper>
     </div>
   );

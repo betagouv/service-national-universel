@@ -9,7 +9,7 @@ const UserObject = require("../models/referent");
 const ApplicationObject = require("../models/application");
 const StructureObject = require("../models/structure");
 const ReferentObject = require("../models/referent");
-const { ERRORS, isYoung } = require("../utils/index.js");
+const { ERRORS, isYoung, updateApplicationsWithYoungOrMission } = require("../utils/index.js");
 const { validateId, validateMission } = require("../utils/validator");
 const { canModifyMission, ROLES } = require("snu-lib/roles");
 const { MISSION_STATUS, APPLICATION_STATUS } = require("snu-lib/constants");
@@ -110,10 +110,12 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     const mission = await MissionObject.findById(checkedId);
     if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canModifyMission(req.user, mission)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canModifyMission(req.user, mission)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { error: errorMission, value: checkedMission } = validateMission(req.body);
     if (errorMission) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error: errorMission });
+
+    // await updateApplicationsWithYoungOrMission({ mission, newMission: checkedMission });
 
     const oldStatus = mission.status;
     mission.set(checkedMission);

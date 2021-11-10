@@ -7,19 +7,18 @@ import { toastr } from "react-redux-toastr";
 import validator from "validator";
 import { useHistory } from "react-router-dom";
 
-import AddressInput from "../../../components/addressInput";
+import AddressInput from "../../../components/addressInputV2";
 import api from "../../../services/api";
 import { setYoung } from "../../../redux/auth/actions";
 import ErrorMessage, { requiredMessage } from "../components/errorMessage";
 import FranceConnectButton from "../components/FranceConnectButton";
-import { environment } from "../../../config";
 import { saveYoung, STEPS } from "../utils";
 import { translate } from "../../../utils";
 import FormLegend from "../../../components/form/FormLegend";
 import FormRow from "../../../components/form/FormRow";
 import FormFooter from "../../../components/form/FormFooter";
 
-const Parent = ({ id = 1, values, errors, touched, handleChange }) => {
+const Parent = ({ id = 1, values, errors, touched, handleChange, validateField }) => {
   const isParentFromFranceConnect = values[`parent${id}FromFranceConnect`] === "true";
 
   function FranceConnectZone({ id, handleSave }) {
@@ -33,10 +32,13 @@ const Parent = ({ id = 1, values, errors, touched, handleChange }) => {
       <FormRow>
         <Col>
           <p>
-            Vous pouvez utiliser ce bouton vous pour identifier et récupérer les données (nom, prénom et email) du représentant légal n°{id} avec FranceConnect, ou remplir les
-            informations manuellement ci-dessous.
+            En tant que représentant légal n°{id}, vous pouvez utiliser ce bouton pour vous identifier avec FranceConnect et récupérer vos données personnelles (nom, prénom et
+            email), ou remplir les informations manuellement ci-dessous.
           </p>
           <FranceConnectButton callback={getFranceConnectCallback(id)} beforeRedirect={() => handleSave()} />
+          <p>
+            L'identification via <b>FranceConnect</b> dispense de signature numérique du consentement du ou des représentants légaux.
+          </p>
         </Col>
       </FormRow>
     );
@@ -44,49 +46,61 @@ const Parent = ({ id = 1, values, errors, touched, handleChange }) => {
   async function handleSave() {
     await saveYoung(values);
   }
+
+  useEffect(() => {
+    if (values[`parent${id}Email`]) validateField(`parent${id}Email`);
+  }, [values[`parent${id}Email`]]);
+  useEffect(() => {
+    if (values[`parent${id}Phone`]) validateField(`parent${id}Phone`);
+  }, [values[`parent${id}Phone`]]);
+
   return (
     <>
-      <FormLegend>Représentant légal n°{id}</FormLegend>
-      <FranceConnectZone handleSave={() => handleSave()} id={id} />
+      <FormLegend>
+        <h5>Représentant légal n°{id}</h5>
+        <FranceConnectZone handleSave={() => handleSave()} id={id} />
+      </FormLegend>
 
       <FormRow>
         <Col md={4}>
           <Label>Je suis</Label>
         </Col>
         <Col>
-          <RadioLabel>
-            <Field
-              validate={(v) => !v && requiredMessage}
-              type="radio"
-              name={`parent${id}Status`}
-              onChange={handleChange}
-              value="mother"
-              checked={values[`parent${id}Status`] === "mother"}
-            />
-            La mère
-          </RadioLabel>
-          <RadioLabel>
-            <Field
-              validate={(v) => !v && requiredMessage}
-              type="radio"
-              name={`parent${id}Status`}
-              onChange={handleChange}
-              value="father"
-              checked={values[`parent${id}Status`] === "father"}
-            />
-            Le père
-          </RadioLabel>
-          <RadioLabel>
-            <Field
-              validate={(v) => !v && requiredMessage}
-              type="radio"
-              name={`parent${id}Status`}
-              onChange={handleChange}
-              value="representant"
-              checked={values[`parent${id}Status`] === "representant"}
-            />
-            Le représentant légal
-          </RadioLabel>
+          <Inline>
+            <RadioLabel>
+              <Field
+                validate={(v) => !v && requiredMessage}
+                type="radio"
+                name={`parent${id}Status`}
+                onChange={handleChange}
+                value="mother"
+                checked={values[`parent${id}Status`] === "mother"}
+              />
+              La mère
+            </RadioLabel>
+            <RadioLabel>
+              <Field
+                validate={(v) => !v && requiredMessage}
+                type="radio"
+                name={`parent${id}Status`}
+                onChange={handleChange}
+                value="father"
+                checked={values[`parent${id}Status`] === "father"}
+              />
+              Le père
+            </RadioLabel>
+            <RadioLabel>
+              <Field
+                validate={(v) => !v && requiredMessage}
+                type="radio"
+                name={`parent${id}Status`}
+                onChange={handleChange}
+                value="representant"
+                checked={values[`parent${id}Status`] === "representant"}
+              />
+              Le représentant légal
+            </RadioLabel>
+          </Inline>
           <ErrorMessage errors={errors} touched={touched} name={`parent${id}Status`} />
         </Col>
       </FormRow>
@@ -97,7 +111,7 @@ const Parent = ({ id = 1, values, errors, touched, handleChange }) => {
         <Col>
           <Field
             validate={(v) => !v && requiredMessage}
-            placeholder={`Prénom du parent ${id}`}
+            placeholder={`Prénom du représentant légal numéro ${id}`}
             name={`parent${id}FirstName`}
             value={values[`parent${id}FirstName`]}
             onChange={handleChange}
@@ -114,7 +128,7 @@ const Parent = ({ id = 1, values, errors, touched, handleChange }) => {
         <Col>
           <Field
             validate={(v) => !v && requiredMessage}
-            placeholder={`Nom du parent ${id}`}
+            placeholder={`Nom du représentant légal numéro ${id}`}
             name={`parent${id}LastName`}
             value={values[`parent${id}LastName`]}
             onChange={handleChange}
@@ -131,7 +145,7 @@ const Parent = ({ id = 1, values, errors, touched, handleChange }) => {
         <Col>
           <Field
             validate={(v) => (!v && requiredMessage) || (!validator.isEmail(v) && "Ce champs est au mauvais format")}
-            placeholder={`Email du parent ${id}`}
+            placeholder={`Email du représentant légal numéro ${id}`}
             type="email"
             name={`parent${id}Email`}
             value={values[`parent${id}Email`]}
@@ -148,7 +162,7 @@ const Parent = ({ id = 1, values, errors, touched, handleChange }) => {
         <Col>
           <Field
             validate={(v) => (!v && requiredMessage) || (!validator.isMobilePhone(v) && "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX")}
-            placeholder={`Téléphone du parent ${id}`}
+            placeholder={`Téléphone du représentant légal numéro ${id}`}
             type="tel"
             name={`parent${id}Phone`}
             value={values[`parent${id}Phone`]}
@@ -163,53 +177,54 @@ const Parent = ({ id = 1, values, errors, touched, handleChange }) => {
           <Label>Lieu de résidence</Label>
         </Col>
         <Col>
-          <RadioLabel>
-            <Field
-              validate={(v) => !v && requiredMessage}
-              className="form-control"
-              type="radio"
-              name={`parent${id}OwnAddress`}
-              value="false"
-              checked={values[`parent${id}OwnAddress`] === "false"}
-              onChange={handleChange}
-            />
-            Identique à celle du volontaire
-          </RadioLabel>
-          <RadioLabel>
-            <Field
-              validate={(v) => !v && requiredMessage}
-              className="form-control"
-              type="radio"
-              name={`parent${id}OwnAddress`}
-              value="true"
-              checked={values[`parent${id}OwnAddress`] === "true"}
-              onChange={handleChange}
-            />
-            Différente de celle du volontaire
-          </RadioLabel>
+          <Inline>
+            <RadioLabel>
+              <Field
+                validate={(v) => !v && requiredMessage}
+                className="form-control"
+                type="radio"
+                name={`parent${id}OwnAddress`}
+                value="false"
+                checked={values[`parent${id}OwnAddress`] === "false"}
+                onChange={handleChange}
+              />
+              Identique à celle du volontaire
+            </RadioLabel>
+            <RadioLabel>
+              <Field
+                validate={(v) => !v && requiredMessage}
+                className="form-control"
+                type="radio"
+                name={`parent${id}OwnAddress`}
+                value="true"
+                checked={values[`parent${id}OwnAddress`] === "true"}
+                onChange={handleChange}
+              />
+              Différente de celle du volontaire
+            </RadioLabel>
+          </Inline>
           <ErrorMessage errors={errors} touched={touched} name={`parent${id}OwnAddress`} />
           {values[`parent${id}OwnAddress`] === "true" && (
             <FormRow>
-              <Col>
-                <Row>
-                  <Col md={12} style={{ marginTop: 15 }}>
-                    <Label>Rechercher</Label>
-                    <AddressInput
-                      keys={{
-                        city: `parent${id}City`,
-                        zip: `parent${id}Zip`,
-                        address: `parent${id}Address`,
-                        location: `parent${id}Location`,
-                        department: `parent${id}Department`,
-                        region: `parent${id}Region`,
-                      }}
-                      values={values}
-                      handleChange={handleChange}
-                      errors={errors}
-                      touched={touched}
-                    />
-                  </Col>
-                </Row>
+              <Col md={12}>
+                <AddressInput
+                  keys={{
+                    city: `parent${id}City`,
+                    zip: `parent${id}Zip`,
+                    address: `parent${id}Address`,
+                    location: `parent${id}Location`,
+                    department: `parent${id}Department`,
+                    region: `parent${id}Region`,
+                    country: `parent${id}Country`,
+                  }}
+                  values={values}
+                  handleChange={handleChange}
+                  errors={errors}
+                  touched={touched}
+                  countryVisible
+                  validateField={validateField}
+                />
+                <ErrorMessage errors={errors} touched={touched} name={`parent${id}OwnAddress`} />
               </Col>
             </FormRow>
           )}
@@ -224,7 +239,7 @@ export default () => {
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
   const [isParent2Visible, setIsParent2Visible] = useState(false);
-  const [initialValues, setInitialValues] = useState(young);
+  const [loading, setLoading] = useState(false);
 
   const hasParent2Infos = () => {
     return young && (young.parent2Status || young.parent2FirstName || young.parent2LastName || young.parent2Email || young.parent2Phone);
@@ -241,32 +256,35 @@ export default () => {
   return (
     <Wrapper>
       <Heading>
-        <h2>Coordonnées du ou des représentants légaux</h2>
+        <h2>Coordonnées de votre ou de vos représentants légaux</h2>
         <p>Faites compléter les informations ci-dessous par votre ou vos représentants légaux.</p>
       </Heading>
       <Formik
-        initialValues={initialValues}
+        initialValues={young}
         enableReinitialize={true}
         validateOnChange={false}
         validateOnBlur={false}
         onSubmit={async (values) => {
+          setLoading(true);
           try {
             values.inscriptionStep = STEPS.CONSENTEMENTS;
-            const { ok, code, data: young } = await api.put("/young", values);
-            if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
-            dispatch(setYoung(young));
+            const { ok, code, data } = await api.put("/young", values);
+            if (!ok || !data?._id) return toastr.error("Une erreur s'est produite :", translate(code));
+            dispatch(setYoung(data));
             history.push("/inscription/consentements");
           } catch (e) {
             console.log(e);
             toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code));
+          } finally {
+            setLoading(false);
           }
         }}
       >
-        {({ values, handleChange, handleSubmit, isSubmitting, submitForm, errors, touched }) => (
+        {({ values, handleChange, handleSubmit, isSubmitting, submitForm, errors, touched, validateField }) => (
           <>
-            <Parent id={1} values={values} handleChange={handleChange} errors={errors} touched={touched} />
+            <Parent id={1} values={values} handleChange={handleChange} errors={errors} touched={touched} validateField={validateField} />
             <FormRow>
-              <Col md={{ offset: 4 }} style={{ padding: "45px 20px" }}>
+              <Col md={4} style={{ padding: "20px 0" }}>
                 <BorderButton
                   onClick={() => {
                     setIsParent2Visible(!isParent2Visible);
@@ -282,20 +300,29 @@ export default () => {
                     delete values.parent2City;
                     delete values.parent2Department;
                     delete values.parent2Location;
+                    delete values.parent2Country;
                   }}
                 >
-                  {!isParent2Visible ? "Ajouter" : "Retirer"} un représentant légal
+                  {!isParent2Visible ? "Ajouter" : "Retirer"} le représentant légal nº2
                 </BorderButton>
               </Col>
             </FormRow>
-            {isParent2Visible ? <Parent id={2} values={values} handleChange={handleChange} errors={errors} touched={touched} /> : null}
-            <FormFooter values={values} handleSubmit={handleSubmit} errors={errors} />
+            {isParent2Visible ? <Parent id={2} values={values} handleChange={handleChange} errors={errors} touched={touched} validateField={validateField} /> : null}
+            <FormFooter loading={loading} values={values} handleSubmit={handleSubmit} errors={errors} />
           </>
         )}
       </Formik>
     </Wrapper>
   );
 };
+
+const Inline = styled.div`
+  display: flex;
+  align-items: center;
+  @media (max-width: 420px) {
+    flex-wrap: wrap;
+  }
+`;
 
 const Wrapper = styled.div`
   padding: 40px;
@@ -311,9 +338,10 @@ const Heading = styled.div`
     font-weight: 700;
   }
   p {
-    color: #161e2e;
-    font-size: 1rem;
-    margin: 0;
+    color: #6b7280;
+    margin-bottom: 0;
+    font-size: 16px;
+    font-weight: 400;
   }
 `;
 
@@ -327,13 +355,10 @@ const RadioLabel = styled.label`
   align-items: center;
   color: #374151;
   font-size: 14px;
-  margin-bottom: 15px;
-  :last-child {
-    margin-bottom: 0;
-  }
+  margin-right: 15px;
   input {
     cursor: pointer;
-    margin-right: 12px;
+    margin-right: 5px;
     width: 15px;
     height: 15px;
     min-width: 15px;
@@ -343,7 +368,7 @@ const RadioLabel = styled.label`
 
 const BorderButton = styled.button`
   color: #5145cd;
-  border: 1px solid #5145cd;
+  border: 1px solid #d1d5db;
   padding: 12px 25px;
   background-color: transparent;
   outline: 0;
@@ -351,5 +376,6 @@ const BorderButton = styled.button`
   font-weight: 500;
   :hover {
     background-color: #f9fafb;
+    border: 1px solid #5145cd;
   }
 `;

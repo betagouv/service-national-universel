@@ -8,15 +8,14 @@ import Coordonnees from "./Create/stepCoordonnees";
 import Representants from "./Create/stepRepresentants";
 import Particulieres from "./Create/stepParticulieres";
 import Consentements from "./Create/stepConsentements";
+import Documents from "./Create/stepDocuments";
+import Availability from "./Create/stepAvailability";
 import Done from "./Create/stepDone";
 import Drawer from "./Create/drawer";
-import HomeClosed from "./Home/closed";
 import { useSelector } from "react-redux";
 
 import Home from "./Home/index.js";
 import { STEPS } from "./utils";
-import { isInscription2021Closed, isEndOfInscriptionManagement2021 } from "../../utils";
-import { environment } from "../../config";
 
 const Step = ({ step }) => {
   function renderStep(step) {
@@ -24,6 +23,8 @@ const Step = ({ step }) => {
     if (step === STEPS.PARTICULIERES) return <Particulieres />;
     if (step === STEPS.REPRESENTANTS) return <Representants />;
     if (step === STEPS.CONSENTEMENTS) return <Consentements />;
+    if (step === STEPS.DOCUMENTS) return <Documents />;
+    if (step === STEPS.AVAILABILITY) return <Availability />;
     if (step === STEPS.DONE) return <Done />;
     return <Profil />;
   }
@@ -41,25 +42,20 @@ const Step = ({ step }) => {
 export default () => {
   const young = useSelector((state) => state.Auth.young);
 
-  if (environment === "production")
-    return (
-      <Switch>
-        <Route path="/inscription" component={HomeClosed} />
-      </Switch>
-    );
-  else
-    return (
-      <Switch>
-        <Route path="/inscription/profil" component={() => <Step step={STEPS.PROFIL} />} />
-        <Route path="/inscription/coordonnees" component={() => <Step step={STEPS.COORDONNEES} />} />
-        <Route path="/inscription/particulieres" component={() => <Step step={STEPS.PARTICULIERES} />} />
-        <Route path="/inscription/representants" component={() => <Step step={STEPS.REPRESENTANTS} />} />
-        <Route path="/inscription/consentements" component={() => <Step step={STEPS.CONSENTEMENTS} />} />
-        <Route path="/inscription/done" component={() => <Step step={STEPS.DONE} />} />
-        <Route path="/inscription/france-connect-callback" component={() => <FranceConnectCallback />} />
-        <Route path="/inscription" component={Home} />
-      </Switch>
-    );
+  return (
+    <Switch>
+      <Route path="/inscription/profil" component={() => <Step step={STEPS.PROFIL} />} />
+      <Route path="/inscription/coordonnees" component={() => <Step step={STEPS.COORDONNEES} />} />
+      <Route path="/inscription/particulieres" component={() => <Step step={STEPS.PARTICULIERES} />} />
+      <Route path="/inscription/representants" component={() => <Step step={STEPS.REPRESENTANTS} />} />
+      <Route path="/inscription/consentements" component={() => <Step step={STEPS.CONSENTEMENTS} />} />
+      <Route path="/inscription/documents" component={() => <Step step={STEPS.DOCUMENTS} />} />
+      <Route path="/inscription/availability" component={() => <Step step={STEPS.AVAILABILITY} />} />
+      <Route path="/inscription/done" component={() => <Step step={STEPS.DONE} />} />
+      <Route path="/inscription/france-connect-callback" component={() => <FranceConnectCallback />} />
+      <Route path="/inscription" component={Home} />
+    </Switch>
+  );
 };
 
 const Content = styled.div`

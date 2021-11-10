@@ -129,14 +129,14 @@ describe("Structure", () => {
       const res = await request(getAppHelper()).get(`/structure/${notExistingStructureId}/patches`).send();
       expect(res.statusCode).toEqual(404);
     });
-    it("should return 401 if not admin", async () => {
+    it("should return 403 if not admin", async () => {
       const structure = await createStructureHelper(getNewStructureFixture());
       structure.name = "MY NEW NAME";
       await structure.save();
       const passport = require("passport");
       passport.user.role = ROLES.RESPONSIBLE;
       const res = await request(getAppHelper()).get(`/structure/${structure._id}/patches`).send();
-      expect(res.status).toBe(401);
+      expect(res.status).toBe(403);
       passport.user.role = ROLES.ADMIN;
     });
     it("should return 200 if structure found with patches", async () => {

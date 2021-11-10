@@ -36,7 +36,7 @@ function handleError(err, req, res, next) {
   res.status(statusCode).json(output);
 }
 
-const origin = [APP_URL, ADMIN_URL];
+const origin = [APP_URL, ADMIN_URL, "https://inscription.snu.gouv.fr"];
 app.use(cors({ credentials: true, origin }));
 app.use(bodyParser.json());
 app.use(bodyParser.text({ type: "application/x-ndjson" }));
@@ -57,6 +57,7 @@ app.use("/contract", require("./controllers/contract"));
 app.use("/program", require("./controllers/program"));
 app.use("/event", require("./controllers/event"));
 app.use("/inscription-goal", require("./controllers/inscription-goal"));
+app.use("/cohort-session", require("./controllers/cohort-session"));
 app.use("/department-service", require("./controllers/department-service"));
 app.use("/waiting-list", require("./controllers/waiting-list"));
 app.use("/cohesion-center", require("./controllers/cohesion-center"));

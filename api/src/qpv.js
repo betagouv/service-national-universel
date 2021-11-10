@@ -2,7 +2,6 @@ const fetch = require("node-fetch");
 const querystring = require("querystring");
 const { capture } = require("./sentry");
 const { QPV_USERNAME, QPV_PASSWORD } = require("./config");
-
 const url = "https://wsa.sig.ville.gouv.fr/service/georeferenceur.json";
 
 // ZUS : Zone Urbain Sensible /

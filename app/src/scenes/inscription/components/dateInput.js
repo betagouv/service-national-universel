@@ -55,7 +55,7 @@ export default ({ value, onChange, placeholder, onSelect }) => {
           </option>
         ))}
       </Input>
-      <Separator>/</Separator>
+      <Separator />
       <Input id="month" name="month" value={month} onChange={handleMonth} type="select">
         <option value="">mois</option>
         {range(0, 11).map((m) => (
@@ -64,7 +64,7 @@ export default ({ value, onChange, placeholder, onSelect }) => {
           </option>
         ))}
       </Input>
-      <Separator>/</Separator>
+      <Separator />
       <Input id="year" name="year" value={year} onChange={handleYear} type="select">
         <option value="">année</option>
         {range(1990, 2020).map((y) => (

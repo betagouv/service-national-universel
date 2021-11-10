@@ -23,6 +23,14 @@ const Schema = new mongoose.Schema({
       description: "Jauge (nombre maximum de volontaires acceptés)",
     },
   },
+  cohort: {
+    type: String,
+    enum: ["Juillet 2022", "Juin 2022", "Février 2022", "2021"],
+    default: "2021",
+    documentation: {
+      description: "Cohorte des jeunes",
+    },
+  },
 
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },

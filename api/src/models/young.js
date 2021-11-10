@@ -42,6 +42,18 @@ const Schema = new mongoose.Schema({
       description: "Pays de naissance",
     },
   },
+  birthCity: {
+    type: String,
+    documentation: {
+      description: "La ville de naissance du volontaire",
+    },
+  },
+  birthCityZip: {
+    type: String,
+    documentation: {
+      description: "Le code postal de la ville de naissance du volontaire",
+    },
+  },
   email: {
     type: String,
     required: true,
@@ -71,8 +83,8 @@ const Schema = new mongoose.Schema({
   },
   cohort: {
     type: String,
-    default: "2021",
-    enum: ["2021", "2020", "2019"],
+    default: "2022",
+    enum: ["Juillet 2022", "Juin 2022", "Février 2022", "2022", "2021", "2020", "2019"],
     documentation: {
       description: "Cohorte",
     },
@@ -96,9 +108,22 @@ const Schema = new mongoose.Schema({
   statusPhase1: {
     type: String,
     default: "WAITING_AFFECTATION",
-    enum: ["AFFECTED", "WAITING_AFFECTATION", "WAITING_ACCEPTATION", "CANCEL", "DONE", "NOT_DONE", "WITHDRAWN", "WAITING_LIST"],
+    enum: ["AFFECTED", "WAITING_AFFECTATION", "WAITING_ACCEPTATION", "CANCEL", "EXEMPTED", "DONE", "NOT_DONE", "WITHDRAWN", "WAITING_LIST"],
     documentation: {
       description: "Statut du volontaire lié à la première phase",
+    },
+  },
+  statusPhase1Motif: {
+    type: String,
+    enum: ["ILLNESS", "DEATH", "ADMINISTRATION_CANCEL", "OTHER"],
+    documentation: {
+      description: "Motif du statut du volontaire lié à la première phase",
+    },
+  },
+  statusPhase1MotifDetail: {
+    type: String,
+    documentation: {
+      description: "Détail du motif du statut du volontaire lié à la première phase",
     },
   },
   statusPhase2: {
@@ -149,7 +174,7 @@ const Schema = new mongoose.Schema({
   inscriptionStep: {
     type: String,
     default: "COORDONNEES", // if the young is created, it passed the first step, so default is COORDONNEES
-    enum: ["PROFIL", "COORDONNEES", "PARTICULIERES", "REPRESENTANTS", "CONSENTEMENTS", "MOTIVATIONS", "DONE"],
+    enum: ["PROFIL", "COORDONNEES", "PARTICULIERES", "REPRESENTANTS", "CONSENTEMENTS", "MOTIVATIONS", "AVAILABILITY", "DONE", "DOCUMENTS"],
     documentation: {
       description: "Étape du tunnel d'inscription",
     },
@@ -163,6 +188,19 @@ const Schema = new mongoose.Schema({
     documentation: {
       description: "Étape du tunnel d'inscription sur le formulaire allégé (uniquement disponible pour la cohorte 2020)",
     },
+  },
+  // Inscription status message
+  inscriptionCorrectionMessage: {
+    type: String,
+    documentation: {
+      description: "Message envoyé au volontaire dans le cas où son inscription nécessite des corrections.",
+    }
+  },
+  inscriptionRefusedMessage: {
+    type: String,
+    documentation: {
+      description: "Message envoyé au volontaire dans le cas où son inscription est refusée.",
+    }
   },
 
   // userName and userId because it can be a young or a referent
@@ -388,6 +426,12 @@ const Schema = new mongoose.Schema({
       description: "Région du volontaire",
     },
   },
+  country: {
+    type: String,
+    documentation: {
+      description: "Pays de résidence du volontaire",
+    },
+  },
   location: {
     lat: { type: Number },
     lon: { type: Number },
@@ -494,6 +538,15 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  // * Situations pro
+  employed: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le volontaire est employé",
+    },
+  },
+
   // * Parents et représentants
   parent1Status: {
     type: String,
@@ -566,6 +619,12 @@ const Schema = new mongoose.Schema({
     type: String,
     documentation: {
       description: "Région du parent 1",
+    },
+  },
+  parent1Country: {
+    type: String,
+    documentation: {
+      description: "Pays du parent 1",
     },
   },
   parent1Location: {
@@ -654,6 +713,12 @@ const Schema = new mongoose.Schema({
       description: "Région du parent 2",
     },
   },
+  parent2Country: {
+    type: String,
+    documentation: {
+      description: "Pays du parent 2",
+    },
+  },
   parent2Location: {
     lat: { type: Number },
     lon: { type: Number },
@@ -667,19 +732,88 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  // * Hébergeur
+  hostLastName: {
+    type: String,
+    documentation: {
+      description: "Nom de l'hébergeur",
+    },
+  },
+  hostFirstName: {
+    type: String,
+    documentation: {
+      description: "Prénom de l'hébergeur",
+    },
+  },
+  hostCity: {
+    type: String,
+    documentation: {
+      description: "Ville de l'hébergeur",
+    },
+  },
+  hostZip: {
+    type: String,
+    documentation: {
+      description: "Code postale de la ville de l'hébergeur",
+    },
+  },
+  hostAddress: {
+    type: String,
+    documentation: {
+      description: "Adresse de l'hébergeur",
+    },
+  },
+  hostDepartment: {
+    type: String,
+    documentation: {
+      description: "Departement de l'hébergeur",
+    },
+  },
+  hostRegion: {
+    type: String,
+    documentation: {
+      description: "Région de l'hébergeur",
+    },
+  },
+  hostRelationship: {
+    type: String,
+    documentation: {
+      description: "Lien de l'hébergeur avec le volontaire",
+    },
+  },
+
   // * Situations particulières
   handicap: {
     type: String,
     enum: ["true", "false"],
-    default: "false",
     documentation: {
       description: "Le volontaire a un handicap",
+    },
+  },
+  allergies: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le volontaire a des allergies",
+    },
+  },
+  handicapInSameDepartment: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le volontaire souhaite être affecté dans son département",
+    },
+  },
+  reducedMobilityAccess: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le volontaire a besoin d’un aménagement pour mobilité réduite",
     },
   },
   ppsBeneficiary: {
     type: String,
     enum: ["true", "false"],
-    default: "false",
     documentation: {
       description: "le volontaire bénéficie d'un PPS (projet personnalisé de scolarisation)",
     },
@@ -687,7 +821,6 @@ const Schema = new mongoose.Schema({
   paiBeneficiary: {
     type: String,
     enum: ["true", "false"],
-    default: "false",
     documentation: {
       description: "Le volontaire bénéficie d'un PAI (projet d'accueil individualisé)",
     },
@@ -756,7 +889,6 @@ const Schema = new mongoose.Schema({
   specificAmenagment: {
     type: String,
     enum: ["true", "false"],
-    default: "false",
     documentation: {
       description: "Le volontaire a besoin d'aménagements spécifiques",
     },
@@ -775,6 +907,13 @@ const Schema = new mongoose.Schema({
       description: "Le volontaire pratique une activité de haut niveau",
     },
   },
+  highSkilledActivityInSameDepartment: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le volontaire pratique une activité de haut niveau et souhaite etre affecté dans son département pour la phase 1",
+    },
+  },
   highSkilledActivityType: {
     type: String,
     documentation: {
@@ -789,6 +928,13 @@ const Schema = new mongoose.Schema({
   },
 
   // * Consentements
+  dataProcessingConsentmentFiles: {
+    type: [String],
+    default: [],
+    documentation: {
+      description: "Fichier : Formulaire de consentement au traitement des données personnelles",
+    },
+  },
   parentConsentment: {
     type: String,
     enum: ["true", "false"],
@@ -849,6 +995,13 @@ const Schema = new mongoose.Schema({
     default: [],
     documentation: {
       description: "Fichier : Formulaire de consentement d'autotest PCR",
+    },
+  },
+  informationAccuracy: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le volontaire certifie l'exactitude des renseignements fournis",
     },
   },
 

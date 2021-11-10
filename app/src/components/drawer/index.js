@@ -281,11 +281,13 @@ const SocialMedia = () => {
   return (
     <IconsBar>
       {medias.map((el, index) => (
-        <IconContainer key={index} onClick={() => window.open(el.link, "_blank").focus()}>
-          <svg width="24" height="24" viewBox="0 0 24 24">
-            <path d={el.svg}></path>
-          </svg>
-        </IconContainer>
+        <a href={el.link} target="_blank" style={{ decoration: "none", borderRadius: "100%", padding: "0" }}>
+          <IconContainer>
+            <svg width="24" height="24" viewBox="0 0 24 24">
+              <path d={el.svg}></path>
+            </svg>
+          </IconContainer>
+        </a>
       ))}
     </IconsBar>
   );

@@ -48,7 +48,7 @@ describe("Department service", () => {
       expectDepartmentServiceToEqual(departmentServiceFixture, res.body.data);
       await deleteDepartmentServiceByIdHelper(departmentService._id);
     });
-    it("should return 401 if a young try to get other department service", async () => {
+    it("should return 403 if a young try to get other department service", async () => {
       const young = await createYoungHelper({ ...getNewYoungFixture(), department: "foo" });
       const passport = require("passport");
       const previous = passport.user;
@@ -57,7 +57,7 @@ describe("Department service", () => {
       departmentServiceFixture.department = "bar";
       const departmentService = await createDepartmentServiceHelper(departmentServiceFixture);
       const res = await request(getAppHelper()).get(`/department-service/bar`).send();
-      expect(res.statusCode).toEqual(401);
+      expect(res.statusCode).toEqual(403);
       await deleteDepartmentServiceByIdHelper(departmentService._id);
       passport.user = previous;
     });

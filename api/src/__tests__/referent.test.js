@@ -67,12 +67,12 @@ describe("Referent", () => {
         .send({ ...referentFixture, structureId: 1 });
       expect(res.statusCode).toEqual(400);
     });
-    it("should return 401 if user can not invite", async () => {
+    it("should return 403 if user can not invite", async () => {
       const passport = require("passport");
       passport.user.role = ROLES.RESPONSIBLE;
       const referentFixture = { ...getNewReferentFixture(), role: ROLES.ADMIN };
       const res = await request(getAppHelper()).post("/referent/signup_invite/001").send(referentFixture);
-      expect(res.statusCode).toEqual(401);
+      expect(res.statusCode).toEqual(403);
       passport.user.role = ROLES.ADMIN;
     });
     it("should return 409 when user already exists", async () => {
@@ -231,14 +231,14 @@ describe("Referent", () => {
       const res = await request(getAppHelper()).get(`/referent/${notExistingReferentId}/patches`).send();
       expect(res.statusCode).toEqual(404);
     });
-    it("should return 401 if not admin", async () => {
+    it("should return 403 if not admin", async () => {
       const referent = await createReferentHelper(getNewReferentFixture());
       referent.firstName = "MY NEW NAME";
       await referent.save();
       const passport = require("passport");
       passport.user.role = ROLES.RESPONSIBLE;
       const res = await request(getAppHelper()).get(`/referent/${referent._id}/patches`).send();
-      expect(res.status).toBe(401);
+      expect(res.status).toBe(403);
       passport.user.role = ROLES.ADMIN;
     });
     it("should return 200 if referent found with patches", async () => {
@@ -268,12 +268,12 @@ describe("Referent", () => {
       expect(res.statusCode).toEqual(200);
       expectReferentToEqual(referent, res.body.data);
     });
-    it("should return 401 if role is not admin", async () => {
+    it("should return 403 if role is not admin", async () => {
       const passport = require("passport");
       passport.user.role = ROLES.RESPONSIBLE;
       const referent = await createReferentHelper(getNewReferentFixture());
       const res = await request(getAppHelper()).get(`/referent/${referent._id}`).send();
-      expect(res.statusCode).toEqual(401);
+      expect(res.statusCode).toEqual(403);
       passport.user.role = ROLES.ADMIN;
     });
   });
@@ -327,12 +327,12 @@ describe("Referent", () => {
         })
       );
     });
-    it("should return 401 if role is not admin", async () => {
+    it("should return 403 if role is not admin", async () => {
       const passport = require("passport");
       passport.user.role = ROLES.RESPONSIBLE;
       const referent = await createReferentHelper(getNewReferentFixture());
       const res = await request(getAppHelper()).put(`/referent/${referent._id}`).send();
-      expect(res.statusCode).toEqual(401);
+      expect(res.statusCode).toEqual(403);
       passport.user.role = ROLES.ADMIN;
     });
 
@@ -371,25 +371,25 @@ describe("Referent", () => {
       expect(res.statusCode).toEqual(200);
       expect(await getReferentByIdHelper(referent._id)).toBeNull();
     });
-    it("should return 401 if role is not admin", async () => {
+    it("should return 403 if role is not admin", async () => {
       const passport = require("passport");
       passport.user.role = ROLES.RESPONSIBLE;
       const referent = await createReferentHelper(getNewReferentFixture());
       const res = await request(getAppHelper()).delete(`/referent/${referent._id}`).send();
-      expect(res.statusCode).toEqual(401);
+      expect(res.statusCode).toEqual(403);
       passport.user.role = ROLES.ADMIN;
     });
   });
 
   describe("POST /referent/signin_as/:type/:id", () => {
-    it("should return 401 if role is not admin", async () => {
+    it("should return 403 if role is not admin", async () => {
       const referent = await createReferentHelper(getNewReferentFixture());
       const passport = require("passport");
       passport.user.role = ROLES.RESPONSIBLE;
       const res = await request(getAppHelper())
         .post("/referent/signin_as/referent/" + referent._id)
         .send();
-      expect(res.statusCode).toEqual(401);
+      expect(res.statusCode).toEqual(403);
       passport.user.role = ROLES.ADMIN;
     });
     it("should return 404 if referent not found", async () => {

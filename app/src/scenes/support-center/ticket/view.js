@@ -100,6 +100,7 @@ export default (props) => {
         <Messages>
           {ticket?.articles
             ?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+            ?.filter((article) => !article.internal)
             ?.map((article, i) => (
               <Message key={i} fromMe={young.email === article.created_by} from={article.from} date={formatStringLongDate(article.created_at)} content={article.body} />
             ))}

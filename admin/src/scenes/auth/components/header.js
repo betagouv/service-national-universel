@@ -19,7 +19,7 @@ export default () => {
           <Link to="/auth">espace&nbsp;administrateur </Link>
         </Button>
         <Button>
-          <a href="https://inscription.snu.gouv.fr/" target="_blank">
+          <a href="https://moncompte.snu.gouv.fr/" target="_blank">
             espace&nbsp;volontaire
           </a>
         </Button>

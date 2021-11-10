@@ -14,9 +14,9 @@ export default ({ isOpen, value, onChange, onSend }) => {
 
   useEffect(() => {
     setMessage(`Bonjour ${value.firstName} ${value.lastName},
-Votre candidature au SNU a bien été étudiée par l'équipe de votre département.
+Votre dossier d'inscription au SNU a bien été étudiée par l'équipe de votre département.
 
-Nous n'avons malheureusement pu donner suite à votre candidature au Service Nationale Universel édition 2021.
+Nous n'avons malheureusement pu donner suite à votre dossier d'inscription à la prochaine édition du Service Nationale Universel.
 En voici les principales raisons :
 -
 -
@@ -31,6 +31,7 @@ En vous souhaitant une excellente continuation.`);
   const send = async () => {
     setSending(true);
     await api.post(`/young/${value._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_REFUSED}`, { message });
+    await api.put(`/referent/young/${value._id}`, { inscriptionRefusedMessage: message });
     toastr.success("Email envoyé !");
     onSend(message);
   };

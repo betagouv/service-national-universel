@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { Row, Col } from "reactstrap";
 import { Field, Formik } from "formik";
@@ -8,11 +8,7 @@ import { toastr } from "react-redux-toastr";
 
 import { setYoung } from "../../../redux/auth/actions";
 import api from "../../../services/api";
-import ErrorMessage, { requiredMessage } from "../components/errorMessage";
-import AddressInput from "../../../components/addressInput";
-import DndFileInput from "../../../components/dndFileInput";
 import FormLegend from "../../../components/form/FormLegend";
-import FormRow from "../../../components/form/FormRow";
 import { STEPS } from "../utils";
 import { translate } from "../../../utils";
 import FormFooter from "../../../components/form/FormFooter";
@@ -22,6 +18,7 @@ export default () => {
   const history = useHistory();
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
+  const [loading, setLoading] = useState(false);
 
   if (!young) {
     history.push("/inscription/profil");
@@ -32,31 +29,42 @@ export default () => {
     <Wrapper>
       <Heading>
         <h2>Situations particulières</h2>
-        <p>Complétez les informations ci-dessous</p>
-        <a target="blank" href="https://apicivique.s3.eu-west-3.amazonaws.com/Note_relative_aux_situations_particulie%CC%80res.pdf">
-          En savoir plus
-        </a>
+        <p style={{ color: "#6B7280" }}>Complétez les informations ci-dessous.</p>
+        <p style={{ color: "#6B7280" }}>
+          Il est important de signaler dès l'inscription toute situation nécessitant une vigilance particulière ou des aménagements spécifiques : situation de handicap, allergies,
+          intolérance alimentaire, projet d'accueil individualisé (PAI), sport de haut niveau, etc. <br />
+          En fonction des situations signalées, un responsable en charge du séjour de cohésion ou de la mission d'intérêt général prendra contact avec le volontaire et ses
+          représentants légaux.
+        </p>
       </Heading>
       <Formik
         initialValues={young}
         validateOnChange={false}
         validateOnBlur={false}
         onSubmit={async (values) => {
+          setLoading(true);
           try {
             values.inscriptionStep = STEPS.REPRESENTANTS;
-            const { ok, code, data: young } = await api.put("/young", values);
-            if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
-            dispatch(setYoung(young));
+            const { ok, code, data } = await api.put("/young", values);
+            if (!ok || !data?._id) return toastr.error("Une erreur s'est produite :", translate(code));
+            dispatch(setYoung(data));
             history.push("/inscription/representants");
           } catch (e) {
             console.log(e);
             toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code));
+          } finally {
+            setLoading(false);
           }
         }}
       >
         {({ values, handleChange, handleSubmit, isSubmitting, submitForm, errors, touched }) => (
           <>
-            <FormLegend>Handicap et pathologies chroniques</FormLegend>
+            <FormLegend style={{ paddingBottom: "0" }}>Handicap et pathologies chroniques</FormLegend>
+            <div>
+              <a target="blank" href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Note_relative_aux_situations_particulieres.pdf">
+                En savoir plus
+              </a>
+            </div>
             <FormRadioLabelTrueFalse title="Etes-vous en situation de handicap ?" name="handicap" values={values} handleChange={handleChange} errors={errors} touched={touched} />
             <FormRadioLabelTrueFalse
               title="Etes-vous bénéficiaire d’un projet personnalisé de scolarisation (PPS)"
@@ -86,163 +94,65 @@ export default () => {
                 </a>
               </div>
             </FormRadioLabelTrueFalse>
-            {(values["ppsBeneficiary"] === "true" || values["handicap"] === "true") && (
-              <>
-                <FormRadioLabelTrueFalse
-                  title="Etes-vous suivi par une structure médicosociale ?"
-                  name="medicosocialStructure"
-                  values={values}
-                  handleChange={handleChange}
-                  errors={errors}
-                  touched={touched}
-                />
-                {values["medicosocialStructure"] === "true" && (
-                  <>
-                    <FormRow align="center">
-                      <Col md={4}>
-                        <Label>Nom de la structure</Label>
-                      </Col>
-                      <Col>
-                        <Field
-                          class="form-control"
-                          validate={(v) => !v && requiredMessage}
-                          placeholder="Nom de la structure"
-                          name="medicosocialStructureName"
-                          value={values.medicosocialStructureName}
-                          onChange={handleChange}
-                        />
-                        <ErrorMessage errors={errors} touched={touched} name="medicosocialStructureName" />
-                      </Col>
-                    </FormRow>
-                    <FormRow>
-                      <Col md={4}>
-                        <Label>Localisation de la structure</Label>
-                      </Col>
-                      <Col>
-                        <Row>
-                          <Col md={12} style={{ marginTop: 15 }}>
-                            <Label>Rechercher</Label>
-                            <AddressInput
-                              keys={{
-                                city: "medicosocialStructureCity",
-                                zip: "medicosocialStructureZip",
-                                address: "medicosocialStructureAddress",
-                                location: "medicosocialStructureLocation",
-                                department: "medicosocialStructureDepartment",
-                                region: "medicosocialStructureRegion",
-                              }}
-                              values={values}
-                              handleChange={handleChange}
-                              errors={errors}
-                              touched={touched}
-                            />
-                          </Col>
-                        </Row>
-                      </Col>
-                    </FormRow>
-                  </>
-                )}
-              </>
-            )}
             {(values["ppsBeneficiary"] === "true" || values["paiBeneficiary"] === "true" || values["handicap"] === "true") && (
               <>
                 <FormRadioLabelTrueFalse
-                  title="Avez-vous besoin d'un aménagement spécifique pour la réalisation du séjour de cohésion ?"
+                  title="Avez-vous besoin d'un aménagement spécifique ?"
+                  children="(accompagnement professionnel, participation de jour, activités adaptées...)"
                   name="specificAmenagment"
                   values={values}
                   handleChange={handleChange}
                   errors={errors}
                   touched={touched}
-                >
-                  <div className="info">Affectation à proximité du domicile, participation de jour uniquement, activités sportives adaptées, ...</div>
-                  {values["specificAmenagment"] === "true" && (
-                    <div className="info" style={{ marginTop: "1rem" }}>
-                      Le chef de centre vous contactera pour les aménagements nécessaires à votre séjour de cohésion.
-                    </div>
-                  )}
-                </FormRadioLabelTrueFalse>
-
-                {values["specificAmenagment"] === "true" && (
-                  <FormRow align="center">
-                    <Col md={4}>
-                      <Label>Précisez-en la nature</Label>
-                    </Col>
-                    <Col>
-                      <Field
-                        placeholder="Affectation à proximité du domicile, participation de jour uniquement, activités sportives adaptées, etc."
-                        className="form-control"
-                        validate={(v) => !v && requiredMessage}
-                        name="specificAmenagmentType"
-                        value={values.specificAmenagmentType}
-                        onChange={handleChange}
-                      />
-                      <ErrorMessage errors={errors} touched={touched} name="specificAmenagmentType" />
-                    </Col>
-                  </FormRow>
-                )}
+                />
+                <FormRadioLabelTrueFalse
+                  title="Avez-vous besoin d’un aménagement pour mobilité réduite ?"
+                  name="reducedMobilityAccess"
+                  values={values}
+                  handleChange={handleChange}
+                  errors={errors}
+                  touched={touched}
+                />
+                <FormRadioLabelTrueFalse
+                  title="Avez-vous besoin d'être affecté(e) dans votre département de résidence ?"
+                  name="handicapInSameDepartment"
+                  values={values}
+                  handleChange={handleChange}
+                  errors={errors}
+                  touched={touched}
+                />
               </>
             )}
-            <FormLegend>
-              Activités de haut niveau (sport, musique, etc.)
-              <p>pour laquelle une participation à un concours, une audition, une compétition est prévue pendant le séjour de cohésion</p>
-            </FormLegend>
             <FormRadioLabelTrueFalse
-              title="Pratiquez-vous une activité de haut-niveau (sport, musique, théâtre...) ?"
+              title="Etes-vous en situation d'allergies ou d'intolérances alimentaires nécessitant la mise en place de mesures adaptées ?"
+              name="allergies"
+              values={values}
+              handleChange={handleChange}
+              errors={errors}
+              touched={touched}
+            />
+            <FormLegend>Sportif de haut niveau inscrit sur liste ministerielle</FormLegend>
+            <FormRadioLabelTrueFalse
+              title="Etes-vous sportif de haut niveau inscrit sur liste ministérielle ?"
               name="highSkilledActivity"
               values={values}
               handleChange={handleChange}
               errors={errors}
               touched={touched}
             />
-
             {values["highSkilledActivity"] === "true" && (
               <>
-                <FormRow align="center">
-                  <Col md={4}>
-                    <Label>Nature de l'activité de haut-niveau</Label>
-                  </Col>
-                  <Col>
-                    <Field
-                      placeholder="sport, musique, etc."
-                      className="form-control"
-                      validate={(v) => !v && requiredMessage}
-                      name="highSkilledActivityType"
-                      value={values.highSkilledActivityType}
-                      onChange={handleChange}
-                    />
-                    <ErrorMessage errors={errors} touched={touched} name="highSkilledActivityType" />
-                  </Col>
-                </FormRow>
-                <FormRow>
-                  <Col md={4}>
-                    <Label>En cas de compétition, concours, audition ... prévu(e) pendant le séjour de cohésion, déposez ici votre convocation - justificatif d'engagement</Label>
-                  </Col>
-                  <Col>
-                    <DndFileInput
-                      optional
-                      value={values.highSkilledActivityProofFiles}
-                      name="highSkilledActivityProofFiles"
-                      onChange={async (e) => {
-                        let { ok, data, code } = await api.uploadFile("/young/file/highSkilledActivityProofFiles", e.target.files);
-                        if (code === "FILE_CORRUPTED") {
-                          return toastr.error(
-                            "Le fichier semble corrompu",
-                            "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
-                            { timeOut: 0 }
-                          );
-                        }
-
-                        if (!ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
-                        handleChange({ target: { value: data, name: "highSkilledActivityProofFiles" } });
-                        toastr.success("Fichier téléversé");
-                      }}
-                    />
-                    <ErrorMessage errors={errors} touched={touched} name="highSkilledActivityProofFiles" />
-                  </Col>
-                </FormRow>
+                <FormRadioLabelTrueFalse
+                  title="Avez-vous besoin d'être affecté(e) dans votre département de résidence ?"
+                  name="highSkilledActivityInSameDepartment"
+                  values={values}
+                  handleChange={handleChange}
+                  errors={errors}
+                  touched={touched}
+                />
               </>
             )}
-            <FormFooter values={values} handleSubmit={handleSubmit} errors={errors} />
+            <FormFooter loading={loading} values={values} handleSubmit={handleSubmit} errors={errors} />
           </>
         )}
       </Formik>
@@ -252,6 +162,13 @@ export default () => {
 
 const Wrapper = styled.div`
   padding: 40px;
+  a {
+    color: #5145cd;
+    margin-top: 5px;
+    font-size: 0.875rem;
+    font-weight: 400;
+    text-decoration: underline;
+  }
   @media (max-width: 768px) {
     padding: 22px;
   }
@@ -262,13 +179,6 @@ const Heading = styled.div`
     color: #161e2e;
     font-size: 1.8rem;
     font-weight: 700;
-  }
-  a {
-    color: #5145cd;
-    margin-top: 5px;
-    font-size: 0.875rem;
-    font-weight: 400;
-    text-decoration: underline;
   }
   p {
     color: #161e2e;

@@ -1,14 +1,47 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import Autosuggest from "react-autosuggest";
 import { Row, Col, Input } from "reactstrap";
 import { Field } from "formik";
-import { departmentLookUp } from "../../../utils";
+import ErrorMessage, { requiredMessage } from "../components/errorMessage";
 
 import api from "../../../services/api";
+import SchoolCityTypeahead from "../../../components/SchoolCityTypeahead";
 
-export default ({ handleChange, values }) => {
-  const [other, setOther] = useState(false);
+export default ({ handleChange, values, keys, errors, touched }) => {
+  const [hits, setHits] = useState([]);
+  const [manual, setManual] = useState(false);
+  const [showManualButton, setShowManualButton] = useState(false);
+  const [emptySearch, setEmptySearch] = useState(false);
+
+  const getSuggestions = async (text) => {
+    if (!text.includes(" - ")) return [];
+
+    const [city, postcode] = text.split(" - ");
+    const { responses } = await api.esQuery("school", {
+      query: {
+        bool: {
+          must: { match_all: {} },
+          filter: [{ term: { "city.keyword": city } }, { term: { "postcode.keyword": postcode } }, { term: { "version.keyword": "2" } }],
+        },
+      },
+      size: 100,
+    });
+    setHits(responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })).sort((a, b) => a.fullName.localeCompare(b.fullName)));
+    if (hits.length) setManual(false);
+    return hits;
+  };
+
+  useEffect(() => {
+    (async () => {
+      if (emptySearch && values[keys.schoolId]) {
+        const { responses } = await api.esQuery("school", {
+          query: { ids: { values: [values[keys.schoolId]] } },
+        });
+        setHits(responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })));
+        return hits;
+      }
+    })();
+  }, [values[keys.schoolId], emptySearch]);
 
   useEffect(() => {
     if (document.getElementsByTagName) {
@@ -20,141 +53,123 @@ export default ({ handleChange, values }) => {
   return (
     <Row>
       <Col md={12} style={{ marginTop: 15 }}>
-        <AutoComplete
-          onSelect={(suggestion) => {
-            setOther(suggestion.type === "AUTRE");
-
-            function getDepartment() {
-              if (!suggestion.department) return "";
-              let d = suggestion.department;
-              d = d.replace(/^0+/, "");
-              if (d < 10) d = "0" + d;
-              d = departmentLookUp[d];
-              return d;
+        <Label>Ville et code postal de l'établissement</Label>
+        <SchoolCityTypeahead
+          onChange={(e) => {
+            if (e !== "") {
+              setTimeout(() => {
+                setShowManualButton(true);
+              }, 5000);
             }
-
-            let depart = getDepartment();
-
-            handleChange({ target: { name: "schoolId", value: suggestion._id } });
-            handleChange({ target: { name: "schoolCity", value: suggestion.city } });
-            handleChange({ target: { name: "schoolZip", value: suggestion.postcode } });
-            handleChange({ target: { name: "schoolDepartment", value: depart } });
-            handleChange({ target: { name: "schoolName", value: suggestion.name2 } });
-            handleChange({ target: { name: "schoolType", value: suggestion.type } });
+            setEmptySearch(!e?.length);
+            handleChange({ target: { name: keys.schoolId, value: "" } });
+            getSuggestions(e);
           }}
-          placeholder="Recherche par nom, code postal, ville ..."
         />
-      </Col>
-      <Col md={6} style={{ marginTop: 15 }}>
-        <Label>Ville</Label>
-        <Field disabled={!other} style={{ maxWidth: 500 }} className="form-control" placeholder="Ville" name="schoolCity" value={values.schoolCity} onChange={handleChange} />
-      </Col>
-      <Col md={4} style={{ marginTop: 15 }}>
-        <Label>Code postal</Label>
-        <Field disabled={!other} style={{ maxWidth: 500 }} className="form-control" placeholder="Code postal" name="schoolZip" value={values.schoolZip} onChange={handleChange} />
-      </Col>
-      <Col md={12} style={{ marginTop: 15 }}>
-        <Label>Type d'établissement</Label>
-        <Input disabled style={{ maxWidth: 500 }} name="schoolType" placeholder="Type d'établissement" value={values.schoolType} onChange={handleChange} />
-      </Col>
-      <Col md={12} style={{ marginTop: 15 }}>
-        <Label>Etablissement scolaire</Label>
-        <Input disabled={!other} placeholder="Nom de l'établissement scolaire" name="schoolName" value={values.schoolName} onChange={handleChange} />
+
+        {hits.length === 0 && !values[keys.schoolId] && <ErrorMessage errors={errors} touched={touched} name={keys.schoolName} />}
+        <div>
+          {manual && (
+            <div>
+              <Label>Nom de l'établissement</Label>
+              <Field
+                placeholder="Nom de l'établissement"
+                className="form-control"
+                validate={(v) => !v && requiredMessage}
+                name={keys.schoolName}
+                value={values[keys.schoolName]}
+                onChange={handleChange}
+              />
+              <ErrorMessage errors={errors} touched={touched} name={keys.schoolName} />
+            </div>
+          )}
+          {!manual && (
+            <div style={{ display: hits.length > 0 || values[keys.schoolId] ? "block" : "none" }}>
+              <Label>Nom de l'établissement</Label>
+              <Field
+                as="select"
+                className="form-control"
+                name={keys.schoolId}
+                value={values[keys.schoolId]}
+                validate={(v) => !v && requiredMessage}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  handleChange({ target: { name: keys.schoolId, value } });
+                  handleChange({ target: { name: keys.schoolName, value: hits?.find((i) => i._id === value)?.fullName || "" } });
+                }}
+              >
+                <option key="" value="" disabled>
+                  Sélectionner votre établissement scolaire
+                </option>
+                {hits?.map((hit) => (
+                  <option key={hit._id} value={hit._id}>
+                    {hit.fullName}
+                  </option>
+                ))}
+                {hits.length === 0 && <option value={values[keys.schoolName]}>{values[keys.schoolName]}</option>}
+              </Field>
+
+              <ErrorMessage errors={errors} touched={touched} name={keys.schoolName} />
+            </div>
+          )}
+
+          <div style={{ display: manual || hits.length > 0 || values[keys.schoolId] ? "block" : "none" }}>
+            <Label>Niveau scolaire</Label>
+            <Field
+              as="select"
+              className="form-control"
+              name={keys.grade}
+              value={values[keys.grade]}
+              validate={(v) => !v && requiredMessage}
+              onChange={(e) => {
+                const value = e.target.value;
+                handleChange({ target: { name: keys.grade, value } });
+              }}
+            >
+              <option key="" value="" disabled>
+                Sélectionner votre niveau scolaire
+              </option>
+              {[
+                { label: "3ème", value: "3eme" },
+                { label: "2nd", value: "2nd" },
+                { label: "1ère", value: "1ere" },
+                { label: "1ère année CAP", value: "1ere CAP" },
+                { label: "Terminale", value: "Terminale" },
+                { label: "Terminale CAP", value: "Terminale CAP" },
+                { label: "SEGPA", value: "SEGPA" },
+                { label: "Classe relais", value: "Classe relais" },
+                { label: "Autre", value: "Autre" },
+              ].map((rank) => (
+                <option key={rank.value} value={rank.value}>
+                  {`${rank.label}`}
+                </option>
+              ))}
+            </Field>
+            <ErrorMessage errors={errors} touched={touched} name={keys.grade} />
+          </div>
+        </div>
+        <div style={{ fontSize: "0.75rem", display: "flex", justifyContent: "flex-end", minHeight: "18px" }}>
+          {showManualButton && (
+            <span
+              style={{ cursor: "pointer", color: "#007bff" }}
+              onClick={() => {
+                handleChange({ target: { name: keys.schoolName, value: "" } });
+                handleChange({ target: { name: keys.schoolId, value: "" } });
+                setManual(true);
+              }}
+            >
+              Je n'ai pas trouvé pas mon établissement
+            </span>
+          )}
+        </div>
       </Col>
     </Row>
   );
 };
 
-const AutoComplete = ({ placeholder, onSelect }) => {
-  const [hits, setHits] = useState([]);
-  const [value, setValue] = useState("");
-
-  const onSuggestionsFetchRequested = async ({ value }) => {
-    setHits(await getSuggestions(value));
-  };
-
-  const onSuggestionsClearRequested = () => {
-    setHits([]);
-  };
-
-  const onSuggestionSelected = async (event, { suggestion }) => {
-    onSelect(suggestion);
-  };
-
-  const renderSuggestion = (suggestion) => (
-    <div style={{ fontSize: 12 }}>
-      <strong>{suggestion.name2 || "RENTREZ MANUELLEMENT L'ETABLISSEMENT"}</strong>
-      <div>
-        {suggestion.city} {suggestion.city && ","} {suggestion.postcode}
-      </div>
-      <div style={{ color: "#aaa" }}>{suggestion.type}</div>
-    </div>
-  );
-  const getSuggestionValue = () => "";
-
-  const getSuggestions = async (text) => {
-    const { responses } = await api.esQuery("school", { query: { multi_match: { query: text, type: "most_fields", fields: ["name2", "city", "type", "postcode"] } } });
-    console.log("responses", responses);
-    const hits = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source }));
-    // if (hits.length) return setHits(hits);
-    hits.push({ name2: "", city: "", postcode: "", type: "AUTRE" });
-    return hits;
-  };
-
-  return (
-    <Wrapper>
-      <Autosuggest
-        suggestions={hits}
-        onSuggestionsFetchRequested={onSuggestionsFetchRequested}
-        onSuggestionsClearRequested={onSuggestionsClearRequested}
-        getSuggestionValue={getSuggestionValue}
-        onSuggestionSelected={onSuggestionSelected}
-        renderSuggestion={renderSuggestion}
-        inputProps={{
-          value,
-          onChange: (event, { newValue }) => setValue(newValue),
-          placeholder,
-          className: "form-control",
-        }}
-      />
-    </Wrapper>
-  );
-};
-
-const Wrapper = styled.div`
-  .react-autosuggest__container {
-    position: relative;
-    max-width: 500px;
-  }
-  .react-autosuggest__suggestions-list {
-    position: absolute;
-    background-color: white;
-    margin: 0;
-    width: 100%;
-    z-index: 10;
-    left: 0px;
-    top: 106%;
-    border: 1px solid #ddd;
-    padding: 5px 0;
-    border-radius: 6px;
-    max-height: 300px;
-    overflow-y: auto;
-  }
-  .react-autosuggest__suggestions-list li {
-    cursor: pointer;
-    padding: 7px 10px;
-    text-transform: capitalize;
-    :hover {
-      background-color: #f3f3f3;
-    }
-  }
-  .react-autosuggest__suggestion--highlighted {
-    background-color: #f3f3f3;
-  }
-`;
-
 const Label = styled.div`
   color: #374151;
   font-size: 14px;
-  margin-bottom: 10px;
+  margin-bottom: 0.5rem;
+  margin-top: 1rem;
 `;

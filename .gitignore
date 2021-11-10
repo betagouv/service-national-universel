@@ -9,5 +9,7 @@ api/.env-testing
 api/.env*
 api/coverage
 .vscode
-.env
+.env*
 .cache_ggshield
+Zammadwebhook.json
+requestZammad.json

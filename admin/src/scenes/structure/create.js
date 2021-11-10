@@ -64,7 +64,7 @@ export default (props) => {
             structureId: data._id,
             structureName: data.name,
           };
-          const { ok, code } = await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent[role]}`, obj);
+          const { ok, code } = await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent.NEW_STRUCTURE}`, obj);
           if (!ok) return toastr.error("Oups, une erreur est survenue lors de l'ajout du nouveau membre", translate(code));
           toastr.success("Invitation envoyée");
 

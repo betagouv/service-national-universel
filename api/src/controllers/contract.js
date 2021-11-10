@@ -279,7 +279,7 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (isYoung(req.user) && data.youngId.toString() !== req.user._id.toString()) {
-      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
     return res.status(200).send({ ok: true, data: serializeContract(data, req.user) });
@@ -377,7 +377,7 @@ router.post("/:id/download", passport.authenticate(["young", "referent"], { sess
 
     // A young can only download their own documents.
     if (isYoung(req.user) && contract.youngId.toString() !== req.user._id.toString()) {
-      return res.status(401).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
     // Create html

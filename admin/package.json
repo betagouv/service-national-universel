@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "webpack serve --port 8082 --mode development --config webpack.dev.config.js --progress --liveReload --open --hot --inline",
+    "mobile": "webpack serve --port 8082 --mode development --config webpack.dev.config.js --progress --liveReload --open --hot --inline --host 0.0.0.0",
     "start": "node server/index.js",
     "install": "node src/build-only-on-clevercloud.js",
     "build": "node --max-old-space-size=3000 node_modules/webpack/bin/webpack.js"
@@ -45,6 +46,7 @@
     "core-js": "^3.12.1",
     "dayjs": "^1.10.3",
     "express": "^4.17.1",
+    "fetch-retry": "^5.0.1",
     "file-saver": "^2.0.5",
     "forcedomain": "^2.2.2",
     "formik": "^2.1.5",

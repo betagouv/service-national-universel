@@ -7,32 +7,66 @@ export default () => {
       <div className="points-title">Conditions d'inscription</div>
       <ul>
         <li>
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="rgb(49,196,141)" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+          <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="20" height="20" rx="10" fill="#32267F" fill-opacity=".06" />
+            <path
+              d="M8.644 13.843l-3.487-3.487a.536.536 0 010-.758l.759-.759c.21-.21.549-.21.758 0l2.349 2.349 5.03-5.03c.21-.21.55-.21.76 0l.758.758c.21.21.21.549 0 .758l-6.169 6.169c-.21.21-.549.21-.758 0z"
+              fill="#32267F"
+            />
           </svg>
           <div>
-            Je suis né(e) entre le <strong> 2 juillet 2003</strong> et le <strong> 20 avril 2006</strong> *
+            <p>Je suis disponible sur l'un des séjours de cohésion 2022, à savoir :</p>
+            <p>
+              <strong>•</strong> Du <strong>13 au 25 février 2022 *</strong>
+            </p>
+            <p>
+              <strong>•</strong> Du <strong>12 au 24 juin 2022 *</strong>
+            </p>
+            <p>
+              <strong>•</strong> Du <strong>3 au 15 juillet 2022</strong>
+            </p>
+            <p className="note">
+              * Pour les élèves de 2nde scolarisés dans un établissement relevant du ministère de l’éducation nationale, de la jeunesse et des sports, l’inscription est possible y
+              compris dans le cas où une semaine du séjour de cohésion se déroule sur le temps scolaire. Ils bénéficieront d’une autorisation de participation au séjour de
+              cohésion.
+            </p>
           </div>
         </li>
         <li>
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="rgb(49,196,141)" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+          <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="20" height="20" rx="10" fill="#32267F" fill-opacity=".06" />
+            <path
+              d="M8.644 13.843l-3.487-3.487a.536.536 0 010-.758l.759-.759c.21-.21.549-.21.758 0l2.349 2.349 5.03-5.03c.21-.21.55-.21.76 0l.758.758c.21.21.21.549 0 .758l-6.169 6.169c-.21.21-.549.21-.758 0z"
+              fill="#32267F"
+            />
           </svg>
           <div>
             Je suis de <strong> nationalité française</strong>
           </div>
         </li>
         <li>
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="rgb(49,196,141)" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+          <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect width="20" height="20" rx="10" fill="#32267F" fill-opacity=".06" />
+            <path
+              d="M8.644 13.843l-3.487-3.487a.536.536 0 010-.758l.759-.759c.21-.21.549-.21.758 0l2.349 2.349 5.03-5.03c.21-.21.55-.21.76 0l.758.758c.21.21.21.549 0 .758l-6.169 6.169c-.21.21-.549.21-.758 0z"
+              fill="#32267F"
+            />
           </svg>
           <div>
-            Je suis disponible du <strong>21 juin</strong> au <strong>2 juillet 2021</strong>
+            J’aurai <strong>15, 16 ou 17 ans</strong> au moment de mon séjour de cohésion
           </div>
         </li>
         <li style={{ padding: 0 }}>
-          <FAQ href="https://www.snu.gouv.fr/foire-aux-questions-11" target="blank">
-            <p>Toutes les réponses à vos questions</p> {">"}
+          <FAQ href="https://support.snu.gouv.fr/help/fr-fr/16-comprendre-le-snu" target="blank">
+            <p>Toutes les réponses à vos questions</p>
+            <svg width="6" height="10" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path
+                fill-rule="evenodd"
+                clip-rule="evenodd"
+                d="M.293 9.707a1 1 0 010-1.414L3.586 5 .293 1.707A1 1 0 011.707.293l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                fill="#fff"
+              />
+            </svg>
           </FAQ>
         </li>
         <li>
@@ -42,17 +76,6 @@ export default () => {
               • Une <b>pièce d'identité</b> (Carte Nationale d'Identité ou Passeport)
               <br />• L'accord de votre ou vos <b>représentants légaux</b>
             </div>
-          </Infos>
-        </li>
-        <li>
-          <Infos>
-            * Vous êtes scolarisé(e) en <b>classe de seconde</b> et né(e) après le 20 avril 2006 ?<br />
-            Une procédure dérogatoire vous permet de vous inscrire !<br />
-            <a href="https://apicivique.s3.eu-west-3.amazonaws.com/SNU+Dossier+Inscriptions+De%CC%81rogatoires+2021.pdf" target="_blank">
-              Voici le lien du formulaire à <b>imprimer et remplir</b>.
-            </a>
-            <br />
-            Merci de renvoyer le formulaire rempli à <a href="mailto:contact@snu.gouv.fr">contact@snu.gouv.fr</a>
           </Infos>
         </li>
       </ul>
@@ -66,6 +89,10 @@ const FAQ = styled.a`
   color: #fff;
   background-color: #32267f;
   display: flex;
+  align-items: center;
+  svg {
+    height: 10px;
+  }
   p {
     flex: 1;
     margin: 0;
@@ -91,9 +118,13 @@ const Points = styled.div`
     text-transform: uppercase;
     display: inline-block;
     padding: 5px 20px;
-    color: #ef4036;
+    color: #32257f;
+    font-size: 0.9rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+  .note {
     font-size: 0.8rem;
-    font-weight: 400;
   }
   li {
     color: #32267f;
@@ -103,7 +134,6 @@ const Points = styled.div`
     align-items: flex-start;
     justify-content: center;
     svg {
-      height: 26px;
       width: 26px;
       margin-right: 10px;
     }

@@ -8,6 +8,10 @@ const zammad = require("../zammad");
 const { ERRORS, isYoung } = require("../utils");
 const { ZAMMAD_GROUP } = require("snu-lib/constants");
 const { ticketStateIdByName } = require("snu-lib/zammad");
+const { sendTemplate } = require("../sendinblue");
+const { SENDINBLUE_TEMPLATES } = require("snu-lib");
+const { APP_URL, ADMIN_URL } = require("../config");
+const zammadAuth = require("../middlewares/zammadAuth");
 
 async function checkStateTicket({ state_id, created_by_id, updated_by_id, id, email }) {
   if (state_id === ticketStateIdByName("fermé")) {
@@ -39,7 +43,7 @@ router.get("/ticket_overviews", passport.authenticate(["referent"], { session: f
   try {
     const email = req.user.email;
     const customer_id = await zammad.getCustomerIdByEmail(email);
-    if (!customer_id) return res.status(401).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!customer_id) return res.status(403).send({ ok: false, code: ERRORS.NOT_FOUND });
     const response = await zammad.api("/ticket_overviews", { method: "GET" });
     return res.status(200).send({ ok: true, data: response });
   } catch (error) {
@@ -53,14 +57,15 @@ router.get("/ticket", passport.authenticate(["referent", "young"], { session: fa
   try {
     const email = req.user.email;
     const customer_id = await zammad.getCustomerIdByEmail(email);
-    if (!customer_id) return res.status(401).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!customer_id) return res.status(403).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (isYoung(req.user)) {
       groupId = 4;
     } else {
       groupId = 5;
     }
-    let response = await zammad.api("/tickets", { method: "GET", headers: { "X-On-Behalf-Of": email } });
-    response = response?.filter((ticket) => ticket.group_id === groupId && ticket.created_by_id === customer_id);
+    let response = await zammad.api(`/tickets/search?query=${email}`);
+    if (!response || !response.assets || !response.assets.Ticket) return res.status(200).send({ ok: true, data: [] });
+    response = Object.values(response?.assets?.Ticket).filter((ticket) => ticket.created_by_id === customer_id);
     if (response.length && req.query.withArticles) {
       const data = [];
       for (const item of response) {
@@ -81,7 +86,7 @@ router.get("/ticket/:id", passport.authenticate(["referent", "young"], { session
   try {
     const email = req.user.email;
     const customer_id = await zammad.getCustomerIdByEmail(email);
-    if (!customer_id) return res.status(401).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!customer_id) return res.status(403).send({ ok: false, code: ERRORS.NOT_FOUND });
     const response = await zammad.api("/tickets/" + req.params.id, { method: "GET", headers: { "X-On-Behalf-Of": email } });
     const articles = await zammad.api("/ticket_articles/by_ticket/" + req.params.id, { method: "GET", headers: { "X-On-Behalf-Of": email } });
     const data = { ...response, articles };
@@ -98,7 +103,7 @@ router.put("/ticket/:id", passport.authenticate(["referent", "young"], { session
   try {
     const email = req.user.email;
     const customer_id = await zammad.getCustomerIdByEmail(email);
-    if (!customer_id) return res.status(401).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!customer_id) return res.status(403).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (message) {
       const response = await zammad.api("/ticket_articles", {
         method: "POST",
@@ -149,7 +154,7 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
     const email = req.user.email;
 
     const customer_id = await zammad.getCustomerIdByEmail(email);
-    if (!customer_id) return res.status(401).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!customer_id) return res.status(403).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // default ?
     let group = "";
@@ -221,6 +226,45 @@ router.get("/ticket/:ticketId/tags", passport.authenticate(["referent"], { sessi
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
     return res.status(200).send({ ok: true, tags: response.tags });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+router.post("/ticket/update", zammadAuth, async (req, res) => {
+  try {
+    const ticket = req.body.ticket;
+    const article = req.body.article;
+    if (!ticket) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!article) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (article.created_by.email !== ticket.created_by.email) {
+      const webhookObject = {
+        email: ticket.created_by.email,
+        firstname: ticket.created_by.firstname,
+        lastname: ticket.created_by.lastname,
+        body: article.body,
+      };
+      const { error, value } = Joi.object({
+        email: Joi.string().email().required(),
+        body: Joi.string().required(),
+        firstname: Joi.string().required(),
+        lastname: Joi.string().required(),
+      })
+        .unknown()
+        .validate(webhookObject);
+      if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      const { email, firstname, lastname, body } = value;
+      const cta = ticket?.created_by?.roles?.includes("Volontaire") ? `${APP_URL}/besoin-d-aide` : `${ADMIN_URL}/besoin-d-aide`;
+      sendTemplate(SENDINBLUE_TEMPLATES.young.ANSWER_RECEIVED, {
+        emailTo: [{ name: `${firstname} ${lastname}`, email }],
+        params: {
+          cta,
+          message: body,
+        },
+      });
+    }
+    return res.status(200).send({ ok: true, data: [] });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });

@@ -51,7 +51,7 @@ function ipAllowListMiddleware(req, res, next) {
     "51.159.58.214",
   ];
   if (ip && (block.contains(ip) || allowedIpList.includes(ip))) return next();
-  return res.status(401).send({ ok: false, code: ERRORS.INVALID_IP, message: "Invalid IP" });
+  return res.status(403).send({ ok: false, code: ERRORS.INVALID_IP, message: "Invalid IP" });
 }
 
 router.post("/", ipAllowListMiddleware, async (req, res) => {
@@ -93,7 +93,7 @@ router.get("/", passport.authenticate(["referent"], { session: false, failWithEr
     const { error, value: email } = Joi.string().lowercase().trim().email().required().validate(req.query.email);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, message: error.message });
 
-    if (!canViewEmailHistory(req.user)) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    if (!canViewEmailHistory(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     const data = await EmailObject.find({ email }).sort("-date");
     return res.status(200).send({ ok: true, data: data.map((e) => serializeEmail(e)) });
   } catch (error) {
