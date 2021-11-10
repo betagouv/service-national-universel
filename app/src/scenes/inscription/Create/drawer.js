@@ -1,5 +1,4 @@
-import React, { useEffect } from "react";
-import { NavLink } from "react-router-dom";
+import React from "react";
 import styled from "styled-components";
 import { STEPS } from "../utils";
 import { useHistory } from "react-router-dom";
@@ -9,10 +8,6 @@ import HelpButton from "../../../components/buttons/HelpButton";
 export default ({ step }) => {
   const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
-
-  useEffect(() => {
-
-  }, [young]);
 
   const currentIndex = Object.keys(STEPS).indexOf(step);
 
@@ -121,25 +116,25 @@ const Element = styled.li`
     margin-bottom: 20px;
     padding-left: 25px;
     color: ${(props) => {
-    if (props.status === "todo") return "#b4c6fc!important";
-    if (props.status === "inprogress") return "#fff!important";
-    if (props.status === "done") return "#fff!important";
-    return "";
-  }};
+      if (props.status === "todo") return "#b4c6fc!important";
+      if (props.status === "inprogress") return "#fff!important";
+      if (props.status === "done") return "#fff!important";
+      return "";
+    }};
     font-weight: ${(props) => {
-    if (props.status === "todo") return "400";
-    if (props.status === "inprogress") return "600";
-    if (props.status === "done") return "600";
-    return "";
-  }};
+      if (props.status === "todo") return "400";
+      if (props.status === "inprogress") return "600";
+      if (props.status === "done") return "600";
+      return "";
+    }};
 
     ::before {
       display: ${(props) => {
-    if (props.status === "todo") return "none";
-    if (props.status === "inprogress") return "none";
-    if (props.status === "done") return "block";
-    return "";
-  }};
+        if (props.status === "todo") return "none";
+        if (props.status === "inprogress") return "none";
+        if (props.status === "done") return "block";
+        return "";
+      }};
       content: "";
       border-left: 2px solid #362f78;
       border-bottom: 2px solid #362f78;
@@ -155,11 +150,11 @@ const Element = styled.li`
     ::after {
       content: "";
       display: ${(props) => {
-    if (props.status === "todo") return "none";
-    if (props.status === "inprogress") return "block";
-    if (props.status === "done") return "block";
-    return "";
-  }};
+        if (props.status === "todo") return "none";
+        if (props.status === "inprogress") return "block";
+        if (props.status === "done") return "block";
+        return "";
+      }};
       height: 8px;
       width: 8px;
       border-radius: 50%;
@@ -169,17 +164,17 @@ const Element = styled.li`
       transform: translatey(-50%);
       z-index: 1;
       background-color: ${(props) => {
-    if (props.status === "todo") return "#b4c6fc!important";
-    if (props.status === "inprogress") return "#362f78!important";
-    if (props.status === "done") return "#fff!important";
-    return "";
-  }};
+        if (props.status === "todo") return "#b4c6fc!important";
+        if (props.status === "inprogress") return "#362f78!important";
+        if (props.status === "done") return "#fff!important";
+        return "";
+      }};
       box-shadow: ${(props) => {
-    if (props.status === "todo") return "";
-    if (props.status === "inprogress") return " 0 0 0 4px #fff";
-    if (props.status === "done") return " 0 0 0 4px #fff";
-    return "";
-  }};
+        if (props.status === "todo") return "";
+        if (props.status === "inprogress") return " 0 0 0 4px #fff";
+        if (props.status === "done") return " 0 0 0 4px #fff";
+        return "";
+      }};
     }
   }
 `;
