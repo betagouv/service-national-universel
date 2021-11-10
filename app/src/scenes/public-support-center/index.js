@@ -1,4 +1,5 @@
 import React from "react";
+import { useSelector } from "react-redux";
 import styled from "styled-components";
 
 import { HeroContainer } from "../../components/Content";
@@ -60,20 +61,24 @@ const articles = [
     body: `La Journée de Défense et Citoyenneté (JDC) est obligatoire pour tous...`,
     url: "https://support.snu.gouv.fr/help/fr-fr/24-questions-frequemment-posees/159-journee-defense-et-citoyennete-jdc",
   },
-  {
+  //! Ne pas supprimer, article en cours
+  /* {
     title: "Je m'identifie via FranceConnect",
     emoji: "🌐",
     body: `Article en cours de rédaction`,
     url: "https://support.snu.gouv.fr/help/fr-fr/24-questions-frequemment-posees/160-je-m-identifie-via-franceconnect",
-  },
+  }, */
 ];
 
 export default () => {
+  const young = useSelector((state) => state.Auth.young);
 
   return (
     <HeroContainer>
       <Container>
-        <p style={{ textAlign: "center", fontSize: "0.8rem" }}>Vous avez déjà un compte sur le site du SNU ? <a className="link" style={{ color: "#32257F", fontWeight: "bold" }} href="https://moncompte.snu.gouv.fr/auth/login?redirect=besoin-d-aide" target="_blank" rel="noopener noreferrer">Connectez-vous</a></p>
+        {!young && (
+           <p style={{ textAlign: "center", fontSize: "0.8rem" }}>Vous avez déjà un compte sur le site du SNU ? <a className="link" style={{ color: "#32257F", fontWeight: "bold" }} href="https://moncompte.snu.gouv.fr/auth/login?redirect=besoin-d-aide" target="_blank" rel="noopener noreferrer">Connectez-vous</a></p>
+        )}
         <h4 style={{ textAlign: "center" }}>Besoin d'aide&nbsp;?</h4>
         <div className="help-section">
           <div className="help-section-block">

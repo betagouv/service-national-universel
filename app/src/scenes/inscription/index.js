@@ -12,10 +12,10 @@ import Documents from "./Create/stepDocuments";
 import Availability from "./Create/stepAvailability";
 import Done from "./Create/stepDone";
 import Drawer from "./Create/drawer";
-import { useSelector } from "react-redux";
 
 import Home from "./Home/index.js";
 import { STEPS } from "./utils";
+import HelpButton from "../../components/buttons/HelpButton";
 
 const Step = ({ step }) => {
   function renderStep(step) {
@@ -34,14 +34,15 @@ const Step = ({ step }) => {
       <Content>
         <Nav step={step} />
         <Wrapper>{renderStep(step)}</Wrapper>
+        <div className="help-button-container">
+          <HelpButton to="/public-besoin-d-aide" color="#362f78" />
+        </div>
       </Content>
     </div>
   );
 };
 
 export default () => {
-  const young = useSelector((state) => state.Auth.young);
-
   return (
     <Switch>
       <Route path="/inscription/profil" component={() => <Step step={STEPS.PROFIL} />} />
@@ -61,7 +62,13 @@ export default () => {
 const Content = styled.div`
   padding: 1rem;
   margin-left: 320px;
+  .help-button-container {
+    display: none;
+  }
   @media (max-width: 768px) {
+    .help-button-container {
+    display: block;
+  }
     margin-left: 0;
   }
 `;
