@@ -24,6 +24,12 @@ export default ({ handleChange, values, keys, errors, touched }) => {
     if (!values[keys.schoolCountry]) handleChange({ target: { name: keys.schoolCountry, value: "France" } });
   }, []);
 
+  const cleanSchoolValues = () => {
+    handleChange({ target: { name: keys.schoolId, value: "" } });
+    handleChange({ target: { name: keys.schoolName, value: "" } });
+    handleChange({ target: { name: keys.schoolCity, value: "" } });
+  };
+
   const getSuggestions = async (filter) => {
     setTimeout(() => {
       setShowManualButton(true);
@@ -44,9 +50,12 @@ export default ({ handleChange, values, keys, errors, touched }) => {
     setHits(hitsFormatted);
 
     if (hitsFormatted.length) setManual(false);
-    else setManual(true);
+    else {
+      cleanSchoolValues();
+      setManual(true);
+    }
 
-    if (!hitsFormatted.find((e) => e._id === values[keys.schoolId])) handleChange({ target: { name: keys.schoolId, value: "" } });
+    if (!hitsFormatted.find((e) => e._id === values[keys.schoolId])) cleanSchoolValues();
   };
 
   const handleChangeSchoolCity = (text) => {
@@ -56,7 +65,10 @@ export default ({ handleChange, values, keys, errors, touched }) => {
   };
 
   useEffect(() => {
-    if (values[keys.schoolCountry] === "France" || values[keys.schoolCountry] === undefined) return;
+    if (values[keys.schoolCountry] === "France" || values[keys.schoolCountry] === undefined) {
+      cleanSchoolValues();
+      return setHits([]);
+    }
 
     getSuggestions([{ term: { "country.keyword": values[keys.schoolCountry] } }]);
   }, [values[keys.schoolCountry]]);
@@ -86,11 +98,13 @@ export default ({ handleChange, values, keys, errors, touched }) => {
           value={values[keys.schoolCountry]}
           onChange={handleChange}
         >
-          {Object.keys(countriesList).map((country_id) => (
-            <option key={country_id} value={countriesList[country_id]}>
-              {countriesList[country_id]}
-            </option>
-          ))}
+          {Object.values(countriesList)
+            .sort((a, b) => a.localeCompare(b))
+            .map((countryName) => (
+              <option key={countryName} value={countryName}>
+                {countryName}
+              </option>
+            ))}
         </Field>
       </Col>
 
