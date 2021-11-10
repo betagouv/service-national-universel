@@ -5,7 +5,7 @@ import { NavLink } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
-import { formatStringLongDate, colors, ticketStateNameById, translateState } from "../../../utils";
+import { formatStringLongDate, colors, ticketStateNameById } from "../../../utils";
 import Loader from "../../../components/Loader";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 import SendIcon from "../../../components/SendIcon";
@@ -92,7 +92,7 @@ export default (props) => {
             </h1>
             <Details title="Crée le" content={ticket?.created_at && formatStringLongDate(ticket?.created_at)} />
           </div>
-          {displayState(translateState(ticketStateNameById(ticket?.state_id)))}
+          {displayState(ticketStateNameById(ticket?.state_id))}
         </Heading>
         <Messages>
           {ticket?.articles

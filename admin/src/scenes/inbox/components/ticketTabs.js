@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { useSelector } from "react-redux";
 
 import Loader from "../../../components/Loader";
-import { formatStringDate, ROLES, ticketStateIdByName, ticketStateNameById, translateState } from "../../../utils";
+import { formatStringDate, ROLES, ticketStateIdByName, ticketStateNameById } from "../../../utils";
 import MailCloseIcon from "../../../components/MailCloseIcon";
 import MailOpenIcon from "../../../components/MailOpenIcon";
 import SuccessIcon from "../../../components/SuccessIcon";
@@ -54,7 +54,7 @@ export default ({ setTicket, selectedTicket }) => {
           <MailOpenIcon color="#F8B951" style={{ margin: 0, padding: "5px" }} />
         </StateContainer>
       );
-    if (state === "fermé")
+    if (state === "archivé")
       return (
         <StateContainer>
           <SuccessIcon color="#6BC762" style={{ margin: 0, padding: "5px" }} />
@@ -103,7 +103,7 @@ export default ({ setTicket, selectedTicket }) => {
               })
               ?.map((ticket) => (
                 <TicketContainer key={ticket.id} active={ticket.id === selectedTicket?.id} className="ticket" onClick={() => setTicket(ticket)}>
-                  {displayState(translateState(ticketStateNameById(ticket.state_id)))}
+                  {displayState(ticketStateNameById(ticket.state_id))}
                   <TicketContent>
                     <TicketHeader>
                       <TicketFrom>{getFrom(ticket)}</TicketFrom>

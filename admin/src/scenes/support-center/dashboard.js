@@ -8,7 +8,7 @@ import { useSelector } from "react-redux";
 
 import api from "../../services/api";
 import Loader from "../../components/Loader";
-import { ticketStateNameById, colors, translateState } from "../../utils";
+import { ticketStateNameById, colors } from "../../utils";
 import MailCloseIcon from "../../components/MailCloseIcon";
 import MailOpenIcon from "../../components/MailOpenIcon";
 import SuccessIcon from "../../components/SuccessIcon";
@@ -51,6 +51,7 @@ export default () => {
   };
 
   const displayState = (state) => {
+    console.log("STATE", state);
     if (state === "ouvert")
       return (
         <StateContainer style={{ display: "flex" }}>
@@ -58,7 +59,7 @@ export default () => {
           {state}
         </StateContainer>
       );
-    if (state === "fermé")
+    if (state === "archivé")
       return (
         <StateContainer>
           <SuccessIcon color="#6BC762" style={{ margin: 0, padding: "5px" }} />
@@ -135,8 +136,8 @@ export default () => {
               <p>{ticket.number}</p>
               <p>{ticket.title}</p>
               <p>{getLastContactName(ticket?.articles)}</p>
-              <p>{displayState(translateState(ticketStateNameById(ticket.state_id)))}</p>
-              <p className="ticket-date">{dayjs(new Date(ticket.updated_at)).fromNow()}</p>
+              <p>{displayState(ticketStateNameById(ticket.state_id))}</p>
+              <div className="ticket-date">{dayjs(new Date(ticket.updated_at)).fromNow()}</div>
             </NavLink>
           ))}
       </List>
