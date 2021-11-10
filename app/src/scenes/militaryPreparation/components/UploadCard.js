@@ -26,8 +26,10 @@ export default ({
       <SubTitle>{subTitle}</SubTitle>
       {subsubTitle ? <SubSubTitle>{subsubTitle}</SubSubTitle> : null}
       {template ? (
-        <LoadingButton style={{ marginBottom: "0.5rem" }} onClick={() => window.open(template, "_blank")?.focus()}>
-          Télécharger le modèle obligatoire
+        <LoadingButton style={{ marginBottom: "0.5rem" }}>
+          <a href={template} target="_blank" style={{ decoration: "none", color: "white" }}>
+            Télécharger le modèle obligatoire
+          </a>
         </LoadingButton>
       ) : null}
       <DndFileInput
