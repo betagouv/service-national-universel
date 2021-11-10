@@ -253,7 +253,7 @@ const Hit = ({ hit, onClick, selected, mission }) => {
           {mission.placesTotal - mission.placesLeft} / {mission.placesTotal}
         </div>
       </td>
-      <td onClick={(e) => e.stopPropagation()}>
+      <td>
         <SelectStatusApplication
           hit={hit}
           callback={(status) => {
