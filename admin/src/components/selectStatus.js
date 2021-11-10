@@ -75,7 +75,6 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
 
   const setStatus = async (status, note) => {
     const prevStatus = young.status;
-    // young.historic.push({ phase, userName: `${user.firstName} ${user.lastName}`, userId: user._id, status, note });
     young[statusName] = status;
     const now = new Date();
     young.lastStatusAt = now.toISOString();
