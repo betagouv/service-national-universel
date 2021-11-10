@@ -91,7 +91,13 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
       //   young.phase = YOUNG_PHASE.COHESION_STAY;
       // }
 
-      const { ok, code, data: newYoung } = await api.put(`/referent/young/${young._id}`, young);
+      const { lastStatusAt, statusPhase2UpdatedAt, withdrawnMessage, phase } = young;
+
+      const {
+        ok,
+        code,
+        data: newYoung,
+      } = await api.put(`/referent/young/${young._id}`, { [statusName]: young[statusName], lastStatusAt, statusPhase2UpdatedAt, withdrawnMessage, phase });
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
 
       if (status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INSCRIPTION) {
