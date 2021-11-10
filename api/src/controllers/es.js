@@ -48,7 +48,7 @@ router.post(
       }
 
       // A head center can not see missions.
-      if (user.role === ROLES.HEAD_CENTER) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      if (user.role === ROLES.HEAD_CENTER) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
       if (req.params.action === "export") {
         const response = await allRecords("mission", applyFilterOnQuery(req.body.query, filter));
@@ -151,20 +151,20 @@ router.post(
       const { user, body } = req;
 
       if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER].includes(user.role)) {
-        return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
 
       if (user.role === ROLES.REFERENT_REGION) {
         const centers = await CohesionCenterObject.find({ region: user.region });
         if (!centers.map((e) => e._id.toString()).includes(req.params.id)) {
-          return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
         }
       }
 
       if (user.role === ROLES.REFERENT_DEPARTMENT) {
         const centers = await CohesionCenterObject.find({ department: user.department });
         if (!centers.map((e) => e._id.toString()).includes(req.params.id)) {
-          return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
         }
       }
 
@@ -214,7 +214,7 @@ router.post("/structure/:action(_msearch|export)", passport.authenticate(["refer
     }
 
     // A head center can not see missions.
-    if (user.role === ROLES.HEAD_CENTER) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (user.role === ROLES.HEAD_CENTER) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     if (req.params.action === "export") {
       const response = await allRecords("structure", applyFilterOnQuery(req.body.query, filter));
@@ -317,7 +317,7 @@ router.post(
       }
 
       // A head center can not see applications.
-      if (user.role === ROLES.HEAD_CENTER) return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      if (user.role === ROLES.HEAD_CENTER) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
       if (req.params.action === "export") {
         const response = await allRecords("application", applyFilterOnQuery(req.body.query, filter));
@@ -345,7 +345,7 @@ router.post(
       if (user.role === ROLES.REFERENT_DEPARTMENT) filter.push({ term: { "department.keyword": user.department } });
 
       if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER].includes(user.role)) {
-        return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
 
       if (req.params.action === "export") {
@@ -370,7 +370,7 @@ router.post(
       const { user, body } = req;
 
       if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER].includes(user.role)) {
-        return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
 
       if (req.params.action === "export") {

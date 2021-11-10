@@ -54,9 +54,9 @@ export default () => {
             values.parentConsentment = "true";
             values.consentment = "true";
             values.inscriptionStep = STEPS.DOCUMENTS;
-            const { ok, code, data: young } = await api.put("/young", values);
-            if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
-            dispatch(setYoung(young));
+            const { ok, code, data } = await api.put("/young", values);
+            if (!ok || !data?._id) return toastr.error("Une erreur s'est produite :", translate(code));
+            dispatch(setYoung(data));
             history.push("/inscription/documents");
           } catch (e) {
             console.log(e);

@@ -52,13 +52,13 @@ describe("Meeting point", () => {
         .send();
       expect(res.status).toBe(200);
     });
-    it("should return 401 if young try to access other meetingPoint", async () => {
+    it("should return 403 if young try to access other meetingPoint", async () => {
       const meetingPoint = await createMeetingPointHelper(getNewMeetingPointFixture());
       const young = await createYoungHelper({ ...getNewYoungFixture(), meetingPointId: notExistingMeetingPointId });
       const passport = require("passport");
       passport.user = young;
       const res = await request(getAppHelper()).get("/meeting-point/" + meetingPoint._id);
-      expect(res.status).toBe(401);
+      expect(res.status).toBe(403);
     });
   });
 

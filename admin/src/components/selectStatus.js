@@ -47,16 +47,6 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
   if (!young) return <i style={{ color: colors.darkPurple }}>Chargement...</i>;
 
   const handleClickStatus = async (status) => {
-    // Gabrielle says: (https://trello.com/c/JBS3Jn8I/576-inscription-impact-fin-instruction-dossiers-au-6-mai)
-    // > Bloquer tous les changements de statuts (sauf désistement)
-    if (user.role !== ROLES.ADMIN && phase === YOUNG_PHASE.INSCRIPTION && status !== YOUNG_STATUS.WITHDRAWN && isEndOfInscriptionManagement2021()) {
-      return setModalConfirm({
-        isOpen: true,
-        title: "Les inscriptions sont closes",
-        message: "Vous ne pouvez plus à faire de changement de statut.",
-        confirmText: "OK",
-      });
-    }
     setModalConfirm({
       isOpen: true,
       onConfirm: () => {
@@ -91,7 +81,13 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
       //   young.phase = YOUNG_PHASE.COHESION_STAY;
       // }
 
-      const { ok, code, data: newYoung } = await api.put(`/referent/young/${young._id}`, young);
+      const { lastStatusAt, statusPhase2UpdatedAt, withdrawnMessage, phase } = young;
+
+      const {
+        ok,
+        code,
+        data: newYoung,
+      } = await api.put(`/referent/young/${young._id}`, { [statusName]: young[statusName], lastStatusAt, statusPhase2UpdatedAt, withdrawnMessage, phase });
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
 
       if (status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INSCRIPTION) {

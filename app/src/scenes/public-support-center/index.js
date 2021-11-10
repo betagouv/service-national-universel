@@ -77,7 +77,7 @@ export default () => {
     <HeroContainer>
       <Container>
         {!young && (
-          <p style={{ textAlign: "center", color: "#32257F", fontSize: "0.7rem" }}>Vous avez déjà un compte sur le site du SNU ? <a className="link" href="https://moncompte.snu.gouv.fr/auth/login?redirect=besoin-d-aide" target="_blank" rel="noopener noreferrer">Connectez-vous</a></p>
+           <p style={{ textAlign: "center", fontSize: "0.8rem" }}>Vous avez déjà un compte sur le site du SNU ? <a className="link" style={{ color: "#32257F", fontWeight: "bold" }} href="https://moncompte.snu.gouv.fr/auth/login?redirect=besoin-d-aide" target="_blank" rel="noopener noreferrer">Connectez-vous</a></p>
         )}
         <h4 style={{ textAlign: "center" }}>Besoin d'aide&nbsp;?</h4>
         <div className="help-section">

@@ -189,6 +189,19 @@ const Schema = new mongoose.Schema({
       description: "Étape du tunnel d'inscription sur le formulaire allégé (uniquement disponible pour la cohorte 2020)",
     },
   },
+  // Inscription status message
+  inscriptionCorrectionMessage: {
+    type: String,
+    documentation: {
+      description: "Message envoyé au volontaire dans le cas où son inscription nécessite des corrections.",
+    }
+  },
+  inscriptionRefusedMessage: {
+    type: String,
+    documentation: {
+      description: "Message envoyé au volontaire dans le cas où son inscription est refusée.",
+    }
+  },
 
   // userName and userId because it can be a young or a referent
   historic: {
@@ -748,6 +761,18 @@ const Schema = new mongoose.Schema({
     type: String,
     documentation: {
       description: "Adresse de l'hébergeur",
+    },
+  },
+  hostDepartment: {
+    type: String,
+    documentation: {
+      description: "Departement de l'hébergeur",
+    },
+  },
+  hostRegion: {
+    type: String,
+    documentation: {
+      description: "Région de l'hébergeur",
     },
   },
   hostRelationship: {

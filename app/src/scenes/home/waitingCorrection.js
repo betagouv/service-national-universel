@@ -9,6 +9,7 @@ import { isEndOfInscriptionManagement2021 } from "../../utils";
 export default () => {
   const young = useSelector((state) => state.Auth.young);
   const [showAlert, setShowAlert] = useState(true);
+  const message = young.inscriptionCorrectionMessage.split("\n").map(line => <p>{line}</p>);
 
   return (
     <HeroContainer>
@@ -38,7 +39,7 @@ export default () => {
                 <p>
                   Merci de vous reconnecter à votre dossier d'inscription et d'effectuer les modifications demandées par votre référent :
                 </p>
-                {/* //TODO : message du jeune */}
+                <Message>{message}</Message>
                 <Link to="/inscription/coordonnees">
                   <WhiteButton>Corriger mon dossier d'inscription</WhiteButton>
                 </Link>
@@ -64,5 +65,21 @@ const IconContainer = styled.div`
     svg {
       margin-bottom: 1rem;
     }
+  }
+`;
+
+const Message = styled.div`
+  background: rgba(79, 70, 229, 0.1);
+  padding: 1rem;
+  color: #32257f;
+  border-radius: 6px;
+  :hover {
+    color: #32257f;
+    opacity: 0.8;
+    cursor: pointer;
+  }
+  p {
+    color: #32257f;
+    font-size: 0.9rem;
   }
 `;

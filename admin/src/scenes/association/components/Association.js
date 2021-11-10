@@ -64,25 +64,26 @@ export default function Association({ hit, missionsInfo }) {
               setShow(true);
               setTab("Contacts");
               sendEventToBackend("CONTACT_CLICK", association.id);
-              window.open(association.url, "_blank").focus();
             }}
           >
-            <svg width="21" height="21" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M11.8513 9.14915C11.1345 8.43273 10.1626 8.03027 9.14926 8.03027C8.13588 8.03027 7.16398 8.43273 6.44726 9.14915L3.74439 11.8511C3.02766 12.5679 2.625 13.54 2.625 14.5536C2.625 15.5672 3.02766 16.5393 3.74439 17.256C4.46112 17.9728 5.43321 18.3754 6.44682 18.3754C7.46043 18.3754 8.43253 17.9728 9.14926 17.256L10.5003 15.905"
-                stroke="#696974"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <path
-                d="M9.14941 11.851C9.86613 12.5674 10.838 12.9699 11.8514 12.9699C12.8648 12.9699 13.8367 12.5674 14.5534 11.851L17.2563 9.14902C17.973 8.43229 18.3757 7.46019 18.3757 6.44658C18.3757 5.43297 17.973 4.46087 17.2563 3.74414C16.5396 3.02741 15.5675 2.62476 14.5539 2.62476C13.5402 2.62476 12.5681 3.02741 11.8514 3.74414L10.5004 5.09514"
-                stroke="#696974"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            <a href={association.url} target="_blank" style={{ decoration: "none", color: "#22252A" }}>
+              <svg width="21" height="21" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M11.8513 9.14915C11.1345 8.43273 10.1626 8.03027 9.14926 8.03027C8.13588 8.03027 7.16398 8.43273 6.44726 9.14915L3.74439 11.8511C3.02766 12.5679 2.625 13.54 2.625 14.5536C2.625 15.5672 3.02766 16.5393 3.74439 17.256C4.46112 17.9728 5.43321 18.3754 6.44682 18.3754C7.46043 18.3754 8.43253 17.9728 9.14926 17.256L10.5003 15.905"
+                  stroke="#696974"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <path
+                  d="M9.14941 11.851C9.86613 12.5674 10.838 12.9699 11.8514 12.9699C12.8648 12.9699 13.8367 12.5674 14.5534 11.851L17.2563 9.14902C17.973 8.43229 18.3757 7.46019 18.3757 6.44658C18.3757 5.43297 17.973 4.46087 17.2563 3.74414C16.5396 3.02741 15.5675 2.62476 14.5539 2.62476C13.5402 2.62476 12.5681 3.02741 11.8514 3.74414L10.5004 5.09514"
+                  stroke="#696974"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </a>
           </ContactButton>
           <ContactButton
             onClick={() => {
@@ -216,8 +217,12 @@ export default function Association({ hit, missionsInfo }) {
                         <b className="category">Disponibilité{mission.places > 1 && "s"}</b>
                         <p className="description">{mission.places || 0} places restantes</p>
                       </div>
-                      <MissionButton style={{ maginInline: "auto" }} onClick={() => window.open(mission.applicationUrl, "_blank").focus()}>
-                        <div className="title">Consulter</div>
+                      <MissionButton style={{ maginInline: "auto" }}>
+                        <div className="title">
+                          <a href={mission.applicationUrl} target="_blank" style={{ decoration: "none", color: "#22252A" }}>
+                            Consulter
+                          </a>
+                        </div>
                       </MissionButton>
                     </MissionInfo>
                   ))
