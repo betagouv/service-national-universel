@@ -39,6 +39,25 @@ export default ({ values, handleChange, handleSubmit, required = {}, errors, tou
           errors={errors}
           touched={touched}
         />
+        <Item
+          title="Pays de naissance"
+          values={values || "France"}
+          name="birthCountry"
+          handleChange={handleChange}
+          required={required.birthCountry}
+          errors={errors}
+          touched={touched}
+        />
+        <Item title="Ville de naissance" values={values} name="birthCity" handleChange={handleChange} required={required.birthCity} errors={errors} touched={touched} />
+        <Item
+          title="Code postal de le ville de naissance"
+          values={values}
+          name="birthCityZip"
+          handleChange={handleChange}
+          required={required.birthCityZip}
+          errors={errors}
+          touched={touched}
+        />
         <Documents>
           <h4>Pièces d'identité</h4>
           <DndFileInput
