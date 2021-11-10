@@ -9,7 +9,7 @@ import { isEndOfInscriptionManagement2021 } from "../../utils";
 export default () => {
   const young = useSelector((state) => state.Auth.young);
   const [showAlert, setShowAlert] = useState(true);
-  const message = young.inscriptionCorrectionMessage.split("\n").map(line => <p>{line}</p>);
+  const message = young.inscriptionCorrectionMessage?.split("\n").map(line => <p>{line}</p>);
 
   return (
     <HeroContainer>
@@ -36,10 +36,14 @@ export default () => {
               </svg>
               <div>
                 <p style={{ color: "#000" }}><strong>Votre dossier d'inscription est en attente de correction.</strong></p>
-                <p>
-                  Merci de vous reconnecter à votre dossier d'inscription et d'effectuer les modifications demandées par votre référent :
-                </p>
-                <Message>{message}</Message>
+                {young.inscriptionCorrectionMessage && young.inscriptionRefusedMessage?.trim()(
+                  <>
+                    <p>
+                      Merci de vous reconnecter à votre dossier d'inscription et d'effectuer les modifications demandées par votre référent :
+                    </p>
+                    <Message>{message}</Message>
+                  </>
+                )}
                 <Link to="/inscription/coordonnees">
                   <WhiteButton>Corriger mon dossier d'inscription</WhiteButton>
                 </Link>
@@ -73,11 +77,6 @@ const Message = styled.div`
   padding: 1rem;
   color: #32257f;
   border-radius: 6px;
-  :hover {
-    color: #32257f;
-    opacity: 0.8;
-    cursor: pointer;
-  }
   p {
     color: #32257f;
     font-size: 0.9rem;
