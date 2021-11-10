@@ -261,6 +261,9 @@ const Action = ({ hit }) => {
         </DropdownToggle>
         <DropdownMenu>
           <DropdownItem className="dropdown-item">
+            <Link to={`/volontaire/${hit._id}`}>Consulter le profil</Link>
+          </DropdownItem>
+          <DropdownItem className="dropdown-item">
             <Link to={`/volontaire/${hit._id}/edit`}>Modifier le profil</Link>
           </DropdownItem>
           <DropdownItem className="dropdown-item">
