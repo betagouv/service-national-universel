@@ -1,29 +1,36 @@
-import React from "react";
+import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import styled from "styled-components";
 import { Spinner } from "reactstrap";
 
 import { setYoung } from "../../redux/auth/actions";
 import { saveYoung } from "../../scenes/inscription/utils";
-import { APP_URL } from "../../config";
+import { appURL } from "../../config";
 
 export default ({ values, handleSubmit, errors, secondButton = "save", loading }) => {
   const dispatch = useDispatch();
+  const [loadingSaveBtn, setloadingSaveBtn] = useState(false);
 
   const handleSave = async () => {
+    setloadingSaveBtn(true);
     const young = await saveYoung(values);
     if (young) dispatch(setYoung(young));
+    setloadingSaveBtn(false);
   };
 
   const handleBackToHome = async () => {
-    window.location.href = APP_URL;
+    window.location.href = appURL;
   };
 
   return (
     <>
       <Footer>
         <ButtonContainer>
-          {secondButton === "save" ? <SecondButton onClick={handleSave}>Enregistrer</SecondButton> : <SecondButton onClick={handleBackToHome}>Retour</SecondButton>}
+          {secondButton === "save" ? (
+            <SecondButton onClick={handleSave}> {loadingSaveBtn ? <Spinner size="sm" style={{ borderWidth: "0.1em" }} /> : "Enregistrer"}</SecondButton>
+          ) : (
+            <SecondButton onClick={handleBackToHome}>Retour</SecondButton>
+          )}
           <ContinueButton onClick={handleSubmit}> {loading ? <Spinner size="sm" style={{ borderWidth: "0.1em" }} /> : "Continuer"}</ContinueButton>
         </ButtonContainer>
       </Footer>

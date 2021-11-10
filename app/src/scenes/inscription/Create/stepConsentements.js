@@ -184,7 +184,7 @@ export default () => {
                   />
                   <div>
                     {isPlural ? "nous engageons" : "m’engage"} à remettre sous pli confidentiel la fiche sanitaire* ainsi que les documents médicaux et justificatifs nécessaires
-                    <b> à mon arrivée au centre de séjour de cohésion.</b>
+                    <b> à son arrivée au centre de séjour de cohésion.</b>
                   </div>
                 </RadioLabel>
                 <ErrorMessage errors={errors} touched={touched} name="parentConsentment4" />

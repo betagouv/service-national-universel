@@ -140,7 +140,7 @@ export default () => {
                     </Col>
                     <Col>
                       <>
-                        <DownloadFormButton url="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Accord_collecte_et_traitement_des_donnees_des_moins_de_15_ans.pdf" />
+                        <DownloadFormButton url="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Accord_collecte_et_traitement_des_donnees_des_moins_de_15_ans_v2.pdf" />
                         <DndFileInput
                           placeholder="le formulaire complété"
                           errorMessage="Vous devez téléverser le formulaire complété."
@@ -195,7 +195,7 @@ const DownloadFormButton = ({ url }) => (
       boxShadow: "0px 1px 2px rgba(0, 0, 0, 0.05)",
       margin: "20px 0",
     }}
-    onClick={() => window.open(url, "_blank").focus()}
+    onClick={() => window.open(url, "_blank")?.focus()}
   >
     Télécharger le formulaire à compléter
   </div>

@@ -1,6 +1,20 @@
 import "isomorphic-fetch";
+import fetchRetry from "fetch-retry";
+const fetch = fetchRetry(window.fetch);
 
 import { apiURL } from "../config";
+import * as Sentry from "@sentry/react";
+
+function jsonOrRedirectToSignIn(response) {
+  if (response.ok === false && response.status === 401) {
+    if (window && window.location && window.location.href) {
+      window.location.href = "/auth?disconnected=1";
+      // We need to return responses to prevent the promise from rejecting.
+      return { responses: [] };
+    }
+  }
+  return response.json();
+}
 
 class api {
   constructor() {
@@ -14,6 +28,9 @@ class api {
   esQuery(index, body) {
     const header = { index, type: "_doc" };
     return fetch(`${apiURL}/es/${index}/_msearch`, {
+      retries: 3,
+      retryDelay: 1000,
+      retryOn: [502, 503, 504],
       mode: "cors",
       method: "POST",
       redirect: "follow",
@@ -21,9 +38,12 @@ class api {
       headers: { "Content-Type": "application/x-ndjson", Authorization: `JWT ${this.token}` },
       body: [header, body].map((e) => `${JSON.stringify(e)}\n`).join(""),
     })
-      .then((r) => r.json())
+      .then((r) => jsonOrRedirectToSignIn(r))
       .catch((e) => {
-        console.log(e);
+        Sentry.captureMessage("Error caught in esQuery");
+        Sentry.captureException(e);
+        console.error(e);
+        return { responses: [] };
       });
   }
 
@@ -60,6 +80,9 @@ class api {
     return new Promise(async (resolve, reject) => {
       try {
         const response = await fetch(`${apiURL}${path}`, {
+          retries: 3,
+          retryDelay: 1000,
+          retryOn: [502, 503, 504],
           mode: "cors",
           method: "POST",
           credentials: "include",
@@ -81,6 +104,9 @@ class api {
     return new Promise(async (resolve, reject) => {
       try {
         const response = await fetch(`${apiURL}${path}`, {
+          retries: 3,
+          retryDelay: 1000,
+          retryOn: [502, 503, 504],
           mode: "cors",
           method: "GET",
           credentials: "include",
@@ -99,6 +125,9 @@ class api {
     return new Promise(async (resolve, reject) => {
       try {
         const response = await fetch(`${apiURL}${path}`, {
+          retries: 3,
+          retryDelay: 1000,
+          retryOn: [502, 503, 504],
           mode: "cors",
           method: "PUT",
           credentials: "include",
@@ -125,6 +154,9 @@ class api {
     return new Promise(async (resolve, reject) => {
       try {
         const response = await fetch(`${apiURL}${path}`, {
+          retries: 3,
+          retryDelay: 1000,
+          retryOn: [502, 503, 504],
           mode: "cors",
           method: "POST",
           credentials: "include",
@@ -143,6 +175,9 @@ class api {
     return new Promise(async (resolve, reject) => {
       try {
         const response = await fetch(`${apiURL}${path}`, {
+          retries: 3,
+          retryDelay: 1000,
+          retryOn: [502, 503, 504],
           mode: "cors",
           credentials: "include",
           method: "DELETE",
@@ -160,6 +195,9 @@ class api {
     return new Promise(async (resolve, reject) => {
       try {
         const response = await fetch(`${apiURL}${path}`, {
+          retries: 3,
+          retryDelay: 1000,
+          retryOn: [502, 503, 504],
           mode: "cors",
           method: "POST",
           credentials: "include",

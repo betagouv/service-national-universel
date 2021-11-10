@@ -16,22 +16,22 @@ import SuccessIcon from "../../components/SuccessIcon";
 
 const articles = [
   {
-    title: "Code de la route",
-    emoji: "🚗",
-    body: `L’accès à la plateforme en ligne d’apprentissage du code de la route...`,
-    url: "https://support.snu.gouv.fr/help/fr-fr/3-volontaire/21-prise-en-charge-du-e-learning-et-de-l-examen-du-code-de-la-route",
+    title: "SNU phase 0 : inscriptions",
+    emoji: "📄",
+    body: `Rédaction du dossier d'inscription : Le jeune remplit son dossier...`,
+    url: "https://support.snu.gouv.fr/help/fr-fr/11-phase-0-inscriptions/173-phase-0-inscriptions",
   },
   {
-    title: "Je cherche une MIG",
-    emoji: "🔍",
-    body: `Depuis l'onglet Mission d'intérêt général, cliquez sur la rubrique...`,
-    url: "https://support.snu.gouv.fr/help/fr-fr/13-phase-2-mission-d-interet-general/33-je-cherche-une-mission-mig",
+    title: "Phase 1 : L'organisation du séjour de cohésion",
+    emoji: "🌲",
+    body: `Lorsque l'inscription du volontaire est validée, il entre dans la phase 1...`,
+    url: "https://support.snu.gouv.fr/help/fr-fr/12-phase-1-le-sejour-de-cohesion/174-phase-1-le-sejour-de-cohesion",
   },
   {
-    title: "Comment se déroule ma phase 3 ?",
-    emoji: "🌟",
-    body: `Optionnelle, la phase 3 vous permet de poursuivre votre...`,
-    url: "https://support.snu.gouv.fr/help/fr-fr/14-phase-3-l-engagement/61-comment-se-deroule-ma-phase-3",
+    title: "Phase 2 : Le parcours d'une MIG",
+    emoji: "🤝",
+    body: `La publication d'une MIG : la structure s'inscrit sur la plateforme...`,
+    url: "https://support.snu.gouv.fr/help/fr-fr/13-phase-2-mission-d-interet-general/77-phase-2-le-parcours-d-une-mig",
   },
 ];
 

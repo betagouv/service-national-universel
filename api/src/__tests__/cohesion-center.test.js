@@ -59,7 +59,7 @@ describe("Cohesion Center", () => {
       passport.user.role = ROLES.RESPONSIBLE;
 
       const res = await request(getAppHelper()).post("/cohesion-center").send(getNewCohesionCenterFixture());
-      expect(res.status).toBe(401);
+      expect(res.status).toBe(403);
 
       passport.user.role = ROLES.ADMIN;
     });
@@ -268,7 +268,7 @@ describe("Cohesion Center", () => {
       res = await request(getAppHelper())
         .get("/cohesion-center/young/" + secondYoung._id)
         .send();
-      expect(res.status).toBe(401);
+      expect(res.status).toBe(403);
 
       passport.user = previous;
     });
@@ -316,7 +316,7 @@ describe("Cohesion Center", () => {
       const res = await request(getAppHelper()).put("/cohesion-center/").send({
         _id: cohesionCenter._id,
       });
-      expect(res.status).toBe(401);
+      expect(res.status).toBe(403);
       passport.user.role = ROLES.ADMIN;
     });
   });
@@ -360,7 +360,7 @@ describe("Cohesion Center", () => {
     const res = await request(getAppHelper())
       .delete("/cohesion-center/" + cohesionCenter._id)
       .send();
-    expect(res.status).toBe(401);
+    expect(res.status).toBe(403);
     passport.user.role = ROLES.ADMIN;
   });
 

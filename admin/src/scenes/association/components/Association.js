@@ -64,7 +64,7 @@ export default function Association({ hit, missionsInfo }) {
               setShow(true);
               setTab("Contacts");
               sendEventToBackend("CONTACT_CLICK", association.id);
-              window.open(association.url, "_blank").focus();
+              window.open(association.url, "_blank")?.focus();
             }}
           >
             <svg width="21" height="21" viewBox="0 0 21 21" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -216,7 +216,7 @@ export default function Association({ hit, missionsInfo }) {
                         <b className="category">Disponibilité{mission.places > 1 && "s"}</b>
                         <p className="description">{mission.places || 0} places restantes</p>
                       </div>
-                      <MissionButton style={{ maginInline: "auto" }} onClick={() => window.open(mission.applicationUrl, "_blank").focus()}>
+                      <MissionButton style={{ maginInline: "auto" }} onClick={() => window.open(mission.applicationUrl, "_blank")?.focus()}>
                         <div className="title">Consulter</div>
                       </MissionButton>
                     </MissionInfo>

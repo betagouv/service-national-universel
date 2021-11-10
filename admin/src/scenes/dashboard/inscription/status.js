@@ -20,7 +20,14 @@ export default ({ filter }) => {
         size: 0,
       };
 
-      if (filter.cohort) body.query.bool.filter.push({ term: { "cohort.keyword": filter.cohort } });
+      if (filter.cohort) {
+        // See: https://trello.com/c/wsy9Q1ro/1021-inscription-tableau-de-bord-en-cours
+        if (filter.cohort.includes("2022")) {
+          body.query.bool.filter.push({ terms: { "cohort.keyword": [filter.cohort, "2022"] } });
+        } else {
+          body.query.bool.filter.push({ term: { "cohort.keyword": filter.cohort } });
+        }
+      }
       if (filter.region) body.query.bool.filter.push({ term: { "region.keyword": filter.region } });
       if (filter.department) body.query.bool.filter.push({ term: { "department.keyword": filter.department } });
 

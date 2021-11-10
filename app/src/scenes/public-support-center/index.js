@@ -7,22 +7,64 @@ import ZammadButton from "../../components/buttons/ZammadButton";
 
 const articles = [
   {
-    title: "Code de la route",
+    title: "Identifiant ou mot de passe oublié (ou incorrect)",
+    emoji: "⛔",
+    body: `Pour se connecter à votre compte SNU, rendez-vous sur...`,
+    url: "https://support.snu.gouv.fr/help/fr-fr/16-comprendre-le-snu/155-je-me-connecte-a-mon-compte-identifiant-ou-mot-de-passe-oublie",
+  },
+  {
+    title: "Est-ce que le SNU est obligatoire ?",
+    emoji: "❓",
+    body: `Le SNU est pour le moment un dispositif basé sur le volontariat...`,
+    url: "https://support.snu.gouv.fr/help/fr-fr/24-questions-frequemment-posees/138-est-ce-que-le-snu-est-obligatoire",
+  },
+  {
+    title: "A qui s'adresse le SNU ?",
+    emoji: "👍",
+    body: `Le Service National Universel s'adresse : aux jeunes de nationalité...`,
+    url: "https://support.snu.gouv.fr/help/fr-fr/24-questions-frequemment-posees/141-a-qui-s-adresse-le-snu",
+  },
+  {
+    title: "Le SNU est-il payant ?",
+    emoji: "👛",
+    body: `La participation au SNU est gratuite ! Le séjour de cohésion...`,
+    url: "https://support.snu.gouv.fr/help/fr-fr/24-questions-frequemment-posees/136-le-snu-est-il-payant-quels-sont-les-frais",
+  },
+  {
+    title: "Je me connecte à mon compte",
+    emoji: "🔐",
+    body: `Pour vous connecter : rendez-vous sur...`,
+    url: "https://support.snu.gouv.fr/help/fr-fr/16-comprendre-le-snu/155-je-me-connecte-a-mon-compte-identifiant-ou-mot-de-passe-oublie",
+  },
+  {
+    title: "J'ai oublié mon identifiant (mail)",
+    emoji: "⛔",
+    body: `La plateforme bloque la création de nouveau dossier d'inscription...`,
+    url: "https://support.snu.gouv.fr/help/fr-fr/24-questions-frequemment-posees/178-comment-recuperer-mon-identifiant-dossier-deja-inscrit",
+  },
+  {
+    title: "J'étais inscrit en 2021, comment me réinscrire en 2022 ?",
+    emoji: "📅",
+    body: `En 2021, vous avez déjà rempli un dossier d'inscription...`,
+    url: "https://support.snu.gouv.fr/help/fr-fr/24-questions-frequemment-posees/175-j-etais-inscrit-en-2021-comment-me-reinscrire-en-2022",
+  },
+  {
+    title: "Le code de la route",
     emoji: "🚗",
-    body: `L’accès à la plateforme en ligne d’apprentissage du code de la route...`,
-    url: "https://support.snu.gouv.fr/help/fr-fr/3-volontaire/21-prise-en-charge-du-e-learning-et-de-l-examen-du-code-de-la-route",
+    body: `L'accès à la plateforme en ligne d'apprentissage du code de la...`,
+    url: "https://support.snu.gouv.fr/help/fr-fr/24-questions-frequemment-posees/158-prise-en-charge-du-e-learning-et-de-l-examen-du-code-de-la-route",
   },
   {
-    title: "Je cherche une MIG",
-    emoji: "🔍",
-    body: `Depuis l'onglet Mission d'intérêt général, cliquez sur la rubrique...`,
-    url: "https://support.snu.gouv.fr/help/fr-fr/13-phase-2-mission-d-interet-general/33-je-cherche-une-mission-mig",
+    title: "Le SNU remplace-t-il la Journée Défense et citoyenneté (JDC)",
+    emoji: "📣",
+    body: `La Journée de Défense et Citoyenneté (JDC) est obligatoire pour tous...`,
+    url: "https://support.snu.gouv.fr/help/fr-fr/24-questions-frequemment-posees/159-journee-defense-et-citoyennete-jdc",
   },
   {
-    title: "Comment se déroule ma phase 3 ?",
-    emoji: "🌟",
-    body: `Optionnelle, la phase 3 vous permet de poursuivre votre...`,
-    url: "https://support.snu.gouv.fr/help/fr-fr/14-phase-3-l-engagement/61-comment-se-deroule-ma-phase-3",
+    title: "Je m'identifie via FranceConnect",
+    emoji: "🌐",
+    body: `Article en cours de rédaction`,
+    url: "https://support.snu.gouv.fr/help/fr-fr/24-questions-frequemment-posees/160-je-m-identifie-via-franceconnect",
   },
 ];
 
@@ -31,28 +73,29 @@ export default () => {
   return (
     <HeroContainer>
       <Container>
+        <p style={{ textAlign: "center", color: "#32257F", fontSize: "0.7rem" }}>Vous avez déjà un compte sur le site du SNU ? <a className="link" href="https://moncompte.snu.gouv.fr/auth/login?redirect=besoin-d-aide" target="_blank" rel="noopener noreferrer">Connectez-vous</a></p>
         <h4 style={{ textAlign: "center" }}>Besoin d'aide&nbsp;?</h4>
         <div className="help-section">
           <div className="help-section-block">
             <div className="help-section-text" style={{ color: "#6B7280" }}>
-              Vous souhaitez en savoir plus sur les phases du Service National Universel ou sur les autres formes d'engagement&nbsp;?
+              Vous souhaitez en savoir plus sur les phases du Service National Universel ou sur les autres formes d'engagement&nbsp;?<br />
               N'hésitez pas à consulter notre{" "}
               <strong>
-                <a className="link" href="https://support.snu.gouv.fr/help/fr-fr/3-volontaire" target="_blank" rel="noopener noreferrer">
+                <a className="link" href="https://support.snu.gouv.fr/help/fr-fr/16-comprendre-le-snu" target="_blank" rel="noopener noreferrer">
                   base de connaissance
                 </a>
               </strong>
               &nbsp;!
             </div>
             <div className="buttons">
-              <LinkButton href="https://support.snu.gouv.fr/help/fr-fr/3-volontaire" target="_blank" rel="noopener noreferrer">
+              <LinkButton href="https://support.snu.gouv.fr/help/fr-fr/16-comprendre-le-snu" target="_blank" rel="noopener noreferrer">
                 Trouver&nbsp;ma&nbsp;réponse
               </LinkButton>
             </div>
           </div>
         </div>
       </Container>
-      <h4 style={{ marginLeft: "0.5rem" }}>Quelques articles pour vous aider&nbsp;:</h4>
+      <h4 style={{ margin: "1rem 0", textAlign: "center" }}>Quelques articles pour vous aider</h4>
       <Articles>
         {articles.map((article) => (
           <div className="block" key={article.url} onClick={() => window.open(article.url)}>
@@ -90,6 +133,8 @@ export default () => {
 const Container = styled.div`
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
   .help-section {
     padding: 0.5rem;
     margin: 1rem auto;
@@ -143,10 +188,15 @@ const LinkButton = styled.a`
 
 const Articles = styled.div`
   min-width: 330px;
+  max-width: 1300px;
+  margin: 0 auto;
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
+  justify-content: center;
   .block {
+    height: 190px;
+    max-width: 285px;
+    min-width: 285px;
     background-color: #fff;
     flex: 1;
     flex-basis: 230px;
