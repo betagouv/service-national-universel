@@ -12,11 +12,11 @@ router.get("/availability/2022", passport.authenticate("young", { session: false
   let sessions = [
     {
       month: "Février",
-      excludedGrade: ["3eme", "Terminale", "Terminale CAP"],
+      excludedGrade: ["3eme", "1ere", "1ère année CAP", "Terminale", "Terminale CAP"],
       excludedZip: ["975", "974", "976", "984", "987", "986", "988"],
       includedBirthdate: { begin: "2004-02-26", end: "2007-02-12" },
       stringDate: "13 au 25 février 2022",
-      info: "Pour les élèves de 2nde et de 1ère scolarisés dans un établissement relevant du ministère de l’éducation nationale, de la jeunesse et des sports, l’inscription est possible y compris dans le cas où une semaine du séjour de cohésion se déroule sur le temps scolaire.",
+      info: "Pour les élèves de 2nde scolarisés dans un établissement relevant du ministère de l’éducation nationale, de la jeunesse et des sports, l’inscription est possible y compris dans le cas où une semaine du séjour de cohésion se déroule sur le temps scolaire. Ils bénéficieront d’une autorisation de participation au séjour de cohésion.",
       buffer: 1.15,
       id: "Février 2022",
     },
