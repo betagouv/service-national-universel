@@ -96,11 +96,13 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
                   handleChange({ target: { name: keys.country, value } });
                 }}
               >
-                {Object.keys(countriesList).map((country_id) => (
-                  <option key={country_id} value={countriesList[country_id]}>
-                    {countriesList[country_id]}
-                  </option>
-                ))}
+                {Object.values(countriesList)
+                  .sort((a, b) => a.localeCompare(b))
+                  .map((countryName) => (
+                    <option key={countryName} value={countryName}>
+                      {countryName}
+                    </option>
+                  ))}
               </Field>
             </Col>
           )}
