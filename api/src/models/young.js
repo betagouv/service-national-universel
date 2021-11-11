@@ -762,7 +762,36 @@ const Schema = new mongoose.Schema({
       description: "Lien de l'hébergeur avec le volontaire",
     },
   },
-
+  hostCity: {
+    type: String,
+    documentation: {
+      description: "Ville de l'hébergeur",
+    },
+  },
+  hostZip: {
+    type: String,
+    documentation: {
+      description: "Code postale de la ville de l'hébergeur",
+    },
+  },
+  hostAddress: {
+    type: String,
+    documentation: {
+      description: "Adresse de l'hébergeur",
+    },
+  },
+  hostDepartment: {
+    type: String,
+    documentation: {
+      description: "Departement de l'hébergeur",
+    },
+  },
+  hostRegion: {
+    type: String,
+    documentation: {
+      description: "Région de l'hébergeur",
+    },
+  },
   // * Situations particulières
   handicap: {
     type: String,
