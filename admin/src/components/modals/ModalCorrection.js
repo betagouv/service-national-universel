@@ -28,7 +28,6 @@ Merci de vous reconnecter à votre compte pour apporter les modifications demand
   const send = async () => {
     setSending(true);
     await api.post(`/young/${value._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_CORRECTION}`, { message });
-    //await api.put(`/referent/young/${value._id}`, { inscriptionCorrectionMessage: message });
     toastr.success("Email envoyé !");
     onSend(message);
   };
