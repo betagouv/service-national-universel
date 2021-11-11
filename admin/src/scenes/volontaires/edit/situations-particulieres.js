@@ -74,6 +74,36 @@ export default ({ values, handleChange, handleSubmit }) => (
           handleChange={handleChange}
         />
         <Select
+          name="reducedMobilityAccess"
+          values={values}
+          handleChange={handleChange}
+          title="Aménagement pour mobilité réduite"
+          options={[
+            { value: "true", label: "Oui" },
+            { value: "false", label: "Non" },
+          ]}
+        />
+        <Select
+          name="handicapInSameDepartment"
+          values={values}
+          handleChange={handleChange}
+          title="Besoin d'être affecté(e) dans le département de résidence"
+          options={[
+            { value: "true", label: "Oui" },
+            { value: "false", label: "Non" },
+          ]}
+        />
+        <Select
+          name="allergies"
+          values={values}
+          handleChange={handleChange}
+          title="Allergies ou intolérances alimentaires"
+          options={[
+            { value: "true", label: "Oui" },
+            { value: "false", label: "Non" },
+          ]}
+        />
+        <Select
           disabled={values.ppsBeneficiary !== "true" && values.handicap !== "true"}
           name="medicosocialStructure"
           values={values}
@@ -133,6 +163,16 @@ export default ({ values, handleChange, handleSubmit }) => (
           values={values}
           handleChange={handleChange}
           title="Activités de haut niveau"
+          options={[
+            { value: "true", label: "Oui" },
+            { value: "false", label: "Non" },
+          ]}
+        />
+        <Select
+          name="highSkilledActivityInSameDepartment"
+          values={values}
+          handleChange={handleChange}
+          title="Activités de haut niveau nécessitant d'être affecté dans le département de résidence"
           options={[
             { value: "true", label: "Oui" },
             { value: "false", label: "Non" },

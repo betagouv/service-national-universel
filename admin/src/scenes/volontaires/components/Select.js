@@ -13,7 +13,7 @@ export default ({ title, name, values, handleChange, disabled, options, required
       <Col md={8}>
         <Field hidden value={values[name]} name={name} onChange={handleChange} validate={(v) => required && !v && requiredMessage} />
         <select disabled={disabled} className="form-control" name={name} value={values[name]} onChange={handleChange} validate={(v) => required && !v && requiredMessage}>
-          <option key={-1} value="" label={placeholder}>
+          <option disabled key={-1} value="" selected={!values[name]} label={placeholder}>
             {placeholder}
           </option>
           {options.map((o, i) => (
