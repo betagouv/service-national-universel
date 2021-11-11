@@ -350,6 +350,7 @@ function validateYoung(young, user) {
     schoolCity: Joi.string().allow(null, ""),
     schoolDepartment: Joi.string().allow(null, ""),
     schoolRegion: Joi.string().allow(null, ""),
+    schoolCountry: Joi.string().allow(null, ""),
     schoolLocation: Joi.object()
       .keys({
         lat: Joi.number().allow(null),

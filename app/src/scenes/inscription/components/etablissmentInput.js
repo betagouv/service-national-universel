@@ -3,6 +3,9 @@ import styled from "styled-components";
 import { Row, Col, Input } from "reactstrap";
 import { Field } from "formik";
 import ErrorMessage, { requiredMessage } from "../components/errorMessage";
+import countries from "i18n-iso-countries";
+countries.registerLocale(require("i18n-iso-countries/langs/fr.json"));
+const countriesList = countries.getNames("fr", { select: "official" });
 
 import api from "../../../services/api";
 import SchoolCityTypeahead from "../../../components/SchoolCityTypeahead";
@@ -13,23 +16,62 @@ export default ({ handleChange, values, keys, errors, touched }) => {
   const [showManualButton, setShowManualButton] = useState(false);
   const [emptySearch, setEmptySearch] = useState(false);
 
-  const getSuggestions = async (text) => {
-    if (!text.includes(" - ")) return [];
+  useEffect(() => {
+    if (document.getElementsByTagName) {
+      const inputElements = document.getElementsByTagName("input");
+      for (let i = 0; inputElements[i]; i++) inputElements[i].setAttribute("autocomplete", "novalue");
+    }
+    if (!values[keys.schoolCountry]) handleChange({ target: { name: keys.schoolCountry, value: "France" } });
+  }, []);
 
-    const [city, postcode] = text.split(" - ");
+  const cleanSchoolValues = () => {
+    handleChange({ target: { name: keys.schoolId, value: "" } });
+    handleChange({ target: { name: keys.schoolName, value: "" } });
+    handleChange({ target: { name: keys.schoolCity, value: "" } });
+  };
+
+  const getSuggestions = async (filter) => {
+    setTimeout(() => {
+      setShowManualButton(true);
+    }, 5000);
+    setEmptySearch(false);
+
     const { responses } = await api.esQuery("school", {
       query: {
         bool: {
           must: { match_all: {} },
-          filter: [{ term: { "city.keyword": city } }, { term: { "postcode.keyword": postcode } }, { term: { "version.keyword": "2" } }],
+          filter: [...filter, { term: { "version.keyword": "2" } }],
         },
       },
       size: 100,
     });
-    setHits(responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })).sort((a, b) => a.fullName.localeCompare(b.fullName)));
-    if (hits.length) setManual(false);
-    return hits;
+
+    const hitsFormatted = responses[0]?.hits?.hits.map((e) => ({ _id: e._id, ...e._source })).sort((a, b) => a.fullName.localeCompare(b.fullName));
+    setHits(hitsFormatted);
+
+    if (hitsFormatted.length) setManual(false);
+    else {
+      cleanSchoolValues();
+      setManual(true);
+    }
+
+    if (!hitsFormatted.find((e) => e._id === values[keys.schoolId])) cleanSchoolValues();
   };
+
+  const handleChangeSchoolCity = (text) => {
+    if (!text.includes(" - ")) return;
+    const [city, postcode] = text.split(" - ");
+    getSuggestions([{ term: { "city.keyword": city } }, { term: { "postcode.keyword": postcode } }]);
+  };
+
+  useEffect(() => {
+    if (values[keys.schoolCountry] === "France" || values[keys.schoolCountry] === undefined) {
+      cleanSchoolValues();
+      return setHits([]);
+    }
+
+    getSuggestions([{ term: { "country.keyword": values[keys.schoolCountry] } }]);
+  }, [values[keys.schoolCountry]]);
 
   useEffect(() => {
     (async () => {
@@ -43,29 +85,36 @@ export default ({ handleChange, values, keys, errors, touched }) => {
     })();
   }, [values[keys.schoolId], emptySearch]);
 
-  useEffect(() => {
-    if (document.getElementsByTagName) {
-      const inputElements = document.getElementsByTagName("input");
-      for (let i = 0; inputElements[i]; i++) inputElements[i].setAttribute("autocomplete", "novalue");
-    }
-  }, []);
-
   return (
     <Row>
-      <Col md={12} style={{ marginTop: 15 }}>
-        <Label>Ville et code postal de l'établissement</Label>
-        <SchoolCityTypeahead
-          onChange={(e) => {
-            if (e !== "") {
-              setTimeout(() => {
-                setShowManualButton(true);
-              }, 5000);
-            }
-            setEmptySearch(!e?.length);
-            handleChange({ target: { name: keys.schoolId, value: "" } });
-            getSuggestions(e);
-          }}
-        />
+      <Col md={12}>
+        <Label>Pays de l'établissement</Label>
+        <Field
+          as="select"
+          validate={(v) => !v && requiredMessage}
+          className="form-control"
+          placeholder="Pays"
+          name={keys.schoolCountry}
+          value={values[keys.schoolCountry]}
+          onChange={handleChange}
+        >
+          {Object.values(countriesList)
+            .sort((a, b) => a.localeCompare(b))
+            .map((countryName) => (
+              <option key={countryName} value={countryName}>
+                {countryName}
+              </option>
+            ))}
+        </Field>
+      </Col>
+
+      <Col md={12}>
+        {values[keys.schoolCountry] === "France" && (
+          <>
+            <Label>Ville et code postal de l'établissement</Label>
+            <SchoolCityTypeahead onChange={handleChangeSchoolCity} />
+          </>
+        )}
 
         {hits.length === 0 && !values[keys.schoolId] && <ErrorMessage errors={errors} touched={touched} name={keys.schoolName} />}
         <div>
@@ -103,10 +152,10 @@ export default ({ handleChange, values, keys, errors, touched }) => {
                 </option>
                 {hits?.map((hit) => (
                   <option key={hit._id} value={hit._id}>
-                    {hit.fullName}
+                    {hit.fullName} - {hit.city}
                   </option>
                 ))}
-                {hits.length === 0 && <option value={values[keys.schoolName]}>{values[keys.schoolName]}</option>}
+                {hits.length === 0 && <option value={values[keys.schoolId]}>{values[keys.schoolName]}</option>}
               </Field>
 
               <ErrorMessage errors={errors} touched={touched} name={keys.schoolName} />
@@ -149,7 +198,7 @@ export default ({ handleChange, values, keys, errors, touched }) => {
           </div>
         </div>
         <div style={{ fontSize: "0.75rem", display: "flex", justifyContent: "flex-end", minHeight: "18px" }}>
-          {showManualButton && (
+          {showManualButton && !manual && (
             <span
               style={{ cursor: "pointer", color: "#007bff" }}
               onClick={() => {
