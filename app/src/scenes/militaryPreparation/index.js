@@ -171,7 +171,7 @@ export default () => {
                   values={values}
                   name="militaryPreparationFilesAuthorization"
                   handleChange={handleChange}
-                  template="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Autorisation_parentale-preparation_militaire.pdf"
+                  template="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Modele_d_autorisation_parentale.pdf"
                 />
                 <UploadCard
                   errors={errors}
