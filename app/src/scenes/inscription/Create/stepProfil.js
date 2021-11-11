@@ -213,7 +213,11 @@ export default () => {
                         name="birthCountrySelector"
                         value="true"
                         checked={values.birthCountrySelector === "true"}
-                        onChange={handleChange}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          handleChange({ target: { value, name: "birthCountrySelector" } });
+                          handleChange({ target: { value: "France", name: "birthCountry" } });
+                        }}
                       />
                       Je suis né(e) en France
                     </RadioLabel>
@@ -225,7 +229,11 @@ export default () => {
                         name="birthCountrySelector"
                         value="false"
                         checked={values.birthCountrySelector === "false"}
-                        onChange={handleChange}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          handleChange({ target: { value, name: "birthCountrySelector" } });
+                          handleChange({ target: { value: "", name: "birthCountry" } });
+                        }}
                       />
                       Je suis né(e) à l'étranger
                     </RadioLabel>
