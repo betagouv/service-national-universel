@@ -1,10 +1,11 @@
-import React from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
 
 import { HeroContainer } from "../../components/Content";
 import { colors } from "../../utils";
 import ZammadButton from "../../components/buttons/ZammadButton";
+import ZammadForm from "./form";
 
 const articles = [
   {
@@ -72,70 +73,93 @@ const articles = [
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
+  const [open, setOpen] = useState(true);
 
   return (
-    <HeroContainer>
-      <Container>
-        {!young && (
-           <p style={{ textAlign: "center", fontSize: "0.8rem" }}>Vous avez déjà un compte sur le site du SNU ? <a className="link" style={{ color: "#32257F", fontWeight: "bold" }} href="https://moncompte.snu.gouv.fr/auth/login?redirect=besoin-d-aide" target="_blank" rel="noopener noreferrer">Connectez-vous</a></p>
-        )}
-        <h4 style={{ textAlign: "center" }}>Besoin d'aide&nbsp;?</h4>
-        <div className="help-section">
-          <div className="help-section-block">
-            <div className="help-section-text" style={{ color: "#6B7280" }}>
-              Vous souhaitez en savoir plus sur les phases du Service National Universel ou sur les autres formes d'engagement&nbsp;?<br />
-              N'hésitez pas à consulter notre{" "}
-              <strong>
-                <a className="link" href="https://support.snu.gouv.fr/help/fr-fr/16-comprendre-le-snu" target="_blank" rel="noopener noreferrer">
-                  base de connaissance
-                </a>
-              </strong>
-              &nbsp;!
+    <>
+      <Filter open={open}>
+        <HeroContainer>
+          <Container style={{ backdropFilter: "blur(6px)" }}>
+            {!young && (
+              <p style={{ textAlign: "center", fontSize: "0.8rem" }}>Vous avez déjà un compte sur le site du SNU ? <a className="link" style={{ color: "#32257F", fontWeight: "bold" }} href="https://moncompte.snu.gouv.fr/auth/login?redirect=besoin-d-aide" target="_blank" rel="noopener noreferrer">Connectez-vous</a></p>
+            )}
+            <h4 style={{ textAlign: "center" }}>Besoin d'aide&nbsp;?</h4>
+            <div className="help-section">
+              <div className="help-section-block">
+                <div className="help-section-text" style={{ color: "#6B7280" }}>
+                  Vous souhaitez en savoir plus sur les phases du Service National Universel ou sur les autres formes d'engagement&nbsp;?<br />
+                  N'hésitez pas à consulter notre{" "}
+                  <strong>
+                    <a className="link" href="https://support.snu.gouv.fr/help/fr-fr/16-comprendre-le-snu" target="_blank" rel="noopener noreferrer">
+                      base de connaissance
+                    </a>
+                  </strong>
+                  &nbsp;!
+                </div>
+                <div className="buttons">
+                  <LinkButton href="https://support.snu.gouv.fr/help/fr-fr/16-comprendre-le-snu" target="_blank" rel="noopener noreferrer">
+                    Trouver&nbsp;ma&nbsp;réponse
+                  </LinkButton>
+                </div>
+              </div>
             </div>
-            <div className="buttons">
-              <LinkButton href="https://support.snu.gouv.fr/help/fr-fr/16-comprendre-le-snu" target="_blank" rel="noopener noreferrer">
-                Trouver&nbsp;ma&nbsp;réponse
-              </LinkButton>
+          </Container>
+          <h4 style={{ margin: "1rem 0", textAlign: "center" }}>Quelques articles pour vous aider</h4>
+          <Articles>
+            {articles.map((article) => (
+              <div className="block" key={article.url} onClick={() => window.open(article.url)}>
+                <div className="block-title">
+                  <p>{article.emoji}</p>
+                  <h6>{article.title}</h6>
+                </div>
+                <p>{article.body}</p>
+                <p>
+                  <a className="block-link" href={article.url} target="_blank">
+                    Lire la suite
+                  </a>
+                </p>
+              </div>
+            ))}
+          </Articles>
+          <hr style={{ margin: "3rem auto", maxWidth: "600px" }} />
+          <Container>
+            <h4 style={{ textAlign: "center" }}>Vous n'avez pas trouvé de réponse à votre demande&nbsp;?</h4>
+            <div className="help-section">
+              <div className="help-section-block">
+                <div className="help-section-text" style={{ color: "#6B7280" }}>
+                  N'hésitez pas à <strong>contacter notre service de support</strong>, nous vous répondrons dans les plus brefs délais !
+                </div>
+                <div className="zammad-container">
+                  <button onClick={() => setOpen(true)}>
+                    Click
+                  </button>
+                  <ZammadButton />
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      </Container>
-      <h4 style={{ margin: "1rem 0", textAlign: "center" }}>Quelques articles pour vous aider</h4>
-      <Articles>
-        {articles.map((article) => (
-          <div className="block" key={article.url} onClick={() => window.open(article.url)}>
-            <div className="block-title">
-              <p>{article.emoji}</p>
-              <h6>{article.title}</h6>
-            </div>
-            <p>{article.body}</p>
-            <p>
-              <a className="block-link" href={article.url} target="_blank">
-                Lire la suite
-              </a>
-            </p>
-          </div>
-        ))}
-      </Articles>
-      <hr style={{ margin: "3rem auto", maxWidth: "600px" }} />
-      <Container>
-        <h4 style={{ textAlign: "center" }}>Vous n'avez pas trouvé de réponse à votre demande&nbsp;?</h4>
-        <div className="help-section">
-          <div className="help-section-block">
-            <div className="help-section-text" style={{ color: "#6B7280" }}>
-              N'hésitez pas à <strong>contacter notre service de support</strong>, nous vous répondrons dans les plus brefs délais !
-            </div>
-            <div className="zammad-container">
-              <ZammadButton />
-            </div>
-          </div>
-        </div>
-      </Container>
-    </HeroContainer>
+          </Container>
+        </HeroContainer>
+      </Filter>
+      {
+        open && (
+          <ZammadForm />
+        )
+      }
+    </>
   );
 };
 
+const Filter = styled.div`
+  ${({ open }) => open && `
+    filter: grayscale(100%);
+    filter: blur(1.5px);
+  `}
+  width: 100%;
+  height: 100%;
+`;
+
 const Container = styled.div`
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
