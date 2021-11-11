@@ -8,7 +8,7 @@ import { useSelector } from "react-redux";
 
 import api from "../../services/api";
 import Loader from "../../components/Loader";
-import { ticketStateNameById, colors } from "../../utils";
+import { ticketStateNameById, colors, translateState } from "../../utils";
 import MailCloseIcon from "../../components/MailCloseIcon";
 import MailOpenIcon from "../../components/MailOpenIcon";
 import SuccessIcon from "../../components/SuccessIcon";
@@ -51,26 +51,26 @@ export default () => {
   };
 
   const displayState = (state) => {
-    console.log("STATE", state);
-    if (state === "ouvert")
+    const translated = translateState(state);
+    if (translated === "ouvert")
       return (
         <StateContainer style={{ display: "flex" }}>
           <MailOpenIcon color="#F8B951" style={{ margin: 0, padding: "5px" }} />
-          {state}
+          {translated}
         </StateContainer>
       );
-    if (state === "archivé")
+    if (translated === "archivé")
       return (
         <StateContainer>
           <SuccessIcon color="#6BC762" style={{ margin: 0, padding: "5px" }} />
-          {state}
+          {translated}
         </StateContainer>
       );
-    if (state === "nouveau")
+    if (translated === "nouveau")
       return (
         <StateContainer>
           <MailCloseIcon color="#F1545B" style={{ margin: 0, padding: "5px" }} />
-          {state}
+          {translated}
         </StateContainer>
       );
   };

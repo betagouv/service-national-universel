@@ -9,7 +9,7 @@ import { useSelector } from "react-redux";
 import { HeroContainer } from "../../components/Content";
 import api from "../../services/api";
 import Loader from "../../components/Loader";
-import { ticketStateNameById, colors } from "../../utils";
+import { ticketStateNameById, colors, translateState } from "../../utils";
 import MailCloseIcon from "../../components/MailCloseIcon";
 import MailOpenIcon from "../../components/MailOpenIcon";
 import SuccessIcon from "../../components/SuccessIcon";
@@ -45,6 +45,7 @@ export default () => {
     const fetchTickets = async () => {
       try {
         const response = await api.get("/support-center/ticket?withArticles=true");
+        console.log("REPONSE TICKETS", response);
         if (!response.ok) return console.log(response);
         setUserTickets(response.data);
       } catch (error) {
@@ -60,25 +61,26 @@ export default () => {
   };
 
   const displayState = (state) => {
-    if (state === "ouvert")
+    const translated = translateState(state);
+    if (translated === "ouvert")
       return (
         <StateContainer style={{ display: "flex" }}>
           <MailOpenIcon color="#F8B951" style={{ margin: 0, padding: "5px" }} />
-          {state}
+          {translated}
         </StateContainer>
       );
-    if (state === "archivé")
+    if (translated === "archivé")
       return (
         <StateContainer>
           <SuccessIcon color="#6BC762" style={{ margin: 0, padding: "5px" }} />
-          {state}
+          {translated}
         </StateContainer>
       );
-    if (state === "nouveau")
+    if (translated === "nouveau")
       return (
         <StateContainer>
           <MailCloseIcon color="#F1545B" style={{ margin: 0, padding: "5px" }} />
-          {state}
+          {translated}
         </StateContainer>
       );
   };

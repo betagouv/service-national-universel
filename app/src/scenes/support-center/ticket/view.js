@@ -6,7 +6,7 @@ import { NavLink } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
-import { formatStringLongDate, colors, ticketStateNameById } from "../../../utils";
+import { formatStringLongDate, colors, ticketStateNameById, translateState } from "../../../utils";
 import Loader from "../../../components/Loader";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 import SendIcon from "../../../components/SendIcon";
@@ -59,25 +59,26 @@ export default (props) => {
   if (ticket === undefined) return <Loader />;
 
   const displayState = (state) => {
-    if (state === "ouvert")
+    const translated = translateState(state);
+    if (translated === "ouvert")
       return (
         <StateContainer style={{ display: "flex" }}>
           <MailOpenIcon color="#F8B951" style={{ margin: 0, padding: "5px" }} />
-          ouvert
+          {translated}
         </StateContainer>
       );
-    if (state === "fermé")
+    if (translated === "archivé")
       return (
         <StateContainer>
           <SuccessIcon color="#6BC762" style={{ margin: 0, padding: "5px" }} />
-          fermé
+          {translated}
         </StateContainer>
       );
-    if (state === "nouveau")
+    if (translated === "nouveau")
       return (
         <StateContainer>
           <MailCloseIcon color="#F1545B" style={{ margin: 0, padding: "5px" }} />
-          nouveau
+          {translated}
         </StateContainer>
       );
   };
