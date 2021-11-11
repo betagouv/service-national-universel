@@ -31,7 +31,6 @@ En vous souhaitant une excellente continuation.`);
   const send = async () => {
     setSending(true);
     await api.post(`/young/${value._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_REFUSED}`, { message });
-    await api.put(`/referent/young/${value._id}`, { inscriptionRefusedMessage: message });
     toastr.success("Email envoyé !");
     onSend(message);
   };
