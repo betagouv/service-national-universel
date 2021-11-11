@@ -33,7 +33,7 @@ export default () => {
     newEmail: "",
     password: "",
     verifyPassword: "",
-    birthCountry: "France",
+    birthCountry: "",
     birthCity: "",
     birthCityZip: "",
     RGPD: "false",
@@ -210,10 +210,14 @@ export default () => {
                         validate={(v) => !v && requiredMessage}
                         className="form-control"
                         type="radio"
-                        name="birthCountry"
-                        value="France"
-                        checked={values.birthCountry === "France"}
-                        onChange={handleChange}
+                        name="birthCountrySelector"
+                        value="true"
+                        checked={values.birthCountrySelector === "true"}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          handleChange({ target: { value, name: "birthCountrySelector" } });
+                          handleChange({ target: { value: "France", name: "birthCountry" } });
+                        }}
                       />
                       Je suis né(e) en France
                     </RadioLabel>
@@ -222,16 +226,20 @@ export default () => {
                         validate={(v) => !v && requiredMessage}
                         className="form-control"
                         type="radio"
-                        name="birthCountry"
-                        value=""
-                        checked={values.birthCountry !== "France"}
-                        onChange={handleChange}
+                        name="birthCountrySelector"
+                        value="false"
+                        checked={values.birthCountrySelector === "false"}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          handleChange({ target: { value, name: "birthCountrySelector" } });
+                          handleChange({ target: { value: "", name: "birthCountry" } });
+                        }}
                       />
                       Je suis né(e) à l'étranger
                     </RadioLabel>
                   </FlexGroup>
                   <FlexGroup style={{ marginTop: "15px" }}>
-                    {values.birthCountry !== "France" && (
+                    {values.birthCountry !== "France" && values.birthCountrySelector === "false" && (
                       <>
                         <div>
                           <FieldWithWidth
@@ -260,7 +268,7 @@ export default () => {
                         </div>
                       </>
                     )}
-                    {values.birthCountry === "France" && (
+                    {values.birthCountrySelector === "true" && (
                       <div style={{ display: "flex", flexWrap: "wrap" }}>
                         <div>
                           <FieldWithWidth
