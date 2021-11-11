@@ -15,7 +15,7 @@ export default ({ values, handleChange }) => (
           name="cohort"
           values={values}
           handleChange={handleChange}
-          placeholder="Sélectionner une cohort"
+          placeholder="Sélectionnez une cohorte"
           title="Cohorte"
           options={[
             { value: "Juillet 2022", label: "Juillet 2022" },

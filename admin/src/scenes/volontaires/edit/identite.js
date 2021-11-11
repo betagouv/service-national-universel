@@ -50,7 +50,7 @@ export default ({ values, handleChange, handleSubmit, required = {}, errors, tou
         />
         <Item title="Ville de naissance" values={values} name="birthCity" handleChange={handleChange} required={required.birthCity} errors={errors} touched={touched} />
         <Item
-          title="Code postal de le ville de naissance"
+          title="Code postal de la ville de naissance"
           values={values}
           name="birthCityZip"
           handleChange={handleChange}
