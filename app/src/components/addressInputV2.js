@@ -10,7 +10,7 @@ import countries from "i18n-iso-countries";
 countries.registerLocale(require("i18n-iso-countries/langs/fr.json"));
 const countriesList = countries.getNames("fr", { select: "official" });
 
-export default ({ keys, values, handleChange, errors, touched, validateField, countryVisible = false }) => {
+export default ({ keys, values, handleChange, errors, touched, validateField, countryVisible = false, onChangeCountry = () => {}, countryByDefault = "" }) => {
   const [suggestion, setSuggestion] = useState({});
   const [addressInFrance, setAddressInFrance] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -24,7 +24,7 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
       const inputElements = document.getElementsByTagName("input");
       for (let i = 0; inputElements[i]; i++) inputElements[i].setAttribute("autocomplete", "novalue");
     }
-    if (!values[keys.country]) handleChange({ target: { name: keys.country, value: "France" } });
+    if (!values[keys.country]) handleChange({ target: { name: keys.country, value: countryByDefault } });
   }, []);
 
   useEffect(() => {
@@ -94,10 +94,14 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
                 onChange={(e) => {
                   const value = e.target.value;
                   handleChange({ target: { name: keys.country, value } });
+                  onChangeCountry();
                 }}
               >
+                <option value="" label="Sélectionner un pays">
+                  Sélectionner un pays
+                </option>
                 {Object.keys(countriesList).map((country_id) => (
-                  <option key={country_id} value={countriesList[country_id]}>
+                  <option key={country_id} value={countriesList[country_id]} label={countriesList[country_id]}>
                     {countriesList[country_id]}
                   </option>
                 ))}

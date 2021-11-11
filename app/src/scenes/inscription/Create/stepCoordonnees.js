@@ -21,24 +21,7 @@ import InfoIcon from "../../../components/InfoIcon";
 export default () => {
   const history = useHistory();
   const dispatch = useDispatch();
-  const young = (() => {
-    let tempYoung = JSON.parse(JSON.stringify(useSelector((state) => state.Auth.young)));
-
-    if (!tempYoung) return tempYoung;
-
-    if (tempYoung.foreignCountry) {
-      tempYoung.hostCountry = tempYoung.country;
-      tempYoung.hostCity = tempYoung.city;
-      tempYoung.hostZip = tempYoung.zip;
-      tempYoung.hostAddress = tempYoung.address;
-
-      tempYoung.country = tempYoung.foreignCountry;
-      tempYoung.city = tempYoung.foreignCity;
-      tempYoung.zip = tempYoung.foreignZip;
-      tempYoung.address = tempYoung.foreignAddress;
-    }
-    return tempYoung;
-  })();
+  const young = useSelector((state) => state.Auth.young);
 
   const [loading, setLoading] = useState(false);
 
@@ -60,13 +43,28 @@ export default () => {
     v.grade = "";
   };
 
-  const cleanHostInformation = (v) => {
-    delete v.hostLastName;
-    delete v.hostFirstName;
-    delete v.hostCity;
-    delete v.hostZip;
-    delete v.hostAddress;
-    delete v.hostRelationship;
+  const cleanAllAddressInformation = (callback) => {
+    callback({ target: { name: "hostLastName", value: "" } });
+    callback({ target: { name: "hostFirstName", value: "" } });
+    callback({ target: { name: "hostCity", value: "" } });
+    callback({ target: { name: "hostZip", value: "" } });
+    callback({ target: { name: "hostDepartment", value: "" } });
+    callback({ target: { name: "hostRegion", value: "" } });
+    callback({ target: { name: "hostAddress", value: "" } });
+    callback({ target: { name: "hostRelationship", value: "" } });
+    callback({ target: { name: "foreignAddress", value: "" } });
+    callback({ target: { name: "foreignCity", value: "" } });
+    callback({ target: { name: "foreignZip", value: "" } });
+    callback({ target: { name: "city", value: "" } });
+    callback({ target: { name: "zip", value: "" } });
+    callback({ target: { name: "department", value: "" } });
+    callback({ target: { name: "region", value: "" } });
+    callback({ target: { name: "address", value: "" } });
+    callback({ target: { name: "location", value: "" } });
+    callback({ target: { name: "cityCode", value: "" } });
+    callback({ target: { name: "populationDensity", value: "" } });
+    callback({ target: { name: "complementAddress", value: "" } });
+    // we do not reinit the country
   };
 
   const cleanSituation = (v) => {
@@ -86,25 +84,8 @@ export default () => {
 
   const onSubmit = async (values) => {
     setLoading(true);
-    let tempYoung = JSON.parse(JSON.stringify(values));
-
-    if (tempYoung.country !== "France") {
-      tempYoung.foreignAddress = tempYoung.address;
-      tempYoung.foreignCity = tempYoung.city;
-      tempYoung.foreignZip = tempYoung.zip;
-      tempYoung.foreignCountry = tempYoung.country;
-      tempYoung.country = "France";
-      tempYoung.city = tempYoung.hostCity;
-      tempYoung.zip = tempYoung.hostZip;
-      tempYoung.address = tempYoung.hostAddress;
-      tempYoung.location = tempYoung.hostLocation;
-      tempYoung.department = tempYoung.hostDepartment;
-      tempYoung.region = tempYoung.hostRegion;
-    }
-
     try {
-      tempYoung.inscriptionStep = STEPS.PARTICULIERES;
-      const { ok, code, data } = await api.put("/young", tempYoung);
+      const { ok, code, data } = await api.put("/young", { ...values, inscriptionStep: STEPS.PARTICULIERES });
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       dispatch(setYoung(data));
       history.push("/inscription/particulieres");
@@ -188,100 +169,64 @@ export default () => {
                   <Label>Lieu de résidence</Label>
                 </Col>
                 <Col>
-                  <AddressInputV2
-                    keys={{
-                      country: "country",
-                      city: "city",
-                      zip: "zip",
-                      address: "address",
-                      location: "location",
-                      department: "department",
-                      region: "region",
-                    }}
-                    values={values}
-                    handleChange={handleChange}
-                    errors={errors}
-                    touched={touched}
-                    countryVisible
-                    validateField={validateField}
-                  />
-                </Col>
-              </FormRow>
-              {values.country !== "France" && (
-                <FormRow>
-                  <Col md={4}>
-                    <Label>Identité et adresse de l'hébergeur en France</Label>
-                    <Infos>
-                      <InfoIcon color="#32257F" />
-                      <p>Proche chez qui vous séjournerez le temps de la réalisation de votre SNU (lieu de départ/retour pour le séjour et de réalisation de la MIG).</p>
-                    </Infos>
-                    <Note>
-                      A noter : l’hébergement chez un proche en France ainsi que le transport entre votre lieu de résidence et celui de votre hébergeur sont à votre charge.
-                    </Note>
-                  </Col>
-                  <Col>
-                    <SecondLabel>Nom de l'hébergeur</SecondLabel>
-                    <Row>
-                      <Col>
-                        <Field
-                          placeholder="Nom de l'hébergeur"
-                          className="form-control"
-                          validate={(v) => !v && requiredMessage}
-                          name="hostLastName"
-                          value={values.hostLastName}
-                          onChange={handleChange}
-                        />
-                        <ErrorMessage errors={errors} touched={touched} name="hostLastName" />
-                      </Col>
-                      <Col>
-                        <Field
-                          placeholder="Prénom de l'hébergeur"
-                          className="form-control"
-                          validate={(v) => !v && requiredMessage}
-                          name="hostFirstName"
-                          value={values.hostFirstName}
-                          onChange={handleChange}
-                        />
-                        <ErrorMessage errors={errors} touched={touched} name="hostFirstName" />
-                      </Col>
-                    </Row>
-                    <SecondLabel style={{ marginTop: 15 }}>Lien avec l'hébergeur</SecondLabel>
+                  <RadioLabel>
                     <Field
-                      as="select"
                       validate={(v) => !v && requiredMessage}
                       className="form-control"
-                      name="hostRelationship"
-                      value={values.hostRelationship}
+                      type="radio"
+                      name="livesInFrance"
+                      value="true"
+                      checked={values.livesInFrance === "true"}
                       onChange={handleChange}
-                    >
-                      <option selected={values.hostRelationship === undefined || values.hostRelationship === ""} disabled>
-                        Précisez votre lien avec l'hébergeur
-                      </option>
-                      {[
-                        { label: "Parent", value: "Parent" },
-                        { label: "Frère/Soeur", value: "Frere/Soeur" },
-                        { label: "Grand-parent", value: "Grand-parent" },
-                        { label: "Oncle/Tante", value: "Oncle/Tante" },
-                        { label: "Ami de la famille", value: "Ami de la famille" },
-                        { label: "Autre", value: "Autre" },
-                      ].map((e) => (
-                        <option key={e.value} value={e.value}>
-                          {e.label}
-                        </option>
-                      ))}
-                    </Field>
-                    <ErrorMessage errors={errors} touched={touched} name="hostRelationship" />
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        handleChange({ target: { name: "livesInFrance", value } });
+                        cleanAllAddressInformation(handleChange);
+                      }}
+                    />
+                    Je réside en France
+                  </RadioLabel>
+                  <ErrorMessage errors={errors} touched={touched} name="livesInFrance" />
+                </Col>
+                <Col>
+                  <RadioLabel>
+                    <Field
+                      validate={(v) => !v && requiredMessage}
+                      className="form-control"
+                      type="radio"
+                      name="livesInFrance"
+                      value="false"
+                      checked={values.livesInFrance === "false"}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        handleChange({ target: { name: "livesInFrance", value } });
+                        cleanAllAddressInformation(handleChange);
+                      }}
+                    />
+                    Je réside à l'étranger
+                  </RadioLabel>
+                </Col>
+              </FormRow>
+              {values.livesInFrance === "true" ? (
+                // if the young lives in France, we store the information in the default fields (country, city, zip, address, location, department, region)
+                <FormRow>
+                  <Col md={4}></Col>
+                  <Col>
                     <AddressInputV2
+                      countryByDefault="France"
+                      onChangeCountry={() => {
+                        cleanAllAddressInformation(handleChange);
+                      }}
                       keys={{
-                        city: "hostCity",
-                        zip: "hostZip",
-                        address: "hostAddress",
-                        location: "hostLocation",
-                        department: "hostDepartment",
-                        region: "hostRegion",
+                        country: "country",
+                        city: "city",
+                        zip: "zip",
+                        address: "address",
+                        location: "location",
+                        department: "department",
+                        region: "region",
                       }}
                       values={values}
-                      departAndRegionVisible={false}
                       handleChange={handleChange}
                       errors={errors}
                       touched={touched}
@@ -289,7 +234,120 @@ export default () => {
                     />
                   </Col>
                 </FormRow>
-              )}
+              ) : null}
+              {values.livesInFrance === "false" ? (
+                // if the young lives in a foreign country, we store the information in the foreign fields
+                // and we store the host's informations in the default fields
+                <>
+                  <FormRow>
+                    <Col md={4}>
+                      <Label>Adresse à l'étranger</Label>
+                    </Col>
+                    <Col>
+                      <AddressInputV2
+                        onChangeCountry={() => {
+                          cleanAllAddressInformation(handleChange);
+                        }}
+                        keys={{
+                          country: "foreignCountry",
+                          city: "foreignCity",
+                          zip: "foreignZip",
+                          address: "foreignAddress",
+                        }}
+                        values={values}
+                        handleChange={handleChange}
+                        errors={errors}
+                        touched={touched}
+                        countryVisible
+                        validateField={validateField}
+                      />
+                    </Col>
+                  </FormRow>
+                  <FormRow>
+                    <Col md={4}>
+                      <Label>Identité et adresse de l'hébergeur en France</Label>
+                      <Infos>
+                        <InfoIcon color="#32257F" />
+                        <p>Proche chez qui vous séjournerez le temps de la réalisation de votre SNU (lieu de départ/retour pour le séjour et de réalisation de la MIG).</p>
+                      </Infos>
+                      <Note>
+                        A noter : l’hébergement chez un proche en France ainsi que le transport entre votre lieu de résidence et celui de votre hébergeur sont à votre charge.
+                      </Note>
+                    </Col>
+                    <Col>
+                      <SecondLabel>Nom de l'hébergeur</SecondLabel>
+                      <Row>
+                        <Col>
+                          <Field
+                            placeholder="Nom de l'hébergeur"
+                            className="form-control"
+                            validate={(v) => !v && requiredMessage}
+                            name="hostLastName"
+                            value={values.hostLastName}
+                            onChange={handleChange}
+                          />
+                          <ErrorMessage errors={errors} touched={touched} name="hostLastName" />
+                        </Col>
+                        <Col>
+                          <Field
+                            placeholder="Prénom de l'hébergeur"
+                            className="form-control"
+                            validate={(v) => !v && requiredMessage}
+                            name="hostFirstName"
+                            value={values.hostFirstName}
+                            onChange={handleChange}
+                          />
+                          <ErrorMessage errors={errors} touched={touched} name="hostFirstName" />
+                        </Col>
+                      </Row>
+                      <SecondLabel style={{ marginTop: 15 }}>Lien avec l'hébergeur</SecondLabel>
+                      <Field
+                        as="select"
+                        validate={(v) => !v && requiredMessage}
+                        className="form-control"
+                        name="hostRelationship"
+                        value={values.hostRelationship}
+                        onChange={handleChange}
+                      >
+                        <option selected={values.hostRelationship === undefined || values.hostRelationship === ""} disabled>
+                          Précisez votre lien avec l'hébergeur
+                        </option>
+                        {[
+                          { label: "Parent", value: "Parent" },
+                          { label: "Frère/Soeur", value: "Frere/Soeur" },
+                          { label: "Grand-parent", value: "Grand-parent" },
+                          { label: "Oncle/Tante", value: "Oncle/Tante" },
+                          { label: "Ami de la famille", value: "Ami de la famille" },
+                          { label: "Autre", value: "Autre" },
+                        ].map((e) => (
+                          <option key={e.value} value={e.value}>
+                            {e.label}
+                          </option>
+                        ))}
+                      </Field>
+                      <ErrorMessage errors={errors} touched={touched} name="hostRelationship" />
+                      <AddressInputV2
+                        countryByDefault="France"
+                        keys={{
+                          country: "country",
+                          city: "city",
+                          zip: "zip",
+                          address: "address",
+                          location: "location",
+                          department: "department",
+                          region: "region",
+                        }}
+                        values={values}
+                        departAndRegionVisible={false}
+                        handleChange={handleChange}
+                        errors={errors}
+                        touched={touched}
+                        validateField={validateField}
+                      />
+                    </Col>
+                  </FormRow>
+                </>
+              ) : null}
               <FormRow>
                 <Col md={4}>
                   <Label>Situation</Label>
