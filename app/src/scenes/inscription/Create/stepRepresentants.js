@@ -239,7 +239,6 @@ export default () => {
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
   const [isParent2Visible, setIsParent2Visible] = useState(false);
-  const [initialValues, setInitialValues] = useState(young);
   const [loading, setLoading] = useState(false);
 
   const hasParent2Infos = () => {
@@ -261,7 +260,7 @@ export default () => {
         <p>Faites compléter les informations ci-dessous par votre ou vos représentants légaux.</p>
       </Heading>
       <Formik
-        initialValues={initialValues}
+        initialValues={young}
         enableReinitialize={true}
         validateOnChange={false}
         validateOnBlur={false}
@@ -269,9 +268,9 @@ export default () => {
           setLoading(true);
           try {
             values.inscriptionStep = STEPS.CONSENTEMENTS;
-            const { ok, code, data: young } = await api.put("/young", values);
-            if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
-            dispatch(setYoung(young));
+            const { ok, code, data } = await api.put("/young", values);
+            if (!ok || !data?._id) return toastr.error("Une erreur s'est produite :", translate(code));
+            dispatch(setYoung(data));
             history.push("/inscription/consentements");
           } catch (e) {
             console.log(e);

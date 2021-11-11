@@ -51,9 +51,9 @@ export default () => {
           setLoading(true);
           try {
             values.inscriptionStep = STEPS.AVAILABILITY;
-            const { ok, code, data: young } = await api.put("/young", values);
-            if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
-            dispatch(setYoung(young));
+            const { ok, code, data } = await api.put("/young", values);
+            if (!ok || !data?._id) return toastr.error("Une erreur s'est produite :", translate(code));
+            dispatch(setYoung(data));
             history.push("/inscription/availability");
           } catch (e) {
             console.log(e);
@@ -195,9 +195,10 @@ const DownloadFormButton = ({ url }) => (
       boxShadow: "0px 1px 2px rgba(0, 0, 0, 0.05)",
       margin: "20px 0",
     }}
-    onClick={() => window.open(url, "_blank")?.focus()}
   >
-    Télécharger le formulaire à compléter
+    <a href={url} target="_blank" style={{ decoration: "none", color: "#22252A" }}>
+      Télécharger le modèle obligatoire
+    </a>
   </div>
 );
 

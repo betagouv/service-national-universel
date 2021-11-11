@@ -17,17 +17,18 @@ export default () => {
           <div>
             <p>Je suis disponible sur l'un des séjours de cohésion 2022, à savoir :</p>
             <p>
-              <strong>•</strong> Du <strong>13 au 25 février 2022*</strong>
+              <strong>•</strong> Du <strong>13 au 25 février 2022 *</strong>
             </p>
             <p>
-              <strong>•</strong> Du <strong>12 au 24 juin 2022</strong>
+              <strong>•</strong> Du <strong>12 au 24 juin 2022 *</strong>
             </p>
             <p>
               <strong>•</strong> Du <strong>3 au 15 juillet 2022</strong>
             </p>
             <p className="note">
-              * Pour les élèves de 2nde et de 1ère scolarisés dans un établissement relevant du ministère de l’éducation nationale, de la jeunesse et des sports, l’inscription est
-              possible y compris dans le cas où une semaine du séjour de cohésion se déroule sur le temps scolaire.
+              * Pour les élèves de 2nde scolarisés dans un établissement relevant du ministère de l’éducation nationale, de la jeunesse et des sports, l’inscription est possible y
+              compris dans le cas où une semaine du séjour de cohésion se déroule sur le temps scolaire. Ils bénéficieront d’une autorisation de participation au séjour de
+              cohésion.
             </p>
           </div>
         </li>

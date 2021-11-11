@@ -28,6 +28,8 @@ export default ({ young }) => {
               <Bloc title="Informations générales">
                 <Details title="E-mail" value={young.email} copy />
                 <Details title="Date de naissance" value={formatStringDate(young.birthdateAt)} />
+                <Details title="Lieu de naissance" value={young.birthCity} />
+                <Details title="Pays de naissance" value={young.birthCountry} />
                 <Details title="Sexe" value={t(young.gender)} />
                 <Details title="Tel" value={young.phone} />
                 <Details title="Adresse" value={young.address} />
@@ -50,10 +52,13 @@ export default ({ young }) => {
                 <Details title="Quartier Prioritaire de la Ville" value={t(young.qpv)} />
                 <Details title="Zone Rurale" value={t(isInRuralArea(young))} />
                 <Details title="Handicap" value={t(young.handicap)} />
+                <Details title="Allergies" value={t(young.allergies)} />
                 <Details title="PPS" value={t(young.ppsBeneficiary)} />
                 <Details title="PAI" value={t(young.paiBeneficiary)} />
-                <Details title="Suivi médicosociale" value={t(young.medicosocialStructure)} />
+                <Details title="Suivi médicosocial" value={t(young.medicosocialStructure)} />
                 <Details title="Aménagement spécifique" value={t(young.specificAmenagment)} />
+                <Details title="A besoin d'un aménagement pour mobilité réduite" value={t(young.reducedMobilityAccess)} />
+                <Details title="Doit être affecté dans son département" value={t(young.handicapInSameDepartment)} />
                 <Details title="Activités de haut niveau" value={t(young.highSkilledActivity)} />
                 {(young.highSkilledActivityProofFiles || []).map((e, i) => (
                   <DownloadButton
@@ -150,6 +155,15 @@ export default ({ young }) => {
                   )}
                 </Bloc>
               ) : null}
+              {young.hostLastName && (
+                <Bloc title="Hébergeur en France">
+                  <Details title="Prénom" value={young.hostFirstName} />
+                  <Details title="Nom" value={young.hostLastName} />
+                  <Details title="Adresse" value={young.hostAddress} />
+                  <Details title="Code Postal" value={young.hostZip} />
+                  <Details title="Ville" value={young.hostCity} />
+                </Bloc>
+              )}
               {young.withdrawnMessage ? (
                 <Bloc title="Désistement">
                   <div className="quote">{`« ${young.withdrawnMessage} »`}</div>

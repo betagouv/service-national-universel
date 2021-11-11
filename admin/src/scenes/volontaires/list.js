@@ -98,6 +98,9 @@ export default () => {
                       Prénom: data.firstName,
                       Nom: data.lastName,
                       "Date de naissance": formatLongDateUTC(data.birthdateAt),
+                      "Pays de naissance": data.birthCountry || "France",
+                      "Ville de naissance": data.birthCity,
+                      "Code postal de naissance": data.birthCityZip,
                       Sexe: translate(data.gender),
                       Email: data.email,
                       Téléphone: data.phone,
@@ -125,8 +128,12 @@ export default () => {
                       "Ville de la structure médico-sociale": data.medicosocialStructureCity,
                       "Aménagement spécifique": translate(data.specificAmenagment),
                       "Nature de l'aménagement spécifique": translate(data.specificAmenagmentType),
+                      "Aménagement pour mobilité réduite": translate(data.reducedMobilityAccess),
+                      "Besoin d'être affecté(e) dans le département de résidence": translate(data.handicapInSameDepartment),
+                      "Allergies ou intolérances alimentaires": translate(data.allergies),
                       "Activité de haut-niveau": translate(data.highSkilledActivity),
                       "Nature de l'activité de haut-niveau": data.highSkilledActivityType,
+                      "Activités de haut niveau nécessitant d'être affecté dans le département de résidence": translate(data.highSkilledActivityInSameDepartment),
                       "Document activité de haut-niveau ": data.highSkilledActivityProofFiles,
                       "Consentement des représentants légaux": translate(data.parentConsentment),
                       "Droit à l'image": translate(data.imageRight),
@@ -479,14 +486,19 @@ const Hit = ({ hit, onClick, selected }) => {
           </p>
         </MultiLine>
       </td>
-      <td onClick={(e) => e.stopPropagation()}>
+      <td>
         <Badge minify text={hit.cohort} tooltipText={`Cohorte ${hit.cohort}`} style={{ cursor: "default" }} />
-        <BadgePhase text="Phase 1" value={hit.statusPhase1} redirect={`/volontaire/${hit._id}/phase1`} />
-        <BadgePhase text="Phase 2" value={hit.statusPhase2} redirect={`/volontaire/${hit._id}/phase2`} />
-        <BadgePhase text="Phase 3" value={hit.statusPhase3} redirect={`/volontaire/${hit._id}/phase3`} />
-        {hit.status === "WITHDRAWN" ? <Badge minify text="Désisté" color={YOUNG_STATUS_COLORS.WITHDRAWN} tooltipText={translate(hit.status)} /> : null}
+        {hit.status === "WITHDRAWN" ? (
+          <Badge minify text="Désisté" color={YOUNG_STATUS_COLORS.WITHDRAWN} tooltipText={translate(hit.status)} />
+        ) : (
+          <>
+            <BadgePhase text="Phase 1" value={hit.statusPhase1} redirect={`/volontaire/${hit._id}/phase1`} />
+            <BadgePhase text="Phase 2" value={hit.statusPhase2} redirect={`/volontaire/${hit._id}/phase2`} />
+            <BadgePhase text="Phase 3" value={hit.statusPhase3} redirect={`/volontaire/${hit._id}/phase3`} />
+          </>
+        )}
       </td>
-      <td onClick={(e) => e.stopPropagation()}>
+      <td>
         <Action hit={hit} />
       </td>
     </tr>

@@ -15,7 +15,7 @@ import ModalConfirm from "../../components/modals/ModalConfirm";
 import ModalConfirmWithMessage from "../../components/modals/ModalConfirmWithMessage";
 import api from "../../services/api";
 import { setYoung } from "../../redux/auth/actions";
-import QuestionMark from "../../assets/QuestionMark";
+import HelpButton from "../buttons/HelpButton";
 
 export default (props) => {
   const [open, setOpen] = useState();
@@ -197,18 +197,6 @@ export default (props) => {
   );
 };
 
-const HelpButton = ({ to }) => (
-  <div className="help-button-container">
-    <NavLink className="help-button" to={to}>
-      <QuestionMark className="icon" />
-      <div className="help-button-text">
-        <div className="help-button-text-primary">Besoin d'aide ?</div>
-        <div className="help-button-text-secondary">Tutoriels, contacts</div>
-      </div>
-    </NavLink>
-  </div>
-);
-
 const DeleteAccountButton = ({ young }) => {
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [modalConfirmWithMessage, setModalConfirmWithMessage] = useState({ isOpen: false, onConfirm: null });
@@ -281,11 +269,13 @@ const SocialMedia = () => {
   return (
     <IconsBar>
       {medias.map((el, index) => (
-        <IconContainer key={index} onClick={() => window.open(el.link, "_blank")?.focus()}>
-          <svg width="24" height="24" viewBox="0 0 24 24">
-            <path d={el.svg}></path>
-          </svg>
-        </IconContainer>
+        <a href={el.link} target="_blank" style={{ decoration: "none", borderRadius: "100%", padding: "0" }}>
+          <IconContainer>
+            <svg width="24" height="24" viewBox="0 0 24 24">
+              <path d={el.svg}></path>
+            </svg>
+          </IconContainer>
+        </a>
       ))}
     </IconsBar>
   );
@@ -463,43 +453,6 @@ const MyNav = styled.ul`
     font-size: 0.75rem;
     padding: 12px 15px;
     border-radius: 6px;
-  }
-  .help-button-container {
-    margin: 0.5rem;
-    justify-content: center;
-    display: flex;
-    .help-button {
-      border: 1px solid #7786cf;
-      border-radius: 0.3rem;
-      padding: 0.5rem;
-      align-items: center;
-      display: flex;
-      .icon {
-        height: 1.5rem;
-        width: 1.5rem;
-        color: #7786cf;
-        margin-right: 0.5rem;
-      }
-      .help-button-text {
-        color: white;
-        text-align: center;
-        .help-button-text-primary {
-          font-weight: 400;
-          font-size: 0.9rem;
-        }
-        .help-button-text-secondary {
-          font-weight: 300;
-          font-size: 0.6rem;
-        }
-      }
-      :hover {
-        background: #7786cf;
-        cursor: pointer;
-        .icon {
-          color: #fff;
-        }
-      }
-    }
   }
 `;
 

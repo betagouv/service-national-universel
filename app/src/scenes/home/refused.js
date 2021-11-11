@@ -6,6 +6,7 @@ import styled from "styled-components";
 export default () => {
   const young = useSelector((state) => state.Auth.young);
   const [showAlert, setShowAlert] = useState(true);
+  const message = young.inscriptionRefusedMessage?.split("\n").map(line => <p>{line}</p>);
 
   return (
     <HeroContainer>
@@ -37,7 +38,9 @@ export default () => {
               <strong>Votre inscription n’a pas pu être retenue</strong>
               <br />
               <p>Suite au traitement de votre dossier d’inscription, votre référent SNU de votre département n’a pu retenir votre inscription.</p>
-              {/* //TODO : params.message */}
+              {young.inscriptionRefusedMessage && young.inscriptionRefusedMessage?.trim() && (
+                <Message>{message}</Message>
+              )}
             </p>
           </IconContainer>
         </Content>
@@ -59,5 +62,16 @@ const IconContainer = styled.div`
     svg {
       margin-bottom: 1rem;
     }
+  }
+`;
+
+const Message = styled.div`
+  background: rgba(79, 70, 229, 0.1);
+  padding: 1rem;
+  color: #32257f;
+  border-radius: 6px;
+  p {
+    color: #32257f;
+    font-size: 0.9rem;
   }
 `;

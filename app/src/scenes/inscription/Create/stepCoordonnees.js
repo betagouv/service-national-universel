@@ -460,7 +460,7 @@ export default () => {
                             handleChange={handleChange}
                             errors={errors}
                             touched={touched}
-                            keys={{ schoolName: "schoolName", grade: "grade", schoolId: "schoolId" }}
+                            keys={{ schoolName: "schoolName", grade: "grade", schoolId: "schoolId", schoolCountry: "schoolCountry" }}
                           />
                         </div>
                       )}

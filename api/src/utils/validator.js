@@ -280,6 +280,8 @@ function validateYoung(young, user) {
     statusPhase3: Joi.string().allow(null, ""),
     lastStatusAt: Joi.alternatives().try(Joi.string().allow(null, ""), Joi.number().allow(null)),
     withdrawnMessage: Joi.string().allow(null, ""),
+    inscriptionCorrectionMessage: Joi.string().allow(null, ""),
+    inscriptionRefusedMessage: Joi.string().allow(null, ""),
     inscriptionStep: Joi.string().allow(null, ""),
     cohesion2020Step: Joi.string().allow(null, ""),
     historic: Joi.array().items(Joi.any().allow(null, "")),
@@ -352,6 +354,7 @@ function validateYoung(young, user) {
     schoolCity: Joi.string().allow(null, ""),
     schoolDepartment: Joi.string().allow(null, ""),
     schoolRegion: Joi.string().allow(null, ""),
+    schoolCountry: Joi.string().allow(null, ""),
     schoolLocation: Joi.object()
       .keys({
         lat: Joi.number().allow(null),

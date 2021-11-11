@@ -15,7 +15,7 @@ import ModalGoal from "./modals/ModalGoal";
 import Chevron from "./Chevron";
 import ModalConfirm from "./modals/ModalConfirm";
 
-export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status", phase = YOUNG_PHASE.INSCRIPTION, disabled, callback = () => {} }) => {
+export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status", phase = YOUNG_PHASE.INSCRIPTION, disabled, callback = () => { } }) => {
   const [modal, setModal] = useState(null);
   const [young, setYoung] = useState(null);
   const user = useSelector((state) => state.Auth.user);
@@ -47,16 +47,6 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
   if (!young) return <i style={{ color: colors.darkPurple }}>Chargement...</i>;
 
   const handleClickStatus = async (status) => {
-    // Gabrielle says: (https://trello.com/c/JBS3Jn8I/576-inscription-impact-fin-instruction-dossiers-au-6-mai)
-    // > Bloquer tous les changements de statuts (sauf désistement)
-    if (user.role !== ROLES.ADMIN && phase === YOUNG_PHASE.INSCRIPTION && status !== YOUNG_STATUS.WITHDRAWN && isEndOfInscriptionManagement2021()) {
-      return setModalConfirm({
-        isOpen: true,
-        title: "Les inscriptions sont closes",
-        message: "Vous ne pouvez plus à faire de changement de statut.",
-        confirmText: "OK",
-      });
-    }
     setModalConfirm({
       isOpen: true,
       onConfirm: () => {
@@ -81,6 +71,8 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
     young.lastStatusAt = now.toISOString();
     if (statusName === "statusPhase2") young.statusPhase2UpdatedAt = now.toISOString();
     if (status === "WITHDRAWN" && note) young.withdrawnMessage = note;
+    if (status === "WAITING_CORRECTION" && note) young.inscriptionCorrectionMessage = note;
+    if (status === "REFUSED" && note) young.inscriptionRefusedMessage = note;
     if (status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INTEREST_MISSION) young.phase = YOUNG_PHASE.CONTINUE;
     try {
       // we decided to let the validated youngs in the INSCRIPTION phase
@@ -91,7 +83,13 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
       //   young.phase = YOUNG_PHASE.COHESION_STAY;
       // }
 
-      const { ok, code, data: newYoung } = await api.put(`/referent/young/${young._id}`, young);
+      const { lastStatusAt, statusPhase2UpdatedAt, withdrawnMessage, phase, inscriptionCorrectionMessage, inscriptionRefusedMessage } = young;
+
+      const {
+        ok,
+        code,
+        data: newYoung,
+      } = await api.put(`/referent/young/${young._id}`, { [statusName]: young[statusName], lastStatusAt, statusPhase2UpdatedAt, withdrawnMessage, phase, inscriptionCorrectionMessage, inscriptionRefusedMessage });
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
 
       if (status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INSCRIPTION) {

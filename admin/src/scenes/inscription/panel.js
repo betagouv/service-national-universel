@@ -46,7 +46,10 @@ export default ({ onChange, value }) => {
             Né(e) le {formatDate(value.birthdateAt)} - {getAge(value.birthdateAt)} ans
           </div>
         )}
-        <div style={{ display: "flex" }}>
+        <div style={{ display: "flex", flexWrap: "wrap" }}>
+          <Link to={`/volontaire/${value._id}`}>
+            <PanelActionButton icon="eye" title="Consulter" />
+          </Link>
           <Link to={`/volontaire/${value._id}/edit`}>
             <PanelActionButton icon="pencil" title="Modifier" />
           </Link>

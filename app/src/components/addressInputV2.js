@@ -100,11 +100,13 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
                 <option value="" label="Sélectionner un pays">
                   Sélectionner un pays
                 </option>
-                {Object.keys(countriesList).map((country_id) => (
-                  <option key={country_id} value={countriesList[country_id]} label={countriesList[country_id]}>
-                    {countriesList[country_id]}
-                  </option>
-                ))}
+                {Object.values(countriesList)
+                  .sort((a, b) => a.localeCompare(b))
+                  .map((countryName) => (
+                    <option key={countryName} value={countryName} label={countryName}>
+                      {countryName}
+                    </option>
+                  ))}
               </Field>
             </Col>
           )}

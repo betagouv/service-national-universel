@@ -3,6 +3,7 @@ import styled from "styled-components";
 import { STEPS } from "../utils";
 import { useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
+import HelpButton from "../../../components/buttons/HelpButton";
 
 export default ({ step }) => {
   const history = useHistory();
@@ -66,6 +67,7 @@ export default ({ step }) => {
           </ul>
         </li>
       </MainNav>
+      <HelpButton to="/public-besoin-d-aide" />
     </Sidebar>
   );
 };
@@ -103,6 +105,81 @@ const Sidebar = styled.div`
   @media (max-width: 768px) {
     display: none;
   }
+`;
+
+const Element = styled.li`
+  a {
+    cursor: pointer;
+    display: block;
+    color: #b4c6fc;
+    position: relative;
+    margin-bottom: 20px;
+    padding-left: 25px;
+    color: ${(props) => {
+      if (props.status === "todo") return "#b4c6fc!important";
+      if (props.status === "inprogress") return "#fff!important";
+      if (props.status === "done") return "#fff!important";
+      return "";
+    }};
+    font-weight: ${(props) => {
+      if (props.status === "todo") return "400";
+      if (props.status === "inprogress") return "600";
+      if (props.status === "done") return "600";
+      return "";
+    }};
+
+    ::before {
+      display: ${(props) => {
+        if (props.status === "todo") return "none";
+        if (props.status === "inprogress") return "none";
+        if (props.status === "done") return "block";
+        return "";
+      }};
+      content: "";
+      border-left: 2px solid #362f78;
+      border-bottom: 2px solid #362f78;
+      height: 5px;
+      width: 8px;
+      border-radius: 0;
+      position: absolute;
+      left: 0;
+      top: 46.5%;
+      transform: translatey(-50%) rotate(-45deg);
+      z-index: 2;
+    }
+    ::after {
+      content: "";
+      display: ${(props) => {
+        if (props.status === "todo") return "none";
+        if (props.status === "inprogress") return "block";
+        if (props.status === "done") return "block";
+        return "";
+      }};
+      height: 8px;
+      width: 8px;
+      border-radius: 50%;
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translatey(-50%);
+      z-index: 1;
+      background-color: ${(props) => {
+        if (props.status === "todo") return "#b4c6fc!important";
+        if (props.status === "inprogress") return "#362f78!important";
+        if (props.status === "done") return "#fff!important";
+        return "";
+      }};
+      box-shadow: ${(props) => {
+        if (props.status === "todo") return "";
+        if (props.status === "inprogress") return " 0 0 0 4px #fff";
+        if (props.status === "done") return " 0 0 0 4px #fff";
+        return "";
+      }};
+    }
+  }
+`;
+
+const MainNav = styled.ul`
   a {
     font-size: 12px;
     /* color: #b4c6fc; */
@@ -120,81 +197,6 @@ const Sidebar = styled.div`
       }
     }
   }
-`;
-
-const Element = styled.li`
-  a {
-    cursor: pointer;
-    display: block;
-    color: #b4c6fc;
-    position: relative;
-    margin-bottom: 20px;
-    padding-left: 25px;
-    color: ${(props) => {
-    if (props.status === "todo") return "#b4c6fc!important";
-    if (props.status === "inprogress") return "#fff!important";
-    if (props.status === "done") return "#fff!important";
-    return "";
-  }};
-    font-weight: ${(props) => {
-    if (props.status === "todo") return "400";
-    if (props.status === "inprogress") return "600";
-    if (props.status === "done") return "600";
-    return "";
-  }};
-
-    ::before {
-      display: ${(props) => {
-    if (props.status === "todo") return "none";
-    if (props.status === "inprogress") return "none";
-    if (props.status === "done") return "block";
-    return "";
-  }};
-      content: "";
-      border-left: 2px solid #362f78;
-      border-bottom: 2px solid #362f78;
-      height: 5px;
-      width: 8px;
-      border-radius: 0;
-      position: absolute;
-      left: 0;
-      top: 46.5%;
-      transform: translatey(-50%) rotate(-45deg);
-      z-index: 2;
-    }
-    ::after {
-      content: "";
-      display: ${(props) => {
-    if (props.status === "todo") return "none";
-    if (props.status === "inprogress") return "block";
-    if (props.status === "done") return "block";
-    return "";
-  }};
-      height: 8px;
-      width: 8px;
-      border-radius: 50%;
-      position: absolute;
-      left: 0;
-      top: 50%;
-      transform: translatey(-50%);
-      z-index: 1;
-      background-color: ${(props) => {
-    if (props.status === "todo") return "#b4c6fc!important";
-    if (props.status === "inprogress") return "#362f78!important";
-    if (props.status === "done") return "#fff!important";
-    return "";
-  }};
-      box-shadow: ${(props) => {
-    if (props.status === "todo") return "";
-    if (props.status === "inprogress") return " 0 0 0 4px #fff";
-    if (props.status === "done") return " 0 0 0 4px #fff";
-    return "";
-  }};
-    }
-  }
-`;
-
-const MainNav = styled.ul`
   > li {
     background-size: 20px;
     padding-left: 0;

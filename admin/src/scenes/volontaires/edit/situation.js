@@ -32,10 +32,15 @@ export default ({ values, handleChange, required = {}, errors, touched }) => {
             name="grade"
             handleChange={handleChange}
             options={[
-              { value: "3eme", label: "3eme" },
-              { value: "2nde", label: "2nde" },
-              { value: "1ere", label: "1ere" },
-              { value: "Terminale", label: "Terminale" },
+              { label: "3ème", value: "3eme" },
+              { label: "2nd", value: "2nd" },
+              { label: "1ère", value: "1ere" },
+              { label: "1ère année CAP", value: "1ere CAP" },
+              { label: "Terminale", value: "Terminale" },
+              { label: "Terminale CAP", value: "Terminale CAP" },
+              { label: "SEGPA", value: "SEGPA" },
+              { label: "Classe relais", value: "Classe relais" },
+              { label: "Autre", value: "Autre" },
             ]}
           />
           <Item title="Type" values={values} name="schoolType" handleChange={handleChange} />
