@@ -89,7 +89,7 @@ export default () => {
         <p>Renseignez ci-dessous vos coordonnées personnelles</p>
       </Heading>
       <Formik initialValues={young} validateOnChange={false} validateOnBlur={false} onSubmit={(values) => onSubmit(values)}>
-        {({ values, handleChange, handleSubmit, errors, touched, validateField }) => {
+        {({ values, handleChange, handleSubmit, errors, touched, validateField, setFieldValue }) => {
           useEffect(() => {
             if (values.phone) validateField("phone");
           }, [values.phone]);
@@ -366,11 +366,12 @@ export default () => {
                       ].includes(values.situation) && (
                         <div style={{ marginBottom: "10px" }}>
                           <Etablissement
+                            setFieldValue={setFieldValue}
                             values={values}
                             handleChange={handleChange}
                             errors={errors}
                             touched={touched}
-                            keys={{ schoolName: "schoolName", grade: "grade", schoolId: "schoolId", schoolCountry: "schoolCountry" }}
+                            keys={{ schoolName: "schoolName", grade: "grade", schoolId: "schoolId", schoolCountry: "schoolCountry", schoolCity: "schoolCity" }}
                           />
                         </div>
                       )}
