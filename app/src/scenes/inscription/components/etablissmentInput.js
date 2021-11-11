@@ -60,57 +60,54 @@ export default ({ handleChange, values, keys, errors, touched, setFieldValue }) 
                 setFieldValue(keys.schoolId, "");
               }}
             />
+            <ErrorMessage errors={errors} touched={touched} name={keys.schoolCity} />
           </>
         )}
+
+        <Label>Nom de l'établissement</Label>
+        <SchoolNameTypeahead
+          initialValue={values[keys.schoolName] || ""}
+          country={values[keys.schoolCountry]}
+          city={values[keys.schoolCity]}
+          disabled={values[keys.schoolCountry] === "France" && !values[keys.schoolCity]}
+          onChange={({ name, id }) => {
+            setFieldValue(keys.schoolName, name);
+            setFieldValue(keys.schoolId, id);
+          }}
+        />
         <ErrorMessage errors={errors} touched={touched} name={keys.schoolName} />
-        <div>
-          <>
-            <Label>Nom de l'établissement</Label>
-            <SchoolNameTypeahead
-              initialValue={values[keys.schoolName] || ""}
-              country={values[keys.schoolCountry]}
-              city={values[keys.schoolCity]}
-              onChange={({ name, id }) => {
-                setFieldValue(keys.schoolName, name);
-                setFieldValue(keys.schoolId, id);
-              }}
-            />
-          </>
-          <div>
-            <Label>Niveau scolaire</Label>
-            <Field
-              as="select"
-              className="form-control"
-              name={keys.grade}
-              value={values[keys.grade]}
-              validate={(v) => !v && requiredMessage}
-              onChange={(e) => {
-                const value = e.target.value;
-                handleChange({ target: { name: keys.grade, value } });
-              }}
-            >
-              <option key="" value="" disabled>
-                Sélectionner votre niveau scolaire
-              </option>
-              {[
-                { label: "3ème", value: "3eme" },
-                { label: "2nd", value: "2nd" },
-                { label: "1ère", value: "1ere" },
-                { label: "1ère année CAP", value: "1ere CAP" },
-                { label: "Terminale", value: "Terminale" },
-                { label: "Terminale CAP", value: "Terminale CAP" },
-                { label: "SEGPA", value: "SEGPA" },
-                { label: "Classe relais", value: "Classe relais" },
-                { label: "Autre", value: "Autre" },
-              ].map((rank) => (
-                <option key={rank.value} value={rank.value}>
-                  {`${rank.label}`}
-                </option>
-              ))}
-            </Field>
-            <ErrorMessage errors={errors} touched={touched} name={keys.grade} />
-          </div>
-        </div>
+        <Label>Niveau scolaire</Label>
+        <Field
+          as="select"
+          className="form-control"
+          name={keys.grade}
+          value={values[keys.grade]}
+          validate={(v) => !v && requiredMessage}
+          onChange={(e) => {
+            const value = e.target.value;
+            handleChange({ target: { name: keys.grade, value } });
+          }}
+        >
+          <option key="" value="" disabled>
+            Sélectionner votre niveau scolaire
+          </option>
+          {[
+            { label: "3ème", value: "3eme" },
+            { label: "2nd", value: "2nd" },
+            { label: "1ère", value: "1ere" },
+            { label: "1ère année CAP", value: "1ere CAP" },
+            { label: "Terminale", value: "Terminale" },
+            { label: "Terminale CAP", value: "Terminale CAP" },
+            { label: "SEGPA", value: "SEGPA" },
+            { label: "Classe relais", value: "Classe relais" },
+            { label: "Autre", value: "Autre" },
+          ].map((rank) => (
+            <option key={rank.value} value={rank.value}>
+              {`${rank.label}`}
+            </option>
+          ))}
+        </Field>
+        <ErrorMessage errors={errors} touched={touched} name={keys.grade} />
       </Col>
     </Row>
   );
@@ -167,10 +164,9 @@ function SchoolCityTypeahead({ onChange, initialValue }) {
   );
 }
 
-function SchoolNameTypeahead({ onChange, country, city, initialValue }) {
+function SchoolNameTypeahead({ onChange, country, city, initialValue, disabled = false }) {
   const [suggestions, setSuggestions] = useState([]);
   const [value, setValue] = useState("");
-  const [schoolId, setSchoolId] = useState("");
 
   useEffect(() => {
     setValue(initialValue);
@@ -202,16 +198,24 @@ function SchoolNameTypeahead({ onChange, country, city, initialValue }) {
         }}
         onSuggestionsClearRequested={() => setSuggestions([])}
         getSuggestionValue={(suggestion) => (suggestion !== "noresult" ? `${suggestion.fullName}` : "")}
-        onSuggestionSelected={(event, { suggestion }) => {
-          setSchoolId(suggestion._id);
-        }}
-        renderSuggestion={(suggestion) => <div>{suggestion !== "noresult" ? suggestion.fullName : NORESULTMESSAGE}</div>}
+        renderSuggestion={(suggestion) => (
+          <div>
+            {suggestion !== "noresult" ? (
+              <>
+                <b>{suggestion.fullName}</b>, {suggestion.postcode} {suggestion.city}
+              </>
+            ) : (
+              NORESULTMESSAGE
+            )}
+          </div>
+        )}
         inputProps={{
-          placeholder: "Indiquez le nom de l'établissement",
+          placeholder: disabled ? "Vous pouvez indiquer le nom seulement après avoir renseigné la ville" : "Indiquez le nom de l'établissement",
           value,
+          disabled,
           onChange: (event, { newValue }) => {
             setValue(newValue);
-            onChange({ name: newValue, id: schoolId });
+            onChange({ name: newValue, id: suggestions.find((e) => e.fullName === newValue)?._id || "" });
           },
           className: "form-control",
         }}
