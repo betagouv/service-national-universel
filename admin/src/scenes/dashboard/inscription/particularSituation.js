@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Col, Row } from "reactstrap";
+import { Link } from "react-router-dom";
 
 import CircularProgress from "../components/CircularProgress";
 
 import api from "../../../services/api";
 import Loader from "../../../components/Loader";
 import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
+import { getLink } from "../../../utils";
 
 export default ({ filter }) => {
   const [handicap, setHandicap] = useState(null);
@@ -62,44 +64,48 @@ export default ({ filter }) => {
 
   function render() {
     if (!handicap || !ppsBeneficiary || !paiBeneficiary || !specificAmenagment) return <Loader />;
-    const totalhandicap = handicap.true + handicap.false;
-    const totalspecificAmenagment = specificAmenagment.true + specificAmenagment.false;
-    console.log(totalhandicap, totalspecificAmenagment);
+
     return (
       <Row>
         {handicap ? (
-          <Col style={{ marginBottom: 15 }}>
-            <CircularProgress
-              circleProgressColor="#1B7BBF"
-              percentage={((handicap.true * 100) / (handicap.true + handicap.false)).toFixed(1)}
-              title={handicap.true}
-              subtitle="En situation de handicap"
-            />
-          </Col>
+          <Link to={getLink({ base: `/inscription`, filter, filtersUrl: ['HANDICAP=%5B"true"%5D'] })}>
+            <Col style={{ marginBottom: 15 }}>
+              <CircularProgress
+                circleProgressColor="#1B7BBF"
+                percentage={((handicap.true * 100) / (handicap.true + handicap.false)).toFixed(1)}
+                title={handicap.true}
+                subtitle="En situation de handicap"
+              />
+            </Col>
+          </Link>
         ) : (
           <Loader />
         )}
         {ppsBeneficiary ? (
-          <Col style={{ marginBottom: 15 }}>
-            <CircularProgress
-              circleProgressColor="#1B7BBF"
-              percentage={((ppsBeneficiary.true * 100) / (ppsBeneficiary.true + ppsBeneficiary.false)).toFixed(1)}
-              title={ppsBeneficiary.true}
-              subtitle="Bénéficiaires d’un PPS"
-            />
-          </Col>
+          <Link to={getLink({ base: `/inscription`, filter, filtersUrl: ['PPS=%5B"true"%5D'] })}>
+            <Col style={{ marginBottom: 15 }}>
+              <CircularProgress
+                circleProgressColor="#1B7BBF"
+                percentage={((ppsBeneficiary.true * 100) / (ppsBeneficiary.true + ppsBeneficiary.false)).toFixed(1)}
+                title={ppsBeneficiary.true}
+                subtitle="Bénéficiaires d’un PPS"
+              />
+            </Col>
+          </Link>
         ) : (
           <Loader />
         )}
         {paiBeneficiary ? (
-          <Col style={{ marginBottom: 15 }}>
-            <CircularProgress
-              circleProgressColor="#1B7BBF"
-              percentage={((paiBeneficiary.true * 100) / (paiBeneficiary.true + paiBeneficiary.false)).toFixed(1)}
-              title={paiBeneficiary.true}
-              subtitle="Bénéficiaires d’un PAI"
-            />
-          </Col>
+          <Link to={getLink({ base: `/inscription`, filter, filtersUrl: ['PAI=%5B"true"%5D'] })}>
+            <Col style={{ marginBottom: 15 }}>
+              <CircularProgress
+                circleProgressColor="#1B7BBF"
+                percentage={((paiBeneficiary.true * 100) / (paiBeneficiary.true + paiBeneficiary.false)).toFixed(1)}
+                title={paiBeneficiary.true}
+                subtitle="Bénéficiaires d’un PAI"
+              />
+            </Col>
+          </Link>
         ) : (
           <Loader />
         )}
