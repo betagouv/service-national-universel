@@ -17,7 +17,7 @@ const AuthObject = require("../auth");
 const ReferentAuth = new AuthObject(ReferentModel);
 const patches = require("./patches");
 
-const { getQPV, getDensity } = require("../../geo");
+const { getQPV, getDensity } = require("../geo");
 const config = require("../config");
 const { capture } = require("../sentry");
 const { decrypt, encrypt } = require("../cryptoUtils");
