@@ -42,15 +42,6 @@ export default () => {
     v.grade = "";
   };
 
-  const cleanHostInformation = (v) => {
-    delete v.hostLastName;
-    delete v.hostFirstName;
-    delete v.hostCity;
-    delete v.hostZip;
-    delete v.hostAddress;
-    delete v.hostRelationship;
-  };
-
   const cleanSituation = (v) => {
     delete v.situation;
     delete v.employed;
@@ -88,8 +79,26 @@ export default () => {
         <h2>Complétez les coordonnées du volontaire</h2>
         <p>Renseignez ci-dessous vos coordonnées personnelles</p>
       </Heading>
-      <Formik initialValues={young} validateOnChange={false} validateOnBlur={false} onSubmit={(values) => onSubmit(values)}>
-        {({ values, handleChange, handleSubmit, errors, touched, validateField }) => {
+      <Formik
+        initialValues={young}
+        validate={(values) => {
+          const errors = {};
+          const needsEtablissement = [
+            YOUNG_SITUATIONS.GENERAL_SCHOOL,
+            YOUNG_SITUATIONS.PROFESSIONAL_SCHOOL,
+            YOUNG_SITUATIONS.AGRICULTURAL_SCHOOL,
+            YOUNG_SITUATIONS.SPECIALIZED_SCHOOL,
+            YOUNG_SITUATIONS.APPRENTICESHIP,
+          ].includes(values.situation);
+          if (needsEtablissement && !values.schoolName) errors.schoolName = "Un établissement est obligatoire";
+          if (needsEtablissement && values.schoolCountry === "France" && !values.schoolCity) errors.schoolCity = "Une ville est obligatoire";
+          return errors;
+        }}
+        validateOnChange={false}
+        validateOnBlur={false}
+        onSubmit={(values) => onSubmit(values)}
+      >
+        {({ values, handleChange, handleSubmit, errors, touched, validateField, setFieldValue }) => {
           useEffect(() => {
             if (values.phone) validateField("phone");
           }, [values.phone]);
@@ -366,11 +375,12 @@ export default () => {
                       ].includes(values.situation) && (
                         <div style={{ marginBottom: "10px" }}>
                           <Etablissement
+                            setFieldValue={setFieldValue}
                             values={values}
                             handleChange={handleChange}
                             errors={errors}
                             touched={touched}
-                            keys={{ schoolName: "schoolName", grade: "grade", schoolId: "schoolId", schoolCountry: "schoolCountry" }}
+                            keys={{ schoolName: "schoolName", grade: "grade", schoolId: "schoolId", schoolCountry: "schoolCountry", schoolCity: "schoolCity" }}
                           />
                         </div>
                       )}
