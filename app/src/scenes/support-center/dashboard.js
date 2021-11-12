@@ -45,7 +45,6 @@ export default () => {
     const fetchTickets = async () => {
       try {
         const response = await api.get("/support-center/ticket?withArticles=true");
-        console.log("REPONSE TICKETS", response);
         if (!response.ok) return console.log(response);
         setUserTickets(response.data);
       } catch (error) {
@@ -61,26 +60,25 @@ export default () => {
   };
 
   const displayState = (state) => {
-    const translated = translateState(state);
-    if (translated === "ouvert")
+    if (state === "open")
       return (
         <StateContainer style={{ display: "flex" }}>
           <MailOpenIcon color="#F8B951" style={{ margin: 0, padding: "5px" }} />
-          {translated}
+          {translateState(state)}
         </StateContainer>
       );
-    if (translated === "archivé")
+    if (state === "closed")
       return (
         <StateContainer>
           <SuccessIcon color="#6BC762" style={{ margin: 0, padding: "5px" }} />
-          {translated}
+          {translateState(state)}
         </StateContainer>
       );
-    if (translated === "nouveau")
+    if (state === "new")
       return (
         <StateContainer>
           <MailCloseIcon color="#F1545B" style={{ margin: 0, padding: "5px" }} />
-          {translated}
+          {translateState(state)}
         </StateContainer>
       );
   };
@@ -194,9 +192,11 @@ const Container = styled.div`
     grid-template-rows: 2fr 1fr;
     text-align: center;
   }
-  ${'' /* .help-section-text {
+  ${
+    "" /* .help-section-text {
     flex: 3;
-  } */}
+  } */
+  }
   .link {
     color: #6b7280;
     :hover {

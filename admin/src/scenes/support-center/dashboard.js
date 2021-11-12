@@ -51,26 +51,25 @@ export default () => {
   };
 
   const displayState = (state) => {
-    const translated = translateState(state);
-    if (translated === "ouvert")
+    if (state === "open")
       return (
         <StateContainer style={{ display: "flex" }}>
           <MailOpenIcon color="#F8B951" style={{ margin: 0, padding: "5px" }} />
-          {translated}
+          {translateState(state)}
         </StateContainer>
       );
-    if (translated === "archivé")
+    if (state === "closed")
       return (
         <StateContainer>
           <SuccessIcon color="#6BC762" style={{ margin: 0, padding: "5px" }} />
-          {translated}
+          {translateState(state)}
         </StateContainer>
       );
-    if (translated === "nouveau")
+    if (state === "new")
       return (
         <StateContainer>
           <MailCloseIcon color="#F1545B" style={{ margin: 0, padding: "5px" }} />
-          {translated}
+          {translateState(state)}
         </StateContainer>
       );
   };
