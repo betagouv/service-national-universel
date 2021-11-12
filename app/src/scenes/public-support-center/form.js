@@ -1,134 +1,99 @@
-import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import React from "react";
 import { Col } from "reactstrap";
 import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
 import { Formik, Field } from "formik";
-import { NavLink } from "react-router-dom";
 import { useHistory } from "react-router-dom";
+import close from "../../assets/cancel.png";
 
 import api from "../../services/api";
-import { HeroContainer } from "../../components/Content";
 import { translate } from "../../utils";
 import ErrorMessage, { requiredMessage } from "../inscription/components/errorMessage";
-//import { SelectTag, step1, step2Technical, step2Question } from "./worflow";
 
-export default () => {
+export default ({ setOpen, setSuccessMessage }) => {
   const history = useHistory();
-  const young = useSelector((state) => state.Auth.young);
   const tags = [`EMETTEUR_Exterieur`, `CANAL_Plateforme`, `AGENT_Startup_Support`];
-
   return (
-    <Container>
-      <BackButton to={`/public-besoin-d-aide`}>{"<"} Retour à l'accueil</BackButton>
-      <Form>
-        <Formik
-          initialValues={{ step1: null, step2: null, message: "", subject: "", email: "", name: "", }}
-          validateOnChange={false}
-          validateOnBlur={false}
-          onSubmit={async (values) => {
-            try {
-              const { message, subject, name, email } = values;
-              const { ok, code, data } = await api.post("/support-center/ticket", {
-                title: `Formulaire de contact - ${subject}`,
-                subject,
-                name,
-                email,
-                message,
-                publicSupport: true,
-                tags: [...new Set([...tags])], // we use this dirty hack to remove duplicates
-              });
-              if (!ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(code));
-              toastr.success("Ticket créé");
-              history.push("/public-besoin-d-aide");
-            } catch (e) {
-              console.log(e);
-              toastr.error("Oups, une erreur est survenue", translate(e.code));
-            }
-          }}
-        >
-          {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
-            <>
-              {/* <SelectTag
-                name="step1"
-                options={Object.values(step1)}
-                title={"Ma demande"}
-                selectPlaceholder={"Choisir la catégorie"}
-                handleChange={handleChange}
-                value={values?.step1?.id}
-              />
-              {values.step1?.id === "TECHNICAL" ? (
-                <SelectTag
-                  name="step2"
-                  options={Object.values(step2Technical)}
-                  title={"Sujet"}
-                  selectPlaceholder={"Choisir le sujet"}
-                  handleChange={handleChange}
-                  value={values.step2?.id}
-                />
-              ) : null}
-              {values.step1?.id === "QUESTION" ? (
-                <SelectTag
-                  name="step2"
-                  options={Object.values(step2Question)}
-                  title={"Sujet"}
-                  selectPlaceholder={"Choisir le sujet"}
-                  handleChange={handleChange}
-                  value={values.step2?.id}
-                />
-              ) : null} */}
-              <Item
-                name="subject"
-                title="Sujet"
-                type="input"
-                value={values.subject}
-                handleChange={handleChange}
-                validate={(v) => !v && requiredMessage}
-                errors={errors}
-                touched={touched}
-                rows="2"
-              />
-              <Item
-                name="name"
-                title="Nom et prénom"
-                type="input"
-                value={values.name}
-                handleChange={handleChange}
-                validate={(v) => !v && requiredMessage}
-                errors={errors}
-                touched={touched}
-                rows="2"
-              />
-              <Item
-                name="email"
-                title="Email"
-                type="input"
-                value={values.email}
-                handleChange={handleChange}
-                validate={(v) => !v && requiredMessage}
-                errors={errors}
-                touched={touched}
-                rows="2"
-              />
-              <Item
-                name="message"
-                title="Mon message"
-                type="textarea"
-                value={values.message}
-                handleChange={handleChange}
-                validate={(v) => !v && requiredMessage}
-                errors={errors}
-                touched={touched}
-                rows="5"
-              />
-              <ContinueButton type="submit" style={{ marginLeft: 10 }} onClick={handleSubmit} disabled={isSubmitting}>
-                Envoyer
-              </ContinueButton>
-            </>
-          )}
-        </Formik>
-      </Form>
-    </Container>
+    <Form>
+      <img src={close} onClick={() => setOpen(false)} />
+      <Formik
+        initialValues={{ step1: null, step2: null, message: "", subject: "", email: "", name: "", }}
+        validateOnChange={false}
+        validateOnBlur={false}
+        onSubmit={async (values) => {
+          try {
+            const { message, subject, name, email } = values;
+            const { ok, code, data } = await api.post("/support-center/public/ticket", {
+              title: `Formulaire de contact - ${subject}`,
+              subject,
+              name,
+              email,
+              message,
+              tags: [...new Set([...tags])], // we use this dirty hack to remove duplicates
+            });
+            if (!ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(code));
+            toastr.success("Ticket créé");
+            setSuccessMessage("Votre demande a bien été envoyée ! Nous vous répondrons par mail.");
+            history.push("/public-besoin-d-aide");
+          } catch (e) {
+            console.log(e);
+            toastr.error("Oups, une erreur est survenue", translate(e.code));
+          }
+        }}
+      >
+        {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
+          <>
+            <Item
+              name="name"
+              title="Nom et prénom"
+              type="input"
+              value={values.name}
+              handleChange={handleChange}
+              validate={(v) => !v && requiredMessage}
+              errors={errors}
+              touched={touched}
+              rows="2"
+            />
+            <Item
+              name="email"
+              title="Email"
+              type="input"
+              value={values.email}
+              handleChange={handleChange}
+              validate={(v) => !v && requiredMessage}
+              errors={errors}
+              touched={touched}
+              rows="2"
+            />
+            <Item
+              name="subject"
+              title="Le sujet de ma demande"
+              type="input"
+              value={values.subject}
+              handleChange={handleChange}
+              validate={(v) => !v && requiredMessage}
+              errors={errors}
+              touched={touched}
+              rows="2"
+            />
+            <Item
+              name="message"
+              title="Mon message"
+              type="textarea"
+              value={values.message}
+              handleChange={handleChange}
+              validate={(v) => !v && requiredMessage}
+              errors={errors}
+              touched={touched}
+              rows="5"
+            />
+            <ContinueButton type="submit" style={{ marginLeft: 10 }} onClick={handleSubmit} disabled={isSubmitting}>
+              Envoyer
+            </ContinueButton>
+          </>
+        )}
+      </Formik>
+    </Form>
   );
 };
 
@@ -154,23 +119,6 @@ const Item = ({ title, name, value, handleChange, errors, touched, validate, typ
     </Col>
   );
 };
-
-const BackButton = styled(NavLink)`
-  color: #666;
-  cursor: pointer;
-  :hover {
-    text-decoration: underline;
-  }
-`;
-
-const Container = styled.div`
-  position: absolute;
-  bottom: 2%;
-  right: 54%;
-  display: flex;
-  margin-top: -1rem;
-  flex-direction: column;
-`;
 
 const Label = styled.div`
   color: #374151;
@@ -212,6 +160,11 @@ const Form = styled.div`
   background-color: #fff;
   margin: 0 auto;
   width: clamp(700px, 80%, 1000px);
+  img {
+    width: 1.5rem;
+    align-self: flex-end;
+    cursor: pointer;
+  }
   @media (max-width: 767px) {
     width: 100%;
   }

@@ -150,14 +150,11 @@ router.put("/ticket/:id", passport.authenticate(["referent", "young"], { session
 // Create a new ticket while authenticated
 router.post("/ticket", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { subject, type, message, tags, title, name, publicSupport } = req.body;
-    const email = req.user?.email || "auto-1632123676-494804";
-    const unknownUser = req.body.email;
+    const { subject, type, message, tags, title, } = req.body;
+    const email = req.user?.email;
 
     let customer_id = await zammad.getCustomerIdByEmail(email);
-    if (!customer_id && publicSupport) {
-      customer_id = "40106";
-    } else return res.status(403).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!customer_id) return res.status(403).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // default ?
     let group = "";
@@ -176,12 +173,60 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
       method: "POST",
       body: JSON.stringify({
         title: `📝 ${ticketTitle}`,
-        group: publicSupport ? "Contact" : group,
+        group,
         customer_id,
-        customer: publicSupport ? "plateforme@email.com" : email,
+        customer: email,
         article: {
           subject,
-          body: publicSupport ? `${name} - ${unknownUser} - ${message}` : message,
+          body: message,
+          // type:'note',
+          internal: false,
+        },
+        tags: tags ? tags.join(",") : "",
+      }),
+    });
+    if (!response.id) return res.status(400).send({ ok: false });
+    return res.status(200).send({ ok: true, data: response });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+// Create a new ticket while non-authenticated
+router.post("/public/ticket", async (req, res) => {
+  try {
+    const ticketObject = {
+      email: req.body.email,
+      subject: req.body.subject,
+      message: req.body.message,
+      title: req.body.title,
+      name: req.body.name,
+    };
+    const { error, value } = Joi.object({
+      email: Joi.string().email().required(),
+      subject: Joi.string().required(),
+      message: Joi.string().required(),
+      title: Joi.string().required(),
+      name: Joi.string().required(),
+    })
+      .unknown()
+      .validate(ticketObject);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { subject, message, tags, title, name, email } = value;
+    const user = "auto-1632123676-494804";
+
+    const response = await zammad.api("/tickets", {
+      headers: { "X-On-Behalf-Of": user },
+      method: "POST",
+      body: JSON.stringify({
+        title: `🔍 ${title}`,
+        group: "Contact",
+        customer_id: "40106",
+        customer: "plateforme@email.com",
+        article: {
+          subject,
+          body: `- Nom et prénom : ${name}\n- Email : ${email}\n\n${message}`,
           // type:'note',
           internal: false,
         },
