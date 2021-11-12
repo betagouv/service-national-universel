@@ -14,7 +14,8 @@ import Status from "./status";
 import Goals from "./goals";
 
 import BirthDate from "./birthdate";
-import ScholarshopSituation from "./scolarshipSituation";
+import ScholarshipSituation from "./scolarshipSituation";
+import ScholarshipGrade from "./scolarshipGrade";
 import ParticularSituation from "./particularSituation";
 import PriorityArea from "./priorityArea";
 import RuralArea from "./ruralArea";
@@ -100,7 +101,10 @@ export default () => {
               <ParticularSituation filter={filter} />
             </Col>
             <Col md={12}>
-              <ScholarshopSituation filter={filter} />
+              <ScholarshipSituation filter={filter} />
+            </Col>
+            <Col md={12}>
+              <ScholarshipGrade filter={filter} />
             </Col>
             <Col md={12} lg={4}>
               <Gender filter={filter} />
