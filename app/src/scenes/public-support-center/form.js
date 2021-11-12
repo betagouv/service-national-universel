@@ -9,12 +9,13 @@ import { useHistory } from "react-router-dom";
 
 import api from "../../services/api";
 import { HeroContainer } from "../../components/Content";
+import { translate } from "../../utils";
 import ErrorMessage, { requiredMessage } from "../inscription/components/errorMessage";
 //import { SelectTag, step1, step2Technical, step2Question } from "./worflow";
 
 export default () => {
   const history = useHistory();
-  //const young = useSelector((state) => state.Auth.young);
+  const young = useSelector((state) => state.Auth.young);
   const tags = [`EMETTEUR_Exterieur`, `CANAL_Plateforme`, `AGENT_Startup_Support`];
 
   return (
@@ -22,16 +23,20 @@ export default () => {
       <BackButton to={`/public-besoin-d-aide`}>{"<"} Retour à l'accueil</BackButton>
       <Form>
         <Formik
-          initialValues={{ step1: null, step2: null, message: "", object: "", }}
+          initialValues={{ step1: null, step2: null, message: "", subject: "", email: "", name: "", }}
           validateOnChange={false}
           validateOnBlur={false}
           onSubmit={async (values) => {
             try {
-              const { message, object } = values;
+              const { message, subject, name, email } = values;
               const { ok, code, data } = await api.post("/support-center/ticket", {
-                title: `Formulaire de contact - ${object}`,
+                title: `Formulaire de contact - ${subject}`,
+                subject,
+                name,
+                email,
                 message,
-                tags: [...new Set([...tags, ...step1?.tags, ...step2?.tags])], // we use this dirty hack to remove duplicates
+                publicSupport: true,
+                tags: [...new Set([...tags])], // we use this dirty hack to remove duplicates
               });
               if (!ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(code));
               toastr.success("Ticket créé");
@@ -73,10 +78,32 @@ export default () => {
                 />
               ) : null} */}
               <Item
-                name="message"
-                title="Mon message"
-                type="text"
-                value={values.object}
+                name="subject"
+                title="Sujet"
+                type="input"
+                value={values.subject}
+                handleChange={handleChange}
+                validate={(v) => !v && requiredMessage}
+                errors={errors}
+                touched={touched}
+                rows="2"
+              />
+              <Item
+                name="name"
+                title="Nom et prénom"
+                type="input"
+                value={values.name}
+                handleChange={handleChange}
+                validate={(v) => !v && requiredMessage}
+                errors={errors}
+                touched={touched}
+                rows="2"
+              />
+              <Item
+                name="email"
+                title="Email"
+                type="input"
+                value={values.email}
                 handleChange={handleChange}
                 validate={(v) => !v && requiredMessage}
                 errors={errors}
@@ -138,8 +165,8 @@ const BackButton = styled(NavLink)`
 
 const Container = styled.div`
   position: absolute;
-  bottom: 0;
-  right: 50%;
+  bottom: 2%;
+  right: 54%;
   display: flex;
   margin-top: -1rem;
   flex-direction: column;

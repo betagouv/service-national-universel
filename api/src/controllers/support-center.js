@@ -147,14 +147,17 @@ router.put("/ticket/:id", passport.authenticate(["referent", "young"], { session
   }
 });
 
-// Create a new ticket
+// Create a new ticket while authenticated
 router.post("/ticket", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { subject, type, message, tags, title } = req.body;
-    const email = req.user.email;
+    const { subject, type, message, tags, title, name, publicSupport } = req.body;
+    const email = req.user?.email || "auto-1632123676-494804";
+    const unknownUser = req.body.email;
 
-    const customer_id = await zammad.getCustomerIdByEmail(email);
-    if (!customer_id) return res.status(403).send({ ok: false, code: ERRORS.NOT_FOUND });
+    let customer_id = await zammad.getCustomerIdByEmail(email);
+    if (!customer_id && publicSupport) {
+      customer_id = "40106";
+    } else return res.status(403).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // default ?
     let group = "";
@@ -173,12 +176,12 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
       method: "POST",
       body: JSON.stringify({
         title: `📝 ${ticketTitle}`,
-        group,
+        group: publicSupport ? "Contact" : group,
         customer_id,
-        customer: email,
+        customer: publicSupport ? "plateforme@email.com" : email,
         article: {
           subject,
-          body: message,
+          body: publicSupport ? `${name} - ${unknownUser} - ${message}` : message,
           // type:'note',
           internal: false,
         },
