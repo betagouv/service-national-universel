@@ -17,7 +17,7 @@ export default ({ handleChange, values, keys, errors, touched, setFieldValue }) 
       const inputElements = document.getElementsByTagName("input");
       for (let i = 0; inputElements[i]; i++) inputElements[i].setAttribute("autocomplete", "novalue");
     }
-    if (!values[keys.schoolCountry]) setFieldValue(keys.schoolCountry, '"France');
+    if (!values[keys.schoolCountry]) setFieldValue(keys.schoolCountry, "France");
   }, []);
 
   return (
