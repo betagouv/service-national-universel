@@ -17,6 +17,7 @@ const AuthObject = require("../auth");
 const ReferentAuth = new AuthObject(ReferentModel);
 const patches = require("./patches");
 
+const { getQPV, getDensity } = require("../geo");
 const config = require("../config");
 const { capture } = require("../sentry");
 const { decrypt, encrypt } = require("../cryptoUtils");
@@ -332,6 +333,20 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       !["CANCEL", "EXEMPTED"].includes(young.statusPhase1)
     ) {
       newYoung = { ...newYoung, statusPhase1: "NOT_DONE" };
+    }
+
+    // Check quartier prioritaires.
+    if (newYoung.zip && newYoung.city && newYoung.address) {
+      const qpv = await getQPV(newYoung.zip, newYoung.city, newYoung.address);
+      if (qpv === true) newYoung.qpv = "true";
+      else if (qpv === false) newYoung.qpv = "false";
+      else newYoung.qpv = "";
+    }
+
+    // Check quartier prioritaires.
+    if (newYoung.cityCode) {
+      const populationDensity = await getDensity(newYoung.cityCode);
+      newYoung.populationDensity = populationDensity;
     }
 
     // await updateApplicationsWithYoungOrMission({ young, newYoung });
