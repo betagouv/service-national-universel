@@ -7,8 +7,7 @@ import styled from "styled-components";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
 import api from "../../../services/api";
 import { ticketStateNameById, copyToClipboard, translate, getAge, formatDateFRTimezoneUTC } from "../../../utils";
-import Loader from "../../../components/Loader";
-import { appURL, adminURL } from "../../../config";
+import { appURL } from "../../../config";
 
 export default ({ ticket }) => {
   const [user, setUser] = useState([]);
@@ -133,7 +132,7 @@ export default ({ ticket }) => {
         <div />
       ) : (
         <>
-          {ticketStateNameById(ticket?.state_id) !== "fermé" ? (
+          {ticketStateNameById(ticket?.state_id) !== "closed" ? (
             <div style={{ display: "flex", justifyContent: "center", alignContent: "center" }}>
               <button className="button" onClick={resolveTicket}>
                 Archiver la demande
