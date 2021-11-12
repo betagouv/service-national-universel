@@ -409,7 +409,7 @@ const Schema = new mongoose.Schema({
   },
   populationDensity: {
     type: String,
-    enum: ["TRES PEU DENSE", "PEU DENSE", "INTERMEDIAIRE", "DENSE"],
+    enum: ["TRES PEU DENSE", "PEU DENSE", "INTERMEDIAIRE", "DENSE", ""],
     documentation: {
       description: "tres peu dense, peu dense, intermediaire, tres dense",
     },
@@ -442,13 +442,6 @@ const Schema = new mongoose.Schema({
     default: "",
     documentation: {
       description: "Le volontaire est dans un Quarier Prioritaire",
-    },
-  },
-  populationDensity: {
-    type: String,
-    default: "",
-    documentation: {
-      description: "Densité de population du domicile du volontaire (ZRR - zone rurale)",
     },
   },
 

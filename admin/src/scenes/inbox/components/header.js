@@ -3,7 +3,6 @@ import styled from "styled-components";
 import MailCloseIcon from "../../../components/MailCloseIcon";
 import MailOpenIcon from "../../../components/MailOpenIcon";
 import SuccessIcon from "../../../components/SuccessIcon";
-import { ticketStateIdByName } from "../../../utils";
 import { useSelector } from "react-redux";
 
 export default () => {

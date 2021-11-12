@@ -1,5 +1,5 @@
 import React from "react";
-import { Route, Switch } from "react-router-dom";
+import { Route, Switch, Redirect } from "react-router-dom";
 import styled from "styled-components";
 import Nav from "./components/Nav";
 import FranceConnectCallback from "./components/FranceConnectCallback";
@@ -12,6 +12,7 @@ import Documents from "./Create/stepDocuments";
 import Availability from "./Create/stepAvailability";
 import Done from "./Create/stepDone";
 import Drawer from "./Create/drawer";
+import { useSelector } from "react-redux";
 
 import Home from "./Home/index.js";
 import { STEPS } from "./utils";
@@ -43,6 +44,11 @@ const Step = ({ step }) => {
 };
 
 export default () => {
+  const young = useSelector((state) => state.Auth.young);
+  if (young?.cohort && !["", "Juillet 2022", "Juin 2022", "Février 2022", "2022"].includes(young?.cohort)) {
+    return <Redirect to={{ pathname: "/" }} />;
+  }
+
   return (
     <Switch>
       <Route path="/inscription/profil" component={() => <Step step={STEPS.PROFIL} />} />
@@ -67,8 +73,8 @@ const Content = styled.div`
   }
   @media (max-width: 768px) {
     .help-button-container {
-    display: block;
-  }
+      display: block;
+    }
     margin-left: 0;
   }
 `;

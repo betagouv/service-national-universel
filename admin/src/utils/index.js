@@ -1,4 +1,3 @@
-import { translate } from "snu-lib/translation";
 import passwordValidator from "password-validator";
 import api from "../services/api";
 export * from "snu-lib";

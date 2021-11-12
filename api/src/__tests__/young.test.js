@@ -22,9 +22,9 @@ jest.mock("../sendinblue", () => ({
   sendEmail: () => Promise.resolve(),
 }));
 
-jest.mock("../qpv", () => ({
-  ...jest.requireActual("../qpv"),
-  getQPV: (a) => Promise.resolve(a === "qpvShouldWork"),
+jest.mock("../geo", () => ({
+  ...jest.requireActual("../geo"),
+  getQPV: (a) => Promise.resolve(a === "geoShouldWork"),
 }));
 
 jest.mock("../utils", () => ({
@@ -193,7 +193,7 @@ describe("Young", () => {
 
     it("should update QPV to true", async () => {
       const { updatedYoung, response } = await selfUpdateYoung({
-        zip: "qpvShouldWork",
+        zip: "geoShouldWork",
         city: "foo",
         address: "bar",
       });
