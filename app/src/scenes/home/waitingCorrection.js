@@ -36,7 +36,7 @@ export default () => {
               </svg>
               <div>
                 <p style={{ color: "#000" }}><strong>Votre dossier d'inscription est en attente de correction.</strong></p>
-                {young.inscriptionCorrectionMessage && young.inscriptionRefusedMessage?.trim()(
+                {young.inscriptionCorrectionMessage && young.inscriptionCorrectionMessage?.trim() && (
                   <>
                     <p>
                       Merci de vous reconnecter à votre dossier d'inscription et d'effectuer les modifications demandées par votre référent :
