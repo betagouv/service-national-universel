@@ -30,6 +30,14 @@ export default () => {
     return <div />;
   }
 
+  useEffect(() => {
+    if (young.foreignCountry) {
+      young.livesInFrance = "false";
+    } else {
+      young.livesInFrance = "true";
+    }
+  }, []);
+
   const cleanSchoolInformation = (v) => {
     delete v.schoolType;
     delete v.schoolAddress;
@@ -60,7 +68,7 @@ export default () => {
     callback({ target: { name: "department", value: "" } });
     callback({ target: { name: "region", value: "" } });
     callback({ target: { name: "address", value: "" } });
-    callback({ target: { name: "location", value: "" } });
+    callback({ target: { name: "location", value: {} } });
     callback({ target: { name: "cityCode", value: "" } });
     callback({ target: { name: "populationDensity", value: "" } });
     callback({ target: { name: "complementAddress", value: "" } });
@@ -181,6 +189,7 @@ export default () => {
                       onChange={(e) => {
                         const value = e.target.value;
                         handleChange({ target: { name: "livesInFrance", value } });
+                        handleChange({ target: { name: "foreignCountry", value: "" } });
                         cleanAllAddressInformation(handleChange);
                       }}
                     />
@@ -200,6 +209,7 @@ export default () => {
                       onChange={(e) => {
                         const value = e.target.value;
                         handleChange({ target: { name: "livesInFrance", value } });
+                        handleChange({ target: { name: "foreignCountry", value: "" } });
                         cleanAllAddressInformation(handleChange);
                       }}
                     />
@@ -234,8 +244,7 @@ export default () => {
                     />
                   </Col>
                 </FormRow>
-              ) : null}
-              {values.livesInFrance === "false" ? (
+              ) : (
                 // if the young lives in a foreign country, we store the information in the foreign fields
                 // and we store the host's informations in the default fields
                 <>
@@ -309,7 +318,7 @@ export default () => {
                         value={values.hostRelationship}
                         onChange={handleChange}
                       >
-                        <option selected={values.hostRelationship === undefined || values.hostRelationship === ""} disabled>
+                        <option value={""} disabled>
                           Précisez votre lien avec l'hébergeur
                         </option>
                         {[
@@ -347,7 +356,7 @@ export default () => {
                     </Col>
                   </FormRow>
                 </>
-              ) : null}
+              )}
               <FormRow>
                 <Col md={4}>
                   <Label>Situation</Label>

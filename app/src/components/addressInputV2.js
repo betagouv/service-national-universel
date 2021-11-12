@@ -30,7 +30,6 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
   useEffect(() => {
     setAddressInFrance(values[keys.country] === undefined || values[keys.country] === "France");
     if (values[keys.country] === undefined) addressVerifiedHelpers.setValue(false);
-    else if (values[keys.country] !== "France") addressVerifiedHelpers.setValue(true);
   }, [values[keys.country]]);
 
   const onSuggestionSelected = () => {
@@ -97,7 +96,7 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
                   onChangeCountry();
                 }}
               >
-                <option value="" label="Sélectionner un pays">
+                <option value="" label="Sélectionner un pays" disabled>
                   Sélectionner un pays
                 </option>
                 {Object.values(countriesList)
@@ -108,6 +107,7 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
                     </option>
                   ))}
               </Field>
+              <ErrorMessage errors={errors} touched={touched} name={keys.country} />
             </Col>
           )}
           <Col md={12} style={{ marginTop: 15 }}>
