@@ -24,7 +24,7 @@ export default ({ setOpen, setSuccessMessage }) => {
           try {
             const { message, subject, name, email } = values;
             const { ok, code, data } = await api.post("/support-center/public/ticket", {
-              title: `Formulaire de contact - ${subject}`,
+              title: `Formulaire de contact - ${name} - ${subject}`,
               subject,
               name,
               email,
