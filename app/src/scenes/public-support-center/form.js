@@ -10,7 +10,7 @@ import api from "../../services/api";
 import { translate } from "../../utils";
 import ErrorMessage, { requiredMessage } from "../inscription/components/errorMessage";
 
-export default ({ setOpen, setSuccessMessage }) => {
+export default ({ setOpen, setSuccessMessage, young }) => {
   const history = useHistory();
   const tags = [`EMETTEUR_Exterieur`, `CANAL_Plateforme`, `AGENT_Startup_Support`];
   return (
@@ -47,7 +47,8 @@ export default ({ setOpen, setSuccessMessage }) => {
               name="name"
               title="Nom et prénom"
               type="input"
-              value={values.name}
+              // If the young is connected, we can automatically input their name. I don't know if it's a good idea ?
+              value={young ? `${young.firstName} ${young.lastName}` : values.name}
               handleChange={handleChange}
               validate={(v) => !v && requiredMessage}
               errors={errors}
