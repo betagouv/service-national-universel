@@ -21,22 +21,23 @@ export default () => {
             <img src={require("../../assets/close.svg")} height={15} onClick={() => setShowAlert(false)} />
           </Alert>
         )}
-        <Content showAlert={showAlert}>
+        <Content showAlert={showAlert} style={{ paddingBottom: "1rem" }}>
           <h1 style={{ marginTop: "1.5rem" }}>
             <strong>{young.firstName},</strong> bienvenue sur votre compte volontaire.
           </h1>
           <IconContainer>
-            <svg width="48" height="48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0 24C0 10.745 10.745 0 24 0s24 10.745 24 24-10.745 24-24 24S0 37.255 0 24z" fill="#D1FAE5" /><path d="M17 25l4 4 10-10" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" /></svg>
+            <svg width="48" height="48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M0 24C0 10.745 10.745 0 24 0s24 10.745 24 24-10.745 24-24 24S0 37.255 0 24z" fill="#D1FAE5" />
+              <path d="M17 25l4 4 10-10" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
             <p style={{ color: "#000" }}>
-              <strong>
-                Merci, votre inscription a bien été enregistrée.
-              </strong>
+              <strong>Merci, votre inscription a bien été enregistrée.</strong>
               <br />
               Votre dossier est en cours de traitement par l'administration.
             </p>
           </IconContainer>
           <p>Vous recevrez prochainement un e-mail de no-reply@snu.gouv.fr vous informant de l'avancement de votre inscription.</p>
-          {young.status === YOUNG_STATUS.WAITING_VALIDATION && isEndOfInscriptionManagement2021() ? (
+          {young.status === YOUNG_STATUS.WAITING_VALIDATION ? (
             <>
               <p>Vous pouvez consulter les informations renseignées dans votre dossier jusqu'à validation de votre inscription.</p>
               <Link to="/inscription/coordonnees">
@@ -44,6 +45,11 @@ export default () => {
               </Link>
             </>
           ) : null}
+          <div style={{ display: "flex", justifyContent: "flex-end", paddingTop: "2rem" }}>
+            <a href="https://voxusagers.numerique.gouv.fr/Demarches/3154?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=060c41afff346d1b228c2c02d891931f">
+              <img src="https://voxusagers.numerique.gouv.fr/static/bouton-blanc.svg" alt="Je donne mon avis" />
+            </a>
+          </div>
         </Content>
         <div className="thumb" />
       </Hero>
@@ -55,7 +61,7 @@ const IconContainer = styled.div`
   display: flex;
   margin-top: 2.5rem;
   svg {
-    min-width: 4rem
+    min-width: 4rem;
   }
   @media (max-width: 768px) {
     flex-direction: column;
