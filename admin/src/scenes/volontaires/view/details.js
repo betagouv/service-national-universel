@@ -11,6 +11,7 @@ import DownloadButton from "../../../components/buttons/DownloadButton";
 import DownloadAttestationButton from "../../../components/buttons/DownloadAttestationButton";
 import { Box, BoxTitle } from "../../../components/box";
 import Emails from "../../../components/views/Emails";
+import InfoIcon from "../../../assets/InfoIcon";
 
 export default ({ young }) => {
   const user = useSelector((state) => state.Auth.user);
@@ -37,6 +38,18 @@ export default ({ young }) => {
                 <Details title="Code Postal" value={young.zip} />
                 <Details title="Dép" value={young.department} />
                 <Details title="Région" value={young.region} />
+                {young.foreignAddress && (
+                  <Infos>
+                    <InfoIcon color="#32257F" />
+                    <p>
+                      Le volontaire réside à l'étranger :
+                      <br />
+                      {[young.foreignAddress, young.foreignZip, young.foreignCity].join(", ")}
+                      <br />
+                      {young.foreignCountry}
+                    </p>
+                  </Infos>
+                )}
                 {(user.role === ROLES.ADMIN) & young.location?.lat && young.location?.lon ? (
                   <Details title="GPS" value={`${young.location?.lat} , ${young.location?.lon}`} copy />
                 ) : null}
@@ -244,5 +257,21 @@ const Wrapper = styled.div`
     background-repeat: no-repeat;
     background-position: center;
     background-size: 15px 15px;
+  }
+`;
+
+const Infos = styled.section`
+  display: grid;
+  grid-template-columns: 1.5rem 2fr;
+  align-items: flex-start;
+  background: rgba(79, 70, 229, 0.1);
+  padding: 1rem;
+  color: #32257f;
+  border-radius: 6px;
+  svg {
+    margin-top: 4px;
+  }
+  p {
+    margin: 0;
   }
 `;
