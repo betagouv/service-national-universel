@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { useDispatch, useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
@@ -12,18 +12,12 @@ import ErrorMessage, { requiredMessage } from "../components/errorMessage";
 import { translate } from "../../../utils";
 import { setYoung } from "../../../redux/auth/actions";
 import { appURL } from "../../../config";
-import ModalConfirm from "../../../components/modals/ModalConfirm";
 
 export default () => {
   const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
-  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
-
-  useEffect(() => {
-    console.log(modal);
-  }, [modal]);
 
   if (!young) {
     history.push("/inscription/profil");
@@ -49,12 +43,6 @@ export default () => {
               toastr.success("Enregistré");
               dispatch(setYoung(data));
               await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_VALIDATION}`, { cta: `${appURL}/auth` });
-              setModal({
-                isOpen: true,
-                title: "Vos retours nous interesse !",
-                message: "Dites nous comment ca s'est passé !",
-                // onCancel: () => history.push("/"),
-              });
             } catch (e) {
               console.log(e);
               toastr.error("Oups, une erreur est survenue pendant le traitement du formulaire :", translate(e.code));
@@ -89,19 +77,6 @@ export default () => {
         </Formik>
       </Info>
       <div className="thumb" />
-      <ModalConfirm
-        isOpen={modal?.isOpen}
-        title={modal?.title}
-        message={modal?.message}
-        // onCancel={() => {
-        //   modal?.onCancel();
-        //   setModal({ isOpen: false, onConfirm: null });
-        // }}
-        // onConfirm={() => {
-        //   modal?.onConfirm();
-        //   setModal({ isOpen: false, onConfirm: null });
-        // }}
-      />
     </Container>
   );
 };
