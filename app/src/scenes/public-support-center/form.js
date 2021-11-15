@@ -47,8 +47,7 @@ export default ({ setOpen, setSuccessMessage, young }) => {
               name="name"
               title="Nom et prénom"
               type="input"
-              // If the young is connected, we can automatically input their name. I don't know if it's a good idea ?
-              value={young ? `${young.firstName} ${young.lastName}` : values.name}
+              value={values.name}
               handleChange={handleChange}
               validate={(v) => !v && requiredMessage}
               errors={errors}
