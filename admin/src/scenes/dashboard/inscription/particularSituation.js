@@ -63,8 +63,6 @@ export default ({ filter }) => {
   }, [JSON.stringify(filter)]);
 
   function render() {
-    if (!handicap || !ppsBeneficiary || !paiBeneficiary || !specificAmenagment) return <Loader />;
-
     return (
       <Row>
         {handicap ? (
