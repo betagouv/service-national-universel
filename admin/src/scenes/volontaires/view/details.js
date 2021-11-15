@@ -38,16 +38,18 @@ export default ({ young }) => {
                 <Details title="Code Postal" value={young.zip} />
                 <Details title="Dép" value={young.department} />
                 <Details title="Région" value={young.region} />
-                <Infos>
-                  <InfoIcon color="#32257F" />
-                  <p>
-                    Le volontaire réside à l'étranger :
-                    <br />
-                    {young.foreignAddress}, {young.foreignZip}, {young.foreignCity}
-                    <br />
-                    {young.foreignCountry}
-                  </p>
-                </Infos>
+                {young.foreignAddress && (
+                  <Infos>
+                    <InfoIcon color="#32257F" />
+                    <p>
+                      Le volontaire réside à l'étranger :
+                      <br />
+                      {[young.foreignAddress, young.foreignZip, young.foreignCity].join(", ")}
+                      <br />
+                      {young.foreignCountry}
+                    </p>
+                  </Infos>
+                )}
                 {(user.role === ROLES.ADMIN) & young.location?.lat && young.location?.lon ? (
                   <Details title="GPS" value={`${young.location?.lat} , ${young.location?.lon}`} copy />
                 ) : null}
