@@ -9,6 +9,7 @@ import close from "../../assets/cancel.png";
 import api from "../../services/api";
 import { translate } from "../../utils";
 import ErrorMessage, { requiredMessage } from "../inscription/components/errorMessage";
+import { SelectTag, step1, step2Technical, step2Question } from "../support-center/worflow";
 
 export default ({ setOpen, setSuccessMessage }) => {
   const history = useHistory();
@@ -43,6 +44,34 @@ export default ({ setOpen, setSuccessMessage }) => {
       >
         {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
           <>
+            <SelectTag
+              name="step1"
+              options={Object.values(step1)}
+              title={"Ma demande"}
+              selectPlaceholder={"Choisir la catégorie"}
+              handleChange={handleChange}
+              value={values?.step1?.id}
+            />
+            {values.step1?.id === "TECHNICAL" ? (
+              <SelectTag
+                name="step2"
+                options={Object.values(step2Technical)}
+                title={"Sujet"}
+                selectPlaceholder={"Choisir le sujet"}
+                handleChange={handleChange}
+                value={values.step2?.id}
+              />
+            ) : null}
+            {values.step1?.id === "QUESTION" ? (
+              <SelectTag
+                name="step2"
+                options={Object.values(step2Question)}
+                title={"Sujet"}
+                selectPlaceholder={"Choisir le sujet"}
+                handleChange={handleChange}
+                value={values.step2?.id}
+              />
+            ) : null}
             <Item
               name="name"
               title="Nom et prénom"
