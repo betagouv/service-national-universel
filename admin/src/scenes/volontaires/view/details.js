@@ -50,7 +50,7 @@ export default ({ young }) => {
                     </p>
                   </Infos>
                 )}
-                {(user.role === ROLES.ADMIN) & young.location?.lat && young.location?.lon ? (
+                {user.role === ROLES.ADMIN && young.location?.lat && young.location?.lon ? (
                   <Details title="GPS" value={`${young.location?.lat} , ${young.location?.lon}`} copy />
                 ) : null}
                 {(young.cniFiles || []).map((e, i) => (
