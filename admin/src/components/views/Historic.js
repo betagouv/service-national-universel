@@ -50,6 +50,11 @@ export default ({ model, value }) => {
 };
 
 const Hit = ({ hit, model }) => {
+  function isIsoDate(str) {
+    if (!Date.parse(str)) return false;
+    var d = new Date(str);
+    return d.toISOString() === str;
+  }
   return (
     <>
       {hit.ops?.map((e, i) => {
@@ -62,8 +67,8 @@ const Hit = ({ hit, model }) => {
             <td>
               <Op>{`${translateOperationName(e.op)}`}</Op> : {`${translateModelFields(model, e.path.substring(1))}`}
             </td>
-            <td>{(Date.parse(originalValue) ? formatStringLongDate(originalValue) : originalValue) || "-"}</td>
-            <td>{(Date.parse(value) ? formatStringLongDate(value) : value) || "-"}</td>
+            <td>{(isIsoDate(originalValue) ? formatStringLongDate(originalValue) : originalValue) || "-"}</td>
+            <td>{(isIsoDate(value) ? formatStringLongDate(value) : value) || "-"}</td>
             <td>{formatStringLongDate(hit.date)}</td>
           </tr>
         );
