@@ -10,6 +10,7 @@ const { ZAMMAD_GROUP } = require("snu-lib/constants");
 const { ticketStateIdByName } = require("snu-lib/zammad");
 const { sendTemplate } = require("../sendinblue");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
+const { SUB_ROLES_LIST, ROLES_LIST } = require("snu-lib/roles");
 const { APP_URL, ADMIN_URL } = require("../config");
 const zammadAuth = require("../middlewares/zammadAuth");
 
@@ -161,9 +162,15 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
     if (req.body.group && ZAMMAD_GROUP.includes(req.body.group)) {
       group = req.body.group;
     } else if (isYoung(req.user)) {
-      group = ZAMMAD_GROUP.YOUNG;
-    } else {
+      group = ZAMMAD_GROUP.VOLONTAIRE;
+    } else if (req.user.role === ROLES_LIST.REFERENT_DEPARTMENT || req.user.role === ROLES_LIST.REFERENT_REGION) {
       group = ZAMMAD_GROUP.REFERENT;
+    } else if (req.user.role === ROLES_LIST.ADMIN) {
+      group = ZAMMAD_GROUP.ADMIN;
+    } else if (req.user.role === ROLES_LIST.RESPONSIBLE) {
+      group = ZAMMAD_GROUP.STRUCTURE;
+    } else {
+      group = ZAMMAD_GROUP.CONTACT;
     }
 
     const ticketTitle = title || `${type} - ${subject}`;
@@ -215,13 +222,14 @@ router.post("/public/ticket", async (req, res) => {
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const { subject, message, tags, title, name, email } = value;
     const user = "auto-1632123676-494804";
+    const group = req.user ? ZAMMAD_GROUP.YOUNG : ZAMMAD_GROUP.CONTACT;
 
     const response = await zammad.api("/tickets", {
       headers: { "X-On-Behalf-Of": user },
       method: "POST",
       body: JSON.stringify({
         title: `🔍 ${title}`,
-        group: "Contact",
+        group,
         customer_id: "40106",
         customer: "plateforme@email.com",
         article: {
