@@ -490,7 +490,14 @@ export default () => {
                             handleChange={handleChange}
                             errors={errors}
                             touched={touched}
-                            keys={{ schoolName: "schoolName", grade: "grade", schoolId: "schoolId", schoolCountry: "schoolCountry", schoolCity: "schoolCity" }}
+                            keys={{
+                              schoolName: "schoolName",
+                              grade: "grade",
+                              schoolId: "schoolId",
+                              schoolCountry: "schoolCountry",
+                              schoolCity: "schoolCity",
+                              schoolAcademy: "schoolAcademy",
+                            }}
                           />
                         </div>
                       )}

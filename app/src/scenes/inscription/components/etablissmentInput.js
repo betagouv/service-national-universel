@@ -6,6 +6,7 @@ import { Field } from "formik";
 import ErrorMessage, { requiredMessage } from "../components/errorMessage";
 import api from "../../../services/api";
 import countries from "i18n-iso-countries";
+import { departmentToAcademy, departmentLookUp } from "../../../utils";
 
 countries.registerLocale(require("i18n-iso-countries/langs/fr.json"));
 const countriesList = countries.getNames("fr", { select: "official" });
@@ -54,8 +55,9 @@ export default ({ handleChange, values, keys, errors, touched, setFieldValue }) 
             <Label>Ville de l'établissement</Label>
             <SchoolCityTypeahead
               initialValue={values[keys.schoolCity] || ""}
-              onChange={(text) => {
-                setFieldValue(keys.schoolCity, text);
+              onChange={(value) => {
+                setFieldValue(keys.schoolCity, value.nom);
+                if (value?.departement?.code) setFieldValue(keys.schoolAcademy, departmentToAcademy[departmentLookUp[value.departement.code]]);
                 setFieldValue(keys.schoolName, "");
                 setFieldValue(keys.schoolId, "");
               }}
@@ -137,7 +139,7 @@ function SchoolCityTypeahead({ onChange, initialValue }) {
           } catch (error) {}
         }}
         onSuggestionsClearRequested={() => setSuggestions([])}
-        getSuggestionValue={(suggestion) => (suggestion !== "noresult" ? `${suggestion.nom}` : "")}
+        getSuggestionValue={(suggestion) => (suggestion !== "noresult" ? suggestion : "")}
         onSuggestionSelected={(event, { suggestion }) => {}}
         renderSuggestion={(suggestion) => (
           <div>
@@ -154,7 +156,7 @@ function SchoolCityTypeahead({ onChange, initialValue }) {
           placeholder: "Indiquez un nom de ville",
           value,
           onChange: (event, { newValue }) => {
-            setValue(newValue);
+            setValue(`${newValue.name || newValue}`);
             onChange(newValue);
           },
           className: "form-control",

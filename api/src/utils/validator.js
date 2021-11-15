@@ -362,6 +362,7 @@ function validateYoung(young, user) {
       })
       .allow(null),
     schoolId: Joi.string().allow(null, ""),
+    schoolAcademy: Joi.string().allow(null, ""),
     employed: Joi.string().allow(null, ""),
     parent1Status: Joi.string().allow(null, ""),
     parent1FirstName: Joi.string().allow(null, ""),
