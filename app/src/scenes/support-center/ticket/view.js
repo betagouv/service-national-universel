@@ -6,7 +6,7 @@ import { NavLink } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
-import { formatStringLongDate, colors, ticketStateNameById } from "../../../utils";
+import { formatStringLongDate, colors, ticketStateNameById, translateState } from "../../../utils";
 import Loader from "../../../components/Loader";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 import SendIcon from "../../../components/SendIcon";
@@ -59,25 +59,25 @@ export default (props) => {
   if (ticket === undefined) return <Loader />;
 
   const displayState = (state) => {
-    if (state === "ouvert")
+    if (state === "open")
       return (
         <StateContainer style={{ display: "flex" }}>
           <MailOpenIcon color="#F8B951" style={{ margin: 0, padding: "5px" }} />
-          ouvert
+          {translateState(state)}
         </StateContainer>
       );
-    if (state === "fermé")
+    if (state === "closed")
       return (
         <StateContainer>
           <SuccessIcon color="#6BC762" style={{ margin: 0, padding: "5px" }} />
-          fermé
+          {translateState(state)}
         </StateContainer>
       );
-    if (state === "nouveau")
+    if (state === "new")
       return (
         <StateContainer>
           <MailCloseIcon color="#F1545B" style={{ margin: 0, padding: "5px" }} />
-          nouveau
+          {translateState(state)}
         </StateContainer>
       );
   };
@@ -85,7 +85,7 @@ export default (props) => {
   return (
     <Container>
       <BackButtonContainer>
-        <BackButton to={`/besoin-d-aide`}>{"<"} Retour à l'accueil</BackButton>
+        <BackButton to={`/besoin-d-aide`}>{"<"} Retour à mes demandes</BackButton>
       </BackButtonContainer>
       <div style={{ padding: 0, display: "flex", flexDirection: "column", height: "calc(100vh - 180px)" }}>
         <Heading>

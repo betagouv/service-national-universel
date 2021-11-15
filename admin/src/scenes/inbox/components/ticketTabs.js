@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { useSelector } from "react-redux";
 
 import Loader from "../../../components/Loader";
-import { formatStringDate, ROLES, ticketStateIdByName, ticketStateNameById } from "../../../utils";
+import { formatStringDate, ROLES, ticketStateIdByName, ticketStateNameById, translateState } from "../../../utils";
 import MailCloseIcon from "../../../components/MailCloseIcon";
 import MailOpenIcon from "../../../components/MailOpenIcon";
 import SuccessIcon from "../../../components/SuccessIcon";
@@ -48,19 +48,19 @@ export default ({ setTicket, selectedTicket }) => {
   };
 
   const displayState = (state) => {
-    if (state === "ouvert")
+    if (state === "open")
       return (
         <StateContainer style={{ display: "flex" }}>
           <MailOpenIcon color="#F8B951" style={{ margin: 0, padding: "5px" }} />
         </StateContainer>
       );
-    if (state === "fermé")
+    if (state === "closed")
       return (
         <StateContainer>
           <SuccessIcon color="#6BC762" style={{ margin: 0, padding: "5px" }} />
         </StateContainer>
       );
-    if (state === "nouveau")
+    if (state === "new")
       return (
         <StateContainer>
           <MailCloseIcon color="#F1545B" style={{ margin: 0, padding: "5px" }} />
@@ -75,13 +75,13 @@ export default ({ setTicket, selectedTicket }) => {
           <TabItem onClick={() => setStateFilter()} isActive={!stateFilter}>
             Tous
           </TabItem>
-          <TabItem onClick={() => setStateFilter(ticketStateIdByName("nouveau"))} isActive={stateFilter === ticketStateIdByName("nouveau")}>
+          <TabItem onClick={() => setStateFilter(ticketStateIdByName("new"))} isActive={stateFilter === ticketStateIdByName("new")}>
             Non&nbsp;lu(s)
           </TabItem>
-          <TabItem onClick={() => setStateFilter(ticketStateIdByName("ouvert"))} isActive={stateFilter === ticketStateIdByName("ouvert")}>
+          <TabItem onClick={() => setStateFilter(ticketStateIdByName("open"))} isActive={stateFilter === ticketStateIdByName("open")}>
             Ouvert(s)
           </TabItem>
-          <TabItem onClick={() => setStateFilter(ticketStateIdByName("fermé"))} isActive={stateFilter === ticketStateIdByName("fermé")}>
+          <TabItem onClick={() => setStateFilter(ticketStateIdByName("closed"))} isActive={stateFilter === ticketStateIdByName("closed")}>
             Archivé(s)
           </TabItem>
           {/* todo other filters */}

@@ -194,13 +194,13 @@ const Schema = new mongoose.Schema({
     type: String,
     documentation: {
       description: "Message envoyé au volontaire dans le cas où son inscription nécessite des corrections.",
-    }
+    },
   },
   inscriptionRefusedMessage: {
     type: String,
     documentation: {
       description: "Message envoyé au volontaire dans le cas où son inscription est refusée.",
-    }
+    },
   },
 
   // userName and userId because it can be a young or a referent
@@ -409,7 +409,7 @@ const Schema = new mongoose.Schema({
   },
   populationDensity: {
     type: String,
-    enum: ["TRES PEU DENSE", "PEU DENSE", "INTERMEDIAIRE", "DENSE"],
+    enum: ["TRES PEU DENSE", "PEU DENSE", "INTERMEDIAIRE", "DENSE", ""],
     documentation: {
       description: "Densité de la ville  pendant le snu du volontaire",
     },
@@ -442,13 +442,6 @@ const Schema = new mongoose.Schema({
     default: "",
     documentation: {
       description: "Le volontaire est dans un Quarier Prioritaire pendant le snu",
-    },
-  },
-  populationDensity: {
-    type: String,
-    default: "",
-    documentation: {
-      description: "Densité de population du domicile du volontaire (ZRR - zone rurale)",
     },
   },
   foreignAddress: {

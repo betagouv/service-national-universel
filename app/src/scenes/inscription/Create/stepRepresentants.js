@@ -17,6 +17,7 @@ import { translate } from "../../../utils";
 import FormLegend from "../../../components/form/FormLegend";
 import FormRow from "../../../components/form/FormRow";
 import FormFooter from "../../../components/form/FormFooter";
+import InfoIcon from "../../../components/InfoIcon";
 
 const Parent = ({ id = 1, values, errors, touched, handleChange, validateField }) => {
   const isParentFromFranceConnect = values[`parent${id}FromFranceConnect`] === "true";
@@ -306,6 +307,15 @@ export default () => {
                   {!isParent2Visible ? "Ajouter" : "Retirer"} le représentant légal nº2
                 </BorderButton>
               </Col>
+              {isParent2Visible ? (
+                <Infos>
+                  <InfoIcon color="#32257F" />
+                  <p>
+                    Veuillez noter que dans le cas où les deux représentants légaux sont renseignés, ceux-ci devront signer conjointement l’ensemble des autorisations demandées
+                    dans la suite du parcours SNU.
+                  </p>
+                </Infos>
+              ) : null}
             </FormRow>
             {isParent2Visible ? <Parent id={2} values={values} handleChange={handleChange} errors={errors} touched={touched} validateField={validateField} /> : null}
             <FormFooter loading={loading} values={values} handleSubmit={handleSubmit} errors={errors} />
@@ -377,5 +387,18 @@ const BorderButton = styled.button`
   :hover {
     background-color: #f9fafb;
     border: 1px solid #5145cd;
+  }
+`;
+
+const Infos = styled.div`
+  display: grid;
+  grid-template-columns: 1.5rem 2fr;
+  align-items: flex-start;
+  background: rgba(79, 70, 229, 0.1);
+  padding: 1rem;
+  color: #32257f;
+  border-radius: 6px;
+  svg {
+    margin-top: 4px;
   }
 `;

@@ -48,6 +48,10 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
     handleChange({ target: { name: keys.department, value: departmentLookUp[depart] } });
     handleChange({ target: { name: keys.region, value: department2region[departmentLookUp[depart]] } });
 
+    if (keys.cityCode) {
+      handleChange({ target: { name: keys.cityCode, value: suggestion.properties.citycode } });
+    }
+
     setSuggestion({});
     addressVerifiedHelpers.setValue(true);
     addressVerifiedHelpers.setError("");

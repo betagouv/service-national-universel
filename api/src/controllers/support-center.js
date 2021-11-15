@@ -14,7 +14,7 @@ const { APP_URL, ADMIN_URL } = require("../config");
 const zammadAuth = require("../middlewares/zammadAuth");
 
 async function checkStateTicket({ state_id, created_by_id, updated_by_id, id, email }) {
-  if (state_id === ticketStateIdByName("fermé")) {
+  if (state_id === ticketStateIdByName("closed")) {
     const response = await zammad.api(`/tickets/${id}`, {
       method: "PUT",
       headers: { "X-On-Behalf-Of": email },
@@ -24,7 +24,7 @@ async function checkStateTicket({ state_id, created_by_id, updated_by_id, id, em
       }),
     });
     if (!response.id) return { ok: false, response };
-  } else if (state_id === ticketStateIdByName("nouveau") && created_by_id !== updated_by_id) {
+  } else if (state_id === ticketStateIdByName("new") && created_by_id !== updated_by_id) {
     const response = await zammad.api(`/tickets/${id}`, {
       method: "PUT",
       headers: { "X-On-Behalf-Of": email },

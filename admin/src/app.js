@@ -8,7 +8,6 @@ import { Integrations } from "@sentry/tracing";
 import styled from "styled-components";
 
 import { setUser, setStructure, setTickets } from "./redux/auth/actions";
-
 import Auth from "./scenes/auth";
 import Validate from "./scenes/validate";
 import Profil from "./scenes/profil";
@@ -68,7 +67,7 @@ export default () => {
         if (res.user) dispatch(setUser(res.user));
         // const { data } = await api.get(`/support-center/ticket_overviews`);
         // dispatch(setTickets(data));
-      } catch (e) { }
+      } catch (e) {}
       setLoading(false);
     }
     fetchData();

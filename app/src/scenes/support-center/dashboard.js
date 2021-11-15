@@ -9,7 +9,7 @@ import { useSelector } from "react-redux";
 import { HeroContainer } from "../../components/Content";
 import api from "../../services/api";
 import Loader from "../../components/Loader";
-import { ticketStateNameById, colors } from "../../utils";
+import { ticketStateNameById, colors, translateState } from "../../utils";
 import MailCloseIcon from "../../components/MailCloseIcon";
 import MailOpenIcon from "../../components/MailOpenIcon";
 import SuccessIcon from "../../components/SuccessIcon";
@@ -60,25 +60,25 @@ export default () => {
   };
 
   const displayState = (state) => {
-    if (state === "ouvert")
+    if (state === "open")
       return (
         <StateContainer style={{ display: "flex" }}>
           <MailOpenIcon color="#F8B951" style={{ margin: 0, padding: "5px" }} />
-          {state}
+          {translateState(state)}
         </StateContainer>
       );
-    if (state === "fermé")
+    if (state === "closed")
       return (
         <StateContainer>
           <SuccessIcon color="#6BC762" style={{ margin: 0, padding: "5px" }} />
-          {state}
+          {translateState(state)}
         </StateContainer>
       );
-    if (state === "nouveau")
+    if (state === "new")
       return (
         <StateContainer>
           <MailCloseIcon color="#F1545B" style={{ margin: 0, padding: "5px" }} />
-          {state}
+          {translateState(state)}
         </StateContainer>
       );
   };
@@ -192,9 +192,11 @@ const Container = styled.div`
     grid-template-rows: 2fr 1fr;
     text-align: center;
   }
-  ${'' /* .help-section-text {
+  ${
+    "" /* .help-section-text {
     flex: 3;
-  } */}
+  } */
+  }
   .link {
     color: #6b7280;
     :hover {
