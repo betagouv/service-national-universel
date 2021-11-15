@@ -21,7 +21,7 @@ export default () => {
             <img src={require("../../assets/close.svg")} height={15} onClick={() => setShowAlert(false)} />
           </Alert>
         )}
-        <Content showAlert={showAlert}>
+        <Content showAlert={showAlert} style={{ paddingBottom: "1rem" }}>
           <h1 style={{ marginTop: "1.5rem" }}>
             <strong>{young.firstName},</strong> bienvenue sur votre compte volontaire.
           </h1>
@@ -45,7 +45,7 @@ export default () => {
               </Link>
             </>
           ) : null}
-          <div style={{ paddingTop: "2rem" }}>
+          <div style={{ display: "flex", justifyContent: "flex-end", paddingTop: "2rem" }}>
             <a href="https://voxusagers.numerique.gouv.fr/Demarches/3154?&view-mode=formulaire-avis&nd_mode=en-ligne-enti%C3%A8rement&nd_source=button&key=060c41afff346d1b228c2c02d891931f">
               <img src="https://voxusagers.numerique.gouv.fr/static/bouton-blanc.svg" alt="Je donne mon avis" />
             </a>
