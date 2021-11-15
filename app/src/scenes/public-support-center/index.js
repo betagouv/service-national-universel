@@ -79,7 +79,7 @@ export default () => {
     <HeroContainer style={{ paddingBottom: "5rem" }}>
       <Container style={{ backdropFilter: "blur(6px)" }}>
         {!young && (
-          <p style={{ textAlign: "center", fontSize: "0.8rem" }}>Vous avez déjà un compte sur le site du SNU ? <a className="link" style={{ color: "#32257F", fontWeight: "bold" }} href="https://moncompte.snu.gouv.fr/auth/login?redirect=besoin-d-aide" target="_blank" rel="noopener noreferrer">Connectez-vous</a></p>
+          <p style={{ textAlign: "center", fontSize: "0.8rem", color: "#6B7280" }}>Vous avez déjà un compte sur le site du SNU ? <a className="link" style={{ color: "#32257F", fontWeight: "bold" }} href="https://moncompte.snu.gouv.fr/auth/login?redirect=besoin-d-aide" target="_blank" rel="noopener noreferrer">Connectez-vous</a></p>
         )}
         <h4 style={{ textAlign: "center" }}>Besoin d'aide&nbsp;?</h4>
         <div className="help-section">
@@ -141,7 +141,7 @@ export default () => {
         }
         {
           successMessage && (
-            <p>{successMessage}</p>
+            <p style={{ color: "#6B7280" }}>{successMessage}</p>
           )
         }
       </Container>
