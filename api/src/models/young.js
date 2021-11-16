@@ -194,13 +194,13 @@ const Schema = new mongoose.Schema({
     type: String,
     documentation: {
       description: "Message envoyé au volontaire dans le cas où son inscription nécessite des corrections.",
-    }
+    },
   },
   inscriptionRefusedMessage: {
     type: String,
     documentation: {
       description: "Message envoyé au volontaire dans le cas où son inscription est refusée.",
-    }
+    },
   },
 
   // userName and userId because it can be a young or a referent
