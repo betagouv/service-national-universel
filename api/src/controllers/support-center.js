@@ -10,7 +10,8 @@ const { ZAMMAD_GROUP } = require("snu-lib/constants");
 const { ticketStateIdByName } = require("snu-lib/zammad");
 const { sendTemplate } = require("../sendinblue");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
-const { APP_URL, ADMIN_URL } = require("../config");
+const { APP_URL, ADMIN_URL, ZAMMAD_PLATEFORME_USER, ZAMMAD_PLATEFORME_USER_ID } = require("../config");
+const { ROLES } = require("snu-lib/roles");
 const zammadAuth = require("../middlewares/zammadAuth");
 
 async function checkStateTicket({ state_id, created_by_id, updated_by_id, id, email }) {
@@ -147,10 +148,10 @@ router.put("/ticket/:id", passport.authenticate(["referent", "young"], { session
   }
 });
 
-// Create a new ticket
+// Create a new ticket while authenticated
 router.post("/ticket", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { subject, type, message, tags, title } = req.body;
+    const { subject, type, message, tags, title, } = req.body;
     const email = req.user.email;
 
     const customer_id = await zammad.getCustomerIdByEmail(email);
@@ -161,9 +162,15 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
     if (req.body.group && ZAMMAD_GROUP.includes(req.body.group)) {
       group = req.body.group;
     } else if (isYoung(req.user)) {
-      group = ZAMMAD_GROUP.YOUNG;
-    } else {
+      group = ZAMMAD_GROUP.VOLONTAIRE;
+    } else if (req.user.role === ROLES.REFERENT_DEPARTMENT || req.user.role === ROLES.REFERENT_REGION) {
       group = ZAMMAD_GROUP.REFERENT;
+    } else if (req.user.role === ROLES.ADMIN) {
+      group = ZAMMAD_GROUP.ADMIN;
+    } else if (req.user.role === ROLES.RESPONSIBLE || req.user.role === ROLES.SUPERVISOR) {
+      group = ZAMMAD_GROUP.STRUCTURE;
+    } else {
+      group = ZAMMAD_GROUP.CONTACT;
     }
 
     const ticketTitle = title || `${type} - ${subject}`;
@@ -186,6 +193,54 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
       }),
     });
     if (!response.id) return res.status(400).send({ ok: false });
+    return res.status(200).send({ ok: true, data: response });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+// Create a new ticket while non-authenticated
+router.post("/public/ticket", async (req, res) => {
+  try {
+    const ticketObject = {
+      email: req.body.email,
+      subject: req.body.subject,
+      message: req.body.message,
+      title: req.body.title,
+      name: req.body.name,
+    };
+    const { error, value } = Joi.object({
+      email: Joi.string().email().required(),
+      subject: Joi.string().required(),
+      message: Joi.string().required(),
+      title: Joi.string().required(),
+      name: Joi.string().required(),
+    })
+      .unknown()
+      .validate(ticketObject);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { subject, message, title, name, email } = value;
+    const group = req.user ? ZAMMAD_GROUP.YOUNG : ZAMMAD_GROUP.CONTACT;
+
+    const response = await zammad.api("/tickets", {
+      headers: { "X-On-Behalf-Of": ZAMMAD_PLATEFORME_USER },
+      method: "POST",
+      body: JSON.stringify({
+        title: `🔍 ${title}`,
+        group,
+        customer_id: ZAMMAD_PLATEFORME_USER_ID,
+        customer: ZAMMAD_PLATEFORME_USER,
+        article: {
+          subject,
+          body: `- Nom et prénom : ${name}\n- Email : ${email}\n\n${message}`,
+          // type:'note',
+          internal: false,
+        },
+        tags: req.body.tags ? req.body.tags.join(",") : "",
+      }),
+    });
+    if (!response.id) return res.status(400).send({ ok: false, message: response });
     return res.status(200).send({ ok: true, data: response });
   } catch (error) {
     capture(error);

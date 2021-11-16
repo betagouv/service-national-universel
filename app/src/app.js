@@ -89,6 +89,7 @@ export default () => {
           <Route path="/bug" component={Bug} />
           <Route path="/conditions-generales-utilisation" component={CGU} />
           <Route path="/public-besoin-d-aide" component={PublicSupport} />
+          <Route path="/besoin-d-aide" component={SupportCenter} />
           <Route path="/validate-contract/done" component={ContractDone} />
           <Route path="/validate-contract" component={Contract} />
           <Route path="/inscription" component={Inscription} />
@@ -132,7 +133,6 @@ const Espace = () => {
             <Route path="/candidature" component={Applications} />
             <Route path="/cohesion" component={Cohesion} />
             <Route path="/diagoriente" component={Diagoriente} />
-            <Route path="/besoin-d-aide" component={SupportCenter} />
             {ENABLE_PM && <Route path="/ma-preparation-militaire" component={MilitaryPreparation} />}
             <Route path="/" component={Home} />
           </Switch>

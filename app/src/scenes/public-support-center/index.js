@@ -1,10 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import styled from "styled-components";
 
 import { HeroContainer } from "../../components/Content";
 import { colors } from "../../utils";
-import ZammadButton from "../../components/buttons/ZammadButton";
+import ZammadForm from "./form";
 
 const articles = [
   {
@@ -72,12 +72,14 @@ const articles = [
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
+  const [open, setOpen] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
   return (
-    <HeroContainer>
-      <Container>
+    <HeroContainer style={{ paddingBottom: "5rem" }}>
+      <Container style={{ backdropFilter: "blur(6px)" }}>
         {!young && (
-           <p style={{ textAlign: "center", fontSize: "0.8rem" }}>Vous avez déjà un compte sur le site du SNU ? <a className="link" style={{ color: "#32257F", fontWeight: "bold" }} href="https://moncompte.snu.gouv.fr/auth/login?redirect=besoin-d-aide" target="_blank" rel="noopener noreferrer">Connectez-vous</a></p>
+          <p style={{ textAlign: "center", fontSize: "0.8rem", color: "#6B7280" }}>Vous avez déjà un compte sur le site du SNU ? <a className="link" style={{ color: "#32257F", fontWeight: "bold" }} href="https://moncompte.snu.gouv.fr/auth/login?redirect=besoin-d-aide" target="_blank" rel="noopener noreferrer">Connectez-vous</a></p>
         )}
         <h4 style={{ textAlign: "center" }}>Besoin d'aide&nbsp;?</h4>
         <div className="help-section">
@@ -126,16 +128,29 @@ export default () => {
               N'hésitez pas à <strong>contacter notre service de support</strong>, nous vous répondrons dans les plus brefs délais !
             </div>
             <div className="zammad-container">
-              <ZammadButton />
+              <LinkButton onClick={() => setOpen(true)}>
+                Contacter quelqu'un
+              </LinkButton>
             </div>
           </div>
         </div>
+        {
+          open && !successMessage && (
+            <ZammadForm setOpen={setOpen} setSuccessMessage={setSuccessMessage} young={young} />
+          )
+        }
+        {
+          successMessage && (
+            <p style={{ color: "#6B7280" }}>{successMessage}</p>
+          )
+        }
       </Container>
     </HeroContainer>
   );
 };
 
 const Container = styled.div`
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -149,6 +164,7 @@ const Container = styled.div`
       flex: 1;
     }
     .zammad-container {
+      margin-top: 0.7rem;
       flex: 1;
     }
   }
@@ -186,6 +202,7 @@ const LinkButton = styled.a`
   color: #fff;
   transition: opacity 0.3s;
   :hover {
+    cursor: pointer;
     color: #fff;
     background: #463bad;
   }
