@@ -96,6 +96,54 @@ export const step2Question = {
   },
 };
 
+export const step2TechnicalPublic = {
+  DOWNLOAD: {
+    parentId: "TECHNICAL",
+    id: "DOWNLOAD",
+    label: "Je n'arrive pas à télécharger un document depuis la plateforme",
+    tags: ["TAG_téléchargment"],
+  },
+  UPLOAD: {
+    parentId: "TECHNICAL",
+    id: "UPLOAD",
+    label: "Je n'arrive pas à téléverser (déposer) un document",
+    tags: ["TAG_téléversement"],
+  },
+  LOGIN: {
+    parentId: "TECHNICAL",
+    id: "LOGIN",
+    label: "Je n'arrive pas à me connecter (Identifiant ou mot de passe incorrect)",
+    tags: ["TAG_probleme_connexion"],
+  },
+  OTHER: {
+    parentId: "TECHNICAL",
+    id: "OTHER",
+    label: "J'ai un autre problème",
+    tags: ["TAG_autre"],
+  },
+}
+
+export const step2QuestionPublic = {
+  PHASE_0: {
+    parentId: "QUESTION",
+    id: "PHASE_0",
+    label: "Les inscriptions des volontaires",
+    tags: ["TAG_phase_0"],
+  },
+  STRUCTURE: {
+    parentId: "QUESTION",
+    id: "STRUCTURE",
+    label: "L'inscription des structures",
+    tags: ["TAG_créer_compte_structure"],
+  },
+  OTHER: {
+    parentId: "QUESTION",
+    id: "OTHER",
+    label: "Autre",
+    tags: ["TAG_autre"],
+  },
+}
+
 const Label = styled.div`
   color: #374151;
   font-weight: 600;

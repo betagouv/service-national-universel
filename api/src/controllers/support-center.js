@@ -220,7 +220,7 @@ router.post("/public/ticket", async (req, res) => {
       .unknown()
       .validate(ticketObject);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    const { subject, message, tags, title, name, email } = value;
+    const { subject, message, title, name, email } = value;
     const user = "auto-1632123676-494804";
     const group = req.user ? ZAMMAD_GROUP.YOUNG : ZAMMAD_GROUP.CONTACT;
 
@@ -238,7 +238,7 @@ router.post("/public/ticket", async (req, res) => {
           // type:'note',
           internal: false,
         },
-        tags: tags ? tags.join(",") : "",
+        tags: req.body.tags ? req.body.tags.join(",") : "",
       }),
     });
     if (!response.id) return res.status(400).send({ ok: false });

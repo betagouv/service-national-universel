@@ -9,11 +9,11 @@ import close from "../../assets/cancel.png";
 import api from "../../services/api";
 import { translate } from "../../utils";
 import ErrorMessage, { requiredMessage } from "../inscription/components/errorMessage";
-import { SelectTag, step1, step2Technical, step2Question } from "../support-center/ticket/worflow";
+import { SelectTag, step1, step2TechnicalPublic, step2QuestionPublic } from "../support-center/ticket/worflow";
 
 export default ({ setOpen, setSuccessMessage }) => {
   const history = useHistory();
-  const tags = [`EMETTEUR_Exterieur`, `CANAL_Plateforme`, `AGENT_Startup_Support`];
+  const tags = [`EMETTEUR_Exterieur`, `CANAL_Formulaire`, `AGENT_Startup_Support`];
   return (
     <Form>
       <img src={close} onClick={() => setOpen(false)} />
@@ -23,14 +23,14 @@ export default ({ setOpen, setSuccessMessage }) => {
         validateOnBlur={false}
         onSubmit={async (values) => {
           try {
-            const { message, subject, name, email } = values;
+            const { message, subject, name, email, step1, step2, } = values;
             const { ok, code, data } = await api.post("/support-center/public/ticket", {
-              title: `Formulaire de contact - ${name} - ${subject}`,
+              title: `${step1?.label} - ${step2?.label} - ${subject}`,
               subject,
               name,
               email,
               message,
-              tags: [...new Set([...tags])], // we use this dirty hack to remove duplicates
+              tags: [...new Set([...tags, ...step1?.tags, ...step2?.tags])], // we use this dirty hack to remove duplicates
             });
             if (!ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(code));
             toastr.success("Ticket créé");
@@ -44,34 +44,6 @@ export default ({ setOpen, setSuccessMessage }) => {
       >
         {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
           <>
-            <SelectTag
-              name="step1"
-              options={Object.values(step1)}
-              title={"Ma demande"}
-              selectPlaceholder={"Choisir la catégorie"}
-              handleChange={handleChange}
-              value={values?.step1?.id}
-            />
-            {values.step1?.id === "TECHNICAL" ? (
-              <SelectTag
-                name="step2"
-                options={Object.values(step2Technical)}
-                title={"Sujet"}
-                selectPlaceholder={"Choisir le sujet"}
-                handleChange={handleChange}
-                value={values.step2?.id}
-              />
-            ) : null}
-            {values.step1?.id === "QUESTION" ? (
-              <SelectTag
-                name="step2"
-                options={Object.values(step2Question)}
-                title={"Sujet"}
-                selectPlaceholder={"Choisir le sujet"}
-                handleChange={handleChange}
-                value={values.step2?.id}
-              />
-            ) : null}
             <Item
               name="name"
               title="Nom et prénom"
@@ -94,6 +66,34 @@ export default ({ setOpen, setSuccessMessage }) => {
               touched={touched}
               rows="2"
             />
+            <SelectTag
+              name="step1"
+              options={Object.values(step1)}
+              title={"Ma demande"}
+              selectPlaceholder={"Choisir la catégorie"}
+              handleChange={handleChange}
+              value={values?.step1?.id}
+            />
+            {values.step1?.id === "TECHNICAL" ? (
+              <SelectTag
+                name="step2"
+                options={Object.values(step2TechnicalPublic)}
+                title={"Sujet"}
+                selectPlaceholder={"Choisir le sujet"}
+                handleChange={handleChange}
+                value={values.step2?.id}
+              />
+            ) : null}
+            {values.step1?.id === "QUESTION" ? (
+              <SelectTag
+                name="step2"
+                options={Object.values(step2QuestionPublic)}
+                title={"Sujet"}
+                selectPlaceholder={"Choisir le sujet"}
+                handleChange={handleChange}
+                value={values.step2?.id}
+              />
+            ) : null}
             <Item
               name="subject"
               title="Le sujet de ma demande"
