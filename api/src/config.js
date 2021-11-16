@@ -6,6 +6,8 @@ const secret = process.env.SECRET || "not-so-secret";
 let APP_URL = process.env.APP_URL || "http://localhost:8081";
 let ADMIN_URL = process.env.ADMIN_URL || "http://localhost:8082";
 let ZAMMAD_IP = process.env.ZAMMAD_IP || "";
+let ZAMMAD_PLATEFORME_USER = process.env.ZAMMAD_PLATEFORME_USER || "";
+let ZAMMAD_PLATEFORME_USER_ID = process.env.ZAMMAD_PLATEFORME_USER_ID || "";
 
 const ES_ENDPOINT = process.env.ES_ENDPOINT || "";
 
@@ -52,6 +54,8 @@ module.exports = {
   API_ENGAGEMENT_KEY,
   ZAMMAD_TOKEN,
   ZAMMAD_URL,
+  ZAMMAD_PLATEFORME_USER,
+  ZAMMAD_PLATEFORME_USER_ID,
   API_ASSOCIATION_ES_ENDPOINT,
   API_ASSOCIATION_AWS_ACCESS_KEY_ID,
   API_ASSOCIATION_AWS_SECRET_ACCESS_KEY,

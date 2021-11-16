@@ -194,13 +194,13 @@ const Schema = new mongoose.Schema({
     type: String,
     documentation: {
       description: "Message envoyé au volontaire dans le cas où son inscription nécessite des corrections.",
-    }
+    },
   },
   inscriptionRefusedMessage: {
     type: String,
     documentation: {
       description: "Message envoyé au volontaire dans le cas où son inscription est refusée.",
-    }
+    },
   },
 
   // userName and userId because it can be a young or a referent
@@ -380,56 +380,56 @@ const Schema = new mongoose.Schema({
   address: {
     type: String,
     documentation: {
-      description: "Adresse du volontaire",
+      description: "Adresse pendant le snu du volontaire",
     },
   },
   complementAddress: {
     type: String,
     documentation: {
-      description: "Complément d'adresse du volontaire",
+      description: "Complément d'adresse pendant le snu du volontaire",
     },
   },
   zip: {
     type: String,
     documentation: {
-      description: "Code postal du volontaire",
+      description: "Code postal pendant le snu du volontaire",
     },
   },
   city: {
     type: String,
     documentation: {
-      description: "Ville du volontaire",
+      description: "Ville pendant le snu du volontaire",
     },
   },
   cityCode: {
     type: String,
     documentation: {
-      description: "Code insee de la ville",
+      description: "Code pendant le snu insee de la ville",
     },
   },
   populationDensity: {
     type: String,
     enum: ["TRES PEU DENSE", "PEU DENSE", "INTERMEDIAIRE", "DENSE", ""],
     documentation: {
-      description: "tres peu dense, peu dense, intermediaire, tres dense",
+      description: "Densité de la ville  pendant le snu du volontaire",
     },
   },
   department: {
     type: String,
     documentation: {
-      description: "Département du volontaire",
+      description: "Département pendant le snu du volontaire",
     },
   },
   region: {
     type: String,
     documentation: {
-      description: "Région du volontaire",
+      description: "Région pendant le snu du volontaire",
     },
   },
   country: {
     type: String,
     documentation: {
-      description: "Pays de résidence du volontaire",
+      description: "Pays de résidence pendant le snu du volontaire",
     },
   },
   location: {
@@ -441,7 +441,31 @@ const Schema = new mongoose.Schema({
     enum: ["true", "false", ""],
     default: "",
     documentation: {
-      description: "Le volontaire est dans un Quarier Prioritaire",
+      description: "Le volontaire est dans un Quarier Prioritaire pendant le snu",
+    },
+  },
+  foreignAddress: {
+    type: String,
+    documentation: {
+      description: "Adresse à l'étranger du volontaire",
+    },
+  },
+  foreignCity: {
+    type: String,
+    documentation: {
+      description: "Ville à l'étranger du volontaire",
+    },
+  },
+  foreignZip: {
+    type: String,
+    documentation: {
+      description: "Code postal à l'étranger du volontaire",
+    },
+  },
+  foreignCountry: {
+    type: String,
+    documentation: {
+      description: "Pays à l'étranger du volontaire",
     },
   },
 
@@ -744,6 +768,12 @@ const Schema = new mongoose.Schema({
       description: "Prénom de l'hébergeur",
     },
   },
+  hostRelationship: {
+    type: String,
+    documentation: {
+      description: "Lien de l'hébergeur avec le volontaire",
+    },
+  },
   hostCity: {
     type: String,
     documentation: {
@@ -774,13 +804,6 @@ const Schema = new mongoose.Schema({
       description: "Région de l'hébergeur",
     },
   },
-  hostRelationship: {
-    type: String,
-    documentation: {
-      description: "Lien de l'hébergeur avec le volontaire",
-    },
-  },
-
   // * Situations particulières
   handicap: {
     type: String,

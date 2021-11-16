@@ -10,7 +10,7 @@ import countries from "i18n-iso-countries";
 countries.registerLocale(require("i18n-iso-countries/langs/fr.json"));
 const countriesList = countries.getNames("fr", { select: "official" });
 
-export default ({ keys, values, handleChange, errors, touched, validateField, countryVisible = false }) => {
+export default ({ keys, values, handleChange, errors, touched, validateField, countryVisible = false, onChangeCountry = () => {}, countryByDefault = "" }) => {
   const [suggestion, setSuggestion] = useState({});
   const [addressInFrance, setAddressInFrance] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -24,13 +24,12 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
       const inputElements = document.getElementsByTagName("input");
       for (let i = 0; inputElements[i]; i++) inputElements[i].setAttribute("autocomplete", "novalue");
     }
-    if (!values[keys.country]) handleChange({ target: { name: keys.country, value: "France" } });
+    if (!values[keys.country]) handleChange({ target: { name: keys.country, value: countryByDefault } });
   }, []);
 
   useEffect(() => {
     setAddressInFrance(values[keys.country] === undefined || values[keys.country] === "France");
     if (values[keys.country] === undefined) addressVerifiedHelpers.setValue(false);
-    else if (values[keys.country] !== "France") addressVerifiedHelpers.setValue(true);
   }, [values[keys.country]]);
 
   const onSuggestionSelected = () => {
@@ -98,16 +97,21 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
                 onChange={(e) => {
                   const value = e.target.value;
                   handleChange({ target: { name: keys.country, value } });
+                  onChangeCountry();
                 }}
               >
+                <option value="" label="Sélectionner un pays" disabled>
+                  Sélectionner un pays
+                </option>
                 {Object.values(countriesList)
                   .sort((a, b) => a.localeCompare(b))
                   .map((countryName) => (
-                    <option key={countryName} value={countryName}>
+                    <option key={countryName} value={countryName} label={countryName}>
                       {countryName}
                     </option>
                   ))}
               </Field>
+              <ErrorMessage errors={errors} touched={touched} name={keys.country} />
             </Col>
           )}
           <Col md={12} style={{ marginTop: 15 }}>

@@ -10,8 +10,8 @@ const { ZAMMAD_GROUP } = require("snu-lib/constants");
 const { ticketStateIdByName } = require("snu-lib/zammad");
 const { sendTemplate } = require("../sendinblue");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
-const { SUB_ROLES_LIST, ROLES_LIST } = require("snu-lib/roles");
-const { APP_URL, ADMIN_URL } = require("../config");
+const { APP_URL, ADMIN_URL, ZAMMAD_PLATEFORME_USER, ZAMMAD_PLATEFORME_USER_ID } = require("../config");
+const { ROLES } = require("snu-lib/roles");
 const zammadAuth = require("../middlewares/zammadAuth");
 
 async function checkStateTicket({ state_id, created_by_id, updated_by_id, id, email }) {
@@ -163,11 +163,11 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
       group = req.body.group;
     } else if (isYoung(req.user)) {
       group = ZAMMAD_GROUP.VOLONTAIRE;
-    } else if (req.user.role === ROLES_LIST.REFERENT_DEPARTMENT || req.user.role === ROLES_LIST.REFERENT_REGION) {
+    } else if (req.user.role === ROLES.REFERENT_DEPARTMENT || req.user.role === ROLES.REFERENT_REGION) {
       group = ZAMMAD_GROUP.REFERENT;
-    } else if (req.user.role === ROLES_LIST.ADMIN) {
+    } else if (req.user.role === ROLES.ADMIN) {
       group = ZAMMAD_GROUP.ADMIN;
-    } else if (req.user.role === ROLES_LIST.RESPONSIBLE) {
+    } else if (req.user.role === ROLES.RESPONSIBLE || req.user.role === ROLES.SUPERVISOR) {
       group = ZAMMAD_GROUP.STRUCTURE;
     } else {
       group = ZAMMAD_GROUP.CONTACT;
@@ -221,17 +221,16 @@ router.post("/public/ticket", async (req, res) => {
       .validate(ticketObject);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const { subject, message, title, name, email } = value;
-    const user = "auto-1632123676-494804";
     const group = req.user ? ZAMMAD_GROUP.YOUNG : ZAMMAD_GROUP.CONTACT;
 
     const response = await zammad.api("/tickets", {
-      headers: { "X-On-Behalf-Of": user },
+      headers: { "X-On-Behalf-Of": ZAMMAD_PLATEFORME_USER },
       method: "POST",
       body: JSON.stringify({
         title: `🔍 ${title}`,
         group,
-        customer_id: "40106",
-        customer: "plateforme@email.com",
+        customer_id: ZAMMAD_PLATEFORME_USER_ID,
+        customer: ZAMMAD_PLATEFORME_USER,
         article: {
           subject,
           body: `- Nom et prénom : ${name}\n- Email : ${email}\n\n${message}`,
@@ -241,7 +240,7 @@ router.post("/public/ticket", async (req, res) => {
         tags: req.body.tags ? req.body.tags.join(",") : "",
       }),
     });
-    if (!response.id) return res.status(400).send({ ok: false });
+    if (!response.id) return res.status(400).send({ ok: false, message: response });
     return res.status(200).send({ ok: true, data: response });
   } catch (error) {
     capture(error);

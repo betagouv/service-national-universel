@@ -46,6 +46,7 @@ export default () => {
   }, []);
 
   const getLastContactName = (array) => {
+    if (!array || array?.error) return "-";
     const lastTicketFromAgent = array?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))?.find((e) => e.created_by !== user.email);
     return lastTicketFromAgent?.from || "-";
   };
@@ -134,7 +135,7 @@ export default () => {
             <NavLink to={`/besoin-d-aide/ticket/${ticket.id}`} key={ticket.id} className="ticket">
               <p>{ticket.number}</p>
               <p>{ticket.title}</p>
-              <p>{getLastContactName(ticket?.articles)}</p>
+              <p>{getLastContactName(ticket?.articles || [])}</p>
               <p>{displayState(ticketStateNameById(ticket.state_id))}</p>
               <div className="ticket-date">{dayjs(new Date(ticket.updated_at)).fromNow()}</div>
             </NavLink>
@@ -229,6 +230,7 @@ const LinkButton = styled.a`
     background: #463bad;
   }
 `;
+
 const InternalLink = styled(NavLink)`
   max-width: 230px;
   margin: 0.3rem;
