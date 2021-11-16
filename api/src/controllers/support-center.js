@@ -11,7 +11,7 @@ const { ticketStateIdByName } = require("snu-lib/zammad");
 const { sendTemplate } = require("../sendinblue");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { APP_URL, ADMIN_URL, ZAMMAD_PLATEFORME_USER, ZAMMAD_PLATEFORME_USER_ID } = require("../config");
-const { SUB_ROLES_LIST, ROLES_LIST } = require("snu-lib/roles");
+const { ROLES } = require("snu-lib/roles");
 const zammadAuth = require("../middlewares/zammadAuth");
 
 async function checkStateTicket({ state_id, created_by_id, updated_by_id, id, email }) {
@@ -152,7 +152,7 @@ router.put("/ticket/:id", passport.authenticate(["referent", "young"], { session
 router.post("/ticket", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { subject, type, message, tags, title, } = req.body;
-    const email = req.user?.email;
+    const email = req.user.email;
 
     const customer_id = await zammad.getCustomerIdByEmail(email);
     if (!customer_id) return res.status(403).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -163,11 +163,11 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
       group = req.body.group;
     } else if (isYoung(req.user)) {
       group = ZAMMAD_GROUP.VOLONTAIRE;
-    } else if (req.user.role === ROLES_LIST.REFERENT_DEPARTMENT || req.user.role === ROLES_LIST.REFERENT_REGION) {
+    } else if (req.user.role === ROLES.REFERENT_DEPARTMENT || req.user.role === ROLES.REFERENT_REGION) {
       group = ZAMMAD_GROUP.REFERENT;
-    } else if (req.user.role === ROLES_LIST.ADMIN) {
+    } else if (req.user.role === ROLES.ADMIN) {
       group = ZAMMAD_GROUP.ADMIN;
-    } else if (req.user.role === ROLES_LIST.RESPONSIBLE) {
+    } else if (req.user.role === ROLES.RESPONSIBLE) {
       group = ZAMMAD_GROUP.STRUCTURE;
     } else {
       group = ZAMMAD_GROUP.CONTACT;
