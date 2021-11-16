@@ -46,7 +46,7 @@ export default () => {
   }, []);
 
   const getLastContactName = (array) => {
-    if (!array) return "-";
+    if (!array || array === []) return "-";
     const lastTicketFromAgent = array?.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))?.find((e) => e.created_by !== user.email);
     return lastTicketFromAgent?.from || "-";
   };
