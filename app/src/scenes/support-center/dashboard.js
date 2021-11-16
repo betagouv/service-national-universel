@@ -85,6 +85,9 @@ export default () => {
 
   return (
     <HeroContainer>
+      <NavLink className="link" style={{ color: "#32257F", fontWeight: "bold" }} to="/profil"> <svg width="8" height="11" viewBox="0 0 6 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4.42367 0L0.423279 4.00716L4.42367 8.01432L5.41483 7.02148L2.4056 4.00716L5.41483 0.992838L4.42367 0Z" fill="#32257F" />
+      </svg> Retour à mon espace</NavLink>
       <Container>
         <h4 style={{ textAlign: "center" }}>Besoin d'aide&nbsp;?</h4>
         <div className="help-section">
@@ -192,8 +195,7 @@ const Container = styled.div`
     grid-template-rows: 2fr 1fr;
     text-align: center;
   }
-  ${
-    "" /* .help-section-text {
+  ${"" /* .help-section-text {
     flex: 3;
   } */
   }
