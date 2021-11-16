@@ -134,7 +134,7 @@ export default () => {
             <NavLink to={`/besoin-d-aide/ticket/${ticket.id}`} key={ticket.id} className="ticket">
               <p>{ticket.number}</p>
               <p>{ticket.title}</p>
-              <p>{getLastContactName(ticket?.articles)}</p>
+              <p>{getLastContactName(ticket?.articles) || "-"}</p>
               <p>{displayState(ticketStateNameById(ticket.state_id))}</p>
               <div className="ticket-date">{dayjs(new Date(ticket.updated_at)).fromNow()}</div>
             </NavLink>
