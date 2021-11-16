@@ -230,6 +230,7 @@ const LinkButton = styled.a`
     background: #463bad;
   }
 `;
+
 const InternalLink = styled(NavLink)`
   max-width: 230px;
   margin: 0.3rem;
