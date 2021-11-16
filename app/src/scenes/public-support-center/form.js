@@ -8,6 +8,7 @@ import close from "../../assets/cancel.png";
 
 import api from "../../services/api";
 import { translate } from "../../utils";
+import LoadingButton from "../../components/buttons/LoadingButton";
 import ErrorMessage, { requiredMessage } from "../inscription/components/errorMessage";
 
 export default ({ setOpen, setSuccessMessage, young }) => {
@@ -87,9 +88,9 @@ export default ({ setOpen, setSuccessMessage, young }) => {
               touched={touched}
               rows="5"
             />
-            <ContinueButton type="submit" style={{ marginLeft: 10 }} onClick={handleSubmit} disabled={isSubmitting}>
+            <LoadingButton type="submit" style={{ marginLeft: 15, maxWidth: "150px", marginTop: 15 }} onClick={handleSubmit} disabled={isSubmitting}>
               Envoyer
-            </ContinueButton>
+            </LoadingButton>
           </>
         )}
       </Formik>
