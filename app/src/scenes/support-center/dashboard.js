@@ -128,7 +128,7 @@ export default () => {
       </Container>
       <h4 style={{ marginLeft: "0.5rem" }}>Quelques articles pour vous aider&nbsp;:</h4>
       <Articles>
-        {articles.map((article) => (
+        {articles?.map((article) => (
           <div className="block" key={article.url} onClick={() => window.open(article.url)}>
             <div className="block-title">
               <p>{article.emoji}</p>
