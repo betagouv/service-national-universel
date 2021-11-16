@@ -9,7 +9,7 @@ import close from "../../assets/cancel.png";
 import api from "../../services/api";
 import { translate } from "../../utils";
 import ErrorMessage, { requiredMessage } from "../inscription/components/errorMessage";
-import { SelectTag, step1, step2Technical, step2Question } from "../support-center/worflow";
+import { SelectTag, step1, step2Technical, step2Question } from "../support-center/ticket/worflow";
 
 export default ({ setOpen, setSuccessMessage }) => {
   const history = useHistory();
