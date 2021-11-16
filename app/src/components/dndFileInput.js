@@ -12,7 +12,7 @@ export default ({ optional, value, onChange, name, errorMessage = requiredMessag
   const [filesList, setFilesList] = useState(value || []);
 
   useEffect(() => {
-    const dropArea = document.getElementById("file-drop");
+    const dropArea = document.getElementById(`file-drop-${name}`);
     dropArea.addEventListener("dragleave", (e) => e.preventDefault(), false);
     dropArea.addEventListener("dragover", (e) => e.preventDefault(), false);
     dropArea.addEventListener(
@@ -68,7 +68,7 @@ export default ({ optional, value, onChange, name, errorMessage = requiredMessag
 
   return (
     <div style={{}}>
-      <ImageInput id="file-drop">
+      <ImageInput id={`file-drop-${name}`}>
         <Field
           type="file"
           accept=".jpg, .jpeg, .png, .pdf"
