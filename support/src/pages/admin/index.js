@@ -1,7 +1,7 @@
 import Layout from "../../components/Layout";
 
 const Admin = () => {
-  return <Layout>TEST</Layout>;
+  return <Layout>DASHBOARD</Layout>;
 };
 
-export default Admin;
+export default withAuth(Admin);

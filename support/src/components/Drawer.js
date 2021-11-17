@@ -1,17 +1,21 @@
 import Image from "next/image";
-import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { environment } from "../config";
 import NavLink from "./ActiveLink";
 
+const getTextEnvironmentBanner = () => {
+  if (environment === "staging") return "Espace de Test";
+  if (environment === "development") return "Développement";
+  return "";
+};
+
 const Drawer = () => {
   const [environmentBannerVisible, setEnvironmentBannerVisible] = useState(true);
+  const [textEnvironment, settextEnvironment] = useState("");
 
-  function getTextEnvironmentBanner() {
-    if (environment === "staging") return "Espace de Test";
-    if (environment === "development") return "Développement";
-    return "";
-  }
+  useEffect(() => {
+    settextEnvironment(getTextEnvironmentBanner());
+  }, []);
 
   return (
     <nav className="bg-snu-purple-900 h-full w-64 flex-col text-white">
@@ -19,9 +23,9 @@ const Drawer = () => {
         <Image src="/assets/logo-snu.png" width={38} height={38} />
         <span className="uppercase text-sm ml-4">Admin support</span>
       </div>
-      {environment !== "production" && !!environmentBannerVisible && (
+      {!!textEnvironment && !!environmentBannerVisible && (
         <div className="flex bg-red-600  w-full h-10  items-center justify-center" onClick={() => setEnvironmentBannerVisible(false)}>
-          <span className="italic">{getTextEnvironmentBanner()}</span>
+          <span className="italic">{textEnvironment}</span>
         </div>
       )}
       <ul className="mt-2">

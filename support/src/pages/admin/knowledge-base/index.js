@@ -1,10 +1,8 @@
 import Head from "next/head";
 import Layout from "../../../components/Layout";
-import useUser from "../../../hooks/useUser";
+import withAuth from "../../../hocs/withAuth";
 
 const KnowledgeBase = () => {
-  const { user } = useUser({ redirectTo: "/admin/auth" });
-
   return (
     <>
       <Head>
@@ -15,4 +13,4 @@ const KnowledgeBase = () => {
   );
 };
 
-export default KnowledgeBase;
+export default withAuth(KnowledgeBase);
