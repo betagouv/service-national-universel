@@ -63,17 +63,14 @@ export default ({ filter }) => {
   }, [JSON.stringify(filter)]);
 
   function render() {
+    // we compute the total from the 'handicap' aggregation because it is mandatory, so the total IS the total
+    const total = handicap?.true + handicap?.false;
     return (
       <Row>
         {handicap ? (
           <Link to={getLink({ base: `/inscription`, filter, filtersUrl: ['HANDICAP=%5B"true"%5D'] })}>
             <Col style={{ marginBottom: 15 }}>
-              <CircularProgress
-                circleProgressColor="#1B7BBF"
-                percentage={((handicap.true * 100) / (handicap.true + handicap.false)).toFixed(1)}
-                title={handicap.true}
-                subtitle="En situation de handicap"
-              />
+              <CircularProgress circleProgressColor="#1B7BBF" percentage={((handicap.true * 100) / total).toFixed(1)} title={handicap.true} subtitle="En situation de handicap" />
             </Col>
           </Link>
         ) : (
@@ -84,7 +81,7 @@ export default ({ filter }) => {
             <Col style={{ marginBottom: 15 }}>
               <CircularProgress
                 circleProgressColor="#1B7BBF"
-                percentage={((ppsBeneficiary.true * 100) / (ppsBeneficiary.true + ppsBeneficiary.false)).toFixed(1)}
+                percentage={((ppsBeneficiary.true * 100) / total).toFixed(1)}
                 title={ppsBeneficiary.true}
                 subtitle="Bénéficiaires d’un PPS"
               />
@@ -98,7 +95,7 @@ export default ({ filter }) => {
             <Col style={{ marginBottom: 15 }}>
               <CircularProgress
                 circleProgressColor="#1B7BBF"
-                percentage={((paiBeneficiary.true * 100) / (paiBeneficiary.true + paiBeneficiary.false)).toFixed(1)}
+                percentage={((paiBeneficiary.true * 100) / total).toFixed(1)}
                 title={paiBeneficiary.true}
                 subtitle="Bénéficiaires d’un PAI"
               />
@@ -111,7 +108,7 @@ export default ({ filter }) => {
           <Col style={{ marginBottom: 15 }}>
             <CircularProgress
               circleProgressColor="#1B7BBF"
-              percentage={((specificAmenagment.true * 100) / (specificAmenagment.true + specificAmenagment.false)).toFixed(1)}
+              percentage={((specificAmenagment.true * 100) / total).toFixed(1)}
               title={specificAmenagment.true}
               subtitle="Aménagement spécifique"
             />
@@ -121,12 +118,7 @@ export default ({ filter }) => {
         )}
         {allergies ? (
           <Col style={{ marginBottom: 15 }}>
-            <CircularProgress
-              circleProgressColor="#1B7BBF"
-              percentage={((allergies.true * 100) / (allergies.true + allergies.false)).toFixed(1)}
-              title={allergies.true}
-              subtitle="Allergie/intolérance"
-            />
+            <CircularProgress circleProgressColor="#1B7BBF" percentage={((allergies.true * 100) / total).toFixed(1)} title={allergies.true} subtitle="Allergie/intolérance" />
           </Col>
         ) : (
           <Loader />
@@ -135,7 +127,7 @@ export default ({ filter }) => {
           <Col style={{ marginBottom: 15 }}>
             <CircularProgress
               circleProgressColor="#1B7BBF"
-              percentage={((handicapInSameDepartment.true * 100) / (handicapInSameDepartment.true + handicapInSameDepartment.false)).toFixed(1)}
+              percentage={((handicapInSameDepartment.true * 100) / total).toFixed(1)}
               title={handicapInSameDepartment.true}
               subtitle="Affectation dans le département de résidence"
             />
@@ -147,7 +139,7 @@ export default ({ filter }) => {
           <Col style={{ marginBottom: 15 }}>
             <CircularProgress
               circleProgressColor="#1B7BBF"
-              percentage={((highSkilledActivity.true * 100) / (highSkilledActivity.true + highSkilledActivity.false)).toFixed(1)}
+              percentage={((highSkilledActivity.true * 100) / total).toFixed(1)}
               title={highSkilledActivity.true}
               subtitle="Sportif de haut-niveau"
             />
@@ -159,7 +151,7 @@ export default ({ filter }) => {
           <Col style={{ marginBottom: 15 }}>
             <CircularProgress
               circleProgressColor="#1B7BBF"
-              percentage={((reducedMobilityAccess.true * 100) / (reducedMobilityAccess.true + reducedMobilityAccess.false)).toFixed(1)}
+              percentage={((reducedMobilityAccess.true * 100) / total).toFixed(1)}
               title={reducedMobilityAccess.true}
               subtitle="Aménagement pour mobilité réduite"
             />

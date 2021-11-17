@@ -189,7 +189,7 @@ export default () => {
                   }}
                   title=""
                   URLParams={true}
-                  renderLabel={(items) => getFilterLabel(items, "PPS")}
+                  renderLabel={(items) => getFilterLabel(items, "PPS", "PPS")}
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
@@ -203,7 +203,7 @@ export default () => {
                   }}
                   title=""
                   URLParams={true}
-                  renderLabel={(items) => getFilterLabel(items, "PAI")}
+                  renderLabel={(items) => getFilterLabel(items, "PAI", "PAI")}
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
@@ -217,7 +217,7 @@ export default () => {
                   }}
                   title=""
                   URLParams={true}
-                  renderLabel={(items) => getFilterLabel(items, "QPV")}
+                  renderLabel={(items) => getFilterLabel(items, "QPV", "QPV")}
                 />
                 <MultiDropdownList
                   defaultQuery={getDefaultQuery}
@@ -231,21 +231,7 @@ export default () => {
                   }}
                   title=""
                   URLParams={true}
-                  renderLabel={(items) => getFilterLabel(items, "Handicap")}
-                />
-                <MultiDropdownList
-                  defaultQuery={getDefaultQuery}
-                  className="dropdown-filter"
-                  placeholder="ZRR"
-                  componentId="ZRR"
-                  dataField="populationDensity.keyword"
-                  react={{ and: FILTERS.filter((e) => e !== "ZRR") }}
-                  renderItem={(e, count) => {
-                    return `${translate(e)} (${count})`;
-                  }}
-                  title=""
-                  URLParams={true}
-                  renderLabel={(items) => getFilterLabel(items, "ZRR")}
+                  renderLabel={(items) => getFilterLabel(items, "Handicap", "Handicap")}
                 />
               </FilterRow>
             </Filter>
