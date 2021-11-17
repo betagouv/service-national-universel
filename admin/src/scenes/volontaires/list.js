@@ -498,7 +498,7 @@ const Hit = ({ hit, onClick, selected }) => {
           </>
         )}
       </td>
-      <td>
+      <td onClick={(e) => e.stopPropagation()}>
         <Action hit={hit} />
       </td>
     </tr>
