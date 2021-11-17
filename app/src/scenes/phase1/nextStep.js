@@ -11,33 +11,15 @@ export default () => {
   const young = useSelector((state) => state.Auth.young);
 
   return (
-    <HeroContainer>
+    <>
       <Hero style={{ flexDirection: "column" }}>
         <Content style={{ width: "100%" }}>
-          <h1>Prochaine étape</h1>
-          {young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION ? (
-            <>
-              <p>
-                Vous êtes actuellement <Tag>en&nbsp;attente&nbsp;d'affectation à un centre de cohésion.</Tag>
-              </p>
-              <p>Vous serez informé(e) par e-mail du lieu et des modalités de votre séjour fin mai.</p>
-            </>
-          ) : null}
-          {young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_LIST ? (
-            <>
-              <p>
-                Vous êtes actuellement <Tag>en&nbsp;attente&nbsp;d'affectation à un centre de cohésion.</Tag>
-              </p>
-              <p>Le SNU étant victime de son succès, nous oeuvrons pour vous trouver une place.</p>
-              <p>Nous vous recontacterons par email au plus vite pour vous confirmer votre participation au séjour de cohésion.</p>
-            </>
-          ) : null}
         </Content>
         <MedicalFile />
         <ImageRight />
         <AutoTest />
       </Hero>
-    </HeroContainer>
+    </>
   );
 };
 

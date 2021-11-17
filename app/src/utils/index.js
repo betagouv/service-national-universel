@@ -31,8 +31,8 @@ const permissionApp = (y) => {
 export function permissionPhase1(y) {
   if (!permissionApp(y)) return false;
   return (
-    ![YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_LIST].includes(y.status) &&
-    !["2022", "Juillet 2022", "Juin 2022", "Février 2022"].includes(y.cohort)
+    ![YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_LIST].includes(y.status)
+    //!["2022", "Juillet 2022", "Juin 2022", "Février 2022"].includes(y.cohort)
   );
 }
 
