@@ -34,6 +34,7 @@ export default ({ setOpen, setSuccessMessage }) => {
               tags: [...new Set([...tags, ...step1?.tags, ...step2?.tags])], // we use this dirty hack to remove duplicates
             });
             setLoading(false);
+            setOpen(false);
             if (!ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(code));
             toastr.success("Ticket créé");
             setSuccessMessage("Votre demande a bien été envoyée ! Nous vous répondrons par mail.");

@@ -124,8 +124,8 @@ export default () => {
         <h4 style={{ textAlign: "center" }}>Vous n'avez pas trouvé de réponse à votre demande&nbsp;?</h4>
         <div className="help-section">
           <div className="help-section-block">
-            <div className="help-section-text" style={{ color: "#6B7280" }}>
-              Vous n'avez pas trouvé de réponse à votre demande ? Contactez nos équipes. Nous travaillons généralement du <strong>lundi au vendredi de 9h00 à 18h00</strong> et traiterons votre demande dès que possible. Vous recevrez une réponse par mail.
+            <div className="help-section-text" style={{ color: "#6B7280", marginBottom: "0.5rem" }}>
+              Contactez nos équipes. Nous travaillons généralement du <strong>lundi au vendredi de 9h00 à 18h00</strong> et traiterons votre demande dès que possible. Vous recevrez une réponse par mail.
             </div>
             <div className="zammad-container">
               <LinkButton onClick={() => setOpen(true)}>
@@ -135,7 +135,7 @@ export default () => {
           </div>
         </div>
         {
-          open && !successMessage && (
+          open && (
             <ZammadForm setOpen={setOpen} setSuccessMessage={setSuccessMessage} />
           )
         }
