@@ -1,24 +1,20 @@
 import React, { useEffect, useState } from "react";
 import { Modal } from "reactstrap";
-import styled from "styled-components";
 
 import api from "../../services/api";
-import LoadingButton from "../buttons/LoadingButton";
+import { ModalContainer, Content, Footer, Header } from "./Modal";
+import ModalButton from "../buttons/ModalButton";
 
 import { toastr } from "react-redux-toastr";
 import { SENDINBLUE_TEMPLATES } from "../../utils";
 
-export default ({ isOpen, value, onChange, onSend }) => {
+export default ({ isOpen, value, onChange, onSend, topTitle = "alerte" }) => {
   const [message, setMessage] = useState();
   const [sending, setSending] = useState(false);
 
   useEffect(() => {
-    setMessage(`Bonjour ${value.firstName} ${value.lastName},
-Votre dossier d'inscription au SNU a bien été étudiée par l'équipe de votre département.
-
-Nous n'avons malheureusement pu donner suite à votre dossier d'inscription à la prochaine édition du Service Nationale Universel.
+    setMessage(`Nous n'avons malheureusement pu donner suite à votre dossier d'inscription à la prochaine édition du Service Nationale Universel.
 En voici les principales raisons :
--
 -
 -
 
@@ -32,6 +28,7 @@ En vous souhaitant une excellente continuation.`);
     setSending(true);
     await api.post(`/young/${value._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_REFUSED}`, { message });
     toastr.success("Email envoyé !");
+    setSending(false);
     onSend(message);
   };
 
@@ -39,46 +36,28 @@ En vous souhaitant une excellente continuation.`);
     <Modal isOpen={isOpen} toggle={onChange}>
       <ModalContainer>
         <img src={require("../../assets/close.svg")} height={10} onClick={onChange} />
-        <h1>Veuillez éditer le message ci-dessous pour préciser les raisons du refus avant de l'envoyer</h1>
-        <h3>votre message</h3>
-        <textarea rows="15" value={message} onChange={(e) => setMessage(e.target.value)} />
-        <LoadingButton disabled={sending || !message} onClick={send}>
-          Envoyer la notification
-        </LoadingButton>
+        <Header>{topTitle}</Header>
+        <Content>
+          <h1>Veuillez éditer le message ci-dessous pour préciser les raisons du refus avant de l'envoyer&nbsp;:</h1>
+          <p style={{ alignSelf: "flex-start", textAlign: "left" }}>
+            Bonjour {value.firstName} {value.lastName}, <br />
+            Suite au traitement de votre dossier d’inscription, le référent SNU de votre département n’a pu retenir votre inscription. Ce dernier vous a laissé un message :
+          </p>
+          <textarea rows="8" value={message} onChange={(e) => setMessage(e.target.value)} />
+          <p style={{ alignSelf: "flex-start", textAlign: "left" }}>
+            Cordialement, <br />
+            Les équipes du Service National Universel.
+          </p>
+        </Content>
+        <Footer>
+          <ModalButton loading={sending} disabled={sending || !message} onClick={send} primary>
+            Confirmer
+          </ModalButton>
+          <ModalButton disabled={sending} onClick={onChange}>
+            Annuler
+          </ModalButton>
+        </Footer>
       </ModalContainer>
     </Modal>
   );
 };
-
-const ModalContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 2.5rem;
-  flex-direction: column;
-  img {
-    position: absolute;
-    right: 0;
-    top: 0;
-    margin: 1rem;
-    cursor: pointer;
-  }
-  h1 {
-    font-size: 1.5rem;
-    text-align: center;
-  }
-  h3 {
-    color: #767676;
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    font-weight: 300;
-  }
-  textarea {
-    padding: 1rem;
-    line-height: 1.5;
-    border-radius: 0.5rem;
-    border: 1px solid #ccc;
-    min-width: 100%;
-    margin-bottom: 2rem;
-  }
-`;
