@@ -1,73 +1,71 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { SuccessMessage, Logo, ContinueButton } from "./components/printable";
+import { HeroContainer, Hero } from "../../components/Content";
 import styled from "styled-components";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
 
   return (
-    <ContentHorizontal style={{ width: "100%" }} id="sanitaire">
-      <div className="icon">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth="2"
-            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-          ></path>
-        </svg>
-      </div>
-      <div>
-        <h2>Transmission de la fiche sanitaire</h2>
-        {young.cohesionStayMedicalFileReceived === "true" ? (
-          <SuccessMessage>
-            <Logo>
-              <svg height={64} width={64} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#057a55" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
-              </svg>
-            </Logo>
-            Ce document a bien été réceptionné
-          </SuccessMessage>
-        ) : (
-          <>
-            <p>
-              Vous devez renseigner votre fiche sanitaire, joindre les photocopies des documents requis et mettre le tout dans une envelope fermée portant la mention “A l’attention
-              de l’infirmier, Pli Confidentiel”. <br />
-              <b>Vous la remettrez en main propre à votre arrivée au centre de séjour à l’équipe d’encadrement.</b>
-            </p>
-            <div style={{ color: "#777" }}>
-              <i>
-                <b>A noter</b> : si vous avez déjà envoyé votre fiche sanitaire par voie postale, vous n'avez rien à faire.
-              </i>
-            </div>
-            <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Note_relative_aux_informations_d_ordre_sanitaire.pdf" target="blank" className="link">
-              Note relative aux informations d'ordre sanitaire ›
-            </a>
-          </>
-        )}
-        <div style={{ marginTop: "2rem" }}>
-          <div style={{ color: "#777" }}>
-            <b> Rappel : </b>Vous devez réaliser un bilan de santé obligatoire auprès de votre médecin traitant entre 15 et 16 ans. Il est recommandé de le faire avant votre séjour
-            de cohésion, mais non obligatoire pour y participer.
+    <HeroContainer>
+      <Hero>
+        <ContentHorizontal style={{ width: "100%" }} id="sanitaire">
+          <div className="icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
+              ></path>
+            </svg>
           </div>
-          <a
-            href="https://www.ameli.fr/assure/sante/themes/suivi-medical-de-lenfant-et-de-ladolescent/examen-medical-propose-ladolescent-entre-15-et-16-ans"
-            className="link"
-            target="_blank"
-          >
-            Plus d’informations sur le bilan de santé obligatoire entre 15 et 16 ans ›
-          </a>
-        </div>
-      </div>
-      {young.cohesionStayMedicalFileReceived !== "true" ? (
-        <div style={{ minWidth: "30%", display: "flex", justifyContent: "flex-end", alignItems: "center", marginLeft: "1.5rem" }}>
-          <a target="blank" href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Fiche_sanitaire.pdf">
-            <ContinueButton>Télécharger la fiche sanitaire</ContinueButton>
-          </a>
-        </div>
-      ) : null}
-    </ContentHorizontal>
+          <div>
+            <h2>Transmission de la fiche sanitaire</h2>
+            {young.cohesionStayMedicalFileReceived === "true" ? (
+              <SuccessMessage>
+                <Logo>
+                  <svg height={64} width={64} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#057a55" aria-hidden="true">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                  </svg>
+                </Logo>
+                Ce document a bien été réceptionné
+              </SuccessMessage>
+            ) : (
+              <>
+                <p style={{ color: "#9C9C9C" }}>
+                  Vous devez renseigner votre fiche sanitaire, la mettre dans une enveloppe portant la mention “A l’attention de l’infirmier, Pli Confidentiel” et  y joindre une photocopie des documents requis. <br />
+                  Vous la remettrez à <strong>votre arrivée au centre de séjour</strong> à l’équipe d’encadrement.
+                </p>
+                <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Note_relative_aux_informations_d_ordre_sanitaire.pdf" target="blank" className="link">
+                  Note relative aux informations d'ordre sanitaire ›
+                </a>
+              </>
+            )}
+            <div style={{ marginTop: "2rem" }}>
+              <div style={{ color: "#9C9C9C" }}>
+                <b> Rappel : </b>Vous devez réaliser un bilan de santé obligatoire auprès de votre médecin traitant. Il est fortement recommandé de le faire avant votre séjour de cohésion.
+              </div>
+              <a
+                href="https://www.ameli.fr/assure/sante/themes/suivi-medical-de-lenfant-et-de-ladolescent/examen-medical-propose-ladolescent-entre-15-et-16-ans"
+                className="link"
+                target="_blank"
+              >
+                Plus d’informations sur le bilan de santé obligatoire ›
+              </a>
+            </div>
+          </div>
+          {young.cohesionStayMedicalFileReceived !== "true" ? (
+            <div style={{ minWidth: "30%", display: "flex", justifyContent: "flex-end", alignItems: "center", marginLeft: "1.5rem" }}>
+              <a target="blank" href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Fiche_sanitaire.pdf">
+                <ContinueButton>Télécharger la fiche sanitaire</ContinueButton>
+              </a>
+            </div>
+          ) : null}
+        </ContentHorizontal>
+      </Hero>
+    </HeroContainer>
   );
 };
 

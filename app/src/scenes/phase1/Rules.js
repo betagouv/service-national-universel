@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Row, Col } from "reactstrap";
 import { useSelector, useDispatch } from "react-redux";
 import { Formik, Field } from "formik";
@@ -27,12 +27,13 @@ import DownloadFormButton from "../../components/buttons/DownloadFormButton";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
+  const [expandInfo, setExpandInfo] = useState(false);
   const dispatch = useDispatch();
 
   return (
     <HeroContainer>
       <Hero>
-        <Content style={{ width: "100%" }} id="autoTest">
+        <Content style={{ width: "100%" }} id="imageRight">
           <div style={{ display: "flex" }}>
             <div className="icon">
               <svg className="h-6 w-6 text-indigo-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -45,17 +46,13 @@ export default () => {
               </svg>
             </div>
             <div>
-              <h2>Consentement à l’utilisation d’autotest COVID</h2>
+              <h2>Règlement intérieur</h2>
               <p style={{ color: "#9C9C9C" }}>
-                Votre représentant légal doit renseigner le formulaire relatif à l’utilisation d’autotest COVID pendant le séjour de cohésion avant votre départ en séjour. Cette étape est un pré-requis pour partir.
-                <br />
-                <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Note_relative_a_l_utilisation_d_autotest_COVID.pdf" target="blank" className="link">
-                  Note relative à l’utilisation d’autotest antigénique COVID ›
-                </a>
+                Vous et votre représentant légal devez lire et acceptez les règles de fonctionnement propres aux centres du Service National Universel exposées dans le règlement intérieur ci-joint avant votre départ en séjour. Cette étape est un pré-requis au séjour de cohésion.
               </p>
             </div>
           </div>
-          {young.autoTestPCRFiles && young.autoTestPCRFiles.length ? (
+          {young.imageRightFiles && young.imageRightFiles.length ? (
             <SuccessMessage>
               <Logo>
                 <svg height={64} width={64} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#057a55" aria-hidden="true">
@@ -73,7 +70,6 @@ export default () => {
                   lastName1: young.parent1LastName,
                   firstName2: young.parent2FirstName,
                   lastName2: young.parent2LastName,
-                  parentPhone: young.parent1Phone,
                 }}
                 validateOnChange={false}
                 validateOnBlur={false}
@@ -91,123 +87,69 @@ export default () => {
               >
                 {({ values, handleChange, handleSubmit, errors, touched, isSubmitting, submitForm }) => (
                   <>
-                    <Title>
-                      <span>Seuls les représentants légaux sont habilités à valider ce consentement</span>
-                    </Title>
-                    <FormGroup>
-                      <label>REPRÉSENTANT LÉGAL N°1</label>
-                      <Row>
-                        <Col md={6}>
-                          <Field
-                            validate={(v) => !v && requiredMessage}
-                            placeholder="Prénom du représentants légal n°1"
-                            name="firstName1"
-                            value={values.firstName1}
-                            onChange={handleChange}
-                            className="form-control"
-                          />
-                          <ErrorMessage errors={errors} touched={touched} name="firstName1" />
-                        </Col>
-                        <Col md={6}>
-                          <Field
-                            validate={(v) => !v && requiredMessage}
-                            placeholder="Nom du représentants légal n°1"
-                            name="lastName1"
-                            value={values.lastName1}
-                            onChange={handleChange}
-                            className="form-control"
-                          />
-                          <ErrorMessage errors={errors} touched={touched} name="lastName1" />
-                        </Col>
-                      </Row>
-                    </FormGroup>
-                    {values.firstName2 ? (
-                      <FormGroup>
-                        <label>REPRÉSENTANT LÉGAL N°2</label>
-                        <Row>
-                          <Col md={6}>
-                            <Field
-                              validate={(v) => !v && requiredMessage}
-                              placeholder="Prénom du représentants légal n°2"
-                              name="firstName2"
-                              value={values.firstName2}
-                              onChange={handleChange}
-                              className="form-control"
-                            />
-                            <ErrorMessage errors={errors} touched={touched} name="firstName2" />
-                          </Col>
-                          <Col md={6}>
-                            <Field
-                              validate={(v) => !v && requiredMessage}
-                              placeholder="Nom du représentants légal n°2"
-                              name="lastName2"
-                              value={values.lastName2}
-                              onChange={handleChange}
-                              className="form-control"
-                            />
-                            <ErrorMessage errors={errors} touched={touched} name="lastName2" />
-                          </Col>
-                        </Row>
-                      </FormGroup>
-                    ) : null}
-                    <FormGroup>
-                      <label>
-                        Numéro de téléphone
-                        <br />
-                        <i style={{ fontSize: ".8rem", color: "#777" }}>Pour être prevenu en cas de résultat positif</i>
-                      </label>
-
-                      <Row>
-                        <Col md={6}>
-                          <Field
-                            validate={(v) => !v && requiredMessage}
-                            placeholder="Numéro de téléphone"
-                            name="parentPhone"
-                            value={values.parentPhone}
-                            onChange={handleChange}
-                            className="form-control"
-                          />
-                          <ErrorMessage errors={errors} touched={touched} name="parentPhone" />
-                        </Col>
-                      </Row>
-                    </FormGroup>
                     <FormRow>
                       <Col>
                         <RadioLabel>
                           <Field
-                            id="autoTestPCR_true"
+                            id="rulesYoung"
                             validate={(v) => !v && requiredMessage}
                             type="radio"
-                            name="autoTestPCR"
+                            name="rulesYoung"
                             value="true"
-                            checked={values.autoTestPCR === "true"}
+                            checked={values.rulesYoung === "true"}
                             onChange={handleChange}
                           />
-                          <label htmlFor="autoTestPCR_true">
-                            J'autorise la <b>réalisation d’autotests antigéniques</b> sur prélèvement nasal par l’enfant dont je suis titulaire de l’autorité parentale, et, en cas de
-                            résultat positif, à la communication de celui-ci au directeur académiques des services académiques, à l’ARS, au chef de centre et aux personnes habilitées
-                            par ce dernier.
+                          <label htmlFor="rulesYoung">
+                            Je,{" "}
+                            <b>
+                              {young.firstName} {young.lastName}
+                            </b>{" "}
+                            certifie avoir lu et accepté les règles de fonctionnement propres aux centres du Service National Universel exposées dans le règlement intérieur ci-joint.
                           </label>
                         </RadioLabel>
-                      </Col>
-                    </FormRow>
-                    <FormRow>
-                      <Col>
+                        <ErrorMessage errors={errors} touched={touched} name="rulesYoung" />
                         <RadioLabel>
                           <Field
-                            id="autoTestPCR_false"
+                            id="rulesParent1"
                             validate={(v) => !v && requiredMessage}
                             type="radio"
-                            name="autoTestPCR"
-                            value="false"
-                            checked={values.autoTestPCR === "false"}
+                            name="rulesParent1"
+                            value="true"
+                            checked={values.rulesParent1 === "true"}
                             onChange={handleChange}
                           />
-                          <label htmlFor="autoTestPCR_false">
-                            Je n'autorise pas la <b>réalisation d'autotests antigéniques</b>
+                          <label htmlFor="rulesParent1">
+                            Je,{" "}
+                            <b>
+                              {young.parent1FirstName} {young.parent1LastName}
+                            </b>{" "}
+                            certifie avoir lu et accepté les règles de fonctionnement propres aux centres du Service National Universel exposées dans le règlement intérieur ci-joint.
                           </label>
                         </RadioLabel>
-                        <ErrorMessage errors={errors} touched={touched} name="autoTestPCR" />
+                        <ErrorMessage errors={errors} touched={touched} name="rulesParent1" />
+                        {young.parent2FirstName && (
+                          <>
+                            <RadioLabel>
+                              <Field
+                                id="rulesParent2"
+                                validate={(v) => !v && requiredMessage}
+                                type="radio"
+                                name="rulesParent2"
+                                value="true"
+                                checked={values.rulesParent1 === "true"}
+                                onChange={handleChange}
+                              />
+                              <label htmlFor="rulesParent2">
+                                Je,{" "}
+                                <b>
+                                  {young.parent1FirstName} {young.parent1LastName}
+                                </b>{" "}
+                                certifie avoir lu et accepté les règles de fonctionnement propres aux centres du Service National Universel exposées dans le règlement intérieur ci-joint.
+                              </label>
+                            </RadioLabel>
+                            <ErrorMessage errors={errors} touched={touched} name="rulesParent2" />
+                          </>
+                        )}
                       </Col>
                     </FormRow>
                     <div className="noPrint">
@@ -218,31 +160,30 @@ export default () => {
                       <div style={{ display: "flex", justifyContent: "center" }}>
                         <div>
                           <BackButton>
-                            <DownloadFormButton young={values} uri="autotestPCR">
+                            <DownloadFormButton young={values} uri="imageRight">
                               Télécharger le formulaire pré-rempli
                             </DownloadFormButton>
                           </BackButton>
                           <DownloadText>
-                            {/* Ou todo : upload version du formialire autotestPCR */}
                             Ou{" "}
-                            <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Consentement_a_l_utilisation_d_autotest_COVID.pdf" target="_blank">
+                            <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Droit_a_l_image.pdf" target="_blank">
                               télécharger le modèle à remplir
                             </a>
                           </DownloadText>
                           <DndFileInput
                             placeholder="le formulaire"
                             errorMessage="Vous devez téléverser le formulaire"
-                            value={values.autoTestPCRFiles}
-                            name="autoTestPCRFiles"
+                            value={values.rulesFiles}
+                            name="rulesFiles"
                             onChange={async (e) => {
-                              const res = await api.uploadFile("/young/file/autoTestPCRFiles", e.target.files);
+                              const res = await api.uploadFile("/young/file/imageRightFiles", e.target.files);
                               if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
                               // We update it instant ( because the bucket is updated instant )
                               toastr.success("Fichier téléversé");
-                              handleChange({ target: { value: res.data, name: "autoTestPCRFiles" } });
+                              handleChange({ target: { value: res.data, name: "imageRightFiles" } });
                             }}
                           />
-                          <ErrorMessage errors={errors} touched={touched} name="autoTestPCRFiles" />
+                          <ErrorMessage errors={errors} touched={touched} name="imageRightFiles" />
                         </div>
                         {/* <div>OU</div>
                     <div>FRANCE CONNECT</div> */}

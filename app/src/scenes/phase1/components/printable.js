@@ -28,7 +28,7 @@ export const RadioLabel = styled.label`
     height: 16px;
   }
   label {
-    color: #4b5563;
+    color: #9C9C9C;
     font-size: 1rem;
     @media (max-width: 768px) {
       font-size: 0.8rem;
