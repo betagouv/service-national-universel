@@ -38,6 +38,7 @@ export default () => {
             setLoading(true);
             try {
               values.informationAccuracy = "true";
+              values.aknowledgmentTerminaleSessionAvailability = "true";
               const { ok, code, data } = await api.put("/young", { ...values, status: YOUNG_STATUS.WAITING_VALIDATION });
               if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
               toastr.success("Enregistré");
@@ -67,9 +68,27 @@ export default () => {
                   Je, <b>{`${young.firstName} ${young.lastName}`}</b>, certifie l'exactitude des renseignements fournis
                 </div>
               </RadioLabel>
-
               <ErrorMessage errors={errors} touched={touched} name="informationAccuracy" />
-
+              {["Terminale", "Terminale CAP"].includes(values.grade) ? (
+                <>
+                  <RadioLabel>
+                    <Field
+                      validate={(v) => !v && requiredMessage}
+                      value={"true"}
+                      checked={values.aknowledgmentTerminaleSessionAvailability}
+                      type="checkbox"
+                      name="aknowledgmentTerminaleSessionAvailability"
+                      onChange={handleChange}
+                    />
+                    <div>
+                      J’ai bien pris connaissance que si je suis convoqué(e) pour les épreuves du second groupe du baccalauréat entre le 6 et le 8 juillet 2022, je ne pourrai pas
+                      participer au séjour de cohésion entre le 3 et le 15 juillet 2022 (il n’y aura ni dérogation sur la date d’arrivée au séjour de cohésion ni report des
+                      épreuves).
+                    </div>
+                  </RadioLabel>
+                  <ErrorMessage errors={errors} touched={touched} name="aknowledgmentTerminaleSessionAvailability" />
+                </>
+              ) : null}
               <ContinueButton onClick={handleSubmit}>
                 {loading ? <Spinner size="sm" style={{ borderWidth: "0.1em" }} /> : "Je valide mon dossier d'inscription au SNU"}
               </ContinueButton>

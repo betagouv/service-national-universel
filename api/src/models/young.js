@@ -1026,6 +1026,13 @@ const Schema = new mongoose.Schema({
       description: "Le volontaire certifie l'exactitude des renseignements fournis",
     },
   },
+  aknowledgmentTerminaleSessionAvailability: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le volontaire a pris connaissance des règles de disponibilité liées au rattrapage du bac",
+    },
+  },
 
   // * JDC
   jdc: {
