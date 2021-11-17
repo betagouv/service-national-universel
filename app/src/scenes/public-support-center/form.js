@@ -1,27 +1,28 @@
-import React from "react";
+import React, { useState } from "react";
 import { Col } from "reactstrap";
 import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
 import { Formik, Field } from "formik";
-import { useHistory } from "react-router-dom";
 import close from "../../assets/cancel.png";
 
 import api from "../../services/api";
 import { translate } from "../../utils";
+import LoadingButton from "../../components/buttons/LoadingButton";
 import ErrorMessage, { requiredMessage } from "../inscription/components/errorMessage";
 
 export default ({ setOpen, setSuccessMessage, young }) => {
-  const history = useHistory();
   const tags = [`EMETTEUR_Exterieur`, `CANAL_Plateforme`, `AGENT_Startup_Support`];
+  const [loading, setLoading] = useState(false);
   return (
     <Form>
       <img src={close} onClick={() => setOpen(false)} />
       <Formik
-        initialValues={{ step1: null, step2: null, message: "", subject: "", email: "", name: "", }}
+        initialValues={{ step1: null, step2: null, message: "", subject: "", email: "", name: "" }}
         validateOnChange={false}
         validateOnBlur={false}
         onSubmit={async (values) => {
           try {
+            setLoading(true);
             const { message, subject, name, email } = values;
             const { ok, code, data } = await api.post("/support-center/public/ticket", {
               title: `Formulaire de contact - ${name} - ${subject}`,
@@ -31,10 +32,10 @@ export default ({ setOpen, setSuccessMessage, young }) => {
               message,
               tags: [...new Set([...tags])], // we use this dirty hack to remove duplicates
             });
+            setLoading(false);
             if (!ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(code));
             toastr.success("Ticket créé");
             setSuccessMessage("Votre demande a bien été envoyée ! Nous vous répondrons par mail.");
-            history.push("/public-besoin-d-aide");
           } catch (e) {
             console.log(e);
             toastr.error("Oups, une erreur est survenue", translate(e.code));
@@ -87,9 +88,9 @@ export default ({ setOpen, setSuccessMessage, young }) => {
               touched={touched}
               rows="5"
             />
-            <ContinueButton type="submit" style={{ marginLeft: 10 }} onClick={handleSubmit} disabled={isSubmitting}>
+            <LoadingButton loading={loading} type="submit" style={{ marginLeft: 15, maxWidth: "150px", marginTop: 15 }} onClick={handleSubmit} disabled={isSubmitting}>
               Envoyer
-            </ContinueButton>
+            </LoadingButton>
           </>
         )}
       </Formik>
