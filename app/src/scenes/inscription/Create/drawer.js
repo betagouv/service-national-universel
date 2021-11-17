@@ -42,6 +42,11 @@ export default ({ step }) => {
               </a>
             </Logos>
           </Header>
+          {young && young?.status !== "IN_PROGRESS" ? (
+            <a class="back-button" onClick={() => history.push("/")}>
+              {"<"} Retour à mon espace
+            </a>
+          ) : null}
           <ul className="stepNav">
             <Element status={getStatus(STEPS.PROFIL)}>
               <a onClick={() => handleClick(STEPS.PROFIL)}>Mon profil</a>
@@ -180,6 +185,16 @@ const Element = styled.li`
 `;
 
 const MainNav = styled.ul`
+  .back-button {
+    padding: 0;
+    margin: 1rem;
+    height: fit-content;
+    color: white;
+    font-weight: normal;
+    :hover {
+      text-decoration: underline;
+    }
+  }
   a {
     font-size: 12px;
     /* color: #b4c6fc; */
