@@ -27,7 +27,6 @@ import DownloadFormButton from "../../components/buttons/DownloadFormButton";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
-  const [expandInfo, setExpandInfo] = useState(false);
   const dispatch = useDispatch();
 
   return (
@@ -52,7 +51,7 @@ export default () => {
               </p>
             </div>
           </div>
-          {young.imageRightFiles && young.imageRightFiles.length ? (
+          {young.rules && young.rules.length ? (
             <SuccessMessage>
               <Logo>
                 <svg height={64} width={64} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#057a55" aria-hidden="true">
@@ -121,13 +120,13 @@ export default () => {
                           <label htmlFor="rulesParent1">
                             Je,{" "}
                             <b>
-                              {young.parent1FirstName} {young.parent1LastName}
+                              {firstName1} {lastName1}
                             </b>{" "}
                             certifie avoir lu et accepté les règles de fonctionnement propres aux centres du Service National Universel exposées dans le règlement intérieur ci-joint.
                           </label>
                         </RadioLabel>
                         <ErrorMessage errors={errors} touched={touched} name="rulesParent1" />
-                        {young.parent2FirstName && (
+                        {firstName2 && (
                           <>
                             <RadioLabel>
                               <Field
@@ -142,7 +141,7 @@ export default () => {
                               <label htmlFor="rulesParent2">
                                 Je,{" "}
                                 <b>
-                                  {young.parent1FirstName} {young.parent1LastName}
+                                  {firstName2} {lastName2}
                                 </b>{" "}
                                 certifie avoir lu et accepté les règles de fonctionnement propres aux centres du Service National Universel exposées dans le règlement intérieur ci-joint.
                               </label>
