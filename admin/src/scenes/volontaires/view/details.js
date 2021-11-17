@@ -91,6 +91,15 @@ export default ({ young }) => {
                   />
                 ))}
               </Bloc>
+              <Bloc title="Traitement des données personnelles (moins de 15 ans)">
+                {(young.dataProcessingConsentmentFiles || []).map((e, i) => (
+                  <DownloadButton
+                    key={i}
+                    source={() => api.get(`/referent/youngFile/${young._id}/dataProcessingConsentmentFiles/${e}`)}
+                    title={`Télécharger le document (${i + 1}/${young.dataProcessingConsentmentFiles.length})`}
+                  />
+                ))}
+              </Bloc>
               <Bloc title="Autotest PCR">
                 <Details title="Autorisation" value={t(young.autoTestPCR)} />
                 {(young.autoTestPCRFiles || []).map((e, i) => (

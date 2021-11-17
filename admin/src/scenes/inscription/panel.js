@@ -86,6 +86,24 @@ export default ({ onChange, value }) => {
           </div>
         )}
       </Info>
+      <Info title="Traitement des données personnelles (moins de 15 ans)" id={value._id}>
+        {(value.dataProcessingConsentmentFiles || []).map((e, i) => (
+          <DownloadButton
+            key={i}
+            source={() => api.get(`/referent/youngFile/${value._id}/dataProcessingConsentmentFiles/${e}`)}
+            title={`Télécharger le document (${i + 1}/${value.dataProcessingConsentmentFiles.length})`}
+          />
+        ))}
+        {isFromFranceConnect(young) && (
+          <div style={{ marginTop: "1rem" }}>
+            <img src={require("../../assets/fc_logo_v2.png")} height={60} />
+            <br />
+            <b>Consentement parental validé via FranceConnect.</b>
+            <br />
+            Les représentants légaux ont utilisé FranceConnect pour s’identifier et consentir, ce qui permet de s’affranchir du document de consentement papier.
+          </div>
+        )}
+      </Info>
       <Info title="Coordonnées" id={value._id}>
         <Details title="E-mail" value={value.email} />
         <Details title="Tel" value={value.phone} />
@@ -96,6 +114,7 @@ export default ({ onChange, value }) => {
       </Info>
       <Info title="Situation" id={value._id}>
         <Details title="Statut" value={t(value.situation)} />
+        <Details title="Classe" value={t(value.grade)} />
         <Details title="Type" value={value.schoolType} />
         <Details title="Nom" value={value.schoolName} />
         <Details title="Région" value={value.schoolRegion} />
