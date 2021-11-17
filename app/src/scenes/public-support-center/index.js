@@ -125,7 +125,7 @@ export default () => {
         <div className="help-section">
           <div className="help-section-block">
             <div className="help-section-text" style={{ color: "#6B7280" }}>
-              N'hésitez pas à <strong>contacter notre service de support</strong>, nous vous répondrons dans les plus brefs délais !
+              Vous n'avez pas trouvé de réponse à votre demande ? Contactez nos équipes. Nous travaillons généralement du <strong>lundi au vendredi de 9h00 à 18h00</strong> et traiterons votre demande dès que possible. Vous recevrez une réponse par mail.
             </div>
             <div className="zammad-container">
               <LinkButton onClick={() => setOpen(true)}>
