@@ -1,10 +1,14 @@
+import Head from "next/head";
 import Drawer from "./Drawer";
 
-const Layout = ({ children }) => {
+const Layout = ({ title, children }) => {
   return (
     <>
+      <Head>
+        <title>SNU - Admin Support - {title}</title>
+      </Head>
       <Drawer />
-      <div>{children}</div>
+      <div className="flex-grow">{children}</div>
     </>
   );
 };

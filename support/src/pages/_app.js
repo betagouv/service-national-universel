@@ -1,4 +1,4 @@
-import "../styles.css";
+import "../global.css";
 import { SWRConfig } from "swr";
 import API from "../services/api";
 
@@ -19,7 +19,7 @@ const swrOptions = {
 function MyApp({ Component, pageProps }) {
   return (
     <SWRConfig value={swrOptions}>
-      <Component {...pageProps} />;
+      <Component {...pageProps} />
     </SWRConfig>
   );
 }
