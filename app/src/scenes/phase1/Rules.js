@@ -120,13 +120,13 @@ export default () => {
                           <label htmlFor="rulesParent1">
                             Je,{" "}
                             <b>
-                              {firstName1} {lastName1}
+                              {young.parent1FirstName} {young.parent1LastName}
                             </b>{" "}
                             certifie avoir lu et accepté les règles de fonctionnement propres aux centres du Service National Universel exposées dans le règlement intérieur ci-joint.
                           </label>
                         </RadioLabel>
                         <ErrorMessage errors={errors} touched={touched} name="rulesParent1" />
-                        {firstName2 && (
+                        {young.parent2FirstName && (
                           <>
                             <RadioLabel>
                               <Field
@@ -141,7 +141,7 @@ export default () => {
                               <label htmlFor="rulesParent2">
                                 Je,{" "}
                                 <b>
-                                  {firstName2} {lastName2}
+                                  {young.parent2FirstName} {young.parent2LastName}
                                 </b>{" "}
                                 certifie avoir lu et accepté les règles de fonctionnement propres aux centres du Service National Universel exposées dans le règlement intérieur ci-joint.
                               </label>
