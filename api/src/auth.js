@@ -65,7 +65,8 @@ class Auth {
       const { user } = req;
       user.set({ lastLoginAt: Date.now() });
       await user.save();
-      res.send({ ok: true, token: value.token, user: isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user) });
+      const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
+      res.send({ ok: true, token: value.token, user: data, data });
     } catch (error) {
       capture(error);
       return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
