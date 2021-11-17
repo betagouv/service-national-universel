@@ -1,20 +1,29 @@
 import { useRouter } from "next/router";
 import { useForm } from "react-hook-form";
+import Loader from "../../components/Loader";
+import useUser from "../../hooks/useUser";
 import API from "../../services/api";
 
 const Auth = () => {
+  const { isLoading, mutate } = useUser({ redirectOnLoggedIn: "/admin" });
+  const router = useRouter();
+
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
-  const router = useRouter();
+
   const onSubmit = async (body) => {
     const response = await API.post({ path: "/referent/signin", body });
     if (response.error) return alert(response.error);
-    if (response.user) router.push("/admin/knowledge-base");
+    if (response.user) {
+      mutate(response);
+      router.push("/admin/knowledge-base");
+    }
   };
 
+  if (isLoading) return <Loader />;
   /* "handleSubmit" will validate your inputs before invoking "onSubmit" */
   return (
     <div className="flex w-full h-full items-center justify-center">

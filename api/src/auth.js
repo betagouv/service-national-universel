@@ -36,10 +36,12 @@ class Auth {
       const token = jwt.sign({ _id: user.id }, config.secret, { expiresIn: JWT_MAX_AGE });
       res.cookie("jwt", token, cookieOptions());
 
+      const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
       return res.status(200).send({
         ok: true,
         token,
-        user: isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user),
+        user: data,
+        data,
       });
     } catch (error) {
       capture(error);

@@ -8,7 +8,6 @@ class ApiService {
 
   swrFetcher = (url) =>
     fetch(url, {
-      method,
       credentials: "include",
       headers: {
         "Content-Type": "application/json",
