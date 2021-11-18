@@ -35,7 +35,8 @@ export default () => {
             ) : (
               <>
                 <p style={{ color: "#9C9C9C" }}>
-                  Vous devez renseigner votre fiche sanitaire, la mettre dans une enveloppe portant la mention “A l’attention de l’infirmier, Pli Confidentiel” et  y joindre une photocopie des documents requis. <br />
+                  Vous devez renseigner votre fiche sanitaire, la mettre dans une enveloppe portant la mention “A l’attention de l’infirmier, Pli Confidentiel” et y joindre une
+                  photocopie des documents requis. <br />
                   Vous la remettrez à <strong>votre arrivée au centre de séjour</strong> à l’équipe d’encadrement.
                 </p>
                 <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Note_relative_aux_informations_d_ordre_sanitaire.pdf" target="blank" className="link">
@@ -45,7 +46,8 @@ export default () => {
             )}
             <div style={{ marginTop: "2rem" }}>
               <div style={{ color: "#9C9C9C" }}>
-                <b> Rappel : </b>Vous devez réaliser un bilan de santé obligatoire auprès de votre médecin traitant. Il est fortement recommandé de le faire avant votre séjour de cohésion.
+                <b> Rappel : </b>Vous devez réaliser un bilan de santé obligatoire auprès de votre médecin traitant. Il est fortement recommandé de le faire avant votre séjour de
+                cohésion.
               </div>
               <a
                 href="https://www.ameli.fr/assure/sante/themes/suivi-medical-de-lenfant-et-de-ladolescent/examen-medical-propose-ladolescent-entre-15-et-16-ans"
@@ -58,7 +60,7 @@ export default () => {
           </div>
           {young.cohesionStayMedicalFileReceived !== "true" ? (
             <div style={{ minWidth: "30%", display: "flex", justifyContent: "flex-end", alignItems: "center", marginLeft: "1.5rem" }}>
-              <a target="blank" href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Fiche_sanitaire.pdf">
+              <a target="blank" href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/fiche_sanitaire_2022.pdf">
                 <ContinueButton>Télécharger la fiche sanitaire</ContinueButton>
               </a>
             </div>
