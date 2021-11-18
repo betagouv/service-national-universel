@@ -38,6 +38,7 @@ export default ({ young }) => {
                 <Details title="Code Postal" value={young.zip} />
                 <Details title="Dép" value={young.department} />
                 <Details title="Région" value={young.region} />
+                <Details title="Académie" value={young.academy} />
                 {young.foreignAddress && (
                   <Infos>
                     <InfoIcon color="#32257F" />

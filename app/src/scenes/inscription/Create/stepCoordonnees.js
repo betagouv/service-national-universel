@@ -254,6 +254,7 @@ export default () => {
                         department: "department",
                         region: "region",
                         cityCode: "cityCode",
+                        academy: "academy",
                       }}
                       values={values}
                       handleChange={handleChange}
@@ -365,6 +366,7 @@ export default () => {
                           department: "department",
                           region: "region",
                           cityCode: "cityCode",
+                          academy: "academy",
                         }}
                         values={values}
                         departAndRegionVisible={false}

@@ -51,8 +51,8 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
     if (keys.cityCode) {
       handleChange({ target: { name: keys.cityCode, value: suggestion.properties.citycode } });
     }
-    if (keys.academy && suggestion.properties.postcode) {
-      handleChange({ target: { name: keys.academy, value: departmentToAcademy[departmentLookUp[suggestion.properties.postcode]] } });
+    if (keys.academy && depart) {
+      handleChange({ target: { name: keys.academy, value: departmentToAcademy[departmentLookUp[depart]] } });
     }
 
     setSuggestion({});
