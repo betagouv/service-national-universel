@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { Row, Col } from "reactstrap";
 import { Field, useField } from "formik";
 import ErrorMessage, { requiredMessage } from "../scenes/inscription/components/errorMessage";
-import { department2region, departmentLookUp } from "../utils";
+import { department2region, departmentLookUp, departmentToAcademy } from "../utils";
 import InfoIcon from "./InfoIcon";
 import { Spinner } from "reactstrap";
 import countries from "i18n-iso-countries";
@@ -50,6 +50,9 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
 
     if (keys.cityCode) {
       handleChange({ target: { name: keys.cityCode, value: suggestion.properties.citycode } });
+    }
+    if (keys.academy && suggestion.properties.postcode) {
+      handleChange({ target: { name: keys.academy, value: departmentToAcademy[departmentLookUp[suggestion.properties.postcode]] } });
     }
 
     setSuggestion({});

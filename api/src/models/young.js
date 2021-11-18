@@ -563,7 +563,7 @@ const Schema = new mongoose.Schema({
   schoolAcademy: {
     type: String,
     documentation: {
-      description: "Académie de l'établissement du volontaire",
+      description: "Académie du volontaire (en fonction de son domicile)",
     },
   },
 
