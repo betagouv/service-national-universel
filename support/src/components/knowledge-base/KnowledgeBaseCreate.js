@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import API from "../../services/api";
 import Modal from "../Modal";
 
-const KnowledgeBaseCreate = ({ position }) => {
+const KnowledgeBaseCreate = ({ position, parentId = null }) => {
   const [type, setType] = useState(null);
 
   const router = useRouter();
@@ -17,6 +17,7 @@ const KnowledgeBaseCreate = ({ position }) => {
   const onSubmit = async (body) => {
     body.type = type;
     body.position = position;
+    body.parentId = parentId;
     const response = await API.post({ path: "/support-center/knowledge-base", body });
     if (response.error) return alert(response.error);
     if (response.data) {
@@ -39,7 +40,9 @@ const KnowledgeBaseCreate = ({ position }) => {
             <button type="submit" className="w-auto">
               Créer
             </button>
-            <button type="reset">Annuler</button>
+            <button type="reset" onClick={() => setType(null)}>
+              Annuler
+            </button>
           </div>
         </form>
       </Modal>

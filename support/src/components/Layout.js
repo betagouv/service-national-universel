@@ -8,7 +8,7 @@ const Layout = ({ title, children }) => {
         <title>SNU - Admin Support - {title}</title>
       </Head>
       <Drawer />
-      <div className="flex-grow w-full h-full">{children}</div>
+      <div className="flex-grow w-full h-full overflow-hidden">{children}</div>
     </>
   );
 };

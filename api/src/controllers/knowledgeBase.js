@@ -81,7 +81,16 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     if (req.body.hasOwnProperty("parentId")) updateKb.parentId = req.body.parentId;
     if (req.body.hasOwnProperty("position")) updateKb.position = req.body.position;
     if (req.body.hasOwnProperty("title")) updateKb.title = req.body.title;
-    if (req.body.hasOwnProperty("slug")) updateKb.slug = req.body.slug;
+    if (req.body.hasOwnProperty("slug")) {
+      updateKb.slug = slugify(req.body.slug.trim(), {
+        replacement: "-",
+        remove: /[*+~.()'"!?:@]/g,
+        lower: true, // convert to lower case, defaults to `false`
+        strict: true, // strip special characters except replacement, defaults to `false`
+        locale: "fr", // language code of the locale to use
+        trim: true, // trim leading and trailing replacement chars, defaults to `true`
+      });
+    }
     if (req.body.hasOwnProperty("imageSrc")) updateKb.imageSrc = req.body.imageSrc;
     if (req.body.hasOwnProperty("imageAlt")) updateKb.imageAlt = req.body.imageAlt;
     if (req.body.hasOwnProperty("content")) updateKb.content = req.body.content;
@@ -94,12 +103,10 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     existingKb.set(updateKb);
     await existingKb.save();
 
-    return res
-      .status(200)
-      .send({
-        ok: true,
-        data: await KnowledgeBaseObject.findById(existingKb._id).populate({ path: "author", select: "_id firstName lastName role" }),
-      });
+    return res.status(200).send({
+      ok: true,
+      data: await KnowledgeBaseObject.findById(existingKb._id).populate({ path: "author", select: "_id firstName lastName role" }),
+    });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
@@ -117,7 +124,6 @@ router.get("/:slug", passport.authenticate(["referent", "young"], { session: fal
 
     if (req.query.withTree === "true") {
       const tree = await buildTree(existingKb);
-      console.log({ existingKb, tree });
       return res.status(200).send({ ok: true, data: tree });
     }
 
@@ -143,7 +149,7 @@ router.get("/", passport.authenticate(["referent", "young"], { session: false, f
 
     const tree = await Promise.all(rootKbs.map(buildTree));
 
-    return res.status(200).send({ ok: true, data: { children: tree } });
+    return res.status(200).send({ ok: true, data: { type: "root", children: tree } });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
