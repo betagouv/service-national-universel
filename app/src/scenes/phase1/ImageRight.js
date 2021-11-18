@@ -11,9 +11,12 @@ import { setYoung } from "../../redux/auth/actions";
 import { translate } from "../../utils";
 import { SuccessMessage, RadioLabel, Footer, FormGroup, FormRow, Title, Logo, DownloadText, BackButton, Content, SignBox, ContinueButton } from "./components/printable";
 import DownloadFormButton from "../../components/buttons/DownloadFormButton";
+import LoadingButton from "../../components/buttons/LoadingButton";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
+  const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const isPlural = young?.parent1Status && young?.parent2Status;
 
   const dispatch = useDispatch();
@@ -64,12 +67,15 @@ export default () => {
                 validateOnBlur={false}
                 onSubmit={async (values) => {
                   try {
+                    setLoading(true);
                     const { imageRight, imageRightFiles } = values;
                     const { ok, code, data: young } = await api.put("/young", { imageRight, imageRightFiles });
+                    setLoading(false);
                     if (!ok) return toastr.error("Une erreur s'est produite", translate(code));
                     dispatch(setYoung(young));
                     toastr.success("Mis à jour !");
                   } catch (e) {
+                    setLoading(false);
                     console.log(e);
                     toastr.error("Erreur !");
                   }
@@ -201,11 +207,13 @@ export default () => {
                             value={values.imageRightFiles}
                             name="imageRightFiles"
                             onChange={async (e) => {
+                              setUploading(true);
                               const res = await api.uploadFile("/young/file/imageRightFiles", e.target.files);
                               if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
                               // We update it instant ( because the bucket is updated instant )
                               toastr.success("Fichier téléversé");
                               handleChange({ target: { value: res.data, name: "imageRightFiles" } });
+                              setUploading(false);
                             }}
                           />
                           <ErrorMessage errors={errors} touched={touched} name="imageRightFiles" />
@@ -241,7 +249,9 @@ export default () => {
                     <Footer className="noPrint">
                       <Title />
                       <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                        <ContinueButton onClick={handleSubmit}>Valider le consentement</ContinueButton>
+                        <LoadingButton loading={loading} disabled={uploading} onClick={handleSubmit}>
+                          Valider le consentement
+                        </LoadingButton>
                       </div>
                       {Object.keys(errors).length ? <h3>Vous ne pouvez pas valider le formulaire car tous les champs ne sont pas correctement renseignés.</h3> : null}
                     </Footer>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Row, Col } from "reactstrap";
 import { useSelector, useDispatch } from "react-redux";
 import { Formik, Field } from "formik";
@@ -11,11 +11,14 @@ import { setYoung } from "../../redux/auth/actions";
 import { translate } from "../../utils";
 import { SuccessMessage, RadioLabel, Footer, FormGroup, FormRow, Title, Logo, DownloadText, BackButton, Content, SignBox, ContinueButton } from "./components/printable";
 import DownloadFormButton from "../../components/buttons/DownloadFormButton";
+import LoadingButton from "../../components/buttons/LoadingButton";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
   const isPlural = young?.parent1Status && young?.parent2Status;
+  const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   return (
     <HeroContainer>
@@ -68,12 +71,15 @@ export default () => {
                 validateOnBlur={false}
                 onSubmit={async (values) => {
                   try {
+                    setLoading(true);
                     const { autoTestPCR, autoTestPCRFiles } = values;
                     const { ok, code, data: young } = await api.put("/young", { autoTestPCR, autoTestPCRFiles });
+                    setLoading(false);
                     if (!ok) return toastr.error("Une erreur s'est produite", translate(code));
                     dispatch(setYoung(young));
                     toastr.success("Mis à jour !");
                   } catch (e) {
+                    setLoading(false);
                     console.log(e);
                     toastr.error("Erreur !");
                   }
@@ -202,11 +208,13 @@ export default () => {
                             value={values.autoTestPCRFiles}
                             name="autoTestPCRFiles"
                             onChange={async (e) => {
+                              setUploading(true);
                               const res = await api.uploadFile("/young/file/autoTestPCRFiles", e.target.files);
                               if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
                               // We update it instant ( because the bucket is updated instant )
                               toastr.success("Fichier téléversé");
                               handleChange({ target: { value: res.data, name: "autoTestPCRFiles" } });
+                              setUploading(false);
                             }}
                           />
                           <ErrorMessage errors={errors} touched={touched} name="autoTestPCRFiles" />
@@ -242,7 +250,9 @@ export default () => {
                     <Footer className="noPrint">
                       <Title />
                       <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-                        <ContinueButton onClick={handleSubmit}>Valider le consentement</ContinueButton>
+                        <LoadingButton loading={loading} disabled={uploading} onClick={handleSubmit}>
+                          Valider le consentement
+                        </LoadingButton>
                       </div>
                       {Object.keys(errors).length ? <h3>Vous ne pouvez pas valider le formulaire car tous les champs ne sont pas correctement renseignés.</h3> : null}
                     </Footer>
