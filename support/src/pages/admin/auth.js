@@ -37,7 +37,7 @@ const Auth = () => {
         {/* errors will return when field validation fails  */}
         {errors.exampleRequired && <span>This field is required</span>}
 
-        <input className="py-2 px-5" type="submit" value="Se connecter" />
+        <button type="submit">Se connecter</button>
       </form>
     </div>
   );
