@@ -9,25 +9,13 @@ import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../redux/auth/actions";
 import { translate } from "../../utils";
-import {
-  SuccessMessage,
-  RadioLabel,
-  Footer,
-  FormGroup,
-  FormRow,
-  Title,
-  Logo,
-  DownloadText,
-  BackButton,
-  Content,
-  SignBox,
-  ContinueButton,
-} from "./components/printable";
+import { SuccessMessage, RadioLabel, Footer, FormGroup, FormRow, Title, Logo, DownloadText, BackButton, Content, SignBox, ContinueButton } from "./components/printable";
 import DownloadFormButton from "../../components/buttons/DownloadFormButton";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
-  const [expandInfo, setExpandInfo] = useState(false);
+  const isPlural = young?.parent1Status && young?.parent2Status;
+
   const dispatch = useDispatch();
 
   return (
@@ -48,7 +36,8 @@ export default () => {
             <div>
               <h2>Consentement de droit à l'image</h2>
               <p style={{ color: "#9C9C9C" }}>
-                Votre représentant légal doit renseigner le formulaire relatif au droit à l'image avant votre départ en séjour de cohésion. Cette étape est un pré-requis au séjour de cohésion.
+                {isPlural ? "Vos représentants légaux doivent" : "Votre représentant légal doit"} renseigner le formulaire relatif au droit à l'image avant votre départ en séjour
+                de cohésion. Cette étape est un pré-requis au séjour de cohésion.
               </p>
             </div>
           </div>
@@ -88,7 +77,9 @@ export default () => {
                 {({ values, handleChange, handleSubmit, errors, touched, isSubmitting, submitForm }) => (
                   <>
                     <Title>
-                      <span>Seuls les représentants légaux sont habilités à valider ce consentement</span>
+                      <span>
+                        {isPlural ? "Seuls les représentants légaux sont habilités à valider ce consentement" : "Seul le représentant légal est habilité à valider ce consentement"}
+                      </span>
                     </Title>
                     <FormGroup>
                       <label>REPRÉSENTANT LÉGAL N°1</label>
@@ -162,11 +153,9 @@ export default () => {
                             onChange={handleChange}
                           />
                           <label htmlFor="imageRight_true">
-                            Nous autorisons l'Administration à reproduire et exploiter l'image et la voix de{" "}
-                            <b>
-                              {young.firstName} {young.lastName}
-                            </b>{" "}
-                            que nous représentons légalement, sur les supports visés ci-après à des fins de promotion du Service Nationnel Universel
+                            {isPlural ? "Nous autorisons" : "J'autorise"} le Ministère de l’Education Nationale, de la Jeunesse et des Sports (MENJS), ses partenaires et les
+                            journalistes dûment accrédités par les services communication du ministère et/ou des préfecture à enregistrer, reproduire et représenter l’image et/ou
+                            la voix du volontaire représenté en partie ou en intégralité, ensemble ou séparément, sur leurs publications respectives.
                           </label>
                         </RadioLabel>
                         <RadioLabel>
@@ -180,11 +169,9 @@ export default () => {
                             onChange={handleChange}
                           />
                           <label htmlFor="imageRight_false">
-                            Nous n'autorisons pas l'Administration à reproduire et exploiter l'image et la voix de{" "}
-                            <b>
-                              {young.firstName} {young.lastName}
-                            </b>{" "}
-                            que nous représentons légalement, sur les supports visés ci-après à des fins de promotion du Service Nationnel Universel
+                            {isPlural ? "Nous n'autorisons" : "Je n'autorise"} pas le Ministère de l’Education Nationale, de la Jeunesse et des Sports, ses partenaires et les
+                            journalistes à enregistrer, reproduire et représenter l’image et/ou la voix du volontaire représenté en partie ou en intégralité, ensemble ou
+                            séparément, sur leurs publications respectives.
                           </label>
                         </RadioLabel>
                         <ErrorMessage errors={errors} touched={touched} name="imageRight" />
@@ -197,17 +184,16 @@ export default () => {
                   </Title> */}
                       <div style={{ display: "flex", justifyContent: "center" }}>
                         <div>
-                          <BackButton>
+                          {/* <BackButton>
                             <DownloadFormButton young={values} uri="imageRight">
                               Télécharger le formulaire pré-rempli
                             </DownloadFormButton>
-                          </BackButton>
-                          <DownloadText>
-                            Ou{" "}
-                            <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Droit_a_l_image.pdf" target="_blank">
+                          </BackButton> */}
+                          <BackButton>
+                            <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/droit_a_l_image_2022.pdf" target="_blank">
                               télécharger le modèle à remplir
                             </a>
-                          </DownloadText>
+                          </BackButton>
                           <DndFileInput
                             placeholder="le formulaire"
                             errorMessage="Vous devez téléverser le formulaire"
@@ -227,7 +213,7 @@ export default () => {
                     <div>FRANCE CONNECT</div> */}
                       </div>
                     </div>
-                    <SignBox className="onlyPrint">
+                    {/* <SignBox className="onlyPrint">
                       <Row>
                         <Col md={6}>
                           <div>Sous réserve du respect de l’ensemble de ces conditions, le consentement délivré est libre et éclairé.</div>
@@ -250,7 +236,7 @@ export default () => {
                           </div>
                         </Col>
                       </Row>
-                    </SignBox>
+                    </SignBox> */}
                     <Footer className="noPrint">
                       <Title />
                       <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
