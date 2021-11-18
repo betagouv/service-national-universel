@@ -47,6 +47,17 @@ export default ({ onChange, value }) => {
             Né(e) le {formatDateFRTimezoneUTC(young.birthdateAt)} • {getAge(young.birthdateAt)} ans
           </div>
         )}
+        {young.frenchNationality && (
+          <div>
+            Nationalité française{" "}
+            <svg xmlns="http://www.w3.org/2000/svg" height="18px" width="18px" fill="#31c48d" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+            </svg>
+          </div>
+        )}
+        <div>
+          Lieu de naissance : {young.birthZip} {young.birthCity}, {young.birthCountry}
+        </div>
         <div style={{ display: "flex" }}>
           <Link to={`/volontaire/${young._id}`}>
             <PanelActionButton icon="eye" title="Consulter" />
@@ -88,6 +99,12 @@ export default ({ onChange, value }) => {
         <Details title="Dép" value={young.department} />
         <Details title="Ville" value={young.city && young.zip && `${young.city} (${young.zip})`} />
         <Details title="Adresse" value={young.address} />
+        {young.parent1OwnAddress ? (
+          <Details title={`Adresse de ${young.parent1FirstName} ${young.parent1LastName} (représentant légal 1)`} value={young.parent1Address} />
+        ) : null}
+        {young.parent2LastName && young.parent2OwnAddress ? (
+          <Details title={`Adresse de ${young.parent2FirstName} ${young.parent2LastName} (représentant légal 2)`} value={young.parent2Address} />
+        ) : null}
       </Info>
       <Info title="Situation" id={young._id}>
         <Details
@@ -120,11 +137,15 @@ export default ({ onChange, value }) => {
         <Details title="Quartier Prioritaire de la Ville" value={t(young.qpv)} />
         <Details title="Zone Rurale" value={t(isInRuralArea(young))} />
         <Details title="Handicap" value={t(young.handicap)} />
+        <Details title="Allergies" value={t(young.allergies)} />
         <Details title="PPS" value={t(young.ppsBeneficiary)} />
         <Details title="PAI" value={t(young.paiBeneficiary)} />
-        <Details title="Suivi médicosociale" value={t(young.medicosocialStructure)} />
+        <Details title="Suivi médicosocial" value={t(young.medicosocialStructure)} />
         <Details title="Aménagement spécifique" value={t(young.specificAmenagment)} />
+        <Details title="Aménagement pour mobilité réduite" value={t(young.reducedMobilityAccess)} />
+        <Details title="Affecté dans son département de résidence" value={t(young.handicapInSameDepartment)} />
         <Details title="Activités de haut niveau" value={t(young.highSkilledActivity)} />
+        <Details title="Affecté dans son département de résidence (activité de haut niveau)" value={t(young.highSkilledActivityInSameDepartment)} />
       </Info>
       {young && young.historic && young.historic.length !== 0 && <Historic value={young.historic} />}
       {young.motivations && (
