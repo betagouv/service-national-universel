@@ -15,7 +15,7 @@ import DownloadFormButton from "../../components/buttons/DownloadFormButton";
 export default () => {
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
-  const isPlural = true; //young?.parent1Status && young?.parent2Status;
+  const isPlural = young?.parent1Status && young?.parent2Status;
 
   return (
     <HeroContainer>

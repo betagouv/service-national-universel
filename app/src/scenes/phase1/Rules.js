@@ -9,25 +9,13 @@ import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../redux/auth/actions";
 import { translate } from "../../utils";
-import {
-  SuccessMessage,
-  RadioLabel,
-  Footer,
-  FormGroup,
-  FormRow,
-  Title,
-  Logo,
-  DownloadText,
-  BackButton,
-  Content,
-  SignBox,
-  ContinueButton,
-} from "./components/printable";
+import { SuccessMessage, RadioLabel, Footer, FormGroup, FormRow, Title, Logo, DownloadText, BackButton, Content, SignBox, ContinueButton } from "./components/printable";
 import DownloadFormButton from "../../components/buttons/DownloadFormButton";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
+  const isPlural = young?.parent1Status && young?.parent2Status;
 
   return (
     <HeroContainer>
@@ -47,11 +35,12 @@ export default () => {
             <div>
               <h2>Règlement intérieur</h2>
               <p style={{ color: "#9C9C9C" }}>
-                Vous et votre représentant légal devez lire et acceptez les règles de fonctionnement propres aux centres du Service National Universel exposées dans le règlement intérieur ci-joint avant votre départ en séjour. Cette étape est un pré-requis au séjour de cohésion.
+                Vous et {isPlural ? "vos représentants légaux" : "votre représentant légal"} devez lire et acceptez les règles de fonctionnement propres aux centres du Service
+                National Universel exposées dans le règlement intérieur ci-joint avant votre départ en séjour. Cette étape est un pré-requis au séjour de cohésion.
               </p>
             </div>
           </div>
-          {young.rules && young.rules.length ? (
+          {young.rulesFiles && young.rulesFiles.length ? (
             <SuccessMessage>
               <Logo>
                 <svg height={64} width={64} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#057a55" aria-hidden="true">
@@ -103,7 +92,8 @@ export default () => {
                             <b>
                               {young.firstName} {young.lastName}
                             </b>{" "}
-                            certifie avoir lu et accepté les règles de fonctionnement propres aux centres du Service National Universel exposées dans le règlement intérieur ci-joint.
+                            certifie avoir lu et accepté les règles de fonctionnement propres aux centres du Service National Universel exposées dans le règlement intérieur
+                            ci-joint.
                           </label>
                         </RadioLabel>
                         <ErrorMessage errors={errors} touched={touched} name="rulesYoung" />
@@ -122,7 +112,8 @@ export default () => {
                             <b>
                               {young.parent1FirstName} {young.parent1LastName}
                             </b>{" "}
-                            certifie avoir lu et accepté les règles de fonctionnement propres aux centres du Service National Universel exposées dans le règlement intérieur ci-joint.
+                            certifie avoir lu et accepté les règles de fonctionnement propres aux centres du Service National Universel exposées dans le règlement intérieur
+                            ci-joint.
                           </label>
                         </RadioLabel>
                         <ErrorMessage errors={errors} touched={touched} name="rulesParent1" />
@@ -135,7 +126,7 @@ export default () => {
                                 type="radio"
                                 name="rulesParent2"
                                 value="true"
-                                checked={values.rulesParent1 === "true"}
+                                checked={values.rulesParent2 === "true"}
                                 onChange={handleChange}
                               />
                               <label htmlFor="rulesParent2">
@@ -143,7 +134,8 @@ export default () => {
                                 <b>
                                   {young.parent2FirstName} {young.parent2LastName}
                                 </b>{" "}
-                                certifie avoir lu et accepté les règles de fonctionnement propres aux centres du Service National Universel exposées dans le règlement intérieur ci-joint.
+                                certifie avoir lu et accepté les règles de fonctionnement propres aux centres du Service National Universel exposées dans le règlement intérieur
+                                ci-joint.
                               </label>
                             </RadioLabel>
                             <ErrorMessage errors={errors} touched={touched} name="rulesParent2" />
@@ -158,37 +150,36 @@ export default () => {
                   </Title> */}
                       <div style={{ display: "flex", justifyContent: "center" }}>
                         <div>
-                          <BackButton>
+                          {/* <BackButton>
                             <DownloadFormButton young={values} uri="imageRight">
                               Télécharger le formulaire pré-rempli
                             </DownloadFormButton>
-                          </BackButton>
-                          <DownloadText>
-                            Ou{" "}
-                            <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Droit_a_l_image.pdf" target="_blank">
+                          </BackButton> */}
+                          <BackButton>
+                            <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/reglement_interieur_Fevrier_2022.pdf" target="_blank">
                               télécharger le modèle à remplir
                             </a>
-                          </DownloadText>
+                          </BackButton>
                           <DndFileInput
                             placeholder="le formulaire"
                             errorMessage="Vous devez téléverser le formulaire"
                             value={values.rulesFiles}
                             name="rulesFiles"
                             onChange={async (e) => {
-                              const res = await api.uploadFile("/young/file/imageRightFiles", e.target.files);
+                              const res = await api.uploadFile("/young/file/rulesFiles", e.target.files);
                               if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
                               // We update it instant ( because the bucket is updated instant )
                               toastr.success("Fichier téléversé");
-                              handleChange({ target: { value: res.data, name: "imageRightFiles" } });
+                              handleChange({ target: { value: res.data, name: "rulesFiles" } });
                             }}
                           />
-                          <ErrorMessage errors={errors} touched={touched} name="imageRightFiles" />
+                          <ErrorMessage errors={errors} touched={touched} name="rulesFiles" />
                         </div>
                         {/* <div>OU</div>
                     <div>FRANCE CONNECT</div> */}
                       </div>
                     </div>
-                    <SignBox className="onlyPrint">
+                    {/* <SignBox className="onlyPrint">
                       <Row>
                         <Col md={6}>
                           <div>Sous réserve du respect de l’ensemble de ces conditions, le consentement délivré est libre et éclairé.</div>
@@ -211,7 +202,7 @@ export default () => {
                           </div>
                         </Col>
                       </Row>
-                    </SignBox>
+                    </SignBox> */}
                     <Footer className="noPrint">
                       <Title />
                       <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>

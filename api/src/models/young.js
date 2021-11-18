@@ -1019,6 +1019,34 @@ const Schema = new mongoose.Schema({
       description: "Fichier : Formulaire de consentement d'autotest PCR",
     },
   },
+  rulesYoung: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le volontaire a accepté le règlement intérieur ",
+    },
+  },
+  rulesParent1: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le representant légal 1 a accepté le règlement intérieur ",
+    },
+  },
+  rulesParent2: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "Le representant légal  2 a accepté le règlement intérieur ",
+    },
+  },
+  rulesFiles: {
+    type: [String],
+    default: [],
+    documentation: {
+      description: "Fichiers : règlement intérieur",
+    },
+  },
   informationAccuracy: {
     type: String,
     enum: ["true", "false"],
