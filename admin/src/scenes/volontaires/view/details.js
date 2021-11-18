@@ -202,7 +202,7 @@ const Bloc = ({ children, title, last }) => {
   return (
     <Row style={{ borderBottom: last ? 0 : "2px solid #f4f5f7" }}>
       <Wrapper>
-        <div style={{ display: "flex" }}>
+        <div>
           <BoxTitle>{title}</BoxTitle>
         </div>
         {children}
@@ -217,32 +217,35 @@ const Details = ({ title, value, copy }) => {
   return (
     <div className="detail">
       <div className="detail-title">{`${title} :`}</div>
-      <div className="detail-text">{value}</div>
-      {copy ? (
-        <div
-          className="icon"
-          icon={require(`../../../assets/copy.svg`)}
-          onClick={() => {
-            copyToClipboard(value);
-            toastr.success(`'${title}' a été copié dans le presse papier.`);
-          }}
-        />
-      ) : null}
+      <section style={{ display: "flex" }}>
+        <div className="detail-text">{value}</div>
+        {copy ? (
+          <div
+            className="icon"
+            icon={require(`../../../assets/copy.svg`)}
+            onClick={() => {
+              copyToClipboard(value);
+              toastr.success(`'${title}' a été copié dans le presse papier.`);
+            }}
+          />
+        ) : null}
+      </section>
     </div>
   );
 };
 
 const Wrapper = styled.div`
   padding: 3rem;
+  width: 100%;
   .detail {
+    border-bottom: 0.5px solid rgba(244, 245, 247, 0.5);
     display: flex;
-    align-items: flex-start;
+    justify-content: space-between;
     font-size: 14px;
-    text-align: left;
     margin-top: 1rem;
+    padding-bottom: 0.5rem;
     &-title {
       min-width: 90px;
-      width: 90px;
       margin-right: 1rem;
       color: #798399;
     }
