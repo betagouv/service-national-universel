@@ -19,7 +19,6 @@ const Schema = new mongoose.Schema(
     parentId: {
       type: mongoose.Types.ObjectId,
       ref: "knowledgeBase",
-      required: true,
       documentation: {
         description: "Lien de parenté entre un article/une section et une section",
       },
@@ -33,6 +32,7 @@ const Schema = new mongoose.Schema(
     },
     title: {
       type: String,
+      trim: true,
       required: true,
       documentation: {
         description: "Soit le titre d'une section, soit le titre d'un article",
@@ -70,12 +70,17 @@ const Schema = new mongoose.Schema(
       },
     },
     allowedRoles: {
-      type: String,
-      enum: SUPPORT_ROLES_LIST,
-      required: true,
-      documentation: {
-        description: "Rôles délimitant le droit de lecture d'une réponse",
-      },
+      type: [
+        {
+          type: String,
+          enum: SUPPORT_ROLES_LIST,
+          required: true,
+          documentation: {
+            description: "Rôles délimitant le droit de lecture d'une réponse",
+          },
+        },
+      ],
+      default: SUPPORT_ROLES_LIST,
     },
     status: {
       type: String,

@@ -10,10 +10,13 @@
   },
   "dependencies": {
     "@sentry/nextjs": "^6.15.0",
+    "dayjs": "^1.10.7",
     "next": "latest",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
+    "react-modal": "^3.14.4",
     "swr": "^1.0.1",
+    "snu-lib": "file:../lib",
     "urijs": "^1.19.7"
   },
   "devDependencies": {
