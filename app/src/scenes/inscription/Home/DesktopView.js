@@ -1,50 +1,17 @@
 import React from "react";
 import styled from "styled-components";
 import { appURL } from "../../../config";
+import StopIcon from "../components/stopIcon";
+import TickIcon from "../components/tickIcon";
+import conditions from "./conditions";
 
 export default () => {
   return (
     <Wrapper>
       <Points backgroundColor="#fff">
         <div className="points-title">Conditions d'inscription</div>
-        <GridContainer className="first_container">
-          <Section>
-            <ul>
-              <li className="section_year">
-                <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect width="20" height="20" rx="10" fill="#32267F" fill-opacity=".06" />
-                  <path
-                    d="M8.644 13.843l-3.487-3.487a.536.536 0 010-.758l.759-.759c.21-.21.549-.21.758 0l2.349 2.349 5.03-5.03c.21-.21.55-.21.76 0l.758.758c.21.21.21.549 0 .758l-6.169 6.169c-.21.21-.549.21-.758 0z"
-                    fill="#32267F"
-                  />
-                </svg>
-                <p>Je suis disponible sur l'un des séjours de cohésion 2022, à savoir :</p>
-              </li>
-              <li className="section_dates">
-                <p>
-                  <strong className="section_dates_bullet">•</strong> Du <strong>13 au 25 février 2022 *</strong>
-                </p>
-              </li>
-              <li className="section_dates">
-                <p>
-                  <strong className="section_dates_bullet">•</strong> Du <strong>12 au 24 juin 2022 *</strong>
-                </p>
-              </li>
-              <li className="section_dates">
-                <p>
-                  <strong className="section_dates_bullet">•</strong> Du <strong>3 au 15 juillet 2022</strong>
-                </p>
-              </li>
-              <li className="section_precision">
-                <p>
-                  * Pour les élèves de 2nde scolarisés dans un établissement relevant du ministère de l’éducation nationale, de la jeunesse et des sports, l’inscription est
-                  possible y compris dans le cas où une semaine du séjour de cohésion se déroule sur le temps scolaire. Ils bénéficieront d’une autorisation de participation au
-                  séjour de cohésion.
-                </p>
-              </li>
-            </ul>
-          </Section>
-          <Section>
+        <div className="first_container">
+          <FirstSection>
             <div className="section_conditions">
               <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="20" height="20" rx="10" fill="#32267F" fill-opacity=".06" />
@@ -69,10 +36,39 @@ export default () => {
                 Je suis de <strong>nationalité française</strong>
               </p>
             </div>
-          </Section>
-        </GridContainer>
+          </FirstSection>
+          <div className="border_container">
+            <SecondSection>
+              <p>Vérifiez si vous êtes <strong>éligible au SNU :</strong></p>
+              <p className="conditions_date">séjour du <strong>13 au 25 février 2022</strong></p>
+              <p className="conditions_date">séjour du <strong>12 au 24 juin 2022</strong></p>
+              <p className="conditions_date">séjour du <strong>3 au 15 juillet 2022</strong></p>
+              {conditions.map((condition) => (
+                <>
+                  <p className="conditions_label">{condition.label} <strong>{condition.bold}</strong></p>
+                  {condition.isDate1 ? (
+                    <p className="centered"><TickIcon /></p>
+                  ) : (
+                    <p className="centered"><StopIcon /></p>
+                  )}
+                  {condition.isDate2 ? (
+                    <p className="centered"><TickIcon /></p>
+                  ) : (
+                    <p className="centered"><StopIcon /></p>
+                  )}
+                  {condition.isDate3 ? (
+                    <p className="centered"><TickIcon /></p>
+                  ) : (
+                    <p className="centered"><StopIcon /></p>
+                  )}
+                </>
+              ))}
+            </SecondSection>
+            <p className="conditions_info">*Les élèves de 2nde dont l'établissement relève du ministère de l’éducation nationale, de la jeunesse et des sports peuvent s’inscrire même si le séjour se déroule sur leur temps scolaire. Ils bénéficieront d’une autorisation de participation au séjour de cohésion.</p>
+          </div>
+        </div>
         <GridContainer className="second_container">
-          <Section className="third_section bottom_section">
+          <div className="third_section bottom_section">
             <svg width="40" height="40" fill="none" xmlns="http://www.w3.org/2000/svg">
               <rect width="40" height="40" rx="8" fill="#32257F" />
               <path d="M21 24h-1v-4h-1l2 4zm-1-8h.01H20zm9 4a9 9 0 11-18 0 9 9 0 0118 0z" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
@@ -84,8 +80,8 @@ export default () => {
                 <br />• L'accord de votre ou vos <b>représentants légaux</b>
               </p>
             </Infos>
-          </Section>
-          <Section className="bottom_section">
+          </div>
+          <div className="bottom_section">
             <svg width="40" height="40" fill="none" xmlns="http://www.w3.org/2000/svg">
               <rect width="40" height="40" rx="8" fill="#32257F" />
               <path
@@ -102,7 +98,7 @@ export default () => {
               </p>
               <p>Toutes les réponses à vos questions</p>
             </FAQ>
-          </Section>
+          </div>
         </GridContainer>
       </Points>
     </Wrapper>
@@ -161,6 +157,20 @@ const Points = styled.div`
   svg {
     margin-right: 10px;
   }
+  .first_container {
+    border-top: 0.5px solid #dfdfdf;
+  }
+  .border_container {
+    border-top: 0.5px solid #dfdfdf;
+    padding-bottom: 1rem;
+    .conditions_info {
+      max-width: 950px;
+      padding: 0.5rem;
+      margin: 0 auto;
+      font-size: 0.8rem;
+      color: #32267f;
+    }
+  }
   .second_container {
     box-shadow: inset 0 10px 14px rgba(0, 0, 0, 0.08);
     background: #f8f8f8;
@@ -189,6 +199,7 @@ const GridContainer = styled.div`
     border-right: 0.5px solid #dfdfdf;
   }
   .bottom_section {
+    width: 100%;
     display: flex;
     padding: 2rem 3rem;
     align-items: center;
@@ -199,10 +210,43 @@ const GridContainer = styled.div`
   }
 `;
 
-const Section = styled.div`
-  ul {
-    border-top: 0.5px solid #dfdfdf;
-    border-right: 0.5px solid #dfdfdf;
+const FirstSection = styled.section`
+  display: flex;
+  justify-content: space-between;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 0.5rem;
+  .section_conditions {
+    padding: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    color: #32267f;
+  }
+`;
+
+const SecondSection = styled.section`
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(6, 1fr);
+  max-width: 950px;
+  margin: 0 auto;
+  padding: 0.5rem;
+  color: #32267f;
+  .conditions_date {
+    font-size: 0.8rem;
+    color: #6B7280;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .conditions_label {
+    align-self: center;
+  }
+  .centered {
+    place-self: center;
+  }
+  p {
+    padding: 0.5rem
   }
   .section_year {
     padding: 1rem 3rem;
@@ -216,14 +260,6 @@ const Section = styled.div`
   }
   .section_dates_bullet {
     margin-right: 5px;
-  }
-  .section_conditions {
-    border-top: 0.5px solid #dfdfdf;
-    padding: 2rem 3rem;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    color: #32267f;
   }
   .section_precision {
     font-size: 0.7rem;

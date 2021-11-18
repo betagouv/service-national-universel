@@ -81,7 +81,11 @@ export default () => {
                 )}
                 <h3>Séjour de cohésion à venir</h3>
                 <h1>Etes-vous disponible du {availability[indexAvailability].stringDate} ?</h1>
-                <AlerteInfo>{availability[indexAvailability].info}</AlerteInfo>
+                {availability[indexAvailability].url ? (
+                  <AlerteInfo url={availability[indexAvailability].url} >{availability[indexAvailability].info}</AlerteInfo>
+                ) : (
+                  <AlerteInfo>{availability[indexAvailability].info}</AlerteInfo>
+                )}
                 <div className="btns">
                   <Button backgroundColor="#4f46e5" dark onClick={() => submit(availability[indexAvailability].id)}>
                     Je suis disponible pour la session de {availability[indexAvailability].month}
@@ -102,10 +106,15 @@ export default () => {
   );
 };
 
-const AlerteInfo = ({ children }) => (
+const AlerteInfo = ({ children, url }) => (
   <div style={{ display: "flex", color: "#32257f", backgroundColor: "#edecfc", padding: "1rem", borderRadius: "6px" }}>
     <InfoIcon color="#32257F" style={{ flex: "none" }} />
-    <div style={{ fontSize: ".9rem", marginLeft: "5px" }}>{children}</div>
+    {url ? (
+      <a href={url} target="_blank" style={{ fontSize: ".9rem", marginLeft: "5px", color: "#32267f" }}>{children}</a>
+    ) : (
+      <div style={{ fontSize: ".9rem", marginLeft: "5px" }}>{children}</div>
+    )}
+
   </div>
 );
 
@@ -180,7 +189,7 @@ const Container = styled.div`
     .thumb {
       min-height: 400px;
       ${({ thumbImage = HERO_IMAGES_LIST[Math.floor(Math.random() * HERO_IMAGES_LIST.length)] }) =>
-        `background: url(${require(`../../../assets/${thumbImage}`)}) no-repeat center;`}
+    `background: url(${require(`../../../assets/${thumbImage}`)}) no-repeat center;`}
       background-size: cover;
       flex: 1;
       -webkit-clip-path: polygon(15% 0, 0 100%, 100% 100%, 100% 0);
