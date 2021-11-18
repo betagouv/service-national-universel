@@ -560,6 +560,12 @@ const Schema = new mongoose.Schema({
       description: "Identifiant de l'établissement du volontaire",
     },
   },
+  academy: {
+    type: String,
+    documentation: {
+      description: "Académie du volontaire (en fonction de son domicile)",
+    },
+  },
 
   // * Situations pro
   employed: {
