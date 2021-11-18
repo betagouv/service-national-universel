@@ -496,7 +496,6 @@ export default () => {
                               schoolId: "schoolId",
                               schoolCountry: "schoolCountry",
                               schoolCity: "schoolCity",
-                              schoolAcademy: "schoolAcademy",
                             }}
                           />
                         </div>
