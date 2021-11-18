@@ -64,7 +64,8 @@ export default () => {
                 validateOnBlur={false}
                 onSubmit={async (values) => {
                   try {
-                    const { ok, code, data: young } = await api.put("/young", values);
+                    const { imageRight, imageRightFiles } = values;
+                    const { ok, code, data: young } = await api.put("/young", { imageRight, imageRightFiles });
                     if (!ok) return toastr.error("Une erreur s'est produite", translate(code));
                     dispatch(setYoung(young));
                     toastr.success("Mis à jour !");

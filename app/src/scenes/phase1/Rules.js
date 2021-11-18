@@ -63,7 +63,8 @@ export default () => {
                 validateOnBlur={false}
                 onSubmit={async (values) => {
                   try {
-                    const { ok, code, data: young } = await api.put("/young", values);
+                    const { rulesYoung, rulesParent1, rulesParent2, rulesFiles } = values;
+                    const { ok, code, data: young } = await api.put("/young", { rulesYoung, rulesParent1, rulesParent2, rulesFiles });
                     if (!ok) return toastr.error("Une erreur s'est produite", translate(code));
                     dispatch(setYoung(young));
                     toastr.success("Mis à jour !");
