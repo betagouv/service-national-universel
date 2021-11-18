@@ -31,17 +31,42 @@ const Schema = new mongoose.Schema(
         description: "Position d'un élément au sein de sa section",
       },
     },
-    content: {
+    title: {
       type: String,
       required: true,
       documentation: {
-        description: "Soit le titre d'une section, soit le contenu d'un article",
+        description: "Soit le titre d'une section, soit le titre d'un article",
+      },
+    },
+    slug: {
+      type: String,
+      required: true,
+      documentation: {
+        description: "Le slug pour l'url de l'élément'",
+      },
+    },
+    content: {
+      type: String,
+      documentation: {
+        description: "ontenu d'un article",
       },
     },
     description: {
       type: String,
       documentation: {
         description: "Description de l'élément",
+      },
+    },
+    imageSrc: {
+      type: String,
+      documentation: {
+        description: "Url de l'image",
+      },
+    },
+    imageAlt: {
+      type: String,
+      documentation: {
+        description: "Description de l'image",
       },
     },
     allowedRoles: {
