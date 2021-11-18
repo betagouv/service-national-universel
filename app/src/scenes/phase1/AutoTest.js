@@ -9,25 +9,13 @@ import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../redux/auth/actions";
 import { translate } from "../../utils";
-import {
-  SuccessMessage,
-  RadioLabel,
-  Footer,
-  FormGroup,
-  FormRow,
-  Title,
-  Logo,
-  DownloadText,
-  BackButton,
-  Content,
-  SignBox,
-  ContinueButton,
-} from "./components/printable";
+import { SuccessMessage, RadioLabel, Footer, FormGroup, FormRow, Title, Logo, DownloadText, BackButton, Content, SignBox, ContinueButton } from "./components/printable";
 import DownloadFormButton from "../../components/buttons/DownloadFormButton";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
+  const isPlural = true; //young?.parent1Status && young?.parent2Status;
 
   return (
     <HeroContainer>
@@ -47,7 +35,8 @@ export default () => {
             <div>
               <h2>Consentement à l’utilisation d’autotest COVID</h2>
               <p style={{ color: "#9C9C9C" }}>
-                Votre représentant légal doit renseigner le formulaire relatif à l’utilisation d’autotest COVID pendant le séjour de cohésion avant votre départ en séjour. Cette étape est un pré-requis pour partir.
+                {isPlural ? "Vos représentants légaux doivent" : "Votre représentant légal doit"} renseigner le formulaire relatif à l’utilisation d’autotest COVID pendant le
+                séjour de cohésion avant votre départ en séjour. Cette étape est un pré-requis au séjour de cohésion.
                 <br />
                 <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Note_relative_a_l_utilisation_d_autotest_COVID.pdf" target="blank" className="link">
                   Note relative à l’utilisation d’autotest antigénique COVID ›
@@ -150,27 +139,6 @@ export default () => {
                         </Row>
                       </FormGroup>
                     ) : null}
-                    <FormGroup>
-                      <label>
-                        Numéro de téléphone
-                        <br />
-                        <i style={{ fontSize: ".8rem", color: "#777" }}>Pour être prevenu en cas de résultat positif</i>
-                      </label>
-
-                      <Row>
-                        <Col md={6}>
-                          <Field
-                            validate={(v) => !v && requiredMessage}
-                            placeholder="Numéro de téléphone"
-                            name="parentPhone"
-                            value={values.parentPhone}
-                            onChange={handleChange}
-                            className="form-control"
-                          />
-                          <ErrorMessage errors={errors} touched={touched} name="parentPhone" />
-                        </Col>
-                      </Row>
-                    </FormGroup>
                     <FormRow>
                       <Col>
                         <RadioLabel>
@@ -184,9 +152,9 @@ export default () => {
                             onChange={handleChange}
                           />
                           <label htmlFor="autoTestPCR_true">
-                            J'autorise la <b>réalisation d’autotests antigéniques</b> sur prélèvement nasal par l’enfant dont je suis titulaire de l’autorité parentale, et, en cas de
-                            résultat positif, à la communication de celui-ci au directeur académiques des services académiques, à l’ARS, au chef de centre et aux personnes habilitées
-                            par ce dernier.
+                            {isPlural ? "Nous autorisons" : "J’autorise"} la <b>réalisation d’autotests antigéniques</b> sur prélèvement nasal par l’enfant dont{" "}
+                            {isPlural ? "nous sommes titulaires" : "je suis titulaire"} de l’autorité parentale, et, en cas de résultat positif, la communication de celui-ci au
+                            directeur académiques des services académiques, à l’ARS, au chef de centre et aux personnes habilitées par ce dernier.
                           </label>
                         </RadioLabel>
                       </Col>
@@ -204,7 +172,7 @@ export default () => {
                             onChange={handleChange}
                           />
                           <label htmlFor="autoTestPCR_false">
-                            Je n'autorise pas la <b>réalisation d'autotests antigéniques</b>
+                            {isPlural ? "Nous n'autorisons" : "Je n’autorise"} pas la <b>réalisation d'autotests antigéniques</b>
                           </label>
                         </RadioLabel>
                         <ErrorMessage errors={errors} touched={touched} name="autoTestPCR" />
@@ -217,18 +185,16 @@ export default () => {
                   </Title> */}
                       <div style={{ display: "flex", justifyContent: "center" }}>
                         <div>
-                          <BackButton>
+                          {/* <BackButton>
                             <DownloadFormButton young={values} uri="autotestPCR">
                               Télécharger le formulaire pré-rempli
                             </DownloadFormButton>
-                          </BackButton>
-                          <DownloadText>
-                            {/* Ou todo : upload version du formialire autotestPCR */}
-                            Ou{" "}
+                          </BackButton> */}
+                          <BackButton>
                             <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Consentement_a_l_utilisation_d_autotest_COVID.pdf" target="_blank">
                               télécharger le modèle à remplir
                             </a>
-                          </DownloadText>
+                          </BackButton>
                           <DndFileInput
                             placeholder="le formulaire"
                             errorMessage="Vous devez téléverser le formulaire"
@@ -248,7 +214,7 @@ export default () => {
                     <div>FRANCE CONNECT</div> */}
                       </div>
                     </div>
-                    <SignBox className="onlyPrint">
+                    {/* <SignBox className="onlyPrint">
                       <Row>
                         <Col md={6}>
                           <div>Sous réserve du respect de l’ensemble de ces conditions, le consentement délivré est libre et éclairé.</div>
@@ -271,7 +237,7 @@ export default () => {
                           </div>
                         </Col>
                       </Row>
-                    </SignBox>
+                    </SignBox> */}
                     <Footer className="noPrint">
                       <Title />
                       <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
