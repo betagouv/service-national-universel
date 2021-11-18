@@ -139,10 +139,10 @@ export default ({ young }) => {
                 <Details title="Nom" value={young.parent1LastName} />
                 <Details title="E-mail" value={young.parent1Email} />
                 <Details title="Tel" value={young.parent1Phone} />
-                <Details title="Région" value={young.parent1Region} />
-                <Details title="Dép" value={young.parent1Department} />
-                <Details title="Ville" value={young.parent1City && young.parent1Zip && `${young.parent1City} (${young.parent1Zip})`} />
                 <Details title="Adresse" value={young.parent1Address} />
+                <Details title="Ville" value={young.parent1City && young.parent1Zip && `${young.parent1City} (${young.parent1Zip})`} />
+                <Details title="Dép" value={young.parent1Department} />
+                <Details title="Région" value={young.parent1Region} />
               </Bloc>
               {young.parent2Status ? (
                 <Bloc title="Représentant légal n°2">
@@ -151,10 +151,10 @@ export default ({ young }) => {
                   <Details title="Nom" value={young.parent2LastName} />
                   <Details title="E-mail" value={young.parent2Email} />
                   <Details title="Tel" value={young.parent2Phone} />
-                  <Details title="Région" value={young.parent2Region} />
-                  <Details title="Dép" value={young.parent2Department} />
-                  <Details title="Ville" value={young.parent2City && young.parent2Zip && `${young.parent2City} (${young.parent2Zip})`} />
                   <Details title="Adresse" value={young.parent2Address} />
+                  <Details title="Ville" value={young.parent2City && young.parent2Zip && `${young.parent2City} (${young.parent2Zip})`} />
+                  <Details title="Dép" value={young.parent2Department} />
+                  <Details title="Région" value={young.parent2Region} />
                 </Bloc>
               ) : null}
               {isFromFranceConnect() || (young.parentConsentmentFiles && young.parentConsentmentFiles.length) ? (
@@ -262,8 +262,10 @@ const Wrapper = styled.div`
 `;
 
 const Infos = styled.section`
-  display: grid;
-  grid-template-columns: 1.5rem 2fr;
+  margin-top: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
   align-items: flex-start;
   background: rgba(79, 70, 229, 0.1);
   padding: 1rem;
@@ -273,6 +275,7 @@ const Infos = styled.section`
     margin-top: 4px;
   }
   p {
+    flex: 1;
     margin: 0;
   }
 `;
