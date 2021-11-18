@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
-import { translate as t, isInRuralArea, ROLES, copyToClipboard, formatStringDate } from "../../../utils";
+import { translate as t, isInRuralArea, ROLES, copyToClipboard, formatStringDate, getAge } from "../../../utils";
 import YoungView from "./wrapper";
 import api from "../../../services/api";
 import DownloadButton from "../../../components/buttons/DownloadButton";
@@ -28,7 +28,7 @@ export default ({ young }) => {
             <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
               <Bloc title="Informations générales">
                 <Details title="E-mail" value={young.email} copy />
-                <Details title="Date de naissance" value={formatStringDate(young.birthdateAt)} />
+                <Details title="Date de naissance" value={`${formatStringDate(young.birthdateAt)} • ${getAge(young.birthdateAt)} ans`} />
                 <Details title="Lieu de naissance" value={young.birthCity} />
                 <Details title="Pays de naissance" value={young.birthCountry} />
                 <Details title="Sexe" value={t(young.gender)} />
@@ -69,9 +69,10 @@ export default ({ young }) => {
                 <Details title="PPS" value={t(young.ppsBeneficiary)} />
                 <Details title="PAI" value={t(young.paiBeneficiary)} />
                 <Details title="Suivi médicosocial" value={t(young.medicosocialStructure)} />
-                <Details title="Aménagement spécifique" value={t(young.specificAmenagment)} />
-                <Details title="A besoin d'un aménagement pour mobilité réduite" value={t(young.reducedMobilityAccess)} />
-                <Details title="Doit être affecté dans son département" value={t(young.handicapInSameDepartment)} />
+                <Details title="Aménagement spécifique" value={t(young.specificAmenagment) || "Non"} />
+                <Details title="A besoin d'un aménagement pour mobilité réduite" value={t(young.reducedMobilityAccess) || "Non"} />
+                <Details title="Doit être affecté dans son département de résidence" value={t(young.handicapInSameDepartment) || "Non"} />
+                <Details title="Doit être affecté dans son département de résidence (activité de haut niveau)" value={t(young.highSkilledActivityInSameDepartment) || "Non"} />
                 <Details title="Activités de haut niveau" value={t(young.highSkilledActivity)} />
                 {(young.highSkilledActivityProofFiles || []).map((e, i) => (
                   <DownloadButton
@@ -177,15 +178,6 @@ export default ({ young }) => {
                   )}
                 </Bloc>
               ) : null}
-              {young.hostLastName && (
-                <Bloc title="Hébergeur en France">
-                  <Details title="Prénom" value={young.hostFirstName} />
-                  <Details title="Nom" value={young.hostLastName} />
-                  <Details title="Adresse" value={young.hostAddress} />
-                  <Details title="Code Postal" value={young.hostZip} />
-                  <Details title="Ville" value={young.hostCity} />
-                </Bloc>
-              )}
               {young.withdrawnMessage ? (
                 <Bloc title="Désistement">
                   <div className="quote">{`« ${young.withdrawnMessage} »`}</div>

@@ -43,9 +43,14 @@ export default ({ onChange, value }) => {
         <div>{t(value.gender)}</div>
         {value.birthdateAt && (
           <div>
-            Né(e) le {formatDate(value.birthdateAt)} - {getAge(value.birthdateAt)} ans
+            Né(e) le {formatDate(value.birthdateAt)} • {getAge(value.birthdateAt)} ans
           </div>
         )}
+        {value.birthCity && value.birthCountry ? (
+          <div>
+            à {value.birthZip} {value.birthCity}, {value.birthCountry}
+          </div>
+        ) : null}
         <div style={{ display: "flex", flexWrap: "wrap" }}>
           <Link to={`/volontaire/${value._id}`}>
             <PanelActionButton icon="eye" title="Consulter" />
@@ -126,11 +131,15 @@ export default ({ onChange, value }) => {
         <Details title="Quartier Prioritaire de la Ville" value={t(value.qpv)} />
         <Details title="Zone Rurale" value={t(isInRuralArea(value))} />
         <Details title="Handicap" value={t(value.handicap)} />
+        <Details title="Allergies" value={t(value.allergies)} />
         <Details title="PPS" value={t(value.ppsBeneficiary)} />
         <Details title="PAI" value={t(value.paiBeneficiary)} />
-        <Details title="Suivi médicosociale" value={t(value.medicosocialStructure)} />
-        <Details title="Aménagement spécifique" value={t(value.medicosocialStructure)} />
+        <Details title="Suivi médicosocial" value={t(value.medicosocialStructure)} />
+        <Details title="Aménagement spécifique" value={t(value.specificAmenagment) || "Non"} />
+        <Details title="Aménagement pour mobilité réduite" value={t(value.reducedMobilityAccess) || "Non"} />
+        <Details title="Affecté dans son département de résidence" value={t(value.handicapInSameDepartment) || "Non"} />
         <Details title="Activités de haut niveau" value={t(value.highSkilledActivity)} />
+        <Details title="Affecté dans son département de résidence (activité de haut niveau)" value={t(value.highSkilledActivityInSameDepartment) || "Non"} />
       </Info>
       <Info title="Représentant légal n°1" id={value._id}>
         <Details title="Statut" value={t(value.parent1Status)} />
