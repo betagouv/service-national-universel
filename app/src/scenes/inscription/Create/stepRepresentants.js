@@ -391,8 +391,9 @@ const BorderButton = styled.button`
 `;
 
 const Infos = styled.div`
-  display: grid;
-  grid-template-columns: 1.5rem 2fr;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
   align-items: flex-start;
   background: rgba(79, 70, 229, 0.1);
   padding: 1rem;
@@ -400,5 +401,8 @@ const Infos = styled.div`
   border-radius: 6px;
   svg {
     margin-top: 4px;
+  }
+  p {
+    flex: 1;
   }
 `;
