@@ -39,7 +39,11 @@ export default () => {
                   photocopie des documents requis. <br />
                   Vous la remettrez à <strong>votre arrivée au centre de séjour</strong> à l’équipe d’encadrement.
                 </p>
-                <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Note_relative_aux_informations_d_ordre_sanitaire.pdf" target="blank" className="link">
+                <a
+                  href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/note_relatives_aux_informations_d_ordre_sanitaire_2022.pdf"
+                  target="blank"
+                  className="link"
+                >
                   Note relative aux informations d'ordre sanitaire ›
                 </a>
               </>
