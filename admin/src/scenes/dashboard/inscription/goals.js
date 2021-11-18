@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Col, Row } from "reactstrap";
-import { YOUNG_STATUS_COLORS, departmentList, department2region } from "../../../utils";
+import { YOUNG_STATUS_COLORS, departmentList, department2region, academyToDepartments } from "../../../utils";
 import { CardArrow, Card, CardTitle, CardValueWrapper, CardValue } from "../../../components/dashboard";
 import { toastr } from "react-redux-toastr";
 
@@ -29,6 +29,7 @@ export default ({ filter }) => {
       size: 0,
     };
 
+    if (filter.academy) body.query.bool.filter.push({ term: { "academy.keyword": filter.academy } });
     if (filter.region) body.query.bool.filter.push({ term: { "region.keyword": filter.region } });
     if (filter.department) body.query.bool.filter.push({ term: { "department.keyword": filter.department } });
 
@@ -46,6 +47,7 @@ export default ({ filter }) => {
       size: 0,
     };
 
+    if (filter.academy) body.query.bool.filter.push({ term: { "academy.keyword": filter.academy } });
     if (filter.region) body.query.bool.filter.push({ term: { "region.keyword": filter.region } });
     if (filter.department) body.query.bool.filter.push({ term: { "department.keyword": filter.department } });
 
@@ -60,14 +62,15 @@ export default ({ filter }) => {
     (async () => {
       fetch2020Affected();
       fetchValidated();
-      getInscriptionGoals(filter.region, filter.department);
+      getInscriptionGoals(filter.region, filter.department, filter.academy);
     })();
   }, [JSON.stringify(filter)]);
 
-  const getInscriptionGoals = async (region, departement) => {
+  const getInscriptionGoals = async (region, departement, academy) => {
     function filterByRegionAndDepartement(e) {
       if (departement) return e.department === departement;
       if (region) return e.region === region;
+      if (academy) return academyToDepartments[academy].includes(e.department);
       return true;
     }
     const { data, ok, code } = await api.get("/inscription-goal/" + filter.cohort);

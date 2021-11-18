@@ -15,9 +15,9 @@ import api from "../../services/api";
 import { apiURL, appURL } from "../../config";
 import Panel from "./panel";
 import { translate, getFilterLabel, formatStringLongDate, YOUNG_STATUS, isInRuralArea, formatDateFRTimezoneUTC, formatLongDateFR, ES_NO_LIMIT, ROLES, colors } from "../../utils";
-import { RegionFilter, DepartmentFilter } from "../../components/filters";
+import { RegionFilter, DepartmentFilter, AcademyFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
-const FILTERS = ["SEARCH", "STATUS", "REGION", "DEPARTMENT", "SCHOOL", "COHORT", "PPS", "PAI", "QPV", "HANDICAP", "ZRR", "GRADE"];
+const FILTERS = ["SEARCH", "STATUS", "REGION", "DEPARTMENT", "SCHOOL", "COHORT", "PPS", "PAI", "QPV", "HANDICAP", "ZRR", "GRADE", "ACADEMY"];
 import { Filter, FilterRow, ResultTable, Table, ActionBox, Header, Title, MultiLine } from "../../components/list";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 
@@ -153,6 +153,7 @@ export default () => {
               </FilterRow>
 
               <FilterRow visible={filterVisible}>
+                <AcademyFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
                 <RegionFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
                 <DepartmentFilter defaultQuery={getDefaultQuery} filters={FILTERS} />
                 <MultiDropdownList

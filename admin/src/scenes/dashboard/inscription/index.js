@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 
 import YearPicker from "../components/YearPicker";
 import Checkbox from "../components/Checkbox";
+import FilterAcademy from "../components/FilterAcademy";
 import FilterRegion from "../components/FilterRegion";
 import FilterDepartment from "../components/FilterDepartment";
 import Schools from "./schools";
@@ -26,7 +27,7 @@ export default () => {
   const user = useSelector((state) => state.Auth.user);
 
   function updateFilter(n) {
-    setFilter({ ...(filter || { status: Object.keys(YOUNG_STATUS), region: "", department: "", cohort: filter?.cohort || "2021" }), ...n });
+    setFilter({ ...(filter || { status: Object.keys(YOUNG_STATUS), academy: "", region: "", department: "", cohort: filter?.cohort || "2021" }), ...n });
   }
 
   useEffect(() => {
@@ -50,6 +51,7 @@ export default () => {
           {filter ? (
             <>
               <FiltersList>
+                <FilterAcademy updateFilter={updateFilter} filter={filter} />
                 <FilterRegion updateFilter={updateFilter} filter={filter} />
                 <FilterDepartment updateFilter={updateFilter} filter={filter} />
               </FiltersList>

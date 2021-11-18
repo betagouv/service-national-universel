@@ -23,6 +23,7 @@ export default ({ filter }) => {
       if (filter.cohort) body.query.bool.filter.push({ term: { "cohort.keyword": filter.cohort } });
       if (filter.region) body.query.bool.filter.push({ term: { "region.keyword": filter.region } });
       if (filter.department) body.query.bool.filter.push({ term: { "department.keyword": filter.department } });
+      if (filter.academy) body.query.bool.filter.push({ term: { "academy.keyword": filter.academy } });
 
       const { responses } = await api.esQuery("young", body);
       if (responses.length) {
@@ -41,7 +42,7 @@ export default ({ filter }) => {
       <Row style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
         {Object.keys(value).map((e, i) => {
           return (
-            <Link to={getLink({ base: `/inscription`, filter, filtersUrl: [`GRADE=%5B"${e}"%5D`] })}>
+            <Link key={i} to={getLink({ base: `/inscription`, filter, filtersUrl: [`GRADE=%5B"${e}"%5D`] })}>
               <Col style={{ marginTop: "15px" }} key={i}>
                 <CircularProgress circleProgressColor="#1B7BBF" percentage={((value[e] * 100) / total).toFixed(1)} title={value[e]} subtitle={translate(e)} />
               </Col>

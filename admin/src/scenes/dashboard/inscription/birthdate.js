@@ -21,6 +21,7 @@ export default ({ filter }) => {
       if (filter.status) body.query.bool.filter.push({ terms: { "status.keyword": filter.status } });
       if (filter.region) body.query.bool.filter.push({ term: { "region.keyword": filter.region } });
       if (filter.department) body.query.bool.filter.push({ term: { "department.keyword": filter.department } });
+      if (filter.academy) body.query.bool.filter.push({ term: { "academy.keyword": filter.academy } });
 
       const { responses } = await api.esQuery("young", body);
       if (responses.length) {

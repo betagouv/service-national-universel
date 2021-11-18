@@ -20,6 +20,7 @@ export default ({ filter }) => {
 
       if (filter.status) body.query.bool.filter.push({ terms: { "status.keyword": filter.status } });
       if (filter.cohort) body.query.bool.filter.push({ term: { "cohort.keyword": filter.cohort } });
+      if (filter.academy) body.query.bool.filter.push({ term: { "academy.keyword": filter.academy } });
       if (filter.region) body.query.bool.filter.push({ term: { "region.keyword": filter.region } });
       if (filter.department) body.query.bool.filter.push({ term: { "department.keyword": filter.department } });
 
