@@ -61,14 +61,14 @@ export default () => {
                 Plus d’informations sur le bilan de santé obligatoire ›
               </a>
             </div>
+            {young.cohesionStayMedicalFileReceived !== "true" ? (
+              <div style={{ minWidth: "30%", display: "flex", justifyContent: "flex-end", alignItems: "center", marginLeft: "1.5rem" }}>
+                <a target="blank" href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/fiche_sanitaire_2022.pdf">
+                  <ContinueButton>Télécharger la fiche sanitaire</ContinueButton>
+                </a>
+              </div>
+            ) : null}
           </div>
-          {young.cohesionStayMedicalFileReceived !== "true" ? (
-            <div style={{ minWidth: "30%", display: "flex", justifyContent: "flex-end", alignItems: "center", marginLeft: "1.5rem" }}>
-              <a target="blank" href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/fiche_sanitaire_2022.pdf">
-                <ContinueButton>Télécharger la fiche sanitaire</ContinueButton>
-              </a>
-            </div>
-          ) : null}
         </ContentHorizontal>
       </Hero>
     </HeroContainer>
