@@ -39,7 +39,7 @@ export default () => {
           </FirstSection>
           <div className="border_container">
             <SecondSection>
-              <p>Vérifiez si vous êtes <strong>éligible au SNU</strong></p>
+              <p>Vérifiez si vous êtes <strong>éligible au SNU :</strong></p>
               <p className="conditions_date">séjour du <strong>13 au 25 février 2022</strong></p>
               <p className="conditions_date">séjour du <strong>12 au 24 juin 2022</strong></p>
               <p className="conditions_date">séjour du <strong>3 au 15 juillet 2022</strong></p>
@@ -164,7 +164,8 @@ const Points = styled.div`
     border-top: 0.5px solid #dfdfdf;
     padding-bottom: 1rem;
     .conditions_info {
-      max-width: 900px;
+      max-width: 950px;
+      padding: 0.5rem;
       margin: 0 auto;
       font-size: 0.8rem;
       color: #32267f;
@@ -216,7 +217,7 @@ const FirstSection = styled.section`
   margin: 0 auto;
   padding: 0.5rem;
   .section_conditions {
-    padding: 2rem 3rem;
+    padding: 2rem;
     display: flex;
     align-items: center;
     justify-content: flex-start;
