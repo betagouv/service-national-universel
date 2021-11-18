@@ -13,12 +13,17 @@ import Availability from "./Create/stepAvailability";
 import Done from "./Create/stepDone";
 import Drawer from "./Create/drawer";
 import { useSelector } from "react-redux";
+import { useHistory } from "react-router-dom";
+import { colors } from "../../utils";
 
 import Home from "./Home/index.js";
 import { STEPS } from "./utils";
 import HelpButton from "../../components/buttons/HelpButton";
 
 const Step = ({ step }) => {
+  const young = useSelector((state) => state.Auth.young);
+  const history = useHistory();
+
   function renderStep(step) {
     if (step === STEPS.COORDONNEES) return <Coordonnees />;
     if (step === STEPS.PARTICULIERES) return <Particulieres />;
@@ -38,6 +43,11 @@ const Step = ({ step }) => {
         <div className="help-button-container">
           <HelpButton to="/public-besoin-d-aide" color="#362f78" />
         </div>
+        {young && young?.status !== "IN_PROGRESS" ? (
+          <a class="back-button" onClick={() => history.push("/")}>
+            {"<"} Retour à mon espace
+          </a>
+        ) : null}
       </Content>
     </div>
   );
@@ -68,12 +78,24 @@ export default () => {
 const Content = styled.div`
   padding: 1rem;
   margin-left: 320px;
-  .help-button-container {
+  .help-button-container,
+  .back-button {
     display: none;
   }
   @media (max-width: 768px) {
     .help-button-container {
       display: block;
+    }
+    .back-button {
+      display: block;
+      padding: 0;
+      font-size: 0.8rem;
+      height: fit-content;
+      color: ${colors.purple};
+      font-weight: normal;
+      :hover {
+        text-decoration: underline;
+      }
     }
     margin-left: 0;
   }
