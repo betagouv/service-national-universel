@@ -28,7 +28,7 @@ export const RadioLabel = styled.label`
     height: 16px;
   }
   label {
-    color: #4b5563;
+    color: #9c9c9c;
     font-size: 1rem;
     @media (max-width: 768px) {
       font-size: 0.8rem;
@@ -199,7 +199,7 @@ export const BackButton = styled.a`
   cursor: pointer;
   color: #374151;
   text-align: center;
-  margin-top: 1rem;
+  margin: 1rem 0;
   background-color: #fff;
   padding: 0.5rem 1rem;
   border: 1px solid #d2d6dc;
@@ -217,6 +217,9 @@ export const BackButton = styled.a`
   z-index: 2;
   :hover {
     opacity: 0.9;
+  }
+  a {
+    color: #374151;
   }
 `;
 

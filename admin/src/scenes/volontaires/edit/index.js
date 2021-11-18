@@ -29,6 +29,7 @@ import Preferences from "./preferences";
 import Consentement from "./consentement";
 import ConsentementImage from "./consentement-image";
 import ConsentementPCR from "./consentement-pcr";
+import Rules from "./rules";
 import InformationsSupplementaires from "./informations-supplementaires";
 import MilitaryPreparation from "./military-preparation";
 import JDC from "./JDC";
@@ -114,6 +115,7 @@ export default (props) => {
               <Consentement values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
               <ConsentementImage values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
               <ConsentementPCR values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
+              <Rules values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
             </Row>
             <Row>
               <InterTitle>Séjour de cohésion</InterTitle>

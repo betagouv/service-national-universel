@@ -149,6 +149,7 @@ router.post("/file/:key", passport.authenticate("young", { session: false, failW
       "autoTestPCRFiles",
       "imageRightFiles",
       "dataProcessingConsentmentFiles",
+      "rulesFiles",
     ];
     const militaryKeys = [
       "militaryPreparationFilesIdentity",

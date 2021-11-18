@@ -15,11 +15,10 @@ import LoadingButton from "../../components/buttons/LoadingButton";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young);
+  const dispatch = useDispatch();
+  const isPlural = young?.parent1Status && young?.parent2Status;
   const [loading, setLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const isPlural = young?.parent1Status && young?.parent2Status;
-
-  const dispatch = useDispatch();
 
   return (
     <HeroContainer>
@@ -37,14 +36,14 @@ export default () => {
               </svg>
             </div>
             <div>
-              <h2>Consentement de droit à l'image</h2>
+              <h2>Règlement intérieur</h2>
               <p style={{ color: "#9C9C9C" }}>
-                {isPlural ? "Vos représentants légaux doivent" : "Votre représentant légal doit"} renseigner le formulaire relatif au droit à l'image avant votre départ en séjour
-                de cohésion. Cette étape est un pré-requis au séjour de cohésion.
+                Vous et {isPlural ? "vos représentants légaux" : "votre représentant légal"} devez lire et acceptez les règles de fonctionnement propres aux centres du Service
+                National Universel exposées dans le règlement intérieur ci-joint avant votre départ en séjour. Cette étape est un pré-requis au séjour de cohésion.
               </p>
             </div>
           </div>
-          {young.imageRightFiles && young.imageRightFiles.length ? (
+          {young.rulesFiles && young.rulesFiles.length ? (
             <SuccessMessage>
               <Logo>
                 <svg height={64} width={64} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="#057a55" aria-hidden="true">
@@ -68,8 +67,8 @@ export default () => {
                 onSubmit={async (values) => {
                   try {
                     setLoading(true);
-                    const { imageRight, imageRightFiles } = values;
-                    const { ok, code, data: young } = await api.put("/young", { imageRight, imageRightFiles });
+                    const { rulesYoung, rulesParent1, rulesParent2, rulesFiles } = values;
+                    const { ok, code, data: young } = await api.put("/young", { rulesYoung, rulesParent1, rulesParent2, rulesFiles });
                     setLoading(false);
                     if (!ok) return toastr.error("Une erreur s'est produite", translate(code));
                     dispatch(setYoung(young));
@@ -83,105 +82,72 @@ export default () => {
               >
                 {({ values, handleChange, handleSubmit, errors, touched, isSubmitting, submitForm }) => (
                   <>
-                    <Title>
-                      <span>
-                        {isPlural ? "Seuls les représentants légaux sont habilités à valider ce consentement" : "Seul le représentant légal est habilité à valider ce consentement"}
-                      </span>
-                    </Title>
-                    <FormGroup>
-                      <label>REPRÉSENTANT LÉGAL N°1</label>
-                      <Row>
-                        <Col md={6}>
-                          <Field
-                            validate={(v) => !v && requiredMessage}
-                            placeholder="Prénom du représentants légal n°1"
-                            name="firstName1"
-                            value={values.firstName1}
-                            onChange={handleChange}
-                            className="form-control"
-                          />
-                          <ErrorMessage errors={errors} touched={touched} name="firstName1" />
-                        </Col>
-                        <Col md={6}>
-                          <Field
-                            validate={(v) => !v && requiredMessage}
-                            placeholder="Nom du représentants légal n°1"
-                            name="lastName1"
-                            value={values.lastName1}
-                            onChange={handleChange}
-                            className="form-control"
-                          />
-                          <ErrorMessage errors={errors} touched={touched} name="lastName1" />
-                        </Col>
-                      </Row>
-                    </FormGroup>
-                    {values.firstName2 ? (
-                      <FormGroup>
-                        <label>REPRÉSENTANT LÉGAL N°2</label>
-                        <Row>
-                          <Col md={6}>
-                            <Field
-                              validate={(v) => !v && requiredMessage}
-                              placeholder="Prénom du représentants légal n°2"
-                              name="firstName2"
-                              value={values.firstName2}
-                              onChange={handleChange}
-                              className="form-control"
-                            />
-                            <ErrorMessage errors={errors} touched={touched} name="firstName2" />
-                          </Col>
-                          <Col md={6}>
-                            <Field
-                              validate={(v) => !v && requiredMessage}
-                              placeholder="Nom du représentants légal n°2"
-                              name="lastName2"
-                              value={values.lastName2}
-                              onChange={handleChange}
-                              className="form-control"
-                            />
-                            <ErrorMessage errors={errors} touched={touched} name="lastName2" />
-                          </Col>
-                        </Row>
-                      </FormGroup>
-                    ) : null}
-                    <Title>
-                      <span>Autorisez ou non le droit à l'image</span>
-                    </Title>
                     <FormRow>
                       <Col>
                         <RadioLabel>
                           <Field
-                            id="imageRight_true"
+                            id="rulesYoung"
                             validate={(v) => !v && requiredMessage}
                             type="radio"
-                            name="imageRight"
+                            name="rulesYoung"
                             value="true"
-                            checked={values.imageRight === "true"}
+                            checked={values.rulesYoung === "true"}
                             onChange={handleChange}
                           />
-                          <label htmlFor="imageRight_true">
-                            {isPlural ? "Nous autorisons" : "J'autorise"} le Ministère de l’Education Nationale, de la Jeunesse et des Sports (MENJS), ses partenaires et les
-                            journalistes dûment accrédités par les services communication du ministère et/ou des préfecture à enregistrer, reproduire et représenter l’image et/ou
-                            la voix du volontaire représenté en partie ou en intégralité, ensemble ou séparément, sur leurs publications respectives.
+                          <label htmlFor="rulesYoung">
+                            Je,{" "}
+                            <b>
+                              {young.firstName} {young.lastName}
+                            </b>{" "}
+                            certifie avoir lu et accepté les règles de fonctionnement propres aux centres du Service National Universel exposées dans le règlement intérieur
+                            ci-joint.
                           </label>
                         </RadioLabel>
+                        <ErrorMessage errors={errors} touched={touched} name="rulesYoung" />
                         <RadioLabel>
                           <Field
-                            id="imageRight_false"
+                            id="rulesParent1"
                             validate={(v) => !v && requiredMessage}
                             type="radio"
-                            name="imageRight"
-                            value="false"
-                            checked={values.imageRight === "false"}
+                            name="rulesParent1"
+                            value="true"
+                            checked={values.rulesParent1 === "true"}
                             onChange={handleChange}
                           />
-                          <label htmlFor="imageRight_false">
-                            {isPlural ? "Nous n'autorisons" : "Je n'autorise"} pas le Ministère de l’Education Nationale, de la Jeunesse et des Sports, ses partenaires et les
-                            journalistes à enregistrer, reproduire et représenter l’image et/ou la voix du volontaire représenté en partie ou en intégralité, ensemble ou
-                            séparément, sur leurs publications respectives.
+                          <label htmlFor="rulesParent1">
+                            Je,{" "}
+                            <b>
+                              {young.parent1FirstName} {young.parent1LastName}
+                            </b>{" "}
+                            certifie avoir lu et accepté les règles de fonctionnement propres aux centres du Service National Universel exposées dans le règlement intérieur
+                            ci-joint.
                           </label>
                         </RadioLabel>
-                        <ErrorMessage errors={errors} touched={touched} name="imageRight" />
+                        <ErrorMessage errors={errors} touched={touched} name="rulesParent1" />
+                        {young.parent2FirstName && (
+                          <>
+                            <RadioLabel>
+                              <Field
+                                id="rulesParent2"
+                                validate={(v) => !v && requiredMessage}
+                                type="radio"
+                                name="rulesParent2"
+                                value="true"
+                                checked={values.rulesParent2 === "true"}
+                                onChange={handleChange}
+                              />
+                              <label htmlFor="rulesParent2">
+                                Je,{" "}
+                                <b>
+                                  {young.parent2FirstName} {young.parent2LastName}
+                                </b>{" "}
+                                certifie avoir lu et accepté les règles de fonctionnement propres aux centres du Service National Universel exposées dans le règlement intérieur
+                                ci-joint.
+                              </label>
+                            </RadioLabel>
+                            <ErrorMessage errors={errors} touched={touched} name="rulesParent2" />
+                          </>
+                        )}
                       </Col>
                     </FormRow>
                     <div className="noPrint">
@@ -197,26 +163,26 @@ export default () => {
                             </DownloadFormButton>
                           </BackButton> */}
                           <BackButton>
-                            <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/droit_a_l_image_2022.pdf" target="_blank">
+                            <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/reglement_interieur_Fevrier_2022.pdf" target="_blank">
                               télécharger le modèle à remplir
                             </a>
                           </BackButton>
                           <DndFileInput
                             placeholder="le formulaire"
                             errorMessage="Vous devez téléverser le formulaire"
-                            value={values.imageRightFiles}
-                            name="imageRightFiles"
+                            value={values.rulesFiles}
+                            name="rulesFiles"
                             onChange={async (e) => {
                               setUploading(true);
-                              const res = await api.uploadFile("/young/file/imageRightFiles", e.target.files);
+                              const res = await api.uploadFile("/young/file/rulesFiles", e.target.files);
                               if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
                               // We update it instant ( because the bucket is updated instant )
                               toastr.success("Fichier téléversé");
-                              handleChange({ target: { value: res.data, name: "imageRightFiles" } });
+                              handleChange({ target: { value: res.data, name: "rulesFiles" } });
                               setUploading(false);
                             }}
                           />
-                          <ErrorMessage errors={errors} touched={touched} name="imageRightFiles" />
+                          <ErrorMessage errors={errors} touched={touched} name="rulesFiles" />
                         </div>
                         {/* <div>OU</div>
                     <div>FRANCE CONNECT</div> */}
