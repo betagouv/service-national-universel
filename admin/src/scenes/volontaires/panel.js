@@ -47,6 +47,11 @@ export default ({ onChange, value }) => {
             Né(e) le {formatDateFRTimezoneUTC(young.birthdateAt)} • {getAge(young.birthdateAt)} ans
           </div>
         )}
+        {young.birthCity && young.birthCountry ? (
+          <div>
+            à {young.birthZip} {young.birthCity}, {young.birthCountry}
+          </div>
+        ) : null}
         <div style={{ display: "flex" }}>
           <Link to={`/volontaire/${young._id}`}>
             <PanelActionButton icon="eye" title="Consulter" />
@@ -84,10 +89,10 @@ export default ({ onChange, value }) => {
       <Info title="Coordonnées" id={young._id}>
         <Details title="E-mail" value={young.email} copy />
         <Details title="Tel" value={young.phone} />
-        <Details title="Région" value={young.region} />
-        <Details title="Dép" value={young.department} />
-        <Details title="Ville" value={young.city && young.zip && `${young.city} (${young.zip})`} />
         <Details title="Adresse" value={young.address} />
+        <Details title="Ville" value={young.city && young.zip && `${young.city} (${young.zip})`} />
+        <Details title="Dép" value={young.department} />
+        <Details title="Région" value={young.region} />
       </Info>
       <Info title="Situation" id={young._id}>
         <Details
@@ -120,12 +125,40 @@ export default ({ onChange, value }) => {
         <Details title="Quartier Prioritaire de la Ville" value={t(young.qpv)} />
         <Details title="Zone Rurale" value={t(isInRuralArea(young))} />
         <Details title="Handicap" value={t(young.handicap)} />
+        <Details title="Allergies" value={t(young.allergies)} />
         <Details title="PPS" value={t(young.ppsBeneficiary)} />
         <Details title="PAI" value={t(young.paiBeneficiary)} />
-        <Details title="Suivi médicosociale" value={t(young.medicosocialStructure)} />
-        <Details title="Aménagement spécifique" value={t(young.specificAmenagment)} />
+        <Details title="Suivi médicosocial" value={t(young.medicosocialStructure)} />
+        <Details title="Aménagement spécifique" value={t(young.specificAmenagment) || "Non"} />
+        <Details title="Aménagement pour mobilité réduite" value={t(young.reducedMobilityAccess) || "Non"} />
+        <Details title="Affecté dans son département de résidence" value={t(young.handicapInSameDepartment) || "Non"} />
         <Details title="Activités de haut niveau" value={t(young.highSkilledActivity)} />
+        <Details title="Affecté dans son département de résidence (activité de haut niveau)" value={t(young.highSkilledActivityInSameDepartment) || "Non"} />
       </Info>
+      <Info title="Représentant légal n°1" id={young._id}>
+        <Details title="Statut" value={t(young.parent1Status)} />
+        <Details title="Prénom" value={young.parent1FirstName} />
+        <Details title="Nom" value={young.parent1LastName} />
+        <Details title="E-mail" value={young.parent1Email} />
+        <Details title="Tel" value={young.parent1Phone} />
+        <Details title="Adresse" value={young.parent1Address} />
+        <Details title="Ville" value={young.parent1City && young.parent1Zip && `${young.parent1City} (${young.parent1Zip})`} />
+        <Details title="Dép" value={young.parent1Department} />
+        <Details title="Région" value={young.parent1Region} />
+      </Info>
+      {young.parent2Status && (
+        <Info title="Représentant légal n°2" id={young._id}>
+          <Details title="Statut" value={t(young.parent2Status)} />
+          <Details title="Prénom" value={young.parent2FirstName} />
+          <Details title="Nom" value={young.parent2LastName} />
+          <Details title="E-mail" value={young.parent2Email} />
+          <Details title="Tel" value={young.parent2Phone} />
+          <Details title="Adresse" value={young.parent2Address} />
+          <Details title="Ville" value={young.parent2City && young.parent2Zip && `${young.parent2City} (${young.parent2Zip})`} />
+          <Details title="Dép" value={young.parent2Department} />
+          <Details title="Région" value={young.parent2Region} />
+        </Info>
+      )}
       {young && young.historic && young.historic.length !== 0 && <Historic value={young.historic} />}
       {young.motivations && (
         <div className="info">
