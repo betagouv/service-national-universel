@@ -1,10 +1,16 @@
+import useSWR from "swr";
 import KnowledgeBaseCard from "../../../components/knowledge-base/KnowledgeBaseCard";
 import KnowledgeBaseNewCard from "../../../components/knowledge-base/KnowledgeBaseNewCard";
 import KnowledgeBaseTree from "../../../components/knowledge-base/KnowledgeBaseTree";
 import Layout from "../../../components/Layout";
 import withAuth from "../../../hocs/withAuth";
+import API from "../../../services/api";
 
 const KnowledgeBase = () => {
+  const { data, error } = useSWR(API.getUrl("/knowledge-base"));
+
+  console.log({ data });
+
   return (
     <Layout title="Base de connaissances">
       <h1 className="px-8 py-3 font-bold text-lg">Base de connaissances</h1>
@@ -14,6 +20,7 @@ const KnowledgeBase = () => {
             {Array.from("al").map((i) => (
               <KnowledgeBaseCard />
             ))}
+            <KnowledgeBaseNewCard />
           </div>
         </div>
         {/*  <div class="flex flex-wrap -mx-1 lg:-mx-4">

@@ -1,8 +1,6 @@
-import Image from "next/image";
-
 const KnowledgeBaseCard = ({ imageSrc, imageAlt, title, description, roles = [] }) => {
   return (
-    <a href="#" className="my-1 px-1 w-full md:w-1/2 lg:my-4 lg:px-4 lg:w-1/3">
+    <a href="#" className="my-1 px-1 w-72 flex-shrink-0 flex-grow-0 lg:my-4 lg:px-4">
       <article className="overflow-hidden rounded-lg shadow-lg">
         <div className="h-56 w-full bg-gray-300 flex items-center justify-center">
           {!!imageSrc ? <img alt={imageAlt} className="block h-auto w-full" src={imageSrc} /> : <span className="text-gray-400">Pas d'image</span>}
@@ -30,19 +28,5 @@ const KnowledgeBaseCard = ({ imageSrc, imageAlt, title, description, roles = [] 
     </a>
   );
 };
-// <div className="w-72 rounded max-h-96 overflow-hidden shadow-lg flex flex-col">
-//   {!!imageSrc ? <Image width="288" height="156" src={imageSrc} alt={imageAlt} className /> : <Image src="/assets/logo-snu.png" alt="Logo SNU" width="288px" height="156px" />}
-//   <div className="px-6 py-4">
-//     <div className="font-bold text-xl mb-2">{title}</div>
-//     {!!description && <p className="text-gray-700 text-base">{description}</p>}
-//   </div>
-//   <div className="px-6 pt-4 pb-2">
-//     {roles.map((role) => (
-//       <span key={role} className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
-//         {role}
-//       </span>
-//     ))}
-//   </div>
-// </div>
 
 export default KnowledgeBaseCard;
