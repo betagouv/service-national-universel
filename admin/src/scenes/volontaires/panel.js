@@ -89,14 +89,10 @@ export default ({ onChange, value }) => {
       <Info title="Coordonnées" id={young._id}>
         <Details title="E-mail" value={young.email} copy />
         <Details title="Tel" value={young.phone} />
-        <Details title="Région" value={young.region} />
-        <Details title="Dép" value={young.department} />
-        <Details title="Ville" value={young.city && young.zip && `${young.city} (${young.zip})`} />
         <Details title="Adresse" value={young.address} />
-        {young.parent1OwnAddress ? <Details title={`Adresse de ${young.parent1FirstName} ${young.parent1LastName} (représentant légal 1)`} value={young.parent1Address} /> : null}
-        {young.parent2LastName && young.parent2OwnAddress ? (
-          <Details title={`Adresse de ${young.parent2FirstName} ${young.parent2LastName} (représentant légal 2)`} value={young.parent2Address} />
-        ) : null}
+        <Details title="Ville" value={young.city && young.zip && `${young.city} (${young.zip})`} />
+        <Details title="Dép" value={young.department} />
+        <Details title="Région" value={young.region} />
       </Info>
       <Info title="Situation" id={young._id}>
         <Details
@@ -139,6 +135,30 @@ export default ({ onChange, value }) => {
         <Details title="Activités de haut niveau" value={t(young.highSkilledActivity)} />
         <Details title="Affecté dans son département de résidence (activité de haut niveau)" value={t(young.highSkilledActivityInSameDepartment) || "Non"} />
       </Info>
+      <Info title="Représentant légal n°1" id={young._id}>
+        <Details title="Statut" value={t(young.parent1Status)} />
+        <Details title="Prénom" value={young.parent1FirstName} />
+        <Details title="Nom" value={young.parent1LastName} />
+        <Details title="E-mail" value={young.parent1Email} />
+        <Details title="Tel" value={young.parent1Phone} />
+        <Details title="Adresse" value={young.parent1Address} />
+        <Details title="Ville" value={young.parent1City && young.parent1Zip && `${young.parent1City} (${young.parent1Zip})`} />
+        <Details title="Dép" value={young.parent1Department} />
+        <Details title="Région" value={young.parent1Region} />
+      </Info>
+      {young.parent2Status && (
+        <Info title="Représentant légal n°2" id={young._id}>
+          <Details title="Statut" value={t(young.parent2Status)} />
+          <Details title="Prénom" value={young.parent2FirstName} />
+          <Details title="Nom" value={young.parent2LastName} />
+          <Details title="E-mail" value={young.parent2Email} />
+          <Details title="Tel" value={young.parent2Phone} />
+          <Details title="Adresse" value={young.parent2Address} />
+          <Details title="Ville" value={young.parent2City && young.parent2Zip && `${young.parent2City} (${young.parent2Zip})`} />
+          <Details title="Dép" value={young.parent2Department} />
+          <Details title="Région" value={young.parent2Region} />
+        </Info>
+      )}
       {young && young.historic && young.historic.length !== 0 && <Historic value={young.historic} />}
       {young.motivations && (
         <div className="info">

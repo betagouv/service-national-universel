@@ -110,7 +110,7 @@ export default ({ onChange, value }) => {
         )}
       </Info>
       <Info title="Coordonnées" id={value._id}>
-        <Details title="E-mail" value={value.email} />
+        <Details title="E-mail" value={value.email} copy />
         <Details title="Tel" value={value.phone} />
         <Details title="Région" value={value.region} />
         <Details title="Dép" value={value.department} />
@@ -122,10 +122,10 @@ export default ({ onChange, value }) => {
         <Details title="Classe" value={t(value.grade)} />
         <Details title="Type" value={value.schoolType} />
         <Details title="Nom" value={value.schoolName} />
-        <Details title="Région" value={value.schoolRegion} />
-        <Details title="Dép" value={value.schoolDepartment} />
-        <Details title="Ville" value={value.schoolCity && value.schoolZip && `${value.schoolCity} (${value.schoolZip})`} />
         <Details title="Adresse" value={value.schoolAdress} />
+        <Details title="Ville" value={value.schoolCity && value.schoolZip && `${value.schoolCity} (${value.schoolZip})`} />
+        <Details title="Dép" value={value.schoolDepartment} />
+        <Details title="Région" value={value.schoolRegion} />
       </Info>
       <Info title="Situations particulières" id={value._id}>
         <Details title="Quartier Prioritaire de la Ville" value={t(value.qpv)} />
@@ -147,10 +147,10 @@ export default ({ onChange, value }) => {
         <Details title="Nom" value={value.parent1LastName} />
         <Details title="E-mail" value={value.parent1Email} />
         <Details title="Tel" value={value.parent1Phone} />
-        <Details title="Région" value={value.parent1Region} />
-        <Details title="Dép" value={value.parent1Department} />
-        <Details title="Ville" value={value.parent1City && value.parent1Zip && `${value.parent1City} (${value.parent1Zip})`} />
         <Details title="Adresse" value={value.parent1Address} />
+        <Details title="Ville" value={value.parent1City && value.parent1Zip && `${value.parent1City} (${value.parent1Zip})`} />
+        <Details title="Dép" value={value.parent1Department} />
+        <Details title="Région" value={value.parent1Region} />
       </Info>
       {value.parent2Status && (
         <Info title="Représentant légal n°2" id={value._id}>
@@ -159,10 +159,10 @@ export default ({ onChange, value }) => {
           <Details title="Nom" value={value.parent2LastName} />
           <Details title="E-mail" value={value.parent2Email} />
           <Details title="Tel" value={value.parent2Phone} />
-          <Details title="Région" value={value.parent2Region} />
-          <Details title="Dép" value={value.parent2Department} />
-          <Details title="Ville" value={value.parent2City && value.parent2Zip && `${value.parent2City} (${value.parent2Zip})`} />
           <Details title="Adresse" value={value.parent2Address} />
+          <Details title="Ville" value={value.parent2City && value.parent2Zip && `${value.parent2City} (${value.parent2Zip})`} />
+          <Details title="Dép" value={value.parent2Department} />
+          <Details title="Région" value={value.parent2Region} />
         </Info>
       )}
       {value.motivations && (
