@@ -192,7 +192,6 @@ router.post("/ticket", passport.authenticate(["referent", "young"], { session: f
         tags: tags ? tags.join(",") : "",
       }),
     });
-    console.log("✍️ ~ responseZammad", response);
     if (!response.id) return res.status(400).send({ ok: false });
     return res.status(200).send({ ok: true, data: response });
   } catch (error) {
