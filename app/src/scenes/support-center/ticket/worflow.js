@@ -121,7 +121,7 @@ export const step2TechnicalPublic = {
     label: "J'ai un autre problème",
     tags: ["TAG_autre"],
   },
-}
+};
 
 export const step2QuestionPublic = {
   PHASE_0: {
@@ -142,7 +142,7 @@ export const step2QuestionPublic = {
     label: "Autre",
     tags: ["TAG_autre"],
   },
-}
+};
 
 const Label = styled.div`
   color: #374151;

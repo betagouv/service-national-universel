@@ -151,10 +151,10 @@ router.put("/ticket/:id", passport.authenticate(["referent", "young"], { session
 // Create a new ticket while authenticated
 router.post("/ticket", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { subject, type, message, tags, title, } = req.body;
+    const { subject, type, message, tags, title } = req.body;
     const email = req.user.email;
 
-    let customer_id = await zammad.getCustomerIdByEmail(email);
+    const customer_id = await zammad.getCustomerIdByEmail(email);
     if (!customer_id) return res.status(403).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // default ?

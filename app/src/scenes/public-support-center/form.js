@@ -24,7 +24,7 @@ export default ({ setOpen, setSuccessMessage }) => {
         onSubmit={async (values) => {
           try {
             setLoading(true);
-            const { message, subject, name, email, step1, step2, } = values;
+            const { message, subject, name, email, step1, step2 } = values;
             const { ok, code, data } = await api.post("/support-center/public/ticket", {
               title: `${step1?.label} - ${step2?.label} - ${subject}`,
               subject,
