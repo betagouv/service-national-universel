@@ -46,17 +46,17 @@ export default () => {
               {conditions.map((condition) => (
                 <>
                   <p className="conditions_label">{condition.label} <strong>{condition.bold}</strong></p>
-                  {condition.date1 ? (
+                  {condition.isDate1 ? (
                     <p className="centered"><TickIcon /></p>
                   ) : (
                     <p className="centered"><StopIcon /></p>
                   )}
-                  {condition.date2 ? (
+                  {condition.isDate2 ? (
                     <p className="centered"><TickIcon /></p>
                   ) : (
                     <p className="centered"><StopIcon /></p>
                   )}
-                  {condition.date3 ? (
+                  {condition.isDate3 ? (
                     <p className="centered"><TickIcon /></p>
                   ) : (
                     <p className="centered"><StopIcon /></p>

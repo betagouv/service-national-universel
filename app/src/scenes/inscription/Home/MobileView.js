@@ -35,27 +35,42 @@ export default () => {
         </li>
         <li>
           <div>
-            <p>Vérifiez si vous êtes <strong>éligible au SNU</strong></p>
-            <p className="conditions_date">séjour du <strong>13 au 25 février 2022</strong></p>
-            <p className="conditions_date">séjour du <strong>12 au 24 juin 2022</strong></p>
-            <p className="conditions_date">séjour du <strong>3 au 15 juillet 2022</strong></p>
+            <p>Vérifiez si vous êtes <strong>éligible au SNU</strong> selon les dates de séjour proposées :</p>
             {conditions.map((condition) => (
               <>
                 <p className="conditions_label">{condition.label} <strong>{condition.bold}</strong></p>
-                {condition.date1 ? (
-                  <p className="centered"><TickIcon /></p>
+                {condition.isDate1 ? (
+                  <Date>
+                    <p className="conditions_date">{condition.date1}</p>
+                    <p className="centered"><TickIcon /></p>
+                  </Date>
                 ) : (
-                  <p className="centered"><StopIcon /></p>
+                  <Date>
+                    <p className="conditions_date">{condition.date1}</p>
+                    <p className="centered"><StopIcon /></p>
+                  </Date>
                 )}
-                {condition.date2 ? (
-                  <p className="centered"><TickIcon /></p>
+                {condition.isDate2 ? (
+                  <Date>
+                    <p className="conditions_date">{condition.date2}</p>
+                    <p className="centered"><TickIcon /></p>
+                  </Date>
                 ) : (
-                  <p className="centered"><StopIcon /></p>
+                  <Date>
+                    <p className="conditions_date">{condition.date2}</p>
+                    <p className="centered"><StopIcon /></p>
+                  </Date>
                 )}
-                {condition.date3 ? (
-                  <p className="centered"><TickIcon /></p>
+                {condition.isDate3 ? (
+                  <Date>
+                    <p className="conditions_date">{condition.date3}</p>
+                    <p className="centered"><TickIcon /></p>
+                  </Date>
                 ) : (
-                  <p className="centered"><StopIcon /></p>
+                  <Date>
+                    <p className="conditions_date">{condition.date3}</p>
+                    <p className="centered"><StopIcon /></p>
+                  </Date>
                 )}
               </>
             ))}
@@ -174,4 +189,9 @@ const Points = styled.div`
   @media (max-width: 767px) {
     display: block;
   }
+`;
+
+const Date = styled.div`
+  display: flex;
+  justify-content: space-between;
 `;
