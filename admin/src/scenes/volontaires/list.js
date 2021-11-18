@@ -109,6 +109,7 @@ export default () => {
                       Ville: data.city,
                       Département: data.department,
                       Région: data.region,
+                      Académie: data.academy,
                       Situation: translate(data.situation),
                       Niveau: translate(data.grade),
                       "Type d'établissement": translate(data.schoolType),
