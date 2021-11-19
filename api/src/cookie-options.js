@@ -18,6 +18,8 @@ function cookieOptions() {
 function logoutCookieOptions() {
   if (config.ENVIRONMENT === "development") {
     return { httpOnly: true, secure: false };
+  } else if (config.ENVIRONMENT === "staging") {
+    return { httpOnly: true, secure: true, sameSite: "none" };
   } else {
     return { httpOnly: true, secure: true, sameSite: "Lax" };
   }
