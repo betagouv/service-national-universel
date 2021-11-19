@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import styled from "styled-components";
 import { Link } from "react-router-dom";
 
-import { translate as t, isInRuralArea, getAge } from "../../utils";
+import { translate as t, isInRuralArea, getAge, YOUNG_STATUS } from "../../utils";
 import DownloadButton from "../../components/buttons/DownloadButton";
 import Historic from "../../components/historic";
 import api from "../../services/api";
@@ -63,6 +62,16 @@ export default ({ onChange, value }) => {
           </a>
         </div>
       </div>
+      {value.status === YOUNG_STATUS.WAITING_CORRECTION && value.inscriptionCorrectionMessage ? (
+        <Info title="Demande de correction :" id={value._id}>
+          {value.inscriptionCorrectionMessage}
+        </Info>
+      ) : null}
+      {value.status === YOUNG_STATUS.REFUSED && value.inscriptionRefusedMessage ? (
+        <Info title="Motif de refus :" id={value._id}>
+          {value.inscriptionRefusedMessage}
+        </Info>
+      ) : null}
       {young && young.historic && young.historic.length !== 0 && <Historic value={young.historic} />}
       <Info title="Pièce d’identité" id={value._id}>
         {(value.cniFiles || []).map((e, i) => (
