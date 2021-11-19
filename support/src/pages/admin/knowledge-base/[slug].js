@@ -24,10 +24,10 @@ const KnowledgeBase = () => {
   };
 
   return (
-    <Layout title="Base de connaissances">
+    <Layout title="Base de connaissances" className="flex flex-col">
       <h1 className="px-8 py-3 font-bold text-lg">Base de connaissances</h1>
-      <div className="flex h-full w-full flex-grow border-t-2">
-        <div className="container my-12 mx-auto px-4 md:px-12 overflow-auto">{renderBody()}</div>
+      <div className="flex border-t-2 h-full w-full flex-grow flex-shrink overflow-hidden">
+        <div className="container relative h-full box-border flex flex-col">{renderBody()}</div>
         <KnowledgeBaseTree />
       </div>
     </Layout>

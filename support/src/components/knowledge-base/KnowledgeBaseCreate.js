@@ -46,11 +46,11 @@ const KnowledgeBaseCreate = ({ position, parentId = null }) => {
           </div>
         </form>
       </Modal>
-      <div className="my-1 px-1 w-72 flex-shrink-0 flex-grow-0 lg:my-4 lg:px-4 overflow-hidden flex flex-col items-center justify-center">
-        <button onClick={() => setType("section")} className="w-full">
+      <div className=" py-2 box-border w-full flex-shrink-0 b-0 l-0 r-0 overflow-hidden flex items-center justify-around">
+        <button onClick={() => setType("section")} className="px-8 py-2 box-border">
           + Nouvelle section
         </button>
-        <button onClick={() => setType("answer")} className="w-full">
+        <button onClick={() => setType("answer")} className="px-8 py-2">
           + Nouvelle réponse
         </button>
       </div>

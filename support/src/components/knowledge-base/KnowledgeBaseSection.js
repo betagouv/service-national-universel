@@ -37,44 +37,46 @@ const KnowledgeBaseSection = ({ section, isRoot }) => {
     router.replace(`/admin/knowledge-base/${response.data.slug}`);
   };
 
-  console.log({ fields });
-
   return (
     <>
-      {!isRoot && (
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col">
-          {/* register your input into the hook by invoking the "register" function */}
-          <div className="flex">
-            <div className="flex flex-col flex-grow">
-              <label htmlFor="title">Titre</label>
-              <input className="p-2 border-2 mb-5" placeholder="Titre de la section" {...register("title")} />
-              {errors.titleRequired && <span>This field is required</span>}
-              <label htmlFor="slug">Slug (Url)</label>
-              <input className="p-2 border-2 mb-5" placeholder="Slug de la section" {...register("slug")} />
-              <label htmlFor="description">Description</label>
-              <textarea className="p-2 border-2 mb-5" placeholder="Description de la section" {...register("description")} />
+      <div className="flex flex-col flex-grow flex-shrink overflow-hidden w-full">
+        {!isRoot && (
+          <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col p-12 items-start">
+            {/* register your input into the hook by invoking the "register" function */}
+            <div className="flex w-full">
+              <div className="flex flex-col flex-grow">
+                <label htmlFor="title">Titre</label>
+                <input className="p-2 border-2 mb-5" placeholder="Titre de la section" {...register("title")} />
+                {errors.titleRequired && <span>This field is required</span>}
+                <label htmlFor="slug">Slug (Url)</label>
+                <input className="p-2 border-2 mb-5" placeholder="Slug de la section" {...register("slug")} />
+                <label htmlFor="description">Description</label>
+                <textarea className="p-2 border-2 mb-5" placeholder="Description de la section" {...register("description")} />
+              </div>
+              <fieldset className="ml-10  flex-grow">
+                <legend className="mb-5">Visible par:</legend>
+                {Object.keys(SUPPORT_ROLES).map((role, index) => (
+                  <div className="flex items-center" key={role}>
+                    <input className="mr-4" id={role} type="checkbox" {...register(`allowedRoles.${index}.value`)} />
+                    <label className="mr-2" id={role} htmlFor={`allowedRoles.${index}.value`}>
+                      {SUPPORT_ROLES[role]}
+                    </label>
+                  </div>
+                ))}
+              </fieldset>
             </div>
-            <fieldset className="ml-10  flex-grow">
-              <legend className="mb-5">Visible par:</legend>
-              {Object.keys(SUPPORT_ROLES).map((role, index) => (
-                <div className="flex items-center" key={role}>
-                  <input className="mr-4" type="checkbox" {...register(`allowedRoles.${index}.value`)} />
-                  <label className="mr-2" htmlFor={`allowedRoles.${index}.value`}>
-                    {SUPPORT_ROLES[role]}
-                  </label>
-                </div>
-              ))}
-            </fieldset>
-          </div>
-          <button type="submit w-64">Enregistrer</button>
-        </form>
-      )}
-      <div className="flex flex-wrap -mx-1 lg:-mx-4">
-        {section.children.map((item) => (
-          <KnowledgeBaseCard key={item._id} title={item.title} date={item.createdAt} author={item.author} tags={item.allowedRoles} slug={item.slug} />
-        ))}
-        <KnowledgeBaseCreate position={section.children.length + 1} parentId={section._id} />
+            <button type="submit" className="w-auto">
+              Enregistrer
+            </button>
+          </form>
+        )}
+        <div className="flex flex-wrap  w-full py-12 flex-shrink overflow-y-auto">
+          {section.children.map((item) => (
+            <KnowledgeBaseCard key={item._id} title={item.title} date={item.createdAt} author={item.author} tags={item.allowedRoles} slug={item.slug} />
+          ))}
+        </div>
       </div>
+      <KnowledgeBaseCreate position={section.children.length + 1} parentId={section._id} />
     </>
   );
 };
