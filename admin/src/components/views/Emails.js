@@ -40,6 +40,7 @@ export default ({ email }) => {
             <thead>
               <tr>
                 <th>id</th>
+                <th>Template id</th>
                 <th style={{ width: "40%" }}>Objet</th>
                 <th>Evenement</th>
                 <th>Date</th>
@@ -106,7 +107,8 @@ const Hit = ({ hit }) => {
   };
   return (
     <tr>
-      <td>{hit._id}</td>
+      <td style={{ fontSize: "0.8rem" }}>{hit._id}</td>
+      <td>{hit.templateId || "-"}</td>
       <td>{hit.subject}</td>
       <td>{translate(hit.event)}</td>
       <td>{formatLongDateUTC(hit.date)}</td>
