@@ -6,7 +6,7 @@ const esClient = require("../es");
 
 const MODELNAME = "ticket";
 
-
+const Messages = new mongoose.Schema({});
 
 const Schema = new mongoose.Schema({
   id: {
@@ -45,9 +45,17 @@ const Schema = new mongoose.Schema({
       description: "Sujet du ticket",
     },
   }, // OK
-  emitterId: {
+  emitterYoungId: {
     type: mongoose.Types.ObjectId,
     ref: 'young',
+    required: true,
+    documentation: {
+      description: "Identifiant de l'émetteur volontaire",
+    },
+  }, // OK
+  emitterUserId: {
+    type: mongoose.Types.ObjectId,
+    ref: 'referent',
     required: true,
     documentation: {
       description: "Identifiant de l'émetteur",
@@ -69,12 +77,6 @@ const Schema = new mongoose.Schema({
       description: "canal de communication d'où provient le ticket",
     },
   }, // OK
-  groupId: {
-    type: String,
-    documentation: {
-      description: "Identifiant du groupe",
-    },
-  }, // OK
   group: {
     type: String,
     enum: ["ADMIN", "CONTACT", "INSCRIPTION", "YOUNG", "REFERENT", "STRUCTURE", "VOLUNTEER"],
@@ -83,23 +85,11 @@ const Schema = new mongoose.Schema({
     },
   }, // OK
 
-  priorityId: {
-    type: String,
-    documentation: {
-      description: "Identifiant du degré de priorité",
-    },
-  },
   priority: {
     type: String,
     enum: ["LOW", "MEDIUM", "HIGH"],
     documentation: {
       description: "nom du degré de priorité",
-    },
-  },
-  stateId: {
-    type: String,
-    documentation: {
-      description: "Identifiant de l'état du ticket",
     },
   },
   state: {
@@ -108,10 +98,6 @@ const Schema = new mongoose.Schema({
     documentation: {
       description: "nom de l'état du ticket",
     },
-  },
-
-  closedAt: {
-    type: Date,
   },
 
   firstResponseAt: {
@@ -138,7 +124,8 @@ const Schema = new mongoose.Schema({
   },
 
   agentInChargeId: {
-    type: String,
+    type: mongoose.Types.ObjectId,
+    ref: 'referent',
     documentation: {
       description: "identifiant de l'agent en charge du ticket",
     },
@@ -152,7 +139,8 @@ const Schema = new mongoose.Schema({
   },
 
   lastUpdateById: {
-    type: String,
+    type: mongoose.Types.ObjectId,
+    ref: 'young'
   },
 
   tagId: {
@@ -162,7 +150,13 @@ const Schema = new mongoose.Schema({
       description: "étiquette reliées au ticket'",
     },
   },
-  messages: {},
+  messages: {
+    type: Messages,
+  },
+
+  closedAt: {
+    type: Date,
+  },
 }, { timestamps: true });
 
 Schema.virtual("user").set(function (user) {
