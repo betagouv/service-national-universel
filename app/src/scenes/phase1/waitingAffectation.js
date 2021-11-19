@@ -1,16 +1,18 @@
 import React from "react";
 import styled from "styled-components";
 import { HeroContainer, Hero } from "../../components/Content";
+import { translateCohort } from "../../utils";
 import NextStep from "./nextStep";
 
-export default () => {
+export default ({ young }) => {
   return (
     <>
       <HeroContainer>
         <Hero>
           <div className="content">
             <h1>
-              <strong>Mon séjour de cohésion</strong>
+              <strong>Mon séjour de cohésion</strong><br />
+              {translateCohort(young.cohort)}
             </h1>
             <p>
               Le SNU vous donne l'opportunité de découvrir la vie collective au sein d'un centre accueillant environ 200 jeunes de votre région pour créer ainsi des liens nouveaux
