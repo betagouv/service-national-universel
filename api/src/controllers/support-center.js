@@ -383,7 +383,7 @@ router.post("/ticket/referent/notif", zammadAuth, async (req, res) => {
     const article = req.body.article;
     if (!ticket) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     if (!article) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    console.log("|---------- TICKET CREATOR EMAIL", ticket.created_by.email);
+    console.log("|---------- TICKET CREATOR EMAIL", ticket.created_by.email, typeof ticket.created_by.email);
     let ticketCreator;
     ticketCreator = await YoungObject.findOne({ email: ticket.created_by.email });
     if (!ticketCreator) {
