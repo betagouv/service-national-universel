@@ -1,9 +1,10 @@
 import { useEffect } from "react";
 import { useRouter } from "next/router";
-import useSWR from "swr";
+import useSWR, { useSWRConfig } from "swr";
 import API from "../services/api";
 
 const useUser = ({ redirectOnLoggedOut = "", redirectOnLoggedIn } = {}) => {
+  const { cache } = useSWRConfig();
   const { data, mutate, error } = useSWR(API.getUrl({ path: "/referent/signin_token" }));
   const router = useRouter();
 
@@ -15,6 +16,7 @@ const useUser = ({ redirectOnLoggedOut = "", redirectOnLoggedIn } = {}) => {
       router.push(redirectOnLoggedOut);
     }
     if (redirectOnLoggedIn && !isLoading && !!user.isLoggedIn) {
+      cache.clear();
       router.push(redirectOnLoggedIn);
     }
   }, [isLoading, error, redirectOnLoggedOut, redirectOnLoggedIn]);

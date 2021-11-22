@@ -12,11 +12,23 @@ const findChildrenRecursive = async (section, allChildren, findAll = false) => {
   if (section.type !== "section") return;
   const children = await KnowledgeBaseObject.find({ parentId: section._id })
     .sort({ position: 1 })
-    .populate({ path: "author", select: "_id firstName lastName role" });
+    .populate({ path: "author", select: "_id firstName lastName role" })
+    .lean(); // to json;
   for (const child of children) {
     allChildren.push(child);
     if (findAll) await findChildrenRecursive(child, allChildren, findAll);
   }
+};
+
+const findParents = async (item) => {
+  const fromRootToItem = [{ ...item }]; // we spread item to avoid circular reference in item.parents = parents
+  let currentItem = item;
+  while (!!currentItem.parentId) {
+    const parent = await KnowledgeBaseObject.findById(currentItem.parentId).lean(); // to json;
+    fromRootToItem.unshift(parent);
+    currentItem = parent;
+  }
+  return fromRootToItem;
 };
 
 const findChildren = async (section, findAll = false) => {
@@ -26,7 +38,6 @@ const findChildren = async (section, findAll = false) => {
 };
 
 const buildTree = async (root) => {
-  root = root.toJSON ? root.toJSON() : root;
   root.children = [];
   const children = [];
   await findChildrenRecursive(root, children);
@@ -63,9 +74,10 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 
     const newKb = await KnowledgeBaseObject.create(kb);
 
-    return res
-      .status(200)
-      .send({ ok: true, data: await KnowledgeBaseObject.findById(newKb._id).populate({ path: "author", select: "_id firstName lastName role" }) });
+    return res.status(200).send({
+      ok: true,
+      data: await KnowledgeBaseObject.findById(newKb._id).populate({ path: "author", select: "_id firstName lastName role" }).lean(),
+    });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
@@ -122,7 +134,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     return res.status(200).send({
       ok: true,
-      data: await KnowledgeBaseObject.findById(existingKb._id).populate({ path: "author", select: "_id firstName lastName role" }),
+      data: await KnowledgeBaseObject.findById(existingKb._id).populate({ path: "author", select: "_id firstName lastName role" }).lean(), // to json,
     });
   } catch (error) {
     capture(error);
@@ -133,11 +145,18 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 router.get("/:slug", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     if (!req.params.slug) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const existingKb = await KnowledgeBaseObject.findOne({ slug: req.params.slug }).populate({
-      path: "author",
-      select: "_id firstName lastName role",
-    });
+    const existingKb = await KnowledgeBaseObject.findOne({ slug: req.params.slug })
+      .populate({
+        path: "author",
+        select: "_id firstName lastName role",
+      })
+      .lean(); // to json
     if (!existingKb) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (req.query.withParents === "true") {
+      const parents = await findParents(existingKb);
+      existingKb.parents = parents;
+    }
 
     if (req.query.withTree === "true") {
       const tree = await buildTree(existingKb);
@@ -163,7 +182,8 @@ router.get("/", passport.authenticate(["referent", "young"], { session: false, f
       .populate({
         path: "author",
         select: "_id firstName lastName role",
-      });
+      })
+      .lean(); // to json;
     if (!rootKbs) return res.status(200).send({ ok: true, data: [] });
 
     const tree = await Promise.all(rootKbs.map(buildTree));

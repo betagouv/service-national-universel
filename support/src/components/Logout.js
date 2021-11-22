@@ -1,12 +1,15 @@
+import { useSWRConfig } from "swr";
 import useUser from "../hooks/useUser";
 import API from "../services/api";
 import NavLink from "./NavLink";
 
 const Logout = () => {
+  const { cache } = useSWRConfig();
   const { mutate } = useUser();
   const onLogout = async () => {
     await API.post({ path: "/referent/logout" });
     mutate(null);
+    cache.clear();
   };
 
   return (

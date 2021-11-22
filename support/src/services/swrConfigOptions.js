@@ -4,10 +4,8 @@ import API from "./api";
 // @TODO: see if it's useful also in production ?
 function sessionStorageProvider() {
   if (typeof window === "undefined") return new Map([]);
-  console.log("inside sessions storage provider");
   // When initializing, we restore the data from `localStorage` into a map.
   const map = new Map(JSON.parse(window.sessionStorage.getItem("snu-user-cache") || "[]"));
-  console.log({ map });
   // Before unloading the app, we write back all the data into `localStorage`.
   window.addEventListener("beforeunload", () => {
     const appCache = JSON.stringify(Array.from(map.entries()));

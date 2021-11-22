@@ -26,7 +26,7 @@ const KnowledgeBaseSection = ({ section, isRoot }) => {
     defaultValues: section,
   });
 
-  const { fields } = useFieldArray({
+  useFieldArray({
     control, // control props comes from useForm (optional: if you are using FormContext)
     name: "allowedRoles", // unique name for your Field Array
     // keyName: "id", default to "id", you can change the key name
@@ -48,10 +48,9 @@ const KnowledgeBaseSection = ({ section, isRoot }) => {
       .map((sortedItem, index) => ({ ...sortedItem, position: index + 1 }));
 
     const response = await API.put({ path: "/support-center/knowledge-base/reorder", body: newSort.map(({ _id, position }) => ({ _id, position })) });
-    if (!response.ok) return alert("Désolé, une erreur est survenue. Veuillez recommencer !");
+    if (!response.ok) return toast.error("Désolé, une erreur est survenue. Veuillez recommencer !");
     if (section.slug) mutate(`/support-center/knowledge-base/${section.slug}`);
     mutate("/support-center/knowledge-base");
-    toast.info("Cest good !");
   };
 
   useEffect(() => {
