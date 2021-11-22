@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
-import { translate as t, isInRuralArea, ROLES, copyToClipboard, formatStringDate, getAge } from "../../../utils";
+import { translate as t, isInRuralArea, ROLES, copyToClipboard, formatStringDate, getAge, YOUNG_STATUS } from "../../../utils";
 import YoungView from "./wrapper";
 import api from "../../../services/api";
 import DownloadButton from "../../../components/buttons/DownloadButton";
@@ -23,6 +23,18 @@ export default ({ young }) => {
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <YoungView young={young} tab="details">
+        {young.status === YOUNG_STATUS.REFUSED && young.inscriptionRefusedMessage ? (
+          <Box>
+            <Bloc title="Motif de refus" id={young._id}>
+              {young.inscriptionRefusedMessage}
+            </Bloc>
+          </Box>
+        ) : null}
+        {young.status === YOUNG_STATUS.WAITING_CORRECTION && young.inscriptionCorrectionMessage ? (
+          <Bloc title="Message de demande de correction :" id={young._id}>
+            {young.inscriptionCorrectionMessage}
+          </Bloc>
+        ) : null}
         <Box>
           <Row>
             <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
@@ -31,6 +43,7 @@ export default ({ young }) => {
                 <Details title="Date de naissance" value={`${formatStringDate(young.birthdateAt)} • ${getAge(young.birthdateAt)} ans`} />
                 <Details title="Lieu de naissance" value={young.birthCity} />
                 <Details title="Pays de naissance" value={young.birthCountry} />
+                {young.frenchNationality === "true" ? <Details title="Nationalité" value="🇫🇷 Nationalité française" /> : null}
                 <Details title="Sexe" value={t(young.gender)} />
                 <Details title="Tel" value={young.phone} />
                 <Details title="Adresse" value={young.address} />
@@ -93,15 +106,26 @@ export default ({ young }) => {
                   />
                 ))}
               </Bloc>
-              <Bloc title="Traitement des données personnelles (moins de 15 ans)">
-                {(young.dataProcessingConsentmentFiles || []).map((e, i) => (
-                  <DownloadButton
-                    key={i}
-                    source={() => api.get(`/referent/youngFile/${young._id}/dataProcessingConsentmentFiles/${e}`)}
-                    title={`Télécharger le document (${i + 1}/${young.dataProcessingConsentmentFiles.length})`}
-                  />
-                ))}
-              </Bloc>
+              {getAge(young?.birthdateAt) < 15 ? (
+                <Bloc title="Traitement des données personnelles">
+                  {(young.dataProcessingConsentmentFiles || []).map((e, i) => (
+                    <DownloadButton
+                      key={i}
+                      source={() => api.get(`/referent/youngFile/${young._id}/dataProcessingConsentmentFiles/${e}`)}
+                      title={`Télécharger le document (${i + 1}/${young.dataProcessingConsentmentFiles.length})`}
+                    />
+                  ))}
+                  {isFromFranceConnect(young) && (
+                    <div style={{ marginTop: "1rem" }}>
+                      <img src={require("../../../assets/fc_logo_v2.png")} height={60} />
+                      <br />
+                      <b>Consentement parental validé via FranceConnect.</b>
+                      <br />
+                      Les représentants légaux ont utilisé FranceConnect pour s’identifier et consentir, ce qui permet de s’affranchir du document de consentement papier.
+                    </div>
+                  )}
+                </Bloc>
+              ) : null}
               <Bloc title="Autotest PCR">
                 <Details title="Autorisation" value={t(young.autoTestPCR)} />
                 {(young.autoTestPCRFiles || []).map((e, i) => (
