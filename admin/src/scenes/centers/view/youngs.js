@@ -57,7 +57,7 @@ export default ({ center, updateCenter }) => {
                         Cohorte: data.cohort,
                         Prénom: data.firstName,
                         Nom: data.lastName,
-                        "Date de naissance": formatLongDateUTC(data.birthdateAt),
+                        "Date de naissance": formatDateFRTimezoneUTC(data.birthdateAt),
                         "Pays de naissance": data.birthCountry || "France",
                         "Ville de naissance": data.birthCity,
                         "Code postal de naissance": data.birthCityZip,
@@ -138,7 +138,9 @@ export default ({ center, updateCenter }) => {
                         "Mobilité aux alentours d'un de ses proches": translate(data.mobilityNearRelative),
                         "Informations du proche":
                           data.mobilityNearRelative &&
-                          [data.mobilityNearRelativeName, data.mobilityNearRelativeAddress, data.mobilityNearRelativeZip, data.mobilityNearRelativeCity].filter((e) => e)?.join(", "),
+                          [data.mobilityNearRelativeName, data.mobilityNearRelativeAddress, data.mobilityNearRelativeZip, data.mobilityNearRelativeCity]
+                            .filter((e) => e)
+                            ?.join(", "),
                         "Mode de transport": data.mobilityTransport?.map((t) => translate(t)).join(", "),
                         "Autre mode de transport": data.mobilityTransportOther,
                         "Format de mission": translate(data.missionFormat),
