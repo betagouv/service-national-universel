@@ -15,6 +15,18 @@ module.exports = {
       font: {
         sans: ["Ubuntu", "ui-sans-serif", "system-ui"],
       },
+      width: {
+        "screen-1/4": "25vw",
+        "screen-1/2": "50vw",
+        "screen-3/4": "75vw",
+      },
+    },
+    maxHeight: {
+      0: "0",
+      "1/4": "25%",
+      "1/2": "50%",
+      "3/4": "75%",
+      full: "100%",
     },
   },
   variants: {

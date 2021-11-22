@@ -14,7 +14,7 @@ const KnowledgeBaseBreadcrumb = ({ parents = [] }) => {
         </svg>
       </Crumb>
       {parents.map(({ _id, slug, title }) => (
-        <Crumb href={`/admin/knowledge-base/${slug}`} withArrow>
+        <Crumb key={_id} href={`/admin/knowledge-base/${slug}`} withArrow>
           {title}
         </Crumb>
       ))}

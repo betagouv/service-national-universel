@@ -1,4 +1,5 @@
 import "react-toastify/dist/ReactToastify.min.css";
+import "emoji-mart/css/emoji-mart.css";
 import "../global.css";
 
 import { SWRConfig } from "swr";

@@ -1,12 +1,7 @@
 import dayjs from "dayjs";
 import { SUPPORT_ROLES } from "snu-lib/roles";
 import Link from "next/link";
-
-const filterTags = (tag, index, tags) => {
-  if (tags.includes("public")) return tag === "public";
-  if (tags.includes("all")) return tag === "all";
-  return true;
-};
+import { filterTags } from "../../utils/tags";
 
 const KnowledgeBaseCard = ({ imageSrc, position, imageAlt, title, date, author, slug, tags = [] }) => {
   return (
