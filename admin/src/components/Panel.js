@@ -21,17 +21,19 @@ export const Details = ({ title, value, copy, to }) => {
     <div className="detail">
       {/* `${title}&nbsp;:` */}
       <div className="detail-title">{`${title} :`}</div>
-      <div className="detail-text">{value}</div>
-      {copy ? (
-        <div
-          className="icon"
-          icon={require(`../assets/copy.svg`)}
-          onClick={() => {
-            copyToClipboard(value);
-            toastr.success(`'${title}' a été copié dans le presse papier.`);
-          }}
-        />
-      ) : null}
+      <div style={{ display: "flex" }}>
+        <div className="detail-text">{value}</div>
+        {copy ? (
+          <div
+            className="icon"
+            icon={require(`../assets/copy.svg`)}
+            onClick={() => {
+              copyToClipboard(value);
+              toastr.success(`'${title}' a été copié dans le presse papier.`);
+            }}
+          />
+        ) : null}
+      </div>
     </div>
   );
 };
@@ -93,10 +95,13 @@ export default styled.div`
     }
   }
   .detail {
+    border-bottom: 0.5px solid rgba(244, 245, 247, 0.5);
+    padding: 5px 0;
     display: flex;
     font-size: 14px;
     text-align: left;
     align-items: flex-end;
+    justify-content: space-between;
     margin-top: 10px;
     &-title {
       font-weight: bold;

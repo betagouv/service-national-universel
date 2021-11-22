@@ -133,10 +133,12 @@ export default ({ onChange, value }) => {
           <Info title="Structure">
             <div className="detail">
               <div className="detail-title">Nom :</div>
-              <div className="detail-text">{structure.name}</div>
-              <Link to={`/structure/${structure._id}`}>
-                <IconLink />
-              </Link>
+              <div style={{ display: "flex" }}>
+                <div className="detail-text">{structure.name}</div>
+                <Link to={`/structure/${structure._id}`}>
+                  <IconLink />
+                </Link>
+              </div>
             </div>
             <Details title="Région" value={structure?.region} />
             <Details title="Dép." value={structure?.department} />
