@@ -48,6 +48,9 @@ const Schema = new mongoose.Schema({
   },
   acceptCGU: {
     type: Boolean,
+    documentation: {
+      description: "l'utilisateur a accepté les CGU",
+    },
   },
   lastLoginAt: {
     type: Date,

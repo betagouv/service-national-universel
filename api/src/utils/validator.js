@@ -542,6 +542,7 @@ function validateReferent(referent) {
       phone: Joi.string().allow(null, ""),
       mobile: Joi.string().allow(null, ""),
       structureId: Joi.string().allow(null, ""),
+      acceptCGU: Joi.string().allow(null, ""),
     })
     .validate(referent, { stripUnknown: true });
 }
