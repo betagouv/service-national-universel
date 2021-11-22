@@ -63,7 +63,7 @@ export default () => {
         <LoginBox>
           <Title>{title}</Title>
           <Formik
-            initialValues={{ firstName: newuser.firstName, lastName: newuser.lastName, email: newuser.email, password: "", repassword: "" }}
+            initialValues={{ firstName: newuser.firstName, lastName: newuser.lastName, email: newuser.email, password: "", repassword: "", acceptCGU }}
             onSubmit={async (values, actions) => {
               try {
                 const { data: user, token, code, ok } = await api.post(`/referent/signup_invite`, { ...values, invitationToken });
@@ -157,6 +157,13 @@ export default () => {
                       placeholder="Confirmez votre mot de passe"
                     />
                     <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.repassword}</p>
+                  </StyledFormGroup>
+                  <StyledFormGroup style={{ display: "flex" }}>
+                    <label>
+                      <span>*</span>Veuillez acceptez les conditions générales d'utilisation
+                    </label>
+                    <InputField validate={(v) => !v && requiredMessage} type="checkbox" value={true} onChange={handleChange} name="acceptCGU" checked={values.acceptCGU} style={{ flex: "2" }} />
+                    <ErrorMessage errors={errors} touched={touched} name="acceptCGU" />
                   </StyledFormGroup>
                   <Submit loading={isSubmitting} type="submit" color="primary">
                     Activer mon compte
