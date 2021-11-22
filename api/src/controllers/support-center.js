@@ -5,6 +5,8 @@ const Joi = require("joi");
 
 const { capture } = require("../sentry");
 const zammad = require("../zammad");
+const YoungObject = require("../models/young");
+const ReferentModel = require("../models/referent");
 const { ERRORS, isYoung } = require("../utils");
 const { ZAMMAD_GROUP } = require("snu-lib/constants");
 const { ticketStateIdByName } = require("snu-lib/zammad");
@@ -317,6 +319,105 @@ router.post("/ticket/update", zammadAuth, async (req, res) => {
         params: {
           cta,
           message: body,
+        },
+      });
+    }
+    if (req.headers['x-zammad-trigger'] === "REFERENTS notification") {
+      const young = await YoungObject.findOne({ email: ticket.created_by.email });
+      const user = await ReferentObject.findOne({ email: ticket.created_by.email });
+      if (!young && !user) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      console.log("TICKET CREATOR", young || user);
+
+      const { error, value } = Joi.string().required().validate(article.body);
+      if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+      console.log("TICKET BODY", value);
+
+      const department = young.department || user.department;
+      const region = young.region || user.region;
+      console.log("TICKET CREATOR LOCATION", department, region);
+
+      const regionReferents = await ReferentObject.find({
+        role: "referent_region",
+        region
+      });
+      console.log("REGION REFERENTS", regionReferents);
+      const departmentReferents = await ReferentObject.find({
+        role: "referent_department",
+        department
+      });
+      console.log("DEPARTMENT REFERENTS", departmentReferents);
+
+      for (let referent of regionReferents) {
+        console.log("REGION REFERENTS LOOP", referent.lastName);
+        sendTemplate(SENDINBLUE_TEMPLATES.referent.MESSAGE_NOTIFICATION, {
+          emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: "chloe@selego.co" }],
+          params: {
+            cta: `${ADMIN_URL}/boite-de-reception`,
+            message: value,
+            from: young ? `${young.firstName} ${young.lastName}` : `${user.firstName} ${user.lastName}`,
+          },
+        });
+      }
+      for (let referent of departmentReferents) {
+        console.log("DEPARTMENT REFERENTS LOOP", referent.lastName);
+        sendTemplate(SENDINBLUE_TEMPLATES.referent.MESSAGE_NOTIFICATION, {
+          emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: "chloe@selego.co" }],
+          params: {
+            cta: `${ADMIN_URL}/boite-de-reception`,
+            message: value,
+            from: young ? `${young.firstName} ${young.lastName}` : `${user.firstName} ${user.lastName}`,
+          },
+        });
+      }
+    }
+    return res.status(200).send({ ok: true, data: [] });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+router.post("/ticket/referent/notif", zammadAuth, async (req, res) => {
+  try {
+    const ticket = req.body.ticket;
+    const article = req.body.article;
+    if (!ticket) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!article) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    let ticketCreator;
+    ticketCreator = await YoungObject.findOne({ email: ticket.created_by.email });
+    if (!ticketCreator) {
+      ticketCreator = await ReferentObject.findOne({ email: ticket.created_by.email });
+    }
+    if (!ticketCreator) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    console.log("TICKET CREATOR", ticketCreator._id);
+
+    const { error, value } = Joi.string().required().validate(article.body);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
+    console.log("TICKET BODY", value);
+
+    const department = ticketCreator.department;
+    const region = ticketCreator.region;
+    console.log("TICKET CREATOR LOCATION", department, region);
+
+    const regionReferents = await ReferentObject.find({
+      role: ROLES.REFERENT_REGION,
+      region
+    });
+    console.log("REGION REFERENTS", regionReferents.length);
+    const departmentReferents = await ReferentObject.find({
+      role: ROLES.REFERENT_DEPARTMENT,
+      department
+    });
+    console.log("DEPARTMENT REFERENTS", departmentReferents.length);
+
+    for (let referent of [...regionReferents, ...departmentReferents]) {
+      console.log("REGION REFERENTS LOOP", referent.lastName);
+      sendTemplate(SENDINBLUE_TEMPLATES.referent.MESSAGE_NOTIFICATION, {
+        emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: `chloe+${department}@selego.co` }],
+        params: {
+          cta: `${ADMIN_URL}/boite-de-reception`,
+          message: value,
+          from: `${ticketCreator.firstName} ${ticketCreator.lastName}`,
         },
       });
     }
