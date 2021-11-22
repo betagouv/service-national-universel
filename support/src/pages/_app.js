@@ -1,5 +1,8 @@
+import "react-toastify/dist/ReactToastify.min.css";
 import "../global.css";
+
 import { SWRConfig } from "swr";
+
 import swrConfigOptions from "../services/swrConfigOptions";
 
 function MyApp({ Component, pageProps }) {

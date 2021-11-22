@@ -1,6 +1,9 @@
 module.exports = {
   mode: "jit",
-  purge: ["./src/pages/**/*.{js,ts,jsx,tsx}", "./src/components/**/*.{js,ts,jsx,tsx}"],
+  purge: {
+    mode: "all",
+    content: ["./src/{components,pages,layout}/**/*.{js,ts,jsx,tsx}", "node_modules/react-toastify/dist/ReactToastify.min.css"],
+  },
   darkMode: false, // or 'media' or 'class'
   theme: {
     extend: {

@@ -10,7 +10,9 @@ const { validateId } = require("../utils/validator");
 
 const findChildrenRecursive = async (section, allChildren, findAll = false) => {
   if (section.type !== "section") return;
-  const children = await KnowledgeBaseObject.find({ parentId: section._id }).populate({ path: "author", select: "_id firstName lastName role" });
+  const children = await KnowledgeBaseObject.find({ parentId: section._id })
+    .sort({ position: 1 })
+    .populate({ path: "author", select: "_id firstName lastName role" });
   for (const child of children) {
     allChildren.push(child);
     if (findAll) await findChildrenRecursive(child, allChildren, findAll);
@@ -70,6 +72,21 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
   }
 });
 
+router.put("/reorder", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const itemsToReorder = req.body;
+    const session = await KnowledgeBaseObject.startSession();
+    await session.withTransaction(async () => {
+      for (const item of itemsToReorder) {
+        await KnowledgeBaseObject.findByIdAndUpdate(item._id, { position: item.position });
+      }
+    });
+    return res.status(200).send({ ok: true });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
 router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const existingKb = await KnowledgeBaseObject.findById(req.params.id);
@@ -141,10 +158,12 @@ router.get("/:slug", passport.authenticate(["referent", "young"], { session: fal
 
 router.get("/", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const rootKbs = await KnowledgeBaseObject.find({ parentId: { $exists: false } }).populate({
-      path: "author",
-      select: "_id firstName lastName role",
-    });
+    const rootKbs = await KnowledgeBaseObject.find({ parentId: { $in: [undefined, null] } })
+      .sort({ position: 1 })
+      .populate({
+        path: "author",
+        select: "_id firstName lastName role",
+      });
     if (!rootKbs) return res.status(200).send({ ok: true, data: [] });
 
     const tree = await Promise.all(rootKbs.map(buildTree));

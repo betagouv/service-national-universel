@@ -4,7 +4,7 @@ const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../es");
 const { SUPPORT_ROLES_LIST } = require("snu-lib/roles");
 
-const MODELNAME = "knowledgeBase";
+const MODELNAME = "knowledgebase";
 
 const Schema = new mongoose.Schema(
   {
@@ -18,7 +18,7 @@ const Schema = new mongoose.Schema(
     },
     parentId: {
       type: mongoose.Types.ObjectId,
-      ref: "knowledgeBase",
+      ref: "knowledgebase",
       documentation: {
         description: "Lien de parenté entre un article/une section et une section",
       },

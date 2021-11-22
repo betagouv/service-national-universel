@@ -1,4 +1,5 @@
 import Document, { Html, Head, Main, NextScript } from "next/document";
+import { ToastContainer } from "react-toastify";
 
 class MyDocument extends Document {
   static async getInitialProps(ctx) {
@@ -15,6 +16,18 @@ class MyDocument extends Document {
         <body>
           <Main />
           <NextScript />
+          <ToastContainer
+            position="top-right"
+            autoClose={5000}
+            hideProgressBar={false}
+            newestOnTop
+            theme="colored"
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+          />
         </body>
       </Html>
     );

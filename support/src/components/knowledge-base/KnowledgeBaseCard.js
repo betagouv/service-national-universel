@@ -8,11 +8,11 @@ const filterTags = (tag, index, tags) => {
   return true;
 };
 
-const KnowledgeBaseCard = ({ imageSrc, imageAlt, title, date, author, slug, tags = [] }) => {
+const KnowledgeBaseCard = ({ imageSrc, position, imageAlt, title, date, author, slug, tags = [] }) => {
   return (
     <Link href={`/admin/knowledge-base/${slug}`} passHref>
-      <a href="#" className="my-1 px-1 w-72 flex-shrink-0 flex-grow-0 lg:my-4 lg:px-4">
-        <article className=" overflow-hidden rounded-lg shadow-lg">
+      <a href="#" data-position={position} className="my-1 px-1 w-72 flex-shrink-0 flex-grow-0 lg:my-4 lg:px-4 ">
+        <article className=" overflow-hidden rounded-lg shadow-lg bg-white">
           <div className="h-56 w-full bg-gray-300 flex items-center justify-center ">
             {!!imageSrc ? <img alt={imageAlt} className="block h-auto w-full" src={imageSrc} /> : <span className="text-gray-400">Pas d'image</span>}
           </div>

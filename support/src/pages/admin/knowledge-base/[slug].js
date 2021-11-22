@@ -12,8 +12,6 @@ const KnowledgeBase = () => {
   const { slug } = router.query;
   const { data: response } = useSWR(API.getUrl({ path: `/support-center/knowledge-base${!!slug ? `/${slug}` : ""}`, query: { withTree: true } }));
 
-  console.log(response);
-
   const renderBody = () => {
     if (!response?.data) return null;
     if (response.data.type === "root") return <KnowledgeBaseSection key={slug} section={response.data} isRoot />;

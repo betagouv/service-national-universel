@@ -5,13 +5,17 @@ import KnowledgeBaseCard from "./KnowledgeBaseCard";
 import KnowledgeBaseCreate from "./KnowledgeBaseCreate";
 import withAuth from "../../hocs/withAuth";
 import API from "../../services/api";
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import { useSWRConfig } from "swr";
+import Sortable from "sortablejs";
+import { toast } from "react-toastify";
 
 const KnowledgeBaseSection = ({ section, isRoot }) => {
   section.allowedRoles = isRoot ? [] : Object.keys(SUPPORT_ROLES).map((role) => ({ id: role, name: role, value: section.allowedRoles.includes(role) }));
 
   const { mutate } = useSWRConfig();
+  const gridRef = useRef(null);
+  const sortable = useRef(null);
 
   const {
     register,
@@ -32,10 +36,27 @@ const KnowledgeBaseSection = ({ section, isRoot }) => {
     body.allowedRoles = body.allowedRoles.filter(({ value }) => !!value).map((item) => item.id);
     const response = await API.put({ path: `/support-center/knowledge-base/${section._id}`, body });
     if (response.error) return alert(response.error);
-    mutate("/support-center/knowledge-base");
     mutate(`/support-center/knowledge-base/${response.data.slug}`);
+    mutate("/support-center/knowledge-base");
     router.replace(`/admin/knowledge-base/${response.data.slug}`);
   };
+
+  const onListChange = async () => {
+    const newSort = [...gridRef.current.children]
+      .map((i) => i.dataset.position)
+      .map((oldPosition) => section.children.find((item) => item.position.toString() === oldPosition))
+      .map((sortedItem, index) => ({ ...sortedItem, position: index + 1 }));
+
+    const response = await API.put({ path: "/support-center/knowledge-base/reorder", body: newSort.map(({ _id, position }) => ({ _id, position })) });
+    if (!response.ok) return alert("Désolé, une erreur est survenue. Veuillez recommencer !");
+    if (section.slug) mutate(`/support-center/knowledge-base/${section.slug}`);
+    mutate("/support-center/knowledge-base");
+    toast.info("Cest good !");
+  };
+
+  useEffect(() => {
+    sortable.current = Sortable.create(gridRef.current, { animation: 150, onEnd: onListChange });
+  }, []);
 
   return (
     <>
@@ -70,9 +91,9 @@ const KnowledgeBaseSection = ({ section, isRoot }) => {
             </button>
           </form>
         )}
-        <div className="flex flex-wrap  w-full py-12 flex-shrink overflow-y-auto">
+        <div ref={gridRef} className="flex flex-wrap  w-full py-12 flex-shrink overflow-y-auto">
           {section.children.map((item) => (
-            <KnowledgeBaseCard key={item._id} title={item.title} date={item.createdAt} author={item.author} tags={item.allowedRoles} slug={item.slug} />
+            <KnowledgeBaseCard key={item._id} position={item.position} title={item.title} date={item.createdAt} author={item.author} tags={item.allowedRoles} slug={item.slug} />
           ))}
         </div>
       </div>
