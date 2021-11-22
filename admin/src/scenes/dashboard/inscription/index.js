@@ -4,6 +4,7 @@ import { Col, Row } from "reactstrap";
 import { useSelector } from "react-redux";
 
 import YearPicker from "../components/YearPicker";
+import FilterStatus from "../components/FilterStatus";
 import Checkbox from "../components/Checkbox";
 import FilterAcademy from "../components/FilterAcademy";
 import FilterRegion from "../components/FilterRegion";
@@ -60,28 +61,28 @@ export default () => {
         </Col>
         {filter ? (
           <Col md={12}>
-            <FilterWrapper style={{ display: "flex", alignItems: "flex-end", flexDirection: "column" }}>
+            <FiltersList>
               <YearPicker
                 options={[
-                  { key: "2019", label: "2019" },
-                  { key: "2020", label: "2020" },
-                  { key: "2021", label: "2021" },
-                  { key: "Février 2022", label: "Février 2022" },
-                  { key: "Juin 2022", label: "Juin 2022" },
-                  { key: "Juillet 2022", label: "Juillet 2022" },
+                  { value: "2019", label: "2019" },
+                  { value: "2020", label: "2020" },
+                  { value: "2021", label: "2021" },
+                  { value: "Février 2022", label: "Février 2022" },
+                  { value: "Juin 2022", label: "Juin 2022" },
+                  { value: "Juillet 2022", label: "Juillet 2022" },
                 ]}
                 onChange={(cohort) => updateFilter({ cohort })}
                 value={filter.cohort}
               />
-            </FilterWrapper>
+            </FiltersList>
+            <FiltersList>
+              <FilterStatus value={filter.status} onChange={(status) => updateFilter({ status })} />
+            </FiltersList>
           </Col>
         ) : null}
       </Row>
       {filter && (
         <>
-          <FiltersList>
-            <FilterStatus value={filter.status} onChange={(status) => updateFilter({ status })} />
-          </FiltersList>
           <Row>
             <Col md={12}>
               <SubTitle>Pilotage</SubTitle>
@@ -124,32 +125,6 @@ export default () => {
         </>
       )}
     </>
-  );
-};
-
-const FilterStatus = ({ value = [], onChange }) => {
-  const user = useSelector((state) => state.Auth.user);
-
-  function updateStatus(e) {
-    const i = value.indexOf(e);
-    if (i == -1) return onChange([...value, e]);
-    const newArr = [...value];
-    newArr.splice(i, 1);
-    return onChange(newArr);
-  }
-
-  let STATUS = Object.keys(YOUNG_STATUS);
-  if (user.role !== ROLES.ADMIN) STATUS = STATUS.filter((e) => e !== "IN_PROGRESS");
-  return (
-    <div style={{ display: "flex", flexWrap: "wrap" }}>
-      {STATUS.map((e, i) => {
-        return (
-          <FilterWrapper key={i}>
-            <Checkbox isChecked={value.includes(YOUNG_STATUS[e])} onChange={(status) => updateStatus(status)} name={e} label={translate(YOUNG_STATUS[e])} />
-          </FilterWrapper>
-        );
-      })}
-    </div>
   );
 };
 

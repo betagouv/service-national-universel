@@ -1,19 +1,24 @@
 import React from "react";
 import Select from "react-select";
 import styled from "styled-components";
-import { colors } from "../../../utils";
+import { colors, YOUNG_STATUS, ROLES, translate } from "../../../utils";
+import { useSelector } from "react-redux";
 
-const YearPicker = ({ value = [], onChange, options }) => {
+const FilterStatus = ({ value = [], onChange }) => {
+  const user = useSelector((state) => state.Auth.user);
+  let STATUS = Object.keys(YOUNG_STATUS).map((s) => ({ label: translate(YOUNG_STATUS[s]), value: s }));
+  if (user.role !== ROLES.ADMIN) STATUS = STATUS.filter((e) => e.value !== "IN_PROGRESS");
+
   return (
     <Container>
-      <Label>cohorte(s)</Label>
+      <Label>statut(s)</Label>
       <Select
         styles={{ placeholder: (provided) => ({ ...provided, position: "relative", transform: "" }) }}
-        options={options}
+        options={STATUS}
         isMulti
         placeholder="Choisir"
         onChange={(e) => onChange(e.map((v) => v.value))}
-        value={options.filter((y) => value.includes(y.value))}
+        value={STATUS.filter((y) => value.includes(y.value))}
       />
     </Container>
   );
@@ -30,4 +35,4 @@ const Label = styled.div`
   text-transform: uppercase;
 `;
 
-export default YearPicker;
+export default FilterStatus;
