@@ -93,10 +93,13 @@ export default styled.div`
     }
   }
   .detail {
+    border-bottom: 0.5px solid rgba(244, 245, 247, 0.5);
+    padding: 5px 0;
     display: flex;
     font-size: 14px;
     text-align: left;
     align-items: flex-end;
+    justify-content: space-between;
     margin-top: 10px;
     &-title {
       font-weight: bold;

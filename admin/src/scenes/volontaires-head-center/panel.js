@@ -177,9 +177,11 @@ const Panel = styled.div`
     }
   }
   .detail {
+    border-bottom: 0.5px solid rgba(244, 245, 247, 0.5);
+    padding: 5px 0;
     display: flex;
     align-items: flex-end;
-    padding: 5px 20px;
+    justify-content: space-between;
     font-size: 14px;
     text-align: left;
     &-title {
