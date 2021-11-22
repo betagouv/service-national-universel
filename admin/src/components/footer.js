@@ -2,8 +2,10 @@ import React from "react";
 import { Container } from "reactstrap";
 import styled from "styled-components";
 import { adminURL } from "../config";
+import { useSelector } from "react-redux";
 
 export default () => {
+  const user = useSelector((state) => state.Auth.user);
   return (
     <Footer>
       <Container>
@@ -29,7 +31,7 @@ export default () => {
             </a>
           </li>
           <li>
-            <a href={`${adminURL}/besoin-d-aide`} target="_blank">
+            <a href={user ? `${adminURL}/besoin-d-aide` : `${adminURL}/public-besoin-d-aide`} target="_blank">
               Besoin d'aide
             </a>
           </li>
