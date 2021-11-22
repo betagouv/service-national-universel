@@ -45,8 +45,8 @@ export default () => {
         initialValues={{ user: {}, structure: {} }}
         onSubmit={async (values, actions) => {
           try {
-            const { firstName, lastName, email, password } = values?.user;
-            const { user, token, code, ok } = await api.post(`/referent/signup`, { firstName, lastName, email, password });
+            const { firstName, lastName, email, password, acceptCGU } = values?.user;
+            const { user, token, code, ok } = await api.post(`/referent/signup`, { firstName, lastName, email, password, acceptCGU });
             if (!ok) {
               if (code === "PASSWORD_NOT_VALIDATED")
                 return toastr.error(
@@ -176,6 +176,13 @@ export default () => {
                         placeholder="Confirmez votre mot de passe"
                       />
                       <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.user?.repassword}</p>
+                    </StyledFormGroup>
+                    <StyledFormGroup style={{ display: "flex" }}>
+                      <label>
+                        <span>*</span>Veuillez acceptez les conditions générales d'utilisation
+                      </label>
+                      <InputField validate={(v) => !v && requiredMessage} type="checkbox" value={true} onChange={handleChange} name="user.acceptCGU" checked={values.user.acceptCGU} style={{ flex: "2" }} />
+                      <ErrorMessage errors={errors} touched={touched} name="user.acceptCGU" />
                     </StyledFormGroup>
                   </form>
                 </LoginBox>

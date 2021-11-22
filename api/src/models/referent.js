@@ -46,6 +46,9 @@ const Schema = new mongoose.Schema({
       description: "Mot de passe de l'utilisateur",
     },
   },
+  acceptCGU: {
+    type: Boolean,
+  },
   lastLoginAt: {
     type: Date,
     documentation: {
