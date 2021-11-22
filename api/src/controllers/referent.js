@@ -327,6 +327,13 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     // if a referent said that a young is present in the cohesion stay, we validate its phase1
     if (newYoung.cohesionStayPresence === "true" && young.statusPhase1 !== "DONE") {
       newYoung = { ...newYoung, statusPhase1: "DONE" };
+      await sendTemplate(SENDINBLUE_TEMPLATES.young.PHASE_1_VALIDATED, {
+        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+        params: {
+          ctaDownloadAttestation: `${config.APP_URL}/phase1`,
+          ctaPhase2: `${config.APP_URL}/phase2`,
+        },
+      });
     } else if (
       newYoung.cohesionStayPresence === "false" &&
       young.statusPhase1 !== "NOT_DONE" &&
