@@ -27,7 +27,7 @@ export default () => {
   const user = useSelector((state) => state.Auth.user);
 
   function updateFilter(n) {
-    setFilter({ ...(filter || { status: Object.keys(YOUNG_STATUS), academy: "", region: "", department: "", cohort: filter?.cohort || "2021" }), ...n });
+    setFilter({ ...(filter || { status: Object.keys(YOUNG_STATUS), academy: "", region: "", department: "", cohort: filter?.cohort || ["2021"] }), ...n });
   }
 
   useEffect(() => {
@@ -79,6 +79,9 @@ export default () => {
       </Row>
       {filter && (
         <>
+          <FiltersList>
+            <FilterStatus value={filter.status} onChange={(status) => updateFilter({ status })} />
+          </FiltersList>
           <Row>
             <Col md={12}>
               <SubTitle>Pilotage</SubTitle>
@@ -92,9 +95,6 @@ export default () => {
           </Row>
           <Status filter={filter} />
           <SubTitle>Dans le détails</SubTitle>
-          <FiltersList>
-            <FilterStatus value={filter.status} onChange={(status) => updateFilter({ status })} />
-          </FiltersList>
           <Row>
             <Col md={12} lg={6}>
               <BirthDate filter={filter} />

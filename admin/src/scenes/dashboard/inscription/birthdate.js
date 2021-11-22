@@ -17,7 +17,7 @@ export default ({ filter }) => {
         size: 0,
       };
 
-      if (filter.cohort) body.query.bool.filter.push({ term: { "cohort.keyword": filter.cohort } });
+      if (filter.cohort) body.query.bool.filter.push({ terms: { "cohort.keyword": filter.cohort } });
       if (filter.status) body.query.bool.filter.push({ terms: { "status.keyword": filter.status } });
       if (filter.region) body.query.bool.filter.push({ term: { "region.keyword": filter.region } });
       if (filter.department) body.query.bool.filter.push({ term: { "department.keyword": filter.department } });

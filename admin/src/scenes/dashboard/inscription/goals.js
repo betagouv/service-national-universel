@@ -42,7 +42,7 @@ export default ({ filter }) => {
 
   async function fetchValidated() {
     const body = {
-      query: { bool: { must: { match_all: {} }, filter: [{ term: { "cohort.keyword": filter.cohort } }, { term: { "status.keyword": "VALIDATED" } }] } },
+      query: { bool: { must: { match_all: {} }, filter: [{ terms: { "cohort.keyword": filter.cohort } }, { term: { "status.keyword": "VALIDATED" } }] } },
       aggs: { status: { terms: { field: "status.keyword" } } },
       size: 0,
     };

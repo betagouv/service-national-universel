@@ -25,9 +25,10 @@ export default ({ filter }) => {
         if (filter.cohort.includes("2022")) {
           body.query.bool.filter.push({ terms: { "cohort.keyword": [filter.cohort, "2022"] } });
         } else {
-          body.query.bool.filter.push({ term: { "cohort.keyword": filter.cohort } });
+          body.query.bool.filter.push({ terms: { "cohort.keyword": filter.cohort } });
         }
       }
+      if (filter.status) body.query.bool.filter.push({ terms: { "status.keyword": filter.status } });
       if (filter.region) body.query.bool.filter.push({ term: { "region.keyword": filter.region } });
       if (filter.department) body.query.bool.filter.push({ term: { "department.keyword": filter.department } });
       if (filter.academy) body.query.bool.filter.push({ term: { "academy.keyword": filter.academy } });
