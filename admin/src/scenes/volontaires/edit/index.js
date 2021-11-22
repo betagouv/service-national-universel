@@ -63,6 +63,8 @@ export default (props) => {
     <Wrapper>
       <Formik
         initialValues={young}
+        validateOnChange={false}
+        validateOnBlur={false}
         onSubmit={async (values) => {
           try {
             const { ok, code, data: young } = await api.put(`/referent/young/${values._id}`, values);
@@ -74,7 +76,7 @@ export default (props) => {
           }
         }}
       >
-        {({ values, handleChange, handleSubmit, isSubmitting, submitForm }) => (
+        {({ values, handleChange, handleSubmit, isSubmitting, submitForm, validateField, errors, touched, setFieldValue }) => (
           <>
             <TitleWrapper>
               <div>
@@ -96,8 +98,8 @@ export default (props) => {
             <Row>
               <Identite values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
               <Historic young={young} />
-              <Coordonnees values={values} handleChange={handleChange} />
-              <Situation values={values} handleChange={handleChange} />
+              <Coordonnees values={values} handleChange={handleChange} validateField={validateField} errors={errors} touched={touched} />
+              <Situation values={values} handleChange={handleChange} setFieldValue={setFieldValue} errors={errors} />
               <SituationsParticulieres values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
               <Motivation values={values} />
             </Row>

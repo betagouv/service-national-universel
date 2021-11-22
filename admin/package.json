@@ -52,6 +52,7 @@
     "formik": "^2.1.5",
     "helmet": "^4.6.0",
     "hsts": "^2.2.0",
+    "i18n-iso-countries": "^7.0.0",
     "isomorphic-fetch": "^3.0.0",
     "less": "^4.1.0",
     "less-loader": "^7.2.1",
