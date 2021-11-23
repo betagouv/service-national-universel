@@ -23,8 +23,8 @@ const KnowledgeBaseSection = ({ section, isRoot }) => {
 
     const response = await API.put({ path: "/support-center/knowledge-base/reorder", body: newSort.map(({ _id, position }) => ({ _id, position })) });
     if (!response.ok) return toast.error("Désolé, une erreur est survenue. Veuillez recommencer !");
-    if (section.slug) mutate(`/support-center/knowledge-base/${section.slug}`);
-    mutate("/support-center/knowledge-base");
+    if (section.slug) mutate(API.getUrl({ path: `/support-center/knowledge-base/${section.slug}`, query: { withTree: true, withParents: true } }));
+    mutate(API.getUrl({ path: "/support-center/knowledge-base/", query: { withTree: true, withParents: true } }));
   };
 
   useEffect(() => {

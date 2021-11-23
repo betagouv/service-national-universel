@@ -18,6 +18,7 @@ const KnowledgeBase = () => {
   }, [router.query?.slug]);
 
   const { data: response } = useSWR(API.getUrl({ path: `/support-center/knowledge-base/${slug}`, query: { withTree: true, withParents: true } }));
+
   const [data, setData] = useState(response?.data || []);
   useEffect(() => {
     setData(response?.data || []);

@@ -6,6 +6,7 @@ import { SUPPORT_ROLES } from "snu-lib/roles";
 import withAuth from "../../hocs/withAuth";
 import API from "../../services/api";
 import Modal from "../Modal";
+import InputWithEmojiPicker from "../InputWithEmojiPicker";
 
 const KnowledgeBaseSectionEdit = ({ section }) => {
   section.computedAllowedRoles = Object.keys(SUPPORT_ROLES).map((role) => ({ id: role, name: role, value: section.allowedRoles.includes(role) }));
@@ -16,6 +17,8 @@ const KnowledgeBaseSectionEdit = ({ section }) => {
     register,
     control,
     handleSubmit,
+    setValue,
+    getValues,
     formState: { errors },
   } = useForm({
     defaultValues: section,
@@ -31,8 +34,8 @@ const KnowledgeBaseSectionEdit = ({ section }) => {
     body.allowedRoles = body.computedAllowedRoles.filter(({ value }) => !!value).map((item) => item.id);
     const response = await API.put({ path: `/support-center/knowledge-base/${section._id}`, body });
     if (response.error) return alert(response.error);
-    mutate(`/support-center/knowledge-base/${response.data.slug}`, response.data);
-    mutate("/support-center/knowledge-base/", null);
+    mutate(API.getUrl({ path: `/support-center/knowledge-base/${section.slug}`, query: { withTree: true, withParents: true } }));
+    mutate(API.getUrl({ path: "/support-center/knowledge-base/", query: { withTree: true, withParents: true } }));
     router.replace(`/admin/knowledge-base/${response.data.slug}`);
     setIsOpen(false);
   };
@@ -53,7 +56,14 @@ const KnowledgeBaseSectionEdit = ({ section }) => {
           <div className="flex w-full">
             <div className="flex flex-col flex-grow">
               <label htmlFor="title">Titre</label>
-              <input className="p-2 border-2 mb-5" placeholder="Titre de la section" {...register("title")} />
+              <InputWithEmojiPicker
+                setValue={setValue}
+                getValues={getValues}
+                inputClassName="p-2"
+                className="border-2  mb-5"
+                placeholder="Titre de la section"
+                {...register("title")}
+              />
               {errors.titleRequired && <span>This field is required</span>}
               <label htmlFor="slug">Slug (Url)</label>
               <input className="p-2 border-2 mb-5" placeholder="Slug de la section" {...register("slug")} />
