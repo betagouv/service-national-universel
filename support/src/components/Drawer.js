@@ -11,7 +11,9 @@ const Drawer = () => (
     </div>
     <EnvBanner />
     <ul className="mt-2 flex flex-col flex-grow">
-      <NavLink href="/admin">Tableau de bord</NavLink>
+      <NavLink href="/admin" exact>
+        Tableau de bord
+      </NavLink>
       <NavLink href="/admin/knowledge-base">Base de connaissance</NavLink>
       <NavLink href="/admin/tickets">Tickets</NavLink>
       <Logout />
