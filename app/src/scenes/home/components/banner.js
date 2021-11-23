@@ -1,11 +1,8 @@
 import React from "react";
-import { useSelector } from "react-redux";
 import styled from "styled-components";
 import { HeroContainer, Hero, VioletButton, WhiteButton } from "../../../components/Content";
 
 export default () => {
-  const young = useSelector((state) => state.Auth.young);
-
   return (
     <HeroContainer>
       <Hero>
