@@ -391,16 +391,10 @@ router.post("/association/_msearch", passport.authenticate(["referent"], { sessi
   try {
     const { body } = req;
     const options = {
-      hosts: `https://${API_ASSOCIATION_ES_ENDPOINT}`,
-      connectionClass: require("http-aws-es"),
-      awsConfig: new AWS.Config({
-        region: "eu-west-3",
-        credentials: new AWS.Credentials(API_ASSOCIATION_AWS_ACCESS_KEY_ID, API_ASSOCIATION_AWS_SECRET_ACCESS_KEY),
-      }),
+      node: `https://${API_ASSOCIATION_ES_ENDPOINT}`,
     };
-    const es = require("elasticsearch").Client(options);
-
-    let response = await es.msearch({ index: "association", body });
+    const es = new (require("@elastic/elasticsearch").Client)(options);
+    let { body: response } = await es.msearch({ index: "association", body });
 
     return res.status(200).send(
       serializeHits(response, (hit) => {
