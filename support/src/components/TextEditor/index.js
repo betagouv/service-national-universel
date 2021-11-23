@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import isHotkey from "is-hotkey";
+import isHotkey, { compareHotkey, parseHotkey } from "is-hotkey";
 import { Editable, withReact, useSlate, Slate } from "slate-react";
 import { Editor, Transforms, createEditor, Element as SlateElement } from "slate";
 import { withHistory } from "slate-history";
@@ -44,7 +44,6 @@ const TextEditor = ({ content, slug, _id }) => {
   };
 
   const onCancel = () => {
-    console.log(content);
     setValue(content || initialValue);
     localStorage.removeItem(`snu-kb-content-${_id}`);
     setIsSaveable(false);
@@ -64,7 +63,6 @@ const TextEditor = ({ content, slug, _id }) => {
   };
 
   const onBeforeUnload = (event) => {
-    console.log("ouaich frere");
     if (localStorage.getItem(`snu-kb-content-${_id}`)) {
       if (window.confirm("Voulez-vous enregistrer vos changements ?")) {
         onSave();
