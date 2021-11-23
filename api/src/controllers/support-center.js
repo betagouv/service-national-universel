@@ -359,7 +359,7 @@ router.post("/ticket/referent/notif", async (req, res) => {
 
     for (let referent of [...regionReferents, ...departmentReferents]) {
       sendTemplate(SENDINBLUE_TEMPLATES.referent.MESSAGE_NOTIFICATION, {
-        emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: "spookyumi.dev@gmail.com" }],
+        emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: `${referent.email}` }],
         params: {
           cta: `${ADMIN_URL}/boite-de-reception`,
           message: value,
