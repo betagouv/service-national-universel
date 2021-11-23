@@ -1,21 +1,53 @@
 const mongoose = require("mongoose");
 const mongooseElastic = require("@selego/mongoose-elastic");
-const patchHistory = require("mongoose-patch-history").default;
 
 const esClient = require("../es");
 
 const MODELNAME = "ticket";
 
-const Messages = new mongoose.Schema({});
+const Message = new mongoose.Schema({
+  type: {
+    type: String,
+    documentation: {
+      description: "D'où provient l'article (mail, chat, Facebook...)",
+      // Not sure if it's relevant to keep this field : we already have a "fromCanal" field in the ticket Schema
+    },
+    emitterRole: {
+      type: String,
+      documentation: {
+        description: "rôle de l'émetteur : agent, référent, volontaire..."
+      },
+    },
+    createdByUserId: {
+      type: mongoose.Types.ObjectId,
+      ref: 'referent',
+      required: true,
+    },
+    createdByYoungId: {
+      type: mongoose.Types.ObjectId,
+      ref: 'young',
+      required: true,
+    },
+    contentType: {
+      type: String,
+    },
+    body: {
+      type: String,
+      documentation: {
+        description: "contenu du message"
+      }
+    },
+    internal: {
+      type: Boolean,
+      documentation: {
+        description: "le message est-il de visibilité interne"
+      }
+    },
+  }
+}, { timestamps: true });
 
 const Schema = new mongoose.Schema({
-  id: {
-    type: String,
-    index: true,
-    documentation: {
-      description: "Identifiant",
-    },
-  },
+
   number: {
     type: [String],
     documentation: {
@@ -131,8 +163,9 @@ const Schema = new mongoose.Schema({
     },
   },
 
-  lastAgentInChargeUpdate: {
-    type: String,
+  lastAgentInChargeUpdateAt: {
+    type: mongoose.Types.ObjectId,
+    ref: 'referent',
     documentation: {
       description: "dernière mise à jour de la part de l'agent en charge",
     },
@@ -151,7 +184,7 @@ const Schema = new mongoose.Schema({
     },
   },
   messages: {
-    type: Messages,
+    type: Message,
   },
 
   closedAt: {
@@ -159,27 +192,6 @@ const Schema = new mongoose.Schema({
   },
 }, { timestamps: true });
 
-Schema.virtual("user").set(function (user) {
-  if (user) {
-    const { _id, role, department, region, email, firstName, lastName, model } = user;
-    this._user = { _id, role, department, region, email, firstName, lastName, model };
-  }
-});
-
-Schema.pre("save", function (next, params) {
-  this.user = params?.fromUser;
-  next();
-});
-
-Schema.plugin(patchHistory, {
-  mongoose,
-  name: `${MODELNAME}Patches`,
-  trackOriginalValue: true,
-  includes: {
-    modelName: { type: String, required: true, default: MODELNAME },
-    user: { type: Object, required: false, from: "_user" },
-  },
-});
 Schema.plugin(mongooseElastic(esClient), MODELNAME);
 
 const OBJ = mongoose.model(MODELNAME, Schema);
