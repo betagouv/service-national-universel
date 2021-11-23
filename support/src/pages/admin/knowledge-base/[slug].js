@@ -1,12 +1,12 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import useSWR from "swr";
+import KnowledgeBaseAnswer from "../../../components/knowledge-base/KnowledgeBaseAnswer";
 import KnowledgeBaseBreadcrumb from "../../../components/knowledge-base/KnowledgeBaseBreadcrumb";
 import KnowledgeBaseCreate from "../../../components/knowledge-base/KnowledgeBaseCreate";
 import KnowledgeBaseSection from "../../../components/knowledge-base/KnowledgeBaseSection";
 import KnowledgeBaseTree from "../../../components/knowledge-base/KnowledgeBaseTree";
 import Layout from "../../../components/Layout";
-import TextEditor from "../../../components/TextEditor";
 import withAuth from "../../../hocs/withAuth";
 import API from "../../../services/api";
 
@@ -42,7 +42,7 @@ const KnowledgeBase = () => {
 const Content = ({ data }) => {
   if (!data) return null;
   if (["root", "section"].includes(data?.type)) return <KnowledgeBaseSection section={data} isRoot={data?.type === "root"} />;
-  if (data?.type === "answer") return <TextEditor />;
+  if (data?.type === "answer") return <KnowledgeBaseAnswer answer={data} />;
   // return answer
   return <KnowledgeBaseCreate position={0} />;
 };

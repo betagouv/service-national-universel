@@ -1,8 +1,14 @@
+// https://github.com/ianstormtaylor/slate/blob/main/site/components.tsx
+
 import React from "react";
 import ReactDOM from "react-dom";
 
 export const Button = React.forwardRef(({ className, active, reversed, ...props }, ref) => (
-  <span {...props} ref={ref} className={`text-${reversed ? (active ? "white" : "gray-300") : active ? "black" : "gray-200"}  cursor-pointer ${className || ""}`} />
+  <span
+    {...props}
+    ref={ref}
+    className={`${reversed ? (active ? "text-white" : "text-gray-300") : active ? "text-black" : "text-gray-200"} cursor-pointer mr-2 ${className || ""}`}
+  />
 ));
 
 export const EditorValue = React.forwardRef(({ className, value, ...props }, ref) => {
@@ -33,28 +39,16 @@ export const Instruction = React.forwardRef(({ className, ...props }, ref) => (
   <div {...props} ref={ref} className={`whitespace-pre-wrap -mx-5 mb-2 py-3 px-5 text-sm bg-gray-200 ${className || ""}`} />
 ));
 
-export const Menu = React.forwardRef(({ className, ...props }, ref) => (
-  <div
-    {...props}
-    ref={ref}
-    className={`${className || ""}`}
-    // className={cx(
-    //   className,
-    //   css`
-    //     & > * {
-    //       display: inline-block;
-    //     }
-
-    //     & > * + * {
-    //       margin-left: 15px;
-    //     }
-    //   `
-    // )}
-  />
+export const Menu = React.forwardRef(({ className, children, ...props }, ref) => (
+  <div {...props} ref={ref} className={`${className || ""}`}>
+    {children}
+  </div>
 ));
 
 export const Portal = ({ children }) => {
   return typeof document === "object" ? ReactDOM.createPortal(children, document.body) : null;
 };
 
-export const Toolbar = React.forwardRef(({ className, ...props }, ref) => <Menu {...props} ref={ref} className={`relative pt-1 pb-4 px-5 mb-5 -mx-5 flex ${className || ""}`} />);
+export const Toolbar = React.forwardRef(({ className, ...props }, ref) => (
+  <Menu {...props} ref={ref} className={`relative pt-1 px-5 mb-5 -mx-5 border-2 flex flex-shrink-0 ${className || ""}`} />
+));

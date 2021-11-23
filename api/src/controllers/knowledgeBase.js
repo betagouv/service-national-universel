@@ -122,7 +122,10 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     }
     if (req.body.hasOwnProperty("imageSrc")) updateKb.imageSrc = req.body.imageSrc;
     if (req.body.hasOwnProperty("imageAlt")) updateKb.imageAlt = req.body.imageAlt;
-    if (req.body.hasOwnProperty("content")) updateKb.content = req.body.content;
+    if (req.body.hasOwnProperty("content")) {
+      console.log(typeof req.body.content);
+      updateKb.content = req.body.content;
+    }
     if (req.body.hasOwnProperty("description")) updateKb.description = req.body.description;
     if (req.body.hasOwnProperty("allowedRoles")) updateKb.allowedRoles = req.body.allowedRoles;
     if (req.body.hasOwnProperty("status")) updateKb.status = req.body.status;

@@ -1,14 +1,14 @@
-import KnowledgeBaseCard from "./KnowledgeBaseCard";
-import KnowledgeBaseCreate from "./KnowledgeBaseCreate";
-import withAuth from "../../hocs/withAuth";
-import API from "../../services/api";
 import React, { useEffect, useRef } from "react";
 import { useSWRConfig } from "swr";
 import Sortable from "sortablejs";
 import { toast } from "react-toastify";
-import KnowledgeBaseSectionEdit from "./KnowledgeBaseSectionEdit";
 import { SUPPORT_ROLES } from "snu-lib/roles";
+import withAuth from "../../hocs/withAuth";
+import API from "../../services/api";
 import { filterTags } from "../../utils/tags";
+import KnowledgeBaseCard from "./KnowledgeBaseCard";
+import KnowledgeBaseCreate from "./KnowledgeBaseCreate";
+import KnowledgeBaseEdit from "./KnowledgeBaseEdit";
 
 const KnowledgeBaseSection = ({ section, isRoot }) => {
   const { mutate } = useSWRConfig();
@@ -51,7 +51,7 @@ const KnowledgeBaseSection = ({ section, isRoot }) => {
                   </p>
                 )}
               </div>
-              <KnowledgeBaseSectionEdit key={section.slug} section={section} />
+              <KnowledgeBaseEdit key={section.slug} sectionOrAnswer={section} />
             </>
           )}
         </div>

@@ -1,10 +1,14 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import isHotkey from "is-hotkey";
 import { Editable, withReact, useSlate, Slate } from "slate-react";
 import { Editor, Transforms, createEditor, Element as SlateElement } from "slate";
 import { withHistory } from "slate-history";
 
 import { Button, Icon, Toolbar } from "./components";
+import API from "../../services/api";
+import { toast } from "react-toastify";
+import { useSWRConfig } from "swr";
+import { useRouter } from "next/router";
 
 const HOTKEYS = {
   "mod+b": "bold",
@@ -15,42 +19,105 @@ const HOTKEYS = {
 
 const LIST_TYPES = ["numbered-list", "bulleted-list"];
 
-const TextEditor = () => {
-  const [value, setValue] = useState(initialValue);
+const TextEditor = ({ content, slug, _id }) => {
+  const router = useRouter();
+
+  const [value, setValue] = useState(JSON.parse(localStorage.getItem(`snu-kb-content-${_id}`)) || content || initialValue);
+  const [isSaveable, setIsSaveable] = useState(!!localStorage.getItem(`snu-kb-content-${_id}`));
+  const [forceUpdateKey, setForceUpdateKey] = useState(0);
   const renderElement = useCallback((props) => <Element {...props} />, []);
   const renderLeaf = useCallback((props) => <Leaf {...props} />, []);
   const editor = useMemo(() => withHistory(withReact(createEditor())), []);
 
+  const { mutate } = useSWRConfig();
+
+  const onChange = (value) => {
+    setValue(value);
+
+    const isAstChange = editor.operations.some((op) => "set_selection" !== op.type);
+    if (isAstChange) {
+      // Save the value to Local Storage.
+      const content = JSON.stringify(value);
+      localStorage.setItem(`snu-kb-content-${_id}`, content);
+      setIsSaveable(true);
+    }
+  };
+
+  const onCancel = () => {
+    console.log(content);
+    setValue(content || initialValue);
+    localStorage.removeItem(`snu-kb-content-${_id}`);
+    setIsSaveable(false);
+    setForceUpdateKey((k) => k + 1);
+  };
+
+  const onSave = async () => {
+    const response = await API.put({ path: `/support-center/knowledge-base/${_id}`, body: { content: value } });
+    if (!response.ok) {
+      if (response.error) return toast.error(response.error);
+      return;
+    }
+    toast.info("Réponse mise-à-jour !");
+    mutate(API.getUrl({ path: `/support-center/knowledge-base/${slug}`, query: { withTree: true, withParents: true } }));
+    localStorage.removeItem(`snu-kb-content-${_id}`);
+    setIsSaveable(false);
+  };
+
+  const onBeforeUnload = (event) => {
+    console.log("ouaich frere");
+    if (localStorage.getItem(`snu-kb-content-${_id}`)) {
+      if (window.confirm("Voulez-vous enregistrer vos changements ?")) {
+        onSave();
+      }
+    }
+  };
+  useEffect(() => {
+    router.events.on("routeChangeStart", onBeforeUnload);
+    return () => router.events.off("routeChangeStart", onBeforeUnload);
+  });
+
   return (
-    <Slate editor={editor} value={value} onChange={(value) => setValue(value)}>
-      <Toolbar>
-        <MarkButton format="bold" icon="format_bold" />
-        <MarkButton format="italic" icon="format_italic" />
-        <MarkButton format="underline" icon="format_underlined" />
-        <MarkButton format="code" icon="code" />
-        <BlockButton format="heading-one" icon="looks_one" />
-        <BlockButton format="heading-two" icon="looks_two" />
-        <BlockButton format="block-quote" icon="format_quote" />
-        <BlockButton format="numbered-list" icon="format_list_numbered" />
-        <BlockButton format="bulleted-list" icon="format_list_bulleted" />
-      </Toolbar>
-      <Editable
-        renderElement={renderElement}
-        renderLeaf={renderLeaf}
-        placeholder="Enter some rich text…"
-        spellCheck
-        autoFocus
-        onKeyDown={(event) => {
-          for (const hotkey in HOTKEYS) {
-            if (isHotkey(hotkey, event)) {
-              event.preventDefault();
-              const mark = HOTKEYS[hotkey];
-              toggleMark(editor, mark);
-            }
-          }
-        }}
-      />
-    </Slate>
+    <div className="p-8 flex-grow flex-shrink flex flex-col overflow-hidden">
+      <Slate key={forceUpdateKey} editor={editor} value={value} onChange={onChange}>
+        <Toolbar>
+          <MarkButton format="bold" icon="format_bold" />
+          <MarkButton format="italic" icon="format_italic" />
+          <MarkButton format="underline" icon="format_underlined" />
+          <MarkButton format="code" icon="code" />
+          <BlockButton format="heading-one" icon="looks_one" />
+          <BlockButton format="heading-two" icon="looks_two" />
+          <BlockButton format="block-quote" icon="format_quote" />
+          <BlockButton format="numbered-list" icon="format_list_numbered" />
+          <BlockButton format="bulleted-list" icon="format_list_bulleted" />
+        </Toolbar>
+        <div className="overflow-auto flex-shrink flex-grow">
+          <Editable
+            renderElement={renderElement}
+            renderLeaf={renderLeaf}
+            placeholder="Commencez à écrire votre réponse..."
+            spellCheck
+            autoFocus
+            onKeyDown={(event) => {
+              for (const hotkey in HOTKEYS) {
+                if (isHotkey(hotkey, event)) {
+                  event.preventDefault();
+                  const mark = HOTKEYS[hotkey];
+                  toggleMark(editor, mark);
+                }
+              }
+            }}
+          />
+        </div>
+      </Slate>
+      <div className="py-2 box-border w-full flex-shrink-0 b-0 l-0 r-0 overflow-hidden flex items-center justify-around">
+        <button onClick={onSave} disabled={!isSaveable} className="px-8 py-2 box-border">
+          Enregistrer
+        </button>
+        <button onClick={onCancel} disabled={!isSaveable} className="px-8 py-2 box-border">
+          Rétablir la dernière version
+        </button>
+      </div>
+    </div>
   );
 };
 
@@ -173,34 +240,12 @@ const initialValue = [
   {
     type: "paragraph",
     children: [
-      { text: "This is editable " },
-      { text: "rich", bold: true },
-      { text: " text, " },
-      { text: "much", italic: true },
-      { text: " better than a " },
-      { text: "<textarea>", code: true },
-      { text: "!" },
+      { text: "Commencez à " },
+      { text: "écrire", bold: true },
+      { text: " votre réponse, " },
+      { text: "avec tous ", italic: true },
+      { text: " les styles que vous voulez " },
     ],
-  },
-  {
-    type: "paragraph",
-    children: [
-      {
-        text: "Since it's rich text, you can do things like turn a selection of text ",
-      },
-      { text: "bold", bold: true },
-      {
-        text: ", or add a semantically rendered block quote in the middle of the page, like this:",
-      },
-    ],
-  },
-  {
-    type: "block-quote",
-    children: [{ text: "A wise quote." }],
-  },
-  {
-    type: "paragraph",
-    children: [{ text: "Try it out for yourself!" }],
   },
 ];
 

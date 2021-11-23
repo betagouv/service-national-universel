@@ -46,9 +46,9 @@ const Schema = new mongoose.Schema(
       },
     },
     content: {
-      type: String,
+      type: {},
       documentation: {
-        description: "ontenu d'un article",
+        description: "Contenu d'un article",
       },
     },
     description: {

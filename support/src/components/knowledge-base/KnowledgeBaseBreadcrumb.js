@@ -2,7 +2,7 @@ import Link from "next/link";
 
 const KnowledgeBaseBreadcrumb = ({ parents = [] }) => {
   return (
-    <div className="flex h-10 border-b-2 items-center px-4">
+    <div className="flex h-10 border-b-2 items-center px-4 flex-shrink-0">
       <Crumb href="/admin/knowledge-base/">
         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path
