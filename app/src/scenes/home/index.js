@@ -22,15 +22,14 @@ export default () => {
           <Withdrawn />
         </>
       );
-    if (young.status === YOUNG_STATUS.WAITING_LIST && young.cohort === "2021")
+    if (young.status === YOUNG_STATUS.WAITING_LIST)
       return (
         <>
           {young.cohort === "2021" ? <Banner /> : null}
           <WaitingList />
         </>
       );
-    if (young.status === YOUNG_STATUS.WAITING_LIST) return <WaitingList />;
-    if (young.status === YOUNG_STATUS.REFUSED && young.cohort === "2021")
+    if (young.status === YOUNG_STATUS.REFUSED)
       return (
         <>
           {young.cohort === "2021" ? <Banner /> : null}
