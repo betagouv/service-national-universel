@@ -15,28 +15,26 @@ export default () => {
   const young = useSelector((state) => state.Auth.young) || {};
 
   const renderStep = () => {
-    // screens that doesn't depend on the cohort of the young
-    if (young.status === YOUNG_STATUS.WITHDRAWN && young.cohort === "2021")
+    if (young.status === YOUNG_STATUS.WITHDRAWN)
       return (
         <>
+          {young.cohort === "2021" ? <Banner /> : null}
           <Withdrawn />
-          <Banner />
         </>
       );
-    if (young.status === YOUNG_STATUS.WITHDRAWN) return <Withdrawn />;
     if (young.status === YOUNG_STATUS.WAITING_LIST && young.cohort === "2021")
       return (
         <>
+          {young.cohort === "2021" ? <Banner /> : null}
           <WaitingList />
-          <Banner />
         </>
       );
     if (young.status === YOUNG_STATUS.WAITING_LIST) return <WaitingList />;
     if (young.status === YOUNG_STATUS.REFUSED && young.cohort === "2021")
       return (
         <>
+          {young.cohort === "2021" ? <Banner /> : null}
           <Refused />
-          <Banner />
         </>
       );
     if (young.status === YOUNG_STATUS.REFUSED) return <Refused />;
