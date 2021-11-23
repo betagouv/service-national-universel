@@ -404,15 +404,29 @@ export default (props) => {
                         />
                       </FormGroup>
                       <FormGroup>
-                        <label>PÉRIODES POSSIBLES POUR RÉALISER LA MISSION</label>
+                        <label>PÉRIODES POSSIBLES POUR RÉALISER LA MISSION (SEMAINE)</label>
                         <MultiSelect
                           value={values.subPeriod}
+                          valueRenderer={(values) => {
+                            const valuesFiltered = values.filter((el) => !!MISSION_PERIOD_DURING_SCHOOL[el.value]).map((el) => el.label);
+                            return valuesFiltered.length ? valuesFiltered.join(", ") : "Sélectionnez une ou plusieurs périodes";
+                          }}
+                          filterOptions={(options) => options.filter((el) => !!MISSION_PERIOD_DURING_SCHOOL[el.value])}
                           onChange={handleChange}
                           name="subPeriod"
-                          options={Object.keys(MISSION_PERIOD_DURING_SCHOOL)
-                            .concat(Object.keys(MISSION_PERIOD_DURING_HOLIDAYS))
-                            .concat(values.subPeriod.filter((e) => !(MISSION_PERIOD_DURING_SCHOOL.hasOwnProperty(e) || MISSION_PERIOD_DURING_HOLIDAYS.hasOwnProperty(e))))}
-                          placeholder="Sélectionnez une ou plusieurs périodes"
+                          options={Object.keys(MISSION_PERIOD_DURING_SCHOOL).concat(values.subPeriod.filter((e) => !MISSION_PERIOD_DURING_SCHOOL.hasOwnProperty(e)))}
+                        />
+                        <label style={{ marginTop: "10px" }}>PÉRIODES POSSIBLES POUR RÉALISER LA MISSION (VACANCES)</label>
+                        <MultiSelect
+                          value={values.subPeriod}
+                          valueRenderer={(values) => {
+                            const valuesFiltered = values.filter((el) => !!MISSION_PERIOD_DURING_HOLIDAYS[el.value]).map((el) => el.label);
+                            return valuesFiltered.length ? valuesFiltered.join(", ") : "Sélectionnez une ou plusieurs périodes";
+                          }}
+                          filterOptions={(options) => options.filter((el) => !!MISSION_PERIOD_DURING_HOLIDAYS[el.value])}
+                          onChange={handleChange}
+                          name="subPeriod"
+                          options={Object.keys(MISSION_PERIOD_DURING_HOLIDAYS).concat(values.subPeriod.filter((e) => !MISSION_PERIOD_DURING_HOLIDAYS.hasOwnProperty(e)))}
                         />
                       </FormGroup>
                       <FormGroup>
