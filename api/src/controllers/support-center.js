@@ -329,7 +329,7 @@ router.post("/ticket/update", zammadAuth, async (req, res) => {
   }
 });
 
-router.post("/ticket/referent/notif", async (req, res) => {
+router.post("/ticket/referent/notif", zammadAuth, async (req, res) => {
   try {
     const ticket = req.body.ticket;
     const article = req.body.article;
