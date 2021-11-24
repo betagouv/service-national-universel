@@ -15,16 +15,19 @@ export default () => {
   const [filter, setFilter] = useState();
 
   function updateFilter(n) {
-    setFilter({ ...(filter || { status: Object.keys(YOUNG_STATUS), region: "", department: "", cohort: "2021" }), ...n });
+    setFilter({
+      ...(filter || { status: Object.keys(YOUNG_STATUS), region: [], department: [], cohort: filter?.cohort || ["2021"] }),
+      ...n,
+    });
   }
 
   useEffect(() => {
-    const cohort = "2021";
+    const cohort = ["2021"];
     const status = Object.keys(YOUNG_STATUS).filter((e) => e !== "IN_PROGRESS");
     if (user.role === ROLES.REFERENT_DEPARTMENT) {
-      updateFilter({ department: user.department, status, cohort });
+      updateFilter({ department: [user.department], status, cohort });
     } else if (user.role === ROLES.REFERENT_REGION) {
-      updateFilter({ region: user.region, status, cohort });
+      updateFilter({ region: [user.region], status, cohort });
     } else {
       updateFilter({ cohort });
     }
@@ -40,18 +43,17 @@ export default () => {
           {filter ? (
             <>
               <FiltersList>
-                <FilterRegion updateFilter={updateFilter} filter={filter} />
-                <FilterDepartment updateFilter={updateFilter} filter={filter} />
+                <FilterRegion onChange={(region) => updateFilter({ region })} value={filter.region} filter={filter} />
+                <FilterDepartment onChange={(department) => updateFilter({ department })} value={filter.department} filter={filter} />
                 <FilterWrapper>
                   <FilterCohort
                     options={[
-                      { key: "2019", label: "2019" },
-                      { key: "2020", label: "2020" },
-                      { key: "2021", label: "2021" },
-                      { key: "Février 2022", label: "Février 2022" },
-                      { key: "Juin 2022", label: "Juin 2022" },
-                      { key: "Juillet 2022", label: "Juillet 2022" },
-                      { key: "", label: "Toutes" },
+                      { value: "2019", label: "2019" },
+                      { value: "2020", label: "2020" },
+                      { value: "2021", label: "2021" },
+                      { value: "Février 2022", label: "Février 2022" },
+                      { value: "Juin 2022", label: "Juin 2022" },
+                      { value: "Juillet 2022", label: "Juillet 2022" },
                     ]}
                     onChange={(cohort) => updateFilter({ cohort })}
                     value={filter.cohort}
@@ -75,6 +77,8 @@ const Title = styled.h2`
 `;
 
 const FiltersList = styled.div`
+  gap: 1rem;
+  flex: 1;
   display: flex;
   justify-content: flex-end;
   flex-wrap: wrap;
