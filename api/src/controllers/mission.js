@@ -36,28 +36,33 @@ const updateApplication = async (mission, fromUser) => {
   });
   for (let application of applications) {
     let statusComment = "";
+    let sendinblueTemplate = "";
     switch (mission.status) {
       case MISSION_STATUS.REFUSED:
         statusComment = "La mission n'est plus disponible.";
         break;
       case MISSION_STATUS.CANCEL:
         statusComment = "La mission a été annulée.";
+        sendinblueTemplate = SENDINBLUE_TEMPLATES.young.MISSION_CANCEL;
         break;
       case MISSION_STATUS.ARCHIVED:
         statusComment = "La mission a été archivée.";
+        sendinblueTemplate = SENDINBLUE_TEMPLATES.young.MISSION_ARCHIVED;
         break;
     }
     application.set({ status: APPLICATION_STATUS.CANCEL, statusComment });
     await application.save({ fromUser });
 
-    await sendTemplate(SENDINBLUE_TEMPLATES.young.MISSION_CANCEL, {
-      emailTo: [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }],
-      params: {
-        cta: `${APP_URL}/phase2`,
-        missionName: mission.name,
-        message: mission.statusComment,
-      },
-    });
+    if (sendinblueTemplate) {
+      await sendTemplate(sendinblueTemplate, {
+        emailTo: [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }],
+        params: {
+          cta: `${APP_URL}/phase2`,
+          missionName: mission.name,
+          message: mission.statusComment,
+        },
+      });
+    }
   }
 };
 

@@ -41,7 +41,9 @@ export default ({ hit, options = [], callback = () => {} }) => {
         isOpen: true,
         onConfirm: (statusComment) => onConfirmStatus(status, statusComment),
         title: `Annulation de la mission ${mission.name}`,
-        message: "Veuillez précisez le motif d'annulation ci-dessous avant de valider. Un mail sera envoyé à tous les jeunes dont la candidature n'a pas été validée ou refusée.",
+        message:
+          "Veuillez préciser le motif d'annulation ci-dessous avant de confirmer l'action. Un email sera envoyé à tous les volontaires dont la candidature n'a pas été validée ou refusée pour les prévenir de cette annulation. Leur statut sera passé automatiquement en \"Annulée\". Cette action est irréversible.",
+        placeholder: "Veuillez éditer ce message pour préciser le motif d'annulation...",
       });
     } else if (status === MISSION_STATUS.ARCHIVED) {
       setModalConfirmWithMessage({
@@ -49,7 +51,7 @@ export default ({ hit, options = [], callback = () => {} }) => {
         onConfirm: (statusComment) => onConfirmStatus(status, statusComment),
         title: `Archivage de la mission ${mission.name}`,
         message:
-          "Toutes les candidatures en attente de validation et en attente de vérification d'éligibilité seront automatiquement passées en : Annulée. Cette action est irréversible.",
+          "Veuillez préciser le motif d'archivage ci-dessous avant de confirmer l'action. Un email sera envoyé à tous les volontaires dont la candidature n'a pas été validée ou refusée pour les prévenir de cet archivage. Leur statut sera passé automatiquement en \"Annulée\". Cette action est irréversible.",
         placeholder: "Veuillez éditer ce message pour préciser le motif d'archivage...",
       });
     } else {
