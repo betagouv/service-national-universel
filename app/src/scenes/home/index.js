@@ -9,15 +9,33 @@ import Default from "./default";
 import Withdrawn from "./withdrawn";
 import WaitingList from "./waitingList";
 import Validated from "./validated";
+import Banner from "./components/banner";
 
 export default () => {
   const young = useSelector((state) => state.Auth.young) || {};
 
   const renderStep = () => {
-    // screens that doesn't depend on the cohort of the young
-    if (young.status === YOUNG_STATUS.WITHDRAWN) return <Withdrawn />;
-    if (young.status === YOUNG_STATUS.WAITING_LIST) return <WaitingList />;
-    if (young.status === YOUNG_STATUS.REFUSED) return <Refused />;
+    if (young.status === YOUNG_STATUS.WITHDRAWN)
+      return (
+        <>
+          {young.cohort === "2021" ? <Banner /> : null}
+          <Withdrawn />
+        </>
+      );
+    if (young.status === YOUNG_STATUS.WAITING_LIST)
+      return (
+        <>
+          {young.cohort === "2021" ? <Banner /> : null}
+          <WaitingList />
+        </>
+      );
+    if (young.status === YOUNG_STATUS.REFUSED)
+      return (
+        <>
+          {young.cohort === "2021" ? <Banner /> : null}
+          <Refused />
+        </>
+      );
     if (["2022", "Juillet 2022", "Juin 2022", "Février 2022"].includes(young.cohort)) {
       // they are in the new cohort, we display the inscription step
       if (young.status === YOUNG_STATUS.WAITING_CORRECTION) return <WaitingCorrection />;
