@@ -38,6 +38,10 @@
     pointer-events: none;
     cursor: default;
   }
+
+  summary::marker {
+    color: #a1a09c;
+  }
 }
 
 body {

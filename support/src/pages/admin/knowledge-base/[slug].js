@@ -11,6 +11,8 @@ import withAuth from "../../../hocs/withAuth";
 import API from "../../../services/api";
 
 const KnowledgeBase = () => {
+  const [treeVisible, setTreeVisible] = useState(true);
+
   const router = useRouter();
 
   const [slug, setSlug] = useState(router.query?.slug || "");
@@ -27,13 +29,16 @@ const KnowledgeBase = () => {
 
   return (
     <Layout title="Base de connaissances" className="flex flex-col">
-      <h1 className="px-8 py-3 font-bold text-lg">Base de connaissances</h1>
+      <h1 className="py-3 pl-12 pr-8 font-bold text-lg flex justify-between">
+        Base de connaissances
+        <TreeButton visible={treeVisible} setVisible={setTreeVisible} />
+      </h1>
       <div className="flex border-t-2 h-full w-full flex-grow flex-shrink overflow-hidden">
-        <div className="container relative h-full box-border flex flex-col">
+        <div className="flex-grow relative h-full box-border flex flex-col items-center">
           <KnowledgeBaseBreadcrumb parents={data?.parents} />
           <Content key={slug} data={data} />
         </div>
-        <KnowledgeBaseTree />
+        <KnowledgeBaseTree visible={treeVisible} setVisible={setTreeVisible} />
       </div>
     </Layout>
   );
@@ -46,5 +51,17 @@ const Content = ({ data }) => {
   // return answer
   return <KnowledgeBaseCreate position={0} />;
 };
+
+const TreeButton = ({ visible, setVisible }) =>
+  visible ? null : (
+    <svg onClick={() => setVisible(true)} xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 cursor-pointer" viewBox="0 0 100 125">
+      <title>Category3</title>
+      <path d="M36,28.5H21a4,4,0,0,1-4-4V9.5a4,4,0,0,1,4-4H36a4,4,0,0,1,4,4v15A4,4,0,0,1,36,28.5ZM21,8.5a1,1,0,0,0-1,1v15a1,1,0,0,0,1,1H36a1,1,0,0,0,1-1V9.5a1,1,0,0,0-1-1Z" />
+      <path d="M79,58.5H64a4,4,0,0,1-4-4v-15a4,4,0,0,1,4-4H79a4,4,0,0,1,4,4v15A4,4,0,0,1,79,58.5Zm-15-20a1,1,0,0,0-1,1v15a1,1,0,0,0,1,1H79a1,1,0,0,0,1-1v-15a1,1,0,0,0-1-1Z" />
+      <path d="M79,94.5H64a4,4,0,0,1-4-4v-15a4,4,0,0,1,4-4H79a4,4,0,0,1,4,4v15A4,4,0,0,1,79,94.5Zm-15-20a1,1,0,0,0-1,1v15a1,1,0,0,0,1,1H79a1,1,0,0,0,1-1v-15a1,1,0,0,0-1-1Z" />
+      <polygon points="61.5 86 25.5 86 25.5 27 31.5 27 31.5 80 61.5 80 61.5 86" />
+      <rect x="28.5" y="44" width="33" height="6" />
+    </svg>
+  );
 
 export default withAuth(KnowledgeBase);

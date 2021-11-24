@@ -5,7 +5,7 @@ import KnowledgeBaseEdit from "./KnowledgeBaseEdit";
 
 const KnowledgeBaseAnswer = ({ answer }) => {
   return (
-    <div className="flex flex-col px-8 py-3 flex-grow flex-shrink overflow-hidden w-full">
+    <div className="container flex flex-col px-8 pt-3 flex-grow flex-shrink overflow-hidden w-full">
       <div className="flex justify-between">
         <div>
           <h2 className="font-bold text-lg">{answer.title}</h2>
@@ -23,7 +23,7 @@ const KnowledgeBaseAnswer = ({ answer }) => {
         </div>
         <KnowledgeBaseEdit key={answer.slug} sectionOrAnswer={answer} />
       </div>
-      <TextEditor content={answer.content} _id={answer._id} slug={answer.slug} />
+      <TextEditor key={answer._id + answer.slug} content={answer.content} _id={answer._id} slug={answer.slug} />
     </div>
   );
 };

@@ -75,7 +75,7 @@ const TextEditor = ({ content, slug, _id }) => {
   });
 
   return (
-    <div className="p-8 flex-grow flex-shrink flex flex-col overflow-hidden">
+    <div className="px-8 pt-8 flex-grow flex-shrink flex flex-col overflow-hidden">
       <Slate key={forceUpdateKey} editor={editor} value={value} onChange={onChange}>
         <Toolbar>
           <MarkButton format="bold" icon="format_bold" />

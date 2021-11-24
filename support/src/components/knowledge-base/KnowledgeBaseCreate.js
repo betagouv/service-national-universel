@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { mutate } from "swr";
+import { useSWRConfig } from "swr";
 import API from "../../services/api";
 import InputWithEmojiPicker from "../InputWithEmojiPicker";
 import Modal from "../Modal";
@@ -10,6 +10,7 @@ const KnowledgeBaseCreate = ({ position, parentId = null }) => {
   const [type, setType] = useState(null);
 
   const router = useRouter();
+  const { mutate } = useSWRConfig();
   const {
     register,
     handleSubmit,

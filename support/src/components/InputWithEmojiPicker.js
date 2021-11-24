@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useRef, useState } from "react";
+import { forwardRef, useRef, useState } from "react";
 import EmojiPicker from "./EmojiPicker";
 
 // https://github.com/missive/emoji-mart/issues/79
@@ -10,7 +10,6 @@ const InputWithEmojiPicker = forwardRef(({ className, inputClassName, setValue, 
 
   const onOpenEmojiPicker = () => {
     const { top, left } = pickerButtonRef.current.getBoundingClientRect();
-    console.log(pickerButtonRef.current.getBoundingClientRect());
     // picker is 420h x 340w
     const idealTop = top + 24; // 24px is the svg button size
     const pickerTop = Math.min(window.innerHeight - 420, idealTop);

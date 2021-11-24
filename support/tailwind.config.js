@@ -1,3 +1,5 @@
+const colors = require("tailwindcss/colors");
+/* https://find-nearest-tailwind-colour.netlify.app/ */
 module.exports = {
   mode: "jit",
   purge: {
@@ -11,6 +13,8 @@ module.exports = {
         "snu-purple-900": "#392f79",
         "snu-purple-600": "#43389b",
         "snu-purple-300": "#5145cc",
+        warmGray: colors.warmGray,
+        trueGray: colors.trueGray,
       },
       font: {
         sans: ["Ubuntu", "ui-sans-serif", "system-ui"],

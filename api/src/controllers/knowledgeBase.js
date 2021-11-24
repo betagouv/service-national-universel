@@ -11,7 +11,7 @@ const { validateId } = require("../utils/validator");
 const findChildrenRecursive = async (section, allChildren, findAll = false) => {
   if (section.type !== "section") return;
   const children = await KnowledgeBaseObject.find({ parentId: section._id })
-    .sort({ position: 1 })
+    .sort({ type: -1, position: 1 })
     .populate({ path: "author", select: "_id firstName lastName role" })
     .lean(); // to json;
   for (const child of children) {
@@ -181,7 +181,7 @@ router.get("/:slug", passport.authenticate(["referent", "young"], { session: fal
 router.get("/", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const rootKbs = await KnowledgeBaseObject.find({ parentId: { $in: [undefined, null] } })
-      .sort({ position: 1 })
+      .sort({ type: -1, position: 1 })
       .populate({
         path: "author",
         select: "_id firstName lastName role",
