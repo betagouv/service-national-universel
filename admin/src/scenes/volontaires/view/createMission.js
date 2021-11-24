@@ -4,6 +4,7 @@ import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { Formik, Field } from "formik";
 import Select from "react-select";
+import { useHistory } from "react-router-dom";
 
 import MultiSelect from "../../../components/Multiselect";
 import AddressInput from "../../../components/addressInput";
@@ -14,6 +15,7 @@ import PlusSVG from "../../../assets/plus.svg";
 import CrossSVG from "../../../assets/cross.svg";
 
 export default ({ young, onSend }) => {
+  const history = useHistory();
   const [structures, setStructures] = useState();
   const [structure, setStructure] = useState();
   const [referents, setReferents] = useState([]);
@@ -58,9 +60,10 @@ export default ({ young, onSend }) => {
       tutorId: mission.tutorId,
       tutorName: mission.tutorName,
     };
-    const { ok, code } = await api.post(`/application`, application);
+    const { ok, code, data } = await api.post(`/application`, application);
     if (!ok) return toastr.error("Oups, une erreur est survenue lors de la candidature", code);
-    return toastr.success("Candidature ajoutée !", code);
+    toastr.success("Candidature ajoutée !", code);
+    return data;
   };
 
   return (
@@ -92,6 +95,7 @@ export default ({ young, onSend }) => {
       }}
       onSubmit={async (values) => {
         values.placesLeft = values.placesTotal;
+        if (values.duration) values.duration = values.duration.toString();
         try {
           // create the strucutre if it is a new one
           if (createStructureVisible) {
@@ -137,9 +141,11 @@ export default ({ young, onSend }) => {
           if (!responseMission.ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", translate(responseMission.code));
 
           //...finally, we create the application
-          await handleProposal(responseMission.data, values.applicationStatus);
+          const application = await handleProposal(responseMission.data, values.applicationStatus);
+          console.log("🚀 ~ file: createMission.js ~ line 144 ~ onSubmit={ ~ application", application);
           toastr.success("Mission enregistrée");
           onSend();
+          history.push(`/volontaire/${young._id}/phase2/application/${application._id}/contrat`);
         } catch (e) {
           console.log("ERRROR", e);
           return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", e?.error?.message);
@@ -256,6 +262,16 @@ export default ({ young, onSend }) => {
                       </option>
                     </Field>
                     <ErrorMessage errors={errors} touched={touched} name="format" />
+                  </FormGroup>
+                  <FormGroup>
+                    <label>Durée de la mission</label>
+                    <p style={{ color: "#a0aec1", fontSize: 12 }}>Saisissez un nombre d'heures prévisionnelles pour la réalisation de la mission</p>
+                    <Row>
+                      <Col>
+                        <Input type="number" name="duration" onChange={handleChange} value={values.duration} />
+                      </Col>
+                      <Col style={{ display: "flex", alignItems: "center" }}>heure(s)</Col>
+                    </Row>
                   </FormGroup>
                   <FormGroup>
                     <label>
@@ -436,7 +452,7 @@ export default ({ young, onSend }) => {
                   </ToggleBloc>
                 </Wrapper>
                 <Wrapper>
-                  <Legend>Statut de la mission</Legend>
+                  <Legend>Statut de la candidature</Legend>
                   <FormGroup>
                     <Field validate={(v) => !v && requiredMessage} component="select" name="applicationStatus" value={values.applicationStatus} onChange={handleChange}>
                       <option value="DONE">{translate("DONE")}</option>
@@ -466,7 +482,7 @@ export default ({ young, onSend }) => {
             {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas proposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
             <Header style={{ justifyContent: "flex-end" }}>
               <ButtonContainer>
-                <button onClick={handleSubmit}>Enregistrer et proposer la mission</button>
+                <button onClick={handleSubmit}>Enregistrer et rattacher la mission</button>
               </ButtonContainer>
             </Header>
           </Wrapper>
