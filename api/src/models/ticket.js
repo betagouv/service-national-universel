@@ -97,6 +97,24 @@ const Schema = new mongoose.Schema({
     type: Boolean,
     default: false,
   },
+  emitterDepartment: {
+    type: String,
+    documentation: {
+      description: "département de l'émetteur",
+    },
+  },
+  emitterRegion: {
+    type: String,
+    documentation: {
+      description: "région de l'émetteur",
+    },
+  },
+  emitterAcademy: {
+    type: String,
+    documentation: {
+      description: "Académie de l'émetteur",
+    },
+  },
   addressedToAgent: {
     type: [String],
     enum: ["AGENT_SUPPORT", "AGENT_TECHNICAL", "AGENT_DEPARTMENT_REFERENT", "AGENT_REGION_REFERENT"],
@@ -128,7 +146,7 @@ const Schema = new mongoose.Schema({
       description: "nom du degré de priorité",
     },
   },
-  state: {
+  status: {
     type: String,
     enum: ["NEW", "OPEN", "CLOSED", "PENDING_REMINDER", "PENDING_CLOSURE"],
     documentation: {
@@ -141,6 +159,12 @@ const Schema = new mongoose.Schema({
     documentation: {
       description: "date de la première réponse",
     },
+  },
+  timeUntilFirstResponse: {
+    type: String,
+    documentation: {
+      description: "temps écoulé avant la première réponse"
+    }
   },
 
   lastContactEmitterAt: {
@@ -157,6 +181,13 @@ const Schema = new mongoose.Schema({
     documentation: {
       description: "date de la dernière interaction de l'agent",
     },
+  },
+
+  agentResponseCount: {
+    type: Number,
+    documentation: {
+      description: "nombre de réponses données par l'agent"
+    }
   },
 
   agentInChargeId: {
