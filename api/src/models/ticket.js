@@ -93,6 +93,10 @@ const Schema = new mongoose.Schema({
       description: "Identifiant de l'émetteur",
     },
   }, // OK
+  emitterExternal: {
+    type: Boolean,
+    default: false,
+  },
   addressedToAgent: {
     type: String,
     enum: ["AGENT_SUPPORT", "AGENT_TECHNICAL", "AGENT_DEPARTMENT_REFERENT", "AGENT_REGION_REFERENT"],
