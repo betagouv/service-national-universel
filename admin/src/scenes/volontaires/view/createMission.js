@@ -87,7 +87,7 @@ export default ({ young, onSend }) => {
         city: "",
         zip: "",
         address: "",
-        location: "",
+        location: {},
         department: "",
         region: "",
         structureLegalStatus: "PUBLIC",
@@ -95,7 +95,9 @@ export default ({ young, onSend }) => {
       }}
       onSubmit={async (values) => {
         values.placesLeft = values.placesTotal;
+        console.log("🚀 ~ file: createMission.js ~ line 98 ~ onSubmit={ ~ values", values.location);
         if (values.duration) values.duration = values.duration.toString();
+        if (!values.location) values.location = {};
         try {
           // create the strucutre if it is a new one
           if (createStructureVisible) {
