@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
-import useSWR from "swr";
+import { useEffect, useRef, useState } from "react";
+import useSWR, { useSWRConfig } from "swr";
 import Link from "next/link";
+import Sortable from "sortablejs";
 import API from "../../services/api";
 import { useRouter } from "next/router";
 
-const useIsActive = ({ slug, title }, onIsActive) => {
+const useIsActive = ({ slug }, onIsActive) => {
   const router = useRouter();
 
   const [active, setActive] = useState(false);
@@ -25,22 +26,51 @@ const useIsActive = ({ slug, title }, onIsActive) => {
   return active;
 };
 
-const Branch = ({ section, level, onIsActive }) => {
+const Branch = ({ section, level, onIsActive, position }) => {
+  const { mutate } = useSWRConfig();
+
   const [open, setIsOpen] = useState(section.type === "root");
 
+  const gridRef = useRef(null);
+  const sortable = useRef(null);
+
   const isActive = useIsActive(section, onIsActive);
+  useEffect(() => {
+    if (isActive) setIsOpen(true);
+  }, [isActive]);
 
   const onChildIsActive = (childIsActive) => {
     if (!!childIsActive) setIsOpen(true);
-    if (onIsActive) onIsActive();
+    if (onIsActive) onIsActive(childIsActive);
   };
 
+  const onListChange = async () => {
+    const newSort = [...gridRef.current.children]
+      .map((i) => i.dataset.position)
+      .map((oldPosition) => section.children.find((item) => item.position.toString() === oldPosition))
+      .map((sortedItem, index) => ({ ...sortedItem, position: index + 1 }));
+
+    const response = await API.put({ path: "/support-center/knowledge-base/reorder", body: newSort.map(({ _id, position }) => ({ _id, position })) });
+    if (!response.ok) return toast.error("Désolé, une erreur est survenue. Veuillez recommencer !");
+    if (section.slug) mutate(API.getUrl({ path: `/support-center/knowledge-base/${section.slug}`, query: { withTree: true, withParents: true } }));
+    mutate(API.getUrl({ path: "/support-center/knowledge-base/", query: { withTree: true, withParents: true } }));
+  };
+
+  useEffect(() => {
+    if (section.type !== "root" && !sortable.current && !!open) {
+      sortable.current = Sortable.create(gridRef.current, { animation: 150, group: "shared", onEnd: onListChange });
+    }
+  }, [open]);
+
   return (
-    <details className={`ml-${level * 2}`} open={open || isActive}>
-      <summary className={` text-warmGray-500 ${isActive ? "font-bold" : ""}`}>
+    <div data-position={position} className={`ml-${level * 2}`}>
+      <span className={` text-warmGray-500 ${isActive ? "font-bold" : ""}`}>
+        <small className="text-trueGray-400 mr-1 cursor-pointer" onClick={() => setIsOpen(!open)}>
+          {!!open ? "\u25BC" : "\u25B6"}
+        </small>
         <Link href={`/admin/knowledge-base/${section.slug}`} passHref>
           {section.title || (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 inline -mt-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -50,24 +80,26 @@ const Branch = ({ section, level, onIsActive }) => {
             </svg>
           )}
         </Link>
-      </summary>
-      {section.children?.map((child) =>
-        child.type === "section" ? (
-          <Branch key={child._id} section={child} level={level + 1} onIsActive={onChildIsActive} />
-        ) : (
-          <Answer key={child._id} answer={child} level={level + 1} onIsActive={onChildIsActive} />
-        )
-      )}
-    </details>
+      </span>
+      <div ref={gridRef} className={`flex flex-col ${!open && "hidden"}`}>
+        {section.children?.map((child) =>
+          child.type === "section" ? (
+            <Branch position={child.position} key={child._id} section={child} level={level + 1} onIsActive={onChildIsActive} />
+          ) : (
+            <Answer position={child.position} key={child._id} answer={child} level={level + 1} onIsActive={onChildIsActive} />
+          )
+        )}
+      </div>
+    </div>
   );
 };
 
-const Answer = ({ answer, level, onIsActive }) => {
+const Answer = ({ answer, level, onIsActive, position }) => {
   const isActive = useIsActive(answer, onIsActive);
 
   return (
     <Link key={answer._id} href={`/admin/knowledge-base/${answer.slug}`} passHref>
-      <a href="#" className={`text-warmGray-500 block ml-${level * 2} ${isActive ? "font-bold" : ""}`}>
+      <a data-position={position} href="#" className={`text-warmGray-500 block ml-${level * 2} ${isActive ? "font-bold" : ""}`}>
         {`\u2022\u00A0\u00A0\u00A0 ${answer.title}`}
       </a>
     </Link>
