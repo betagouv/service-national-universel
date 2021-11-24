@@ -38,8 +38,8 @@ export default () => {
         <Col md={6}>
           {filter && (
             <FiltersList>
-              <FilterRegion updateFilter={updateFilter} filter={filter} />
-              <FilterDepartment updateFilter={updateFilter} filter={filter} />
+              <FilterRegion onChange={(region) => updateFilter({ region })} value={filter.region} filter={filter} />
+              <FilterDepartment onChange={(department) => updateFilter({ department })} value={filter.department} filter={filter} />
             </FiltersList>
           )}
         </Col>
@@ -57,6 +57,8 @@ const Title = styled.h2`
   margin-bottom: 10px;
 `;
 const FiltersList = styled.div`
+  gap: 1rem;
+  flex: 1;
   display: flex;
   justify-content: flex-end;
   flex-wrap: wrap;
