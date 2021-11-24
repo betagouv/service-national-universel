@@ -43,6 +43,15 @@ export default ({ hit, options = [], callback = () => {} }) => {
         title: `Annulation de la mission ${mission.name}`,
         message: "Veuillez précisez le motif d'annulation ci-dessous avant de valider. Un mail sera envoyé à tous les jeunes dont la candidature n'a pas été validée ou refusée.",
       });
+    } else if (status === MISSION_STATUS.ARCHIVED) {
+      setModalConfirmWithMessage({
+        isOpen: true,
+        onConfirm: (statusComment) => onConfirmStatus(status, statusComment),
+        title: `Archivage de la mission ${mission.name}`,
+        message:
+          "Toutes les candidatures en attente de validation et en attente de vérification d'éligibilité seront automatiquement passées en : Annulée. Cette action est irréversible.",
+        placeholder: "Veuillez éditer ce message pour préciser le motif d'archivage...",
+      });
     } else {
       setModal({
         isOpen: true,
@@ -129,6 +138,7 @@ export default ({ hit, options = [], callback = () => {} }) => {
         isOpen={modalConfirmWithMessage.isOpen}
         title={modalConfirmWithMessage.title}
         message={modalConfirmWithMessage.message}
+        placeholder={modalConfirmWithMessage.placeholder}
         onChange={() => setModalConfirmWithMessage({ isOpen: false, onConfirm: null })}
         onConfirm={(statusComment) => {
           modalConfirmWithMessage?.onConfirm(statusComment);
