@@ -90,7 +90,7 @@ router.put("/reorder", passport.authenticate("referent", { session: false, failW
     const session = await KnowledgeBaseObject.startSession();
     await session.withTransaction(async () => {
       for (const item of itemsToReorder) {
-        await KnowledgeBaseObject.findByIdAndUpdate(item._id, { position: item.position });
+        await KnowledgeBaseObject.findByIdAndUpdate(item._id, { position: item.position, parentId: item.parentId || null });
       }
     });
     return res.status(200).send({ ok: true });
@@ -99,6 +99,7 @@ router.put("/reorder", passport.authenticate("referent", { session: false, failW
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
   }
 });
+
 router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const existingKb = await KnowledgeBaseObject.findById(req.params.id);
@@ -122,10 +123,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     }
     if (req.body.hasOwnProperty("imageSrc")) updateKb.imageSrc = req.body.imageSrc;
     if (req.body.hasOwnProperty("imageAlt")) updateKb.imageAlt = req.body.imageAlt;
-    if (req.body.hasOwnProperty("content")) {
-      console.log(typeof req.body.content);
-      updateKb.content = req.body.content;
-    }
+    if (req.body.hasOwnProperty("content")) updateKb.content = req.body.content;
     if (req.body.hasOwnProperty("description")) updateKb.description = req.body.description;
     if (req.body.hasOwnProperty("allowedRoles")) updateKb.allowedRoles = req.body.allowedRoles;
     if (req.body.hasOwnProperty("status")) updateKb.status = req.body.status;

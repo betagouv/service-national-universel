@@ -21,7 +21,7 @@ const KnowledgeBaseSection = ({ section, isRoot }) => {
       .map((oldPosition) => section.children.find((item) => item.position.toString() === oldPosition))
       .map((sortedItem, index) => ({ ...sortedItem, position: index + 1 }));
 
-    const response = await API.put({ path: "/support-center/knowledge-base/reorder", body: newSort.map(({ _id, position }) => ({ _id, position })) });
+    const response = await API.put({ path: "/support-center/knowledge-base/reorder", body: newSort.map(({ _id, position }) => ({ _id, position, parentId: section._id })) });
     if (!response.ok) return toast.error("Désolé, une erreur est survenue. Veuillez recommencer !");
     if (section.slug) mutate(API.getUrl({ path: `/support-center/knowledge-base/${section.slug}`, query: { withTree: true, withParents: true } }));
     mutate(API.getUrl({ path: "/support-center/knowledge-base/", query: { withTree: true, withParents: true } }));

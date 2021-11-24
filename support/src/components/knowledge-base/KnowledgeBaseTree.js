@@ -4,6 +4,7 @@ import Link from "next/link";
 import Sortable from "sortablejs";
 import API from "../../services/api";
 import { useRouter } from "next/router";
+import { toast } from "react-toastify";
 
 const useIsActive = ({ slug }, onIsActive) => {
   const router = useRouter();
@@ -26,9 +27,7 @@ const useIsActive = ({ slug }, onIsActive) => {
   return active;
 };
 
-const Branch = ({ section, level, onIsActive, position }) => {
-  const { mutate } = useSWRConfig();
-
+const Branch = ({ section, level, onIsActive, position, parentId, onListChange }) => {
   const [open, setIsOpen] = useState(section.type === "root");
 
   const gridRef = useRef(null);
@@ -44,26 +43,12 @@ const Branch = ({ section, level, onIsActive, position }) => {
     if (onIsActive) onIsActive(childIsActive);
   };
 
-  const onListChange = async () => {
-    const newSort = [...gridRef.current.children]
-      .map((i) => i.dataset.position)
-      .map((oldPosition) => section.children.find((item) => item.position.toString() === oldPosition))
-      .map((sortedItem, index) => ({ ...sortedItem, position: index + 1 }));
-
-    const response = await API.put({ path: "/support-center/knowledge-base/reorder", body: newSort.map(({ _id, position }) => ({ _id, position })) });
-    if (!response.ok) return toast.error("Désolé, une erreur est survenue. Veuillez recommencer !");
-    if (section.slug) mutate(API.getUrl({ path: `/support-center/knowledge-base/${section.slug}`, query: { withTree: true, withParents: true } }));
-    mutate(API.getUrl({ path: "/support-center/knowledge-base/", query: { withTree: true, withParents: true } }));
-  };
-
   useEffect(() => {
-    if (section.type !== "root" && !sortable.current && !!open) {
-      sortable.current = Sortable.create(gridRef.current, { animation: 150, group: "shared", onEnd: onListChange });
-    }
-  }, [open]);
+    sortable.current = Sortable.create(gridRef.current, { animation: 150, group: "shared", onEnd: onListChange });
+  }, []);
 
   return (
-    <div data-position={position} className={`ml-${level * 2}`}>
+    <div data-position={position} data-parentid={parentId || "root"} data-id={section._id || "root"} data-type="section" className={`ml-${level * 2}`}>
       <span className={` text-warmGray-500 ${isActive ? "font-bold" : ""}`}>
         <small className="text-trueGray-400 mr-1 cursor-pointer" onClick={() => setIsOpen(!open)}>
           {!!open ? "\u25BC" : "\u25B6"}
@@ -81,12 +66,20 @@ const Branch = ({ section, level, onIsActive, position }) => {
           )}
         </Link>
       </span>
-      <div ref={gridRef} className={`flex flex-col ${!open && "hidden"}`}>
+      <div ref={gridRef} id={`child-container-${section._id || "root"}`} className={`flex flex-col ${!open ? "hidden" : ""}`}>
         {section.children?.map((child) =>
           child.type === "section" ? (
-            <Branch position={child.position} key={child._id} section={child} level={level + 1} onIsActive={onChildIsActive} />
+            <Branch
+              parentId={child.parentId}
+              position={child.position}
+              key={child._id}
+              section={child}
+              level={level + 1}
+              onIsActive={onChildIsActive}
+              onListChange={onListChange}
+            />
           ) : (
-            <Answer position={child.position} key={child._id} answer={child} level={level + 1} onIsActive={onChildIsActive} />
+            <Answer parentId={child.parentId} position={child.position} key={child._id} answer={child} level={level + 1} onIsActive={onChildIsActive} />
           )
         )}
       </div>
@@ -94,25 +87,56 @@ const Branch = ({ section, level, onIsActive, position }) => {
   );
 };
 
-const Answer = ({ answer, level, onIsActive, position }) => {
+const Answer = ({ answer, level, onIsActive, position, parentId }) => {
   const isActive = useIsActive(answer, onIsActive);
 
   return (
     <Link key={answer._id} href={`/admin/knowledge-base/${answer.slug}`} passHref>
-      <a data-position={position} href="#" className={`text-warmGray-500 block ml-${level * 2} ${isActive ? "font-bold" : ""}`}>
+      <a data-position={position} data-parentid={parentId} data-id={answer._id} href="#" className={`text-warmGray-500 block ml-${level * 2} ${isActive ? "font-bold" : ""}`}>
         {`\u2022\u00A0\u00A0\u00A0 ${answer.title}`}
       </a>
     </Link>
   );
 };
 
+const findChildrenRecursive = async (section, allItems) => {
+  const childrenContainer = section.querySelector(`#child-container-${section.dataset.id}`);
+  for (const [index, child] of Object.entries([...childrenContainer.children])) {
+    const updatedChild = {
+      position: Number(index) + 1,
+      parentId: section.dataset.id === "root" ? null : section.dataset.id,
+      _id: child.dataset.id,
+    };
+    allItems.push(updatedChild);
+    if (child.dataset.type === "section") findChildrenRecursive(child, allItems);
+  }
+};
+
+const getReorderedTree = (root) => {
+  const allItems = [];
+  findChildrenRecursive(root, allItems);
+  return allItems;
+};
+
 const KnowledgeBaseTree = ({ visible, setVisible }) => {
   const { data: response } = useSWR(API.getUrl({ path: "/support-center/knowledge-base/", query: { withTree: true, withParents: true } }));
+  const { mutate } = useSWRConfig();
 
   const [data, setData] = useState(response?.data || []);
+  // reloadTreeKey to prevent error `Failed to execute 'removeChild' on 'Node'` from sortablejs after updating messy tree
+  const [reloadTreeKey, setReloadeTreeKey] = useState(0);
   useEffect(() => {
     setData(response?.data || []);
   }, [response?.data]);
+
+  const rootRef = useRef(null);
+
+  const onListChange = async () => {
+    const response = await API.put({ path: "/support-center/knowledge-base/reorder", body: getReorderedTree(rootRef.current.children[0]) });
+    if (!response.ok) return toast.error("Désolé, une erreur est survenue. Veuillez recommencer !");
+    mutate(API.getUrl({ path: "/support-center/knowledge-base/", query: { withTree: true, withParents: true } }));
+    setReloadeTreeKey((k) => k + 1);
+  };
 
   return (
     <div className={`flex flex-col flex-grow-0 flex-shrink-0 border-l-2 p-2 ${visible ? "w-80" : "w-0 hidden"}`}>
@@ -124,7 +148,9 @@ const KnowledgeBaseTree = ({ visible, setVisible }) => {
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
         </svg>
       </div>
-      <Branch section={data} level={0} />
+      <div ref={rootRef} key={reloadTreeKey}>
+        <Branch section={data} level={0} onListChange={onListChange} />
+      </div>
     </div>
   );
 };
