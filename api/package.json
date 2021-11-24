@@ -16,9 +16,6 @@
   },
   "author": "SELEGO",
   "license": "MIT",
-  "prettier": {
-    "printWidth": 150
-  },
   "dependencies": {
     "@babel/preset-env": "^7.14.2",
     "@elastic/elasticsearch": "^7.14.0",

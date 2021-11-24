@@ -8,9 +8,6 @@
     "install": "node src/build-only-on-clevercloud.js",
     "build": "node --max-old-space-size=3000 node_modules/webpack/bin/webpack.js"
   },
-  "prettier": {
-    "printWidth": 180
-  },
   "devDependencies": {
     "@babel/cli": "^7.4.4",
     "@babel/core": "^7.14.0",
