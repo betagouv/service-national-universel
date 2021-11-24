@@ -14,7 +14,7 @@ import MailOpenIcon from "../../components/MailOpenIcon";
 import SuccessIcon from "../../components/SuccessIcon";
 import { referentArticles, adminArticles, structureArticles } from "./articles";
 
-export default () => {
+const Dashboard = () => {
   const [userTickets, setUserTickets] = useState(null);
   const [articles, setArticles] = useState(null);
   const [link, setLink] = useState(null);
@@ -78,13 +78,13 @@ export default () => {
   return (
     <HeroContainer>
       <Container>
-        <h4 style={{ textAlign: "center" }}>Besoin d'aide&nbsp;?</h4>
+        <h4 style={{ textAlign: "center" }}>Besoin d&apos;aide&nbsp;?</h4>
         <div className="help-section">
           <div className="help-section-block">
             <div className="help-section-text" style={{ color: "#6B7280" }}>
-              Vous rencontrez une difficulté, avez besoin d'assistance pour réaliser une action ou avez besoin d'informations sur la plateforme&nbsp;?
+              Vous rencontrez une difficulté, avez besoin d&apos;assistance pour réaliser une action ou avez besoin d&apos;informations sur la plateforme&nbsp;?
               <br />
-              N'hésitez pas à consulter notre{" "}
+              N&apos;hésitez pas à consulter notre{" "}
               <strong>
                 <a className="link" href="https://support.snu.gouv.fr/help/fr-fr/1-referent" target="_blank" rel="noopener noreferrer">
                   base de connaissance
@@ -100,7 +100,7 @@ export default () => {
           </div>
           <div className="help-section-block">
             <div className="help-section-text" style={{ color: "#6B7280" }}>
-              Vous n'avez pas trouvé de réponse à votre demande ?<br />
+              Vous n&apos;avez pas trouvé de réponse à votre demande ?<br />
               Contactez notre{" "}
               <strong>
                 <NavLink className="link" to="/besoin-d-aide/ticket">
@@ -110,7 +110,7 @@ export default () => {
               .
             </div>
             <div className="buttons">
-              <InternalLink to="/besoin-d-aide/ticket">Contacter&nbsp;quelqu'un</InternalLink>
+              <InternalLink to="/besoin-d-aide/ticket">Contacter&nbsp;quelqu&apos;un</InternalLink>
             </div>
           </div>
         </div>
@@ -145,6 +145,8 @@ export default () => {
   );
 };
 
+export default Dashboard;
+
 export const ArticlesBlock = ({ articles }) => (
   <Articles>
     {articles?.map((article) => (
@@ -155,7 +157,7 @@ export const ArticlesBlock = ({ articles }) => (
         </div>
         <p>{article.body}</p>
         <p>
-          <a className="block-link" href={article.url} target="_blank">
+          <a className="block-link" href={article.url} target="_blank" rel="noreferrer">
             Lire la suite
           </a>
         </p>
