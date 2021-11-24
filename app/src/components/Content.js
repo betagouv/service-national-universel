@@ -228,7 +228,7 @@ export const WhiteButton = styled.button`
 
 export const VioletButton = styled.button`
   display: inline-block;
-  padding: 10px 40px;
+  padding: 0.5rem 1rem;
   background-color: #5145cd;
   color: #fff;
   font-size: 16px;
@@ -236,6 +236,7 @@ export const VioletButton = styled.button`
   font-weight: 700;
   margin: 25px auto 10px;
   border-radius: 30px;
+  border: 1px solid #5145cd;
   border: none;
   box-shadow: rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.05) 0px 4px 6px -2px;
   :hover {
