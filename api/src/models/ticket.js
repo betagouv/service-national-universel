@@ -98,7 +98,7 @@ const Schema = new mongoose.Schema({
     default: false,
   },
   addressedToAgent: {
-    type: String,
+    type: [String],
     enum: ["AGENT_SUPPORT", "AGENT_TECHNICAL", "AGENT_DEPARTMENT_REFERENT", "AGENT_REGION_REFERENT"],
     required: true,
     documentation: {
@@ -123,7 +123,7 @@ const Schema = new mongoose.Schema({
 
   priority: {
     type: String,
-    enum: ["LOW", "MEDIUM", "HIGH"],
+    enum: ["LOW", "NORMAL", "HIGH"],
     documentation: {
       description: "nom du degré de priorité",
     },
