@@ -12,7 +12,9 @@
     "dev": "nodemon ./src/index.js",
     "start": "node ./src/index.js",
     "test": "jest --silent --runInBand",
-    "coverage": "jest --runInBand --coverage --silent"
+    "coverage": "jest --runInBand --coverage --silent",
+    "lint": "eslint . --ext .js,.jsx",
+    "lint:fix": "eslint --ext .js,.jsx --fix"
   },
   "author": "SELEGO",
   "license": "MIT",
