@@ -68,6 +68,14 @@ const dataMapper = {
       throw error;
     }
   },
+  getAllGroups: async () => {
+    try {
+      const groups = await client.query("SELECT * from groups");
+      return groups.rows;
+    } catch (error) {
+      throw error;
+    }
+  },
 };
 
 module.exports = dataMapper;
