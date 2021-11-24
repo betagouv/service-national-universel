@@ -6,10 +6,9 @@
     "mobile": "webpack serve --port 8081 --mode development --config webpack.dev.config.js --progress --liveReload --open --hot --inline --host 0.0.0.0",
     "start": "node server/index.js",
     "install": "node src/build-only-on-clevercloud.js",
-    "build": "node --max-old-space-size=3000 node_modules/webpack/bin/webpack.js"
-  },
-  "prettier": {
-    "printWidth": 180
+    "build": "node --max-old-space-size=3000 node_modules/webpack/bin/webpack.js",
+    "lint": "eslint . --ext .js,.jsx",
+    "lint:fix": "eslint --ext .js,.jsx --fix"
   },
   "devDependencies": {
     "@babel/cli": "^7.4.4",
@@ -27,9 +26,16 @@
     "@sentry/webpack-plugin": "^1.17.1",
     "copy-webpack-plugin": "^7.0.0",
     "css-loader": "^5.0.1",
+    "eslint": "^8.3.0",
+    "eslint-config-prettier": "^8.3.0",
+    "eslint-plugin-import": "^2.25.3",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-react": "^7.27.1",
+    "eslint-plugin-react-hooks": "^4.3.0",
     "file-loader": "^6.2.0",
     "fs": "0.0.1-security",
     "html-webpack-plugin": "^5.3.1",
+    "prettier": "^2.4.1",
     "react-refresh": "^0.9.0",
     "style-loader": "^2.0.0",
     "svg-inline-loader": "^0.8.0",
