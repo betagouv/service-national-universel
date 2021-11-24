@@ -50,6 +50,7 @@ export default ({ hit, options = [], callback = () => {} }) => {
         title: `Archivage de la mission ${mission.name}`,
         message:
           "Toutes les candidatures en attente de validation et en attente de vérification d'éligibilité seront automatiquement passées en : Annulée. Cette action est irréversible.",
+        placeholder: "Veuillez éditer ce message pour préciser le motif d'archivage...",
       });
     } else {
       setModal({
@@ -137,6 +138,7 @@ export default ({ hit, options = [], callback = () => {} }) => {
         isOpen={modalConfirmWithMessage.isOpen}
         title={modalConfirmWithMessage.title}
         message={modalConfirmWithMessage.message}
+        placeholder={modalConfirmWithMessage.placeholder}
         onChange={() => setModalConfirmWithMessage({ isOpen: false, onConfirm: null })}
         onConfirm={(statusComment) => {
           modalConfirmWithMessage?.onConfirm(statusComment);
