@@ -17,7 +17,7 @@ function cookieOptions() {
 }
 function logoutCookieOptions() {
   if (config.ENVIRONMENT === "development") {
-    return { httpOnly: true, secure: false, sameSite: "Lax" };
+    return { httpOnly: true, secure: false };
   } else {
     return { httpOnly: true, secure: true, sameSite: "none" };
   }
