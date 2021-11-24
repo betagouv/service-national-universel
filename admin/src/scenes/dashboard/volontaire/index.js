@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { Col, Row } from "reactstrap";
 import { useSelector } from "react-redux";
 
-import YearPicker from "../components/YearPicker";
+import FilterCohort from "../components/FilterCohort";
 import FilterRegion from "../components/FilterRegion";
 import FilterDepartment from "../components/FilterDepartment";
 import SubTab from "./status";
@@ -43,7 +43,7 @@ export default () => {
                 <FilterRegion updateFilter={updateFilter} filter={filter} />
                 <FilterDepartment updateFilter={updateFilter} filter={filter} />
                 <FilterWrapper>
-                  <YearPicker
+                  <FilterCohort
                     options={[
                       { key: "2019", label: "2019" },
                       { key: "2020", label: "2020" },

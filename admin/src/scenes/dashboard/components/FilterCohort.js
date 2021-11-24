@@ -1,19 +1,12 @@
 import React from "react";
-import { useSelector } from "react-redux";
-import styled from "styled-components";
 import Select from "react-select";
-
-import Dropdown from "./Dropdown";
-import { academyList, ROLES } from "../../../utils";
+import styled from "styled-components";
 import { colors } from "../../../utils";
 
-export default ({ value = [], onChange, updateFilter, filter }) => {
-  const user = useSelector((state) => state.Auth.user);
-  if (user.role !== ROLES.ADMIN) return <div />;
-  const options = academyList.sort((a, b) => a.localeCompare(b)).map((a) => ({ value: a, label: a }));
+const FilterCohort = ({ value = [], onChange, options }) => {
   return (
     <Container>
-      <Label>académie(s)</Label>
+      <Label>cohorte(s)</Label>
       <Select
         styles={{
           placeholder: (provided) => ({ ...provided, position: "relative", transform: "" }),
@@ -41,16 +34,8 @@ export default ({ value = [], onChange, updateFilter, filter }) => {
       />
     </Container>
   );
-  return (
-    <FilterWrapper>
-      <Dropdown onChange={(academy) => updateFilter({ academy })} selectedOption={filter.academy} options={academyList.sort((a, b) => a.localeCompare(b))} prelabel="Académie" />
-    </FilterWrapper>
-  );
 };
 
-const FilterWrapper = styled.div`
-  margin: 0 5px 10px;
-`;
 const Container = styled.div`
   display: flex;
   flex-direction: column;
@@ -61,3 +46,5 @@ const Label = styled.div`
   color: ${colors.darkPurple};
   text-transform: uppercase;
 `;
+
+export default FilterCohort;

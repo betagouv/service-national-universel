@@ -13,7 +13,24 @@ const FilterStatus = ({ value = [], onChange }) => {
     <Container>
       <Label>statut(s)</Label>
       <Select
-        styles={{ placeholder: (provided) => ({ ...provided, position: "relative", transform: "" }) }}
+        styles={{
+          placeholder: (provided) => ({ ...provided, position: "relative", transform: "" }),
+          multiValue: (provided) => ({ ...provided, backgroundColor: "#5145cd29" }),
+          option: (provided, state) => {
+            return {
+              ...provided,
+              backgroundColor: state.isFocused ? "#5145cd29" : "",
+              ":hover": {
+                ...provided[":hover"],
+                backgroundColor: "#5145cd29",
+              },
+              ":active": {
+                ...provided[":active"],
+                backgroundColor: "red",
+              },
+            };
+          },
+        }}
         options={STATUS}
         isMulti
         placeholder="Choisir"

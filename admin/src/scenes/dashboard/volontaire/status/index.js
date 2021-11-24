@@ -42,17 +42,17 @@ export default ({ filter }) => {
         size: 0,
       };
 
-      if (filter.cohort) body.query.bool.filter.push({ term: { "cohort.keyword": filter.cohort } });
-      if (filter.region) body.query.bool.filter.push({ term: { "region.keyword": filter.region } });
-      if (filter.department) body.query.bool.filter.push({ term: { "department.keyword": filter.department } });
+      if (filter.cohort?.length) body.query.bool.filter.push({ term: { "cohort.keyword": filter.cohort } });
+      if (filter.region?.length) body.query.bool.filter.push({ terms: { "region.keyword": filter.region } });
+      if (filter.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
 
       const { responses } = await api.esQuery("young", body);
 
       body.query.bool.filter = [{ terms: { "status.keyword": ["WITHDRAWN"] } }];
 
-      if (filter.cohort) body.query.bool.filter.push({ term: { "cohort.keyword": filter.cohort } });
-      if (filter.region) body.query.bool.filter.push({ term: { "region.keyword": filter.region } });
-      if (filter.department) body.query.bool.filter.push({ term: { "department.keyword": filter.department } });
+      if (filter.cohort?.length) body.query.bool.filter.push({ term: { "cohort.keyword": filter.cohort } });
+      if (filter.region?.length) body.query.bool.filter.push({ terms: { "region.keyword": filter.region } });
+      if (filter.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
 
       const { responses: responses2 } = await api.esQuery("young", body);
 
@@ -78,7 +78,7 @@ export default ({ filter }) => {
         size: 0,
       };
 
-      if (filter.cohort) body.query.bool.filter.push({ term: { "youngCohort.keyword": filter.cohort } });
+      if (filter.cohort?.length) body.query.bool.filter.push({ term: { "youngCohort.keyword": filter.cohort } });
       if (filter.region) body.query.bool.filter.push({ terms: { "youngDepartment.keyword": region2department[filter.region] } });
       if (filter.department) body.query.bool.filter.push({ term: { "youngDepartment.keyword": filter.department } });
 

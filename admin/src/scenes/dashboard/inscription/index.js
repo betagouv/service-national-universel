@@ -3,9 +3,8 @@ import styled from "styled-components";
 import { Col, Row } from "reactstrap";
 import { useSelector } from "react-redux";
 
-import YearPicker from "../components/YearPicker";
+import FilterCohort from "../components/FilterCohort";
 import FilterStatus from "../components/FilterStatus";
-import Checkbox from "../components/Checkbox";
 import FilterAcademy from "../components/FilterAcademy";
 import FilterRegion from "../components/FilterRegion";
 import FilterDepartment from "../components/FilterDepartment";
@@ -28,15 +27,18 @@ export default () => {
   const user = useSelector((state) => state.Auth.user);
 
   function updateFilter(n) {
-    setFilter({ ...(filter || { status: Object.keys(YOUNG_STATUS), academy: "", region: "", department: "", cohort: filter?.cohort || ["2021"] }), ...n });
+    setFilter({
+      ...(filter || { status: Object.keys(YOUNG_STATUS), academy: [], region: [], department: [], cohort: filter?.cohort || ["Février 2022", "Juin 2022", "Juillet 2022"] }),
+      ...n,
+    });
   }
 
   useEffect(() => {
     const status = Object.keys(YOUNG_STATUS).filter((e) => e !== "IN_PROGRESS");
     if (user.role === ROLES.REFERENT_DEPARTMENT) {
-      updateFilter({ department: user.department, status });
+      updateFilter({ department: [user.department], status });
     } else if (user.role === ROLES.REFERENT_REGION) {
-      updateFilter({ region: user.region, status });
+      updateFilter({ region: [user.region], status });
     } else {
       updateFilter();
     }
@@ -44,41 +46,27 @@ export default () => {
 
   return (
     <>
-      <Row style={{}}>
-        <Col md={6}>
-          <Title>Inscriptions</Title>
-        </Col>
-        <Col md={6}>
-          {filter ? (
-            <>
-              <FiltersList>
-                <FilterAcademy updateFilter={updateFilter} filter={filter} />
-                <FilterRegion updateFilter={updateFilter} filter={filter} />
-                <FilterDepartment updateFilter={updateFilter} filter={filter} />
-              </FiltersList>
-            </>
-          ) : null}
-        </Col>
+      <Row style={{ display: "flex" }}>
+        <Title>Inscriptions</Title>
         {filter ? (
-          <Col md={12}>
-            <FiltersList>
-              <YearPicker
-                options={[
-                  { value: "2019", label: "2019" },
-                  { value: "2020", label: "2020" },
-                  { value: "2021", label: "2021" },
-                  { value: "Février 2022", label: "Février 2022" },
-                  { value: "Juin 2022", label: "Juin 2022" },
-                  { value: "Juillet 2022", label: "Juillet 2022" },
-                ]}
-                onChange={(cohort) => updateFilter({ cohort })}
-                value={filter.cohort}
-              />
-            </FiltersList>
-            <FiltersList>
-              <FilterStatus value={filter.status} onChange={(status) => updateFilter({ status })} />
-            </FiltersList>
-          </Col>
+          <FiltersList>
+            <FilterAcademy value={filter.academy} onChange={(academy) => updateFilter({ academy })} />
+            <FilterRegion onChange={(region) => updateFilter({ region })} value={filter.region} filter={filter} />
+            <FilterDepartment onChange={(department) => updateFilter({ department })} value={filter.department} filter={filter} />
+            <FilterCohort
+              options={[
+                { value: "2019", label: "2019" },
+                { value: "2020", label: "2020" },
+                { value: "2021", label: "2021" },
+                { value: "Février 2022", label: "Février 2022" },
+                { value: "Juin 2022", label: "Juin 2022" },
+                { value: "Juillet 2022", label: "Juillet 2022" },
+              ]}
+              onChange={(cohort) => updateFilter({ cohort })}
+              value={filter.cohort}
+            />
+            <FilterStatus value={filter.status} onChange={(status) => updateFilter({ status })} />
+          </FiltersList>
         ) : null}
       </Row>
       {filter && (
@@ -143,11 +131,10 @@ const SubTitle = styled.h3`
   font-weight: normal;
 `;
 const FiltersList = styled.div`
+  gap: 1rem;
+  flex: 1;
   display: flex;
   justify-content: flex-end;
   flex-wrap: wrap;
   margin-bottom: 10px;
-`;
-const FilterWrapper = styled.div`
-  margin: 0 5px 10px;
 `;
