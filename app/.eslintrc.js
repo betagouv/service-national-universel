@@ -11,4 +11,7 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 2020,
   },
+  rules: {
+    'react/jsx-no-duplicate-props': 1,
+  },
 };
