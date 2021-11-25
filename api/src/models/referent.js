@@ -47,7 +47,8 @@ const Schema = new mongoose.Schema({
     },
   },
   acceptCGU: {
-    type: Boolean,
+    type: String,
+    enum: ["true", "false"],
     documentation: {
       description: "l'utilisateur a accepté les CGU",
     },

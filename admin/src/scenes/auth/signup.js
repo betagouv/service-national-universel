@@ -20,6 +20,7 @@ import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
 import MultiSelect from "../../components/Multiselect";
 
 import { associationTypes, privateTypes, publicTypes, publicEtatTypes, translate, colors, getRegionByZip, getDepartmentByZip } from "../../utils";
+import { adminURL } from "../../config";
 
 export default () => {
   const dispatch = useDispatch();
@@ -177,13 +178,6 @@ export default () => {
                       />
                       <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.user?.repassword}</p>
                     </StyledFormGroup>
-                    <StyledFormGroup style={{ display: "flex" }}>
-                      <label>
-                        <span>*</span>Veuillez acceptez les conditions générales d'utilisation
-                      </label>
-                      <InputField validate={(v) => !v && requiredMessage} type="checkbox" value={true} onChange={handleChange} name="user.acceptCGU" checked={values.user.acceptCGU} style={{ flex: "2" }} />
-                      <ErrorMessage errors={errors} touched={touched} name="user.acceptCGU" />
-                    </StyledFormGroup>
                   </form>
                 </LoginBox>
                 <LoginBox>
@@ -323,6 +317,30 @@ export default () => {
                   </form>
                 </LoginBox>
               </LoginBoxes>
+              <div>
+                <div style={{ display: "flex", alignItems: "center", marginBottom: "1rem" }}>
+                  <CheckBox
+                    id="checkboxCGU"
+                    validate={(v) => !v && requiredMessage}
+                    type="checkbox"
+                    value="true"
+                    onChange={(e) => handleChange({ target: { name: "user.acceptCGU", value: e.target.checked ? "true" : "false" } })}
+                    name="user.acceptCGU"
+                    checked={values.user.acceptCGU === "true"}
+                    style={{ display: "flex" }}
+                  />
+                  <label for="checkboxCGU" style={{ flex: 1, margin: 0 }}>
+                    <p style={{ marginBottom: "0" }}>
+                      J'ai lu et j'accepte les{" "}
+                      <a href={`${adminURL}/conditions-generales-utilisation`} target="_blank" style={{ textDecoration: "underline", color: colors.darkPurple }}>
+                        conditions générales d'utilisation{" "}
+                      </a>
+                      de la plateforme du Service national universel
+                    </p>
+                  </label>
+                </div>
+                <ErrorMessage errors={errors} touched={touched} name="user.acceptCGU" />
+              </div>
               <Submit loading={isSubmitting} type="submit" color="primary" onClick={handleSubmit}>
                 S'inscrire
               </Submit>
@@ -347,16 +365,6 @@ const Register = styled.h3`
   a {
     color: ${colors.purple};
     font-weight: 500;
-  }
-`;
-
-const Thumb = styled.div`
-  flex: 1 2;
-  min-height: 400px;
-  background: url(${require("../../assets/login.jpg")}) no-repeat center;
-  background-size: cover;
-  @media (max-width: 1000px) {
-    display: none;
   }
 `;
 
@@ -399,6 +407,24 @@ const InputField = styled(Field)`
   display: block;
   width: 100%;
   margin-bottom: 0.375rem;
+  background-color: #fff;
+  color: #606266;
+  outline: 0;
+  padding: 9px 20px;
+  border-radius: 4px;
+  border: 1px solid;
+  border-color: ${({ haserror }) => (haserror ? "red" : "#dcdfe6")};
+  ::placeholder {
+    color: #d6d6e1;
+  }
+  :focus {
+    border: 1px solid #aaa;
+  }
+`;
+
+const CheckBox = styled(Field)`
+  display: flex;
+  margin-right: 1rem;
   background-color: #fff;
   color: #606266;
   outline: 0;

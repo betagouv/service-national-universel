@@ -81,6 +81,7 @@ router.post("/signup", async (req, res) => {
       firstName: Joi.string().lowercase().trim().required(),
       lastName: Joi.string().uppercase().trim().required(),
       password: Joi.string().required(),
+      acceptCGU: Joi.string().required(),
     })
       .unknown()
       .validate(req.body);
@@ -90,12 +91,12 @@ router.post("/signup", async (req, res) => {
         return res.status(400).send({ ok: false, user: null, code: ERRORS.EMAIL_INVALID });
       return res.status(400).send({ ok: false, code: error.toString() });
     }
-    const { email, lastName, password } = value;
+    const { email, lastName, password, acceptCGU } = value;
     if (!validatePassword(password)) return res.status(400).send({ ok: false, user: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
     const firstName = value.firstName.charAt(0).toUpperCase() + value.firstName.toLowerCase().slice(1);
     const role = ROLES.RESPONSIBLE; // responsible by default
 
-    const user = await ReferentModel.create({ password, email, firstName, lastName, role });
+    const user = await ReferentModel.create({ password, email, firstName, lastName, role, acceptCGU });
     const token = jwt.sign({ _id: user._id }, config.secret, { expiresIn: JWT_MAX_AGE });
     res.cookie("jwt", token, cookieOptions());
 
