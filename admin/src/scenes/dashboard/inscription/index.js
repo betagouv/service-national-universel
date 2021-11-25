@@ -53,36 +53,38 @@ export default () => {
 
   return (
     <>
-      <Row style={{ display: "flex" }}>
-        <Title>Inscriptions</Title>
-        {filter ? (
-          <FiltersList>
-            {user.role === ROLES.ADMIN ? (
+      <Row>
+        <Col style={{ display: "flex" }}>
+          <Title>Inscriptions</Title>
+          {filter ? (
+            <FiltersList>
+              {user.role === ROLES.ADMIN ? (
+                <MultiSelect
+                  label="Académie(s)"
+                  options={academyList.map((a) => ({ value: a, label: a }))}
+                  value={filter.academy}
+                  onChange={(academy) => updateFilter({ academy })}
+                />
+              ) : null}
+              <FilterRegion onChange={(region) => updateFilter({ region })} value={filter.region} />
+              <FilterDepartment onChange={(department) => updateFilter({ department })} value={filter.department} filter={filter} />
               <MultiSelect
-                label="Académie(s)"
-                options={academyList.map((a) => ({ value: a, label: a }))}
-                value={filter.academy}
-                onChange={(academy) => updateFilter({ academy })}
+                label="Cohorte(s)"
+                options={[
+                  { value: "2019", label: "2019" },
+                  { value: "2020", label: "2020" },
+                  { value: "2021", label: "2021" },
+                  { value: "Février 2022", label: "Février 2022" },
+                  { value: "Juin 2022", label: "Juin 2022" },
+                  { value: "Juillet 2022", label: "Juillet 2022" },
+                ]}
+                onChange={(cohort) => updateFilter({ cohort })}
+                value={filter.cohort}
               />
-            ) : null}
-            <FilterRegion onChange={(region) => updateFilter({ region })} value={filter.region} />
-            <FilterDepartment onChange={(department) => updateFilter({ department })} value={filter.department} filter={filter} />
-            <MultiSelect
-              label="Cohorte(s)"
-              options={[
-                { value: "2019", label: "2019" },
-                { value: "2020", label: "2020" },
-                { value: "2021", label: "2021" },
-                { value: "Février 2022", label: "Février 2022" },
-                { value: "Juin 2022", label: "Juin 2022" },
-                { value: "Juillet 2022", label: "Juillet 2022" },
-              ]}
-              onChange={(cohort) => updateFilter({ cohort })}
-              value={filter.cohort}
-            />
-            <MultiSelect label="Statut(s)" options={getOptionsStatus()} value={filter.status} onChange={(status) => updateFilter({ status })} />
-          </FiltersList>
-        ) : null}
+              <MultiSelect label="Statut(s)" options={getOptionsStatus()} value={filter.status} onChange={(status) => updateFilter({ status })} />
+            </FiltersList>
+          ) : null}
+        </Col>
       </Row>
       {filter && (
         <>

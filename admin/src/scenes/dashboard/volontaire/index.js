@@ -35,32 +35,28 @@ export default () => {
 
   return (
     <>
-      <Row style={{}}>
-        <Col md={3}>
+      <Row>
+        <Col style={{ display: "flex" }}>
           <Title>Volontaires</Title>
-        </Col>
-        <Col md={9}>
           {filter ? (
-            <>
-              <FiltersList>
-                <FilterRegion onChange={(region) => updateFilter({ region })} value={filter.region} filter={filter} />
-                <FilterDepartment onChange={(department) => updateFilter({ department })} value={filter.department} filter={filter} />
-                <FilterWrapper>
-                  <FilterCohort
-                    options={[
-                      { value: "2019", label: "2019" },
-                      { value: "2020", label: "2020" },
-                      { value: "2021", label: "2021" },
-                      { value: "Février 2022", label: "Février 2022" },
-                      { value: "Juin 2022", label: "Juin 2022" },
-                      { value: "Juillet 2022", label: "Juillet 2022" },
-                    ]}
-                    onChange={(cohort) => updateFilter({ cohort })}
-                    value={filter.cohort}
-                  />
-                </FilterWrapper>
-              </FiltersList>
-            </>
+            <FiltersList>
+              <FilterRegion onChange={(region) => updateFilter({ region })} value={filter.region} filter={filter} />
+              <FilterDepartment onChange={(department) => updateFilter({ department })} value={filter.department} filter={filter} />
+              <FilterWrapper>
+                <FilterCohort
+                  options={[
+                    { value: "2019", label: "2019" },
+                    { value: "2020", label: "2020" },
+                    { value: "2021", label: "2021" },
+                    { value: "Février 2022", label: "Février 2022" },
+                    { value: "Juin 2022", label: "Juin 2022" },
+                    { value: "Juillet 2022", label: "Juillet 2022" },
+                  ]}
+                  onChange={(cohort) => updateFilter({ cohort })}
+                  value={filter.cohort}
+                />
+              </FilterWrapper>
+            </FiltersList>
           ) : null}
         </Col>
       </Row>

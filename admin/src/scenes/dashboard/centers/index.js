@@ -30,11 +30,9 @@ export default () => {
 
   return (
     <>
-      <Row style={{}}>
-        <Col md={6}>
+      <Row>
+        <Col style={{ display: "flex" }}>
           <Title>Centres</Title>
-        </Col>
-        <Col md={6}>
           {filter && (
             <>
               <FiltersList>

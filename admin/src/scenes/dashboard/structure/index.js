@@ -31,11 +31,9 @@ export default () => {
 
   return (
     <>
-      <Row style={{}}>
-        <Col md={6}>
+      <Row>
+        <Col style={{ display: "flex" }}>
           <Title>Structures</Title>
-        </Col>
-        <Col md={6}>
           {filter && (
             <FiltersList>
               <FilterRegion onChange={(region) => updateFilter({ region })} value={filter.region} filter={filter} />
