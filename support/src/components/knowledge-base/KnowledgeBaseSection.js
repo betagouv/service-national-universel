@@ -68,7 +68,7 @@ const KnowledgeBaseSection = ({ section, isRoot }) => {
               {answers.map(KnowledgeBaseCardAnswer)}
             </div>
           </div>
-          <div className={`flex flex-col col-span-1 ${!sections.length ? "hidden" : ""}`}>
+          <div className={`flex flex-col col-span-1 ${!answers.length ? "col-span-3" : ""} ${!sections.length ? "hidden" : ""}`}>
             <h3 className="px-10 text-coolGray-500 ">Rubriques</h3>
             <div ref={gridSectionsRef} id="sections" className="flex flex-wrap h-full w-full flex-shrink overflow-y-auto">
               {sections.map((section) => (
