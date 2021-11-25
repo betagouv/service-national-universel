@@ -9,6 +9,7 @@ import KnowledgeBaseCardAnswer from "./KnowledgeBaseCardAnswer";
 import KnowledgeBaseCreate from "./KnowledgeBaseCreate";
 import KnowledgeBaseEdit from "./KnowledgeBaseEdit";
 import Tags from "../Tags";
+import getTitleWithStatus from "../../utils/getTitleWithStatus";
 
 const KnowledgeBaseSection = ({ section, isRoot }) => {
   const { mutate } = useSWRConfig();
@@ -48,7 +49,7 @@ const KnowledgeBaseSection = ({ section, isRoot }) => {
           {!isRoot && (
             <>
               <div>
-                <h2 className="font-bold text-lg">{section.title}</h2>
+                <h2 className="font-bold text-lg">{getTitleWithStatus(section)}</h2>
                 {!!section.description?.length && <p className="mt-1 text-sm italic">{section.description}</p>}
                 {!!section.allowedRoles?.length && (
                   <p className="flex flex-wrap mt-3.5  text-sm">

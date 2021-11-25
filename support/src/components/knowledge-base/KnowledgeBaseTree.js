@@ -6,6 +6,7 @@ import API from "../../services/api";
 import { useRouter } from "next/router";
 import { toast } from "react-toastify";
 import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
+import getTitleWithStatus from "../../utils/getTitleWithStatus";
 
 const useIsActive = ({ slug }, onIsActive) => {
   const router = useRouter();
@@ -54,7 +55,7 @@ const Branch = ({ section, level, onIsActive, position, parentId, onListChange }
           {!!open ? "\u25BC" : "\u25B6"}
         </small>
         <Link href={`/admin/knowledge-base/${section.slug}`} passHref>
-          {section.title || (
+          {getTitleWithStatus(section) || (
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 inline -mt-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
                 strokeLinecap="round"
@@ -92,7 +93,7 @@ const Answer = ({ answer, level, onIsActive, position, parentId }) => {
   return (
     <Link key={answer._id} href={`/admin/knowledge-base/${answer.slug}`} passHref>
       <a data-position={position} data-parentid={parentId} data-id={answer._id} href="#" className={`text-warmGray-500 block ml-${level * 2} ${isActive ? "font-bold" : ""}`}>
-        {`\u2022\u00A0\u00A0\u00A0 ${answer.title}`}
+        {`\u2022\u00A0\u00A0\u00A0 ${getTitleWithStatus(answer)}`}
       </a>
     </Link>
   );
