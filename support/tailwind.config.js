@@ -11,10 +11,13 @@ module.exports = {
     extend: {
       colors: {
         "snu-purple-900": "#342484",
+        "snu-purple-800": "#3830a9",
         "snu-purple-600": "#43389b",
         "snu-purple-300": "#5145cc",
+        "snu-purple-100": "#dee7ff",
         warmGray: colors.warmGray,
         trueGray: colors.trueGray,
+        coolGray: colors.coolGray,
       },
       font: {
         sans: ["Ubuntu", "ui-sans-serif", "system-ui"],

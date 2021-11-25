@@ -1,5 +1,4 @@
-import { SUPPORT_ROLES } from "snu-lib/roles";
-import { filterTags } from "../../utils/tags";
+import Tags from "../Tags";
 import TextEditor from "../TextEditor";
 import KnowledgeBaseEdit from "./KnowledgeBaseEdit";
 
@@ -13,11 +12,7 @@ const KnowledgeBaseAnswer = ({ answer }) => {
           {!!answer.allowedRoles?.length && (
             <p className="flex flex-wrap mt-3.5  text-sm">
               Visible par:
-              {answer.allowedRoles.filter(filterTags).map((tag) => (
-                <span className="bg-gray-200 px-2 py-0.5 rounded-xl ml-2 mb-2 text-xs" key={tag}>
-                  {SUPPORT_ROLES[tag]}
-                </span>
-              ))}
+              <Tags tags={answer.allowedRoles} />
             </p>
           )}
         </div>

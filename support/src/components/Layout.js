@@ -1,17 +1,26 @@
 import Head from "next/head";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ToastContainer } from "react-toastify";
 import Drawer from "./Drawer";
 
 const Layout = ({ title, children, className = "" }) => {
-  const [drawerVisible, setDrawerVisible] = useState(true);
+  const [drawerVisible, setDrawerVisible] = useState(!localStorage.getItem("snu-support-drawer-hidden"));
+
+  useEffect(() => {
+    if (!drawerVisible) {
+      localStorage.setItem("snu-support-drawer-hidden", "true");
+    } else {
+      localStorage.removeItem("snu-support-drawer-hidden");
+    }
+  }, [drawerVisible]);
+
   return (
     <>
       <Head>
         <title>SNU - Admin Support - {title}</title>
       </Head>
       <Drawer visible={drawerVisible} setVisible={setDrawerVisible} />
-      <div className={`relative flex-grow w-full h-full overflow-hidden transition-transform ${!drawerVisible && ""} ${className}`}>
+      <div className={`relative flex-grow w-full h-full overflow-hidden transition-transform bg-coolGray-100 ${!drawerVisible && ""} ${className}`}>
         {children}
         {!drawerVisible && (
           <svg

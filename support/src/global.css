@@ -172,3 +172,7 @@ iframe {
   font-size: 1.5em;
   font-weight: bold;
 }
+
+.debug * {
+  border: 2px solid black;
+}

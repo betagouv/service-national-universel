@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import useSWR, { useSWRConfig } from "swr";
+import { useSWRConfig } from "swr";
 import Link from "next/link";
 import Sortable from "sortablejs";
 import API from "../../services/api";
@@ -120,6 +120,7 @@ const getReorderedTree = (root) => {
 const KnowledgeBaseTree = ({ visible, setVisible }) => {
   const { mutate } = useSWRConfig();
   const { data } = useKnowledgeBaseData();
+  const router = useRouter();
 
   // reloadTreeKey to prevent error `Failed to execute 'removeChild' on 'Node'` from sortablejs after updating messy tree
   const [reloadTreeKey, setReloadeTreeKey] = useState(0);
@@ -128,6 +129,7 @@ const KnowledgeBaseTree = ({ visible, setVisible }) => {
     const response = await API.put({ path: "/support-center/knowledge-base/reorder", body: getReorderedTree(rootRef.current.children[0]) });
     if (!response.ok) return toast.error("Désolé, une erreur est survenue. Veuillez recommencer !");
     mutate(API.getUrl({ path: "/support-center/knowledge-base/", query: { withTree: true, withParents: true } }));
+    mutate(API.getUrl({ path: `/support-center/knowledge-base/${router.query?.slug}`, query: { withTree: true, withParents: true } }));
     setReloadeTreeKey((k) => k + 1);
   };
 

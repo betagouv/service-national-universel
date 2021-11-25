@@ -12,7 +12,14 @@ import withAuth from "../../../hocs/withAuth";
 import API from "../../../services/api";
 
 const KnowledgeBase = () => {
-  const [treeVisible, setTreeVisible] = useState(true);
+  const [treeVisible, setTreeVisible] = useState(!localStorage.getItem("snu-support-kb-tree-hidden"));
+  useEffect(() => {
+    if (!treeVisible) {
+      localStorage.setItem("snu-support-kb-tree-hidden", "true");
+    } else {
+      localStorage.removeItem("snu-support-kb-tree-hidden");
+    }
+  }, [treeVisible]);
 
   const router = useRouter();
 
@@ -47,7 +54,7 @@ const KnowledgeBase = () => {
 
 const Content = ({ data }) => {
   if (!data) return null;
-  if (["root", "section"].includes(data?.type)) return <KnowledgeBaseSection section={data} isRoot={data?.type === "root"} />;
+  if (["root", "section"].includes(data?.type)) return <KnowledgeBaseSection key={data._id} section={data} isRoot={data?.type === "root"} />;
   if (data?.type === "answer") return <KnowledgeBaseAnswer answer={data} />;
   // return answer
   return <KnowledgeBaseCreate position={0} />;
