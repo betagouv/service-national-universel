@@ -74,17 +74,30 @@ const KnowledgeBaseEdit = ({ sectionOrAnswer }) => {
                 {...register("description")}
               />
             </div>
-            <fieldset className="ml-10  flex-grow">
-              <legend className="mb-5">Visible par:</legend>
-              {Object.keys(SUPPORT_ROLES).map((role, index) => (
-                <div className="flex items-center" key={role}>
-                  <input className="mr-4" id={role} type="checkbox" {...register(`computedAllowedRoles.${index}.value`)} />
-                  <label className="mr-2" id={role} htmlFor={`computedAllowedRoles.${index}.value`}>
-                    {SUPPORT_ROLES[role]}
-                  </label>
+            <div className="ml-10 flex flex-col flex-grow">
+              <fieldset className="mb-5">
+                <div className=" flex flex-row">
+                  <legend>Visible par:</legend>
+                  <div className="flex flex-col ml-10">
+                    {Object.keys(SUPPORT_ROLES).map((role, index) => (
+                      <div className="flex items-center" key={role}>
+                        <input className="mr-4" id={role} type="checkbox" {...register(`computedAllowedRoles.${index}.value`)} />
+                        <label className="mr-2" id={role} htmlFor={`computedAllowedRoles.${index}.value`}>
+                          {SUPPORT_ROLES[role]}
+                        </label>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              ))}
-            </fieldset>
+              </fieldset>
+              <div className="flex flex-row items-center">
+                <label htmlFor="status">Status: </label>
+                <select className="border-2 ml-10 p-2" {...register("status")}>
+                  <option value="PUBLISHED">Publié</option>
+                  <option value="DRAFT">Brouillon</option>
+                </select>
+              </div>
+            </div>
           </div>
           <button type="submit" className="w-auto">
             Enregistrer
