@@ -62,14 +62,21 @@ const KnowledgeBaseSection = ({ section, isRoot }) => {
           )}
         </div>
         <div className="grid grid-cols-3 h-full w-full py-12 flex-shrink overflow-y-auto">
-          <div className={`flex flex-col col-span-2 ${!answers.length ? "hidden" : ""}`}>
-            <h3 className="px-10 text-coolGray-500 ">Articles</h3>
+          <div className="flex flex-col col-span-2">
+            <h3 className="px-10 text-coolGray-500 flex items-center font-bold">
+              Articles
+              <KnowledgeBaseCreate position={section.children.length + 1} parentId={section._id} type="answer" />
+            </h3>
             <div ref={gridAnswersRef} id="answers" className="flex flex-col flex-wrap h-full w-full flex-shrink overflow-y-auto">
               {answers.map(KnowledgeBaseCardAnswer)}
+              {!answers.length && <span className="self-center w-full p-10 text-gray-400 block">Pas d'article</span>}
             </div>
           </div>
-          <div className={`flex flex-col col-span-1 ${!answers.length ? "col-span-3" : ""} ${!sections.length ? "hidden" : ""}`}>
-            <h3 className="px-10 text-coolGray-500 ">Rubriques</h3>
+          <div className="flex flex-col col-span-1">
+            <h3 className="px-10 text-coolGray-500 flex items-center font-bold">
+              Rubriques
+              <KnowledgeBaseCreate position={section.children.length + 1} parentId={section._id} type="section" />
+            </h3>
             <div ref={gridSectionsRef} id="sections" className="flex flex-wrap h-full w-full flex-shrink overflow-y-auto">
               {sections.map((section) => (
                 <KnowledgeBaseCardSection
@@ -82,15 +89,16 @@ const KnowledgeBaseSection = ({ section, isRoot }) => {
                   createdAt={section.createdAt}
                   slug={section.slug}
                   allowedRoles={section.allowedRoles}
+                  // a section has `children`, reserved prop in React: don't spread the whole section as props for a component or it will bug !
                   sectionChildren={section.children}
                 />
               ))}
+              {!sections.length && <span className="w-full p-10 text-gray-400 block">Pas de rubrique</span>}
             </div>
           </div>
-          {!section.children.length && <span className="self-center w-full text-center text-gray-400 my-auto block">Pas de contenu, pour l'instant !</span>}
         </div>
       </div>
-      <KnowledgeBaseCreate position={section.children.length + 1} parentId={section._id} />
+      {/*  */}
     </>
   );
 };

@@ -49,9 +49,9 @@ const Branch = ({ section, level, onIsActive, position, parentId, onListChange }
   }, []);
 
   return (
-    <div data-position={position} data-parentid={parentId || "root"} data-id={section._id || "root"} data-type="section" className={`ml-${level * 2}`}>
+    <div data-position={position} data-parentid={parentId || "root"} data-id={section._id || "root"} data-type="section" className={`ml-${level * 3} mb-1 `}>
       <span className={` text-warmGray-500 ${isActive ? "font-bold" : ""}`}>
-        <small className="text-trueGray-400 mr-1 cursor-pointer" onClick={() => setIsOpen(!open)}>
+        <small className="text-trueGray-400 mr-1 mb-1  w-3 inline-block cursor-pointer" onClick={() => setIsOpen(!open)}>
           {!!open ? "\u25BC" : "\u25B6"}
         </small>
         <Link href={`/admin/knowledge-base/${section.slug}`} passHref>
@@ -92,7 +92,7 @@ const Answer = ({ answer, level, onIsActive, position, parentId }) => {
   const isActive = useIsActive(answer, onIsActive);
   return (
     <Link key={answer._id} href={`/admin/knowledge-base/${answer.slug}`} passHref>
-      <a data-position={position} data-parentid={parentId} data-id={answer._id} href="#" className={`text-warmGray-500 block ml-${level * 2} ${isActive ? "font-bold" : ""}`}>
+      <a data-position={position} data-parentid={parentId} data-id={answer._id} href="#" className={`text-warmGray-500 block ml-${level * 3} ${isActive ? "font-bold" : ""}`}>
         {`\u2022\u00A0\u00A0\u00A0 ${getTitleWithStatus(answer)}`}
       </a>
     </Link>
@@ -138,13 +138,13 @@ const KnowledgeBaseTree = ({ visible, setVisible }) => {
     <div className={`flex flex-col flex-grow-0 flex-shrink-0 border-l-2 p-2 ${visible ? "w-80" : "w-0 hidden"}`}>
       {/* TODO find a way for tailwind to not filter margins from compiling,
        because things like `ml-${level}` are not compiled */}
-      <div className="hidden ml-2 ml-3 ml-4 ml-6 ml-8 ml-10 ml-12 ml-14"></div>
+      <div className="hidden ml-2 ml-3 ml-4 ml-5 ml-6 ml-7 ml-8 ml-9 ml-10 ml-11 ml-12 ml-13 ml-14 ml-15 ml-16"></div>
       <div className="p-2 flex flex-row-reverse">
         <svg onClick={() => setVisible(false)} xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
         </svg>
       </div>
-      <div ref={rootRef} key={reloadTreeKey}>
+      <div ref={rootRef} key={reloadTreeKey} className="overflow-auto">
         <Branch section={data} level={0} onListChange={onListChange} />
       </div>
     </div>

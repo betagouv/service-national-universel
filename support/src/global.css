@@ -71,6 +71,7 @@ BREADCRUMB
   text-decoration: none;
   color: #555;
   padding: 7px 25px 7px 10px;
+  transform-style: preserve-3d;
 }
 #breadcrumb a:after,
 #breadcrumb a:before {
@@ -79,15 +80,19 @@ BREADCRUMB
   height: 0;
   width: 1px;
   top: 50%;
-  left: -26px;
   margin-top: -24px;
-  border: 24px solid #eee;
-  border-right: 0 !important;
+  border-right: 1px solid #555;
   border-left-color: transparent !important;
 }
 #breadcrumb a:before {
   left: -27px;
   border: 24px solid #555;
+  transform: translateZ(-1px);
+}
+#breadcrumb a:after {
+  left: -26px;
+  border: 24px solid #eee;
+  transform: translateZ(-1px);
 }
 /* ACTIVE STYLES */
 #breadcrumb a.active {

@@ -49,12 +49,8 @@ const KnowledgeBaseBreadcrumb = () => {
 
 const Crumb = ({ href, children, withArrow }) => (
   <Link href={href} passHref>
-    <a href="#" className="bg-white underline">
-      {children}
-    </a>
+    <a href="#">{children}</a>
   </Link>
 );
-
-const Arrow = () => <div className="h-0 w-0 " />;
 
 export default KnowledgeBaseBreadcrumb;
