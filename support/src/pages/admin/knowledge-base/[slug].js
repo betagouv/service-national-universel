@@ -8,6 +8,7 @@ import KnowledgeBaseCreate from "../../../components/knowledge-base/KnowledgeBas
 import KnowledgeBaseSection from "../../../components/knowledge-base/KnowledgeBaseSection";
 import KnowledgeBaseTree from "../../../components/knowledge-base/KnowledgeBaseTree";
 import Layout from "../../../components/Layout";
+import Loader from "../../../components/Loader";
 import withAuth from "../../../hocs/withAuth";
 import API from "../../../services/api";
 
@@ -30,22 +31,28 @@ const KnowledgeBase = () => {
 
   const { data: response } = useSWR(API.getUrl({ path: `/support-center/knowledge-base/${slug}`, query: { withTree: true, withParents: true } }));
 
-  const [data, setData] = useState(response?.data || []);
+  const [data, setData] = useState(response?.data);
   useEffect(() => {
-    setData(response?.data || []);
+    setData(response?.data);
   }, [response?.data]);
+
+  const isRoot = router.pathname === "/admin/knowledge-base";
 
   return (
     <Layout title="Base de connaissances" className="flex flex-col">
       <Header>Base de connaissances</Header>
       <KnowledgeBaseBreadcrumb parents={data?.parents} />
-      <div className="relative flex border-t-2 h-full w-full flex-grow flex-shrink overflow-hidden">
-        <div className="flex-grow relative h-full box-border flex flex-col items-center">
-          <Content key={slug} data={data} />
+      {(!isRoot && !slug) || !data ? (
+        <Loader />
+      ) : (
+        <div className="relative flex border-t-2 h-full w-full flex-grow flex-shrink overflow-hidden">
+          <div className="flex-grow relative h-full box-border flex flex-col items-center">
+            <Content key={slug} data={data} />
+          </div>
+          <TreeButton visible={treeVisible} setVisible={setTreeVisible} />
+          <KnowledgeBaseTree visible={treeVisible} setVisible={setTreeVisible} />
         </div>
-        <TreeButton visible={treeVisible} setVisible={setTreeVisible} />
-        <KnowledgeBaseTree visible={treeVisible} setVisible={setTreeVisible} />
-      </div>
+      )}
     </Layout>
   );
 };

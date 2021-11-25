@@ -1,43 +1,39 @@
 import { useState } from "react";
 import { useSWRConfig } from "swr";
 import router from "next/router";
-import { useFieldArray, useForm } from "react-hook-form";
 import { SUPPORT_ROLES } from "snu-lib/roles";
+import { toast } from "react-toastify";
+import KnowledgeBaseForm from "./KnowledgeBaseForm";
 import withAuth from "../../hocs/withAuth";
 import API from "../../services/api";
 import Modal from "../Modal";
-import InputWithEmojiPicker from "../InputWithEmojiPicker";
+import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
 
 const KnowledgeBaseEdit = ({ sectionOrAnswer }) => {
-  sectionOrAnswer.computedAllowedRoles = Object.keys(SUPPORT_ROLES).map((role) => ({ id: role, name: role, value: sectionOrAnswer.allowedRoles.includes(role) }));
-
   const { mutate } = useSWRConfig();
-
-  const {
-    register,
-    control,
-    handleSubmit,
-    setValue,
-    getValues,
-    formState: { errors },
-  } = useForm({
-    defaultValues: sectionOrAnswer,
-  });
-
-  const { fields } = useFieldArray({
-    control, // control props comes from useForm (optional: if you are using FormContext)
-    name: "computedAllowedRoles", // unique name for your Field Array
-    // keyName: "id", default to "id", you can change the key name
-  });
+  const { flattenedData } = useKnowledgeBaseData();
 
   const onSubmit = async (body) => {
     body.allowedRoles = body.computedAllowedRoles.filter(({ value }) => !!value).map((item) => item.id);
     const response = await API.put({ path: `/support-center/knowledge-base/${sectionOrAnswer._id}`, body });
-    if (response.error) return alert(response.error);
+    if (response.error) return toast.error(response.error);
     mutate(API.getUrl({ path: `/support-center/knowledge-base/${sectionOrAnswer.slug}`, query: { withTree: true, withParents: true } }));
     mutate(API.getUrl({ path: "/support-center/knowledge-base/", query: { withTree: true, withParents: true } }));
     router.replace(`/admin/knowledge-base/${response.data.slug}`);
     setIsOpen(false);
+  };
+
+  const onDelete = async () => {
+    if (window.confirm("Vouelz-vous vraiment supprimer cet élément ? Cette opération est définitive")) {
+      const response = await API.delete({ path: `/support-center/knowledge-base/${sectionOrAnswer._id}` });
+      if (response.error) return toast.error(response.error);
+      toast.success("Élément supprimé !");
+      const parent = flattenedData.find((item) => item._id === sectionOrAnswer.parentId);
+      mutate(API.getUrl({ path: "/support-center/knowledge-base/", query: { withTree: true, withParents: true } }));
+      mutate(API.getUrl({ path: `/admin/knowledge-base/${parent.slug}`, query: { withTree: true, withParents: true } }));
+      router.replace(`/admin/knowledge-base/${parent.slug}`);
+      setIsOpen(false);
+    }
   };
 
   const [isOpen, setIsOpen] = useState(false);
@@ -50,59 +46,22 @@ const KnowledgeBaseEdit = ({ sectionOrAnswer }) => {
         </svg>
       </span>
       <Modal isOpen={isOpen} onRequestClose={() => setIsOpen(false)}>
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col w-screen-3/4 items-start">
-          {/* register your input into the hook by invoking the "register" function */}
-          <h2 className="font-bold ml-4 mb-4 text-xl">Éditer la {sectionOrAnswer.type === "section" ? "section" : "réponse"}</h2>
-          <div className="flex w-full">
-            <div className="flex flex-col flex-grow">
-              <label htmlFor="title">Titre</label>
-              <InputWithEmojiPicker
-                setValue={setValue}
-                getValues={getValues}
-                inputClassName="p-2"
-                className="border-2  mb-5"
-                placeholder={`Titre de la ${sectionOrAnswer.type === "section" ? "section" : "réponse"}`}
-                {...register("title")}
-              />
-              {errors.titleRequired && <span>This field is required</span>}
-              <label htmlFor="slug">Slug (Url)</label>
-              <input className="p-2 border-2 mb-5" placeholder={`Slug de la ${sectionOrAnswer.type === "section" ? "section" : "réponse"}`} {...register("slug")} />
-              <label htmlFor="description">Description</label>
-              <textarea
-                className="p-2 border-2 mb-5"
-                placeholder={`Description de la ${sectionOrAnswer.type === "section" ? "section" : "réponse"}`}
-                {...register("description")}
-              />
-            </div>
-            <div className="ml-10 flex flex-col flex-grow">
-              <fieldset className="mb-5">
-                <div className=" flex flex-row">
-                  <legend>Visible par:</legend>
-                  <div className="flex flex-col ml-10">
-                    {Object.keys(SUPPORT_ROLES).map((role, index) => (
-                      <div className="flex items-center" key={role}>
-                        <input className="mr-4" id={role} type="checkbox" {...register(`computedAllowedRoles.${index}.value`)} />
-                        <label className="mr-2" id={role} htmlFor={`computedAllowedRoles.${index}.value`}>
-                          {SUPPORT_ROLES[role]}
-                        </label>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </fieldset>
-              <div className="flex flex-row items-center">
-                <label htmlFor="status">Status: </label>
-                <select className="border-2 ml-10 p-2" {...register("status")}>
-                  <option value="PUBLISHED">Publié</option>
-                  <option value="DRAFT">Brouillon</option>
-                </select>
-              </div>
-            </div>
+        <KnowledgeBaseForm
+          defaultValues={{
+            ...sectionOrAnswer,
+            computedAllowedRoles: Object.keys(SUPPORT_ROLES).map((role) => ({ id: role, name: role, value: sectionOrAnswer.allowedRoles.includes(role) })),
+          }}
+          onSubmit={onSubmit}
+        >
+          <div className="flex justify-evenly mt-3.5 w-full">
+            <button type="submit" className="w-auto">
+              Enregistrer
+            </button>
+            <button className="bg-white !border-2 border-red-500  text-red-500" onClick={onDelete}>
+              Supprimer
+            </button>
           </div>
-          <button type="submit" className="w-auto">
-            Enregistrer
-          </button>
-        </form>
+        </KnowledgeBaseForm>
       </Modal>
     </>
   );

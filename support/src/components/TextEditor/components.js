@@ -7,7 +7,7 @@ export const Button = React.forwardRef(({ className, active, reversed, ...props 
   <span
     {...props}
     ref={ref}
-    className={`${reversed ? (active ? "text-white" : "text-gray-300") : active ? "text-black" : "text-gray-200"} cursor-pointer mr-2 ${className || ""}`}
+    className={`${reversed ? (active ? "text-white" : "text-gray-300") : active ? "text-black" : "text-coolGray-400"} cursor-pointer mr-2 ${className || ""}`}
   />
 ));
 

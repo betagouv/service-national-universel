@@ -55,6 +55,12 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     kb.author = req.user._id;
     kb.status = "DRAFT";
 
+    if (!req.body.hasOwnProperty("title")) {
+      return res.status(400).send({
+        ok: false,
+        error: "Un titre est obligatoire !",
+      });
+    }
     if (req.body.hasOwnProperty("type")) kb.type = req.body.type;
     if (req.body.hasOwnProperty("parentId")) kb.parentId = req.body.parentId;
     if (req.body.hasOwnProperty("position")) kb.position = req.body.position;
@@ -111,7 +117,15 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     if (req.body.hasOwnProperty("type")) updateKb.type = req.body.type;
     if (req.body.hasOwnProperty("parentId")) updateKb.parentId = req.body.parentId;
     if (req.body.hasOwnProperty("position")) updateKb.position = req.body.position;
-    if (req.body.hasOwnProperty("title")) updateKb.title = req.body.title;
+    if (req.body.hasOwnProperty("title")) {
+      if (!req.body.title.trim().length) {
+        return res.status(400).send({
+          ok: false,
+          error: "Un titre est obligatoire !",
+        });
+      }
+      updateKb.title = req.body.title;
+    }
     if (req.body.hasOwnProperty("slug")) {
       updateKb.slug = slugify(req.body.slug.trim(), {
         replacement: "-",

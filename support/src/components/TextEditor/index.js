@@ -56,7 +56,7 @@ const TextEditor = ({ content, slug, _id }) => {
       if (response.error) return toast.error(response.error);
       return;
     }
-    toast.info("Réponse mise-à-jour !");
+    toast.success("Article mis-à-jour !");
     mutate(API.getUrl({ path: `/support-center/knowledge-base/${slug}`, query: { withTree: true, withParents: true } }));
     localStorage.removeItem(`snu-kb-content-${_id}`);
     setIsSaveable(false);
