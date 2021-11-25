@@ -17,7 +17,7 @@ const Layout = ({ title, children, className = "" }) => {
           <svg
             onClick={() => setDrawerVisible(true)}
             xmlns="http://www.w3.org/2000/svg"
-            className="absolute top-3.5 left-3 h-6 w-6"
+            className="absolute text-white top-3.5 left-3 h-6 w-6"
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"

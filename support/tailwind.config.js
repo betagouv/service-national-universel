@@ -10,7 +10,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        "snu-purple-900": "#392f79",
+        "snu-purple-900": "#342484",
         "snu-purple-600": "#43389b",
         "snu-purple-300": "#5145cc",
         warmGray: colors.warmGray,

@@ -5,12 +5,12 @@ import Sortable from "sortablejs";
 import API from "../../services/api";
 import { useRouter } from "next/router";
 import { toast } from "react-toastify";
+import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
 
 const useIsActive = ({ slug }, onIsActive) => {
   const router = useRouter();
 
   const [active, setActive] = useState(false);
-
   useEffect(() => {
     setActive(slug === router.query?.slug);
   }, [router.query?.slug]);
@@ -30,19 +30,19 @@ const useIsActive = ({ slug }, onIsActive) => {
 const Branch = ({ section, level, onIsActive, position, parentId, onListChange }) => {
   const [open, setIsOpen] = useState(section.type === "root");
 
-  const gridRef = useRef(null);
-  const sortable = useRef(null);
-
   const isActive = useIsActive(section, onIsActive);
   useEffect(() => {
     if (isActive) setIsOpen(true);
   }, [isActive]);
 
   const onChildIsActive = (childIsActive) => {
+    // open if child is active, don't close if child is not active
     if (!!childIsActive) setIsOpen(true);
     if (onIsActive) onIsActive(childIsActive);
   };
 
+  const gridRef = useRef(null);
+  const sortable = useRef(null);
   useEffect(() => {
     sortable.current = Sortable.create(gridRef.current, { animation: 150, group: "shared", onEnd: onListChange });
   }, []);
@@ -89,7 +89,6 @@ const Branch = ({ section, level, onIsActive, position, parentId, onListChange }
 
 const Answer = ({ answer, level, onIsActive, position, parentId }) => {
   const isActive = useIsActive(answer, onIsActive);
-
   return (
     <Link key={answer._id} href={`/admin/knowledge-base/${answer.slug}`} passHref>
       <a data-position={position} data-parentid={parentId} data-id={answer._id} href="#" className={`text-warmGray-500 block ml-${level * 2} ${isActive ? "font-bold" : ""}`}>
@@ -119,18 +118,12 @@ const getReorderedTree = (root) => {
 };
 
 const KnowledgeBaseTree = ({ visible, setVisible }) => {
-  const { data: response } = useSWR(API.getUrl({ path: "/support-center/knowledge-base/", query: { withTree: true, withParents: true } }));
   const { mutate } = useSWRConfig();
+  const { data } = useKnowledgeBaseData();
 
-  const [data, setData] = useState(response?.data || []);
   // reloadTreeKey to prevent error `Failed to execute 'removeChild' on 'Node'` from sortablejs after updating messy tree
   const [reloadTreeKey, setReloadeTreeKey] = useState(0);
-  useEffect(() => {
-    setData(response?.data || []);
-  }, [response?.data]);
-
   const rootRef = useRef(null);
-
   const onListChange = async () => {
     const response = await API.put({ path: "/support-center/knowledge-base/reorder", body: getReorderedTree(rootRef.current.children[0]) });
     if (!response.ok) return toast.error("Désolé, une erreur est survenue. Veuillez recommencer !");

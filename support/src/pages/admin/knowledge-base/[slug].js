@@ -1,6 +1,7 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import useSWR from "swr";
+import Header from "../../../components/Header";
 import KnowledgeBaseAnswer from "../../../components/knowledge-base/KnowledgeBaseAnswer";
 import KnowledgeBaseBreadcrumb from "../../../components/knowledge-base/KnowledgeBaseBreadcrumb";
 import KnowledgeBaseCreate from "../../../components/knowledge-base/KnowledgeBaseCreate";
@@ -29,13 +30,13 @@ const KnowledgeBase = () => {
 
   return (
     <Layout title="Base de connaissances" className="flex flex-col">
-      <h1 className="py-3 pl-12 pr-8 font-bold text-lg flex justify-between">
+      <Header>
         Base de connaissances
         <TreeButton visible={treeVisible} setVisible={setTreeVisible} />
-      </h1>
+      </Header>
+      <KnowledgeBaseBreadcrumb parents={data?.parents} />
       <div className="flex border-t-2 h-full w-full flex-grow flex-shrink overflow-hidden">
         <div className="flex-grow relative h-full box-border flex flex-col items-center">
-          <KnowledgeBaseBreadcrumb parents={data?.parents} />
           <Content key={slug} data={data} />
         </div>
         <KnowledgeBaseTree visible={treeVisible} setVisible={setTreeVisible} />
@@ -54,7 +55,7 @@ const Content = ({ data }) => {
 
 const TreeButton = ({ visible, setVisible }) =>
   visible ? null : (
-    <svg onClick={() => setVisible(true)} xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 cursor-pointer" viewBox="0 0 100 125">
+    <svg onClick={() => setVisible(true)} xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 cursor-pointer" viewBox="0 0 100 125" fill="currentColor" stroke="currentColor">
       <title>Category3</title>
       <path d="M36,28.5H21a4,4,0,0,1-4-4V9.5a4,4,0,0,1,4-4H36a4,4,0,0,1,4,4v15A4,4,0,0,1,36,28.5ZM21,8.5a1,1,0,0,0-1,1v15a1,1,0,0,0,1,1H36a1,1,0,0,0,1-1V9.5a1,1,0,0,0-1-1Z" />
       <path d="M79,58.5H64a4,4,0,0,1-4-4v-15a4,4,0,0,1,4-4H79a4,4,0,0,1,4,4v15A4,4,0,0,1,79,58.5Zm-15-20a1,1,0,0,0-1,1v15a1,1,0,0,0,1,1H79a1,1,0,0,0,1-1v-15a1,1,0,0,0-1-1Z" />
