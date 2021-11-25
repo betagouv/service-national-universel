@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+#__next {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+}
+* {
+  font-family: Ubuntu, sans-serif;
+}
+
+@layer base {
+  button {
+    padding: 0.5em 3em;
+    margin-bottom: 30px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background-color: #5145cc;
+
+    color: white;
+    font-size: 1rem;
+    font-weight: 700;
+
+    border: 0;
+    border-radius: 10px;
+    box-shadow: rgb(0 0 0 / 10%) 0px 10px 15px -3px, rgb(0 0 0 / 5%) 0px 4px 6px -2px;
+
+    opacity: 1;
+    cursor: pointer;
+  }
+}
