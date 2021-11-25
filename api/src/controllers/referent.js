@@ -273,18 +273,28 @@ router.post("/signup_invite", async (req, res) => {
       firstName: Joi.string().allow(null, ""),
       lastName: Joi.string().allow(null, ""),
       invitationToken: Joi.string().required(),
+      acceptCGU: Joi.string().required(),
     })
       .unknown()
       .validate(req.body, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    const { email, password, firstName, lastName, invitationToken } = value;
+    const { email, password, firstName, lastName, invitationToken, acceptCGU } = value;
 
     const referent = await ReferentModel.findOne({ email, invitationToken, invitationExpires: { $gt: Date.now() } });
     if (!referent) return res.status(404).send({ ok: false, data: null, code: ERRORS.USER_NOT_FOUND });
     if (referent.registredAt) return res.status(400).send({ ok: false, data: null, code: ERRORS.USER_ALREADY_REGISTERED });
     if (!validatePassword(password)) return res.status(400).send({ ok: false, prescriber: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
 
-    referent.set({ firstName, lastName, password, registredAt: Date.now(), lastLoginAt: Date.now(), invitationToken: "", invitationExpires: null });
+    referent.set({
+      firstName,
+      lastName,
+      password,
+      registredAt: Date.now(),
+      lastLoginAt: Date.now(),
+      invitationToken: "",
+      invitationExpires: null,
+      acceptCGU,
+    });
 
     const token = jwt.sign({ _id: referent.id }, config.secret, { expiresIn: "30d" });
     res.cookie("jwt", token, cookieOptions());
