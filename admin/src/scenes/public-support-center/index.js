@@ -4,6 +4,7 @@ import styled from "styled-components";
 
 //import { HeroContainer } from "../../components/Content";
 import { colors } from "../../utils";
+import { adminURL } from "../../config";
 import ZammadForm from "./form";
 
 const articles = [
@@ -45,13 +46,7 @@ export default () => {
         {!user && (
           <p style={{ textAlign: "center", fontSize: "0.8rem", color: "#6B7280" }}>
             Vous avez déjà un compte sur le site du SNU ?{" "}
-            <a
-              className="link"
-              style={{ color: "#32257F", fontWeight: "bold" }}
-              href="https://admin.snu.gouv.fr/auth/login?redirect=besoin-d-aide"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <a className="link" style={{ color: "#32257F", fontWeight: "bold" }} href={`${adminURL}/auth/login?redirect=besoin-d-aide`} target="_blank" rel="noopener noreferrer">
               Connectez-vous
             </a>
           </p>
