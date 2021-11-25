@@ -5,8 +5,6 @@ import { useSelector } from "react-redux";
 
 import MultiSelect from "../components/MultiSelect";
 
-import FilterStatus from "../components/FilterStatus";
-import FilterAcademy from "../components/FilterAcademy";
 import FilterRegion from "../components/FilterRegion";
 import FilterDepartment from "../components/FilterDepartment";
 import Schools from "./schools";

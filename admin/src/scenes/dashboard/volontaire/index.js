@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { Col, Row } from "reactstrap";
 import { useSelector } from "react-redux";
 
-import FilterCohort from "../components/FilterCohort";
+import MultiSelect from "../components/MultiSelect";
 import FilterRegion from "../components/FilterRegion";
 import FilterDepartment from "../components/FilterDepartment";
 import SubTab from "./status";
@@ -43,7 +43,8 @@ export default () => {
               <FilterRegion onChange={(region) => updateFilter({ region })} value={filter.region} filter={filter} />
               <FilterDepartment onChange={(department) => updateFilter({ department })} value={filter.department} filter={filter} />
               <FilterWrapper>
-                <FilterCohort
+                <MultiSelect
+                  label="Cohorte(s)"
                   options={[
                     { value: "2019", label: "2019" },
                     { value: "2020", label: "2020" },
