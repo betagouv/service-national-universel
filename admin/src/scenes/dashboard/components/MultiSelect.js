@@ -4,10 +4,11 @@ import styled from "styled-components";
 import { colors } from "../../../utils";
 
 const MultiSelect = ({ disabled, label, value = [], onChange, options, placeholder = "Choisir" }) => {
+  console.log("✍️ ~ disabled", disabled);
   return (
     <Container>
       <Select
-        disabled={disabled}
+        isDisabled={disabled}
         styles={{
           control: (provided) => ({ ...provided, border: 0, borderRadius: "0.4rem", filter: "drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.05))" }),
           placeholder: (provided) => ({ ...provided, position: "relative", transform: "" }),

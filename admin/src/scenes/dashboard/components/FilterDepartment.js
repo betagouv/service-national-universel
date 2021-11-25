@@ -5,6 +5,8 @@ import { departmentList, region2department, REFERENT_ROLES, academyToDepartments
 import MultiSelect from "./MultiSelect";
 
 export default ({ value = [], onChange, filter }) => {
+  console.log("✍️ ~ filter", filter);
+  console.log("✍️ ~ value", value);
   const user = useSelector((state) => state.Auth.user);
   const filteredDepartment = () => {
     if (filter.academy?.length)
@@ -16,7 +18,7 @@ export default ({ value = [], onChange, filter }) => {
   };
 
   if (user.role === REFERENT_ROLES.REFERENT_DEPARTMENT) {
-    return <MultiSelect disabled label="Département(s)" options={[]} onChange={onChange} value={value} />;
+    return <MultiSelect disabled label="Département(s)" options={filteredDepartment()} onChange={onChange} value={value} />;
   }
-  return <MultiSelect disabled label="Département(s)" options={filteredDepartment()} onChange={onChange} value={value} />;
+  return <MultiSelect label="Département(s)" options={filteredDepartment()} onChange={onChange} value={value} />;
 };
