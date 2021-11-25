@@ -404,7 +404,7 @@ export default (props) => {
                         />
                       </FormGroup>
                       <FormGroup>
-                        <label>PÉRIODES POSSIBLES POUR RÉALISER LA MISSION (SEMAINE)</label>
+                        <label>PÉRIODES POSSIBLES POUR RÉALISER LA MISSION EN SEMAINE</label>
                         <MultiSelect
                           value={values.subPeriod}
                           valueRenderer={(values) => {
@@ -416,7 +416,7 @@ export default (props) => {
                           name="subPeriod"
                           options={Object.keys(MISSION_PERIOD_DURING_SCHOOL).concat(values.subPeriod.filter((e) => !MISSION_PERIOD_DURING_SCHOOL.hasOwnProperty(e)))}
                         />
-                        <label style={{ marginTop: "10px" }}>PÉRIODES POSSIBLES POUR RÉALISER LA MISSION (VACANCES)</label>
+                        <label style={{ marginTop: "10px" }}>PÉRIODES POSSIBLES POUR RÉALISER LA MISSION EN VACANCES</label>
                         <MultiSelect
                           value={values.subPeriod}
                           valueRenderer={(values) => {
