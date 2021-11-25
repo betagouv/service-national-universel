@@ -8,7 +8,7 @@ import close from "../../assets/cancel.png";
 import api from "../../services/api";
 import { translate } from "../../utils";
 import LoadingButton from "../../components/buttons/LoadingButton";
-import ErrorMessage, { requiredMessage } from "../inscription/errorMessage";
+import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
 import { SelectTag, step1, step2TechnicalPublic, step2QuestionPublic } from "../support-center/ticket/workflow";
 
 export default ({ setOpen, setSuccessMessage }) => {
