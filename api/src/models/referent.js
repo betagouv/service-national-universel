@@ -46,6 +46,13 @@ const Schema = new mongoose.Schema({
       description: "Mot de passe de l'utilisateur",
     },
   },
+  acceptCGU: {
+    type: String,
+    enum: ["true", "false"],
+    documentation: {
+      description: "l'utilisateur a accepté les CGU",
+    },
+  },
   lastLoginAt: {
     type: Date,
     documentation: {

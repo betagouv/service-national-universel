@@ -13,6 +13,7 @@ import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import PasswordEye from "../../components/PasswordEye";
 import Header from "./components/header";
+import { adminURL } from "../../config";
 
 import { translate, ROLES, colors } from "../../utils";
 import Loader from "../../components/Loader";
@@ -63,10 +64,10 @@ export default () => {
         <LoginBox>
           <Title>{title}</Title>
           <Formik
-            initialValues={{ firstName: newuser.firstName, lastName: newuser.lastName, email: newuser.email, password: "", repassword: "" }}
+            initialValues={{ firstName: newuser.firstName, lastName: newuser.lastName, email: newuser.email, password: "", repassword: "", acceptCGU: "" }}
             onSubmit={async (values, actions) => {
               try {
-                const { data: user, token, code, ok } = await api.post(`/referent/signup_invite`, { ...values, invitationToken });
+                const { data: user, token, code, ok } = await api.post(`/referent/signup_invite`, { ...values, invitationToken, acceptCGU: values.acceptCGU });
                 actions.setSubmitting(false);
                 if (ok && token) api.setToken(token);
                 if (ok && user) dispatch(setUser(user));
@@ -158,6 +159,30 @@ export default () => {
                     />
                     <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.repassword}</p>
                   </StyledFormGroup>
+                  <div>
+                    <div style={{ display: "flex", alignItems: "center", marginBottom: "1rem" }}>
+                      <CheckBox
+                        id="checkboxCGU"
+                        validate={(v) => (!v || v === "false") && requiredMessage}
+                        type="checkbox"
+                        value="true"
+                        onChange={(e) => handleChange({ target: { name: "acceptCGU", value: e.target.checked ? "true" : "false" } })}
+                        name="acceptCGU"
+                        checked={values.acceptCGU === "true"}
+                        style={{ display: "flex" }}
+                      />
+                      <label for="checkboxCGU" style={{ flex: 1, margin: 0 }}>
+                        <p style={{ marginBottom: "0" }}>
+                          J'ai lu et j'accepte les{" "}
+                          <a href={`${adminURL}/conditions-generales-utilisation`} target="_blank" style={{ textDecoration: "underline", color: colors.darkPurple }}>
+                            conditions générales d'utilisation{" "}
+                          </a>
+                          de la plateforme du Service national universel
+                        </p>
+                      </label>
+                    </div>
+                    <p style={{ fontSize: 12, color: "rgb(253, 49, 49)" }}>{errors.acceptCGU}</p>
+                  </div>
                   <Submit loading={isSubmitting} type="submit" color="primary">
                     Activer mon compte
                   </Submit>
@@ -254,5 +279,22 @@ const Account = styled.div`
     color: #262a3e;
     font-weight: 600;
     margin-left: 5px;
+  }
+`;
+const CheckBox = styled(Field)`
+  display: flex;
+  margin-right: 1rem;
+  background-color: #fff;
+  color: #606266;
+  outline: 0;
+  padding: 9px 20px;
+  border-radius: 4px;
+  border: 1px solid;
+  border-color: ${({ haserror }) => (haserror ? "red" : "#dcdfe6")};
+  ::placeholder {
+    color: #d6d6e1;
+  }
+  :focus {
+    border: 1px solid #aaa;
   }
 `;
