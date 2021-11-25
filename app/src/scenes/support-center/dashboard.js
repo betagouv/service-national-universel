@@ -1,50 +1,50 @@
-import React, { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
-import styled from "styled-components";
-import relativeTime from "dayjs/plugin/relativeTime";
-import dayjs from "dayjs";
-import "dayjs/locale/fr";
-import { useSelector } from "react-redux";
+import React, { useEffect, useState } from 'react';
+import { NavLink } from 'react-router-dom';
+import styled from 'styled-components';
+import relativeTime from 'dayjs/plugin/relativeTime';
+import dayjs from 'dayjs';
+import 'dayjs/locale/fr';
+import { useSelector } from 'react-redux';
 
-import { HeroContainer } from "../../components/Content";
-import api from "../../services/api";
-import Loader from "../../components/Loader";
-import { ticketStateNameById, colors, translateState } from "../../utils";
-import MailCloseIcon from "../../components/MailCloseIcon";
-import MailOpenIcon from "../../components/MailOpenIcon";
-import SuccessIcon from "../../components/SuccessIcon";
+import { HeroContainer } from '../../components/Content';
+import api from '../../services/api';
+import Loader from '../../components/Loader';
+import { ticketStateNameById, colors, translateState } from '../../utils';
+import MailCloseIcon from '../../components/MailCloseIcon';
+import MailOpenIcon from '../../components/MailOpenIcon';
+import SuccessIcon from '../../components/SuccessIcon';
 
 const articles = [
   {
-    title: "SNU phase 0 : inscriptions",
-    emoji: "📄",
+    title: 'SNU phase 0 : inscriptions',
+    emoji: '📄',
     body: `Rédaction du dossier d'inscription : Le jeune remplit son dossier...`,
-    url: "https://support.snu.gouv.fr/help/fr-fr/11-phase-0-inscriptions/173-phase-0-inscriptions",
+    url: 'https://support.snu.gouv.fr/help/fr-fr/11-phase-0-inscriptions/173-phase-0-inscriptions',
   },
   {
     title: "Phase 1 : L'organisation du séjour de cohésion",
-    emoji: "🌲",
+    emoji: '🌲',
     body: `Lorsque l'inscription du volontaire est validée, il entre dans la phase 1...`,
-    url: "https://support.snu.gouv.fr/help/fr-fr/12-phase-1-le-sejour-de-cohesion/174-phase-1-le-sejour-de-cohesion",
+    url: 'https://support.snu.gouv.fr/help/fr-fr/12-phase-1-le-sejour-de-cohesion/174-phase-1-le-sejour-de-cohesion',
   },
   {
     title: "Phase 2 : Le parcours d'une MIG",
-    emoji: "🤝",
+    emoji: '🤝',
     body: `La publication d'une MIG : la structure s'inscrit sur la plateforme...`,
-    url: "https://support.snu.gouv.fr/help/fr-fr/13-phase-2-mission-d-interet-general/77-phase-2-le-parcours-d-une-mig",
+    url: 'https://support.snu.gouv.fr/help/fr-fr/13-phase-2-mission-d-interet-general/77-phase-2-le-parcours-d-une-mig',
   },
 ];
 
-export default () => {
+const Dashboard = () => {
   const [userTickets, setUserTickets] = useState(null);
   const young = useSelector((state) => state.Auth.young);
 
-  dayjs.extend(relativeTime).locale("fr");
+  dayjs.extend(relativeTime).locale('fr');
 
   useEffect(() => {
     const fetchTickets = async () => {
       try {
-        const response = await api.get("/support-center/ticket?withArticles=true");
+        const response = await api.get('/support-center/ticket?withArticles=true');
         if (!response.ok) return console.log(response);
         setUserTickets(response.data);
       } catch (error) {
@@ -60,42 +60,49 @@ export default () => {
   };
 
   const displayState = (state) => {
-    if (state === "open")
+    if (state === 'open')
       return (
-        <StateContainer style={{ display: "flex" }}>
-          <MailOpenIcon color="#F8B951" style={{ margin: 0, padding: "5px" }} />
+        <StateContainer style={{ display: 'flex' }}>
+          <MailOpenIcon color="#F8B951" style={{ margin: 0, padding: '5px' }} />
           {translateState(state)}
         </StateContainer>
       );
-    if (state === "closed")
+    if (state === 'closed')
       return (
         <StateContainer>
-          <SuccessIcon color="#6BC762" style={{ margin: 0, padding: "5px" }} />
+          <SuccessIcon color="#6BC762" style={{ margin: 0, padding: '5px' }} />
           {translateState(state)}
         </StateContainer>
       );
-    if (state === "new")
+    if (state === 'new')
       return (
         <StateContainer>
-          <MailCloseIcon color="#F1545B" style={{ margin: 0, padding: "5px" }} />
+          <MailCloseIcon color="#F1545B" style={{ margin: 0, padding: '5px' }} />
           {translateState(state)}
         </StateContainer>
       );
   };
+  /* @ts-ignore */
+  // @ts-nocheck
+  /* tslint:disable */
 
   return (
     <HeroContainer>
-      <NavLink style={{ color: "#32257F", fontWeight: "bold" }} to="/"> <svg width="8" height="11" viewBox="0 0 6 9" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M4.42367 0L0.423279 4.00716L4.42367 8.01432L5.41483 7.02148L2.4056 4.00716L5.41483 0.992838L4.42367 0Z" fill="#32257F" />
-      </svg> Retour à mon espace</NavLink>
+      <NavLink style={{ color: '#32257F', fontWeight: 'bold' }} to="/">
+        {' '}
+        <svg width="8" height="11" viewBox="0 0 6 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M4.42367 0L0.423279 4.00716L4.42367 8.01432L5.41483 7.02148L2.4056 4.00716L5.41483 0.992838L4.42367 0Z" fill="#32257F" />
+        </svg>{' '}
+        Retour à mon espace
+      </NavLink>
       <Container>
-        <h4 style={{ textAlign: "center" }}>Besoin d'aide&nbsp;?</h4>
+        <h4 style={{ textAlign: 'center' }}>Besoin d&apos;aide&nbsp;?</h4>
         <div className="help-section">
           <div className="help-section-block">
-            <div className="help-section-text" style={{ color: "#6B7280" }}>
+            <div className="help-section-text" style={{ color: '#6B7280' }}>
               Vous souhaitez en savoir plus sur les phases de votre parcours volontaire ou sur le fonctionnement de votre espace&nbsp;?
               <br />
-              N'hésitez pas à consulter notre{" "}
+              N&apos;hésitez pas à consulter notre{' '}
               <strong>
                 <a className="link" href="https://support.snu.gouv.fr/help/fr-fr/3-volontaire" target="_blank" rel="noopener noreferrer">
                   base de connaissance
@@ -110,9 +117,9 @@ export default () => {
             </div>
           </div>
           <div className="help-section-block">
-            <div className="help-section-text" style={{ color: "#6B7280" }}>
-              Vous n'avez pas trouvé de réponse à votre demande ?<br />
-              Contactez notre{" "}
+            <div className="help-section-text" style={{ color: '#6B7280' }}>
+              Vous n&apos;avez pas trouvé de réponse à votre demande ?<br />
+              Contactez notre{' '}
               <strong>
                 <NavLink className="link" to="/besoin-d-aide/ticket">
                   service de support
@@ -121,12 +128,12 @@ export default () => {
               .
             </div>
             <div className="buttons">
-              <InternalLink to="/besoin-d-aide/ticket">Contacter&nbsp;quelqu'un</InternalLink>
+              <InternalLink to="/besoin-d-aide/ticket">Contacter&nbsp;quelqu&apos;un</InternalLink>
             </div>
           </div>
         </div>
       </Container>
-      <h4 style={{ marginLeft: "0.5rem" }}>Quelques articles pour vous aider&nbsp;:</h4>
+      <h4 style={{ marginLeft: '0.5rem' }}>Quelques articles pour vous aider&nbsp;:</h4>
       <Articles>
         {articles?.map((article) => (
           <div className="block" key={article.url} onClick={() => window.open(article.url)}>
@@ -136,15 +143,15 @@ export default () => {
             </div>
             <p>{article.body}</p>
             <p>
-              <a className="block-link" href={article.url} target="_blank">
+              <a className="block-link" href={article.url} target="_blank" rel="noreferrer">
                 Lire la suite
               </a>
             </p>
           </div>
         ))}
       </Articles>
-      <hr style={{ margin: "2rem" }} />
-      <h4 style={{ marginLeft: "0.5rem" }}>Mes conversations en cours</h4>
+      <hr style={{ margin: '2rem' }} />
+      <h4 style={{ marginLeft: '0.5rem' }}>Mes conversations en cours</h4>
       <List>
         <section className="ticket titles">
           <p>Nº demande</p>
@@ -154,7 +161,7 @@ export default () => {
           <p className="ticket-date">Dernière mise à jour</p>
         </section>
         {!userTickets ? <Loader /> : null}
-        {userTickets?.length === 0 ? <div style={{ textAlign: "center", padding: "1rem", fontSize: "0.85rem" }}>Aucun ticket</div> : null}
+        {userTickets?.length === 0 ? <div style={{ textAlign: 'center', padding: '1rem', fontSize: '0.85rem' }}>Aucun ticket</div> : null}
         {userTickets
           ?.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at))
           ?.map((ticket) => (
@@ -170,6 +177,8 @@ export default () => {
     </HeroContainer>
   );
 };
+
+export default Dashboard;
 
 const StateContainer = styled.div`
   display: flex;
@@ -195,7 +204,8 @@ const Container = styled.div`
     grid-template-rows: 2fr 1fr;
     text-align: center;
   }
-  ${"" /* .help-section-text {
+  ${
+    '' /* .help-section-text {
     flex: 3;
   } */
   }
