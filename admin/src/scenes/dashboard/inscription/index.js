@@ -3,7 +3,8 @@ import styled from "styled-components";
 import { Col, Row } from "reactstrap";
 import { useSelector } from "react-redux";
 
-import FilterCohort from "../components/FilterCohort";
+import MultiSelect from "../components/MultiSelect";
+
 import FilterStatus from "../components/FilterStatus";
 import FilterAcademy from "../components/FilterAcademy";
 import FilterRegion from "../components/FilterRegion";
@@ -20,7 +21,7 @@ import ScholarshipGrade from "./scolarshipGrade";
 import ParticularSituation from "./particularSituation";
 import PriorityArea from "./priorityArea";
 import RuralArea from "./ruralArea";
-import { YOUNG_STATUS, translate, ROLES } from "../../../utils";
+import { YOUNG_STATUS, translate, ROLES, academyList } from "../../../utils";
 
 export default () => {
   const [filter, setFilter] = useState();
@@ -44,16 +45,30 @@ export default () => {
     }
   }, []);
 
+  const getOptionsStatus = () => {
+    let STATUS = Object.keys(YOUNG_STATUS).map((s) => ({ label: translate(YOUNG_STATUS[s]), value: s }));
+    if (user.role !== ROLES.ADMIN) STATUS = STATUS.filter((e) => e.value !== "IN_PROGRESS");
+    return STATUS;
+  };
+
   return (
     <>
       <Row style={{ display: "flex" }}>
         <Title>Inscriptions</Title>
         {filter ? (
           <FiltersList>
-            <FilterAcademy value={filter.academy} onChange={(academy) => updateFilter({ academy })} />
-            <FilterRegion onChange={(region) => updateFilter({ region })} value={filter.region} filter={filter} />
+            {user.role === ROLES.ADMIN ? (
+              <MultiSelect
+                label="Académie(s)"
+                options={academyList.map((a) => ({ value: a, label: a }))}
+                value={filter.academy}
+                onChange={(academy) => updateFilter({ academy })}
+              />
+            ) : null}
+            <FilterRegion onChange={(region) => updateFilter({ region })} value={filter.region} />
             <FilterDepartment onChange={(department) => updateFilter({ department })} value={filter.department} filter={filter} />
-            <FilterCohort
+            <MultiSelect
+              label="Cohorte(s)"
               options={[
                 { value: "2019", label: "2019" },
                 { value: "2020", label: "2020" },
@@ -65,7 +80,7 @@ export default () => {
               onChange={(cohort) => updateFilter({ cohort })}
               value={filter.cohort}
             />
-            <FilterStatus value={filter.status} onChange={(status) => updateFilter({ status })} />
+            <MultiSelect label="Statut(s)" options={getOptionsStatus()} value={filter.status} onChange={(status) => updateFilter({ status })} />
           </FiltersList>
         ) : null}
       </Row>
