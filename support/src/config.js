@@ -1,6 +1,4 @@
-const forceProd = false;
-
-const environment = getEnvironment();
+const environment = process.env.NEXT_PUBLIC_ENVIRONMENT;
 
 let apiURL = "http://localhost:8080";
 let adminURL = "http://localhost:8082";
@@ -24,14 +22,6 @@ let franceConnectUrl = "https://fcp.integ01.dev-franceconnect.fr/api/v1";
 
 if (environment === "production") {
   franceConnectUrl = "https://app.francecon0nect.gouv.fr/api/v1";
-}
-
-function getEnvironment() {
-  if (typeof window !== "undefined") {
-    if (window?.location.href.indexOf("localhost") !== -1 || window?.location.href.indexOf("127.0.0.1") !== -1) return "development";
-    if (window?.location.href.indexOf("app_16a214d4-a14b-4be0-abc6-da10131a8938.cleverapps.io") !== -1) return "staging";
-  }
-  return "production";
 }
 
 export { apiURL, S3PREFIX, SENTRY_URL, environment, franceConnectUrl, adminURL, appURL };
