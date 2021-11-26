@@ -3,12 +3,12 @@ import Select, { components } from "react-select";
 import styled from "styled-components";
 import { colors } from "../../../utils";
 
-const MultiSelect = ({ disabled, label, value = [], onChange, options, placeholder = "Choisir" }) => {
-  console.log("✍️ ~ disabled", disabled);
+const MultiSelect = ({ disabled, label, value = [], onChange, options, placeholder = "Choisir"}) => {
   return (
     <Container>
       <Select
         isDisabled={disabled}
+        noOptionsMessage={() => "Aucune option"}
         styles={{
           control: (provided) => ({ ...provided, border: 0, borderRadius: "0.4rem", filter: "drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.05))" }),
           placeholder: (provided) => ({ ...provided, position: "relative", transform: "" }),
