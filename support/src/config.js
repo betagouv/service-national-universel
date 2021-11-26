@@ -29,7 +29,7 @@ if (environment === "production") {
 function getEnvironment() {
   if (typeof window !== "undefined") {
     if (window?.location.href.indexOf("localhost") !== -1 || window?.location.href.indexOf("127.0.0.1") !== -1) return "development";
-    if (window?.location.href.indexOf("app-66aba4d6-e5fc-4c74-b252-f55fb0e9d37f.cleverapps.io") !== -1) return "staging";
+    if (window?.location.href.indexOf("app_16a214d4-a14b-4be0-abc6-da10131a8938.cleverapps.io") !== -1) return "staging";
   }
   return "production";
 }
