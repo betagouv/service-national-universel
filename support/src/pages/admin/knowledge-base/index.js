@@ -1,8 +1,3 @@
-import Layout from "../../../components/Layout";
-import withAuth from "../../../hocs/withAuth";
+import KnowledgeBase from "./[slug]";
 
-const KnowledgeBase = () => {
-  return <Layout title="Base de connaissances"></Layout>;
-};
-
-export default withAuth(KnowledgeBase);
+export default KnowledgeBase;

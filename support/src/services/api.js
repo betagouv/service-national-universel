@@ -2,7 +2,7 @@ import URI from "urijs";
 import { apiURL } from "../config";
 
 class ApiService {
-  getUrl = (path, query = {}) => {
+  getUrl = ({ path, query = {} }) => {
     return new URI().origin(apiURL).path(path).setSearch(query).toString();
   };
 
@@ -30,7 +30,7 @@ class ApiService {
       if (body) options.body = JSON.stringify(body);
       if (credentials) options.credentials = credentials;
 
-      const url = this.getUrl(path, query);
+      const url = this.getUrl({ path, query });
       console.log("url", url);
       const response = await fetch(url, options);
 

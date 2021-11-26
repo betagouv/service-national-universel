@@ -4,7 +4,7 @@ const patchHistory = require("mongoose-patch-history").default;
 const esClient = require("../es");
 const { SUPPORT_ROLES_LIST } = require("snu-lib/roles");
 
-const MODELNAME = "knowledgeBase";
+const MODELNAME = "knowledgebase";
 
 const Schema = new mongoose.Schema(
   {
@@ -18,8 +18,7 @@ const Schema = new mongoose.Schema(
     },
     parentId: {
       type: mongoose.Types.ObjectId,
-      ref: "knowledgeBase",
-      required: true,
+      ref: "knowledgebase",
       documentation: {
         description: "Lien de parenté entre un article/une section et une section",
       },
@@ -33,6 +32,7 @@ const Schema = new mongoose.Schema(
     },
     title: {
       type: String,
+      trim: true,
       required: true,
       documentation: {
         description: "Soit le titre d'une section, soit le titre d'un article",
@@ -46,9 +46,9 @@ const Schema = new mongoose.Schema(
       },
     },
     content: {
-      type: String,
+      type: {},
       documentation: {
-        description: "ontenu d'un article",
+        description: "Contenu d'un article",
       },
     },
     description: {
@@ -70,12 +70,17 @@ const Schema = new mongoose.Schema(
       },
     },
     allowedRoles: {
-      type: String,
-      enum: SUPPORT_ROLES_LIST,
-      required: true,
-      documentation: {
-        description: "Rôles délimitant le droit de lecture d'une réponse",
-      },
+      type: [
+        {
+          type: String,
+          enum: SUPPORT_ROLES_LIST,
+          required: true,
+          documentation: {
+            description: "Rôles délimitant le droit de lecture d'une réponse",
+          },
+        },
+      ],
+      default: SUPPORT_ROLES_LIST,
     },
     status: {
       type: String,
