@@ -41,6 +41,7 @@ export default () => {
             <Formik
               initialValues={{ email: "", password: "" }}
               onSubmit={async ({ email, password }, actions) => {
+                const { user, token } = await api.post(`/referent/signin`, { email, password });
                 try {
                   if (token) api.setToken(token);
                   if (user) {
@@ -57,8 +58,7 @@ export default () => {
                   toastr.error("Erreur détectée");
                 }
                 actions.setSubmitting(false);
-              }}
-            >
+              }}>
               {({ values, errors, isSubmitting, handleChange, handleSubmit }) => {
                 return (
                   <form onSubmit={handleSubmit}>
