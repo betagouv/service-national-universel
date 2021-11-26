@@ -4,6 +4,7 @@ const fetch = require("node-fetch");
 require("../mongo");
 const { API_ENGAGEMENT_KEY } = require("../config");
 const { capture } = require("../sentry");
+const slack = require("../slack");
 const MissionApiModel = require("../models/missionAPI");
 
 const SIZE = 1000;
@@ -35,17 +36,20 @@ const sync = async (result) => {
 };
 
 const cleanData = async () => {
-  capture("CLEANING OUTDATED MISSIONS API ENGAGEMENT");
+  slack.info({ title: "sync with missions api-engagement", text: "I'm cleaning the outdated missions !" });
   try {
     await MissionApiModel.deleteMany({ lastSyncAt: { $lte: startTime } });
+    slack.success({ title: "sync with missions api-engagement", text: "I'm done !" });
   } catch (error) {
+    slack.error({ title: "sync with missions api-engagement", text: "Error while deleting outdated missions !" });
     capture("ERROR WHILE DELETING OUTDATED", error);
   }
 };
 
 exports.handler = async () => {
-  capture("START IMPORT MISSIONS API ENGAGEMENT");
+  slack.info({ title: "sync with missions api-engagement", text: "I'm starting the synchronization !" });
   if (!API_ENGAGEMENT_KEY) {
+    slack.error({ title: "sync with missions api-engagement", text: "I do not have any API_ENGAGEMENT_KEY !" });
     capture("NO API_ENGAGEMENT_KEY");
     return;
   }
@@ -57,8 +61,6 @@ exports.handler = async () => {
       headers: myHeaders,
       redirect: "follow",
     };
-    console.log("START at", startTime);
-    console.log("SIZE", SIZE);
     fetchData(requestOptions);
   } catch (e) {
     capture(`ERROR`, JSON.stringify(e));
