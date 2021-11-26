@@ -18,7 +18,7 @@ import Subtitle from "./components/subtitle";
 import { colors } from "../../utils";
 import PasswordEye from "../../components/PasswordEye";
 
-export default () => {
+export default function Signin() {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.Auth.user);
   const [userIsValid, setUserIsValid] = useState(true);
@@ -59,7 +59,7 @@ export default () => {
                 }
                 actions.setSubmitting(false);
               }}>
-              {({ values, errors, isSubmitting, handleChange, handleSubmit }) => {
+              {({ values, isSubmitting, handleChange, handleSubmit }) => {
                 return (
                   <form onSubmit={handleSubmit}>
                     {!userIsValid && (
@@ -113,7 +113,7 @@ export default () => {
       </AuthWrapper>
     </div>
   );
-};
+}
 
 const Thumb = styled.div`
   min-height: 400px;
