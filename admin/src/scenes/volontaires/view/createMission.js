@@ -4,8 +4,10 @@ import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { Formik, Field } from "formik";
 import Select from "react-select";
+import { useHistory } from "react-router-dom";
 
 import MultiSelect from "../../../components/Multiselect";
+import LoadingButton from "../../../components/buttons/LoadingButton";
 import AddressInput from "../../../components/addressInput";
 import ErrorMessage, { requiredMessage } from "../../../components/errorMessage";
 import { translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, MISSION_DOMAINS, dateForDatePicker, ROLES, SENDINBLUE_TEMPLATES, PERIOD } from "../../../utils";
@@ -14,6 +16,7 @@ import PlusSVG from "../../../assets/plus.svg";
 import CrossSVG from "../../../assets/cross.svg";
 
 export default function CreateMission({ young, onSend }) {
+  const history = useHistory();
   const [structures, setStructures] = useState();
   const [structure, setStructure] = useState();
   const [referents, setReferents] = useState([]);
@@ -54,13 +57,15 @@ export default function CreateMission({ young, onSend }) {
       missionName: mission.name,
       missionDepartment: mission.department,
       missionRegion: mission.region,
+      missionDuration: mission.duration,
       structureId: mission.structureId,
       tutorId: mission.tutorId,
       tutorName: mission.tutorName,
     };
-    const { ok, code } = await api.post(`/application`, application);
+    const { ok, code, data } = await api.post(`/application`, application);
     if (!ok) return toastr.error("Oups, une erreur est survenue lors de la candidature", code);
-    return toastr.success("Candidature ajoutée !", code);
+    toastr.success("Candidature ajoutée !", code);
+    return data;
   };
 
   return (
@@ -84,7 +89,7 @@ export default function CreateMission({ young, onSend }) {
         city: "",
         zip: "",
         address: "",
-        location: "",
+        location: {},
         department: "",
         region: "",
         structureLegalStatus: "PUBLIC",
@@ -94,6 +99,8 @@ export default function CreateMission({ young, onSend }) {
       }}
       onSubmit={async (values) => {
         values.placesLeft = values.placesTotal;
+        if (values.duration) values.duration = values.duration.toString();
+        if (!values.location) values.location = {};
         try {
           // create the strucutre if it is a new one
           if (createStructureVisible) {
@@ -139,15 +146,16 @@ export default function CreateMission({ young, onSend }) {
           if (!responseMission.ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", translate(responseMission.code));
 
           //...finally, we create the application
-          await handleProposal(responseMission.data, values.applicationStatus);
+          const application = await handleProposal(responseMission.data, values.applicationStatus);
           toastr.success("Mission enregistrée");
           onSend();
+          history.push(`/volontaire/${young._id}/phase2/application/${application._id}/contrat`);
         } catch (e) {
           console.log("ERRROR", e);
           return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", e?.error?.message);
         }
       }}>
-      {({ values, handleChange, handleSubmit, errors, touched }) => (
+      {({ values, handleChange, handleSubmit, errors, touched, isSubmitting }) => (
         <div>
           <Wrapper>
             {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas proposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
@@ -256,6 +264,16 @@ export default function CreateMission({ young, onSend }) {
                       </option>
                     </Field>
                     <ErrorMessage errors={errors} touched={touched} name="format" />
+                  </FormGroup>
+                  <FormGroup>
+                    <label>Durée de la mission</label>
+                    <p style={{ color: "#a0aec1", fontSize: 12 }}>Saisissez un nombre d'heures prévisionnelles pour la réalisation de la mission</p>
+                    <Row>
+                      <Col>
+                        <Input type="number" name="duration" onChange={handleChange} value={values.duration} />
+                      </Col>
+                      <Col style={{ display: "flex", alignItems: "center" }}>heure(s)</Col>
+                    </Row>
                   </FormGroup>
                   <FormGroup>
                     <label>
@@ -455,7 +473,7 @@ export default function CreateMission({ young, onSend }) {
                   </ToggleBloc>
                 </Wrapper>
                 <Wrapper>
-                  <Legend>Statut de la mission</Legend>
+                  <Legend>Statut de la candidature</Legend>
                   <FormGroup>
                     <Field validate={(v) => !v && requiredMessage} component="select" name="applicationStatus" value={values.applicationStatus} onChange={handleChange}>
                       <option value="DONE">{translate("DONE")}</option>
@@ -485,7 +503,7 @@ export default function CreateMission({ young, onSend }) {
             {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas proposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
             <Header style={{ justifyContent: "flex-end" }}>
               <ButtonContainer>
-                <button onClick={handleSubmit}>Enregistrer et proposer la mission</button>
+                <LoadingButton loading={isSubmitting} onClick={handleSubmit}>Enregistrer et rattacher la mission</LoadingButton>
               </ButtonContainer>
             </Header>
           </Wrapper>
