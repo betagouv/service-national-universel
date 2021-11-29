@@ -74,8 +74,7 @@ export default (props) => {
             console.log(e);
             toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
           }
-        }}
-      >
+        }}>
         {({ values, handleChange, handleSubmit, isSubmitting, submitForm, validateField, errors, touched, setFieldValue }) => (
           <>
             <TitleWrapper>
@@ -95,6 +94,9 @@ export default (props) => {
                 </LoadingButton>
               </div>
             </TitleWrapper>
+            {Object.values(errors).filter((e) => !!e).length ? (
+              <Alert>Vous ne pouvez pas enregistrer ce volontaires car tous les champs ne sont pas correctement renseignés.</Alert>
+            ) : null}
             <Row>
               <Identite values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
               <Historic young={young} />
@@ -174,6 +176,17 @@ const InterTitle = styled.h2`
   font-weight: 450;
   font-size: 0.9rem;
   text-transform: uppercase;
+`;
+
+const Alert = styled.h3`
+  border: 1px solid #fc8181;
+  border-radius: 0.25em;
+  background-color: #fff5f5;
+  color: #c53030;
+  font-weight: 400;
+  font-size: 12px;
+  padding: 1em;
+  text-align: center;
 `;
 
 const Title = styled.h2`

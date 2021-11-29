@@ -55,9 +55,8 @@ export default (props) => {
             console.log(e);
             toastr.error("Oups, une erreur est survenue pendant la création du volontaire :", translate(e.code));
           }
-        }}
-      >
-        {({ values, handleChange, handleSubmit, isSubmitting, submitForm, errors, touched, setFieldValue }) => (
+        }}>
+        {({ values, handleChange, handleSubmit, isSubmitting, submitForm, errors, touched, setFieldValue, validateField }) => (
           <>
             <TitleWrapper>
               <div>
@@ -67,6 +66,9 @@ export default (props) => {
                 Valider cette candidature
               </SaveBtn>
             </TitleWrapper>
+            {Object.values(errors).filter((e) => !!e).length ? (
+              <Alert>Vous ne pouvez pas enregistrer ce volontaires car tous les champs ne sont pas correctement renseignés.</Alert>
+            ) : null}
             <Row>
               <Identite
                 values={values}
@@ -82,6 +84,7 @@ export default (props) => {
                 required={{ email: true, phone: true, address: true, city: true, zip: true, department: true, region: true }}
                 errors={errors}
                 touched={touched}
+                validateField={validateField}
               />
               <Situation values={values} handleChange={handleChange} required={{ situation: true }} errors={errors} setFieldValue={setFieldValue} />
               <SituationsParticulieres values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
@@ -128,6 +131,17 @@ const Title = styled.h2`
   color: #242526;
   font-weight: bold;
   font-size: 28px;
+`;
+
+const Alert = styled.h3`
+  border: 1px solid #fc8181;
+  border-radius: 0.25em;
+  background-color: #fff5f5;
+  color: #c53030;
+  font-weight: 400;
+  font-size: 12px;
+  padding: 1em;
+  text-align: center;
 `;
 
 const SaveBtn = styled(LoadingButton)`
