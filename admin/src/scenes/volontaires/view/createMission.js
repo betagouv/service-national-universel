@@ -8,7 +8,7 @@ import Select from "react-select";
 import MultiSelect from "../../../components/Multiselect";
 import AddressInput from "../../../components/addressInput";
 import ErrorMessage, { requiredMessage } from "../../../components/errorMessage";
-import { translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, MISSION_DOMAINS, dateForDatePicker, ROLES, SENDINBLUE_TEMPLATES } from "../../../utils";
+import { translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, MISSION_DOMAINS, dateForDatePicker, ROLES, SENDINBLUE_TEMPLATES,PERIOD } from "../../../utils";
 import api from "../../../services/api";
 import PlusSVG from "../../../assets/plus.svg";
 import CrossSVG from "../../../assets/cross.svg";
@@ -90,6 +90,7 @@ export default ({ young, onSend }) => {
         structureLegalStatus: "PUBLIC",
         applicationStatus: "DONE",
         period: [],
+        subPeriod: [],
       }}
       onSubmit={async (values) => {
         values.placesLeft = values.placesTotal;
@@ -358,30 +359,37 @@ export default ({ young, onSend }) => {
                       />
                     </FormGroup>
                     <FormGroup>
-                      <label>PÉRIODES POSSIBLES POUR RÉALISER LA MISSION (SEMAINE)</label>
+                      <label>Période de réalisation de la mission :</label>
                       <MultiSelect
                         value={values.period}
                         valueRenderer={(values) => {
-                          const valuesFiltered = values.filter((el) => !!MISSION_PERIOD_DURING_SCHOOL[el.value]).map((el) => el.label);
+                          const valuesFiltered = values.map((el) => el.label);
                           return valuesFiltered.length ? valuesFiltered.join(", ") : "Sélectionnez une ou plusieurs périodes";
                         }}
-                        filterOptions={(options) => options.filter((el) => !!MISSION_PERIOD_DURING_SCHOOL[el.value])}
                         onChange={handleChange}
                         name="period"
-                        options={Object.keys(MISSION_PERIOD_DURING_SCHOOL).concat(values.period.filter((e) => !MISSION_PERIOD_DURING_SCHOOL.hasOwnProperty(e)))}
+                        options={Object.keys(PERIOD)}
                       />
-                      <label style={{ marginTop: "10px" }}>PÉRIODES POSSIBLES POUR RÉALISER LA MISSION (VACANCES)</label>
-                      <MultiSelect
-                        value={values.period}
-                        valueRenderer={(values) => {
-                          const valuesFiltered = values.filter((el) => !!MISSION_PERIOD_DURING_HOLIDAYS[el.value]).map((el) => el.label);
-                          return valuesFiltered.length ? valuesFiltered.join(", ") : "Sélectionnez une ou plusieurs périodes";
-                        }}
-                        filterOptions={(options) => options.filter((el) => !!MISSION_PERIOD_DURING_HOLIDAYS[el.value])}
-                        onChange={handleChange}
-                        name="period"
-                        options={Object.keys(MISSION_PERIOD_DURING_HOLIDAYS).concat(values.period.filter((e) => !MISSION_PERIOD_DURING_HOLIDAYS.hasOwnProperty(e)))}
-                      />
+                      {values.period?.length ? (
+                        <>
+                          <label style={{ marginTop: "10px" }}>Précisez :</label>
+                          <MultiSelect
+                            value={values.subPeriod}
+                            valueRenderer={(values) => {
+                              const valuesFiltered = values.map((el) => el.label);
+                              return valuesFiltered.length ? valuesFiltered.join(", ") : "Sélectionnez une ou plusieurs périodes";
+                            }}
+                            onChange={handleChange}
+                            name="subPeriod"
+                            options={(() => {
+                              let options = [];
+                              if (values.period?.indexOf(PERIOD.DURING_HOLIDAYS) !== -1) options.push(...Object.keys(MISSION_PERIOD_DURING_HOLIDAYS));
+                              if (values.period?.indexOf(PERIOD.DURING_SCHOOL) !== -1) options.push(...Object.keys(MISSION_PERIOD_DURING_SCHOOL));
+                              return options;
+                            })()}
+                          />
+                        </>
+                      ) : null}
                     </FormGroup>
                     <FormGroup>
                       <label>NOMBRE DE VOLONTAIRES RECHERCHÉS POUR CETTE MISSION</label>

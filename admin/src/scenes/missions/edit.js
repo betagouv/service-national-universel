@@ -425,7 +425,6 @@ export default (props) => {
                                 let options = [];
                                 if (values.period?.indexOf(PERIOD.DURING_HOLIDAYS) !== -1) options.push(...Object.keys(MISSION_PERIOD_DURING_HOLIDAYS));
                                 if (values.period?.indexOf(PERIOD.DURING_SCHOOL) !== -1) options.push(...Object.keys(MISSION_PERIOD_DURING_SCHOOL));
-                                console.log("✍️ ~ options", options);
                                 return options;
                               })()}
                             />
