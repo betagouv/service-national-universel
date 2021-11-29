@@ -7,6 +7,7 @@ import Select from "react-select";
 import { useHistory } from "react-router-dom";
 
 import MultiSelect from "../../../components/Multiselect";
+import LoadingButton from "../../../components/buttons/LoadingButton";
 import AddressInput from "../../../components/addressInput";
 import ErrorMessage, { requiredMessage } from "../../../components/errorMessage";
 import { translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, MISSION_DOMAINS, dateForDatePicker, ROLES, SENDINBLUE_TEMPLATES } from "../../../utils";
@@ -56,6 +57,7 @@ export default ({ young, onSend }) => {
       missionName: mission.name,
       missionDepartment: mission.department,
       missionRegion: mission.region,
+      missionDuration: mission.duration,
       structureId: mission.structureId,
       tutorId: mission.tutorId,
       tutorName: mission.tutorName,
@@ -95,7 +97,6 @@ export default ({ young, onSend }) => {
       }}
       onSubmit={async (values) => {
         values.placesLeft = values.placesTotal;
-        console.log("🚀 ~ file: createMission.js ~ line 98 ~ onSubmit={ ~ values", values.location);
         if (values.duration) values.duration = values.duration.toString();
         if (!values.location) values.location = {};
         try {
@@ -144,7 +145,6 @@ export default ({ young, onSend }) => {
 
           //...finally, we create the application
           const application = await handleProposal(responseMission.data, values.applicationStatus);
-          console.log("🚀 ~ file: createMission.js ~ line 144 ~ onSubmit={ ~ application", application);
           toastr.success("Mission enregistrée");
           onSend();
           history.push(`/volontaire/${young._id}/phase2/application/${application._id}/contrat`);
@@ -154,7 +154,7 @@ export default ({ young, onSend }) => {
         }
       }}
     >
-      {({ values, handleChange, handleSubmit, errors, touched }) => (
+      {({ values, handleChange, handleSubmit, errors, touched, isSubmitting }) => (
         <div>
           <Wrapper>
             {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas proposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
@@ -484,7 +484,7 @@ export default ({ young, onSend }) => {
             {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas proposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
             <Header style={{ justifyContent: "flex-end" }}>
               <ButtonContainer>
-                <button onClick={handleSubmit}>Enregistrer et rattacher la mission</button>
+                <LoadingButton loading={isSubmitting} onClick={handleSubmit}>Enregistrer et rattacher la mission</LoadingButton>
               </ButtonContainer>
             </Header>
           </Wrapper>
