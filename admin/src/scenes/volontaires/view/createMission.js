@@ -267,7 +267,7 @@ export default function CreateMission({ young, onSend }) {
                   </FormGroup>
                   <FormGroup>
                     <label>Durée de la mission</label>
-                    <p style={{ color: "#a0aec1", fontSize: 12 }}>Saisissez un nombre d'heures prévisionnelles pour la réalisation de la mission</p>
+                    <p style={{ color: "#a0aec1", fontSize: 12 }}>Saisissez un nombre d&apos;heures prévisionnelles pour la réalisation de la mission</p>
                     <Row>
                       <Col>
                         <Input type="number" name="duration" onChange={handleChange} value={values.duration} />
@@ -442,14 +442,18 @@ export default function CreateMission({ young, onSend }) {
                           </span>
                         )}
                       </p>
-                      <Field validate={(v) => !v && requiredMessage} component="select" name="tutorId" value={values.tutorId} onChange={handleChange}>
-                        <option value="">Sélectionner un tuteur</option>
-                        {referents &&
-                          referents.map((referent) => {
-                            return <option key={referent._id} value={referent._id}>{`${referent.firstName} ${referent.lastName}`}</option>;
-                          })}
-                      </Field>
-                      <ErrorMessage errors={errors} touched={touched} name="tutorId" />
+                      {!createTutorVisible ? (
+                        <>
+                          <Field validate={(v) => !v && requiredMessage} component="select" name="tutorId" value={values.tutorId} onChange={handleChange}>
+                            <option value="">Sélectionner un tuteur</option>
+                            {referents &&
+                              referents.map((referent) => {
+                                return <option key={referent._id} value={referent._id}>{`${referent.firstName} ${referent.lastName}`}</option>;
+                              })}
+                          </Field>
+                          <ErrorMessage errors={errors} touched={touched} name="tutorId" />
+                        </>
+                      ) : null}
                     </FormGroup>
                   ) : null}
                   <ToggleBloc
@@ -503,7 +507,9 @@ export default function CreateMission({ young, onSend }) {
             {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas proposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
             <Header style={{ justifyContent: "flex-end" }}>
               <ButtonContainer>
-                <LoadingButton loading={isSubmitting} onClick={handleSubmit}>Enregistrer et rattacher la mission</LoadingButton>
+                <LoadingButton loading={isSubmitting} onClick={handleSubmit}>
+                  Enregistrer et rattacher la mission
+                </LoadingButton>
               </ButtonContainer>
             </Header>
           </Wrapper>
