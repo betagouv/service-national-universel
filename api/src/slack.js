@@ -1,6 +1,6 @@
 const fetch = require("node-fetch");
 
-const { SLACK_BOT_TOKEN, SLACK_BOT_CHANNEL } = require("./config");
+const { SLACK_BOT_TOKEN, SLACK_BOT_CHANNEL, ENVIRONMENT } = require("./config");
 const { capture } = require("./sentry");
 
 const STATUS_PREFIX = {
@@ -27,23 +27,27 @@ const postMessage = async ({ title, text, author_name, color }) => {
       },
     ],
   };
-  fetch("https://slack.com/api/chat.postMessage", {
-    method: "POST",
-    body: JSON.stringify(payload),
-    headers: {
-      "Content-Type": "application/json; charset=utf-8",
-      "Content-Length": payload.length,
-      Authorization: `Bearer ${SLACK_BOT_TOKEN}`,
-      Accept: "application/json",
-    },
-  })
-    .then((res) => {
-      return res.json();
+  if (ENVIRONMENT === "production") {
+    fetch("https://slack.com/api/chat.postMessage", {
+      method: "POST",
+      body: JSON.stringify(payload),
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        "Content-Length": payload.length,
+        Authorization: `Bearer ${SLACK_BOT_TOKEN}`,
+        Accept: "application/json",
+      },
     })
-    .catch((error) => {
-      capture(error);
-      console.log(error);
-    });
+      .then((res) => {
+        return res.json();
+      })
+      .catch((error) => {
+        capture(error);
+        console.log(error);
+      });
+  } else {
+    console.log("slack", payload?.attachments);
+  }
 };
 
 const error = async (args) => {

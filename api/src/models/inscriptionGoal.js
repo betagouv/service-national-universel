@@ -31,7 +31,12 @@ const Schema = new mongoose.Schema({
       description: "Cohorte des jeunes",
     },
   },
-
+  fillingRate: {
+    type: Number,
+    documentation: {
+      description: "taux de remplissage (en pourcentage)",
+    },
+  },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });
