@@ -50,6 +50,7 @@ export default ({ onChange, value }) => {
             à {value.birthZip} {value.birthCity}, {value.birthCountry}
           </div>
         ) : null}
+        {value.frenchNationality === "true" ? <div style={{ fontStyle: "italic", fontSize: "0.9rem" }}>🇫🇷 Nationalité française</div> : null}
         <div style={{ display: "flex", flexWrap: "wrap" }}>
           <Link to={`/volontaire/${value._id}`}>
             <PanelActionButton icon="eye" title="Consulter" />
@@ -100,24 +101,26 @@ export default ({ onChange, value }) => {
           </div>
         )}
       </Info>
-      <Info title="Traitement des données personnelles (moins de 15 ans)" id={value._id}>
-        {(value.dataProcessingConsentmentFiles || []).map((e, i) => (
-          <DownloadButton
-            key={i}
-            source={() => api.get(`/referent/youngFile/${value._id}/dataProcessingConsentmentFiles/${e}`)}
-            title={`Télécharger le document (${i + 1}/${value.dataProcessingConsentmentFiles.length})`}
-          />
-        ))}
-        {isFromFranceConnect(young) && (
-          <div style={{ marginTop: "1rem" }}>
-            <img src={require("../../assets/fc_logo_v2.png")} height={60} />
-            <br />
-            <b>Consentement parental validé via FranceConnect.</b>
-            <br />
-            Les représentants légaux ont utilisé FranceConnect pour s’identifier et consentir, ce qui permet de s’affranchir du document de consentement papier.
-          </div>
-        )}
-      </Info>
+      {getAge(young?.birthdateAt) < 15 ? (
+        <Info title="Traitement des données personnelles" id={value._id}>
+          {(value.dataProcessingConsentmentFiles || []).map((e, i) => (
+            <DownloadButton
+              key={i}
+              source={() => api.get(`/referent/youngFile/${value._id}/dataProcessingConsentmentFiles/${e}`)}
+              title={`Télécharger le document (${i + 1}/${value.dataProcessingConsentmentFiles.length})`}
+            />
+          ))}
+          {isFromFranceConnect(young) && (
+            <div style={{ marginTop: "1rem" }}>
+              <img src={require("../../assets/fc_logo_v2.png")} height={60} />
+              <br />
+              <b>Consentement parental validé via FranceConnect.</b>
+              <br />
+              Les représentants légaux ont utilisé FranceConnect pour s’identifier et consentir, ce qui permet de s’affranchir du document de consentement papier.
+            </div>
+          )}
+        </Info>
+      ) : null}
       <Info title="Coordonnées" id={value._id}>
         <Details title="E-mail" value={value.email} copy />
         <Details title="Tel" value={value.phone} />

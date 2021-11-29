@@ -5,7 +5,6 @@ import "bootstrap/dist/css/bootstrap.min.css";
 
 import * as Sentry from "@sentry/react";
 import { Integrations } from "@sentry/tracing";
-
 import queryString from "query-string";
 import styled from "styled-components";
 
@@ -53,7 +52,7 @@ if (environment === "production") {
   });
 }
 
-export default () => {
+export default function App() {
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
   useEffect(() => {
@@ -100,7 +99,7 @@ export default () => {
       </div>
     </Router>
   );
-};
+}
 
 const Espace = () => {
   const [menuVisible, setMenuVisible] = useState(false);

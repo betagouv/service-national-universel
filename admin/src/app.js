@@ -2,12 +2,11 @@ import React, { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { BrowserRouter as Router, Route, Switch, Redirect } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
-
 import * as Sentry from "@sentry/react";
 import { Integrations } from "@sentry/tracing";
 import styled from "styled-components";
 
-import { setUser, setStructure, setTickets } from "./redux/auth/actions";
+import { setUser } from "./redux/auth/actions";
 import Auth from "./scenes/auth";
 import Validate from "./scenes/validate";
 import Profil from "./scenes/profil";
@@ -31,6 +30,7 @@ import SupportCenter from "./scenes/support-center";
 import Association from "./scenes/association";
 import Inbox from "./scenes/inbox";
 import CGU from "./scenes/CGU";
+import PublicSupport from "./scenes/public-support-center";
 
 import Drawer from "./components/drawer";
 import Header from "./components/header";
@@ -54,7 +54,7 @@ if (environment === "production") {
   });
 }
 
-export default () => {
+export default function App() {
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
   useEffect(() => {
@@ -67,7 +67,9 @@ export default () => {
         if (res.user) dispatch(setUser(res.user));
         // const { data } = await api.get(`/support-center/ticket_overviews`);
         // dispatch(setTickets(data));
-      } catch (e) {}
+      } catch (e) {
+        console.log(e);
+      }
       setLoading(false);
     }
     fetchData();
@@ -83,13 +85,14 @@ export default () => {
           <Route path="/validate" component={Validate} />
           <Route path="/conditions-generales-utilisation" component={CGU} />
           <Route path="/auth" component={Auth} />
+          <Route path="/public-besoin-d-aide" component={PublicSupport} />
           <Route path="/" component={Home} />
         </Switch>
         <Footer />
       </div>
     </Router>
   );
-};
+}
 
 const Home = () => {
   const user = useSelector((state) => state.Auth.user);
@@ -142,7 +145,7 @@ const Home = () => {
   );
 };
 
-const RestrictedRoute = ({ component: Component, isLoggedIn, ...rest }) => {
+const RestrictedRoute = ({ component: Component, ...rest }) => {
   const user = useSelector((state) => state.Auth.user);
   if (!user) {
     const redirect = encodeURIComponent(window.location.href.replace(window.location.origin, "").substring(1));

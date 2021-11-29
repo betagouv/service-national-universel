@@ -71,7 +71,7 @@ router.get("/availability/2022", passport.authenticate("young", { session: false
         continue;
       }
 
-      const ratio = Math.floor(data.max * session.buffer) / nbYoung;
+      const ratio = Math.floor(goal.max * session.buffer) / nbYoung;
       if (ratio >= 1) session.goalReached = true;
       else session.goalReached = false;
     }

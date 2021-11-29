@@ -18,7 +18,7 @@ import Subtitle from "./components/subtitle";
 import { colors } from "../../utils";
 import PasswordEye from "../../components/PasswordEye";
 
-export default () => {
+export default function Signin() {
   const dispatch = useDispatch();
   const user = useSelector((state) => state.Auth.user);
   const [userIsValid, setUserIsValid] = useState(true);
@@ -41,8 +41,8 @@ export default () => {
             <Formik
               initialValues={{ email: "", password: "" }}
               onSubmit={async ({ email, password }, actions) => {
+                const { user, token } = await api.post(`/referent/signin`, { email, password });
                 try {
-                  const { user, token } = await api.post(`/referent/signin`, { email, password });
                   if (token) api.setToken(token);
                   if (user) {
                     dispatch(setUser(user));
@@ -58,9 +58,8 @@ export default () => {
                   toastr.error("Erreur détectée");
                 }
                 actions.setSubmitting(false);
-              }}
-            >
-              {({ values, errors, isSubmitting, handleChange, handleSubmit }) => {
+              }}>
+              {({ values, isSubmitting, handleChange, handleSubmit }) => {
                 return (
                   <form onSubmit={handleSubmit}>
                     {!userIsValid && (
@@ -114,7 +113,7 @@ export default () => {
       </AuthWrapper>
     </div>
   );
-};
+}
 
 const Thumb = styled.div`
   min-height: 400px;
