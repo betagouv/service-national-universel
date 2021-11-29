@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useDebugValue, useEffect, useState } from "react";
 import styled from "styled-components";
 import { Link, useHistory } from "react-router-dom";
 
@@ -15,6 +15,7 @@ export default ({ onChange, value }) => {
   const [young, setYoung] = useState(null);
 
   useEffect(() => {
+    console.log(correctionRequests);
     (async () => {
       const id = value && value._id;
       if (!id) return setYoung(null);
@@ -33,6 +34,8 @@ export default ({ onChange, value }) => {
   }, [young]);
 
   if (!value || !young) return <div />;
+
+  const correctionRequests = young.historic.filter((i) => i.status === "WAITING_CORRECTION");
 
   return (
     <Panel>
@@ -159,7 +162,16 @@ export default ({ onChange, value }) => {
           <Details title="Région" value={young.parent2Region} />
         </Info>
       )}
-      {young && young.historic && young.historic.length !== 0 && <Historic value={young.historic} />}
+      {young && young.historic && correctionRequests.length !== 0 && (
+        <Info title="Historique des demandes de correction :" id={value._id}>
+          <Historic value={correctionRequests} />
+        </Info>
+      )}
+      {young && young.historic && young.historic.length !== 0 && (
+        <Info title="Historique des statuts :" id={value._id}>
+          <Historic value={young.historic} />
+        </Info>
+      )}
       {young.motivations && (
         <div className="info">
           <div className="info-title">Motivations</div>

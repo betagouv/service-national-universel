@@ -68,6 +68,11 @@ export default ({ onChange, value }) => {
           {value.inscriptionCorrectionMessage}
         </Info>
       ) : null}
+      {value.status === YOUNG_STATUS.WAITING_CORRECTION && value.inscriptionCorrectionMessage ? (
+        <Info title="Historique des messages :" id={value._id}>
+          <Historic value={young.historic} />
+        </Info>
+      ) : null}
       {value.status === YOUNG_STATUS.REFUSED && value.inscriptionRefusedMessage ? (
         <Info title="Motif de refus :" id={value._id}>
           {value.inscriptionRefusedMessage}
