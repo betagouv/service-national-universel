@@ -8,12 +8,12 @@ import Select from "react-select";
 import MultiSelect from "../../../components/Multiselect";
 import AddressInput from "../../../components/addressInput";
 import ErrorMessage, { requiredMessage } from "../../../components/errorMessage";
-import { translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, MISSION_DOMAINS, dateForDatePicker, ROLES, SENDINBLUE_TEMPLATES,PERIOD } from "../../../utils";
+import { translate, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, MISSION_DOMAINS, dateForDatePicker, ROLES, SENDINBLUE_TEMPLATES, PERIOD } from "../../../utils";
 import api from "../../../services/api";
 import PlusSVG from "../../../assets/plus.svg";
 import CrossSVG from "../../../assets/cross.svg";
 
-export default ({ young, onSend }) => {
+export default function CreateMission({ young, onSend }) {
   const [structures, setStructures] = useState();
   const [structure, setStructure] = useState();
   const [referents, setReferents] = useState([]);
@@ -146,8 +146,7 @@ export default ({ young, onSend }) => {
           console.log("ERRROR", e);
           return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", e?.error?.message);
         }
-      }}
-    >
+      }}>
       {({ values, handleChange, handleSubmit, errors, touched }) => (
         <div>
           <Wrapper>
@@ -161,9 +160,9 @@ export default ({ young, onSend }) => {
                       <span>*</span>NOM DE LA MISSION
                     </label>
                     <p style={{ color: "#a0aec1", fontSize: 12 }}>
-                      Privilégiez une phrase précisant l'action du volontaire.
+                      Privilégiez une phrase précisant l&apos;action du volontaire.
                       <br />
-                      Exemple: "Je fais les courses de produits pour mes voisins les plus fragiles"
+                      Exemple: &quot;Je fais les courses de produits pour mes voisins les plus fragiles&quot;
                     </p>
                     <Field validate={(v) => !v && requiredMessage} value={values.name} onChange={handleChange} name="name" placeholder="Nom de votre mission" />
                     <ErrorMessage errors={errors} touched={touched} name="name" />
@@ -191,8 +190,7 @@ export default ({ young, onSend }) => {
                         setCreateTutorVisible(!createStructureVisible);
                         setStructure(null);
                       }}
-                      title="Créer une nouvelle structure"
-                    >
+                      title="Créer une nouvelle structure">
                       <FormGroup>
                         <Field
                           validate={(v) => !v && requiredMessage}
@@ -236,7 +234,7 @@ export default ({ young, onSend }) => {
                     </ToggleBloc>
                   </FormGroup>
                   <FormGroup>
-                    <label>DOMAINES D'ACTION</label>
+                    <label>DOMAINES D&apos;ACTION</label>
                     <MultiSelect
                       value={values.domains || []}
                       onChange={handleChange}
@@ -408,7 +406,7 @@ export default ({ young, onSend }) => {
                         <span>*</span>TUTEUR
                       </label>
                       <p style={{ color: "#a0aec1", fontSize: 12 }}>
-                        Sélectionner le tuteur qui va s'occuper de la mission. <br />
+                        Sélectionner le tuteur qui va s&apos;occuper de la mission. <br />
                         {/* todo invite tuteur */}
                         {structure && (
                           <span>
@@ -418,8 +416,7 @@ export default ({ young, onSend }) => {
                                 style={{ textDecoration: "underline", cursor: "pointer" }}
                                 onClick={() => {
                                   setCreateTutorVisible(true);
-                                }}
-                              >
+                                }}>
                                 ajouter un nouveau tuteur
                               </a>
                             </u>{" "}
@@ -442,8 +439,7 @@ export default ({ young, onSend }) => {
                     onClick={() => {
                       setCreateTutorVisible(!createTutorVisible);
                     }}
-                    title="Ajouter un nouveau tuteur"
-                  >
+                    title="Ajouter un nouveau tuteur">
                     <FormGroup>
                       <Field validate={(v) => !v && requiredMessage} value={values.tutorFirstName} onChange={handleChange} name="tutorFirstName" placeholder="Prénom" />
                       <ErrorMessage errors={errors} touched={touched} name="tutorFirstName" />
@@ -482,7 +478,7 @@ export default ({ young, onSend }) => {
                     errors={errors}
                     touched={touched}
                   />
-                  <p style={{ color: "#a0aec1", fontSize: 12 }}>Si l'adresse n'est pas reconnue, veuillez saisir le nom de la ville.</p>
+                  <p style={{ color: "#a0aec1", fontSize: 12 }}>Si l&apos;adresse n&apos;est pas reconnue, veuillez saisir le nom de la ville.</p>
                 </Wrapper>
               </Col>
             </Row>
@@ -497,7 +493,7 @@ export default ({ young, onSend }) => {
       )}
     </Formik>
   );
-};
+}
 
 const AutocompleteSelectStructure = ({ values, handleChange, placeholder, options, onSelect }) => {
   return (
@@ -518,7 +514,7 @@ const AutocompleteSelectStructure = ({ values, handleChange, placeholder, option
   );
 };
 
-const ToggleBloc = ({ children, title, borderBottom, borderRight, borderLeft, disabled, onClick, visible }) => {
+const ToggleBloc = ({ children, title, onClick, visible }) => {
   return (
     <Wrapper style={{ marginTop: "1rem", padding: ".5rem", border: "1px solid #cccccc", borderRadius: ".5rem" }}>
       <div onClick={onClick} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer" }}>
