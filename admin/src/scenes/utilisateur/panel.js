@@ -95,7 +95,7 @@ export default ({ onChange, value }) => {
             <Link to={`/user/${value._id}`}>
               <PanelActionButton icon="eye" title="Consulter" />
             </Link>
-            {user.role !== ROLES.REFERENT_REGION && user.role !== ROLES.REFERENT_DEPARTMENT ? (
+            {user.role === ROLES.ADMIN ? (
               <PanelActionButton onClick={handleImpersonate} icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
             ) : null}
             {structure ? (
