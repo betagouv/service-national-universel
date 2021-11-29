@@ -21,7 +21,7 @@ function logoutCookieOptions() {
   } else if (config.ENVIRONMENT === "staging") {
     return { httpOnly: true, secure: true, sameSite: "none" };
   } else {
-    return { httpOnly: true, secure: true, sameSite: "Lax" };
+    return { httpOnly: true, secure: true, domain: ".snu.gouv.fr", sameSite: "Lax" };
   }
 }
 
