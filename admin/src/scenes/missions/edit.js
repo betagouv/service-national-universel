@@ -399,7 +399,7 @@ export default (props) => {
                         />
                       </FormGroup>
                       <FormGroup>
-                        <label>La mission se déroulera :</label>
+                        <label>Période de réalisation de la mission :</label>
                         <MultiSelect
                           value={values.period}
                           valueRenderer={(values) => {
@@ -412,7 +412,7 @@ export default (props) => {
                         />
                         {values.period?.length ? (
                           <>
-                            <label style={{ marginTop: "10px" }}>La mission se déroulera plus précisemment :</label>
+                            <label style={{ marginTop: "10px" }}>Précisez :</label>
                             <MultiSelect
                               value={values.subPeriod}
                               valueRenderer={(values) => {
