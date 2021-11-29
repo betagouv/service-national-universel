@@ -11,6 +11,7 @@
     "printWidth": 180
   },
   "dependencies": {
+    "@headlessui/react": "^1.4.2",
     "@sentry/nextjs": "6.15.0",
     "dayjs": "1.10.7",
     "emoji-mart": "3.0.1",
@@ -24,6 +25,7 @@
     "slate": "0.72.0",
     "slate-history": "0.66.0",
     "slate-react": "0.72.0",
+    "react-icons": "^4.3.1",
     "snu-lib": "file:../lib",
     "sortablejs": "1.14.0",
     "swr": "1.1.0",

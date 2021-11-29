@@ -9,6 +9,10 @@ module.exports = {
   darkMode: false, // or 'media' or 'class'
   theme: {
     extend: {
+      boxShadow: {
+        base: "0px 1px 3px rgba(0, 0, 0, 0.1), 0px 1px 2px rgba(0, 0, 0, 0.06)",
+        block: "0px 10px 20px rgba(0, 0, 0, 0.1)",
+      },
       colors: {
         "snu-purple-900": "#342484",
         "snu-purple-800": "#3830a9",
