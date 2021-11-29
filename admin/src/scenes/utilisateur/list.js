@@ -217,6 +217,7 @@ const Hit = ({ hit, onClick, user, selected, structure }) => {
 };
 
 const Action = ({ hit, color }) => {
+  const user = useSelector((state) => state.Auth.user);
   const dispatch = useDispatch();
   const history = useHistory();
 
@@ -232,6 +233,7 @@ const Action = ({ hit, color }) => {
       toastr.error("Oops, une erreur est survenu lors de la masquarade !", translate(e.code));
     }
   };
+  console.log("🚀 ~ file: list.js ~ line 252 ~ Action ~ user", user.role, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT);
   return (
     <ActionBox color={"#444"}>
       <UncontrolledDropdown setActiveFromChild>
@@ -243,9 +245,11 @@ const Action = ({ hit, color }) => {
           <Link to={`/user/${hit._id}`}>
             <DropdownItem className="dropdown-item">Consulter le profil</DropdownItem>
           </Link>
-          <DropdownItem className="dropdown-item" onClick={handleImpersonate}>
-            Prendre sa place
-          </DropdownItem>
+          {user.role !== ROLES.REFERENT_REGION && user.role !== ROLES.REFERENT_DEPARTMENT ? (
+            <DropdownItem className="dropdown-item" onClick={handleImpersonate}>
+              Prendre sa place
+            </DropdownItem>
+          ) : null}
         </DropdownMenu>
       </UncontrolledDropdown>
     </ActionBox>
