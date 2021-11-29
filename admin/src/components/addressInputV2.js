@@ -30,12 +30,6 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
     }
   }, []);
 
-  useEffect(() => {
-    setAddressInFrance(values[keys.country] === undefined || values[keys.country] === "France");
-    if (values[keys.country] === undefined) addressVerifiedHelpers.setValue(false);
-    else if (values[keys.country] !== "France") addressVerifiedHelpers.setValue(true);
-  }, [values[keys.country]]);
-
   const onSuggestionSelected = () => {
     let depart = suggestion.properties.postcode.substr(0, 2);
     if (["97", "98"].includes(depart)) {
@@ -101,6 +95,9 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
                 onChange={(e) => {
                   const value = e.target.value;
                   handleChange({ target: { name: keys.country, value } });
+                  setAddressInFrance(value === undefined || value === "France");
+                  if (value === undefined) addressVerifiedHelpers.setValue(false);
+                  else if (value !== "France") addressVerifiedHelpers.setValue(true);
                 }}
               >
                 {Object.values(countriesList)

@@ -43,6 +43,8 @@ export default (props) => {
           parentConsentmentFiles: [],
           imageRightFiles: [],
         }}
+        validateOnBlur={false}
+        validateOnChange={false}
         onSubmit={async (values) => {
           try {
             const { ok, code, data: young } = await api.post("/young/invite", values);
@@ -55,7 +57,7 @@ export default (props) => {
           }
         }}
       >
-        {({ values, handleChange, handleSubmit, isSubmitting, submitForm, errors, touched }) => (
+        {({ values, handleChange, handleSubmit, isSubmitting, submitForm, errors, touched, setFieldValue }) => (
           <>
             <TitleWrapper>
               <div>
@@ -81,7 +83,7 @@ export default (props) => {
                 errors={errors}
                 touched={touched}
               />
-              <Situation values={values} handleChange={handleChange} required={{ situation: true }} errors={errors} touched={touched} />
+              <Situation values={values} handleChange={handleChange} required={{ situation: true }} errors={errors} setFieldValue={setFieldValue} />
               <SituationsParticulieres values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
             </Row>
             <Row>

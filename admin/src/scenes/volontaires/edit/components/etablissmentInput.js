@@ -115,6 +115,7 @@ export default ({ handleChange, values, keys, errors, touched, setFieldValue, re
             const value = e.target.value;
             handleChange({ target: { name: keys.grade, value } });
           }}
+          defaultValue=""
         >
           <option key="" value="" disabled>
             Sélectionner votre niveau scolaire
