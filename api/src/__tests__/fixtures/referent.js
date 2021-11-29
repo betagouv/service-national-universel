@@ -14,6 +14,7 @@ function getNewReferentFixture() {
     phone: faker.phone.phoneNumber(),
     mobile: faker.phone.phoneNumber(),
     role: ROLES.ADMIN,
+    acceptCGU: "true",
   };
 }
 

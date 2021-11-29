@@ -21,26 +21,24 @@ export default () => {
   useEffect(() => {
     const status = Object.keys(YOUNG_STATUS).filter((e) => e !== "IN_PROGRESS");
     if (user.role === REFERENT_ROLES.REFERENT_DEPARTMENT) {
-      updateFilter({ department: user.department, status });
+      updateFilter({ department: [user.department], status });
     } else if (user.role === REFERENT_ROLES.REFERENT_REGION) {
-      updateFilter({ region: user.region, status });
+      updateFilter({ region: [user.region], status });
     } else {
-      updateFilter({ status: Object.keys(YOUNG_STATUS), region: "", department: "" });
+      updateFilter({ status: Object.keys(YOUNG_STATUS), region: [] });
     }
   }, []);
 
   return (
     <>
-      <Row style={{}}>
-        <Col md={6}>
+      <Row>
+        <Col style={{ display: "flex" }}>
           <Title>Missions</Title>
-        </Col>
-        <Col md={6}>
           {filter && (
             <>
               <FiltersList>
-                <FilterRegion updateFilter={updateFilter} filter={filter} />
-                <FilterDepartment updateFilter={updateFilter} filter={filter} />
+                <FilterRegion onChange={(region) => updateFilter({ region })} value={filter.region} filter={filter} />
+                <FilterDepartment onChange={(department) => updateFilter({ department })} value={filter.department} filter={filter} />
               </FiltersList>
             </>
           )}
@@ -59,6 +57,8 @@ const Title = styled.h2`
   margin-bottom: 10px;
 `;
 const FiltersList = styled.div`
+  gap: 1rem;
+  flex: 1;
   display: flex;
   justify-content: flex-end;
   flex-wrap: wrap;

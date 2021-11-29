@@ -3,7 +3,7 @@ import MultiSelect from "react-multi-select-component";
 import styled from "styled-components";
 import { translate } from "../utils";
 
-export default ({ value, name, onChange, options, placeholder }) => {
+export default ({ value, name, onChange, options, placeholder, valueRenderer = () => {}, filterOptions = (options) => options }) => {
   const transformOptions = options.map((e) => {
     return { label: translate(e), value: e };
   });
@@ -29,7 +29,9 @@ export default ({ value, name, onChange, options, placeholder }) => {
       <MultiSelect
         hasSelectAll={false}
         disableSearch={true}
+        valueRenderer={valueRenderer}
         options={transformOptions}
+        filterOptions={filterOptions}
         value={selected}
         onChange={(v) => handleChange(v)}
         overrideStrings={{ selectSomeItems: placeholder, allItemsAreSelected: "Toutes les options." }}

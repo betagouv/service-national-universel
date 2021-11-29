@@ -7,7 +7,6 @@ import { toastr } from "react-redux-toastr";
 import { YOUNG_PHASE, YOUNG_STATUS, PHASE_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, permissionPhase1, permissionPhase2, permissionPhase3, translate } from "../../utils";
 import Item from "./item";
 import { DRAWER_TABS } from "../utils";
-import DownloadAttestationButton from "../buttons/DownloadAttestationButton";
 import SubMenuPhase2 from "./SubMenuPhase2";
 import SubMenuPhase3 from "./SubMenuPhase3";
 import { environment } from "../../config";
@@ -17,7 +16,7 @@ import api from "../../services/api";
 import { setYoung } from "../../redux/auth/actions";
 import HelpButton from "../buttons/HelpButton";
 
-export default (props) => {
+export default function Drawer(props) {
   const [open, setOpen] = useState();
   const [status1, setStatus1] = useState(PHASE_STATUS.IN_COMING);
   const [status2, setStatus2] = useState(PHASE_STATUS.IN_COMING);
@@ -102,8 +101,7 @@ export default (props) => {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth="2"
-                d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a1 1 0 001-1V10M9 21h6"
-              ></path>
+                d="M3 12l9-9 9 9M5 10v10a1 1 0 001 1h3a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1h3a1 1 0 001-1V10M9 21h6"></path>
             </svg>
           </div>
           Accueil
@@ -117,8 +115,7 @@ export default (props) => {
             to="/phase1"
             disabled={getDisabled(DRAWER_TABS.PHASE1)}
             handleClick={(event) => handleClick(event, DRAWER_TABS.PHASE1)}
-            open={activeTab === DRAWER_TABS.PHASE1}
-          >
+            open={activeTab === DRAWER_TABS.PHASE1}>
             {/* <ul className="subNav">
               {young.statusPhase1 === "DONE" && young.cohesionCenterName ? (
                 <li>
@@ -137,8 +134,7 @@ export default (props) => {
             to="/phase2"
             disabled={getDisabled(DRAWER_TABS.PHASE2)}
             handleClick={(event) => handleClick(event, DRAWER_TABS.PHASE2)}
-            open={activeTab === DRAWER_TABS.PHASE2}
-          >
+            open={activeTab === DRAWER_TABS.PHASE2}>
             <SubMenuPhase2 young={young} handleClick={handleClick} />
           </Item>
           <Item
@@ -149,8 +145,7 @@ export default (props) => {
             to="/phase3"
             disabled={getDisabled(DRAWER_TABS.PHASE3)}
             handleClick={(event) => handleClick(event, DRAWER_TABS.PHASE3)}
-            open={activeTab === DRAWER_TABS.PHASE3}
-          >
+            open={activeTab === DRAWER_TABS.PHASE3}>
             <SubMenuPhase3 young={young} handleClick={handleClick} />
           </Item>
         </MainNav>
@@ -174,7 +169,7 @@ export default (props) => {
               </DownloadAttestationButton>
             </DrawerButton>
           ) : null} */}
-            {young.status === YOUNG_STATUS.VALIDATED ? (
+            {[YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION].includes(young.status) ? (
               <DrawerButton>
                 <DeleteAccountButton young={young} />
               </DrawerButton>
@@ -185,7 +180,7 @@ export default (props) => {
               <DiagorienteButton>
                 <NavLink to="/diagoriente" onClick={(event) => handleClick(event, DRAWER_TABS.HOME)}>
                   <img src={require("../../assets/logo-diagoriente-white.png")} />
-                  Outil d'aide à l'orientation
+                  Outil d&apos;aide à l&apos;orientation
                 </NavLink>
               </DiagorienteButton>
             )}
@@ -195,7 +190,7 @@ export default (props) => {
       </Sidebar>
     </>
   );
-};
+}
 
 const DeleteAccountButton = ({ young }) => {
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
@@ -210,7 +205,7 @@ const DeleteAccountButton = ({ young }) => {
     if (note) young.withdrawnMessage = note;
     young.lastStatusAt = Date.now();
     try {
-      const { ok, code, data } = await api.put(`/young`, young);
+      const { ok, code } = await api.put(`/young`, young);
       if (!ok) return toastr.error("Une erreur est survenu lors du traitement de votre demande :", translate(code));
       logout();
     } catch (e) {
@@ -269,7 +264,7 @@ const SocialMedia = () => {
   return (
     <IconsBar>
       {medias.map((el, index) => (
-        <a href={el.link} target="_blank" style={{ decoration: "none", borderRadius: "100%", padding: "0" }}>
+        <a key={index} href={el.link} target="_blank" style={{ decoration: "none", borderRadius: "100%", padding: "0" }} rel="noreferrer">
           <IconContainer>
             <svg width="24" height="24" viewBox="0 0 24 24">
               <path d={el.svg}></path>
