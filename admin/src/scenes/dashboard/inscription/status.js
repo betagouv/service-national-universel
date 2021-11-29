@@ -7,7 +7,7 @@ import { CardArrow, Card, CardTitle, CardSubtitle, CardValueWrapper, CardValue, 
 
 import api from "../../../services/api";
 
-export default ({ filter }) => {
+export default function Status({ filter }) {
   const [status, setStatus] = useState({});
 
   const user = useSelector((state) => state.Auth.user);
@@ -20,10 +20,10 @@ export default ({ filter }) => {
         size: 0,
       };
 
-      if (filter.cohort) {
+      if (filter.cohort?.length) {
         // See: https://trello.com/c/wsy9Q1ro/1021-inscription-tableau-de-bord-en-cours
-        if (filter.cohort.includes("2022")) {
-          body.query.bool.filter.push({ terms: { "cohort.keyword": [filter.cohort, "2022"] } });
+        if (filter.cohort.some((e) => e?.includes("2022"))) {
+          body.query.bool.filter.push({ terms: { "cohort.keyword": [...filter.cohort, "2022"] } });
         } else {
           body.query.bool.filter.push({ terms: { "cohort.keyword": filter.cohort } });
         }
@@ -126,4 +126,4 @@ export default ({ filter }) => {
       </Col>
     </Row>
   );
-};
+}
