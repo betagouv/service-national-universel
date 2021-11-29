@@ -138,6 +138,9 @@ export default (props) => {
             <Row>
               <MilitaryPreparation values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
             </Row>
+            {Object.values(errors).filter((e) => !!e).length ? (
+              <Alert>Vous ne pouvez pas enregistrer ce volontaires car tous les champs ne sont pas correctement renseignés.</Alert>
+            ) : null}
             <TitleWrapper>
               <DeleteButton young={young} />
               <div style={{ display: "flex" }}>
