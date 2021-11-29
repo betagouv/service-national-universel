@@ -36,7 +36,7 @@ const sync = async (result) => {
 };
 
 const cleanData = async () => {
-  slack.info({ title: "sync with missions api-engagement", text: "I'm cleaning the outdated missions !" });
+  // slack.info({ title: "sync with missions api-engagement", text: "I'm cleaning the outdated missions !" });
   try {
     await MissionApiModel.deleteMany({ lastSyncAt: { $lte: startTime } });
     slack.success({ title: "sync with missions api-engagement", text: "I'm done !" });
@@ -47,7 +47,7 @@ const cleanData = async () => {
 };
 
 exports.handler = async () => {
-  slack.info({ title: "sync with missions api-engagement", text: "I'm starting the synchronization !" });
+  // slack.info({ title: "sync with missions api-engagement", text: "I'm starting the synchronization !" });
   if (!API_ENGAGEMENT_KEY) {
     slack.error({ title: "sync with missions api-engagement", text: "I do not have any API_ENGAGEMENT_KEY !" });
     capture("NO API_ENGAGEMENT_KEY");
