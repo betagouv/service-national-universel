@@ -123,7 +123,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     const { error, value: checkedMission } = validateMission(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
 
-    if (!checkedMission.location.lat || !checkedMission.location.lat) {
+    if (!checkedMission.location?.lat || !checkedMission.location?.lat) {
       checkedMission.location = await putLocation(checkedMission.city, checkedMission.zip);
     }
 
@@ -175,7 +175,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     // await updateApplicationsWithYoungOrMission({ mission, newMission: checkedMission });
 
-    if (!checkedMission.location.lat || !checkedMission.location.lat) {
+    if (!checkedMission.location?.lat || !checkedMission.location?.lat) {
       checkedMission.location = await putLocation(checkedMission.city, checkedMission.zip);
     }
 
@@ -239,11 +239,7 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
   }
 });
 
-router.get(
-  "/:id/patches",
-  passport.authenticate("referent", { session: false, failWithError: true }),
-  async (req, res) => await patches.get(req, res, MissionObject)
-);
+router.get("/:id/patches", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => await patches.get(req, res, MissionObject));
 
 router.get("/:id/application", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
