@@ -6,14 +6,13 @@ import { useHistory } from "react-router-dom";
 import { Spinner } from "reactstrap";
 
 import api from "../../../services/api";
-import { HERO_IMAGES_LIST } from "../../../utils";
+import { HERO_IMAGES_LIST, translate } from "../../../utils";
 import { setYoung } from "../../../redux/auth/actions";
 import { STEPS } from "../utils";
 import InfoIcon from "../../../components/InfoIcon";
 import BackIcon from "../../../components/BackIcon";
-import { translate, YOUNG_STATUS } from "../../../utils";
 
-export default () => {
+export default function StepAvailability() {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
   const dispatch = useDispatch();
@@ -61,10 +60,23 @@ export default () => {
             <>
               <Info>
                 <h3>INSCRIPTION NON-RECEVABLE</h3>
-                <h1>Malheureusement votre situation ne vous permet pas de participer à la session 2022 du SNU.</h1>
+                <h1 style={{ marginBottom: "1rem" }}>Malheureusement votre situation ne vous permet pas de participer à la session 2022 du SNU.</h1>
+                <a
+                  style={{ fontSize: ".85rem", color: "#4f46e5" }}
+                  href="https://support.snu.gouv.fr/help/fr-fr/24-questions-frequemment-posees/181-suis-je-eligible-a-un-sejour-de-cohesion-en-2022"
+                  target="_blank"
+                  rel="noreferrer">
+                  Pourquoi je ne vois aucun séjour ? <span style={{ fontWeight: "500", textDecoration: "underline" }}> Vérifier mon éligibilité</span>
+                </a>
                 <div className="btns">
-                  <Button onClick={() => history.push("/les-programmes")} borderColor="#D1D5DB">
-                    Consulter d'autres dispositifs d'engagement
+                  <Button backgroundColor="#4f46e5" dark>
+                    <a
+                      style={{ fontSize: ".9rem", color: "#fff" }}
+                      href="https://support.snu.gouv.fr/help/fr-fr/16-comprendre-le-snu/7-les-autres-formes-d-engagement"
+                      target="_blank"
+                      rel="noreferrer">
+                      Consulter d&apos;autres dispositifs d&apos;engagement
+                    </a>
                   </Button>
                 </div>
               </Info>
@@ -82,7 +94,7 @@ export default () => {
                 <h3>Séjour de cohésion à venir</h3>
                 <h1>Etes-vous disponible du {availability[indexAvailability].stringDate} ?</h1>
                 {availability[indexAvailability].url ? (
-                  <AlerteInfo url={availability[indexAvailability].url} >{availability[indexAvailability].info}</AlerteInfo>
+                  <AlerteInfo url={availability[indexAvailability].url}>{availability[indexAvailability].info}</AlerteInfo>
                 ) : (
                   <AlerteInfo>{availability[indexAvailability].info}</AlerteInfo>
                 )}
@@ -104,17 +116,18 @@ export default () => {
       )}
     </>
   );
-};
+}
 
 const AlerteInfo = ({ children, url }) => (
   <div style={{ display: "flex", color: "#32257f", backgroundColor: "#edecfc", padding: "1rem", borderRadius: "6px" }}>
     <InfoIcon color="#32257F" style={{ flex: "none" }} />
     {url ? (
-      <a href={url} target="_blank" style={{ fontSize: ".9rem", marginLeft: "5px", color: "#32267f" }}>{children}</a>
+      <a href={url} target="_blank" style={{ fontSize: ".9rem", marginLeft: "5px", color: "#32267f" }} rel="noreferrer">
+        {children}
+      </a>
     ) : (
       <div style={{ fontSize: ".9rem", marginLeft: "5px" }}>{children}</div>
     )}
-
   </div>
 );
 
@@ -180,6 +193,10 @@ const Button = styled.div`
   @media (max-width: 768px) {
     margin: 1rem 0rem 0rem 0rem;
   }
+
+  :hover {
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 2px 12px 0px;
+  }
 `;
 
 const Container = styled.div`
@@ -189,7 +206,7 @@ const Container = styled.div`
     .thumb {
       min-height: 400px;
       ${({ thumbImage = HERO_IMAGES_LIST[Math.floor(Math.random() * HERO_IMAGES_LIST.length)] }) =>
-    `background: url(${require(`../../../assets/${thumbImage}`)}) no-repeat center;`}
+        `background: url(${require(`../../../assets/${thumbImage}`)}) no-repeat center;`}
       background-size: cover;
       flex: 1;
       -webkit-clip-path: polygon(15% 0, 0 100%, 100% 100%, 100% 0);
