@@ -1,7 +1,7 @@
 import React from "react";
 import { Spinner, Button } from "reactstrap";
 
-const LoadingButton = ({ loading, children, disabled, ...rest }) => (
+export const LoadingButton = ({ loading, children, disabled, ...rest }) => (
   <Button
     {...rest}
     disabled={loading || disabled}
@@ -16,5 +16,3 @@ const LoadingButton = ({ loading, children, disabled, ...rest }) => (
     {!loading && children}
   </Button>
 );
-
-export default LoadingButton;

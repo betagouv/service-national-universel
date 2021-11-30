@@ -4,7 +4,7 @@ import { Modal } from "reactstrap";
 import { ModalContainer, Content, Footer, Header } from "./Modal";
 import ModalButton from "../buttons/ModalButton";
 
-const ModalConfirm = ({ isOpen, topTitle = "alerte", title, message, onChange, onCancel, onConfirm, confirmText = "Confirmer", cancelText = "Annuler" }) => {
+export default function ModalConfirm({ isOpen, topTitle = "alerte", title, message, onChange, onCancel, onConfirm, confirmText = "Confirmer", cancelText = "Annuler" }) {
   const [sending, setSending] = useState(false);
 
   const submit = async () => {
@@ -33,6 +33,4 @@ const ModalConfirm = ({ isOpen, topTitle = "alerte", title, message, onChange, o
       </ModalContainer>
     </Modal>
   );
-};
-
-export default ModalConfirm;
+}

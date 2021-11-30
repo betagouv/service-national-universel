@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 
-const ProgramCard = ({ program, image, enableToggle = true }) => {
+export default function ProgramCard({ program, image, enableToggle = true }) {
   if (!program) return <div />;
   const [expandDetails, setExpandDetails] = useState(false);
   const preview = program.description.substring(0, 130);
@@ -50,9 +50,7 @@ const ProgramCard = ({ program, image, enableToggle = true }) => {
       </div>
     </Card>
   );
-};
-
-export default ProgramCard;
+}
 
 const Detail = ({ title, value }) => {
   if (!value) return <span />;

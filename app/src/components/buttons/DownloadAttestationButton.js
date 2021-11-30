@@ -5,7 +5,7 @@ import styled from "styled-components";
 import { colors } from "../../utils";
 import downloadPDF from "../../utils/download-pdf";
 
-const DownloadAttestationButton = ({ young, children, uri, ...rest }) => {
+export default function DownloadAttestationButton({ young, children, uri, ...rest }) {
   const [loading, setLoading] = useState();
 
   const viewAttestation = async (a) => {
@@ -21,9 +21,7 @@ const DownloadAttestationButton = ({ young, children, uri, ...rest }) => {
       {loading ? <Spinner size="sm" style={{ borderWidth: "0.1em" }} /> : children}
     </PrimaryStyle>
   );
-};
-
-export default DownloadAttestationButton;
+}
 
 export const PrimaryStyle = styled.div`
   font-size: 0.9rem;

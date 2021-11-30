@@ -8,7 +8,7 @@ function getFileName(file) {
   return (file && file.name) || file;
 }
 
-const FileInput = ({ optional, value, onChange, name, errorMessage = requiredMessage, placeholder = "votre fichier" }) => {
+export default function DndFileInput({ optional, value, onChange, name, errorMessage = requiredMessage, placeholder = "votre fichier" }) {
   const [filesList, setFilesList] = useState(value || []);
 
   useEffect(() => {
@@ -92,9 +92,7 @@ const FileInput = ({ optional, value, onChange, name, errorMessage = requiredMes
       ))}
     </div>
   );
-};
-
-export default FileInput;
+}
 
 function isFileSupported(fileName) {
   const allowTypes = ["jpg", "jpeg", "png", "pdf"];

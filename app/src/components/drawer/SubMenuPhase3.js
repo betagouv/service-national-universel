@@ -4,7 +4,7 @@ import { NavLink } from "react-router-dom";
 import { DRAWER_TABS } from "../utils";
 import { YOUNG_STATUS_PHASE3 } from "../../utils";
 
-const SubMenuPhase3 = ({ young, handleClick }) => {
+export default function SubMenuPhase3({ young, handleClick }) {
   const render = () => {
     if (young.statusPhase3 === YOUNG_STATUS_PHASE3.VALIDATED)
       return (
@@ -49,6 +49,4 @@ const SubMenuPhase3 = ({ young, handleClick }) => {
   };
 
   return render();
-};
-
-export default SubMenuPhase3;
+}

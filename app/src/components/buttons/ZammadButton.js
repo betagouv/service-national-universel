@@ -3,7 +3,7 @@ import styled from "styled-components";
 
 //! À supprimer dans une autre PR maintenant qu'on a le formulaire maison
 
-const ZammadButton = () => {
+export default function ZammadButton() {
   useEffect(() => {
     if (!window || !window.$) return;
 
@@ -19,9 +19,7 @@ const ZammadButton = () => {
     });
   }, [window?.$]);
   return <LinkButton id="feedback-form">Contacter quelqu&apos;un</LinkButton>;
-};
-
-export default ZammadButton;
+}
 
 const LinkButton = styled.button`
   max-width: 230px;

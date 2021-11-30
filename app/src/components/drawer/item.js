@@ -4,7 +4,7 @@ import styled from "styled-components";
 
 import { translate, PHASE_STATUS_COLOR } from "../../utils";
 
-const Item = ({ title, subtitle, to, status, handleClick, disabled, children, open, phase }) => {
+export default function Item({ title, subtitle, to, status, handleClick, disabled, children, open, phase }) {
   const [color, setColor] = useState();
   const [strokeColor, setStrokeColor] = useState();
   const [icon, setIcon] = useState();
@@ -39,9 +39,7 @@ const Item = ({ title, subtitle, to, status, handleClick, disabled, children, op
       {open ? children : null}
     </ItemContainer>
   );
-};
-
-export default Item;
+}
 
 const Icon = styled.div`
   background-color: ${({ color }) => color};

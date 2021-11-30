@@ -7,7 +7,7 @@ import api from "../../services/api";
 import { colors, translate } from "../../utils";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 
-const MailAttestationButton = ({ young, children, type, template, placeholder, ...rest }) => {
+export default function MailAttestationButton({ young, children, type, template, placeholder, ...rest }) {
   const [loading, setLoading] = useState();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
@@ -46,9 +46,7 @@ const MailAttestationButton = ({ young, children, type, template, placeholder, .
       />
     </>
   );
-};
-
-export default MailAttestationButton;
+}
 
 export const PrimaryStyle = styled.div`
   font-size: 0.9rem;

@@ -10,7 +10,7 @@ countries.registerLocale(require("i18n-iso-countries/langs/fr.json"));
 const countriesList = countries.getNames("fr", { select: "official" });
 
 // eslint-disable-next-line prettier/prettier
-const AddressInputV2 = ({ keys, values, handleChange, errors, touched, validateField, countryVisible = false, onChangeCountry = () => { }, countryByDefault = "" }) => {
+export default function AddressInputV2({ keys, values, handleChange, errors, touched, validateField, countryVisible = false, onChangeCountry = () => { }, countryByDefault = "" }) {
   const [suggestion, setSuggestion] = useState({});
   const [addressInFrance, setAddressInFrance] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -205,9 +205,7 @@ const AddressInputV2 = ({ keys, values, handleChange, errors, touched, validateF
       )}
     </Wrapper>
   );
-};
-
-export default AddressInputV2;
+}
 
 const Wrapper = styled.div`
   .react-autosuggest__container {

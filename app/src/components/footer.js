@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { appURL } from "../config";
 import { useSelector } from "react-redux";
 
-const Footer = () => {
+export default function Footer() {
   const young = useSelector((state) => state.Auth.young);
   return (
     <FooterContainer>
@@ -77,9 +77,7 @@ const Footer = () => {
       </Container>
     </FooterContainer>
   );
-};
-
-export default Footer;
+}
 
 const FooterContainer = styled.footer`
   text-align: center;

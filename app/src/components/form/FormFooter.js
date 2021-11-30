@@ -7,7 +7,7 @@ import { setYoung } from "../../redux/auth/actions";
 import { saveYoung } from "../../scenes/inscription/utils";
 import { appURL } from "../../config";
 
-const FormFooter = ({ values, handleSubmit, errors, secondButton = "save", loading }) => {
+export default function FormFooter({ values, handleSubmit, errors, secondButton = "save", loading }) {
   const dispatch = useDispatch();
   const [loadingSaveBtn, setloadingSaveBtn] = useState(false);
 
@@ -39,9 +39,7 @@ const FormFooter = ({ values, handleSubmit, errors, secondButton = "save", loadi
       ) : null}
     </>
   );
-};
-
-export default FormFooter;
+}
 
 const Footer = styled.div`
   display: flex;

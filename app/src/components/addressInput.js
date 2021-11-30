@@ -8,7 +8,7 @@ import ErrorMessage, { requiredMessage } from "../scenes/inscription/components/
 
 const NORESULTMESSAGE = "Rentrer manuellement l'adresse";
 
-const AddressInput = ({ keys, values, handleChange, errors, touched, departAndRegionVisible = true, placeholder = "Commencez à tapez votre adresse" }) => {
+export default function AddressInput({ keys, values, handleChange, errors, touched, departAndRegionVisible = true, placeholder = "Commencez à tapez votre adresse" }) {
   const [str, setStr] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [noResultMode, setNoResultMode] = useState(false);
@@ -196,9 +196,7 @@ const AddressInput = ({ keys, values, handleChange, errors, touched, departAndRe
       </Row>
     </Wrapper>
   );
-};
-
-export default AddressInput;
+}
 
 const Wrapper = styled.div`
   .react-autosuggest__container {

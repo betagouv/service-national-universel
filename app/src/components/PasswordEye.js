@@ -6,7 +6,8 @@ import { getPasswordErrorMessage } from "../utils";
 import EyeOpen from "../assets/eye.svg";
 import EyeClose from "../assets/eye-slash.svg";
 
-const PasswordEye = ({ value, onChange, autoComplete = "new-password", placeholder = "Tapez votre mot de passe", name = "password", validate = () => { } }) => {
+// eslint-disable-next-line prettier/prettier
+export default function PasswordEye({ value, onChange, autoComplete = "new-password", placeholder = "Tapez votre mot de passe", name = "password", validate = () => { } }) {
   const [passwordText, setPasswordText] = useState(false);
 
   return (
@@ -24,9 +25,7 @@ const PasswordEye = ({ value, onChange, autoComplete = "new-password", placehold
       <EyeIcon src={passwordText ? EyeClose : EyeOpen} onClick={() => setPasswordText(!passwordText)} />
     </ContainerPassword>
   );
-};
-
-export default PasswordEye;
+}
 
 const ContainerPassword = styled.div`
   position: relative;

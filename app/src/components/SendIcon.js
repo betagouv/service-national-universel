@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 
-const SendIcon = ({ ...props }) => (
+export const SendIcon = ({ ...props }) => (
   <SendContainer {...props}>
     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
@@ -11,8 +11,6 @@ const SendIcon = ({ ...props }) => (
     </svg>
   </SendContainer>
 );
-
-export default SendIcon;
 
 const SendContainer = styled.div`
   svg {

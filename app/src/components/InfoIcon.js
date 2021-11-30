@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 
-const InfoIcon = ({ ...props }) => {
+export default function InfoIcon({ ...props }) {
   return (
     <Container {...props}>
       <svg width="20" height="20" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
@@ -13,9 +13,7 @@ const InfoIcon = ({ ...props }) => {
       </svg>
     </Container>
   );
-};
-
-export default InfoIcon;
+}
 
 const Container = styled.div`
   svg {

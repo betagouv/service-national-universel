@@ -13,7 +13,7 @@ const TABS_USER = {
   DECONNEXION: "DECONNEXION",
 };
 
-const User = () => {
+export default function User() {
   const [open, setOpen] = useState(false);
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
@@ -56,9 +56,7 @@ const User = () => {
       </Dropdown>
     </div>
   );
-};
-
-export default User;
+}
 
 const Dropdown = styled.div`
   position: relative;

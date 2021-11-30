@@ -3,7 +3,7 @@ import { NavLink } from "react-router-dom";
 import styled from "styled-components";
 import QuestionMark from "../../assets/QuestionMark";
 
-const HelpButton = ({ to, color }) => {
+export default function HelpButton({ to, color }) {
   const Container = styled.div`
     margin: 0.5rem;
     justify-content: center;
@@ -53,6 +53,4 @@ const HelpButton = ({ to, color }) => {
       </NavLink>
     </Container>
   );
-};
-
-export default HelpButton;
+}

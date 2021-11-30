@@ -3,23 +3,23 @@ import { Spinner, Button } from "reactstrap";
 import styled from "styled-components";
 import { colors } from "../../utils";
 
-const LoadingButton = ({ loading, children, disabled, ...rest }) => (
-  <VioletButtonHeader
-    disabled={loading || disabled}
-    style={{
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      opacity: loading ? 0.7 : 1,
-      cursor: loading || disabled ? "not-allowed" : "pointer",
-    }}
-    {...rest}>
-    {loading && <Spinner size="sm" style={{ borderWidth: "0.1em" }} />}
-    {!loading && children}
-  </VioletButtonHeader>
-);
-
-export default LoadingButton;
+export default function LoadingButton({ loading, children, disabled, ...rest }) {
+  return (
+    <VioletButtonHeader
+      disabled={loading || disabled}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        opacity: loading ? 0.7 : 1,
+        cursor: loading || disabled ? "not-allowed" : "pointer",
+      }}
+      {...rest}>
+      {loading && <Spinner size="sm" style={{ borderWidth: "0.1em" }} />}
+      {!loading && children}
+    </VioletButtonHeader>
+  );
+}
 
 const VioletButtonHeader = styled(Button)`
   background-color: #5245cc;

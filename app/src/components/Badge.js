@@ -1,16 +1,14 @@
 import React from "react";
 import styled from "styled-components";
 
-const Badge = ({ text, textColor, backgroundColor, tooltipText, ...rest }) => {
+export default function Badge({ text, textColor, backgroundColor, tooltipText, ...rest }) {
   return (
     <BadgeContainer {...rest} textColor={textColor} backgroundColor={backgroundColor}>
       {text}
       {tooltipText ? <div className="tooltiptext">{tooltipText}</div> : null}
     </BadgeContainer>
   );
-};
-
-export default Badge;
+}
 
 const BadgeContainer = styled.div`
   position: relative;

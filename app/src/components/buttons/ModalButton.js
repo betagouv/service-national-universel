@@ -3,7 +3,7 @@ import { Spinner, Button } from "reactstrap";
 import styled from "styled-components";
 import { colors } from "../../utils";
 
-const ModalButton = ({ primary, secondary, loading, children, disabled, ...rest }) => {
+export default function ModalButton({ primary, secondary, loading, children, disabled, ...rest }) {
   const getBackgroundColor = () => {
     if (disabled) return colors.grey;
     if (primary) return colors.purple;
@@ -34,9 +34,7 @@ const ModalButton = ({ primary, secondary, loading, children, disabled, ...rest 
       {!loading && children}
     </VioletButtonHeader>
   );
-};
-
-export default ModalButton;
+}
 
 const VioletButtonHeader = styled(Button)`
   border: 0;

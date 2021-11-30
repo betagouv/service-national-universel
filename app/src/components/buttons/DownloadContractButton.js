@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import downloadPDF from "../../utils/download-pdf";
 import LoadingButton from "./LoadingButton";
 
-const DownloadContractButton = ({ young, children, uri }) => {
+export default function DownloadContractButton({ young, children, uri }) {
   const [loading, setLoading] = useState();
 
   const viewContract = async (contractId) => {
@@ -18,6 +18,4 @@ const DownloadContractButton = ({ young, children, uri }) => {
       {children}
     </LoadingButton>
   );
-};
-
-export default DownloadContractButton;
+}

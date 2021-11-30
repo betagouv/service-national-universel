@@ -4,7 +4,7 @@ import { Modal } from "reactstrap";
 import { ModalContainer, Content, Footer, Header } from "./Modal";
 import ModalButton from "../buttons/ModalButton";
 
-const ModalInProgress = ({ onChange }) => {
+export default function ModalInProgress({ onChange }) {
   return (
     <Modal isOpen={true} toggle={onChange}>
       <ModalContainer>
@@ -22,6 +22,4 @@ const ModalInProgress = ({ onChange }) => {
       </ModalContainer>
     </Modal>
   );
-};
-
-export default ModalInProgress;
+}
