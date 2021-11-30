@@ -10,7 +10,7 @@ import Volunteer from "./Volunteer";
 import { getLink } from "../../../utils";
 import api from "../../../services/api";
 
-export default ({ filter }) => {
+export default function Places({ filter }) {
   const [youngsDomains, setYoungsDomains] = useState({});
   const [youngsPeriod, setYoungsPeriod] = useState({});
   const [youngsFormat, setYoungsFormat] = useState({});
@@ -104,4 +104,4 @@ export default ({ filter }) => {
       <Volunteer youngsEngaged={youngsEngaged} />
     </React.Fragment>
   );
-};
+}
