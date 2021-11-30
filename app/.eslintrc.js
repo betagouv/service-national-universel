@@ -6,12 +6,13 @@ module.exports = {
     node: true,
     es6: true,
   },
-  extends: ['eslint:recommended', 'plugin:react/recommended', 'plugin:import/recommended', 'plugin:prettier/recommended'],
-  plugins: ['prettier'],
+  extends: ["eslint:recommended", "plugin:react/recommended", "plugin:import/recommended", "plugin:prettier/recommended"],
+  plugins: ["prettier"],
   parserOptions: {
     ecmaVersion: 2020,
   },
   rules: {
-    'react/jsx-no-duplicate-props': 1,
+    "react/jsx-no-duplicate-props": 1,
+    "react/prop-types": 0,
   },
 };
