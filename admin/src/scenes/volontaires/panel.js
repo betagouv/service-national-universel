@@ -9,6 +9,7 @@ import PanelActionButton from "../../components/buttons/PanelActionButton";
 import Panel, { Info, Details } from "../../components/Panel";
 import Historic from "../../components/historic";
 import ContractLink from "../../components/ContractLink";
+import CorrectionMessagesHistoric from "../../components/views/CorrectionMessagesHistoric";
 
 export default ({ onChange, value }) => {
   const [referentManagerPhase2, setReferentManagerPhase2] = useState();
@@ -162,16 +163,20 @@ export default ({ onChange, value }) => {
           <Details title="Région" value={young.parent2Region} />
         </Info>
       )}
-      {young && young.historic && correctionRequests.length !== 0 && (
-        <Info title="Historique des demandes de correction :" id={value._id}>
-          <Historic value={correctionRequests} />
-        </Info>
-      )}
-      {young && young.historic && young.historic.length !== 0 && (
-        <Info title="Historique des statuts :" id={value._id}>
-          <Historic value={young.historic} />
-        </Info>
-      )}
+      <div className="info">
+        {young && young.historic && correctionRequests.length !== 0 && (
+          <>
+            <div className="info-title">Historique des messages</div>
+            <CorrectionMessagesHistoric value={young} model="young" />
+          </>
+        )}
+        {young && young.historic && young.historic.length !== 0 && (
+          <>
+            <div className="info-title">Historique des statuts</div>
+            <Historic value={young.historic} />
+          </>
+        )}
+      </div>
       {young.motivations && (
         <div className="info">
           <div className="info-title">Motivations</div>
@@ -199,8 +204,7 @@ const ApplicationDetails = ({ application, i }) => {
           style={{ margin: 0 }}
           onClick={() => {
             history.push(`/volontaire/${application.youngId}/phase2/application/${application._id}/contrat`);
-          }}
-        >
+          }}>
           Contrat d'engagement &gt;
         </ContractLink>
       ) : null}
