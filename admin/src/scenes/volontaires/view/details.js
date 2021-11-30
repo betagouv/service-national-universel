@@ -12,6 +12,25 @@ import DownloadAttestationButton from "../../../components/buttons/DownloadAttes
 import { Box, BoxTitle } from "../../../components/box";
 import Emails from "../../../components/views/Emails";
 import InfoIcon from "../../../assets/InfoIcon";
+import ExpandComponent from "../../../components/ExpandComponent";
+
+const consentmentText = (
+  <p>
+    <strong>Côté volontaire :</strong>
+    <br />A lu et accepte les Conditions générales d&apos;utilisation de la plateforme du Service national universel A pris connaissance des modalités de traitement de mes données
+    personnelles Est volontaire, sous le contrôle des représentants légaux, pour effectuer la session 2022 du Service National Universel qui comprend la participation au séjour de
+    cohésion puis la réalisation d&apos;une mission d&apos;intérêt général Certifie l&apos;exactitude des renseignements fourni si en terminale, a bien pris connaissance que si je
+    suis convoqué(e) pour les épreuves du second groupe du baccalauréat entre le 6 et le 8 juillet 2022, je ne pourrai pas participer au séjour de cohésion entre le 3 et le 15
+    juillet 2022 (il n’y aura ni dérogation sur la date d’arrivée au séjour de cohésion ni report des épreuves).
+    <br />
+    <br /> <strong>Côté représentants légaux :</strong> <br /> confirmation d&apos;être titulaire de l&apos;autorité parentale/ le représentant légal du volontaire autorisation du
+    volontaire à participer à la session 2022 du Service National Universel qui comprend la participation au séjour de cohésion puis la réalisation d&apos;une mission
+    d&apos;intérêt général. engagement à renseigner le consentement relatif aux droits à l&apos;image avant le début du séjour de cohésion engagement à renseigner
+    l&apos;utilisation d&apos;autotest COVID avant le début du séjour de cohésion. engagement à remettre sous pli confidentiel la fiche sanitaire ainsi que les documents médicaux
+    et justificatifs nécessaires à son arrivée au centre de séjour de cohésion. engagement à ce que le volontaire soit à jour de ses vaccinations obligatoires, c&apos;est-à-dire
+    anti-diphtérie, tétanos et poliomyélite (DTP), et pour les volontaires résidents de Guyane, la fièvre jaune.
+  </p>
+);
 
 export default ({ young }) => {
   const user = useSelector((state) => state.Auth.user);
@@ -205,7 +224,8 @@ export default ({ young }) => {
               ) : null}
               {young.consentment ? (
                 <Bloc title="Consentement">
-                  <div className="quote">Consentements validés par le volontaire et ses représentants légaux : {t(young.consentment)}</div>
+                  <Details title="Consentements validés par le volontaire et ses représentants légaux" value={t(young.consentment)} style={{ border: "none" }} />
+                  <ExpandComponent children={consentmentText} />
                 </Bloc>
               ) : null}
               {young.withdrawnMessage ? (
