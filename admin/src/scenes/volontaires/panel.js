@@ -1,8 +1,8 @@
-import React, { useDebugValue, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Link, useHistory } from "react-router-dom";
 
-import { YOUNG_SITUATIONS, YOUNG_PHASE, translate as t, YOUNG_STATUS, isInRuralArea, getAge, formatDateFRTimezoneUTC, formatStringLongDate } from "../../utils";
+import { YOUNG_SITUATIONS, translate as t, YOUNG_STATUS, isInRuralArea, getAge, formatDateFRTimezoneUTC, formatStringLongDate } from "../../utils";
 import { appURL } from "../../config";
 import api from "../../services/api";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
@@ -11,7 +11,7 @@ import Historic from "../../components/historic";
 import ContractLink from "../../components/ContractLink";
 import CorrectionMessagesHistoric from "../../components/views/CorrectionMessagesHistoric";
 
-export default ({ onChange, value }) => {
+export default function PanelComponent({ onChange, value }) {
   const [referentManagerPhase2, setReferentManagerPhase2] = useState();
   const [young, setYoung] = useState(null);
 
@@ -164,18 +164,13 @@ export default ({ onChange, value }) => {
         </Info>
       )}
       <div className="info">
-        {young && young.historic && correctionRequests.length !== 0 && (
+        {young && young?.historic && correctionRequests?.length !== 0 && (
           <>
-            <div className="info-title">Historique des messages</div>
+            <div className="info-title">Historique des demandes de correction</div>
             <CorrectionMessagesHistoric value={young} model="young" />
           </>
         )}
-        {young && young.historic && young.historic.length !== 0 && (
-          <>
-            <div className="info-title">Historique des statuts</div>
-            <Historic value={young.historic} />
-          </>
-        )}
+        {young && young.historic && young.historic.length !== 0 && <Historic value={young.historic} />}
       </div>
       {young.motivations && (
         <div className="info">

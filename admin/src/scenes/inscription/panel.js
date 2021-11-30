@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { translate as t, isInRuralArea, getAge, YOUNG_STATUS } from "../../utils";
 import DownloadButton from "../../components/buttons/DownloadButton";
 import Historic from "../../components/historic";
+import CorrectionMessagesHistoric from "../../components/views/CorrectionMessagesHistoric";
 import api from "../../services/api";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
 import Panel, { Info, Details } from "../../components/Panel";
@@ -64,13 +65,8 @@ export default ({ onChange, value }) => {
         </div>
       </div>
       {value.status === YOUNG_STATUS.WAITING_CORRECTION && value.inscriptionCorrectionMessage ? (
-        <Info title="Demande de correction :" id={value._id}>
+        <Info title="Demande de correction en cours :" id={value._id}>
           {value.inscriptionCorrectionMessage}
-        </Info>
-      ) : null}
-      {value.status === YOUNG_STATUS.WAITING_CORRECTION && value.inscriptionCorrectionMessage ? (
-        <Info title="Historique des messages :" id={value._id}>
-          <Historic value={young.historic} />
         </Info>
       ) : null}
       {value.status === YOUNG_STATUS.REFUSED && value.inscriptionRefusedMessage ? (
@@ -78,7 +74,16 @@ export default ({ onChange, value }) => {
           {value.inscriptionRefusedMessage}
         </Info>
       ) : null}
-      {young && young.historic && young.historic.length !== 0 && <Historic value={young.historic} />}
+      {young && young.historic && young.historic.length !== 0 && (
+        <Info title="Historique des statuts" id={value._id}>
+          <Historic value={young.historic} />
+        </Info>
+      )}
+      {value.inscriptionCorrectionMessage ? (
+        <Info title="Demandes de correction :" id={value._id}>
+          <CorrectionMessagesHistoric value={value} model="young" />
+        </Info>
+      ) : null}
       <Info title="Pièce d’identité" id={value._id}>
         {(value.cniFiles || []).map((e, i) => (
           <DownloadButton

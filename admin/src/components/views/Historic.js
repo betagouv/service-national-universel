@@ -83,7 +83,6 @@ const Table = styled.table`
   margin-top: 10px;
   background-color: #fff;
   th {
-    border-top: 1px solid #f4f5f7;
     border-bottom: 1px solid #f4f5f7;
     padding: 15px;
     font-weight: 400;

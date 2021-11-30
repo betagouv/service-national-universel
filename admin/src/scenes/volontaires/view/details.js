@@ -20,7 +20,6 @@ export default ({ young }) => {
   function isFromFranceConnect() {
     return young.parent1FromFranceConnect === "true" && (!young.parent2Status || young.parent2FromFranceConnect === "true");
   }
-  const correctionRequests = young.historic.filter((i) => i.status === "WAITING_CORRECTION");
 
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
@@ -205,7 +204,7 @@ export default ({ young }) => {
                   )}
                 </Bloc>
               ) : null}
-              {young && young.historic && correctionRequests.length !== 0 && (
+              {young && young.historic && young.inscriptionCorrectionMessage && (
                 <Bloc title="Historique des demandes de correction">
                   <CorrectionMessagesHistoric value={young} model="young" />
                 </Bloc>

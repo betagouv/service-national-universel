@@ -1,47 +1,19 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { translate, formatStringLongDate, YOUNG_STATUS_COLORS, colors } from "../utils";
 import Badge from "../components/Badge";
 
-export default ({ value }) => {
-  useEffect(() => {
-    console.log(value);
-  }, []);
+export default function HistoricComponent({ value }) {
   if (!value) return <div />;
-  const [isExpand, setIsExpand] = useState(false);
-  const toggleList = () => {
-    setIsExpand(!isExpand);
-  };
-
 
   return (
     <Historic className="info">
-      {isExpand ? (
-        <>
-          {
-            value.map((historicItem, key) => (
-              <HistoricItem key={key} item={historicItem} />
-            )).reverse()
-          }
-          {value.length === 1 ? (
-            null
-          ) : (
-            <div className="see-more" style={{ marginLeft: "0.5rem", marginTop: "1rem" }} onClick={toggleList}>
-              CACHER L'HISTORIQUE
-            </div>
-          )}
-        </>
-      ) : (
-        <>
-          <HistoricItem key={value[value.length - 1]._id} item={value[value.length - 1]} />
-          <div className="see-more" style={{ marginLeft: "0.5rem", marginTop: "1rem" }} onClick={toggleList}>
-            AFFICHER L'HISTORIQUE
-          </div>
-        </>
-      )}
+      {value.map((historicItem, key) => (
+        <HistoricItem key={key} item={historicItem} />
+      ))}
     </Historic>
   );
-};
+}
 
 const HistoricItem = ({ item }) => {
   const getLabel = () =>

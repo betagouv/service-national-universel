@@ -46,7 +46,7 @@ export default ({ model, value }) => {
   return !data ? (
     <Loader />
   ) : (
-    <Historic className="info">
+    <Historic className="historic">
       {isExpand ? (
         <>
           {data.map((historicItem, key) => (
@@ -156,9 +156,8 @@ const Historic = styled.ul`
       }
     }
   }
-  .info {
+  .historic {
     padding: 30px 25px;
-    border-bottom: 1px solid #f2f1f1;
     &-title {
       font-weight: 500;
       font-size: 18px;
