@@ -19,7 +19,7 @@ import Representant2 from "./edit/representant-legal2";
 import Consentement from "./edit/consentement";
 import ConsentementImage from "./edit/consentement-image";
 
-export default (props) => {
+export default function Create() {
   const history = useHistory();
 
   return (
@@ -40,12 +40,11 @@ export default (props) => {
           region: "",
           parentConsentmentFiles: [],
           highSkilledActivityProofFiles: [],
-          parentConsentmentFiles: [],
           imageRightFiles: [],
         }}
         onSubmit={async (values) => {
           try {
-            const { ok, code, data: young } = await api.post("/young/invite", values);
+            const { ok, code } = await api.post("/young/invite", values);
             if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
             toastr.success("Volontaire créé !");
             return history.push("/inscription");
@@ -53,9 +52,8 @@ export default (props) => {
             console.log(e);
             toastr.error("Oups, une erreur est survenue pendant la création du volontaire :", translate(e.code));
           }
-        }}
-      >
-        {({ values, handleChange, handleSubmit, isSubmitting, submitForm, errors, touched }) => (
+        }}>
+        {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
           <>
             <TitleWrapper>
               <div>
@@ -97,7 +95,7 @@ export default (props) => {
       </Formik>
     </Wrapper>
   );
-};
+}
 
 const Wrapper = styled.div`
   padding: 20px 40px;

@@ -7,7 +7,7 @@ import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import Item from "../components/Item";
 import Select from "../components/Select";
 
-export default ({ values, handleChange, required = {}, errors, touched }) => {
+export default function Coordonnees({ values, handleChange, required = {}, errors, touched }) {
   const [departmentAndRegionDisabled, setDepartmentAndRegionDisabled] = React.useState(true);
 
   const getDepartmentAndRegion = (zip) => {
@@ -52,8 +52,8 @@ export default ({ values, handleChange, required = {}, errors, touched }) => {
           {values.cohort === "2020" ? (
             <Info>
               <i>
-                Les volontaires de la cohorte <b>2020</b> sont rattaché(e)s au département de leur établissement scolaire au jour de l'inscription. Il n'est pas modifié en fonction
-                de leur adresse postale. Si vous voulez quand-même le modifier,{" "}
+                Les volontaires de la cohorte <b>2020</b> sont rattaché(e)s au département de leur établissement scolaire au jour de l&apos;inscription. Il n&apos;est pas modifié
+                en fonction de leur adresse postale. Si vous voulez quand-même le modifier,{" "}
                 <span className="link" onClick={() => setDepartmentAndRegionDisabled(false)}>
                   Cliquez-ici
                 </span>
@@ -93,7 +93,7 @@ export default ({ values, handleChange, required = {}, errors, touched }) => {
       </Box>
     </Col>
   );
-};
+}
 
 const Info = styled.div`
   font-size: 0.8rem;

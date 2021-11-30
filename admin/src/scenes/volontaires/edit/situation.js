@@ -7,7 +7,7 @@ import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import Item from "../components/Item";
 import Select from "../components/Select";
 
-export default ({ values, handleChange, required = {}, errors, touched }) => {
+export default function Situation({ values, handleChange, required = {}, errors, touched }) {
   const user = useSelector((state) => state.Auth.user);
 
   return (
@@ -54,4 +54,4 @@ export default ({ values, handleChange, required = {}, errors, touched }) => {
       </Box>
     </Col>
   );
-};
+}

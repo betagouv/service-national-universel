@@ -7,7 +7,7 @@ import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 
-export default ({ young }) => {
+export default function DeleteButton({ young }) {
   const history = useHistory();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
@@ -47,7 +47,7 @@ export default ({ young }) => {
       />
     </>
   );
-};
+}
 
 const DeleteBtn = styled.button`
   background-color: #bd2130;

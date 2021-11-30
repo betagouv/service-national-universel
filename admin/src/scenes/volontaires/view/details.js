@@ -13,7 +13,7 @@ import { Box, BoxTitle } from "../../../components/box";
 import Emails from "../../../components/views/Emails";
 import InfoIcon from "../../../assets/InfoIcon";
 
-export default ({ young }) => {
+export default function DetailsView({ young }) {
   const user = useSelector((state) => state.Auth.user);
 
   function isFromFranceConnect() {
@@ -56,7 +56,7 @@ export default ({ young }) => {
                   <Infos>
                     <InfoIcon color="#32257F" />
                     <p>
-                      Le volontaire réside à l'étranger :
+                      Le volontaire réside à l&apos;étranger :
                       <br />
                       {[young.foreignAddress, young.foreignZip, young.foreignCity].join(", ")}
                       <br />
@@ -214,13 +214,13 @@ export default ({ young }) => {
         <Emails email={young.email} />
         {young.statusPhase1 === "DONE" && young.statusPhase2 === "VALIDATED" ? (
           <DownloadAttestationButton young={young} uri="snu">
-            Télécharger l'attestation de réalisation du SNU
+            Télécharger l&apos;attestation de réalisation du SNU
           </DownloadAttestationButton>
         ) : null}
       </YoungView>
     </div>
   );
-};
+}
 
 const Bloc = ({ children, title, last }) => {
   return (

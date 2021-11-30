@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { useSelector } from "react-redux";
 
 import api from "../../services/api";
-import { apiURL, environment } from "../../config";
+import { apiURL } from "../../config";
 import Panel from "./panel";
 import DownloadAllAttestation from "../../components/buttons/DownloadAllAttestation";
 import ExportComponent from "../../components/ExportXlsx";
@@ -22,7 +22,6 @@ import {
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Badge from "../../components/Badge";
 import { ResultTable, Filter, Table, FilterRow } from "../../components/list";
-import ToggleSwitch from "../../components/ToogleSwitch";
 import Chevron from "../../components/Chevron";
 import Select from "./components/Select";
 import { toastr } from "react-redux-toastr";
@@ -45,7 +44,7 @@ const FILTERS = [
   "COHESION_PRESENCE",
 ];
 
-export default () => {
+export default function List() {
   const user = useSelector((state) => state.Auth.user);
   const [volontaire, setVolontaire] = useState(null);
   const [meetingPoints, setMeetingPoints] = useState(null);
@@ -338,7 +337,7 @@ export default () => {
       </ReactiveBase>
     </div>
   );
-};
+}
 
 const Hit = ({ hit, onClick, selected, callback }) => {
   const [value, setValue] = useState(null);

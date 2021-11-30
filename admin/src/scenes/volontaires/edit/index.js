@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { Col, Row } from "reactstrap";
+import { Row } from "reactstrap";
 import { Formik } from "formik";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -13,7 +13,7 @@ import LoadingButton from "../../../components/buttons/LoadingButton";
 import { translate, ROLES } from "../../../utils";
 import api from "../../../services/api";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
-import { appURL, environment } from "../../../config";
+import { appURL } from "../../../config";
 import Loader from "../../../components/Loader";
 
 import DeleteButton from "../components/DeleteButton";
@@ -36,7 +36,7 @@ import JDC from "./JDC";
 import CohesionCenter from "./cohesion-center";
 import MeetingPoint from "./meeting-point";
 
-export default (props) => {
+export default function Index(props) {
   const [young, setYoung] = useState();
   const user = useSelector((state) => state.Auth.user);
 
@@ -65,16 +65,15 @@ export default (props) => {
         initialValues={young}
         onSubmit={async (values) => {
           try {
-            const { ok, code, data: young } = await api.put(`/referent/young/${values._id}`, values);
+            const { ok, code } = await api.put(`/referent/young/${values._id}`, values);
             if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             toastr.success("Mis à jour!");
           } catch (e) {
             console.log(e);
             toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
           }
-        }}
-      >
-        {({ values, handleChange, handleSubmit, isSubmitting, submitForm }) => (
+        }}>
+        {({ values, handleChange, handleSubmit, isSubmitting }) => (
           <>
             <TitleWrapper>
               <div>
@@ -153,7 +152,7 @@ export default (props) => {
       </Formik>
     </Wrapper>
   );
-};
+}
 
 const Wrapper = styled.div`
   padding: 20px 40px;
