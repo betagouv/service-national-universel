@@ -16,7 +16,6 @@ export default function PanelComponent({ onChange, value }) {
   const [young, setYoung] = useState(null);
 
   useEffect(() => {
-    console.log(correctionRequests);
     (async () => {
       const id = value && value._id;
       if (!id) return setYoung(null);
