@@ -100,7 +100,7 @@ const Schema = new mongoose.Schema({
   status: {
     type: String,
     default: "IN_PROGRESS",
-    enum: ["IN_PROGRESS", "WAITING_VALIDATION", "WAITING_CORRECTION", "VALIDATED", "REFUSED", "WITHDRAWN", "DELETED", "WAITING_LIST"],
+    enum: ["IN_PROGRESS", "WAITING_VALIDATION", "WAITING_CORRECTION", "VALIDATED", "REFUSED", "WITHDRAWN", "DELETED", "WAITING_LIST", "NOT_ELIGIBLE"],
     documentation: {
       description: "Statut général du volontaire",
     },
@@ -1294,15 +1294,7 @@ Schema.plugin(patchHistory, {
     modelName: { type: String, required: true, default: MODELNAME },
     user: { type: Object, required: false, from: "_user" },
   },
-  excludes: [
-    "/password",
-    "/lastLoginAt",
-    "/forgotPasswordResetToken",
-    "/forgotPasswordResetExpires",
-    "/invitationToken",
-    "/invitationExpires",
-    "/phase3Token",
-  ],
+  excludes: ["/password", "/lastLoginAt", "/forgotPasswordResetToken", "/forgotPasswordResetExpires", "/invitationToken", "/invitationExpires", "/phase3Token"],
 });
 Schema.plugin(mongooseElastic(esClient, { ignore: ["historic"] }), MODELNAME);
 

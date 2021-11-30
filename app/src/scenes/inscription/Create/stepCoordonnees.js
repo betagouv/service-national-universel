@@ -93,10 +93,10 @@ export default () => {
   const onSubmit = async (values) => {
     setLoading(true);
     try {
-      const { ok, code, data } = await api.put("/young", { ...values, inscriptionStep: STEPS.PARTICULIERES });
+      const { ok, code, data } = await api.put("/young", { ...values, inscriptionStep: STEPS.AVAILABILITY });
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       dispatch(setYoung(data));
-      history.push("/inscription/particulieres");
+      history.push("/inscription/availability");
     } catch (e) {
       console.log(e);
       toastr.error("Erreur !");
@@ -128,8 +128,7 @@ export default () => {
         }}
         validateOnChange={false}
         validateOnBlur={false}
-        onSubmit={(values) => onSubmit(values)}
-      >
+        onSubmit={(values) => onSubmit(values)}>
         {({ values, handleChange, handleSubmit, errors, touched, validateField, setFieldValue }) => {
           useEffect(() => {
             if (values.phone) validateField("phone");
@@ -336,8 +335,7 @@ export default () => {
                         className="form-control"
                         name="hostRelationship"
                         value={values.hostRelationship}
-                        onChange={handleChange}
-                      >
+                        onChange={handleChange}>
                         <option value={""} disabled>
                           Précisez votre lien avec l'hébergeur
                         </option>

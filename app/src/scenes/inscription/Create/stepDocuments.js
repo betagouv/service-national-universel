@@ -51,18 +51,17 @@ export default () => {
           setLoading(true);
           try {
             values.inscriptionStep = STEPS.AVAILABILITY;
-            const { ok, code, data } = await api.put("/young", values);
+            const { ok, code, data } = await api.put("/young", { ...values, inscriptionStep: STEPS.DONE });
             if (!ok || !data?._id) return toastr.error("Une erreur s'est produite :", translate(code));
             dispatch(setYoung(data));
-            history.push("/inscription/availability");
+            history.push("/inscription/done");
           } catch (e) {
             console.log(e);
             toastr.error("Erreur !");
           } finally {
             setLoading(false);
           }
-        }}
-      >
+        }}>
         {({ values, handleChange, handleSubmit, isSubmitting, submitForm, errors, touched }) => (
           <>
             <FormRow>
@@ -83,7 +82,7 @@ export default () => {
                       return toastr.error(
                         "Le fichier semble corrompu",
                         "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
-                        { timeOut: 0 }
+                        { timeOut: 0 },
                       );
                     }
                     if (!res.ok) return toastr.error("Une erreur s'est produite lors du téléversement de votre fichier");
@@ -119,7 +118,7 @@ export default () => {
                             return toastr.error(
                               "Le fichier semble corrompu",
                               "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
-                              { timeOut: 0 }
+                              { timeOut: 0 },
                             );
                           }
 
@@ -153,7 +152,7 @@ export default () => {
                               return toastr.error(
                                 "Le fichier semble corrompu",
                                 "Pouvez vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support inscription@snu.gouv.fr",
-                                { timeOut: 0 }
+                                { timeOut: 0 },
                               );
                             }
 
@@ -194,8 +193,7 @@ const DownloadFormButton = ({ url }) => (
       width: "fit-content",
       boxShadow: "0px 1px 2px rgba(0, 0, 0, 0.05)",
       margin: "20px 0",
-    }}
-  >
+    }}>
     <a href={url} target="_blank" style={{ decoration: "none", color: "#22252A" }}>
       Télécharger le modèle obligatoire
     </a>

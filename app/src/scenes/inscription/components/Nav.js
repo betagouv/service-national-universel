@@ -111,11 +111,11 @@ export default ({ step }) => {
       <Topbar>
         <Step stepId={STEPS.PROFIL} stepName="Profil" stepNumber="1" />
         <Step stepId={STEPS.COORDONNEES} stepName="Coordonnées" stepNumber="2" />
-        <Step stepId={STEPS.PARTICULIERES} stepName="Situations particulières" stepNumber="3" />
-        <Step stepId={STEPS.REPRESENTANTS} stepName="Représentants légaux" stepNumber="4" />
-        <Step stepId={STEPS.CONSENTEMENTS} stepName="Consentements" stepNumber="5" />
-        <Step stepId={STEPS.DOCUMENTS} stepName="Pièces justificatives" stepNumber="6" />
-        <Step stepId={STEPS.AVAILABILITY} stepName="Disponibilités" stepNumber="7" />
+        <Step stepId={STEPS.AVAILABILITY} stepName="Disponibilités" stepNumber="3" />
+        <Step stepId={STEPS.PARTICULIERES} stepName="Situations particulières" stepNumber="4" />
+        <Step stepId={STEPS.REPRESENTANTS} stepName="Représentants légaux" stepNumber="5" />
+        <Step stepId={STEPS.CONSENTEMENTS} stepName="Consentements" stepNumber="6" />
+        <Step stepId={STEPS.DOCUMENTS} stepName="Pièces justificatives" stepNumber="7" />
         {window.innerWidth > 1240 && (
           <Element onClick={() => handleClick(STEPS.DONE)} style={{ flexGrow: 0 }}>
             <div className="logo" />
@@ -244,17 +244,17 @@ const Element = styled.li`
     height: 35px;
     width: 35px;
     -webkit-filter: ${(props) => {
-    if (props.status === "inprogress" || props.status === "done") return "";
-    return "grayscale(100%)";
-  }};
+      if (props.status === "inprogress" || props.status === "done") return "";
+      return "grayscale(100%)";
+    }};
     filter: ${(props) => {
-    if (props.status === "inprogress" || props.status === "done") return "";
-    return "grayscale(100%)";
-  }};
+      if (props.status === "inprogress" || props.status === "done") return "";
+      return "grayscale(100%)";
+    }};
     opacity: ${(props) => {
-    if (props.status === "inprogress" || props.status === "done") return "";
-    return "0.4";
-  }};
+      if (props.status === "inprogress" || props.status === "done") return "";
+      return "0.4";
+    }};
   }
 
   a {
@@ -262,15 +262,15 @@ const Element = styled.li`
     font-size: 14px;
     line-height: 1.2;
     font-weight: ${(props) => {
-    if (props.status === "inprogress" || props.status === "done") return "600";
-    return "400";
-  }};
+      if (props.status === "inprogress" || props.status === "done") return "600";
+      return "400";
+    }};
     color: ${(props) => {
-    if (props.status === "todo") return "#949ca8!important";
-    if (props.status === "inprogress") return "#362F78!important";
-    if (props.status === "done") return "black!important";
-    return "";
-  }};
+      if (props.status === "todo") return "#949ca8!important";
+      if (props.status === "inprogress") return "#362F78!important";
+      if (props.status === "done") return "black!important";
+      return "";
+    }};
 
     position: relative;
     display: flex;
@@ -280,16 +280,16 @@ const Element = styled.li`
     cursor: pointer;
     .icon {
       background-color: ${(props) => {
-    if (props.status === "inprogress" || props.status === "todo") return "#fff";
-    if (props.status === "done") return "#362f78";
-    return "";
-  }};
+        if (props.status === "inprogress" || props.status === "todo") return "#fff";
+        if (props.status === "done") return "#362f78";
+        return "";
+      }};
       color: ${(props) => {
-    if (props.status === "todo") return "#7A808C";
-    if (props.status === "inprogress") return "#362f78";
-    if (props.status === "done") return "#fff";
-    return "";
-  }};
+        if (props.status === "todo") return "#7A808C";
+        if (props.status === "inprogress") return "#362f78";
+        if (props.status === "done") return "#fff";
+        return "";
+      }};
       width: 40px;
       height: 40px;
       display: flex;
@@ -299,10 +299,10 @@ const Element = styled.li`
       border-radius: 50%;
       border: 2px solid;
       border-color: ${(props) => {
-    if (props.status === "done" || props.status === "inprogress") return "#362f78";
-    if (props.status === "todo") return "#D3D7DB";
-    return "";
-  }};
+        if (props.status === "done" || props.status === "inprogress") return "#362f78";
+        if (props.status === "todo") return "#D3D7DB";
+        return "";
+      }};
       margin: 10px;
     }
     &.done {

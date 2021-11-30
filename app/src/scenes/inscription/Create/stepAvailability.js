@@ -4,6 +4,7 @@ import { toastr } from "react-redux-toastr";
 import { useSelector, useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { Spinner } from "reactstrap";
+import { YOUNG_STATUS } from "snu-lib";
 
 import api from "../../../services/api";
 import { HERO_IMAGES_LIST, translate } from "../../../utils";
@@ -36,12 +37,18 @@ export default function StepAvailability() {
     })();
   }, []);
 
+  useEffect(() => {
+    (async () => {
+      if (availability?.length === 0) await api.put("/young", { ...young, status: YOUNG_STATUS.NOT_ELIGIBLE });
+    })();
+  }, [availability]);
+
   const submit = async (cohort) => {
     try {
-      const { ok, code, data } = await api.put("/young", { ...young, cohort, inscriptionStep: STEPS.DONE });
+      const { ok, code, data } = await api.put("/young", { ...young, cohort, inscriptionStep: STEPS.PARTICULIERES });
       if (!ok || !data?._id) return toastr.error("Une erreur s'est produite :", translate(code));
       dispatch(setYoung(data));
-      history.push("/inscription/done");
+      history.push("/inscription/particulieres");
     } catch (e) {
       console.log(e);
       toastr.error("Erreur !");
