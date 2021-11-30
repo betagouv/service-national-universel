@@ -19,7 +19,7 @@ import Representant2 from "./edit/representant-legal2";
 import Consentement from "./edit/consentement";
 import ConsentementImage from "./edit/consentement-image";
 
-export default (props) => {
+export default function Create() {
   const history = useHistory();
 
   return (
@@ -40,14 +40,13 @@ export default (props) => {
           region: "",
           parentConsentmentFiles: [],
           highSkilledActivityProofFiles: [],
-          parentConsentmentFiles: [],
           imageRightFiles: [],
         }}
         validateOnBlur={false}
         validateOnChange={false}
         onSubmit={async (values) => {
           try {
-            const { ok, code, data: young } = await api.post("/young/invite", values);
+            const { ok, code } = await api.post("/young/invite", values);
             if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
             toastr.success("Volontaire créé !");
             return history.push("/inscription");
@@ -56,7 +55,7 @@ export default (props) => {
             toastr.error("Oups, une erreur est survenue pendant la création du volontaire :", translate(e.code));
           }
         }}>
-        {({ values, handleChange, handleSubmit, isSubmitting, submitForm, errors, touched, setFieldValue, validateField }) => (
+        {({ values, handleChange, handleSubmit, isSubmitting, errors, touched, setFieldValue, validateField }) => (
           <>
             <TitleWrapper>
               <div>
@@ -86,7 +85,7 @@ export default (props) => {
                 touched={touched}
                 validateField={validateField}
               />
-              <Situation values={values} handleChange={handleChange} required={{ situation: true }} errors={errors} setFieldValue={setFieldValue} />
+              <Situation values={values} handleChange={handleChange} required={{ situation: true }} errors={errors} setFieldValue={setFieldValue} touched={touched} />
               <SituationsParticulieres values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
             </Row>
             <Row>
@@ -102,7 +101,7 @@ export default (props) => {
       </Formik>
     </Wrapper>
   );
-};
+}
 
 const Wrapper = styled.div`
   padding: 20px 40px;
