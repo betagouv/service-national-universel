@@ -2,7 +2,17 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Link, useHistory } from "react-router-dom";
 
-import { YOUNG_SITUATIONS, YOUNG_PHASE, translate as t, YOUNG_STATUS, isInRuralArea, getAge, formatDateFRTimezoneUTC, formatStringLongDate } from "../../utils";
+import {
+  YOUNG_SITUATIONS,
+  YOUNG_PHASE,
+  translate as t,
+  YOUNG_STATUS,
+  isInRuralArea,
+  getAge,
+  formatDateFRTimezoneUTC,
+  formatStringLongDate,
+  getLabelWithdrawnReason,
+} from "../../utils";
 import { appURL } from "../../config";
 import api from "../../services/api";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
@@ -10,7 +20,7 @@ import Panel, { Info, Details } from "../../components/Panel";
 import Historic from "../../components/historic";
 import ContractLink from "../../components/ContractLink";
 
-export default ({ onChange, value }) => {
+export default function VolontairePanel({ onChange, value }) {
   const [referentManagerPhase2, setReferentManagerPhase2] = useState();
   const [young, setYoung] = useState(null);
 
@@ -67,6 +77,7 @@ export default ({ onChange, value }) => {
       </div>
       {young.status === YOUNG_STATUS.WITHDRAWN ? (
         <Info title="Motif du désistement">
+          {young.withdrawnReason ? <div className="quote">{getLabelWithdrawnReason(young.withdrawnReason)}</div> : null}
           <div className="quote">{young.withdrawnMessage ? `« ${young.withdrawnMessage} »` : "Non renseigné"}</div>
         </Info>
       ) : null}
@@ -168,7 +179,7 @@ export default ({ onChange, value }) => {
       )}
     </Panel>
   );
-};
+}
 
 const ApplicationDetails = ({ application, i }) => {
   const history = useHistory();
@@ -187,8 +198,7 @@ const ApplicationDetails = ({ application, i }) => {
           style={{ margin: 0 }}
           onClick={() => {
             history.push(`/volontaire/${application.youngId}/phase2/application/${application._id}/contrat`);
-          }}
-        >
+          }}>
           Contrat d'engagement &gt;
         </ContractLink>
       ) : null}
