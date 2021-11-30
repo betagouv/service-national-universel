@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { Row, Col } from "reactstrap";
+import { Row, Col, Spinner } from "reactstrap";
 import { Field, useField } from "formik";
 import ErrorMessage, { requiredMessage } from "./errorMessage";
 import { department2region, departmentLookUp } from "../utils";
 import InfoIcon from "./InfoIcon";
-import { Spinner } from "reactstrap";
 import countries from "i18n-iso-countries";
 countries.registerLocale(require("i18n-iso-countries/langs/fr.json"));
 const countriesList = countries.getNames("fr", { select: "official" });
 
-export default ({ keys, values, handleChange, errors, touched, validateField, countryVisible = false }) => {
+export default function AddressInputV2({ keys, values, handleChange, errors, touched, validateField, countryVisible = false }) {
   const [suggestion, setSuggestion] = useState({});
   const [addressInFrance, setAddressInFrance] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -43,9 +42,10 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
     handleChange({ target: { name: keys.zip, value: suggestion.properties.postcode } });
     handleChange({ target: { name: keys.address, value: suggestion.properties.name } });
     handleChange({ target: { name: keys.location, value: { lon: suggestion.geometry.coordinates[0], lat: suggestion.geometry.coordinates[1] } } });
-    handleChange({ target: { name: keys.department, value: departmentLookUp[depart] } });
-    handleChange({ target: { name: keys.region, value: department2region[departmentLookUp[depart]] } });
-
+    if (values.cohort !== "2020") {
+      handleChange({ target: { name: keys.department, value: departmentLookUp[depart] } });
+      handleChange({ target: { name: keys.region, value: department2region[departmentLookUp[depart]] } });
+    }
     if (keys.cityCode) {
       handleChange({ target: { name: keys.cityCode, value: suggestion.properties.citycode } });
     }
@@ -98,8 +98,7 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
                   setAddressInFrance(value === undefined || value === "France");
                   if (value === undefined) addressVerifiedHelpers.setValue(false);
                   else if (value !== "France") addressVerifiedHelpers.setValue(true);
-                }}
-              >
+                }}>
                 {Object.values(countriesList)
                   .sort((a, b) => a.localeCompare(b))
                   .map((countryName) => (
@@ -170,7 +169,7 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
                 ) : (
                   <div style={{ display: "flex", color: "#32257f", backgroundColor: "#edecfc", padding: "1rem", borderRadius: "6px", width: "100%", marginTop: "10px" }}>
                     <InfoIcon color="#32257F" style={{ flex: "none" }} />
-                    <div style={{ fontSize: ".9rem", marginLeft: "5px" }}>L'adresse a été vérifiée</div>
+                    <div style={{ fontSize: ".9rem", marginLeft: "5px" }}>L&apos;adresse a été vérifiée</div>
                   </div>
                 )}
               </Col>
@@ -181,7 +180,7 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
       ) : (
         <Row>
           <Col md={12} style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-            <b style={{ marginBottom: "16px" }}>Est-ce que c'est la bonne adresse ?</b>
+            <b style={{ marginBottom: "16px" }}>Est-ce que c&apos;est la bonne adresse ?</b>
             <p>{suggestion.properties.name}</p>
             <p>{`${suggestion.properties.postcode}, ${suggestion.properties.city}`}</p>
             <p>France</p>
@@ -190,8 +189,7 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
                 onClick={() => {
                   setSuggestion({});
                   addressVerifiedHelpers.setValue(true);
-                }}
-              >
+                }}>
                 Non
               </SecondaryButton>
               <PrimaryButton onClick={onSuggestionSelected}>Oui</PrimaryButton>
@@ -202,7 +200,7 @@ export default ({ keys, values, handleChange, errors, touched, validateField, co
       )}
     </Wrapper>
   );
-};
+}
 
 const Wrapper = styled.div`
   .react-autosuggest__container {

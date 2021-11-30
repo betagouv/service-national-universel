@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { Col, Row } from "reactstrap";
+import { Row } from "reactstrap";
 import { Formik } from "formik";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -13,7 +13,7 @@ import LoadingButton from "../../../components/buttons/LoadingButton";
 import { translate, ROLES } from "../../../utils";
 import api from "../../../services/api";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
-import { appURL, environment } from "../../../config";
+import { appURL } from "../../../config";
 import Loader from "../../../components/Loader";
 
 import DeleteButton from "../components/DeleteButton";
@@ -36,7 +36,7 @@ import JDC from "./JDC";
 import CohesionCenter from "./cohesion-center";
 import MeetingPoint from "./meeting-point";
 
-export default (props) => {
+export default function VolontaireEdit(props) {
   const [young, setYoung] = useState();
   const user = useSelector((state) => state.Auth.user);
 
@@ -101,7 +101,7 @@ export default (props) => {
               <Identite values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
               <Historic young={young} />
               <Coordonnees values={values} handleChange={handleChange} validateField={validateField} errors={errors} touched={touched} />
-              <Situation values={values} handleChange={handleChange} setFieldValue={setFieldValue} errors={errors} />
+              <Situation values={values} handleChange={handleChange} setFieldValue={setFieldValue} errors={errors} touched={touched} />
               <SituationsParticulieres values={values} handleChange={handleChange} handleSubmit={handleSubmit} />
               <Motivation values={values} />
             </Row>
@@ -160,7 +160,7 @@ export default (props) => {
       </Formik>
     </Wrapper>
   );
-};
+}
 
 const Wrapper = styled.div`
   padding: 20px 40px;

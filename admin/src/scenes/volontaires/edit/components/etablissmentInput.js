@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Autosuggest from "react-autosuggest";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
-import { Row, Col, Input } from "reactstrap";
+import { Row, Col } from "reactstrap";
 import { Field } from "formik";
 import ErrorMessage, { requiredMessage } from "../../../../components/errorMessage";
 import api from "../../../../services/api";
@@ -13,7 +13,7 @@ countries.registerLocale(require("i18n-iso-countries/langs/fr.json"));
 const countriesList = countries.getNames("fr", { select: "official" });
 const NORESULTMESSAGE = "Aucun résultat trouvé";
 
-export default ({ handleChange, values, keys, errors, touched, setFieldValue, required }) => {
+export default function EtablissementInput({ handleChange, values, keys, errors, touched, setFieldValue, required }) {
   const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
@@ -35,10 +35,9 @@ export default ({ handleChange, values, keys, errors, touched, setFieldValue, re
           name="situation"
           value={values.situation}
           onChange={handleChange}
-          validate={(v) => required && !v && requiredMessage}
-        >
+          validate={(v) => required && !v && requiredMessage}>
           <option disabled key={-1} value="" selected={!values.situation} label="Statut">
-            "Statut"
+            &quot;Statut&quot;
           </option>
           {Object.keys(YOUNG_SITUATIONS)
             .map((s) => ({ value: s, label: translate(s) }))
@@ -48,10 +47,10 @@ export default ({ handleChange, values, keys, errors, touched, setFieldValue, re
               </option>
             ))}
         </select>
-        {errors && touched && <Error errors={errors} touched={touched} name="situation" />}
+        {errors && touched && <ErrorMessage errors={errors} touched={touched} name="situation" />}
       </Col>
       <Col md={12}>
-        <Label>Pays de l'établissement</Label>
+        <Label>Pays de l&apos;établissement</Label>
         <Field
           as="select"
           validate={(v) => !v && requiredMessage}
@@ -64,8 +63,7 @@ export default ({ handleChange, values, keys, errors, touched, setFieldValue, re
             setFieldValue(keys.schoolName, "");
             setFieldValue(keys.schoolCity, "");
             setFieldValue(keys.schoolId, "");
-          }}
-        >
+          }}>
           {Object.values(countriesList)
             .sort((a, b) => a.localeCompare(b))
             .map((countryName) => (
@@ -79,7 +77,7 @@ export default ({ handleChange, values, keys, errors, touched, setFieldValue, re
       <Col md={12}>
         {values[keys.schoolCountry] === "France" && (
           <>
-            <Label>Ville de l'établissement</Label>
+            <Label>Ville de l&apos;établissement</Label>
             <SchoolCityTypeahead
               initialValue={values[keys.schoolCity] || ""}
               onChange={(text) => {
@@ -92,7 +90,7 @@ export default ({ handleChange, values, keys, errors, touched, setFieldValue, re
           </>
         )}
 
-        <Label>Nom de l'établissement</Label>
+        <Label>Nom de l&apos;établissement</Label>
         <SchoolNameTypeahead
           initialValue={values[keys.schoolName] || ""}
           country={values[keys.schoolCountry]}
@@ -115,8 +113,7 @@ export default ({ handleChange, values, keys, errors, touched, setFieldValue, re
             const value = e.target.value;
             handleChange({ target: { name: keys.grade, value } });
           }}
-          defaultValue=""
-        >
+          defaultValue="">
           <option key="" value="" disabled>
             Sélectionner votre niveau scolaire
           </option>
@@ -140,7 +137,7 @@ export default ({ handleChange, values, keys, errors, touched, setFieldValue, re
       </Col>
     </Row>
   );
-};
+}
 
 function SchoolCityTypeahead({ onChange, initialValue }) {
   const [suggestions, setSuggestions] = useState([]);
@@ -163,7 +160,9 @@ function SchoolCityTypeahead({ onChange, initialValue }) {
             });
             const res = await response.json();
             return setSuggestions(res.slice(0, 10));
-          } catch (error) {}
+          } catch (error) {
+            console.log(error);
+          }
         }}
         onSuggestionsClearRequested={() => setSuggestions([])}
         getSuggestionValue={(suggestion) => (suggestion !== "noresult" ? `${suggestion.nom}` : "")}

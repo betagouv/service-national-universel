@@ -5,9 +5,7 @@ import { useSelector } from "react-redux";
 import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import Etablissement from "./components/etablissmentInput";
 
-export default ({ values, handleChange, required = {}, errors, touched, setFieldValue }) => {
-  const user = useSelector((state) => state.Auth.user);
-
+export default function Situation({ values, handleChange, required = {}, errors, touched, setFieldValue }) {
   return (
     <Col md={6} style={{ marginBottom: "20px" }}>
       <Box>
@@ -32,4 +30,4 @@ export default ({ values, handleChange, required = {}, errors, touched, setField
       </Box>
     </Col>
   );
-};
+}
