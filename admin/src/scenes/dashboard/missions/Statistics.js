@@ -44,8 +44,8 @@ export default ({ filter }) => {
         },
         size: 0,
       };
-      if (filter.region) body.query.bool.filter.push({ term: { "region.keyword": filter.region } });
-      if (filter.department) body.query.bool.filter.push({ term: { "department.keyword": filter.department } });
+      if (filter.region?.length) body.query.bool.filter.push({ terms: { "region.keyword": filter.region } });
+      if (filter.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
       const { responses: missionResponse } = await api.esQuery("mission", body);
 
       const body2 = {
@@ -64,8 +64,8 @@ export default ({ filter }) => {
         },
         size: 0,
       };
-      if (filter.region) body2.query.bool.filter.push({ term: { "region.keyword": filter.region } });
-      if (filter.department) body2.query.bool.filter.push({ term: { "department.keyword": filter.department } });
+      if (filter.region?.length) body2.query.bool.filter.push({ terms: { "region.keyword": filter.region } });
+      if (filter.department?.length) body2.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
       const { responses: youngResponse } = await api.esQuery("young", body2);
 
       if (missionResponse.length) {

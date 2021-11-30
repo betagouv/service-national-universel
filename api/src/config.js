@@ -5,6 +5,7 @@ const secret = process.env.SECRET || "not-so-secret";
 
 let APP_URL = process.env.APP_URL || "http://localhost:8081";
 let ADMIN_URL = process.env.ADMIN_URL || "http://localhost:8082";
+let SUPPORT_URL = process.env.SUPPORT_URL || "http://localhost:8083";
 let ZAMMAD_IP = process.env.ZAMMAD_IP || "";
 let ZAMMAD_PLATEFORME_USER = process.env.ZAMMAD_PLATEFORME_USER || "";
 let ZAMMAD_PLATEFORME_USER_ID = process.env.ZAMMAD_PLATEFORME_USER_ID || "";
@@ -33,12 +34,16 @@ const API_ASSOCIATION_CELLAR_ENDPOINT = process.env.API_ASSOCIATION_CELLAR_ENDPO
 const API_ASSOCIATION_CELLAR_KEYID = process.env.API_ASSOCIATION_CELLAR_KEYID || "";
 const API_ASSOCIATION_CELLAR_KEYSECRET = process.env.API_ASSOCIATION_CELLAR_KEYSECRET || "";
 
+const SLACK_BOT_TOKEN = process.env.SLACK_BOT_TOKEN || "";
+const SLACK_BOT_CHANNEL = process.env.SLACK_BOT_CHANNEL || "";
+
 module.exports = {
   PORT,
   MONGO_URL,
   secret,
   APP_URL,
   ADMIN_URL,
+  SUPPORT_URL,
   ZAMMAD_IP,
   ENVIRONMENT,
   ES_ENDPOINT,
@@ -62,6 +67,8 @@ module.exports = {
   API_ASSOCIATION_CELLAR_ENDPOINT,
   API_ASSOCIATION_CELLAR_KEYID,
   API_ASSOCIATION_CELLAR_KEYSECRET,
+  SLACK_BOT_TOKEN,
+  SLACK_BOT_CHANNEL,
 };
 
 function getEnvironment() {

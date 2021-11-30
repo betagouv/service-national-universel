@@ -7,7 +7,7 @@ import { CardArrow, Card, CardTitle, CardSubtitle, CardValueWrapper, CardValue, 
 
 import api from "../../../services/api";
 
-export default ({ filter }) => {
+export default function Status({ filter }) {
   const [status, setStatus] = useState({});
 
   const user = useSelector((state) => state.Auth.user);
@@ -20,17 +20,18 @@ export default ({ filter }) => {
         size: 0,
       };
 
-      if (filter.cohort) {
+      if (filter.cohort?.length) {
         // See: https://trello.com/c/wsy9Q1ro/1021-inscription-tableau-de-bord-en-cours
-        if (filter.cohort.includes("2022")) {
-          body.query.bool.filter.push({ terms: { "cohort.keyword": [filter.cohort, "2022"] } });
+        if (filter.cohort.some((e) => e?.includes("2022"))) {
+          body.query.bool.filter.push({ terms: { "cohort.keyword": [...filter.cohort, "2022"] } });
         } else {
-          body.query.bool.filter.push({ term: { "cohort.keyword": filter.cohort } });
+          body.query.bool.filter.push({ terms: { "cohort.keyword": filter.cohort } });
         }
       }
-      if (filter.region) body.query.bool.filter.push({ term: { "region.keyword": filter.region } });
-      if (filter.department) body.query.bool.filter.push({ term: { "department.keyword": filter.department } });
-      if (filter.academy) body.query.bool.filter.push({ term: { "academy.keyword": filter.academy } });
+      if (filter.status) body.query.bool.filter.push({ terms: { "status.keyword": filter.status } });
+      if (filter.region?.length) body.query.bool.filter.push({ terms: { "region.keyword": filter.region } });
+      if (filter.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
+      if (filter.academy?.length) body.query.bool.filter.push({ terms: { "academy.keyword": filter.academy } });
 
       const { responses } = await api.esQuery("young", body);
       if (responses.length) {
@@ -125,4 +126,4 @@ export default ({ filter }) => {
       </Col>
     </Row>
   );
-};
+}

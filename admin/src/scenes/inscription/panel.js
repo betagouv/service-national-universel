@@ -8,8 +8,9 @@ import api from "../../services/api";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
 import Panel, { Info, Details } from "../../components/Panel";
 import { appURL } from "../../config";
+import Badge from "../../components/Badge";
 
-export default ({ onChange, value }) => {
+export default function InscriptionPanel({ onChange, value }) {
   const [young, setYoung] = useState(null);
 
   useEffect(() => {
@@ -38,6 +39,9 @@ export default ({ onChange, value }) => {
         <div style={{ display: "flex" }}>
           <div className="close" onClick={onChange} />
           <div className="title">{`${value.firstName} ${value.lastName}`}</div>
+        </div>
+        <div>
+          <Badge text={value.cohort} />
         </div>
         <div>{t(value.gender)}</div>
         {value.birthdateAt && (
@@ -190,4 +194,4 @@ export default ({ onChange, value }) => {
       </div> */}
     </Panel>
   );
-};
+}

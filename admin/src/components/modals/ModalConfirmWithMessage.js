@@ -11,6 +11,8 @@ export default ({ isOpen, topTitle = "alerte", title, message, defaultInput, onC
   const submit = async () => {
     setSending(true);
     onConfirm(messageTextArea);
+    setSending(false);
+    setMessageTextArea("");
   };
   const renderInput = () => {
     if (type === "textarea") return <textarea placeholder={placeholder} rows="15" value={messageTextArea} onChange={(e) => setMessageTextArea(e.target.value)} />;

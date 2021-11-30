@@ -1,37 +1,22 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import styled from "styled-components";
 
-import Dropdown from "./Dropdown";
-import { departmentList, region2department, REFERENT_ROLES } from "../../../utils";
+import { departmentList, region2department, REFERENT_ROLES, academyToDepartments } from "../../../utils";
+import MultiSelect from "./MultiSelect";
 
-export default ({ updateFilter, filter }) => {
+export default ({ value = [], onChange, filter }) => {
   const user = useSelector((state) => state.Auth.user);
   const filteredDepartment = () => {
-    if (!filter.region) return departmentList;
-    return region2department[filter.region];
+    if (filter.academy?.length)
+      return filter.academy?.reduce((previous, current) => {
+        return [...previous, ...academyToDepartments[current]?.map((d) => ({ label: d, value: d }))];
+      }, []);
+    if (!filter.region?.length) return departmentList?.map((d) => ({ label: d, value: d }));
+    return filter.region?.reduce((previous, current) => previous?.concat(region2department[current]?.map((d) => ({ label: d, value: d }))), []);
   };
 
   if (user.role === REFERENT_ROLES.REFERENT_DEPARTMENT) {
-    return (
-      <FilterWrapper>
-        <Dropdown disabled onChange={() => {}} selectedOption={filter.department} options={[]} prelabel="Départements" />
-      </FilterWrapper>
-    );
+    return <MultiSelect disabled label="Département(s)" options={filteredDepartment()} onChange={onChange} value={value} />;
   }
-
-  return (
-    <FilterWrapper>
-      <Dropdown
-        onChange={(department) => updateFilter({ department })}
-        selectedOption={filter.department}
-        options={filteredDepartment().sort((a, b) => a.localeCompare(b))}
-        prelabel="Départements"
-      />
-    </FilterWrapper>
-  );
+  return <MultiSelect label="Département(s)" options={filteredDepartment()} onChange={onChange} value={value} />;
 };
-
-const FilterWrapper = styled.div`
-  margin: 0 5px 10px;
-`;

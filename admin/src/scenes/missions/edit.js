@@ -169,11 +169,6 @@ export default (props) => {
         //if edit mission, add modified delta to placesLeft
         else values.placesLeft += values.placesTotal - defaultValue.placesTotal;
 
-        //get the period given the subperiods
-        values.subPeriod.forEach((p) => {
-          if (MISSION_PERIOD_DURING_HOLIDAYS[p] && values.period.indexOf(PERIOD.DURING_HOLIDAYS) === -1) values.period.push(PERIOD.DURING_HOLIDAYS);
-          if (MISSION_PERIOD_DURING_SCHOOL[p] && values.period.indexOf(PERIOD.DURING_SCHOOL) === -1) values.period.push(PERIOD.DURING_SCHOOL);
-        });
         try {
           //if mission doesn't have location, put one from city and zip code
           //or put Paris location
@@ -404,16 +399,37 @@ export default (props) => {
                         />
                       </FormGroup>
                       <FormGroup>
-                        <label>PÉRIODES POSSIBLES POUR RÉALISER LA MISSION</label>
+                        <label>Période de réalisation de la mission :</label>
                         <MultiSelect
-                          value={values.subPeriod}
+                          value={values.period}
+                          valueRenderer={(values) => {
+                            const valuesFiltered = values.map((el) => el.label);
+                            return valuesFiltered.length ? valuesFiltered.join(", ") : "Sélectionnez une ou plusieurs périodes";
+                          }}
                           onChange={handleChange}
-                          name="subPeriod"
-                          options={Object.keys(MISSION_PERIOD_DURING_SCHOOL)
-                            .concat(Object.keys(MISSION_PERIOD_DURING_HOLIDAYS))
-                            .concat(values.subPeriod.filter((e) => !(MISSION_PERIOD_DURING_SCHOOL.hasOwnProperty(e) || MISSION_PERIOD_DURING_HOLIDAYS.hasOwnProperty(e))))}
-                          placeholder="Sélectionnez une ou plusieurs périodes"
+                          name="period"
+                          options={Object.keys(PERIOD)}
                         />
+                        {values.period?.length ? (
+                          <>
+                            <label style={{ marginTop: "10px" }}>Précisez :</label>
+                            <MultiSelect
+                              value={values.subPeriod}
+                              valueRenderer={(values) => {
+                                const valuesFiltered = values.map((el) => el.label);
+                                return valuesFiltered.length ? valuesFiltered.join(", ") : "Sélectionnez une ou plusieurs périodes";
+                              }}
+                              onChange={handleChange}
+                              name="subPeriod"
+                              options={(() => {
+                                let options = [];
+                                if (values.period?.indexOf(PERIOD.DURING_HOLIDAYS) !== -1) options.push(...Object.keys(MISSION_PERIOD_DURING_HOLIDAYS));
+                                if (values.period?.indexOf(PERIOD.DURING_SCHOOL) !== -1) options.push(...Object.keys(MISSION_PERIOD_DURING_SCHOOL));
+                                return options;
+                              })()}
+                            />
+                          </>
+                        ) : null}
                       </FormGroup>
                       <FormGroup>
                         <label>NOMBRE DE VOLONTAIRES RECHERCHÉS POUR CETTE MISSION</label>

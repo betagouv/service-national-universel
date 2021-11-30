@@ -5,7 +5,7 @@ import styled from "styled-components";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
-import { translate, formatStringDateTimezoneUTC, ROLES, copyToClipboard } from "../../../utils";
+import { translate, formatStringDateTimezoneUTC, ROLES, copyToClipboard, MISSION_STATUS } from "../../../utils";
 import MissionView from "./wrapper";
 import { Box, BoxTitle } from "../../../components/box";
 
@@ -57,7 +57,7 @@ export default ({ mission, structure, tutor }) => {
                   </Bloc>
                 ) : null}
               </Row>
-              <Row>
+              <Row style={{ borderBottom: "2px solid #f4f5f7" }}>
                 {structure ? (
                   <Bloc
                     title="Le structure"
@@ -76,6 +76,13 @@ export default ({ mission, structure, tutor }) => {
                   </Bloc>
                 ) : null}
               </Row>
+              {[MISSION_STATUS.ARCHIVED, MISSION_STATUS.CANCEL]?.includes(mission.status) && mission.statusComment ? (
+                <Row>
+                  <Bloc title={mission.status === MISSION_STATUS.ARCHIVED ? "Archivage" : mission.status === MISSION_STATUS.CANCEL ? "Annulation" : ""}>
+                    <Details title="Motif" value={mission.statusComment} />
+                  </Bloc>
+                </Row>
+              ) : null}
             </Col>
           </Row>
         </Box>

@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
-import styled from "styled-components";
 import relativeTime from "dayjs/plugin/relativeTime";
 import dayjs from "dayjs";
 import "dayjs/locale/fr";
@@ -20,8 +19,9 @@ import Chevron from "../../components/Chevron";
 const FILTERS = ["SEARCH", "STATUS", "REGION", "DEPARTMENT", "SCHOOL", "COHORT", "PPS", "PAI", "QPV", "HANDICAP", "ZRR", "GRADE", "ACADEMY"];
 import { Filter, FilterRow, ResultTable, Table, ActionBox, Header, Title, MultiLine } from "../../components/list";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
+import Badge from "../../components/Badge";
 
-export default () => {
+export default function Inscription() {
   const [young, setYoung] = useState(null);
   const getDefaultQuery = () => ({ query: { bool: { filter: { term: { "phase.keyword": "INSCRIPTION" } } } } });
   const getExportQuery = () => ({ ...getDefaultQuery(), size: ES_NO_LIMIT });
@@ -297,7 +297,7 @@ export default () => {
       </ReactiveBase>
     </div>
   );
-};
+}
 
 const Hit = ({ hit, index, onClick, selected }) => {
   dayjs.extend(relativeTime).locale("fr");
@@ -313,7 +313,7 @@ const Hit = ({ hit, index, onClick, selected }) => {
       <td>
         <MultiLine>
           <h2>
-            {hit.firstName} {hit.lastName}
+            {hit.firstName} {hit.lastName} <Badge text={hit.cohort} />
           </h2>
           <p>{`Statut mis à jour ${diff} • ${formatStringLongDate(hit.lastStatusAt)}`}</p>
         </MultiLine>

@@ -30,9 +30,9 @@ export default ({ filter }) => {
         size: 0,
       };
 
-      if (filter.cohort) body.query.bool.filter.push({ term: { "cohort.keyword": filter.cohort } });
-      if (filter.region) body.query.bool.filter.push({ term: { "region.keyword": filter.region } });
-      if (filter.department) body.query.bool.filter.push({ term: { "department.keyword": filter.department } });
+      if (filter.cohort?.length) body.query.bool.filter.push({ terms: { "cohort.keyword": filter.cohort } });
+      if (filter.region?.length) body.query.bool.filter.push({ terms: { "region.keyword": filter.region } });
+      if (filter.department?.length) body.query.bool.filter.push({ terms: { "department.keyword": filter.department } });
 
       const { responses } = await api.esQuery("young", body);
       if (responses?.length) {
@@ -56,12 +56,10 @@ export default ({ filter }) => {
           }, 0);
   };
 
-  const replaceSpaces = (v) => v.replace(/\s+/g, "+");
+  const replaceSpaces = (v) => v?.replace(/\s+/g, "+");
 
   const getLink = (link) => {
-    if (filter.region) link += `&REGION=%5B"${replaceSpaces(filter.region)}"%5D`;
-    if (filter.cohort) link += `&COHORT=%5B"${replaceSpaces(filter.cohort)}"%5D`;
-    if (filter.department) link += `&DEPARTMENT=%5B"${replaceSpaces(filter.department)}"%5D`;
+    if (filter.cohort?.length) link += `&COHORT=%5B${replaceSpaces(filter?.cohort?.map((c) => `"${c}"`)?.join("%2C"))}%5D`;
     return link;
   };
 

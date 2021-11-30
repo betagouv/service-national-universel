@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { Col, Row } from "reactstrap";
 import { useSelector } from "react-redux";
 
-import YearPicker from "../../dashboard/components/YearPicker";
+import MultiSelect from "../../dashboard/components/MultiSelect";
 import Status from "./status";
 import { YOUNG_STATUS, REFERENT_ROLES } from "../../../utils";
 
@@ -12,15 +12,15 @@ export default () => {
   const user = useSelector((state) => state.Auth.user);
 
   function updateFilter(n) {
-    setFilter({ ...(filter || { status: Object.keys(YOUNG_STATUS), region: "", department: "", cohort: "2021" }), ...n });
+    setFilter({ ...(filter || { status: Object.keys(YOUNG_STATUS), region: [], department: [], cohort: ["2021"] }), ...n });
   }
 
   useEffect(() => {
     const status = Object.keys(YOUNG_STATUS).filter((e) => e !== "IN_PROGRESS");
     if (user.role === REFERENT_ROLES.REFERENT_DEPARTMENT) {
-      updateFilter({ department: user.department, status });
+      updateFilter({ department: [user.department], status });
     } else if (user.role === REFERENT_ROLES.REFERENT_REGION) {
-      updateFilter({ region: user.region, status });
+      updateFilter({ region: [user.region], status });
     } else {
       updateFilter();
     }
@@ -37,12 +37,12 @@ export default () => {
             <>
               <FiltersList>
                 <FilterWrapper>
-                  <YearPicker
+                  <MultiSelect
+                    label="Cohorte(s)"
                     options={[
-                      { key: "2019", label: "2019" },
-                      { key: "2020", label: "2020" },
-                      { key: "2021", label: "2021" },
-                      { key: "", label: "Toutes" },
+                      { value: "2019", label: "2019" },
+                      { value: "2020", label: "2020" },
+                      { value: "2021", label: "2021" },
                     ]}
                     onChange={(cohort) => updateFilter({ cohort })}
                     value={filter.cohort}

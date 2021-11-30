@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const Joi = require("joi");
+const fetch = require("node-fetch");
 
 const { capture } = require("../sentry");
 const MissionObject = require("../models/mission");
@@ -18,6 +19,54 @@ const patches = require("./patches");
 const { sendTemplate } = require("../sendinblue");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { APP_URL, ADMIN_URL } = require("../config");
+
+const putLocation = async (city, zip) => {
+  // try with municipality = city + zip
+  const responseMunicipality = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(city + " " + zip)}&type=municipality`, {
+    mode: "cors",
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  });
+  const resMunicipality = await responseMunicipality.json();
+  if (resMunicipality.features.length > 0) {
+    return {
+      lon: resMunicipality.features[0].geometry.coordinates[0],
+      lat: resMunicipality.features[0].geometry.coordinates[1],
+    };
+  }
+  // try with locality = city + zip
+  const responseLocality = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(zip + " " + city)}&type=locality`, {
+    mode: "cors",
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  });
+  const resLocality = await responseLocality.json();
+  if (resLocality.features.length > 0) {
+    return {
+      lon: resLocality.features[0].geometry.coordinates[0],
+      lat: resLocality.features[0].geometry.coordinates[1],
+    };
+  }
+  // try with postcode = zip
+  let url = `https://api-adresse.data.gouv.fr/search/?q=${city || zip}`;
+  if (zip) url += `&postcode=${zip}`;
+  const responsePostcode = await fetch(url, {
+    mode: "cors",
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  });
+  const resPostcode = await responsePostcode.json();
+  if (resPostcode.features.length > 0) {
+    return {
+      lon: resPostcode.features[0].geometry.coordinates[0],
+      lat: resPostcode.features[0].geometry.coordinates[1],
+    };
+  }
+  return {
+    lon: 2.352222,
+    lat: 48.856613,
+  };
+};
 
 const updateApplication = async (mission, fromUser) => {
   if (![MISSION_STATUS.CANCEL, MISSION_STATUS.ARCHIVED, MISSION_STATUS.REFUSED].includes(mission.status))
@@ -36,28 +85,33 @@ const updateApplication = async (mission, fromUser) => {
   });
   for (let application of applications) {
     let statusComment = "";
+    let sendinblueTemplate = "";
     switch (mission.status) {
       case MISSION_STATUS.REFUSED:
         statusComment = "La mission n'est plus disponible.";
         break;
       case MISSION_STATUS.CANCEL:
         statusComment = "La mission a été annulée.";
+        sendinblueTemplate = SENDINBLUE_TEMPLATES.young.MISSION_CANCEL;
         break;
       case MISSION_STATUS.ARCHIVED:
         statusComment = "La mission a été archivée.";
+        sendinblueTemplate = SENDINBLUE_TEMPLATES.young.MISSION_ARCHIVED;
         break;
     }
     application.set({ status: APPLICATION_STATUS.CANCEL, statusComment });
     await application.save({ fromUser });
 
-    await sendTemplate(SENDINBLUE_TEMPLATES.young.MISSION_CANCEL, {
-      emailTo: [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }],
-      params: {
-        cta: `${APP_URL}/phase2`,
-        missionName: mission.name,
-        message: mission.statusComment,
-      },
-    });
+    if (sendinblueTemplate) {
+      await sendTemplate(sendinblueTemplate, {
+        emailTo: [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }],
+        params: {
+          cta: `${APP_URL}/phase2`,
+          missionName: mission.name,
+          message: mission.statusComment,
+        },
+      });
+    }
   }
 };
 
@@ -68,6 +122,10 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
   try {
     const { error, value: checkedMission } = validateMission(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+
+    if (!checkedMission.location?.lat || !checkedMission.location?.lat) {
+      checkedMission.location = await putLocation(checkedMission.city, checkedMission.zip);
+    }
 
     const data = await MissionObject.create({ ...checkedMission, fromUser: req.user });
 
@@ -116,6 +174,10 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     if (errorMission) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error: errorMission });
 
     // await updateApplicationsWithYoungOrMission({ mission, newMission: checkedMission });
+
+    if (!checkedMission.location?.lat || !checkedMission.location?.lat) {
+      checkedMission.location = await putLocation(checkedMission.city, checkedMission.zip);
+    }
 
     const oldStatus = mission.status;
     mission.set(checkedMission);
@@ -177,11 +239,7 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
   }
 });
 
-router.get(
-  "/:id/patches",
-  passport.authenticate("referent", { session: false, failWithError: true }),
-  async (req, res) => await patches.get(req, res, MissionObject)
-);
+router.get("/:id/patches", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => await patches.get(req, res, MissionObject));
 
 router.get("/:id/application", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
