@@ -3,9 +3,8 @@ import { NavLink } from "react-router-dom";
 
 import { DRAWER_TABS } from "../utils";
 import { YOUNG_STATUS_PHASE3 } from "../../utils";
-import DownloadAttestationButton from "../buttons/DownloadAttestationButton";
 
-export default ({ young, handleClick }) => {
+const SubMenuPhase3 = ({ young, handleClick }) => {
   const render = () => {
     if (young.statusPhase3 === YOUNG_STATUS_PHASE3.VALIDATED)
       return (
@@ -17,7 +16,7 @@ export default ({ young, handleClick }) => {
           </li>
           <li>
             <NavLink to="/les-programmes" onClick={(event) => handleClick(event, DRAWER_TABS.PHASE3, "les-programmes")}>
-              Les possibilités d'engagement
+              Les possibilités d&apos;engagement
             </NavLink>
           </li>
           <li>
@@ -32,7 +31,7 @@ export default ({ young, handleClick }) => {
         <ul className="subNav">
           <li>
             <NavLink to="/les-programmes" onClick={(event) => handleClick(event, DRAWER_TABS.PHASE3, "les-programmes")}>
-              Les programmes d'engagement
+              Les programmes d&apos;engagement
             </NavLink>
           </li>
           <li>
@@ -51,3 +50,5 @@ export default ({ young, handleClick }) => {
 
   return render();
 };
+
+export default SubMenuPhase3;

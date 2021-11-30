@@ -5,7 +5,7 @@ const ProgressBar = ({ backgroundColor, backgroundColorCompleted, completed }) =
   return (
     <Container backgroundColor={backgroundColorCompleted}>
       <Filler backgroundColor={backgroundColor} completed={completed}>
-        <Label>{`${completed} %`}</Label>
+        <Label>{`${completed}`} %</Label>
       </Filler>
     </Container>
   );

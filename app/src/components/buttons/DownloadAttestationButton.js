@@ -5,7 +5,7 @@ import styled from "styled-components";
 import { colors } from "../../utils";
 import downloadPDF from "../../utils/download-pdf";
 
-export default ({ young, children, disabled, uri, ...rest }) => {
+const DownloadAttestationButton = ({ young, children, uri, ...rest }) => {
   const [loading, setLoading] = useState();
 
   const viewAttestation = async (a) => {
@@ -22,6 +22,8 @@ export default ({ young, children, disabled, uri, ...rest }) => {
     </PrimaryStyle>
   );
 };
+
+export default DownloadAttestationButton;
 
 export const PrimaryStyle = styled.div`
   font-size: 0.9rem;

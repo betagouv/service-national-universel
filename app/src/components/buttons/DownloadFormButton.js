@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Spinner } from "reactstrap";
 import downloadPDF from "../../utils/download-pdf";
 
-export default ({ young, children, disabled, uri, ...rest }) => {
+const DownloadFormButton = ({ young, children, uri, ...rest }) => {
   const [loading, setLoading] = useState();
 
   const viewFile = async (a) => {
@@ -19,3 +19,5 @@ export default ({ young, children, disabled, uri, ...rest }) => {
     </div>
   );
 };
+
+export default DownloadFormButton;

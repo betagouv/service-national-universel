@@ -8,7 +8,7 @@ import FormRadioLabel from "./FormRadioLabel";
 import ErrorMessage, { requiredMessage } from "../../scenes/inscription/components/errorMessage";
 import styled from "styled-components";
 
-export default ({ title, children, name, values, handleChange, errors, touched }) => (
+const FormRadioLabelTrueFalse = ({ title, children, name, values, handleChange, errors, touched }) => (
   <FormRow>
     <Col md={4}>
       <FormLabel>
@@ -28,6 +28,8 @@ export default ({ title, children, name, values, handleChange, errors, touched }
     </Col>
   </FormRow>
 );
+
+export default FormRadioLabelTrueFalse;
 
 const FormRadioLabelStyled = styled(FormRadioLabel)`
   margin-right: 30px;

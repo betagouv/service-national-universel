@@ -3,8 +3,7 @@ import { NavLink } from "react-router-dom";
 import styled from "styled-components";
 import QuestionMark from "../../assets/QuestionMark";
 
-export default ({ to, color }) => {
-
+const HelpButton = ({ to, color }) => {
   const Container = styled.div`
     margin: 0.5rem;
     justify-content: center;
@@ -41,18 +40,19 @@ export default ({ to, color }) => {
         }
       }
     }
-`;
+  `;
 
   return (
     <Container>
       <NavLink className="help-button" to={to}>
         <QuestionMark className="icon" />
         <div className="help-button-text">
-          <div className="help-button-text-primary">Besoin d'aide ?</div>
+          <div className="help-button-text-primary">Besoin d&apos;aide ?</div>
           <div className="help-button-text-secondary">Tutoriels, contacts</div>
         </div>
       </NavLink>
     </Container>
-
-  )
+  );
 };
+
+export default HelpButton;

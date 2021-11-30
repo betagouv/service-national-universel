@@ -4,7 +4,7 @@ import styled from "styled-components";
 
 import User from "./user";
 
-export default ({ step, onClickBurger }) => {
+const Header = ({ onClickBurger }) => {
   return (
     <>
       <HeaderNav>
@@ -20,6 +20,8 @@ export default ({ step, onClickBurger }) => {
     </>
   );
 };
+
+export default Header;
 
 const HeaderNav = styled.div`
   display: flex;

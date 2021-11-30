@@ -1,9 +1,11 @@
 import React from "react";
 import styled from "styled-components";
 
-export default ({ errors, name }) => {
+const ErrorMessage = ({ errors, name }) => {
   return <Error>{errors[name]}</Error>;
 };
+
+export default ErrorMessage;
 
 const Error = styled.div`
   color: red;

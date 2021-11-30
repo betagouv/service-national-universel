@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 
-export default ({ ...props }) => (
+const BackIcon = ({ ...props }) => (
   <BackContainer {...props}>
     <svg width="16" height="10" viewBox="0 0 16 10" fill="none" xmlns="http://www.w3.org/2000/svg" {...props}>
       <path
@@ -12,6 +12,8 @@ export default ({ ...props }) => (
     </svg>
   </BackContainer>
 );
+
+export default BackIcon;
 
 const BackContainer = styled.div`
   display: flex;

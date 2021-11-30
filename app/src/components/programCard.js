@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 
-export default ({ program, image, enableToggle = true }) => {
+const ProgramCard = ({ program, image, enableToggle = true }) => {
   if (!program) return <div />;
   const [expandDetails, setExpandDetails] = useState(false);
   const preview = program.description.substring(0, 130);
@@ -32,7 +32,8 @@ export default ({ program, image, enableToggle = true }) => {
     );
   };
 
-  const handleClick = () => {};
+  // eslint-disable-next-line prettier/prettier
+  const handleClick = () => { };
 
   return (
     <Card onClick={handleClick}>
@@ -50,6 +51,8 @@ export default ({ program, image, enableToggle = true }) => {
     </Card>
   );
 };
+
+export default ProgramCard;
 
 const Detail = ({ title, value }) => {
   if (!value) return <span />;

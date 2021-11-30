@@ -2,7 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import { Container } from "reactstrap";
 
-export default ({ onClose, title, message }) => (
+const AlertBox = ({ onClose, title, message }) => (
   <Alert>
     <img src={require("../assets/information.svg")} height={15} />
     <div className="text">
@@ -12,6 +12,8 @@ export default ({ onClose, title, message }) => (
     {onClose ? <img src={require("../assets/close.svg")} height={15} onClick={onClose} style={{ cursor: "pointer" }} /> : null}
   </Alert>
 );
+
+export default AlertBox;
 
 const Alert = styled(Container)`
   border-radius: 8px;

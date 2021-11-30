@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 
-export default ({ ...props }) => (
+const MailOpenIcon = ({ ...props }) => (
   <MailContainer {...props}>
     <svg viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path
@@ -13,6 +13,8 @@ export default ({ ...props }) => (
     </svg>
   </MailContainer>
 );
+
+export default MailOpenIcon;
 
 const MailContainer = styled.div`
   svg {

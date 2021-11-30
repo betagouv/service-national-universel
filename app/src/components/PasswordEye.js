@@ -6,7 +6,7 @@ import { getPasswordErrorMessage } from "../utils";
 import EyeOpen from "../assets/eye.svg";
 import EyeClose from "../assets/eye-slash.svg";
 
-export default ({ value, onChange, autoComplete = "new-password", placeholder = "Tapez votre mot de passe", name = "password", validate = () => {} }) => {
+const PasswordEye = ({ value, onChange, autoComplete = "new-password", placeholder = "Tapez votre mot de passe", name = "password", validate = () => { } }) => {
   const [passwordText, setPasswordText] = useState(false);
 
   return (
@@ -25,6 +25,8 @@ export default ({ value, onChange, autoComplete = "new-password", placeholder = 
     </ContainerPassword>
   );
 };
+
+export default PasswordEye;
 
 const ContainerPassword = styled.div`
   position: relative;
