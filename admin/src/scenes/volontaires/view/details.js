@@ -203,6 +203,11 @@ export default ({ young }) => {
                   )}
                 </Bloc>
               ) : null}
+              {young.consentment ? (
+                <Bloc title="Consentement">
+                  <div className="quote">Consentements validés par le volontaire et ses représentants légaux : {t(young.consentment)}</div>
+                </Bloc>
+              ) : null}
               {young.withdrawnMessage ? (
                 <Bloc title="Désistement">
                   <div className="quote">{`« ${young.withdrawnMessage} »`}</div>
