@@ -194,6 +194,8 @@ export default () => {
 };
 
 const Hit = ({ hit, onClick, user, selected, structure }) => {
+  const displayActionButton = canUpdateReferent({ actor: user, originalTarget: hit, structure });
+
   return (
     <tr style={{ backgroundColor: selected && "#e6ebfa" }} onClick={onClick}>
       <td>
@@ -205,7 +207,7 @@ const Hit = ({ hit, onClick, user, selected, structure }) => {
       <td>{hit.role && <Badge text={translate(hit.role)} />}</td>
       <td>{formatStringLongDate(hit.createdAt)}</td>
       <td>{formatStringLongDate(hit.lastLoginAt)}</td>
-      {canUpdateReferent({ actor: user, originalTarget: hit, structure }) ? (
+      {displayActionButton ? (
         <td onClick={(e) => e.stopPropagation()}>
           <Action hit={hit} />
         </td>
