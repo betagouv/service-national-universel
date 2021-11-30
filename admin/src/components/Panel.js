@@ -1,4 +1,3 @@
-/* eslint-disable no-irregular-whitespace */
 import React from "react";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
@@ -20,8 +19,7 @@ export const Details = ({ title, value, copy }) => {
   if (typeof value === "function") value = value();
   return (
     <div className="detail">
-      {/* `${title}&nbsp;:` */}
-      <div className="detail-title">{`${title} :`}</div>
+      <div className="detail-title">{title}&nbsp;:</div>
       <div style={{ display: "flex" }}>
         <div className="detail-text">{value}</div>
         {copy ? (
