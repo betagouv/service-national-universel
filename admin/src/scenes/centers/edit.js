@@ -13,7 +13,7 @@ import Item from "./components/Item";
 import Select from "./components/Select";
 import LoadingButton from "../../components/buttons/LoadingButton";
 
-export default (props) => {
+export default function Edit(props) {
   const [defaultValue, setDefaultValue] = useState(null);
   const [loading, setLoading] = useState(false);
   const history = useHistory();
@@ -53,8 +53,7 @@ export default (props) => {
           setLoading(false);
           return toastr.error("Une erreur s'est produite lors de l'enregistrement de ce centre", e?.error?.message);
         }
-      }}
-    >
+      }}>
       {({ values, handleChange, handleSubmit, errors, touched }) => (
         <div>
           <Header>
@@ -146,7 +145,7 @@ export default (props) => {
       )}
     </Formik>
   );
-};
+}
 
 const Wrapper = styled.div`
   padding: 2rem;

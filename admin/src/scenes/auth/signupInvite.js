@@ -19,8 +19,9 @@ import { translate, ROLES, colors } from "../../utils";
 import Loader from "../../components/Loader";
 import LoginBox from "./components/loginBox";
 import AuthWrapper from "./components/authWrapper";
+import { requiredMessage } from "../../components/errorMessage";
 
-export default () => {
+export default function SignupInvite() {
   const [invitation, setInvitation] = useState("");
   const [newuser, setNewUser] = useState(null);
 
@@ -31,7 +32,7 @@ export default () => {
     (async () => {
       try {
         if (!invitationToken) return setInvitation("INVITATION_TOKEN_EXPIRED_OR_INVALID");
-        const { data, code, token } = await api.post(`/referent/signup_verify`, { invitationToken });
+        const { data, token } = await api.post(`/referent/signup_verify`, { invitationToken });
         if (token) api.setToken(token);
         setNewUser(data);
       } catch (error) {
@@ -51,6 +52,7 @@ export default () => {
 
   let title;
   if (newuser.department && newuser.role === ROLES.REFERENT_DEPARTMENT) {
+    // eslint-disable-next-line no-irregular-whitespace
     title = `Activez votre compte de Référent du département : ${newuser.department}`;
   } else {
     title = "Activez votre compte";
@@ -67,7 +69,7 @@ export default () => {
             initialValues={{ firstName: newuser.firstName, lastName: newuser.lastName, email: newuser.email, password: "", repassword: "", acceptCGU: "" }}
             onSubmit={async (values, actions) => {
               try {
-                const { data: user, token, code, ok } = await api.post(`/referent/signup_invite`, { ...values, invitationToken, acceptCGU: values.acceptCGU });
+                const { data: user, token, ok } = await api.post(`/referent/signup_invite`, { ...values, invitationToken, acceptCGU: values.acceptCGU });
                 actions.setSubmitting(false);
                 if (ok && token) api.setToken(token);
                 if (ok && user) dispatch(setUser(user));
@@ -78,13 +80,12 @@ export default () => {
                   return toastr.error(
                     "Mot de passe incorrect",
                     "Votre mot de passe doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole",
-                    { timeOut: 10000 }
+                    { timeOut: 10000 },
                   );
                 if (e.code === "USER_ALREADY_REGISTERED") return toastr.error("Votre compte est déja activé. Veuillez vous connecter", { timeOut: 10000 });
                 return toastr.error("Problème", translate(e.code));
               }
-            }}
-          >
+            }}>
             {({ values, errors, isSubmitting, handleChange, handleSubmit }) => {
               return (
                 <form onSubmit={handleSubmit}>
@@ -171,11 +172,15 @@ export default () => {
                         checked={values.acceptCGU === "true"}
                         style={{ display: "flex" }}
                       />
-                      <label for="checkboxCGU" style={{ flex: 1, margin: 0 }}>
+                      <label htmlFor="checkboxCGU" style={{ flex: 1, margin: 0 }}>
                         <p style={{ marginBottom: "0" }}>
-                          J'ai lu et j'accepte les{" "}
-                          <a href={`${adminURL}/conditions-generales-utilisation`} target="_blank" style={{ textDecoration: "underline", color: colors.darkPurple }}>
-                            conditions générales d'utilisation{" "}
+                          J&apos;ai lu et j&apos;accepte les{" "}
+                          <a
+                            href={`${adminURL}/conditions-generales-utilisation`}
+                            target="_blank"
+                            style={{ textDecoration: "underline", color: colors.darkPurple }}
+                            rel="noreferrer">
+                            conditions générales d&apos;utilisation{" "}
                           </a>
                           de la plateforme du Service national universel
                         </p>
@@ -197,7 +202,7 @@ export default () => {
       </AuthWrapper>
     </div>
   );
-};
+}
 
 const Thumb = styled.div`
   min-height: 400px;

@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 
-export default () => {
+export default function CGU() {
   return (
     <Container>
       <Header>
@@ -13,11 +13,11 @@ export default () => {
             <img src={require("../../assets/logo-snu.png")} />
           </a>
         </Logos>
-        <h1>CONDITIONS GÉNÉRALES D'UTILISATION (CGU)</h1>
+        <h1>CONDITIONS GÉNÉRALES D&apos;UTILISATION (CGU)</h1>
       </Header>
       <p>
-        admin.snu.gouv.fr et moncompte.snu.gouv.fr (ci-après la « Plateforme ») sont deux sites mis en œuvre par la Direction de la jeunesse, de l'éducation populaire et de la vie
-        associative (DJEPVA) du Ministère de l’éducation nationale et de la jeunesse et des sports (MENJS), dans le cadre de sa politique publique. La Plateforme permet aux
+        admin.snu.gouv.fr et moncompte.snu.gouv.fr (ci-après la « Plateforme ») sont deux sites mis en œuvre par la Direction de la jeunesse, de l&apos;éducation populaire et de la
+        vie associative (DJEPVA) du Ministère de l’éducation nationale et de la jeunesse et des sports (MENJS), dans le cadre de sa politique publique. La Plateforme permet aux
         volontaires du Service National Universel (SNU) de s’inscrire et de suivre leur parcours, à l’administration de piloter et accompagner la mise en œuvre du SNU, et à des
         structures publiques, privées ou associatives de déposer des missions d’intérêt général.
       </p>
@@ -46,8 +46,8 @@ export default () => {
           cohésion et une mission d’intérêt général.
         </p>
         <p>
-          • « Structure » désigne toute personne morale constituée, sans but lucratif de droit français ou service public, souhaitant proposer une mission d'intérêt général
-          répondant aux orientations du Service National Universel et aux valeurs qu'il promeut.
+          • « Structure » désigne toute personne morale constituée, sans but lucratif de droit français ou service public, souhaitant proposer une mission d&apos;intérêt général
+          répondant aux orientations du Service National Universel et aux valeurs qu&apos;il promeut.
         </p>
         <p>
           • « Référent » désigne l’agent de l’administration territoriale qui veille à la mise en œuvre et à l’accompagnement des volontaires et des structures dans son territoire.
@@ -119,78 +119,84 @@ export default () => {
         <h5>CHARTE DE LA RÉSERVE CIVIQUE</h5>
         <h6>1° Principes directeurs</h6>
         <p>
-          La réserve civique permet à toute personne qui le souhaite de s'engager à servir les valeurs de la République en participant à des missions d'intérêt général, à titre
-          bénévole et occasionnel.
+          La réserve civique permet à toute personne qui le souhaite de s&apos;engager à servir les valeurs de la République en participant à des missions d&apos;intérêt général, à
+          titre bénévole et occasionnel.
         </p>
         <p>
-          La réserve civique, ses sections territoriales et les réserves thématiques qu'elle comporte favorisent la participation de tout citoyen à ces missions, dans un cadre
+          La réserve civique, ses sections territoriales et les réserves thématiques qu&apos;elle comporte favorisent la participation de tout citoyen à ces missions, dans un cadre
           collectif, ponctuel ou, à titre exceptionnel, récurrent, quelles que soient ses aptitudes et compétences. Elle concourt au renforcement du lien social en favorisant la
           mixité sociale.
         </p>
         <p>
-          Les domaines d'actions de la réserve civique, de ses sections territoriales et des réserves thématiques recouvrent des champs d'actions variés : la solidarité,
-          l'éducation, la culture, la santé, l'environnement, le sport, la mémoire et la citoyenneté, la coopération internationale, la sécurité ou encore les interventions
-          d'urgence en situation de crise ou d'événement exceptionnel.
+          Les domaines d&apos;actions de la réserve civique, de ses sections territoriales et des réserves thématiques recouvrent des champs d&apos;actions variés : la solidarité,
+          l&apos;éducation, la culture, la santé, l&apos;environnement, le sport, la mémoire et la citoyenneté, la coopération internationale, la sécurité ou encore les
+          interventions d&apos;urgence en situation de crise ou d&apos;événement exceptionnel.
         </p>
         <p>
-          La réserve civique est complémentaire des autres formes d'engagement citoyen que sont, d'une part, la garde nationale et les réserves opérationnelles et, d'autre part,
-          l'engagement bénévole et volontaire.
+          La réserve civique est complémentaire des autres formes d&apos;engagement citoyen que sont, d&apos;une part, la garde nationale et les réserves opérationnelles et,
+          d&apos;autre part, l&apos;engagement bénévole et volontaire.
         </p>
-        <h6>2° Engagements et obligations des réservistes et des organismes d'accueil</h6>
-        <p>L'affectation à une mission nécessite l'accord de l'organisme d'accueil et du réserviste.</p>
+        <h6>2° Engagements et obligations des réservistes et des organismes d&apos;accueil</h6>
+        <p>L&apos;affectation à une mission nécessite l&apos;accord de l&apos;organisme d&apos;accueil et du réserviste.</p>
         <span>A. - Engagements et obligations des réservistes</span>
         <p>
           Sous réserve de satisfaire aux conditions légales et réglementaires qui régissent la réserve civique et ses sections territoriales et aux règles spécifiques propres aux
-          réserves thématiques qu'elle comporte, peut être réserviste toute personne volontaire souhaitant s'engager dans le respect des principes directeurs de la réserve civique.
+          réserves thématiques qu&apos;elle comporte, peut être réserviste toute personne volontaire souhaitant s&apos;engager dans le respect des principes directeurs de la
+          réserve civique.
         </p>
-        <p>Toute personne qui participe à la réserve civique, ses sections territoriales ou l'une des réserves thématiques qu'elle comporte s'engage à :</p>
+        <p>Toute personne qui participe à la réserve civique, ses sections territoriales ou l&apos;une des réserves thématiques qu&apos;elle comporte s&apos;engage à :</p>
         <p>- respecter la présente charte ;</p>
         <p>- apporter son concours à titre bénévole ;</p>
-        <p>- s'engager pour une période déterminée, qui peut être renouvelée avec son accord ;</p>
+        <p>- s&apos;engager pour une période déterminée, qui peut être renouvelée avec son accord ;</p>
         <p>
-          - accomplir la mission pour laquelle elle est mobilisée selon les instructions données par le responsable de l'organisme au sein duquel elle effectue sa mission - ou par
-          toute personne que ce responsable a désignée - en tenant compte des règles de service et de fonctionnement ;
+          - accomplir la mission pour laquelle elle est mobilisée selon les instructions données par le responsable de l&apos;organisme au sein duquel elle effectue sa mission - ou
+          par toute personne que ce responsable a désignée - en tenant compte des règles de service et de fonctionnement ;
         </p>
-        <p>- faire preuve d'une disponibilité adaptée aux exigences de son engagement ;</p>
-        <p>- observer un devoir de réserve, de discrétion et de neutralité pendant l'exercice de sa mission ;</p>
+        <p>- faire preuve d&apos;une disponibilité adaptée aux exigences de son engagement ;</p>
+        <p>- observer un devoir de réserve, de discrétion et de neutralité pendant l&apos;exercice de sa mission ;</p>
         <p>- faire preuve de bienveillance envers toute personne en contact avec une mission de la réserve ;</p>
-        <p>- rendre compte de sa mission à l'organisme qui l'accueille ;</p>
-        <p>- signaler à l'autorité de gestion de la réserve compétente tout incident ou anomalie survenu à l'occasion de sa période d'engagement ;</p>
-        <p>- promouvoir l'engagement citoyen sous toutes ses formes.</p>
-        <span>B. - Engagements et obligations des organismes d'accueil</span>
+        <p>- rendre compte de sa mission à l&apos;organisme qui l&apos;accueille ;</p>
+        <p>- signaler à l&apos;autorité de gestion de la réserve compétente tout incident ou anomalie survenu à l&apos;occasion de sa période d&apos;engagement ;</p>
+        <p>- promouvoir l&apos;engagement citoyen sous toutes ses formes.</p>
+        <span>B. - Engagements et obligations des organismes d&apos;accueil</span>
         <p>
-          Les organismes qui accueillent les réservistes sont les services de l'Etat, les personnes morales de droit public, notamment les établissements publics et les
-          collectivités territoriales, ainsi que les organismes sans but lucratif de droit français qui portent un projet d'intérêt général, répondant aux orientations de la
-          réserve civique et aux valeurs qu'elle promeut.
+          Les organismes qui accueillent les réservistes sont les services de l&apos;Etat, les personnes morales de droit public, notamment les établissements publics et les
+          collectivités territoriales, ainsi que les organismes sans but lucratif de droit français qui portent un projet d&apos;intérêt général, répondant aux orientations de la
+          réserve civique et aux valeurs qu&apos;elle promeut.
         </p>
         <p>
-          Une association cultuelle ou politique, une organisation syndicale, une congrégation, une fondation d'entreprise ou un comité d'entreprise ne peut accueillir de
+          Une association cultuelle ou politique, une organisation syndicale, une congrégation, une fondation d&apos;entreprise ou un comité d&apos;entreprise ne peut accueillir de
           réserviste.
         </p>
         <p>
-          Les organismes éligibles proposent aux réservistes des missions compatibles avec leurs obligations professionnelles. Il ne peut être opposé à l'employeur une quelconque
-          forme de réquisition.
+          Les organismes éligibles proposent aux réservistes des missions compatibles avec leurs obligations professionnelles. Il ne peut être opposé à l&apos;employeur une
+          quelconque forme de réquisition.
         </p>
-        <p>Les missions impliquant une intervention récurrente de réservistes citoyens sont préalablement validées par l'autorité de gestion compétente de la réserve civique.</p>
-        <p>Les organismes d'accueil s'engagent à :</p>
+        <p>
+          Les missions impliquant une intervention récurrente de réservistes citoyens sont préalablement validées par l&apos;autorité de gestion compétente de la réserve civique.
+        </p>
+        <p>Les organismes d&apos;accueil s&apos;engagent à :</p>
         <p>- respecter la présente charte ;</p>
-        <p>- proposer des missions conformes à l'objet de la réserve civique, ses sections territoriales et ses réserves thématiques ;</p>
+        <p>- proposer des missions conformes à l&apos;objet de la réserve civique, ses sections territoriales et ses réserves thématiques ;</p>
         <p>- proposer des missions non substituables à un emploi ou à un stage ;</p>
-        <p>- préparer le réserviste à l'exercice de sa mission ;</p>
+        <p>- préparer le réserviste à l&apos;exercice de sa mission ;</p>
         <p>- prendre en considération les attentes, les compétences et les disponibilités exprimées par le réserviste au regard des besoins de la mission proposée ;</p>
-        <p>- le cas échéant, compléter la convention d'engagement décrivant précisément la mission du réserviste (fréquence, lieu d'exercice, durée) ;</p>
+        <p>- le cas échéant, compléter la convention d&apos;engagement décrivant précisément la mission du réserviste (fréquence, lieu d&apos;exercice, durée) ;</p>
         <p>- attester du déroulement de la mission ;</p>
         <p>- participer à des actions de communication, de sensibilisation et de promotion de la réserve civique ;</p>
-        <p>- couvrir le réserviste contre les dommages subis par lui ou causés à des tiers dans l'accomplissement de sa mission.</p>
-        <p>Les organismes d'accueil peuvent par ailleurs rembourser les frais réellement engagés par le réserviste dans l'exercice de la mission qu'ils lui ont confiée.</p>
+        <p>- couvrir le réserviste contre les dommages subis par lui ou causés à des tiers dans l&apos;accomplissement de sa mission.</p>
         <p>
-          Tout manquement aux principes et engagements énoncés par la présente charte justifie qu'il soit mis fin à la participation de la personne ou de l'organisme concerné à la
-          réserve civique, ses sections territoriales ou ses réserves thématiques.
+          Les organismes d&apos;accueil peuvent par ailleurs rembourser les frais réellement engagés par le réserviste dans l&apos;exercice de la mission qu&apos;ils lui ont
+          confiée.
+        </p>
+        <p>
+          Tout manquement aux principes et engagements énoncés par la présente charte justifie qu&apos;il soit mis fin à la participation de la personne ou de l&apos;organisme
+          concerné à la réserve civique, ses sections territoriales ou ses réserves thématiques.
         </p>
       </Article>
     </Container>
   );
-};
+}
 
 const Header = styled.header`
   h1 {
