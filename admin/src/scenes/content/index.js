@@ -4,7 +4,7 @@ import { Switch, Route } from "react-router-dom";
 import List from "./list";
 import Edit from "./edit";
 
-export default () => {
+export default function Index() {
   return (
     <Switch>
       <Route path="/contenu/create" component={Edit} />
@@ -12,4 +12,4 @@ export default () => {
       <Route path="/contenu" component={List} />
     </Switch>
   );
-};
+}

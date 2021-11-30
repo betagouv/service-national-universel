@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Formik, Field } from "formik";
+import { Formik } from "formik";
 import queryString from "query-string";
 import { FormGroup, Row, Col } from "reactstrap";
 import { toastr } from "react-redux-toastr";
@@ -11,7 +11,7 @@ import LoadingButton from "../../components/buttons/LoadingButton";
 import PasswordEye from "../../components/PasswordEye";
 import { translate } from "../../utils";
 
-export default ({ location }) => {
+export default function ResetPassword({ location }) {
   const [redirect, setRedirect] = useState(false);
 
   return (
@@ -37,8 +37,7 @@ export default ({ location }) => {
                 return toastr.error(translate(e && e.code));
               }
               actions.setSubmitting(false);
-            }}
-          >
+            }}>
             {({ values, errors, isSubmitting, handleChange, handleSubmit }) => {
               return (
                 <form onSubmit={handleSubmit}>
@@ -68,7 +67,7 @@ export default ({ location }) => {
       </Col>
     </Wrapper>
   );
-};
+}
 
 const Wrapper = styled(Row)`
   height: 100vh;
