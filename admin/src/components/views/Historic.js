@@ -5,7 +5,7 @@ import { formatStringLongDate, translateOperationName, translateModelFields, tra
 import Loader from "../../components/Loader";
 import api from "../../services/api";
 
-export default ({ model, value }) => {
+export default function Historic({ model, value }) {
   const [data, setData] = useState();
 
   const getPatches = async () => {
@@ -47,7 +47,7 @@ export default ({ model, value }) => {
       </div>
     </div>
   );
-};
+}
 
 const Hit = ({ hit, model }) => {
   function isIsoDate(str) {

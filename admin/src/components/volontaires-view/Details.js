@@ -7,7 +7,7 @@ import api from "../../services/api";
 import DownloadButton from "../buttons/DownloadButton";
 import { Box, BoxTitle } from "../box";
 
-export default ({ young }) => {
+export default function DetailsVolontaires({ young }) {
   return (
     <Box>
       <Row>
@@ -97,7 +97,7 @@ export default ({ young }) => {
       </Row>
     </Box>
   );
-};
+}
 
 const Bloc = ({ children, title, last }) => {
   return (

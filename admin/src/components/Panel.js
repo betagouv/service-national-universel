@@ -1,9 +1,10 @@
+/* eslint-disable no-irregular-whitespace */
 import React from "react";
 import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { copyToClipboard } from "../utils";
 
-export const Info = ({ children, title, id }) => {
+export const Info = ({ children, title }) => {
   return (
     <div className="info">
       <div style={{ position: "relative" }}>
@@ -14,7 +15,7 @@ export const Info = ({ children, title, id }) => {
   );
 };
 
-export const Details = ({ title, value, copy, to }) => {
+export const Details = ({ title, value, copy }) => {
   if (!value) return <div />;
   if (typeof value === "function") value = value();
   return (
