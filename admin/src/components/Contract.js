@@ -17,7 +17,7 @@ import DownloadContractButton from "./buttons/DownloadContractButton";
 import LoadingButton from "./buttons/LoadingButton";
 import ModalConfirm from "./modals/ModalConfirm";
 
-export default ({ young, admin }) => {
+export default function Contract({ young, admin }) {
   const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
@@ -216,8 +216,7 @@ export default ({ young, admin }) => {
       <BackLink
         onClick={() => {
           history.push(`/volontaire/${young._id}/${admin ? "phase2" : ""}`);
-        }}
-      >
+        }}>
         {"<"} Revenir à la fiche volontaire
       </BackLink>
       <Box>
@@ -227,11 +226,11 @@ export default ({ young, admin }) => {
               <p>Ce contrat doit être validé par le(s) représentant(s) légal(aux) du volontaire, le tuteur de mission et le référent départemental.</p>
               {isReferentOrAdmin(user) ? (
                 <p>
-                  La structure d'accueil doit envoyer le contrat d'engagement après validation de la candidature. Néanmoins vous pouvez le faire en rattrapage et suivi d'une
-                  structure.
+                  La structure d&apos;accueil doit envoyer le contrat d&apos;engagement après validation de la candidature. Néanmoins vous pouvez le faire en rattrapage et suivi
+                  d&apos;une structure.
                 </p>
               ) : (
-                <p>La structure d'accueil doit envoyer le contrat d'engagement après validation de la candidature. </p>
+                <p>La structure d&apos;accueil doit envoyer le contrat d&apos;engagement après validation de la candidature. </p>
               )}
             </div>
             <div style={{ textAlign: "right" }}>
@@ -277,7 +276,7 @@ export default ({ young, admin }) => {
         </DownloadContractButton>
       ) : (
         <Formik validateOnChange={false} validateOnBlur={false} initialValues={initialValues} onSubmit={onSubmit}>
-          {({ values, errors, touched, isSubmitting, handleChange, handleSubmit, setFieldValue, validateForm }) => {
+          {({ values, errors, touched, handleChange, handleSubmit, setFieldValue, validateForm }) => {
             const context = { values, errors, touched, handleChange };
             return (
               <>
@@ -484,11 +483,11 @@ export default ({ young, admin }) => {
                           </p>
                           <p>Le volontaire exécute la mission d’intérêt général à titre bénévole.</p>
                           <p>
-                            L'engagement, l'affectation et l'activité du volontaire ne sont régis ni par le code du travail, ni par le chapitre Ier de la loi n° 84-16 du 11 janvier
-                            1984 portant dispositions statutaires relatives à la fonction publique de l'Etat, le chapitre Ier de la loi n° 84-53 du 26 janvier 1984 portant
-                            dispositions statutaires relatives à la fonction publique territoriale ou le chapitre Ier de la loi n° 86-33 du 9 janvier 1986 portant dispositions
-                            statutaires relatives à la fonction publique hospitalière. Le cas échéant, la structure d’accueil, directement ou par le mentor désigné, informe le
-                            représentant de l’Etat, signataire du présent contrat, des difficultés rencontrées dans l’exécution du présent contrat.
+                            L&apos;engagement, l&apos;affectation et l&apos;activité du volontaire ne sont régis ni par le code du travail, ni par le chapitre Ier de la loi n°
+                            84-16 du 11 janvier 1984 portant dispositions statutaires relatives à la fonction publique de l&apos;Etat, le chapitre Ier de la loi n° 84-53 du 26
+                            janvier 1984 portant dispositions statutaires relatives à la fonction publique territoriale ou le chapitre Ier de la loi n° 86-33 du 9 janvier 1986
+                            portant dispositions statutaires relatives à la fonction publique hospitalière. Le cas échéant, la structure d’accueil, directement ou par le mentor
+                            désigné, informe le représentant de l’Etat, signataire du présent contrat, des difficultés rencontrées dans l’exécution du présent contrat.
                           </p>
                           <p>
                             Conformément aux dispositions du décret n° 2020-922 du 29 juillet 2020 portant diverses dispositions relatives au service national universel, le
@@ -508,7 +507,7 @@ export default ({ young, admin }) => {
                         <h3>f) Responsabilités</h3>
                         <div>
                           <p>La structure d’accueil est chargée de la surveillance et de la sécurité du volontaire accueilli.</p>
-                          <p>L'organisme d'accueil le couvre des dommages subis par lui ou causés à des tiers dans l'accomplissement de sa mission.</p>
+                          <p>L&apos;organisme d&apos;accueil le couvre des dommages subis par lui ou causés à des tiers dans l&apos;accomplissement de sa mission.</p>
                         </div>
                         <h3>g) Résiliation du contrat</h3>
                         <div>
@@ -520,8 +519,8 @@ export default ({ young, admin }) => {
                         </div>
                         <h3>h) Conditions de validation de la mission d’intérêt général</h3>
                         <div>
-                          La confirmation de la réalisation de la mission d'intérêt général est effectuée par le tuteur de mission qui, au nom de la structure d'accueil, effectue
-                          la procédure de fin de mission sur la plateforme.
+                          La confirmation de la réalisation de la mission d&apos;intérêt général est effectuée par le tuteur de mission qui, au nom de la structure d&apos;accueil,
+                          effectue la procédure de fin de mission sur la plateforme.
                           <br />
                           La validation est conditionnée à la réalisation de
                           <ContractField name="missionDuration" placeholder="nombre d'heure" context={context} />
@@ -624,86 +623,91 @@ export default ({ young, admin }) => {
                         <h2>CHARTE DE LA RÉSERVE CIVIQUE</h2>
                         <h3>1° Principes directeurs</h3>
                         <p>
-                          La réserve civique permet à toute personne qui le souhaite de s'engager à servir les valeurs de la République en participant à des missions d'intérêt
-                          général, à titre bénévole et occasionnel.
+                          La réserve civique permet à toute personne qui le souhaite de s&apos;engager à servir les valeurs de la République en participant à des missions
+                          d&apos;intérêt général, à titre bénévole et occasionnel.
                         </p>
                         <p>
-                          La réserve civique, ses sections territoriales et les réserves thématiques qu'elle comporte favorisent la participation de tout citoyen à ces missions,
-                          dans un cadre collectif, ponctuel ou, à titre exceptionnel, récurrent, quelles que soient ses aptitudes et compétences. Elle concourt au renforcement du
-                          lien social en favorisant la mixité sociale.
+                          La réserve civique, ses sections territoriales et les réserves thématiques qu&apos;elle comporte favorisent la participation de tout citoyen à ces
+                          missions, dans un cadre collectif, ponctuel ou, à titre exceptionnel, récurrent, quelles que soient ses aptitudes et compétences. Elle concourt au
+                          renforcement du lien social en favorisant la mixité sociale.
                         </p>
                         <p>
-                          Les domaines d'actions de la réserve civique, de ses sections territoriales et des réserves thématiques recouvrent des champs d'actions variés : la
-                          solidarité, l'éducation, la culture, la santé, l'environnement, le sport, la mémoire et la citoyenneté, la coopération internationale, la sécurité ou
-                          encore les interventions d'urgence en situation de crise ou d'événement exceptionnel.
+                          Les domaines d&apos;actions de la réserve civique, de ses sections territoriales et des réserves thématiques recouvrent des champs d&apos;actions variés :
+                          la solidarité, l&apos;éducation, la culture, la santé, l&apos;environnement, le sport, la mémoire et la citoyenneté, la coopération internationale, la
+                          sécurité ou encore les interventions d&apos;urgence en situation de crise ou d&apos;événement exceptionnel.
                         </p>
                         <p>
-                          La réserve civique est complémentaire des autres formes d'engagement citoyen que sont, d'une part, la garde nationale et les réserves opérationnelles et,
-                          d'autre part, l'engagement bénévole et volontaire.
+                          La réserve civique est complémentaire des autres formes d&apos;engagement citoyen que sont, d&apos;une part, la garde nationale et les réserves
+                          opérationnelles et, d&apos;autre part, l&apos;engagement bénévole et volontaire.
                         </p>
-                        <h3>2° Engagements et obligations des réservistes et des organismes d'accueil</h3>
-                        <p>L'affectation à une mission nécessite l'accord de l'organisme d'accueil et du réserviste.</p>
+                        <h3>2° Engagements et obligations des réservistes et des organismes d&apos;accueil</h3>
+                        <p>L&apos;affectation à une mission nécessite l&apos;accord de l&apos;organisme d&apos;accueil et du réserviste.</p>
                         <h4>A. - Engagements et obligations des réservistes</h4>
                         <p>
                           Sous réserve de satisfaire aux conditions légales et réglementaires qui régissent la réserve civique et ses sections territoriales et aux règles
-                          spécifiques propres aux réserves thématiques qu'elle comporte, peut être réserviste toute personne volontaire souhaitant s'engager dans le respect des
-                          principes directeurs de la réserve civique.
+                          spécifiques propres aux réserves thématiques qu&apos;elle comporte, peut être réserviste toute personne volontaire souhaitant s&apos;engager dans le
+                          respect des principes directeurs de la réserve civique.
                         </p>
-                        <p>Toute personne qui participe à la réserve civique, ses sections territoriales ou l'une des réserves thématiques qu'elle comporte s'engage à :</p>
+                        <p>
+                          Toute personne qui participe à la réserve civique, ses sections territoriales ou l&apos;une des réserves thématiques qu&apos;elle comporte s&apos;engage à
+                          :
+                        </p>
                         <ul>
                           <li>respecter la présente charte ;</li>
                           <li>apporter son concours à titre bénévole ;</li>
-                          <li>s'engager pour une période déterminée, qui peut être renouvelée avec son accord ;</li>
+                          <li>s&apos;engager pour une période déterminée, qui peut être renouvelée avec son accord ;</li>
                           <li>
-                            accomplir la mission pour laquelle elle est mobilisée selon les instructions données par le responsable de l'organisme au sein duquel elle effectue sa
-                            mission (ou par toute personne que ce responsable a désignée) en tenant compte des règles de service et de fonctionnement ;
+                            accomplir la mission pour laquelle elle est mobilisée selon les instructions données par le responsable de l&apos;organisme au sein duquel elle effectue
+                            sa mission (ou par toute personne que ce responsable a désignée) en tenant compte des règles de service et de fonctionnement ;
                           </li>
 
-                          <li>faire preuve d'une disponibilité adaptée aux exigences de son engagement ;</li>
-                          <li>observer un devoir de réserve, de discrétion et de neutralité pendant l'exercice de sa mission ;</li>
+                          <li>faire preuve d&apos;une disponibilité adaptée aux exigences de son engagement ;</li>
+                          <li>observer un devoir de réserve, de discrétion et de neutralité pendant l&apos;exercice de sa mission ;</li>
                           <li>faire preuve de bienveillance envers toute personne en contact avec une mission de la réserve ;</li>
-                          <li>rendre compte de sa mission à l'organisme qui l'accueille ;</li>
-                          <li>signaler à l'autorité de gestion de la réserve compétente tout incident ou anomalie survenu à l'occasion de sa période d'engagement ;</li>
+                          <li>rendre compte de sa mission à l&apos;organisme qui l&apos;accueille ;</li>
+                          <li>
+                            signaler à l&apos;autorité de gestion de la réserve compétente tout incident ou anomalie survenu à l&apos;occasion de sa période d&apos;engagement ;
+                          </li>
 
-                          <li>promouvoir l'engagement citoyen sous toutes ses formes.</li>
+                          <li>promouvoir l&apos;engagement citoyen sous toutes ses formes.</li>
                         </ul>
-                        <h4>B. - Engagements et obligations des organismes d'accueil</h4>
+                        <h4>B. - Engagements et obligations des organismes d&apos;accueil</h4>
                         <p>
-                          Les organismes qui accueillent les réservistes sont les services de l'Etat, les personnes morales de droit public, notamment les établissements publics et
-                          les collectivités territoriales, ainsi que les organismes sans but lucratif de droit français qui portent un projet d'intérêt général, répondant aux
-                          orientations de la réserve civique et aux valeurs qu'elle promeut.
+                          Les organismes qui accueillent les réservistes sont les services de l&apos;Etat, les personnes morales de droit public, notamment les établissements
+                          publics et les collectivités territoriales, ainsi que les organismes sans but lucratif de droit français qui portent un projet d&apos;intérêt général,
+                          répondant aux orientations de la réserve civique et aux valeurs qu&apos;elle promeut.
                         </p>
                         <p>
-                          Une association cultuelle ou politique, une organisation syndicale, une congrégation, une fondation d'entreprise ou un comité d'entreprise ne peut
-                          accueillir de réserviste.
+                          Une association cultuelle ou politique, une organisation syndicale, une congrégation, une fondation d&apos;entreprise ou un comité d&apos;entreprise ne
+                          peut accueillir de réserviste.
                         </p>
                         <p>
-                          Les organismes éligibles proposent aux réservistes des missions compatibles avec leurs obligations professionnelles. Il ne peut être opposé à l'employeur
-                          une quelconque forme de réquisition.
+                          Les organismes éligibles proposent aux réservistes des missions compatibles avec leurs obligations professionnelles. Il ne peut être opposé à
+                          l&apos;employeur une quelconque forme de réquisition.
                         </p>
                         <p>
-                          Les missions impliquant une intervention récurrente de réservistes citoyens sont préalablement validées par l'autorité de gestion compétente de la réserve
-                          civique.
+                          Les missions impliquant une intervention récurrente de réservistes citoyens sont préalablement validées par l&apos;autorité de gestion compétente de la
+                          réserve civique.
                         </p>
-                        <p>Les organismes d'accueil s'engagent à :</p>
+                        <p>Les organismes d&apos;accueil s&apos;engagent à :</p>
                         <li>respecter la présente charte ;</li>
-                        <li>proposer des missions conformes à l'objet de la réserve civique, ses sections territoriales et ses réserves thématiques ;</li>
+                        <li>proposer des missions conformes à l&apos;objet de la réserve civique, ses sections territoriales et ses réserves thématiques ;</li>
                         <li>proposer des missions non substituables à un emploi ou à un stage ;</li>
-                        <li>préparer le réserviste à l'exercice de sa mission ;</li>
+                        <li>préparer le réserviste à l&apos;exercice de sa mission ;</li>
                         <li>
                           prendre en considération les attentes, les compétences et les disponibilités exprimées par le réserviste au regard des besoins de la mission proposée ;
                         </li>
-                        <li>le cas échéant, compléter la convention d'engagement décrivant précisément la mission du réserviste (fréquence, lieu d'exercice, durée) ;</li>
+                        <li>le cas échéant, compléter la convention d&apos;engagement décrivant précisément la mission du réserviste (fréquence, lieu d&apos;exercice, durée) ;</li>
                         <li>attester du déroulement de la mission ;</li>
                         <li>participer à des actions de communication, de sensibilisation et de promotion de la réserve civique ;</li>
-                        <li>couvrir le réserviste contre les dommages subis par lui ou causés à des tiers dans l'accomplissement de sa mission.</li>
+                        <li>couvrir le réserviste contre les dommages subis par lui ou causés à des tiers dans l&apos;accomplissement de sa mission.</li>
                         <p>
-                          Les organismes d'accueil peuvent par ailleurs rembourser les frais réellement engagés par le réserviste dans l'exercice de la mission qu'ils lui ont
-                          confiée.
+                          Les organismes d&apos;accueil peuvent par ailleurs rembourser les frais réellement engagés par le réserviste dans l&apos;exercice de la mission
+                          qu&apos;ils lui ont confiée.
                         </p>
                         <p>
-                          Tout manquement aux principes et engagements énoncés par la présente charte justifie qu'il soit mis fin à la participation de la personne ou de
-                          l'organisme concerné à la réserve civique, ses sections territoriales ou ses réserves thématiques.
+                          Tout manquement aux principes et engagements énoncés par la présente charte justifie qu&apos;il soit mis fin à la participation de la personne ou de
+                          l&apos;organisme concerné à la réserve civique, ses sections territoriales ou ses réserves thématiques.
                         </p>
                       </div>
                     </ContractContainer>
@@ -734,8 +738,7 @@ export default ({ young, admin }) => {
                     color={"#fff"}
                     textColor={"#767697"}
                     loading={loadings.saveButton}
-                    disabled={loadings.submitButton}
-                  >
+                    disabled={loadings.submitButton}>
                     Enregistrer les modifications
                   </LoadingButton>
                   {contract?.invitationSent !== "true" && (
@@ -747,8 +750,7 @@ export default ({ young, admin }) => {
                         handleSubmit();
                       }}
                       loading={loadings.submitButton}
-                      disabled={loadings.saveButton}
-                    >
+                      disabled={loadings.saveButton}>
                       Envoyer une demande de validation aux {values.parent2Email && !isYoungAdult ? "4" : "3"} parties prenantes
                     </LoadingButton>
                   )}
@@ -767,7 +769,7 @@ export default ({ young, admin }) => {
       {young.statusPhase2 === "VALIDATED" ? (
         <div style={{ marginTop: "2rem" }}>
           <DownloadAttestationButton young={young} uri="2">
-            Télécharger l'attestation de réalisation de la phase 2
+            Télécharger l&apos;attestation de réalisation de la phase 2
           </DownloadAttestationButton>
         </div>
       ) : null}
@@ -783,9 +785,9 @@ export default ({ young, admin }) => {
       />
     </>
   );
-};
+}
 
-const ContractField = ({ name, placeholder, optional, context: { values, errors, touched, handleChange }, ...rest }) => {
+const ContractField = ({ name, placeholder, optional, context: { values, errors, handleChange }, ...rest }) => {
   const content = (
     <>
       {errors[name] && <ErrorInContractField>Ce champ est obligatoire</ErrorInContractField>}
@@ -812,8 +814,7 @@ const Bloc = ({ children, title, borderBottom, borderRight, borderLeft, disabled
         borderRight: borderRight ? "2px solid #f4f5f7" : 0,
         borderLeft: borderLeft ? "2px solid #f4f5f7" : 0,
         backgroundColor: disabled ? "#f9f9f9" : "transparent",
-      }}
-    >
+      }}>
       <Wrapper>
         <div style={{ display: "flex" }}>
           <Legend>{title}</Legend>
@@ -855,8 +856,7 @@ function SendContractLink({ contract, target }) {
           } catch (e) {
             toastr.error("Une erreur est survenue lors de l'envoi du mail", e.message);
           }
-        }}
-      >
+        }}>
         ✉️ Renvoyer le lien par email
       </CopyLink>
       <ModalConfirm
@@ -895,8 +895,7 @@ function ContractStatusbadgeItem({ contract, status, token, target }) {
         onClick={() => {
           copyToClipboard(`${appURL}/validate-contract?token=${token}`);
           toastr.success("Le lien a été copié dans le presse papier.");
-        }}
-      >
+        }}>
         Copier le lien de validation
       </CopyLink>
       <br />

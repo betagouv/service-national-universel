@@ -47,7 +47,7 @@ const lookUpAuthorizedStatus = ({ status, role }) => {
   }
 };
 
-export default ({ hit, options = [], callback }) => {
+export default function SelectStatusApplication({ hit, options = [], callback }) {
   const [application, setApplication] = useState(null);
   const [modalConfirm, setModalConfirm] = useState({ isOpen: false, onConfirm: null });
   const [modalRefuse, setModalRefuse] = useState({ isOpen: false, onConfirm: null });
@@ -159,7 +159,7 @@ export default ({ hit, options = [], callback }) => {
       />
     </>
   );
-};
+}
 
 const ActionBox = styled.div`
   .dropdown-menu {
