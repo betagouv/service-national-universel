@@ -12,6 +12,7 @@ import DownloadAttestationButton from "../../../components/buttons/DownloadAttes
 import { Box, BoxTitle } from "../../../components/box";
 import Emails from "../../../components/views/Emails";
 import InfoIcon from "../../../assets/InfoIcon";
+import CorrectionMessagesHistoric from "../../../components/views/CorrectionMessagesHistoric";
 
 export default ({ young }) => {
   const user = useSelector((state) => state.Auth.user);
@@ -19,6 +20,7 @@ export default ({ young }) => {
   function isFromFranceConnect() {
     return young.parent1FromFranceConnect === "true" && (!young.parent2Status || young.parent2FromFranceConnect === "true");
   }
+  const correctionRequests = young.historic.filter((i) => i.status === "WAITING_CORRECTION");
 
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
@@ -203,6 +205,11 @@ export default ({ young }) => {
                   )}
                 </Bloc>
               ) : null}
+              {young && young.historic && correctionRequests.length !== 0 && (
+                <Bloc title="Historique des demandes de correction">
+                  <CorrectionMessagesHistoric value={young} model="young" />
+                </Bloc>
+              )}
               {young.withdrawnMessage ? (
                 <Bloc title="Désistement">
                   <div className="quote">{`« ${young.withdrawnMessage} »`}</div>

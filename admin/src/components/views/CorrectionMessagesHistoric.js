@@ -17,22 +17,23 @@ export default ({ model, value }) => {
     try {
       const { ok, data } = await api.get(`/${model}/${value._id}/patches`);
       if (!ok) return;
-      setData(data);
-      // const correctionMessages = data.map((element) => {
-      //   const correctionOps = element.ops.filter((item) => item.path === "/inscriptionCorrectionMessage");
-      //   if (!correctionOps[0]) return;
-      //   return {
-      //     referent: `${element.user?.firstName} ${element.user?.lastName}`,
-      //     message: correctionOps[0].value,
-      //   }
-      // });
-      const correctionMessages = data.reduce((previousValue, currentValue) => {
-        if () {
-          currentValue.
+      const correctionMessages = data.reduce((finalArray, historyObject) => {
+        for (const item of historyObject.ops) {
+          if (item.path === "/inscriptionCorrectionMessage") {
+            finalArray.push({
+              _id: historyObject._id,
+              createdAt: historyObject.date,
+              userName: `${historyObject.user.firstName} ${historyObject.user.lastName}`,
+              userId: historyObject.user._id,
+              note: item.value,
+              status: "WAITING_CORRECTION",
+            });
+          }
         }
+        return finalArray.sort((a, b) => a.createdAt - b.createdAt);
       }, []);
-      console.log("DATA", data);
-      console.log("MESSAGES", correctionMessages);
+
+      setData(correctionMessages);
     } catch (error) {
       console.log(error);
     }
@@ -48,14 +49,10 @@ export default ({ model, value }) => {
     <Historic className="info">
       {isExpand ? (
         <>
-          {
-            data.map((historicItem, key) => (
-              <HistoricItem key={key} item={historicItem} />
-            )).reverse()
-          }
-          {data.length === 1 ? (
-            null
-          ) : (
+          {data.map((historicItem, key) => (
+            <HistoricItem key={key} item={historicItem} />
+          ))}
+          {data.length === 1 ? null : (
             <div className="see-more" style={{ marginLeft: "0.5rem", marginTop: "1rem" }} onClick={toggleList}>
               CACHER L'HISTORIQUE
             </div>
