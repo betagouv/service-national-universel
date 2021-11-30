@@ -51,10 +51,10 @@ export default function StepDocuments() {
           setLoading(true);
           try {
             values.inscriptionStep = STEPS.AVAILABILITY;
-            const { ok, code, data } = await api.put("/young", values);
+            const { ok, code, data } = await api.put("/young", { ...values, inscriptionStep: STEPS.DONE });
             if (!ok || !data?._id) return toastr.error("Une erreur s'est produite :", translate(code));
             dispatch(setYoung(data));
-            history.push("/inscription/availability");
+            history.push("/inscription/done");
           } catch (e) {
             console.log(e);
             toastr.error("Erreur !");
@@ -62,7 +62,7 @@ export default function StepDocuments() {
             setLoading(false);
           }
         }}>
-        {({ values, handleChange, handleSubmit, errors, touched }) => (
+        {({ values, handleChange, handleSubmit, isSubmitting, submitForm, errors, touched }) => (
           <>
             <FormRow>
               <Col md={4}>
