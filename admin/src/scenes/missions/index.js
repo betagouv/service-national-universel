@@ -5,7 +5,7 @@ import List from "./list";
 import Edit from "./edit";
 import View from "./view";
 
-export default () => {
+export default function Index() {
   return (
     <Switch>
       <Route path="/mission/create/:structureId" component={Edit} />
@@ -15,4 +15,4 @@ export default () => {
       <Route path="/mission" component={List} />
     </Switch>
   );
-};
+}

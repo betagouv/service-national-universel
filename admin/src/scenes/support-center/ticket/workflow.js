@@ -17,8 +17,7 @@ export const SelectTag = ({ options, name, value, title, selectPlaceholder, hand
           const value = options.find((o) => o.id === e.target.value);
           handleChange({ target: { name, value } });
         }}
-        validate={(v) => !v && requiredMessage}
-      >
+        validate={(v) => !v && requiredMessage}>
         <option value="" disabled>
           {selectPlaceholder}
         </option>
@@ -107,6 +106,7 @@ export const subjectsReferent = {
     label: "Phase 3 - L'engagement",
     tags: ["TAG_phase_3"],
   },
+  // eslint-disable-next-line no-dupe-keys
   OTHER: {
     parentId: "SPECIAL_CASE",
     id: "OTHER",

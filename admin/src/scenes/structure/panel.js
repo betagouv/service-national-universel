@@ -2,8 +2,7 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import SocialIcons from "../../components/SocialIcons";
 import { toastr } from "react-redux-toastr";
-import { Link } from "react-router-dom";
-import { useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 
 import api from "../../services/api";
 import { translate, ES_NO_LIMIT, MISSION_STATUS_COLORS } from "../../utils";
@@ -13,7 +12,7 @@ import PanelActionButton from "../../components/buttons/PanelActionButton";
 import Panel, { Info, Details } from "../../components/Panel";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 
-export default ({ onChange, value }) => {
+export default function PanelView({ onChange, value }) {
   const [missions, setMissions] = useState({ count: "-", placesTotal: "-", placesLeft: "-", all: [] });
   const [referents, setReferents] = useState([]);
   const [parentStructure, setParentStructure] = useState(null);
@@ -157,7 +156,7 @@ export default ({ onChange, value }) => {
       />
     </Panel>
   );
-};
+}
 
 const Subtitle = styled.div`
   color: rgb(113, 128, 150);

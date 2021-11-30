@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
-import { useHistory } from "react-router-dom";
 
 import { translate, formatStringDateTimezoneUTC, MISSION_STATUS_COLORS } from "../../utils";
 import api from "../../services/api";
@@ -11,7 +10,7 @@ import Panel, { Info, Details } from "../../components/Panel";
 import Badge from "../../components/Badge";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 
-export default ({ onChange, mission }) => {
+export default function PanelView({ onChange, mission }) {
   const [tutor, setTutor] = useState();
   const [structure, setStructure] = useState({});
   const history = useHistory();
@@ -150,7 +149,7 @@ export default ({ onChange, mission }) => {
       />
     </Panel>
   );
-};
+}
 
 const Subtitle = styled.div`
   color: rgb(113, 128, 150);

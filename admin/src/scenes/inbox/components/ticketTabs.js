@@ -3,14 +3,14 @@ import styled from "styled-components";
 import { useSelector } from "react-redux";
 
 import Loader from "../../../components/Loader";
-import { formatStringDate, ROLES, ticketStateIdByName, ticketStateNameById, translateState } from "../../../utils";
+import { formatStringDate, ROLES, ticketStateIdByName, ticketStateNameById } from "../../../utils";
 import MailCloseIcon from "../../../components/MailCloseIcon";
 import MailOpenIcon from "../../../components/MailOpenIcon";
 import SuccessIcon from "../../../components/SuccessIcon";
 
 import api from "../../../services/api";
 
-export default ({ setTicket, selectedTicket }) => {
+export default function TicketTabs({ setTicket, selectedTicket }) {
   const [stateFilter, setStateFilter] = useState();
   const [tickets, setTickets] = useState(null);
   const user = useSelector((state) => state.Auth.user);
@@ -118,7 +118,7 @@ export default ({ setTicket, selectedTicket }) => {
       </List>
     </HeroContainer>
   );
-};
+}
 
 const StateContainer = styled.div`
   display: flex;
