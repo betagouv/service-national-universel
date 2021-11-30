@@ -17,6 +17,12 @@ const Schema = new mongoose.Schema({
       description: "Nom de la région (peut être déduit du département)",
     },
   },
+  academy: {
+    type: String,
+    documentation: {
+      description: "Nom de l'académie (peut être déduit du département)",
+    },
+  },
   max: {
     type: Number,
     documentation: {
