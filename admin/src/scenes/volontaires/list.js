@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from "reactstrap";
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import { useSelector } from "react-redux";
-import { useHistory } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 import ExportComponent from "../../components/ExportXlsx";
@@ -14,7 +14,6 @@ import { apiURL, appURL } from "../../config";
 import Panel from "./panel";
 import Badge from "../../components/Badge";
 import { translate, getFilterLabel, YOUNG_STATUS_COLORS, isInRuralArea, formatLongDateFR, getAge, ES_NO_LIMIT, ROLES, formatDateFRTimezoneUTC, colors } from "../../utils";
-import { Link } from "react-router-dom";
 import { RegionFilter, DepartmentFilter } from "../../components/filters";
 import Chevron from "../../components/Chevron";
 import { Filter, FilterRow, ResultTable, Table, ActionBox, Header, Title, MultiLine, Help, LockIcon, HelpText } from "../../components/list";
@@ -36,7 +35,7 @@ const FILTERS = [
   "MILITARY_PREPARATION_FILES_STATUS",
 ];
 
-export default () => {
+export default function VolontaireList() {
   const [volontaire, setVolontaire] = useState(null);
   const [centers, setCenters] = useState(null);
   const [meetingPoints, setMeetingPoints] = useState(null);
@@ -388,15 +387,15 @@ export default () => {
                     <span className="title">Statut :</span>statut du parcours SNU du volontaire
                   </div>
                   <div>
-                    <span className="title">Cohorte :</span>année d'inscription
+                    <span className="title">Cohorte :</span>année d&apos;inscription
                   </div>
                   <div>
                     <span className="title">Régions et Départements :</span>origine du volontaire
                   </div>
                   <div>
                     <span className="title">Statut de phase :</span>pour en savoir plus consultez le{" "}
-                    <a href="https://snu.crisp.help/fr/" target="_blank">
-                      centre d'aide
+                    <a href="https://support.snu.gouv.fr/help/fr-fr/1-referent/72-les-phases-du-snu" target="_blank" rel="noreferrer">
+                      centre d&apos;aide
                     </a>
                   </div>
                   <div>
@@ -406,24 +405,27 @@ export default () => {
                     <span className="title">Fiche sanitaire :</span> reçue (Oui ou Non) (phase 1)
                   </div>
                   <div>
-                    <span className="title">Statut de mission :</span> s'active dès la 1ère candidature et concerne le statut de sa candidature. Pour en savoir plus sur les
+                    <span className="title">Statut de mission :</span> s&apos;active dès la 1ère candidature et concerne le statut de sa candidature. Pour en savoir plus sur les
                     statuts, consultez le{" "}
-                    <a href="https://snu.crisp.help/fr/article/phase-2-les-statuts-volontaire-2ipjp1/" target="_blank">
-                      centre d'aide
+                    <a href="https://support.snu.gouv.fr/help/fr-fr/6-phase-2-mission-d-interet-general/121-phase-2-le-parcours-d-une-mig" target="_blank" rel="noreferrer">
+                      centre d&apos;aide
                     </a>
                   </div>
                   <div>
-                    <span className="title">Statut documents Préparation Militaire :</span>s'active dès la 1ère candidature à une Préparation Militaire. Pour en savoir plus sur les
-                    statuts de ce filtre consultez le{" "}
-                    <a href="https://snu.crisp.help/fr/" target="_blank">
-                      centre d'aide
+                    <span className="title">Statut documents Préparation Militaire :</span>s&apos;active dès la 1ère candidature à une Préparation Militaire. Pour en savoir plus
+                    sur les statuts de ce filtre consultez le{" "}
+                    <a
+                      href="https://support.snu.gouv.fr/help/fr-fr/6-phase-2-mission-d-interet-general/40-je-consulte-les-pieces-justificatives-pour-une-pm"
+                      target="_blank"
+                      rel="noreferrer">
+                      centre d&apos;aide
                     </a>{" "}
                     (phase 2)
                   </div>
                   <div>
                     <span className="title">Statut contrats :</span>Lorsque la candidature de mission est validée par la structure, le contrat généré est en{" "}
                     <strong>Brouillon</strong>. Il est ensuite rempli et envoyé par la structure aux parties-prenantes via la plateforme, son statut devient{" "}
-                    <strong>Envoyée</strong> . Lorsque toutes les parties-prenantes l'ont validé, son statut passe en <strong>Validée</strong>.
+                    <strong>Envoyée</strong> . Lorsque toutes les parties-prenantes l&apos;ont validé, son statut passe en <strong>Validée</strong>.
                   </div>
                 </div>
               </HelpText>
@@ -451,7 +453,7 @@ export default () => {
                       </tr>
                     </thead>
                     <tbody>
-                      {data.map((hit, i) => (
+                      {data.map((hit) => (
                         <Hit key={hit._id} hit={hit} onClick={() => setVolontaire(hit)} selected={volontaire?._id === hit._id} />
                       ))}
                     </tbody>
@@ -470,7 +472,7 @@ export default () => {
       </ReactiveBase>
     </div>
   );
-};
+}
 
 const Hit = ({ hit, onClick, selected }) => {
   const getBackgroundColor = () => {
