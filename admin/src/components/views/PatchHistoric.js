@@ -2,16 +2,13 @@ import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 
 import { formatStringLongDate, translate, YOUNG_STATUS_COLORS, colors } from "../../utils";
-import Loader from "../../components/Loader";
-import Badge from "../../components/Badge";
+import Loader from "../Loader";
+import Badge from "../Badge";
 import api from "../../services/api";
 
-export default ({ model, value }) => {
+export default function PatchHistoric({ model, value, field, previewNumber = 1 }) {
   const [data, setData] = useState();
   const [isExpand, setIsExpand] = useState(false);
-  const toggleList = () => {
-    setIsExpand(!isExpand);
-  };
 
   const getPatches = async () => {
     try {
@@ -19,14 +16,13 @@ export default ({ model, value }) => {
       if (!ok) return;
       const correctionMessages = data.reduce((finalArray, historyObject) => {
         for (const item of historyObject.ops) {
-          if (item.path === "/inscriptionCorrectionMessage") {
+          if (item.path === `/${field}`) {
             finalArray.push({
               _id: historyObject._id,
               createdAt: historyObject.date,
               userName: `${historyObject.user.firstName} ${historyObject.user.lastName}`,
               userId: historyObject.user._id,
               note: item.value,
-              status: "WAITING_CORRECTION",
             });
           }
         }
@@ -53,22 +49,26 @@ export default ({ model, value }) => {
             <HistoricItem key={key} item={historicItem} />
           ))}
           {data.length === 1 ? null : (
-            <div className="see-more" style={{ marginLeft: "0.5rem", marginTop: "1rem" }} onClick={toggleList}>
-              CACHER L'HISTORIQUE
+            <div className="see-more" style={{ marginLeft: "0.5rem", marginTop: "1rem" }} onClick={() => setIsExpand((e) => !e)}>
+              CACHER L&apos;HISTORIQUE
             </div>
           )}
         </>
       ) : (
         <>
-          <HistoricItem key={data[data.length - 1]._id} item={data[data.length - 1]} />
-          <div className="see-more" style={{ marginLeft: "0.5rem", marginTop: "1rem" }} onClick={toggleList}>
-            AFFICHER L'HISTORIQUE
-          </div>
+          {data?.slice(0, previewNumber)?.map((historicItem, key) => (
+            <HistoricItem key={key} item={historicItem} />
+          ))}
+          {data.length > previewNumber ? (
+            <div className="see-more" style={{ marginLeft: "0.5rem", marginTop: "1rem" }} onClick={() => setIsExpand((e) => !e)}>
+              AFFICHER L&apos;HISTORIQUE
+            </div>
+          ) : null}
         </>
       )}
     </Historic>
   );
-};
+}
 
 const HistoricItem = ({ item }) => {
   const getLabel = () =>
@@ -82,9 +82,9 @@ const HistoricItem = ({ item }) => {
 
   return (
     <Item>
-      <Badge text={translate(item.status)} color={YOUNG_STATUS_COLORS[item.status]} />
+      {item.status ? <Badge text={translate(item.status)} color={YOUNG_STATUS_COLORS[item.status]} /> : null}
       <div className="history-detail">
-        {item.note ? <Note value={item.note} /> : null}
+        {item.note ? <Note value={item.note} /> : "-"}
         <div>
           {getLabel()} • le {formatStringLongDate(item.createdAt)}
         </div>
@@ -98,10 +98,6 @@ const Note = ({ value }) => {
   const preview = value.substring(0, 100);
   const rest = value.substring(100);
 
-  const toggleNote = () => {
-    setExpandNote(!expandNote);
-  };
-
   const renderText = () => {
     if (!rest) return preview;
     return preview + (expandNote ? rest : " ...");
@@ -110,7 +106,7 @@ const Note = ({ value }) => {
   return (
     <div>
       « {renderText()} »
-      <div className="see-more" onClick={toggleNote}>
+      <div className="see-more" onClick={() => setExpandNote((e) => !e)}>
         {rest ? (expandNote ? "  VOIR MOINS" : "  VOIR PLUS") : null}
       </div>
     </div>

@@ -9,7 +9,6 @@ import PanelActionButton from "../../components/buttons/PanelActionButton";
 import Panel, { Info, Details } from "../../components/Panel";
 import Historic from "../../components/historic";
 import ContractLink from "../../components/ContractLink";
-import CorrectionMessagesHistoric from "../../components/views/CorrectionMessagesHistoric";
 
 export default function PanelComponent({ onChange, value }) {
   const [referentManagerPhase2, setReferentManagerPhase2] = useState();
@@ -34,8 +33,6 @@ export default function PanelComponent({ onChange, value }) {
   }, [young]);
 
   if (!value || !young) return <div />;
-
-  const correctionRequests = young.historic.filter((i) => i.status === "WAITING_CORRECTION");
 
   return (
     <Panel>
@@ -85,7 +82,7 @@ export default function PanelComponent({ onChange, value }) {
             </Link>
           </>
         ) : (
-          <NoResult>Aucune candidature n'est liée à ce volontaire.</NoResult>
+          <NoResult>Aucune candidature n&aops;est liée à ce volontaire.</NoResult>
         )}
         <Details title="Contact phase 2" value={referentManagerPhase2?.email || (referentManagerPhase2 !== undefined && "Non trouvé") || "Chargement..."} copy />
       </Info>
@@ -162,15 +159,7 @@ export default function PanelComponent({ onChange, value }) {
           <Details title="Région" value={young.parent2Region} />
         </Info>
       )}
-      <div className="info">
-        {young && young?.historic && correctionRequests?.length !== 0 && (
-          <>
-            <div className="info-title">Historique des demandes de correction</div>
-            <CorrectionMessagesHistoric value={young} model="young" />
-          </>
-        )}
-        {young && young.historic && young.historic.length !== 0 && <Historic value={young.historic} />}
-      </div>
+      <div className="info">{young?.historic?.length !== 0 && <Historic value={young.historic} />}</div>
       {young.motivations && (
         <div className="info">
           <div className="info-title">Motivations</div>
@@ -179,7 +168,7 @@ export default function PanelComponent({ onChange, value }) {
       )}
     </Panel>
   );
-};
+}
 
 const ApplicationDetails = ({ application, i }) => {
   const history = useHistory();
@@ -199,7 +188,7 @@ const ApplicationDetails = ({ application, i }) => {
           onClick={() => {
             history.push(`/volontaire/${application.youngId}/phase2/application/${application._id}/contrat`);
           }}>
-          Contrat d'engagement &gt;
+          Contrat d&apos;engagement &gt;
         </ContractLink>
       ) : null}
     </div>
