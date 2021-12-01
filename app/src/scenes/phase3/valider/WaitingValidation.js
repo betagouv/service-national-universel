@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 
 import YoungMissionCard from "../components/YoungMissionCard";
 
-export default () => {
+export default function WaitingValidation() {
   const young = useSelector((state) => state.Auth.young);
 
   return (
@@ -17,7 +17,7 @@ export default () => {
       <YoungMissionCard />
     </Wrapper>
   );
-};
+}
 
 const Wrapper = styled.div`
   padding: 1rem;

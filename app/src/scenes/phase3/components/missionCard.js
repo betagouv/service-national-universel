@@ -3,7 +3,7 @@ import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 import { translate } from "../../../utils";
 
-export default ({ mission, image }) => {
+export default function MissionCard({ mission, image }) {
   if (!mission) return <div />;
   const tags = [];
   tags.push(mission.remote ? "À distance" : "En présentiel");
@@ -30,13 +30,13 @@ export default ({ mission, image }) => {
       </Col>
       <Col md={6} xl={4}>
         <Button onClick={handleClick} target="_blank" href={mission.applicationUrl}>
-          Voir sur <b>{mission.publisherName}</b>
+          Voir sur<b> {mission.publisherName}</b>
           <img src={require("../../../assets/external-link.svg")} height={15} color="white" />
         </Button>
       </Col>
     </Card>
   );
-};
+}
 
 const Card = styled(Row)`
   margin-bottom: 30px;

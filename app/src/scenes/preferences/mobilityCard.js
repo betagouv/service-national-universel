@@ -5,7 +5,7 @@ import Button from "./button";
 import { Field } from "formik";
 import ErrorMessage, { requiredMessage } from "./errorMessage";
 
-export default ({ title, handleChange, values, errors, touched }) => {
+export default function MobilityCard({ title, handleChange, values, errors, touched }) {
   return (
     <Container>
       <Title>{title}</Title>
@@ -55,7 +55,7 @@ export default ({ title, handleChange, values, errors, touched }) => {
       ) : null}
     </Container>
   );
-};
+}
 
 const Item = ({ values, handleChange, name, label, errors, touched }) => {
   return (

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import styled from "styled-components";
 import { useHistory } from "react-router-dom";
 
@@ -8,7 +8,7 @@ import { Carousel } from "react-responsive-carousel";
 import MobileView from "./MobileView";
 import DesktopView from "./DesktopView";
 
-export default ({ location }) => {
+export default function Home({ location }) {
   const history = useHistory();
 
   return (
@@ -60,18 +60,18 @@ export default ({ location }) => {
             <CardPhase upText="phase 3 - facultative" title="L'engagement" downText="Mission facultative de 3 mois minimum" to="https://www.snu.gouv.fr/l-engagement-28" />
           </Carousel>
           <StartButtonContainer className="desktop desktopButton">
-            <StartButton onClick={() => history.push("/inscription/profil")}>Commencer&nbsp;l'inscription</StartButton>
+            <StartButton onClick={() => history.push("/inscription/profil")}>Commencer&nbsp;l&apos;inscription</StartButton>
           </StartButtonContainer>
         </CardsContainer>
         <MobileView />
         <DesktopView />
       </Wrapper>
       <StartButtonContainer className="mobile">
-        <StartButton onClick={() => history.push("/inscription/profil")}>Commencer&nbsp;l'inscription</StartButton>
+        <StartButton onClick={() => history.push("/inscription/profil")}>Commencer&nbsp;l&apos;inscription</StartButton>
       </StartButtonContainer>
     </div>
   );
-};
+}
 
 const CardTitle = styled.div`
   color: #fff;
@@ -135,7 +135,7 @@ const CardsContainer = styled.div`
   }
 `;
 
-const CardPhase = ({ upText, title, downText, color, to }) => {
+const CardPhase = ({ upText, title, downText, to }) => {
   return (
     <Card href={to} target="_blank">
       <div>

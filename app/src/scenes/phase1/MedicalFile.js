@@ -4,7 +4,7 @@ import { SuccessMessage, Logo, ContinueButton } from "./components/printable";
 import { HeroContainer, Hero } from "../../components/Content";
 import styled from "styled-components";
 
-export default () => {
+export default function MedicalFile() {
   const young = useSelector((state) => state.Auth.young);
 
   return (
@@ -17,8 +17,7 @@ export default () => {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth="2"
-                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
-              ></path>
+                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
             </svg>
           </div>
           <div>
@@ -42,9 +41,8 @@ export default () => {
                 <a
                   href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/note_relatives_aux_informations_d_ordre_sanitaire_2022.pdf"
                   target="blank"
-                  className="link"
-                >
-                  Note relative aux informations d'ordre sanitaire ›
+                  className="link">
+                  Note relative aux informations d&apos;ordre sanitaire ›
                 </a>
               </>
             )}
@@ -57,7 +55,7 @@ export default () => {
                 href="https://www.ameli.fr/assure/sante/themes/suivi-medical-de-lenfant-et-de-ladolescent/examen-medical-propose-ladolescent-entre-15-et-16-ans"
                 className="link"
                 target="_blank"
-              >
+                rel="noreferrer">
                 Plus d’informations sur le bilan de santé obligatoire ›
               </a>
             </div>
@@ -73,7 +71,7 @@ export default () => {
       </Hero>
     </HeroContainer>
   );
-};
+}
 
 const Content = styled.div`
   margin-top: ${({ showAlert }) => (showAlert ? "2rem" : "")};

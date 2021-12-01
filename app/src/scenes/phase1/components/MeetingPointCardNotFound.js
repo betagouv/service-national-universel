@@ -7,7 +7,7 @@ import Loader from "../../../components/Loader";
 import api from "../../../services/api";
 import { translate } from "../../../utils";
 
-export default ({ onClick, selected, ...props }) => {
+export default function MeetingPointCardNotFound({ onClick, selected, ...props }) {
   const young = useSelector((state) => state.Auth.young);
 
   const [center, setCenter] = useState();
@@ -39,7 +39,7 @@ export default ({ onClick, selected, ...props }) => {
       <Time>retour : vendredi 2 juillet, 14:00</Time>
     </HeroStyle>
   );
-};
+}
 
 const Time = styled.div`
   text-transform: uppercase;

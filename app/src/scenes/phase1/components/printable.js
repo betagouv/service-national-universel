@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import { Row, Col } from "reactstrap";
+import { Row } from "reactstrap";
 
 export const SuccessMessage = styled.div`
   padding: 0.5rem;

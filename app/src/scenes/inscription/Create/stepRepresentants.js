@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import { Row, Col } from "reactstrap";
+import { Col } from "reactstrap";
 import { Field, Formik } from "formik";
 import { useSelector, useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
@@ -38,7 +38,7 @@ const Parent = ({ id = 1, values, errors, touched, handleChange, validateField }
           </p>
           <FranceConnectButton callback={getFranceConnectCallback(id)} beforeRedirect={() => handleSave()} />
           <p>
-            L'identification via <b>FranceConnect</b> dispense de signature numérique du consentement du ou des représentants légaux.
+            L&apos;identification via <b>FranceConnect</b> dispense de signature numérique du consentement du ou des représentants légaux.
           </p>
         </Col>
       </FormRow>
@@ -235,7 +235,7 @@ const Parent = ({ id = 1, values, errors, touched, handleChange, validateField }
   );
 };
 
-export default () => {
+export default function StepRepresentants() {
   const history = useHistory();
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
@@ -279,9 +279,8 @@ export default () => {
           } finally {
             setLoading(false);
           }
-        }}
-      >
-        {({ values, handleChange, handleSubmit, isSubmitting, submitForm, errors, touched, validateField }) => (
+        }}>
+        {({ values, handleChange, handleSubmit, errors, touched, validateField }) => (
           <>
             <Parent id={1} values={values} handleChange={handleChange} errors={errors} touched={touched} validateField={validateField} />
             <FormRow>
@@ -302,8 +301,7 @@ export default () => {
                     delete values.parent2Department;
                     delete values.parent2Location;
                     delete values.parent2Country;
-                  }}
-                >
+                  }}>
                   {!isParent2Visible ? "Ajouter" : "Retirer"} le représentant légal nº2
                 </BorderButton>
               </Col>
@@ -324,7 +322,7 @@ export default () => {
       </Formik>
     </Wrapper>
   );
-};
+}
 
 const Inline = styled.div`
   display: flex;

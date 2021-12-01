@@ -15,7 +15,7 @@ import ErrorMessage, { requiredMessage } from "./errorMessage";
 import { translate, MISSION_DOMAINS, PERIOD, PROFESSIONNAL_PROJECT, PROFESSIONNAL_PROJECT_PRECISION } from "../../utils";
 import { HeroContainer, Hero, Content } from "../../components/Content";
 
-export default () => {
+export default function Index() {
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
 
@@ -26,8 +26,8 @@ export default () => {
           <Content>
             <h1>Préférences de missions</h1>
             <p>
-              En vue de la mission d'intérêt général de la Phase 2, renseignez ci-dessous vos préférences. Ces choix permettront à l'administration de vous proposer des missions en
-              cohérence avec vos motivations.
+              En vue de la mission d&apos;intérêt général de la Phase 2, renseignez ci-dessous vos préférences. Ces choix permettront à l&apos;administration de vous proposer des
+              missions en cohérence avec vos motivations.
             </p>
           </Content>
           <div className="thumb" />
@@ -50,9 +50,8 @@ export default () => {
             console.log(e);
             toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", e.code);
           }
-        }}
-      >
-        {({ values, handleChange, handleSubmit, errors, touched, isSubmitting, submitForm }) => (
+        }}>
+        {({ values, handleChange, handleSubmit, errors, touched }) => (
           <>
             <PreferenceItem title="Sélectionnez 3 thématiques qui vous intéressent le plus parmi les domaines d'action disponibles">
               <Field
@@ -226,8 +225,7 @@ export default () => {
             </PreferenceItem>
             <PreferenceItem
               title="Quelle est votre mobilité géographique ?"
-              subtitle="Les frais de transport et d'hébergement sont à votre charge pour la réalisation de votre mission de phase 2."
-            >
+              subtitle="Les frais de transport et d'hébergement sont à votre charge pour la réalisation de votre mission de phase 2.">
               <Row style={{ width: "100%" }}>
                 <Col md={6}>
                   <MobilityCard title="MISSION À PROXIMITÉ DE" handleChange={handleChange} values={values} errors={errors} touched={touched} />
@@ -292,7 +290,7 @@ export default () => {
       </Formik>
     </>
   );
-};
+}
 
 const Infos = styled.div`
   font-size: 0.8rem;

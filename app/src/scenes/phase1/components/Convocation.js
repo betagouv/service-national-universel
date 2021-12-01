@@ -8,7 +8,7 @@ import api from "../../../services/api";
 import { translate } from "../../../utils";
 import { Hero, Content } from "../../../components/Content";
 
-export default () => {
+export default function Convocation() {
   const young = useSelector((state) => state.Auth.young);
 
   const [meetingPoint, setMeetingPoint] = useState();
@@ -17,7 +17,7 @@ export default () => {
 
   const isFromDOMTOM = () => {
     return ["Guadeloupe", "Martinique", "Guyane", "La Réunion", "Saint-Pierre-et-Miquelon", "Mayotte", "Saint-Martin", "Polynésie française", "Nouvelle-Calédonie"].includes(
-      young.department
+      young.department,
     );
   };
 
@@ -80,8 +80,8 @@ export default () => {
         </ConvocText>
         {isFromDOMTOM() ? (
           <ConvocText>
-            Merci de vous présenter <b>impérativement</b> à la <b>date</b>, à l'<b>heure</b> et au <b>lieu</b> qui vous auront été indiqués par votre <b>service régional</b> (pour
-            l'aller et le retour).
+            Merci de vous présenter <b>impérativement</b> à la <b>date</b>, à l&apos;<b>heure</b> et au <b>lieu</b> qui vous auront été indiqués par votre <b>service régional</b>{" "}
+            (pour l&apos;aller et le retour).
           </ConvocText>
         ) : (
           <>
@@ -109,8 +109,8 @@ export default () => {
               votre prise en charge par les accompagnateurs
             </ConvocText>
             <ConvocText>
-              Le RDV à la fin du séjour se déroule selon les mêmes modalités que le départ. Il est prévu le <b>{getReturnMeetingDate()}</b> au même lieu de rassemblement qu'à
-              l'aller.
+              Le RDV à la fin du séjour se déroule selon les mêmes modalités que le départ. Il est prévu le <b>{getReturnMeetingDate()}</b> au même lieu de rassemblement qu&apos;à
+              l&apos;aller.
               <br /> Votre représentant légal se présentera au lieu et horaire indiqué ci-dessus. Il veillera à bien respecter l’horaire indiqué.
             </ConvocText>
           </>
@@ -130,7 +130,7 @@ export default () => {
         </ConvocText>
         <ConvocText>
           Afin que votre séjour se déroule dans les meilleures conditions, nous vous rappelons que chaque volontaire, lors de son inscription, s’est engagé à respecter le{" "}
-          <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/SNU_-_Réglement_intérieur.pdf" target="_blank">
+          <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/SNU_-_Réglement_intérieur.pdf" target="_blank" rel="noreferrer">
             règlement intérieur
           </a>{" "}
           du centre
@@ -142,7 +142,7 @@ export default () => {
         </Sign>
         <ConvocText style={{ border: "solid 1px #666", padding: "1rem" }}>
           Pour toute information complémentaire, rendez-vous sur votre compte volontaire ou sur la{" "}
-          <a href="https://www.snu.gouv.fr/foire-aux-questions-11" target="_blank">
+          <a href="https://www.snu.gouv.fr/foire-aux-questions-11" target="_blank" rel="noreferrer">
             FAQ
           </a>{" "}
           du site snu.gouv.fr.
@@ -150,7 +150,7 @@ export default () => {
       </Content>
     </Hero>
   );
-};
+}
 
 const ConvocText = styled.div`
   margin: 1rem;

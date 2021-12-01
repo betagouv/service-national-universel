@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { Row, Col } from "reactstrap";
 import { useDispatch, useSelector } from "react-redux";
 import { Formik } from "formik";
 import { useHistory, Link } from "react-router-dom";
@@ -16,7 +15,7 @@ import AlertBox from "../../components/AlertBox";
 import Loader from "../../components/Loader";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 
-export default () => {
+export default function Index() {
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
   const history = useHistory();
@@ -60,7 +59,7 @@ export default () => {
     });
   };
 
-  const onSubmit = async (values) => {
+  const onSubmit = async () => {
     try {
       const { ok, code, data: young } = await api.put("/young", { statusMilitaryPreparationFiles: "WAITING_VALIDATION" });
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
@@ -189,7 +188,7 @@ export default () => {
         </Formik>
       ) : (
         <NoResult>
-          <p>Vous n'avez candidaté à aucune préparation militaire.</p>
+          <p>Vous n&apos;avez candidaté à aucune préparation militaire.</p>
           <Link to="/mission">
             <Button>Trouver des préparations militaires</Button>
           </Link>
@@ -207,7 +206,7 @@ export default () => {
       />
     </>
   );
-};
+}
 
 const SubmitComponent = ({ young, loading, onClick, errors }) => (
   <Footer>

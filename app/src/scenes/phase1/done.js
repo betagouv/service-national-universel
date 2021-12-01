@@ -7,7 +7,7 @@ import MailAttestationButton from "../../components/buttons/MailAttestationButto
 
 import { HeroContainer, Hero } from "../../components/Content";
 
-export default () => {
+export default function Done() {
   const young = useSelector((state) => state.Auth.young) || {};
 
   return (
@@ -29,7 +29,7 @@ export default () => {
                   Télécharger mon attestation {">"}
                 </DownloadAttestationButton>
                 <MailAttestationButton young={young} type="1" template="certificate" placeholder="Attestation de réalisation de la phase 1">
-                  Envoyer l'attestation de réalisation par mail {">"}
+                  Envoyer l&apos;attestation de réalisation par mail {">"}
                 </MailAttestationButton>
               </p>
             </>
@@ -39,7 +39,7 @@ export default () => {
       </Hero>
     </HeroContainer>
   );
-};
+}
 
 const Separator = styled.hr`
   margin: 2.5rem 0;
