@@ -240,9 +240,9 @@ export default function VolontaireView({ young }) {
                 </Bloc>
               ) : null}
               <Bloc title="Consentements">
-                <Details title={`Consentements validés par ${young.firstName} ${young.lastName}`} value={t(young.consentment)} style={{ border: "none" }} />
+                <Details title={`Consentements validés par ${young.firstName} ${young.lastName}`} value={t(young.consentment || "false")} style={{ border: "none" }} />
                 <ExpandComponent>{youngConsentmentText}</ExpandComponent>
-                <Details title="Consentements validés par ses représentants légaux" value={t(young.parentConsentment)} style={{ border: "none" }} />
+                <Details title="Consentements validés par ses représentants légaux" value={t(young.parentConsentment || "false")} style={{ border: "none" }} />
                 <ExpandComponent>{parentsConsentmentText}</ExpandComponent>
               </Bloc>
               {young.withdrawnMessage ? (
