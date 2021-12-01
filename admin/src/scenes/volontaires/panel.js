@@ -159,7 +159,7 @@ export default function PanelComponent({ onChange, value }) {
           <Details title="Région" value={young.parent2Region} />
         </Info>
       )}
-      <div className="info">{young?.historic?.length !== 0 && <Historic value={young.historic} />}</div>
+      <div className="info">{young?.historic?.length > 0 && <Historic value={young.historic} />}</div>
       {young.motivations && (
         <div className="info">
           <div className="info-title">Motivations</div>
