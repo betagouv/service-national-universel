@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { adminURL } from "../config";
@@ -61,7 +62,7 @@ export default function Zammad() {
                 // Actually send the message when ticket is created
                 sendMessage(chat, [...info, `📝 Ticket : https://support.snu.gouv.fr/#ticket/zoom/${res.data.id}`]);
               })
-              .catch((e) => {
+              .catch(() => {
                 // We don't care about errors.
                 sendMessage(chat, [...info, `Échec de la création du ticket, il faut le créer manuellement`]);
               });
@@ -87,7 +88,7 @@ export default function Zammad() {
             .put(`/support-center/ticket/${chat.ticketId}`, {
               message: `https://support.snu.gouv.fr/#customer_chat/session/${data.message.chat_session_id}`,
             })
-            .then((res) => {
+            .then(() => {
               //
             });
         }

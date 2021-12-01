@@ -4,7 +4,17 @@ import { Modal } from "reactstrap";
 import { ModalContainer, Content, Footer, Header } from "./Modal";
 import ModalButton from "../buttons/ModalButton";
 
-export default ({ isOpen, topTitle = "alerte", title, message, defaultInput, onChange, onConfirm, placeholder = "Votre message...", type = "textarea" }) => {
+export default function ModalConfirmWithMessage({
+  isOpen,
+  topTitle = "alerte",
+  title,
+  message,
+  defaultInput,
+  onChange,
+  onConfirm,
+  placeholder = "Votre message...",
+  type = "textarea",
+}) {
   const [messageTextArea, setMessageTextArea] = useState(defaultInput);
   const [sending, setSending] = useState(false);
 
@@ -40,4 +50,4 @@ export default ({ isOpen, topTitle = "alerte", title, message, defaultInput, onC
       </ModalContainer>
     </Modal>
   );
-};
+}

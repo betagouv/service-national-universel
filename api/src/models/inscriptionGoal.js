@@ -17,6 +17,12 @@ const Schema = new mongoose.Schema({
       description: "Nom de la région (peut être déduit du département)",
     },
   },
+  academy: {
+    type: String,
+    documentation: {
+      description: "Nom de l'académie (peut être déduit du département)",
+    },
+  },
   max: {
     type: Number,
     documentation: {
@@ -31,7 +37,12 @@ const Schema = new mongoose.Schema({
       description: "Cohorte des jeunes",
     },
   },
-
+  fillingRate: {
+    type: Number,
+    documentation: {
+      description: "taux de remplissage (en pourcentage)",
+    },
+  },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

@@ -60,7 +60,7 @@ const notify1Week = async () => {
 };
 
 exports.handler = async () => {
-  slack.info({ title: "outdated mission", text: "I'm checking if there is any outdated mission in our database !" });
+  // slack.info({ title: "outdated mission", text: "I'm checking if there is any outdated mission in our database !" });
   try {
     clean();
   } catch (e) {
@@ -71,7 +71,7 @@ exports.handler = async () => {
 };
 
 exports.handlerNotice1Week = async () => {
-  slack.info({ title: "1 week notice outdated mission", text: "I'm checking if there is any mission in our database that will be expired in 1 week !" });
+  // slack.info({ title: "1 week notice outdated mission", text: "I'm checking if there is any mission in our database that will be expired in 1 week !" });
   try {
     notify1Week();
   } catch (e) {

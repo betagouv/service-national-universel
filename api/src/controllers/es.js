@@ -76,7 +76,7 @@ router.post("/missionapi/_msearch", passport.authenticate(["young"], { session: 
   }
 });
 
-router.post("/school/_msearch", passport.authenticate(["young"], { session: false, failWithError: true }), async (req, res) => {
+router.post("/school/_msearch", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { body } = req;
     const response = await esClient.msearch({ index: "school", body });

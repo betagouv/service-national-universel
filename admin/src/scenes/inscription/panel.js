@@ -9,6 +9,7 @@ import api from "../../services/api";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
 import Panel, { Info, Details } from "../../components/Panel";
 import { appURL } from "../../config";
+import Badge from "../../components/Badge";
 
 export default function InscriptionPanel({ onChange, value }) {
   const [young, setYoung] = useState(null);
@@ -39,6 +40,9 @@ export default function InscriptionPanel({ onChange, value }) {
         <div style={{ display: "flex" }}>
           <div className="close" onClick={onChange} />
           <div className="title">{`${value.firstName} ${value.lastName}`}</div>
+        </div>
+        <div>
+          <Badge text={value.cohort} />
         </div>
         <div>{t(value.gender)}</div>
         {value.birthdateAt && (
@@ -182,6 +186,10 @@ export default function InscriptionPanel({ onChange, value }) {
           <Details title="Région" value={value.parent2Region} />
         </Info>
       )}
+      <Info title="Consentements">
+        <Details title={`Consentements validés par ${value.firstName} ${value.lastName}`} value={t(value.consentment || "false")} />
+        <Details title="Consentements validés par ses représentants légaux" value={t(value.parentConsentment || "false")} />
+      </Info>
       {value.motivations && (
         <div className="info">
           <div className="info-title">Motivations</div>

@@ -9,7 +9,7 @@ import validator from "validator";
 
 const NORESULTMESSAGE = "Rentrer manuellement l'adresse";
 
-export default ({ keys, values, handleChange, errors, touched, required = true }) => {
+export default function AddressInput({ keys, values, handleChange, errors, touched, required = true }) {
   const [str, setStr] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [noResultMode, setNoResultMode] = useState(false);
@@ -122,8 +122,7 @@ export default ({ keys, values, handleChange, errors, touched, required = true }
                   // filter and preselect the region
                   setRegionListFiltered(value ? [department2region[value]] : regionList);
                   handleChange({ target: { name: keys.region, value: department2region[value] || "" } });
-                }}
-              >
+                }}>
                 <option label=""></option>
                 {departmentListFiltered?.sort()?.map((d) => (
                   <option key={d} value={d}>
@@ -148,8 +147,7 @@ export default ({ keys, values, handleChange, errors, touched, required = true }
                   handleChange({ target: { name: keys.region, value } });
                   // filter departments
                   setDepartmentListFiltered(value ? region2department[value] : departmentList);
-                }}
-              >
+                }}>
                 <option label=""></option>
                 {regionListFiltered?.sort()?.map((r) => (
                   <option key={r} value={r}>
@@ -202,7 +200,7 @@ export default ({ keys, values, handleChange, errors, touched, required = true }
       </Row>
     </Wrapper>
   );
-};
+}
 
 const Wrapper = styled.div`
   .react-autosuggest__container {

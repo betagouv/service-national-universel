@@ -3,7 +3,7 @@ import { ReactiveList } from "@appbaseio/reactivesearch";
 import { TopResultStats, BottomResultStats } from "./list";
 import { getResultLabel } from "../utils";
 
-export default (props) => {
+export default function ReactiveListComponent(props) {
   return (
     <ReactiveList
       // default props
@@ -36,4 +36,4 @@ export default (props) => {
       {...props}
     />
   );
-};
+}

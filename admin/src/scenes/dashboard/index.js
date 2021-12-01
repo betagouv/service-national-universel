@@ -12,7 +12,7 @@ import ExportAll from "./inscription/ExportAll";
 import { ROLES } from "../../utils";
 
 export default () => {
-  const [currentTab, setCurrentTab] = useState("volontaires");
+  const [currentTab, setCurrentTab] = useState("inscriptions");
   const user = useSelector((state) => state.Auth.user);
 
   return (

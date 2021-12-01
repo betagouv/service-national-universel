@@ -10,7 +10,7 @@ import api from "../../../services/api";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
 import { Box, BoxTitle } from "../../../components/box";
 
-export default ({ center }) => {
+export default function Details({ center }) {
   const [headCenter, setHeadCenter] = useState();
   useEffect(() => {
     (async () => {
@@ -71,7 +71,7 @@ export default ({ center }) => {
                 <Row>
                   <Col md={6}>
                     <div>
-                      <DetailCardTitle>Taux d'occupation</DetailCardTitle>
+                      <DetailCardTitle>Taux d&apos;occupation</DetailCardTitle>
                       <DetailCardContent>{`${center.placesTotal ? (((center.placesTotal - center.placesLeft) * 100) / center.placesTotal).toFixed(2) : 0} %`}</DetailCardContent>
                     </div>
                   </Col>
@@ -116,7 +116,7 @@ export default ({ center }) => {
       </CenterView>
     </div>
   );
-};
+}
 
 const DetailCardTitle = styled.div`
   color: #7c7c7c;

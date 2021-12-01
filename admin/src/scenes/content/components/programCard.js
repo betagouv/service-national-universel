@@ -5,10 +5,10 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
 import api from "../../../services/api";
-import { translate, ROLES, colors } from "../../../utils";
+import { translate, ROLES } from "../../../utils";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 
-export default ({ program, image, enableToggle = true, onDelete }) => {
+export default function ProgramCard({ program, image, enableToggle = true, onDelete }) {
   const [expandDetails, setExpandDetails] = useState(false);
   const preview = program.description.substring(0, 130);
 
@@ -57,7 +57,7 @@ export default ({ program, image, enableToggle = true, onDelete }) => {
 
   return (
     <Card>
-      <a href={program.url} target="_blank" className="thumb">
+      <a href={program.url} target="_blank" className="thumb" rel="noreferrer">
         <img src={image} />
         <Badge>{program.type}</Badge>
       </a>
@@ -69,7 +69,7 @@ export default ({ program, image, enableToggle = true, onDelete }) => {
       <Actions program={program} onDelete={onDelete} />
     </Card>
   );
-};
+}
 
 const Actions = ({ program, onDelete }) => {
   const user = useSelector((state) => state.Auth.user);
@@ -183,16 +183,6 @@ const Card = styled.div`
       box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }
   }
-`;
-
-const SeeMore = styled.a`
-  :hover {
-    color: #372f78;
-  }
-  cursor: pointer;
-  color: ${colors.purple};
-  font-size: 16px;
-  font-weight: 600;
 `;
 
 const ToogleText = styled.span`

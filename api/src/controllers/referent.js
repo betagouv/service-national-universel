@@ -697,7 +697,11 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     const referent = await ReferentModel.findById(req.params.id);
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canUpdateReferent(req.user, referent, value)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    const structure = await StructureModel.findById(value.structureId);
+
+    if (!canUpdateReferent({ actor: req.user, originalTarget: referent, modifiedTarget: value, structure })) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     referent.set(value);
     await referent.save({ fromUser: req.user });

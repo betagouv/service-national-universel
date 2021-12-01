@@ -21,25 +21,23 @@ export default () => {
 
   useEffect(() => {
     if (user.role === REFERENT_ROLES.REFERENT_DEPARTMENT) {
-      updateFilter({ department: user.department });
+      updateFilter({ department: [user.department] });
     } else if (user.role === REFERENT_ROLES.REFERENT_REGION) {
-      updateFilter({ region: user.region });
+      updateFilter({ region: [user.region] });
     } else {
-      updateFilter({ region: "", department: "" });
+      updateFilter({ region: [], department: [] });
     }
   }, []);
 
   return (
     <>
-      <Row style={{}}>
-        <Col md={6}>
+      <Row>
+        <Col style={{ display: "flex" }}>
           <Title>Structures</Title>
-        </Col>
-        <Col md={6}>
           {filter && (
             <FiltersList>
-              <FilterRegion updateFilter={updateFilter} filter={filter} />
-              <FilterDepartment updateFilter={updateFilter} filter={filter} />
+              <FilterRegion onChange={(region) => updateFilter({ region })} value={filter.region} filter={filter} />
+              <FilterDepartment onChange={(department) => updateFilter({ department })} value={filter.department} filter={filter} />
             </FiltersList>
           )}
         </Col>
@@ -57,6 +55,8 @@ const Title = styled.h2`
   margin-bottom: 10px;
 `;
 const FiltersList = styled.div`
+  gap: 1rem;
+  flex: 1;
   display: flex;
   justify-content: flex-end;
   flex-wrap: wrap;

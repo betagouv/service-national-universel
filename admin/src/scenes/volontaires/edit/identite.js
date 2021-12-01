@@ -39,6 +39,8 @@ export default ({ values, handleChange, handleSubmit, required = {}, errors, tou
           errors={errors}
           touched={touched}
         />
+        <Item title="E-mail" values={values} name="email" handleChange={handleChange} required={required.email} errors={errors} touched={touched} />
+        <Item title="Tél." values={values} name="phone" handleChange={handleChange} required={required.phone} errors={errors} touched={touched} />
         <Item
           title="Pays de naissance"
           values={values || "France"}
