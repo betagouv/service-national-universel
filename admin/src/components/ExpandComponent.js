@@ -57,6 +57,7 @@ const Expand = styled.ul`
   }
   .container {
     color: rgb(156, 156, 156);
+    margin-bottom: 0.5rem;
   }
   .see-more {
     font-style: normal;

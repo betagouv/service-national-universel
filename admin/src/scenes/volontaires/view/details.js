@@ -15,15 +15,19 @@ import InfoIcon from "../../../assets/InfoIcon";
 import ExpandComponent from "../../../components/ExpandComponent";
 
 const youngConsentmentText = (
-  <p>
-    • A lu et accepte les Conditions générales d&apos;utilisation de la plateforme du Service national universel ;
-    <br /> • A pris connaissance des modalités de traitement de mes données personnelles ; <br />
-    • Est volontaire, sous le contrôle des représentants légaux, pour effectuer la session 2022 du Service National Universel qui comprend la participation au séjour de cohésion
-    puis la réalisation d&apos;une mission d&apos;intérêt général ; <br />
-    • Certifie l&apos;exactitude des renseignements fournis ; <br />• Si en terminale, a bien pris connaissance que si je suis convoqué(e) pour les épreuves du second groupe du
-    baccalauréat entre le 6 et le 8 juillet 2022, je ne pourrai pas participer au séjour de cohésion entre le 3 et le 15 juillet 2022 (il n’y aura ni dérogation sur la date
-    d’arrivée au séjour de cohésion ni report des épreuves).
-  </p>
+  <ul>
+    <li>A lu et accepte les Conditions générales d&apos;utilisation de la plateforme du Service national universel ;</li>
+    <li>A pris connaissance des modalités de traitement de mes données personnelles ;</li>
+    <li>
+      Est volontaire, sous le contrôle des représentants légaux, pour effectuer la session 2022 du Service National Universel qui comprend la participation au séjour de cohésion
+      puis la réalisation d&apos;une mission d&apos;intérêt général ;
+    </li>
+    <li>Certifie l&apos;exactitude des renseignements fournis ;</li>
+    <li>
+      Si en terminale, a bien pris connaissance que si je suis convoqué(e) pour les épreuves du second groupe du baccalauréat entre le 6 et le 8 juillet 2022, je ne pourrai pas
+      participer au séjour de cohésion entre le 3 et le 15 juillet 2022 (il n’y aura ni dérogation sur la date d’arrivée au séjour de cohésion ni report des épreuves).
+    </li>
+  </ul>
 );
 
 const parentsConsentmentText = (
@@ -232,9 +236,9 @@ export default ({ young }) => {
               {young.consentment ? (
                 <Bloc title="Consentement">
                   <Details title="Consentements validés par le volontaire" value={t(young.consentment)} style={{ border: "none" }} />
-                  <ExpandComponent children={youngConsentmentText} displayText="Plus de détails côté volontaire" />
+                  <ExpandComponent children={youngConsentmentText} displayText={`Consentements de ${young.firstName} ${young.lastName}`} />
                   <Details title="Consentements validés par ses représentants légaux" value={t(young.consentment)} style={{ border: "none" }} />
-                  <ExpandComponent children={parentsConsentmentText} displayText="Plus de détails côté représentants légaux" />
+                  <ExpandComponent children={parentsConsentmentText} displayText={`Consentements de ses représentants légaux`} />
                 </Bloc>
               ) : null}
               {young.withdrawnMessage ? (
