@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 import { useEffect } from "react";
 import { useSelector } from "react-redux";
 import { adminURL } from "../config";
