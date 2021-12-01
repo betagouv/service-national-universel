@@ -2,19 +2,21 @@ import { useRef, useState } from "react";
 import EmojiPicker from "./EmojiPicker";
 
 // https://github.com/missive/emoji-mart/issues/79
-const InputWithEmojiPicker = ({ className, inputClassName, name, value }) => {
+const InputWithEmojiPicker = ({ className, inputClassName, name, defaultValue }) => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   const [pickerPosition, setPickerPosition] = useState({ top: 0, right: 0 });
   const pickerButtonRef = useRef(null);
-  const inputRef = useRef({ value });
+  const inputRef = useRef({ defaultValue });
 
   const onOpenEmojiPicker = () => {
-    const { top, left } = pickerButtonRef.current.getBoundingClientRect();
+    const { top, left, right } = pickerButtonRef.current.getBoundingClientRect();
     // picker is 420h x 340w
+    console.log({ top, left, right });
     const idealTop = top + 24; // 24px is the svg button size
     const pickerTop = Math.min(window.innerHeight - 420, idealTop);
-    const pickerLeft = idealTop > pickerTop ? left + 24 : left;
+    const idealLeft = Math.min(left, window.innerWidth - 340 - 24);
+    const pickerLeft = idealTop > pickerTop ? idealLeft + 24 : idealLeft;
     setPickerPosition({ top: pickerTop, left: pickerLeft });
     setShowEmojiPicker(!showEmojiPicker);
   };
@@ -27,7 +29,7 @@ const InputWithEmojiPicker = ({ className, inputClassName, name, value }) => {
 
   return (
     <div className={`flex relative justify-between items-center ${className}`}>
-      <input className={`w-full ${inputClassName}`} ref={inputRef} name={name} value={value} />
+      <input className={`w-full ${inputClassName}`} ref={inputRef} name={name} defaultValue={defaultValue} />
       <svg
         ref={pickerButtonRef}
         onClick={onOpenEmojiPicker}
