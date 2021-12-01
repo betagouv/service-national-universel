@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { colors } from "../utils";
 
-export default function ExpandComponent({ children }) {
+export default function ExpandComponent({ children, displayText }) {
   const [expandNote, setExpandNote] = useState(false);
 
   const toggleNote = () => {
@@ -17,7 +17,7 @@ export default function ExpandComponent({ children }) {
         </>
       ) : null}
       <div className="see-more" onClick={toggleNote}>
-        {expandNote ? "  VOIR MOINS" : "  PLUS DE DÉTAILS"}
+        {expandNote ? "  VOIR MOINS" : `${displayText} ↓`}
       </div>
     </Expand>
   );
@@ -64,6 +64,7 @@ const Expand = styled.ul`
     margin-bottom: 0.8rem;
     font-size: 0.75rem;
     font-weight: 700;
+    text-transform: uppercase;
     cursor: pointer;
     :hover {
       color: ${colors.purple};
