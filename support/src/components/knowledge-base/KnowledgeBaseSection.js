@@ -6,7 +6,6 @@ import API from "../../services/api";
 import KnowledgeBaseCardSection from "./KnowledgeBaseCardSection";
 import KnowledgeBaseCardArticle from "./KnowledgeBaseCardArticle";
 import KnowledgeBaseCreate from "./KnowledgeBaseCreate";
-import KnowledgeBaseEdit from "./KnowledgeBaseEdit";
 import Tags from "../Tags";
 import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
 
@@ -41,24 +40,19 @@ const KnowledgeBaseSection = ({ section, isRoot }) => {
   }, []);
 
   return (
-    <article className="container flex flex-col flex-grow flex-shrink overflow-hidden w-full">
-      <div className="px-8 py-3 flex justify-between">
-        {!isRoot && (
-          <>
-            <div>
-              <h2 className={`font-bold text-lg`}>{section.title}</h2>
-              {!!section.description?.length && <p className="mt-1 text-sm italic">{section.description}</p>}
-              {!!section.allowedRoles?.length && (
-                <p className="flex flex-wrap mt-3.5  text-sm">
-                  Visible par: <Tags tags={section.allowedRoles} />
-                </p>
-              )}
-            </div>
-            <KnowledgeBaseEdit key={section.slug} sectionOrAnswer={section} />
-          </>
-        )}
-      </div>
-      <main className="grid grid-cols-3 h-full w-full py-12 flex-shrink overflow-y-auto">
+    <article className="container bg-coolGray-100 mx-auto flex flex-col flex-grow h-full relative w-full flex-shrink overflow-hidden">
+      {!isRoot && (
+        <header className="px-8 py-3 flex flex-col">
+          <h2 className={`font-bold text-lg`}>{section.title}</h2>
+          {!!section.description?.length && <p className="mt-1 text-sm italic">{section.description}</p>}
+          {!!section.allowedRoles?.length && (
+            <p className="flex flex-wrap mt-3.5  text-sm">
+              Visible par: <Tags tags={section.allowedRoles} />
+            </p>
+          )}
+        </header>
+      )}
+      <main className="grid grid-cols-3 gap-4 md:gap-6 h-full w-full py-12 flex-shrink overflow-y-auto">
         <section className="flex flex-col col-span-2">
           <h3 className="px-10 text-coolGray-500 flex items-center font-bold">
             Articles

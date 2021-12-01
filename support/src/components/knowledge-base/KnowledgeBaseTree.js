@@ -48,15 +48,17 @@ const Branch = ({ section, level, onIsActive, position, parentId, onListChange }
     sortable.current = SortableJS.create(gridRef.current, { animation: 150, group: "shared", onEnd: onListChange });
   }, []);
 
+  let isDraft = JSON.stringify(section.children || []).includes("DRAFT") ? " 🚦 " : "";
+
   return (
     <div data-position={position} data-parentid={parentId || "root"} data-id={section._id || "root"} data-type="section" className={`ml-${level * horizontalSpacing} mb-1 `}>
-      <span className={` text-warmGray-500 ${isActive ? "font-bold" : ""}`}>
-        <small className="text-trueGray-400 mr-1 mb-1  w-3 inline-block cursor-pointer" onClick={() => setIsOpen(!open)}>
+      <span className={` text-warmGray-500 max-w-full inline-block overflow-hidden overflow-ellipsis whitespace-nowrap ${isActive ? "font-bold" : ""}`}>
+        <small className="text-trueGray-400 mr-1 mb-1 w-3 inline-block cursor-pointer" onClick={() => setIsOpen(!open)}>
           {open ? "\u25BC" : "\u25B6"}
         </small>
         <Link href={`/admin/knowledge-base/${section.slug || ""}`} passHref>
           {section.title ? (
-            `${open ? "📂" : "📁"} ${section.title} (${section.children?.length || 0}) ${JSON.stringify(section.children || []).includes("DRAFT") ? "🚦" : ""}`
+            `${open ? "📂" : "📁"}${isDraft}${section.title} (${section.children?.length || 0})`
           ) : (
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 inline -mt-2 cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
@@ -99,7 +101,7 @@ const Answer = ({ article, level, onIsActive, position, parentId }) => {
         data-parentid={parentId}
         data-id={article._id}
         href="#"
-        className={`text-warmGray-500 block ml-${level * horizontalSpacing} ${isActive ? "font-bold" : ""}`}
+        className={`text-warmGray-500 overflow-hidden overflow-ellipsis whitespace-nowrap block ml-${level * horizontalSpacing} ${isActive ? "font-bold" : ""}`}
       >
         {`${article.status === "DRAFT" ? "📝" : "📃"}  ${article.title}`}
       </a>

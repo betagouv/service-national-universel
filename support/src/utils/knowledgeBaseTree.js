@@ -32,12 +32,21 @@ const findParents = (item, flattenedData) => {
 };
 
 // addParents only for first item
-export const buildTree = (item, flattenedData, { addParents = true, debug } = {}) => {
+export const buildTree = (item, flattenedData, options) => {
+  if (!["root", "section"].includes(item.type)) return JSON.parse(JSON.stringify(item));
+  // clone items to avoid circular reference in item.parents = parents
+  const clonedItem = JSON.parse(JSON.stringify(item));
+  const clonedData = JSON.parse(JSON.stringify(flattenedData));
+
+  return buildTreeRecursive(clonedItem, clonedData, options);
+};
+// addParents only for first item
+export const buildTreeRecursive = (item, flattenedData, { addParents = true, debug } = {}) => {
   if (!["root", "section"].includes(item.type)) return item;
   const populatedSection = item;
-  const children = [...flattenedData.filter((i) => i.parentId === item._id)].sort(sortItemsInSection);
+  const children = flattenedData.filter((i) => i.parentId === item._id).sort(sortItemsInSection);
   for (const child of children) {
-    buildTree(child, flattenedData, { addParents: false, debug });
+    buildTreeRecursive(child, flattenedData, { addParents: false, debug });
   }
   populatedSection.children = children;
   if (addParents) populatedSection.parents = findParents(populatedSection, flattenedData);

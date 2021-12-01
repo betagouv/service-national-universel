@@ -84,7 +84,7 @@ const KnowledgeBaseCreate = ({ type, position, parentId = null }) => {
           </div>
         </form>
       </Modal>
-      <button className="w-8 h-8 rounded-full p-0 ml-3" onClick={() => setOpen(true)}>
+      <button className="flex justify-center items-center text-center w-8 h-8 rounded-full p-0 ml-3" onClick={() => setOpen(true)}>
         +
       </button>
     </>
