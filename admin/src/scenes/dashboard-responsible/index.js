@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { Col, Container, Row } from "reactstrap";
-import { Link } from "react-router-dom";
+import { useHistory, useParams, Link } from "react-router-dom";
 
 import Volontaires from "./volontaires";
 import Missions from "./missions";
@@ -11,7 +11,8 @@ import api from "../../services/api";
 import { DEFAULT_STRUCTURE_NAME, MISSION_STATUS } from "../../utils";
 
 export default () => {
-  const [currentTab, setCurrentTab] = useState("volontaires");
+  const history = useHistory();
+  const { currentTab } = useParams();
   const [showAlert, setShowAlert] = useState(false);
   const [structure, setStructure] = useState();
   const [referentManagerPhase2, setReferentManagerPhase2] = useState();
@@ -35,15 +36,20 @@ export default () => {
     })();
   }, []);
 
+  useEffect(() => {
+    const listTab = ["missions", "volontaires"];
+    if (!listTab.includes(currentTab)) history.push(`/dashboard/volontaires`);
+  }, [currentTab]);
+
   return (
     <>
       {showAlert ? <AlertBox onClose={() => setShowAlert(false)} /> : null}
       <TabNavigation>
         <TabNavigationList>
-          <TabItem onClick={() => setCurrentTab("volontaires")} isActive={currentTab === "volontaires"}>
+          <TabItem onClick={() => history.push(`/dashboard/volontaires`)} isActive={currentTab === "volontaires"}>
             Volontaires
           </TabItem>
-          <TabItem onClick={() => setCurrentTab("missions")} isActive={currentTab === "missions"}>
+          <TabItem onClick={() => history.push(`/dashboard/missions`)} isActive={currentTab === "missions"}>
             Missions
           </TabItem>
         </TabNavigationList>

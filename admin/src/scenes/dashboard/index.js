@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
+import { useParams, useHistory } from "react-router-dom";
 
 import Inscription from "./inscription";
 import Volontaire from "./volontaire";
@@ -12,26 +13,32 @@ import ExportAll from "./inscription/ExportAll";
 import { ROLES } from "../../utils";
 
 export default () => {
-  const [currentTab, setCurrentTab] = useState("inscriptions");
+  const history = useHistory();
+  const { currentTab } = useParams();
   const user = useSelector((state) => state.Auth.user);
+
+  useEffect(() => {
+    const listTab = ["inscriptions", "volontaires", "structures", "missions", "centers"];
+    if (!listTab.includes(currentTab)) history.push(`/dashboard/inscriptions`);
+  }, [currentTab]);
 
   return (
     <>
       <TabNavigation>
         <TabNavigationList>
-          <TabItem onClick={() => setCurrentTab("inscriptions")} isActive={currentTab === "inscriptions"}>
+          <TabItem onClick={() => history.push(`/dashboard/inscriptions`)} isActive={currentTab === "inscriptions"}>
             Inscriptions
           </TabItem>
-          <TabItem onClick={() => setCurrentTab("volontaires")} isActive={currentTab === "volontaires"}>
+          <TabItem onClick={() => history.push(`/dashboard/volontaires`)} isActive={currentTab === "volontaires"}>
             Volontaires
           </TabItem>
-          <TabItem onClick={() => setCurrentTab("structures")} isActive={currentTab === "structures"}>
+          <TabItem onClick={() => history.push(`/dashboard/structures`)} isActive={currentTab === "structures"}>
             Structures
           </TabItem>
-          <TabItem onClick={() => setCurrentTab("missions")} isActive={currentTab === "missions"}>
+          <TabItem onClick={() => history.push(`/dashboard/missions`)} isActive={currentTab === "missions"}>
             Missions
           </TabItem>
-          <TabItem onClick={() => setCurrentTab("centers")} isActive={currentTab === "centers"}>
+          <TabItem onClick={() => history.push(`/dashboard/centers`)} isActive={currentTab === "centers"}>
             Centres
           </TabItem>
         </TabNavigationList>
