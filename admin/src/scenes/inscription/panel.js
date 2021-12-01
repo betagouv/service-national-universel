@@ -181,6 +181,10 @@ export default function InscriptionPanel({ onChange, value }) {
           <Details title="Région" value={value.parent2Region} />
         </Info>
       )}
+      <Info title="Consentements">
+        <Details title={`Consentements validés par ${value.firstName} ${value.lastName}`} value={t(value.consentment || "false")} />
+        <Details title="Consentements validés par ses représentants légaux" value={t(value.parentConsentment || "false")} />
+      </Info>
       {value.motivations && (
         <div className="info">
           <div className="info-title">Motivations</div>
