@@ -1,6 +1,5 @@
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import useSWR from "swr";
 import Header from "../../../components/Header";
 import KnowledgeBaseAnswer from "../../../components/knowledge-base/KnowledgeBaseAnswer";
 import KnowledgeBaseBreadcrumb from "../../../components/knowledge-base/KnowledgeBaseBreadcrumb";
@@ -10,7 +9,7 @@ import KnowledgeBaseTree from "../../../components/knowledge-base/KnowledgeBaseT
 import Layout from "../../../components/Layout";
 import Loader from "../../../components/Loader";
 import withAuth from "../../../hocs/withAuth";
-import API from "../../../services/api";
+import useKnowledgeBaseData from "../../../hooks/useKnowledgeBaseData";
 
 const KnowledgeBase = () => {
   const [treeVisible, setTreeVisible] = useState(!localStorage.getItem("snu-support-kb-tree-hidden"));
@@ -29,12 +28,7 @@ const KnowledgeBase = () => {
     setSlug(router.query?.slug || "");
   }, [router.query?.slug]);
 
-  const { data: response } = useSWR(API.getUrl({ path: `/support-center/knowledge-base/${slug}`, query: { withTree: true, withParents: true } }));
-
-  const [data, setData] = useState(response?.data);
-  useEffect(() => {
-    setData(response?.data);
-  }, [response?.data]);
+  const { item: data } = useKnowledgeBaseData(slug);
 
   const isRoot = router.pathname === "/admin/knowledge-base";
 

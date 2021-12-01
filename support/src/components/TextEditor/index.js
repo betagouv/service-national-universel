@@ -7,8 +7,8 @@ import { withHistory } from "slate-history";
 import { Button, Icon, Toolbar } from "./components";
 import API from "../../services/api";
 import { toast } from "react-toastify";
-import { useSWRConfig } from "swr";
 import { useRouter } from "next/router";
+import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
 
 const HOTKEYS = {
   "mod+b": "bold",
@@ -19,7 +19,7 @@ const HOTKEYS = {
 
 const LIST_TYPES = ["numbered-list", "bulleted-list"];
 
-const TextEditor = ({ content, slug, _id }) => {
+const TextEditor = ({ content, _id }) => {
   const router = useRouter();
 
   const [value, setValue] = useState(JSON.parse(localStorage.getItem(`snu-kb-content-${_id}`)) || content || initialValue);
@@ -29,7 +29,7 @@ const TextEditor = ({ content, slug, _id }) => {
   const renderLeaf = useCallback((props) => <Leaf {...props} />, []);
   const editor = useMemo(() => withHistory(withReact(createEditor())), []);
 
-  const { mutate } = useSWRConfig();
+  const { mutate } = useKnowledgeBaseData();
 
   const onChange = (value) => {
     setValue(value);
@@ -57,7 +57,7 @@ const TextEditor = ({ content, slug, _id }) => {
       return;
     }
     toast.success("Article mis-à-jour !");
-    mutate(API.getUrl({ path: `/support-center/knowledge-base/${slug}`, query: { withTree: true, withParents: true } }));
+    mutate();
     localStorage.removeItem(`snu-kb-content-${_id}`);
     setIsSaveable(false);
   };

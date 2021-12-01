@@ -1,5 +1,4 @@
 import React, { useEffect, useRef } from "react";
-import { useSWRConfig } from "swr";
 import SortableJS from "sortablejs";
 import { toast } from "react-toastify";
 import withAuth from "../../hocs/withAuth";
@@ -10,9 +9,10 @@ import KnowledgeBaseCreate from "./KnowledgeBaseCreate";
 import KnowledgeBaseEdit from "./KnowledgeBaseEdit";
 import Tags from "../Tags";
 import getTitleWithStatus from "../../utils/getTitleWithStatus";
+import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
 
 const KnowledgeBaseSection = ({ section, isRoot }) => {
-  const { mutate } = useSWRConfig();
+  const { mutate } = useKnowledgeBaseData();
   const gridSectionsRef = useRef(null);
   const gridAnswersRef = useRef(null);
   const sortableSections = useRef(null);
@@ -30,8 +30,7 @@ const KnowledgeBaseSection = ({ section, isRoot }) => {
       body: newSort.map(({ _id, position, title }) => ({ _id, position, title, parentId: section._id })),
     });
     if (!response.ok) return toast.error("Désolé, une erreur est survenue. Veuillez recommencer !");
-    if (section.slug) mutate(API.getUrl({ path: `/support-center/knowledge-base/${section.slug}`, query: { withTree: true, withParents: true } }));
-    mutate(API.getUrl({ path: "/support-center/knowledge-base/", query: { withTree: true, withParents: true } }));
+    mutate();
   };
 
   const sections = section.children.filter((c) => c.type === "section");

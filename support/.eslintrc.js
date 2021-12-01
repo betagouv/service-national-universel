@@ -7,6 +7,11 @@ module.exports = {
     es6: true,
   },
   extends: ["eslint:recommended", "plugin:react/recommended", "plugin:import/recommended", "plugin:prettier/recommended"],
+  settings: {
+    react: {
+      version: "detect",
+    },
+  },
   plugins: ["prettier"],
   parserOptions: {
     ecmaVersion: 2020,

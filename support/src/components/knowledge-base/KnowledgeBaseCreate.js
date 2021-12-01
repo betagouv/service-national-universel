@@ -1,7 +1,7 @@
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { toast } from "react-toastify";
-import { useSWRConfig } from "swr";
+import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
 import API from "../../services/api";
 import Modal from "../Modal";
 import KnowledgeBaseForm from "./KnowledgeBaseForm";
@@ -10,7 +10,7 @@ const KnowledgeBaseCreate = ({ type, position, parentId = null }) => {
   const [open, setOpen] = useState(null);
 
   const router = useRouter();
-  const { mutate } = useSWRConfig();
+  const { mutate } = useKnowledgeBaseData();
 
   const onSubmit = async (body) => {
     body.allowedRoles = body.computedAllowedRoles.filter(({ value }) => !!value).map((item) => item.id);
@@ -20,8 +20,7 @@ const KnowledgeBaseCreate = ({ type, position, parentId = null }) => {
     const response = await API.post({ path: "/support-center/knowledge-base", body });
     if (response.error) return toast.error(response.error);
     if (response.data) {
-      if (router.query.slug) mutate(API.getUrl({ path: `/support-center/knowledge-base/${router.query.slug}`, query: { withTree: true, withParents: true } }));
-      mutate(API.getUrl({ path: "/support-center/knowledge-base/", query: { withTree: true, withParents: true } }));
+      mutate();
       router.push(`/admin/knowledge-base/${response.data.slug}`);
       setOpen(false);
     }

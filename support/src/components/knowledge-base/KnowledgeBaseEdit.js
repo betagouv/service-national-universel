@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useSWRConfig } from "swr";
 import router from "next/router";
 import { SUPPORT_ROLES } from "snu-lib/roles";
 import { toast } from "react-toastify";
@@ -10,15 +9,13 @@ import Modal from "../Modal";
 import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
 
 const KnowledgeBaseEdit = ({ sectionOrAnswer }) => {
-  const { mutate } = useSWRConfig();
-  const { flattenedData } = useKnowledgeBaseData();
+  const { flattenedData, mutate } = useKnowledgeBaseData();
 
   const onSubmit = async (body) => {
     body.allowedRoles = body.computedAllowedRoles.filter(({ value }) => !!value).map((item) => item.id);
     const response = await API.put({ path: `/support-center/knowledge-base/${sectionOrAnswer._id}`, body });
     if (response.error) return toast.error(response.error);
-    mutate(API.getUrl({ path: `/support-center/knowledge-base/${sectionOrAnswer.slug}`, query: { withTree: true, withParents: true } }));
-    mutate(API.getUrl({ path: "/support-center/knowledge-base/", query: { withTree: true, withParents: true } }));
+    mutate();
     router.replace(`/admin/knowledge-base/${response.data.slug}`);
     setIsOpen(false);
   };
@@ -29,8 +26,7 @@ const KnowledgeBaseEdit = ({ sectionOrAnswer }) => {
       if (response.error) return toast.error(response.error);
       toast.success("Élément supprimé !");
       const parent = flattenedData.find((item) => item._id === sectionOrAnswer.parentId);
-      mutate(API.getUrl({ path: "/support-center/knowledge-base/", query: { withTree: true, withParents: true } }));
-      mutate(API.getUrl({ path: `/admin/knowledge-base/${parent.slug}`, query: { withTree: true, withParents: true } }));
+      mutate();
       router.replace(`/admin/knowledge-base/${parent.slug}`);
       setIsOpen(false);
     }
