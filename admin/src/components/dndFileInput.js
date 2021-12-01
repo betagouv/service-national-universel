@@ -9,7 +9,7 @@ function getFileName(file) {
   return (file && file.name) || file;
 }
 
-export default ({ value, onChange, name, errorMessage = requiredMessage, placeholder = "votre fichier", source, required }) => {
+export default function DndFileInput({ value, onChange, name, errorMessage = requiredMessage, placeholder = "votre fichier", source, required }) {
   const [filesList, setFilesList] = useState(value || []);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
@@ -62,7 +62,7 @@ export default ({ value, onChange, name, errorMessage = requiredMessage, placeho
           />
           <>
             <span style={{ color: "#5850ec" }}>Téléversez {placeholder}</span>
-            <span style={{ display: "block", fontSize: 13 }}>PDF, PNG ou JPG jusqu'à 5 Mo</span>
+            <span style={{ display: "block", fontSize: 13 }}>PDF, PNG ou JPG jusqu&apos;à 5 Mo</span>
           </>
         </ImageInput>
       </div>
@@ -77,7 +77,7 @@ export default ({ value, onChange, name, errorMessage = requiredMessage, placeho
       />
     </>
   );
-};
+}
 
 const FileName = styled.span`
   white-space: nowrap;

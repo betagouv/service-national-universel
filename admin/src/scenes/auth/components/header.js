@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { Link } from "react-router-dom";
 import { colors } from "../../../utils";
 
-export default () => {
+export default function HeaderComponent() {
   return (
     <Header>
       <Logos>
@@ -19,14 +19,14 @@ export default () => {
           <Link to="/auth">espace&nbsp;administrateur </Link>
         </Button>
         <Button>
-          <a href="https://moncompte.snu.gouv.fr/" target="_blank">
+          <a href="https://moncompte.snu.gouv.fr/" target="_blank" rel="noreferrer">
             espace&nbsp;volontaire
           </a>
         </Button>
       </ButtonContainer>
     </Header>
   );
-};
+}
 
 const Header = styled.div`
   background-color: #fff;

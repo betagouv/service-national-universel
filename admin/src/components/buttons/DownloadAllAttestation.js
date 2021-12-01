@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import LoadingButton from "./LoadingButton";
 import downloadPDF from "../../utils/download-pdf";
 
-export default ({ cohesionCenterId, children, disabled, uri }) => {
+export default function DownloadAllAttestation({ cohesionCenterId, children }) {
   const [loading, setLoading] = useState();
 
   const viewAttestation = async () => {
@@ -19,4 +19,4 @@ export default ({ cohesionCenterId, children, disabled, uri }) => {
       {children}
     </LoadingButton>
   );
-};
+}

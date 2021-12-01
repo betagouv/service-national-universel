@@ -7,7 +7,7 @@ import { SENDINBLUE_TEMPLATES } from "../../utils";
 import { ModalContainer, Content, Footer, Header } from "./Modal";
 import ModalButton from "../buttons/ModalButton";
 
-export default ({ isOpen, value, onChange, onSend, topTitle = "alerte" }) => {
+export default function ModalCorrection({ isOpen, value, onChange, onSend, topTitle = "alerte" }) {
   const [message, setMessage] = useState();
   const [sending, setSending] = useState(false);
 
@@ -31,10 +31,10 @@ export default ({ isOpen, value, onChange, onSend, topTitle = "alerte" }) => {
         <img src={require("../../assets/close.svg")} height={10} onClick={onChange} />
         <Header>{topTitle}</Header>
         <Content>
-          <h1>Veuillez éditer le message ci-dessous pour préciser les corrections à apporter avant de l'envoyer :</h1>
+          <h1>Veuillez éditer le message ci-dessous pour préciser les corrections à apporter avant de l&apos;envoyer :</h1>
           <p style={{ alignSelf: "flex-start", textAlign: "left" }}>
             Bonjour {value.firstName} {value.lastName}, <br />
-            Votre dossier d'inscription a été vérifié et est en attente de correction de votre part. Pour finaliser votre inscription au SNU, merci de suivre les éléments
+            Votre dossier d&apos;inscription a été vérifié et est en attente de correction de votre part. Pour finaliser votre inscription au SNU, merci de suivre les éléments
             renseignés par votre référent SNU :
           </p>
           <textarea placeholder="Renseignez ici les éléments à modifier..." rows="8" value={message} onChange={(e) => setMessage(e.target.value)} />
@@ -54,4 +54,4 @@ export default ({ isOpen, value, onChange, onSend, topTitle = "alerte" }) => {
       </ModalContainer>
     </Modal>
   );
-};
+}

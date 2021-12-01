@@ -8,7 +8,7 @@ The props name, small, disabled and optionLabels are optional.
 Usage: <ToggleSwitch id={id} checked={value} onChange={checked => setValue(checked)}} />
 */
 
-export default ({ id, name, checked, onChange, optionLabels = ["Oui", "Non"], small, disabled }) => {
+export default function ToggleSwitch({ id, name, checked, onChange, optionLabels = ["Oui", "Non"], small, disabled }) {
   function handleKeyPress(e) {
     if (e.keyCode !== 32) return;
 
@@ -26,15 +26,14 @@ export default ({ id, name, checked, onChange, optionLabels = ["Oui", "Non"], sm
           tabIndex={disabled ? -1 : 1}
           onKeyDown={(e) => {
             handleKeyPress(e);
-          }}
-        >
+          }}>
           <span className={disabled ? "toggle-switch-inner toggle-switch-disabled" : "toggle-switch-inner"} data-yes={optionLabels[0]} data-no={optionLabels[1]} tabIndex={-1} />
           {/* <span className={disabled ? "toggle-switch-switch toggle-switch-disabled" : "toggle-switch-switch"} tabIndex={-1} /> */}
         </label>
       ) : null}
     </Toggle>
   );
-};
+}
 
 const Toggle = styled.div`
   .toggle-switch {

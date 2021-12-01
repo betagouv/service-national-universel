@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
-import { useHistory } from "react-router-dom";
 import { Col, Row } from "reactstrap";
 import { useSelector } from "react-redux";
 
@@ -12,7 +11,7 @@ import Panel, { Info, Details } from "../../components/Panel";
 import api from "../../services/api";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 
-export default ({ onChange, center }) => {
+export default function PanelCenter({ onChange, center }) {
   const history = useHistory();
   const [headCenter, setHeadCenter] = useState();
   const user = useSelector((state) => state.Auth.user);
@@ -79,7 +78,7 @@ export default ({ onChange, center }) => {
         <Row>
           <Col md={6}>
             <div>
-              <DetailCardTitle>Taux d'occupation</DetailCardTitle>
+              <DetailCardTitle>Taux d&apos;occupation</DetailCardTitle>
               <DetailCardContent>{`${center.placesTotal ? (((center.placesTotal - center.placesLeft) * 100) / center.placesTotal).toFixed(2) : 0} %`}</DetailCardContent>
             </div>
           </Col>
@@ -120,7 +119,7 @@ export default ({ onChange, center }) => {
       />
     </Panel>
   );
-};
+}
 
 const Subtitle = styled.div`
   color: rgb(113, 128, 150);

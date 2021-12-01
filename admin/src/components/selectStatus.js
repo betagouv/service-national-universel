@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 
 import api from "../services/api";
 
-import { translate, YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_COLORS, isEndOfInscriptionManagement2021, ROLES, colors, SENDINBLUE_TEMPLATES } from "../utils";
+import { translate, YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_COLORS, /* isEndOfInscriptionManagement2021, ROLES, */ colors, SENDINBLUE_TEMPLATES } from "../utils";
 import { toastr } from "react-redux-toastr";
 
 import ModalCorrection from "./modals/ModalCorrection";
@@ -15,25 +15,25 @@ import ModalGoal from "./modals/ModalGoal";
 import Chevron from "./Chevron";
 import ModalConfirm from "./modals/ModalConfirm";
 
-export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status", phase = YOUNG_PHASE.INSCRIPTION, disabled, callback = () => {} }) => {
+export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status", phase = YOUNG_PHASE.INSCRIPTION, disabled, callback = () => {} }) {
   const [modal, setModal] = useState(null);
   const [young, setYoung] = useState(null);
   const user = useSelector((state) => state.Auth.user);
   const [modalConfirm, setModalConfirm] = useState({ isOpen: false, onConfirm: null });
 
-  const getInscriptions = async (department) => {
-    const { data, ok, code } = await api.get(`/inscription-goal/${department}/current`);
-    return data;
-  };
+  // const getInscriptions = async (department) => {
+  //   const { data } = await api.get(`/inscription-goal/${department}/current`);
+  //   return data;
+  // };
 
-  const getInscriptionGoalReachedNormalized = async (departement) => {
-    const { data, ok, code } = await api.get("/inscription-goal");
-    let max = 0;
-    if (data) max = data.filter((d) => d.department === departement)[0]?.max;
-    if (!ok) return toastr.error("Oups, une erreur s'est produite", translate(code));
-    const nbYoungs = await getInscriptions(departement);
-    return max > 0 && { ...nbYoungs, max };
-  };
+  // const getInscriptionGoalReachedNormalized = async (departement) => {
+  //   const { data, ok, code } = await api.get("/inscription-goal");
+  //   let max = 0;
+  //   if (data) max = data.filter((d) => d.department === departement)[0]?.max;
+  //   if (!ok) return toastr.error("Oups, une erreur s'est produite", translate(code));
+  //   const nbYoungs = await getInscriptions(departement);
+  //   return max > 0 && { ...nbYoungs, max };
+  // };
 
   useEffect(() => {
     (async () => {
@@ -202,7 +202,7 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
       </ActionBox>
     </>
   );
-};
+}
 
 const ActionBox = styled.div`
   .dropdown-menu {

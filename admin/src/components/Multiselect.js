@@ -3,7 +3,7 @@ import MultiSelect from "react-multi-select-component";
 import styled from "styled-components";
 import { translate } from "../utils";
 
-export default ({ value, name, onChange, options, placeholder, valueRenderer = () => {}, filterOptions = (options) => options }) => {
+export default function MultiSelectComponent({ value, name, onChange, options, placeholder, valueRenderer = () => {}, filterOptions = (options) => options }) {
   const transformOptions = options.map((e) => {
     return { label: translate(e), value: e };
   });
@@ -38,7 +38,7 @@ export default ({ value, name, onChange, options, placeholder, valueRenderer = (
       />
     </Wrapper>
   );
-};
+}
 
 const Wrapper = styled.div`
   .dropdown-container:focus-within,
