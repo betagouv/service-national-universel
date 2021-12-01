@@ -8,7 +8,7 @@ import { useHistory } from "react-router-dom";
 import ReactSelect from "react-select";
 
 import MultiSelect from "../../components/Multiselect";
-import AddressInput from "../../components/addressInput";
+import AddressInput from "../../components/addressInputV2";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
 import {
   translate,
@@ -198,7 +198,7 @@ export default (props) => {
         }
       }}
     >
-      {({ values, handleChange, handleSubmit, errors, touched }) => (
+      {({ values, handleChange, handleSubmit, errors, touched, validateField }) => (
         <div>
           <Header>
             <Title>{defaultValue ? values.name : "Création d'une mission"}</Title>
@@ -488,6 +488,7 @@ export default (props) => {
                       handleChange={handleChange}
                       errors={errors}
                       touched={touched}
+                      validateField={validateField}
                     />
                     <p style={{ color: "#a0aec1", fontSize: 12 }}>Si l'adresse n'est pas reconnue, veuillez saisir le nom de la ville.</p>
                   </Wrapper>
@@ -540,8 +541,9 @@ export default (props) => {
                 <Loader />
               )
             ) : null}
-
-            {Object.keys(errors).length ? <h3 className="alert">Vous ne pouvez pas proposer cette mission car tous les champs ne sont pas correctement renseignés.</h3> : null}
+            {Object.values(errors).filter((e) => !!e).length ? (
+              <h3 className="alert">Vous ne pouvez pas proposer cette mission car tous les champs ne sont pas correctement renseignés.</h3>
+            ) : null}
             <Header style={{ justifyContent: "flex-end" }}>
               {!defaultValue ? (
                 <LoadingButton
