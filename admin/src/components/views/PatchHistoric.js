@@ -37,7 +37,7 @@ export default function PatchHistoric({ model, value, field, previewNumber = 1 }
 
   useEffect(() => {
     getPatches();
-  }, []);
+  }, [model, value, field]);
 
   return !data ? (
     <Loader />
