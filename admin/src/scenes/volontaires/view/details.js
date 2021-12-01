@@ -31,16 +31,22 @@ const youngConsentmentText = (
 );
 
 const parentsConsentmentText = (
-  <p>
-    • Confirmation d&apos;être titulaire de l&apos;autorité parentale / le représentant légal du volontaire ; <br />
-    • Autorisation du volontaire à participer à la session 2022 du Service National Universel qui comprend la participation au séjour de cohésion puis la réalisation d&apos;une
-    mission d&apos;intérêt général ; <br />
-    • Engagement à renseigner le consentement relatif aux droits à l&apos;image avant le début du séjour de cohésion ; <br />
-    • Engagement à renseigner l&apos;utilisation d&apos;autotest COVID avant le début du séjour de cohésion ; <br />
-    • Engagement à remettre sous pli confidentiel la fiche sanitaire ainsi que les documents médicaux et justificatifs nécessaires à son arrivée au centre de séjour de cohésion ;
-    <br />• Engagement à ce que le volontaire soit à jour de ses vaccinations obligatoires, c&apos;est-à-dire anti-diphtérie, tétanos et poliomyélite (DTP), et pour les volontaires
-    résidents de Guyane, la fièvre jaune.
-  </p>
+  <ul>
+    <li>Confirmation d&apos;être titulaire de l&apos;autorité parentale / le représentant légal du volontaire ;</li>
+    <li>
+      Autorisation du volontaire à participer à la session 2022 du Service National Universel qui comprend la participation au séjour de cohésion puis la réalisation d&apos;une
+      mission d&apos;intérêt général ;
+    </li>
+    <li>Engagement à renseigner le consentement relatif aux droits à l&apos;image avant le début du séjour de cohésion ;</li>
+    <li>Engagement à renseigner l&apos;utilisation d&apos;autotest COVID avant le début du séjour de cohésion ;</li>
+    <li>
+      Engagement à remettre sous pli confidentiel la fiche sanitaire ainsi que les documents médicaux et justificatifs nécessaires à son arrivée au centre de séjour de cohésion ;
+    </li>
+    <li>
+      Engagement à ce que le volontaire soit à jour de ses vaccinations obligatoires, c&apos;est-à-dire anti-diphtérie, tétanos et poliomyélite (DTP), et pour les volontaires
+      résidents de Guyane, la fièvre jaune.
+    </li>
+  </ul>
 );
 
 export default ({ young }) => {
