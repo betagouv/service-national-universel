@@ -42,31 +42,24 @@ export default function PatchHistoric({ model, value, field, previewNumber = 1 }
   return !data ? (
     <Loader />
   ) : (
-    <Historic className="historic">
-      {isExpand ? (
-        <>
-          {data.map((historicItem, key) => (
-            <HistoricItem key={key} item={historicItem} />
-          ))}
-          {data.length === 1 ? null : (
-            <div className="see-more" style={{ marginLeft: "0.5rem", marginTop: "1rem" }} onClick={() => setIsExpand((e) => !e)}>
-              CACHER L&apos;HISTORIQUE
-            </div>
-          )}
-        </>
-      ) : (
-        <>
-          {data?.slice(0, previewNumber)?.map((historicItem, key) => (
-            <HistoricItem key={key} item={historicItem} />
-          ))}
-          {data.length > previewNumber ? (
-            <div className="see-more" style={{ marginLeft: "0.5rem", marginTop: "1rem" }} onClick={() => setIsExpand((e) => !e)}>
-              AFFICHER L&apos;HISTORIQUE
-            </div>
-          ) : null}
-        </>
-      )}
-    </Historic>
+    <>
+      <Historic className="historic">
+        {isExpand
+          ? data.map((historicItem, key) => <HistoricItem key={key} item={historicItem} />)
+          : data?.slice(0, previewNumber)?.map((historicItem, key) => <HistoricItem key={key} item={historicItem} />)}
+      </Historic>
+      {data.length > previewNumber ? (
+        isExpand ? (
+          <ToggleButton style={{ marginLeft: "0.5rem", marginTop: "1rem" }} onClick={() => setIsExpand((e) => !e)}>
+            CACHER L&apos;HISTORIQUE
+          </ToggleButton>
+        ) : (
+          <ToggleButton style={{ marginLeft: "0.5rem", marginTop: "1rem" }} onClick={() => setIsExpand((e) => !e)}>
+            AFFICHER L&apos;HISTORIQUE
+          </ToggleButton>
+        )
+      ) : null}
+    </>
   );
 }
 
@@ -117,6 +110,18 @@ const Item = styled.li`
   padding-left: 1rem;
 `;
 
+const ToggleButton = styled.div`
+  font-style: normal;
+  color: #696974;
+  margin-bottom: 0.8rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  :hover {
+    color: ${colors.purple};
+  }
+`;
+
 const Historic = styled.ul`
   /* display: flex;
   flex-direction: column-reverse;
@@ -137,7 +142,7 @@ const Historic = styled.ul`
       top: 32px;
       z-index: 1;
     }
-    :not(:last-child) {
+    :nth-last-child(n + 2) {
       position: relative;
       ::after {
         content: "";
@@ -148,7 +153,7 @@ const Historic = styled.ul`
         position: absolute;
         left: 0;
         top: 32px;
-        z-index: -1;
+        /* z-index: -1; */
       }
     }
   }
@@ -176,16 +181,5 @@ const Historic = styled.ul`
     font-size: 0.8rem;
     margin-top: 0.8rem;
     margin-left: 10px;
-  }
-  .see-more {
-    font-style: normal;
-    color: #696974;
-    margin-bottom: 0.8rem;
-    font-size: 0.75rem;
-    font-weight: 700;
-    cursor: pointer;
-    :hover {
-      color: ${colors.purple};
-    }
   }
 `;
