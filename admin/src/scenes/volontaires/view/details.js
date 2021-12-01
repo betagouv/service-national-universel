@@ -12,8 +12,44 @@ import DownloadAttestationButton from "../../../components/buttons/DownloadAttes
 import { Box, BoxTitle } from "../../../components/box";
 import Emails from "../../../components/views/Emails";
 import InfoIcon from "../../../assets/InfoIcon";
+import ExpandComponent from "../../../components/ExpandComponent";
 
-export default ({ young }) => {
+const youngConsentmentText = (
+  <ul>
+    <li>A lu et accepte les Conditions générales d&apos;utilisation de la plateforme du Service national universel ;</li>
+    <li>A pris connaissance des modalités de traitement de mes données personnelles ;</li>
+    <li>
+      Est volontaire, sous le contrôle des représentants légaux, pour effectuer la session 2022 du Service National Universel qui comprend la participation au séjour de cohésion
+      puis la réalisation d&apos;une mission d&apos;intérêt général ;
+    </li>
+    <li>Certifie l&apos;exactitude des renseignements fournis ;</li>
+    <li>
+      Si en terminale, a bien pris connaissance que si je suis convoqué(e) pour les épreuves du second groupe du baccalauréat entre le 6 et le 8 juillet 2022, je ne pourrai pas
+      participer au séjour de cohésion entre le 3 et le 15 juillet 2022 (il n’y aura ni dérogation sur la date d’arrivée au séjour de cohésion ni report des épreuves).
+    </li>
+  </ul>
+);
+
+const parentsConsentmentText = (
+  <ul>
+    <li>Confirmation d&apos;être titulaire de l&apos;autorité parentale / le représentant légal du volontaire ;</li>
+    <li>
+      Autorisation du volontaire à participer à la session 2022 du Service National Universel qui comprend la participation au séjour de cohésion puis la réalisation d&apos;une
+      mission d&apos;intérêt général ;
+    </li>
+    <li>Engagement à renseigner le consentement relatif aux droits à l&apos;image avant le début du séjour de cohésion ;</li>
+    <li>Engagement à renseigner l&apos;utilisation d&apos;autotest COVID avant le début du séjour de cohésion ;</li>
+    <li>
+      Engagement à remettre sous pli confidentiel la fiche sanitaire ainsi que les documents médicaux et justificatifs nécessaires à son arrivée au centre de séjour de cohésion ;
+    </li>
+    <li>
+      Engagement à ce que le volontaire soit à jour de ses vaccinations obligatoires, c&apos;est-à-dire anti-diphtérie, tétanos et poliomyélite (DTP), et pour les volontaires
+      résidents de Guyane, la fièvre jaune.
+    </li>
+  </ul>
+);
+
+export default function VolontaireView({ young }) {
   const user = useSelector((state) => state.Auth.user);
 
   function isFromFranceConnect() {
@@ -56,7 +92,7 @@ export default ({ young }) => {
                   <Infos>
                     <InfoIcon color="#32257F" />
                     <p>
-                      Le volontaire réside à l'étranger :
+                      Le volontaire réside à l&apos;étranger :
                       <br />
                       {[young.foreignAddress, young.foreignZip, young.foreignCity].join(", ")}
                       <br />
@@ -203,6 +239,12 @@ export default ({ young }) => {
                   )}
                 </Bloc>
               ) : null}
+              <Bloc title="Consentements">
+                <Details title={`Consentements validés par ${young.firstName} ${young.lastName}`} value={t(young.consentment || "false")} style={{ border: "none" }} />
+                <ExpandComponent>{youngConsentmentText}</ExpandComponent>
+                <Details title="Consentements validés par ses représentants légaux" value={t(young.parentConsentment || "false")} style={{ border: "none" }} />
+                <ExpandComponent>{parentsConsentmentText}</ExpandComponent>
+              </Bloc>
               {young.withdrawnMessage ? (
                 <Bloc title="Désistement">
                   <div className="quote">{`« ${young.withdrawnMessage} »`}</div>
@@ -214,13 +256,13 @@ export default ({ young }) => {
         <Emails email={young.email} />
         {young.statusPhase1 === "DONE" && young.statusPhase2 === "VALIDATED" ? (
           <DownloadAttestationButton young={young} uri="snu">
-            Télécharger l'attestation de réalisation du SNU
+            Télécharger l&apos;attestation de réalisation du SNU
           </DownloadAttestationButton>
         ) : null}
       </YoungView>
     </div>
   );
-};
+}
 
 const Bloc = ({ children, title, last }) => {
   return (
@@ -235,11 +277,11 @@ const Bloc = ({ children, title, last }) => {
   );
 };
 
-const Details = ({ title, value, copy }) => {
+const Details = ({ title, value, copy, style }) => {
   if (!value) return <div />;
   if (typeof value === "function") value = value();
   return (
-    <div className="detail">
+    <div className="detail" style={style}>
       <div className="detail-title">{`${title} :`}</div>
       <section style={{ display: "flex" }}>
         <div className="detail-text">{value}</div>
