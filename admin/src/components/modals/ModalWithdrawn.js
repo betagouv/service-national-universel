@@ -1,66 +1,58 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Modal } from "reactstrap";
-import styled from "styled-components";
 
-import api from "../../services/api";
+import { ModalContainer, Content, Footer } from "./Modal";
+import ModalButton from "../buttons/ModalButton";
+import { WITHRAWN_REASONS } from "../../utils";
+import RoundWarning from "../../assets/RoundWarning";
 
-import { toastr } from "react-redux-toastr";
-import LoadingButton from "../buttons/LoadingButton";
-
-export default ({ isOpen, value, onChange, onSend }) => {
-  const [message, setMessage] = useState();
+export default function ModalWithdrawn({ isOpen, title, message, onChange, onConfirm, placeholder = "Votre message..." }) {
+  const [withdrawnMessage, setWithdrawnMessage] = useState();
+  const [withdrawnReason, setWithdrawnReason] = useState("");
   const [sending, setSending] = useState(false);
 
-  if (!value) return <div />;
-
-  const send = async () => {
+  const submit = async () => {
     setSending(true);
-    onSend(message);
+    onConfirm({ withdrawnReason, withdrawnMessage });
   };
 
   return (
-    <Modal isOpen={isOpen} toggle={onChange}>
+    <Modal centered isOpen={isOpen} toggle={onChange}>
       <ModalContainer>
         <img src={require("../../assets/close.svg")} height={10} onClick={onChange} />
-        <h1>Veuillez précisez le motif du désistement ci-dessous avant de valider.</h1>
-        <textarea rows="6" value={message} onChange={(e) => setMessage(e.target.value)} placeholder="Message..." />
-        <LoadingButton disabled={sending || !message} onClick={send}>
-          Valider le désistement
-        </LoadingButton>
+        <RoundWarning style={{ marginBottom: "1.5rem" }} />
+        <Content>
+          <h1>{title}</h1>
+          <p style={{ marginBottom: "1rem" }}>{message}</p>
+          <select style={{ marginBottom: "1rem" }} className="form-control" value={withdrawnReason} onChange={(e) => setWithdrawnReason(e.target.value)}>
+            <option disabled value="" label="Choisir">
+              Choisir
+            </option>
+            {WITHRAWN_REASONS.map((reason) => (
+              <option key={reason.value} value={reason.value} label={reason.label}>
+                {reason.label}
+              </option>
+            ))}
+          </select>
+          {withdrawnReason ? (
+            <textarea
+              className="form-control"
+              placeholder={placeholder + (withdrawnReason === "other" ? " (obligatoire)" : " (facultatif)")}
+              rows="8"
+              value={withdrawnMessage}
+              onChange={(e) => setWithdrawnMessage(e.target.value)}
+            />
+          ) : null}
+        </Content>
+        <Footer>
+          <ModalButton loading={sending} disabled={sending || !withdrawnReason || (withdrawnReason === "other" && !withdrawnMessage)} onClick={submit} primary>
+            Confirmer
+          </ModalButton>
+          <ModalButton disabled={sending} onClick={onChange}>
+            Annuler
+          </ModalButton>
+        </Footer>
       </ModalContainer>
     </Modal>
   );
-};
-
-const ModalContainer = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 2.5rem;
-  flex-direction: column;
-  img {
-    position: absolute;
-    right: 0;
-    top: 0;
-    margin: 1rem;
-    cursor: pointer;
-  }
-  h1 {
-    font-size: 1.5rem;
-    text-align: center;
-  }
-  h3 {
-    color: #767676;
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    font-weight: 300;
-  }
-  textarea {
-    padding: 1rem;
-    line-height: 1.5;
-    border-radius: 0.5rem;
-    border: 1px solid #ccc;
-    min-width: 100%;
-    margin-bottom: 2rem;
-  }
-`;
+}

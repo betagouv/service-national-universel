@@ -15,7 +15,7 @@ import ModalGoal from "./modals/ModalGoal";
 import Chevron from "./Chevron";
 import ModalConfirm from "./modals/ModalConfirm";
 
-export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status", phase = YOUNG_PHASE.INSCRIPTION, disabled, callback = () => { } }) => {
+export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status", phase = YOUNG_PHASE.INSCRIPTION, disabled, callback = () => {} }) => {
   const [modal, setModal] = useState(null);
   const [young, setYoung] = useState(null);
   const user = useSelector((state) => state.Auth.user);
@@ -65,12 +65,23 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
 
   const setStatus = async (status, note) => {
     const prevStatus = young.status;
-    young.historic.push({ phase, userName: `${user.firstName} ${user.lastName}`, userId: user._id, status, note });
+    if (status === "WITHDRAWN") {
+      young.historic.push({
+        phase,
+        userName: `${user.firstName} ${user.lastName}`,
+        userId: user._id,
+        status,
+        note: WITHRAWN_REASONS.find((r) => r.value === note.withdrawnReason)?.label + " " + note.withdrawnMessage,
+      });
+    } else young.historic.push({ phase, userName: `${user.firstName} ${user.lastName}`, userId: user._id, status, note });
     young[statusName] = status;
     const now = new Date();
     young.lastStatusAt = now.toISOString();
     if (statusName === "statusPhase2") young.statusPhase2UpdatedAt = now.toISOString();
-    if (status === "WITHDRAWN" && note) young.withdrawnMessage = note;
+    if (status === "WITHDRAWN" && note) {
+      young.withdrawnReason = note.withdrawnReason;
+      young.withdrawnMessage = note.withdrawnMessage;
+    }
     if (status === "WAITING_CORRECTION" && note) young.inscriptionCorrectionMessage = note;
     if (status === "REFUSED" && note) young.inscriptionRefusedMessage = note;
     if (status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INTEREST_MISSION) young.phase = YOUNG_PHASE.CONTINUE;
@@ -89,7 +100,15 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
         ok,
         code,
         data: newYoung,
-      } = await api.put(`/referent/young/${young._id}`, { [statusName]: young[statusName], lastStatusAt, statusPhase2UpdatedAt, withdrawnMessage, phase, inscriptionCorrectionMessage, inscriptionRefusedMessage });
+      } = await api.put(`/referent/young/${young._id}`, {
+        [statusName]: young[statusName],
+        lastStatusAt,
+        statusPhase2UpdatedAt,
+        withdrawnMessage,
+        phase,
+        inscriptionCorrectionMessage,
+        inscriptionRefusedMessage,
+      });
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
 
       if (status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INSCRIPTION) {
@@ -140,10 +159,12 @@ export default ({ hit, options = Object.keys(YOUNG_STATUS), statusName = "status
       />
       <ModalWithdrawn
         isOpen={modal === YOUNG_STATUS.WITHDRAWN}
-        value={young}
+        title="Desistement du SNU"
+        message="Précisez la raison du désistement"
+        placeholder="Précisez en quelques mots les raisons du désistement du volontaire"
         onChange={() => setModal(false)}
-        onSend={(msg) => {
-          setStatus(YOUNG_STATUS.WITHDRAWN, msg);
+        onConfirm={(values) => {
+          setStatus(YOUNG_STATUS.WITHDRAWN, values);
           setModal(null);
         }}
       />
