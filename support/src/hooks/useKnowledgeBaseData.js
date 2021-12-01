@@ -6,11 +6,18 @@ import { buildTree, flattenTree } from "../utils/knowledgeBaseTree";
 const useKnowledgeBaseData = (slug) => {
   const { data: response, mutate } = useSWR(API.getUrl({ path: "/support-center/knowledge-base/", query: { withTree: true, withParents: true } }));
 
+  // whole tree, from root to all articles with nested children
   const [data, setData] = useState(response?.data || []);
+  // flattened tree as a flat array
   const [flattenedData, setFlattenedData] = useState(flattenTree(response?.data || []));
+  // whole tree from specific section
   const [item, setItem] = useState(
-    flattenedData.find((i) => i.slug === slug),
-    flattenedData
+    slug
+      ? buildTree(
+          flattenedData.find((i) => i.slug === slug),
+          flattenedData
+        )
+      : data
   );
 
   useEffect(() => {
@@ -19,13 +26,18 @@ const useKnowledgeBaseData = (slug) => {
   }, [response?.data]);
 
   useEffect(() => {
-    setItem(
-      buildTree(
-        flattenedData.find((i) => i.slug === slug),
-        flattenedData
-      )
-    );
-    setFlattenedData(flattenTree(response?.data));
+    if (!!flattenedData.length) {
+      if (!!slug) {
+        setItem(
+          buildTree(
+            flattenedData.find((i) => i.slug === slug),
+            flattenedData
+          )
+        );
+      } else {
+        setItem(data);
+      }
+    }
   }, [flattenedData, slug]);
 
   return {

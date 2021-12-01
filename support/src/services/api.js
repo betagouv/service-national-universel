@@ -7,7 +7,7 @@ class ApiService {
   }
 
   async swrFetcher(url) {
-    const response = fetch(url, {
+    const response = await fetch(url, {
       credentials: "include",
       headers: {
         "Content-Type": "application/json",

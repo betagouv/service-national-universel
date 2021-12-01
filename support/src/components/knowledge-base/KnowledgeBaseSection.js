@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import withAuth from "../../hocs/withAuth";
 import API from "../../services/api";
 import KnowledgeBaseCardSection from "./KnowledgeBaseCardSection";
-import KnowledgeBaseCardAnswer from "./KnowledgeBaseCardAnswer";
+import KnowledgeBaseCardArticle from "./KnowledgeBaseCardArticle";
 import KnowledgeBaseCreate from "./KnowledgeBaseCreate";
 import KnowledgeBaseEdit from "./KnowledgeBaseEdit";
 import Tags from "../Tags";
@@ -34,7 +34,7 @@ const KnowledgeBaseSection = ({ section, isRoot }) => {
   };
 
   const sections = section.children.filter((c) => c.type === "section");
-  const answers = section.children.filter((c) => c.type === "answer");
+  const answers = section.children.filter((c) => c.type === "article");
 
   useEffect(() => {
     sortableSections.current = new SortableJS(gridSectionsRef.current, { animation: 150, group: "sections", onEnd: () => onListChange("sections") });
@@ -64,10 +64,10 @@ const KnowledgeBaseSection = ({ section, isRoot }) => {
           <div className="flex flex-col col-span-2">
             <h3 className="px-10 text-coolGray-500 flex items-center font-bold">
               Articles
-              <KnowledgeBaseCreate position={section.children.length + 1} parentId={section._id} type="answer" />
+              <KnowledgeBaseCreate position={section.children.length + 1} parentId={section._id} type="article" />
             </h3>
             <div ref={gridAnswersRef} id="answers" className="flex flex-col flex-wrap h-full w-full flex-shrink overflow-y-auto">
-              {answers.map(KnowledgeBaseCardAnswer)}
+              {answers.map(KnowledgeBaseCardArticle)}
               {!answers.length && <span className="self-center w-full p-10 text-gray-400 block">Pas d'article</span>}
             </div>
           </div>

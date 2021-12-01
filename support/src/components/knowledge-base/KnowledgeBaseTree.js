@@ -53,7 +53,7 @@ const Branch = ({ section, level, onIsActive, position, parentId, onListChange }
         <small className="text-trueGray-400 mr-1 mb-1  w-3 inline-block cursor-pointer" onClick={() => setIsOpen(!open)}>
           {open ? "\u25BC" : "\u25B6"}
         </small>
-        <Link href={`/admin/knowledge-base/${section.slug}`} passHref>
+        <Link href={`/admin/knowledge-base/${section.slug || ""}`} passHref>
           {getTitleWithStatus(section) || (
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 inline -mt-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
@@ -79,7 +79,7 @@ const Branch = ({ section, level, onIsActive, position, parentId, onListChange }
               onListChange={onListChange}
             />
           ) : (
-            <Answer parentId={child.parentId} position={child.position} key={child._id} answer={child} level={level + 1} onIsActive={onChildIsActive} />
+            <Answer parentId={child.parentId} position={child.position} key={child._id} article={child} level={level + 1} onIsActive={onChildIsActive} />
           )
         )}
       </div>
@@ -87,12 +87,12 @@ const Branch = ({ section, level, onIsActive, position, parentId, onListChange }
   );
 };
 
-const Answer = ({ answer, level, onIsActive, position, parentId }) => {
-  const isActive = useIsActive(answer, onIsActive);
+const Answer = ({ article, level, onIsActive, position, parentId }) => {
+  const isActive = useIsActive(article, onIsActive);
   return (
-    <Link key={answer._id} href={`/admin/knowledge-base/${answer.slug}`} passHref>
-      <a data-position={position} data-parentid={parentId} data-id={answer._id} href="#" className={`text-warmGray-500 block ml-${level * 3} ${isActive ? "font-bold" : ""}`}>
-        {`\u2022\u00A0\u00A0\u00A0 ${getTitleWithStatus(answer)}`}
+    <Link key={article._id} href={`/admin/knowledge-base/${article.slug}`} passHref>
+      <a data-position={position} data-parentid={parentId} data-id={article._id} href="#" className={`text-warmGray-500 block ml-${level * 3} ${isActive ? "font-bold" : ""}`}>
+        {`\u2022\u00A0\u00A0\u00A0 ${getTitleWithStatus(article)}`}
       </a>
     </Link>
   );

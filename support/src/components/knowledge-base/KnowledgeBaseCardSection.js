@@ -2,7 +2,7 @@ import Link from "next/link";
 import Tags from "../Tags";
 
 const contentSummary = (sectionChildren) => {
-  const answers = sectionChildren.filter((child) => child.type === "answer");
+  const answers = sectionChildren.filter((child) => child.type === "article");
   const sections = sectionChildren.filter((child) => child.type === "section");
   if (!answers.length && !sections.length) return "Pas de contenu";
   const sectionsSummary = `${sections.length} sous-rubrique${sections.length > 1 ? "s" : ""}`;

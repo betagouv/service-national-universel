@@ -30,6 +30,8 @@ const KnowledgeBase = () => {
 
   const { item: data } = useKnowledgeBaseData(slug);
 
+  console.log({ data, slug });
+
   const isRoot = router.pathname === "/admin/knowledge-base";
 
   return (
@@ -54,8 +56,8 @@ const KnowledgeBase = () => {
 const Content = ({ data }) => {
   if (!data) return null;
   if (["root", "section"].includes(data?.type)) return <KnowledgeBaseSection key={data._id} section={data} isRoot={data?.type === "root"} />;
-  if (data?.type === "answer") return <KnowledgeBaseAnswer answer={data} />;
-  // return answer
+  if (data?.type === "article") return <KnowledgeBaseAnswer article={data} />;
+  // return article
   return <KnowledgeBaseCreate position={0} />;
 };
 
