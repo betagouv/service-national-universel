@@ -74,7 +74,7 @@ export default function InscriptionPanel({ onChange, value }) {
           {value.inscriptionRefusedMessage}
         </Info>
       ) : null}
-      {young && young.historic && young.historic.length !== 0 && (
+      {young?.historic?.length !== 0 && (
         <Info title="Historique des statuts" id={value._id}>
           <Historic value={young.historic} />
         </Info>
