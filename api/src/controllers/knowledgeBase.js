@@ -93,7 +93,6 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 router.put("/reorder", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const itemsToReorder = req.body;
-    console.log(JSON.stringify(itemsToReorder, null, 2));
     const session = await KnowledgeBaseObject.startSession();
     await session.withTransaction(async () => {
       for (const item of itemsToReorder) {

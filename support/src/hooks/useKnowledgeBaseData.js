@@ -1,19 +1,7 @@
 import { useEffect, useState } from "react";
 import useSWR from "swr";
 import API from "../services/api";
-
-const flattenBranch = (branch, flatTree) => {
-  for (const child of branch?.children || []) {
-    flatTree.push({ ...child, children: null });
-    flattenBranch(child, flatTree);
-  }
-};
-
-const flattenTree = (tree) => {
-  const flatTree = [{ ...tree, children: null }];
-  flattenBranch(tree, flatTree);
-  return flatTree;
-};
+import { flattenTree } from "../utils/knowledgeBaseTree";
 
 const useKnowledgeBaseData = () => {
   const { data: response } = useSWR(API.getUrl({ path: "/support-center/knowledge-base/", query: { withTree: true, withParents: true } }));

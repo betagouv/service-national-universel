@@ -2,7 +2,7 @@ import { forwardRef, useRef, useState } from "react";
 import EmojiPicker from "./EmojiPicker";
 
 // https://github.com/missive/emoji-mart/issues/79
-const InputWithEmojiPicker = forwardRef(({ className, inputClassName, setValue, getValues, ...props }, ref) => {
+const InputWithEmojiPicker = ({ className, inputClassName, setValue, getValues, ...props }, ref) => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
   const [pickerPosition, setPickerPosition] = useState({ top: 0, right: 0 });
@@ -44,6 +44,6 @@ const InputWithEmojiPicker = forwardRef(({ className, inputClassName, setValue, 
       </div>
     </div>
   );
-});
+};
 
-export default InputWithEmojiPicker;
+export default forwardRef(InputWithEmojiPicker);

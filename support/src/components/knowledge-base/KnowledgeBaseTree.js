@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useSWRConfig } from "swr";
 import Link from "next/link";
-import Sortable from "sortablejs";
+import SortableJS from "sortablejs";
 import API from "../../services/api";
 import { useRouter } from "next/router";
 import { toast } from "react-toastify";
@@ -17,8 +17,8 @@ const useIsActive = ({ slug }, onIsActive) => {
   }, [router.query?.slug]);
 
   useEffect(() => {
-    if (!!onIsActive) {
-      if (!!active) {
+    if (onIsActive) {
+      if (active) {
         onIsActive(true);
       } else {
         onIsActive(false);
@@ -38,21 +38,21 @@ const Branch = ({ section, level, onIsActive, position, parentId, onListChange }
 
   const onChildIsActive = (childIsActive) => {
     // open if child is active, don't close if child is not active
-    if (!!childIsActive) setIsOpen(true);
+    if (childIsActive) setIsOpen(true);
     if (onIsActive) onIsActive(childIsActive);
   };
 
   const gridRef = useRef(null);
   const sortable = useRef(null);
   useEffect(() => {
-    sortable.current = Sortable.create(gridRef.current, { animation: 150, group: "shared", onEnd: onListChange });
+    sortable.current = SortableJS.create(gridRef.current, { animation: 150, group: "shared", onEnd: onListChange });
   }, []);
 
   return (
     <div data-position={position} data-parentid={parentId || "root"} data-id={section._id || "root"} data-type="section" className={`ml-${level * 3} mb-1 `}>
       <span className={` text-warmGray-500 ${isActive ? "font-bold" : ""}`}>
         <small className="text-trueGray-400 mr-1 mb-1  w-3 inline-block cursor-pointer" onClick={() => setIsOpen(!open)}>
-          {!!open ? "\u25BC" : "\u25B6"}
+          {open ? "\u25BC" : "\u25B6"}
         </small>
         <Link href={`/admin/knowledge-base/${section.slug}`} passHref>
           {getTitleWithStatus(section) || (

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { useSWRConfig } from "swr";
-import Sortable from "sortablejs";
+import SortableJS from "sortablejs";
 import { toast } from "react-toastify";
 import withAuth from "../../hocs/withAuth";
 import API from "../../services/api";
@@ -38,8 +38,8 @@ const KnowledgeBaseSection = ({ section, isRoot }) => {
   const answers = section.children.filter((c) => c.type === "answer");
 
   useEffect(() => {
-    sortableSections.current = new Sortable(gridSectionsRef.current, { animation: 150, group: "sections", onEnd: () => onListChange("sections") });
-    sortableAnswers.current = new Sortable(gridAnswersRef.current, { animation: 150, group: "answers", onEnd: () => onListChange("answers") });
+    sortableSections.current = new SortableJS(gridSectionsRef.current, { animation: 150, group: "sections", onEnd: () => onListChange("sections") });
+    sortableAnswers.current = new SortableJS(gridAnswersRef.current, { animation: 150, group: "answers", onEnd: () => onListChange("answers") });
   }, []);
 
   return (

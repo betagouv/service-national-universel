@@ -12,7 +12,7 @@ const contentSummary = (sectionChildren) => {
   return `${answersSummary} \u00A0\u2022\u00A0 ${sectionsSummary}`;
 };
 
-const KnowledgeBaseCardSection = ({ _id, imageSrc, position, imageAlt, title, createdAt, slug, allowedRoles, sectionChildren }) => {
+const KnowledgeBaseCardSection = ({ _id, imageSrc, position, imageAlt, title, slug, allowedRoles, sectionChildren }) => {
   return (
     <Link key={_id} href={`/admin/knowledge-base/${slug}`} passHref>
       <a href="#" data-position={position} data-id={_id} className="my-1 px-1 w-72 flex-shrink-0 flex-grow-0 lg:my-4 lg:px-4 ">

@@ -12,6 +12,7 @@ const KnowledgeBaseForm = ({ type, defaultValues, onSubmit, children }) => {
     formState: { errors },
   } = useForm({ defaultValues });
 
+  // eslint-disable-next-line no-unused-vars
   const { fields } = useFieldArray({
     control, // control props comes from useForm (optional: if you are using FormContext)
     name: "computedAllowedRoles", // unique name for your Field Array
