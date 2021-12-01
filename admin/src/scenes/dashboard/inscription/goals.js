@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Col, Row } from "reactstrap";
-import { YOUNG_STATUS_COLORS, departmentList, department2region, academyToDepartments } from "../../../utils";
+import { YOUNG_STATUS_COLORS, departmentList, department2region } from "../../../utils";
 import { CardArrow, Card, CardTitle, CardValueWrapper, CardValue } from "../../../components/dashboard";
 import { toastr } from "react-redux-toastr";
 
@@ -66,17 +66,32 @@ export default ({ filter }) => {
     })();
   }, [JSON.stringify(filter)]);
 
-  const getInscriptionGoals = async (region, departement, academy) => {
+  const getInscriptionGoals = async (regions, departements, academy) => {
     function filterByRegionAndDepartement(e) {
-      if (departement) return e.department === departement;
-      if (region) return e.region === region;
-      if (academy) return academyToDepartments[academy].includes(e.department);
+      if (departements.length) return departements.includes(e.department);
+      if (regions.length) return regions.includes(e.region);
+      if (academy.length) return academy.includes(e.academy);
       return true;
     }
-    const { data, ok, code } = await api.get("/inscription-goal/" + filter.cohort);
-    if (!ok) return toastr.error("Une erreur s'est produite.");
+
+    let dataMerged = [];
+    for (const cohort of filter.cohort) {
+      const { data, ok, code } = await api.get("/inscription-goal/" + cohort);
+      if (!ok) return toastr.error("Une erreur s'est produite.");
+
+      data.forEach(
+        ({ department, region, academy, max }) =>
+          (dataMerged[department] = { department, region, academy, max: (dataMerged[department]?.max ? dataMerged[department].max : 0) + max }),
+      );
+    }
+
     setInscriptionGoals(
-      departmentList.map((d) => data.filter(filterByRegionAndDepartement).find((e) => e.department === d) || { department: d, region: department2region[d], max: null })
+      departmentList.map(
+        (d) =>
+          Object.values(dataMerged)
+            .filter(filterByRegionAndDepartement)
+            .find((e) => e.department === d) || { department: d, region: department2region[d], max: null },
+      ),
     );
   };
 
