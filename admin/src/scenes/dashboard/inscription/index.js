@@ -21,7 +21,7 @@ import PriorityArea from "./priorityArea";
 import RuralArea from "./ruralArea";
 import { YOUNG_STATUS, translate, ROLES, academyList } from "../../../utils";
 
-export default () => {
+export default ({ onChangeFilter }) => {
   const [filter, setFilter] = useState();
   const user = useSelector((state) => state.Auth.user);
 
@@ -42,6 +42,10 @@ export default () => {
       updateFilter();
     }
   }, []);
+
+  useEffect(() => {
+    onChangeFilter(filter);
+  }, [filter]);
 
   const getOptionsStatus = () => {
     let STATUS = Object.keys(YOUNG_STATUS).map((s) => ({ label: translate(YOUNG_STATUS[s]), value: s }));
