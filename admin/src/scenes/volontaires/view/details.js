@@ -49,7 +49,7 @@ const parentsConsentmentText = (
   </ul>
 );
 
-export default ({ young }) => {
+export default function VolontaireView({ young }) {
   const user = useSelector((state) => state.Auth.user);
 
   function isFromFranceConnect() {
@@ -92,7 +92,7 @@ export default ({ young }) => {
                   <Infos>
                     <InfoIcon color="#32257F" />
                     <p>
-                      Le volontaire réside à l'étranger :
+                      Le volontaire réside à l&apos;étranger :
                       <br />
                       {[young.foreignAddress, young.foreignZip, young.foreignCity].join(", ")}
                       <br />
@@ -241,10 +241,10 @@ export default ({ young }) => {
               ) : null}
               {young.consentment ? (
                 <Bloc title="Consentement">
-                  <Details title="Consentements validés par le volontaire" value={t(young.consentment)} style={{ border: "none" }} />
-                  <ExpandComponent children={youngConsentmentText} displayText={`Consentements de ${young.firstName} ${young.lastName}`} />
+                  <Details title={`Consentements validés par ${young.firstName} ${young.lastName}`} value={t(young.consentment)} style={{ border: "none" }} />
+                  <ExpandComponent>{youngConsentmentText}</ExpandComponent>
                   <Details title="Consentements validés par ses représentants légaux" value={t(young.consentment)} style={{ border: "none" }} />
-                  <ExpandComponent children={parentsConsentmentText} displayText={`Consentements de ses représentants légaux`} />
+                  <ExpandComponent>{parentsConsentmentText}</ExpandComponent>
                 </Bloc>
               ) : null}
               {young.withdrawnMessage ? (
@@ -258,13 +258,13 @@ export default ({ young }) => {
         <Emails email={young.email} />
         {young.statusPhase1 === "DONE" && young.statusPhase2 === "VALIDATED" ? (
           <DownloadAttestationButton young={young} uri="snu">
-            Télécharger l'attestation de réalisation du SNU
+            Télécharger l&apos;attestation de réalisation du SNU
           </DownloadAttestationButton>
         ) : null}
       </YoungView>
     </div>
   );
-};
+}
 
 const Bloc = ({ children, title, last }) => {
   return (

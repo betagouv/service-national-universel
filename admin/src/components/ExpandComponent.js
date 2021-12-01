@@ -2,22 +2,18 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { colors } from "../utils";
 
-export default function ExpandComponent({ children, displayText }) {
-  const [expandNote, setExpandNote] = useState(false);
-
-  const toggleNote = () => {
-    setExpandNote(!expandNote);
-  };
+export default function ExpandComponent({ children, showMoreText = "Voir plus", showLessText = "Voir moins" }) {
+  const [expand, setExpand] = useState(false);
 
   return (
     <Expand>
-      {expandNote ? (
+      {expand ? (
         <>
           <div className="container">{children}</div>
         </>
       ) : null}
-      <div className="see-more" onClick={toggleNote}>
-        {expandNote ? "  VOIR MOINS" : `${displayText} ↓`}
+      <div className="see-more" onClick={() => setExpand((e) => !e)}>
+        {expand ? showLessText : showMoreText}
       </div>
     </Expand>
   );
@@ -25,7 +21,6 @@ export default function ExpandComponent({ children, displayText }) {
 
 const Expand = styled.ul`
   list-style-type: none;
-  padding: 1rem 0;
   > li {
     ::before {
       content: "";
