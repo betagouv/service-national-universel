@@ -11,7 +11,7 @@ const KnowledgeBaseCreate = ({ type, position, parentId = null }) => {
   const [open, setOpen] = useState(null);
 
   const router = useRouter();
-  const { mutate } = useKnowledgeBaseData();
+  const { mutate, flattenedData } = useKnowledgeBaseData();
 
   const onSubmit = async (event) => {
     event.preventDefault();
@@ -29,7 +29,7 @@ const KnowledgeBaseCreate = ({ type, position, parentId = null }) => {
     const response = await API.post({ path: "/support-center/knowledge-base", body });
     if (response.error) return toast.error(response.error);
     if (response.data) {
-      mutate();
+      mutate({ ok: true, data: [...flattenedData, response.data] });
       router.push(`/admin/knowledge-base/${response.data.slug}`);
       setOpen(false);
     }

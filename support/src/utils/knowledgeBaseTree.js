@@ -3,7 +3,7 @@ const sortItemsInSection = (item1, item2) => {
     if (item1.type === "article") return 1;
     return -1;
   }
-  return item1.position > item2.position ? -1 : 1;
+  return item1.position > item2.position ? 1 : -1;
 };
 
 export const flattenBranch = (branch, flatTree) => {
@@ -19,17 +19,8 @@ export const flattenTree = (tree) => {
   return flatTree;
 };
 
-const findChildrenRecursive = (section, allChildren, { flattenedData = [], findAll = false }) => {
-  if (section.type !== "section") return;
-  const children = flattenedData.filter((item) => item.parentId === section._id).sort(sortItemsInSection);
-
-  for (const child of children) {
-    allChildren.push(child);
-    if (findAll) findChildrenRecursive(child, allChildren, { flattenedData, findAll });
-  }
-};
-
 const findParents = (item, flattenedData) => {
+  if (!item.parentId) return [];
   const fromRootToItem = [{ ...item }]; // we spread item to avoid circular reference in item.parents = parents
   let currentItem = item;
   while (!!currentItem.parentId) {
@@ -41,14 +32,14 @@ const findParents = (item, flattenedData) => {
 };
 
 // addParents only for first item
-export const buildTree = (root, flattenedData, { addParents = true } = {}) => {
-  root.children = [];
-  const children = [];
-  findChildrenRecursive(root, children, { flattenedData });
+export const buildTree = (item, flattenedData, { addParents = true, debug } = {}) => {
+  if (!["root", "section"].includes(item.type)) return item;
+  const populatedSection = item;
+  const children = [...flattenedData.filter((i) => i.parentId === item._id)].sort(sortItemsInSection);
   for (const child of children) {
-    buildTree(child, flattenedData, { addParents: false });
+    buildTree(child, flattenedData, { addParents: false, debug });
   }
-  root.children = children;
-  if (addParents) root.parents = findParents(root, flattenedData);
-  return root;
+  populatedSection.children = children;
+  if (addParents) populatedSection.parents = findParents(populatedSection, flattenedData);
+  return populatedSection;
 };

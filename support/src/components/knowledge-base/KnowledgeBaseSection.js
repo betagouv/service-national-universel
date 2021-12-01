@@ -8,7 +8,6 @@ import KnowledgeBaseCardArticle from "./KnowledgeBaseCardArticle";
 import KnowledgeBaseCreate from "./KnowledgeBaseCreate";
 import KnowledgeBaseEdit from "./KnowledgeBaseEdit";
 import Tags from "../Tags";
-import getTitleWithStatus from "../../utils/getTitleWithStatus";
 import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
 
 const KnowledgeBaseSection = ({ section, isRoot }) => {
@@ -42,63 +41,60 @@ const KnowledgeBaseSection = ({ section, isRoot }) => {
   }, []);
 
   return (
-    <>
-      <div className="container flex flex-col flex-grow flex-shrink overflow-hidden w-full">
-        <div className="px-8 py-3 flex justify-between">
-          {!isRoot && (
-            <>
-              <div>
-                <h2 className="font-bold text-lg">{getTitleWithStatus(section)}</h2>
-                {!!section.description?.length && <p className="mt-1 text-sm italic">{section.description}</p>}
-                {!!section.allowedRoles?.length && (
-                  <p className="flex flex-wrap mt-3.5  text-sm">
-                    Visible par: <Tags tags={section.allowedRoles} />
-                  </p>
-                )}
-              </div>
-              <KnowledgeBaseEdit key={section.slug} sectionOrAnswer={section} />
-            </>
-          )}
-        </div>
-        <div className="grid grid-cols-3 h-full w-full py-12 flex-shrink overflow-y-auto">
-          <div className="flex flex-col col-span-2">
-            <h3 className="px-10 text-coolGray-500 flex items-center font-bold">
-              Articles
-              <KnowledgeBaseCreate position={section.children.length + 1} parentId={section._id} type="article" />
-            </h3>
-            <div ref={gridAnswersRef} id="answers" className="flex flex-col flex-wrap h-full w-full flex-shrink overflow-y-auto">
-              {answers.map(KnowledgeBaseCardArticle)}
-              {!answers.length && <span className="self-center w-full p-10 text-gray-400 block">Pas d'article</span>}
+    <article className="container flex flex-col flex-grow flex-shrink overflow-hidden w-full">
+      <div className="px-8 py-3 flex justify-between">
+        {!isRoot && (
+          <>
+            <div>
+              <h2 className={`font-bold text-lg`}>{section.title}</h2>
+              {!!section.description?.length && <p className="mt-1 text-sm italic">{section.description}</p>}
+              {!!section.allowedRoles?.length && (
+                <p className="flex flex-wrap mt-3.5  text-sm">
+                  Visible par: <Tags tags={section.allowedRoles} />
+                </p>
+              )}
             </div>
-          </div>
-          <div className="flex flex-col col-span-1">
-            <h3 className="px-10 text-coolGray-500 flex items-center font-bold">
-              Rubriques
-              <KnowledgeBaseCreate position={section.children.length + 1} parentId={section._id} type="section" />
-            </h3>
-            <div ref={gridSectionsRef} id="sections" className="flex flex-wrap h-full w-full flex-shrink overflow-y-auto">
-              {sections.map((section) => (
-                <KnowledgeBaseCardSection
-                  _id={section._id}
-                  key={section._id}
-                  imageSrc={section.imageSrc}
-                  position={section.position}
-                  imageAlt={section.imageAlt}
-                  title={section.title}
-                  createdAt={section.createdAt}
-                  slug={section.slug}
-                  allowedRoles={section.allowedRoles}
-                  // a section has `children`, reserved prop in React: don't spread the whole section as props for a component or it will bug !
-                  sectionChildren={section.children}
-                />
-              ))}
-              {!sections.length && <span className="w-full p-10 text-gray-400 block">Pas de rubrique</span>}
-            </div>
-          </div>
-        </div>
+            <KnowledgeBaseEdit key={section.slug} sectionOrAnswer={section} />
+          </>
+        )}
       </div>
-      {/*  */}
-    </>
+      <main className="grid grid-cols-3 h-full w-full py-12 flex-shrink overflow-y-auto">
+        <section className="flex flex-col col-span-2">
+          <h3 className="px-10 text-coolGray-500 flex items-center font-bold">
+            Articles
+            <KnowledgeBaseCreate position={section.children.length + 1} parentId={section._id} type="article" />
+          </h3>
+          <div ref={gridAnswersRef} id="answers" className="flex flex-col flex-wrap h-full w-full flex-shrink overflow-y-auto">
+            {answers.map(KnowledgeBaseCardArticle)}
+            {!answers.length && <span className="self-center w-full p-10 text-gray-400 block">Pas d'article</span>}
+          </div>
+        </section>
+        <section className="flex flex-col col-span-1">
+          <h3 className="px-10 text-coolGray-500 flex items-center font-bold">
+            Rubriques
+            <KnowledgeBaseCreate position={section.children.length + 1} parentId={section._id} type="section" />
+          </h3>
+          <div ref={gridSectionsRef} id="sections" className="flex flex-wrap h-full w-full flex-shrink overflow-y-auto">
+            {sections.map((section) => (
+              <KnowledgeBaseCardSection
+                _id={section._id}
+                key={section._id}
+                imageSrc={section.imageSrc}
+                position={section.position}
+                imageAlt={section.imageAlt}
+                title={section.title}
+                createdAt={section.createdAt}
+                slug={section.slug}
+                allowedRoles={section.allowedRoles}
+                // a section has `children`, reserved prop in React: don't spread the whole section as props for a component or it will bug !
+                sectionChildren={section.children}
+              />
+            ))}
+            {!sections.length && <span className="w-full p-10 text-gray-400 block">Pas de rubrique</span>}
+          </div>
+        </section>
+      </main>
+    </article>
   );
 };
 

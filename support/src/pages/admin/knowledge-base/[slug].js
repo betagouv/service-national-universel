@@ -28,35 +28,33 @@ const KnowledgeBase = () => {
     setSlug(router.query?.slug || "");
   }, [router.query?.slug]);
 
-  const { item: data } = useKnowledgeBaseData(slug);
-
-  console.log({ data, slug });
+  const { item } = useKnowledgeBaseData({ slug, debug: true });
 
   const isRoot = router.pathname === "/admin/knowledge-base";
 
   return (
     <Layout title="Base de connaissances" className="flex flex-col">
       <Header>Base de connaissances</Header>
-      <KnowledgeBaseBreadcrumb parents={data?.parents} />
-      {(!isRoot && !slug) || !data ? (
+      <KnowledgeBaseBreadcrumb parents={item?.parents} />
+      {(!isRoot && !slug) || !item ? (
         <Loader />
       ) : (
         <div className="relative flex border-t-2 h-full w-full flex-grow flex-shrink overflow-hidden">
-          <div className="flex-grow relative h-full box-border flex flex-col items-center">
-            <Content key={slug} data={data} />
-          </div>
           <TreeButton visible={treeVisible} setVisible={setTreeVisible} />
           <KnowledgeBaseTree visible={treeVisible} setVisible={setTreeVisible} />
+          <main className="flex-grow relative h-full box-border flex flex-col items-center">
+            <Content key={slug} item={item} />
+          </main>
         </div>
       )}
     </Layout>
   );
 };
 
-const Content = ({ data }) => {
-  if (!data) return null;
-  if (["root", "section"].includes(data?.type)) return <KnowledgeBaseSection key={data._id} section={data} isRoot={data?.type === "root"} />;
-  if (data?.type === "article") return <KnowledgeBaseAnswer article={data} />;
+const Content = ({ item }) => {
+  if (!item) return null;
+  if (["root", "section"].includes(item?.type)) return <KnowledgeBaseSection key={item._id} section={item} isRoot={item?.type === "root"} />;
+  if (item?.type === "article") return <KnowledgeBaseAnswer article={item} />;
   // return article
   return <KnowledgeBaseCreate position={0} />;
 };
@@ -66,7 +64,7 @@ const TreeButton = ({ visible, setVisible }) =>
     <svg
       onClick={() => setVisible(true)}
       xmlns="http://www.w3.org/2000/svg"
-      className="h-8 w-8 cursor-pointer absolute right-2 top-2"
+      className="h-8 w-8 cursor-pointer absolute left-2 top-2 z-10"
       viewBox="0 0 100 125"
       fill="currentColor"
       stroke="currentColor"
