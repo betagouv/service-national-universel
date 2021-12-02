@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { translate as t, isInRuralArea, getAge, YOUNG_STATUS } from "../../utils";
 import DownloadButton from "../../components/buttons/DownloadButton";
 import Historic from "../../components/historic";
+import PatchHistoric from "../../components/views/PatchHistoric";
 import api from "../../services/api";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
 import Panel, { Info, Details } from "../../components/Panel";
@@ -68,8 +69,8 @@ export default function InscriptionPanel({ onChange, value }) {
         </div>
       </div>
       {value.status === YOUNG_STATUS.WAITING_CORRECTION && value.inscriptionCorrectionMessage ? (
-        <Info title="Demande de correction :" id={value._id}>
-          {value.inscriptionCorrectionMessage}
+        <Info title="Demande de correction en cours :" id={value._id}>
+          <PatchHistoric value={value} model="young" field="inscriptionCorrectionMessage" previewNumber={1} />
         </Info>
       ) : null}
       {value.status === YOUNG_STATUS.REFUSED && value.inscriptionRefusedMessage ? (
@@ -77,7 +78,11 @@ export default function InscriptionPanel({ onChange, value }) {
           {value.inscriptionRefusedMessage}
         </Info>
       ) : null}
-      {young && young.historic && young.historic.length !== 0 && <Historic value={young.historic} />}
+      {young?.historic?.length > 0 && (
+        <Info title="Historique des statuts" id={value._id}>
+          <Historic value={young.historic} />
+        </Info>
+      )}
       <Info title="Pièce d’identité" id={value._id}>
         {(value.cniFiles || []).map((e, i) => (
           <DownloadButton
