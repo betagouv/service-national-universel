@@ -3,18 +3,16 @@ import { Col } from "reactstrap";
 import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
 import { Formik, Field } from "formik";
-import { NavLink } from "react-router-dom";
-import { useHistory } from "react-router-dom";
+import { NavLink, useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { translate } from "../../../utils";
+import { translate, ROLES } from "../../../utils";
 
 import { SelectTag, typesReferent, subjectsReferent, typesAdmin, subjectsAdmin, typesStructure, subjectsStructure } from "./workflow";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 import api from "../../../services/api";
 import ErrorMessage, { requiredMessage } from "../../../components/errorMessage";
-import { ROLES } from "../../../utils";
 
-export default () => {
+export default function Create() {
   const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
 
@@ -45,10 +43,10 @@ export default () => {
 
   return (
     <Container>
-      <BackButton to={`/besoin-d-aide`}>{"<"} Retour à l'accueil</BackButton>
+      <BackButton to={`/besoin-d-aide`}>{"<"} Retour à l&apos;accueil</BackButton>
       <Heading>
-        <h4>Contacter quelqu'un</h4>
-        <p>Vous rencontrez une difficulté, avez besoin d'assistance pour réaliser une action ou avez besoin d'informations supplémentaires sur la plateforme ?</p>
+        <h4>Contacter quelqu&apos;un</h4>
+        <p>Vous rencontrez une difficulté, avez besoin d&apos;assistance pour réaliser une action ou avez besoin d&apos;informations supplémentaires sur la plateforme ?</p>
       </Heading>
       <Form>
         <Formik
@@ -62,13 +60,13 @@ export default () => {
               // add the default tags
               const computedTags = [...tags];
               // add the type tag
-              if (type?.tags) computedTags.push(...type?.tags);
+              if (type?.tags) computedTags.push(...type.tags);
               // if needed, add the subject tag (we do not add the subject tag if the type is "Autre")
-              if (subject?.tags && type?.id !== "OTHER") computedTags.push(...subject?.tags);
+              if (subject?.tags && type?.id !== "OTHER") computedTags.push(...subject.tags);
 
               let title = type?.label;
               if (subject?.label && type?.id !== "OTHER") title += ` - ${subject?.label}`;
-              const { ok, code, data } = await api.post("/support-center/ticket", {
+              const { ok, code } = await api.post("/support-center/ticket", {
                 title,
                 message,
                 tags: [...new Set([...computedTags])], // dirty hack to remove duplicates
@@ -80,8 +78,7 @@ export default () => {
               console.log(e);
               toastr.error("Oups, une erreur est survenue", translate(e.code));
             }
-          }}
-        >
+          }}>
           {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
             <>
               <SelectTag
@@ -132,7 +129,7 @@ export default () => {
       </Form>
     </Container>
   );
-};
+}
 
 const Item = ({ title, name, value, handleChange, errors, touched, validate, type, options, ...props }) => {
   return (

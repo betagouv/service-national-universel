@@ -6,7 +6,7 @@ import TicketTabs from "./components/ticketTabs";
 import TicketMessage from "./components/ticketMessage";
 import Infos from "./components/ticketInfos";
 
-export default () => {
+export default function Index() {
   const [ticket, setTicket] = useState(null);
 
   return (
@@ -19,7 +19,7 @@ export default () => {
       </section>
     </HeroContainer>
   );
-};
+}
 
 export const HeroContainer = styled.div`
   height: calc(87vh + 3px);
