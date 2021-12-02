@@ -15,7 +15,7 @@ import Register from "./components/Register";
 import LoginBox from "./components/LoginBox";
 import Subtitle from "./components/Subtitle";
 
-export default () => {
+export default function Reset() {
   const [redirect, setRedirect] = useState(false);
 
   return (
@@ -42,8 +42,7 @@ export default () => {
               return toastr.error("Une erreur s'est produite :", translate(e && e.code));
             }
             actions.setSubmitting(false);
-          }}
-        >
+          }}>
           {({ values, errors, isSubmitting, handleChange, handleSubmit }) => {
             return (
               <form onSubmit={handleSubmit}>
@@ -70,4 +69,4 @@ export default () => {
       </LoginBox>
     </div>
   );
-};
+}
