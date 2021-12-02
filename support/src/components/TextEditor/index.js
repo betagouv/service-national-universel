@@ -92,9 +92,8 @@ const TextEditor = ({ content, _id }) => {
           <Editable
             renderElement={renderElement}
             renderLeaf={renderLeaf}
-            placeholder=" "
+            placeholder="Commencez à écrire votre article..."
             spellCheck
-            renderPlaceholder={Placeholder}
             autoFocus
             onKeyDown={(event) => {
               for (const hotkey in HOTKEYS) {
@@ -234,42 +233,6 @@ const MarkButton = ({ format, icon }) => {
     </Button>
   );
 };
-
-const Placeholder = ({ attributes }) => (
-  <div {...attributes}>
-    <p data-slate-node="element">
-      <span data-slate-node="text">
-        <span data-slate-leaf="true">
-          <span data-slate-string="true">Commencez à </span>
-        </span>
-      </span>
-      <span data-slate-node="text">
-        <span data-slate-leaf="true">
-          <strong>
-            <span data-slate-string="true">écrire</span>
-          </strong>
-        </span>
-      </span>
-      <span data-slate-node="text">
-        <span data-slate-leaf="true">
-          <span data-slate-string="true"> votre réponse, </span>
-        </span>
-      </span>
-      <span data-slate-node="text">
-        <span data-slate-leaf="true">
-          <em>
-            <span data-slate-string="true">avec tous </span>
-          </em>
-        </span>
-      </span>
-      <span data-slate-node="text">
-        <span data-slate-leaf="true">
-          <span data-slate-string="true"> les styles que vous voulez </span>
-        </span>
-      </span>
-    </p>
-  </div>
-);
 
 const empty = [{ type: "paragraph", children: [{ text: "" }] }];
 
