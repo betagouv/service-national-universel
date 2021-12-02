@@ -48,7 +48,7 @@
     "@sentry/react": "^6.13.3",
     "@sentry/tracing": "^6.13.3",
     "babel-loader": "^8.2.2",
-    "bootstrap": "^4.5.2",
+    "bootstrap": "4.6.1",
     "core-js": "^3.12.1",
     "dayjs": "^1.10.7",
     "express": "^4.17.1",
