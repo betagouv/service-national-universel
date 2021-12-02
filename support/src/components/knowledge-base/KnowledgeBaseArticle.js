@@ -1,7 +1,10 @@
+import { useState } from "react";
 import Tags from "../Tags";
 import TextEditor from "../TextEditor";
 
 const KnowledgeBaseArticle = ({ article }) => {
+  const [forceUpdateKey, setForceUpdateKey] = useState(0);
+
   return (
     <div className="container bg-coolGray-100  mx-auto flex flex-col px-8 pt-3 flex-grow flex-shrink overflow-hidden w-full">
       <header className="flex flex-col">
@@ -14,7 +17,14 @@ const KnowledgeBaseArticle = ({ article }) => {
           </p>
         )}
       </header>
-      <TextEditor key={article._id + article.slug} content={article.content} _id={article._id} slug={article.slug} />
+      <TextEditor
+        key={article._id + article.slug}
+        content={article.content}
+        _id={article._id}
+        slug={article.slug}
+        forceUpdateKey={forceUpdateKey}
+        setForceUpdateKey={setForceUpdateKey}
+      />
     </div>
   );
 };
