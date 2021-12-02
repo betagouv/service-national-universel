@@ -4,7 +4,7 @@ import styled from "styled-components";
 import Volontaires from "./volontaires";
 import Center from "./center";
 
-export default () => {
+export default function Index() {
   const [currentTab, setCurrentTab] = useState("volontaires");
 
   return (
@@ -23,7 +23,7 @@ export default () => {
       <Wrapper>{currentTab === "center" && <Center />}</Wrapper>
     </>
   );
-};
+}
 
 const Wrapper = styled.div`
   padding: 20px 40px;

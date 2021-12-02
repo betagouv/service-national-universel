@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 
 import { CardArrow, Card, CardTitle, CardValueWrapper, CardValue, CardPercentage, Subtitle } from "../../../../components/dashboard";
 
-export default ({ data, filter, getLink }) => {
+export default function Participation({ data, filter, getLink }) {
   const total = Object.keys(data).reduce((acc, a) => acc + data[a], 0);
   return (
     <React.Fragment>
@@ -41,4 +41,4 @@ export default ({ data, filter, getLink }) => {
       </Row>
     </React.Fragment>
   );
-};
+}

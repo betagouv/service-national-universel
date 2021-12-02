@@ -60,7 +60,8 @@ router.get("/", passport.authenticate(["referent", "young"], { session: false, f
     else {
       const { error: errorDepartement, value: checkedDepartement } = validateString(req.user.department);
       const { error: errorRegion, value: checkedRegion } = validateString(req.user.region);
-      if (errorDepartement || errorRegion) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+      if (errorDepartement) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error: errorDepartement });
+      if (errorRegion) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error: errorRegion });
       data = await ProgramObject.find({ $or: [{ visibility: "NATIONAL" }, { department: checkedDepartement }, { region: checkedRegion }] });
     }
     return res.status(200).send({ ok: true, data });

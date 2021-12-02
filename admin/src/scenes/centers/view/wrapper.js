@@ -1,19 +1,17 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import styled from "styled-components";
 import { Col, Row } from "reactstrap";
-import { useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
 import api from "../../../services/api";
-import SelectStatusMission from "../../../components/selectStatusMission";
 import { translate, canAssignCohesionCenter, ROLES } from "../../../utils";
 import TabList from "../../../components/views/TabList";
 import Tab from "../../../components/views/Tab";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
 
-export default ({ center: centerDefault, tab, children }) => {
+export default function Wrapper({ center: centerDefault, tab, children }) {
   const history = useHistory();
   const [center, setCenter] = useState(centerDefault);
   const user = useSelector((state) => state.Auth.user);
@@ -40,7 +38,7 @@ export default ({ center: centerDefault, tab, children }) => {
               Volontaires
             </Tab>
             <Tab isActive={tab === "waiting_list"} onClick={() => history.push(`/centre/${center._id}/liste-attente`)}>
-              Liste d'attente
+              Liste d&apos;attente
             </Tab>
             {canAssignCohesionCenter(user) ? (
               <Tab isActive={tab === "affectation"} onClick={() => history.push(`/centre/${center._id}/affectation`)}>
@@ -80,7 +78,7 @@ export default ({ center: centerDefault, tab, children }) => {
       {children}
     </div>
   );
-};
+}
 
 const Title = styled.div`
   color: rgb(38, 42, 62);

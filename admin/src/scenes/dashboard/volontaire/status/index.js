@@ -17,7 +17,7 @@ import Status from "./status";
 import StatusMap from "./statusMap";
 import Participation from "./participation";
 
-export default ({ filter }) => {
+export default function StatusIndex({ filter }) {
   const [currentTab, setCurrentTab] = useState("global");
   const [status, setStatus] = useState({});
   const [statusPhase1, setStatusPhase1] = useState({});
@@ -181,7 +181,7 @@ export default ({ filter }) => {
       </Wrapper>
     </>
   );
-};
+}
 
 const SubTitle = styled.h3`
   color: #242526;

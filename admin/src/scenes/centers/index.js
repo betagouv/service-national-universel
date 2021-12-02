@@ -5,7 +5,7 @@ import List from "./list";
 import Edit from "./edit";
 import View from "./view";
 
-export default () => {
+export default function CenterIndex() {
   return (
     <Switch>
       <Route path="/centre/create" component={Edit} />
@@ -14,4 +14,4 @@ export default () => {
       <Route path="/centre" component={List} />
     </Switch>
   );
-};
+}

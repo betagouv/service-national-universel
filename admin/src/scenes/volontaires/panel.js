@@ -10,7 +10,7 @@ import Panel, { Info, Details } from "../../components/Panel";
 import Historic from "../../components/historic";
 import ContractLink from "../../components/ContractLink";
 
-export default function PanelView({ onChange, value }) {
+export default function PanelComponent({ onChange, value }) {
   const [referentManagerPhase2, setReferentManagerPhase2] = useState();
   const [young, setYoung] = useState(null);
 
@@ -159,7 +159,7 @@ export default function PanelView({ onChange, value }) {
           <Details title="Région" value={young.parent2Region} />
         </Info>
       )}
-      {young && young.historic && young.historic.length !== 0 && <Historic value={young.historic} />}
+      <div className="info">{young?.historic?.length > 0 && <Historic value={young.historic} />}</div>
       {young.motivations && (
         <div className="info">
           <div className="info-title">Motivations</div>

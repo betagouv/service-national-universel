@@ -3,15 +3,14 @@ import styled from "styled-components";
 import { Col, Row } from "reactstrap";
 import { useSelector } from "react-redux";
 
-import Dropdown from "../components/Dropdown";
 import FilterRegion from "../components/FilterRegion";
 import FilterDepartment from "../components/FilterDepartment";
 
 import Status from "./status";
 
-import { departmentList, regionList, region2department, REFERENT_ROLES } from "../../../utils";
+import { REFERENT_ROLES } from "../../../utils";
 
-export default () => {
+export default function Index() {
   const [filter, setFilter] = useState();
   const user = useSelector((state) => state.Auth.user);
 
@@ -45,7 +44,7 @@ export default () => {
       {filter && <Status filter={filter} />}
     </>
   );
-};
+}
 
 // Title line with filters
 const Title = styled.h2`

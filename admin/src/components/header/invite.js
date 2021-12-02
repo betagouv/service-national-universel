@@ -5,9 +5,8 @@ import styled from "styled-components";
 import ReactSelect from "react-select";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { colors } from "../../utils";
-
 import {
+  colors,
   translate,
   departmentList,
   regionList,
@@ -18,10 +17,11 @@ import {
   ROLES,
   SENDINBLUE_TEMPLATES,
 } from "../../utils";
+
 import LoadingButton from "../../components/buttons/LoadingButton";
 import api from "../../services/api";
 
-export default ({ setOpen, open, label = "Inviter un référent", role = "" }) => {
+export default function InviteHeader({ setOpen, open, label = "Inviter un référent" }) {
   const [centers, setCenters] = useState(null);
 
   useEffect(() => {
@@ -77,8 +77,7 @@ export default ({ setOpen, open, label = "Inviter un référent", role = "" }) =
                   toastr.error("Erreur !", translate(e.code));
                 }
                 setSubmitting(false);
-              }}
-            >
+              }}>
               {({ values, handleChange, handleSubmit, isSubmitting, errors }) => (
                 <React.Fragment>
                   <Row>
@@ -144,9 +143,9 @@ export default ({ setOpen, open, label = "Inviter un référent", role = "" }) =
                   ) : null}
                   <br />
                   <LoadingButton loading={isSubmitting} onClick={handleSubmit}>
-                    Envoyer l'invitation
+                    Envoyer l&apos;invitation
                   </LoadingButton>
-                  {Object.keys(errors).length ? <h3>Merci de remplir tous les champs avant d'envoyer une invitation.</h3> : null}
+                  {Object.keys(errors).length ? <h3>Merci de remplir tous les champs avant d&apos;envoyer une invitation.</h3> : null}
                 </React.Fragment>
               )}
             </Formik>
@@ -155,7 +154,7 @@ export default ({ setOpen, open, label = "Inviter un référent", role = "" }) =
       </Modal>
     </Invitation>
   );
-};
+}
 
 const ChooseDepartment = ({ value, onChange, validate }) => {
   const { user } = useSelector((state) => state.Auth);
@@ -181,8 +180,7 @@ const ChooseDepartment = ({ value, onChange, validate }) => {
       placeholder="Département"
       name="department"
       value={value}
-      onChange={onChange}
-    >
+      onChange={onChange}>
       <option disabled value="" label=""></option>
       {list.map((e) => {
         return (
@@ -213,8 +211,7 @@ const ChooseRegion = ({ value, onChange, validate }) => {
       placeholder="Région"
       name="region"
       value={value}
-      onChange={onChange}
-    >
+      onChange={onChange}>
       <option key={-1} value="" label=""></option>
       {regionList.map((e) => {
         return (
@@ -227,7 +224,7 @@ const ChooseRegion = ({ value, onChange, validate }) => {
   );
 };
 
-const ChooseCenter = ({ value, onChange, centers, onSelect }) => {
+const ChooseCenter = ({ onChange, centers, onSelect }) => {
   const { user } = useSelector((state) => state.Auth);
 
   useEffect(() => {

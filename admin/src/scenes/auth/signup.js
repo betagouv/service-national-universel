@@ -2,11 +2,10 @@ import React from "react";
 import { FormGroup, Row, Col } from "reactstrap";
 import { Formik, Field } from "formik";
 import validator from "validator";
-import { Link, Redirect } from "react-router-dom";
+import { Link, Redirect, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
-import { useHistory } from "react-router-dom";
 
 import { setUser } from "../../redux/auth/actions";
 import PasswordEye from "../../components/PasswordEye";
@@ -22,7 +21,7 @@ import MultiSelect from "../../components/Multiselect";
 import { associationTypes, privateTypes, publicTypes, publicEtatTypes, translate, colors, getRegionByZip, getDepartmentByZip } from "../../utils";
 import { adminURL } from "../../config";
 
-export default () => {
+export default function Signup() {
   const dispatch = useDispatch();
   const history = useHistory();
 
@@ -46,14 +45,14 @@ export default () => {
         initialValues={{ user: {}, structure: {} }}
         onSubmit={async (values, actions) => {
           try {
-            const { firstName, lastName, email, password, acceptCGU } = values?.user;
+            const { firstName, lastName, email, password, acceptCGU } = values?.user || {};
             const { user, token, code, ok } = await api.post(`/referent/signup`, { firstName, lastName, email, password, acceptCGU });
             if (!ok) {
               if (code === "PASSWORD_NOT_VALIDATED")
                 return toastr.error(
                   "Mot de passe incorrect",
                   "Votre mot de passe doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole",
-                  { timeOut: 10000 }
+                  { timeOut: 10000 },
                 );
               if (code === "USER_ALREADY_REGISTERED") return toastr.error("Votre compte est déja activé. Veuillez vous connecter", { timeOut: 10000 });
               return toastr.error("Un problème est survenu lors de la création de votre compte.", translate(code));
@@ -72,12 +71,11 @@ export default () => {
             actions.setSubmitting(false);
             console.log("e", e);
           }
-        }}
-      >
+        }}>
         {({ values, errors, touched, isSubmitting, handleChange, handleSubmit }) => {
           return (
             <AuthWrapper>
-              <Title>Inscrivez votre structure d'accueil</Title>
+              <Title>Inscrivez votre structure d&apos;accueil</Title>
               <Subtitle style={{ color: colors.grey }}>A destination des structures souhaitant accueillir des volontaires</Subtitle>
               <div>
                 <hr />
@@ -217,7 +215,7 @@ export default () => {
                     </StyledFormGroup>
                     {values.structure.legalStatus === "ASSOCIATION" && (
                       <StyledFormGroup>
-                        <label>DISPOSEZ-VOUS D'UN AGRÉMENT ?</label>
+                        <label>DISPOSEZ-VOUS D&apos;UN AGRÉMENT ?</label>
                         <MultiSelect
                           value={values.structure.associationTypes}
                           onChange={handleChange}
@@ -237,8 +235,7 @@ export default () => {
                           component="select"
                           name="structure.structurePriveeType"
                           value={values.structure.structurePriveeType}
-                          onChange={handleChange}
-                        >
+                          onChange={handleChange}>
                           <option key="" value="" selected disabled>
                             Type de structure privée
                           </option>
@@ -264,8 +261,7 @@ export default () => {
                             component="select"
                             name="structure.structurePubliqueType"
                             value={values.structure.structurePubliqueType}
-                            onChange={handleChange}
-                          >
+                            onChange={handleChange}>
                             <option key="" value="" selected disabled>
                               Type de structure publique
                             </option>
@@ -282,17 +278,16 @@ export default () => {
                         {["Service de l'Etat", "Etablissement public"].includes(values.structure.structurePubliqueType) && (
                           <StyledFormGroup>
                             <label>
-                              <span>*</span>TYPE DE SERVICE DE L'ETAT
+                              <span>*</span>TYPE DE SERVICE DE L&apos;ETAT
                             </label>
                             <Field
                               validate={(v) => !v && requiredMessage}
                               component="select"
                               name="structure.structurePubliqueEtatType"
                               value={values.structure.structurePubliqueEtatType}
-                              onChange={handleChange}
-                            >
+                              onChange={handleChange}>
                               <option key="" value="" selected disabled>
-                                Type de service de l'état
+                                Type de service de l&apos;état
                               </option>
                               {publicEtatTypes.map((e) => {
                                 return (
@@ -329,11 +324,11 @@ export default () => {
                     checked={values.user.acceptCGU === "true"}
                     style={{ display: "flex" }}
                   />
-                  <label for="checkboxCGU" style={{ flex: 1, margin: 0 }}>
+                  <label htmlFor="checkboxCGU" style={{ flex: 1, margin: 0 }}>
                     <p style={{ marginBottom: "0" }}>
-                      J'ai lu et j'accepte les{" "}
-                      <a href={`${adminURL}/conditions-generales-utilisation`} target="_blank" style={{ textDecoration: "underline", color: colors.darkPurple }}>
-                        conditions générales d'utilisation{" "}
+                      J&apos;ai lu et j&apos;accepte les{" "}
+                      <a href={`${adminURL}/conditions-generales-utilisation`} target="_blank" style={{ textDecoration: "underline", color: colors.darkPurple }} rel="noreferrer">
+                        conditions générales d&apos;utilisation{" "}
                       </a>
                       de la plateforme du Service national universel
                     </p>
@@ -342,7 +337,7 @@ export default () => {
                 <ErrorMessage errors={errors} touched={touched} name="user.acceptCGU" />
               </div>
               <Submit loading={isSubmitting} type="submit" color="primary" onClick={handleSubmit}>
-                S'inscrire
+                S&apos;inscrire
               </Submit>
             </AuthWrapper>
           );
@@ -350,7 +345,7 @@ export default () => {
       </Formik>
     </div>
   );
-};
+}
 
 const Register = styled.h3`
   position: relative;

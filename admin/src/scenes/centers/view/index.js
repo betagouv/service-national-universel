@@ -9,7 +9,7 @@ import WaitingList from "./waitingList";
 import { toastr } from "react-redux-toastr";
 import { translate } from "../../../utils";
 
-export default ({ ...props }) => {
+export default function Index({ ...props }) {
   const [center, setCenter] = useState();
   const history = useHistory();
 
@@ -41,4 +41,4 @@ export default ({ ...props }) => {
       <Route path="/centre/:id" component={() => <Details center={center} />} />
     </Switch>
   );
-};
+}

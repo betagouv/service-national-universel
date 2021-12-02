@@ -17,7 +17,7 @@ import { referentArticles, adminArticles, structureArticles } from "./articles";
 const Dashboard = () => {
   const [userTickets, setUserTickets] = useState(null);
   const [articles, setArticles] = useState(null);
-  const [link, setLink] = useState(null);
+  const [setLink] = useState(null);
   const user = useSelector((state) => state.Auth.user);
 
   dayjs.extend(relativeTime).locale("fr");

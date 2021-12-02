@@ -32,7 +32,7 @@ import ModalConfirm from "../../../components/modals/ModalConfirm";
 
 const FILTERS = ["SEARCH", "STATUS", "DEPARTMENT"];
 
-export default ({ mission, applications }) => {
+export default function Youngs({ mission, applications }) {
   const [missionTemp, setMissionTemp] = useState(mission);
   const [young, setYoung] = useState();
   const handleClick = async (application) => {
@@ -188,7 +188,7 @@ export default ({ mission, applications }) => {
       </div>
     </div>
   );
-};
+}
 
 const Hit = ({ hit, onClick, onChangeApplication, selected }) => {
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
@@ -214,9 +214,8 @@ const Hit = ({ hit, onClick, onChangeApplication, selected }) => {
           <ContractLink
             onClick={() => {
               history.push(`/volontaire/${hit.youngId}/phase2/application/${hit._id}/contrat`);
-            }}
-          >
-            Contrat d'engagement &gt;
+            }}>
+            Contrat d&apos;engagement &gt;
           </ContractLink>
         ) : null}
         {hit.status === "WAITING_VALIDATION" && [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(user.role) && (
@@ -237,8 +236,7 @@ const Hit = ({ hit, onClick, onChangeApplication, selected }) => {
                     }
                   },
                 });
-              }}
-            >
+              }}>
               ✉️ Renvoyer un mail à la structure
             </CopyLink>
             <ModalConfirm
@@ -271,8 +269,7 @@ const Hit = ({ hit, onClick, onChangeApplication, selected }) => {
                     }
                   },
                 });
-              }}
-            >
+              }}>
               ✉️ Envoyer un rappel au volontaire
             </CopyLink>
             <ModalConfirm

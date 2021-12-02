@@ -7,7 +7,7 @@ import LoadingButton from "../../../components/buttons/LoadingButton";
 import api from "../../../services/api";
 
 // TODO (fix): Export not only for 2021.
-export default () => {
+export default function ExportAll() {
   const [loading, setLoading] = useState(false);
   async function run() {
     const { data: inscriptionGoal } = await api.get("/inscription-goal/2021");
@@ -72,4 +72,4 @@ export default () => {
       Exporter le rapport
     </LoadingButton>
   );
-};
+}

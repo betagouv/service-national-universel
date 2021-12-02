@@ -17,7 +17,7 @@ const updateHeightElement = (e) => {
   e.target.style.height = `${e.target.scrollHeight}px`;
 };
 
-export default ({ ticket: propTicket }) => {
+export default function TicketMessage({ ticket: propTicket }) {
   const [ticket, setTicket] = useState(propTicket);
   const [message, setMessage] = useState();
   const user = useSelector((state) => state.Auth.user);
@@ -51,7 +51,7 @@ export default ({ ticket: propTicket }) => {
     // then send the message
     // todo : we may be able to reset the status in only one call
     // but im not sure the POST for a message can take state in its body
-    const responseMessage = await api.put(`/support-center/ticket/${ticket?.id}`, { message, ticket });
+    await api.put(`/support-center/ticket/${ticket?.id}`, { message, ticket });
 
     // reset ticket and input message
     setMessage("");
@@ -137,7 +137,7 @@ export default ({ ticket: propTicket }) => {
       )}
     </Container>
   );
-};
+}
 
 const Message = ({ from, date, content, fromMe, internal }) => {
   if (!content || !content.length) return null;
@@ -250,14 +250,6 @@ const MessageDate = styled.div`
 const MessageContent = styled.div`
   font-weight: 400;
   color: ${({ color }) => color};
-`;
-const Box = styled.div`
-  width: ${(props) => props.width || 100}%;
-  ${"" /* height: 100%; */}
-  filter: drop-shadow(0px 2px 4px rgba(0, 0, 0, 0.05));
-  border-radius: 8px;
-  padding: 1rem;
-  margin: 1rem 0;
 `;
 
 const Heading = styled(Container)`

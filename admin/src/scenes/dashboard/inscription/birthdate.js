@@ -6,7 +6,7 @@ import api from "../../../services/api";
 import Loader from "../../../components/Loader";
 import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 
-export default ({ filter }) => {
+export default function Birthdate({ filter }) {
   const [dates, setDates] = useState(null);
 
   useEffect(() => {
@@ -56,4 +56,4 @@ export default ({ filter }) => {
       <BoxContent direction="column">{render()}</BoxContent>
     </Box>
   );
-};
+}

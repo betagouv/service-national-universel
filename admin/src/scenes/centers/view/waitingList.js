@@ -11,7 +11,7 @@ import { ResultTable, Table, MultiLine } from "../../../components/list";
 import { toastr } from "react-redux-toastr";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
 
-export default ({ center, updateCenter }) => {
+export default function WaitingList({ center, updateCenter }) {
   const [young, setYoung] = useState();
   const [list, setList] = useState([]);
   const user = useSelector((state) => state.Auth.user);
@@ -68,7 +68,7 @@ export default ({ center, updateCenter }) => {
             <div style={{ flex: 1, position: "relative" }}>
               <ResultTable>
                 {list.length === 0 ? (
-                  <NoResult>La liste d'attente est vide</NoResult>
+                  <NoResult>La liste d&apos;attente est vide</NoResult>
                 ) : (
                   <Table>
                     <thead>
@@ -106,9 +106,9 @@ export default ({ center, updateCenter }) => {
       />
     </div>
   );
-};
+}
 
-const Hit = ({ index, hit, onSend, onClick, selected, onChangeYoung }) => {
+const Hit = ({ index, hit, onSend, onClick, selected }) => {
   const user = useSelector((state) => state.Auth.user);
   return (
     <tr style={{ backgroundColor: selected && "#e6ebfa" }} onClick={onClick}>

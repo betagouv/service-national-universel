@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Col, Row } from "reactstrap";
-import { useHistory } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 
 import { MISSION_STATUS_COLORS, MISSION_STATUS, translate, colors, copyToClipboard } from "../../../utils";
@@ -11,7 +10,7 @@ import { MISSION_STATUS_COLORS, MISSION_STATUS, translate, colors, copyToClipboa
 import api from "../../../services/api";
 import { CardArrow, Card, CardTitle, CardValueWrapper, CardValue } from "../../../components/dashboard";
 
-export default ({ referentManagerPhase2 }) => {
+export default function Missions({ referentManagerPhase2 }) {
   const user = useSelector((state) => state.Auth.user);
   const [missions, setMissions] = useState([]);
   const [stats, setStats] = useState({});
@@ -76,7 +75,7 @@ export default ({ referentManagerPhase2 }) => {
       })}
     </Row>
   );
-};
+}
 const Title = styled.h2`
   color: #242526;
   font-weight: bold;

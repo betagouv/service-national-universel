@@ -11,7 +11,7 @@ const Schema = new mongoose.Schema(
     type: {
       type: String,
       required: true,
-      enum: ["section", "answer"],
+      enum: ["section", "article"],
       documentation: {
         description: "Une section peut contenir des réponses et d'autres sections, une réponse est inclue dans une section",
       },
@@ -41,6 +41,7 @@ const Schema = new mongoose.Schema(
     slug: {
       type: String,
       required: true,
+      unique: true,
       documentation: {
         description: "Le slug pour l'url de l'élément'",
       },

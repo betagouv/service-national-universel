@@ -5,7 +5,7 @@ import styled from "styled-components";
 import ModalButton from "../buttons/ModalButton";
 import { colors } from "../../utils";
 
-export default ({ isOpen, onChange, onValidate, callback }) => {
+export default function ModalGoal({ isOpen, onChange, onValidate, callback }) {
   return (
     <Modal isOpen={isOpen} toggle={onChange}>
       <ModalContainer>
@@ -28,7 +28,7 @@ export default ({ isOpen, onChange, onValidate, callback }) => {
       </ModalContainer>
     </Modal>
   );
-};
+}
 
 const ModalContainer = styled.div`
   display: flex;

@@ -16,7 +16,7 @@ import { Box, BoxContent } from "../../components/box";
 import { translate, ROLES, REFERENT_DEPARTMENT_SUBROLE, REFERENT_REGION_SUBROLE, getPasswordErrorMessage } from "../../utils";
 import PasswordEye from "../../components/PasswordEye";
 
-export default () => {
+export default function Profil() {
   const user = useSelector((state) => state.Auth.user);
   const [service, setService] = useState();
   const dispatch = useDispatch();
@@ -57,8 +57,7 @@ export default () => {
               }
               toastr.error("Erreur");
               actions.setSubmitting(false);
-            }}
-          >
+            }}>
             {({ values, errors, touched, isSubmitting, handleChange, handleSubmit }) => (
               <>
                 <TitleWrapper>
@@ -154,9 +153,8 @@ export default () => {
                   console.log(e);
                   toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
                 }
-              }}
-            >
-              {({ values, handleChange, handleSubmit, isSubmitting, submitForm }) => (
+              }}>
+              {({ values, handleChange, handleSubmit, isSubmitting }) => (
                 <>
                   <TitleWrapper>
                     <div>
@@ -206,8 +204,7 @@ export default () => {
                 console.log(e);
                 toastr.error("Oups, une erreur est survenue pendant la mise à jour du mot de passe :", translate(e.code));
               }
-            }}
-          >
+            }}>
             {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
               <Box style={{ height: "fit-content" }}>
                 <BoxTitle>
@@ -255,9 +252,9 @@ export default () => {
       </Row>
     </Wrapper>
   );
-};
+}
 
-const Select = ({ title, name, values, onChange, disabled, errors, touched, validate, options }) => {
+const Select = ({ title, name, values, onChange, disabled, options }) => {
   return (
     <Row>
       <Col md={6}>
