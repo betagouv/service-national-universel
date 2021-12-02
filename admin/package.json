@@ -79,7 +79,7 @@
     "redux": "^4.0.5",
     "regenerator-runtime": "^0.13.7",
     "snu-lib": "file:../lib",
-    "styled-components": "^5.1.1",
+    "styled-components": "5.3.3",
     "validator": "^13.1.1",
     "xlsx": "^0.17.0"
   },
