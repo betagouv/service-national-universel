@@ -10,7 +10,7 @@ import SubTab from "./status";
 
 import { YOUNG_STATUS, ROLES } from "../../../utils";
 
-export default () => {
+export default function Index() {
   const user = useSelector((state) => state.Auth.user);
   const [filter, setFilter] = useState();
 
@@ -64,7 +64,7 @@ export default () => {
       {filter ? <SubTab filter={filter} /> : null}
     </>
   );
-};
+}
 
 const Title = styled.h2`
   color: #242526;

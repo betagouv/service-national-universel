@@ -7,7 +7,7 @@ import api from "../../services/api";
 import { colors, translate } from "../../utils";
 import ModalConfirm from "../../components/modals/ModalConfirm";
 
-export default ({ young, children, disabled, type, template, placeholder, ...rest }) => {
+export default function MailAttestationButton({ young, children, type, template, placeholder, ...rest }) {
   const [loading, setLoading] = useState();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
 
@@ -31,8 +31,7 @@ export default ({ young, children, disabled, type, template, placeholder, ...res
             title: "Envoie de document par mail",
             message: `Êtes-vous sûr de vouloir transmettre le document "${placeholder}" par mail à ${young.email} ?`,
           });
-        }}
-      >
+        }}>
         {loading ? <Spinner size="sm" style={{ borderWidth: "0.1em" }} /> : children}
       </PrimaryStyle>
       <ModalConfirm
@@ -47,7 +46,7 @@ export default ({ young, children, disabled, type, template, placeholder, ...res
       />
     </>
   );
-};
+}
 
 export const PrimaryStyle = styled.div`
   color: ${colors.purple};

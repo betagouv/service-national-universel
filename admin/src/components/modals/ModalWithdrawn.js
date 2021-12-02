@@ -1,13 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Modal } from "reactstrap";
 import styled from "styled-components";
 
-import api from "../../services/api";
-
-import { toastr } from "react-redux-toastr";
 import LoadingButton from "../buttons/LoadingButton";
 
-export default ({ isOpen, value, onChange, onSend }) => {
+export default function ModalWithdrawn({ isOpen, value, onChange, onSend }) {
   const [message, setMessage] = useState();
   const [sending, setSending] = useState(false);
 
@@ -30,7 +27,7 @@ export default ({ isOpen, value, onChange, onSend }) => {
       </ModalContainer>
     </Modal>
   );
-};
+}
 
 const ModalContainer = styled.div`
   display: flex;

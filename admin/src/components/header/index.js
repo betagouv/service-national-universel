@@ -5,7 +5,7 @@ import { ROLES } from "../../utils";
 
 import User from "./user";
 
-export default ({ onClickBurger }) => {
+export default function HeaderIndex({ onClickBurger }) {
   const { user } = useSelector((state) => state.Auth);
   if (!user) return <div />;
 
@@ -27,7 +27,7 @@ export default ({ onClickBurger }) => {
       </div>
     </Header>
   );
-};
+}
 
 const Header = styled.div`
   background-color: #fff;

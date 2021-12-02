@@ -348,18 +348,12 @@ router.post("/ticket/referent/notif", zammadAuth, async (req, res) => {
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, error: error.message });
 
     const department = ticketCreator.department;
-    const region = ticketCreator.region;
-
-    const regionReferents = await ReferentObject.find({
-      role: ROLES.REFERENT_REGION,
-      region,
-    });
     const departmentReferents = await ReferentObject.find({
       role: ROLES.REFERENT_DEPARTMENT,
       department,
     });
 
-    for (let referent of [...regionReferents, ...departmentReferents]) {
+    for (let referent of departmentReferents) {
       sendTemplate(SENDINBLUE_TEMPLATES.referent.MESSAGE_NOTIFICATION, {
         emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: `${referent.email}` }],
         params: {

@@ -12,7 +12,7 @@ import Chevron from "./Chevron";
 import ModalConfirm from "./modals/ModalConfirm";
 import ModalConfirmWithMessage from "./modals/ModalConfirmWithMessage";
 
-export default ({ hit, options = [], callback = () => {} }) => {
+export default function SelectStatusMission({ hit, options = [], callback = () => {} }) {
   const [waitingCorrectionModal, setWaitingCorrectionModal] = useState(false);
   const [refusedModal, setRefusedModal] = useState(false);
   const [mission, setMission] = useState(null);
@@ -72,8 +72,7 @@ export default ({ hit, options = [], callback = () => {} }) => {
 
   const setStatus = async (status, statusComment = "") => {
     try {
-      const { ok, code, data: newMission } = await api.put(`/mission/${mission._id}`, { status, statusComment });
-
+      const { ok, code, data: newMission } = await api.put(`/mission/${mission._id}`, { ...mission, status, statusComment });
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
       setMission(newMission);
       toastr.success("Mis à jour!");
@@ -149,7 +148,7 @@ export default ({ hit, options = [], callback = () => {} }) => {
       />
     </>
   );
-};
+}
 
 const ActionBox = styled.div`
   .dropdown-menu {

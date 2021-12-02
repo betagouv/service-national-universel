@@ -3,13 +3,12 @@ import { NavLink, Link } from "react-router-dom";
 import styled from "styled-components";
 import { useSelector, connect } from "react-redux";
 import { environment } from "../../config";
-import { ROLES, colors } from "../../utils";
+import { totalNewTickets, totalOpenedTickets, totalClosedTickets, ROLES, colors } from "../../utils";
 import MailOpenIcon from "../MailOpenIcon";
 import MailCloseIcon from "../MailCloseIcon";
 import SuccessIcon from "../SuccessIcon";
 import QuestionMark from "../../assets/QuestionMark";
 import api from "../../services/api";
-import { totalNewTickets, totalOpenedTickets, totalClosedTickets } from "../../utils";
 
 const DrawerTab = ({ title, to, onClick }) => (
   <li onClick={onClick}>
@@ -30,7 +29,7 @@ const HelpButton = ({ onClick, to }) => (
     <NavLink className="help-button" to={to}>
       <QuestionMark className="icon" />
       <div className="help-button-text">
-        <div className="help-button-text-primary">Besoin d'aide ?</div>
+        <div className="help-button-text-primary">Besoin d&apos;aide ?</div>
         <div className="help-button-text-secondary">Tutoriels, contacts</div>
       </div>
     </NavLink>
@@ -62,7 +61,7 @@ function responsible({ user, onClick }) {
   );
 }
 
-function supervisor({ user, onClick }) {
+function supervisor({ onClick }) {
   return (
     <>
       <DrawerTab to="/structure" title="Structures" onClick={onClick} />
@@ -151,7 +150,7 @@ function referent({ onClick, newTickets, openedTickets, closedTickets, tickets }
   );
 }
 
-function headCenter({ user, onClick }) {
+function headCenter({ onClick }) {
   return (
     <>
       <DrawerTab to="/user" title="Utilisateurs" onClick={onClick} />

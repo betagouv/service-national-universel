@@ -10,7 +10,7 @@ import { ROLES, colors } from "../../utils";
 
 import Avatar from "../Avatar";
 
-export default () => {
+export default function HeaderUser() {
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
   const { user } = useSelector((state) => state.Auth);
@@ -54,7 +54,7 @@ export default () => {
       </Dropdown>
     </div>
   );
-};
+}
 
 const InviteReferent = ({ role }) => {
   const [open, setOpen] = useState(false);

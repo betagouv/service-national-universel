@@ -9,7 +9,7 @@ import Loader from "../../../components/Loader";
 import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import { getLink } from "../../../utils";
 
-export default ({ filter }) => {
+export default function ParticularSituation({ filter }) {
   const [handicap, setHandicap] = useState(null);
   const [ppsBeneficiary, setPpsBeneficiary] = useState(null);
   const [paiBeneficiary, setPaiBeneficiary] = useState(null);
@@ -46,6 +46,7 @@ export default ({ filter }) => {
       const { responses } = await api.esQuery("young", body);
 
       if (responses.length) {
+        // eslint-disable-next-line no-inner-declarations
         function transform(arr) {
           const t = arr.find((e) => e.key === "true");
           const f = arr.find((e) => e.key === "false");
@@ -170,4 +171,4 @@ export default ({ filter }) => {
       <BoxContent direction="column">{render()}</BoxContent>
     </Box>
   );
-};
+}

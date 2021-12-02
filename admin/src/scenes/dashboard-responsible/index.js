@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { Col, Container, Row } from "reactstrap";
+import { Container } from "reactstrap";
 import { Link } from "react-router-dom";
 
 import Volontaires from "./volontaires";
 import Missions from "./missions";
 import { useSelector } from "react-redux";
-import { apiURL } from "../../config";
 import api from "../../services/api";
-import { DEFAULT_STRUCTURE_NAME, MISSION_STATUS } from "../../utils";
+import { MISSION_STATUS } from "../../utils";
 
-export default () => {
+export default function Index() {
   const [currentTab, setCurrentTab] = useState("volontaires");
   const [showAlert, setShowAlert] = useState(false);
   const [structure, setStructure] = useState();
@@ -54,16 +53,16 @@ export default () => {
       </Wrapper>
     </>
   );
-};
+}
 
-const AlertBox = ({ onClose }) => {
+const AlertBox = () => {
   const user = useSelector((state) => state.Auth.user);
   return (
     <Link to={`/structure/${user.structureId}/edit`}>
       <Alert>
         <img src={require("../../assets/information.svg")} height={15} />
         <div className="text">
-          <strong>Vous n'avez pas terminé l'inscription de votre structure !</strong>
+          <strong>Vous n&apos;avez pas terminé l&apos;inscription de votre structure !</strong>
           <p>Cliquez ici pour renseigner toutes ses informations.</p>
         </div>
         {/* <img src={require("../../assets/close.svg")} height={15} onClick={onClose} style={{ cursor: "pointer" }}/> */}

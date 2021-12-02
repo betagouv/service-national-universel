@@ -7,10 +7,10 @@ import { toastr } from "react-redux-toastr";
 import { APPLICATION_STATUS_COLORS, ROLES, translate, ENABLE_PM } from "../../../utils";
 import Badge from "../../../components/Badge";
 import api from "../../../services/api";
-import { CardArrow, Card, CardTitle, CardValueWrapper, CardValue, CardContainer, Title } from "../../../components/dashboard";
+import { CardArrow, Card, CardTitle, CardValueWrapper, CardValue, CardContainer } from "../../../components/dashboard";
 import Loader from "../../../components/Loader";
 
-export default () => {
+export default function Applications() {
   const user = useSelector((state) => state.Auth.user);
   const [missions, setMissions] = useState();
   const [applications, setApplications] = useState();
@@ -59,7 +59,7 @@ export default () => {
           .filter((a) => a.ok)
           .map((a) => a.data)
           // Get all application from all missions as a flat array
-          .reduce((acc, current) => [...acc, ...current], [])
+          .reduce((acc, current) => [...acc, ...current], []),
       );
     }
     initApplications();
@@ -221,4 +221,4 @@ export default () => {
       </Row>
     </>
   );
-};
+}

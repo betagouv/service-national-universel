@@ -17,7 +17,7 @@ const MONTH = {
   11: "dec.",
 };
 
-export default ({ value, onChange, placeholder, onSelect }) => {
+export default function DateInput({ value, onChange }) {
   const [y, m, d] = value ? value.substring(0, 10).split("-") : ["", "", ""];
   const [day, setDay] = useState(parseInt(d));
   const [month, setMonth] = useState(parseInt(m - 1));
@@ -75,7 +75,7 @@ export default ({ value, onChange, placeholder, onSelect }) => {
       </Input>
     </Wrapper>
   );
-};
+}
 
 const Wrapper = styled.div`
   display: flex;

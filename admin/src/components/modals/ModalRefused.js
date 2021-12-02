@@ -8,7 +8,7 @@ import ModalButton from "../buttons/ModalButton";
 import { toastr } from "react-redux-toastr";
 import { SENDINBLUE_TEMPLATES } from "../../utils";
 
-export default ({ isOpen, value, onChange, onSend, topTitle = "alerte" }) => {
+export default function ModalRefused({ isOpen, value, onChange, onSend, topTitle = "alerte" }) {
   const [message, setMessage] = useState();
   const [sending, setSending] = useState(false);
 
@@ -38,7 +38,7 @@ En vous souhaitant une excellente continuation.`);
         <img src={require("../../assets/close.svg")} height={10} onClick={onChange} />
         <Header>{topTitle}</Header>
         <Content>
-          <h1>Veuillez éditer le message ci-dessous pour préciser les raisons du refus avant de l'envoyer&nbsp;:</h1>
+          <h1>Veuillez éditer le message ci-dessous pour préciser les raisons du refus avant de l&apos;envoyer&nbsp;:</h1>
           <p style={{ alignSelf: "flex-start", textAlign: "left" }}>
             Bonjour {value.firstName} {value.lastName}, <br />
             Suite au traitement de votre dossier d’inscription, le référent SNU de votre département n’a pu retenir votre inscription. Ce dernier vous a laissé un message :
@@ -60,4 +60,4 @@ En vous souhaitant une excellente continuation.`);
       </ModalContainer>
     </Modal>
   );
-};
+}

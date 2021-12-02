@@ -3,27 +3,12 @@ import { Link, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
-import { translate, ROLES, ES_NO_LIMIT, copyToClipboard } from "../../utils";
+import { translate, ROLES, ES_NO_LIMIT, copyToClipboard, canUpdateReferent } from "../../utils";
 import api from "../../services/api";
 import { setUser } from "../../redux/auth/actions";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
 import Panel, { Info, Details } from "../../components/Panel";
 import styled from "styled-components";
-
-// Sorry about that: return true, return false, false, true, false.
-function canModify(user, value) {
-  if (user.role === ROLES.ADMIN) return true;
-  // https://trello.com/c/Wv2TrQnQ/383-admin-ajouter-onglet-utilisateurs-pour-les-r%C3%A9f%C3%A9rents
-  if (user.role === ROLES.REFERENT_REGION) {
-    if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(value.role) && user.region === value.region) return true;
-    return false;
-  }
-  if (user.role === ROLES.REFERENT_DEPARTMENT) {
-    if (user.role === value.role && user.department === value.department) return true;
-    return false;
-  }
-  return false;
-}
 
 export default function UserPanel({ onChange, value }) {
   if (!value) return <div />;
@@ -104,12 +89,14 @@ export default function UserPanel({ onChange, value }) {
           <div className="title">{`${value.firstName} ${value.lastName}`}</div>
           <div className="close" onClick={onChange} />
         </div>
-        {canModify(user, value) && (
+        {canUpdateReferent({ actor: user, originalTarget: value, structure: structure }) && (
           <div style={{ display: "flex", flexWrap: "wrap" }}>
             <Link to={`/user/${value._id}`}>
               <PanelActionButton icon="eye" title="Consulter" />
             </Link>
-            <PanelActionButton onClick={handleImpersonate} icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
+            {user.role === ROLES.ADMIN ? (
+              <PanelActionButton onClick={handleImpersonate} icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
+            ) : null}
             {structure ? (
               <Link to={`/structure/${structure._id}`}>
                 <PanelActionButton icon="eye" title="Voir la structure" />

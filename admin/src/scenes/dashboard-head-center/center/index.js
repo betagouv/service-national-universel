@@ -4,7 +4,7 @@ import { Col, Row } from "reactstrap";
 
 import Status from "./status";
 
-export default () => {
+export default function Index() {
   return (
     <>
       <Row style={{}}>
@@ -15,7 +15,7 @@ export default () => {
       <Status />
     </>
   );
-};
+}
 
 // Title line with filters
 const Title = styled.h2`

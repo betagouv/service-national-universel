@@ -11,7 +11,7 @@ import VioletButton from "../../components/buttons/VioletButton";
 import ExportAll from "./inscription/ExportAll";
 import { ROLES } from "../../utils";
 
-export default () => {
+export default function DashboardIndex() {
   const [currentTab, setCurrentTab] = useState("inscriptions");
   const user = useSelector((state) => state.Auth.user);
 
@@ -51,7 +51,7 @@ export default () => {
       </Wrapper>
     </>
   );
-};
+}
 
 const Wrapper = styled.div`
   padding: 1.5rem;

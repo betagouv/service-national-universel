@@ -5,7 +5,7 @@ import { formatStringLongDate, translateOperationName, translateModelFields, tra
 import Loader from "../../components/Loader";
 import api from "../../services/api";
 
-export default ({ model, value }) => {
+export default function Historic({ model, value }) {
   const [data, setData] = useState();
 
   const getPatches = async () => {
@@ -47,7 +47,7 @@ export default ({ model, value }) => {
       </div>
     </div>
   );
-};
+}
 
 const Hit = ({ hit, model }) => {
   function isIsoDate(str) {
@@ -83,7 +83,6 @@ const Table = styled.table`
   margin-top: 10px;
   background-color: #fff;
   th {
-    border-top: 1px solid #f4f5f7;
     border-bottom: 1px solid #f4f5f7;
     padding: 15px;
     font-weight: 400;

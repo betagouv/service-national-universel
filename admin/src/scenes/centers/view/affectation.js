@@ -8,7 +8,7 @@ import ComboBoxYoungs from "../components/ComboBoxYoungs";
 import Panel from "../../volontaires/panel";
 import { canAssignCohesionCenter } from "../../../utils";
 
-export default ({ center, updateCenter }) => {
+export default function Affectation({ center, updateCenter }) {
   const [young, setYoung] = useState(null);
   const user = useSelector((state) => state.Auth.user);
 
@@ -27,4 +27,4 @@ export default ({ center, updateCenter }) => {
       <Panel value={young} onChange={() => setYoung(null)} />
     </div>
   );
-};
+}
