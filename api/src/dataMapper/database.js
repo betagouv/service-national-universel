@@ -1,69 +1,69 @@
-// require('dotenv').config();
+require("dotenv").config();
+var pg = require("pg"),
+  { Client } = require("ssh2");
+var pgHost = "localhost",
+  pgPort = 5432,
+  proxyPort = 9090,
+  ready = false;
 
-// const { Pool } = require("pg");
-
-// console.log(`Connecting to DB: ${PG_URL}`);
-
-// const client = new Pool({ connectionString: PG_URL });
-
-// module.exports = client;
-
-const {
-  PG_PORT,
-  PROXY_PORT,
-  ZAMMAD_SERVER_HOST,
-  ZAMMAD_SERVER_USER,
-  PRIVATE_KEY_PATH,
-  ZAMMAD_DB_USER,
-  ZAMMAD_DB_PASSWORD,
-} = require("../config");
-
-const pg = require("pg");
-const SSH2Promise = require("ssh2-promise");
-
-const pgHost = "localhost";
-const pgPort = PG_PORT;
-const proxyPort = PROXY_PORT;
-let ready = false;
-
-const proxy = require('net').createServer(function (sock) {
-  if (!ready)
-    return sock.destroy();
-  c.forwardOut(sock.remoteAddress, sock.remotePort, pgHost, pgPort, function (err, stream) {
-    if (err)
-      return sock.destroy();
-    sock.pipe(stream);
-    stream.pipe(sock);
-  });
+var proxy = require("net").createServer(function (sock) {
+  if (!ready) return sock.destroy();
+  c.forwardOut(
+    sock.remoteAddress,
+    sock.remotePort,
+    pgHost,
+    pgPort,
+    function (err, stream) {
+      if (err) return sock.destroy();
+      sock.pipe(stream);
+      stream.pipe(sock);
+    }
+  );
 });
-proxy.listen(proxyPort, '127.0.0.1');
+proxy.listen(proxyPort, "127.0.0.1");
 
-const c = new SSH2Promise();
-(async function () {
-  await c.connect({
-    host: `${ZAMMAD_SERVER_HOST}`,
-    port: 22,
-    username: `${ZAMMAD_SERVER_USER}`,
-    privateKey: require('fs').readFileSync(`${PRIVATE_KEY_PATH}`)
-  });
-})();
+var c = new Client();
 
-(async function () {
-  await c.on('connect', function () {
-    console.log('Connection :: connect');
-  });
-})();
-
-(async function () {
-  await c.on('ready', function () {
-    ready = true;
-    const conString = `postgres://${ZAMMAD_DB_USER}:${ZAMMAD_DB_PASSWORD}@127.0.0.1:` + proxyPort + '/postgres',
-      client = new pg.Client(conString);
-    client.connect(function (err) {
-      console.log("Connected");
-      console.log(err);
+function clientCreated(query) {
+  return new Promise((resolve, reject) => {
+    c.connect({
+      host: process.env.SSHHOST,
+      port: 22,
+      username: process.env.SSHUSER,
+      // Ici il faut le contenu d'une clé privée.
+      // Autrement dit il faut que le compte soit créé comme le notre par Lucas ou quelqu'un d'autre
+      // (qui a le droit de créer des comptes SSH). Donc il faut générer une clé privée et la copier
+      // directement dans ce script (ou un fichier à côté).
+      privateKey: require("fs").readFileSync(process.env.SSHKEY),
+      // Ma clé privée nécessite une passphrase, mais dans notre cas il n'y aura peut-être pas besoin.
+      //passphrase: process.env.PP,
+    });
+    c.on("connect", function () {
+      console.log("Connection :: connect");
+    });
+    c.on("ready", function () {
+      ready = true;
+      var conString =
+        "postgres://" +
+        process.env.PGUSER +
+        ":" +
+        process.env.PGPASS +
+        "@127.0.0.1:" +
+        proxyPort +
+        "/zammad",
+        client = new pg.Client(conString);
+      client.connect(function (err) {
+        if (err) {
+          console.log("Error while connecting to the database");
+          console.log(err);
+          reject(err);
+        } else {
+          console.log("Connected to the database");
+          resolve(client.query(query));
+        }
+      });
     });
   });
-})();
+}
 
-module.exports = c;
+module.exports = clientCreated;

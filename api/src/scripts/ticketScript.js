@@ -76,7 +76,7 @@ const dataMapper = require("../dataMapper/dataMapper");
       lastAgentInChargeUpdateAt: ticket.last_owner_update_at,
       lastUpdateById: ticket.updated_by_id,
     });
-    console.log("TICKETS", ticketsArray);
+    // Here we could make our TicketModel.create ?
   }
   console.log(tickets.length);
-})();
+});
