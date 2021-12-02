@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { toastr } from "react-redux-toastr";
-import { useSelector } from "react-redux";
-import { NavLink, Link, useHistory } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import styled from "styled-components";
 
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
@@ -9,7 +8,7 @@ import api from "../../../services/api";
 import { ticketStateNameById, copyToClipboard, translate, getAge, formatDateFRTimezoneUTC } from "../../../utils";
 import { appURL } from "../../../config";
 
-export default ({ ticket }) => {
+export default function TicketInfos({ ticket }) {
   const [user, setUser] = useState([]);
   const [tag, setTag] = useState("");
   const history = useHistory();
@@ -24,7 +23,7 @@ export default ({ ticket }) => {
         const { data } = await api.get(`/young?email=${email}`);
         setUser(data);
         setTag("EMETTEUR_Volontaire");
-      } else if (tags?.find(tag => tag.includes("EMETTEUR"))) {
+      } else if (tags?.find((tag) => tag.includes("EMETTEUR"))) {
         const response = await api.get(`/referent?email=${email}`);
         setUser(response.data);
         setTag("EMETTEUR_other");
@@ -113,7 +112,7 @@ export default ({ ticket }) => {
           </>
         </>
       );
-    };
+    }
   };
 
   if (!user)
@@ -147,7 +146,7 @@ export default ({ ticket }) => {
       )}
     </HeroContainer>
   );
-};
+}
 
 const Item = ({ title, content, copy = false }) => {
   if (!content) return null;

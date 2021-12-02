@@ -18,7 +18,7 @@ const updateHeightElement = (e) => {
   e.target.style.height = `${e.target.scrollHeight}px`;
 };
 
-export default (props) => {
+export default function View(props) {
   const [ticket, setTicket] = useState();
   const [sending, setSending] = useState(false);
   const [message, setMessage] = useState();
@@ -47,7 +47,7 @@ export default (props) => {
     setSending(true);
     if (!message) return setSending(false);
     const id = props.match?.params?.id;
-    const { data } = await api.put(`/support-center/ticket/${id}`, { message, ticket });
+    await api.put(`/support-center/ticket/${id}`, { message, ticket });
     setMessage("");
     getTicket();
     setSending(false);
@@ -122,7 +122,7 @@ export default (props) => {
       </div>
     </Container>
   );
-};
+}
 
 const Message = ({ from, date, content, fromMe }) => {
   if (!content || !content.length) return null;

@@ -1,35 +1,35 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import isHotkey, { compareHotkey, parseHotkey } from "is-hotkey";
+import isHotkey from "is-hotkey";
 import { Editable, withReact, useSlate, Slate } from "slate-react";
-import { Editor, Transforms, createEditor, Element as SlateElement } from "slate";
+import { Editor, Transforms, createEditor, Node, Element as SlateElement } from "slate";
 import { withHistory } from "slate-history";
 
 import { Button, Icon, Toolbar } from "./components";
 import API from "../../services/api";
 import { toast } from "react-toastify";
-import { useSWRConfig } from "swr";
 import { useRouter } from "next/router";
+import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
 
 const HOTKEYS = {
   "mod+b": "bold",
   "mod+i": "italic",
   "mod+u": "underline",
-  "mod+`": "code",
+  // "mod+`": "code",
 };
 
 const LIST_TYPES = ["numbered-list", "bulleted-list"];
 
-const TextEditor = ({ content, slug, _id }) => {
+const TextEditor = ({ content, _id }) => {
   const router = useRouter();
 
-  const [value, setValue] = useState(JSON.parse(localStorage.getItem(`snu-kb-content-${_id}`)) || content || initialValue);
+  const [value, setValue] = useState(JSON.parse(localStorage.getItem(`snu-kb-content-${_id}`)) || content || empty);
   const [isSaveable, setIsSaveable] = useState(!!localStorage.getItem(`snu-kb-content-${_id}`));
   const [forceUpdateKey, setForceUpdateKey] = useState(0);
   const renderElement = useCallback((props) => <Element {...props} />, []);
   const renderLeaf = useCallback((props) => <Leaf {...props} />, []);
   const editor = useMemo(() => withHistory(withReact(createEditor())), []);
 
-  const { mutate } = useSWRConfig();
+  const { mutate } = useKnowledgeBaseData();
 
   const onChange = (value) => {
     setValue(value);
@@ -57,12 +57,12 @@ const TextEditor = ({ content, slug, _id }) => {
       return;
     }
     toast.success("Article mis-à-jour !");
-    mutate(API.getUrl({ path: `/support-center/knowledge-base/${slug}`, query: { withTree: true, withParents: true } }));
+    mutate();
     localStorage.removeItem(`snu-kb-content-${_id}`);
     setIsSaveable(false);
   };
 
-  const onBeforeUnload = (event) => {
+  const onBeforeUnload = () => {
     if (localStorage.getItem(`snu-kb-content-${_id}`)) {
       if (window.confirm("Voulez-vous enregistrer vos changements ?")) {
         onSave();
@@ -81,7 +81,7 @@ const TextEditor = ({ content, slug, _id }) => {
           <MarkButton format="bold" icon="format_bold" />
           <MarkButton format="italic" icon="format_italic" />
           <MarkButton format="underline" icon="format_underlined" />
-          <MarkButton format="code" icon="code" />
+          {/* <MarkButton format="code" icon="code" /> */}
           <BlockButton format="heading-one" icon="looks_one" />
           <BlockButton format="heading-two" icon="looks_two" />
           <BlockButton format="block-quote" icon="format_quote" />
@@ -92,7 +92,7 @@ const TextEditor = ({ content, slug, _id }) => {
           <Editable
             renderElement={renderElement}
             renderLeaf={renderLeaf}
-            placeholder="Commencez à écrire votre réponse..."
+            placeholder="Commencez à écrire votre article..."
             spellCheck
             autoFocus
             onKeyDown={(event) => {
@@ -189,9 +189,9 @@ const Leaf = ({ attributes, children, leaf }) => {
     children = <strong>{children}</strong>;
   }
 
-  if (leaf.code) {
-    children = <code>{children}</code>;
-  }
+  // if (leaf.code) {
+  //   children = <code>{children}</code>;
+  // }
 
   if (leaf.italic) {
     children = <em>{children}</em>;
@@ -233,6 +233,8 @@ const MarkButton = ({ format, icon }) => {
     </Button>
   );
 };
+
+const empty = [{ type: "paragraph", children: [{ text: "" }] }];
 
 const initialValue = [
   {

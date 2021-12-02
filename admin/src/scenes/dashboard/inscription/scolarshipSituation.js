@@ -6,7 +6,7 @@ import { translate } from "../../../utils";
 import Loader from "../../../components/Loader";
 import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 
-export default ({ filter }) => {
+export default function scholarshipSituation({ filter }) {
   const [value, setValue] = useState(null);
 
   useEffect(() => {
@@ -55,4 +55,4 @@ export default ({ filter }) => {
       <BoxContent direction="column">{render()}</BoxContent>
     </Box>
   );
-};
+}

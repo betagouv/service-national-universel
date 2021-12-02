@@ -8,7 +8,7 @@ import api from "../../../services/api";
 import { translate, ROLES, SENDINBLUE_TEMPLATES } from "../../../utils";
 import LoadingButton from "../../../components/buttons/LoadingButton";
 
-export default ({ structure, onSent }) => {
+export default function Invite({ structure, onSent }) {
   const [sent, setSent] = useState();
   return sent ? (
     <Wrapper>
@@ -39,13 +39,12 @@ export default ({ structure, onSent }) => {
             toastr.error("Oups, une erreur est survenue lors de l'ajout du nouveau membre", translate(e));
           }
           actions.setSubmitting(false);
-        }}
-      >
+        }}>
         {({ values, handleChange, handleSubmit }) => {
           return (
             <form onSubmit={handleSubmit}>
               <Title>Assigner un/e autre responsable</Title>
-              <Subtitle>Vous pouvez partager vos droits d'administration de votre compte de structure d'accueil SNU avec plusieurs personnes</Subtitle>
+              <Subtitle>Vous pouvez partager vos droits d&apos;administration de votre compte de structure d&apos;accueil SNU avec plusieurs personnes</Subtitle>
               <Row>
                 <Col>
                   <FormGroup>
@@ -72,7 +71,7 @@ export default ({ structure, onSent }) => {
               </FormGroup>
               <ButtonContainer>
                 <LoadingButton type="submit" onClick={handleSubmit}>
-                  Envoyer l'invitation
+                  Envoyer l&apos;invitation
                 </LoadingButton>
               </ButtonContainer>
             </form>
@@ -81,7 +80,7 @@ export default ({ structure, onSent }) => {
       </Formik>
     </Wrapper>
   );
-};
+}
 
 const Wrapper = styled.div`
   padding: 40px;

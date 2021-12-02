@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Tags from "../Tags";
 
-const KnowledgeBaseCardAnswer = ({ _id, position, title, createdAt, author, slug, allowedRoles = [] }) => {
+const KnowledgeBaseCardArticle = ({ _id, position, title, slug, allowedRoles = [] }) => {
   return (
     <Link key={_id} href={`/admin/knowledge-base/${slug}`} passHref>
       <a href="#" data-position={position} data-id={_id} className="my-1 px-1 w-full flex-shrink-0 flex-grow-0 lg:my-4 lg:px-4 ">
@@ -26,4 +26,4 @@ const KnowledgeBaseCardAnswer = ({ _id, position, title, createdAt, author, slug
   );
 };
 
-export default KnowledgeBaseCardAnswer;
+export default KnowledgeBaseCardArticle;

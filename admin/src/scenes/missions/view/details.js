@@ -9,7 +9,7 @@ import { translate, formatStringDateTimezoneUTC, ROLES, copyToClipboard, MISSION
 import MissionView from "./wrapper";
 import { Box, BoxTitle } from "../../../components/box";
 
-export default ({ mission, structure, tutor }) => {
+export default function DetailsView({ mission, structure, tutor }) {
   const user = useSelector((state) => state.Auth.user);
 
   return (
@@ -49,8 +49,7 @@ export default ({ mission, structure, tutor }) => {
                       <Link to={`/user/${tutor._id}`}>
                         <SubtitleLink>{`${tutor.firstName} ${tutor.lastName} >`}</SubtitleLink>
                       </Link>
-                    }
-                  >
+                    }>
                     <Details title="E-mail" value={tutor.email} copy />
                     <Details title="Tel. fixe" value={tutor.phone} copy />
                     <Details title="Tel. mobile" value={mission.mobile} copy />
@@ -65,8 +64,7 @@ export default ({ mission, structure, tutor }) => {
                       <Link to={`/structure/${structure._id}`}>
                         <SubtitleLink>{`${structure.name} >`}</SubtitleLink>
                       </Link>
-                    }
-                  >
+                    }>
                     <Details title="Statut Légal" value={translate(structure.legalStatus)} />
                     <Details title="Région" value={structure.region} />
                     <Details title="Dép." value={structure.department} />
@@ -89,7 +87,7 @@ export default ({ mission, structure, tutor }) => {
       </MissionView>
     </div>
   );
-};
+}
 
 const Bloc = ({ children, title, titleRight, borderBottom, borderRight, borderTop, disabled }) => {
   return (
@@ -100,13 +98,11 @@ const Bloc = ({ children, title, titleRight, borderBottom, borderRight, borderTo
         borderBottom: borderBottom ? "2px solid #f4f5f7" : 0,
         borderRight: borderRight ? "2px solid #f4f5f7" : 0,
         backgroundColor: disabled ? "#f9f9f9" : "transparent",
-      }}
-    >
+      }}>
       <Wrapper
         style={{
           width: "100%",
-        }}
-      >
+        }}>
         <div style={{ display: "flex", width: "100%" }}>
           <BoxTitle>
             <div>{title}</div>

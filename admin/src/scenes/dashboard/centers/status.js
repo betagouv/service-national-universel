@@ -6,7 +6,7 @@ import { CardArrow, Card, CardTitle, CardValueWrapper, CardValue } from "../../.
 
 import api from "../../../services/api";
 
-export default ({ filter }) => {
+export default function Status({ filter }) {
   const [placesTotal, setPlacesTotal] = useState(0);
   const [placesLeft, setPlacesLeft] = useState(0);
   const [total, setTotal] = useState(0);
@@ -69,7 +69,7 @@ export default ({ filter }) => {
         </Col>
         <Col md={6} xl={3}>
           <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
-            <CardTitle>Taux d'occupation</CardTitle>
+            <CardTitle>Taux d&apos;occupation</CardTitle>
             <CardValueWrapper>
               <CardValue>{placesTotal ? `${(((placesTotal - placesLeft || 0) * 100) / placesTotal).toFixed(2)}%` : `0%`}</CardValue>
             </CardValueWrapper>
@@ -78,4 +78,4 @@ export default ({ filter }) => {
       </Row>
     </>
   );
-};
+}

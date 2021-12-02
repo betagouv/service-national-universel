@@ -12,6 +12,7 @@ import DownloadAttestationButton from "../../../components/buttons/DownloadAttes
 import { Box, BoxTitle } from "../../../components/box";
 import Emails from "../../../components/views/Emails";
 import InfoIcon from "../../../assets/InfoIcon";
+import PatchHistoric from "../../../components/views/PatchHistoric";
 import ExpandComponent from "../../../components/ExpandComponent";
 
 const youngConsentmentText = (
@@ -49,7 +50,7 @@ const parentsConsentmentText = (
   </ul>
 );
 
-export default function VolontaireView({ young }) {
+export default function VolontaireViewDetails({ young }) {
   const user = useSelector((state) => state.Auth.user);
 
   function isFromFranceConnect() {
@@ -67,9 +68,11 @@ export default function VolontaireView({ young }) {
           </Box>
         ) : null}
         {young.status === YOUNG_STATUS.WAITING_CORRECTION && young.inscriptionCorrectionMessage ? (
-          <Bloc title="Message de demande de correction :" id={young._id}>
-            {young.inscriptionCorrectionMessage}
-          </Bloc>
+          <Box>
+            <Bloc title="Message de demande de correction :" id={young._id}>
+              <PatchHistoric value={young} model="young" field="inscriptionCorrectionMessage" previewNumber={1} />
+            </Bloc>
+          </Box>
         ) : null}
         <Box>
           <Row>
