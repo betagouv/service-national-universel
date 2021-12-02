@@ -14,7 +14,7 @@ export default function AddressInputV2({ keys, values, handleChange, errors, tou
   const [suggestion, setSuggestion] = useState({});
   const [addressInFrance, setAddressInFrance] = useState(true);
   const [loading, setLoading] = useState(false);
-  const [addressVerified, addressVerifiedHelpers] = useField({
+  const [addressVerified, , addressVerifiedHelpers] = useField({
     name: "addressVerified",
     validate: (v) => !v && addressInFrance && "Il est obligatoire de vérifier l'adresse",
   });
