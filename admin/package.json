@@ -50,7 +50,7 @@
     "babel-loader": "^8.2.2",
     "bootstrap": "^4.5.2",
     "core-js": "^3.12.1",
-    "dayjs": "^1.10.3",
+    "dayjs": "1.10.7",
     "express": "^4.17.1",
     "fetch-retry": "^5.0.1",
     "file-saver": "^2.0.5",
