@@ -2,7 +2,7 @@ import Link from "next/link";
 import Tags from "../Tags";
 
 const contentSummary = (sectionChildren) => {
-  const answers = sectionChildren.filter((child) => child.type === "answer");
+  const answers = sectionChildren.filter((child) => child.type === "article");
   const sections = sectionChildren.filter((child) => child.type === "section");
   if (!answers.length && !sections.length) return "Pas de contenu";
   const sectionsSummary = `${sections.length} sous-rubrique${sections.length > 1 ? "s" : ""}`;
@@ -12,10 +12,10 @@ const contentSummary = (sectionChildren) => {
   return `${answersSummary} \u00A0\u2022\u00A0 ${sectionsSummary}`;
 };
 
-const KnowledgeBaseCardSection = ({ _id, imageSrc, position, imageAlt, title, createdAt, slug, allowedRoles, sectionChildren }) => {
+const KnowledgeBaseCardSection = ({ _id, imageSrc, position, imageAlt, title, slug, allowedRoles, sectionChildren }) => {
   return (
     <Link key={_id} href={`/admin/knowledge-base/${slug}`} passHref>
-      <a href="#" data-position={position} data-id={_id} className="my-1 px-1 w-72 flex-shrink-0 flex-grow-0 lg:my-4 lg:px-4 ">
+      <a href="#" data-position={position} data-id={_id} className="my-1 px-1 w-full flex-shrink-0 flex-grow-0 lg:my-4 lg:px-4 ">
         <article className="overflow-hidden rounded-lg shadow-lg bg-white">
           <div className="h-32 w-full bg-gray-300 flex items-center justify-center ">
             {!!imageSrc ? <img alt={imageAlt} className="block h-auto w-full" src={imageSrc} /> : <span className="text-gray-400">Pas d'image</span>}
