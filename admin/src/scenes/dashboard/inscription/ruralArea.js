@@ -7,7 +7,7 @@ import api from "../../../services/api";
 import Loader from "../../../components/Loader";
 import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 
-export default ({ filter }) => {
+export default function RuralArea({ filter }) {
   const [value, setValue] = useState(null);
 
   useEffect(() => {
@@ -49,11 +49,11 @@ export default ({ filter }) => {
 
   return (
     <Box style={{ height: "fit-content" }}>
-      <BoxHeadTitle>Issus d'une Zone Rurale</BoxHeadTitle>
+      <BoxHeadTitle>Issus d&apos;une Zone Rurale</BoxHeadTitle>
       <BoxContent direction="column">{render()}</BoxContent>
     </Box>
   );
-};
+}
 
 const Content = styled.div`
   display: flex;

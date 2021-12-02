@@ -4,7 +4,7 @@ import CircularProgress, { CircularLine, CircularLineIndex } from "../components
 import { translate, TRANSPORT } from "../../../utils";
 import { Box, BoxTitleCircular as BoxTitle } from "../../../components/box";
 
-export default ({ mobilityNearHome, mobilityNearRelative, mobilityNearSchool, mobilityTransport }) => {
+export default function Mobility({ mobilityNearHome, mobilityNearRelative, mobilityNearSchool, mobilityTransport }) {
   const totalNearHome = Object.keys(mobilityNearHome).reduce((acc, a) => acc + mobilityNearHome[a], 0);
   const totalNearRelative = Object.keys(mobilityNearRelative).reduce((acc, a) => acc + mobilityNearRelative[a], 0);
   const totalNearSchool = Object.keys(mobilityNearSchool).reduce((acc, a) => acc + mobilityNearSchool[a], 0);
@@ -70,4 +70,4 @@ export default ({ mobilityNearHome, mobilityNearRelative, mobilityNearSchool, mo
       </Box>
     </React.Fragment>
   );
-};
+}

@@ -6,13 +6,13 @@ import { toastr } from "react-redux-toastr";
 
 import api from "../../../services/api";
 
-export default ({ filter }) => {
+export default function Goal({ filter }) {
   const [total2020Affected, setTotal2020Affected] = useState();
   const [totalValidated, setTotalValidated] = useState();
   const [inscriptionGoals, setInscriptionGoals] = useState();
   const goal = useMemo(
     () => inscriptionGoals && inscriptionGoals.reduce((acc, current) => acc + (current.max && !isNaN(Number(current.max)) ? Number(current.max) : 0), 0),
-    [inscriptionGoals]
+    [inscriptionGoals],
   );
   const totalInscription = useMemo(() => {
     return Number((filter.cohort === "2021" && total2020Affected) || 0) + Number(totalValidated || 0);
@@ -73,10 +73,10 @@ export default ({ filter }) => {
       if (academy) return academyToDepartments[academy].includes(e.department);
       return true;
     }
-    const { data, ok, code } = await api.get("/inscription-goal/" + filter.cohort);
+    const { data, ok } = await api.get("/inscription-goal/" + filter.cohort);
     if (!ok) return toastr.error("Une erreur s'est produite.");
     setInscriptionGoals(
-      departmentList.map((d) => data.filter(filterByRegionAndDepartement).find((e) => e.department === d) || { department: d, region: department2region[d], max: null })
+      departmentList.map((d) => data.filter(filterByRegionAndDepartement).find((e) => e.department === d) || { department: d, region: department2region[d], max: null }),
     );
   };
 
@@ -85,7 +85,7 @@ export default ({ filter }) => {
       <Row>
         <Col md={4}>
           <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS}>
-            <CardTitle>Objectif d'inscriptions</CardTitle>
+            <CardTitle>Objectif d&apos;inscriptions</CardTitle>
             <CardValueWrapper>
               <CardValue>{goal || "-"}</CardValue>
               <CardArrow />
@@ -94,7 +94,7 @@ export default ({ filter }) => {
         </Col>
         <Col md={4}>
           <Card borderBottomColor={YOUNG_STATUS_COLORS.IN_PROGRESS} style={filter.cohort === "2021" ? { padding: "22px 15px 6px" } : {}}>
-            <CardTitle>Nombre d'inscrits {filter.cohort === "2021" && "*"}</CardTitle>
+            <CardTitle>Nombre d&apos;inscrits {filter.cohort === "2021" && "*"}</CardTitle>
             <CardValueWrapper>
               <CardValue>{totalInscription || "0"}</CardValue>
               <CardArrow />
@@ -114,4 +114,4 @@ export default ({ filter }) => {
       </Row>
     </>
   );
-};
+}
