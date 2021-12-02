@@ -40,7 +40,7 @@ const EmojiPicker = ({ insertEmoji }) => {
     }
   }, []);
 
-  const onSelect = ({ unified }) => {
+  const onSelect = ({ id, name, short_names, colons, emoticons, unified, skin, native }) => {
     insertEmoji(String.fromCodePoint(parseInt(Number(`0x${unified}`), 10)));
     /*
   "id": "heart_eyes",

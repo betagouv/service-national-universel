@@ -2,22 +2,20 @@ import URI from "urijs";
 import { apiURL } from "../config";
 
 class ApiService {
-  getUrl({ path, query = {} }) {
+  getUrl = ({ path, query = {} }) => {
     return new URI().origin(apiURL).path(path).setSearch(query).toString();
-  }
+  };
 
-  async swrFetcher(url) {
-    const response = await fetch(url, {
+  swrFetcher = (url) =>
+    fetch(url, {
       credentials: "include",
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
       },
-    });
-    return response.json();
-  }
+    }).then((res) => res.json());
 
-  async execute({ method, path = "", body = null, query = {}, headers = {}, credentials = null } = {}) {
+  execute = async ({ method, path = "", body = null, query = {}, headers = {}, credentials = null, debug = false } = {}) => {
     try {
       const options = {
         method,
@@ -54,20 +52,17 @@ class ApiService {
       ok: false,
       error: "Une erreur est survenue, l'équipe technique est prévenue, veuillez nous en excuser.",
     };
-  }
+  };
 
-  post(args) {
-    return this.execute({ method: "POST", ...args });
-  }
-  getasync(args) {
-    return this.execute({ method: "GET", ...args });
-  }
-  put(args) {
-    return this.execute({ method: "PUT", ...args });
-  }
-  delete(args) {
-    return this.execute({ method: "DELETE", ...args });
-  }
+  post = (args) => this.execute({ method: "POST", ...args });
+  get = async (args) => this.execute({ method: "GET", ...args });
+  put = (args) => this.execute({ method: "PUT", ...args });
+  delete = (args) => this.execute({ method: "DELETE", ...args });
+
+  postWithCreds = (args) => this.execute({ method: "POST", credentials: "include", ...args });
+  getWithCreds = async (args) => this.execute({ method: "GET", credentials: "include", ...args });
+  putWithCreds = (args) => this.execute({ method: "PUT", credentials: "include", ...args });
+  deleteWithCreds = (args) => this.execute({ method: "DELETE", credentials: "include", ...args });
 }
 
 const API = new ApiService();

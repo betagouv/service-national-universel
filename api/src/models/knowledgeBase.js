@@ -11,7 +11,7 @@ const Schema = new mongoose.Schema(
     type: {
       type: String,
       required: true,
-      enum: ["section", "article"],
+      enum: ["section", "answer"],
       documentation: {
         description: "Une section peut contenir des réponses et d'autres sections, une réponse est inclue dans une section",
       },

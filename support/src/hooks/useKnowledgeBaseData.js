@@ -1,43 +1,33 @@
 import { useEffect, useState } from "react";
 import useSWR from "swr";
 import API from "../services/api";
-import { buildTree } from "../utils/knowledgeBaseTree";
 
-const root = { type: "root", slug: "", _id: null };
-
-const buildItemTree = (slug, flattenedData, tree, debug) => {
-  if (!slug) return tree;
-  if (!flattenedData.find((i) => i.slug === slug)) return tree;
-  return buildTree(
-    flattenedData.find((i) => i.slug === slug),
-    flattenedData,
-    { debug }
-  );
+const flattenBranch = (branch, flatTree) => {
+  for (const child of branch?.children || []) {
+    flatTree.push({ ...child, children: null });
+    flattenBranch(child, flatTree);
+  }
 };
 
-const useKnowledgeBaseData = ({ slug = "", debug = false } = {}) => {
-  const { data: response, mutate } = useSWR(API.getUrl({ path: "/support-center/knowledge-base/all" }));
-  // whole tree, from root to all articles with nested children
-  const [tree, setTree] = useState(buildTree(root, response?.data || [], { debug }));
-  // flattened tree as a flat array
-  const [flattenedData, setFlattenedData] = useState(response?.data || []);
-  // whole tree from specific section
-  const [item, setItem] = useState(buildItemTree(slug, flattenedData, tree, debug));
+const flattenTree = (tree) => {
+  const flatTree = [{ ...tree, children: null }];
+  flattenBranch(tree, flatTree);
+  return flatTree;
+};
 
+const useKnowledgeBaseData = () => {
+  const { data: response } = useSWR(API.getUrl({ path: "/support-center/knowledge-base/", query: { withTree: true, withParents: true } }));
+
+  const [data, setData] = useState(response?.data || []);
+  const [flattenedData, setFlattenedData] = useState(flattenTree(response?.data || []));
   useEffect(() => {
-    setFlattenedData(response?.data || []);
-    setTree(buildTree(root, response?.data || [], { debug }));
+    setData(response?.data || []);
+    setFlattenedData(flattenTree(response?.data));
   }, [response?.data]);
 
-  useEffect(() => {
-    setItem(buildItemTree(slug, flattenedData, tree, debug));
-  }, [flattenedData, slug]);
-
   return {
-    tree,
+    data,
     flattenedData,
-    item,
-    mutate,
   };
 };
 

@@ -1,4 +1,3 @@
-/* eslint-disable react/display-name */
 import { useEffect, useState } from "react";
 import Loader from "../components/Loader";
 import useUser from "../hooks/useUser";
@@ -11,7 +10,7 @@ const withAuth = (WrappedComponent) => {
     const [isMounted, setIsMounted] = useState(false);
     useEffect(() => setIsMounted(true), []);
 
-    if (!isMounted) return null;
+    // if (!isMounted) return null;
 
     if (isLoading) return <Loader />;
     if (!user.isLoggedIn) return null;
