@@ -8,7 +8,7 @@ function getFileName(file) {
   return (file && file.name) || file;
 }
 
-export default ({ optional, value, onChange, name, errorMessage = requiredMessage, placeholder = "votre fichier" }) => {
+export default function DndFileInput({ optional, value, onChange, name, errorMessage = requiredMessage, placeholder = "votre fichier" }) {
   const [filesList, setFilesList] = useState(value || []);
 
   useEffect(() => {
@@ -21,7 +21,7 @@ export default ({ optional, value, onChange, name, errorMessage = requiredMessag
         e.preventDefault();
         dropArea.style.background = "#eee";
       },
-      false
+      false,
     );
     dropArea.addEventListener(
       "drop",
@@ -42,7 +42,7 @@ export default ({ optional, value, onChange, name, errorMessage = requiredMessag
         }
         handleChange([...filesList, ...files]);
       },
-      false
+      false,
     );
   }, []);
 
@@ -82,7 +82,7 @@ export default ({ optional, value, onChange, name, errorMessage = requiredMessag
         <img src={require("../assets/image.svg")} />
         <>
           <span style={{ color: "#5850ec" }}>Téléversez {placeholder}</span> ou glissez-déposez
-          <span style={{ display: "block", fontSize: 13 }}>PDF, PNG ou JPG jusqu'à 5 Mo</span>
+          <span style={{ display: "block", fontSize: 13 }}>PDF, PNG ou JPG jusqu&apos;à 5 Mo</span>
         </>
       </ImageInput>
       {filesList.map((e, i) => (
@@ -92,7 +92,7 @@ export default ({ optional, value, onChange, name, errorMessage = requiredMessag
       ))}
     </div>
   );
-};
+}
 
 function isFileSupported(fileName) {
   const allowTypes = ["jpg", "jpeg", "png", "pdf"];

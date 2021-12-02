@@ -7,7 +7,7 @@ import { setYoung } from "../../redux/auth/actions";
 import { saveYoung } from "../../scenes/inscription/utils";
 import { appURL } from "../../config";
 
-export default ({ values, handleSubmit, errors, secondButton = "save", loading }) => {
+export default function FormFooter({ values, handleSubmit, errors, secondButton = "save", loading }) {
   const dispatch = useDispatch();
   const [loadingSaveBtn, setloadingSaveBtn] = useState(false);
 
@@ -35,11 +35,11 @@ export default ({ values, handleSubmit, errors, secondButton = "save", loading }
         </ButtonContainer>
       </Footer>
       {Object.keys(errors).filter((key) => errors[key]).length ? (
-        <ErrorText>Vous ne pouvez pas passer à l'étape suivante car tous les champs ne sont pas correctement renseignés.</ErrorText>
+        <ErrorText>Vous ne pouvez pas passer à l&apos;étape suivante car tous les champs ne sont pas correctement renseignés.</ErrorText>
       ) : null}
     </>
   );
-};
+}
 
 const Footer = styled.div`
   display: flex;
