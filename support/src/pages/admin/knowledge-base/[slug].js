@@ -44,19 +44,29 @@ const KnowledgeBase = () => {
 
   return (
     <Layout title="Base de connaissances" className="flex flex-col">
-      <Header>Base de connaissances</Header>
-      <KnowledgeBaseBreadcrumb parents={item?.parents} />
+      <Header>
+        Base de connaissances
+        <KnowledgeBaseBreadcrumb parents={item?.parents} />
+        <div id="breadcrumb" className="px-4 py-2 -ml-12 -mr-12 -mb-3 flex justify-between items-baseline flex-shrink-0 w-screen bg-snu-purple-900">
+          <button onClick={() => setTreeVisible((v) => !v)} className="bg-transparent border-none hover:underline text-xs font-light p-0 m-0">
+            {treeVisible ? "Masquer" : "Afficher"} l'arbre
+          </button>
+          {!isRoot && (
+            <button onClick={() => setMetadataVisible((v) => !v)} className="bg-transparent border-none hover:underline text-xs font-light p-0 m-0">
+              {metadataVisible ? "Masquer les infos" : "Afficher les infos"}
+            </button>
+          )}
+        </div>
+      </Header>
       {(!isRoot && !slug) || !item ? (
         <Loader />
       ) : (
         <div className="relative bg-coolGray-200 flex border-t-2 h-full w-full flex-grow flex-shrink overflow-hidden">
-          <TreeButton visible={treeVisible} setVisible={setTreeVisible} />
           <KnowledgeBaseTree visible={treeVisible} setVisible={setTreeVisible} />
           <Content key={slug} item={item} />
           {!isRoot && (
             <>
-              <KnowledgeBaseItemMetadata visible={metadataVisible} setVisible={setMetadataVisible} />
-              <MoreButton visible={metadataVisible} setVisible={setMetadataVisible} />
+              <KnowledgeBaseItemMetadata visible={metadataVisible} />
             </>
           )}
         </div>

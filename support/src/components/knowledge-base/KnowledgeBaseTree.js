@@ -48,7 +48,7 @@ const Branch = ({ section, level, onIsActive, position, parentId, onListChange, 
     sortable.current = SortableJS.create(gridRef.current, { animation: 150, group: "shared", onEnd: onListChange, onStart: onStartDrag });
   }, []);
 
-  let isDraft = JSON.stringify(section.children || []).includes("DRAFT") ? " 🚦 " : "";
+  let isDraft = JSON.stringify(section.children || []).includes("DRAFT") ? " 🚦 " : " ";
 
   const showOpen = isDragging || open;
 
@@ -132,7 +132,7 @@ const getReorderedTree = (root) => {
   return allItems;
 };
 
-const KnowledgeBaseTree = ({ visible, setVisible }) => {
+const KnowledgeBaseTree = ({ visible }) => {
   const { tree, mutate } = useKnowledgeBaseData();
 
   // reloadTreeKey to prevent error `Failed to execute 'removeChild' on 'Node'` from sortablejs after updating messy tree
@@ -152,13 +152,10 @@ const KnowledgeBaseTree = ({ visible, setVisible }) => {
   };
 
   return (
-    <aside className={`flex flex-col flex-grow-0 flex-shrink-0 border-r-2 shadow-md resize-x p-2 overflow-hidden ${visible ? "w-80" : "w-0 hidden"}`}>
+    <aside className={`flex flex-col flex-grow-0 flex-shrink-0 border-r-2 shadow-lg z-10 resize-x p-2 overflow-hidden ${visible ? "w-80" : "w-0 hidden"}`}>
       {/* TODO find a way for tailwind to not filter margins from compiling,
        because things like `ml-${level}` are not compiled */}
       <div className="hidden ml-2 ml-3 ml-4 ml-5 ml-6 ml-7 ml-8 ml-9 ml-10 ml-11 ml-12 ml-13 ml-14 ml-15 ml-16"></div>
-      <svg onClick={() => setVisible(false)} xmlns="http://www.w3.org/2000/svg" className="m-2 h-6 w-6 cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-      </svg>
       <div ref={rootRef} key={reloadTreeKey} className="overflow-auto">
         <Branch section={tree} level={0} onListChange={onListChange} isDragging={isDragging} onStartDrag={onStartDrag} />
       </div>
