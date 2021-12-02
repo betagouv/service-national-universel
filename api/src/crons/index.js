@@ -1,11 +1,8 @@
 const cron = require("node-cron");
 const { ENVIRONMENT } = require("../config");
 
-const { sendRecapRegion } = require("./mailRecap/cron_hebdo_region");
-const { sendRecapDepartmentTuesday, sendRecapDepartmentThursday } = require("./mailRecap/cron_hebdo_department");
+const mailRecapDepartment = require("./mailRecap/cron_hebdo_department");
 const apiEngagement = require("./syncApiEngagement");
-const { capture } = require("../sentry");
-const autoAffectationCohesionCenter = require("./autoAffectationCohesionCenter");
 const missionOutdated = require("./missionOutdated");
 const computeGoalsInscription = require("./computeGoalsInscription");
 
@@ -26,14 +23,12 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
 
   // every tuesday at 0800
   // cron.schedule("0 8 * * 2", function () {
-  //   capture("START CRON RECAP DEPARTEMENT");
-  //   sendRecapDepartmentTuesday();
+  //   mailRecapDepartment.handler();
   // });
 
   // every thursday at 0800
   // cron.schedule("0 8 * * 4", function () {
-  //   capture("START CRON RECAP DEPARTEMENT");
-  //   sendRecapDepartmentThursday();
+  //   mailRecapDepartment.handler();
   // });
 
   // everyday at 0200
