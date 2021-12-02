@@ -31,24 +31,26 @@ const findParents = (item, flattenedData) => {
   return fromRootToItem;
 };
 
-// addParents only for first item
 export const buildTree = (item, flattenedData, options) => {
-  if (!["root", "section"].includes(item.type)) return JSON.parse(JSON.stringify(item));
-  // clone items to avoid circular reference in item.parents = parents
+  // clone items to avoid circular reference
   const clonedItem = JSON.parse(JSON.stringify(item));
   const clonedData = JSON.parse(JSON.stringify(flattenedData));
 
   return buildTreeRecursive(clonedItem, clonedData, options);
 };
+
 // addParents only for first item
 export const buildTreeRecursive = (item, flattenedData, { addParents = true, debug } = {}) => {
-  if (!["root", "section"].includes(item.type)) return item;
   const populatedSection = item;
-  const children = flattenedData.filter((i) => i.parentId === item._id).sort(sortItemsInSection);
-  for (const child of children) {
-    buildTreeRecursive(child, flattenedData, { addParents: false, debug });
+  if (["root", "section"].includes(item.type)) {
+    const children = flattenedData.filter((i) => i.parentId === item._id).sort(sortItemsInSection);
+    for (const child of children) {
+      buildTreeRecursive(child, flattenedData, { addParents: false, debug });
+    }
+    populatedSection.children = children;
   }
-  populatedSection.children = children;
-  if (addParents) populatedSection.parents = findParents(populatedSection, flattenedData);
+  if (!["root"].includes(item.type) && addParents) {
+    populatedSection.parents = findParents(populatedSection, flattenedData);
+  }
   return populatedSection;
 };

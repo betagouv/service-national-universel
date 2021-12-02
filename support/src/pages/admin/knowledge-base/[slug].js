@@ -38,7 +38,7 @@ const KnowledgeBase = () => {
     setSlug(router.query?.slug || "");
   }, [router.query?.slug]);
 
-  const { item } = useKnowledgeBaseData({ slug, debug: true });
+  const { item } = useKnowledgeBaseData({ debug: true });
 
   const isRoot = router.pathname === "/admin/knowledge-base";
 

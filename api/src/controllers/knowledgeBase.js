@@ -67,7 +67,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     if (req.body.hasOwnProperty("position")) kb.position = req.body.position;
     if (req.body.hasOwnProperty("title")) {
       kb.title = req.body.title.trim();
-      kb.slug = slugify(req.body.title.trim(), {
+      let slug = slugify(req.body.title.trim(), {
         replacement: "-",
         remove: /[*+~.()'"!?:@]/g,
         lower: true, // convert to lower case, defaults to `false`
@@ -75,6 +75,12 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
         locale: "fr", // language code of the locale to use
         trim: true, // trim leading and trailing replacement chars, defaults to `true`
       });
+      let itemWithSameSlug = await KnowledgeBaseObject.findOne({ slug });
+      while (!!itemWithSameSlug) {
+        slug = `${slug}-${new Date().toISOString().split('T')[0]}`
+        itemWithSameSlug = await KnowledgeBaseObject.findOne({ slug });
+      }
+      kb.slug = slug;
     }
     if (req.body.hasOwnProperty("allowedRoles")) kb.allowedRoles = req.body.allowedRoles;
     if (req.body.hasOwnProperty("status")) kb.status = req.body.status;

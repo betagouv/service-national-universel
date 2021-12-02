@@ -41,6 +41,7 @@ const Schema = new mongoose.Schema(
     slug: {
       type: String,
       required: true,
+      unique: true,
       documentation: {
         description: "Le slug pour l'url de l'élément'",
       },

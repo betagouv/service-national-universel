@@ -36,15 +36,16 @@ const KnowledgeBaseItemMetadata = ({ visible, setVisible }) => {
   };
 
   const onDelete = async () => {
-    if (window.confirm("Vouelz-vous vraiment supprimer cet élément ? Cette opération est définitive")) {
+    if (window.confirm("Voulez-vous vraiment supprimer cet élément ? Cette opération est définitive")) {
       const response = await API.delete({ path: `/support-center/knowledge-base/${item._id}` });
       if (response.error) return toast.error(response.error);
       toast.success("Élément supprimé !");
-      const parent = flattenedData.find((item) => item._id === item.parentId);
+      const parent = flattenedData.find((otherItems) => otherItems._id === item.parentId);
       mutate();
-      router.replace(`/admin/knowledge-base/${parent.slug}`);
+      router.replace(`/admin/knowledge-base/${parent?.slug || ""}`);
     }
   };
+  console.log(item);
 
   return (
     <div className={`flex-grow-0 flex-shrink-0 border-l-2 shadow-md resize-x dir-rtl overflow-hidden ${visible ? "w-80" : "w-0 hidden"}`}>
@@ -91,7 +92,7 @@ const KnowledgeBaseItemMetadata = ({ visible, setVisible }) => {
             </div>
           </fieldset>
           <div className="flex justify-start items-center">
-            <label htmlFor="status">Status: </label>
+            <label htmlFor="status">Visibilité: </label>
             <select className="border-2 ml-5 p-2" name="status" defaultValue={item.status}>
               <option value="PUBLISHED">Publié</option>
               <option value="DRAFT">Brouillon</option>
