@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import router, { useRouter } from "next/router";
+import { useRouter } from "next/router";
 import { SUPPORT_ROLES } from "snu-lib/roles";
 import { toast } from "react-toastify";
 import API from "../../services/api";
@@ -79,10 +79,10 @@ const KnowledgeBaseItemMetadata = ({ visible, setVisible }) => {
           />
           <fieldset className="mb-5">
             <legend className="mb-2">Visible par:</legend>
-            <div className="flex flex-col ml-10">
+            <div className="flex flex-col ml-4">
               {Object.keys(SUPPORT_ROLES).map((role) => (
                 <div className="flex items-center" key={role}>
-                  <input className="mr-4" id={`allowedRoles.${role}`} type="checkbox" name={`allowedRoles.${role}`} defaultChecked={item.allowedRoles.includes(role)} />
+                  <input className="mr-4" id={`allowedRoles.${role}`} type="checkbox" name={`allowedRoles.${role}`} defaultChecked={item.allowedRoles?.includes(role)} />
                   <label className="mr-2" id={role} htmlFor={`allowedRoles.${role}`}>
                     {SUPPORT_ROLES[role]}
                   </label>
@@ -92,7 +92,7 @@ const KnowledgeBaseItemMetadata = ({ visible, setVisible }) => {
           </fieldset>
           <div className="flex justify-start items-center">
             <label htmlFor="status">Status: </label>
-            <select className="border-2 ml-10 p-2" name="status" defaultValue={item.status}>
+            <select className="border-2 ml-5 p-2" name="status" defaultValue={item.status}>
               <option value="PUBLISHED">Publié</option>
               <option value="DRAFT">Brouillon</option>
             </select>

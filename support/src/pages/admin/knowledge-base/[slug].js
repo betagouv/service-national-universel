@@ -53,8 +53,12 @@ const KnowledgeBase = () => {
           <TreeButton visible={treeVisible} setVisible={setTreeVisible} />
           <KnowledgeBaseTree visible={treeVisible} setVisible={setTreeVisible} />
           <Content key={slug} item={item} />
-          <KnowledgeBaseItemMetadata visible={metadataVisible} setVisible={setMetadataVisible} />
-          <MoreButton visible={metadataVisible} setVisible={setMetadataVisible} />
+          {!isRoot && (
+            <>
+              <KnowledgeBaseItemMetadata visible={metadataVisible} setVisible={setMetadataVisible} />
+              <MoreButton visible={metadataVisible} setVisible={setMetadataVisible} />
+            </>
+          )}
         </div>
       )}
     </Layout>
