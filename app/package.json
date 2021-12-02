@@ -25,7 +25,7 @@
     "@pmmmwh/react-refresh-webpack-plugin": "^0.4.3",
     "@sentry/webpack-plugin": "^1.17.1",
     "copy-webpack-plugin": "^7.0.0",
-    "css-loader": "^5.0.1",
+    "css-loader": "5.2.7",
     "eslint": "^8.3.0",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-import": "^2.25.3",
