@@ -82,7 +82,7 @@ export default function PanelComponent({ onChange, value }) {
             </Link>
           </>
         ) : (
-          <NoResult>Aucune candidature n&apos;est liée à ce volontaire.</NoResult>
+          <NoResult>Aucune candidature n&aops;est liée à ce volontaire.</NoResult>
         )}
         <Details title="Contact phase 2" value={referentManagerPhase2?.email || (referentManagerPhase2 !== undefined && "Non trouvé") || "Chargement..."} copy />
       </Info>

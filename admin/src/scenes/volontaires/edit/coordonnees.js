@@ -4,7 +4,6 @@ import styled from "styled-components";
 
 import { departmentList, regionList, department2region, departmentLookUp, colors } from "../../../utils";
 import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
-import Item from "../components/Item";
 import Select from "../components/Select";
 import AddressInput from "../../../components/addressInputV2";
 
