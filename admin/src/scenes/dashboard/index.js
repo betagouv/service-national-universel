@@ -18,7 +18,7 @@ export default () => {
   const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
-    const listTab = ["inscriptions", "volontaires", "structures", "missions", "centers"];
+    const listTab = ["inscriptions", "volontaires", "structures", "missions", "centres"];
     if (!listTab.includes(currentTab)) history.push(`/dashboard/inscriptions`);
   }, [currentTab]);
 
@@ -38,7 +38,7 @@ export default () => {
           <TabItem onClick={() => history.push(`/dashboard/missions`)} isActive={currentTab === "missions"}>
             Missions
           </TabItem>
-          <TabItem onClick={() => history.push(`/dashboard/centers`)} isActive={currentTab === "centers"}>
+          <TabItem onClick={() => history.push(`/dashboard/centres`)} isActive={currentTab === "centres"}>
             Centres
           </TabItem>
         </TabNavigationList>
@@ -54,7 +54,7 @@ export default () => {
         {currentTab === "volontaires" && <Volontaire />}
         {currentTab === "structures" && <Structure />}
         {currentTab === "missions" && <Mission />}
-        {currentTab === "centers" && <Center />}
+        {currentTab === "centres" && <Center />}
       </Wrapper>
     </>
   );

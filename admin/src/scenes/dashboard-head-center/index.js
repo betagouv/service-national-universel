@@ -10,7 +10,7 @@ export default () => {
   const { currentTab } = useParams();
 
   useEffect(() => {
-    const listTab = ["center", "volontaires"];
+    const listTab = ["centre", "volontaires"];
     if (!listTab.includes(currentTab)) history.push(`/dashboard/volontaires`);
   }, [currentTab]);
 
@@ -21,13 +21,13 @@ export default () => {
           <TabItem onClick={() => history.push(`/dashboard/volontaires`)} isActive={currentTab === "volontaires"}>
             Volontaires
           </TabItem>
-          <TabItem onClick={() => history.push(`/dashboard/center`)} isActive={currentTab === "center"}>
+          <TabItem onClick={() => history.push(`/dashboard/centre`)} isActive={currentTab === "centre"}>
             Centre
           </TabItem>
         </TabNavigationList>
       </TabNavigation>
       <Wrapper>{currentTab === "volontaires" && <Volontaires />}</Wrapper>
-      <Wrapper>{currentTab === "center" && <Center />}</Wrapper>
+      <Wrapper>{currentTab === "centre" && <Center />}</Wrapper>
     </>
   );
 };
