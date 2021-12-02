@@ -20,4 +20,4 @@ Lancer la commande `npm run dev` pour accéder à l'application via l'URL `http:
 
 > La startup d’Etat vise donc à créer un espace personnel où chacun des jeunes effectuant son SNU pourra gérer sa participation en choisissant ses missions d’intérêt général et obtenir si nécessaire de l’aide. Cet espace qui pourra ensuite intégrer des services complémentaires liés au déroulement du SNU sera partie prenante du site informationnel snu.gouv.fr. Notre souhait est de construire un service adapté aux usages de jeunes de 15 ans et non pas destiné à répondre aux contraintes de l’administration.
 
-Source: https://beta.gouv.fr/startups/engagement-civique.html.
+Source: https://beta.gouv.fr/startups/engagement-civique.html
