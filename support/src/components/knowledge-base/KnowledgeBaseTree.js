@@ -28,7 +28,7 @@ const useIsActive = ({ slug }, onIsActive) => {
 
 const horizontalSpacing = 2;
 
-const Branch = ({ section, level, onIsActive, position, parentId, onListChange }) => {
+const Branch = ({ section, level, onIsActive, position, parentId, onListChange, isDragging, onStartDrag }) => {
   const [open, setIsOpen] = useState(section.type === "root");
 
   const isActive = useIsActive(section, onIsActive);
@@ -45,20 +45,22 @@ const Branch = ({ section, level, onIsActive, position, parentId, onListChange }
   const gridRef = useRef(null);
   const sortable = useRef(null);
   useEffect(() => {
-    sortable.current = SortableJS.create(gridRef.current, { animation: 150, group: "shared", onEnd: onListChange });
+    sortable.current = SortableJS.create(gridRef.current, { animation: 150, group: "shared", onEnd: onListChange, onStart: onStartDrag });
   }, []);
 
   let isDraft = JSON.stringify(section.children || []).includes("DRAFT") ? " 🚦 " : "";
+
+  const showOpen = isDragging || open;
 
   return (
     <div data-position={position} data-parentid={parentId || "root"} data-id={section._id || "root"} data-type="section" className={`ml-${level * horizontalSpacing} mb-1 `}>
       <span className={` text-warmGray-500 max-w-full inline-block overflow-hidden overflow-ellipsis whitespace-nowrap ${isActive ? "font-bold" : ""}`}>
         <small className="text-trueGray-400 mr-1 mb-1 w-3 inline-block cursor-pointer" onClick={() => setIsOpen(!open)}>
-          {open ? "\u25BC" : "\u25B6"}
+          {showOpen ? "\u25BC" : "\u25B6"}
         </small>
         <Link href={`/admin/knowledge-base/${section.slug || ""}`} passHref>
           {section.title ? (
-            `${open ? "📂" : "📁"}${isDraft}${section.title} (${section.children?.length || 0})`
+            `${showOpen ? "📂" : "📁"}${isDraft}${section.title} (${section.children?.length || 0})`
           ) : (
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 inline -mt-2 cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
@@ -71,7 +73,7 @@ const Branch = ({ section, level, onIsActive, position, parentId, onListChange }
           )}
         </Link>
       </span>
-      <div ref={gridRef} id={`child-container-${section._id || "root"}`} className={`flex flex-col ${!open ? "hidden" : ""}`}>
+      <div ref={gridRef} id={`child-container-${section._id || "root"}`} className={`flex flex-col ${!showOpen ? "hidden" : ""}`}>
         {section.children?.map((child) =>
           child.type === "section" ? (
             <Branch
@@ -80,8 +82,10 @@ const Branch = ({ section, level, onIsActive, position, parentId, onListChange }
               key={child._id}
               section={child}
               level={level + 1}
+              isDragging={isDragging}
               onIsActive={onChildIsActive}
               onListChange={onListChange}
+              onStartDrag={onStartDrag}
             />
           ) : (
             <Answer parentId={child.parentId} position={child.position} key={child._id} article={child} level={level + 1} onIsActive={onChildIsActive} />
@@ -133,11 +137,17 @@ const KnowledgeBaseTree = ({ visible, setVisible }) => {
 
   // reloadTreeKey to prevent error `Failed to execute 'removeChild' on 'Node'` from sortablejs after updating messy tree
   const [reloadTreeKey, setReloadeTreeKey] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+
   const rootRef = useRef(null);
+  const onStartDrag = () => setIsDragging(true);
+
   const onListChange = async () => {
+    setIsDragging(false);
     const response = await API.put({ path: "/support-center/knowledge-base/reorder", body: getReorderedTree(rootRef.current.children[0]) });
     if (!response.ok) return toast.error("Désolé, une erreur est survenue. Veuillez recommencer !");
     mutate();
+    setIsDragging(false);
     setReloadeTreeKey((k) => k + 1);
   };
 
@@ -150,7 +160,7 @@ const KnowledgeBaseTree = ({ visible, setVisible }) => {
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
       </svg>
       <div ref={rootRef} key={reloadTreeKey} className="overflow-auto">
-        <Branch section={tree} level={0} onListChange={onListChange} />
+        <Branch section={tree} level={0} onListChange={onListChange} isDragging={isDragging} onStartDrag={onStartDrag} />
       </div>
     </aside>
   );
