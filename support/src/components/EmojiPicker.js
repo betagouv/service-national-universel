@@ -1,5 +1,5 @@
 import { Picker } from "emoji-mart";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // https://github.com/missive/emoji-mart#i18n
 const i18n = {
@@ -32,8 +32,25 @@ const i18n = {
   },
 };
 
-const EmojiPicker = ({ insertEmoji }) => {
+const EmojiPicker = ({ insertEmoji, className }) => {
   const [theme, setTheme] = useState("light");
+
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+
+  const [pickerPosition, setPickerPosition] = useState({ top: 0, right: 0 });
+  const pickerButtonRef = useRef(null);
+
+  const onOpenEmojiPicker = () => {
+    const { top, left } = pickerButtonRef.current.getBoundingClientRect();
+    // picker is 420h x 340w
+    const idealTop = top + 24; // 24px is the svg button size
+    const pickerTop = Math.min(window.innerHeight - 420, idealTop);
+    const idealLeft = Math.min(left, window.innerWidth - 340 - 24);
+    const pickerLeft = idealTop > pickerTop ? idealLeft + 24 : idealLeft;
+    setPickerPosition({ top: pickerTop, left: pickerLeft });
+    setShowEmojiPicker(!showEmojiPicker);
+  };
+
   useEffect(() => {
     if (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches && theme === "light") {
       setTheme("dark");
@@ -41,7 +58,6 @@ const EmojiPicker = ({ insertEmoji }) => {
   }, []);
 
   const onSelect = ({ unified }) => {
-    insertEmoji(String.fromCodePoint(parseInt(Number(`0x${unified}`), 10)));
     /*
   "id": "heart_eyes",
     "name": "Smiling Face with Heart-Shaped Eyes",
@@ -54,9 +70,28 @@ const EmojiPicker = ({ insertEmoji }) => {
     "skin": null,
     "native": "😍"
   */
+    insertEmoji(String.fromCodePoint(parseInt(Number(`0x${unified}`), 10)));
+    setShowEmojiPicker(!showEmojiPicker);
   };
 
-  return <Picker i18n={i18n} set="apple" enableFrequentEmojiSort onSelect={onSelect} native theme={theme} title="SNU" />;
+  return (
+    <>
+      <svg
+        ref={pickerButtonRef}
+        onClick={onOpenEmojiPicker}
+        xmlns="http://www.w3.org/2000/svg"
+        className={`relative h-6 w-6 cursor-pointer text-gray-400 mr-2 ${className}`}
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+      <div className="fixed z-10" style={pickerPosition}>
+        {!!showEmojiPicker && <Picker i18n={i18n} set="apple" enableFrequentEmojiSort onSelect={onSelect} native theme={theme} title="SNU" />}
+      </div>
+    </>
+  );
 };
 
 export default EmojiPicker;
