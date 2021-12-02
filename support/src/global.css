@@ -6,6 +6,7 @@
   height: 100vh;
   width: 100%;
   display: flex;
+  flex-direction: column;
 }
 
 * {
@@ -62,28 +63,28 @@ body {
   margin: 0;
 }
 
-p {
+#text-editor p {
   margin: 0;
 }
 
-pre {
+#text-editor pre {
   padding: 10px;
   background-color: #eee;
   white-space: pre-wrap;
 }
 
-:not(pre) > code {
+#text-editor :not(pre) > code {
   font-family: monospace;
   background-color: #eee;
   padding: 3px;
 }
 
-img {
+#text-editor img {
   max-width: 100%;
   max-height: 20em;
 }
 
-blockquote {
+#text-editor blockquote {
   border-left: 2px solid #ddd;
   margin-left: 0;
   margin-right: 0;
@@ -92,39 +93,59 @@ blockquote {
   font-style: italic;
 }
 
-blockquote[dir="rtl"] {
+#text-editor blockquote[dir="rtl"] {
   border-left: none;
   padding-left: 0;
   padding-right: 10px;
   border-right: 2px solid #ddd;
 }
 
-table {
+#text-editor table {
   border-collapse: collapse;
 }
 
-td {
+#text-editor td {
   padding: 10px;
   border: 2px solid #ddd;
 }
 
-iframe {
+#text-editor iframe {
   width: 100%;
   border: 1px solid #eee;
 }
 
-[data-slate-editor] > * + * {
+#text-editor [data-slate-editor] > * + * {
   margin-top: 1em;
 }
 
-[data-slate-editor] h1 {
+#text-editor [data-slate-editor] h1 {
   font-size: 2em;
   font-weight: bold;
 }
 
-[data-slate-editor] h2 {
+#text-editor [data-slate-editor] h2 {
   font-size: 1.5em;
   font-weight: bold;
+}
+
+#text-editor ul {
+  list-style: initial;
+  margin: initial;
+  padding: initial;
+}
+
+#text-editor ul li {
+  margin-left: 2rem;
+}
+
+#text-editor ol {
+  list-style: decimal;
+  margin: initial;
+  padding: initial;
+}
+
+#text-editor ol li {
+  margin-left: 2rem;
 }
 
 .debug * {

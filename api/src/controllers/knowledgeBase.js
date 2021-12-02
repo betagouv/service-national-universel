@@ -104,7 +104,8 @@ router.put("/reorder", passport.authenticate("referent", { session: false, failW
         await KnowledgeBaseObject.findByIdAndUpdate(item._id, { position: item.position, parentId: item.parentId || null });
       }
     });
-    return res.status(200).send({ ok: true });
+    const data = await KnowledgeBaseObject.find().populate({ path: "author", select: "_id firstName lastName role" })
+    return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
