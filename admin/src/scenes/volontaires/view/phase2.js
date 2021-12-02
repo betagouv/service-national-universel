@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 
@@ -12,14 +12,14 @@ import DownloadAttestationButton from "../../../components/buttons/DownloadAttes
 import MailAttestationButton from "../../../components/buttons/MailAttestationButton";
 import { Box, BoxTitle } from "../../../components/box";
 
-export default ({ young, onChange }) => {
+export default function Phase2({ young, onChange }) {
   return (
     <div style={{ display: "flex", alignItems: "flex-start", width: "100%" }}>
       <WrapperPhase2 young={young} tab="phase2">
         <Box>
           <Row>
             <Col md={4} sm={4} style={{ padding: "3rem", borderRight: "2px solid #f4f5f7" }}>
-              <BoxTitle>Réalisation des 84 heures de mission d'intérêt général</BoxTitle>
+              <BoxTitle>Réalisation des 84 heures de mission d&apos;intérêt général</BoxTitle>
               <p style={{ flex: 1 }}>
                 Le volontaire doit achever sa phase 2 avant le <b>{getLimitDateForPhase2(young.cohort)}</b>
               </p>
@@ -34,8 +34,7 @@ export default ({ young, onChange }) => {
                   padding: "1rem",
                   margin: 0,
                   borderBottom: "2px solid #f4f5f7",
-                }}
-              >
+                }}>
                 <HourTitle>Heures de MIG prévisionnelles</HourTitle>
                 <HourDetail>{young.phase2NumberHoursEstimated || "0"}h</HourDetail>
               </Row>
@@ -61,8 +60,7 @@ export default ({ young, onChange }) => {
               md={6}
               style={{
                 borderRight: "2px solid #f4f5f7",
-              }}
-            >
+              }}>
               <Bloc borderBottom>
                 <Details title="Domaines">{young.domains && young.domains.map((d, i) => <Badge key={i} text={t(d)} />)}</Details>
                 <Details title="Projet professionnel">
@@ -123,10 +121,10 @@ export default ({ young, onChange }) => {
           <div style={{ display: "flex", alignItems: "flex-start" }}>
             <div style={{ textAlign: "center" }}>
               <DownloadAttestationButton young={young} uri="2">
-                Télécharger l'attestation de réalisation de la phase 2
+                Télécharger l&apos;attestation de réalisation de la phase 2
               </DownloadAttestationButton>
               <MailAttestationButton style={{ marginTop: ".5rem" }} young={young} type="2" template="certificate" placeholder="Attestation de réalisation de la phase 2">
-                Envoyer l'attestation par mail
+                Envoyer l&apos;attestation par mail
               </MailAttestationButton>
             </div>
           </div>
@@ -134,7 +132,7 @@ export default ({ young, onChange }) => {
       </WrapperPhase2>
     </div>
   );
-};
+}
 
 const Bloc = ({ children, title, borderBottom, borderRight, borderLeft, disabled }) => {
   return (
@@ -144,8 +142,7 @@ const Bloc = ({ children, title, borderBottom, borderRight, borderLeft, disabled
         borderRight: borderRight ? "2px solid #f4f5f7" : 0,
         borderLeft: borderLeft ? "2px solid #f4f5f7" : 0,
         backgroundColor: disabled ? "#f9f9f9" : "transparent",
-      }}
-    >
+      }}>
       <Wrapper>
         {title && (
           <div style={{ display: "flex" }}>

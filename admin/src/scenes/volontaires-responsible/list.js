@@ -19,7 +19,7 @@ import ReactiveListComponent from "../../components/ReactiveListComponent";
 
 const FILTERS = ["SEARCH", "STATUS", "PHASE", "COHORT", "MISSIONS", "TUTOR"];
 
-export default () => {
+export default function List() {
   const user = useSelector((state) => state.Auth.user);
   const [missions, setMissions] = useState();
   const [panel, setPanel] = useState(null);
@@ -213,7 +213,7 @@ export default () => {
       </ReactiveBase>
     </div>
   );
-};
+}
 
 const Hit = ({ hit, onClick, selected, mission }) => {
   const history = useHistory();
@@ -266,9 +266,8 @@ const Hit = ({ hit, onClick, selected, mission }) => {
           <ContractLink
             onClick={() => {
               history.push(`/volontaire/${hit.youngId}/phase2/application/${hit._id}/contrat`);
-            }}
-          >
-            Contrat d'engagement &gt;
+            }}>
+            Contrat d&apos;engagement &gt;
           </ContractLink>
         ) : null}
       </td>
