@@ -72,7 +72,7 @@
     "react-loading": "^2.0.3",
     "react-multi-select-component": "^3.0.7",
     "react-redux": "^7.2.1",
-    "react-redux-toastr": "^7.6.5",
+    "react-redux-toastr": "7.6.6",
     "react-router-dom": "^5.2.0",
     "react-select": "^4.1.0",
     "reactstrap": "^8.9.0",
