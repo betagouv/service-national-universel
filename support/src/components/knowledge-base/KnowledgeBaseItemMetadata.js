@@ -91,7 +91,7 @@ const KnowledgeBaseItemMetadata = ({ visible, setVisible }) => {
             </div>
           </fieldset>
           <div className="flex justify-start items-center">
-            <label htmlFor="status">Status: </label>
+            <label htmlFor="status">Visibilité: </label>
             <select className="border-2 ml-5 p-2" name="status" defaultValue={item.status}>
               <option value="PUBLISHED">Publié</option>
               <option value="DRAFT">Brouillon</option>

@@ -66,7 +66,7 @@ const KnowledgeBaseCreate = ({ type, position, parentId = null }) => {
                 </div>
               </fieldset>
               {/* <div className="flex flex-row items-center">
-                <label htmlFor="status">Status: </label>
+                <label htmlFor="status">Visibilité: </label>
                 <select className="border-2 ml-10 p-2" name="status" value="DRAFT">
                   <option value="PUBLISHED">Publié</option>
                   <option value="DRAFT">Brouillon</option>
