@@ -6,7 +6,7 @@ import { ROLES } from "../../../utils";
 import WrapperHistory from "./wrapper";
 import HistoricComponent from "../../../components/views/Historic";
 
-export default ({ young }) => {
+export default function History({ young }) {
   const user = useSelector((state) => state.Auth.user);
   if (user.role !== ROLES.ADMIN) return <Redirect to="/" />;
 
@@ -17,4 +17,4 @@ export default ({ young }) => {
       </WrapperHistory>
     </div>
   );
-};
+}

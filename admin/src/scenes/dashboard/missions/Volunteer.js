@@ -3,7 +3,7 @@ import { Col, Row } from "reactstrap";
 import CircularProgress, { CircularLine, CircularLineIndex } from "../components/CircularProgress";
 import { Box, BoxTitleCircular as BoxTitle } from "../../../components/box";
 
-export default ({ youngsEngaged }) => {
+export default function Volunteer({ youngsEngaged }) {
   const total = Object.keys(youngsEngaged).reduce((acc, a) => acc + youngsEngaged[a], 0);
 
   return (
@@ -42,4 +42,4 @@ export default ({ youngsEngaged }) => {
       </Box>
     </React.Fragment>
   );
-};
+}

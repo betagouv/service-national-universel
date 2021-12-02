@@ -6,7 +6,7 @@ import Edit from "./edit";
 import List from "./list";
 import Create from "./create";
 
-export default () => {
+export default function Index() {
   return (
     <Switch>
       <Route path="/structure/create" component={Create} />
@@ -15,4 +15,4 @@ export default () => {
       <Route path="/structure" component={List} />
     </Switch>
   );
-};
+}

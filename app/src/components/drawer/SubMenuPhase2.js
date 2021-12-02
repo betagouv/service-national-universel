@@ -3,9 +3,8 @@ import { NavLink } from "react-router-dom";
 
 import { DRAWER_TABS } from "../utils";
 import { YOUNG_STATUS_PHASE2, ENABLE_PM } from "../../utils";
-import DownloadAttestationButton from "../buttons/DownloadAttestationButton";
 
-export default ({ young, handleClick }) => {
+export default function SubMenuPhase2({ young, handleClick }) {
   const render = () => {
     if (young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED)
       return (
@@ -52,4 +51,4 @@ export default ({ young, handleClick }) => {
   };
 
   return render();
-};
+}

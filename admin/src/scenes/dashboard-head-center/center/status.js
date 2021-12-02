@@ -6,7 +6,7 @@ import { colors } from "../../../utils";
 
 import api from "../../../services/api";
 
-export default () => {
+export default function Status() {
   const [placesTotal, setPlacesTotal] = useState(0);
   const [placesLeft, setPlacesLeft] = useState(0);
   const user = useSelector((state) => state.Auth.user);
@@ -33,4 +33,4 @@ export default () => {
       </Col>
     </Row>
   );
-};
+}

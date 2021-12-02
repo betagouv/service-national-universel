@@ -18,7 +18,7 @@ import ReactiveListComponent from "../../components/ReactiveListComponent";
 
 const FILTERS = ["DOMAIN", "SEARCH", "STATUS", "PLACES", "LOCATION", "TUTOR", "REGION", "DEPARTMENT", "STRUCTURE", "MILITARY_PREPARATION"];
 
-export default () => {
+export default function List() {
   const [mission, setMission] = useState(null);
   const [structure, setStructure] = useState();
   const [structureIds, setStructureIds] = useState();
@@ -265,7 +265,7 @@ export default () => {
       </ReactiveBase>
     </div>
   );
-};
+}
 
 const Hit = ({ hit, onClick, selected, callback }) => {
   const [value, setValue] = useState(null);

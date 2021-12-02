@@ -1,3 +1,4 @@
+'use strict'
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
@@ -66,7 +67,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     if (req.body.hasOwnProperty("position")) kb.position = req.body.position;
     if (req.body.hasOwnProperty("title")) {
       kb.title = req.body.title.trim();
-      kb.slug = slugify(req.body.title.trim(), {
+      let slug = slugify(req.body.title.trim(), {
         replacement: "-",
         remove: /[*+~.()'"!?:@]/g,
         lower: true, // convert to lower case, defaults to `false`
@@ -74,16 +75,20 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
         locale: "fr", // language code of the locale to use
         trim: true, // trim leading and trailing replacement chars, defaults to `true`
       });
+      let itemWithSameSlug = await KnowledgeBaseObject.findOne({ slug });
+      while (!!itemWithSameSlug) {
+        slug = `${slug}-${new Date().toISOString().split('T')[0]}`
+        itemWithSameSlug = await KnowledgeBaseObject.findOne({ slug });
+      }
+      kb.slug = slug;
     }
     if (req.body.hasOwnProperty("allowedRoles")) kb.allowedRoles = req.body.allowedRoles;
     if (req.body.hasOwnProperty("status")) kb.status = req.body.status;
 
     const newKb = await KnowledgeBaseObject.create(kb);
 
-    return res.status(200).send({
-      ok: true,
-      data: await KnowledgeBaseObject.findById(newKb._id).populate({ path: "author", select: "_id firstName lastName role" }).lean(),
-    });
+    const data = await KnowledgeBaseObject.findById(newKb._id).populate({ path: "author", select: "_id firstName lastName role" }).lean();
+    return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
@@ -93,7 +98,6 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 router.put("/reorder", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const itemsToReorder = req.body;
-    console.log(JSON.stringify(itemsToReorder, null, 2));
     const session = await KnowledgeBaseObject.startSession();
     await session.withTransaction(async () => {
       for (const item of itemsToReorder) {
@@ -158,6 +162,37 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
   }
 });
 
+router.get("/tree", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const rootKbs = await KnowledgeBaseObject.find({ parentId: { $in: [undefined, null] } })
+      .sort({ type: -1, position: 1 })
+      .populate({
+        path: "author",
+        select: "_id firstName lastName role",
+      })
+      .lean(); // to json;
+    if (!rootKbs) return res.status(200).send({ ok: true, data: [] });
+
+    const tree = await Promise.all(rootKbs.map(buildTree));
+
+    return res.status(200).send({ ok: true, data: { type: "root", children: tree } });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
+router.get("/all", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const data = await KnowledgeBaseObject.find().populate({ path: "author", select: "_id firstName lastName role" })
+
+    return res.status(200).send({ ok: true, data });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+  }
+});
+
 router.get("/:slug", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
     if (!req.params.slug) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -185,26 +220,6 @@ router.get("/:slug", passport.authenticate(["referent", "young"], { session: fal
     }
 
     return res.status(200).send({ ok: true, data: existingKb });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
-  }
-});
-
-router.get("/", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const rootKbs = await KnowledgeBaseObject.find({ parentId: { $in: [undefined, null] } })
-      .sort({ type: -1, position: 1 })
-      .populate({
-        path: "author",
-        select: "_id firstName lastName role",
-      })
-      .lean(); // to json;
-    if (!rootKbs) return res.status(200).send({ ok: true, data: [] });
-
-    const tree = await Promise.all(rootKbs.map(buildTree));
-
-    return res.status(200).send({ ok: true, data: { type: "root", children: tree } });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });

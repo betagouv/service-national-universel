@@ -35,7 +35,7 @@ const articles = [
   }, */
 ];
 
-export default () => {
+export default function PublicSupportCenter() {
   const user = useSelector((state) => state.Auth.user);
   const [open, setOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
@@ -51,13 +51,13 @@ export default () => {
             </a>
           </p>
         )}
-        <h4 style={{ textAlign: "center" }}>Besoin d'aide&nbsp;?</h4>
+        <h4 style={{ textAlign: "center" }}>Besoin d&apos;aide&nbsp;?</h4>
         <div className="help-section">
           <div className="help-section-block">
             <div className="help-section-text" style={{ color: "#6B7280" }}>
-              Vous souhaitez en savoir plus sur les phases du Service National Universel ou sur les autres formes d'engagement&nbsp;?
+              Vous souhaitez en savoir plus sur les phases du Service National Universel ou sur les autres formes d&apos;engagement&nbsp;?
               <br />
-              N'hésitez pas à consulter notre{" "}
+              N&apos;hésitez pas à consulter notre{" "}
               <strong>
                 <a className="link" href="https://support.snu.gouv.fr/help/fr-fr/2-responsable-de-structure" target="_blank" rel="noopener noreferrer">
                   base de connaissance
@@ -83,7 +83,7 @@ export default () => {
             </div>
             <p>{article.body}</p>
             <p>
-              <a className="block-link" href={article.url} target="_blank">
+              <a className="block-link" href={article.url} target="_blank" rel="noreferrer">
                 Lire la suite
               </a>
             </p>
@@ -92,7 +92,7 @@ export default () => {
       </Articles>
       <hr style={{ margin: "3rem auto", maxWidth: "600px" }} />
       <Container>
-        <h4 style={{ textAlign: "center" }}>Vous n'avez pas trouvé de réponse à votre demande&nbsp;?</h4>
+        <h4 style={{ textAlign: "center" }}>Vous n&apos;avez pas trouvé de réponse à votre demande&nbsp;?</h4>
         <div className="help-section">
           <div className="help-section-block">
             <div className="help-section-text" style={{ color: "#6B7280", marginBottom: "0.5rem" }}>
@@ -100,7 +100,7 @@ export default () => {
               une réponse par mail.
             </div>
             <div className="zammad-container">
-              <LinkButton onClick={() => setOpen(true)}>Contacter quelqu'un</LinkButton>
+              <LinkButton onClick={() => setOpen(true)}>Contacter quelqu&apos;un</LinkButton>
             </div>
           </div>
         </div>
@@ -109,7 +109,7 @@ export default () => {
       </Container>
     </div>
   );
-};
+}
 
 const Container = styled.div`
   position: relative;

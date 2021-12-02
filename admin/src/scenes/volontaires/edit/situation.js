@@ -1,6 +1,5 @@
 import React from "react";
 import { Col } from "reactstrap";
-import { useSelector } from "react-redux";
 
 import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import Etablissement from "./components/etablissmentInput";

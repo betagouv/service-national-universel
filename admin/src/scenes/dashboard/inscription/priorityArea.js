@@ -9,7 +9,7 @@ import Loader from "../../../components/Loader";
 import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import { getLink } from "../../../utils";
 
-export default ({ filter }) => {
+export default function PriorityArea({ filter }) {
   const [value, setValue] = useState(null);
 
   useEffect(() => {
@@ -56,11 +56,11 @@ export default ({ filter }) => {
 
   return (
     <Box style={{ height: "fit-content" }}>
-      <BoxHeadTitle>Issus d'un Quartier Prioritaire de la Ville</BoxHeadTitle>
+      <BoxHeadTitle>Issus d&apos;un Quartier Prioritaire de la Ville</BoxHeadTitle>
       <BoxContent direction="column">{render()}</BoxContent>
     </Box>
   );
-};
+}
 
 const Content = styled.div`
   display: flex;

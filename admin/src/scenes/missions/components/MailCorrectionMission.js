@@ -6,7 +6,7 @@ import { toastr } from "react-redux-toastr";
 import api from "../../../services/api";
 import { SENDINBLUE_TEMPLATES } from "../../../utils";
 
-export default ({ value, onChange, onSend }) => {
+export default function MailCorrectionMission({ value, onChange, onSend }) {
   const [message, setMessage] = useState();
   const [sending, setSending] = useState(false);
 
@@ -37,7 +37,7 @@ Merci d'effectuer ces modifications depuis votre espace.`);
     <Modal isOpen={true} toggle={onChange}>
       <ModalContainer>
         <img src={require("../../../assets/close.svg")} height={10} onClick={onChange} />
-        <h1>Veuillez éditer le message ci-dessous pour préciser les corrections à apporter avant de l'envoyer</h1>
+        <h1>Veuillez éditer le message ci-dessous pour préciser les corrections à apporter avant de l&apos;envoyer</h1>
         <h3>votre message</h3>
         <textarea rows="15" value={message} onChange={(e) => setMessage(e.target.value)} />
         <button disabled={sending} onClick={send}>
@@ -46,7 +46,7 @@ Merci d'effectuer ces modifications depuis votre espace.`);
       </ModalContainer>
     </Modal>
   );
-};
+}
 
 const ModalContainer = styled.div`
   display: flex;

@@ -9,7 +9,7 @@ import PanelActionButton from "../../../components/buttons/PanelActionButton";
 import { translate, getResultLabel } from "../../../utils";
 import ReactiveListComponent from "../../../components/ReactiveListComponent";
 
-export default ({ young, onAffect, onClick }) => {
+export default function AssignCenter({ young, onAffect, onClick }) {
   const FILTERS = ["SEARCH"];
   const [searchedValue, setSearchedValue] = useState("");
 
@@ -82,7 +82,7 @@ export default ({ young, onAffect, onClick }) => {
       </ReactiveBase>
     </>
   );
-};
+}
 
 const HitCenter = ({ hit, onSend, onClick }) => {
   return (

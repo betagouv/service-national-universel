@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { Card, CardTitle, CardValueWrapper, CardValue, Subtitle } from "../../../components/dashboard";
 import { colors } from "../../../utils";
 
-export default ({ missionPlaceLeft, missionPlaceTotal, filter, getLink }) => {
+export default function ProposedPlaces({ missionPlaceLeft, missionPlaceTotal, filter, getLink }) {
   return (
     <React.Fragment>
       <Subtitle>Places proposées par les structures</Subtitle>
@@ -42,4 +42,4 @@ export default ({ missionPlaceLeft, missionPlaceTotal, filter, getLink }) => {
       </Row>
     </React.Fragment>
   );
-};
+}

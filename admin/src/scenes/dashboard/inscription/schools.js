@@ -9,7 +9,7 @@ function round1Decimal(num) {
   return Math.round((num + Number.EPSILON) * 10) / 10;
 }
 
-export default ({ filter }) => {
+export default function Schools({ filter }) {
   const [schools, setSchools] = useState([]);
   const history = useHistory();
 
@@ -118,7 +118,7 @@ export default ({ filter }) => {
       </TableLoadMoreWrapper> */}
     </TableWrapper>
   );
-};
+}
 
 // Table
 const TableWrapper = styled.div`
@@ -196,18 +196,4 @@ const TableCellPercentage = styled.span`
   border-radius: 10px;
   font-size: 14px;
   color: #7c7c7c;
-`;
-const TableLoadMoreWrapper = styled.div`
-  padding: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
-const TableLoadMoreButton = styled.button`
-  text-transform: uppercase;
-  color: #372f78;
-  font-weight: bold;
-  font-size: 14px;
-  background-color: transparent;
-  border: 0;
 `;

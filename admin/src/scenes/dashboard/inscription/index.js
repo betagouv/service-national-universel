@@ -21,7 +21,7 @@ import PriorityArea from "./priorityArea";
 import RuralArea from "./ruralArea";
 import { YOUNG_STATUS, translate, ROLES, academyList } from "../../../utils";
 
-export default ({ onChangeFilter }) => {
+export default function Index({ onChangeFilter }) {
   const [filter, setFilter] = useState();
   const user = useSelector((state) => state.Auth.user);
 
@@ -133,7 +133,7 @@ export default ({ onChangeFilter }) => {
       )}
     </>
   );
-};
+}
 
 // Title line with filters
 const Title = styled.h2`

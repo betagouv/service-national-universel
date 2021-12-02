@@ -9,7 +9,7 @@ import Phase3 from "./phase3";
 import Phase2Contract from "./phase2Contract";
 import History from "./history";
 
-export default ({ ...props }) => {
+export default function Index({ ...props }) {
   const [young, setYoung] = useState();
 
   const getYoung = async () => {
@@ -34,4 +34,4 @@ export default ({ ...props }) => {
       <Route path="/volontaire/:id" component={() => <Details young={young} />} />
     </Switch>
   );
-};
+}
