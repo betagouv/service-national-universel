@@ -69,7 +69,7 @@
     "jest": "^27.0.4",
     "jest-cli": "^27.0.4",
     "prettier": "^2.4.1",
-    "regenerator-runtime": "^0.13.7",
+    "regenerator-runtime": "0.13.9",
     "supertest": "6.1.6"
   }
 }
