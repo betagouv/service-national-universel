@@ -6,7 +6,7 @@ import { HeroContainer, Hero, Content } from "../../components/Content";
 import Badge from "../../components/Badge";
 import { Link } from "react-router-dom";
 
-export default function Default() {
+export default function HomeDefault() {
   const young = useSelector((state) => state.Auth.young);
   return (
     <HeroContainer>
