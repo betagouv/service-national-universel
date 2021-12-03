@@ -16,7 +16,6 @@ export default function Situation({ values, handleChange, required = {}, errors,
             handleChange={handleChange}
             errors={errors}
             touched={touched}
-            required={required}
             keys={{
               schoolName: "schoolName",
               grade: "grade",

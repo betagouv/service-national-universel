@@ -13,7 +13,7 @@ export default function Coordonnees({ values, handleChange, required = {}, error
   useEffect(() => {
     const zip = values.zip;
     if (values.cohort === "2020") return;
-    if (zip.length < 2) return;
+    if (!zip || zip.length < 2) return;
     let departmentCode = zip.substr(0, 2);
     if (["97", "98"].includes(departmentCode)) {
       departmentCode = zip.substr(0, 3);
