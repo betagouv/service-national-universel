@@ -4,7 +4,7 @@ import styled from "styled-components";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
 
-import { translate as t, isInRuralArea, ROLES, copyToClipboard, formatStringDate, getAge, YOUNG_STATUS, getLabelWithdrawnReason } from "../../../utils";
+import { translate as t, isInRuralArea, ROLES, copyToClipboard, formatStringDate, getAge, YOUNG_STATUS, getLabelWithdrawnReason, colors } from "../../../utils";
 import YoungView from "./wrapper";
 import api from "../../../services/api";
 import DownloadButton from "../../../components/buttons/DownloadButton";
@@ -12,6 +12,8 @@ import DownloadAttestationButton from "../../../components/buttons/DownloadAttes
 import { Box, BoxTitle } from "../../../components/box";
 import Emails from "../../../components/views/Emails";
 import InfoIcon from "../../../assets/InfoIcon";
+import TickDone from "../../../assets/TickDone";
+import Copy from "../../../assets/Copy";
 import PatchHistoric from "../../../components/views/PatchHistoric";
 import ExpandComponent from "../../../components/ExpandComponent";
 
@@ -283,7 +285,13 @@ const Bloc = ({ children, title, last }) => {
 
 const Details = ({ title, value, copy, style }) => {
   if (!value) return <div />;
+  const [copied, setCopied] = React.useState(false);
   if (typeof value === "function") value = value();
+  React.useEffect(() => {
+    if (copied) {
+      setTimeout(() => setCopied(false), 3000);
+    }
+  }, [copied]);
   return (
     <div className="detail" style={style}>
       <div className="detail-title">{`${title} :`}</div>
@@ -292,12 +300,12 @@ const Details = ({ title, value, copy, style }) => {
         {copy ? (
           <div
             className="icon"
-            icon={require(`../../../assets/copy.svg`)}
             onClick={() => {
               copyToClipboard(value);
-              toastr.success(`'${title}' a été copié dans le presse papier.`);
-            }}
-          />
+              setCopied(true);
+            }}>
+            {copied ? <TickDone color={colors.green} width={17} height={17} /> : <Copy color={colors.darkPurple} width={17} height={17} />}
+          </div>
         ) : null}
       </section>
     </div>
@@ -326,12 +334,6 @@ const Wrapper = styled.div`
   .icon {
     cursor: pointer;
     margin: 0 0.5rem;
-    width: 15px;
-    height: 15px;
-    background: ${`url(${require("../../../assets/copy.svg")})`};
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 15px 15px;
   }
 `;
 

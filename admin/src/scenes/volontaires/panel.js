@@ -2,16 +2,7 @@ import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Link, useHistory } from "react-router-dom";
 
-import {
-  YOUNG_SITUATIONS,
-  translate as t,
-  YOUNG_STATUS,
-  isInRuralArea,
-  getAge,
-  formatDateFRTimezoneUTC,
-  formatStringLongDate,
-  getLabelWithdrawnReason,
-} from "../../utils";
+import { YOUNG_SITUATIONS, translate as t, YOUNG_STATUS, isInRuralArea, getAge, formatDateFRTimezoneUTC, formatStringLongDate, getLabelWithdrawnReason } from "../../utils";
 import { appURL } from "../../config";
 import api from "../../services/api";
 import PanelActionButton from "../../components/buttons/PanelActionButton";

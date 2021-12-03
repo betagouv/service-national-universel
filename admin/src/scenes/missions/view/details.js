@@ -3,11 +3,12 @@ import { Link } from "react-router-dom";
 import { Col, Row } from "reactstrap";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
-import { toastr } from "react-redux-toastr";
 
-import { translate, formatStringDateTimezoneUTC, ROLES, copyToClipboard, MISSION_STATUS } from "../../../utils";
+import { translate, formatStringDateTimezoneUTC, ROLES, copyToClipboard, MISSION_STATUS, colors } from "../../../utils";
 import MissionView from "./wrapper";
 import { Box, BoxTitle } from "../../../components/box";
+import TickDone from "../../../assets/TickDone";
+import Copy from "../../../assets/Copy";
 
 export default function DetailsView({ mission, structure, tutor }) {
   const user = useSelector((state) => state.Auth.user);
@@ -117,7 +118,13 @@ const Bloc = ({ children, title, titleRight, borderBottom, borderRight, borderTo
 
 const Details = ({ title, value, copy }) => {
   if (!value) return <div />;
+  const [copied, setCopied] = React.useState(false);
   if (typeof value === "function") value = value();
+  React.useEffect(() => {
+    if (copied) {
+      setTimeout(() => setCopied(false), 3000);
+    }
+  }, [copied]);
   return (
     <div className="detail">
       <div className="detail-title">{`${title} :`}</div>
@@ -127,9 +134,10 @@ const Details = ({ title, value, copy }) => {
           className="icon"
           onClick={() => {
             copyToClipboard(value);
-            toastr.success(`'${title}' a été copié dans le presse papier.`);
-          }}
-        />
+            setCopied(true);
+          }}>
+          {copied ? <TickDone color={colors.green} width={17} height={17} /> : <Copy color={colors.darkPurple} width={17} height={17} />}
+        </div>
       ) : null}
     </div>
   );
@@ -158,12 +166,6 @@ const Wrapper = styled.div`
   .icon {
     cursor: pointer;
     margin: 0 0.5rem;
-    width: 15px;
-    height: 15px;
-    background: ${`url(${require("../../../assets/copy.svg")})`};
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 15px 15px;
   }
 `;
 
