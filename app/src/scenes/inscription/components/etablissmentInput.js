@@ -138,7 +138,7 @@ function SchoolCityTypeahead({ onChange, initialValue }) {
         }}
         onSuggestionsClearRequested={() => setSuggestions([])}
         getSuggestionValue={(suggestion) => (suggestion !== "noresult" ? `${suggestion.nom}` : "")}
-        onSuggestionSelected
+        onSuggestionSelected={(event, { suggestion }) => {}}
         renderSuggestion={(suggestion) => (
           <div>
             {suggestion !== "noresult" ? (
