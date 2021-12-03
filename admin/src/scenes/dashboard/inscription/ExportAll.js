@@ -32,7 +32,7 @@ export default function ExportAll({ filter }) {
     setLoading(true);
 
     // get all the inscriptions goals for the selected cohorts
-    const inscriptionGoalsRequest = filter?.cohort?.map((cohort) => api.get(`/inscription-goal/${encodeURI(cohort)}`));
+    const inscriptionGoalsRequest = [filter?.cohort || []].map((cohort) => api.get(`/inscription-goal/${encodeURI(cohort)}`));
     let inscriptionGoals = await Promise.all([...inscriptionGoalsRequest]);
     inscriptionGoals = inscriptionGoals?.reduce((previous, current) => {
       if (current.ok && current.data?.length) {
