@@ -61,7 +61,7 @@
     "i18n-iso-countries": "^7.0.0",
     "isomorphic-fetch": "^3.0.0",
     "less": "4.1.2",
-    "less-loader": "^7.2.1",
+    "less-loader": "7.3.0",
     "password-validator": "^5.1.1",
     "path": "^0.12.7",
     "query-string": "^6.14.1",
