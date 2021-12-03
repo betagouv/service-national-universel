@@ -11,9 +11,10 @@ import VioletButton from "../../components/buttons/VioletButton";
 import ExportAll from "./inscription/ExportAll";
 import { ROLES } from "../../utils";
 
-export default function DashboardIndex() {
+export default function Dashboard() {
   const [currentTab, setCurrentTab] = useState("inscriptions");
   const user = useSelector((state) => state.Auth.user);
+  const [filter, setFilter] = useState({});
 
   return (
     <>
@@ -36,14 +37,14 @@ export default function DashboardIndex() {
           </TabItem>
         </TabNavigationList>
         <div style={{ display: "flex", marginTop: "1rem" }}>
-          {user.role === ROLES.ADMIN && currentTab === "inscriptions" ? <ExportAll /> : null}
+          {user.role === ROLES.ADMIN && currentTab === "inscriptions" ? <ExportAll filter={filter} /> : null}
           <VioletButton onClick={() => print()}>
             <p>Exporter les statistiques</p>
           </VioletButton>
         </div>
       </TabNavigation>
       <Wrapper>
-        {currentTab === "inscriptions" && <Inscription />}
+        {currentTab === "inscriptions" && <Inscription onChangeFilter={setFilter} />}
         {currentTab === "volontaires" && <Volontaire />}
         {currentTab === "structures" && <Structure />}
         {currentTab === "missions" && <Mission />}
