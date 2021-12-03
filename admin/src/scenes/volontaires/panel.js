@@ -9,10 +9,13 @@ import PanelActionButton from "../../components/buttons/PanelActionButton";
 import Panel, { Info, Details } from "../../components/Panel";
 import Historic from "../../components/historic";
 import ContractLink from "../../components/ContractLink";
+import ModalConfirm from "../../components/modals/ModalConfirm";
 
 export default function VolontairePanel({ onChange, value }) {
   const [referentManagerPhase2, setReferentManagerPhase2] = useState();
   const [young, setYoung] = useState(null);
+  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+  const history = useHistory();
 
   useEffect(() => {
     (async () => {
@@ -34,6 +37,15 @@ export default function VolontairePanel({ onChange, value }) {
 
   if (!value || !young) return <div />;
 
+  const onConfirm = async () => {
+    try {
+      const { ok } = await api.post(`/young/${young._id}/anonymize`);
+      if (ok) history.go(0);
+    } catch (e) {
+      console.log(e);
+    }
+  };
+
   return (
     <Panel>
       <div className="info">
@@ -52,17 +64,29 @@ export default function VolontairePanel({ onChange, value }) {
             à {young.birthZip} {young.birthCity}, {young.birthCountry}
           </div>
         ) : null}
-        <div style={{ display: "flex" }}>
+        <div style={{ display: "flex", flexWrap: "wrap" }}>
           <Link to={`/volontaire/${young._id}`}>
             <PanelActionButton icon="eye" title="Consulter" />
           </Link>
           <Link to={`/volontaire/${young._id}/edit`}>
             <PanelActionButton icon="pencil" title="Modifier" />
           </Link>
+          <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`}>
+            <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
+          </a>
+          <div
+            onClick={() => {
+              setModal({
+                isOpen: true,
+                onConfirm,
+                title: `Êtes-vous sûr(e) de vouloir anonymiser le profil de ${young.firstName} ?`,
+                message:
+                  "Cette action est irréversible , et enverra automatiquement un mail au volontaire lui indiquant qu'il peut à nouveau s'inscrire sur la plateforme. Si vous souhaitez modifier le sujet du template, contactez l'équipe technique.",
+              });
+            }}>
+            <PanelActionButton icon="impersonate" title="Anonymiser" />
+          </div>
         </div>
-        <a href={`${appURL}/auth/connect?token=${api.getToken()}&young_id=${young._id}`}>
-          <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
-        </a>
         <Details title="Vu(e) le" value={formatStringLongDate(young.lastLoginAt)} />
       </div>
       {young.status === YOUNG_STATUS.WITHDRAWN ? (
@@ -167,6 +191,16 @@ export default function VolontairePanel({ onChange, value }) {
           <div className="quote">{`« ${young.motivations} »`}</div>
         </div>
       )}
+      <ModalConfirm
+        isOpen={modal?.isOpen}
+        title={modal?.title}
+        message={modal?.message}
+        onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+        onConfirm={() => {
+          modal?.onConfirm();
+          setModal({ isOpen: false, onConfirm: null });
+        }}
+      />
     </Panel>
   );
 }
