@@ -122,7 +122,7 @@ export default styled.div`
       font-size: 0.8rem;
     }
     .quote {
-      font-size: 18px;
+      font-size: 0.9rem;
       font-weight: 400;
       font-style: italic;
     }
@@ -161,7 +161,7 @@ export default styled.div`
     }
   }
   .quote {
-    font-size: 18px;
+    font-size: 0.9rem;
     font-weight: 400;
     font-style: italic;
   }
