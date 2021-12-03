@@ -219,7 +219,7 @@ const DeleteAccountButton = ({ young }) => {
       note: WITHRAWN_REASONS.find((r) => r.value === values.withdrawnReason)?.label + " " + values.withdrawnMessage,
     });
     try {
-      const { ok, code } = await api.put(`/young`, { status, lastStatusAt: Date.now(), ...values });
+      const { ok, code } = await api.put(`/young`, { ...values, status, lastStatusAt: Date.now() });
       if (!ok) return toastr.error("Une erreur est survenu lors du traitement de votre demande :", translate(code));
       logout();
     } catch (e) {

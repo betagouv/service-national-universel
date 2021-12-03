@@ -5,7 +5,7 @@ import { useSelector } from "react-redux";
 
 import api from "../services/api";
 
-import { translate, YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_COLORS, /* isEndOfInscriptionManagement2021, ROLES, */ colors, SENDINBLUE_TEMPLATES } from "../utils";
+import { translate, YOUNG_STATUS, YOUNG_PHASE, YOUNG_STATUS_COLORS, /* isEndOfInscriptionManagement2021, ROLES, */ colors, SENDINBLUE_TEMPLATES, WITHRAWN_REASONS } from "../utils";
 import { toastr } from "react-redux-toastr";
 
 import ModalCorrection from "./modals/ModalCorrection";
@@ -63,7 +63,7 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
     });
   };
 
-  const setStatus = async (status, note) => {
+  const setStatus = async (status, values) => {
     const prevStatus = young.status;
     if (status === "WITHDRAWN") {
       young.historic.push({
@@ -71,19 +71,19 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
         userName: `${user.firstName} ${user.lastName}`,
         userId: user._id,
         status,
-        note: WITHRAWN_REASONS.find((r) => r.value === note.withdrawnReason)?.label + " " + note.withdrawnMessage,
+        note: WITHRAWN_REASONS.find((r) => r.value === values?.withdrawnReason)?.label + " " + values?.withdrawnMessage,
       });
-    } else young.historic.push({ phase, userName: `${user.firstName} ${user.lastName}`, userId: user._id, status, note });
+    } else young.historic.push({ phase, userName: `${user.firstName} ${user.lastName}`, userId: user._id, status, note: values?.note });
     young[statusName] = status;
     const now = new Date();
     young.lastStatusAt = now.toISOString();
     if (statusName === "statusPhase2") young.statusPhase2UpdatedAt = now.toISOString();
-    if (status === "WITHDRAWN" && note) {
-      young.withdrawnReason = note.withdrawnReason;
-      young.withdrawnMessage = note.withdrawnMessage;
+    if (status === "WITHDRAWN" && (values?.withdrawnReason || values?.withdrawnMessage)) {
+      young.withdrawnReason = values?.withdrawnReason;
+      young.withdrawnMessage = values?.withdrawnMessage || "";
     }
-    if (status === "WAITING_CORRECTION" && note) young.inscriptionCorrectionMessage = note;
-    if (status === "REFUSED" && note) young.inscriptionRefusedMessage = note;
+    if (status === "WAITING_CORRECTION" && values?.note) young.inscriptionCorrectionMessage = values?.note;
+    if (status === "REFUSED" && values?.note) young.inscriptionRefusedMessage = values?.note;
     if (status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INTEREST_MISSION) young.phase = YOUNG_PHASE.CONTINUE;
     try {
       // we decided to let the validated youngs in the INSCRIPTION phase
@@ -94,7 +94,7 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
       //   young.phase = YOUNG_PHASE.COHESION_STAY;
       // }
 
-      const { lastStatusAt, statusPhase2UpdatedAt, withdrawnMessage, phase, inscriptionCorrectionMessage, inscriptionRefusedMessage } = young;
+      const { lastStatusAt, statusPhase2UpdatedAt, withdrawnMessage, phase, inscriptionCorrectionMessage, inscriptionRefusedMessage, withdrawnReason } = young;
 
       const {
         ok,
@@ -108,6 +108,7 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
         phase,
         inscriptionCorrectionMessage,
         inscriptionRefusedMessage,
+        withdrawnReason,
       });
       if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
 
@@ -143,8 +144,8 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
         isOpen={modal === YOUNG_STATUS.WAITING_CORRECTION}
         value={young}
         onChange={() => setModal(false)}
-        onSend={(msg) => {
-          setStatus(YOUNG_STATUS.WAITING_CORRECTION, msg);
+        onSend={(note) => {
+          setStatus(YOUNG_STATUS.WAITING_CORRECTION, { note });
           setModal(null);
         }}
       />
@@ -152,8 +153,8 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
         isOpen={modal === YOUNG_STATUS.REFUSED}
         value={young}
         onChange={() => setModal(false)}
-        onSend={(msg) => {
-          setStatus(YOUNG_STATUS.REFUSED, msg);
+        onSend={(note) => {
+          setStatus(YOUNG_STATUS.REFUSED, { note });
           setModal(null);
         }}
       />

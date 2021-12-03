@@ -245,10 +245,10 @@ export default function VolontaireView({ young }) {
                 <Details title="Consentements validés par ses représentants légaux" value={t(young.parentConsentment || "false")} style={{ border: "none" }} />
                 <ExpandComponent>{parentsConsentmentText}</ExpandComponent>
               </Bloc>
-              {young.withdrawnMessage ? (
+              {(young.withdrawnMessage === YOUNG_STATUS.WITHDRAWN && young.withdrawnMessage) || young.withdrawnReason ? (
                 <Bloc title="Désistement">
                   {young.withdrawnReason ? <div className="quote">{getLabelWithdrawnReason(young.withdrawnReason)}</div> : null}
-                  <div className="quote">{young.withdrawnMessage ? `« ${young.withdrawnMessage} »` : "Non renseigné"}</div>
+                  <div className="quote">Précision : {young.withdrawnMessage ? `« ${young.withdrawnMessage} »` : "Non renseigné"}</div>
                 </Bloc>
               ) : null}
             </Col>
