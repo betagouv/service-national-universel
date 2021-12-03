@@ -79,6 +79,16 @@ export default function Application({ application, index }) {
               <TagContainer>
                 <Tag color={APPLICATION_STATUS_COLORS[value.status]}>{translate(value.status)}</Tag>
                 {value.statusComment ? <StatusComment>{value.statusComment}</StatusComment> : null}
+                {value.status === APPLICATION_STATUS.WAITING_VALIDATION && value?.mission?.placesTotal > 0 ? (
+                  value?.mission?.placesLeft > 0 ? (
+                    <StatusComment>
+                      Place{value?.mission?.placesLeft > 1 ? "s" : ""} disponible{value?.mission?.placesLeft > 1 ? "s" : ""} : {value?.mission?.placesLeft}/
+                      {value?.mission?.placesTotal}
+                    </StatusComment>
+                  ) : (
+                    <StatusComment>Plus de places disponibles</StatusComment>
+                  )
+                ) : null}
               </TagContainer>
             </Col>
           </Card>
