@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Container } from "reactstrap";
 import styled from "styled-components";
-import { toastr } from "react-redux-toastr";
 import { NavLink } from "react-router-dom";
 import { useSelector } from "react-redux";
 
@@ -19,7 +18,7 @@ const updateHeightElement = (e) => {
   e.style.height = `${e.scrollHeight}px`;
 };
 
-export default (props) => {
+export default function TicketView(props) {
   const [ticket, setTicket] = useState();
   const [sending, setSending] = useState(false);
   const [message, setMessage] = useState();
@@ -49,7 +48,7 @@ export default (props) => {
     setSending(true);
     if (!message) return setSending(false);
     const id = props.match?.params?.id;
-    const { data } = await api.put(`/support-center/ticket/${id}`, { message, ticket });
+    await api.put(`/support-center/ticket/${id}`, { message, ticket });
     setMessage("");
     updateHeightElement(inputRef?.current);
     getTicket();
@@ -126,7 +125,7 @@ export default (props) => {
       </div>
     </Container>
   );
-};
+}
 
 const Message = ({ from, date, content, fromMe }) => {
   if (!content || !content.length) return null;

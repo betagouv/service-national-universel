@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 
-export default ({ location }) => {
+export default function HeaderComponent({ location }) {
   return (
     <Header>
       <Logos>
@@ -19,7 +19,7 @@ export default ({ location }) => {
       </AvatarContainer>
     </Header>
   );
-};
+}
 
 const AvatarContainer = styled(Link)`
   display: flex;
@@ -76,30 +76,6 @@ const Logos = styled.div`
       .mobileHide {
         height: 80px;
       }
-    }
-  }
-`;
-
-const Title = styled.div`
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  text-align: center;
-  h1 {
-    color: #151d2f;
-    font-size: 1.5rem;
-    font-weight: 700;
-  }
-  h3 {
-    color: #6a7181;
-    font-size: 1.5rem;
-  }
-  @media (max-width: 768px) {
-    h1 {
-      font-size: 1.2rem;
-    }
-    h3 {
-      font-size: 0.8rem;
     }
   }
 `;

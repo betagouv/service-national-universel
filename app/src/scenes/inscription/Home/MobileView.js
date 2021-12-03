@@ -4,14 +4,14 @@ import StopIcon from "../components/stopIcon";
 import TickIcon from "../components/tickIcon";
 import conditions from "./conditions";
 
-export default () => {
+export default function MobileView() {
   return (
     <Points>
-      <div className="points-title">Conditions d'inscription</div>
+      <div className="points-title">Conditions d&apos;inscription</div>
       <ul>
         <li>
           <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="20" height="20" rx="10" fill="#32267F" fill-opacity=".06" />
+            <rect width="20" height="20" rx="10" fill="#32267F" fillOpacity=".06" />
             <path
               d="M8.644 13.843l-3.487-3.487a.536.536 0 010-.758l.759-.759c.21-.21.549-.21.758 0l2.349 2.349 5.03-5.03c.21-.21.55-.21.76 0l.758.758c.21.21.21.549 0 .758l-6.169 6.169c-.21.21-.549.21-.758 0z"
               fill="#32267F"
@@ -23,7 +23,7 @@ export default () => {
         </li>
         <li>
           <svg width="20" height="20" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect width="20" height="20" rx="10" fill="#32267F" fill-opacity=".06" />
+            <rect width="20" height="20" rx="10" fill="#32267F" fillOpacity=".06" />
             <path
               d="M8.644 13.843l-3.487-3.487a.536.536 0 010-.758l.759-.759c.21-.21.549-.21.758 0l2.349 2.349 5.03-5.03c.21-.21.55-.21.76 0l.758.758c.21.21.21.549 0 .758l-6.169 6.169c-.21.21-.549.21-.758 0z"
               fill="#32267F"
@@ -35,46 +35,65 @@ export default () => {
         </li>
         <li>
           <div>
-            <p>Vérifiez si vous êtes <strong>éligible au SNU</strong> selon les dates de séjour proposées :</p>
+            <p>
+              Vérifiez si vous êtes <strong>éligible au SNU</strong> selon les dates de séjour proposées :
+            </p>
             {conditions.map((condition) => (
               <>
-                <p className="conditions_label">{condition.label} <strong>{condition.bold}</strong></p>
+                <p className="conditions_label">
+                  {condition.label} <strong>{condition.bold}</strong>
+                </p>
                 {condition.isDate1 ? (
                   <Date>
                     <p className="conditions_date">{condition.date1}</p>
-                    <p className="centered"><TickIcon /></p>
+                    <p className="centered">
+                      <TickIcon />
+                    </p>
                   </Date>
                 ) : (
                   <Date>
                     <p className="conditions_date">{condition.date1}</p>
-                    <p className="centered"><StopIcon /></p>
+                    <p className="centered">
+                      <StopIcon />
+                    </p>
                   </Date>
                 )}
                 {condition.isDate2 ? (
                   <Date>
                     <p className="conditions_date">{condition.date2}</p>
-                    <p className="centered"><TickIcon /></p>
+                    <p className="centered">
+                      <TickIcon />
+                    </p>
                   </Date>
                 ) : (
                   <Date>
                     <p className="conditions_date">{condition.date2}</p>
-                    <p className="centered"><StopIcon /></p>
+                    <p className="centered">
+                      <StopIcon />
+                    </p>
                   </Date>
                 )}
                 {condition.isDate3 ? (
                   <Date>
                     <p className="conditions_date">{condition.date3}</p>
-                    <p className="centered"><TickIcon /></p>
+                    <p className="centered">
+                      <TickIcon />
+                    </p>
                   </Date>
                 ) : (
                   <Date>
                     <p className="conditions_date">{condition.date3}</p>
-                    <p className="centered"><StopIcon /></p>
+                    <p className="centered">
+                      <StopIcon />
+                    </p>
                   </Date>
                 )}
               </>
             ))}
-            <p style={{ fontSize: "0.9rem", marginTop: "1rem" }}>*Les élèves de 2nde dont l'établissement relève du ministère de l’éducation nationale, de la jeunesse et des sports peuvent s’inscrire même si le séjour se déroule sur leur temps scolaire. Ils bénéficieront d’une autorisation de participation au séjour de cohésion.</p>
+            <p style={{ fontSize: "0.9rem", marginTop: "1rem" }}>
+              *Les élèves de 2nde dont l&apos;établissement relève du ministère de l’éducation nationale, de la jeunesse et des sports peuvent s’inscrire même si le séjour se
+              déroule sur leur temps scolaire. Ils bénéficieront d’une autorisation de participation au séjour de cohésion.
+            </p>
           </div>
         </li>
         <li style={{ padding: 0 }}>
@@ -82,8 +101,8 @@ export default () => {
             <p>Toutes les réponses à vos questions</p>
             <svg width="6" height="10" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path
-                fill-rule="evenodd"
-                clip-rule="evenodd"
+                fillRule="evenodd"
+                clipRule="evenodd"
                 d="M.293 9.707a1 1 0 010-1.414L3.586 5 .293 1.707A1 1 0 011.707.293l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
                 fill="#fff"
               />
@@ -92,17 +111,17 @@ export default () => {
         </li>
         <li>
           <Infos>
-            Pour compléter l'inscription en quelques minutes, il vous faudra :
+            Pour compléter l&apos;inscription en quelques minutes, il vous faudra :
             <div>
-              • Une <b>pièce d'identité</b> (Carte Nationale d'Identité ou Passeport)
-              <br />• L'accord de votre ou vos <b>représentants légaux</b>
+              • Une <b>pièce d&apos;identité</b> (Carte Nationale d&apos;Identité ou Passeport)
+              <br />• L&apos;accord de votre ou vos <b>représentants légaux</b>
             </div>
           </Infos>
         </li>
       </ul>
     </Points>
   );
-};
+}
 
 const FAQ = styled.a`
   width: 100%;
@@ -146,7 +165,7 @@ const Points = styled.div`
   }
   .conditions_date {
     font-size: 0.8rem;
-    color: #6B7280;
+    color: #6b7280;
     text-transform: uppercase;
     letter-spacing: 1px;
   }

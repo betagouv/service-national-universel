@@ -6,14 +6,13 @@ import { Field, Formik } from "formik";
 import { toastr } from "react-redux-toastr";
 import { Spinner } from "reactstrap";
 
-import { HERO_IMAGES_LIST, SENDINBLUE_TEMPLATES, YOUNG_STATUS } from "../../../utils";
+import { HERO_IMAGES_LIST, SENDINBLUE_TEMPLATES, YOUNG_STATUS, translate } from "../../../utils";
 import api from "../../../services/api";
 import ErrorMessage, { requiredMessage } from "../components/errorMessage";
-import { translate } from "../../../utils";
 import { setYoung } from "../../../redux/auth/actions";
 import { appURL } from "../../../config";
 
-export default () => {
+export default function StepDone() {
   const history = useHistory();
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
@@ -28,7 +27,7 @@ export default () => {
       <Info>
         <h3>INSCRIPTION AU SNU</h3>
         <h1>Vous y êtes presque !</h1>
-        <p>Vous êtes sur le point de soumettre votre dossier à l'administration du SNU.</p>
+        <p>Vous êtes sur le point de soumettre votre dossier à l&apos;administration du SNU.</p>
 
         <Formik
           initialValues={young}
@@ -51,8 +50,7 @@ export default () => {
             } finally {
               setLoading(false);
             }
-          }}
-        >
+          }}>
           {({ values, handleChange, handleSubmit, errors, touched }) => (
             <>
               <RadioLabel>
@@ -65,7 +63,7 @@ export default () => {
                   onChange={handleChange}
                 />
                 <div>
-                  Je, <b>{`${young.firstName} ${young.lastName}`}</b>, certifie l'exactitude des renseignements fournis
+                  Je, <b>{`${young.firstName} ${young.lastName}`}</b>, certifie l&apos;exactitude des renseignements fournis
                 </div>
               </RadioLabel>
               <ErrorMessage errors={errors} touched={touched} name="informationAccuracy" />
@@ -99,7 +97,7 @@ export default () => {
       <div className="thumb" />
     </Container>
   );
-};
+}
 
 const Info = styled.div`
   flex: 1.5;

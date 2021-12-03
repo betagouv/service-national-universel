@@ -11,7 +11,7 @@ import { translate, ENABLE_CHOOSE_MEETING_POINT } from "../../utils";
 import MeetingPointCard from "./components/MeetingPointCard";
 import MeetingPointCardNotFound from "./components/MeetingPointCardNotFound";
 
-export default () => {
+export default function SelectMeetingPoint() {
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
   const [meetingPoints, setMeetingPoints] = useState();
@@ -59,8 +59,8 @@ export default () => {
         <div>
           <h2>Confirmez votre point de rassemblement</h2>
           <p>
-            Il n'est plus possible de confirmer votre point de rassemblement. Si vous aviez plusieurs propositions, un point de rassemblement va vous être assigné d'office parmi
-            les choix ci-dessous.
+            Il n&apos;est plus possible de confirmer votre point de rassemblement. Si vous aviez plusieurs propositions, un point de rassemblement va vous être assigné
+            d&apos;office parmi les choix ci-dessous.
           </p>
         </div>
         <Row style={{ justifyContent: "center" }}>
@@ -136,4 +136,4 @@ export default () => {
       />
     </HeroContainer>
   );
-};
+}

@@ -1,5 +1,5 @@
 import React from "react";
-import { Route, Switch, Redirect } from "react-router-dom";
+import { Route, Switch, Redirect, useHistory } from "react-router-dom";
 import styled from "styled-components";
 import Nav from "./components/Nav";
 import FranceConnectCallback from "./components/FranceConnectCallback";
@@ -13,7 +13,6 @@ import Availability from "./Create/stepAvailability";
 import Done from "./Create/stepDone";
 import Drawer from "./Create/drawer";
 import { useSelector } from "react-redux";
-import { useHistory } from "react-router-dom";
 import { colors } from "../../utils";
 
 import Home from "./Home/index.js";
@@ -44,7 +43,7 @@ const Step = ({ step }) => {
           <HelpButton to="/public-besoin-d-aide" color="#362f78" />
         </div>
         {young && young?.status !== "IN_PROGRESS" ? (
-          <a class="back-button" onClick={() => history.push("/")}>
+          <a className="back-button" onClick={() => history.push("/")}>
             {"<"} Retour à mon espace
           </a>
         ) : null}
@@ -53,7 +52,7 @@ const Step = ({ step }) => {
   );
 };
 
-export default () => {
+export default function Index() {
   const young = useSelector((state) => state.Auth.young);
   if (young?.cohort && !["", "Juillet 2022", "Juin 2022", "Février 2022", "2022"].includes(young?.cohort)) {
     return <Redirect to={{ pathname: "/" }} />;
@@ -73,7 +72,7 @@ export default () => {
       <Route path="/inscription" component={Home} />
     </Switch>
   );
-};
+}
 
 const Content = styled.div`
   padding: 1rem;

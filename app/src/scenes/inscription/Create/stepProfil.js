@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-duplicate-props */
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { Col } from "reactstrap";
@@ -19,7 +20,7 @@ import EyeClose from "../../../assets/eye-slash.svg";
 import FormFooter from "../../../components/form/FormFooter";
 import { appURL } from "../../../config";
 
-export default () => {
+export default function StepProfil() {
   const [passwordText, setPasswordText] = useState(false);
   const dispatch = useDispatch();
   const [loading, setLoading] = useState(false);
@@ -76,7 +77,7 @@ export default () => {
                       href="https://support.snu.gouv.fr/help/fr-fr/24-questions-frequemment-posees/178-comment-recuperer-mon-identifiant"
                       target="_blank"
                       style={{ color: "white", textDecoration: "underline" }}
-                    >
+                      rel="noreferrer">
                       cliquez ici.
                     </a>
                   </p>
@@ -87,9 +88,8 @@ export default () => {
           } finally {
             setLoading(false);
           }
-        }}
-      >
-        {({ values, handleChange, handleSubmit, setFieldValue, isSubmitting, submitForm, errors, touched, validateField }) => {
+        }}>
+        {({ values, handleChange, handleSubmit, errors, touched, validateField }) => {
           useEffect(() => {
             if (values.email) validateField("email");
           }, [values.email]);
@@ -235,7 +235,7 @@ export default () => {
                           handleChange({ target: { value: "", name: "birthCountry" } });
                         }}
                       />
-                      Je suis né(e) à l'étranger
+                      Je suis né(e) à l&apos;étranger
                     </RadioLabel>
                   </FlexGroup>
                   <FlexGroup style={{ marginTop: "15px" }}>
@@ -291,8 +291,7 @@ export default () => {
                             className="form-control"
                             name="birthCity"
                             value={values.birthCity}
-                            onChange={handleChange}
-                          >
+                            onChange={handleChange}>
                             <option selected={values.birthCity === undefined || values.birthCity === ""}>Ville de naissance</option>
                             {suggestions.map((el) => (
                               <option key={el} value={el}>
@@ -325,7 +324,7 @@ export default () => {
                     onChange={handleChange}
                   />
                   <ErrorMessage errors={errors} touched={touched} name="email" />
-                  <TextUnderField style={{ marginBottom: "15px" }}>Cette adresse vous servira d'identifiant de connexion, notez le bien.</TextUnderField>
+                  <TextUnderField style={{ marginBottom: "15px" }}>Cette adresse vous servira d&apos;identifiant de connexion, notez le bien.</TextUnderField>
                 </Col>
                 <Col md={4}>
                   <Label>Confirmez votre email</Label>
@@ -400,9 +399,9 @@ export default () => {
                       onChange={(e) => handleChange({ target: { name: e.target.name, value: e.target.checked ? "true" : "false" } })}
                     />
                     <p style={{ marginBottom: "0" }}>
-                      J'ai lu et j'accepte les{" "}
-                      <a href={`${appURL}/conditions-generales-utilisation`} target="_blank">
-                        Conditions générales d'utilisation{" "}
+                      J&apos;ai lu et j&apos;accepte les{" "}
+                      <a href={`${appURL}/conditions-generales-utilisation`} target="_blank" rel="noreferrer">
+                        Conditions générales d&apos;utilisation{" "}
                       </a>
                       de la plateforme du Service national universel
                     </p>
@@ -418,8 +417,8 @@ export default () => {
                       onChange={(e) => handleChange({ target: { name: e.target.name, value: e.target.checked ? "true" : "false" } })}
                     />
                     <p style={{ marginBottom: "0" }}>
-                      J'ai pris connaissance des{" "}
-                      <a href="https://www.snu.gouv.fr/donnees-personnelles-et-cookies-23" target="_blank">
+                      J&apos;ai pris connaissance des{" "}
+                      <a href="https://www.snu.gouv.fr/donnees-personnelles-et-cookies-23" target="_blank" rel="noreferrer">
                         modalités de traitement de mes données personnelles
                       </a>
                     </p>
@@ -434,7 +433,7 @@ export default () => {
       </Formik>
     </Wrapper>
   );
-};
+}
 
 const ContainerPass = styled.div`
   position: relative;
