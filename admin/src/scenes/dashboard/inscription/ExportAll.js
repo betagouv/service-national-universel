@@ -42,7 +42,7 @@ export default function ExportAll({ filter }) {
     }, []);
     const lines = [];
 
-    lines.push(["Académie", "Région", "Numéro dpt", "Département", "Objectif", ...filter?.status?.map((e) => translate(e))]);
+    lines.push(["Académie", "Région", "Numéro dpt", "Département", "Objectif", ...[filter?.status || []].map((e) => translate(e))]);
     const keys = Object.keys(departmentLookUp)
       // remove the special case for Corse
       ?.filter((number) => number !== "20")
