@@ -73,7 +73,7 @@ export default function ExportAll({ filter }) {
       if (responses.length) {
         const status = api.getAggregations(responses[0]);
         const goal = inscriptionGoals.filter((g) => g.department === dptName)?.reduce((p, c) => p + (c.max || 0), 0);
-        const line = [academy, region, dptCode, dptName, goal, ...(filter?.status || [])?.map((filterStatus) => status[filterStatus] || 0))];
+        const line = [academy, region, dptCode, dptName, goal, ...(filter?.status || []).map((filterStatus) => status[filterStatus] || 0)];
         lines.push(line);
       }
       setLoadingText(`${((i / keys.length) * 100).toFixed(0)} %`);
