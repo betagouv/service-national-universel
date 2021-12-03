@@ -32,7 +32,7 @@ export default function ExportAll({ filter }) {
     setLoading(true);
 
     // get all the inscriptions goals for the selected cohorts
-    const inscriptionGoalsRequest = [filter?.cohort || []].map((cohort) => api.get(`/inscription-goal/${encodeURI(cohort)}`));
+    const inscriptionGoalsRequest = (filter?.cohort || []).map((cohort) => api.get(`/inscription-goal/${encodeURI(cohort)}`));
     let inscriptionGoals = await Promise.all([...inscriptionGoalsRequest]);
     inscriptionGoals = inscriptionGoals?.reduce((previous, current) => {
       if (current.ok && current.data?.length) {
@@ -42,7 +42,7 @@ export default function ExportAll({ filter }) {
     }, []);
     const lines = [];
 
-    lines.push(["Académie", "Région", "Numéro dpt", "Département", "Objectif", ...[filter?.status || []].map((e) => translate(e))]);
+    lines.push(["Académie", "Région", "Numéro dpt", "Département", "Objectif", ...(filter?.status || []).map((e) => translate(e))]);
     const keys = Object.keys(departmentLookUp)
       // remove the special case for Corse
       ?.filter((number) => number !== "20")
@@ -73,7 +73,7 @@ export default function ExportAll({ filter }) {
       if (responses.length) {
         const status = api.getAggregations(responses[0]);
         const goal = inscriptionGoals.filter((g) => g.department === dptName)?.reduce((p, c) => p + (c.max || 0), 0);
-        const line = [academy, region, dptCode, dptName, goal, ...filter?.status?.map((filterStatus) => status[filterStatus] || 0)];
+        const line = [academy, region, dptCode, dptName, goal, ...(filter?.status || [])?.map((filterStatus) => status[filterStatus] || 0))];
         lines.push(line);
       }
       setLoadingText(`${((i / keys.length) * 100).toFixed(0)} %`);
