@@ -21,12 +21,10 @@ const Message = new mongoose.Schema({
     createdByUserId: {
       type: mongoose.Types.ObjectId,
       ref: 'referent',
-      required: true,
     },
     createdByYoungId: {
       type: mongoose.Types.ObjectId,
       ref: 'young',
-      required: true,
     },
     contentType: {
       type: String,
@@ -80,7 +78,6 @@ const Schema = new mongoose.Schema({
   emitterYoungId: {
     type: mongoose.Types.ObjectId,
     ref: 'young',
-    required: true,
     documentation: {
       description: "Identifiant de l'émetteur volontaire",
     },
@@ -88,7 +85,6 @@ const Schema = new mongoose.Schema({
   emitterUserId: {
     type: mongoose.Types.ObjectId,
     ref: 'referent',
-    required: true,
     documentation: {
       description: "Identifiant de l'émetteur",
     },
