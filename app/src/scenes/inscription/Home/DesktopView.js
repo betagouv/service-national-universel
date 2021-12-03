@@ -51,8 +51,8 @@ export default function DesktopView() {
               <p className="conditions_date">
                 séjour du <strong>3 au 15 juillet 2022</strong>
               </p>
-              {conditions.map((condition) => (
-                <>
+              {conditions.map((condition, i) => (
+                <React.Fragment key={i}>
                   <p className="conditions_label">
                     {condition.label} <strong>{condition.bold}</strong>
                   </p>
@@ -83,7 +83,7 @@ export default function DesktopView() {
                       <StopIcon />
                     </p>
                   )}
-                </>
+                </React.Fragment>
               ))}
             </SecondSection>
             <p className="conditions_info">

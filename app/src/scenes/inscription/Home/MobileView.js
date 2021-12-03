@@ -38,8 +38,8 @@ export default function MobileView() {
             <p>
               Vérifiez si vous êtes <strong>éligible au SNU</strong> selon les dates de séjour proposées :
             </p>
-            {conditions.map((condition) => (
-              <>
+            {conditions.map((condition, i) => (
+              <React.Fragment key={i}>
                 <p className="conditions_label">
                   {condition.label} <strong>{condition.bold}</strong>
                 </p>
@@ -88,7 +88,7 @@ export default function MobileView() {
                     </p>
                   </Date>
                 )}
-              </>
+              </React.Fragment>
             ))}
             <p style={{ fontSize: "0.9rem", marginTop: "1rem" }}>
               *Les élèves de 2nde dont l&apos;établissement relève du ministère de l’éducation nationale, de la jeunesse et des sports peuvent s’inscrire même si le séjour se
