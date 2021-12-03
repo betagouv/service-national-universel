@@ -374,7 +374,7 @@ const translateFieldMission = (f) => {
       return "Pays";
     case "location":
       return "Coordonnées";
-    case "reacmote":
+    case "remote":
       return " à distance";
     case "isMilitaryPreparation":
       return "Préparation militaire";
