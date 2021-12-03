@@ -49,7 +49,11 @@ export default function Account() {
         onSubmit={async (values) => {
           try {
             const { ok, code, data: young } = await api.put("/young", values);
-            if (!ok) toastr.error("Une erreur s'est produite :", translate(code));
+            if (!ok) {
+              if (code === "USER_ALREADY_REGISTERED")
+                return toastr.error("Cet identifiant est déjà utilisé, pour plus d'informations contactez le support : contact@snu.gouv.fr ", { timeOut: 10000 });
+              return toastr.error("Une erreur s'est produite :", translate(code));
+            }
             dispatch(setYoung(young));
             toastr.success("Mis à jour!");
           } catch (e) {
