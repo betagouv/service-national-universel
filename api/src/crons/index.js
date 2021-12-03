@@ -21,13 +21,13 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
   //   sendRecapRegion();
   // });
 
-  // every tuesday at 0800
-  // cron.schedule("0 8 * * 2", function () {
+  // every tuesday at 0900
+  // cron.schedule("0 9 * * 2", function () {
   //   mailRecapDepartment.handler();
   // });
 
-  // every thursday at 0800
-  // cron.schedule("0 8 * * 4", function () {
+  // every thursday at 0900
+  // cron.schedule("0 9 * * 4", function () {
   //   mailRecapDepartment.handler();
   // });
 
