@@ -24,19 +24,19 @@ export default () => {
           <Hero>
             <div className="content">
               <h1>
-                Réalisez vos <strong>84 heures de mission d'intérêt général</strong>
+                Réalisez vos <strong>84 heures de mission d&apos;intérêt général</strong>
               </h1>
               <p>
-                Partez à la découverte de l'engagement en réalisant 84 heures de mission d'intérêt général, au sein d'une ou plusieurs structures, en contribuant à leurs activités
-                concrètes !
+                Partez à la découverte de l&apos;engagement en réalisant 84 heures de mission d&apos;intérêt général, au sein d&apos;une ou plusieurs structures, en contribuant à
+                leurs activités concrètes !
               </p>
               <Separator />
               <p>
-                <strong>Vos missions d'intérêt général</strong>
+                <strong>Vos missions d&apos;intérêt général</strong>
                 <br />
                 {young.phase2NumberHoursDone ? (
                   <>
-                    Vous avez réalisé {young.phase2NumberHoursDone} heures de mission d'intérêt général.
+                    Vous avez réalisé {young.phase2NumberHoursDone} heures de mission d&apos;intérêt général.
                     <br />
                   </>
                 ) : null}

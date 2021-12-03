@@ -1,13 +1,7 @@
 export default [
   {
     article_count: 4,
-    article_ids: [
-      520,
-      543,
-      544,
-      561,
-
-    ],
+    article_ids: [520, 543, 544, 561],
     articles: [
       {
         body: "Bonjour, test",
@@ -92,7 +86,7 @@ export default [
     owner_id: 5,
     pending_time: null,
     preferences: {
-      channel_id: 3
+      channel_id: 3,
     },
     priority_id: 1,
     state_id: 4,
@@ -105,5 +99,5 @@ export default [
     update_in_min: null,
     updated_at: "2021-10-08T14:42:25.471Z",
     updated_by_id: 5,
-  }
-]
+  },
+];

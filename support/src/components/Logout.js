@@ -13,8 +13,8 @@ const Logout = () => {
   };
 
   return (
-    <NavLink href="#" className="mt-auto !px-0 !py-0 flex">
-      <a className="h-full w-full px-6 py-4" onClick={onLogout}>
+    <NavLink href="#">
+      <a className="h-full w-full" onClick={onLogout}>
         Se déconnecter
       </a>
     </NavLink>

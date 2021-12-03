@@ -3,8 +3,7 @@ import { DropdownItem, DropdownMenu, DropdownToggle, UncontrolledDropdown } from
 import { ReactiveBase, MultiDropdownList, DataSearch } from "@appbaseio/reactivesearch";
 import { toastr } from "react-redux-toastr";
 import { useDispatch, useSelector } from "react-redux";
-import { useHistory } from "react-router-dom";
-import { Link } from "react-router-dom";
+import { useHistory, Link } from "react-router-dom";
 
 import { setUser } from "../../redux/auth/actions";
 import { translate, getFilterLabel, formatLongDateFR, formatStringLongDate, ES_NO_LIMIT, ROLES, canUpdateReferent } from "../../utils";
@@ -20,7 +19,7 @@ import Badge from "../../components/Badge";
 import ExportComponent from "../../components/ExportXlsx";
 import ReactiveListComponent from "../../components/ReactiveListComponent";
 
-export default () => {
+export default function List() {
   const [responsable, setResponsable] = useState(null);
   const user = useSelector((state) => state.Auth.user);
   const [structureIds, setStructureIds] = useState();
@@ -191,7 +190,7 @@ export default () => {
       </ReactiveBase>
     </div>
   );
-};
+}
 
 const Hit = ({ hit, onClick, user, selected, structure }) => {
   const displayActionButton = canUpdateReferent({ actor: user, originalTarget: hit, structure });
@@ -226,7 +225,7 @@ const Action = ({ hit, color }) => {
   const handleImpersonate = async () => {
     try {
       const { ok, data, token } = await api.post(`/referent/signin_as/referent/${hit._id}`);
-      if (!ok) return toastr.error("Oops, une erreur est survenu lors de la masquarade !", translate(e.code));
+      if (!ok) return toastr.error("Oops, une erreur est survenu lors de la masquarade !");
       if (token) api.setToken(token);
       if (data) dispatch(setUser(data));
       history.push("/dashboard");

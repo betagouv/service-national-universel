@@ -32,7 +32,7 @@ export default () => {
               <p>
                 <strong>Mes missions réalisées</strong>
                 <br />
-                Retrouver l'historique de vos missions réalisées
+                Retrouver l&apos;historique de vos missions réalisées
                 <br />
                 <Link to="/candidature">Consulter mes missions réalisées {">"}</Link>
               </p>
@@ -45,7 +45,7 @@ export default () => {
                   Télécharger mon attestation {">"}
                 </DownloadAttestationButton>
                 <MailAttestationButton young={young} type="2" template="certificate" placeholder="Attestation de réalisation de la phase 2">
-                  Envoyer l'attestation de réalisation par mail {">"}
+                  Envoyer l&apos;attestation de réalisation par mail {">"}
                 </MailAttestationButton>
               </p>
               {young.statusPhase1 === "DONE" && young.statusPhase2 === "VALIDATED" ? (
@@ -60,7 +60,7 @@ export default () => {
                       Télécharger mon attestation {">"}
                     </DownloadAttestationButton>
                     <MailAttestationButton young={young} type="snu" template="certificate" placeholder="Attestation de réalisation de snu">
-                      Envoyer l'attestation de réalisation par mail {">"}
+                      Envoyer l&apos;attestation de réalisation par mail {">"}
                     </MailAttestationButton>
                   </p>
                 </>

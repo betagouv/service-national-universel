@@ -11,7 +11,7 @@ import LoadingButton from "../../components/buttons/LoadingButton";
 import ErrorMessage, { requiredMessage } from "../inscription/components/errorMessage";
 import { SelectTag, step1, step2TechnicalPublic, step2QuestionPublic } from "../support-center/ticket/worflow";
 
-export default ({ setOpen, setSuccessMessage }) => {
+export default function FormComponent({ setOpen, setSuccessMessage }) {
   const tags = [`EMETTEUR_Exterieur`, `CANAL_Formulaire`, `AGENT_Startup_Support`];
   const [loading, setLoading] = useState(false);
   return (
@@ -25,13 +25,14 @@ export default ({ setOpen, setSuccessMessage }) => {
           try {
             setLoading(true);
             const { message, subject, name, email, step1, step2 } = values;
-            const { ok, code, data } = await api.post("/support-center/public/ticket", {
+            const { ok, code } = await api.post("/support-center/public/ticket", {
               title: `${step1?.label} - ${step2?.label} - ${subject}`,
               subject,
               name,
               email,
               message,
-              tags: [...new Set([...tags, ...step1?.tags, ...step2?.tags])], // we use this dirty hack to remove duplicates
+              // eslint-disable-next-line no-unsafe-optional-chaining
+              tags: [...new Set([...tags, ...[step1?.tags || []], ...[step2?.tags || []]])], // we use this dirty hack to remove duplicates
             });
             setLoading(false);
             setOpen(false);
@@ -42,8 +43,7 @@ export default ({ setOpen, setSuccessMessage }) => {
             console.log(e);
             toastr.error("Oups, une erreur est survenue", translate(e.code));
           }
-        }}
-      >
+        }}>
         {({ values, handleChange, handleSubmit, isSubmitting, errors, touched }) => (
           <>
             <Item
@@ -126,7 +126,7 @@ export default ({ setOpen, setSuccessMessage }) => {
       </Formik>
     </Form>
   );
-};
+}
 
 const Item = ({ title, name, value, handleChange, errors, touched, validate, type, options, ...props }) => {
   return (
@@ -156,29 +156,6 @@ const Label = styled.div`
   font-weight: 600;
   font-size: 14px;
   margin-bottom: 5px;
-`;
-
-const ContinueButton = styled.button`
-  @media (max-width: 767px) {
-    margin: 1rem 0;
-  }
-  color: #fff;
-  background-color: #5145cd;
-  padding: 10px 40px;
-  border: 0;
-  outline: 0;
-  border-radius: 6px;
-  font-weight: 600;
-  font-size: 14px;
-  display: block;
-  width: auto;
-  outline: 0;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  align-self: flex-start;
-  margin-top: 1rem;
-  :hover {
-    opacity: 0.9;
-  }
 `;
 
 const Form = styled.div`

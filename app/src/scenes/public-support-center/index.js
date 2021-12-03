@@ -70,7 +70,7 @@ const articles = [
   }, */
 ];
 
-export default () => {
+export default function Index() {
   const young = useSelector((state) => state.Auth.young);
   const [open, setOpen] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
@@ -79,14 +79,25 @@ export default () => {
     <HeroContainer style={{ paddingBottom: "5rem" }}>
       <Container style={{ backdropFilter: "blur(6px)" }}>
         {!young && (
-          <p style={{ textAlign: "center", fontSize: "0.8rem", color: "#6B7280" }}>Vous avez déjà un compte sur le site du SNU ? <a className="link" style={{ color: "#32257F", fontWeight: "bold" }} href="https://moncompte.snu.gouv.fr/auth/login?redirect=besoin-d-aide" target="_blank" rel="noopener noreferrer">Connectez-vous</a></p>
+          <p style={{ textAlign: "center", fontSize: "0.8rem", color: "#6B7280" }}>
+            Vous avez déjà un compte sur le site du SNU ?{" "}
+            <a
+              className="link"
+              style={{ color: "#32257F", fontWeight: "bold" }}
+              href="https://moncompte.snu.gouv.fr/auth/login?redirect=besoin-d-aide"
+              target="_blank"
+              rel="noopener noreferrer">
+              Connectez-vous
+            </a>
+          </p>
         )}
-        <h4 style={{ textAlign: "center" }}>Besoin d'aide&nbsp;?</h4>
+        <h4 style={{ textAlign: "center" }}>Besoin d&apos;aide&nbsp;?</h4>
         <div className="help-section">
           <div className="help-section-block">
             <div className="help-section-text" style={{ color: "#6B7280" }}>
-              Vous souhaitez en savoir plus sur les phases du Service National Universel ou sur les autres formes d'engagement&nbsp;?<br />
-              N'hésitez pas à consulter notre{" "}
+              Vous souhaitez en savoir plus sur les phases du Service National Universel ou sur les autres formes d&apos;engagement&nbsp;?
+              <br />
+              N&apos;hésitez pas à consulter notre{" "}
               <strong>
                 <a className="link" href="https://support.snu.gouv.fr/help/fr-fr/16-comprendre-le-snu" target="_blank" rel="noopener noreferrer">
                   base de connaissance
@@ -112,7 +123,7 @@ export default () => {
             </div>
             <p>{article.body}</p>
             <p>
-              <a className="block-link" href={article.url} target="_blank">
+              <a className="block-link" href={article.url} target="_blank" rel="noreferrer">
                 Lire la suite
               </a>
             </p>
@@ -121,33 +132,24 @@ export default () => {
       </Articles>
       <hr style={{ margin: "3rem auto", maxWidth: "600px" }} />
       <Container>
-        <h4 style={{ textAlign: "center" }}>Vous n'avez pas trouvé de réponse à votre demande&nbsp;?</h4>
+        <h4 style={{ textAlign: "center" }}>Vous n&apos;avez pas trouvé de réponse à votre demande&nbsp;?</h4>
         <div className="help-section">
           <div className="help-section-block">
             <div className="help-section-text" style={{ color: "#6B7280", marginBottom: "0.5rem" }}>
-              Contactez nos équipes. Nous travaillons généralement du <strong>lundi au vendredi de 9h00 à 18h00</strong> et traiterons votre demande dès que possible. Vous recevrez une réponse par mail.
+              Contactez nos équipes. Nous travaillons généralement du <strong>lundi au vendredi de 9h00 à 18h00</strong> et traiterons votre demande dès que possible. Vous recevrez
+              une réponse par mail.
             </div>
             <div className="zammad-container">
-              <LinkButton onClick={() => setOpen(true)}>
-                Contacter quelqu'un
-              </LinkButton>
+              <LinkButton onClick={() => setOpen(true)}>Contacter quelqu&apos;un</LinkButton>
             </div>
           </div>
         </div>
-        {
-          open && (
-            <ZammadForm setOpen={setOpen} setSuccessMessage={setSuccessMessage} />
-          )
-        }
-        {
-          successMessage && (
-            <p style={{ color: "#6B7280" }}>{successMessage}</p>
-          )
-        }
+        {open && <ZammadForm setOpen={setOpen} setSuccessMessage={setSuccessMessage} />}
+        {successMessage && <p style={{ color: "#6B7280" }}>{successMessage}</p>}
       </Container>
     </HeroContainer>
   );
-};
+}
 
 const Container = styled.div`
   position: relative;

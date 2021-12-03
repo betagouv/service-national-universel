@@ -11,7 +11,7 @@ import { MISSION_DOMAINS, translate, YOUNG_STATUS_PHASE3 } from "../../../utils"
 import ErrorMessage, { requiredMessage } from "../../inscription/components/errorMessage";
 import api from "../../../services/api";
 
-export default () => {
+export default function WaitingRealisation() {
   const history = useHistory();
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
@@ -43,9 +43,8 @@ export default () => {
         } catch (e) {
           return toastr.error("Une erreur s'est produite ", e?.error?.message);
         }
-      }}
-    >
-      {({ values, handleChange, handleSubmit, isValid, errors, touched }) => (
+      }}>
+      {({ values, handleChange, handleSubmit, errors, touched }) => (
         <>
           <FormLegend>
             Ma mission
@@ -78,8 +77,7 @@ export default () => {
                 component="select"
                 name="phase3MissionDomain"
                 value={values.phase3MissionDomain}
-                onChange={handleChange}
-              >
+                onChange={handleChange}>
                 <option value="" disabled>
                   Domaine de la mission
                 </option>
@@ -214,17 +212,16 @@ export default () => {
             <ContinueButton
               onClick={() => {
                 handleSubmit();
-              }}
-            >
+              }}>
               Faire valider ma phase 3
             </ContinueButton>
-            {Object.keys(errors).length ? <h3>Vous ne pouvez passer à l'étape suivante car tous les champs ne sont pas correctement renseignés.</h3> : null}
+            {Object.keys(errors).length ? <h3>Vous ne pouvez passer à l&apos;étape suivante car tous les champs ne sont pas correctement renseignés.</h3> : null}
           </Footer>
         </>
       )}
     </Formik>
   );
-};
+}
 
 const Footer = styled.div`
   text-align: center;

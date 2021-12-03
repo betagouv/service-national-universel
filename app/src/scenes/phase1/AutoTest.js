@@ -9,11 +9,10 @@ import api from "../../services/api";
 import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../redux/auth/actions";
 import { translate } from "../../utils";
-import { SuccessMessage, RadioLabel, Footer, FormGroup, FormRow, Title, Logo, DownloadText, BackButton, Content, SignBox, ContinueButton } from "./components/printable";
-import DownloadFormButton from "../../components/buttons/DownloadFormButton";
+import { SuccessMessage, RadioLabel, Footer, FormGroup, FormRow, Title, Logo, BackButton, Content } from "./components/printable";
 import LoadingButton from "../../components/buttons/LoadingButton";
 
-export default () => {
+export default function AutoTest() {
   const young = useSelector((state) => state.Auth.young);
   const dispatch = useDispatch();
   const isPlural = young?.parent1Status && young?.parent2Status;
@@ -31,8 +30,7 @@ export default () => {
                   strokeLinecap="round"
                   strokeLinejoin="round"
                   strokeWidth="2"
-                  d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"
-                ></path>
+                  d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path>
               </svg>
             </div>
             <div>
@@ -83,9 +81,8 @@ export default () => {
                     console.log(e);
                     toastr.error("Erreur !");
                   }
-                }}
-              >
-                {({ values, handleChange, handleSubmit, errors, touched, isSubmitting, submitForm }) => (
+                }}>
+                {({ values, handleChange, handleSubmit, errors, touched }) => (
                   <>
                     <Title>
                       <span>Seuls les représentants légaux sont habilités à valider ce consentement</span>
@@ -179,7 +176,7 @@ export default () => {
                             onChange={handleChange}
                           />
                           <label htmlFor="autoTestPCR_false">
-                            {isPlural ? "Nous n'autorisons" : "Je n’autorise"} pas la <b>réalisation d'autotests antigéniques</b>
+                            {isPlural ? "Nous n'autorisons" : "Je n’autorise"} pas la <b>réalisation d&apos;autotests antigéniques</b>
                           </label>
                         </RadioLabel>
                         <ErrorMessage errors={errors} touched={touched} name="autoTestPCR" />
@@ -198,7 +195,10 @@ export default () => {
                             </DownloadFormButton>
                           </BackButton> */}
                           <BackButton>
-                            <a href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Consentement_a_l_utilisation_d_autotest_COVID.pdf" target="_blank">
+                            <a
+                              href="https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Consentement_a_l_utilisation_d_autotest_COVID.pdf"
+                              target="_blank"
+                              rel="noreferrer">
                               télécharger le modèle à remplir
                             </a>
                           </BackButton>
@@ -265,4 +265,4 @@ export default () => {
       </Hero>
     </HeroContainer>
   );
-};
+}

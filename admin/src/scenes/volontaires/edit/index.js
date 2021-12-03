@@ -67,7 +67,7 @@ export default function VolontaireEdit(props) {
         validateOnBlur={false}
         onSubmit={async (values) => {
           try {
-            const { ok, code, data: young } = await api.put(`/referent/young/${values._id}`, values);
+            const { ok, code } = await api.put(`/referent/young/${values._id}`, values);
             if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
             toastr.success("Mis à jour!");
           } catch (e) {
@@ -75,7 +75,7 @@ export default function VolontaireEdit(props) {
             toastr.error("Oups, une erreur est survenue pendant la mise à jour des informations :", translate(e.code));
           }
         }}>
-        {({ values, handleChange, handleSubmit, isSubmitting, submitForm, validateField, errors, touched, setFieldValue }) => (
+        {({ values, handleChange, handleSubmit, isSubmitting, validateField, errors, touched, setFieldValue }) => (
           <>
             <TitleWrapper>
               <div>

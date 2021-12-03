@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { useSWRConfig } from "swr";
 import Link from "next/link";
-import Sortable from "sortablejs";
+import SortableJS from "sortablejs";
 import API from "../../services/api";
 import { useRouter } from "next/router";
 import { toast } from "react-toastify";
 import useKnowledgeBaseData from "../../hooks/useKnowledgeBaseData";
-import getTitleWithStatus from "../../utils/getTitleWithStatus";
+import Loader from "../Loader";
 
 const useIsActive = ({ slug }, onIsActive) => {
   const router = useRouter();
@@ -17,8 +16,8 @@ const useIsActive = ({ slug }, onIsActive) => {
   }, [router.query?.slug]);
 
   useEffect(() => {
-    if (!!onIsActive) {
-      if (!!active) {
+    if (onIsActive) {
+      if (active) {
         onIsActive(true);
       } else {
         onIsActive(false);
@@ -28,7 +27,9 @@ const useIsActive = ({ slug }, onIsActive) => {
   return active;
 };
 
-const Branch = ({ section, level, onIsActive, position, parentId, onListChange }) => {
+const horizontalSpacing = 2;
+
+const Branch = ({ section, level, onIsActive, position, parentId, onListChange, isDragging, onStartDrag }) => {
   const [open, setIsOpen] = useState(section.type === "root");
 
   const isActive = useIsActive(section, onIsActive);
@@ -38,25 +39,37 @@ const Branch = ({ section, level, onIsActive, position, parentId, onListChange }
 
   const onChildIsActive = (childIsActive) => {
     // open if child is active, don't close if child is not active
-    if (!!childIsActive) setIsOpen(true);
+    if (childIsActive) setIsOpen(true);
     if (onIsActive) onIsActive(childIsActive);
   };
 
   const gridRef = useRef(null);
   const sortable = useRef(null);
   useEffect(() => {
-    sortable.current = Sortable.create(gridRef.current, { animation: 150, group: "shared", onEnd: onListChange });
+    sortable.current = SortableJS.create(gridRef.current, { animation: 150, group: "shared", onEnd: onListChange, onStart: onStartDrag });
   }, []);
 
+  let isDraft = JSON.stringify(section.children || []).includes("DRAFT") ? " 🚦 " : " ";
+
+  const showOpen = isDragging || open;
+
   return (
-    <div data-position={position} data-parentid={parentId || "root"} data-id={section._id || "root"} data-type="section" className={`ml-${level * 3} mb-1 `}>
-      <span className={` text-warmGray-500 ${isActive ? "font-bold" : ""}`}>
-        <small className="text-trueGray-400 mr-1 mb-1  w-3 inline-block cursor-pointer" onClick={() => setIsOpen(!open)}>
-          {!!open ? "\u25BC" : "\u25B6"}
+    <div
+      data-position={position}
+      data-parentid={parentId || "root"}
+      data-id={section._id || "root"}
+      data-type="section"
+      className={`flex flex-col ml-${level * horizontalSpacing}`}
+    >
+      <span className={` text-warmGray-500  max-w-full inline-block overflow-hidden overflow-ellipsis whitespace-nowrap ${isActive ? "font-bold" : ""}`}>
+        <small className="text-trueGray-400 mr-1 w-3 inline-block cursor-pointer" onClick={() => setIsOpen(!open)}>
+          {showOpen ? "\u25BC" : "\u25B6"}
         </small>
-        <Link href={`/admin/knowledge-base/${section.slug}`} passHref>
-          {getTitleWithStatus(section) || (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 inline -mt-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <Link href={`/admin/knowledge-base/${section.slug || ""}`} passHref>
+          {section.title ? (
+            `${showOpen ? "📂" : "📁"}${isDraft}${section.title} (${section.children?.length || 0})`
+          ) : (
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 inline -mt-2 cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -67,7 +80,7 @@ const Branch = ({ section, level, onIsActive, position, parentId, onListChange }
           )}
         </Link>
       </span>
-      <div ref={gridRef} id={`child-container-${section._id || "root"}`} className={`flex flex-col ${!open ? "hidden" : ""}`}>
+      <div ref={gridRef} id={`child-container-${section._id || "root"}`} className={`flex flex-col ${!showOpen ? "hidden" : ""}`}>
         {section.children?.map((child) =>
           child.type === "section" ? (
             <Branch
@@ -76,11 +89,13 @@ const Branch = ({ section, level, onIsActive, position, parentId, onListChange }
               key={child._id}
               section={child}
               level={level + 1}
+              isDragging={isDragging}
               onIsActive={onChildIsActive}
               onListChange={onListChange}
+              onStartDrag={onStartDrag}
             />
           ) : (
-            <Answer parentId={child.parentId} position={child.position} key={child._id} answer={child} level={level + 1} onIsActive={onChildIsActive} />
+            <Answer parentId={child.parentId} position={child.position} key={child._id} article={child} level={level + 1} onIsActive={onChildIsActive} />
           )
         )}
       </div>
@@ -88,12 +103,18 @@ const Branch = ({ section, level, onIsActive, position, parentId, onListChange }
   );
 };
 
-const Answer = ({ answer, level, onIsActive, position, parentId }) => {
-  const isActive = useIsActive(answer, onIsActive);
+const Answer = ({ article, level, onIsActive, position, parentId }) => {
+  const isActive = useIsActive(article, onIsActive);
   return (
-    <Link key={answer._id} href={`/admin/knowledge-base/${answer.slug}`} passHref>
-      <a data-position={position} data-parentid={parentId} data-id={answer._id} href="#" className={`text-warmGray-500 block ml-${level * 3} ${isActive ? "font-bold" : ""}`}>
-        {`\u2022\u00A0\u00A0\u00A0 ${getTitleWithStatus(answer)}`}
+    <Link key={article._id} href={`/admin/knowledge-base/${article.slug}`} passHref>
+      <a
+        data-position={position}
+        data-parentid={parentId}
+        data-id={article._id}
+        href="#"
+        className={`text-warmGray-500  overflow-hidden overflow-ellipsis whitespace-nowrap block ml-${level * horizontalSpacing} ${isActive ? "font-bold" : ""}`}
+      >
+        {`${article.status === "DRAFT" ? "📝" : "📃"}  ${article.title}`}
       </a>
     </Link>
   );
@@ -112,42 +133,55 @@ const findChildrenRecursive = async (section, allItems) => {
   }
 };
 
-const getReorderedTree = (root) => {
+const getReorderedTree = (root, flattenedData) => {
   const allItems = [];
   findChildrenRecursive(root, allItems);
-  return allItems;
+  return allItems.filter((newItem) => {
+    const originalItem = flattenedData.find((original) => original._id === newItem._id);
+    return originalItem.position !== newItem.position || originalItem.parentId !== newItem.parentId;
+  });
 };
 
-const KnowledgeBaseTree = ({ visible, setVisible }) => {
-  const { mutate } = useSWRConfig();
-  const { data } = useKnowledgeBaseData();
-  const router = useRouter();
+const KnowledgeBaseTree = ({ visible }) => {
+  const { tree, flattenedData, mutate } = useKnowledgeBaseData();
 
   // reloadTreeKey to prevent error `Failed to execute 'removeChild' on 'Node'` from sortablejs after updating messy tree
   const [reloadTreeKey, setReloadeTreeKey] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+
   const rootRef = useRef(null);
+  const onStartDrag = () => setIsDragging(true);
+
   const onListChange = async () => {
-    const response = await API.put({ path: "/support-center/knowledge-base/reorder", body: getReorderedTree(rootRef.current.children[0]) });
-    if (!response.ok) return toast.error("Désolé, une erreur est survenue. Veuillez recommencer !");
-    mutate(API.getUrl({ path: "/support-center/knowledge-base/", query: { withTree: true, withParents: true } }));
-    mutate(API.getUrl({ path: `/support-center/knowledge-base/${router.query?.slug}`, query: { withTree: true, withParents: true } }));
+    setIsSaving(true);
+    setIsDragging(false);
+    const body = getReorderedTree(rootRef.current.children[0], flattenedData);
+    const response = await API.put({ path: "/support-center/knowledge-base/reorder", body });
+    if (!response.ok) {
+      setIsSaving(false);
+      return toast.error("Désolé, une erreur est survenue. Veuillez recommencer !");
+    }
+    mutate(response);
+    setIsDragging(false);
     setReloadeTreeKey((k) => k + 1);
+    setIsSaving(false);
   };
 
   return (
-    <div className={`flex flex-col flex-grow-0 flex-shrink-0 border-l-2 p-2 ${visible ? "w-80" : "w-0 hidden"}`}>
+    <aside className={`relative flex flex-col flex-grow-0 flex-shrink-0 border-r-2 shadow-lg z-10 resize-x p-2 overflow-hidden ${visible ? "w-80" : "w-0 hidden"}`}>
       {/* TODO find a way for tailwind to not filter margins from compiling,
        because things like `ml-${level}` are not compiled */}
       <div className="hidden ml-2 ml-3 ml-4 ml-5 ml-6 ml-7 ml-8 ml-9 ml-10 ml-11 ml-12 ml-13 ml-14 ml-15 ml-16"></div>
-      <div className="p-2 flex flex-row-reverse">
-        <svg onClick={() => setVisible(false)} xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 cursor-pointer" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </div>
       <div ref={rootRef} key={reloadTreeKey} className="overflow-auto">
-        <Branch section={data} level={0} onListChange={onListChange} />
+        <Branch section={tree} level={0} onListChange={onListChange} onStartDrag={onStartDrag} />
       </div>
-    </div>
+      {!!isSaving && (
+        <div className="absolute w-full h-full top-0 left-0 bg-gray-500 opacity-25 pointer-events-none">
+          <Loader color="#bbbbbb" size={40} />
+        </div>
+      )}
+    </aside>
   );
 };
 

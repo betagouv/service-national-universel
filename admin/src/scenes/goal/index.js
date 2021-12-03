@@ -11,7 +11,7 @@ import CrossSVG from "../../assets/cross.svg";
 import { region2department, departmentList, department2region } from "../../utils";
 
 import YearPicker from "../dashboard/components/YearPicker";
-export default () => {
+export default function Goal() {
   const [inscriptionGoals, setInscriptionGoals] = useState();
   const [loading, setLoading] = useState(false);
   const [blocsOpened, setBlocsOpened] = useState([]);
@@ -33,7 +33,7 @@ export default () => {
     <>
       <Header>
         <div style={{ flex: 1 }}>
-          <Title>Objectifs d'inscriptions au SNU 2021</Title>
+          <Title>Objectifs d&apos;inscriptions au SNU 2021</Title>
         </div>
         <LoadingButton
           loading={loading}
@@ -41,8 +41,7 @@ export default () => {
             setLoading(true);
             await api.post(`/inscription-goal/${cohort}`, inscriptionGoals);
             setLoading(false);
-          }}
-        >
+          }}>
           Enregistrer
         </LoadingButton>
       </Header>
@@ -77,8 +76,7 @@ export default () => {
               key={region}
               onClick={() => {
                 setBlocsOpened(blocsOpened.includes(region) ? blocsOpened.filter((b) => b !== region) : [...blocsOpened, region]);
-              }}
-            >
+              }}>
               {departements.map((department) => {
                 return (
                   <Departement key={department}>
@@ -112,7 +110,7 @@ export default () => {
       </div>
     </>
   );
-};
+}
 
 const Departement = styled.div`
   border-top: #eee 1px solid;
@@ -129,8 +127,7 @@ const ToggleBloc = ({ children, title, borderBottom, borderRight, borderLeft, di
         borderRight: borderRight ? "2px solid #f4f5f7" : 0,
         borderLeft: borderLeft ? "2px solid #f4f5f7" : 0,
         backgroundColor: disabled ? "#f9f9f9" : "transparent",
-      }}
-    >
+      }}>
       <Wrapper>
         <div onClick={onClick} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer" }}>
           <Legend>{title}</Legend>

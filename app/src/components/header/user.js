@@ -13,7 +13,7 @@ const TABS_USER = {
   DECONNEXION: "DECONNEXION",
 };
 
-export default () => {
+export default function User() {
   const [open, setOpen] = useState(false);
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
@@ -46,7 +46,7 @@ export default () => {
           )}
           {!getDisabled(TABS_USER.PREFERENCES) && (
             <Item onClick={() => setOpen(false)}>
-              <Link to="/preferences">Mes préférences de missions</Link>
+              <Link to="/preferences">Mes&nbsp;préférences&nbsp;de&nbsp;missions</Link>
             </Item>
           )}
           <Item onClick={logout}>
@@ -56,7 +56,7 @@ export default () => {
       </Dropdown>
     </div>
   );
-};
+}
 
 const Dropdown = styled.div`
   position: relative;

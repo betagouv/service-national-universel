@@ -5,7 +5,7 @@ import { Subtitle } from "../../../components/dashboard";
 import { translate, MISSION_DOMAINS } from "../../../utils";
 import { Box, BoxTitleCircular as BoxTitle } from "../../../components/box";
 
-export default ({ youngsDomains, missionsDomains }) => {
+export default function MissionDetail({ youngsDomains, missionsDomains }) {
   const totalMissions = Object.keys(missionsDomains).reduce((acc, a) => acc + missionsDomains[a], 0);
   const totalYoungs = Object.keys(youngsDomains).reduce((acc, a) => acc + youngsDomains[a], 0);
 
@@ -15,7 +15,7 @@ export default ({ youngsDomains, missionsDomains }) => {
       <Box>
         <Row>
           <Col md={6} xl={6} key="1">
-            <BoxTitle>Domaine d'action des missions validées</BoxTitle>
+            <BoxTitle>Domaine d&apos;action des missions validées</BoxTitle>
           </Col>
           <Col md={6} xl={6} key="2">
             <BoxTitle>Selon les préférences des volontaires</BoxTitle>
@@ -57,4 +57,4 @@ export default ({ youngsDomains, missionsDomains }) => {
       </Box>
     </React.Fragment>
   );
-};
+}

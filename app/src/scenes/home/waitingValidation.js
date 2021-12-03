@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { HeroContainer, Hero, Content, Alert, Separator, WhiteButton } from "../../components/Content";
+import { HeroContainer, Hero, Content, Alert, WhiteButton } from "../../components/Content";
 import { YOUNG_STATUS } from "../../utils";
 import styled from "styled-components";
-import { isEndOfInscriptionManagement2021 } from "snu-lib";
 
-export default () => {
+export default function WaitingValidation() {
   const young = useSelector((state) => state.Auth.young);
   const [showAlert, setShowAlert] = useState(true);
 
@@ -28,20 +27,20 @@ export default () => {
           <IconContainer>
             <svg width="48" height="48" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M0 24C0 10.745 10.745 0 24 0s24 10.745 24 24-10.745 24-24 24S0 37.255 0 24z" fill="#D1FAE5" />
-              <path d="M17 25l4 4 10-10" stroke="#059669" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M17 25l4 4 10-10" stroke="#059669" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
             <p style={{ color: "#000" }}>
               <strong>Merci, votre inscription a bien été enregistrée.</strong>
               <br />
-              Votre dossier est en cours de traitement par l'administration.
+              Votre dossier est en cours de traitement par l&apos;administration.
             </p>
           </IconContainer>
-          <p>Vous recevrez prochainement un e-mail de no-reply@snu.gouv.fr vous informant de l'avancement de votre inscription.</p>
+          <p>Vous recevrez prochainement un e-mail de no-reply@snu.gouv.fr vous informant de l&apos;avancement de votre inscription.</p>
           {young.status === YOUNG_STATUS.WAITING_VALIDATION ? (
             <>
-              <p>Vous pouvez consulter les informations renseignées dans votre dossier jusqu'à validation de votre inscription.</p>
+              <p>Vous pouvez consulter les informations renseignées dans votre dossier jusqu&apos;à validation de votre inscription.</p>
               <Link to="/inscription/coordonnees">
-                <WhiteButton>Revenir à mon dossier d'inscription</WhiteButton>
+                <WhiteButton>Revenir à mon dossier d&apos;inscription</WhiteButton>
               </Link>
             </>
           ) : null}
@@ -55,7 +54,7 @@ export default () => {
       </Hero>
     </HeroContainer>
   );
-};
+}
 
 const IconContainer = styled.div`
   display: flex;

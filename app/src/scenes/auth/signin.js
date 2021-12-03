@@ -18,7 +18,7 @@ import ErrorLogin from "./components/ErrorLogin";
 import ModalInProgress from "../../components/modals/ModalInProgress";
 import { toastr } from "react-redux-toastr";
 
-export default () => {
+export default function Signin() {
   const [modal, setModal] = useState(null);
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
@@ -62,8 +62,7 @@ export default () => {
               }
             }
             actions.setSubmitting(false);
-          }}
-        >
+          }}>
           {({ values, errors, isSubmitting, handleChange, handleSubmit }) => {
             return (
               <form onSubmit={handleSubmit}>
@@ -120,11 +119,11 @@ export default () => {
         </Formik>
         <>
           <Title>
-            <span>Vous n'êtes pas encore inscrit ?</span>
+            <span>Vous n&apos;êtes pas encore inscrit ?</span>
           </Title>
-          <Register to="/inscription/profil">Commencer l'inscription</Register>
+          <Register to="/inscription/profil">Commencer l&apos;inscription</Register>
         </>
       </LoginBox>
     </div>
   );
-};
+}

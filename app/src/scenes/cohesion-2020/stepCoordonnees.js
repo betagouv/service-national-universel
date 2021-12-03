@@ -16,7 +16,7 @@ import { translate } from "../../utils";
 import FormFooter from "../../components/form/FormFooter";
 import FormRow from "../../components/form/FormRow";
 
-export default () => {
+export default function Coordonnees() {
   const history = useHistory();
   const dispatch = useDispatch();
   const young = useSelector((state) => state.Auth.young);
@@ -59,8 +59,7 @@ export default () => {
             console.log(e);
             toastr.error("Erreur !");
           }
-        }}
-      >
+        }}>
         {({ values, handleChange, handleSubmit, errors, touched }) => (
           <>
             <FormRow>
@@ -201,8 +200,7 @@ export default () => {
                         placeholder="Ma classe"
                         name="grade"
                         value={values.grade}
-                        onChange={handleChange}
-                      >
+                        onChange={handleChange}>
                         <option label=""></option>
                         <option label="3eme" value="3eme">
                           3eme
@@ -345,7 +343,7 @@ export default () => {
       </Formik>
     </Wrapper>
   );
-};
+}
 
 const Wrapper = styled.div`
   padding: 40px;

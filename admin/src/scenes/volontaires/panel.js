@@ -4,7 +4,6 @@ import { Link, useHistory } from "react-router-dom";
 
 import {
   YOUNG_SITUATIONS,
-  YOUNG_PHASE,
   translate as t,
   YOUNG_STATUS,
   isInRuralArea,
@@ -93,7 +92,7 @@ export default function VolontairePanel({ onChange, value }) {
             </Link>
           </>
         ) : (
-          <NoResult>Aucune candidature n'est liée à ce volontaire.</NoResult>
+          <NoResult>Aucune candidature n&aops;est liée à ce volontaire.</NoResult>
         )}
         <Details title="Contact phase 2" value={referentManagerPhase2?.email || (referentManagerPhase2 !== undefined && "Non trouvé") || "Chargement..."} copy />
       </Info>
@@ -170,7 +169,7 @@ export default function VolontairePanel({ onChange, value }) {
           <Details title="Région" value={young.parent2Region} />
         </Info>
       )}
-      {young && young.historic && young.historic.length !== 0 && <Historic value={young.historic} />}
+      <div className="info">{young?.historic?.length > 0 && <Historic value={young.historic} />}</div>
       {young.motivations && (
         <div className="info">
           <div className="info-title">Motivations</div>
@@ -199,7 +198,7 @@ const ApplicationDetails = ({ application, i }) => {
           onClick={() => {
             history.push(`/volontaire/${application.youngId}/phase2/application/${application._id}/contrat`);
           }}>
-          Contrat d'engagement &gt;
+          Contrat d&apos;engagement &gt;
         </ContractLink>
       ) : null}
     </div>

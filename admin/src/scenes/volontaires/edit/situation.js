@@ -1,6 +1,5 @@
 import React from "react";
 import { Col } from "reactstrap";
-import { useSelector } from "react-redux";
 
 import { Box, BoxContent, BoxHeadTitle } from "../../../components/box";
 import Etablissement from "./components/etablissmentInput";
@@ -17,7 +16,6 @@ export default function Situation({ values, handleChange, required = {}, errors,
             handleChange={handleChange}
             errors={errors}
             touched={touched}
-            required={required}
             keys={{
               schoolName: "schoolName",
               grade: "grade",

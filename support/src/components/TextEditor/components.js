@@ -33,7 +33,7 @@ export const EditorValue = React.forwardRef(({ className, value, ...props }, ref
   );
 });
 
-export const Icon = React.forwardRef(({ className, ...props }, ref) => <span {...props} ref={ref} className={`material-icons align-text-bottom text-lg ${className || ""}`} />);
+export const Icon = React.forwardRef(({ className, ...props }, ref) => <span {...props} ref={ref} className={`material-icons align-text-bottom text-2xl ${className || ""}`} />);
 
 export const Instruction = React.forwardRef(({ className, ...props }, ref) => (
   <div {...props} ref={ref} className={`whitespace-pre-wrap -mx-5 mb-2 py-3 px-5 text-sm bg-gray-200 ${className || ""}`} />
@@ -52,3 +52,13 @@ export const Portal = ({ children }) => {
 export const Toolbar = React.forwardRef(({ className, ...props }, ref) => (
   <Menu {...props} ref={ref} className={`relative pt-1 px-5 mb-5 -mx-5 border-2 flex flex-shrink-0 ${className || ""}`} />
 ));
+
+export const Spacer = React.forwardRef(({ className, ...props }, ref) => <div {...props} ref={ref} className={`relative w-6 ${className || ""}`} />);
+
+Button.displayName = "Button";
+EditorValue.displayName = "EditorValue";
+Icon.displayName = "Icon";
+Instruction.displayName = "Instruction";
+Menu.displayName = "Menu";
+Toolbar.displayName = "Toolbar";
+Spacer.displayName = "Spacer";

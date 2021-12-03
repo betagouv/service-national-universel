@@ -8,7 +8,7 @@ import Details from "../../../components/volontaires-view/Details";
 import Wrapper from "./wrapper";
 import { ENABLE_PM } from "../../../utils";
 
-export default ({ ...props }) => {
+export default function VolontaireResponsible({ ...props }) {
   const [young, setYoung] = useState();
 
   const getYoung = async () => {
@@ -50,4 +50,4 @@ export default ({ ...props }) => {
       />
     </Switch>
   );
-};
+}

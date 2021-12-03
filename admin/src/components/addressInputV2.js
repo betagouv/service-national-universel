@@ -9,7 +9,7 @@ import countries from "i18n-iso-countries";
 countries.registerLocale(require("i18n-iso-countries/langs/fr.json"));
 const countriesList = countries.getNames("fr", { select: "official" });
 
-export default function AddressInputV2({ keys, values, handleChange, errors, touched, validateField, countryVisible = false }) {
+export default function AddressInputV2({ keys, values, handleChange, errors, touched, validateField, countryVisible = false, required }) {
   const [suggestion, setSuggestion] = useState({});
   const [addressInFrance, setAddressInFrance] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -24,7 +24,7 @@ export default function AddressInputV2({ keys, values, handleChange, errors, tou
       for (let i = 0; inputElements[i]; i++) inputElements[i].setAttribute("autocomplete", "novalue");
     }
     if (!values[keys.country]) handleChange({ target: { name: keys.country, value: "France" } });
-    if (values[keys.city] && values[keys.zip] && values[keys.address]) {
+    if ((values[keys.city] && values[keys.zip] && values[keys.address]) || !required) {
       addressVerifiedHelpers.setValue(true);
     }
   }, []);
@@ -87,7 +87,7 @@ export default function AddressInputV2({ keys, values, handleChange, errors, tou
               <Label>Pays</Label>
               <Field
                 as="select"
-                validate={(v) => !v && requiredMessage}
+                validate={(v) => required && !v && requiredMessage}
                 className="form-control"
                 placeholder="Pays"
                 name={keys.country}
@@ -112,7 +112,7 @@ export default function AddressInputV2({ keys, values, handleChange, errors, tou
           <Col md={12} style={{ marginTop: countryVisible ? 15 : 0 }}>
             <Label>Adresse</Label>
             <Field
-              validate={(v) => !v && requiredMessage}
+              validate={(v) => required && !v && requiredMessage}
               className="form-control"
               placeholder="Adresse"
               name={keys.address}
@@ -128,7 +128,7 @@ export default function AddressInputV2({ keys, values, handleChange, errors, tou
           <Col md={6} style={{ marginTop: 15 }}>
             <Label>Code postal</Label>
             <Field
-              validate={(v) => !v && requiredMessage}
+              validate={(v) => required && !v && requiredMessage}
               className="form-control"
               placeholder="Code postal"
               name={keys.zip}
@@ -144,7 +144,7 @@ export default function AddressInputV2({ keys, values, handleChange, errors, tou
           <Col md={6} style={{ marginTop: 15 }}>
             <Label>Ville</Label>
             <Field
-              validate={(v) => !v && requiredMessage}
+              validate={(v) => required && !v && requiredMessage}
               className="form-control"
               placeholder="Ville"
               name={keys.city}
@@ -157,7 +157,7 @@ export default function AddressInputV2({ keys, values, handleChange, errors, tou
             />
             <ErrorMessage errors={errors} touched={touched} name={keys.city} />
           </Col>
-          {addressInFrance ? (
+          {addressInFrance && required ? (
             <>
               <Col md={12} style={{ display: "flex", alignItems: "flex-end" }}>
                 {!addressVerified.value ? (

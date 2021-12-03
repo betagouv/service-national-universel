@@ -13,7 +13,7 @@ import { Box, BoxTitle } from "../../components/box";
 import { associationTypes, privateTypes, publicTypes, publicEtatTypes, translate, ROLES, SENDINBLUE_TEMPLATES } from "../../utils";
 import api from "../../services/api";
 
-export default (props) => {
+export default function Create() {
   const user = useSelector((state) => state.Auth.user);
   const history = useHistory();
   const [networks, setNetworks] = useState([]);
@@ -73,8 +73,7 @@ export default (props) => {
           console.log(e);
           toastr.error("Erreur!");
         }
-      }}
-    >
+      }}>
       {({ values, handleChange, handleSubmit, errors, touched }) => (
         <Wrapper>
           <Header>
@@ -87,7 +86,7 @@ export default (props) => {
               <Col md={6} style={{ borderRight: "2px solid #f4f5f7" }}>
                 <Wrapper>
                   {/*<pre>{JSON.stringify(values, null, 2)}</pre>*/}
-                  <BoxTitle>Informations sur la structure d'accueil</BoxTitle>
+                  <BoxTitle>Informations sur la structure d&apos;accueil</BoxTitle>
                   <FormGroup>
                     <label>
                       <span>*</span>NOM DE LA STRUCTURE
@@ -118,7 +117,7 @@ export default (props) => {
                   </FormGroup>
                   {values.legalStatus === "ASSOCIATION" && (
                     <FormGroup>
-                      <label>DISPOSEZ-VOUS D'UN AGRÉMENT ?</label>
+                      <label>DISPOSEZ-VOUS D&apos;UN AGRÉMENT ?</label>
                       <MultiSelect
                         value={values.associationTypes}
                         onChange={handleChange}
@@ -167,15 +166,14 @@ export default (props) => {
                       {["Service de l'Etat", "Etablissement public"].includes(values.structurePubliqueType) && (
                         <FormGroup>
                           <label>
-                            <span>*</span>TYPE DE SERVICE DE L'ETAT
+                            <span>*</span>TYPE DE SERVICE DE L&apos;ETAT
                           </label>
                           <Field
                             validate={(v) => !v && requiredMessage}
                             component="select"
                             name="structurePubliqueEtatType"
                             value={values.structurePubliqueEtatType}
-                            onChange={handleChange}
-                          >
+                            onChange={handleChange}>
                             <option key="" value="" />
                             {publicEtatTypes.map((e) => {
                               return (
@@ -240,8 +238,8 @@ export default (props) => {
                   <FormGroup>
                     <label>RÉSEAU NATIONAL</label>
                     <p style={{ color: "#a0aec1", fontSize: 12 }}>
-                      Si l’organisation est membre d'un réseau national (Les Banques alimentaires, Armée du Salut...), renseignez son nom. Vous permettez ainsi au superviseur de
-                      votre réseau de visualiser les missions et bénévoles rattachés à votre organisation.
+                      Si l’organisation est membre d&apos;un réseau national (Les Banques alimentaires, Armée du Salut...), renseignez son nom. Vous permettez ainsi au superviseur
+                      de votre réseau de visualiser les missions et bénévoles rattachés à votre organisation.
                     </p>
                     <Field component="select" name="networkId" value={values.networkId} onChange={handleChange}>
                       <option key="" value="" />
@@ -302,7 +300,7 @@ export default (props) => {
                     <Field validate={(v) => !v && requiredMessage} type="email" value={values.email} name="email" onChange={handleChange} placeholder="Adresse Email" />
                     <ErrorMessage errors={errors} touched={touched} name="email" />
                     <p style={{ color: "#a0aec1", fontSize: 12 }}>
-                      Une notification par mail sera envoyée au responsable pour activation de son compte dès l'enregistrement de la structure.
+                      Une notification par mail sera envoyée au responsable pour activation de son compte dès l&apos;enregistrement de la structure.
                     </p>
                   </FormGroup>
                 </Wrapper>
@@ -319,7 +317,7 @@ export default (props) => {
                     errors={errors}
                     touched={touched}
                   />
-                  <p style={{ color: "#a0aec1", fontSize: 12 }}>Si l'adresse n'est pas reconnue, veuillez saisir le nom de la ville.</p>
+                  <p style={{ color: "#a0aec1", fontSize: 12 }}>Si l&apos;adresse n&apos;est pas reconnue, veuillez saisir le nom de la ville.</p>
                 </Wrapper>
               </Col>
             </Row>
@@ -332,7 +330,7 @@ export default (props) => {
       )}
     </Formik>
   );
-};
+}
 
 const SaveButton = ({ handleSubmit }) => {
   const handleSave = async () => {
