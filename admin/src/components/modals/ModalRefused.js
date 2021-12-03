@@ -4,6 +4,7 @@ import { Modal } from "reactstrap";
 import api from "../../services/api";
 import { ModalContainer, Content, Footer, Header } from "./Modal";
 import ModalButton from "../buttons/ModalButton";
+import CloseSvg from "../../assets/Close";
 
 import { toastr } from "react-redux-toastr";
 import { SENDINBLUE_TEMPLATES } from "../../utils";
@@ -35,7 +36,7 @@ En vous souhaitant une excellente continuation.`);
   return (
     <Modal centered isOpen={isOpen} toggle={onChange}>
       <ModalContainer>
-        <img src={require("../../assets/close.svg")} height={10} onClick={onChange} />
+        <CloseSvg className="close-icon" height={10} onClick={onChange} />
         <Header>{topTitle}</Header>
         <Content>
           <h1>Veuillez éditer le message ci-dessous pour préciser les raisons du refus avant de l&apos;envoyer&nbsp;:</h1>

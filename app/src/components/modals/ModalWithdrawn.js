@@ -5,6 +5,7 @@ import { ModalContainer, Content, Footer } from "./Modal";
 import ModalButton from "../buttons/ModalButton";
 import { WITHRAWN_REASONS } from "../../utils";
 import RoundWarning from "../../assets/RoundWarning";
+import CloseSvg from "../../assets/Close";
 
 export default function ModalWithdrawn({ isOpen, title, message, onChange, onConfirm, placeholder = "Votre message..." }) {
   const [withdrawnMessage, setWithdrawnMessage] = useState();
@@ -19,7 +20,7 @@ export default function ModalWithdrawn({ isOpen, title, message, onChange, onCon
   return (
     <Modal centered isOpen={isOpen} toggle={onChange}>
       <ModalContainer>
-        <img src={require("../../assets/close.svg")} height={10} onClick={onChange} />
+        <CloseSvg className="close-icon" height={10} onClick={onChange} />
         <RoundWarning style={{ marginBottom: "1.5rem" }} />
         <Content>
           <h1>{title}</h1>

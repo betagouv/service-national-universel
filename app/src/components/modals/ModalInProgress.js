@@ -3,12 +3,13 @@ import { Modal } from "reactstrap";
 
 import { ModalContainer, Content, Footer, Header } from "./Modal";
 import ModalButton from "../buttons/ModalButton";
+import CloseSvg from "../../assets/Close";
 
 export default function ModalInProgress({ onChange }) {
   return (
     <Modal centered isOpen={true} toggle={onChange}>
       <ModalContainer>
-        <img src={require("../../assets/close.svg")} height={10} onClick={onChange} />
+        <CloseSvg className="close-icon" height={10} onClick={onChange} />
         <Header>avertissement</Header>
         <Content>
           <h1>Les inscriptions sont closes</h1>

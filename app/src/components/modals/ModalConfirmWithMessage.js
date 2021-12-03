@@ -3,6 +3,7 @@ import { Modal } from "reactstrap";
 
 import { ModalContainer, Content, Footer, Header } from "./Modal";
 import ModalButton from "../buttons/ModalButton";
+import CloseSvg from "../../assets/Close";
 
 export default function ModalConfirmWithMessage({ isOpen, topTitle = "alerte", title, message, onChange, onConfirm, placeholder = "Votre message..." }) {
   const [messageTextArea, setMessageTextArea] = useState();
@@ -16,7 +17,7 @@ export default function ModalConfirmWithMessage({ isOpen, topTitle = "alerte", t
   return (
     <Modal centered isOpen={isOpen} toggle={onChange}>
       <ModalContainer>
-        <img src={require("../../assets/close.svg")} height={10} onClick={onChange} />
+        <CloseSvg className="close-icon" height={10} onClick={onChange} />
         <Header>{topTitle}</Header>
         <Content>
           <h1>{title}</h1>
