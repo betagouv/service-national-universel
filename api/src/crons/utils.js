@@ -1,6 +1,5 @@
 const YoungModel = require("../models/young");
 const InscriptionGoal = require("../models/inscriptionGoal");
-const StructureModel = require("../models/structure");
 const { regionList, departmentList } = require("snu-lib");
 
 const getMinusDate = (v) => {
@@ -16,7 +15,6 @@ const getDataInscriptions = async ({ department, region }) => {
   if (region) filter.region = region;
   const newInscriptions = await YoungModel.find({ ...filter });
   const inscriptionGoals = await InscriptionGoal.find({ ...filter });
-  console.log("✍️ ~ inscriptionGoals", inscriptionGoals);
 
   obj.all.WAITING_VALIDATION = newInscriptions.filter((e) => e.status === "WAITING_VALIDATION").length;
   obj.all.VALIDATED = newInscriptions.filter((e) => e.status === "VALIDATED").length;

@@ -15,8 +15,8 @@ const debug = (...e) => {
 
 async function handler() {
   try {
+    slack.info({ title: `TEST`, text: `sorry for the spamming incoming...` });
     let count = 0;
-
     for (let i = 0; i < departmentList.length; i++) {
       const department = departmentList[i];
       debug("> start department :", department);
@@ -27,20 +27,19 @@ async function handler() {
       debug(dataInscriptions);
 
       const { all, february, june, july } = dataInscriptions;
+      if (i < 5) {
+        slack.info({ title: `department ${department} - ${referents.length} referents`, text: `${JSON.stringify({ all, february, june, july })}` });
+      }
+
       for (let j = 0; j < referents.length; j++) {
-        const ref = referents[j];
-        let name = `${ref.firstName} ${ref.lastName}`;
-        let email = ref.email;
-        await sendTemplate(SENDINBLUE_TEMPLATES.referent.RECAP_BI_HEBDO_DEPARTMENT, {
-          emailTo: [{ name, email }],
-          params: { all, february, june, july },
-        });
+        // const ref = referents[j];
+        // let name = `${ref.firstName} ${ref.lastName}`;
+        // let email = ref.email;
+        // await sendTemplate(SENDINBLUE_TEMPLATES.referent.RECAP_BI_HEBDO_DEPARTMENT, {
+        //   emailTo: [{ name, email }],
+        //   params: { all, february, june, july },
+        // });
         count++;
-        debug({
-          department,
-          emailTo: [{ name, email }],
-          params: { all, february, june, july },
-        });
       }
     }
     slack.success({ title: `recap inscription referent department`, text: `${count} mails` });

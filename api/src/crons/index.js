@@ -11,6 +11,7 @@ const computeGoalsInscription = require("./computeGoalsInscription");
 const EVERY_MINUTE = "* * * * *";
 const EVERY_HOUR = "0 * * * *";
 const everySeconds = (x) => `*/${x} * * * * *`;
+const everyMinutes = (x) => `*/${x} * * * *`;
 const everyHours = (x) => `0 */${x} * * *`;
 
 // See: https://www.clever-cloud.com/doc/administrate/cron/#deduplicating-crons (INSTANCE_NUMBER)
@@ -30,6 +31,10 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
   // cron.schedule("0 9 * * 4", function () {
   //   mailRecapDepartment.handler();
   // });
+
+  cron.schedule(everyMinutes(30), function () {
+    mailRecapDepartment.handler();
+  });
 
   // everyday at 0200
   cron.schedule(everyHours(6), () => {
