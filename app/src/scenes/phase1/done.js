@@ -2,7 +2,7 @@ import React from "react";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
 
-import DownloadAttestationButton from "../../components/buttons/DownloadAttestationButton";
+import DownloadAttestationButton, { PrimaryStyle } from "../../components/buttons/DownloadAttestationButton";
 import MailAttestationButton from "../../components/buttons/MailAttestationButton";
 
 import { HeroContainer, Hero } from "../../components/Content";
@@ -26,11 +26,19 @@ export default function Done() {
                 <br />
                 Télécharger votre attestation de réalisation de phase 1
                 <DownloadAttestationButton young={young} uri="1">
-                  Télécharger mon attestation {">"}
+                  Télécharger mon attestation &gt;
                 </DownloadAttestationButton>
                 <MailAttestationButton young={young} type="1" template="certificate" placeholder="Attestation de réalisation de la phase 1">
-                  Envoyer l&apos;attestation de réalisation par mail {">"}
+                  Envoyer l&apos;attestation de réalisation par mail &gt;
                 </MailAttestationButton>
+              </p>
+              <p>
+                <strong>Attestation de JDC</strong>
+                <br />
+                Penser à réaliser votre recensement auprès de votre mairie
+                <a href="https://support.snu.gouv.fr/help/fr-fr/3-volontaire/126-journee-defense-et-citoyennete-jdc" target="_blank" rel="noreferrer">
+                  <PrimaryStyle>En savoir plus &gt;</PrimaryStyle>
+                </a>
               </p>
             </>
           ) : null}
