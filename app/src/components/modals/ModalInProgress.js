@@ -6,7 +6,7 @@ import ModalButton from "../buttons/ModalButton";
 
 export default function ModalInProgress({ onChange }) {
   return (
-    <Modal isOpen={true} toggle={onChange}>
+    <Modal centered isOpen={true} toggle={onChange}>
       <ModalContainer>
         <img src={require("../../assets/close.svg")} height={10} onClick={onChange} />
         <Header>avertissement</Header>

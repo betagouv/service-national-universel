@@ -7,7 +7,7 @@ import { colors } from "../../utils";
 
 export default function ModalGoal({ isOpen, onChange, onValidate, callback }) {
   return (
-    <Modal isOpen={isOpen} toggle={onChange}>
+    <Modal centered isOpen={isOpen} toggle={onChange}>
       <ModalContainer>
         <img src={require("../../assets/close.svg")} height={10} onClick={onChange} />
         <Header>attention</Header>

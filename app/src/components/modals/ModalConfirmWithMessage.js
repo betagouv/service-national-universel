@@ -14,7 +14,7 @@ export default function ModalConfirmWithMessage({ isOpen, topTitle = "alerte", t
   };
 
   return (
-    <Modal isOpen={isOpen} toggle={onChange}>
+    <Modal centered isOpen={isOpen} toggle={onChange}>
       <ModalContainer>
         <img src={require("../../assets/close.svg")} height={10} onClick={onChange} />
         <Header>{topTitle}</Header>

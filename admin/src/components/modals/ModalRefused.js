@@ -33,7 +33,7 @@ En vous souhaitant une excellente continuation.`);
   };
 
   return (
-    <Modal isOpen={isOpen} toggle={onChange}>
+    <Modal centered isOpen={isOpen} toggle={onChange}>
       <ModalContainer>
         <img src={require("../../assets/close.svg")} height={10} onClick={onChange} />
         <Header>{topTitle}</Header>
