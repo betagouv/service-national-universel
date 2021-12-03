@@ -23,16 +23,12 @@ if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
   // });
 
   // every tuesday at 0900
-  // cron.schedule("0 9 * * 2", function () {
-  //   mailRecapDepartment.handler();
-  // });
+  cron.schedule("0 9 * * 2", function () {
+    mailRecapDepartment.handler();
+  });
 
   // every thursday at 0900
-  // cron.schedule("0 9 * * 4", function () {
-  //   mailRecapDepartment.handler();
-  // });
-
-  cron.schedule(everyMinutes(30), function () {
+  cron.schedule("0 9 * * 4", function () {
     mailRecapDepartment.handler();
   });
 
