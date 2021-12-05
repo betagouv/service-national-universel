@@ -17,7 +17,10 @@ async function handler() {
   try {
     slack.info({ title: `recap inscription referent department`, text: `Mmmh, let me check the data... ` });
     let count = 0;
-    for (let i = 0; i < departmentList.length; i++) {
+
+    let textDepartments = [];
+    // Test first for the 5 first departments
+    for (let i = 0; i < 5; i++) {
       const department = departmentList[i];
       debug("> start department :", department);
       const referents = await ReferentModel.find({ role: ROLES.REFERENT_DEPARTMENT, department });
@@ -27,6 +30,13 @@ async function handler() {
       debug(dataInscriptions);
 
       const { all, february, june, july } = dataInscriptions;
+
+      textDepartments.push(`Département ${department} 👇`);
+      textDepartments.push(`• global : ${JSON.stringify(all)}`);
+      textDepartments.push(`• février : ${JSON.stringify(february)}`);
+      textDepartments.push(`• juin : ${JSON.stringify(june)}`);
+      textDepartments.push(`• juillet : ${JSON.stringify(july)}`);
+      textDepartments.push("---");
 
       for (let j = 0; j < referents.length; j++) {
         const ref = referents[j];
@@ -39,6 +49,7 @@ async function handler() {
         count++;
       }
     }
+    slack.info({ title: `recap inscription referent department`, text: textDepartments.join("\n") });
     slack.success({ title: `recap inscription referent department`, text: `${count} mails sent` });
   } catch (e) {
     capture(e);
