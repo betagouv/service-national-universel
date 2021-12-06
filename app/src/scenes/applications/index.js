@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { Container } from "reactstrap";
 import styled from "styled-components";
 import { useSelector } from "react-redux";
@@ -16,6 +16,7 @@ export default function Index() {
   const [applications, setApplications] = useState(null);
   const [showInfo, setShowInfo] = useState(true);
   const young = useSelector((state) => state.Auth.young);
+  const history = useHistory();
   if (!young || !permissionPhase2(young)) history.push("/");
 
   const toggleShowInfo = () => {

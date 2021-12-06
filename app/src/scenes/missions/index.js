@@ -1,5 +1,5 @@
 import React from "react";
-import { Switch, Route } from "react-router-dom";
+import { Switch, Route, useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 import List from "./list";
@@ -8,6 +8,7 @@ import { permissionPhase2 } from "../../utils";
 
 export default function Index() {
   const young = useSelector((state) => state.Auth.young);
+  const history = useHistory();
   if (!young || !permissionPhase2(young)) history.push("/");
   return (
     <Switch>
