@@ -14,7 +14,7 @@ function getToken(req) {
   return token;
 }
 
-module.exports = function (app) {
+module.exports = function () {
   const opts = {};
   opts.jwtFromRequest = getToken;
   opts.secretOrKey = secret;
@@ -32,7 +32,7 @@ module.exports = function (app) {
         capture(error);
       }
       return done(null, false);
-    })
+    }),
   );
 
   passport.use(
@@ -48,8 +48,6 @@ module.exports = function (app) {
         capture(error);
       }
       return done(null, false);
-    })
+    }),
   );
-
-  app.use(passport.initialize());
 };
